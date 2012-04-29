@@ -1,0 +1,308 @@
+<%@page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,java.text.SimpleDateFormat,art.utils.*" %>
+<%@page import="org.jfree.chart.*,org.apache.commons.beanutils.*" %>
+<%@taglib uri='/WEB-INF/cewolf.tld' prefix='cewolf' %>
+
+<jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
+<jsp:useBean id="lineRenderer" class="de.laures.cewolf.cpp.LineRendererProcessor" />
+
+
+<%
+  request.setCharacterEncoding("UTF-8");
+  response.setHeader("Cache-control","no-cache");
+
+  String graphType[] = {"xy","pie3d","horizontalBar3D","verticalBar3D","line"
+                        ,"timeseries","timeseries","stackedVerticalBar3d","stackedHorizontalBar3d","meter"};
+						  
+  //get query type from attribute so that it doesn't have to be specified in direct url 
+  Integer graphIdInteger = (Integer)request.getAttribute("queryType");
+  int graphId=graphIdInteger.intValue();
+  graphId=Math.abs(graphId);
+  
+  Integer queryId = (Integer) request.getAttribute("queryId");
+
+  String graphElementId = "artGraph_" + queryId + "_" + graphId;
+
+  if ( request.getAttribute("artGraph") == null ) {
+    %><html><body>Error: Graphic object has not been created. Check permissions, parameters, database connection or size string.<br>
+                  Try to run the query with tabular output to debug it better.</body></html>
+    <%
+    return;
+  }
+  
+  ArtGraph graph = (ArtGraph) request.getAttribute("artGraph");
+  pageContext.setAttribute("graph", graph);
+  
+  boolean usesHyperlinks=graph.getUseHyperLinks();
+  boolean hasTooltips=graph.getHasTooltips();
+  
+  //add support for drill down queries
+  boolean hasDrilldown=graph.getHasDrilldown();
+		  
+   // y axis data range
+  Integer from = (Integer) request.getAttribute("_from");
+  Integer to = (Integer) request.getAttribute("_to");
+  
+  // Labels
+  String labelFormat;
+  final String LABELS_OFF="off";
+  final String PIE_LABEL_FORMAT="{0} ({2})";
+  final String CATEGORY_LABEL_FORMAT="{2}";
+  //set default values. by default labels are shown for pie charts but not for category dataset charts (line and bar)
+  if(graphId==2){
+	labelFormat= PIE_LABEL_FORMAT;
+} else {
+	labelFormat=LABELS_OFF;
+}
+
+//set specific label format if modifiers are provided
+  if (request.getAttribute("_nolabels") != null){
+	labelFormat = LABELS_OFF;
+	} 
+	if (request.getAttribute("_showlabels") != null){
+		if(graphId==2){
+			labelFormat= PIE_LABEL_FORMAT;
+		} else {
+			labelFormat=CATEGORY_LABEL_FORMAT;
+		}
+	}
+  
+  // legend
+  boolean showLegend = true;
+  if (request.getAttribute("_nolegend") != null){
+	showLegend = false;
+	}
+  
+  // data points
+   boolean showPoints = false;
+  if (request.getAttribute("_showpoints") != null){
+	showPoints = true;
+	}
+	
+	// graph data
+   boolean showGraphData = false;
+  if (request.getAttribute("_showdata") != null){
+	showGraphData = true;
+	}
+  	
+  
+  //determine if chart is to be output to file
+  String outputToFile = "nofile";  
+  if (request.getAttribute("outputToFile") != null){
+	outputToFile=(String) request.getAttribute("outputToFile");
+	}
+  
+	//build output file name   
+  String fileName = "nofile";  
+    String fullFileName="nofile";
+    String baseFileName=(String) request.getAttribute("baseFileName");
+	
+	if (outputToFile.equals("pdf")){
+        fileName=baseFileName + ".pdf";
+		fullFileName= ArtDBCP.getExportPath() + fileName;
+	} else if (outputToFile.equals("png")){
+        fileName=baseFileName + ".png";
+		fullFileName= ArtDBCP.getExportPath() + fileName;
+	}
+	
+	//make target configurable, mainly for drill down queries
+	String target="_blank"; //default to showing links in new window
+	String openInNewWindow=graph.getOpenDrilldownInNewWindow();
+	if(hasDrilldown){
+		if("Y".equals(openInNewWindow) || openInNewWindow==null){
+			//open in new window
+			target="_blank";
+		} else {
+			//open in same window
+			target="";			
+		}
+	}
+	
+    
+  boolean isFragment = (request.getParameter("_isFragment")!= null?true:false);  // the html code will be rendered as an html fragmnet (without <html> and </html> tags)
+  boolean isPlain    = (request.getParameter("_isPlain")!= null?true:false);
+  if (!isFragment && !isPlain) {
+%>
+    <%@ include file ="header.jsp" %>
+<%
+  } else if (isPlain) { out.println("<html>"); }
+
+/*
+ this is to show this page just after the user clicked on the submit button
+  - it avoids an issue with IE that stops the spinning icon when the mouse
+  is moved out of the button area
+ */
+
+out.flush(); 
+
+//reset jfreechat theme to the default theme. jasper reports sets it to the legacy theme and this affects the speedometer chart
+ChartFactory.setChartTheme(StandardChartTheme.createJFreeTheme());
+
+//enable show parameters for graphs
+Map<Integer,ArtQueryParam> displayParams = (Map<Integer,ArtQueryParam>) request.getAttribute("displayParams");
+if(displayParams!=null && displayParams.size()>0){
+    out.println("<div align=\"center\">");
+    out.println("<table border=\"0\" width=\"90%\"><tr><td>");
+	out.println("<div id=\"param_div\" width=\"90%\" align=\"center\" class=\"qeparams\">");
+	// decode the parameters handling multi ones
+	Iterator it = displayParams.entrySet().iterator();
+	while (it.hasNext()) {
+		Map.Entry entry = (Map.Entry) it.next();                
+		ArtQueryParam param=(ArtQueryParam)entry.getValue();
+		String paramName=param.getName();
+		Object pValue = param.getParamValue();
+
+		if (pValue instanceof String) {
+			out.println(paramName + ":" + pValue + " <br> ");
+		} else if (pValue instanceof String[]) { // multi
+			StringBuilder pValuesSb = new StringBuilder(256);
+			String[] pValues = (String[]) pValue;
+			for (int i = 0; i < pValues.length; i++) {
+				pValuesSb.append(pValues[i]);
+				pValuesSb.append(", ");
+			}
+			out.println(paramName + ": (" + pValuesSb.toString() + " )<br> ");
+		}
+	}                      
+	out.println("</div>");
+	out.println("</td></tr></table>");
+    out.println("</div>");        
+}
+request.removeAttribute("displayParams");
+displayParams=null;
+
+
+%>
+
+<p>
+<table class="plain" align="center" border="0">
+ <tr>
+  <td> 
+   
+   <cewolf:chart 
+       id="<%=graphElementId%>" 
+       title="<%=graph.getTitle()%>" 
+       type="<%=graphType[graphId-1]%>" 
+       showlegend="<%=showLegend%>"
+	   plotbackgroundcolor="#FFFFFF"
+       xaxislabel="<%=graph.getXlabel()%>" 
+       yaxislabel="<%=graph.getYlabel()%>">
+       <cewolf:colorpaint color="<%=graph.getBgColor()%>"/>
+	   
+       <cewolf:data>
+           <cewolf:producer id="graph" />
+       </cewolf:data>
+	   	    	
+      <cewolf:chartpostprocessor id="graph">
+          <cewolf:param name="from" value="<%= from %>"/>
+          <cewolf:param name="to" value="<%= to %>"/>
+          <cewolf:param name="labelFormat" value="<%= labelFormat %>" />
+		  <cewolf:param name="outputToFile" value="<%= outputToFile %>" />
+          <cewolf:param name="fullFileName" value="<%= fullFileName %>" />          		  		  
+		  <cewolf:param name="showLegend" value="<%= showLegend %>" />	  		  
+		  <cewolf:param name="showPoints" value="<%=showPoints%>" />
+      </cewolf:chartpostprocessor>	  	
+   </cewolf:chart>
+   
+   <cewolf:img chartid="<%=graphElementId%>" 
+               renderer="/cewolf" 
+	       width="<%=graph.getWidth()%>" 
+	       height="<%=graph.getHeight()%>"
+			removeAfterRender="true"
+		   >
+	   	
+	<% if(usesHyperlinks || hasDrilldown) {  %>
+         <cewolf:map linkgeneratorid="graph" target="<%=target%>" tooltipgeneratorid="graph"/> 
+      <%} else if(hasTooltips) {%>
+         <cewolf:map tooltipgeneratorid="graph"/> 
+      <%} %>
+   </cewolf:img>
+ 
+
+  <% if (outputToFile.equals("pdf") || outputToFile.equals("png")) {  %>
+   <p>
+    <div align="center">
+     <table border="0" width="90%">
+      <tr>
+       <td colspan="2" class="data" align="center" >
+        <a type="application/octet-stream" href="../export/<%=fileName%>" target="_blank"><%=fileName%></a>
+       </td>
+      </tr>
+     </table>
+    </div>
+   </p>
+
+  <% }  %>
+  
+  <%
+	RowSetDynaClass rsdc=(RowSetDynaClass)request.getAttribute("graphData");
+	
+	if(showGraphData){
+		if(rsdc!=null){
+			List rows=rsdc.getRows();
+			DynaProperty[] dynaProperties = null;
+			String columnName;
+			String columnValue;
+			%>
+			<p>
+			<br>
+			<table border="0" align="center" width="90%">	
+			<%
+			for(int i=0;i<rows.size();i++){
+				DynaBean row=(DynaBean)rows.get(i);
+				if (i==0) {
+					%>
+					<tr>
+					<%
+					dynaProperties = row.getDynaClass().getDynaProperties();
+					for (int j=0;j<dynaProperties.length;j++) {
+						columnName=dynaProperties[j].getName();
+						%>
+						<td class="graphheader"><%=columnName%></td>
+					<%
+					}
+					%>
+					</tr>
+					<%
+				}
+				%>
+				<tr>
+				<%
+				for (int k=0;k<dynaProperties.length;k++) {
+					columnName=dynaProperties[k].getName();
+					columnValue=String.valueOf(row.get(columnName));
+					%>
+					<td class="graphdata"><%=columnValue%></td>
+				<%
+				}
+				%>
+				</tr>
+				<%
+			}
+		}
+	}
+	%>
+	</table>
+	</p>
+
+
+  </td>
+  </tr>
+</table>
+</p>
+
+<p>
+
+<!-- Test Memory Leak: removing object from request. -->
+<% // Remove object from request 
+ request.removeAttribute("artGraph");
+ graph = null;
+ 
+ request.removeAttribute("graphData");
+ rsdc=null;
+
+ if (!isFragment && ! isPlain) {    
+    %><%@ include file ="footer.jsp" %><%
+  } else if (isPlain) {
+    %></html><%
+  } 
+%>

@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+    <!-- General description of ART -->
+    <display-name>ART - A Reporting Tool</display-name>
+    <description>
+	This is an application to perform
+	a wild and wonderful task, based on servlets and jsp.
+	It was written by eliboni@sourceforge.net
+	who should be contacted for more information.
+	Web site http://art.sourceforge.net
+	</description>
+    <!-- Version information -->
+    <context-param>
+        <description>ART Version Number</description>
+        <param-name>versionNumber</param-name>
+        <param-value>2.2.1</param-value>
+    </context-param>
+    <context-param>
+        <description>
+		Either full or light
+		  Light version has some jars and features omitted 
+		  to keep the package size small (jpivot and jaspereports)
+		</description>
+        <param-name>versionType</param-name>
+        <param-value>light</param-value>
+    </context-param>
+    <!-- View modes -->
+    <context-param>
+        <description>A comma separated list of available view modes (prefix only).
+	    The order will be respected in the list viewable to users. First one is the default.
+	    Note: for every new mode a proper message entry must be added in art_messages.properties file</description>
+        <param-name>userViewModesList</param-name>
+        <param-value>htmlGrid,htmlDataTable,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip</param-value>
+    </context-param>
+    <!-- Scheduling -->
+    <context-param>
+        <description>
+           Set this to false to disable job execution
+		</description>
+        <param-name>enableJobScheduling</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <!-- Max connections -->
+    <context-param>
+        <description>
+           Set the maximum number of connections a connection pool can open
+		   to the same datasource (further requests are queued).
+		</description>
+        <param-name>poolMaxConnections</param-name>
+        <param-value>20</param-value>
+    </context-param>
+    <!-- Max running queries-->
+    <context-param>
+        <description>
+           Set the maximum number of concurrent running queries
+		</description>
+        <param-name>maxNumberOfRunningQueries</param-name>
+        <param-value>1000</param-value>
+    </context-param>
+    <!-- Max rows -->
+    <context-param>
+        <description>
+        Set the default maximum number of rows to retrieve
+		(note: the view mode itself may ignore or override this)
+		</description>
+        <param-name>defaultMaxRows</param-name>
+        <param-value>10000</param-value>
+    </context-param>
+    <context-param>
+        <description>
+        Set the default maximum number of rows to retrieve
+		for this view mode (name must be "classNameMaxRows")
+		</description>
+        <param-name>xlsOutputMaxRows</param-name>
+        <param-value>20000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>xlsZipOutputMaxRows</param-name>
+        <param-value>30000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>pdfOutputMaxRows</param-name>
+        <param-value>20000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>tsvOutputMaxRows</param-name>
+        <param-value>60000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>tsvGzOutputMaxRows</param-name>
+        <param-value>120000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>tsvZipOutputMaxRows</param-name>
+        <param-value>120000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>slkOutputMaxRows</param-name>
+        <param-value>60000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>slkZipOutputMaxRows</param-name>
+        <param-value>120000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>xlsxOutputMaxRows</param-name>
+        <param-value>120000</param-value>
+    </context-param>
+    <!-- Filters -->
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>art.servlets.AuthFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>AuthFilterAdmin</filter-name>
+        <filter-class>art.servlets.AuthFilterAdmin</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/user/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>AuthFilterAdmin</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+    <!-- Servlet definitions -->
+    <servlet>
+        <description>
+           Initialize ART properties and database connection pools
+		</description>
+        <servlet-name>ArtDBCP</servlet-name>
+        <servlet-class>art.servlets.ArtDBCP</servlet-class>
+        <!-- Load this servlet at server startup time -->
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>
+           Get various info for ajax components
+		</description>
+        <servlet-name>XmlDataProvider</servlet-name>
+        <servlet-class>art.servlets.XmlDataProvider</servlet-class>
+        <!-- Load this servlet at server startup time. load after ArtDBCP -->
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>
+           Clean export files 	   
+		</description>
+        <servlet-name>Scheduler</servlet-name>
+        <servlet-class>art.servlets.Scheduler</servlet-class>
+        <!-- Load this servlet at server startup time. load after ArtDBCP -->
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>
+           Execute the query and show the results
+		</description>
+        <servlet-name>QueryExecute</servlet-name>
+        <servlet-class>art.servlets.QueryExecute</servlet-class>
+    </servlet>
+    <!-- CeWolf -->
+    <servlet>
+        <servlet-name>CewolfServlet</servlet-name>
+        <servlet-class>de.laures.cewolf.CewolfRenderer</servlet-class>
+        <init-param>
+            <param-name>overliburl</param-name>
+            <param-value>/js/overlib.js</param-value>
+        </init-param>
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>storage</param-name>
+            <param-value>de.laures.cewolf.storage.TransientSessionStorage</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CewolfServlet</servlet-name>
+        <url-pattern>/portlets/cewolf/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CewolfServlet</servlet-name>
+        <url-pattern>/user/cewolf/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CewolfServlet</servlet-name>
+        <url-pattern>/cewolf/*</url-pattern>
+    </servlet-mapping>
+    <!-- End CeWolf -->
+    <!-- 
+      * Define servlet mappings
+      
+		  that are used by the servlet container to
+		  translate a particular request URI (context-relative) to a
+		  particular servlet.  
+		  You may define any number of servlet mappings, including zero.
+		  It is also legal to define more than one mapping for the same
+		  servlet, if you wish to.
+     -->
+    <servlet-mapping>
+        <servlet-name>ArtDBCP</servlet-name>
+        <url-pattern>/ArtDBCP</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>XmlDataProvider</servlet-name>
+        <url-pattern>/XmlDataProvider</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>QueryExecute</servlet-name>
+        <url-pattern>/QueryExecute</url-pattern>
+        <url-pattern>/ExecuteQuery</url-pattern>
+        <url-pattern>/user/QueryExecute</url-pattern>
+        <url-pattern>/user/ExecuteQuery</url-pattern>
+        <url-pattern>/servlet/QueryExecute</url-pattern>
+    </servlet-mapping>
+    <!-- Define the default session timeout for your application,
+          in minutes.  From a servlet or JSP page, you can modify
+          the timeout for a particular session dynamically by using
+          HttpSession.getMaxInactiveInterval(). -->
+    <session-config>
+        <session-timeout>120</session-timeout>
+        <!-- 120 minutes -->
+    </session-config>
+    <!-- JPivot -->
+    <!-- removed in light version -->
+    <!-- End JPivot -->
+</web-app>
