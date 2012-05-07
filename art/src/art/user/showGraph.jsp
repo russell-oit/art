@@ -4,6 +4,7 @@
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <jsp:useBean id="lineRenderer" class="de.laures.cewolf.cpp.LineRendererProcessor" />
+<jsp:useBean id="labelRotation" class="de.laures.cewolf.cpp.RotatedAxisLabels" />
 
 
 <%
@@ -200,7 +201,12 @@ displayParams=null;
           <cewolf:param name="fullFileName" value="<%= fullFileName %>" />          		  		  
 		  <cewolf:param name="showLegend" value="<%= showLegend %>" />	  		  
 		  <cewolf:param name="showPoints" value="<%=showPoints%>" />
-      </cewolf:chartpostprocessor>	  	
+      </cewolf:chartpostprocessor>
+       
+       <cewolf:chartpostprocessor id="labelRotation">
+		<cewolf:param name="rotate_at" value="5"/>
+		<cewolf:param name="remove_at" value="50"/>
+	</cewolf:chartpostprocessor> 	     
    </cewolf:chart>
    
    <cewolf:img chartid="<%=graphElementId%>" 
