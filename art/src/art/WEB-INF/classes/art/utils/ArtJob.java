@@ -18,68 +18,68 @@
  */
 
 /* 2007-02-02  john   added editable subject
-2007-05-14  enrico added new type = 5 (mail with html output inside the email)
-filenamecolumn in ART_JOB enlarged so error message can be fully displayed
-2008-04-04  enrico reworkto use this class as a bean
-and allow to edit/run an existing job
-2008-05-06  enrico fixes to support UTF-8 correctly in generated html files and inline emails
-2009-10-20  enrico  fixed weekday (it was weekDay causing the bean to do not populate it)
-on line 321, 376, 300 replaced charset name UTF8 to UTF-8 (utf-8 inline html should be ok now...
-2010-05-01 enrico/timothy added option to handle charts
+ 2007-05-14  enrico added new type = 5 (mail with html output inside the email)
+ filenamecolumn in ART_JOB enlarged so error message can be fully displayed
+ 2008-04-04  enrico reworkto use this class as a bean
+ and allow to edit/run an existing job
+ 2008-05-06  enrico fixes to support UTF-8 correctly in generated html files and inline emails
+ 2009-10-20  enrico  fixed weekday (it was weekDay causing the bean to do not populate it)
+ on line 321, 376, 300 replaced charset name UTF8 to UTF-8 (utf-8 inline html should be ok now...
+ 2010-05-01 enrico/timothy added option to handle charts
  */
 package art.utils;
 
+import art.graph.ExportGraph;
 import art.mail.Mailer;
+import art.output.ArtOutHandler;
+import art.output.ArtOutputInterface;
+import art.output.jasperOutput;
+import art.output.jxlsOutput;
 import art.servlets.ArtDBCP;
-import art.output.*;
-import art.graph.ExportGraph; //to enable scheduling of charts
-
-import java.util.*;
 import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.*;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.quartz.*;
-
-/**  
+/**
  * Class to run scheduled jobs.
-
- * <br>
-To run an existing job:
-<pre>
-ArtJob aj = new ArtJob();
-aj.load(jobId)
-aj.start(); // run the job
-</pre>
-
-To delete an existing job
-<pre>
-ArtJob aj = new ArtJob();
-aj.load(jobId)
-aj.delete();
-</pre>
-
-To update an existing job
-(query parameters can't be updated - delete and recreate if needed)
-<pre>
-ArtJob aj = new ArtJob();
-aj.load(jobId)
-aj.set...
-...
-aj.save()
-</pre>
-
-To create a new job
-<pre>
-ArtJob aj = new ArtJob();
-aj.set...
-...
-//params need to be set apart
-aj.save()
-</pre>
-
+ *
+ * <br> To run an existing job:
+ * <pre>
+ * ArtJob aj = new ArtJob();
+ * aj.load(jobId)
+ * aj.start(); // run the job
+ * </pre>
+ *
+ * To delete an existing job
+ * <pre>
+ * ArtJob aj = new ArtJob();
+ * aj.load(jobId)
+ * aj.delete();
+ * </pre>
+ *
+ * To update an existing job (query parameters can't be updated - delete and
+ * recreate if needed)
+ * <pre>
+ * ArtJob aj = new ArtJob();
+ * aj.load(jobId)
+ * aj.set...
+ * ...
+ * aj.save()
+ * </pre>
+ *
+ * To create a new job
+ * <pre>
+ * ArtJob aj = new ArtJob();
+ * aj.set...
+ * ...
+ * //params need to be set apart
+ * aj.save()
+ * </pre>
+ *
  */
 public class ArtJob implements Job {
 
@@ -133,9 +133,10 @@ public class ArtJob implements Job {
     boolean showParameters = false; //to enable display of parameters in reports
     Map<Integer, ArtQueryParam> displayParams; //to enable display of parameters in reports
 
-    /**  Instantiate a new "empty" Job (to insert/save)
-    A new Job is created. Use the setXyx methods to set properties, then save()
-    to store the new job on the ART repository (Connection c).
+    /**
+     * Instantiate a new "empty" Job (to insert/save) A new Job is created. Use
+     * the setXyx methods to set properties, then save() to store the new job on
+     * the ART repository (Connection c).
      */
     public ArtJob() {
         exportPath = ArtDBCP.getExportPath();
@@ -143,7 +144,9 @@ public class ArtJob implements Job {
 
     /**
      * Determine is parameters should be shown in output
-     * @param value <code>true</code> is parameters should be shown in output
+     *
+     * @param value
+     * <code>true</code> is parameters should be shown in output
      */
     public void setShowParameters(boolean value) {
         showParameters = value;
@@ -151,7 +154,9 @@ public class ArtJob implements Job {
 
     /**
      * Determine is parameters should be shown in output
-     * @return <code>true</code> is parameters should be shown in output
+     *
+     * @return
+     * <code>true</code> is parameters should be shown in output
      */
     public boolean isShowParameters() {
         return showParameters;
@@ -159,6 +164,7 @@ public class ArtJob implements Job {
 
     /**
      * Set string that displays the job's parameters
+     *
      * @param value string that displays the job's parameters
      */
     public void setParametersDisplayString(String value) {
@@ -166,7 +172,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return string to display job parameter values
      */
     public String getParametersDisplayString() {
@@ -174,7 +180,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return last end date for shared job
      */
     public java.util.Date getSharedLastEndDate() {
@@ -182,7 +188,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setSharedLastEndDate(java.util.Date value) {
@@ -190,7 +196,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job last end date
      */
     public java.util.Date getLastEndDate() {
@@ -198,7 +204,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setLastEndDate(java.util.Date value) {
@@ -206,7 +212,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return last start date for shared job
      */
     public java.util.Date getSharedLastStartDate() {
@@ -214,7 +220,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setSharedLastStartDate(java.util.Date value) {
@@ -222,7 +228,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return shared file name
      */
     public String getSharedFileName() {
@@ -230,7 +236,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setSharedFileName(String value) {
@@ -238,7 +244,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job last start date
      */
     public java.util.Date getLastStartDate() {
@@ -246,7 +252,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setLastStartDate(java.util.Date value) {
@@ -254,7 +260,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return file name in the jobs table
      */
     public String getFileName() {
@@ -262,7 +268,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setFileName(String value) {
@@ -270,7 +276,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job name
      */
     public String getJobName() {
@@ -281,7 +287,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setJobName(String value) {
@@ -289,7 +295,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return allow sharing setting
      */
     public String getAllowSharing() {
@@ -297,7 +303,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setAllowSharing(String value) {
@@ -305,7 +311,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return allow splitting setting
      */
     public String getAllowSplitting() {
@@ -313,7 +319,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setAllowSplitting(String value) {
@@ -321,7 +327,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return whether rules should be applied to query
      */
     public String getQueryRulesFlag() {
@@ -329,7 +335,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setQueryRulesFlag(String value) {
@@ -337,7 +343,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job last file name
      */
     public String getLastFileName() {
@@ -345,7 +351,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setLastFileName(String value) {
@@ -353,7 +359,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return query status
      */
     public String getQueryStatus() {
@@ -361,7 +367,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setQueryStatus(String value) {
@@ -369,7 +375,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return setting indicating whether job has been migrated to quartz
      */
     public String getMigratedToQuartz() {
@@ -377,7 +383,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setMigratedToQuartz(String value) {
@@ -385,7 +391,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job start date
      */
     public java.util.Date getStartDate() {
@@ -393,7 +399,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job end date
      */
     public java.util.Date getEndDate() {
@@ -401,7 +407,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setStartDate(java.util.Date value) {
@@ -409,7 +415,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setEndDate(java.util.Date value) {
@@ -417,9 +423,9 @@ public class ArtJob implements Job {
     }
 
     /**
-     * Specifically for use with editjob.jsp. To work around problems with implicit date-string conversions.
-     * Not saved to the database
-     * 
+     * Specifically for use with editjob.jsp. To work around problems with
+     * implicit date-string conversions. Not saved to the database
+     *
      * @return start date string
      */
     public String getStartDateString() {
@@ -432,7 +438,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job end date string
      */
     public String getEndDateString() {
@@ -445,7 +451,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setStartDateString(String value) {
@@ -453,7 +459,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setEndDateString(String value) {
@@ -467,7 +473,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param date
      */
     public void setNextRunDate(java.util.Date date) {
@@ -475,7 +481,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return next run date
      */
     public java.util.Date getNextRunDate() {
@@ -483,7 +489,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param jId
      */
     public void setJobId(int jId) {
@@ -491,7 +497,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param jId
      */
     public void setJobIdOnly(int jId) {
@@ -499,7 +505,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param i
      */
     public void setQueryId(int i) {
@@ -507,7 +513,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setUsername(String s) {
@@ -515,7 +521,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setQueryName(String s) {
@@ -523,7 +529,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param i
      */
     public void setQueryType(int i) {
@@ -531,7 +537,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return query type
      */
     public int getQueryType() {
@@ -539,7 +545,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setOutputFormat(String s) {
@@ -547,7 +553,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param i
      */
     public void setJobType(int i) {
@@ -555,7 +561,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setTos(String s) {
@@ -566,7 +572,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setFrom(String s) {
@@ -574,7 +580,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setSubject(String s) {
@@ -582,7 +588,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setMessage(String s) {
@@ -593,7 +599,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setEnableAudit(String s) {
@@ -601,7 +607,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setActiveStatus(String s) {
@@ -609,7 +615,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setMinute(String value) {
@@ -617,7 +623,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setHour(String value) {
@@ -625,7 +631,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setDay(String value) {
@@ -633,7 +639,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setWeekday(String value) {
@@ -641,7 +647,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param value
      */
     public void setMonth(String value) {
@@ -649,7 +655,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job id
      */
     public int getJobId() {
@@ -657,7 +663,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return query id
      */
     public int getQueryId() {
@@ -665,7 +671,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job owner
      */
     public String getUsername() {
@@ -673,7 +679,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return query name
      */
     public String getQueryName() {
@@ -681,7 +687,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return output format
      */
     public String getOutputFormat() {
@@ -689,7 +695,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return job type
      */
     public int getJobType() {
@@ -697,7 +703,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return email addresses of recipients
      */
     public String getTos() {
@@ -705,7 +711,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return from email address
      */
     public String getFrom() {
@@ -713,7 +719,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return subject of email message
      */
     public String getSubject() {
@@ -721,7 +727,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return email body contents
      */
     public String getMessage() {
@@ -729,7 +735,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return enable audit setting
      */
     public String getEnableAudit() {
@@ -737,7 +743,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return active status
      */
     public String getActiveStatus() {
@@ -745,7 +751,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return minute of the day that the job should run
      */
     public String getMinute() {
@@ -753,7 +759,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return hour of the day that job should run
      */
     public String getHour() {
@@ -761,7 +767,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return day of the month that job should run
      */
     public String getDay() {
@@ -769,7 +775,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return weekday that job should run
      */
     public String getWeekday() {
@@ -777,7 +783,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return month of the year that job should run
      */
     public String getMonth() {
@@ -785,7 +791,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @return cached table name
      */
     public String getCachedTableName() {
@@ -793,7 +799,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param s
      */
     public void setCachedTableName(String s) {
@@ -805,7 +811,7 @@ public class ArtJob implements Job {
 
     /**
      * execute job
-     * 
+     *
      * @param context
      * @throws JobExecutionException
      */
@@ -954,35 +960,34 @@ public class ArtJob implements Job {
                 pq.isAdminSession(true);
             }
 
-            /* BEGIN EXECUTE QUERY
+            /*
+             * BEGIN EXECUTE QUERY
              */
 
             pq.execute(ResultSet.TYPE_FORWARD_ONLY);
 
 
-            /* END EXECUTE QUERY
+            /*
+             * END EXECUTE QUERY
              */
 
 
-            /* Job Types:
-            1 = Alert
-            2 = Mails as attachment
-            3 = Publish
-            4 = Just Run
-            5 = Mail with output within the email as html
-            6 = Mails as attachment only if query returns one or more rows
-            7 = Mail with output within the email as html only if query returns one or more rows
-            8 = Publish only if query returns one or more rows
-            9 =  Cache the result set in the cache database (append)
-            10 = Cache the result set in the cache database (drop/insert)
+            /*
+             * Job Types: 1 = Alert 2 = Mails as attachment 3 = Publish 4 = Just
+             * Run 5 = Mail with output within the email as html 6 = Mails as
+             * attachment only if query returns one or more rows 7 = Mail with
+             * output within the email as html only if query returns one or more
+             * rows 8 = Publish only if query returns one or more rows 9 = Cache
+             * the result set in the cache database (append) 10 = Cache the
+             * result set in the cache database (drop/insert)
              */
 
             boolean mailSent; //use to check if email was successfully sent
 
             if (jobType == 1) {
-                /* ALERT
-                 * if the resultset is not null and the first column is a positive integer
-                 * => send the alert email
+                /*
+                 * ALERT if the resultset is not null and the first column is a
+                 * positive integer => send the alert email
                  */
 
                 fileName = "-No Alert";
@@ -1023,7 +1028,8 @@ public class ArtJob implements Job {
                     logger.debug("Job Id {} - Empty resultset for alert", jobId);
                 }
             } else if (jobType == 2 || jobType == 3 || jobType == 5 || jobType == 6 || jobType == 7 || jobType == 8) {
-                /* MAILwithAttachment or PUBLISH or MAILinLine
+                /*
+                 * MAILwithAttachment or PUBLISH or MAILinLine
                  */
                 ResultSet rs = null;
                 ResultSetMetaData rsmd = null;
@@ -1158,12 +1164,13 @@ public class ArtJob implements Job {
                             ArtOutHandler.flushOutput(messages, o, rs, rsmd, displayParams);
                         }
 
-                        /* Now the resultset has been flushed in the o ArtOutput object
-                        and therefore it has been:
-                        1. streamed in the out PrintWriter (file)
-                        (or) 2. written in another file if the o object did it (for example xls view mode)
-                        Thus now we need to
-                        discover where the output is (in the out object or in another file)
+                        /*
+                         * Now the resultset has been flushed in the o ArtOutput
+                         * object and therefore it has been: 1. streamed in the
+                         * out PrintWriter (file) (or) 2. written in another
+                         * file if the o object did it (for example xls view
+                         * mode) Thus now we need to discover where the output
+                         * is (in the out object or in another file)
                          */
                         if (o.getFileName() != null) {
                             fileName = o.getFileName();
@@ -1211,9 +1218,9 @@ public class ArtJob implements Job {
 
                         if (jobType == 2 || jobType == 6) {
                             // e-mail output as attachment
-                            Vector<File> v = new Vector<File>();
-                            v.add(new File(fileName));
-                            m.setAttachments(v);
+                            List<File> l = new ArrayList<File>();
+                            l.add(new File(fileName));
+                            m.setAttachments(l);
                             m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
                         } else if (jobType == 5 || jobType == 7) {
                             // inline html within email
@@ -1291,8 +1298,9 @@ public class ArtJob implements Job {
     }
 
     /**
-     * Update shared jobs table with users who have access through group membership.
-     * 
+     * Update shared jobs table with users who have access through group
+     * membership.
+     *
      * @param conn
      * @param jId
      */
@@ -1344,7 +1352,7 @@ public class ArtJob implements Job {
     /**
      * Remove records in shared jobs table for users who have been denied access
      * because their user group has been denied access
-     * 
+     *
      * @param conn
      * @param jId
      * @param groupId
@@ -1392,7 +1400,8 @@ public class ArtJob implements Job {
         }
     }
 
-    /** Set timestamps in ART_JOBS table before job execution
+    /**
+     * Set timestamps in ART_JOBS table before job execution
      */
     private void beforeExecution(Connection conn) {
         try {
@@ -1478,8 +1487,9 @@ public class ArtJob implements Job {
         }
     }
 
-    /** Set timestamps in ART_JOBS table after job execution
-     * If Audit Flag is set, a new row is added to ART_JOBS_AUDIT table
+    /**
+     * Set timestamps in ART_JOBS table after job execution If Audit Flag is
+     * set, a new row is added to ART_JOBS_AUDIT table
      */
     private void afterExecution(Connection conn, boolean singleOutput, String user) {
         try {
@@ -1528,8 +1538,9 @@ public class ArtJob implements Job {
         }
     }
 
-    /** Sets exception in ART_JOBS table after job execution
-     * If Audit Flag is set, a new row is added to ART_JOBS_AUDIT table
+    /**
+     * Sets exception in ART_JOBS table after job execution If Audit Flag is
+     * set, a new row is added to ART_JOBS_AUDIT table
      */
     private void afterExecutionOnException(Connection conn, Exception ex, boolean singleOutput, String user) {
         try {
@@ -1579,9 +1590,9 @@ public class ArtJob implements Job {
         }
     }
 
-    /**  Save a job in the database.
-     *   If the job id is set, updates the existing job. Otherwise a new
-     *   job is created.
+    /**
+     * Save a job in the database. If the job id is set, updates the existing
+     * job. Otherwise a new job is created.
      */
     public void save() {
         Connection conn = null;
@@ -1710,10 +1721,10 @@ public class ArtJob implements Job {
         }
     }
 
-    /**  Delete this Job.
-     *   Remove a Job from the database.
-     *   If the jobs has parameters, the parameters are removed as well.
-     *   If the job is a cached result one, drop the cached table
+    /**
+     * Delete this Job. Remove a Job from the database. If the jobs has
+     * parameters, the parameters are removed as well. If the job is a cached
+     * result one, drop the cached table
      */
     public void delete() {
         Connection conn = null;
@@ -1789,19 +1800,20 @@ public class ArtJob implements Job {
         }
     }
 
-    /**  Load an existing  Job (to update/save/execute).
-    An existing Job is loaded from the database. Use the getXyz methods to
-    get current properties and setXyx method to modify properties; then save()
-    to commit the changes on the database.
-     * 
-     * @param jId 
+    /**
+     * Load an existing Job (to update/save/execute). An existing Job is loaded
+     * from the database. Use the getXyz methods to get current properties and
+     * setXyx method to modify properties; then save() to commit the changes on
+     * the database.
+     *
+     * @param jId
      */
     public void load(int jId) {
         load(jId, username); // if username is not null this job is loaded only if the existing job username matches this job username
     }
 
     /**
-     * 
+     *
      * @param jId
      * @param usr
      */
@@ -1894,11 +1906,10 @@ public class ArtJob implements Job {
 
     }
 
-    /**  Reset Job attributes.
-    This is used to "empty" an existing ArtJob object in order to
-    re-use it to save another job.
-    Used in editJob.jsp to make sure a cached ArtJob is not considered
-    when creating a new schduled job
+    /**
+     * Reset Job attributes. This is used to "empty" an existing ArtJob object
+     * in order to re-use it to save another job. Used in editJob.jsp to make
+     * sure a cached ArtJob is not considered when creating a new schduled job
      */
     public void reset() {
         jobId = -1;
@@ -1912,7 +1923,7 @@ public class ArtJob implements Job {
     }
 
     /**
-     * 
+     *
      * @param hashInline
      * @param hashMulti
      */
@@ -2098,8 +2109,9 @@ public class ArtJob implements Job {
 
     }
 
-    /** Prepares a job for its execution
-     *  Loads additional info needed to execute (immediately) the job (query id, datasource etc).
+    /**
+     * Prepares a job for its execution Loads additional info needed to execute
+     * (immediately) the job (query id, datasource etc).
      */
     private PreparedQuery prepare(String user) throws SQLException {
         logger.debug("Job Id {}. prepare()", jobId);
@@ -2143,8 +2155,8 @@ public class ArtJob implements Job {
     }
 
 
-    /* Convert ; separated list of smtp addresses to
-    and array of strings
+    /*
+     * Convert ; separated list of smtp addresses to and array of strings
      */
     private String[] stringToArray(String s) {
         // by default send to the requester if to is not set
@@ -2178,7 +2190,7 @@ public class ArtJob implements Job {
         String smtpPassword = ArtDBCP.getArtProps("smtp_password");
 
         Mailer m = new Mailer();
-        m.setSmtp(smtpServer);
+        m.setSmtpHost(smtpServer);
         if (smtpUsername != null && smtpPassword != null && smtpUsername.length() > 3) {
             m.setUsername(smtpUsername);
             smtpPassword = Encrypter.decrypt(smtpPassword);
@@ -2194,7 +2206,7 @@ public class ArtJob implements Job {
 
     /**
      * Migrate existing jobs created in art versions before 1.11 to quartz jobs
-     * 
+     *
      * @param c connection to art repository
      * @param scheduler quartz scheduler
      */
@@ -2245,15 +2257,44 @@ public class ArtJob implements Job {
                 if (hour == null) {
                     hour = "3"; //default to 3am
                 }
-                day = rs.getString("JOB_DAY");
-                if (day == null) {
-                    day = "*"; //default to every day
-                }
                 month = rs.getString("JOB_MONTH");
                 if (month == null) {
                     month = "*"; //default to every month
                 }
-                weekday = "?"; //always default to undefined. quartz can't have day of the month and weekday both defined
+                //set day and weekday
+                day = rs.getString("JOB_DAY");
+                if(day==null){
+                    day="*";
+                }
+                weekday = rs.getString("JOB_WEEKDAY");
+                if(weekday==null){
+                    weekday="?";
+                }
+                
+                //set default day of the month if weekday is defined
+                if (day.length()==0 && weekday.length() >= 1 && !weekday.equals("?")) {
+                    //weekday defined but day of the month is not. default day to ?
+                    day = "?";
+                }
+
+                if (day.length() == 0) {
+                    //no day of month defined. default to *
+                    day = "*";
+                }
+                if (weekday.length() == 0) {
+                    //no day of week defined. default to undefined
+                    weekday = "?";
+                }
+                if (day.equals("?") && weekday.equals("?")) {
+                    //unsupported. only one can be ?
+                    day = "*";
+                    weekday = "?";
+                }
+                if (day.equals("*") && weekday.equals("*")) {
+                    //unsupported. only one can be defined
+                    day = "*";
+                    weekday = "?";
+                }
 
                 cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
                 if (CronExpression.isValidExpression(cronString)) {
@@ -2320,7 +2361,7 @@ public class ArtJob implements Job {
 
     /**
      * Grant or revoke access to users
-     * 
+     *
      * @param action
      * @param users
      */
@@ -2373,7 +2414,7 @@ public class ArtJob implements Job {
 
     /**
      * Grant or revoke access to users
-     * 
+     *
      * @param action
      * @param users
      * @param jobs
@@ -2430,7 +2471,7 @@ public class ArtJob implements Job {
 
     /**
      * Grant or revoke access to user groups
-     * 
+     *
      * @param action
      * @param groups
      */
@@ -2483,7 +2524,7 @@ public class ArtJob implements Job {
 
     /**
      * Grant or revoke access to user groups
-     * 
+     *
      * @param action
      * @param groups
      * @param jobs
@@ -2544,8 +2585,9 @@ public class ArtJob implements Job {
     }
 
     /**
-     * Get an indicator of jobs and the users and user groups they have been shared with
-     * 
+     * Get an indicator of jobs and the users and user groups they have been
+     * shared with
+     *
      * @return jobs and the users and user groups they have been shared with
      */
     public Map<Integer, String> getSharedJobAssignment() {

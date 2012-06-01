@@ -269,7 +269,7 @@ public class ArtDBCP extends HttpServlet {
                     dataSources = new LinkedHashMap<Integer, DataSource>();
                     rs.close();
                     rs = st.executeQuery("SELECT DATABASE_ID, NAME, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL FROM ART_DATABASES WHERE DATABASE_ID > 0 ORDER BY NAME");// ordered by NAME to have them inserted in order in the LinkedHashMap dataSources (note: first item is always the ArtRepository)
-                    int i = 0;
+                    int i;
 
                     /********************************************
                      * ART database is the 0 one

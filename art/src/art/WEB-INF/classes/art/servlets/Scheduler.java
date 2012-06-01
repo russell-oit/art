@@ -32,18 +32,24 @@ Anyway, this may not work on all servlet engine
  */
 package art.servlets;
 
-import art.utils.*;
-
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import art.utils.ArtJob;
+import art.utils.ArtProps;
+import art.utils.Encrypter;
+import art.utils.QuartzProperties;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import org.quartz.SchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.quartz.*;
-import org.quartz.impl.*;
 
 /**
  * Class to delete export and job files older than x minutes.
@@ -203,7 +209,7 @@ public class Scheduler extends HttpServlet {
             // Delete old files in the export directory
             File exportFiles = new File(base_export_path);
             File[] fileNames = exportFiles.listFiles();
-            long lastModified = 0;
+            long lastModified;
             long actualTime = new java.util.Date().getTime();
             String fileName;
             for (int i = 0; i < fileNames.length; i++) {

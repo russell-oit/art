@@ -23,9 +23,9 @@ if (action!=null && request.getSession().getAttribute("AdminSession")!=null) {
 			out.println("<hr>");
 			out.println("Name: <b>"+ ds.getName()+"</b> , ID: <b>"+key+"</b>");
 			
-			Vector connectionPool=ds.getConnectionPool();
+			List connectionPool=ds.getConnectionPool();
 			out.println("<pre>");			
-			out.println(" Pool Actual Size  = " + connectionPool.size());
+			out.println(" Connection Pool Size  = " + connectionPool.size());
 			
 			StringBuilder sb = new StringBuilder(512);
 			SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -35,7 +35,7 @@ if (action!=null && request.getSession().getAttribute("AdminSession")!=null) {
 				sb.append(ec.getInUse() + " (" + dateFormatter.format(lastUsedTime) + ") , ");				
 			}
 			out.println("   In use          = " + sb.toString());
-			out.println(" Total Connections Ever Made = " + ds.getTotalConnections());
+			out.println(" Total Connections Ever Requested = " + ds.getTotalConnections());
 			out.println("</pre>");
 		}
 	}
