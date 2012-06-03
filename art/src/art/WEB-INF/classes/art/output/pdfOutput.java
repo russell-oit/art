@@ -8,14 +8,18 @@ see http://itextdocs.lowagie.com/examples/com/lowagie/examples/objects/tables/pd
 package art.output;
 
 import art.servlets.ArtDBCP;
-
 import art.utils.ArtQueryParam;
-import java.io.*;
-import java.util.*;
-import java.text.SimpleDateFormat; //smileybits 20100212. format dates using simpledateformat class
-
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -314,7 +318,7 @@ public class pdfOutput implements ArtOutputInterface {
         }
 
         // split table in smaller pieces in order to save memory:
-        // fragment size should come from ArtDBCP servler from  web.xml or properties		
+        // fragment size should come from ArtDBCP servlet, from  web.xml or properties		
         if (counter % 500 == 500 - 1) {
             try {
                 document.add(table);

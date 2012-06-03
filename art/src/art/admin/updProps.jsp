@@ -1,5 +1,6 @@
-<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP,org.apache.commons.lang.StringUtils;" %>
 <%@ include file ="headerAdmin2.jsp" %>
+
 <%
   String isValidAdminSession = (String) session.getAttribute("AdminSession");
   if ( isValidAdminSession == null || !isValidAdminSession.equals("Y")) {
@@ -21,7 +22,7 @@
   String  propsFile = baseDir+sep+"WEB-INF"+sep+"art.props";
 
   String  administrator , smtp_server, smtp_username, smtp_password,
-          art_username, art_password, art_url, art_jdbc_driver, art_testsql, art_pooltimeout, msg;
+          art_username, art_password, art_jdbc_url, art_jdbc_driver, art_testsql, art_pooltimeout, msg;
   String  ldap_auth_server, ldap_auth_method  ,mswin_auth_server, mswin_domains,
           jdbc_auth_driver ,jdbc_auth_url ,index_page_default, bottom_logo, css_skin,header_with_public_user,
 	  page_size, rss_link;
@@ -46,7 +47,10 @@
     art_password           = ap.getProp("art_password");
 	// un-obfuscate password
 	art_password = Encrypter.decrypt(art_password);
-	art_url                = ap.getProp("art_url");
+	art_jdbc_url                = ap.getProp("art_jdbc_url");
+	if(StringUtils.isBlank(art_jdbc_url)){
+		art_jdbc_url=ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+	}
     art_jdbc_driver        = ap.getProp("art_jdbc_driver");
 	art_testsql            = ap.getProp("art_testsql");
 	art_pooltimeout        = ap.getProp("art_pooltimeout");
@@ -67,7 +71,7 @@
     bottom_logo            = ap.getProp("bottom_logo");
     css_skin               = ap.getProp("css_skin");
     
-    //enable smooth upgrade from 2.1 to 2.2
+    //enable smooth upgrade from 2.1 to 2.2+
     if("/art/css/art.css".equals(css_skin)){
         css_skin="/css/art.css";
     }
@@ -125,7 +129,7 @@
   } else {        
     art_username    = "ART";
     art_password    = "ART";
-    art_url         = "default";
+    art_jdbc_url         = "default";
     art_jdbc_driver = "org.hsqldb.jdbcDriver";
 	art_testsql     = "";
 	art_pooltimeout = "15";
@@ -160,7 +164,7 @@
 	mondrian_cache_expiry="0";
 
     %>
-
+	
     <p>
     <table align="center"><tr><td class="title"> Welcome! </td></tr>
            <tr><td class="data"><span style="color:green">
@@ -177,9 +181,38 @@
     <%
   }
 
-
-
 %>
+
+<script language="javascript" type="text/javascript">	
+	function onTypeSelection() {		
+		var dbType=document.getElementById("art_database_type").value;
+		var driverElement=document.getElementById("art_jdbc_driver");
+		var urlElement=document.getElementById("art_jdbc_url");		
+		if(dbType == "oracle"){			
+			driverElement.value="oracle.jdbc.OracleDriver";
+			urlElement.value="jdbc:oracle:thin:@<server_name>:1521:<sid>";
+		} else if(dbType == "mysql"){
+			driverElement.value="com.mysql.jdbc.Driver";
+			urlElement.value="jdbc:mysql://<server_name>/<database_name>";
+		} else if(dbType == "postgresql"){
+			driverElement.value="org.postgresql.Driver";
+			urlElement.value="jdbc:postgresql://<host>/<database_name>";
+		} else if(dbType == "hsqldb-standalone"){
+			driverElement.value="org.hsqldb.jdbcDriver";
+			urlElement.value="jdbc:hsqldb:<file_path>;shutdown=true;hsqldb.write_delay=false";
+		} else if(dbType == "sqlserver-ms"){
+			driverElement.value="com.microsoft.sqlserver.jdbc.SQLServerDriver";
+			urlElement.value="jdbc:sqlserver://<server_name>;databaseName=<db>[;instanceName=<inst>]";
+		} else if(dbType == "cubrid"){
+			driverElement.value="cubrid.jdbc.driver.CUBRIDDriver";
+			urlElement.value="jdbc:cubrid:<server_name>:33000:<database_name>";		
+		} else if(dbType == "other"){
+			driverElement.value="";
+			urlElement.value="";
+		}
+	}
+</script>
+
 <form action="execUpdProps.jsp" method="post">
  <table align="center" width="60%">
   <tr><td class="title" colspan="2" > ART Properties </td></tr>
@@ -197,15 +230,32 @@
        </td>
    </tr>
    
+   <tr><td class="attr"> Database Type</td>
+       <td class="data">
+		   <select name="art_database_type" id="art_database_type" size="1" onChange="javascript:onTypeSelection();">
+			   <option value="--" selected="selected">--</option>
+			   <option value="cubrid">CUBRID</option>
+			   <option value="oracle">Oracle</option>
+			   <option value="mysql">MySQL</option>
+			   <option value="postgresql">PostgreSQL</option>
+			   <option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
+			   <option value="sqlserver-ms">SQL Server (Microsoft driver)</option>
+			   <option value="other">Other</option>
+		   </select>
+		   <%msg = "Sets the jdbc driver and url fields with default values for the selected database type"; %>
+		<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+       </td>
+   </tr>
+   
    <tr><td class="attr"> ART Database JDBC Driver</td>
        <td class="data">
-         <input type="text" name="art_jdbc_driver" size="60" maxlength="200" value="<%=art_jdbc_driver%>">
+         <input type="text" name="art_jdbc_driver" id="art_jdbc_driver" size="60" maxlength="200" value="<%=art_jdbc_driver%>">
        </td>
    </tr>
 
    <tr><td class="attr"> ART Database URL</td>
        <td class="data">
-         <input type="text" name="art_url" size="60" maxlength="2000" value="<%=art_url%>">
+         <input type="text" name="art_jdbc_url" id="art_jdbc_url" size="60" maxlength="2000" value="<%=art_jdbc_url%>">
         <%
 		String baseDirEscaped=baseDir.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments
 		String sepEscaped=sep.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments

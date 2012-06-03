@@ -40,6 +40,7 @@ import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1215,13 +1216,17 @@ public class ArtJob implements Job {
 
                         m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
                         m.setFrom(from);
+						
+						if(StringUtils.isBlank(message)){
+							message="&nbsp;"; //if message is blank, ensure there's a space before the hr
+						}
 
                         if (jobType == 2 || jobType == 6) {
                             // e-mail output as attachment
                             List<File> l = new ArrayList<File>();
                             l.add(new File(fileName));
                             m.setAttachments(l);
-                            m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
+                            m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
                         } else if (jobType == 5 || jobType == 7) {
                             // inline html within email
                             // read the file and include it in the HTML message
@@ -1231,15 +1236,15 @@ public class ArtJob implements Job {
                             // convert the file to a string and get only the html table
                             String htmlTable = new String(fileBytes, "UTF-8");
                             htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
-                            m.setMessage("<html>" + message + "<hr>" + htmlTable + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
+                            m.setMessage("<html>" + message + "<hr>" + htmlTable + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
                             fis.close();
                         } else { // publish
                             int retentionPeriod = ArtDBCP.getPublishedFilesRetentionPeriod();
 
                             if (retentionPeriod == 0) {
-                                m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published. (ART Reporting Tool, Job " + jobId + ")</small></html>");
+                                m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published. (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
                             } else {
-                                m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published and will be available for the following number of days: " + retentionPeriod + " (ART Reporting Tool, Job " + jobId + ")</small></html>");
+                                m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published and will be available for the following number of days: " + retentionPeriod + " (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
                             }
                         }
 

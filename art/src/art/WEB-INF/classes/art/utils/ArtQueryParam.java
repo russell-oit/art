@@ -19,11 +19,14 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import org.apache.commons.lang.math.NumberUtils; //for isnumeric functionality
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -427,6 +430,11 @@ public class ArtQueryParam {
                     + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             ps = conn.prepareStatement(SQL);
+			
+			//if name is empty string, save space. for error free database migrations using tools like PDI
+			if(StringUtils.isBlank(name)){
+				name=" ";
+			}
 
             ps.setInt(1, getQueryId());
             ps.setInt(2, getFieldPosition());

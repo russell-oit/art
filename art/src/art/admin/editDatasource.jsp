@@ -50,6 +50,36 @@ if (action.equals("MODIFY")){
 String msg;
 %>
 
+<script language="javascript" type="text/javascript">	
+	function onTypeSelection() {		
+		var dbType=document.getElementById("database_type").value;
+		var driverElement=document.getElementById("DRIVER");
+		var urlElement=document.getElementById("URL");		
+		if(dbType == "oracle"){			
+			driverElement.value="oracle.jdbc.OracleDriver";
+			urlElement.value="jdbc:oracle:thin:@<server_name>:1521:<sid>";
+		} else if(dbType == "mysql"){
+			driverElement.value="com.mysql.jdbc.Driver";
+			urlElement.value="jdbc:mysql://<server_name>/<database_name>";
+		} else if(dbType == "postgresql"){
+			driverElement.value="org.postgresql.Driver";
+			urlElement.value="jdbc:postgresql://<host>/<database_name>";
+		} else if(dbType == "hsqldb-standalone"){
+			driverElement.value="org.hsqldb.jdbcDriver";
+			urlElement.value="jdbc:hsqldb:<file_path>;shutdown=true;hsqldb.write_delay=false";
+		} else if(dbType == "sqlserver-ms"){
+			driverElement.value="com.microsoft.sqlserver.jdbc.SQLServerDriver";
+			urlElement.value="jdbc:sqlserver://<server_name>;databaseName=<db>[;instanceName=<inst>]";
+		} else if(dbType == "cubrid"){
+			driverElement.value="cubrid.jdbc.driver.CUBRIDDriver";
+			urlElement.value="jdbc:cubrid:<server_name>:33000:<database_name>";		
+		} else if(dbType == "other"){
+			driverElement.value="";
+			urlElement.value="";
+		}
+	}
+</script>
+
 
 <form name="editDatasource" method="post" action="execEditDatasource.jsp">    	
 	<input type="hidden" name="ACTION" value="<%=action%>">
@@ -77,12 +107,29 @@ String msg;
 			<td class="data"> <input type="text" name="NAME" value="<%=ds.getName()%>" size="25" maxlength="25"> </td>
 		</tr>
 		
+		<tr><td class="data"> Type</td>
+			<td class="data">
+				<select name="database_type" id="database_type" size="1" onChange="javascript:onTypeSelection();">
+					<option value="--">--</option>
+					<option value="cubrid">CUBRID</option>
+					<option value="oracle">Oracle</option>
+					<option value="mysql">MySQL</option>
+					<option value="postgresql">PostgreSQL</option>
+					<option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
+					<option value="sqlserver-ms">SQL Server (Microsoft driver)</option>
+					<option value="other">Other</option>
+				</select>
+				<%msg = "Sets the jdbc driver and url fields with default values for the selected database type"; %>
+				<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			</td>
+		</tr>
+		
 		<tr><td class="data"> Driver </td>
-			<td class="data"> <input type="text" name="DRIVER" value="<%=ds.getDriver()%>" size="50" maxlength="200"> </td>
+			<td class="data"> <input type="text" name="DRIVER" id="DRIVER" value="<%=ds.getDriver()%>" size="50" maxlength="200"> </td>
 		</tr>
 		
 		<tr><td class="data"> Database URL </td>
-			<td class="data"> <input type="text" name="URL" value="<%=ds.getUrl()%>" size="50" maxlength="2000"> </td>
+			<td class="data"> <input type="text" name="URL" id="URL" value="<%=ds.getUrl()%>" size="50" maxlength="2000"> </td>
 		</tr>
 		
 		<tr><td class="data"> Username </td>
@@ -143,54 +190,5 @@ String msg;
 	%>
 	
 </form>
-        
-<p>&nbsp;</p>
-    <div class="notes">
-        <b>Notes:</b>
-<table class="notes">
-    <tr>
-        <td>Some JDBC Drivers and URLs
-            <ul>
-                <li><b>CUBRID</b><br>
-Driver Name: cubrid.jdbc.driver.CUBRIDDriver<br>
-JDBC URL: jdbc:cubrid:&lt;server_name&gt;:&lt;port&gt;:&lt;database_name&gt;:&lt;username&gt;:&lt;password&gt;  <i>(default port is 30000)</i>
-            </li>
-            
-            <br>
-                <li><b>Oracle</b><br>
-Driver Name: oracle.jdbc.driver.OracleDriver<br>
-JDBC URL: jdbc:oracle:thin:@&lt;server_name&gt;:&lt;port&gt;:&lt;sid&gt;   <i>(default port is 1521)</i>
-            </li>
-                  
-            <br>
-                <li><b>MySQL</b><br>
-Driver Name: com.mysql.jdbc.Driver<br>
-JDBC URL: jdbc:mysql://&lt;server_name&gt;/&lt;database_name&gt;
-            </li>
-            
-            <br>
-            <li><b>PostgreSQL</b><br>
-Driver Name: org.postgresql.Driver<br>
-JDBC URL: jdbc:postgresql://&lt;host&gt;/&lt;database_name&gt;
-            </li>
-            
-            <br>            
-            <li><b>HSQLDB</b><br>
-Driver Name: org.hsqldb.jdbcDriver<br>
-JDBC URL: jdbc:hsqldb:&lt;file_path&gt;
-            </li>
-            
-            <br>
-            <li><b>SQL Server (using Microsoft's JDBC driver)</b><br>
-Driver Name: com.microsoft.sqlserver.jdbc.SQLServerDriver<br>
-JDBC URL: jdbc:sqlserver://&lt;server_name&gt;;databaseName=&lt;db&gt;[;instanceName=&lt;inst&gt;]
-            </li>
-            
-            </ul>
-        </td>
-    </tr>
-</table>
-    </div>
-
 
 <%@ include file="footer.html" %>

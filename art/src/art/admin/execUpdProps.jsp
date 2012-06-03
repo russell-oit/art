@@ -27,7 +27,7 @@ ArtProps ap = new ArtProps();
 
 String username=request.getParameter("art_username");
 String password=request.getParameter("art_password");
-String url=request.getParameter("art_url");
+String url=request.getParameter("art_jdbc_url");
 String driver=request.getParameter("art_jdbc_driver");
 boolean useDefaultDatabase=false;
 if(url!=null && url.toLowerCase().equals("default")){
@@ -71,8 +71,8 @@ while (names.hasMoreElements()) {
 	if (name.equals("smtp_password") && value.length()>0 ) {
 		value = Encrypter.encrypt(value);
 	}
-	// if the property is the art_url and value is default one, let's set it properly
-	if (name.equals("art_url") && useDefaultDatabase ) {
+	// if the property is the art_jdbc_url and value is default one, let's set it properly
+	if (name.equals("art_jdbc_url") && useDefaultDatabase ) {
 		value = defaultArtUrl;
 	}
 	if (name.equals("art_jdbc_driver") && useDefaultDatabase ) {
@@ -119,8 +119,7 @@ while (names.hasMoreElements()) {
 		Statement st = c.createStatement();
 		int i = st.executeUpdate("UPDATE ART_DATABASES SET URL='"+defaultDB_url+"' , PASSWORD='"+artRepositoryEncryptedPassword+"' WHERE DATABASE_ID=2");
 		i = i+ st.executeUpdate("UPDATE ART_DATABASES SET URL='"+sampleDB_url+"' WHERE DATABASE_ID=1");
-		//System.out.println("..."+i+"updates");
-
+		
 		if(!ArtDBCP.getArtPropsStatus()){
 			//allow changing of password on initial setup
 			st.executeUpdate("ALTER USER ART SET PASSWORD \""+request.getParameter("art_password")+"\"");

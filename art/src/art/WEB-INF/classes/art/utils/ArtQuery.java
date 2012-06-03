@@ -4,12 +4,12 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
 import art.params.*;
-
+import art.servlets.ArtDBCP;
 import java.sql.*;
-import java.util.*;
 import java.text.Collator;
+import java.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -717,6 +717,12 @@ public class ArtQuery {
                     + "(OBJECT_ID, OBJECT_GROUP_ID, LINE_NUMBER, TEXT_INFO)"
                     + " values (?, ?, ?, ?)");
             ps = conn.prepareStatement(SQLUpdate);
+			
+			//if text is empty string, save space. for error free database migrations using tools like PDI
+			if(StringUtils.isBlank(text)){
+				text=" ";
+			}
+			
             int start = 0;
             int end = SOURCE_CHUNK_LENGTH;
             int step = 1;

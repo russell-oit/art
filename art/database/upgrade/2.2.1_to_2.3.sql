@@ -1,4 +1,4 @@
--- Upgrade script from ART 2.2 to ART 2.3
+-- Upgrade script from ART 2.2.1 to ART 2.3
 --
 -- Purpose: create/update the tables needed to 
 --          . update database version
