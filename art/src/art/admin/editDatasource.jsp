@@ -63,13 +63,13 @@ String msg;
 			urlElement.value="jdbc:mysql://<server_name>/<database_name>";
 		} else if(dbType == "postgresql"){
 			driverElement.value="org.postgresql.Driver";
-			urlElement.value="jdbc:postgresql://<host>/<database_name>";
+			urlElement.value="jdbc:postgresql://<server_name>/<database_name>";
 		} else if(dbType == "hsqldb-standalone"){
 			driverElement.value="org.hsqldb.jdbcDriver";
 			urlElement.value="jdbc:hsqldb:<file_path>;shutdown=true;hsqldb.write_delay=false";
 		} else if(dbType == "sqlserver-ms"){
 			driverElement.value="com.microsoft.sqlserver.jdbc.SQLServerDriver";
-			urlElement.value="jdbc:sqlserver://<server_name>;databaseName=<db>[;instanceName=<inst>]";
+			urlElement.value="jdbc:sqlserver://<server_name>;databaseName=<database_name>";
 		} else if(dbType == "cubrid"){
 			driverElement.value="cubrid.jdbc.driver.CUBRIDDriver";
 			urlElement.value="jdbc:cubrid:<server_name>:33000:<database_name>";		
@@ -107,7 +107,7 @@ String msg;
 			<td class="data"> <input type="text" name="NAME" value="<%=ds.getName()%>" size="25" maxlength="25"> </td>
 		</tr>
 		
-		<tr><td class="data"> Type</td>
+		<tr><td class="data"> Database Type</td>
 			<td class="data">
 				<select name="database_type" id="database_type" size="1" onChange="javascript:onTypeSelection();">
 					<option value="--">--</option>
@@ -124,11 +124,11 @@ String msg;
 			</td>
 		</tr>
 		
-		<tr><td class="data"> Driver </td>
+		<tr><td class="data"> JDBC Driver </td>
 			<td class="data"> <input type="text" name="DRIVER" id="DRIVER" value="<%=ds.getDriver()%>" size="50" maxlength="200"> </td>
 		</tr>
 		
-		<tr><td class="data"> Database URL </td>
+		<tr><td class="data"> JDBC URL </td>
 			<td class="data"> <input type="text" name="URL" id="URL" value="<%=ds.getUrl()%>" size="50" maxlength="2000"> </td>
 		</tr>
 		
@@ -139,8 +139,18 @@ String msg;
 		<tr>
 			<td class="data"> Password </td>			
 			<td class="data">
-				<input type="hidden" name="OLD_PASSWORD" value="<%=ds.getPassword()%>">
-				<input type="password" name="PASSWORD" value="" size="25" maxlength="40">
+				<%
+				String password=ds.getPassword();
+				if(password==null){
+					password="";
+				} else {
+					if(password.startsWith("o:")){
+						//password is encrypted. decrypt
+						password=Encrypter.decrypt(password.substring(2));
+					}					
+				}
+				%>	
+				<input type="password" name="PASSWORD" value="<%=password%>" size="25" maxlength="40">
 			</td>
 		</tr>
 		
@@ -179,15 +189,7 @@ String msg;
 		<tr>
 			<td class="data" colspan="2"> <input type="submit" value="Submit"> </td>
 		</tr>
-    </table> 
-
-	<%
-	if(modify){
-		%>
-		<p align="center">Leave the password field blank to mantain the previous password</p>
-	<%
-	}
-	%>
+    </table> 	
 	
 </form>
 

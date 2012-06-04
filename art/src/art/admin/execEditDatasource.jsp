@@ -4,26 +4,10 @@
 
 <%
 String action = request.getParameter("ACTION");
-
-String oldPassword = request.getParameter("OLD_PASSWORD");
-String newPassword = request.getParameter("PASSWORD");
-if (action.equals("MODIFY") && newPassword.equals("")){
-	if (oldPassword.startsWith("o:")) {
-		// password is encrypted. decrypt for connection testing purposes
-		oldPassword = Encrypter.decrypt(oldPassword.substring(2));
-	}
-	newPassword=oldPassword;
-}
+String password = request.getParameter("PASSWORD");
 String driver=request.getParameter("DRIVER").trim();
 String url=request.getParameter("URL").trim();
 String username=request.getParameter("USERNAME").trim();
-
-//for cubrid database, username and password are specified in the url and need to be blank for DriverManager.getConnection(url, username, newPassword) to work
-if(driver.equals("cubrid.jdbc.driver.CUBRIDDriver")){
-    username="";
-    newPassword="";
-}
-
 
 //test database connection
 try{
@@ -37,7 +21,7 @@ try{
 		out.println("...OK<br>");
 	}
 	out.println("<br>Testing connection ...<br>");
-	Connection testConn = DriverManager.getConnection(url, username, newPassword);
+	Connection testConn = DriverManager.getConnection(url, username, password);
 	testConn.close();
 	out.println("...OK<br>");
 }catch(SQLException ex){
@@ -64,9 +48,9 @@ try{
 	out.println("</td></tr></table></p>");
 }
 
-//encrypt password string
-if (!newPassword.equals(""))  {
-	newPassword = "o:" + Encrypter.encrypt(newPassword);
+//encrypt password
+if (!password.equals(""))  {
+	password = "o:" + Encrypter.encrypt(password);
 }
 
 
@@ -77,7 +61,7 @@ ds.setName(request.getParameter("NAME").trim());
 ds.setDriver(driver);
 ds.setUrl(url);
 ds.setUsername(username);
-ds.setPassword(newPassword);
+ds.setPassword(password);
 ds.setPoolTimeout(Integer.parseInt(request.getParameter("POOL_TIMEOUT")));
 ds.setTestSql(request.getParameter("TEST_SQL"));
 

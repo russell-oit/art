@@ -36,12 +36,6 @@ if(url!=null && url.toLowerCase().equals("default")){
 	driver=defaultArtDriver;
 }
 
-//for cubrid database, username and password are specified in the url and need to be blank for DriverManager.getConnection(url, username, password) to work
-if(driver.equals("cubrid.jdbc.driver.CUBRIDDriver")){
-    username="";
-    password="";
-}
-
 String name, value;
 /* used to properly set the new password in ART_DATABASES
  * see "if (useDefaultDatabase)"  below
@@ -56,18 +50,9 @@ while (names.hasMoreElements()) {
 	if (name.equals("art_password") ) {
 		value = Encrypter.encrypt(value);
 
-		artRepositoryEncryptedPassword= "o:" + value;
-        //for cubrid database, username and password are specified in the url and need to be blank for DriverManager.getConnection(url, username, newPassword) to work
-        if(driver.equals("cubrid.jdbc.driver.CUBRIDDriver")){
-            value ="";
-        }
+		artRepositoryEncryptedPassword= "o:" + value;        
 	}
-    if (name.equals("art_username") ) {		
-        //for cubrid database, username and password are specified in the url and need to be blank for DriverManager.getConnection(url, username, newPassword) to work
-        if(driver.equals("cubrid.jdbc.driver.CUBRIDDriver")){
-            value ="";
-        }
-	}
+    //encrypt smtp password
 	if (name.equals("smtp_password") && value.length()>0 ) {
 		value = Encrypter.encrypt(value);
 	}

@@ -196,13 +196,13 @@
 			urlElement.value="jdbc:mysql://<server_name>/<database_name>";
 		} else if(dbType == "postgresql"){
 			driverElement.value="org.postgresql.Driver";
-			urlElement.value="jdbc:postgresql://<host>/<database_name>";
+			urlElement.value="jdbc:postgresql://<server_name>/<database_name>";
 		} else if(dbType == "hsqldb-standalone"){
 			driverElement.value="org.hsqldb.jdbcDriver";
 			urlElement.value="jdbc:hsqldb:<file_path>;shutdown=true;hsqldb.write_delay=false";
 		} else if(dbType == "sqlserver-ms"){
 			driverElement.value="com.microsoft.sqlserver.jdbc.SQLServerDriver";
-			urlElement.value="jdbc:sqlserver://<server_name>;databaseName=<db>[;instanceName=<inst>]";
+			urlElement.value="jdbc:sqlserver://<server_name>;databaseName=<database_name>";
 		} else if(dbType == "cubrid"){
 			driverElement.value="cubrid.jdbc.driver.CUBRIDDriver";
 			urlElement.value="jdbc:cubrid:<server_name>:33000:<database_name>";		
@@ -253,7 +253,7 @@
        </td>
    </tr>
 
-   <tr><td class="attr"> ART Database URL</td>
+   <tr><td class="attr"> ART Database JDBC URL</td>
        <td class="data">
          <input type="text" name="art_jdbc_url" id="art_jdbc_url" size="60" maxlength="2000" value="<%=art_jdbc_url%>">
         <%

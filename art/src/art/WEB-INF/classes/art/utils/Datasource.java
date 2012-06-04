@@ -325,36 +325,21 @@ public class Datasource {
 
             java.util.Date now = new java.util.Date();
             java.sql.Date sysdate = new java.sql.Date(now.getTime());
+            
+			sql = "UPDATE ART_DATABASES SET NAME = ?, DRIVER = ?, URL = ?"
+					+ " ,USERNAME = ?, PASSWORD = ?, POOL_TIMEOUT=?, TEST_SQL=?, UPDATE_DATE=?"
+					+ " WHERE DATABASE_ID = ? ";
+			ps = conn.prepareStatement(sql);
 
-            if (password.equals("")) {
-                sql = "UPDATE ART_DATABASES SET NAME = ?, DRIVER = ?, URL = ?, USERNAME = ?, POOL_TIMEOUT=?, TEST_SQL=?, UPDATE_DATE=? "
-                        + " WHERE DATABASE_ID = ? ";
-                ps = conn.prepareStatement(sql);
-
-                ps.setString(1, name);
-                ps.setString(2, driver);
-                ps.setString(3, url);
-                ps.setString(4, username);
-                ps.setInt(5, poolTimeout);
-                ps.setString(6, testSql);
-                ps.setDate(7, sysdate);
-                ps.setInt(8, datasourceId);
-            } else {
-                sql = "UPDATE ART_DATABASES SET NAME = ?, DRIVER = ?, URL = ?"
-                        + " ,USERNAME = ?, PASSWORD = ?, POOL_TIMEOUT=?, TEST_SQL=?, UPDATE_DATE=?"
-                        + " WHERE DATABASE_ID = ? ";
-                ps = conn.prepareStatement(sql);
-
-                ps.setString(1, name);
-                ps.setString(2, driver);
-                ps.setString(3, url);
-                ps.setString(4, username);
-                ps.setString(5, password);
-                ps.setInt(6, poolTimeout);
-                ps.setString(7, testSql);
-                ps.setDate(8, sysdate);
-                ps.setInt(9, datasourceId);
-            }
+			ps.setString(1, name);
+			ps.setString(2, driver);
+			ps.setString(3, url);
+			ps.setString(4, username);
+			ps.setString(5, password);
+			ps.setInt(6, poolTimeout);
+			ps.setString(7, testSql);
+			ps.setDate(8, sysdate);
+			ps.setInt(9, datasourceId);            
 
             ps.executeUpdate();
             ps.close();
