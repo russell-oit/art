@@ -1,5 +1,11 @@
-<%@ page import="art.utils.*,java.util.*,java.text.*,art.servlets.ArtDBCP,java.util.ResourceBundle" %>
+<%@ page import="art.utils.*,java.util.*,java.text.*,art.servlets.ArtDBCP" %>
 <%@ page import="org.quartz.*" %>
+<%@ page import="static org.quartz.JobBuilder.*" %>
+<%@ page import="static org.quartz.CronScheduleBuilder.*" %>
+<%@ page import="static org.quartz.TriggerBuilder.*" %>
+<%@ page import="static org.quartz.JobKey.jobKey" %>
+<%@ page import="static org.quartz.TriggerKey.triggerKey" %>
+
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -223,12 +229,7 @@ if (request.getParameter("jobName").equals("")){
 	}
 	if (msg.equals("")){
 
-  //evaluate the next run date for the the job
-	java.util.Date nextRunDate;
-
-	CronTrigger tempTrigger=new CronTrigger();
-	tempTrigger.setCronExpression(cronString);
-
+  	
 	//set start date and end date. must be today or in the future
 	//define calendar with date of today and time of midnight - first second of the day
 	java.util.Calendar cal = java.util.Calendar.getInstance();
@@ -236,7 +237,7 @@ if (request.getParameter("jobName").equals("")){
 	cal.set(java.util.Calendar.MINUTE, 0);
 	cal.set(java.util.Calendar.SECOND, 0);
 	cal.set(java.util.Calendar.MILLISECOND, 0);
-
+	
 	java.util.Date now=new java.util.Date();
 
 	if (startDate==null){
@@ -265,10 +266,14 @@ if (request.getParameter("jobName").equals("")){
 		endDate=calEndDate.getTime();
 	}
 
-	tempTrigger.setStartTime(startDate);
-	tempTrigger.setEndTime(endDate);
-
-	nextRunDate=tempTrigger.getFireTimeAfter(new java.util.Date());
+	//evaluate the next run date for the the job
+	CronTrigger tempTrigger = newTrigger()
+			.withSchedule(cronSchedule(cronString))
+			.startAt(startDate)
+			.endAt(endDate)
+			.build();	
+		
+	java.util.Date nextRunDate=tempTrigger.getFireTimeAfter(new java.util.Date());
 
 		if (nextRunDate==null){
 			msg="Job will never execute. Please change the schedule details";
@@ -303,27 +308,30 @@ if (request.getParameter("jobName").equals("")){
 		String jobGroup="jobGroup";
 		String triggerName="trigger"+jobId;
 		String triggerGroup="triggerGroup";
+		
+		JobDetail quartzJob = newJob(ArtJob.class)
+				.withIdentity(jobKey(jobName,jobGroup))
+				.usingJobData("jobid",jobId)
+				.build();
+		
+		//create trigger that defines the schedule for the job
+       CronTrigger trigger= newTrigger()
+			   .withIdentity(triggerKey(triggerName,triggerGroup))
+			.withSchedule(cronSchedule(cronString))
+			.startAt(startDate)
+			.endAt(endDate)
+			.build();
 
-		JobDetail quartzJob;
-
-		quartzJob = new JobDetail(jobName, jobGroup, ArtJob.class);
-		quartzJob.getJobDataMap().put("jobid",jobId);
-
-//create trigger that defines the schedule for the job
-        CronTrigger trigger=new CronTrigger(triggerName,triggerGroup,cronString);
-	trigger.setStartTime(startDate);
-	trigger.setEndTime(endDate);
-
-	//get scheduler instance
-    org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
+		//get scheduler instance
+		org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
 
 		if (scheduler!=null){
-		//delete any existing jobs or triggers with the same id before adding them to the scheduler
-		scheduler.deleteJob(jobName,jobGroup);
-		scheduler.unscheduleJob(triggerName,triggerGroup);
+			//delete any existing jobs or triggers with the same id before adding them to the scheduler
+			scheduler.deleteJob(jobKey(jobName,jobGroup));
+			scheduler.unscheduleJob(triggerKey(triggerName,triggerGroup));
 
-		//add job and trigger to scheduler
-		scheduler.scheduleJob(quartzJob, trigger);
+			//add job and trigger to scheduler
+			scheduler.scheduleJob(quartzJob, trigger);
 		}
 
 		//save schedule details

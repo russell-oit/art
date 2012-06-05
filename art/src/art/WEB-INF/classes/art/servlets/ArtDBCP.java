@@ -41,6 +41,7 @@ import java.util.*;
 import java.sql.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class ArtDBCP extends HttpServlet {
     private static final long serialVersionUID = 1L;
     final static Logger logger = LoggerFactory.getLogger(ArtDBCP.class);
     // Global variables
-    private static String art_username, art_password, art_jdbc_driver, art_url,
+    private static String art_username, art_password, art_jdbc_driver, art_jdbc_url,
             exportPath, art_testsql, art_pooltimeout;
     private static int poolMaxConnections;
     private static ArtDBCP thisArtDBCP;
@@ -132,7 +133,10 @@ public class ArtDBCP extends HttpServlet {
             // de-obfuscate the password
             art_password = Encrypter.decrypt(art_password);
 
-            art_url = ap.getProp("art_url");
+            art_jdbc_url = ap.getProp("art_jdbc_url");
+			if(StringUtils.isBlank(art_jdbc_url)){
+				art_jdbc_url=ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+			}
             art_jdbc_driver = ap.getProp("art_jdbc_driver");
 
             art_pooltimeout = ap.getProp("art_pooltimeout");
@@ -247,7 +251,7 @@ public class ArtDBCP extends HttpServlet {
         }
         DataSource artdb = new DataSource(artPoolTimeout * 60);
         artdb.setName("ART_Repository"); // custom name
-        artdb.setUrl(art_url);
+        artdb.setUrl(art_jdbc_url);
         artdb.setUsername(art_username);
         artdb.setPassword(art_password);
         artdb.setLogToStandardOutput(true);
@@ -546,7 +550,7 @@ public class ArtDBCP extends HttpServlet {
         logger.debug("Getting admin connection");
         // Create a connection to the ART repository for this admin and store it in the
         // admin session (we are not getting this from the pool sice it is not in Autocommit mode)
-        Connection connArt = DriverManager.getConnection(art_url, art_username, art_password);
+        Connection connArt = DriverManager.getConnection(art_jdbc_url, art_username, art_password);
         connArt.setAutoCommit(false);
         return connArt;
     }

@@ -1,4 +1,9 @@
-﻿<%@ page import="java.util.*,art.utils.*,art.servlets.ArtDBCP,org.quartz.*,java.text.*" %>
+<%@ page import="java.util.*,art.utils.*,art.servlets.ArtDBCP,org.quartz.*,java.text.*" %>
+<%@ page import="static org.quartz.JobBuilder.*" %>
+<%@ page import="static org.quartz.TriggerBuilder.*" %>
+<%@ page import="static org.quartz.JobKey.jobKey" %>
+<%@ page import="static org.quartz.TriggerKey.triggerKey" %>
+
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <%@ include file ="header.jsp" %>
 
@@ -84,25 +89,30 @@ owner=request.getParameter("OWNER");
 	
 		//create temporary quartz job to run the job
 		long ctime = System.currentTimeMillis();  
-		JobDetail tempJob = new JobDetail("temp-job-"+jobId+"-"+ctime,"tempJobGroup", ArtJob.class);
-        // create SimpleTrigger that will fire once, immediately		
-        SimpleTrigger tempTrigger = new SimpleTrigger("temp-trigger-"+jobId+"-"+ctime,"tempTriggerGroup",new java.util.Date());
-        
-		tempJob.getJobDataMap().put("jobid",jobId);        		
-		tempJob.getJobDataMap().put("tempjob","yes"); 
-		
+		//JobDetail tempJob = newJob("temp-job-"+jobId+"-"+ctime,"tempJobGroup", ArtJob.class);
+		JobDetail tempJob = newJob(ArtJob.class)
+				.withIdentity(jobKey("temp-job-"+jobId+"-"+ctime,"tempJobGroup"))
+				.usingJobData("jobid",jobId)
+				.usingJobData("tempjob","yes")
+				.build();
+        // create SimpleTrigger that will fire once, immediately		        
+		SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
+				.withIdentity(triggerKey("temp-trigger-"+jobId+"-"+ctime,"tempTriggerGroup"))
+				.startNow()
+				.build();
+        				
 		if (scheduler!=null){		
 			if (enableJobScheduling){
-			jobRunningId = jobId;
-			scheduler.scheduleJob(tempJob, tempTrigger);
-			msg = "Job (" + jobId + ") Running";
+				jobRunningId = jobId;
+				scheduler.scheduleJob(tempJob, tempTrigger);
+				msg = "Job (" + jobId + ") Running";
 			}
 			else {
-			msg = "Couldn't run job. Scheduling not enabled";
+				msg = "Couldn't run job. Scheduling not enabled";
 			}															
 		}
 		else {
-		msg = "Couldn't run job. Scheduler not available";
+			msg = "Couldn't run job. Scheduler not available";
 		}
        
     } else if (action.equals("delete")) {       		

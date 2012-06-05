@@ -1,3 +1,5 @@
+<!-- Based on quartz javadoc - CronExpression class -->
+
 <p>&nbsp;</p>
   
 <div class="notes">
@@ -61,7 +63,13 @@
  <P>
  The '/' character is used to specify increments. For example, &quot;0/15&quot;
  in the minute field means &quot;the minute 0, and every 15 minutes afterwards&quot;
- i.e. the minutes 0, 15, 30, and 45. </p> 
+ i.e. the minutes 0, 15, 30, and 45.
+ Essentially, for each field in the expression, there is a set of numbers that can
+ be turned on or off. For seconds and minutes, the numbers range from 0 to 59. 
+ For hours 0 to 23, for days of the month 0 to 31, and for months 1 to 12. 
+ The "/" character simply helps you turn on every "nth" value in the given set. 
+ Thus "7/6" in the month field only turns on month "7", it does NOT mean every 6th month.
+ </p> 
   <P>
  The '?' character is allowed for the day of the month and week day fields. It
  is used to specify "no specific value". It is not possible to define specific values for both
@@ -76,8 +84,11 @@ set the day of the month to &quot;?&quot;.</p>
  week day field is equivalent to &quot;7&quot; or &quot;SAT&quot; i.e Saturday. 
  If used in the week day field after another value, it
  means &quot;the last certain weekday of the month&quot; - for example &quot;6L&quot;
- means &quot;the last Friday of the month&quot;. When using the 'L' option, 
- do not specify additional lists of values in the field. </p>
+ means &quot;the last Friday of the month&quot;.
+ You can also specify an offset from the last day of the month, e.g &quot;L-3&quot; in the 
+ day of the month field would mean the third-to-last day of the calendar month.
+ When using the 'L' option, 
+ do not specify lists or ranges of values. </p>
  <P>
  The 'W' character is allowed for the day of the month field. It 
  is used to specify the weekday (Monday-Friday) nearest the given day.  For example,
@@ -87,8 +98,12 @@ set the day of the month to &quot;?&quot;.</p>
  16th. If the 15th is a Tuesday, then it will run on Tuesday the 15th. 
  If &quot;1W&quot; is specified as the day of the month and the
  1st is a Saturday, the job will run on Monday the 3rd. It will not 
- cross the month boundary. If the 'W' character is used, there can only be one value
- in the field. No additional lists or ranges are allowed. </p>
+ cross the month boundary. When using the 'W' option, do not specify lists
+ or ranges of days. </p>
+ <p>
+	 The 'L' and 'W' characters can also be combined in the day of the month field to yield 'LW', 
+	 which translates to &quot;last weekday of the month&quot;. 
+ </p>
  <P>
  The '#' character is allowed for the week day field. It is
  used to specify &quot;the nth certain weekday day of the month&quot;. For example, the 
@@ -100,5 +115,10 @@ set the day of the month to &quot;?&quot;.</p>
  <P>
  The legal characters and the names of months and days of the week are not
  case sensitive. </p>
+ <p>
+	 Overflowing ranges is supported - that is, having a larger number on the left hand side
+	 than the right e.g. 22-2 in the hour field to catch 10 o'clock at night until 2 o'clock in the morning,
+	 or NOV-FEB in the month field.
+ </p>
 
 </div>

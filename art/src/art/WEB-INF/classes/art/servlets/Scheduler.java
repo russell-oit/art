@@ -46,6 +46,7 @@ import java.util.Properties;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import org.apache.commons.lang.StringUtils;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class Scheduler extends HttpServlet {
     static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
     long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
     long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
-    String base_export_path, art_username, art_password, art_jdbc_driver, art_url;
+    String base_export_path, art_username, art_password, art_jdbc_driver, art_jdbc_url;
     final String MONDRIAN_CACHE_CLEARED_FILE_NAME = "mondrian-cache-cleared.txt"; //file to indicate when the mondrian cache was last cleared
     
     Timer t;
@@ -171,7 +172,10 @@ public class Scheduler extends HttpServlet {
             // de-obfuscate the password
             art_password = Encrypter.decrypt(art_password);
 
-            art_url = ap.getProp("art_url");
+            art_jdbc_url = ap.getProp("art_jdbc_url");
+			if(StringUtils.isBlank(art_jdbc_url)){
+				art_jdbc_url=ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+			}
             art_jdbc_driver = ap.getProp("art_jdbc_driver");
 
             try {
@@ -195,7 +199,7 @@ public class Scheduler extends HttpServlet {
      * @throws SQLException 
      */
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(art_url, art_username, art_password);
+        return DriverManager.getConnection(art_jdbc_url, art_username, art_password);
     }
 
     /**
