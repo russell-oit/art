@@ -1,6 +1,7 @@
 -- Create the ART Repository
 
--- IMPORTANT: after running this script, also run the quartz script for your database (found in the quartz directory)
+-- IMPORTANT:
+-- after running this script, ALSO RUN the tables_xxx.sql script for your database (found in the quartz directory)
 
 -- NOTES:
 -- for sql server, replace "timestamp" data type with "datetime"

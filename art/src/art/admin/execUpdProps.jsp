@@ -75,8 +75,9 @@ while (names.hasMoreElements()) {
        if (connOld != null){
 			connOld.close();
 		}
-    } catch (Exception exOnClose) {
-       System.err.println("ART - Update Props: WARNING: Error closing old connection: " +exOnClose);
+    } catch (Exception e) {
+       System.out.println("ART - execUpdProps.jsp: WARNING: Error closing old connection: " + e);
+	   e.printStackTrace(System.out);
     }
 
 	Class.forName(driver).newInstance();
@@ -102,8 +103,8 @@ while (names.hasMoreElements()) {
 		String defaultDB_url = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;hsqldb.write_delay=false";
 		String sampleDB_url  = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"SampleDB;shutdown=true;hsqldb.write_delay=false";
 		Statement st = c.createStatement();
-		int i = st.executeUpdate("UPDATE ART_DATABASES SET URL='"+defaultDB_url+"' , PASSWORD='"+artRepositoryEncryptedPassword+"' WHERE DATABASE_ID=2");
-		i = i+ st.executeUpdate("UPDATE ART_DATABASES SET URL='"+sampleDB_url+"' WHERE DATABASE_ID=1");
+		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+defaultDB_url+"' , PASSWORD='"+artRepositoryEncryptedPassword+"' WHERE DATABASE_ID=2");
+		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+sampleDB_url+"' WHERE DATABASE_ID=1");
 		
 		if(!ArtDBCP.getArtPropsStatus()){
 			//allow changing of password on initial setup
@@ -115,8 +116,8 @@ while (names.hasMoreElements()) {
 
 
  } catch(Exception ex){
-  System.err.println("ART - Update Props: " +ex);
-  ex.printStackTrace();
+  System.out.println("ART - execUpdProps.jsp: " +ex);
+  ex.printStackTrace(System.out);
     %>
        <jsp:forward page="error.jsp">
 		<jsp:param name="MOD" value="Exec Update Properties"/>
@@ -164,14 +165,15 @@ while (names.hasMoreElements()) {
 		//save scheduler, to make it accessible throughout the application
 		ArtDBCP.setScheduler(scheduler);
 
-		//migrate jobs to quartz, if any exist from pre-1.11 art versions
+		//migrate jobs to quartz, if any exist that require migrating
 		try{
 			Connection conn = DriverManager.getConnection(url, username, password);            
 			ArtJob aj=new ArtJob();
 			aj.migrateJobsToQuartz(conn,scheduler);
 			conn.close();
 		} catch (Exception e) {
-			System.err.println("ART - Update Props: Error migrating jobs to quartz: " + e);
+			System.out.println("ART - execUpdProps.jsp: Error migrating jobs to quartz: " + e);
+			e.printStackTrace(System.out);
 		}
 
 		//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job

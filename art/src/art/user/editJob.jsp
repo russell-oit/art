@@ -1,5 +1,5 @@
 <%@ page import="art.utils.*,java.util.*,java.text.*,art.servlets.ArtDBCP" %>
-<%@ page import="org.quartz.*" %>
+<%@ page import="org.quartz.*,org.apache.commons.lang.StringUtils" %>
 <%@ page import="static org.quartz.JobBuilder.*" %>
 <%@ page import="static org.quartz.CronScheduleBuilder.*" %>
 <%@ page import="static org.quartz.TriggerBuilder.*" %>
@@ -122,7 +122,7 @@ if (request.getParameter("jobName").equals("")){
 	String month;
 	String second="0"; //seconds always 0
 
-  minute=job.getMinute().replaceAll(" ", ""); // trim();
+  minute=job.getMinute().replaceAll(" ", ""); // cron fields shouldn't have any spaces in them
   if (minute.length()==0){
 	//no minute defined. default to 0
 	minute="0";
@@ -182,8 +182,9 @@ if (request.getParameter("jobName").equals("")){
 	boolean endDateValid=false;
 	SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd");
 	dateFormatter.setLenient(false);
+	java.util.Date nextRunDate=null;
 
-	if (job.getStartDateString().trim().length()==0){
+	if (StringUtils.isBlank(job.getStartDateString())){
 		//allow blank
 		startDateValid=true;
 	} else {
@@ -195,7 +196,7 @@ if (request.getParameter("jobName").equals("")){
 	}
 	}
 
-	if (job.getEndDateString().trim().length()==0){
+	if (StringUtils.isBlank(job.getEndDateString())){
 		//allow blank
 		endDateValid=true;
 	} else {
@@ -213,7 +214,7 @@ if (request.getParameter("jobName").equals("")){
 	JobSchedule schedule=new JobSchedule();
 	if(saveSchedule!=null){
 		//we are saving the schedule
-		if(scheduleName!=null && scheduleName.trim().length()==0){
+		if(StringUtils.isBlank(scheduleName)){
 			msg="Schedule must have a name";
 		} else if(schedule.exists(scheduleName)){
 			msg="Schedule name exists. Change the name or un-check the save schedule option";
@@ -227,73 +228,81 @@ if (request.getParameter("jobName").equals("")){
 	} else if (!CronExpression.isValidExpression(cronString)){
 		msg="Invalid job schedule";
 	}
-	if (msg.equals("")){
-
-  	
-	//set start date and end date. must be today or in the future
-	//define calendar with date of today and time of midnight - first second of the day
-	java.util.Calendar cal = java.util.Calendar.getInstance();
-	cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
-	cal.set(java.util.Calendar.MINUTE, 0);
-	cal.set(java.util.Calendar.SECOND, 0);
-	cal.set(java.util.Calendar.MILLISECOND, 0);
+		
+	if(msg.equals("")){
+		//dates and schedule are valid
+		//ensure end date is after start date
 	
-	java.util.Date now=new java.util.Date();
+		//set start date and end date. must be today or in the future
+		//define calendar with date of today and time of midnight - first millisecond of the day
+		java.util.Calendar calToday = java.util.Calendar.getInstance();
+		calToday.set(java.util.Calendar.HOUR_OF_DAY, 0);
+		calToday.set(java.util.Calendar.MINUTE, 0);
+		calToday.set(java.util.Calendar.SECOND, 0);
+		calToday.set(java.util.Calendar.MILLISECOND, 0);
 
-	if (startDate==null){
-		//no start date specified. default to now
-		startDate=now;
-	} else if (cal.getTime().after(startDate)){
-		//start date in the past. default to now
-		startDate=now;
+		java.util.Date now=new java.util.Date();
+
+		if (startDate==null){
+			//no start date specified. default to now
+			startDate=now;
+		} else if (calToday.getTime().after(startDate)){
+			//start date in the past. default to now. to avoid job running for apparently missed schedules (in the past)
+			startDate=now;
+		} 
+
+		//ensure end date is always last millisecond of the day. to enable same date for start and end date	
+		if(endDate!=null){
+			//set end date to the same day but just before midnight
+			java.util.Calendar calEndDate=java.util.Calendar.getInstance();
+			calEndDate.setTime(endDate);
+			calEndDate.set(java.util.Calendar.HOUR_OF_DAY, 23);
+			calEndDate.set(java.util.Calendar.MINUTE, 59);
+			calEndDate.set(java.util.Calendar.SECOND, 59);
+			calEndDate.set(java.util.Calendar.MILLISECOND, 999);
+			endDate=calEndDate.getTime();
+		}
+
+		//check if start date after end date
+		if(endDate!=null && startDate.after(endDate)){
+			msg="Start Date is after End Date. Consider changing the End Date";
+		}
 	}
-
-	if (endDate!=null && cal.getTime().after(endDate)){
-		//end date in the past. default to no end
-		endDate=null;
-	}
-
-	//check that start date is not after end date
-	if (endDate!=null && startDate.after(endDate)){
-		//start date after end date
-		//set end date to the same day as start date but just before midnight
-		java.util.Calendar calEndDate=java.util.Calendar.getInstance();
-		calEndDate.setTime(startDate);
-		calEndDate.set(java.util.Calendar.HOUR_OF_DAY, 23);
-		calEndDate.set(java.util.Calendar.MINUTE, 59);
-		calEndDate.set(java.util.Calendar.SECOND, 59);
-		calEndDate.set(java.util.Calendar.MILLISECOND, 999);
-		endDate=calEndDate.getTime();
-	}
-
-	//evaluate the next run date for the the job
+	
+	if (msg.equals("")){
+		//start date and end date are ok
+		//confirm if the given schedule will ever run
+		//evaluate the next run date for the the job
 	CronTrigger tempTrigger = newTrigger()
 			.withSchedule(cronSchedule(cronString))
 			.startAt(startDate)
 			.endAt(endDate)
 			.build();	
 		
-	java.util.Date nextRunDate=tempTrigger.getFireTimeAfter(new java.util.Date());
+	nextRunDate=tempTrigger.getFireTimeAfter(new java.util.Date());
 
 		if (nextRunDate==null){
 			msg="Job will never execute. Please change the schedule details";
 		}
-		else{
-
+	}
+	
+	if (msg.equals("")){
+		//everything is in order. save the job
+		
 		//set the next run date for the job
 		job.setNextRunDate(nextRunDate);
 
 		//save job details to the art database. generates job id for new jobs
-	job.setMinute(minute);
-	job.setHour(hour);
-	job.setDay(day);
-	job.setMonth(month);
-	job.setWeekday(weekday);
+		job.setMinute(minute);
+		job.setHour(hour);
+		job.setDay(day);
+		job.setMonth(month);
+		job.setWeekday(weekday);
 
-	job.setStartDate(startDate);
-	job.setEndDate(endDate);
+		job.setStartDate(startDate);
+		job.setEndDate(endDate);
 
-	job.save(); //for a new job, will generate a new job id
+		job.save(); //for a new job, will generate a new job id
 
 		//grant/revoke access to the job. job needs to have been saved first so that a valid job id is available
 		if("Y".equals(job.getAllowSharing())){
@@ -302,30 +311,31 @@ if (request.getParameter("jobName").equals("")){
 		}
 
 		//create quartz job
-		int jobId=job.getJobId();
-
-		String jobName="job"+jobId;
-		String jobGroup="jobGroup";
-		String triggerName="trigger"+jobId;
-		String triggerGroup="triggerGroup";
 		
-		JobDetail quartzJob = newJob(ArtJob.class)
-				.withIdentity(jobKey(jobName,jobGroup))
-				.usingJobData("jobid",jobId)
-				.build();
-		
-		//create trigger that defines the schedule for the job
-       CronTrigger trigger= newTrigger()
-			   .withIdentity(triggerKey(triggerName,triggerGroup))
-			.withSchedule(cronSchedule(cronString))
-			.startAt(startDate)
-			.endAt(endDate)
-			.build();
-
 		//get scheduler instance
 		org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
 
 		if (scheduler!=null){
+			int jobId=job.getJobId();
+
+			String jobName="job"+jobId;
+			String jobGroup="jobGroup";
+			String triggerName="trigger"+jobId;
+			String triggerGroup="triggerGroup";
+
+			JobDetail quartzJob = newJob(ArtJob.class)
+					.withIdentity(jobKey(jobName,jobGroup))
+					.usingJobData("jobid",jobId)
+					.build();
+
+			//create trigger that defines the schedule for the job
+		CronTrigger trigger= newTrigger()
+				.withIdentity(triggerKey(triggerName,triggerGroup))
+				.withSchedule(cronSchedule(cronString))
+				.startAt(startDate)
+				.endAt(endDate)
+				.build();
+	   
 			//delete any existing jobs or triggers with the same id before adding them to the scheduler
 			scheduler.deleteJob(jobKey(jobName,jobGroup));
 			scheduler.unscheduleJob(triggerKey(triggerName,triggerGroup));
@@ -354,9 +364,7 @@ if (request.getParameter("jobName").equals("")){
 		response.sendRedirect("myJobs.jsp");
 		return;
 		}
-
-	}
-
+	
 %>
 
 

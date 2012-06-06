@@ -10,9 +10,9 @@
 -- ***************
 -- IMPORTANT!!!
 
--- After running this upgrade script, run the quartz script for your database (located in the quartz directory)
--- This is not the usual process for upgrades, but is necessary for this upgrade as the
--- quartz database schema has changed between 1.8.x and 2.x
+-- after running this upgrade script, ALSO RUN the tables_xxx.sql script for your database (found in the quartz directory)
+-- this is not the usual process for upgrades, but is necessary for this upgrade as the
+-- quartz schema has changed between 1.8.x and 2.x
 
 -- *****************
 
