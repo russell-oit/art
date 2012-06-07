@@ -2217,24 +2217,31 @@ public class ArtJob implements Job {
 	/**
 	 * Migrate existing jobs created in art versions before 1.11 to quartz jobs
 	 *
-	 * @param c connection to art repository
-	 * @param scheduler quartz scheduler
 	 */
-	public void migrateJobsToQuartz(Connection c, org.quartz.Scheduler scheduler) {
+	public void migrateJobsToQuartz() {
 
-		if (scheduler == null || c == null) {
+		Connection conn = ArtDBCP.getConnection();
+		org.quartz.Scheduler scheduler = ArtDBCP.getScheduler();
+
+		if (conn == null) {
+			logger.info("Can't migrate jobs to Quartz. Connection to ART repository not available");
+		} else if (scheduler == null) {
+			logger.info("Can't migrate jobs to Quartz. Scheduler not available");
+		}
+
+		if (scheduler == null || conn == null) {
 			return;
 		}
 
 		try {
 			String oldJobsSqlString;
 			String updateJobSqlString;
-			PreparedStatement psUpdate;
+			PreparedStatement psUpdate = null;
 
 			//determine the jobs to migrate
 			oldJobsSqlString = "SELECT JOB_ID, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_WEEKDAY, JOB_MONTH FROM ART_JOBS WHERE MIGRATED_TO_QUARTZ='N'";
-
-			PreparedStatement ps = c.prepareStatement(oldJobsSqlString);
+			
+			PreparedStatement ps = conn.prepareStatement(oldJobsSqlString);
 			ResultSet rs = ps.executeQuery();
 
 			String minute;
@@ -2254,6 +2261,7 @@ public class ArtJob implements Job {
 
 			int totalRecordCount = 0; //total number of jobs to be migrated
 			int migratedRecordCount = 0; //actual number of jobs migrated
+			final int batchSize = 100; //max number of updates to batch together for executebatch
 
 			while (rs.next()) {
 				totalRecordCount += 1;
@@ -2309,9 +2317,7 @@ public class ArtJob implements Job {
 				cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
 				if (CronExpression.isValidExpression(cronString)) {
 					//ensure that trigger will fire at least once in the future
-					CronTrigger tempTrigger = newTrigger()
-							.withSchedule(cronSchedule(cronString))
-							.build();
+					CronTrigger tempTrigger = newTrigger().withSchedule(cronSchedule(cronString)).build();
 
 					nextRunDate = tempTrigger.getFireTimeAfter(new java.util.Date());
 					if (nextRunDate != null) {
@@ -2325,54 +2331,63 @@ public class ArtJob implements Job {
 						jobName = "job" + jobId;
 						triggerName = "trigger" + jobId;
 
-						JobDetail quartzJob = newJob(ArtJob.class)
-								.withIdentity(jobName,jobGroup)
-								.usingJobData("jobid",jobId)
-								.build();
-						
+						JobDetail quartzJob = newJob(ArtJob.class).withIdentity(jobName, jobGroup).usingJobData("jobid", jobId).build();
+
 						//create trigger that defines the schedule for the job						
-						CronTrigger trigger = newTrigger()
-								.withIdentity(triggerName, triggerGroup)
-								.withSchedule(cronSchedule(cronString))
-								.build();						
+						CronTrigger trigger = newTrigger().withIdentity(triggerName, triggerGroup).withSchedule(cronSchedule(cronString)).build();
 
-						if (scheduler != null) {
-							//delete any existing jobs or triggers with the same id before adding them to the scheduler
-							scheduler.deleteJob(jobKey(jobName, jobGroup)); //delete job records
-							scheduler.unscheduleJob(triggerKey(triggerName, triggerGroup)); //delete any trigger records
 
-							//add job and trigger to scheduler
-							scheduler.scheduleJob(quartzJob, trigger);
+						//delete any existing jobs or triggers with the same id before adding them to the scheduler
+						scheduler.deleteJob(jobKey(jobName, jobGroup)); //delete job records
+						scheduler.unscheduleJob(triggerKey(triggerName, triggerGroup)); //delete any trigger records
 
-							//update jobs table to indicate that the job has been migrated
-							updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y', NEXT_RUN_DATE=? "
-									+ ", JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
-									+ " WHERE JOB_ID=?";
-							psUpdate = c.prepareStatement(updateJobSqlString);
-							psUpdate.setTimestamp(1, new java.sql.Timestamp(nextRunDate.getTime()));
-							psUpdate.setString(2, minute);
-							psUpdate.setString(3, hour);
-							psUpdate.setString(4, day);
-							psUpdate.setString(5, weekday);
-							psUpdate.setString(6, month);
-							psUpdate.setInt(7, jobId);
+						//add job and trigger to scheduler
+						scheduler.scheduleJob(quartzJob, trigger);
 
-							psUpdate.executeUpdate();
-							psUpdate.close();
+						//update jobs table to indicate that the job has been migrated
+						updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y', NEXT_RUN_DATE=? "
+								+ ", JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
+								+ " WHERE JOB_ID=?";
+						psUpdate = conn.prepareStatement(updateJobSqlString);
+						psUpdate.setTimestamp(1, new java.sql.Timestamp(nextRunDate.getTime()));
+						psUpdate.setString(2, minute);
+						psUpdate.setString(3, hour);
+						psUpdate.setString(4, day);
+						psUpdate.setString(5, weekday);
+						psUpdate.setString(6, month);
+						psUpdate.setInt(7, jobId);
+
+						psUpdate.addBatch();
+
+						//run executebatch periodically to prevent out of memory errors
+						if (migratedRecordCount % batchSize == 0) {
+							ps.executeBatch();
+							ps.clearBatch(); //not sure if this is necessary
 						}
-
 					}
 				}
 			}
+			if (migratedRecordCount > 0) {
+				psUpdate.executeBatch(); //run any remaining updates												
+				psUpdate.close();
+			}
 			rs.close();
 			ps.close();
-			c.close();
+
 			if (migratedRecordCount > 0) {
 				//output the number of jobs migrated
 				logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs", migratedRecordCount, totalRecordCount);
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {					
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 		}
 	}
 

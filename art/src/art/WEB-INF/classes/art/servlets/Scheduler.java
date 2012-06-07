@@ -111,11 +111,9 @@ public class Scheduler extends HttpServlet {
                 //save scheduler, to make it accessible throughout the application
                 ArtDBCP.setScheduler(scheduler);
 
-                //migrate existing jobs to quartz, if any exist from previous art versions
-                Connection conn = getConnection();
+                //migrate existing jobs to quartz, if any exist from previous art versions                
                 ArtJob aj = new ArtJob();
-                aj.migrateJobsToQuartz(conn, scheduler);
-                conn.close();
+                aj.migrateJobsToQuartz();                
             }
 
             t = new Timer(this);
@@ -190,16 +188,6 @@ public class Scheduler extends HttpServlet {
             return false;
         }
 
-    }
-
-    /**
-     * Get a normal jdbc connection to the art repository.
-     * 
-     * @return connection to the art repository
-     * @throws SQLException 
-     */
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(art_jdbc_url, art_username, art_password);
     }
 
     /**

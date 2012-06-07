@@ -166,16 +166,9 @@ while (names.hasMoreElements()) {
 		ArtDBCP.setScheduler(scheduler);
 
 		//migrate jobs to quartz, if any exist that require migrating
-		try{
-			Connection conn = DriverManager.getConnection(url, username, password);            
-			ArtJob aj=new ArtJob();
-			aj.migrateJobsToQuartz(conn,scheduler);
-			conn.close();
-		} catch (Exception e) {
-			System.out.println("ART - execUpdProps.jsp: Error migrating jobs to quartz: " + e);
-			e.printStackTrace(System.out);
-		}
-
+		ArtJob aj=new ArtJob();
+		aj.migrateJobsToQuartz();
+		
 		//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
 		response.sendRedirect("adminAccess.jsp");
 		return;

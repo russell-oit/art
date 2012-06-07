@@ -549,7 +549,7 @@ public class ArtDBCP extends HttpServlet {
     public static Connection getAdminConnection() throws java.sql.SQLException {
         logger.debug("Getting admin connection");
         // Create a connection to the ART repository for this admin and store it in the
-        // admin session (we are not getting this from the pool sice it is not in Autocommit mode)
+        // admin session (we are not getting this from the pool since it should not be in Autocommit mode)
         Connection connArt = DriverManager.getConnection(art_jdbc_url, art_username, art_password);
         connArt.setAutoCommit(false);
         return connArt;
