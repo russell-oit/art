@@ -2236,7 +2236,13 @@ public class ArtJob implements Job {
 		try {
 			String oldJobsSqlString;
 			String updateJobSqlString;
-			PreparedStatement psUpdate = null;
+			PreparedStatement psUpdate;
+			
+			//prepare statement for updating migration status			
+			updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y', NEXT_RUN_DATE=? "
+					+ ", JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
+					+ " WHERE JOB_ID=?";
+			psUpdate = conn.prepareStatement(updateJobSqlString);
 
 			//determine the jobs to migrate
 			oldJobsSqlString = "SELECT JOB_ID, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_WEEKDAY, JOB_MONTH FROM ART_JOBS WHERE MIGRATED_TO_QUARTZ='N'";
@@ -2344,11 +2350,7 @@ public class ArtJob implements Job {
 						//add job and trigger to scheduler
 						scheduler.scheduleJob(quartzJob, trigger);
 
-						//update jobs table to indicate that the job has been migrated
-						updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y', NEXT_RUN_DATE=? "
-								+ ", JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
-								+ " WHERE JOB_ID=?";
-						psUpdate = conn.prepareStatement(updateJobSqlString);
+						//update jobs table to indicate that the job has been migrated						
 						psUpdate.setTimestamp(1, new java.sql.Timestamp(nextRunDate.getTime()));
 						psUpdate.setString(2, minute);
 						psUpdate.setString(3, hour);
@@ -2368,9 +2370,10 @@ public class ArtJob implements Job {
 				}
 			}
 			if (migratedRecordCount > 0) {
-				psUpdate.executeBatch(); //run any remaining updates												
-				psUpdate.close();
+				psUpdate.executeBatch(); //run any remaining updates																
 			}
+			psUpdate.close();
+			
 			rs.close();
 			ps.close();
 
