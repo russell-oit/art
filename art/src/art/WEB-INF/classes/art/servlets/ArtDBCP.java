@@ -230,10 +230,10 @@ public class ArtDBCP extends HttpServlet {
         allViewModes.addAll(noDup);
 
 
-        //load properties from art.props file
+        //load settings from art.props file
         if (!initArtProperties()) {
             //art.props not available. don't continue as required configuration settings will be missing
-            logger.warn("Not able to get ART properties file (WEB-INF/art.props). Admin should define ART properties at first logon");
+            logger.warn("Not able to get ART settings file (WEB-INF/art.props). Admin should define ART settings at first logon");
             return;
         }
 
@@ -469,7 +469,7 @@ public class ArtDBCP extends HttpServlet {
     }
 
     /**
-     * Determine if art.props file is available and properties have been loaded.
+     * Determine if art.props file is available and settings have been loaded.
      * @return <code>true</code> if file is available. <code>false</code> otherwise.
      */
     public static boolean getArtPropsStatus() {

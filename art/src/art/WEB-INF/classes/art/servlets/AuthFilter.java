@@ -84,15 +84,15 @@ public final class AuthFilter implements Filter {
             if (session.getAttribute("ue") == null) {
                 // Let's authenticate it
                 if (!ArtDBCP.getArtPropsStatus()) {
-                    // properties not defined: 1st Logon -> go to adminAccess.jsp (passing through the AuthFilterAdmin)
-                    hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminAccess.jsp"));
+                    // properties not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
+                    hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
                     return; // !!!! this need to be here!!!
                 }
                 isArtSuperUser = false;
                 try {
                     AuthenticateSession(hrequest);
                     if (isArtSuperUser) {
-                        hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminAccess.jsp"));
+                        hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
                         return;
                     } else {
                         // auth ok

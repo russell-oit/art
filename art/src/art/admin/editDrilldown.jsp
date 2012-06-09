@@ -25,7 +25,7 @@ dq.create(queryId,queryPosition);
   
 %>
 
-<form action="execUpdDrilldown.jsp" method="post">
+<form action="execEditDrilldown.jsp" method="post">
     <input type="hidden" name="QUERY_ID" value="<%=queryId%>">
     <input type="hidden" name="DRILLDOWN_ACTION" value="<%= request.getParameter("DRILLDOWN_ACTION")%>">
 

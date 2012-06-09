@@ -54,7 +54,7 @@
         actionSuccessful = drilldown.delete(conn);
 	conn.commit();
 	%>
-	   <jsp:forward page="viewDrilldowns.jsp">
+	   <jsp:forward page="manageDrilldowns.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
 	   </jsp:forward>
 	<%   
@@ -64,7 +64,7 @@
         actionSuccessful = drilldown.moveUp(conn);
 	conn.commit();
 	%>
-	   <jsp:forward page="viewDrilldowns.jsp">
+	   <jsp:forward page="manageDrilldowns.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
 	   </jsp:forward>
 	<%   
@@ -90,7 +90,7 @@
        }
        conn.commit();
 	%>
-	   <jsp:forward page="viewDrilldowns.jsp">
+	   <jsp:forward page="manageDrilldowns.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
 	   </jsp:forward>
 	<%   

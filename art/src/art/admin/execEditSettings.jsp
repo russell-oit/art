@@ -10,7 +10,7 @@
     %>
        <jsp:forward page="error.jsp">
 		<jsp:param name="MOD" value="Authentication Error"/>
-		<jsp:param name="ACT" value="Error on Update Properties"/>
+		<jsp:param name="ACT" value="Error on Update Settings"/>
 		<jsp:param name="MSG" value="No Valid Admin Session"/>
 		<jsp:param name="NUM" value="150"/>
        </jsp:forward>
@@ -76,7 +76,7 @@ while (names.hasMoreElements()) {
 			connOld.close();
 		}
     } catch (Exception e) {
-       System.out.println("ART - execUpdProps.jsp: WARNING: Error closing old connection: " + e);
+       System.out.println("ART - execEditSettings.jsp: WARNING: Error closing old connection: " + e);
 	   e.printStackTrace(System.out);
     }
 
@@ -99,7 +99,7 @@ while (names.hasMoreElements()) {
 
     */
     if (useDefaultDatabase) {
-		System.out.println("ART - execUpdProps.jsp: Updating Art demo...");
+		System.out.println("ART - execEditSettings.jsp: Updating Art demo...");
 		String defaultDB_url = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;hsqldb.write_delay=false";
 		String sampleDB_url  = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"SampleDB;shutdown=true;hsqldb.write_delay=false";
 		Statement st = c.createStatement();
@@ -116,11 +116,11 @@ while (names.hasMoreElements()) {
 
 
  } catch(Exception ex){
-  System.out.println("ART - execUpdProps.jsp: " +ex);
+  System.out.println("ART - execEditSettings.jsp: " +ex);
   ex.printStackTrace(System.out);
     %>
        <jsp:forward page="error.jsp">
-		<jsp:param name="MOD" value="Exec Update Properties"/>
+		<jsp:param name="MOD" value="Exec Update Settings"/>
 		<jsp:param name="ACT" value="Error when creating new connection to ART database. Not able to connect to ART repository. Verify the connection parameters."/>
 		<jsp:param name="MSG" value="<%=ex%>"/>
 		<jsp:param name="NUM" value="150"/>
@@ -170,15 +170,15 @@ while (names.hasMoreElements()) {
 		aj.migrateJobsToQuartz();
 		
 		//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
-		response.sendRedirect("adminAccess.jsp");
+		response.sendRedirect("adminConsole.jsp");
 		return;
 
  } else {
     String msg = "Not able to write to file: " + propsFile;
     %>
        <jsp:forward page="error.jsp">
-		<jsp:param name="MOD" value="Exec Update Properties"/>
-		<jsp:param name="ACT" value="Error storing ART properties"/>
+		<jsp:param name="MOD" value="Exec Update Settings"/>
+		<jsp:param name="ACT" value="Error storing ART settings"/>
 		<jsp:param name="MSG" value="<%=msg%>"/>
 		<jsp:param name="NUM" value="140"/>
        </jsp:forward>

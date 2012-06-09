@@ -26,7 +26,7 @@
         <table width="100%"  class="art" cellpadding="0" cellspacing="0">
             <tr>
                 <td align="left" class="attr" >
-                    <a href="<%= request.getContextPath() %>/admin/adminAccess.jsp">Admin Console</a>
+                    <a href="<%= request.getContextPath() %>/admin/adminConsole.jsp">Admin Console</a>
 
                     <% if (session.getAttribute("username") != null) {%>
 

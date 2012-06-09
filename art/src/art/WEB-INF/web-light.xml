@@ -126,7 +126,7 @@
     <!-- Servlet definitions -->
     <servlet>
         <description>
-           Initialize ART properties and database connection pools
+           Initialize ART settings and database connection pools
 		</description>
         <servlet-name>ArtDBCP</servlet-name>
         <servlet-class>art.servlets.ArtDBCP</servlet-class>

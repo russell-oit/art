@@ -60,7 +60,7 @@
         bp = qp.delete(conn);
 	conn.commit();
 	%>
-	   <jsp:forward page="viewParams.jsp">
+	   <jsp:forward page="manageParameters.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
 	   </jsp:forward>
 	<%   
@@ -70,7 +70,7 @@
         bp = qp.moveUp(conn);
 	conn.commit();
 	%>
-	   <jsp:forward page="viewParams.jsp">
+	   <jsp:forward page="manageParameters.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
 	   </jsp:forward>
 	<%   
@@ -158,7 +158,7 @@
        }
        conn.commit();
 	%>
-	   <jsp:forward page="viewParams.jsp">
+	   <jsp:forward page="manageParameters.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
 	   </jsp:forward>
 	<%   

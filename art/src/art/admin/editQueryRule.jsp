@@ -9,7 +9,7 @@
  }
  
 %>
-<form action="execUpdRule.jsp" method="post">
+<form action="execEditQueryRule.jsp" method="post">
     <input type="hidden" name="QUERY_ID" value="<%= request.getParameter("QUERY_ID")%>">
     <input type="hidden" name="RULEACTION" value="<%= request.getParameter("RULEACTION")%>">
     <table align="center">

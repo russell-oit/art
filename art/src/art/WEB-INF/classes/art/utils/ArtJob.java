@@ -475,8 +475,7 @@ public class ArtJob implements Job {
 
 	//generate jobAuditKey to be used to identify a job run in the audit table
 	private String generateKey() {		
-		//return UUID.randomUUID().toString(); //randomuuid takes long to generate sometimes?
-		return jobId + "-" + System.currentTimeMillis();
+		return UUID.randomUUID().toString(); 		
 	}
 
 	/**

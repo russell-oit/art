@@ -11,10 +11,10 @@
 	  if (adminLevel == 100) {
    %>
 
-	     <tr><td class="artLink" onclick="javascript:parent.location='updProps.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
-		 Properties
+	     <tr><td class="artLink" onclick="javascript:parent.location='editSettings.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
+		 Settings
 		 </td>
-	     <td class="data"> Define ART properties<br>
+	     <td class="data"> Define ART settings<br>
 		<small> ART Repository, SMTP settings etc </small>
 	     </td></tr>
    <%
@@ -22,7 +22,7 @@
 
 	  if (!ArtDBCP.getArtPropsStatus()) {
    %>
-	      <tr><td class="artLink" colspan="2"><small>You need to define the <i>ART Properties</i> - database connection
+	      <tr><td class="artLink" colspan="2"><small>You need to define <i>ART Settings</i> - database connection
 	                   parameters and other settings - before being able to use ART.</small></td></tr>
    <%
 

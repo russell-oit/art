@@ -309,7 +309,7 @@ tinyMCE.init({
 	// End -->
 </script>
 
-<form method="post" name="updQuery" action="execUpdQuery.jsp" enctype="multipart/form-data">
+<form method="post" name="updQuery" action="execEditQuery.jsp" enctype="multipart/form-data">
     <input type="hidden" name="QUERYACTION" value="<%=request.getParameter("QUERYACTION")%>" >
     <%
      if (MODIFY) {

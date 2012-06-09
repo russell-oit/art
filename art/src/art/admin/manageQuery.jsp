@@ -47,7 +47,7 @@ if("Y".equals(aq.getUsesRules())){
     <tr><td class="title" colspan="2" > Object Editor </td></tr>
 
     <tr><td class="attr" >
-            <form method="post" action="updQuery.jsp" class="data">
+            <form method="post" action="editQuery.jsp" class="data">
                 <input type="hidden" name="QUERY_ID" value="<%=queryId%>">
                 <input type="hidden" name="GROUP_ID" value="<%=requestGroupId%>">
                 <input type="hidden" name="QUERYACTION" value="MODIFY">
@@ -61,7 +61,7 @@ if("Y".equals(aq.getUsesRules())){
      //list of values, dashboards, text ojbects do not have parameters
     %>
     <tr><td class="attr" >
-            <form method="post" action="viewParams.jsp" class="data">
+            <form method="post" action="manageParameters.jsp" class="data">
                 <input type="hidden" name="QUERY_ID" value="<%=queryId%>">
                 <input type="hidden" name="GROUP_ID" value="<%=requestGroupId%>">
                 <input type="submit" value="Parameters">
@@ -74,7 +74,7 @@ if("Y".equals(aq.getUsesRules())){
      if (usesRules) { // show only if the query uses rules
     %>
     <tr><td class="attr" >
-            <form method="post" action="viewRules.jsp" class="data">
+            <form method="post" action="manageQueryRules.jsp" class="data">
                 <input type="hidden" name="QUERY_ID" value="<%=queryId%>">
                 <input type="hidden" name="GROUP_ID" value="<%=requestGroupId%>">
                 <input type="submit" value="Rules">
@@ -90,7 +90,7 @@ if("Y".equals(aq.getUsesRules())){
      //only graphs and normal queries can have drill down queries
     %>
     <tr><td class="attr" >
-            <form method="post" action="viewDrilldowns.jsp" class="data">
+            <form method="post" action="manageDrilldowns.jsp" class="data">
                 <input type="hidden" name="QUERY_ID" value="<%=queryId%>">
                 <input type="submit" value="Drill Down Queries">
             </form>

@@ -1,4 +1,4 @@
-<%@ include file ="headerAdmin2.jsp" %>
+<%@ include file ="headerAdminPlain.jsp" %>
 
 <table align="center" width="90%">
 
@@ -50,10 +50,10 @@
 
 
     <tr><td>
-            <b>140 Error storing ART properties</b>
+            <b>140 Error storing ART settings</b>
             <br><i>Reason:</i>
-            <br><small>You are attempting to modify or insert ART properties but ART is not
-                able to save the properties correcly.
+            <br><small>You are attempting to modify or insert ART settings but ART is not
+                able to save the settings correctly.
             </small>
             <br><i>Solution:</i>
             <br><small>Make sure the user that executes the servlet engine is able to write
@@ -62,10 +62,10 @@
         </td></tr>
 
     <tr><td>
-            <b>145 Authentication failure when modifying ART properties</b>
+            <b>145 Authentication failure when modifying ART settings</b>
             <br><i>Reason:</i>
             <br><small>You must specify previous art database username and
-                password in order to replace existing properties
+                password in order to replace existing settings
             </small>
             <br><i>Solution:</i>
             <%
@@ -80,7 +80,7 @@
         </td></tr>
 
     <tr><td>
-            <b>150 Error in ART properties</b>
+            <b>150 Error in ART settings</b>
             <br><i>Reason:</i>
             <br><small>The ART database connection parameters are not correct or
                 the JDBC driver has not been loaded by the servlet engine

@@ -7,7 +7,7 @@
     function deleteRule() {
         if (document.viewRule.QUERY_RULES.selectedIndex>=0) {
             if (window.confirm("Do you really want to delete this rule?")) {
-                document.viewRule.action="execUpdRule.jsp";
+                document.viewRule.action="execEditQueryRule.jsp";
                 document.viewRule.RULEACTION.value="DELETE";
                 document.viewRule.submit();
             } 
@@ -19,7 +19,7 @@
 
     function addRule() {
 		if (document.viewRule.RULE_NAME.selectedIndex>=0) {
-			document.viewRule.action="updRule.jsp";
+			document.viewRule.action="editQueryRule.jsp";
 			document.viewRule.RULEACTION.value="NEW";
 			document.viewRule.submit();
 		} else {
@@ -28,7 +28,7 @@
     }
 
     function goBackToEditQuery() {
-        document.viewRule.action="editQuery.jsp";
+        document.viewRule.action="manageQuery.jsp";
         document.viewRule.submit();
     }
 

@@ -41,7 +41,7 @@ String help;
 
 %>
 
-<form action="execUpdParam.jsp" method="post">
+<form action="execEditParameter.jsp" method="post">
     <input type="hidden" name="QUERY_ID" value="<%= request.getParameter("QUERY_ID")%>">
     <input type="hidden" name="PARAMACTION" value="<%= request.getParameter("PARAMACTION")%>">
     <%

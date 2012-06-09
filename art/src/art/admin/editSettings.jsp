@@ -1,5 +1,5 @@
 <%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP,org.apache.commons.lang.StringUtils;" %>
-<%@ include file ="headerAdmin2.jsp" %>
+<%@ include file ="headerAdminPlain.jsp" %>
 
 <%
   String isValidAdminSession = (String) session.getAttribute("AdminSession");
@@ -7,7 +7,7 @@
     %>
        <jsp:forward page="error.jsp">
 		<jsp:param name="MOD" value="Authentication Error"/>
-		<jsp:param name="ACT" value="Update Properties"/>
+		<jsp:param name="ACT" value="Update Settings"/>
 		<jsp:param name="MSG" value="No valid admin session"/>
 		<jsp:param name="NUM" value="150"/>
        </jsp:forward>
@@ -169,10 +169,10 @@
     <table align="center"><tr><td class="title"> Welcome! </td></tr>
            <tr><td class="data"><span style="color:green">
 	     This is the first time you are logging in.
-		 You need to specify the parameters below before being able to use ART.</span><br>
+		 You need to specify the settings below before being able to use ART.</span><br>
 		 <span style="color:red"><small>
 		 To use the embedded ART Repository and Demo, leave the default below for ART Database Username/url/JDBC Driver but
-		 set a new ART Database Password of your choice (default is "ART"). Once ART Properties are defined, make sure to update
+		 set a new ART Database Password of your choice (default is "ART"). Once ART settings are defined, make sure to update
 		 the password for the two art users in the repository ("admin" and "auser", default passwords match the usernames).
 		 Finally log off and log in using one of the two users.</small>
 	   </span></td></tr>
@@ -213,10 +213,10 @@
 	}
 </script>
 
-<form action="execUpdProps.jsp" method="post">
+<form action="execEditSettings.jsp" method="post">
  <table align="center" width="60%">
-  <tr><td class="title" colspan="2" > ART Properties </td></tr>
-  <tr><td class="Data" colspan="2" > Specify <i>ART Repository</i> connection parameters and other properties </td></tr>
+  <tr><td class="title" colspan="2" > ART Settings </td></tr>
+  <tr><td class="Data" colspan="2" > Specify <i>ART Repository</i> connection parameters and other settings </td></tr>
 
    <tr><td class="attr"> ART Database Username</td>
        <td class="data">
@@ -503,7 +503,7 @@
 
    <tr>
     <td><input type="submit" value="Submit"></td>
-    <td style="font-size:10pt"><p align="right"><a href="adminAccess.jsp"> Cancel</a> </p></td>
+    <td style="font-size:10pt"><p align="right"><a href="adminConsole.jsp"> Cancel</a> </p></td>
    </tr>
 
  </table>
@@ -513,8 +513,7 @@
  <p>
   <table align="center">
    <tr><td colspan="2" class="title"> Servlet Context Properties </td></tr>
-   <tr><td class="data">Webapp Path</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>
-   <tr><td class="data">Webapp Props File</td><td><code> <%=propsFile%></code></td></tr>
+   <tr><td class="data">ART Files Path</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>   
    <tr><td class="data">Server Info</td><td><code> <%=ctx.getServerInfo()%></code></td></tr>
    <tr><td class="data">Servlet API Supported</td><td><code> <%=ctx.getMajorVersion()%>.<%= ctx.getMinorVersion()%></code> </td></tr>
    <tr><td class="data">Java Vendor</td><td><code> <%=System.getProperty("java.vendor")%></code> </td></tr>

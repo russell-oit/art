@@ -1,4 +1,4 @@
-<%@ include file ="headerAdmin2.jsp" %>
+<%@ include file ="headerAdminPlain.jsp" %>
 <%
  String mod = request.getParameter("MOD");
  String act = request.getParameter("ACT");

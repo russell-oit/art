@@ -6,7 +6,7 @@
 
     function moveUp() {
 		if (document.viewParam.FIELD_POSITION.selectedIndex>=0) {
-			document.viewParam.action="execUpdParam.jsp";
+			document.viewParam.action="execEditParameter.jsp";
 			document.viewParam.PARAMACTION.value="MOVEUP";
 			document.viewParam.submit();
 		} else {
@@ -17,7 +17,7 @@
     function deleteParam() {
         if (document.viewParam.FIELD_POSITION.selectedIndex>=0) {
             if (window.confirm("Do you really want to delete this parameter?\nNote: For INLINE parameters you need to modify the query's SQL to remove the parameter label.")) {
-                document.viewParam.action="execUpdParam.jsp";
+                document.viewParam.action="execEditParameter.jsp";
                 document.viewParam.PARAMACTION.value="DELETE";
                 document.viewParam.submit();
             }
@@ -29,7 +29,7 @@
 
     function updateParam() {
 		if (document.viewParam.FIELD_POSITION.selectedIndex>=0) {
-			document.viewParam.action="updParam.jsp";
+			document.viewParam.action="editParameter.jsp";
 			document.viewParam.PARAMACTION.value="MODIFY";
 			document.viewParam.submit();
 		} else {
@@ -38,13 +38,13 @@
     }
 
     function createParam() {
-        document.viewParam.action="updParam.jsp";
+        document.viewParam.action="editParameter.jsp";
         document.viewParam.PARAMACTION.value="NEW";
         document.viewParam.submit();
     }
 
     function goBackToEditQuery() {
-        document.viewParam.action="editQuery.jsp";
+        document.viewParam.action="manageQuery.jsp";
         document.viewParam.submit();
     }
 

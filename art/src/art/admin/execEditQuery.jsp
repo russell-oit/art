@@ -257,7 +257,7 @@
 			}
 
 %>
-<jsp:forward page="editQuery.jsp">
+<jsp:forward page="manageQuery.jsp">
 	<jsp:param name="QUERY_ID" value="<%= queryId%>"/>
 	<jsp:param name="GROUP_ID" value="<%= groupId%>"/>
 </jsp:forward>
@@ -273,7 +273,7 @@
 </jsp:forward>
 <%	}
 } catch (ArtException e) {
-	System.err.println("execUpdQuery.jsp ROLLBACK: ArtException:" + e);
+	System.err.println("execEditQuery.jsp ROLLBACK: ArtException:" + e);
 	conn.rollback();
 %>
 <jsp:forward page="error.jsp">
@@ -286,7 +286,7 @@
 
 } catch (Exception e) {
 	// revert to page error
-	System.err.println("execUpdQuery.jsp ROLLBACK: Exception:" + e);
+	System.err.println("execEditQuery.jsp ROLLBACK: Exception:" + e);
 	conn.rollback();
 %>
 <jsp:forward page="error.jsp">

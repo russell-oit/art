@@ -40,7 +40,7 @@
 	if(actionSuccessful){
 		conn.commit();
 		%>
-		   <jsp:forward page="viewRules.jsp">
+		   <jsp:forward page="manageQueryRules.jsp">
 			<jsp:param name="QUERY_ID" value="<%= queryId %>"/>
 		   </jsp:forward>
 		<%

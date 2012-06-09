@@ -6,7 +6,7 @@
 
     function moveUp() {
         if (document.viewDrilldown.DRILLDOWN_QUERY_POSITION.selectedIndex>=0) {
-            document.viewDrilldown.action="execUpdDrilldown.jsp";
+            document.viewDrilldown.action="execEditDrilldown.jsp";
             document.viewDrilldown.DRILLDOWN_ACTION.value="MOVEUP";
             document.viewDrilldown.submit();
         } else {
@@ -18,7 +18,7 @@
 
         if (document.viewDrilldown.DRILLDOWN_QUERY_POSITION.selectedIndex>=0) {
             if (window.confirm("Do you really want to delete this drill down query? Only the drill down association will be deleted. The actual query will not be deleted.")) {
-                document.viewDrilldown.action="execUpdDrilldown.jsp";
+                document.viewDrilldown.action="execEditDrilldown.jsp";
                 document.viewDrilldown.DRILLDOWN_ACTION.value="DELETE";
                 document.viewDrilldown.submit();
             }
@@ -30,7 +30,7 @@
 
     function updateDrilldown() {
         if (document.viewDrilldown.DRILLDOWN_QUERY_POSITION.selectedIndex>=0) {
-            document.viewDrilldown.action="updDrilldown.jsp";
+            document.viewDrilldown.action="editDrilldown.jsp";
             document.viewDrilldown.DRILLDOWN_ACTION.value="MODIFY";
             document.viewDrilldown.submit();
         } else {
@@ -39,13 +39,13 @@
     }
 
     function createDrilldown() {
-        document.viewDrilldown.action="updDrilldown.jsp";
+        document.viewDrilldown.action="editDrilldown.jsp";
         document.viewDrilldown.DRILLDOWN_ACTION.value="NEW";
         document.viewDrilldown.submit();
     }
 
     function goBackToEditQuery() {
-        document.viewDrilldown.action="editQuery.jsp";
+        document.viewDrilldown.action="manageQuery.jsp";
         document.viewDrilldown.submit();
     }
 

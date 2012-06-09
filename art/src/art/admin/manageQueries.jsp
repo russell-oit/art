@@ -42,7 +42,7 @@
     }
 
     function newQuery() {
-        document.manageQueries.action="<%= request.getContextPath() %>/admin/updQuery.jsp";
+        document.manageQueries.action="<%= request.getContextPath() %>/admin/editQuery.jsp";
         document.manageQueries.QUERYACTION.value="NEW";
         document.manageQueries.submit();
     }
@@ -51,7 +51,7 @@
         if(countSelected(document.getElementById("queryId"))>1){
             alert("Please select a single object");
         } else if ( document.getElementById("queryId").value > 0 ) {
-            document.manageQueries.action="<%= request.getContextPath() %>/admin/editQuery.jsp";
+            document.manageQueries.action="<%= request.getContextPath() %>/admin/manageQuery.jsp";
             document.manageQueries.submit();
         } else {
             alert("You need to select an object in order to modify it!");
@@ -59,7 +59,7 @@
     }
 
     function goBackToartConsole() {
-        document.manageQueries.action="<%= request.getContextPath() %>/admin/adminAccess.jsp";
+        document.manageQueries.action="<%= request.getContextPath() %>/admin/adminConsole.jsp";
         document.manageQueries.submit();
     }
 
@@ -168,7 +168,7 @@ baseUrl="<%=dataProviderUrl%>"
 <div align="center" valign="center">
     <table>
         <tr><td>
-                <form name="backToAdminConsole" method="post" action="<%= request.getContextPath() %>/admin/adminAccess.jsp">
+                <form name="backToAdminConsole" method="post" action="<%= request.getContextPath() %>/admin/adminConsole.jsp">
                     <input type="submit"  value=" << " name="backQuery"><small>&nbsp;Back to Admin Console</small>
                 </form>
             </td>

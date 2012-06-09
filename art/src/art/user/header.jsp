@@ -40,7 +40,7 @@
     <tr>
      <td class="attr" align="left" width="50%">
       <% if (ue2.getAdminLevel() > 5) {%>
-       &nbsp;<a href="<%= request.getContextPath() %>/admin/adminAccess.jsp" ><img src="<%= request.getContextPath() %>/images/admin.png" title="Admin Console" border="0" /></a> ::
+       &nbsp;<a href="<%= request.getContextPath() %>/admin/adminConsole.jsp" ><img src="<%= request.getContextPath() %>/images/admin.png" title="Admin Console" border="0" /></a> ::
       <% } %>
 
        <a href="<%= request.getContextPath() %>/user/showGroups.jsp"><img src="<%= request.getContextPath() %>/images/back-home.png" title="<%=messages.getString("startLink")%>" border="0" /></a> 
