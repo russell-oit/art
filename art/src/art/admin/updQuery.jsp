@@ -455,6 +455,10 @@ tinyMCE.init({
                     <option value="9" <%=(currentStringValue.equals("9")?"SELECTED":"")%>>Report on Column: 9</option>
 
                 </select>
+					<%
+				helpText="See the Notes at the bottom of this page for the syntax to use for some query types e.g. graphs, crosstabs, dashboards";
+				%>
+				<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 			</td>
         </tr>
 
@@ -493,7 +497,7 @@ tinyMCE.init({
         <tr>
             <td class="data" colspan="2" >
                 <span style="color:red"><b>Error:</b></span> <br>
-                At least one Datasource and one Group need to be available in order to manage objects.
+                At least one Datasource and one Object Group need to be available in order to manage objects.
             </td>
         </tr>
     </table>
@@ -755,7 +759,7 @@ tinyMCE.init({
                         <i>Crosstab</i>: Create a pivot over two columns of the
 	resultset. The resultset is expected to be:<br>
                         <i> SELECT Col1 "Label1", [AltSort1,] Col2 "Label2", [AltSort2,] Value FROM ... </i> (data type: string, [any, ] string, [any, ] any )
-                        <br>The Altername Sort columns are optional.
+                        <br>The AltSort columns are optional.
                     </li>
                     <li>
                         <i>Report on Column</i>: Split the retrieved rows

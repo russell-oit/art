@@ -191,19 +191,19 @@ Locale locale=request.getLocale();
 			
 			<br>	      
 		    <table width="60%" align="center"> 
-		      <tr>
-		       <td class="action"><small><%=messages.getString("minute")%> </small></td>  
-		       <td class="action"><small><%=messages.getString("hour")%>   </small></td>  
+		      <tr>		         		       
+			   <td class="action"><small><%=messages.getString("month")%>  </small></td>  
 		       <td class="action"><small><%=messages.getString("day")%>    </small></td>  
-		       <td class="action"><small><%=messages.getString("weekDay")%></small></td>  
-		       <td class="action"><small><%=messages.getString("month")%>  </small></td>  
+		       <td class="action"><small><%=messages.getString("weekDay")%></small></td>
+			   <td class="action"><small><%=messages.getString("hour")%>   </small></td>
+			   <td class="action"><small><%=messages.getString("minute")%> </small></td>		       
 		      </tr>
-		      <tr>
-		       <td class="attr"><small><code><%=job.getMinute()%></code></small></td>  
-		       <td class="attr"><small><code><%=job.getHour()%></code></small></td>  
+		      <tr>		       		       
+			   <td class="attr"><small><code><%=job.getMonth()%></code></small></td>  
 		       <td class="attr"><small><code><%=job.getDay()%></code></small></td>  
-		       <td class="attr"><small><code><%=job.getWeekday()%></code></small></td>  
-		       <td class="attr"><small><code><%=job.getMonth()%></code></small></td>  
+		       <td class="attr"><small><code><%=job.getWeekday()%></code></small></td>
+			   <td class="attr"><small><code><%=job.getHour()%></code></small></td>
+		       <td class="attr"><small><code><%=job.getMinute()%></code></small></td>  
 		      </tr>
 		     </table>
               </td>

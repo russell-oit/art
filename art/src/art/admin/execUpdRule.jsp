@@ -63,7 +63,7 @@
 %>
    <jsp:forward page="error.jsp">
 	    <jsp:param name="MOD" value="Execute Update Rule"/>
-	    <jsp:param name="ACT" value="Modify Query Param and SQL"/>
+	    <jsp:param name="ACT" value="Modify Query Rule"/>
 	    <jsp:param name="MSG" value="<%= act %>"/>
 	    <jsp:param name="NUM" value="199"/>
    </jsp:forward>

@@ -37,7 +37,7 @@
        <jsp:forward page="error.jsp">
 		<jsp:param name="MOD" value="Execute Update Drilldown"/>
 		<jsp:param name="ACT" value="Parsing Parameters"/>
-		<jsp:param name="MSG" value="At least one parameter contains an invalid char."/>
+		<jsp:param name="MSG" value="At least one parameter contains an invalid character."/>
 		<jsp:param name="NUM" value="110"/>
        </jsp:forward>
     <%   
