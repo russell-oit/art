@@ -10,6 +10,7 @@ package art.output;
 import art.servlets.ArtDBCP;
 import art.utils.ArtQueryParam;
 import com.lowagie.text.*;
+import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -117,9 +118,11 @@ public class pdfOutput implements ArtOutputInterface {
             PdfWriter.getInstance(document, new FileOutputStream(fullFileName));
             document.addTitle(queryName);
             document.addAuthor("ART - http://art.sourceforge.net");
-            font6 = new Font(Font.HELVETICA, 6, Font.NORMAL);
-            font8 = new Font(Font.HELVETICA, 8, Font.NORMAL);
-            font10b = new Font(Font.HELVETICA, 10, Font.BOLD);
+									
+			font6 = new Font(Font.HELVETICA, 6, Font.NORMAL);
+			font8 = new Font(Font.HELVETICA, 8, Font.NORMAL);
+			font10b = new Font(Font.HELVETICA, 10, Font.BOLD);
+						            			
             HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.setFooter(footer);

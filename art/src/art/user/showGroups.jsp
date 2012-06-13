@@ -67,7 +67,7 @@ function voidGroupSelection() {
         <%
     Iterator it2 = groups.entrySet().iterator();
 	Integer groupId;
-	int defaultGroup=ue.getDefaultObjectGroup();
+	int defaultGroup=ue.getDefaultObjectGroup();	
 	while(it2.hasNext()) {
 		Map.Entry entry = (Map.Entry)it2.next();
 		groupId=(Integer)entry.getValue();

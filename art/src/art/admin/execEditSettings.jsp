@@ -30,7 +30,7 @@ String password=request.getParameter("art_password");
 String url=request.getParameter("art_jdbc_url");
 String driver=request.getParameter("art_jdbc_driver");
 boolean useDefaultDatabase=false;
-if(url!=null && url.toLowerCase().equals("default")){
+if(url!=null && (url.toLowerCase().equals("default") || url.toLowerCase().equals("demo"))){
 	useDefaultDatabase=true;
 	url=defaultArtUrl;
 	driver=defaultArtDriver;
@@ -99,7 +99,7 @@ while (names.hasMoreElements()) {
 
     */
     if (useDefaultDatabase) {
-		System.out.println("ART - execEditSettings.jsp: Updating Art demo...");
+		System.out.println("ART - execEditSettings.jsp: Updating ART demo...");
 		String defaultDB_url = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;hsqldb.write_delay=false";
 		String sampleDB_url  = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"SampleDB;shutdown=true;hsqldb.write_delay=false";
 		Statement st = c.createStatement();

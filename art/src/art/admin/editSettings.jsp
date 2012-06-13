@@ -209,6 +209,9 @@
 		} else if(dbType == "other"){
 			driverElement.value="";
 			urlElement.value="";
+		} else if(dbType == "demo"){
+			driverElement.value="org.hsqldb.jdbcDriver";
+			urlElement.value="demo";
 		}
 	}
 </script>
@@ -234,12 +237,13 @@
        <td class="data">
 		   <select name="art_database_type" id="art_database_type" size="1" onChange="javascript:onTypeSelection();">
 			   <option value="--" selected="selected">--</option>
+			   <option value="demo">Demo</option>
 			   <option value="cubrid">CUBRID</option>
 			   <option value="oracle">Oracle</option>
 			   <option value="mysql">MySQL</option>
 			   <option value="postgresql">PostgreSQL</option>
 			   <option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
-			   <option value="sqlserver-ms">SQL Server (Microsoft driver)</option>
+			   <option value="sqlserver-ms">SQL Server (Microsoft driver)</option>			   
 			   <option value="other">Other</option>
 		   </select>
 		   <%msg = "Sets the jdbc driver and url fields with default values for the selected database type"; %>
