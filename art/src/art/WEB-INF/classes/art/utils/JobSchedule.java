@@ -1,10 +1,13 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-
-import java.sql.*;
-import java.util.*;
-import java.text.Collator; //for ordering of strings
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +20,11 @@ public class JobSchedule{
 
 	final static Logger logger = LoggerFactory.getLogger(JobSchedule.class);
 	
-	String minute="0";
-	String hour="3";
-	String day="1";
-	String month="*";
-	String weekday="?";	
+	String minute="";
+	String hour="";
+	String day="";
+	String month="";
+	String weekday="";	
 	String scheduleName="";
 	
 	

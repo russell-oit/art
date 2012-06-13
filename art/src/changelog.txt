@@ -2,6 +2,7 @@ ART 2.3
 * Added database type drop down field to help populate common jdbc details
 * Allow username and password field values to be used for CUBRID database
 * Allow blank passwords for datasources
+* Allow "not equals" operator for dynamic queries
 * Updated quartz to 2.1.5
 
 ART 2.2.1

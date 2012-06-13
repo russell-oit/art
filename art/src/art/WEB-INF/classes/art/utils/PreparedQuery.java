@@ -1101,12 +1101,29 @@ public class PreparedQuery {
     private boolean evaluateIF(String exp1, String op, String exp2)
             throws ArtException {
         // transform null in empty strings
-        exp1 = (exp1 == null ? "" : exp1.trim().toLowerCase());
-        exp2 = (exp2 == null ? "" : exp2.trim().toLowerCase());
-        op = (op == null ? "" : op.trim().toLowerCase());
-
+		if(op==null){
+			op="";
+		} else {
+			op.trim().toLowerCase();
+		}		
+		//although since exp1,exp2 come from a parameter values, they can never be null. maybe only empty string
+		if(exp1==null){
+			exp1="";
+		} else {
+			exp1=exp1.trim().toLowerCase();
+		}
+        if(exp2==null){
+			exp2="";
+		} else {
+			exp2=exp2.trim().toLowerCase();
+		}
+        
+		//evaluate conditions
         if (op.equals("eq") || op.equals("equals")) { // -- equals
             return exp1.equals(exp2);
+		
+		} else if(op.equals("neq") || op.equals("not equals")) { // -- not equals
+            return !exp1.equals(exp2);
 
         } else if (op.equals("la")) { // ----------------- less than  (alpha)
             return (exp1.compareTo(exp2) < 0 ? true : false);
@@ -1134,10 +1151,10 @@ public class PreparedQuery {
                 throw new ArtException("<br>Not able to convert to a number &lt;EXP1&gt;" + exp1 + "&lt;/EXP1&gt; or &lt;EXP2&gt;" + exp2 + "&lt;/EXP2&gt;");
             }
 
-        } else if (op.equals("is null")) { // ------------ is null
+        } else if (op.equals("is blank") || op.equals("is null")) { // ------------ is empty string. "is null" for backward compatibility. exp can never be null string
             return exp1.equals("");
 
-        } else if (op.equals("is not null")) { // -------- is not null
+        } else if (op.equals("is not blank") || op.equals("is not null")) { // -------- is not empty string. "is not null" for backward compatibility
             return !exp1.equals("");
 
         } else if (op.equals("starts with")) { // -------- startsWith
