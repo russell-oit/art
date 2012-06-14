@@ -1,20 +1,31 @@
 package art.output;
 
 import art.servlets.ArtDBCP;
-import art.utils.*;
-
-import java.sql.*;
-import java.util.*;
-import java.io.*;
+import art.utils.ArtQuery;
+import art.utils.PreparedQuery;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.export.*;
-import net.sf.jasperreports.engine.fill.*;
-import net.sf.jasperreports.engine.util.*;
+import net.sf.jasperreports.engine.design.JRDesignBand;
+import net.sf.jasperreports.engine.design.JRDesignSubreport;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.export.JRXhtmlExporter;
+import net.sf.jasperreports.engine.export.JRXlsExporter;
+import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.engine.fill.JRAbstractLRUVirtualizer;
+import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
+import net.sf.jasperreports.engine.fill.JRGzipVirtualizer;
+import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
+import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
-import net.sf.jasperreports.engine.design.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +173,7 @@ public class jasperOutput {
             }
 
             //set report parameters
-            HashMap<Object,Object> params = new HashMap<Object,Object>();
+            Map<String,Object> params = new HashMap<String,Object>();
 
             //process inline parameters to obtain appropriate jasper data type objects and multi parameters to obtain parameter names instead of parameter identifiers
             PreparedQuery pq = new PreparedQuery();
