@@ -61,10 +61,10 @@ public class ArtDBCP extends HttpServlet {
     private static int poolMaxConnections;
     private static ArtDBCP thisArtDBCP;
     private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
-    private static boolean artPropsStatus = false;
+    private static boolean artSettingsLoaded = false;
     private static ArtProps ap;
     private static ArrayList<String> userViewModes; //view modes shown to users
-    private static boolean isSchedulingEnabled = true;
+    private static boolean schedulingEnabled = true;
     private static String templatesPath; //full path to templates directory where formatted report templates and mondiran cube definitions are stored
     private static String relativeTemplatesPath; //relative path to templates directory. used by showAnalysis.jsp
     private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
@@ -117,7 +117,7 @@ public class ArtDBCP extends HttpServlet {
      *
      * @return <code>true</code> if file found. <code>false</code> otherwise.
      */
-    private boolean initArtProperties() {
+    public static boolean loadArtSettings() {
         logger.debug("Loading art.props file");
 
         String sep = File.separator;
@@ -142,13 +142,13 @@ public class ArtDBCP extends HttpServlet {
             art_pooltimeout = ap.getProp("art_pooltimeout");
             art_testsql = ap.getProp("art_testsql");
 
-            artPropsStatus = true;
+            artSettingsLoaded = true;
 
         } else {
-            artPropsStatus = false;
+            artSettingsLoaded = false;
         }
 
-        return artPropsStatus;
+        return artSettingsLoaded;
 
     }
 
@@ -170,7 +170,7 @@ public class ArtDBCP extends HttpServlet {
         }
 
         if ("false".equals(ctx.getInitParameter("enableJobScheduling"))) {
-            isSchedulingEnabled = false;
+            schedulingEnabled = false;
         }
 
         //set application path
@@ -231,17 +231,26 @@ public class ArtDBCP extends HttpServlet {
 
 
         //load settings from art.props file
-        if (!initArtProperties()) {
+        if (!loadArtSettings()) {
             //art.props not available. don't continue as required configuration settings will be missing
             logger.warn("Not able to get ART settings file (WEB-INF/art.props). Admin should define ART settings at first logon");
             return;
         }
-
-        //Register jdbc driver for art repository
+		
+		//initialize datasources
+		initializeDatasources();
+        
+    }
+	
+	/**
+	 * Initialize art repository datasource, and other defined datasources
+	 */
+	private static void initializeDatasources(){
+		//Register jdbc driver for art repository
         try {
             Class.forName(art_jdbc_driver).newInstance();
         } catch (Exception e) {
-            logger.error("Error wihle loading driver for ART repository: {}", art_jdbc_driver, e);
+            logger.error("Error wihle registering driver for ART repository: {}", art_jdbc_driver, e);
         }
 
         //initialize art repository datasource
@@ -261,8 +270,7 @@ public class ArtDBCP extends HttpServlet {
             artdb.setTestSQL(art_testsql);
         }
 
-
-        //Initialize the target databases array
+        //Initialize the datasources array
         try {
             Connection conn = artdb.getConnection();
             Statement st = conn.createStatement();
@@ -332,15 +340,11 @@ public class ArtDBCP extends HttpServlet {
                     dataSources = new LinkedHashMap<Integer, DataSource>();
                     dataSources.put(new Integer(0), artdb);
                 }
-            }
-
-        } catch (SQLException e) {
-            logger.error("Error while initializing target databases array", e);
+            }        
         } catch (Exception e) {
-            logger.error("Error while initializing target databases array", e);
-            artPropsStatus = false;
+            logger.error("Error", e);            
         }
-    }
+	}
 
     /**
      * Get full path to the export directory.
@@ -470,10 +474,10 @@ public class ArtDBCP extends HttpServlet {
 
     /**
      * Determine if art.props file is available and settings have been loaded.
-     * @return <code>true</code> if file is available. <code>false</code> otherwise.
+     * @return <code>true</code> if file is available and settings have been loaded correctly. <code>false</code> otherwise.
      */
-    public static boolean getArtPropsStatus() {
-        return artPropsStatus; // is false if art.props is not defined
+    public static boolean isArtSettingsLoaded() {
+        return artSettingsLoaded; // is false if art.props is not defined
     }
 
     /** 
@@ -486,7 +490,7 @@ public class ArtDBCP extends HttpServlet {
         Connection conn = null;
 
         try {
-            if (artPropsStatus) {
+            if (artSettingsLoaded) {
                 //artprops has been defined
                 DataSource ds = dataSources.get(new Integer(i));
                 conn = ds.getConnection(); // i=0 => ART Repository
@@ -517,7 +521,7 @@ public class ArtDBCP extends HttpServlet {
         Connection conn = null;
 
         try {
-            if (artPropsStatus) {
+            if (artSettingsLoaded) {
                 //artprops has been defined
                 if (dataSources != null) {
                     for (Integer key : dataSources.keySet()) {
@@ -576,12 +580,12 @@ public class ArtDBCP extends HttpServlet {
     }
 
     /** 
-     * Get an ART property as defined in the art.props file
+     * Get an ART setting as defined in the art.props file
      * 
-     * @param key property name
-     * @return property value
+     * @param key setting name
+     * @return setting value
      */
-    public static String getArtProps(String key) {
+    public static String getArtSetting(String key) {
         return ap.getProp(key);
     }
 
@@ -609,6 +613,7 @@ public class ArtDBCP extends HttpServlet {
      * 
      */
     public static void refreshConnections() {
+		//properly close connections
         if (dataSources != null) {
             for (Integer key : dataSources.keySet()) {
                 DataSource ds = dataSources.get(key);
@@ -617,7 +622,9 @@ public class ArtDBCP extends HttpServlet {
                 }
             }
         }
-        thisArtDBCP.ArtDBCPInit();
+		
+		//reset datasources array
+        initializeDatasources();
 
         logger.info("Datasources Refresh: Completed at {}", new java.util.Date().toString());
     }
@@ -631,8 +638,11 @@ public class ArtDBCP extends HttpServlet {
      * the garbage collector decide to remove them sooner or later...
      */
     public static void forceRefreshConnections() {
-        dataSources = null;
-        thisArtDBCP.ArtDBCPInit();
+        //no attempt to close connections
+		dataSources = null;
+		
+        //reset datasources array
+        initializeDatasources();
 
         logger.info("Datasources Force Refresh: Completed at {}", new java.util.Date().toString());
     }
@@ -663,7 +673,7 @@ public class ArtDBCP extends HttpServlet {
      * @return <code>true</code> if job scheduling is enabled
      */
     public static boolean isSchedulingEnabled() {
-        return isSchedulingEnabled;
+        return schedulingEnabled;
     }
 
     /**
@@ -711,7 +721,7 @@ public class ArtDBCP extends HttpServlet {
         String retentionPeriodString = "";
 
         try {
-            retentionPeriodString = getArtProps("published_files_retention_period");
+            retentionPeriodString = getArtSetting("published_files_retention_period");
             retentionPeriod = Integer.parseInt(retentionPeriodString);
         } catch (NumberFormatException e) {
             logger.warn("Invalid number for published files retention period: {}", retentionPeriodString, e);
@@ -731,7 +741,7 @@ public class ArtDBCP extends HttpServlet {
         String cacheExpiryString = "";
 
         try {
-            cacheExpiryString = getArtProps("mondrian_cache_expiry");
+            cacheExpiryString = getArtSetting("mondrian_cache_expiry");
             cacheExpiry = Integer.parseInt(cacheExpiryString);
         } catch (NumberFormatException e) {
             //invalid number set for cache expiry. default to 0 (no automatic clearing of cache)

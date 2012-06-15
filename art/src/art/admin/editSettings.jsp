@@ -223,19 +223,21 @@
 
    <tr><td class="attr"> ART Database Username</td>
        <td class="data">
-         <input type="text" name="art_username" size="20" maxlength="25" value="<%=art_username%>">
+		   <input type="hidden" name="_old_art_username" value="<%=art_username%>">
+		<input type="text" name="art_username" size="20" maxlength="25" value="<%=art_username%>">
        </td>
    </tr>
 
    <tr><td class="attr"> ART Database Password</td>
        <td class="data">
-         <input type="password" name="art_password" size="20" maxlength="40" value="<%=art_password%>">
+		   <input type="hidden" name="_old_art_password" value="<%=art_password%>">
+		<input type="password" name="art_password" size="20" maxlength="40" value="<%=art_password%>">
        </td>
    </tr>
    
    <tr><td class="attr"> Database Type</td>
        <td class="data">
-		   <select name="art_database_type" id="art_database_type" size="1" onChange="javascript:onTypeSelection();">
+		   <select name="_art_database_type" id="art_database_type" size="1" onChange="javascript:onTypeSelection();">
 			   <option value="--" selected="selected">--</option>
 			   <option value="demo">Demo</option>
 			   <option value="cubrid">CUBRID</option>
@@ -253,12 +255,14 @@
    
    <tr><td class="attr"> ART Database JDBC Driver</td>
        <td class="data">
+		   <input type="hidden" name="_old_art_jdbc_driver" value="<%=art_jdbc_driver%>">
          <input type="text" name="art_jdbc_driver" id="art_jdbc_driver" size="60" maxlength="200" value="<%=art_jdbc_driver%>">
        </td>
    </tr>
 
    <tr><td class="attr"> ART Database JDBC URL</td>
        <td class="data">
+		   <input type="hidden" name="_old_art_jdbc_url" value="<%=art_jdbc_url%>">
          <input type="text" name="art_jdbc_url" id="art_jdbc_url" size="60" maxlength="2000" value="<%=art_jdbc_url%>">
         <%
 		String baseDirEscaped=baseDir.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments

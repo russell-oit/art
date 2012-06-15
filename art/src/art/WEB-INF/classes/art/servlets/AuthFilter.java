@@ -83,7 +83,7 @@ public final class AuthFilter implements Filter {
             HttpSession session = hrequest.getSession();
             if (session.getAttribute("ue") == null) {
                 // Let's authenticate it
-                if (!ArtDBCP.getArtPropsStatus()) {
+                if (!ArtDBCP.isArtSettingsLoaded()) {
                     // properties not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
                     hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
                     return; // !!!! this need to be here!!!
@@ -129,7 +129,7 @@ public final class AuthFilter implements Filter {
      */
     private void forwardPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
         hrequest.setAttribute("message", msg);
-        String toPage = ArtDBCP.getArtProps("index_page_default");
+        String toPage = ArtDBCP.getArtSetting("index_page_default");
         if (toPage == null || toPage.equals("default")) {
             toPage = "login";
         }

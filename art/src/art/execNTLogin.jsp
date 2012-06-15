@@ -61,7 +61,7 @@ ValidateNTLogin vnl;
 
 public void jspInit() {
       
-    String domainCtrlAddr = ArtDBCP.getArtProps("mswin_auth_server");
+    String domainCtrlAddr = ArtDBCP.getArtSetting("mswin_auth_server");
     try {
        vnl = new ValidateNTLogin();
        vnl.setDomainController(domainCtrlAddr);

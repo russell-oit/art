@@ -38,7 +38,7 @@
                     <td vAlign="center" align="left" width="50%">
                         <select name="ntdomain">
                             <%
-                             String domains = ArtDBCP.getArtProps("mswin_domains");
+                             String domains = ArtDBCP.getArtSetting("mswin_domains");
                              java.util.StringTokenizer st = new java.util.StringTokenizer(domains,",");
                              while(st.hasMoreElements() ) {
                               domains = st.nextToken().trim();

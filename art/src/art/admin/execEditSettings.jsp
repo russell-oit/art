@@ -36,6 +36,20 @@ if(url!=null && (url.toLowerCase().equals("default") || url.toLowerCase().equals
 	driver=defaultArtDriver;
 }
 
+//determine if repository details have changed. so as not to restart the scheduler unnecessarily
+String oldUsername=request.getParameter("_old_art_username");
+String oldPassword=request.getParameter("_old_art_password");
+String oldUrl=request.getParameter("_old_art_jdbc_url");
+String oldDriver=request.getParameter("_old_art_jdbc_driver");
+boolean repositoryHasChanged=true;
+if(username.equals(oldUsername) && password.equals(oldPassword) && url.equals(oldUrl) && driver.equals(oldDriver)){
+	repositoryHasChanged=false;
+}
+if(!ArtDBCP.isArtSettingsLoaded()){
+	//first time repository is being defined. ensure scheduler is created/started
+	repositoryHasChanged=true;
+}
+
 String name, value;
 /* used to properly set the new password in ART_DATABASES
  * see "if (useDefaultDatabase)"  below
@@ -63,7 +77,11 @@ while (names.hasMoreElements()) {
 	if (name.equals("art_jdbc_driver") && useDefaultDatabase ) {
 		value = defaultArtDriver;
 	}
-	ap.setProp(name, value);
+	
+	//don't save utility fields (start with _)
+	if (!name.startsWith("-")){
+		ap.setProp(name, value);
+	}
 }
 
 
@@ -82,7 +100,7 @@ while (names.hasMoreElements()) {
 
 	Class.forName(driver).newInstance();
     Connection c;
-	if(useDefaultDatabase && !ArtDBCP.getArtPropsStatus()){
+	if(useDefaultDatabase && !ArtDBCP.isArtSettingsLoaded()){
 		c = DriverManager.getConnection(url, username, "ART");
 	} else {
 		c = DriverManager.getConnection(url, username, password);        
@@ -106,7 +124,7 @@ while (names.hasMoreElements()) {
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+defaultDB_url+"' , PASSWORD='"+artRepositoryEncryptedPassword+"' WHERE DATABASE_ID=2");
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+sampleDB_url+"' WHERE DATABASE_ID=1");
 		
-		if(!ArtDBCP.getArtPropsStatus()){
+		if(!ArtDBCP.isArtSettingsLoaded()){
 			//allow changing of password on initial setup
 			st.executeUpdate("ALTER USER ART SET PASSWORD \""+request.getParameter("art_password")+"\"");
 		}
@@ -130,32 +148,28 @@ while (names.hasMoreElements()) {
 
 
  if(ap.store(propsFile)) {
+	 //refresh settings and connections
+	 ArtDBCP.loadArtSettings();
     ArtDBCP.refreshConnections();
 
 	//recreate scheduler in case repository has changed
+	if(repositoryHasChanged){
+		//get current scheduler instance
+		org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
+		if (scheduler!=null){
+			scheduler.shutdown();
+			scheduler=null;
+		}
 
-	//get current scheduler instance
-	org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
-	if (scheduler!=null){
-		scheduler.shutdown();
-		scheduler=null;
-	}
-
-	//create new scheduler instance
+		//create new scheduler instance
 		QuartzProperties qp=new QuartzProperties();
 		Properties props=qp.GetProperties();
 
 		//start quartz scheduler
 		SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
 		scheduler = schedulerFactory.getScheduler();
-
-		boolean enableJobScheduling=true;
-
-		if ("false".equals(ctx.getInitParameter("enableJobScheduling"))) {
-			enableJobScheduling    = false;
-		}
-
-		if (enableJobScheduling){
+		
+		if (ArtDBCP.isSchedulingEnabled()){
 			scheduler.start();
 		}
 		else {
@@ -168,10 +182,11 @@ while (names.hasMoreElements()) {
 		//migrate jobs to quartz, if any exist that require migrating
 		ArtJob aj=new ArtJob();
 		aj.migrateJobsToQuartz();
+	}
 		
-		//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
-		response.sendRedirect("adminConsole.jsp");
-		return;
+	//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
+	response.sendRedirect("adminConsole.jsp");
+	return;
 
  } else {
     String msg = "Not able to write to file: " + propsFile;

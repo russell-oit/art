@@ -29,13 +29,13 @@
 </c:if> 
   
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>  
-  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + art.servlets.ArtDBCP.getArtProps("css_skin")%>" />      
+  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + art.servlets.ArtDBCP.getArtSetting("css_skin")%>" />      
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/ajaxtags-art.css" /> 
        
 </head>
 <body>
  <c:if test="${empty param._mobile}">  
- <% if ( !(ue2.getUsername().equals("public_user") && art.servlets.ArtDBCP.getArtProps("header_with_public_user").equals("no") )  ) { %>
+ <% if ( !(ue2.getUsername().equals("public_user") && art.servlets.ArtDBCP.getArtSetting("header_with_public_user").equals("no") )  ) { %>
    <table width="100%"  class="art" cellpadding="0" cellspacing="0">
     <tr>
      <td class="attr" align="left" width="50%">

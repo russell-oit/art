@@ -15,7 +15,7 @@ try{
 
 	// Register the database driver for the database
 	// that has just been specified (only if it is not the one already registered for the ART repository)
-	if (!driver.equals(ArtDBCP.getArtProps("art_jdbc_driver"))) {
+	if (!driver.equals(ArtDBCP.getArtSetting("art_jdbc_driver"))) {
 		out.println("<br>Registering driver "+driver+" ...<br>");
 		Class.forName(driver).newInstance();
 		out.println("...OK<br>");

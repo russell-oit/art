@@ -21,7 +21,7 @@
     <script type="text/javascript" src="<%= request.getContextPath() %>/js/ajaxtags-1.1.5.js"></script>
   </c:if>
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>
-  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + ArtDBCP.getArtProps("css_skin")%>" />      
+  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + ArtDBCP.getArtSetting("css_skin")%>" />      
   <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/ajaxtags-art.css" />
   <c:if test="${empty param._mobile}">  
     <link rel="stylesheet" href="<%= request.getContextPath() %>/js/dhtmlgoodies_calendar/dhtmlgoodies_calendar.css" media="screen">
@@ -30,7 +30,7 @@
 </head>
 <body>
  <c:if test="${empty param._mobile}">  
- <% if ( !(ue.getUsername().equals("public_user") && ArtDBCP.getArtProps("header_with_public_user").equals("no") )  ) { %>
+ <% if ( !(ue.getUsername().equals("public_user") && ArtDBCP.getArtSetting("header_with_public_user").equals("no") )  ) { %>
    <table width="100%"  class="art" cellpadding="0" cellspacing="0">
     <tr>
      <td class="attr" align="left" width="50%">

@@ -5,12 +5,12 @@
 <%	
  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
 
- if (!ArtDBCP.getArtPropsStatus()) {
+ if (!ArtDBCP.isArtSettingsLoaded()) {
     // settings not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
     response.sendRedirect(response.encodeRedirectURL(request.getContextPath() +"/admin/adminConsole.jsp"));
     return; 
  } else {
-        String toPage = ArtDBCP.getArtProps("index_page_default");
+        String toPage = ArtDBCP.getArtSetting("index_page_default");
         if (toPage != null && !toPage.equals("default") ) {
         toPage  = toPage + ".jsp";
 %>

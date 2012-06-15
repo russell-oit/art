@@ -119,7 +119,7 @@ public class rss20Output implements ArtOutputInterface {
 
         out.println("<channel>");
         out.println("<title>" + queryName + "</title>");
-        out.println("<link>" + ArtDBCP.getArtProps("rss_link") + "</link>");
+        out.println("<link>" + ArtDBCP.getArtSetting("rss_link") + "</link>");
         out.println("<description>" + queryName + " ART Feed</description>");
         out.println("<pubDate>" + getDateAsRFC822String(new java.util.Date()) + "</pubDate> ");
         out.println("<generator>http://art.sourceforge.net</generator> ");

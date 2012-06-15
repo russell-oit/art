@@ -46,7 +46,7 @@ public class PdfGraph {
 
         Rectangle pageSize;
 
-        switch (Integer.parseInt(ArtDBCP.getArtProps("page_size"))) {
+        switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
             case 1:
                 pageSize = PageSize.A4;
                 break;

@@ -71,7 +71,7 @@ public final class AuthFilterAdmin implements Filter {
             HttpServletRequest hrequest = (HttpServletRequest) request;
             HttpSession session = hrequest.getSession();
 
-            if (ArtDBCP.getArtPropsStatus()) { // properties are defined
+            if (ArtDBCP.isArtSettingsLoaded()) { // properties are defined
 
                 if (session.getAttribute("AdminSession") != null) {
                     // if the admin connection is not in the session 
@@ -91,7 +91,7 @@ public final class AuthFilterAdmin implements Filter {
                     java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
                     //hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath()+"/login.jsp?message="+messages.getString("sessionExpired")));
                     hrequest.setAttribute("message", messages.getString("sessionExpired"));
-                    String toPage = ArtDBCP.getArtProps("index_page_default");
+                    String toPage = ArtDBCP.getArtSetting("index_page_default");
                     if (toPage == null || toPage.equals("default")) {
                         toPage = "login";
                     }

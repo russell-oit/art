@@ -73,12 +73,12 @@ public class QuartzProperties {
 
 
             //check if art props file exists. this will supply data source details
-            if (ArtDBCP.getArtPropsStatus()) {
-                dbUrl = ArtDBCP.getArtProps("art_jdbc_url");
+            if (ArtDBCP.isArtSettingsLoaded()) {
+                dbUrl = ArtDBCP.getArtSetting("art_jdbc_url");
 				if(StringUtils.isBlank(dbUrl)){
-					dbUrl=ArtDBCP.getArtProps("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+					dbUrl=ArtDBCP.getArtSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
 				}
-                dbDriver = ArtDBCP.getArtProps("art_jdbc_driver");
+                dbDriver = ArtDBCP.getArtSetting("art_jdbc_driver");
                 dbUsername = ArtDBCP.getArtRepositoryUsername();
                 dbPassword = ArtDBCP.getArtRepositoryPassword(); //has already been decrypted
 

@@ -2195,9 +2195,9 @@ public class ArtJob implements Job {
 	}
 
 	private Mailer getMailer() {
-		String smtpServer = ArtDBCP.getArtProps("smtp_server");
-		String smtpUsername = ArtDBCP.getArtProps("smtp_username");
-		String smtpPassword = ArtDBCP.getArtProps("smtp_password");
+		String smtpServer = ArtDBCP.getArtSetting("smtp_server");
+		String smtpUsername = ArtDBCP.getArtSetting("smtp_username");
+		String smtpPassword = ArtDBCP.getArtSetting("smtp_password");
 
 		Mailer m = new Mailer();
 		m.setSmtpHost(smtpServer);
@@ -2208,8 +2208,8 @@ public class ArtJob implements Job {
 		}
 
 		//pass secure smtp mechanism and smtp port, in case they are required
-		m.setSmtpPort(ArtDBCP.getArtProps("smtp_port"));
-		m.setSecureSmtp(ArtDBCP.getArtProps("secure_smtp"));
+		m.setSmtpPort(ArtDBCP.getArtSetting("smtp_port"));
+		m.setSecureSmtp(ArtDBCP.getArtSetting("secure_smtp"));
 
 		return m;
 	}

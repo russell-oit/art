@@ -20,7 +20,7 @@
    <%
 	  }
 
-	  if (!ArtDBCP.getArtPropsStatus()) {
+	  if (!ArtDBCP.isArtSettingsLoaded()) {
    %>
 	      <tr><td class="artLink" colspan="2"><small>You need to define <i>ART Settings</i> - database connection
 	                   parameters and other settings - before being able to use ART.</small></td></tr>

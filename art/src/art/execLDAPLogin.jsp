@@ -8,8 +8,8 @@
 
 java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
 
-String ldapServer   = ArtDBCP.getArtProps("ldap_auth_server");
-String ldapAuthType = ArtDBCP.getArtProps("ldap_auth_method");
+String ldapServer   = ArtDBCP.getArtSetting("ldap_auth_server");
+String ldapAuthType = ArtDBCP.getArtSetting("ldap_auth_method");
 
 String username = request.getParameter("ldapusername");
 // NOTE: username should be the uid e.g. for distinguished name like uid=jdoe,ou=users,ou=system, username should be jdoe
@@ -19,8 +19,8 @@ String password = request.getParameter("ldappassword");
 String nextPage= request.getParameter("nextPage");
 session.setAttribute("nextPage", nextPage);
 
-String ldapUsersParentDn   = ArtDBCP.getArtProps("ldap_users_parent_dn");
-String ldapRealm = ArtDBCP.getArtProps("ldap_realm");
+String ldapUsersParentDn   = ArtDBCP.getArtSetting("ldap_users_parent_dn");
+String ldapRealm = ArtDBCP.getArtSetting("ldap_realm");
 String bindAuthType="simple"; //actual authentication method string used for ldap bind
 String bindUsername; //actual username used for LDAP bind
 

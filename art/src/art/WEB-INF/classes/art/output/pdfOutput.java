@@ -93,7 +93,7 @@ public class pdfOutput implements ArtOutputInterface {
             fullFileName = s + filename;
 
             com.lowagie.text.Rectangle pageSize;
-            switch (Integer.parseInt(ArtDBCP.getArtProps("page_size"))) {
+            switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
                 case 1:
                     pageSize = PageSize.A4;
                     break;
@@ -128,7 +128,7 @@ public class pdfOutput implements ArtOutputInterface {
 			bf=BaseFont.createFont("Helvetica",BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
 			font=new Font(bf,8,Font.NORMAL);
 			fsBody.addFont(font);
-			
+						
 			//set fonts for document heading
 			fsHeading=new FontSelector();
 			font = new Font(Font.HELVETICA, 10, Font.BOLD);
@@ -211,9 +211,7 @@ public class pdfOutput implements ArtOutputInterface {
             if (displayParams != null && displayParams.size() > 0) {
 
                 document.add(new Paragraph(fsBody.process("Parameters\n")));
-
-                com.lowagie.text.List list = new com.lowagie.text.List(true, 10);
-
+                
                 String[] params = new String[displayParams.size()];
                 int index = 0;
                 Iterator it = displayParams.entrySet().iterator();
@@ -239,16 +237,25 @@ public class pdfOutput implements ArtOutputInterface {
                     params[index] = param;
                     index++;
                 }
+				
+				//show parameters in a numbered list
+				List list = new List(true, 10);
+				//set font to use for the list item numbers
+				Font font=new Font(Font.HELVETICA, 8, Font.NORMAL);
+				list.setListSymbol(new Chunk("1",font)); //item number will get font from chunk details. chunk string doesn't matter for numbered lists
 
-                int size = params.length - 1;
+				//add list items
+                int size = params.length - 1;				
                 for (int i = size; i >= 0; i--) {
 					Phrase ph=fsBody.process(params[i]);
-                    ListItem listItem = new ListItem(ph);
+					ph.setLeading(12); //set spacing before the phrase
+					ListItem listItem = new ListItem(ph); 					
                     list.add(listItem);
                 }
+				
                 document.add(list);
             }
-
+			
             document.add(new Paragraph(fsBody.process("\n")));
 
         } catch (DocumentException e) {
