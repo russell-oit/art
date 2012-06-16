@@ -34,13 +34,15 @@
 package art.servlets;
 
 import art.dbcp.DataSource;
-import art.utils.*;
-
-import java.io.*;
-import java.util.*;
+import art.utils.ArtProps;
+import art.utils.Encrypter;
+import java.io.File;
 import java.sql.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.util.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +60,7 @@ public class ArtDBCP extends HttpServlet {
     // Global variables
     private static String art_username, art_password, art_jdbc_driver, art_jdbc_url,
             exportPath, art_testsql, art_pooltimeout;
-    private static int poolMaxConnections;
-    private static ArtDBCP thisArtDBCP;
+    private static int poolMaxConnections;    
     private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
     private static boolean artSettingsLoaded = false;
     private static ArtProps ap;
@@ -76,6 +77,7 @@ public class ArtDBCP extends HttpServlet {
     private static int defaultMaxRows;
     private static ServletContext ctx;
     private static int maxRunningQueries;
+	private static String artPropertiesFilePath; //full path to art.properties file
 
     /**
      * {@inheritDoc}
@@ -90,8 +92,7 @@ public class ArtDBCP extends HttpServlet {
         logger.info("ART is starting up...");
 
         ctx = getServletConfig().getServletContext();
-
-        thisArtDBCP = this;
+        
         ArtDBCPInit();
 
     }
@@ -113,20 +114,25 @@ public class ArtDBCP extends HttpServlet {
     }
 
     /**
-     *  Load art.props file and initialize variables
+     *  Load art.properties file and initialize variables
      *
      * @return <code>true</code> if file found. <code>false</code> otherwise.
      */
     public static boolean loadArtSettings() {
-        logger.debug("Loading art.props file");
+        logger.debug("Loading art.properties file");
 
-        String sep = File.separator;
-        String propsFile = ctx.getRealPath("") + sep + "WEB-INF" + sep + "art.props";
-
+        String propsFilePath=getArtPropertiesFilePath();
+		File propsFile = new File(propsFilePath);
+		if(!propsFile.exists()){
+			//art.properties doesn't exit. try art.props
+			String  sep = java.io.File.separator;
+			propsFilePath=getAppPath() + sep + "WEB-INF" + sep + "art.props";
+		}
+				
         ap = new ArtProps();
 
-        if (ap.load(propsFile)) { // file already exist  
-            logger.debug("art.props found");
+        if (ap.load(propsFilePath)) { // file exists
+            logger.debug("Loaded settings from {}",propsFilePath);
 
             art_username = ap.getProp("art_username");
             art_password = ap.getProp("art_password");
@@ -183,6 +189,9 @@ public class ArtDBCP extends HttpServlet {
 
         //set export path
         exportPath = appPath + sep + "export" + sep;
+		
+		//set art.properties file path
+		artPropertiesFilePath=appPath + sep + "WEB-INF" + sep + "art.properties";
 
 
         //Get user view modes from web.xml file. if a view mode is not in the user list, then it's hidden
@@ -230,10 +239,10 @@ public class ArtDBCP extends HttpServlet {
         allViewModes.addAll(noDup);
 
 
-        //load settings from art.props file
+        //load settings from art.properties file
         if (!loadArtSettings()) {
-            //art.props not available. don't continue as required configuration settings will be missing
-            logger.warn("Not able to get ART settings file (WEB-INF/art.props). Admin should define ART settings at first logon");
+            //art.properties not available. don't continue as required configuration settings will be missing
+            logger.warn("Not able to get ART settings file (WEB-INF/art.properties). Admin should define ART settings at first logon");
             return;
         }
 		
@@ -376,6 +385,14 @@ public class ArtDBCP extends HttpServlet {
      */
     public static String getAppPath() {
         return appPath;
+    }
+	
+	/**
+     * Get the full path to the art.properties file
+     * @return the full path to the art.properties file
+     */
+    public static String getArtPropertiesFilePath() {
+        return artPropertiesFilePath;
     }
 
     /**
@@ -580,7 +597,7 @@ public class ArtDBCP extends HttpServlet {
     }
 
     /** 
-     * Get an ART setting as defined in the art.props file
+     * Get an ART setting as defined in the art.properties file
      * 
      * @param key setting name
      * @return setting value

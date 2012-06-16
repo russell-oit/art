@@ -1109,8 +1109,7 @@ public class ArtJob implements Job {
 						jxls.setQueryName(queryName);
 						jxls.setUserName(jobFileUsername);
 						jxls.setExportPath(jobsPath);
-						jxls.setOutput(outputFormat);
-
+						
 						if (queryType == 117) {
 							//report will use query in the jxls template
 							jxls.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams());

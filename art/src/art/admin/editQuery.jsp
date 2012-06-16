@@ -740,12 +740,13 @@ tinyMCE.init({
                         <i>operator</i> can be one of the following:
                         <select style="font-size: 8pt">
                             <option>eq or equals</option>
+							<option>neq or not equals</option>
                             <option>la - less than (alpha)</option>
                             <option>ga - great than (alpha)</option>
                             <option>ln - less than (number)</option>
                             <option>gn - great than (number)</option>
-                            <option>is null</option>
-                            <option>is not null</option>
+                            <option>is blank</option>
+                            <option>is not blank</option>
                             <option>starts with</option>
                             <option>ends with</option>
                             <option>contains</option>

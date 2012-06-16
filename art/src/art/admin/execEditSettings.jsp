@@ -17,10 +17,9 @@
     <%
   }
 
-ServletContext ctx   = getServletConfig().getServletContext();
-String baseDir = ctx.getRealPath("");
+String baseDir = ArtDBCP.getAppPath();
 String sep = java.io.File.separator;
-String propsFile = ctx.getRealPath("")+sep+"WEB-INF"+sep+"art.props";
+String propsFile = ArtDBCP.getArtPropertiesFilePath();
 String defaultArtUrl = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;hsqldb.write_delay=false";
 String defaultArtDriver="org.hsqldb.jdbcDriver";
 ArtProps ap = new ArtProps();
@@ -79,7 +78,7 @@ while (names.hasMoreElements()) {
 	}
 	
 	//don't save utility fields (start with _)
-	if (!name.startsWith("-")){
+	if (!name.startsWith("_")){
 		ap.setProp(name, value);
 	}
 }

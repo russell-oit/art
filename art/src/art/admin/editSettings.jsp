@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP,org.apache.commons.lang.StringUtils;" %>
+<%@ page import="java.sql.*,java.io.File,art.utils.*,art.servlets.ArtDBCP,org.apache.commons.lang.StringUtils;" %>
 <%@ include file ="headerAdminPlain.jsp" %>
 
 <%
@@ -14,12 +14,6 @@
     <%
 
   }
-
-  ServletContext ctx   = getServletConfig().getServletContext();
-
-  String  baseDir = ctx.getRealPath("");
-  String  sep = java.io.File.separator;
-  String  propsFile = baseDir+sep+"WEB-INF"+sep+"art.props";
 
   String  administrator , smtp_server, smtp_username, smtp_password,
           art_username, art_password, art_jdbc_url, art_jdbc_driver, art_testsql, art_pooltimeout, msg;
@@ -40,9 +34,16 @@
 	 String mondrian_cache_expiry;
 
 
+String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
+File propsFile = new File(propsFilePath);
+if(!propsFile.exists()){
+	//art.properties doesn't exit. try art.props
+	String  sep = java.io.File.separator;
+	propsFilePath=ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
+}
   ArtProps ap = new ArtProps();
 
-  if (ap.load(propsFile)){ // file already exist        
+  if (ap.load(propsFilePath)){ // file exists
     art_username           = ap.getProp("art_username");
     art_password           = ap.getProp("art_password");
 	// un-obfuscate password
@@ -265,6 +266,8 @@
 		   <input type="hidden" name="_old_art_jdbc_url" value="<%=art_jdbc_url%>">
          <input type="text" name="art_jdbc_url" id="art_jdbc_url" size="60" maxlength="2000" value="<%=art_jdbc_url%>">
         <%
+		String baseDir = ArtDBCP.getAppPath();
+		String sep = java.io.File.separator;
 		String baseDirEscaped=baseDir.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments
 		String sepEscaped=sep.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments
 		msg = "JDBC URL\\n\\nNote: If you use the embedded HSQLDB database as the ART repository pay attention." +
@@ -517,6 +520,9 @@
  </table>
  </form>
 
+<%
+ServletContext ctx   = getServletConfig().getServletContext();
+%>
 
  <p>
   <table align="center">

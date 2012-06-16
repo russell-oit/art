@@ -1,3 +1,5 @@
+<%@ page import="art.servlets.ArtDBCP" %>
+
 <%@ include file ="headerAdminPlain.jsp" %>
 
 <table align="center" width="90%">
@@ -12,8 +14,8 @@
             </small>
             <br><i>Solution:</i>
             <br><small> Log in again to restore the connection. If it does not work, check
-                the ART Database connection parameters in the art.props file and make sure
-                the ART Database is up and running.
+                the ART database connection parameters in the art.properties file and make sure
+                the ART database is up and running.
             </small>
         </td></tr>
 
@@ -57,25 +59,19 @@
             </small>
             <br><i>Solution:</i>
             <br><small>Make sure the user that executes the servlet engine is able to write
-                to the art.props file in the WEB-INF directory
+                to the art.properties file in the WEB-INF directory
             </small>
         </td></tr>
 
     <tr><td>
             <b>145 Authentication failure when modifying ART settings</b>
             <br><i>Reason:</i>
-            <br><small>You must specify previous art database username and
+            <br><small>You must specify the ART database username and
                 password in order to replace existing settings
             </small>
-            <br><i>Solution:</i>
-            <%
-              ServletContext ctx   = getServletConfig().getServletContext();
-              String baseDir = ctx.getRealPath("");
-              String sep = java.io.File.separator;
-              String propsFile = baseDir+sep+"WEB-INF"+sep+"art.props";
-            %>
-            <br><small>If you do not know previous password, edit the file art.props
-                in the WEB-INF directory of ART web application (<i><%=propsFile%></i>).
+            <br><i>Solution:</i>           
+            <br><small>If you do not know previous password, delete the art.properties file
+                in the WEB-INF directory of ART web application (<i><%=ArtDBCP.getArtPropertiesFilePath()%></i>).
             </small>
         </td></tr>
 

@@ -1,15 +1,19 @@
 package art.output;
 
-import java.sql.*;
-import java.util.*;
-import java.io.*;
-import java.text.SimpleDateFormat;
-
 import art.servlets.ArtDBCP;
-import art.utils.*;
-
+import art.utils.ArtJxlsReportManager;
+import art.utils.ArtJxlsResultSetCollection;
+import art.utils.ArtQuery;
+import art.utils.PreparedQuery;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import net.sf.jxls.report.ReportManager;
 import net.sf.jxls.transformer.XLSTransformer;
-import net.sf.jxls.report.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +29,7 @@ public class jxlsOutput {
     
     String fullOutputFileName = "-No File";
     String queryName;
-    String userName;
-    String output;
+    String userName;    
     String y_m_d;
     String h_m_s;
     String exportPath;
@@ -72,14 +75,7 @@ public class jxlsOutput {
         userName = s;
     }
 
-    /**
-     * Set output format
-     * @param s output format
-     */
-    public void setOutput(String s) {
-        output = s;
-    }
-
+    
     /**
      * Generate output and set final filename
      * 

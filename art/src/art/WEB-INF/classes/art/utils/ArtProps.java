@@ -1,12 +1,15 @@
 package art.utils;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.Enumeration;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Load and write art properties to file
+ * Load and write art settings to file
  * 
  * @author Enrico Liboni
  */
@@ -15,7 +18,7 @@ public class ArtProps {
 	final static Logger logger = LoggerFactory.getLogger(ArtProps.class);
 	
 	Properties p;
-	String artPropsDefaultName = "art.props";
+	String artPropsDefaultName = "art.properties";
 
 
     /**

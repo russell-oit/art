@@ -224,7 +224,7 @@ boolean hasParams=false;
 						 <%
 						 break;
 					  default:
-						if (queryType >1 && queryType <99 ) {
+						if (queryType >0 && queryType <100 ) {
 							%>
 							<input type="hidden" name="viewMode" VALUE="HTMLREPORT">
 							<input type="hidden" name="SPLITCOL" VALUE="<%=queryType%>">

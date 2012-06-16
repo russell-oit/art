@@ -39,9 +39,6 @@ import art.utils.QuartzProperties;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Properties;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -151,20 +148,25 @@ public class Scheduler extends HttpServlet {
     }
 
     /**
-     * Load system settings from art.props file.
+     * Load system settings from art.properties file.
      * 
      * @return <code>true</code> if file is found. <code>false</code> if file is not found.
      */
     public boolean loadProperties() {
         
-        logger.debug("Loading properties");
-
-        // Get path info
-        String sep = java.io.File.separator;
-        String propsFile = getServletConfig().getServletContext().getRealPath("") + sep + "WEB-INF" + sep + "art.props";
+        logger.debug("Loading art.properties");
+		
+		String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
+		File propsFile=new File(propsFilePath);
+		if(!propsFile.exists()){
+			//art.properties doesn't exit. try art.props
+			String  sep = java.io.File.separator;
+			propsFilePath=ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
+		}
+		                
         ArtProps ap = new ArtProps();
 
-        if (ap.load(propsFile)) { // file exists            
+        if (ap.load(propsFilePath)) { // file exists            
             art_username = ap.getProp("art_username");
             art_password = ap.getProp("art_password");
             // de-obfuscate the password
@@ -184,7 +186,7 @@ public class Scheduler extends HttpServlet {
            
             return true;
         } else {
-            logger.warn("art.props file not found. Admin should define ART properties on first login");
+            logger.warn("art.properties file not found. Admin should define ART settings on first logon");
             return false;
         }
 
@@ -354,8 +356,8 @@ class Timer extends Thread {
     public void run() {
         try {
             while (true) {
-                // get properties. art.props must exist before cleaning in order to get configured durations
-                if (scheduler.loadProperties()) { // this returns false if art properties are not defined yet
+                // get settings. art.properties must exist before cleaning in order to get configured durations
+                if (scheduler.loadProperties()) { // this returns false if art settings are not defined yet
                     // clean old files in export path
                     scheduler.clean();
                 }

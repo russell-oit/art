@@ -23,7 +23,7 @@
  *              2. build the html page to show the data
  *                 or
  *		   create the spreadsheet or exportable file and show
- *                 the link to retrive it
+ *                 the link to retrieve it
  *                 or
  *                 forward to the page to create the graph
  *		3. Write log file with statistics
@@ -32,18 +32,26 @@
  */
 package art.servlets;
 
-import art.output.*;
 import art.graph.*;
+import art.output.*;
 import art.utils.*;
-
-import java.io.*;
-import java.sql.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +71,7 @@ public class QueryExecute extends HttpServlet {
     String baseExportPath;
     private int currentNumberOfRunningQueries = 0;
     HashMap<String, java.lang.Class> viewModesHash;
-    String username; //currently logged on user
-    
+        
     
     /**
      * 
@@ -75,7 +82,6 @@ public class QueryExecute extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
 
         super.init(config);
-
 
         //load all view modes
         List<String> allViewModes = ArtDBCP.getAllViewModes();
@@ -224,7 +230,7 @@ public class QueryExecute extends HttpServlet {
     //generate graph object in preparation for it's display using the showGraph.jsp page
     private ArtGraph artGraphOut(ResultSet rs, ResultSetMetaData rsmd, HttpServletRequest request,
             String xLabel, String yLabel, String graphOptions, String shortDescr, 
-            int queryId, int queryType, String queryName,
+            int queryId, int queryType, String queryName, String username,
             Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
 
         ArtGraph o;
@@ -256,9 +262,9 @@ public class QueryExecute extends HttpServlet {
             o.setUseHyperLinks(false);
         }
 
-        int width = 400;
-        int height = 300;
-        String bgColor = "#FFFFFF";
+        int width;
+        int height;
+        String bgColor;
 
         // @200x100 -10:100 #FFFFFF nolegend nolabels
         // = make a chart 200px width 100px height focused
@@ -433,14 +439,11 @@ public class QueryExecute extends HttpServlet {
 
         PrintWriter out = null; // this will be initialized according to the content type of the view mode
         ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
-
-        // Load context parameters (art properties)
+        
         ServletContext ctx = getServletConfig().getServletContext();
-        baseExportPath = ArtDBCP.getExportPath();
-
-        // Get session
+        baseExportPath = ArtDBCP.getExportPath();        
         HttpSession session = request.getSession();
-        username = (String) session.getAttribute("username");
+        String username = (String) session.getAttribute("username");
 
         //generate output
         if (username != null) { // the session is valid if the username is not null
@@ -499,25 +502,37 @@ public class QueryExecute extends HttpServlet {
             request.setAttribute("queryName", queryName);
             
             String viewMode = request.getParameter("viewMode");
-            if (viewMode == null) {
+            if (viewMode == null || viewMode.equals("default")) {
                 if(queryType<0){
                     //graph
                     viewMode="graph";
+				} else if(queryType>0 && queryType<100){
+					//report on column
+					viewMode="HTMLREPORT";
+				} else if(queryType==115 || queryType==116){
+					//jasper report
+					viewMode="pdf";
                 } else {
                     viewMode = "html";
                 }
             }
+			
+			//ensure html only queries only output as html
+			if(queryType==102 || queryType==103){
+				//crosstab html only or normal query html only
+				viewMode="html";
+			}
 
             /*
              * Find if output allows this servlet to print the header&footer (flush active or not)
              */
-            if (viewMode.equals("SCHEDULE")) {
+            if (viewMode.toUpperCase().equals("SCHEDULE")) {
                 // forward to the editJob page
                 ctx.getRequestDispatcher("/user/editJob.jsp").forward(request, response);
                 return; // a return is needed otherwise the flow would proceed!
             } else if (viewMode.toUpperCase().equals("GRAPH") || viewMode.toUpperCase().equals("PDFGRAPH") || viewMode.toUpperCase().equals("PNGGRAPH")) {
                 isFlushEnabled = false; // graphs are created in memory and displayed by showGraph.jsp page
-            } else if (viewMode.equals("UPDATE") || viewMode.equals("HTMLREPORT")) {
+            } else if (viewMode.toUpperCase().equals("HTMLREPORT")) {
                 response.setContentType("text/html; charset=UTF-8");
                 out = response.getWriter();
             } else if (queryType == 115 || queryType == 116 || queryType == 117 || queryType == 118) {
@@ -525,6 +540,10 @@ public class QueryExecute extends HttpServlet {
                 response.setContentType("text/html; charset=UTF-8");
                 out = response.getWriter();
                 isFlushEnabled = true;
+			} else if(queryType==100){
+				//update query
+				response.setContentType("text/html; charset=UTF-8");
+                out = response.getWriter();
             } else {
                 // This is not a request to schedule, produce a graph or an "htmlReport" or an update query
                 // => Load the appropriate ArtOutputInterface for the view mode
@@ -549,7 +568,7 @@ public class QueryExecute extends HttpServlet {
 
                 } catch (Exception e) {
                     logger.error("Error while instantiating class: {}", viewMode, e);
-                    request.setAttribute("errorMessage", "Exception while initializing " + viewMode + " view mode:" + e);
+                    request.setAttribute("errorMessage", "Error while initializing " + viewMode + " view mode:" + e);
                     ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
                     return;
                 }
@@ -564,16 +583,16 @@ public class QueryExecute extends HttpServlet {
             //run query            
             if (currentNumberOfRunningQueries <= ArtDBCP.getMaxRunningQueries()) {
                 int probe = 0; // used for debugging
-                boolean isQuery = true; // it will contain the result of the PreparedQuery.execute() to state if query is a Select query or an update
+                boolean isQuery; // it will contain the result of the PreparedQuery.execute() to state if query is a Select query or an update
                 int numberOfRows = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
 
                 ResultSet rs = null;
                 PreparedQuery pq = null;
 
                 try {
-                    ResultSetMetaData rsmd = null;
-                    long startQueryTime = 0;
-                    long endQueryTime = 0;
+                    ResultSetMetaData rsmd;
+                    long startQueryTime;
+                    long endQueryTime;
                     long startTime = new java.util.Date().getTime(); //overall start time                    
                     String startTimeString = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.MEDIUM, request.getLocale()).format(new java.util.Date(startTime)); //for display in query output header
 
@@ -748,8 +767,7 @@ public class QueryExecute extends HttpServlet {
                         jxlsOutput jxls = new jxlsOutput();
                         jxls.setQueryName(queryName);
                         jxls.setUserName(username);
-                        jxls.setExportPath(baseExportPath);
-                        jxls.setOutput(viewMode);
+                        jxls.setExportPath(baseExportPath);                        
                         jxls.setWriter(out);
                         if (queryType == 117) {
                             //report will use query in the jxls template
@@ -776,12 +794,18 @@ public class QueryExecute extends HttpServlet {
                             try {
                                 if (viewMode.equals("HTMLREPORT")) {
                                     /* HTML REPORT */
-                                    numberOfRows = htmlReportOut(out, rs, rsmd, Integer.parseInt(request.getParameter("SPLITCOL")));
+									int splitCol;
+									if(request.getParameter("SPLITCOL")==null){
+										splitCol=queryType;
+									} else {
+										splitCol=Integer.parseInt(request.getParameter("SPLITCOL"));
+									}
+                                    numberOfRows = htmlReportOut(out, rs, rsmd, splitCol);
                                     probe = 100;
                                 } else if (viewMode.toUpperCase().equals("GRAPH") || viewMode.toUpperCase().equals("PDFGRAPH") || viewMode.toUpperCase().equals("PNGGRAPH")) {
                                     /* GRAPH */
                                     probe = 105;
-                                    ArtGraph og = artGraphOut(rs, rsmd, request, xaxisLabel, yaxisLabel, graphOptions, shortDescription, queryId, queryType, queryName, inlineParams, multiParams);
+                                    ArtGraph og = artGraphOut(rs, rsmd, request, xaxisLabel, yaxisLabel, graphOptions, shortDescription, queryId, queryType, queryName, username, inlineParams, multiParams);
                                     request.setAttribute("artGraph", og);
 
                                     //enable show parameters for graphs

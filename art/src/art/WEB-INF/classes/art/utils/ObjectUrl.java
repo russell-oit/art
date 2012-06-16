@@ -165,13 +165,12 @@ public class ObjectUrl {
 	*/
 	static private String lookupExecuteUrl(int typeId, int objectId) {
 		String type = "";
-		String url  = "";
+		String url;
 
 		switch (typeId) {
 		case 0:
 		case 100:
-		case 103:
-			type= "&viewMode=html";
+		case 103:			
 			url = "/user/ExecuteQuery?queryId="+objectId;
 			break;
 		case 101:
@@ -179,8 +178,7 @@ public class ObjectUrl {
 			type= "&viewMode=html&_isCrosstab=Y";
 			url = "/user/ExecuteQuery?queryId="+objectId;
 			break;
-		case 110:
-			//changed 1.8 url= "/ShowPortlets?objectId="+objectId;
+		case 110:			
 			url= "/user/showPortlets.jsp?queryId="+objectId;
 			break;
 		case 111:
@@ -192,21 +190,15 @@ public class ObjectUrl {
 			url= "/user/showAnalysis.jsp?queryId="+objectId;
 			break;
 		case 115:
-		case 116:
-			type= "&viewMode=pdf";
+		case 116:			
 			url = "/user/ExecuteQuery?queryId="+objectId;
 			break;
 		case 117:
-		case 118:
-			type= "&viewMode=xls";
+		case 118:			
 			url = "/user/ExecuteQuery?queryId="+objectId;
 			break;
 		default:
-			if (typeId>0 && typeId<99) {
-				type= "&viewMode=html&SPLITCOL="+typeId;
-			} else if (typeId < 0) {
-				type= "&viewMode=graph";
-			}
+			//graph or report on column			
 			url = "/user/ExecuteQuery?queryId="+objectId;
 		}
 

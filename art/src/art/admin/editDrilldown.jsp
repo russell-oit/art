@@ -92,6 +92,7 @@ dq.create(queryId,queryPosition);
 					%>
                     
                     <option value="ALL" <%="ALL".equals(value)?"selected":""%> > All </option>
+					<option value="default" <%="default".equals(value)?"selected":""%> > Default </option>
                     <%
                        Iterator itVm = ArtDBCP.getUserViewModes().iterator();
                        while(itVm.hasNext()) {
