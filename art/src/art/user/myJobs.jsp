@@ -144,6 +144,8 @@ int jobId;
 int jobType;
 String queryName;
 String lastFileName;
+String lines[];
+String resultMessage;
 %>
 
  <table align="center" width="50%">
@@ -230,9 +232,20 @@ String lastFileName;
 	<%=messages.getString("noFile")%>
      <% } else if (lastFileName.startsWith("-")) { %>
         <%=lastFileName.substring(1)%>
-     <% } else { %>
-        <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>
-     <% } %>      
+     <% } else { 
+		lines = lastFileName.split("\\r?\\n");
+		resultMessage="";
+		if (lines.length > 1) {
+			//publish jobs can have file link and message
+			lastFileName=lines[0];
+			resultMessage=lines[1];
+		}	
+	   %>
+        <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>		
+     <%
+out.println(resultMessage);
+}
+   %>      
    </td> 
    <td class="jobdetails" > <code><%=formatTimestamp(job.getNextRunDate(),locale)%></code>  </td>  
    <td class="jobdetails" width="60px"> 
@@ -406,9 +419,20 @@ if(adminLevel==100){
 	<%=messages.getString("noFile")%>
      <% } else if (lastFileName.startsWith("-")) { %>
         <%=lastFileName.substring(1)%>
-     <% } else { %>
-        <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>
-     <% } %>      
+     <% } else { 
+		lines = lastFileName.split("\\r?\\n");
+		resultMessage="";
+		if (lines.length > 1) {
+			//publish jobs can have file link and message
+			lastFileName=lines[0];
+			resultMessage=lines[1];
+		}	
+	   %>
+        <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>		
+     <%
+out.println(resultMessage);
+}
+   %>          
    </td> 
    <td class="jobdetails" > <code><%=formatTimestamp(job.getNextRunDate(),locale)%></code>  </td>  
    <td class="jobdetails" width="60px"> 

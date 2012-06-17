@@ -43,6 +43,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -829,4 +830,12 @@ public class ArtDBCP extends HttpServlet {
     public static int getMaxRunningQueries() {
         return maxRunningQueries;
     }
+	
+	/**
+	 * Get random string to be appended to output filenames
+	 * @return random string to be appended to output filenames
+	 */
+	public static String getRandomString(){
+		return "-" + RandomStringUtils.randomAlphanumeric(10);
+	}
 }

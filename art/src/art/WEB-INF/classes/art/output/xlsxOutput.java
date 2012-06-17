@@ -82,7 +82,7 @@ public class xlsxOutput implements ArtOutputInterface {
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH_mm_ss");
         h_m_s = timeFormatter.format(today);
 
-        String baseName = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s;
+        String baseName = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
 
         filename = baseName + ".xlsx";
         filename = ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename

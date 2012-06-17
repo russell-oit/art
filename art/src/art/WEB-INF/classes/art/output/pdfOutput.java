@@ -85,7 +85,7 @@ public class pdfOutput implements ArtOutputInterface {
         dateFormatter.applyPattern(timeFormat);
         h_m_s = dateFormatter.format(today);
 
-        filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ".pdf";
+        filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".pdf";
         filename=ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
 
         try {

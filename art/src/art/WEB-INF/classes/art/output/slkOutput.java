@@ -76,7 +76,7 @@ public class slkOutput implements ArtOutputInterface {
             SimpleDateFormat timeFormatter = new SimpleDateFormat("HH_mm_ss");
             h_m_s = timeFormatter.format(today);
 
-            filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ".slk";
+            filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".slk";
             filename=ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
             fullFileName = s + filename;
 

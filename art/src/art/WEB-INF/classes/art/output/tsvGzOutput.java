@@ -74,7 +74,7 @@ public class tsvGzOutput implements ArtOutputInterface {
             SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
             h_m_s = timeFormatter.format(today);
 
-            filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ".tsv.gz";
+            filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".tsv.gz";
             filename=ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
             fullFileName = s + filename;
 

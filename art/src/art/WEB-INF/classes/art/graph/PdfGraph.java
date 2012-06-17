@@ -12,16 +12,15 @@
 package art.graph;
 
 import art.servlets.ArtDBCP;
-
-import org.jfree.chart.*;
-
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.*;
-
-import java.awt.geom.Rectangle2D;
+import com.lowagie.text.pdf.DefaultFontMapper;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfTemplate;
+import com.lowagie.text.pdf.PdfWriter;
 import java.awt.Graphics2D;
-
+import java.awt.geom.Rectangle2D;
 import java.io.FileOutputStream;
+import org.jfree.chart.JFreeChart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +70,7 @@ public class PdfGraph {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filename));
             document.addTitle(title);
             document.addAuthor("Created by ART - http://art.sourceforge.net");
-            HeaderFooter footer = new HeaderFooter(new Phrase("ART pdf Output (" + new java.util.Date().toString() + ")", FontFactory.getFont(FontFactory.HELVETICA, 8)), false);
+            HeaderFooter footer = new HeaderFooter(new Phrase("ART pdf output (" + new java.util.Date().toString() + ")", FontFactory.getFont(FontFactory.HELVETICA, 8)), false);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.setFooter(footer);
             document.open();

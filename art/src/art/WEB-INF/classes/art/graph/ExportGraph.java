@@ -1,24 +1,27 @@
 package art.graph;
 
-import art.utils.ArtQuery;
 import art.servlets.ArtDBCP;
-
-import java.sql.*;
-import java.io.*;
-import org.jfree.chart.*;
-import org.jfree.data.general.*;
-import org.jfree.chart.plot.*;
-import org.jfree.chart.labels.*;
-import org.jfree.data.xy.*; //for xyseriescollection
-import org.jfree.data.time.*; //for timeseriescollection
-import org.jfree.data.category.*; //for categorydataset
-import org.jfree.chart.renderer.xy.*;
-import java.awt.Color; //for decoding chart background colour
-import org.jfree.chart.renderer.category.*; //to display item labels
-import org.jfree.ui.TextAnchor; //to display item labels
-import org.jfree.chart.axis.NumberAxis; //to set the y axis range
-import java.text.*; //to format numbers
+import art.utils.ArtQuery;
+import java.awt.Color;
 import java.awt.Font;
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import org.jfree.chart.*;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.*;
+import org.jfree.chart.plot.*;
+import org.jfree.chart.renderer.category.*;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.general.DefaultValueDataset;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +134,7 @@ public class ExportGraph {
         SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
         h_m_s = timeFormatter.format(today);
 
-        fullFileNameWithoutExt = exportPath + userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s;
+        fullFileNameWithoutExt = exportPath + userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
     }
 
     /**
@@ -143,18 +146,18 @@ public class ExportGraph {
     public void createFile(ResultSet rs, int queryType) {
 
         JFreeChart chart = null;
-        int width = 600;
-        int height = 400;
+        int width;
+        int height;
         String seriesName;
         ResultSetMetaData rsmd;
-        boolean showLegend = true;
+        boolean showLegend;
         boolean showTooltips = false;
         boolean showUrls = false;
         boolean showLabels;
-        boolean showPoints = false;
-        String bgColor = "#FFFFFF";
-        int from = 0; //y axis range minimum
-        int to = 0; //y axis range maximum
+        boolean showPoints;
+        String bgColor;
+        int from; //y axis range minimum
+        int to; //y axis range maximum
 
         ChartTheme currentChartTheme = null;
         BarPainter currentBarPainter = null;

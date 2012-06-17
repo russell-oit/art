@@ -48,6 +48,8 @@ String description="";
 
 <% 
 Locale locale=request.getLocale();
+String lines[];
+String resultMessage;
 
   boolean splitJob=false; //for split jobs, get last start date and file name from shared jobs table
   
@@ -146,9 +148,20 @@ Locale locale=request.getLocale();
 		out.println(messages.getString("noFile"));
 	} else if (fileName.startsWith("-")) { 
         out.println(fileName.substring(1));
-	} else { %>
-        <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=fileName%>" target="_blank"><%=fileName%> </a>
- <% } %>      
+	}  else { 
+		lines = fileName.split("\\r?\\n");
+		resultMessage="";
+		if (lines.length > 1) {
+			//publish jobs can have file link and message
+			fileName=lines[0];
+			resultMessage=lines[1];
+		}	
+	   %>
+        <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=fileName%>" target="_blank"><%=fileName%> </a>		
+     <%
+out.println(resultMessage);
+}
+   %>           
 
    </td> 
    <td class="jobdetails" > <code><%=formatTimestamp(job.getNextRunDate(),locale)%></code>  </td>  

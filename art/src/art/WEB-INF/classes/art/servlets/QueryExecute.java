@@ -394,7 +394,7 @@ public class QueryExecute extends HttpServlet {
         //set base file name
         java.util.Date today = new java.util.Date();
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-        String filename = username + "-" + queryName + "-" + dateFormatter.format(today);
+        String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtDBCP.getRandomString();
         filename = ArtDBCP.cleanFileName(filename);
         request.setAttribute("baseFileName", filename);
         

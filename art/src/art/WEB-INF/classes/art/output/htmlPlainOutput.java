@@ -91,6 +91,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void beginHeader() {
+		out.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
         out.println("<html><div align=\"center\">");
 
         if (displayParams != null && displayParams.size()>0) {

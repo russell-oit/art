@@ -73,7 +73,7 @@ public class xlsOutput implements ArtOutputInterface {
         SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
         h_m_s = timeFormatter.format(today);
 
-        filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ".xls";
+        filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".xls";
         filename=ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
 
         try {

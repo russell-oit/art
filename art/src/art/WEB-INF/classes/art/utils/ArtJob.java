@@ -1067,13 +1067,8 @@ public class ArtJob implements Job {
 				if (generateOutput) {
 					String sep = java.io.File.separator;
 					String jobsPath = exportPath + "jobs" + sep;
-					String jobFileUsername;
-					if (useSharedInFileName) {
-						jobFileUsername = "JobId" + jobId + "-shared";
-					} else {
-						jobFileUsername = "JobId" + jobId + "-" + user;
-					}
-
+					String jobFileUsername="JobId" + jobId;
+					
 					if (queryType < 0) {
 						//save charts to file
 						ExportGraph eg = new ExportGraph();
@@ -1134,23 +1129,16 @@ public class ArtJob implements Job {
 						PrintWriter out = null;
 						boolean printWriterUsed = false;
 
-						if (outputFormat.indexOf("html") >= 0 || outputFormat.indexOf("xml") >= 0 || outputFormat.indexOf("rss") >= 0) {
-							String fileNameUser; //used when building the file name
-							if (useSharedInFileName) {
-								fileNameUser = "shared";
-							} else {
-								fileNameUser = user;
-							}
-
+						if (outputFormat.indexOf("html") >= 0 || outputFormat.indexOf("xml") >= 0 || outputFormat.indexOf("rss") >= 0) {							
 							if (outputFormat.indexOf("html") >= 0) {
 								queryName = ArtDBCP.cleanFileName(queryName);
 								SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
 								String datePart = dateFormatter.format(new java.util.Date());
 
-								fileName = jobsPath + "JobId" + jobId + "-" + fileNameUser + "-" + queryName + "-" + datePart + ".html";
+								fileName = jobsPath + jobFileUsername + "-" + queryName + "-" + datePart + ArtDBCP.getRandomString() + ".html";
 							} else {
 								//xml or rss
-								fileName = jobsPath + "JobId" + jobId + "-" + fileNameUser + ".html";
+								fileName = jobsPath + jobFileUsername + ".html";
 							}
 							fos = new FileOutputStream(fileName);
 							out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
@@ -1263,6 +1251,13 @@ public class ArtJob implements Job {
 								fileName = "-File has been emailed";
 							} else {
 								fileName = "-Error when sending email <p>" + m.getSendError() + "</p>";
+							}
+						} else {
+							//publish job reminder email. separate file link and message with a newline character
+							if(mailSent){
+								fileName=fileName + System.getProperty("line.separator") + "<p>Reminder email sent</p>";
+							} else {
+								fileName = fileName + System.getProperty("line.separator") + "<p>Error when sending reminder email <br>" + m.getSendError() + "</p>";
 							}
 						}
 					}

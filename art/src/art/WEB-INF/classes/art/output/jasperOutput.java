@@ -273,7 +273,7 @@ public class jasperOutput {
             SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
             h_m_s = timeFormatter.format(today);
 
-            String fileName = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s;
+            String fileName = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
             fileName=ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename
             String fullFileNameWithoutExt = exportPath + fileName;
 
