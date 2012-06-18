@@ -92,7 +92,7 @@ public class pdfOutput implements ArtOutputInterface {
             // Create files
             fullFileName = s + filename;
 
-            com.lowagie.text.Rectangle pageSize;
+            Rectangle pageSize;
             switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
                 case 1:
                     pageSize = PageSize.A4;
@@ -198,7 +198,7 @@ public class pdfOutput implements ArtOutputInterface {
         table = new PdfPTable(columns);
         table.getDefaultCell().setBorder(0);
         table.setHorizontalAlignment(0);
-        table.setTotalWidth(width - 72);
+        table.setTotalWidth(width - 72); //end result will have 72pt (1 inch) left and right margins
         table.setLockedWidth(true);
         table.setHeaderRows(1);
 

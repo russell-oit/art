@@ -6,9 +6,10 @@
 package art.output;
 
 import art.utils.ArtQueryParam;
-import java.io.*;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Simple html output mode.
@@ -91,8 +92,9 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void beginHeader() {
-		out.println("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
-        out.println("<html><div align=\"center\">");
+		out.println("<html>");
+		out.println("<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head>");        
+		out.println("<body><div align=\"center\">");
 
         if (displayParams != null && displayParams.size()>0) {
             out.println("<table border=\"0\" width=\"90%\"><tr><td>");
@@ -186,7 +188,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void endLines() {
-        out.println("</tr></table></div></html>");
+        out.println("</tr></table></div></body></html>");
     }
 
     @Override

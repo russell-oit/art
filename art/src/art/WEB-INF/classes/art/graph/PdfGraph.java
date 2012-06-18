@@ -61,7 +61,7 @@ public class PdfGraph {
             default:
                 pageSize = PageSize.A4;
         }
-        Document document = new Document(pageSize, 72, 72, 72, 72);
+        Document document = new Document(pageSize, 72, 72, 36, 36); //document with 72pt (1 inch) margins for left, right, top, bottom
         //  float width = document.getPageSize().width();
         //  float height = document.getPageSize().height();
         //W= 595.0 H= 842.0
@@ -78,15 +78,26 @@ public class PdfGraph {
             paragraph.setAlignment(Element.ALIGN_CENTER);
                         
             paragraph.add(new Phrase(title, FontFactory.getFont(FontFactory.HELVETICA, 12)));
-            document.add(paragraph);
-
+            //document.add(paragraph);
+			
+			//create chart in pdf
+			float chartWidth=500f;
+			float chartHeight=400f;
             PdfContentByte cb = writer.getDirectContent();
-            PdfTemplate tp = cb.createTemplate(520, 420);
-            Graphics2D g2 = tp.createGraphics(520, 420, new DefaultFontMapper());
-            Rectangle2D r2D = new Rectangle2D.Double(20, 20, 500, 400);
-            ((JFreeChart) chart).draw(g2, r2D);
-            g2.dispose();
-            cb.addTemplate(tp, 47, 175);                      
+            PdfTemplate tp = cb.createTemplate(chartWidth,chartHeight+100);
+            Graphics2D chartGraphics = tp.createGraphics(chartWidth, chartWidth, new DefaultFontMapper());
+            Rectangle2D chartRegion = new Rectangle2D.Float(0, 0, chartWidth, chartHeight);
+            ((JFreeChart) chart).draw(chartGraphics, chartRegion);
+            chartGraphics.dispose();
+			
+			//place chart in pdf as image element instead of using addTemplate. so that positioning is as per document flow instead of absolute
+            //cb.addTemplate(tp, 47, 175); 						
+			Image chartImage = Image.getInstance(tp);
+			chartImage.setAlignment(Image.ALIGN_CENTER);
+			//chartImage.scaleToFit(chartWidth, chartHeight);
+			document.add(chartImage);
+						
+            //document.add(new Paragraph("blah blah"));
         } catch (Exception e) {
             logger.error("Error",e);
         }

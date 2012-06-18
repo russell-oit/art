@@ -1227,7 +1227,8 @@ public class ArtJob implements Job {
 							fis.read(fileBytes);
 							// convert the file to a string and get only the html table
 							String htmlTable = new String(fileBytes, "UTF-8");
-							htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
+							//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
+							htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
 							m.setMessage("<html>" + message + "<hr>" + htmlTable + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
 							fis.close();
 						} else { // publish
