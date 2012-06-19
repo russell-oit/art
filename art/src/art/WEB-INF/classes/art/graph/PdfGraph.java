@@ -13,14 +13,16 @@ package art.graph;
 
 import art.servlets.ArtDBCP;
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.DefaultFontMapper;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfTemplate;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.DefaultFontMapper.BaseFontParameters;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartTheme;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.StandardChartTheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +43,9 @@ public class PdfGraph {
      * @param filename full file name to use to save the chart
      * @param title chart title     
      */
-    public static void createPdf(Object chart, String filename, String title) {
+    public static void createPdf(Object chartObject, String filename, String title) {
 
+		ChartTheme currentChartTheme=null;
         Rectangle pageSize;
 
         switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
@@ -70,24 +73,61 @@ public class PdfGraph {
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filename));
             document.addTitle(title);
             document.addAuthor("Created by ART - http://art.sourceforge.net");
-            HeaderFooter footer = new HeaderFooter(new Phrase("ART pdf output (" + new java.util.Date().toString() + ")", FontFactory.getFont(FontFactory.HELVETICA, 8)), false);
+			SimpleDateFormat df=new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+            HeaderFooter footer = new HeaderFooter(new Phrase("ART pdf output (" + df.format(new java.util.Date()) + ")", FontFactory.getFont(FontFactory.HELVETICA, 8)), false);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.setFooter(footer);
             document.open();
-            Paragraph paragraph = new Paragraph();
-            paragraph.setAlignment(Element.ALIGN_CENTER);
-                        
-            paragraph.add(new Phrase(title, FontFactory.getFont(FontFactory.HELVETICA, 12)));
-            //document.add(paragraph);
-			
+            			
 			//create chart in pdf
 			float chartWidth=500f;
 			float chartHeight=400f;
+			
+			//enable use of custom fonts so as to display more non-ascii characters
+			DefaultFontMapper mapper =new DefaultFontMapper();
+			
+//			mapper.insertDirectory("c:/windows/fonts");			
+//			BaseFontParameters fp=mapper.getBaseFontParameters("Tahoma");
+//			if(fp!=null){
+//				System.out.println("font mapper found");
+//				fp.encoding=BaseFont.CP1250;
+//				fp.embedded=false;
+//			}
+			
+			//			BaseFontParameters fontParameters=new BaseFontParameters("c:/windows/fonts/arialuni.ttf");			
+//			fontParameters.encoding=BaseFont.CP1250;
+			//			mapper.putName("Arial Unicode MS", fontParameters);
+
+			
+			
+			JFreeChart chart=(JFreeChart) chartObject;
+//			System.out.println(ch.getLegend().getItemFont().getName());
+//			System.out.println(ch.getLegend().getItemFont().getSize());
+//			ch.getLegend().setItemFont(new java.awt.Font("Tahoma", 0, 12));
+			
+//			//change chart them to allow use of different font in chart elements. to enable display of non-ascii characters
+//			currentChartTheme = ChartFactory.getChartTheme();
+//			//final StandardChartTheme chartTheme = (StandardChartTheme)org.jfree.chart.StandardChartTheme.createJFreeTheme();
+//			StandardChartTheme chartTheme= (StandardChartTheme) StandardChartTheme.createLegacyTheme();
+//			final java.awt.Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
+//            final java.awt.Font oldLargeFont = chartTheme.getLargeFont();
+//            final java.awt.Font oldRegularFont = chartTheme.getRegularFont();
+//            
+//            final java.awt.Font extraLargeFont = new java.awt.Font("Tahoma", oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
+//            final java.awt.Font largeFont = new java.awt.Font("Tahoma", oldLargeFont.getStyle(), oldLargeFont.getSize());
+//            final java.awt.Font regularFont = new java.awt.Font("Tahoma", oldRegularFont.getStyle(), oldRegularFont.getSize());
+//            
+//            chartTheme.setExtraLargeFont(extraLargeFont);
+//            chartTheme.setLargeFont(largeFont);
+//            chartTheme.setRegularFont(regularFont);
+//            			
+//			chartTheme.apply(chart);
+			
             PdfContentByte cb = writer.getDirectContent();
             PdfTemplate tp = cb.createTemplate(chartWidth,chartHeight+100);
-            Graphics2D chartGraphics = tp.createGraphics(chartWidth, chartWidth, new DefaultFontMapper());
+            Graphics2D chartGraphics = tp.createGraphics(chartWidth, chartWidth, mapper);
             Rectangle2D chartRegion = new Rectangle2D.Float(0, 0, chartWidth, chartHeight);
-            ((JFreeChart) chart).draw(chartGraphics, chartRegion);
+            chart.draw(chartGraphics, chartRegion);
             chartGraphics.dispose();
 			
 			//place chart in pdf as image element instead of using addTemplate. so that positioning is as per document flow instead of absolute
@@ -102,5 +142,10 @@ public class PdfGraph {
             logger.error("Error",e);
         }
         document.close();
+		
+//		//restore chart theme
+//		if (currentChartTheme != null) {
+//			ChartFactory.setChartTheme(currentChartTheme);
+//		}
     }
 }
