@@ -14,6 +14,9 @@
     <%
 
   }
+  
+  //NOTE: the html element names correspond to art setting values
+  //if they are changed, code that uses on those settings needs to be changed
 
   String  administrator , smtp_server, smtp_username, smtp_password,
           art_username, art_password, art_jdbc_url, art_jdbc_driver, art_testsql, art_pooltimeout, msg;
@@ -28,10 +31,17 @@
 	 String smtp_port;
 
 	 //new properties for ldap authentication
-	 String ldap_users_parent_dn;
-	 String ldap_realm;
+	 String ldap_users_parent_dn; //the parent DN of the user entries
+	 String ldap_realm; //optional realm for digest-md5 authentication
 
 	 String mondrian_cache_expiry;
+	 
+	 //new properties to enhance display of non-ascii characters in pdf output
+	 String pdf_font_directory; //directory that contains fonts to be used
+	 String pdf_font_name; //name of font
+	 String pdf_font_file; //full path to a font file e.g. .ttf that contains the font to be used
+	 String pdf_font_encoding; //font encoding to be used
+	 String pdf_font_embedded; //whether font should be embedded in the generated pdf or not. embedding results in much larger files
 
 
 String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
@@ -126,6 +136,28 @@ if(!propsFile.exists()){
 	else {
 		mondrian_cache_expiry=ap.getProp("mondrian_cache_expiry");
 	}
+	
+	//new properties for pdf unicode support
+	pdf_font_directory=ap.getProp("pdf_font_directory");
+	if(pdf_font_directory==null){
+		pdf_font_directory="";
+	}
+	pdf_font_name=ap.getProp("pdf_font_name");
+	if(pdf_font_name==null){
+		pdf_font_name="";
+	}
+	pdf_font_file=ap.getProp("pdf_font_file");
+	if(pdf_font_file==null){
+		pdf_font_file="";
+	}
+	pdf_font_encoding=ap.getProp("pdf_font_encoding");
+	if(pdf_font_encoding==null){
+		pdf_font_encoding="";
+	}
+	pdf_font_embedded=ap.getProp("pdf_font_embedded");
+	if(pdf_font_embedded==null){
+		pdf_font_embedded="";
+	}
 
   } else {        
     art_username    = "ART";
@@ -163,6 +195,12 @@ if(!propsFile.exists()){
 	ldap_realm=""; //optional realm for digest-md5 authentication
 
 	mondrian_cache_expiry="0";
+	
+	pdf_font_directory=""; 
+	pdf_font_name=""; //default to blank so that no custom fonts are used
+	pdf_font_file="";
+	pdf_font_encoding="";
+	pdf_font_embedded="no";
 
     %>
 	
@@ -389,6 +427,7 @@ if(!propsFile.exists()){
 	   </select>
 	</td>
        </tr>
+	   
        <tr>
         <td class="attr">PDF Document Page Size</td>
 		<td>
@@ -400,6 +439,37 @@ if(!propsFile.exists()){
 	   </select>
 	</td>
        </tr>
+	   
+	    <tr>
+        <td class="attr">PDF Font Directory</td>
+        <td class="data"><input type="text" name="pdf_font_directory" size="40" maxlength="200" value="<%=pdf_font_directory%>"></td>
+       </tr>
+	   
+	    <tr>
+        <td class="attr">PDF Font Name</td>
+        <td class="data"><input type="text" name="pdf_font_name" size="40" maxlength="200" value="<%=pdf_font_name%>"></td>
+       </tr>
+	   
+	   <tr>
+        <td class="attr">PDF Font File</td>
+        <td class="data"><input type="text" name="pdf_font_file" size="40" maxlength="200" value="<%=pdf_font_file%>"></td>
+       </tr>
+	   
+	    <tr>
+        <td class="attr">PDF Font Encoding</td>
+        <td class="data"><input type="text" name="pdf_font_encoding" size="40" maxlength="200" value="<%=pdf_font_encoding%>"></td>
+       </tr>
+	   
+	    <tr>
+        <td class="attr">PDF Font Embedded</td>
+        <td class="data">
+		<select name="pdf_font_embedded">
+	     <option value="no" <%= ("no".equals(pdf_font_embedded)?"SELECTED":"") %> > No</option>
+	     <option value="yes" <%= ("yes".equals(pdf_font_embedded)?"SELECTED":"") %> > Yes</option>
+	   </select>
+		</td>
+       </tr>
+	   
        <tr>
         <td class="attr">RSS Link
 			 &nbsp;<a href="javascript:alert('If you plan to use ART to generate RSS feeds you should specify the proper RSS link URL, i.e. the URL to the website corresponding to the channel.');">note</a>

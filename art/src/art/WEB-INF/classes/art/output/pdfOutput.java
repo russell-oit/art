@@ -117,29 +117,25 @@ public class pdfOutput implements ArtOutputInterface {
 			
 			//use fontselector and fonts with specified encoding to enable display of more non-ascii characters
 			fsBody=new FontSelector();	
-			//default helvetica font
-			Font font=new Font(Font.HELVETICA, 8, Font.NORMAL);
-			fsBody.addFont(font);
-			//helvetica with cp1252 (latin1) encoding - for western european languages
-			BaseFont bf=BaseFont.createFont("Helvetica",BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-			font=new Font(bf,8,Font.NORMAL);
-			fsBody.addFont(font);
-			//helvetica with cp1250 (latin2) encoding - for central and eastern european languages
-			bf=BaseFont.createFont("Helvetica",BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
-			font=new Font(bf,8,Font.NORMAL);
-			fsBody.addFont(font);
-						
-			//set fonts for document heading
-			fsHeading=new FontSelector();
-			font = new Font(Font.HELVETICA, 10, Font.BOLD);
-			fsHeading.addFont(font);
-			bf=BaseFont.createFont("Helvetica",BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-			font=new Font(bf,10,Font.BOLD);
-			fsBody.addFont(font);
-			bf=BaseFont.createFont("Helvetica",BaseFont.CP1250, BaseFont.NOT_EMBEDDED);
-			font=new Font(bf,10,Font.BOLD);
-			fsBody.addFont(font);
-															            			
+			//set default body font			
+			fsBody.addFont(FontFactory.getFont(BaseFont.HELVETICA, 8, Font.NORMAL));
+			//set default heading font
+			fsHeading=new FontSelector();			
+			fsHeading.addFont(FontFactory.getFont(BaseFont.HELVETICA, 10, Font.BOLD));
+			
+			//add custom fonts if defined			
+			if(ArtDBCP.isUseCustomPdfFont()){
+				Font bodyFont=FontFactory.getFont(ArtDBCP.getArtSetting("pdf_font_name"),ArtDBCP.getArtSetting("pdf_font_encoding"),ArtDBCP.isPdfFontEmbedded());
+				bodyFont.setSize(8);
+				bodyFont.setStyle(Font.NORMAL);
+				fsBody.addFont(bodyFont);
+				
+				Font headingFont=FontFactory.getFont(ArtDBCP.getArtSetting("pdf_font_name"),ArtDBCP.getArtSetting("pdf_font_encoding"),ArtDBCP.isPdfFontEmbedded());
+				headingFont.setSize(10);
+				headingFont.setStyle(Font.BOLD);
+				fsHeading.addFont(headingFont);
+			}
+																								            			
             HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.setFooter(footer);

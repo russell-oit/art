@@ -36,6 +36,7 @@ package art.servlets;
 import art.dbcp.DataSource;
 import art.utils.ArtProps;
 import art.utils.Encrypter;
+import com.lowagie.text.FontFactory;
 import java.io.File;
 import java.sql.*;
 import java.util.*;
@@ -79,6 +80,8 @@ public class ArtDBCP extends HttpServlet {
     private static ServletContext ctx;
     private static int maxRunningQueries;
 	private static String artPropertiesFilePath; //full path to art.properties file
+	private static boolean useCustomPdfFont=false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
+	private static boolean pdfFontEmbedded=false; //determines if custom font should be embedded in the generated pdf
 
     /**
      * {@inheritDoc}
@@ -148,6 +151,19 @@ public class ArtDBCP extends HttpServlet {
 
             art_pooltimeout = ap.getProp("art_pooltimeout");
             art_testsql = ap.getProp("art_testsql");
+			
+			String pdfFontName=ap.getProp("pdf_font_name");
+			if(StringUtils.isBlank(pdfFontName)){
+				useCustomPdfFont=false; //font name must be defined in order to use custom font
+			} else {
+				useCustomPdfFont=true;
+			}
+			String fontEmbedded=ap.getProp("pdf_font_embedded");
+			if(StringUtils.equals(fontEmbedded, "no")){
+				pdfFontEmbedded=false;
+			} else {
+				pdfFontEmbedded=true;
+			}
 
             artSettingsLoaded = true;
 
@@ -249,8 +265,41 @@ public class ArtDBCP extends HttpServlet {
 		
 		//initialize datasources
 		initializeDatasources();
+		
+		//register pdf fonts
+		registerPdfFonts();
         
     }
+	
+	/**
+	 * Register custom fonts to be used in pdf output
+	 */
+	public static void registerPdfFonts(){
+		//register pdf fonts
+		if(useCustomPdfFont){
+			String pdfFontDirectory=ap.getProp("pdf_font_directory");
+			if(!StringUtils.isBlank(pdfFontDirectory)){
+				logger.info("Registering fonts for pdf output from directory: {}",pdfFontDirectory);
+				int i=FontFactory.registerDirectory(pdfFontDirectory);
+				logger.info("{} fonts registered",i);
+			}
+			String pdfFontFile=ap.getProp("pdf_font_file");
+			if(!StringUtils.isBlank(pdfFontFile)){
+				FontFactory.register(pdfFontFile);
+				logger.info("Font file {} registered",pdfFontFile);
+			}
+			//output registerd fonts
+			StringBuilder sb=new StringBuilder();
+			String newline=System.getProperty("line.separator");
+			Set<String> fonts=FontFactory.getRegisteredFonts();
+			for (Iterator<String> it = fonts.iterator(); it.hasNext();) {
+				String f = it.next();
+				sb.append(newline);
+				sb.append(f);
+			}
+			logger.info("Registered fonts: {}",sb.toString());
+		}
+	}
 	
 	/**
 	 * Initialize art repository datasource, and other defined datasources
@@ -395,6 +444,22 @@ public class ArtDBCP extends HttpServlet {
     public static String getArtPropertiesFilePath() {
         return artPropertiesFilePath;
     }
+	
+	/**
+	 * Determine whether a custom font should be used in pdf output
+	 * @return <code>true</code> if a custom font should be used in pdf output
+	 */
+	public static boolean isUseCustomPdfFont(){
+		return useCustomPdfFont;
+	}
+	
+	/**
+	 * Determine if the custom pdf font should be embedded in the generated pdf
+	 * @return <code>true</code> if the custom pdf font should be embedded
+	 */
+	public static boolean isPdfFontEmbedded(){
+		return pdfFontEmbedded;
+	}
 
     /**
      * Log login attempts to the ART_LOGS table.

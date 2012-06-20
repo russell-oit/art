@@ -1,5 +1,6 @@
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtDBCP" %>
-<%@ page import="org.quartz.*,org.quartz.impl.*" %>
+<%@ page import="org.quartz.*,org.quartz.impl.*,com.lowagie.text.FontFactory" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%  request.setCharacterEncoding("UTF-8"); %>
 <%
@@ -33,20 +34,6 @@ if(url!=null && (url.toLowerCase().equals("default") || url.toLowerCase().equals
 	useDefaultDatabase=true;
 	url=defaultArtUrl;
 	driver=defaultArtDriver;
-}
-
-//determine if repository details have changed. so as not to restart the scheduler unnecessarily
-String oldUsername=request.getParameter("_old_art_username");
-String oldPassword=request.getParameter("_old_art_password");
-String oldUrl=request.getParameter("_old_art_jdbc_url");
-String oldDriver=request.getParameter("_old_art_jdbc_driver");
-boolean repositoryHasChanged=true;
-if(username.equals(oldUsername) && password.equals(oldPassword) && url.equals(oldUrl) && driver.equals(oldDriver)){
-	repositoryHasChanged=false;
-}
-if(!ArtDBCP.isArtSettingsLoaded()){
-	//first time repository is being defined. ensure scheduler is created/started
-	repositoryHasChanged=true;
 }
 
 String name, value;
@@ -151,7 +138,20 @@ while (names.hasMoreElements()) {
 	 ArtDBCP.loadArtSettings();
     ArtDBCP.refreshConnections();
 
-	//recreate scheduler in case repository has changed
+	//recreate scheduler in case repository has changed	
+	String oldUsername=request.getParameter("_old_art_username");
+	String oldPassword=request.getParameter("_old_art_password");
+	String oldUrl=request.getParameter("_old_art_jdbc_url");
+	String oldDriver=request.getParameter("_old_art_jdbc_driver");
+	boolean repositoryHasChanged=true;
+	if(username.equals(oldUsername) && password.equals(oldPassword) && url.equals(oldUrl) && driver.equals(oldDriver)){
+		repositoryHasChanged=false;
+	}
+	if(!ArtDBCP.isArtSettingsLoaded()){
+		//first time repository is being defined. ensure scheduler is created/started
+		repositoryHasChanged=true;
+	}
+
 	if(repositoryHasChanged){
 		//get current scheduler instance
 		org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
@@ -181,6 +181,24 @@ while (names.hasMoreElements()) {
 		//migrate jobs to quartz, if any exist that require migrating
 		ArtJob aj=new ArtJob();
 		aj.migrateJobsToQuartz();
+	}
+	
+	//register fonts if pdf font details have changed
+	String pdfFontDirectory=request.getParameter("pdf_font_directory");
+	String pdfFontFile=request.getParameter("pdf_font_file");
+	String oldPdfFontDirectory=request.getParameter("_old_pdf_font_directory");
+	String oldPdfFontFile=request.getParameter("_old_pdf_font_file");
+	if(ArtDBCP.isUseCustomPdfFont()){
+		if(!pdfFontDirectory.equals(oldPdfFontDirectory) && !StringUtils.isBlank(pdfFontDirectory)){
+			//register new font directory
+			int i=FontFactory.registerDirectory(pdfFontDirectory);
+			System.out.println(i + " fonts registered in directory: " + pdfFontDirectory);
+		}
+		if(!pdfFontFile.equals(oldPdfFontFile) && !StringUtils.isBlank(pdfFontFile)){
+			//register new font file (.ttf or .ttc)
+			FontFactory.register(pdfFontFile);
+			System.out.println(pdfFontFile + " font file registered");
+		}
 	}
 		
 	//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
