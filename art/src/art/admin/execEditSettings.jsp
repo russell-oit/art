@@ -183,24 +183,17 @@ while (names.hasMoreElements()) {
 		aj.migrateJobsToQuartz();
 	}
 	
-	//register fonts if pdf font details have changed
-	String pdfFontDirectory=request.getParameter("pdf_font_directory");
-	String pdfFontFile=request.getParameter("pdf_font_file");
-	String oldPdfFontDirectory=request.getParameter("_old_pdf_font_directory");
-	String oldPdfFontFile=request.getParameter("_old_pdf_font_file");
-	if(ArtDBCP.isUseCustomPdfFont()){
-		if(!pdfFontDirectory.equals(oldPdfFontDirectory) && !StringUtils.isBlank(pdfFontDirectory)){
-			//register new font directory
-			int i=FontFactory.registerDirectory(pdfFontDirectory);
-			System.out.println(i + " fonts registered in directory: " + pdfFontDirectory);
-		}
-		if(!pdfFontFile.equals(oldPdfFontFile) && !StringUtils.isBlank(pdfFontFile)){
-			//register new font file (.ttf or .ttc)
-			FontFactory.register(pdfFontFile);
-			System.out.println(pdfFontFile + " font file registered");
-		}
+	//register pdf font if not already registered
+	String pdfFontName=request.getParameter("pdf_font_name");
+	if(!StringUtils.isBlank(pdfFontName) && !FontFactory.isRegistered(pdfFontName)){
+		//font not registered
+		System.out.println("Font " + pdfFontName + " not yet registered");
+		ArtDBCP.registerPdfFonts();
+	} else {
+		System.out.println("Font " + pdfFontName + " already registered");
 	}
-		
+	
+			
 	//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
 	response.sendRedirect("adminConsole.jsp");
 	return;

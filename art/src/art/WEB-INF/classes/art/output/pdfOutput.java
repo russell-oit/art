@@ -53,7 +53,7 @@ public class pdfOutput implements ArtOutputInterface {
     float oddgray = 0.75f;
     float headergray = 0.5f;	
 	FontSelector fsBody; //fonts to use for document body
-	FontSelector fsHeading; //fonts to use for document heading/title
+	FontSelector fsHeading; //fonts to use for document title and column headings
 
     /**
      * Constructor
@@ -109,33 +109,20 @@ public class pdfOutput implements ArtOutputInterface {
                 default:
                     pageSize = PageSize.A4;
             }
-            document = new Document(pageSize);
+			//set document margins
+            //document = new Document(pageSize);
+			document = new Document(pageSize,72,72,72,72); //document with 72pt (1 inch) margins for left, right, top, bottom
 
             PdfWriter.getInstance(document, new FileOutputStream(fullFileName));
             document.addTitle(queryName);
             document.addAuthor("ART - http://art.sourceforge.net");
 			
-			//use fontselector and fonts with specified encoding to enable display of more non-ascii characters
-			fsBody=new FontSelector();	
-			//set default body font			
-			fsBody.addFont(FontFactory.getFont(BaseFont.HELVETICA, 8, Font.NORMAL));
-			//set default heading font
-			fsHeading=new FontSelector();			
-			fsHeading.addFont(FontFactory.getFont(BaseFont.HELVETICA, 10, Font.BOLD));
-			
-			//add custom fonts if defined			
-			if(ArtDBCP.isUseCustomPdfFont()){
-				Font bodyFont=FontFactory.getFont(ArtDBCP.getArtSetting("pdf_font_name"),ArtDBCP.getArtSetting("pdf_font_encoding"),ArtDBCP.isPdfFontEmbedded());
-				bodyFont.setSize(8);
-				bodyFont.setStyle(Font.NORMAL);
-				fsBody.addFont(bodyFont);
+			//use fontselector and potentially custom fonts with specified encoding to enable display of more non-ascii characters
+			//first font added to selector wins
+			fsBody=new FontSelector();
+			fsHeading=new FontSelector();
+			setFontSelectors(fsBody,fsHeading);
 				
-				Font headingFont=FontFactory.getFont(ArtDBCP.getArtSetting("pdf_font_name"),ArtDBCP.getArtSetting("pdf_font_encoding"),ArtDBCP.isPdfFontEmbedded());
-				headingFont.setSize(10);
-				headingFont.setStyle(Font.BOLD);
-				fsHeading.addFont(headingFont);
-			}
-																								            			
             HeaderFooter footer = new HeaderFooter(new Phrase(""), true);
             footer.setAlignment(Element.ALIGN_CENTER);
             document.setFooter(footer);
@@ -185,17 +172,20 @@ public class pdfOutput implements ArtOutputInterface {
     }
 
     @Override
-    public void beginHeader() {
-        float width = document.getPageSize().getWidth();
-
+    public void beginHeader() {        
         table = null;
         cell = null;
 
         table = new PdfPTable(columns);
         table.getDefaultCell().setBorder(0);
-        table.setHorizontalAlignment(0);
-        table.setTotalWidth(width - 72); //end result will have 72pt (1 inch) left and right margins
-        table.setLockedWidth(true);
+		
+		//use percentage width
+//        table.setHorizontalAlignment(0);
+//		float width = document.getPageSize().getWidth();
+//        table.setTotalWidth(width - 72); //end result will have 72pt (1 inch) left and right margins
+//        table.setLockedWidth(true);
+		
+		table.setWidthPercentage(90f);
         table.setHeaderRows(1);
 
         try {
@@ -373,9 +363,9 @@ public class pdfOutput implements ArtOutputInterface {
     public void endLines() {
         // flush and close files
         try {
-            document.add(new Paragraph(fsBody.process("\n")));
-            document.add(table);
-            document.close();
+           document.add(new Paragraph(fsBody.process("\n")));
+			document.add(table);
+			document.close();
 
             //htmlout not needed for scheduled jobs
             if (htmlout != null) {
@@ -395,4 +385,37 @@ public class pdfOutput implements ArtOutputInterface {
     public boolean isDefaultHtmlHeaderAndFooterEnabled() {
         return true;
     }
+	
+	/**
+	 * Set font selector objects to be used for body text and header text
+	 * @param body
+	 * @param header 
+	 */
+	public void setFontSelectors(FontSelector body, FontSelector header){
+		//use fontselector and potentially custom fonts with specified encoding to enable display of more non-ascii characters
+		//first font added to selector wins
+//		body=new FontSelector();	//for document contents
+//		header=new FontSelector(); //for document title and column headings
+
+		//use custom font if defined			
+		if(ArtDBCP.isUseCustomPdfFont()){
+			String fontName=ArtDBCP.getArtSetting("pdf_font_name");
+			String encoding=ArtDBCP.getArtSetting("pdf_font_encoding");
+			boolean embedded=ArtDBCP.isPdfFontEmbedded();
+
+			Font bodyFont=FontFactory.getFont(fontName,encoding,embedded);
+			bodyFont.setSize(8);
+			bodyFont.setStyle(Font.NORMAL);
+			body.addFont(bodyFont);
+
+			Font headingFont=FontFactory.getFont(fontName,encoding,embedded);
+			headingFont.setSize(10);
+			headingFont.setStyle(Font.BOLD);
+			header.addFont(headingFont);
+		} 
+
+		//add default font after custom font			
+		body.addFont(FontFactory.getFont(BaseFont.HELVETICA, 8, Font.NORMAL));				
+		header.addFont(FontFactory.getFont(BaseFont.HELVETICA, 10, Font.BOLD));
+	}
 }

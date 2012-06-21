@@ -1,5 +1,5 @@
 <%@page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,java.text.SimpleDateFormat,art.utils.*" %>
-<%@page import="org.jfree.chart.*,org.apache.commons.beanutils.*" %>
+<%@page import="org.jfree.chart.*,org.apache.commons.beanutils.*,org.apache.commons.lang.StringUtils" %>
 <%@taglib uri='/WEB-INF/cewolf.tld' prefix='cewolf' %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -42,31 +42,7 @@
    // y axis data range
   Integer from = (Integer) request.getAttribute("_from");
   Integer to = (Integer) request.getAttribute("_to");
-  
-  // Labels
-  String labelFormat;
-  final String LABELS_OFF="off";
-  final String PIE_LABEL_FORMAT="{0} ({2})";
-  final String CATEGORY_LABEL_FORMAT="{2}";
-  //set default values. by default labels are shown for pie charts but not for category dataset charts (line and bar)
-  if(graphId==2){
-	labelFormat= PIE_LABEL_FORMAT;
-} else {
-	labelFormat=LABELS_OFF;
-}
-
-//set specific label format if modifiers are provided
-  if (request.getAttribute("_nolabels") != null){
-	labelFormat = LABELS_OFF;
-	} 
-	if (request.getAttribute("_showlabels") != null){
-		if(graphId==2){
-			labelFormat= PIE_LABEL_FORMAT;
-		} else {
-			labelFormat=CATEGORY_LABEL_FORMAT;
-		}
-	}
-  
+    
   // legend
   boolean showLegend = true;
   if (request.getAttribute("_nolegend") != null){
@@ -84,8 +60,7 @@
   if (request.getAttribute("_showdata") != null){
 	showGraphData = true;
 	}
-  	
-  
+    
   //determine if chart is to be output to file
   String outputToFile = "nofile";  
   if (request.getAttribute("outputToFile") != null){
@@ -103,6 +78,40 @@
 	} else if (outputToFile.equals("png")){
         fileName=baseFileName + ".png";
 		fullFileName= ArtDBCP.getExportPath() + fileName;
+	}
+	
+	  // Labels
+  String labelFormat;
+  final String LABELS_OFF="off";
+  final String CATEGORY_LABEL_FORMAT="{2}";
+  
+  //display pie chart data value in label for png/pdf output
+  String pieLabelFormat;  
+  if(!StringUtils.equals(outputToFile,"nofile")){
+	  //either png or pdf output
+	  pieLabelFormat="{0} = {1} ({2})";
+  } else {
+	  //browser output
+	  pieLabelFormat="{0} ({2})";
+  }
+  
+  //set default values. by default labels are shown for pie charts but not for category dataset charts (line and bar)
+  if(graphId==2){
+	labelFormat= pieLabelFormat;
+} else {
+	labelFormat=LABELS_OFF;
+}
+
+//set specific label format if modifiers are provided
+  if (request.getAttribute("_nolabels") != null){
+	labelFormat = LABELS_OFF;
+	} 
+	if (request.getAttribute("_showlabels") != null){
+		if(graphId==2){
+			labelFormat= pieLabelFormat;
+		} else {
+			labelFormat=CATEGORY_LABEL_FORMAT;
+		}
 	}
 	
 	//make target configurable, mainly for drill down queries

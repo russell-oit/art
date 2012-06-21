@@ -440,24 +440,56 @@ if(!propsFile.exists()){
 	</td>
        </tr>
 	   
-	    <tr>
-        <td class="attr">PDF Font Directory</td>
-        <td class="data"><input type="text" name="pdf_font_directory" size="40" maxlength="200" value="<%=pdf_font_directory%>"></td>
-       </tr>
-	   
-	    <tr>
+	   <tr>
         <td class="attr">PDF Font Name</td>
-        <td class="data"><input type="text" name="pdf_font_name" size="40" maxlength="200" value="<%=pdf_font_name%>"></td>
+        <td class="data">			
+			<input type="text" name="pdf_font_name" size="40" maxlength="200" value="<%=pdf_font_name%>">
+		<%
+		msg = "Name of custom font to be used for pdf output. Leave blank to use the default font." +
+				"\\n\\nExample:\\nArial Unicode MS";
+		%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			</td>
        </tr>
 	   
 	   <tr>
         <td class="attr">PDF Font File</td>
-        <td class="data"><input type="text" name="pdf_font_file" size="40" maxlength="200" value="<%=pdf_font_file%>"></td>
+        <td class="data">
+			<input type="hidden" name="_old_pdf_font_file" value="<%=pdf_font_file%>">
+			<input type="text" name="pdf_font_file" size="40" maxlength="200" value="<%=pdf_font_file%>">
+		<%
+		msg = "File that contains custom font to be used for pdf output" +
+				"\\n\\nExample:\\nc:"+sepEscaped+"windows"+sepEscaped+"fonts"+sepEscaped+"arialuni.ttf";
+		%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			</td>
+       </tr>
+	   	   	   	    	   
+	   <tr>
+        <td class="attr">PDF Font Directory</td>
+        <td class="data">
+			<input type="hidden" name="_old_pdf_font_directory" value="<%=pdf_font_directory%>">
+			<input type="text" name="pdf_font_directory" size="40" maxlength="200" value="<%=pdf_font_directory%>">
+			<%
+			msg = "Directory that contains custom fonts to be used for pdf output" +
+					"\\n\\nExample:\\nc:"+sepEscaped+"windows"+sepEscaped+"fonts";
+			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			</td>
        </tr>
 	   
 	    <tr>
         <td class="attr">PDF Font Encoding</td>
-        <td class="data"><input type="text" name="pdf_font_encoding" size="40" maxlength="200" value="<%=pdf_font_encoding%>"></td>
+        <td class="data">
+			<input type="text" name="pdf_font_encoding" size="40" maxlength="200" value="<%=pdf_font_encoding%>">
+			<%
+			msg = "Encoding for custom font to be used for pdf output" +
+					"\\n\\nExamples:\\nCp1252 (Western European)\\nCp1250 (Central and Eastern European)" +
+					"\\nCp1251 (Russian)\\nCp1253 (Greek)\\nIdentity-H (Full Unicode)" +
+					"\\n\\nEncodings are case sensitive";
+			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
        </tr>
 	   
 	    <tr>
@@ -467,6 +499,8 @@ if(!propsFile.exists()){
 	     <option value="no" <%= ("no".equals(pdf_font_embedded)?"SELECTED":"") %> > No</option>
 	     <option value="yes" <%= ("yes".equals(pdf_font_embedded)?"SELECTED":"") %> > Yes</option>
 	   </select>
+	   <%msg = "Whether to embed custom font in the pdf output. Embedding the font results in much larger pdf files."; %>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
        </tr>
 	   
