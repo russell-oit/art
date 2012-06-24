@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartTheme;
 import org.jfree.chart.JFreeChart;
@@ -51,9 +52,8 @@ public class PdfGraph {
 	 * @param filename full file name to use to save the chart
 	 * @param title chart title
 	 */
-	public static void createPdf(Object chartObject, String filename, String title, RowSetDynaClass rsdc) {
-
-		ChartTheme currentChartTheme = null;
+	public static void createPdf(Object chartObject, String filename, String title, RowSetDynaClass graphData) {
+		
 		Rectangle pageSize;
 
 		switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
@@ -81,81 +81,70 @@ public class PdfGraph {
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filename));
 			document.addTitle(title);
 			document.addAuthor("Created by ART - http://art.sourceforge.net");
-			SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+			SimpleDateFormat df = new SimpleDateFormat("dd MMM yyyy  HH:mm:ss");
 			HeaderFooter footer = new HeaderFooter(new Phrase("ART pdf output (" + df.format(new java.util.Date()) + ")", FontFactory.getFont(FontFactory.HELVETICA, 8)), false);
 			footer.setAlignment(Element.ALIGN_CENTER);
 			document.setFooter(footer);
 			document.open();
 
-			//create chart in pdf
-			float chartWidth = 500f;
-			float chartHeight = 400f;
-
-			//enable use of custom fonts so as to display more non-ascii characters
+			//create chart in pdf						
+			JFreeChart chart = (JFreeChart) chartObject;
 			DefaultFontMapper mapper = new DefaultFontMapper();
 
-//			mapper.insertDirectory("c:/windows/fonts");			
-//			BaseFontParameters fp=mapper.getBaseFontParameters("Tahoma");
-//			if(fp!=null){
-//				System.out.println("font mapper found");
-//				fp.encoding=BaseFont.CP1250;
-//				fp.embedded=false;
-//			}
+			//enable use of custom font so as to display non-ascii characters			
+			if (ArtDBCP.isUseCustomPdfFont()) {
+				//enable custom chart font to be used in pdf output
+				BaseFontParameters fp;
+				String pdfFontName = ArtDBCP.getArtSetting("pdf_font_name");
+				String pdfFontDirectory = ArtDBCP.getArtSetting("pdf_font_directory");
+				String pdfFontFile = ArtDBCP.getArtSetting("pdf_font_file");
+				String pdfFontEncoding = ArtDBCP.getArtSetting("pdf_font_encoding");
+				boolean pdfFontEmbedded = ArtDBCP.isPdfFontEmbedded();
+				if (!StringUtils.isBlank(pdfFontDirectory)) {
+					mapper.insertDirectory(pdfFontDirectory);
+					fp = mapper.getBaseFontParameters(pdfFontName);
+					if (fp != null) {
+						fp.encoding = pdfFontEncoding;
+						fp.embedded = pdfFontEmbedded;
+					}
+				} else if (!StringUtils.isBlank(pdfFontFile)) {
+					fp = new BaseFontParameters(pdfFontFile);
+					fp.encoding = pdfFontEncoding;
+					fp.embedded = pdfFontEmbedded;
+					mapper.putName(pdfFontName, fp);
+				}				
+			}
 
-			//			BaseFontParameters fontParameters=new BaseFontParameters("c:/windows/fonts/arialuni.ttf");			
-//			fontParameters.encoding=BaseFont.CP1250;
-			//			mapper.putName("Arial Unicode MS", fontParameters);
-
-
-
-			JFreeChart chart = (JFreeChart) chartObject;
-//			System.out.println(ch.getLegend().getItemFont().getName());
-//			System.out.println(ch.getLegend().getItemFont().getSize());
-//			ch.getLegend().setItemFont(new java.awt.Font("Tahoma", 0, 12));
-
-//			//change chart them to allow use of different font in chart elements. to enable display of non-ascii characters
-//			currentChartTheme = ChartFactory.getChartTheme();
-//			//final StandardChartTheme chartTheme = (StandardChartTheme)org.jfree.chart.StandardChartTheme.createJFreeTheme();
-//			StandardChartTheme chartTheme= (StandardChartTheme) StandardChartTheme.createLegacyTheme();
-//			final java.awt.Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
-//            final java.awt.Font oldLargeFont = chartTheme.getLargeFont();
-//            final java.awt.Font oldRegularFont = chartTheme.getRegularFont();
-//            
-//            final java.awt.Font extraLargeFont = new java.awt.Font("Tahoma", oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
-//            final java.awt.Font largeFont = new java.awt.Font("Tahoma", oldLargeFont.getStyle(), oldLargeFont.getSize());
-//            final java.awt.Font regularFont = new java.awt.Font("Tahoma", oldRegularFont.getStyle(), oldRegularFont.getSize());
-//            
-//            chartTheme.setExtraLargeFont(extraLargeFont);
-//            chartTheme.setLargeFont(largeFont);
-//            chartTheme.setRegularFont(regularFont);
-//            			
-//			chartTheme.apply(chart);
+			//add chart to document
+			int chartWidth = 500;
+			int chartHeight = 400;
+			int chartHeightBuffer = 100; //to avoid chart being cut off at the top. not sure why. because of margin?
 
 			PdfContentByte cb = writer.getDirectContent();
-			PdfTemplate tp = cb.createTemplate(chartWidth, chartHeight + 100);
+			PdfTemplate tp = cb.createTemplate(chartWidth, chartHeight + chartHeightBuffer);
 			Graphics2D chartGraphics = tp.createGraphics(chartWidth, chartWidth, mapper);
-			Rectangle2D chartRegion = new Rectangle2D.Float(0, 0, chartWidth, chartHeight);
+			Rectangle2D chartRegion = new Rectangle2D.Double(0, 0, chartWidth, chartHeight);
 			chart.draw(chartGraphics, chartRegion);
 			chartGraphics.dispose();
 
-			//place chart in pdf as image element instead of using addTemplate. so that positioning is as per document flow instead of absolute
-			//cb.addTemplate(tp, 47, 175); 						
+			//place chart in pdf as image element. so that positioning is as per document flow instead of using absolute positioning									
 			Image chartImage = Image.getInstance(tp);
 			chartImage.setAlignment(Image.ALIGN_CENTER);
-			//chartImage.scaleToFit(chartWidth, chartHeight);
 			document.add(chartImage);
 
 			//display chart data below graph if so required
-			if (rsdc != null) {
-				java.util.List rows = rsdc.getRows();
+			if (graphData != null) {
+				java.util.List rows = graphData.getRows();
 				DynaProperty[] dynaProperties = null;
 				String columnName;
 				String columnValue;
-				
+				int columns=0; //column count
+
 				PdfPTable table = null;
 				PdfPCell cell;
 				float headergray = 0.5f;
 
+				//set fonts to be used, incase custom font is defined
 				FontSelector fsBody = new FontSelector();
 				FontSelector fsHeading = new FontSelector();
 				pdfOutput pdfo = new pdfOutput();
@@ -166,11 +155,11 @@ public class PdfGraph {
 					if (i == 0) {
 						//output column headings
 						dynaProperties = row.getDynaClass().getDynaProperties();
-						int columns = dynaProperties.length;
+						columns = dynaProperties.length;
 						table = new PdfPTable(columns);
-						table.getDefaultCell().setBorder(0);						
+						table.getDefaultCell().setBorder(0);
 						table.setHeaderRows(1);
-						for (int j = 0; j < dynaProperties.length; j++) {
+						for (int j = 0; j < columns; j++) {
 							columnName = dynaProperties[j].getName();
 							cell = new PdfPCell(new Paragraph(fsHeading.process(columnName)));
 							cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -182,7 +171,7 @@ public class PdfGraph {
 					}
 
 					//output data values
-					for (int k = 0; k < dynaProperties.length; k++) {
+					for (int k = 0; k < columns; k++) {
 						columnName = dynaProperties[k].getName();
 						columnValue = String.valueOf(row.get(columnName));
 						cell = new PdfPCell(new Paragraph(fsBody.process(columnValue)));
@@ -201,9 +190,5 @@ public class PdfGraph {
 		}
 		document.close();
 
-//		//restore chart theme
-//		if (currentChartTheme != null) {
-//			ChartFactory.setChartTheme(currentChartTheme);
-//		}
 	}
 }

@@ -11,25 +11,32 @@
  */
 package art.graph;
 
-import art.utils.*; //to support drill down queries
-
-import de.laures.cewolf.*;
-import de.laures.cewolf.links.*;
-import de.laures.cewolf.tooltips.XYToolTipGenerator; //to display tooltips
-
-import org.jfree.data.time.*;
-import org.jfree.data.xy.*;
-import org.jfree.chart.*;
-import org.jfree.chart.plot.*;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.renderer.xy.*; //to support highlighting of data points
-
-import java.util.*;
-import java.sql.*;
-import java.io.*; //to save chart to png file + enable serialization
-import java.text.*; //to format numbers and dates in tooltips
-import java.awt.Color; //for colour of grid lines
+import art.utils.ArtQueryParam;
+import art.utils.DrilldownQuery;
+import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.DatasetProducer;
+import de.laures.cewolf.links.XYItemLinkGenerator;
+import de.laures.cewolf.tooltips.XYToolTipGenerator;
+import java.awt.Color;
+import java.io.File;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import org.apache.commons.beanutils.RowSetDynaClass;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.time.Millisecond;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +107,8 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
     boolean hasTooltips = true;
     String openDrilldownInNewWindow;
     TimeSeriesCollection dataset;
+	boolean showGraphData=false;
+	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
     
 
     /**
@@ -107,8 +116,22 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
      */
     public ArtTimeSeries() {
     }
-    
-    
+	
+	@Override
+	public RowSetDynaClass getGraphData(){
+		return graphData;
+	}
+	
+	@Override
+	public void setShowGraphData(boolean value){
+		showGraphData=value;
+	}
+	
+	@Override
+	public boolean isShowGraphData(){
+		return showGraphData;
+	}
+        
     @Override
     public String getOpenDrilldownInNewWindow() {
         return openDrilldownInNewWindow;
@@ -506,6 +529,17 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                 dataset.addSeries(ts[i]);
             }
         }
+		
+		//store data for potential use in pdf output
+		if (showGraphData) {
+			int rsType = rs.getType();
+			if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
+				rs.beforeFirst();
+			}
+			graphData = new RowSetDynaClass(rs, false, true);
+		} else {
+			graphData=null;
+		}
     }
 
     /**
@@ -636,7 +670,7 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
         String outputToFile = (String) params.get("outputToFile");
         String fileName = (String) params.get("fullFileName");
         if (outputToFile.equals("pdf")) {
-            PdfGraph.createPdf(chart, fileName, title);
+            PdfGraph.createPdf(chart, fileName, title,graphData);
         } else if (outputToFile.equals("png")) {
             //save chart as png file									            
             try {

@@ -454,8 +454,7 @@ if(!propsFile.exists()){
 	   
 	   <tr>
         <td class="attr">PDF Font File</td>
-        <td class="data">
-			<input type="hidden" name="_old_pdf_font_file" value="<%=pdf_font_file%>">
+        <td class="data">			
 			<input type="text" name="pdf_font_file" size="40" maxlength="200" value="<%=pdf_font_file%>">
 		<%
 		msg = "File that contains custom font to be used for pdf output" +
@@ -467,8 +466,7 @@ if(!propsFile.exists()){
 	   	   	   	    	   
 	   <tr>
         <td class="attr">PDF Font Directory</td>
-        <td class="data">
-			<input type="hidden" name="_old_pdf_font_directory" value="<%=pdf_font_directory%>">
+        <td class="data">			
 			<input type="text" name="pdf_font_directory" size="40" maxlength="200" value="<%=pdf_font_directory%>">
 			<%
 			msg = "Directory that contains custom fonts to be used for pdf output" +

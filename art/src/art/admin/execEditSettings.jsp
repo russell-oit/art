@@ -64,7 +64,7 @@ while (names.hasMoreElements()) {
 		value = defaultArtDriver;
 	}
 	
-	//don't save utility fields (start with _)
+	//don't save utility fields (fields starting with _)
 	if (!name.startsWith("_")){
 		ap.setProp(name, value);
 	}
@@ -184,16 +184,8 @@ while (names.hasMoreElements()) {
 	}
 	
 	//register pdf font if not already registered
-	String pdfFontName=request.getParameter("pdf_font_name");
-	if(!StringUtils.isBlank(pdfFontName) && !FontFactory.isRegistered(pdfFontName)){
-		//font not registered
-		System.out.println("Font " + pdfFontName + " not yet registered");
-		ArtDBCP.registerPdfFonts();
-	} else {
-		System.out.println("Font " + pdfFontName + " already registered");
-	}
-	
-			
+	ArtDBCP.registerPdfFonts();
+				
 	//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
 	response.sendRedirect("adminConsole.jsp");
 	return;

@@ -276,35 +276,40 @@ public class ArtDBCP extends HttpServlet {
 	 * Register custom fonts to be used in pdf output
 	 */
 	public static void registerPdfFonts() {
-		//register pdf fonts. re-registering already registered files or directories doesn't take long
+		//register pdf fonts. 
 		//fresh registering of 661 fonts in c:\windows\fonts can take as little as 10 secs
+		//re-registering already registered directory of 661 fonts takes as little as 1 sec
 
 		if (useCustomPdfFont) {
+			//register pdf font if not already registered
+			String pdfFontName = getArtSetting("pdf_font_name");
+			if (!StringUtils.isBlank(pdfFontName) && !FontFactory.isRegistered(pdfFontName)) {
+				//font not registered. register any defined font files or directories
+				String pdfFontDirectory = ap.getProp("pdf_font_directory");
+				if (!StringUtils.isBlank(pdfFontDirectory)) {
+					logger.info("Registering fonts from directory: {}", pdfFontDirectory);
+					int i = FontFactory.registerDirectory(pdfFontDirectory);
+					logger.info("{} fonts registered", i);
+				}
 
-			String pdfFontDirectory = ap.getProp("pdf_font_directory");
-			if (!StringUtils.isBlank(pdfFontDirectory)) {
-				logger.info("Registering fonts from directory: {}", pdfFontDirectory);
-				int i = FontFactory.registerDirectory(pdfFontDirectory);
-				logger.info("{} fonts registered", i);
-			}
+				String pdfFontFile = ap.getProp("pdf_font_file");
+				if (!StringUtils.isBlank(pdfFontFile)) {
+					logger.info("Registering font file: {}", pdfFontFile);
+					FontFactory.register(pdfFontFile);
+					logger.info("Font file {} registered", pdfFontFile);
+				}
 
-			String pdfFontFile = ap.getProp("pdf_font_file");
-			if (!StringUtils.isBlank(pdfFontFile)) {
-				logger.info("Registering font file: {}", pdfFontFile);
-				FontFactory.register(pdfFontFile);
-				logger.info("Font file {} registered", pdfFontFile);
+				//output registerd fonts
+				StringBuilder sb = new StringBuilder();
+				String newline = System.getProperty("line.separator");
+				Set<String> fonts = FontFactory.getRegisteredFonts();
+				for (Iterator<String> it = fonts.iterator(); it.hasNext();) {
+					String f = it.next();
+					sb.append(newline);
+					sb.append(f);
+				}
+				logger.info("Registered fonts: {}", sb.toString());
 			}
-
-			//output registerd fonts
-			StringBuilder sb = new StringBuilder();
-			String newline = System.getProperty("line.separator");
-			Set<String> fonts = FontFactory.getRegisteredFonts();
-			for (Iterator<String> it = fonts.iterator(); it.hasNext();) {
-				String f = it.next();
-				sb.append(newline);
-				sb.append(f);
-			}
-			logger.info("Registered fonts: {}", sb.toString());
 		}
 	}
 

@@ -366,29 +366,13 @@ public class QueryExecute extends HttpServlet {
         o.setHeight(height);
         o.setSeriesName(rsmd.getColumnLabel(2));
         o.setBgColor(bgColor);
+		o.setShowGraphData(showGraphData);
 
         //add drill down queries
-        Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(queryId);
-        o.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
-
-        //enable show graph data option. use recordset after preparedataset has finished
-        if(queryType==-10){
-            //never show data for speedometer charts. data doesn't make sense for speedometer            
-            showGraphData=false;
-        }
-        
-        if (showGraphData) {            
-            int rsType = rs.getType();
-            if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-                rs.beforeFirst();
-            }
-            RowSetDynaClass rsdc = new RowSetDynaClass(rs, false, true);
-            
-            request.setAttribute("_showdata", "true");
-            request.setAttribute("graphData", rsdc);
-        } else {
-            request.removeAttribute("_showdata");
-        }
+        Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(queryId);                      				
+		
+		//build graph dataset
+		o.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
                
         //enable file names to contain query name
         //set base file name

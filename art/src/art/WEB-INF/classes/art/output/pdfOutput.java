@@ -180,12 +180,14 @@ public class pdfOutput implements ArtOutputInterface {
         table.getDefaultCell().setBorder(0);
 		
 		//use percentage width
-//        table.setHorizontalAlignment(0);
-//		float width = document.getPageSize().getWidth();
-//        table.setTotalWidth(width - 72); //end result will have 72pt (1 inch) left and right margins
-//        table.setLockedWidth(true);
+		/*
+        table.setHorizontalAlignment(0);
+		float width = document.getPageSize().getWidth();
+        table.setTotalWidth(width - 72); //end result will have 72pt (1 inch) left and right margins
+        table.setLockedWidth(true);
+		*/
 		
-		table.setWidthPercentage(90f);
+		table.setWidthPercentage(100f); //default is 80%
         table.setHeaderRows(1);
 
         try {
@@ -394,8 +396,6 @@ public class pdfOutput implements ArtOutputInterface {
 	public void setFontSelectors(FontSelector body, FontSelector header){
 		//use fontselector and potentially custom fonts with specified encoding to enable display of more non-ascii characters
 		//first font added to selector wins
-//		body=new FontSelector();	//for document contents
-//		header=new FontSelector(); //for document title and column headings
 
 		//use custom font if defined			
 		if(ArtDBCP.isUseCustomPdfFont()){

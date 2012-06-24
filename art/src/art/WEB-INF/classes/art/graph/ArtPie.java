@@ -74,12 +74,28 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	boolean hasTooltips = true;
 	String openDrilldownInNewWindow;
 	DefaultPieDataset dataset = new DefaultPieDataset();
-	RowSetDynaClass rsdc = null;
+	boolean showGraphData = false;
+	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
 
 	/**
 	 * Constructor
 	 */
 	public ArtPie() {
+	}
+	
+	@Override
+	public RowSetDynaClass getGraphData(){
+		return graphData;
+	}
+
+	@Override
+	public void setShowGraphData(boolean value) {
+		showGraphData = value;
+	}
+
+	@Override
+	public boolean isShowGraphData() {
+		return showGraphData;
 	}
 
 	@Override
@@ -310,11 +326,15 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 		}
 
 		//store data for potential use in pdf output
-		int rsType = rs.getType();
-		if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-			rs.beforeFirst();
+		if (showGraphData) {
+			int rsType = rs.getType();
+			if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
+				rs.beforeFirst();
+			}
+			graphData = new RowSetDynaClass(rs, false, true);
+		} else {
+			graphData=null;
 		}
-		rsdc = new RowSetDynaClass(rs, false, true);
 	}
 
 	/**
@@ -419,8 +439,9 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 		String outputToFile = (String) params.get("outputToFile");
 		String fileName = (String) params.get("fullFileName");
 		if (outputToFile.equals("pdf")) {
-			PdfGraph.createPdf(chart, fileName, title);
-			//PdfGraph.createPdf(chart, fileName, title,rsdc);
+			//allow show graph data below graph
+			//PdfGraph.createPdf(chart, fileName, title);
+			PdfGraph.createPdf(chart, fileName, title,graphData);
 		} else if (outputToFile.equals("png")) {
 			//save chart as png file									            
 			try {

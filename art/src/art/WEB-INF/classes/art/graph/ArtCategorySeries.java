@@ -11,26 +11,41 @@
  */
 package art.graph;
 
-import art.utils.*; //to support drill down queries
-
-import de.laures.cewolf.*;
-import de.laures.cewolf.links.*;
+import art.utils.ArtQueryParam;
+import art.utils.DrilldownQuery;
+import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.DatasetProducer;
+import de.laures.cewolf.links.CategoryItemLinkGenerator;
 import de.laures.cewolf.tooltips.CategoryToolTipGenerator;
-
-import org.jfree.data.category.*;
-import org.jfree.chart.labels.*;
-import org.jfree.chart.*;
-import org.jfree.chart.plot.*;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.renderer.category.*; //to display item labels and highlighting of data points
-import org.jfree.ui.TextAnchor; //to display item labels
-
-import java.util.*;
-import java.sql.*;
-import java.text.*; //to format numbers in tooltips
-import java.io.*; //to save chart to png file + enable serialization
-import java.awt.Color; //for colour of grid lines
+import java.awt.Color;
+import java.io.File;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.beanutils.RowSetDynaClass;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.CategoryItemLabelGenerator;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,6 +121,8 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
     boolean hasTooltips = true;
     String openDrilldownInNewWindow;
     DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+	boolean showGraphData=false;
+	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
     
 
     /**
@@ -113,6 +130,21 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
      */
     public ArtCategorySeries() {
     }
+	
+	@Override
+	public RowSetDynaClass getGraphData(){
+		return graphData;
+	}
+	
+	@Override
+	public void setShowGraphData(boolean value){
+		showGraphData=value;
+	}
+	
+	@Override
+	public boolean isShowGraphData(){
+		return showGraphData;
+	}
     
     @Override
     public String getOpenDrilldownInNewWindow() {
@@ -491,6 +523,17 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
                 }
             }
         }
+		
+		//store data for potential use in pdf output
+		if (showGraphData) {
+			int rsType = rs.getType();
+			if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
+				rs.beforeFirst();
+			}
+			graphData = new RowSetDynaClass(rs, false, true);
+		} else {
+			graphData=null;
+		}
 
     }
 
@@ -635,7 +678,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
         String outputToFile = (String) params.get("outputToFile");
         String fileName = (String) params.get("fullFileName");
         if (outputToFile.equals("pdf")) {
-            PdfGraph.createPdf(chart, fileName, title);
+            PdfGraph.createPdf(chart, fileName, title, graphData);
         } else if (outputToFile.equals("png")) {
             //save chart as png file									            
             try {

@@ -54,13 +54,7 @@
   if (request.getAttribute("_showpoints") != null){
 	showPoints = true;
 	}
-	
-	// graph data
-   boolean showGraphData = false;
-  if (request.getAttribute("_showdata") != null){
-	showGraphData = true;
-	}
-    
+      
   //determine if chart is to be output to file
   String outputToFile = "nofile";  
   if (request.getAttribute("outputToFile") != null){
@@ -145,8 +139,25 @@
 out.flush(); 
 
 //reset jfreechat theme to the default theme. jasper reports sets it to the legacy theme and this affects the speedometer chart
-ChartFactory.setChartTheme(StandardChartTheme.createJFreeTheme());
+//also allow use of custom font to enable display of non-ascii characters
+StandardChartTheme chartTheme = (StandardChartTheme) StandardChartTheme.createJFreeTheme(); 
+if(ArtDBCP.isUseCustomPdfFont()){
+	String pdfFontName = ArtDBCP.getArtSetting("pdf_font_name");
+	final java.awt.Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
+	final java.awt.Font oldLargeFont = chartTheme.getLargeFont();
+	final java.awt.Font oldRegularFont = chartTheme.getRegularFont();
 
+	final java.awt.Font extraLargeFont = new java.awt.Font(pdfFontName, oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
+	final java.awt.Font largeFont = new java.awt.Font(pdfFontName, oldLargeFont.getStyle(), oldLargeFont.getSize());
+	final java.awt.Font regularFont = new java.awt.Font(pdfFontName, oldRegularFont.getStyle(), oldRegularFont.getSize());
+
+	chartTheme.setExtraLargeFont(extraLargeFont);
+	chartTheme.setLargeFont(largeFont);
+	chartTheme.setRegularFont(regularFont);
+}
+ChartFactory.setChartTheme(chartTheme);
+
+				
 //enable show parameters for graphs
 Map<Integer,ArtQueryParam> displayParams = (Map<Integer,ArtQueryParam>) request.getAttribute("displayParams");
 if(displayParams!=null && displayParams.size()>0){
@@ -184,9 +195,9 @@ displayParams=null;
 %>
 
 <p>
-<table class="plain" align="center" border="0">
+<table class="plain" align="center" border="0" width="60%">
  <tr>
-  <td> 
+  <td align="center"> 
    
    <cewolf:chart 
        id="<%=graphElementId%>" 
@@ -248,19 +259,19 @@ displayParams=null;
 
   <% }  %>
   
-  <%
-	RowSetDynaClass rsdc=(RowSetDynaClass)request.getAttribute("graphData");
-	
-	if(showGraphData){
-		if(rsdc!=null){
-			List rows=rsdc.getRows();
+  <%	
+	if(graph.isShowGraphData()){
+		RowSetDynaClass graphData=graph.getGraphData();
+		if(graphData!=null){
+			List rows=graphData.getRows();
 			DynaProperty[] dynaProperties = null;
 			String columnName;
 			String columnValue;
 			%>
 			<p>
 			<br>
-			<table border="0" align="center" width="90%">	
+			<div align="center">
+			<table border="0" width="90%">	
 			<%
 			for(int i=0;i<rows.size();i++){
 				DynaBean row=(DynaBean)rows.get(i);
@@ -297,6 +308,7 @@ displayParams=null;
 	}
 	%>
 	</table>
+			</div>
 	</p>
 
 
@@ -305,16 +317,12 @@ displayParams=null;
 </table>
 </p>
 
-<p>
 
 <!-- Test Memory Leak: removing object from request. -->
 <% // Remove object from request 
  request.removeAttribute("artGraph");
  graph = null;
  
- request.removeAttribute("graphData");
- rsdc=null;
-
  if (!isFragment && ! isPlain) {    
     %><%@ include file ="footer.jsp" %><%
   } else if (isPlain) {

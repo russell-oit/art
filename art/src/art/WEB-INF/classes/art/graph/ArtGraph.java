@@ -12,9 +12,10 @@
 package art.graph;
 
 import art.utils.DrilldownQuery;
-
-import java.sql.*;
-import java.util.*; //to support drill down queries
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+import org.apache.commons.beanutils.RowSetDynaClass;
 
 /**
 <b>ArtGraph</b> is the common interface implemented by art
@@ -216,5 +217,22 @@ public interface ArtGraph {
      * @return <code>true</code> if graph can have tooltips
      */
     public boolean getHasTooltips();
+	
+	/**
+	 * Determine if graph data should be shown below graph
+	 */
+	public void setShowGraphData(boolean value);
+	
+	/**
+	 * Get show graph data setting
+	 * @return <code>true</code> if graph data should be shown below graph
+	 */
+	public boolean isShowGraphData();
+	
+	/**
+	 * Get graph's data
+	 * @return rowset that contains the graph's data
+	 */
+	public RowSetDynaClass getGraphData();
          
 }

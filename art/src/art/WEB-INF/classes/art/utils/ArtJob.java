@@ -1995,8 +1995,7 @@ public class ArtJob implements Job {
 					sa.add(paramValue);
 					while (rs.next()) {
 						logger.debug("Job Id {}. Multi parameter: {}", jobId, name);
-
-						paramType = rs.getString("PARAM_TYPE");
+						
 						paramName = rs.getString("PARAM_NAME");
 						paramValue = rs.getString("PARAM_VALUE");
 

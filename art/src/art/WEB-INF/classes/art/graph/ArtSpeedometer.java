@@ -1,19 +1,24 @@
 package art.graph;
 
-import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
-
-import org.jfree.data.general.DefaultValueDataset;
-import org.jfree.chart.plot.*;
-import org.jfree.chart.*;
+import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.DatasetProducer;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.io.File;
+import java.io.Serializable;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.TreeMap;
+import org.apache.commons.beanutils.RowSetDynaClass;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.MeterInterval;
+import org.jfree.chart.plot.MeterPlot;
 import org.jfree.data.Range;
-
-import de.laures.cewolf.*;
-
-import java.sql.*;
-import java.util.*;
-import java.io.*;
-import java.awt.*;
+import org.jfree.data.general.DefaultValueDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,13 +68,28 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
     int rangeCount;
     String openDrilldownInNewWindow;
     DefaultValueDataset dataset = new DefaultValueDataset();
-    
+	    
 
     /**
      * Constructor
      */
     public ArtSpeedometer() {
     }
+	
+	@Override
+	public RowSetDynaClass getGraphData(){
+		return null; //never show data for speedometer chart
+	}
+	
+	@Override
+	public void setShowGraphData(boolean value){
+		//do nothing. for speedometer never show data. doesn't make sense
+	}
+	
+	@Override
+	public boolean isShowGraphData(){
+		return false; //for speedometer never show data. doesn't make sense
+	}
    
     @Override
     public String getOpenDrilldownInNewWindow() {

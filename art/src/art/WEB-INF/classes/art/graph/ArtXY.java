@@ -11,24 +11,32 @@
  */
 package art.graph;
 
-import art.utils.*; //to support drill down queries
-
-import de.laures.cewolf.*;
-import de.laures.cewolf.links.*;
-import de.laures.cewolf.tooltips.XYToolTipGenerator; //to display tooltips
-
-import org.jfree.data.xy.*;
-import org.jfree.chart.*;
-import org.jfree.chart.plot.*;
-import org.jfree.chart.axis.NumberAxis; //allow setting of y axis range
-import org.jfree.chart.renderer.xy.*; //to support highlighting of data points
-
-import java.util.*;
-import java.sql.*;
-import java.io.*; //to save chart to png file + enable serialization
-import java.text.*; //to format numbers in tooltips
-import java.awt.Color; //for colour of grid lines
+import art.utils.ArtQueryParam;
+import art.utils.DrilldownQuery;
+import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.DatasetProduceException;
+import de.laures.cewolf.DatasetProducer;
+import de.laures.cewolf.links.XYItemLinkGenerator;
+import de.laures.cewolf.tooltips.XYToolTipGenerator;
+import java.awt.Color;
+import java.io.File;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.*;
+import org.apache.commons.beanutils.RowSetDynaClass;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,6 +92,8 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
     boolean hasTooltips = true;
     String openDrilldownInNewWindow;
     XYSeriesCollection dataset;
+	boolean showGraphData=false;
+	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
     
 
     /**
@@ -91,7 +101,21 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
      */
     public ArtXY() {
     }
-   
+	
+	@Override
+	public RowSetDynaClass getGraphData(){
+		return graphData;
+	}
+	
+	@Override
+	public void setShowGraphData(boolean value){
+		showGraphData=value;
+	}
+	
+	@Override
+	public boolean isShowGraphData(){
+		return showGraphData;
+	}
     
     @Override
     public String getOpenDrilldownInNewWindow() {
@@ -355,6 +379,17 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
         }
 
         dataset = new XYSeriesCollection(xys);
+		
+		//store data for potential use in pdf output
+		if (showGraphData) {
+			int rsType = rs.getType();
+			if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
+				rs.beforeFirst();
+			}
+			graphData = new RowSetDynaClass(rs, false, true);
+		} else {
+			graphData=null;
+		}
     }
 
     /**
@@ -449,7 +484,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
         String outputToFile = (String) params.get("outputToFile");
         String fileName = (String) params.get("fullFileName");
         if (outputToFile.equals("pdf")) {
-            PdfGraph.createPdf(chart, fileName, title);
+            PdfGraph.createPdf(chart, fileName, title,graphData);
         } else if (outputToFile.equals("png")) {
             //save chart as png file									            
             try {
