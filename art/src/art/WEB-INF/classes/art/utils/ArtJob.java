@@ -138,6 +138,8 @@ public class ArtJob implements Job {
 	String jobOwnerStatus; //if job owner is not active, don't run job
 	boolean showParameters = false; //to enable display of parameters in reports
 	Map<Integer, ArtQueryParam> displayParams; //to enable display of parameters in reports
+	boolean showGraphData=false; //to enable display of graph data below graph for pdf output
+	
 
 	/**
 	 * Instantiate a new "empty" Job (to insert/save) A new Job is created. Use
@@ -146,6 +148,22 @@ public class ArtJob implements Job {
 	 */
 	public ArtJob() {
 		exportPath = ArtDBCP.getExportPath();
+	}
+	
+	/**
+	 * Determine if graph data should be shown below graph for pdf output
+	 * @param value <code>true</code> is graph data should be shown in output
+	 */
+	public void setShowGraphData(boolean value){
+		showGraphData=value;
+	}
+	
+	/**
+	 * Determine if graph data should be shown below graph for pdf output
+	 * @return <code>true</code> is graph data should be shown in output
+	 */
+	public boolean isShowGraphData(){
+		return showGraphData;
 	}
 
 	/**
@@ -965,12 +983,19 @@ public class ArtJob implements Job {
 			if (!singleOutput) {
 				pq.isAdminSession(true);
 			}
+			
+			int resultSetType;
+			if (queryType < 0) {
+				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
+			} else {
+				resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+			}
 
 			/*
 			 * BEGIN EXECUTE QUERY
 			 */
 
-			pq.execute(ResultSet.TYPE_FORWARD_ONLY);
+			pq.execute(resultSetType);
 
 
 			/*
@@ -1080,6 +1105,8 @@ public class ArtJob implements Job {
 						eg.setYlabel(yaxisLabel);
 						eg.setTitle(queryShortDescription);
 						eg.setGraphOptions(graphOptions);
+						eg.setShowGraphData(showGraphData); //enable display of graph data below graph for pdf graph output
+						eg.setDisplayParameters(displayParams); //enable display of graph parameters above graph for pdf graph output
 						eg.createFile(rs, queryType);
 						fileName = eg.getFileName();
 					} else if (queryType == 115 || queryType == 116) {
@@ -1713,6 +1740,20 @@ public class ArtJob implements Job {
 				ps.executeUpdate();
 				ps.close();
 			}
+			
+			//enable show graph data in pdf output
+			if (showGraphData) {
+				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
+						+ " VALUES (?,?,?,?)";
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+				ps.setString(2, "O");
+				ps.setString(3, "_showGraphData");
+				ps.setString(4, "true");
+
+				ps.executeUpdate();
+				ps.close();
+			}
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
 		} finally {
@@ -2026,10 +2067,13 @@ public class ArtJob implements Job {
 
 					multiParams.put(name, sa.getStringArray());
 				} else if ("O".equals(paramType)) {
-					//other parameters
-					//enable display of parameters in output
-					if ("_showParams".equals(paramName)) {
+					//other parameters					
+					if (StringUtils.equals(paramName, "_showParams")) {
+						//enable display of parameters in output
 						showParameters = true;
+					} else if(StringUtils.equals(paramName, "_showGraphData")){
+						//enable display of graph data in pdf graph output
+						showGraphData=true;
 					}
 				}
 			}

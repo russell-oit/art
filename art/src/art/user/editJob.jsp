@@ -385,6 +385,11 @@ if (request.getParameter("jobName").equals("")){
  if (request.getParameter("_showParams")!=null){
      job.setShowParameters(true);
  }
+ 
+ //enable show graph data in pdf output
+ if (request.getParameter("_showGraphData")!=null){
+     job.setShowGraphData(true);
+ }
  %>
 </c:if>
 

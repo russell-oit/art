@@ -123,6 +123,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
     DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 	boolean showGraphData=false;
 	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
+	Map<Integer,ArtQueryParam> displayParameters=null; //to enable display of graph parameters in pdf output
     
 
     /**
@@ -130,6 +131,16 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
      */
     public ArtCategorySeries() {
     }
+	
+	@Override
+	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
+		displayParameters=value;
+	}
+	
+	@Override
+	public Map<Integer,ArtQueryParam> getDisplayParameters(){
+		return displayParameters;
+	}
 	
 	@Override
 	public RowSetDynaClass getGraphData(){
@@ -678,7 +689,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
         String outputToFile = (String) params.get("outputToFile");
         String fileName = (String) params.get("fullFileName");
         if (outputToFile.equals("pdf")) {
-            PdfGraph.createPdf(chart, fileName, title, graphData);
+            PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
         } else if (outputToFile.equals("png")) {
             //save chart as png file									            
             try {

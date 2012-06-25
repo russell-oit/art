@@ -13,21 +13,20 @@ package art.graph;
 
 import art.output.pdfOutput;
 import art.servlets.ArtDBCP;
+import art.utils.ArtQueryParam;
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.*;
 import com.lowagie.text.pdf.DefaultFontMapper.BaseFontParameters;
+import com.lowagie.text.pdf.*;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang.StringUtils;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartTheme;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.StandardChartTheme;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,11 @@ public class PdfGraph {
 	final static Logger logger = LoggerFactory.getLogger(PdfGraph.class);
 
 	public static void createPdf(Object chartObject, String filename, String title) {
-		createPdf(chartObject, filename, title, null);
+		createPdf(chartObject, filename, title, null, null);
+	}
+
+	public static void createPdf(Object chartObject, String filename, String title, RowSetDynaClass graphData) {
+		createPdf(chartObject, filename, title, graphData, null);
 	}
 
 	/**
@@ -52,8 +55,9 @@ public class PdfGraph {
 	 * @param filename full file name to use to save the chart
 	 * @param title chart title
 	 */
-	public static void createPdf(Object chartObject, String filename, String title, RowSetDynaClass graphData) {
-		
+	public static void createPdf(Object chartObject, String filename, String title,
+			RowSetDynaClass graphData, Map<Integer, ArtQueryParam> displayParams) {
+
 		Rectangle pageSize;
 
 		switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
@@ -79,6 +83,7 @@ public class PdfGraph {
 
 		try {
 			PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filename));
+			writer.setStrictImageSequence(true); //ensure image order is maintained
 			document.addTitle(title);
 			document.addAuthor("Created by ART - http://art.sourceforge.net");
 			SimpleDateFormat df = new SimpleDateFormat("dd MMM yyyy  HH:mm:ss");
@@ -86,6 +91,15 @@ public class PdfGraph {
 			footer.setAlignment(Element.ALIGN_CENTER);
 			document.setFooter(footer);
 			document.open();
+
+			//set fonts to be used, incase custom font is defined
+			FontSelector fsBody = new FontSelector();
+			FontSelector fsHeading = new FontSelector();
+			pdfOutput pdfo = new pdfOutput();
+			pdfo.setFontSelectors(fsBody, fsHeading);
+			
+			//output parameters if any
+			pdfo.outputParameters(document, fsBody, displayParams);
 
 			//create chart in pdf						
 			JFreeChart chart = (JFreeChart) chartObject;
@@ -112,7 +126,7 @@ public class PdfGraph {
 					fp.encoding = pdfFontEncoding;
 					fp.embedded = pdfFontEmbedded;
 					mapper.putName(pdfFontName, fp);
-				}				
+				}
 			}
 
 			//add chart to document
@@ -134,21 +148,19 @@ public class PdfGraph {
 
 			//display chart data below graph if so required
 			if (graphData != null) {
+				Paragraph p=new Paragraph(fsBody.process("Data\n"));
+				p.setAlignment(Element.ALIGN_CENTER);				
+				document.add(p);
+				
 				java.util.List rows = graphData.getRows();
 				DynaProperty[] dynaProperties = null;
 				String columnName;
 				String columnValue;
-				int columns=0; //column count
+				int columns = 0; //column count
 
 				PdfPTable table = null;
 				PdfPCell cell;
 				float headergray = 0.5f;
-
-				//set fonts to be used, incase custom font is defined
-				FontSelector fsBody = new FontSelector();
-				FontSelector fsHeading = new FontSelector();
-				pdfOutput pdfo = new pdfOutput();
-				pdfo.setFontSelectors(fsBody, fsHeading);
 
 				for (int i = 0; i < rows.size(); i++) {
 					DynaBean row = (DynaBean) rows.get(i);

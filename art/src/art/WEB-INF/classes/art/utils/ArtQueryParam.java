@@ -19,6 +19,7 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,8 +35,10 @@ import org.slf4j.LoggerFactory;
  * Class to represent query parameters
  *  
  */
-public class ArtQueryParam {
+public class ArtQueryParam implements Serializable{
 
+	private static final long serialVersionUID = 1L; //need to implement serializable to be used as a field in artgraph classes
+	
     final static Logger logger = LoggerFactory.getLogger(ArtQueryParam.class);
     
     String name = "";

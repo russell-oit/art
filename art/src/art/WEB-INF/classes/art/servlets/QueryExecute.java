@@ -790,10 +790,9 @@ public class QueryExecute extends HttpServlet {
                                     /* GRAPH */
                                     probe = 105;
                                     ArtGraph og = artGraphOut(rs, rsmd, request, xaxisLabel, yaxisLabel, graphOptions, shortDescription, queryId, queryType, queryName, username, inlineParams, multiParams);
-                                    request.setAttribute("artGraph", og);
-
-                                    //enable show parameters for graphs
-                                    request.setAttribute("displayParams", displayParams);
+									og.setDisplayParameters(displayParams);
+									
+                                    request.setAttribute("artGraph", og);																		
                                     probe = 110;
                                 } else {
                                     if (request.getParameter("_isCrosstab") != null) {

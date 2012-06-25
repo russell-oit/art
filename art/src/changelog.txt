@@ -4,6 +4,7 @@ ART 2.3
 * Allow blank passwords for datasources
 * Allow "not equals" operator for dynamic queries
 * Support display of unicode characters in pdf output
+* Enable display of graph parameters and data in pdf output
 * Updated quartz to 2.1.5
 * Updated jasperreports to 4.6
 

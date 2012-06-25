@@ -159,7 +159,7 @@ ChartFactory.setChartTheme(chartTheme);
 
 				
 //enable show parameters for graphs
-Map<Integer,ArtQueryParam> displayParams = (Map<Integer,ArtQueryParam>) request.getAttribute("displayParams");
+Map<Integer,ArtQueryParam> displayParams=graph.getDisplayParameters();
 if(displayParams!=null && displayParams.size()>0){
     out.println("<div align=\"center\">");
     out.println("<table border=\"0\" width=\"90%\"><tr><td>");
@@ -173,7 +173,7 @@ if(displayParams!=null && displayParams.size()>0){
 		Object pValue = param.getParamValue();
 
 		if (pValue instanceof String) {
-			out.println(paramName + ":" + pValue + " <br> ");
+			out.println(paramName + ": " + pValue + " <br> ");
 		} else if (pValue instanceof String[]) { // multi
 			StringBuilder pValuesSb = new StringBuilder(256);
 			String[] pValues = (String[]) pValue;
@@ -188,9 +188,6 @@ if(displayParams!=null && displayParams.size()>0){
 	out.println("</td></tr></table>");
     out.println("</div>");        
 }
-request.removeAttribute("displayParams");
-displayParams=null;
-
 
 %>
 

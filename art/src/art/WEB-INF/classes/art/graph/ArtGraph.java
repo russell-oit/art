@@ -11,6 +11,7 @@
  */
 package art.graph;
 
+import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -234,5 +235,17 @@ public interface ArtGraph {
 	 * @return rowset that contains the graph's data
 	 */
 	public RowSetDynaClass getGraphData();
+	
+	/**
+	 * Set parameters to be displayed with the graph output
+	 * @param value parameters to be displayed with the graph output
+	 */
+	public void setDisplayParameters(Map<Integer,ArtQueryParam> value);
+	
+	/**
+	 * Get parameters to be displayed with the graph output
+	 * @return parameters to be displayed with the graph output
+	 */
+	public Map<Integer,ArtQueryParam> getDisplayParameters();
          
 }

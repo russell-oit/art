@@ -1,5 +1,6 @@
 package art.graph;
 
+import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
 import de.laures.cewolf.ChartPostProcessor;
 import de.laures.cewolf.DatasetProducer;
@@ -68,6 +69,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
     int rangeCount;
     String openDrilldownInNewWindow;
     DefaultValueDataset dataset = new DefaultValueDataset();
+	Map<Integer,ArtQueryParam> displayParameters=null; //to enable display of graph parameters in pdf output
 	    
 
     /**
@@ -75,6 +77,16 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
      */
     public ArtSpeedometer() {
     }
+	
+	@Override
+	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
+		displayParameters=value;
+	}
+	
+	@Override
+	public Map<Integer,ArtQueryParam> getDisplayParameters(){
+		return displayParameters;
+	}
 	
 	@Override
 	public RowSetDynaClass getGraphData(){
@@ -289,7 +301,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
         String outputToFile = (String) params.get("outputToFile");
         String fileName = (String) params.get("fullFileName");
         if (outputToFile.equals("pdf")) {
-            PdfGraph.createPdf(ch, fileName, title);
+            PdfGraph.createPdf(chart, fileName, title, null, displayParameters);
         } else if (outputToFile.equals("png")) {
             //save chart as png file									            
             try {
@@ -310,6 +322,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
         plot.setRange(new Range(minValue, maxValue));
         plot.setUnits(unitsDescription);
 
+		plot.setBackgroundPaint(Color.lightGray);
         plot.setNeedlePaint(Color.darkGray);
 
         //set ranges

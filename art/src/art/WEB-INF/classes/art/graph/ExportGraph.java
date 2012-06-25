@@ -2,6 +2,7 @@ package art.graph;
 
 import art.servlets.ArtDBCP;
 import art.utils.ArtQuery;
+import art.utils.ArtQueryParam;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.File;
@@ -10,7 +11,9 @@ import java.sql.ResultSetMetaData;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.*;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.*;
@@ -50,6 +53,16 @@ public class ExportGraph {
 	String title;
 	String exportPath;
 	boolean showGraphData = false;
+	Map<Integer, ArtQueryParam> displayParameters = null; //to enable display of graph parameters in pdf output
+
+	/**
+	 * Set parameters to be displayed with the graph output
+	 *
+	 * @param value parameters to be displayed with the graph output
+	 */
+	public void setDisplayParameters(Map<Integer, ArtQueryParam> value) {
+		displayParameters = value;
+	}
 
 	/**
 	 * Determine if graph data should be included below graph for pdf output
@@ -182,13 +195,36 @@ public class ExportGraph {
 		BarPainter currentBarPainter = null;
 
 		try {
-			//ensure you have white plot backgrounds. this was changed in jfreechart 1.0.11 to default to grey
+			//use legacy theme to ensure you have white plot backgrounds. this was changed in jfreechart 1.0.11 to default to grey
 			//save current settings
 			currentChartTheme = ChartFactory.getChartTheme();
 			currentBarPainter = BarRenderer.getDefaultBarPainter();
 
-			ChartFactory.setChartTheme(StandardChartTheme.createLegacyTheme());
 			BarRenderer.setDefaultBarPainter(new StandardBarPainter());
+			StandardChartTheme chartTheme = (StandardChartTheme) StandardChartTheme.createJFreeTheme(); //if using createLegacyTheme custom font isn't applied in pdf output for some reason
+
+			//change default colours. default "jfree" theme has plot background colour of light grey
+			chartTheme.setPlotBackgroundPaint(Color.white); //default is grey
+			chartTheme.setDomainGridlinePaint(Color.lightGray); //default is white
+			chartTheme.setRangeGridlinePaint(Color.lightGray); //default is white
+			
+			//enable use of custom font in pdf output
+			String fontName="SansSerif"; //for use in speedometer chart creation
+			if (StringUtils.equals(outputFormat, "pdf") && ArtDBCP.isUseCustomPdfFont()) {				
+				fontName = ArtDBCP.getArtSetting("pdf_font_name");
+				final Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
+				final Font oldLargeFont = chartTheme.getLargeFont();
+				final Font oldRegularFont = chartTheme.getRegularFont();
+
+				final Font extraLargeFont = new Font(fontName, oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
+				final Font largeFont = new Font(fontName, oldLargeFont.getStyle(), oldLargeFont.getSize());
+				final Font regularFont = new Font(fontName, oldRegularFont.getStyle(), oldRegularFont.getSize());
+
+				chartTheme.setExtraLargeFont(extraLargeFont);
+				chartTheme.setLargeFont(largeFont);
+				chartTheme.setRegularFont(regularFont);								
+			} 
+			ChartFactory.setChartTheme(chartTheme);
 
 			//build file name to use for output
 			buildOutputFileName();
@@ -340,12 +376,9 @@ public class ExportGraph {
 					DefaultValueDataset speedometerDataset = (DefaultValueDataset) speedometerChart.produceDataset(null);
 
 					//create chart. chartfactory doesn't have a method for creating a meter chart
+					Font titleFont=new Font(fontName, Font.BOLD, 18);
 					MeterPlot speedometerPlot = new MeterPlot(speedometerDataset);
-					chart = new JFreeChart(title, new Font("SansSerif", Font.BOLD, 18), speedometerPlot, showLegend); //font same as in cewolf to achieve similar look
-
-					//use default chart theme to achieve same look as in interactive (cewolf) chart. cewolf applies the current chart theme to meter plots
-					ChartTheme defaultChartTheme = StandardChartTheme.createJFreeTheme();
-					defaultChartTheme.apply(chart);
+					chart = new JFreeChart(title, titleFont, speedometerPlot, showLegend); //font same as in cewolf to achieve similar look
 
 					//add ranges and any custom formatting
 					speedometerChart.finalizePlot(speedometerPlot);
@@ -423,15 +456,15 @@ public class ExportGraph {
 
 			//save chart as png or pdf file	
 			if (chart != null) {
-				//set chart background colour. doesn't include plot background. plot always white
+				//set chart background colour. doesn't include plot background
 				chart.setBackgroundPaint(Color.decode(bgColor));
-
+				
 				if (outputFormat.equals("png")) {
 					fullFileName = fullFileNameWithoutExt + ".png";
 					ChartUtilities.saveChartAsPNG(new File(fullFileName), chart, width, height);
 				} else if (outputFormat.equals("pdf")) {
 					fullFileName = fullFileNameWithoutExt + ".pdf";
-					
+
 					//include graph data if applicable
 					RowSetDynaClass graphData;
 					if (showGraphData) {
@@ -443,7 +476,8 @@ public class ExportGraph {
 					} else {
 						graphData = null;
 					}
-					PdfGraph.createPdf(chart, fullFileName, title, graphData);
+
+					PdfGraph.createPdf(chart, fullFileName, title, graphData, displayParameters);
 				}
 			}
 

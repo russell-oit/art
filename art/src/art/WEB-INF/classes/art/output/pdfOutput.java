@@ -195,10 +195,22 @@ public class pdfOutput implements ArtOutputInterface {
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
 
-            // Output parameter values list			
-            if (displayParams != null && displayParams.size() > 0) {
+            // Output parameter values list
+			outputParameters(document,fsBody,displayParams);
 
-                document.add(new Paragraph(fsBody.process("Parameters\n")));
+        } catch (DocumentException e) {
+            logger.error("Error",e);
+        }
+
+    }
+	
+	public void outputParameters(Document doc, FontSelector fs, Map<Integer, ArtQueryParam> displayParams){
+		// Output parameter values list	
+		
+		try{
+			 if (displayParams != null && displayParams.size() > 0) {
+
+                doc.add(new Paragraph(fs.process("Parameters\n")));
                 
                 String[] params = new String[displayParams.size()];
                 int index = 0;
@@ -207,7 +219,7 @@ public class pdfOutput implements ArtOutputInterface {
                     Map.Entry entry = (Map.Entry) it.next();
                     ArtQueryParam aqp = (ArtQueryParam) entry.getValue();
                     String paramName = aqp.getName();
-                    String param = paramName + " : ";
+                    String param = paramName + ": ";
                     Object pValue = aqp.getParamValue();
 
                     if (pValue instanceof String) {
@@ -217,7 +229,7 @@ public class pdfOutput implements ArtOutputInterface {
                         String[] pValues = (String[]) pValue;
                         int size = pValues.length - 1;
                         for (int i = 0; i < size; i++) {
-                            param += pValues[i] + ",";
+                            param += pValues[i] + ", ";
                         }
                         param += pValues[size];
                     }
@@ -235,22 +247,21 @@ public class pdfOutput implements ArtOutputInterface {
 				//add list items
                 int size = params.length - 1;				
                 for (int i = size; i >= 0; i--) {
-					Phrase ph=fsBody.process(params[i]);
+					Phrase ph=fs.process(params[i]);
 					ph.setLeading(12); //set spacing before the phrase
 					ListItem listItem = new ListItem(ph); 					
                     list.add(listItem);
                 }
 				
-                document.add(list);
-            }
-			
-            document.add(new Paragraph(fsBody.process("\n")));
-
-        } catch (DocumentException e) {
-            logger.error("Error",e);
-        }
-
-    }
+                doc.add(list);
+				
+				doc.add(new Paragraph(fs.process("\n")));							
+            }			            
+		} catch (Exception e){
+			logger.error("Error",e);
+		}
+           
+	}
 
     @Override
     public void addHeaderCell(String s) {
