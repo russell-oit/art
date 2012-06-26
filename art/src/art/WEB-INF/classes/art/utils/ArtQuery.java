@@ -1172,22 +1172,32 @@ public class ArtQuery {
 
         return map;
     }
+	
+	/**
+     *  Connect to Art repository and retrieve info related to the query.
+     *  Also get the query params and build the list with all values
+     */
+	public void create(){
+		create(queryId, true);
+	}
 
     /**
      *  Connect to Art repository and retrieve info related to the query.
      *  Also get the query params and build the list with all values
      */
-    public void create() {
+    public void create(int qId, boolean buildParamList) {
         Connection conn = null;
 
         try {
 
             //get query details
             conn = ArtDBCP.getConnection();
-            create(conn, queryId);
+            create(conn, qId);
 
             //build parameter list
-            buildParamList(conn);
+			if(buildParamList){
+				buildParamList(conn);
+			}
 
         } catch (Exception e) {
             logger.error("Error",e);

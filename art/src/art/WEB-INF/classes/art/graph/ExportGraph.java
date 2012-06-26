@@ -15,7 +15,7 @@ import java.util.Map;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.*;
-import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.*;
 import org.jfree.chart.labels.*;
 import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.category.*;
@@ -52,8 +52,48 @@ public class ExportGraph {
 	String graphOptions;
 	String title;
 	String exportPath;
-	boolean showGraphData = false;
+	boolean showData;
+	private boolean showLegend;
+	private boolean showLabels;
+	private boolean showDataPoints;
 	Map<Integer, ArtQueryParam> displayParameters = null; //to enable display of graph parameters in pdf output
+	final int rotateThreshold=5; //number of x-axis categories above which x-axis labels will be displayed vertically
+	final int removeThreshold=50; //number of x-axis categories above which x-axis labels will be removed (not displayed)
+	int queryId;
+	
+	
+	/**
+	 * Set the query id for the graph
+	 * @param value 
+	 */
+	public void setQueryId(int value){
+		queryId=value;
+	}
+	
+	
+	/**
+	 * Determine if legend should be shown
+	 * @param showLegend <code>true</true> if legend should be shown
+	 */
+	public void setShowLegend(boolean showLegend) {
+		this.showLegend = showLegend;
+	}
+
+	/**
+	 * Determine if labels should be shown
+	 * @param showLabels <code>true</true> if labels should be shown
+	 */
+	public void setShowLabels(boolean showLabels) {
+		this.showLabels = showLabels;
+	}
+
+	/**
+	 * Determine if data points should be highlighted
+	 * @param showDataPoints <code>true</true> if data points should be highlighted
+	 */
+	public void setShowDataPoints(boolean showDataPoints) {
+		this.showDataPoints = showDataPoints;
+	}
 
 	/**
 	 * Set parameters to be displayed with the graph output
@@ -69,8 +109,8 @@ public class ExportGraph {
 	 *
 	 * @param value
 	 */
-	public void setShowGraphData(boolean value) {
-		showGraphData = value;
+	public void setShowData(boolean value) {
+		showData = value;
 	}
 
 	/**
@@ -181,12 +221,9 @@ public class ExportGraph {
 		int width;
 		int height;
 		String seriesName;
-		ResultSetMetaData rsmd;
-		boolean showLegend;
+		ResultSetMetaData rsmd;		
 		boolean showTooltips = false;
-		boolean showUrls = false;
-		boolean showLabels;
-		boolean showPoints;
+		boolean showUrls = false;				
 		String bgColor;
 		int from; //y axis range minimum
 		int to; //y axis range maximum
@@ -210,7 +247,7 @@ public class ExportGraph {
 			
 			//enable use of custom font in pdf output
 			String fontName="SansSerif"; //for use in speedometer chart creation
-			if (StringUtils.equals(outputFormat, "pdf") && ArtDBCP.isUseCustomPdfFont()) {				
+			if (ArtDBCP.isUseCustomPdfFont()) {				
 				fontName = ArtDBCP.getArtSetting("pdf_font_name");
 				final Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
 				final Font oldLargeFont = chartTheme.getLargeFont();
@@ -237,27 +274,18 @@ public class ExportGraph {
 				ylabel = rsmd.getColumnLabel(1);
 			}
 
-			//process graph options	string					
-			String options = "";
-			boolean usingShortDescription = true;
-			int indexOf = title.lastIndexOf("@");
-			if (indexOf > -1) {
-				options = title;
-				title = title.substring(0, indexOf);
+			//process graph options	string to get custom width, height (only used for png output), bgcolour, y-min, y-max			
+			
+			//set graph options from query definition
+			ArtQuery aq = new ArtQuery();			
+			aq.create(queryId, false); //populate query attributes, but don't build parameter list
+			
+			//override any custom graph options defined
+			if(graphOptions!=null){
+				aq.setGraphDisplayOptions(graphOptions, false); //sets graph width, height, y-min, y-max, bgcolour
 			}
-
-			if (graphOptions != null) {
-				options = graphOptions;
-				usingShortDescription = false;
-			}
-
-			ArtQuery aq = new ArtQuery();
-			aq.setQueryType(queryType);
-			aq.setGraphDisplayOptions(options, usingShortDescription);
-
-			showLegend = aq.isShowLegend();
-			showLabels = aq.isShowLabels();
-			showPoints = aq.isShowPoints();
+			
+			//graph options have now been set
 			bgColor = aq.getGraphBgColor();
 			width = aq.getGraphWidth();
 			height = aq.getGraphHeight();
@@ -303,7 +331,7 @@ public class ExportGraph {
 					XYPlot xyPlot = (XYPlot) chart.getPlot();
 
 					//show data points if required
-					if (showPoints) {
+					if (showDataPoints) {
 						XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) xyPlot.getRenderer();
 						renderer.setBaseShapesVisible(true);
 					}
@@ -335,7 +363,7 @@ public class ExportGraph {
 					}
 
 					//show data points if required
-					if (showPoints) {
+					if (showDataPoints) {
 						XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) timePlot.getRenderer();
 						renderer.setBaseShapesVisible(true);
 					}
@@ -361,7 +389,7 @@ public class ExportGraph {
 					}
 
 					//show data points if required
-					if (showPoints) {
+					if (showDataPoints) {
 						XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) datePlot.getRenderer();
 						renderer.setBaseShapesVisible(true);
 					}
@@ -376,9 +404,12 @@ public class ExportGraph {
 					DefaultValueDataset speedometerDataset = (DefaultValueDataset) speedometerChart.produceDataset(null);
 
 					//create chart. chartfactory doesn't have a method for creating a meter chart
-					Font titleFont=new Font(fontName, Font.BOLD, 18);
+					Font titleFont=new Font(fontName, Font.BOLD, 18); //font same as in cewolf to achieve similar look
 					MeterPlot speedometerPlot = new MeterPlot(speedometerDataset);
-					chart = new JFreeChart(title, titleFont, speedometerPlot, showLegend); //font same as in cewolf to achieve similar look
+					chart = new JFreeChart(title, titleFont, speedometerPlot, showLegend); 
+					
+					//apply current theme to charts not created using the chartfactory
+					chartTheme.apply(chart);
 
 					//add ranges and any custom formatting
 					speedometerChart.finalizePlot(speedometerPlot);
@@ -407,7 +438,7 @@ public class ExportGraph {
 							chart = ChartFactory.createLineChart(title, xlabel, ylabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 
 							//show data points if required
-							if (showPoints) {
+							if (showDataPoints) {
 								CategoryPlot linePlot = (CategoryPlot) chart.getPlot();
 								LineAndShapeRenderer renderer = (LineAndShapeRenderer) linePlot.getRenderer();
 								renderer.setBaseShapesVisible(true);
@@ -449,8 +480,8 @@ public class ExportGraph {
 							rangeAxis.setRange(from, to);
 						}
 
-						//make x axis labels more readable by breaking them into 2 lines
-						categoryPlot.getDomainAxis().setMaximumCategoryLabelLines(2);
+						//make x axis labels more readable by breaking them into 3 lines
+						categoryPlot.getDomainAxis().setMaximumCategoryLabelLines(3);
 					}
 			}
 
@@ -458,6 +489,9 @@ public class ExportGraph {
 			if (chart != null) {
 				//set chart background colour. doesn't include plot background
 				chart.setBackgroundPaint(Color.decode(bgColor));
+				
+				//display x-axis labels vertically if too many categories present
+				rotateAxis(chart);
 				
 				if (outputFormat.equals("png")) {
 					fullFileName = fullFileNameWithoutExt + ".png";
@@ -467,7 +501,7 @@ public class ExportGraph {
 
 					//include graph data if applicable
 					RowSetDynaClass graphData;
-					if (showGraphData) {
+					if (showData) {
 						int rsType = rs.getType();
 						if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
 							rs.beforeFirst();
@@ -498,4 +532,50 @@ public class ExportGraph {
 			}
 		}
 	}
+	
+	/**
+	 * Display x-axis labels vertically if the chart has many categories
+	 * Code from cewolf RotatedAxisLabels.java
+	 * @param chart 
+	 */
+	private void rotateAxis(JFreeChart chart){
+		Plot plot = chart.getPlot();
+		Axis axis = null;
+		int numValues = 0;
+
+		if (plot instanceof CategoryPlot) {
+			axis = ((CategoryPlot) plot).getDomainAxis();
+			numValues = ((CategoryPlot) plot).getDataset().getRowCount();
+		} else if (plot instanceof XYPlot) {
+			axis = ((XYPlot) plot).getDomainAxis();
+			numValues = ((XYPlot) plot).getDataset().getItemCount(0);
+		} else if (plot instanceof FastScatterPlot) {
+			axis = ((FastScatterPlot) plot).getDomainAxis();
+			numValues = ((FastScatterPlot) plot).getData()[0].length;
+		}
+
+		if (axis instanceof CategoryAxis) {
+			CategoryAxis catAxis = (CategoryAxis) axis;
+
+			if (rotateThreshold > 0) {
+				if (numValues >= rotateThreshold) {
+					catAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+				} else {
+					catAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
+				}
+			}
+		} else if (axis instanceof ValueAxis) {
+			ValueAxis valueAxis = (ValueAxis) axis;
+
+			if (rotateThreshold > 0) {
+				valueAxis.setVerticalTickLabels(numValues >= rotateThreshold);
+			}
+		}
+
+		if ((axis != null) && (removeThreshold > 0)) {
+			axis.setTickLabelsVisible(numValues < removeThreshold);
+		}
+	}
+
+	
 }

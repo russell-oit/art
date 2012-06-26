@@ -260,7 +260,7 @@ public class ArtDBCP extends HttpServlet {
 		//load settings from art.properties file
 		if (!loadArtSettings()) {
 			//art.properties not available. don't continue as required configuration settings will be missing
-			logger.warn("Not able to get ART settings file (WEB-INF/art.properties). Admin should define ART settings at first logon");
+			logger.warn("Not able to get ART settings file (WEB-INF/art.properties). Admin should define ART settings on first logon");
 			return;
 		}
 

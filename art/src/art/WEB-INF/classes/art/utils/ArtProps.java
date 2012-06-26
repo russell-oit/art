@@ -100,7 +100,7 @@ public class ArtProps {
 			
 			success=true;
 		} catch(FileNotFoundException e) {
-			logger.warn("The {} file has not been created yet",fileName);			
+			logger.warn("The file {} has not been created yet",fileName);			
 		} catch(Exception e) {
 			logger.error("Error",e);
 		}

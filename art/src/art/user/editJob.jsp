@@ -390,6 +390,21 @@ if (request.getParameter("jobName").equals("")){
  if (request.getParameter("_showGraphData")!=null){
      job.setShowGraphData(true);
  }
+ 
+ //enable use of custom graph settings
+ if (request.getParameter("_showDataPoints")!=null){
+     job.setShowGraphDataPoints(true);
+ }
+  if (request.getParameter("_showLegend")!=null){
+     job.setShowGraphLegend(true);
+ }
+  if (request.getParameter("_showLabels")!=null){
+     job.setShowGraphLabels(true);
+ }
+ String jobGraphOptions=request.getParameter("_GRAPH_SIZE");
+ if(!StringUtils.isBlank(jobGraphOptions) && !StringUtils.equalsIgnoreCase(jobGraphOptions, "default")){
+	 job.setJobGraphOptions(jobGraphOptions);
+ }
  %>
 </c:if>
 

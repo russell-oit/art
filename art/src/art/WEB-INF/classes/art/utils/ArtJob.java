@@ -126,7 +126,7 @@ public class ArtJob implements Job {
 	String queryShortDescription;
 	String xaxisLabel;
 	String yaxisLabel;
-	String graphOptions;
+	String queryGraphOptions; //graph options defined for the query
 	//
 	Map<String, String[]> multiParams;
 	Map<String, String> inlineParams;
@@ -136,9 +136,13 @@ public class ArtJob implements Job {
 	java.sql.Timestamp jobStartDate; //store job start date. relevant for split jobs
 	String jobAuditKey = ""; //hold identifier for a job run in the audit table
 	String jobOwnerStatus; //if job owner is not active, don't run job
-	boolean showParameters = false; //to enable display of parameters in reports
+	boolean showParameters; //to enable display of parameters in reports
 	Map<Integer, ArtQueryParam> displayParams; //to enable display of parameters in reports
-	boolean showGraphData=false; //to enable display of graph data below graph for pdf output
+	boolean showGraphData; //to enable display of graph data below graph for pdf output
+	private boolean showGraphLegend;
+	private boolean showGraphLabels;
+	private boolean showGraphDataPoints;
+	private String jobGraphOptions; //custom graph options defined for the job
 	
 
 	/**
@@ -148,6 +152,70 @@ public class ArtJob implements Job {
 	 */
 	public ArtJob() {
 		exportPath = ArtDBCP.getExportPath();
+	}
+
+	/**
+	 * Get the custom graph options defined for the job
+	 * @return the custom graph options defined for the job
+	 */
+	public String getJobGraphOptions() {
+		return jobGraphOptions;
+	}
+
+	/**
+	 * Set the custom graph options defined for the job
+	 * @param jobGraphOptions the custom graph options defined for the job
+	 */
+	public void setJobGraphOptions(String jobGraphOptions) {
+		this.jobGraphOptions = jobGraphOptions;
+	}
+
+	/**
+	 * Determine if graph legend should be shown
+	 * @return
+	 */
+	public boolean isShowGraphLegend() {
+		return showGraphLegend;
+	}
+
+	/**
+	 * Determine if graph legend should be shown
+	 * @param showGraphLegend
+	 */
+	public void setShowGraphLegend(boolean showGraphLegend) {
+		this.showGraphLegend = showGraphLegend;
+	}
+
+	/**
+	 * Determine if graph labels should be shown
+	 * @return
+	 */
+	public boolean isShowGraphLabels() {
+		return showGraphLabels;
+	}
+
+	/**
+	 * Determine if graph labels should be shown
+	 * @param showGraphLabels
+	 */
+	public void setShowGraphLabels(boolean showGraphLabels) {
+		this.showGraphLabels = showGraphLabels;
+	}
+
+	/**
+	 * Determine if graph data points should be shown
+	 * @return
+	 */
+	public boolean isShowGraphDataPoints() {
+		return showGraphDataPoints;
+	}
+
+	/**
+	 * Determine if graph data points should be shown
+	 * @param showGraphDataPoints
+	 */
+	public void setShowGraphDataPoints(boolean showGraphDataPoints) {
+		this.showGraphDataPoints = showGraphDataPoints;
 	}
 	
 	/**
@@ -1103,10 +1171,15 @@ public class ArtJob implements Job {
 						eg.setOutputFormat(outputFormat); // png or pdf
 						eg.setXlabel(xaxisLabel);
 						eg.setYlabel(yaxisLabel);
-						eg.setTitle(queryShortDescription);
-						eg.setGraphOptions(graphOptions);
-						eg.setShowGraphData(showGraphData); //enable display of graph data below graph for pdf graph output
+						eg.setTitle(queryShortDescription);						
+						eg.setShowData(showGraphData); //enable display of graph data below graph for pdf graph output
 						eg.setDisplayParameters(displayParams); //enable display of graph parameters above graph for pdf graph output
+						eg.setShowDataPoints(showGraphDataPoints);
+						eg.setShowLegend(showGraphLegend);
+						eg.setShowLabels(showGraphLabels);
+						eg.setQueryId(queryId);	
+						eg.setGraphOptions(jobGraphOptions);
+												
 						eg.createFile(rs, queryType);
 						fileName = eg.getFileName();
 					} else if (queryType == 115 || queryType == 116) {
@@ -1754,6 +1827,56 @@ public class ArtJob implements Job {
 				ps.executeUpdate();
 				ps.close();
 			}
+			
+			//enable custom graph settings
+			if (showGraphDataPoints) {
+				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
+						+ " VALUES (?,?,?,?)";
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+				ps.setString(2, "O");
+				ps.setString(3, "_showGraphDataPoints");
+				ps.setString(4, "true");
+
+				ps.executeUpdate();
+				ps.close();
+			}
+			if (showGraphLegend) {
+				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
+						+ " VALUES (?,?,?,?)";
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+				ps.setString(2, "O");
+				ps.setString(3, "_showGraphLegend");
+				ps.setString(4, "true");
+
+				ps.executeUpdate();
+				ps.close();
+			}
+			if (showGraphLabels) {
+				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
+						+ " VALUES (?,?,?,?)";
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+				ps.setString(2, "O");
+				ps.setString(3, "_showGraphLabels");
+				ps.setString(4, "true");
+
+				ps.executeUpdate();
+				ps.close();
+			}
+			if (!StringUtils.isBlank(jobGraphOptions)) {
+				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
+						+ " VALUES (?,?,?,?)";
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+				ps.setString(2, "O");
+				ps.setString(3, "_graphOptions");
+				ps.setString(4, jobGraphOptions);
+
+				ps.executeUpdate();
+				ps.close();
+			}
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
 		} finally {
@@ -1915,7 +2038,7 @@ public class ArtJob implements Job {
 				queryShortDescription = rs.getString("SHORT_DESCRIPTION");
 				xaxisLabel = rs.getString("X_AXIS_LABEL");
 				yaxisLabel = rs.getString("Y_AXIS_LABEL");
-				graphOptions = rs.getString("GRAPH_OPTIONS");
+				queryGraphOptions = rs.getString("GRAPH_OPTIONS");
 
 				setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
 				setStartDate(rs.getDate("START_DATE"));
@@ -2074,6 +2197,18 @@ public class ArtJob implements Job {
 					} else if(StringUtils.equals(paramName, "_showGraphData")){
 						//enable display of graph data in pdf graph output
 						showGraphData=true;
+					} else if(StringUtils.equals(paramName, "_showGraphDataPoints")){
+						//enable display of graph data points
+						showGraphDataPoints=true;
+					} else if(StringUtils.equals(paramName, "_showGraphLegend")){
+						//enable display of graph legend
+						showGraphLegend=true;
+					} else if(StringUtils.equals(paramName, "_showGraphLabels")){
+						//enable display of graph labels
+						showGraphLabels=true;
+					} else if(StringUtils.equals(paramName, "_graphOptions")){
+						//enable use of custom graph options
+						jobGraphOptions=paramValue;
 					}
 				}
 			}
