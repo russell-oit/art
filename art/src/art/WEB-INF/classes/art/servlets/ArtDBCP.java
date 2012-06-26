@@ -80,7 +80,8 @@ public class ArtDBCP extends HttpServlet {
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
 	private static boolean pdfFontEmbedded = false; //determines if custom font should be embedded in the generated pdf
-
+	
+	
 	/**
 	 * {@inheritDoc}
 	 *
@@ -96,8 +97,7 @@ public class ArtDBCP extends HttpServlet {
 
 		ctx = getServletConfig().getServletContext();
 
-		ArtDBCPInit();
-
+		ArtDBCPInit();		
 	}
 
 	/**
@@ -210,8 +210,7 @@ public class ArtDBCP extends HttpServlet {
 
 		//set art.properties file path
 		artPropertiesFilePath = appPath + sep + "WEB-INF" + sep + "art.properties";
-
-
+		
 		//Get user view modes from web.xml file. if a view mode is not in the user list, then it's hidden
 		StringTokenizer stCode = new StringTokenizer(ctx.getInitParameter("userViewModesList"), ",");
 		String token;
@@ -283,17 +282,17 @@ public class ArtDBCP extends HttpServlet {
 		if (useCustomPdfFont) {
 			//register pdf font if not already registered
 			String pdfFontName = getArtSetting("pdf_font_name");
-			if (!StringUtils.isBlank(pdfFontName) && !FontFactory.isRegistered(pdfFontName)) {
+			if (!FontFactory.isRegistered(pdfFontName)) {
 				//font not registered. register any defined font files or directories
 				String pdfFontDirectory = ap.getProp("pdf_font_directory");
-				if (!StringUtils.isBlank(pdfFontDirectory)) {
+				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					logger.info("Registering fonts from directory: {}", pdfFontDirectory);
 					int i = FontFactory.registerDirectory(pdfFontDirectory);
 					logger.info("{} fonts registered", i);
 				}
 
 				String pdfFontFile = ap.getProp("pdf_font_file");
-				if (!StringUtils.isBlank(pdfFontFile)) {
+				if (StringUtils.isNotBlank(pdfFontFile)) {
 					logger.info("Registering font file: {}", pdfFontFile);
 					FontFactory.register(pdfFontFile);
 					logger.info("Font file {} registered", pdfFontFile);

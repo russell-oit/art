@@ -4,9 +4,10 @@
 package art.output;
 
 import art.utils.ArtQueryParam;
-import java.io.*;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Fancy html output mode
@@ -99,7 +100,7 @@ public class htmlOutput implements ArtOutputInterface {
                 Object pValue = param.getParamValue();
 
                 if (pValue instanceof String) {
-                    out.println(paramName + ":" + pValue + " <br> ");
+                    out.println(paramName + ": " + pValue + " <br> ");
                 } else if (pValue instanceof String[]) { // multi
                     StringBuilder pValuesSb = new StringBuilder(256);
                     String[] pValues = (String[]) pValue;

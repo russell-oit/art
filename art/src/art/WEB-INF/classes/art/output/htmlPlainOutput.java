@@ -108,7 +108,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
                 Object pValue = param.getParamValue();
 
                 if (pValue instanceof String) {
-                    out.println(paramName + ":" + pValue + " <br> ");
+                    out.println(paramName + ": " + pValue + " <br> ");
                 } else if (pValue instanceof String[]) { // multi
                     StringBuilder pValuesSb = new StringBuilder(256);
                     String[] pValues = (String[]) pValue;

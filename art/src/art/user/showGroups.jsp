@@ -14,13 +14,7 @@ boolean canChangePassword=ue.isCanChangePassword();
 
 function setAction() {
 	val = document.queryForm.typeId.value ;
-	if (val == 110){
-		if (document.getElementById('editPortletsParameters').checked == true) {
-			document.queryForm.action = "showParams.jsp";
-		} else {
-			document.queryForm.action = "showPortlets.jsp";
-		}
-	} else if (val == 111){
+	if (val == 111){
 		document.queryForm.action = "showText.jsp";
 	} else {
 		document.queryForm.action = "showParams.jsp";

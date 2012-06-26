@@ -1,6 +1,6 @@
 package art.output;
 
-import java.io.*;
+import java.io.PrintWriter;
 
 /**
  * Generate "Report on column x" reports

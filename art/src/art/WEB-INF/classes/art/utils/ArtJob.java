@@ -1865,7 +1865,7 @@ public class ArtJob implements Job {
 				ps.executeUpdate();
 				ps.close();
 			}
-			if (!StringUtils.isBlank(jobGraphOptions)) {
+			if (StringUtils.isNotBlank(jobGraphOptions)) {
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
 						+ " VALUES (?,?,?,?)";
 				ps = conn.prepareStatement(sql);

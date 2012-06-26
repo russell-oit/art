@@ -114,14 +114,14 @@ public class PdfGraph {
 				String pdfFontFile = ArtDBCP.getArtSetting("pdf_font_file");
 				String pdfFontEncoding = ArtDBCP.getArtSetting("pdf_font_encoding");
 				boolean pdfFontEmbedded = ArtDBCP.isPdfFontEmbedded();
-				if (!StringUtils.isBlank(pdfFontDirectory)) {
+				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					mapper.insertDirectory(pdfFontDirectory);
 					fp = mapper.getBaseFontParameters(pdfFontName);
 					if (fp != null) {
 						fp.encoding = pdfFontEncoding;
 						fp.embedded = pdfFontEmbedded;
 					}
-				} else if (!StringUtils.isBlank(pdfFontFile)) {
+				} else if (StringUtils.isNotBlank(pdfFontFile)) {
 					fp = new BaseFontParameters(pdfFontFile);
 					fp.encoding = pdfFontEncoding;
 					fp.embedded = pdfFontEmbedded;

@@ -349,9 +349,12 @@ public class XmlDataProvider extends BaseAjaxServlet {
                 builder.append(messages.getString("targetDatasource") + " <b>" + rs.getString("DATABASE_NAME") + "</b><br>");
             }
 
+			//remove show params checkbox. let parameters always be shown
+			/*
             if (typeId == 110) { // add show params checkbox for dashboards
                 builder.append("<input type=\"checkbox\" id=\"editPortletsParameters\" name=\"editPortletsParameters\" value=\"true\" checked>" + messages.getString("editPortletsParameters"));
             }
+			*/
 
             builder.append("<input type=\"hidden\" name=\"typeId\" value=\"" + typeId + "\">");
             builder.append("</fieldset>");

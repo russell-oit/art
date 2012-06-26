@@ -402,7 +402,7 @@ if (request.getParameter("jobName").equals("")){
      job.setShowGraphLabels(true);
  }
  String jobGraphOptions=request.getParameter("_GRAPH_SIZE");
- if(!StringUtils.isBlank(jobGraphOptions) && !StringUtils.equalsIgnoreCase(jobGraphOptions, "default")){
+ if(StringUtils.isNotBlank(jobGraphOptions) && !StringUtils.equalsIgnoreCase(jobGraphOptions, "default")){
 	 job.setJobGraphOptions(jobGraphOptions);
  }
  %>
