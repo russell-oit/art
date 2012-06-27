@@ -30,15 +30,15 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.text.*;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Execute query
@@ -138,7 +138,7 @@ public class PreparedQuery {
      * 
      * @param b 
      */
-    public void isUseSmartRules(boolean b) {
+    public void setUseSmartRules(boolean b) {
         useSmartRules = b;
     }
 

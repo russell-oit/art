@@ -46,7 +46,7 @@ public class ArtQueryParam implements Serializable{
     String description = "";
     String fieldClass = "";
     String defaultValue = "";
-    String useLov = "";
+    String useLov = "";	
     String paramType = "";
     String paramLabel = "";
     String applyRulesToLov = "";
@@ -61,15 +61,30 @@ public class ArtQueryParam implements Serializable{
     //variables to support bind parameters
     String bindQuerySql = "";
     boolean[] bindVector;
-    //
-    //variables to store parameter values
-    Object paramValue; //either String for inline parameters or String[] for multi parameters
+    //    
+    Object paramValue; //store parameter values. either String for inline parameters or String[] for multi parameters
+	
 
     /**
      * 
      */
     public ArtQueryParam() {
     }
+
+	/**
+	 * Utility method to determine if the parameter uses an lov query for its values
+	 * @return the <code>false</code> is use_lov column has 'N'. <code>true</code> otherwise
+	 */
+	public boolean isUsesLov() {
+		boolean usesLov;
+		if(StringUtils.equals(useLov,"N")){
+			usesLov=false;
+		} else {
+			usesLov=true;
+		}
+		
+		return usesLov;
+	}
 
     /**
      * 
@@ -546,7 +561,7 @@ public class ArtQueryParam implements Serializable{
     }
 
     /**
-     * Delete an existing param from the database
+     * Delete an existing parameter from the database
      *
      *
      * @param conn 
@@ -681,7 +696,7 @@ public class ArtQueryParam implements Serializable{
      * @return string around bind variable
      */
     public String getStringAroundBind(int pos) {
-        String result = "";
+        String result;
 
         int index = 0;
         for (int i = 0; i < pos && index >= 0; i++) {
@@ -780,4 +795,5 @@ public class ArtQueryParam implements Serializable{
 
         return displayName;
     }
+		
 }

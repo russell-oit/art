@@ -123,7 +123,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             PreparedQuery pq = new PreparedQuery();
             pq.setUsername(username);
             pq.setQueryId(queryId);
-            pq.isUseSmartRules(false);
+            pq.setUseSmartRules(false);
 
             // Get parameters
             String filter = request.getParameter("filter");

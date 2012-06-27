@@ -26,7 +26,9 @@
  */
 package art.utils;
 
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,19 +79,28 @@ public class ParameterProcessor {
         String label; //parameter label        
         Map<Integer, ArtQueryParam> displayParams = null; //display parameters. contains param position and list with display name and value                
         
-
-        boolean showParams = false;
-        if (request.getParameter("_showParams") != null) {
-            showParams = true;
-        }
+        
+		boolean showParams; 
+		ArtQuery aq = new ArtQuery();
+		boolean alwaysShowParams=aq.isAlwaysShowParameters(queryId);
+		if(alwaysShowParams){
+			//always show params, regardless of whether _showParams html parameter exists. especially for drill down queries
+			showParams=true;
+		} else {
+			//consider the user's choice
+			if (request.getParameter("_showParams") != null) {
+				showParams = true;
+			} else {
+				showParams=false;
+			}
+		}
 
         if (showParams) {
             displayParams = new TreeMap<Integer, ArtQueryParam>(); //use treemap so that params can be displayed in field position order
         }
 
         if(htmlParams==null){
-            //get list of all valid parameters. used with display params and counters sql injection from direct url execution
-            ArtQuery aq = new ArtQuery();
+            //get list of all valid parameters. used with display params and counters sql injection from direct url execution            
             htmlParams = aq.getHtmlParams(queryId);
         }
 

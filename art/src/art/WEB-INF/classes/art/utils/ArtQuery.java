@@ -2193,5 +2193,54 @@ public class ArtQuery {
 
         return params;
     }
+	
+	/**
+	 * Determine if parameter values should be shown for a query
+	 * Especially for drill down queries where there's no chance to check/uncheck the show parameters check box
+	 * @return 
+	 */
+	public boolean isAlwaysShowParameters(int qId){
+		boolean alwaysShow=false;
+
+        Connection conn = null;
+
+        try {
+            conn = ArtDBCP.getConnection();
+
+            String sql;
+            PreparedStatement ps;
+            ResultSet rs;
+
+            sql = "SELECT SHOW_PARAMETERS "
+                    + " FROM ART_QUERIES WHERE QUERY_ID =?";
+
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, qId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String setting = rs.getString("SHOW_PARAMETERS");
+				if(StringUtils.equals(setting,"A")){					
+					alwaysShow=true;
+				}                
+            }
+
+            ps.close();
+            rs.close();
+
+        } catch (Exception e) {
+            logger.error("Error",e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                logger.error("Error",e);
+            }
+        }
+
+        return alwaysShow;
+	}
    
 }

@@ -9,7 +9,6 @@ When     Who  What
 package art.params;
 
 import art.utils.PreparedQuery;
-
 import java.util.Iterator;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -151,7 +150,7 @@ public class HtmlLovParam implements ParamInterface {
             pq = new PreparedQuery();
             pq.setUsername(username);
             pq.setQueryId(lovQueryId);
-            pq.isUseSmartRules(useSmartRules);
+            pq.setUseSmartRules(useSmartRules);
                         
             String selected;
             String value;
