@@ -2199,7 +2199,7 @@ public class ArtQuery {
 	 * Especially for drill down queries where there's no chance to check/uncheck the show parameters check box
 	 * @return 
 	 */
-	public boolean isAlwaysShowParameters(int qId){
+	public boolean alwaysShowParameters(int qId){
 		boolean alwaysShow=false;
 
         Connection conn = null;

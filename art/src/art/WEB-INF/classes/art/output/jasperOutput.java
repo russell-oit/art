@@ -41,7 +41,7 @@ public class jasperOutput {
     
     String fullFileName = "-No File";
     String queryName;
-    String userName;
+    String fileUserName;
     String outputFormat;
     String y_m_d;
     String h_m_s;
@@ -93,8 +93,8 @@ public class jasperOutput {
      * Set the username to be used in the file name
      * @param s username to be used in the file name
      */
-    public void setUserName(String s) {
-        userName = s;
+    public void setFileUserName(String s) {
+        fileUserName = s;
     }
 
     /**
@@ -273,7 +273,7 @@ public class jasperOutput {
             SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
             h_m_s = timeFormatter.format(today);
 
-            String fileName = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
+            String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
             fileName=ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename
             String fullFileNameWithoutExt = exportPath + fileName;
 

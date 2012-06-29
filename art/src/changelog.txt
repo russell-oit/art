@@ -3,8 +3,9 @@ ART 2.3
 * Allow username and password field values to be used for CUBRID database
 * Allow blank passwords for datasources
 * Allow "not equals" operator for dynamic queries
-* Support display of unicode characters in pdf output
+* Support display of unicode characters in pdf output and charts
 * Enable display of graph parameters and data in pdf output
+* When using show parameters option, for lov parameters, display actual parameter value and friendly display value
 * Updated quartz to 2.1.5
 * Updated jasperreports to 4.6
 

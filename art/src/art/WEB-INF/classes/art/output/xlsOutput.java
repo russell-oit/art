@@ -1,12 +1,15 @@
 package art.output;
 
 import art.servlets.ArtDBCP;
-
 import art.utils.ArtQueryParam;
-import java.io.*;
-import java.util.*;
-import java.text.SimpleDateFormat; //smileybits 20100212. format dates using simpledateformat class
-
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,28 +24,30 @@ public class xlsOutput implements ArtOutputInterface {
 
     final static Logger logger = LoggerFactory.getLogger(xlsOutput.class);
     
-    FileOutputStream ou;
+    FileOutputStream fout;
     HSSFWorkbook wb;
     HSSFSheet sheet;
-    HSSFRow r;
-    HSSFCell c;
+    HSSFRow row;
+    HSSFCell cell;
     HSSFCellStyle headerStyle;
     HSSFCellStyle bodyStyle;
     HSSFCellStyle dateStyle;
-    HSSFFont fh;
-    HSSFFont fb;
+    HSSFFont headerFont;
+    HSSFFont bodyFont;
     int currentRow;
     String filename;
     String fullFileName;
     PrintWriter htmlout;
     String queryName;
-    String userName;
+    String fileUserName;
     int maxRows;
     int columns;
     int cellNumber;
     String y_m_d;
     String h_m_s;
     Map<Integer, ArtQueryParam> displayParams;
+	String exportPath;
+		
 
     /**
      * Constructor
@@ -62,51 +67,7 @@ public class xlsOutput implements ArtOutputInterface {
 
     @Override
     public void setExportPath(String s) {
-        // Build filename		
-        Date today = new Date();
-
-        String dateFormat = "yyyy_MM_dd";
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-        y_m_d = dateFormatter.format(today);
-
-        String timeFormat = "HH_mm_ss";
-        SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
-        h_m_s = timeFormatter.format(today);
-
-        filename = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".xls";
-        filename=ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
-
-        try {
-            fullFileName = s + filename;
-            ou = new FileOutputStream(fullFileName);
-            wb = new HSSFWorkbook();
-            sheet = wb.createSheet();
-            r = null;
-            c = null;
-            headerStyle = wb.createCellStyle();
-            bodyStyle = wb.createCellStyle();
-            fh = wb.createFont();
-            fb = wb.createFont();
-
-            currentRow = 0;
-
-            fh.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-            fh.setColor(org.apache.poi.hssf.util.HSSFColor.BLUE.index);
-            fh.setFontHeightInPoints((short) 12);
-            headerStyle.setFont(fh);
-            headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
-
-            fb.setColor(HSSFFont.COLOR_NORMAL);
-            fb.setFontHeightInPoints((short) 10);
-            bodyStyle.setFont(fb);
-
-            dateStyle = wb.createCellStyle();
-            dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
-            dateStyle.setFont(fb);
-
-        } catch (IOException e) {
-            logger.error("Error",e);
-        }
+		exportPath=s;		
     }
 
     @Override
@@ -125,8 +86,8 @@ public class xlsOutput implements ArtOutputInterface {
     }
 
     @Override
-    public void setUserName(String s) {
-        userName = s;
+    public void setFileUserName(String s) {
+        fileUserName = s;
     }
 
     @Override
@@ -146,6 +107,9 @@ public class xlsOutput implements ArtOutputInterface {
 
     @Override
     public void beginHeader() {
+		//initialize objects required for output
+		initializeOutput();
+		
         final int MAX_SHEET_NAME = 30; //excel max is 31
         String sheetName = queryName;
         if (sheetName.length() > MAX_SHEET_NAME) {
@@ -159,7 +123,7 @@ public class xlsOutput implements ArtOutputInterface {
 
         // Output parameter values list
         if (displayParams != null && displayParams.size()>0) {
-            // rows with params names
+            // rows with parameter names
             newLine();
             Iterator it = displayParams.entrySet().iterator();
             while (it.hasNext()) {
@@ -168,25 +132,57 @@ public class xlsOutput implements ArtOutputInterface {
                 String paramName=param.getName();
                 addHeaderCell(paramName);
             }
-            // rows with params values
+			
+            // rows with parameter values
             newLine();
             it = displayParams.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 ArtQueryParam param=(ArtQueryParam)entry.getValue();                
                 Object pValue = param.getParamValue();
+				String outputString;
 
                 if (pValue instanceof String) {
-                    addCellString((String) pValue);
+                    String paramValue = (String) pValue;
+					outputString = paramValue; //default to displaying parameter value
+
+					if (param.usesLov()) {
+						//for lov parameters, show both parameter value and display string if any
+						Map<String, String> lov = param.getLovValues();
+						if (lov != null) {
+							//get friendly/display string for this value
+							String paramDisplayString = lov.get(paramValue);
+							if (!StringUtils.equals(paramValue, paramDisplayString)) {
+								//parameter value and display string differ. show both
+								outputString = paramDisplayString + " (" + paramValue + ")";
+							}
+						}
+					}					
+					addCellString(outputString);
                 } else if (pValue instanceof String[]) { // multi
-                    // decode the parameters handling multi one
-                    StringBuilder pValuesSb = new StringBuilder(256);
-                    String[] pValues = (String[]) pValue;
-                    for (int i = 0; i < pValues.length; i++) {
-                        pValuesSb.append(pValues[i]);
-                        pValuesSb.append(",");
-                    }
-                    addCellString(pValuesSb.toString());
+                    String[] paramValues = (String[]) pValue;
+					outputString = StringUtils.join(paramValues, ", "); //default to showing parameter values only
+
+					if (param.usesLov()) {
+						//for lov parameters, show both parameter value and display string if any
+						Map<String, String> lov = param.getLovValues();
+						if (lov != null) {
+							//get friendly/display string for all the parameter values
+							String[] paramDisplayStrings = new String[paramValues.length];
+							for (int i = 0; i < paramValues.length; i++) {
+								String value = paramValues[i];
+								String display = lov.get(value);
+								if (!StringUtils.equals(display, value)) {
+									//parameter value and display string differ. show both
+									paramDisplayStrings[i] = display + " (" + value + ")";
+								} else {
+									paramDisplayStrings[i] = value;
+								}
+							}
+							outputString = StringUtils.join(paramDisplayStrings, ", ");
+						}
+					}					
+					addCellString(outputString);
                 }
             }
         }
@@ -196,16 +192,16 @@ public class xlsOutput implements ArtOutputInterface {
 
     @Override
     public void addHeaderCell(String s) {
-        c = r.createCell(cellNumber++);
-        c.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell = row.createCell(cellNumber++);
+        cell.setCellType(HSSFCell.CELL_TYPE_STRING);
 
         //upgraded from poi 2.5. setencoding deprecated and removed. POI now automatically handles Unicode without forcing the encoding
         //use undeprecated setcellvalue overload
         //c.setEncoding(HSSFCell.ENCODING_UTF_16);  
         //c.setCellValue(s);
-        c.setCellValue(new HSSFRichTextString(s));
+        cell.setCellValue(new HSSFRichTextString(s));
 
-        c.setCellStyle(headerStyle);
+        cell.setCellStyle(headerStyle);
     }
 
     @Override
@@ -220,50 +216,50 @@ public class xlsOutput implements ArtOutputInterface {
 
     @Override
     public void addCellString(String s) {
-        c = r.createCell(cellNumber++);
-        c.setCellType(HSSFCell.CELL_TYPE_STRING);
+        cell = row.createCell(cellNumber++);
+        cell.setCellType(HSSFCell.CELL_TYPE_STRING);
 
         //upgraded from poi 2.5. setencoding deprecated and removed. POI now automatically handles Unicode without forcing the encoding
         //use undeprecated setcellvalue overload
         //c.setEncoding(HSSFCell.ENCODING_UTF_16); 
         //c.setCellValue(s);
-        c.setCellValue(new HSSFRichTextString(s));
+        cell.setCellValue(new HSSFRichTextString(s));
 
-        c.setCellStyle(bodyStyle);
+        cell.setCellStyle(bodyStyle);
     }
 
     @Override
     public void addCellDouble(Double d) {
-        c = r.createCell(cellNumber++);
+        cell = row.createCell(cellNumber++);
         if (d != null) {
-            c.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
-            c.setCellValue(d);
-            c.setCellStyle(bodyStyle);
+            cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+            cell.setCellValue(d);
+            cell.setCellStyle(bodyStyle);
         }
     }
 
     @Override
     public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-        c = r.createCell(cellNumber++);
+        cell = row.createCell(cellNumber++);
         if (i != null) {
-            c.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
-            c.setCellValue(i);
-            c.setCellStyle(bodyStyle);
+            cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+            cell.setCellValue(i);
+            cell.setCellStyle(bodyStyle);
         }
     }
 
     @Override
     public void addCellDate(java.util.Date d) {
-        c = r.createCell(cellNumber++);
+        cell = row.createCell(cellNumber++);
         if (d != null) {
-            c.setCellValue(d);
-            c.setCellStyle(dateStyle);
+            cell.setCellValue(d);
+            cell.setCellStyle(dateStyle);
         }
     }
 
     @Override
     public boolean newLine() {
-        r = sheet.createRow(currentRow++);
+        row = sheet.createRow(currentRow++);
         cellNumber = 0;
 
         if (currentRow <= maxRows + 2) { //+2 because of query title and column header rows
@@ -284,8 +280,8 @@ public class xlsOutput implements ArtOutputInterface {
     @Override
     public void endLines() {
         try {
-            wb.write(ou);
-            ou.close();
+            wb.write(fout);
+            fout.close();
 
             //htmlout not used for scheduled jobs
             if (htmlout != null) {
@@ -306,4 +302,63 @@ public class xlsOutput implements ArtOutputInterface {
     public boolean isDefaultHtmlHeaderAndFooterEnabled() {
         return true;
     }
+	
+	/**
+	 * Build filename for output file
+	 */
+	private void buildOutputFileName() {
+		// Build filename		
+        Date today = new Date();
+
+        String dateFormat = "yyyy_MM_dd";
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+        y_m_d = dateFormatter.format(today);
+
+        String timeFormat = "HH_mm_ss";
+        SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
+        h_m_s = timeFormatter.format(today);
+
+        filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".xls";
+        filename=ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
+        
+        fullFileName = exportPath + filename;
+	}
+	
+	/**
+	 * Initialise objects required to generate output
+	 */
+	private void initializeOutput(){
+		buildOutputFileName();
+		
+		 try {    			 					 
+            fout = new FileOutputStream(fullFileName);
+            wb = new HSSFWorkbook();
+            sheet = wb.createSheet();
+            row = null;
+            cell = null;
+            headerStyle = wb.createCellStyle();
+            bodyStyle = wb.createCellStyle();
+            headerFont = wb.createFont();
+            bodyFont = wb.createFont();
+
+            currentRow = 0;
+
+            headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+            headerFont.setColor(org.apache.poi.hssf.util.HSSFColor.BLUE.index);
+            headerFont.setFontHeightInPoints((short) 12);
+            headerStyle.setFont(headerFont);
+            headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
+
+            bodyFont.setColor(HSSFFont.COLOR_NORMAL);
+            bodyFont.setFontHeightInPoints((short) 10);
+            bodyStyle.setFont(bodyFont);
+
+            dateStyle = wb.createCellStyle();
+            dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+            dateStyle.setFont(bodyFont);
+
+        } catch (IOException e) {
+            logger.error("Error",e);
+        }
+	}
 }

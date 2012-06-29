@@ -605,7 +605,7 @@ public class QueryExecute extends HttpServlet {
                     pq = new PreparedQuery();
                     pq.setUsername(username);
                     pq.setQueryId(queryId);
-                    pq.isAdminSession(adminSession);
+                    pq.setAdminSession(adminSession);
 
 
                     /*****************************************************************************
@@ -707,8 +707,9 @@ public class QueryExecute extends HttpServlet {
                             o.setMaxRows(ArtDBCP.getMaxRows(viewMode));
                             o.setWriter(out);
                             o.setQueryName(queryName);
-                            o.setUserName(username);
+                            o.setFileUserName(username);
                             o.setExportPath(baseExportPath);
+							o.setDisplayParameters(displayParams);
 
                         } catch (Exception e) {
                             logger.error("Error setting properties for class: {}", viewMode, e);
@@ -731,7 +732,7 @@ public class QueryExecute extends HttpServlet {
                         probe = 91;
                         jasperOutput jasper = new jasperOutput();
                         jasper.setQueryName(queryName);
-                        jasper.setUserName(username);
+                        jasper.setFileUserName(username);
                         jasper.setExportPath(baseExportPath);
                         jasper.setOutputFormat(viewMode);
                         jasper.setWriter(out);
@@ -749,7 +750,7 @@ public class QueryExecute extends HttpServlet {
                         probe = 92;
                         jxlsOutput jxls = new jxlsOutput();
                         jxls.setQueryName(queryName);
-                        jxls.setUserName(username);
+                        jxls.setFileUserName(username);
                         jxls.setExportPath(baseExportPath);                        
                         jxls.setWriter(out);
                         if (queryType == 117) {
@@ -796,7 +797,7 @@ public class QueryExecute extends HttpServlet {
                                 } else {
                                     if (request.getParameter("_isCrosstab") != null) {
                                         /* CROSSTAB */
-                                        numberOfRows = ArtOutHandler.flushXOutput(messages, o, rs, rsmd, displayParams);
+                                        numberOfRows = ArtOutHandler.flushXOutput(messages, o, rs, rsmd);
                                     } else {
                                         /* NORMAL TABULAR OUTPUT */
 
@@ -806,7 +807,7 @@ public class QueryExecute extends HttpServlet {
                                             //only drill down for html output. drill down query launched from hyperlink                                            
                                             drilldownQueries = aq.getDrilldownQueries(queryId);
                                         }
-                                        numberOfRows = ArtOutHandler.flushOutput(messages, o, rs, rsmd, displayParams, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+                                        numberOfRows = ArtOutHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
                                     }
                                     probe = 130;
                                 }

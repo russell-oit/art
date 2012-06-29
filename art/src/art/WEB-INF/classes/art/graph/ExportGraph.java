@@ -13,7 +13,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 import org.apache.commons.beanutils.RowSetDynaClass;
-import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.*;
 import org.jfree.chart.axis.*;
 import org.jfree.chart.labels.*;
@@ -43,7 +42,7 @@ public class ExportGraph {
 	String fullFileName = "-No File";
 	String fullFileNameWithoutExt;
 	String queryName;
-	String userName;
+	String fileUserName; //username portion of output file name
 	String outputFormat;
 	String y_m_d;
 	String h_m_s;
@@ -56,24 +55,23 @@ public class ExportGraph {
 	private boolean showLegend;
 	private boolean showLabels;
 	private boolean showDataPoints;
-	Map<Integer, ArtQueryParam> displayParameters = null; //to enable display of graph parameters in pdf output
-	final int rotateThreshold=5; //number of x-axis categories above which x-axis labels will be displayed vertically
-	final int removeThreshold=50; //number of x-axis categories above which x-axis labels will be removed (not displayed)
+	Map<Integer, ArtQueryParam> displayParameters = null; //to enable display of graph parameters in pdf output	
 	int queryId;
-	
-	
+
 	/**
 	 * Set the query id for the graph
-	 * @param value 
+	 *
+	 * @param value
 	 */
-	public void setQueryId(int value){
-		queryId=value;
+	public void setQueryId(int value) {
+		queryId = value;
 	}
-	
-	
+
 	/**
 	 * Determine if legend should be shown
-	 * @param showLegend <code>true</true> if legend should be shown
+	 *
+	 * @param showLegend
+	 * <code>true</true> if legend should be shown
 	 */
 	public void setShowLegend(boolean showLegend) {
 		this.showLegend = showLegend;
@@ -81,7 +79,9 @@ public class ExportGraph {
 
 	/**
 	 * Determine if labels should be shown
-	 * @param showLabels <code>true</true> if labels should be shown
+	 *
+	 * @param showLabels
+	 * <code>true</true> if labels should be shown
 	 */
 	public void setShowLabels(boolean showLabels) {
 		this.showLabels = showLabels;
@@ -89,7 +89,9 @@ public class ExportGraph {
 
 	/**
 	 * Determine if data points should be highlighted
-	 * @param showDataPoints <code>true</true> if data points should be highlighted
+	 *
+	 * @param showDataPoints
+	 * <code>true</true> if data points should be highlighted
 	 */
 	public void setShowDataPoints(boolean showDataPoints) {
 		this.showDataPoints = showDataPoints;
@@ -145,8 +147,8 @@ public class ExportGraph {
 	 *
 	 * @param s username to be used in the filename
 	 */
-	public void setUserName(String s) {
-		userName = s;
+	public void setFileUserName(String s) {
+		fileUserName = s;
 	}
 
 	/**
@@ -206,7 +208,7 @@ public class ExportGraph {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		fullFileNameWithoutExt = exportPath + userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
+		fullFileNameWithoutExt = exportPath + fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
 	}
 
 	/**
@@ -221,9 +223,9 @@ public class ExportGraph {
 		int width;
 		int height;
 		String seriesName;
-		ResultSetMetaData rsmd;		
+		ResultSetMetaData rsmd;
 		boolean showTooltips = false;
-		boolean showUrls = false;				
+		boolean showUrls = false;
 		String bgColor;
 		int from; //y axis range minimum
 		int to; //y axis range maximum
@@ -244,23 +246,23 @@ public class ExportGraph {
 			chartTheme.setPlotBackgroundPaint(Color.white); //default is grey
 			chartTheme.setDomainGridlinePaint(Color.lightGray); //default is white
 			chartTheme.setRangeGridlinePaint(Color.lightGray); //default is white
-			
-			//enable use of custom font in pdf output
-			String fontName="SansSerif"; //for use in speedometer chart creation
-			if (ArtDBCP.isUseCustomPdfFont()) {				
-				fontName = ArtDBCP.getArtSetting("pdf_font_name");
-				final Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
-				final Font oldLargeFont = chartTheme.getLargeFont();
-				final Font oldRegularFont = chartTheme.getRegularFont();
 
-				final Font extraLargeFont = new Font(fontName, oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
-				final Font largeFont = new Font(fontName, oldLargeFont.getStyle(), oldLargeFont.getSize());
-				final Font regularFont = new Font(fontName, oldRegularFont.getStyle(), oldRegularFont.getSize());
+			//enable use of custom font in pdf output
+			String fontName = "SansSerif"; //for use in speedometer chart creation
+			if (ArtDBCP.isUseCustomPdfFont()) {
+				fontName = ArtDBCP.getArtSetting("pdf_font_name");
+				Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
+				Font oldLargeFont = chartTheme.getLargeFont();
+				Font oldRegularFont = chartTheme.getRegularFont();
+
+				Font extraLargeFont = new Font(fontName, oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
+				Font largeFont = new Font(fontName, oldLargeFont.getStyle(), oldLargeFont.getSize());
+				Font regularFont = new Font(fontName, oldRegularFont.getStyle(), oldRegularFont.getSize());
 
 				chartTheme.setExtraLargeFont(extraLargeFont);
 				chartTheme.setLargeFont(largeFont);
-				chartTheme.setRegularFont(regularFont);								
-			} 
+				chartTheme.setRegularFont(regularFont);
+			}
 			ChartFactory.setChartTheme(chartTheme);
 
 			//build file name to use for output
@@ -275,16 +277,22 @@ public class ExportGraph {
 			}
 
 			//process graph options	string to get custom width, height (only used for png output), bgcolour, y-min, y-max			
-			
+
 			//set graph options from query definition
-			ArtQuery aq = new ArtQuery();			
+			ArtQuery aq = new ArtQuery();
 			aq.create(queryId, false); //populate query attributes, but don't build parameter list
-			
+
 			//override any custom graph options defined
-			if(graphOptions!=null){
+			if (graphOptions != null) {
 				aq.setGraphDisplayOptions(graphOptions, false); //sets graph width, height, y-min, y-max, bgcolour
 			}
-			
+
+			//get show options from job settings and not from query settings
+			/*
+			 * showData=aq.isShowGraphData(); showLegend=aq.isShowLegend();
+			 * showLabels=aq.isShowLabels(); showDataPoints=aq.isShowPoints();
+			 */
+
 			//graph options have now been set
 			bgColor = aq.getGraphBgColor();
 			width = aq.getGraphWidth();
@@ -404,10 +412,10 @@ public class ExportGraph {
 					DefaultValueDataset speedometerDataset = (DefaultValueDataset) speedometerChart.produceDataset(null);
 
 					//create chart. chartfactory doesn't have a method for creating a meter chart
-					Font titleFont=new Font(fontName, Font.BOLD, 18); //font same as in cewolf to achieve similar look
+					Font titleFont = new Font(fontName, Font.BOLD, 18); //font same as in cewolf to achieve similar look
 					MeterPlot speedometerPlot = new MeterPlot(speedometerDataset);
-					chart = new JFreeChart(title, titleFont, speedometerPlot, showLegend); 
-					
+					chart = new JFreeChart(title, titleFont, speedometerPlot, showLegend);
+
 					//apply current theme to charts not created using the chartfactory
 					chartTheme.apply(chart);
 
@@ -489,10 +497,10 @@ public class ExportGraph {
 			if (chart != null) {
 				//set chart background colour. doesn't include plot background
 				chart.setBackgroundPaint(Color.decode(bgColor));
-				
+
 				//display x-axis labels vertically if too many categories present
 				rotateAxis(chart);
-				
+
 				if (outputFormat.equals("png")) {
 					fullFileName = fullFileNameWithoutExt + ".png";
 					ChartUtilities.saveChartAsPNG(new File(fullFileName), chart, width, height);
@@ -532,13 +540,17 @@ public class ExportGraph {
 			}
 		}
 	}
-	
+
 	/**
-	 * Display x-axis labels vertically if the chart has many categories
-	 * Code from cewolf RotatedAxisLabels.java
-	 * @param chart 
+	 * Display x-axis labels vertically if the chart has many categories Code
+	 * from cewolf RotatedAxisLabels.java
+	 *
+	 * @param chart
 	 */
-	private void rotateAxis(JFreeChart chart){
+	private void rotateAxis(JFreeChart chart) {
+		final int rotateThreshold = 5; //number of x-axis categories above which x-axis labels will be displayed vertically
+		final int removeThreshold = 50; //number of x-axis categories above which x-axis labels will be removed (not displayed)
+
 		Plot plot = chart.getPlot();
 		Axis axis = null;
 		int numValues = 0;
@@ -576,6 +588,4 @@ public class ExportGraph {
 			axis.setTickLabelsVisible(numValues < removeThreshold);
 		}
 	}
-
-	
 }

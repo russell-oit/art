@@ -986,7 +986,7 @@ public class ArtJob implements Job {
 						ResultSet rs = ps.executeQuery();
 						while (rs.next()) {
 							userCount += 1;
-							runJob(conn, false, false, rs.getString("USERNAME"), rs.getString("EMAIL"));
+							runJob(conn, false, rs.getString("USERNAME"), rs.getString("EMAIL"));
 							//ensure that the job owner's output version is saved in the jobs table
 							if (username.equals(rs.getString("USERNAME"))) {
 								ownerFileName = fileName;
@@ -997,16 +997,16 @@ public class ArtJob implements Job {
 
 						if (userCount == 0) {
 							//no shared users defined yet. generate one file for the job owner
-							runJob(conn, false, true, username, tos);
+							runJob(conn, true, username, tos);
 						}
 					} else {
 						//generate one single output to be used by all users
 						String emails = getSharedJobEmails();
-						runJob(conn, true, true, username, emails);
+						runJob(conn, true, username, emails);
 					}
 				} else {
 					//job isn't shared. generate one file for the job owner
-					runJob(conn, false, true, username, tos);
+					runJob(conn, true, username, tos);
 				}
 
 				//ensure jobs table always has job owner's file, or a note if no output was produced for the job owner
@@ -1033,7 +1033,7 @@ public class ArtJob implements Job {
 	}
 
 	//run job
-	private void runJob(Connection conn, boolean useSharedInFileName, boolean singleOutput, String user, String userEmail) {
+	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail) {
 		//set job start date. relevant for split jobs
 		jobStartDate = new java.sql.Timestamp(new java.util.Date().getTime());
 
@@ -1049,7 +1049,7 @@ public class ArtJob implements Job {
 
 			//for split jobs, don't check security for shared users. they have been allowed access to the output
 			if (!singleOutput) {
-				pq.isAdminSession(true);
+				pq.setAdminSession(true);
 			}
 			
 			int resultSetType;
@@ -1145,7 +1145,7 @@ public class ArtJob implements Job {
 				if (jobType == 6 || jobType == 7 || jobType == 8) {
 					//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
 					PreparedQuery pqCount = prepare(user);
-					pqCount.isAdminSession(true);
+					pqCount.setAdminSession(true);
 					pqCount.execute(ResultSet.TYPE_FORWARD_ONLY);
 					ResultSet rsCount = pqCount.getResultSet();
 					if (!rsCount.next()) {
@@ -1165,7 +1165,7 @@ public class ArtJob implements Job {
 					if (queryType < 0) {
 						//save charts to file
 						ExportGraph eg = new ExportGraph();
-						eg.setUserName(jobFileUsername);
+						eg.setFileUserName(jobFileUsername);
 						eg.setQueryName(queryName);
 						eg.setExportPath(jobsPath);
 						eg.setOutputFormat(outputFormat); // png or pdf
@@ -1186,7 +1186,7 @@ public class ArtJob implements Job {
 						//jasper report
 						jasperOutput jasper = new jasperOutput();
 						jasper.setQueryName(queryName);
-						jasper.setUserName(jobFileUsername);
+						jasper.setFileUserName(jobFileUsername);
 						jasper.setExportPath(jobsPath);
 						jasper.setOutputFormat(outputFormat);
 
@@ -1202,7 +1202,7 @@ public class ArtJob implements Job {
 						//jxls spreadsheet
 						jxlsOutput jxls = new jxlsOutput();
 						jxls.setQueryName(queryName);
-						jxls.setUserName(jobFileUsername);
+						jxls.setFileUserName(jobFileUsername);
 						jxls.setExportPath(jobsPath);
 						
 						if (queryType == 117) {
@@ -1247,14 +1247,15 @@ public class ArtJob implements Job {
 						}
 
 						o.setQueryName(queryName);
-						o.setUserName(jobFileUsername);
+						o.setFileUserName(jobFileUsername);
 						o.setExportPath(jobsPath);
+						o.setDisplayParameters(displayParams);
 
 						ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages");
 						if (queryType == 101 || queryType == 102) {
-							ArtOutHandler.flushXOutput(messages, o, rs, rsmd, displayParams);
+							ArtOutHandler.flushXOutput(messages, o, rs, rsmd);
 						} else {
-							ArtOutHandler.flushOutput(messages, o, rs, rsmd, displayParams);
+							ArtOutHandler.flushOutput(messages, o, rs, rsmd);
 						}
 
 						/*
@@ -2242,10 +2243,10 @@ public class ArtJob implements Job {
 					ArtQueryParam param = params.get(htmlName);
 					if (param != null) {
 						//for dynamic date values e.g. ADD... ensure what is used to execute the query is same as what is displayed
-						String paramClass = param.getFieldClass();
-						if (paramClass.startsWith("DATE")) {
+						String paramDataType = param.getFieldClass();
+						if (StringUtils.startsWith(paramDataType, "DATE")){							
 							String dateFormat;
-							if (paramClass.equals("DATE")) {
+							if (paramDataType.equals("DATE")) {
 								dateFormat = "yyyy-MM-dd";
 							} else {
 								dateFormat = "yyyy-MM-dd HH:mm:ss";
@@ -2258,6 +2259,19 @@ public class ArtJob implements Job {
 							inlineParams.put(label, value);
 						}
 						param.setParamValue(value);
+						
+						//for lov parameters, show both parameter value and friendly value
+						if (param.usesLov()) {
+							//get all possible lov values.							
+							try {
+								PreparedQuery pq = new PreparedQuery();
+								pq.setQueryId(param.getLovQueryId());
+								Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
+								param.setLovValues(lov);
+							} catch (Exception e) {
+								logger.error("Error", e);
+							}
+						}
 						displayParams.put(param.getFieldPosition(), param);
 					}
 
@@ -2273,6 +2287,20 @@ public class ArtJob implements Job {
 					ArtQueryParam param = params.get(htmlName);
 					if (param != null) {
 						param.setParamValue(values);
+						
+						//for lov parameters, show both parameter value and friendly value
+						if (param.usesLov()) {
+							//get all possible lov values.							
+							try {
+								PreparedQuery pq = new PreparedQuery();
+								pq.setQueryId(param.getLovQueryId());
+								Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
+								param.setLovValues(lov);
+							} catch (Exception e) {
+								logger.error("Error", e);
+							}
+						}
+						
 						displayParams.put(param.getFieldPosition(), param);
 					}
 
@@ -2305,7 +2333,7 @@ public class ArtJob implements Job {
 		PreparedQuery qp = new PreparedQuery();
 		qp.setUsername(user);
 		qp.setQueryId(queryId);
-		qp.isAdminSession(false);
+		qp.setAdminSession(false);
 		qp.setInlineParams(inlineParams);
 		qp.setMultiParams(multiParams);
 

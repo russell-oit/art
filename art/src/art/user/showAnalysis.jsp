@@ -126,7 +126,7 @@
 
 	pq.setUsername(username);
 	pq.setQueryId(queryId);
-	pq.isAdminSession(adminSession);	
+	pq.setAdminSession(adminSession);	
 	pq.setMultiParams(multiParams);	
 	pq.setInlineParams(inlineParams);
 

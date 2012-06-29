@@ -1,5 +1,6 @@
 <%@page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,java.text.SimpleDateFormat,art.utils.*" %>
 <%@page import="org.jfree.chart.*,org.apache.commons.beanutils.*,org.apache.commons.lang.StringUtils" %>
+<%@page import="java.awt.Font" %>
 <%@taglib uri='/WEB-INF/cewolf.tld' prefix='cewolf' %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -143,13 +144,13 @@ out.flush();
 StandardChartTheme chartTheme = (StandardChartTheme) StandardChartTheme.createJFreeTheme(); 
 if(ArtDBCP.isUseCustomPdfFont()){
 	String pdfFontName = ArtDBCP.getArtSetting("pdf_font_name");
-	final java.awt.Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
-	final java.awt.Font oldLargeFont = chartTheme.getLargeFont();
-	final java.awt.Font oldRegularFont = chartTheme.getRegularFont();
+	Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
+	Font oldLargeFont = chartTheme.getLargeFont();
+	Font oldRegularFont = chartTheme.getRegularFont();
 
-	final java.awt.Font extraLargeFont = new java.awt.Font(pdfFontName, oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
-	final java.awt.Font largeFont = new java.awt.Font(pdfFontName, oldLargeFont.getStyle(), oldLargeFont.getSize());
-	final java.awt.Font regularFont = new java.awt.Font(pdfFontName, oldRegularFont.getStyle(), oldRegularFont.getSize());
+	Font extraLargeFont = new Font(pdfFontName, oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
+	Font largeFont = new Font(pdfFontName, oldLargeFont.getStyle(), oldLargeFont.getSize());
+	Font regularFont = new Font(pdfFontName, oldRegularFont.getStyle(), oldRegularFont.getSize());
 
 	chartTheme.setExtraLargeFont(extraLargeFont);
 	chartTheme.setLargeFont(largeFont);

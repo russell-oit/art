@@ -10,11 +10,13 @@ package art.output;
 
 import art.servlets.ArtDBCP;
 import art.servlets.XmlDataProvider;
-
 import art.utils.ArtQueryParam;
-import java.io.*;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 
 /**
  *  Generate RSS 2.0 output.
@@ -30,8 +32,7 @@ public class rss20Output implements ArtOutputInterface {
 
     PrintWriter out;
     int numberOfLines = 0;
-    String queryName;
-    String userName;
+    String queryName;    
     int maxRows;
     int columns;
     int columnIndex = 0; // current column
@@ -70,8 +71,8 @@ public class rss20Output implements ArtOutputInterface {
     }
 
     @Override
-    public void setUserName(String s) {
-        userName = s;
+    public void setFileUserName(String s) {
+        //not used
     }
 
     @Override
@@ -135,18 +136,50 @@ public class rss20Output implements ArtOutputInterface {
                 ArtQueryParam param=(ArtQueryParam)entry.getValue();
                 String paramName=param.getName();
                 Object pValue = param.getParamValue();
+				String outputString;
                 
                 out.println("<art:param>");
                 if (pValue instanceof String) {
-                    out.println("<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml((String) pValue) + "</art:value> ");
+					String paramValue = (String) pValue;
+					outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(paramValue) + "</art:value> "; //default to displaying parameter value
+
+					if (param.usesLov()) {
+						//for lov parameters, show both parameter value and display string if any
+						Map<String, String> lov = param.getLovValues();
+						if (lov != null) {
+							//get friendly/display string for this value
+							String paramDisplayString = lov.get(paramValue);
+							if (!StringUtils.equals(paramValue, paramDisplayString)) {
+								//parameter value and display string differ. show both
+								outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(paramDisplayString) + " (" + XmlDataProvider.parseXml(paramValue) + ")</art:value> ";
+							}
+						}
+					}
+					out.println(outputString);                    
                 } else if (pValue instanceof String[]) { // multi
-                    StringBuilder pValuesSb = new StringBuilder(256);
-                    String[] pValues = (String[]) pValue;
-                    for (int i = 0; i < pValues.length; i++) {
-                        pValuesSb.append(pValues[i]);
-                        pValuesSb.append(",");
-                    }
-                    out.println("<art:name>" + paramName + "</art:name><art:value>" + XmlDataProvider.parseXml(pValuesSb.toString()) + "</art:value> ");
+                    String[] paramValues = (String[]) pValue;
+					outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(StringUtils.join(paramValues, ", ")) + "</art:value> "; //default to showing parameter values only
+
+					if (param.usesLov()) {
+						//for lov parameters, show both parameter value and display string if any
+						Map<String, String> lov = param.getLovValues();
+						if (lov != null) {
+							//get friendly/display string for all the parameter values
+							String[] paramDisplayStrings = new String[paramValues.length];
+							for (int i = 0; i < paramValues.length; i++) {
+								String value = paramValues[i];
+								String display = lov.get(value);
+								if (!StringUtils.equals(display, value)) {
+									//parameter value and display string differ. show both
+									paramDisplayStrings[i] = display + " (" + value + ")";
+								} else {
+									paramDisplayStrings[i] = value;
+								}
+							}
+							outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(StringUtils.join(paramDisplayStrings, ", ")) + "</art:value> ";
+						}
+					}
+					out.println(outputString);                    
                 }
                 out.println("</art:param>");
             }            

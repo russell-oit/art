@@ -1,7 +1,6 @@
 package art.output;
 
 import art.utils.ArtQueryParam;
-
 import java.io.PrintWriter;
 import java.util.Map;
 
@@ -60,7 +59,7 @@ public interface ArtOutputInterface {
 
     /**     
     Returns output mime Type (use <code>text/html</code> for html)
-    produced by this object<br>
+    produced by this object. Should use text/html;charset=utf-8<br>
     <br> Since ART 1.3.1     
      * 
      * @return output mime Type
@@ -88,13 +87,12 @@ public interface ArtOutputInterface {
     public void setQueryName(String s);
 
     /**     
-    Method invoked  with the username of the person executing the query as argument.
-    <br>Used, for example, to show the name in the output header or to create
-    the file name.
+    Method invoked  with the username of the person executing the query or the job id for the job
+    <br>Used to show the name in the username or job id in the output file name.
      * 
-     * @param s username of the person executing the query
+     * @param s username of the person executing the query or the job id for the job
      */
-    public void setUserName(String s);
+    public void setFileUserName(String s);
 
     /**     
     This method is invoked to set the maximum number of rows allowed to be output,
@@ -131,6 +129,7 @@ public interface ArtOutputInterface {
 
     /**     
     This method is invoked to state that the header begins. 
+	* Initialization code should run here
      */
     public void beginHeader();
 

@@ -123,8 +123,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             PreparedQuery pq = new PreparedQuery();
             pq.setUsername(username);
             pq.setQueryId(queryId);
-            pq.setUseSmartRules(false);
-
+            
             // Get parameters
             String filter = request.getParameter("filter");
             String isMulti = request.getParameter("isMulti");
@@ -133,7 +132,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             inlineParams.put("filter", filter);
             pq.setInlineParams(inlineParams);
 
-            ResultSet rs = pq.executeQuery();
+            ResultSet rs = pq.executeQuery(false); //don't apply rules
 
             int viewColumn = rs.getMetaData().getColumnCount();
             if (isMulti != null) {

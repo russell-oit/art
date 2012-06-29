@@ -4,7 +4,7 @@ Lov Box
 Used in showParams.jsp page to display lov parameters and chained parameter fields
 
 When     Who  What
-20070918 john added line to copmare with default value (line ~109)
+20070918 john added line to compare with default value (line ~109)
  */
 package art.params;
 
@@ -148,10 +148,9 @@ public class HtmlLovParam implements ParamInterface {
 
         try {
             pq = new PreparedQuery();
-            pq.setUsername(username);
+            pq.setUsername(username); //in case lov should use rules
             pq.setQueryId(lovQueryId);
-            pq.setUseSmartRules(useSmartRules);
-                        
+                                    
             String selected;
             String value;
             String viewColumnValue;
@@ -169,7 +168,7 @@ public class HtmlLovParam implements ParamInterface {
                 sb.append("<option value=\"ALL_ITEMS\" " + selected + ">All</option>");
             }
 
-            Map<String,String> lov = pq.executeLovQuery();
+            Map<String,String> lov = pq.executeLovQuery(useSmartRules); //override lov use rules setting with setting defined in the parameter definition
             Iterator it=lov.entrySet().iterator();
             while (it.hasNext()) {
                 // build html option list

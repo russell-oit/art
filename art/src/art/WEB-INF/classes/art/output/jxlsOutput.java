@@ -29,7 +29,7 @@ public class jxlsOutput {
     
     String fullOutputFileName = "-No File";
     String queryName;
-    String userName;    
+    String fileUserName;    
     String y_m_d;
     String h_m_s;
     String exportPath;
@@ -71,8 +71,8 @@ public class jxlsOutput {
      * Set username to be used in file name
      * @param s username to be used in file name
      */
-    public void setUserName(String s) {
-        userName = s;
+    public void setFileUserName(String s) {
+        fileUserName = s;
     }
 
     
@@ -150,7 +150,7 @@ public class jxlsOutput {
                 extension = templateFileName.substring(index);
             }
 
-            String fileName = userName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + extension;
+            String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + extension;
             fileName=ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename
             fullOutputFileName = exportPath + fileName;
 

@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Simple html output mode.
@@ -21,11 +22,8 @@ import java.util.Map;
 public class htmlPlainOutput implements ArtOutputInterface {
 
     PrintWriter out;
-    int numberOfLines;
-    String queryName;
-    String userName;
-    int maxRows;
-    int columns;
+    int numberOfLines;      
+    int maxRows;    
     NumberFormat nfPlain;
     boolean oddline = true;
     Map<Integer, ArtQueryParam> displayParams;
@@ -63,12 +61,12 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void setQueryName(String s) {
-        queryName = s;
+        //not used
     }
 
     @Override
-    public void setUserName(String s) {
-        userName = s;
+    public void setFileUserName(String s) {
+        //not used. this output mode doesn't produce files by itself
     }
 
     @Override
@@ -78,7 +76,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void setColumnsNumber(int i) {
-        columns = i;
+        //not used
     }
 
     @Override
@@ -101,24 +99,56 @@ public class htmlPlainOutput implements ArtOutputInterface {
             out.println("<div align=\"center\"> <small>");
             // decode the parameters handling multi one
             Iterator it = displayParams.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();                
-                ArtQueryParam param=(ArtQueryParam)entry.getValue();
-                String paramName=param.getName();
-                Object pValue = param.getParamValue();
+			while (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				ArtQueryParam param = (ArtQueryParam) entry.getValue();
+				String paramName = param.getName();
+				Object pValue = param.getParamValue();
+				String outputString;
 
-                if (pValue instanceof String) {
-                    out.println(paramName + ": " + pValue + " <br> ");
-                } else if (pValue instanceof String[]) { // multi
-                    StringBuilder pValuesSb = new StringBuilder(256);
-                    String[] pValues = (String[]) pValue;
-                    for (int i = 0; i < pValues.length; i++) {
-                        pValuesSb.append(pValues[i]);
-                        pValuesSb.append(", ");
-                    }
-                    out.println(paramName + ": (" + pValuesSb.toString() + " )<br> ");
-                }
-            }                
+				if (pValue instanceof String) {
+					String paramValue = (String) pValue;
+					outputString = paramName + ": " + paramValue + " <br> "; //default to displaying parameter value
+
+					if (param.usesLov()) {
+						//for lov parameters, show both parameter value and display string if any
+						Map<String, String> lov = param.getLovValues();
+						if (lov != null) {
+							//get friendly/display string for this value
+							String paramDisplayString = lov.get(paramValue);
+							if (!StringUtils.equals(paramValue, paramDisplayString)) {
+								//parameter value and display string differ. show both
+								outputString = paramName + ": " + paramDisplayString + " (" + paramValue + ") <br> ";
+							}
+						}
+					}
+					out.println(outputString);
+				} else if (pValue instanceof String[]) { // multi
+					String[] paramValues = (String[]) pValue;
+					outputString = paramName + ": " + StringUtils.join(paramValues, ", ") + " <br> "; //default to showing parameter values only
+
+					if (param.usesLov()) {
+						//for lov parameters, show both parameter value and display string if any
+						Map<String, String> lov = param.getLovValues();
+						if (lov != null) {
+							//get friendly/display string for all the parameter values
+							String[] paramDisplayStrings = new String[paramValues.length];
+							for (int i = 0; i < paramValues.length; i++) {
+								String value = paramValues[i];
+								String display = lov.get(value);
+								if (!StringUtils.equals(display, value)) {
+									//parameter value and display string differ. show both
+									paramDisplayStrings[i] = display + " (" + value + ")";
+								} else {
+									paramDisplayStrings[i] = value;
+								}
+							}
+							outputString = paramName + ": " + StringUtils.join(paramDisplayStrings, ", ") + " <br> ";
+						}
+					}
+					out.println(outputString);
+				}
+			}
             out.println("</small></div>");
             out.println("</td></tr></table>");
         }

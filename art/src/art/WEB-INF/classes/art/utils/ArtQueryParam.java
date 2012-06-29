@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -62,7 +63,8 @@ public class ArtQueryParam implements Serializable{
     String bindQuerySql = "";
     boolean[] bindVector;
     //    
-    Object paramValue; //store parameter values. either String for inline parameters or String[] for multi parameters
+    Object paramValue=null; //store parameter values. either String for inline parameters or String[] for multi parameters
+	private Map<String, String> lovValues=null; //store value/friendly display string for lov parameters
 	
 
     /**
@@ -72,10 +74,26 @@ public class ArtQueryParam implements Serializable{
     }
 
 	/**
+	 * Get value and friendly display string for lov parameters
+	 * @return the lovValues
+	 */
+	public Map<String, String> getLovValues() {
+		return lovValues;
+	}
+
+	/**
+	 * Store value and friendly display string for lov parameters
+	 * @param lovValues the lovValues to set
+	 */
+	public void setLovValues(Map<String, String> lovValues) {
+		this.lovValues = lovValues;
+	}
+
+	/**
 	 * Utility method to determine if the parameter uses an lov query for its values
 	 * @return the <code>false</code> is use_lov column has 'N'. <code>true</code> otherwise
 	 */
-	public boolean isUsesLov() {
+	public boolean usesLov() {
 		boolean usesLov;
 		if(StringUtils.equals(useLov,"N")){
 			usesLov=false;

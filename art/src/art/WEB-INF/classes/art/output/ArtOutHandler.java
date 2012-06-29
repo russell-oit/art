@@ -45,23 +45,7 @@ public class ArtOutHandler {
     
     final static Logger logger = LoggerFactory.getLogger(ArtOutHandler.class);
     
-    /**
-     * Flush the output as it is (row by row).
-     * For output that can't have drill down queries
-     * 
-     * @param messages resourcebundle for error message translation
-     * @param o output object
-     * @param rs query resultset
-     * @param rsmd resultset metadata
-     * @return number of rows in the resultset
-     * @throws SQLException 
-     * @throws ArtException 
-     */
-    public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
-
-        return flushOutput(messages, o, rs, rsmd, null, null, null, null, null);
-    }
-
+    
     /**
      * Flush the output as it is (row by row).
      * For output that can't have drill down queries and needs to show parameters in output
@@ -69,15 +53,14 @@ public class ArtOutHandler {
      * @param messages resourcebundle for error message translation
      * @param o output object
      * @param rs query resultset
-     * @param rsmd resultset metadata
-     * @param displayParams parameters to be displayed
+     * @param rsmd resultset metadata     
      * @return number of rows in the resultset
      * @throws SQLException 
      * @throws ArtException 
      */
-    public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd,Map<Integer, ArtQueryParam> displayParams) throws SQLException, ArtException {
+    public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
 
-        return flushOutput(messages, o, rs, rsmd, displayParams, null, null, null, null);
+        return flushOutput(messages, o, rs, rsmd, null, null, null, null);
     }
 
     /**
@@ -86,8 +69,7 @@ public class ArtOutHandler {
      * @param messages resourcebundle for error message translation
      * @param o output object
      * @param rs query resultset
-     * @param rsmd resultset metadata
-     * @param displayParams parameters to be displayed
+     * @param rsmd resultset metadata     
      * @param drilldownQueries drill down queries
      * @param baseUrl url to art application
      * @param inlineParams inline parameters
@@ -96,12 +78,9 @@ public class ArtOutHandler {
      * @throws SQLException
      * @throws ArtException if max rows reached
      */
-    public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd, Map<Integer, ArtQueryParam> displayParams, Map<Integer,DrilldownQuery> drilldownQueries, String baseUrl, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException, ArtException {
+    public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd, Map<Integer,DrilldownQuery> drilldownQueries, String baseUrl, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException, ArtException {
 
-        if (displayParams != null) {
-            o.setDisplayParameters(displayParams);
-        }
-
+       
         int col_count = rsmd.getColumnCount();
         int i;
         int counter = 0;
@@ -302,24 +281,7 @@ public class ArtOutHandler {
 
         return counter;
     }
-
-    /**
-     * Flush the output in a pivot (crosstab) format.
-     * The resultset needs to be <br>
-     * String X [, String XaltSort], String Y, [, String YaltSort], Object Value
-     * 
-     * @param messages resourcebundle for error message translation
-     * @param o output object
-     * @param rs query resultset
-     * @param rsmd resultset metadata
-     * @return number of records in resultset
-     * @throws SQLException
-     * @throws ArtException if resulset not in format for a crosstab or max rows exceeded
-     */
-    public static int flushXOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
-        return flushXOutput(messages, o, rs, rsmd, null);
-    }
-
+   
     /**
      * Generate crosstab output.
      * 
@@ -332,7 +294,7 @@ public class ArtOutHandler {
      * @throws SQLException
      * @throws ArtException if resulset not in format for a crosstab or max rows exceeded
      */
-    public static int flushXOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd, Map<Integer, ArtQueryParam> displayParams) throws SQLException, ArtException {
+    public static int flushXOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
 
         /* input */ 		     	 /* input */
         // A Jan 14			     	  A 1 Jan 1 14
@@ -354,11 +316,7 @@ public class ArtOutHandler {
         //                   ^--- Jan comes after Feb!			     	 
 
 
-
-        if (displayParams != null) {
-            o.setDisplayParameters(displayParams);
-        }
-
+        
         int colCount = rsmd.getColumnCount();
         if (colCount != 3 && colCount != 5) {
             throw new ArtException(messages.getString("notACrosstab"));
