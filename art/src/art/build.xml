@@ -113,6 +113,9 @@
 		,WEB-INF/lib/wcf.jar
 		,WEB-INF/lib/jxls-core*.jar
 		,WEB-INF/lib/commons-jexl*.*"
+		,WEB-INF/lib/postgresql*.*"
+		,WEB-INF/lib/CUBRID*.*"
+		,WEB-INF/lib/mysql*.*"
 		/>
 
 	</target>
