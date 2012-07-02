@@ -301,9 +301,9 @@ public class ArtDBCP extends HttpServlet {
 				//output registerd fonts
 				StringBuilder sb = new StringBuilder();
 				String newline = System.getProperty("line.separator");
-				Set<String> fonts = FontFactory.getRegisteredFonts();
-				for (Iterator<String> it = fonts.iterator(); it.hasNext();) {
-					String f = it.next();
+				Set fonts = FontFactory.getRegisteredFonts();
+				for (Iterator it = fonts.iterator(); it.hasNext();) {
+					String f = (String) it.next();
 					sb.append(newline);
 					sb.append(f);
 				}
