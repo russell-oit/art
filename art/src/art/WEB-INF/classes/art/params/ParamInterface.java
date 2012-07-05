@@ -32,6 +32,12 @@ public interface ParamInterface {
      * @return the html code for capturing the parameter
      */
     public String getValueBox();
+	
+	/** 
+     * Get the html code required for capturing the parameter.  
+     * @return the html code for capturing the parameter
+     */
+    public String getValueBox(String value);
 
     /** 
      * Determine if this is a chained parameter (depends on another parameter).

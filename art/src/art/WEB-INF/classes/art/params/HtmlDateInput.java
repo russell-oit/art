@@ -9,9 +9,9 @@ Used in showParams.jsp page to display date and datetime parameter fields
 package art.params;
 
 import art.utils.PreparedQuery;
-
-import java.util.*;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Class to display DATE and DATETIME parameters.
@@ -50,7 +50,7 @@ public class HtmlDateInput implements ParamInterface {
         paramClass = pClass;
 
         String defaultDateFormat; //date format for use with simpledateformat object
-        if ("DATETIME".equals(paramClass)) {
+        if (StringUtils.equals(paramClass,"DATETIME")) {
             datetime = true;
             calendarFormat = "yyyy-mm-dd hh:ii";
             inputSize = "19";
@@ -93,13 +93,22 @@ public class HtmlDateInput implements ParamInterface {
     public String getName() {
         return paramName;
     }
+	
+	 @Override
+    public String getValueBox() {
+        return getValueBox(defaultValue);
+    }
 
     @Override
-    public String getValueBox() {
+    public String getValueBox(String value) {
+		if(value==null){
+			value=defaultValue;
+		}
+		
         String vBox = "<input type=\"text\" size=\"" + inputSize + "\" maxlength=\"" + maxLength + "\" "
                 + " id=\"" + paramHtmlId + "\""
                 + " name=\"" + paramHtmlName + "\""
-                + " value = \"" + defaultValue + "\" > "
+                + " value = \"" + value + "\" > "
                 + "<img onclick=\"displayCalendar(document.artparameters."
                 + paramHtmlName + ",'" + calendarFormat + "',this," + displayTime + ")\" src=\"../images/calendar.png\">";
 

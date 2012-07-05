@@ -11,6 +11,7 @@ package art.params;
 import art.utils.PreparedQuery;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class HtmlLovParam implements ParamInterface {
     final static Logger logger = LoggerFactory.getLogger(HtmlLovParam.class);
     
     String username, paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue, chainedParamId;
-    boolean useSmartRules;
+    boolean useRules;
     boolean isMulti = false;
     int lovQueryId;
     String chainedValueId;
@@ -57,7 +58,7 @@ public class HtmlLovParam implements ParamInterface {
         this.defaultValue = defaultValue;
         this.lovQueryId = lovQueryId;
         this.chainedParamId = chainedParamId;
-        this.useSmartRules = useSmartRules;
+        this.useRules = useSmartRules;
         this.username = username;
         this.chainedValueId = chainedValueId;
 
@@ -89,16 +90,21 @@ public class HtmlLovParam implements ParamInterface {
     public String getName() {
         return paramName;
     }
+	
+	@Override
+    public String getValueBox() {
+        return getValueBox(defaultValue);
+    }
 
     @Override
-    public String getValueBox() {
+    public String getValueBox(String value) {
         String vBox;
 
         if (chainedParamId != null) {
             //ajaxed
             vBox = "\n<select id=\"" + paramHtmlId + "\" name=\"" + paramHtmlName + "\" " + (isMulti ? "size=\"5\" multiple" : "") + "><option value=\"\">...</option></select>";
         } else {
-            vBox = getValues();
+            vBox = getValues(value);
         }
 
         return vBox;
@@ -141,8 +147,13 @@ public class HtmlLovParam implements ParamInterface {
      * Get the html code required for capturing a non-chained parameter.
      * @return the html code required for capturing a non-chained parameter.
      */
-    private String getValues() {
+    private String getValues(String initialValue) {
         String values = "";
+		
+		if(initialValue==null){
+			//no parameter value override. use default value
+			initialValue=defaultValue;
+		}
 
         PreparedQuery pq = null;
 
@@ -160,7 +171,7 @@ public class HtmlLovParam implements ParamInterface {
                     + " id=\"" + paramHtmlId + "\""
                     + " name=\"" + paramHtmlName + "\" " + (isMulti ? "size=\"5\" multiple" : "") + ">");
             if (isMulti) {
-                if (defaultValue.equals("ALL_ITEMS") || defaultValue.equals("All")) {
+				if(StringUtils.equals(initialValue, "ALL_ITEMS") || StringUtils.equals(initialValue, "All")){                
                     selected = "selected";
                 } else {
                     selected = "";
@@ -168,7 +179,7 @@ public class HtmlLovParam implements ParamInterface {
                 sb.append("<option value=\"ALL_ITEMS\" " + selected + ">All</option>");
             }
 
-            Map<String,String> lov = pq.executeLovQuery(useSmartRules); //override lov use rules setting with setting defined in the parameter definition
+            Map<String,String> lov = pq.executeLovQuery(useRules); //override lov use rules setting with setting defined in the parameter definition
             Iterator it=lov.entrySet().iterator();
             while (it.hasNext()) {
                 // build html option list
@@ -176,7 +187,7 @@ public class HtmlLovParam implements ParamInterface {
                 value = (String) entry.getKey();
                 viewColumnValue = (String) entry.getValue();
                 
-                if (defaultValue.equals(viewColumnValue) || defaultValue.equals(value)) {
+				if(StringUtils.equals(initialValue, viewColumnValue) || StringUtils.equals(initialValue, value) ) {                
                     selected = "selected";
                 } else {
                     selected = "";

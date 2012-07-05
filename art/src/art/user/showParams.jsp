@@ -72,9 +72,11 @@ boolean hasParams=false;
                     <td class="data">
                         <%=paramName%>
                     </td>
-                    <td class="data">
-                        <%=param.getValueBox()%>
-                        <% if (param.isChained()) {
+                    <td class="data">                        
+                        <%
+						out.println(param.getValueBox(request.getParameter(param.getHtmlName())));
+						
+						if (param.isChained()) {
                               String params = "";
                               if (paramHtmlName.startsWith("M_")) { // handle ALL_ITEMS in select
                                  params = "action=lov,queryId="+paramClass+",isMulti=yes,filter={"+param.getChainedValueId()+"}";

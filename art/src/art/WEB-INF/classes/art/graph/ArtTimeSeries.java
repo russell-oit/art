@@ -322,9 +322,9 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                         drilldownQueryId = drilldown.getDrilldownQueryId();
                         outputFormat = drilldown.getOutputFormat();
                         if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-                            drilldownUrl = "selectViewMode.jsp?QUERY_ID=" + drilldownQueryId;
+                            drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
                         } else {
-                            drilldownUrl = "ExecuteQuery?QUERY_ID=" + drilldownQueryId + "&viewMode=" + outputFormat;
+                            drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
                         }
 
                         drilldownParams = drilldown.getDrilldownParams();
@@ -453,9 +453,9 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                     drilldownQueryId = drilldown.getDrilldownQueryId();
                     outputFormat = drilldown.getOutputFormat();
                     if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-                        drilldownUrl = "selectViewMode.jsp?QUERY_ID=" + drilldownQueryId;
+                        drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
                     } else {
-                        drilldownUrl = "ExecuteQuery?QUERY_ID=" + drilldownQueryId + "&viewMode=" + outputFormat;
+                        drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
                     }
 
                     drilldownParams = drilldown.getDrilldownParams();

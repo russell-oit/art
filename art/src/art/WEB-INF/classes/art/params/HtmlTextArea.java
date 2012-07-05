@@ -56,13 +56,23 @@ public class HtmlTextArea implements ParamInterface {
     public String getName() {
         return paramName;
     }
+	
+	@Override
+    public String getValueBox() {
+        return getValueBox(defaultValue);
+    }
 
     @Override
-    public String getValueBox() {
+    public String getValueBox(String value) {
+		if(value==null){
+			//no parameter value override. use default value
+			value=defaultValue;
+		}
+		
         String vBox = "<textarea col=\"50\" rows=\"5\" "
                 + " id=\"" + paramHtmlId + "\""
                 + " name=\"" + paramHtmlName + "\">"
-                + defaultValue.trim() + "</textarea>";
+                + value + "</textarea>";
 
         return vBox;
     }

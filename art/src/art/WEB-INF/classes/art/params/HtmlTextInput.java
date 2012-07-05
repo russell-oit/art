@@ -57,10 +57,20 @@ public class HtmlTextInput implements ParamInterface {
 
     @Override
     public String getValueBox() {
+        return getValueBox(defaultValue);
+    }
+	
+	@Override
+	public String getValueBox(String value) {
+		if(value==null){
+			//no parameter value override. use default value
+			value=defaultValue;
+		}
+		
         String vBox = "<input type=\"text\" size=\"20\" maxlength=\"30\" "
                 + " id=\"" + paramHtmlId + "\""
                 + " name=\"" + paramHtmlName + "\""
-                + " value = \"" + defaultValue + "\"> ";
+                + " value = \"" + value + "\"> ";
 
         return vBox;
     }

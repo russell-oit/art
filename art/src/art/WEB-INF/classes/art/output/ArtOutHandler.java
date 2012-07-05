@@ -200,9 +200,9 @@ public class ArtOutHandler {
                     drilldownQueryId = drilldown.getDrilldownQueryId();
                     outputFormat = drilldown.getOutputFormat();
                     if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-                        drilldownUrl = baseUrl + "/user/selectViewMode.jsp?QUERY_ID=" + drilldownQueryId;
+                        drilldownUrl = baseUrl + "/user/showParams.jsp?queryId=" + drilldownQueryId;
                     } else {
-                        drilldownUrl = baseUrl + "/user/ExecuteQuery?QUERY_ID=" + drilldownQueryId + "&viewMode=" + outputFormat;
+                        drilldownUrl = baseUrl + "/user/ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
                     }
 
                     String paramLabel;

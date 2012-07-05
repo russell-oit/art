@@ -6,6 +6,7 @@ ART 2.3
 * Support display of unicode characters in pdf output and charts
 * Enable display of graph parameters and data in pdf output
 * When using show parameters option, for lov parameters, display actual parameter value and friendly display value
+* Allow selection of parameters for drill down queries
 * Updated quartz to 2.1.5
 * Updated jasperreports to 4.6
 
