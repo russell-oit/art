@@ -539,7 +539,7 @@ if(!propsFile.exists()){
 
        <tr>
         <td class="attr" rowspan="4">LDAP
-	 &nbsp;<a href="javascript:alert('LDAP Authentication\n\nThe username in ART needs to match the uid of the user.');">note</a>
+	 
 	</td>
         <td class="data"> Server: </td>
 	 <td class="data"> <input type="text" name="ldap_auth_server" size="40" maxlength="120" value="<%=ldap_auth_server%>">
@@ -572,8 +572,8 @@ if(!propsFile.exists()){
        </tr>
 
 	<tr>
-        <td class="attr" rowspan="2">Windows Authentication <br> (NTLM)
-	 &nbsp;<a href="javascript:alert('NTLM Authentication\n\nThe username in ART needs to match the NTLM username.');">note</a>
+        <td class="attr" rowspan="2">Windows
+	 
 	</td>
         <td class="data">Domain Controller:</td>
 	 <td class="data"><input type="text" name="mswin_auth_server" size="40" maxlength="120" value="<%=mswin_auth_server%>">	</td>
@@ -585,7 +585,7 @@ if(!propsFile.exists()){
 
 	   <tr>
         <td  class="attr" rowspan="2">Database
-	 &nbsp;<a href="javascript:alert('Database Authentication\n\nA database is used to authenticate usernames. The username in ART needs to match the database username.');">note</a>
+	 
 	</td>
         <td class="data">JDBC Driver:</td>
 	  <td class="data"><input type="text" name="jdbc_auth_driver" size="40" maxlength="120" value="<%=jdbc_auth_driver%>"> </td>
@@ -601,7 +601,7 @@ if(!propsFile.exists()){
 	     <option value="default"   <%= (index_page_default.equals("default")?"SELECTED":"") %>  >Default </option>
 	     <option value="login"     <%= (index_page_default.equals("login")?"SELECTED":"") %>    >Internal Login</option>
 	     <option value="LDAPLogin" <%= (index_page_default.equals("LDAPLogin")?"SELECTED":"") %>>LDAP Login</option>
-	     <option value="NTLogin"   <%= (index_page_default.equals("NTLogin")?"SELECTED":"") %>  >NTLM Login</option>
+	     <option value="NTLogin"   <%= (index_page_default.equals("NTLogin")?"SELECTED":"") %>  >Windows Login</option>
 	     <option value="DBLogin"   <%= (index_page_default.equals("DBLogin")?"SELECTED":"") %>  >Database Login</option>
 	     <option value="AutoLogin" <%= (index_page_default.equals("AutoLogin")?"SELECTED":"") %>>Single Sign On</option>
 	   </select>

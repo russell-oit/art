@@ -492,14 +492,10 @@ CREATE TABLE ART_DRILLDOWN_QUERIES
 --
 -- Default Data
 --
-
--- LOV object group (that stores LOV queries)
-INSERT INTO ART_QUERY_GROUPS (QUERY_GROUP_ID,NAME,DESCRIPTION) VALUES
-(0, 'LOV' , 'Group for LOV queries');
  
 -- test object group
 INSERT INTO ART_QUERY_GROUPS (QUERY_GROUP_ID,NAME,DESCRIPTION) VALUES
-(1, 'Test' , 'Group for testing purposes');
+(1, 'Test' , 'Test Group');
  
 -- sample job schedule
 INSERT INTO ART_JOB_SCHEDULES (SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY) VALUES
