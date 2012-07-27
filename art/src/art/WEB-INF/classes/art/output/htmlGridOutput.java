@@ -170,7 +170,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellString(String s) {
-		out.println("  <td>" + s + "</td>");
+		out.println("  <td style=\"text-align: left\">" + s + "</td>");
 	}
 
 	@Override
@@ -189,7 +189,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td>" + d + "</td>");
+		out.println("  <td style=\"text-align: left\">" + d + "</td>");
 	}
 
 	@Override

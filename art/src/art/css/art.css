@@ -345,8 +345,7 @@ TD.qeodd {
  color:#003366;
  padding-left: 5px;
  padding-right: 5px;
-     border: 1px solid #000000;
-
+ border: 1px solid #000000;
 }
 
 TD.qeeven {
@@ -358,6 +357,30 @@ TD.qeeven {
  padding-left: 5px;
  padding-right: 5px;
  border: 1px solid #000000;
+}
+
+TD.qeoddLeft {
+ font-size: 10pt;
+ background-image: URL('../images/bg-gray.png');
+ background-repeat: repeat-x;
+ background-color:#FFFFFF;
+ color:#003366;
+ padding-left: 5px;
+ padding-right: 5px;
+ border: 1px solid #000000;
+ text-align: left;
+}
+
+TD.qeevenLeft {
+ font-size: 10pt;
+ background-image: URL('../images/bg-gray.png');
+ background-repeat: repeat-x;
+ background-color:#FFFFFF;
+ color:#003366;
+ padding-left: 5px;
+ padding-right: 5px;
+ border: 1px solid #000000;
+ text-align: left;
 }
 
 input.qetfstatus {

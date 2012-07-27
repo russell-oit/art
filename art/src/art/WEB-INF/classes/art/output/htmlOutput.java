@@ -164,7 +164,7 @@ public class htmlOutput implements ArtOutputInterface {
 
     @Override
     public void addCellString(String s) {
-        out.println("<td class=\"" + (oddline ? "qeodd" : "qeeven") + "\" >" + s + "</td>");
+        out.println("<td class=\"" + (oddline ? "qeoddLeft" : "qeevenLeft") + "\" >" + s + "</td>");
     }
 
     @Override
@@ -183,7 +183,7 @@ public class htmlOutput implements ArtOutputInterface {
 
     @Override
     public void addCellDate(java.util.Date d) {
-        out.println("<td class=\"" + (oddline ? "qeodd" : "qeeven") + "\" >" + d + "</td>");
+        out.println("<td class=\"" + (oddline ? "qeoddLeft" : "qeevenLeft") + "\" >" + d + "</td>");
     }
 
     @Override

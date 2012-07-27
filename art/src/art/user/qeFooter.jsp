@@ -6,7 +6,7 @@
 
 <table width="90%" border="0" cellspacing="0" cellpadding="0">
  <tr> 
-  <td>
+  <td style="text-align: left">
    <div class="small">
     <small> <%=messages.getString("numberOfRows")%> <%=(String) request.getAttribute("numberOfRows")%>
        <br> <%=messages.getString("timeElapsed")%> <%=(String) request.getAttribute("timeElapsed")%>
