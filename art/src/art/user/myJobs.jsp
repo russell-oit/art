@@ -1,3 +1,4 @@
+<%@page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="java.util.*,art.utils.*,art.servlets.ArtDBCP,org.quartz.*,java.text.*" %>
 <%@ page import="static org.quartz.JobBuilder.*" %>
 <%@ page import="static org.quartz.TriggerBuilder.*" %>
@@ -228,11 +229,14 @@ String resultMessage;
    <td class="jobdetails" > <code><%=formatTimestamp(job.getLastEndDate(),locale)%></code>
    </td>  
    <td class="jobdetails">
-     <% if ( lastFileName == null )  { %>
-	<%=messages.getString("noFile")%>
-     <% } else if (lastFileName.startsWith("-")) { %>
-        <%=lastFileName.substring(1)%>
-     <% } else { 
+     <%
+	 if(StringUtils.isBlank(timeTakenString)){
+		 out.println("");
+	 } else if ( lastFileName == null )  {
+	out.println(messages.getString("noFile"));
+      } else if (lastFileName.startsWith("-")) {
+        out.println(lastFileName.substring(1));
+     } else { 
 		lines = lastFileName.split("\\r?\\n");
 		resultMessage="";
 		if (lines.length > 1) {
@@ -415,11 +419,14 @@ if(adminLevel==100){
    <td class="jobdetails"><%=timeTakenString%></td>
    	 <td class="jobdetails" > <code><%=formatTimestamp(job.getLastEndDate(),locale)%></code>  </td>  
    <td class="jobdetails">
-     <% if ( lastFileName == null )  { %>
-	<%=messages.getString("noFile")%>
-     <% } else if (lastFileName.startsWith("-")) { %>
-        <%=lastFileName.substring(1)%>
-     <% } else { 
+     <%
+	 if(StringUtils.isBlank(timeTakenString)){
+		 out.println("");
+	 } else if ( lastFileName == null )  {
+	out.println(messages.getString("noFile"));
+      } else if (lastFileName.startsWith("-")) {
+        out.println(lastFileName.substring(1));
+     } else { 
 		lines = lastFileName.split("\\r?\\n");
 		resultMessage="";
 		if (lines.length > 1) {

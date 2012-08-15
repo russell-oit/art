@@ -1,3 +1,4 @@
+<%@page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="java.util.*,art.utils.*,art.servlets.ArtDBCP" %>
 <%@ page import="java.text.*" %>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -144,7 +145,9 @@ String resultMessage;
 		//get value from jobs table
 		fileName=job.getFileName();
 	}
-    if (fileName==null){
+	if(StringUtils.isBlank(timeTakenString)){
+		out.println("");
+	} else if (fileName==null){
 		out.println(messages.getString("noFile"));
 	} else if (fileName.startsWith("-")) { 
         out.println(fileName.substring(1));
