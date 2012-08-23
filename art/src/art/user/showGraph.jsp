@@ -225,7 +225,7 @@ if(displayParams!=null && displayParams.size()>0){
 
 //set values for axis label rotate and remove options. use variables to prevent error with java 1.7
 String rotateAt="5";
-String removeAt="100";
+String removeAt="10000";
 
 %>
 
