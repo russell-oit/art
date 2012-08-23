@@ -1,3 +1,8 @@
+ART 2.3.1
+* Fix NullPointerException on pdf output with null strings
+* Fix to enable error free charts with java 1.7
+* Increase x-axis labels remove_at value for charts
+
 ART 2.3
 * Added database type drop down field to help populate common jdbc details
 * Allow username and password field values to be used for CUBRID database

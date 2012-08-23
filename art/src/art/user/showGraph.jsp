@@ -223,6 +223,10 @@ if(displayParams!=null && displayParams.size()>0){
     out.println("</div>");        
 }
 
+//set values for axis label rotate and remove options. use variables to prevent error with java 1.7
+String rotateAt="5";
+String removeAt="100";
+
 %>
 
 <p>
@@ -255,8 +259,8 @@ if(displayParams!=null && displayParams.size()>0){
       </cewolf:chartpostprocessor>
        
        <cewolf:chartpostprocessor id="labelRotation">
-		<cewolf:param name="rotate_at" value="5"/>
-		<cewolf:param name="remove_at" value="50"/>
+		<cewolf:param name="rotate_at" value="<%=rotateAt%>" />
+		<cewolf:param name="remove_at" value="<%=removeAt%>" />
 	</cewolf:chartpostprocessor> 	     
    </cewolf:chart>
    

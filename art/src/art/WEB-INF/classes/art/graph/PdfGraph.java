@@ -173,7 +173,7 @@ public class PdfGraph {
 						table.setHeaderRows(1);
 						for (int j = 0; j < columns; j++) {
 							columnName = dynaProperties[j].getName();
-							cell = new PdfPCell(new Paragraph(fsHeading.process(columnName)));
+							cell = new PdfPCell(new Paragraph(fsHeading.process(columnName + "")));
 							cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 							cell.setPaddingLeft(5f);
 							cell.setPaddingRight(5f);
@@ -186,7 +186,7 @@ public class PdfGraph {
 					for (int k = 0; k < columns; k++) {
 						columnName = dynaProperties[k].getName();
 						columnValue = String.valueOf(row.get(columnName));
-						cell = new PdfPCell(new Paragraph(fsBody.process(columnValue)));
+						cell = new PdfPCell(new Paragraph(fsBody.process(columnValue + ""))); //add empty string to prevent NPE if value is null
 						cell.setPaddingLeft(5f);
 						cell.setPaddingRight(5f);
 						table.addCell(cell);

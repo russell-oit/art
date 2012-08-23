@@ -1,4 +1,4 @@
--- Create the ART Repository, version 2.3
+-- Create the ART Repository
 
 -- IMPORTANT:
 -- after running this script, ALSO RUN the tables_xxx.sql script for your database (found in the quartz directory)
@@ -60,7 +60,7 @@ CREATE TABLE ART_SETTINGS
 	PRIMARY KEY (SETTING_NAME)
 );
 -- insert database version
-INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) VALUES('database version','2.3');
+INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) VALUES('database version','2.3.1');
 
 
 -- ART_USERS 

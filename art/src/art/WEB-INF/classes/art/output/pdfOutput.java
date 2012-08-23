@@ -218,7 +218,7 @@ public class pdfOutput implements ArtOutputInterface {
 				//add list items
 				int size = params.length - 1;
 				for (int i = size; i >= 0; i--) {
-					Phrase ph = fs.process(params[i]);
+					Phrase ph = fs.process(params[i] + ""); //add empty string to prevent NPE if value is null
 					ph.setLeading(12); //set spacing before the phrase
 					ListItem listItem = new ListItem(ph);
 					list.add(listItem);
@@ -236,7 +236,7 @@ public class pdfOutput implements ArtOutputInterface {
 
 	@Override
 	public void addHeaderCell(String s) {
-		cell = new PdfPCell(new Paragraph(fsHeading.process(s)));
+		cell = new PdfPCell(new Paragraph(fsHeading.process(s + ""))); //add empty string to prevent NPE if value is null
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
@@ -255,7 +255,7 @@ public class pdfOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellString(String s) {
-		cell = new PdfPCell(new Paragraph(fsBody.process(s)));
+		cell = new PdfPCell(new Paragraph(fsBody.process(s + ""))); //add empty string to prevent NPE if value is null
 
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
