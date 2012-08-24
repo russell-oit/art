@@ -34,47 +34,45 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class to represent query parameters
- *  
+ *
  */
-public class ArtQueryParam implements Serializable{
+public class ArtQueryParam implements Serializable {
 
 	private static final long serialVersionUID = 1L; //need to implement serializable to be used as a field in artgraph classes
-	
-    final static Logger logger = LoggerFactory.getLogger(ArtQueryParam.class);
-    
-    String name = "";
-    String shortDescription = "";
-    String description = "";
-    String fieldClass = "";
-    String defaultValue = "";
-    String useLov = "";	
-    String paramType = "";
-    String paramLabel = "";
-    String applyRulesToLov = "";
-    int queryId;
-    int fieldPosition = -1;
-    int lovQueryId;
-    int bindPosition = -1;
-    int chainedPosition;
-    int drilldownColumn;
-    int chainedValuePosition;
-    boolean isBind;
-    //variables to support bind parameters
-    String bindQuerySql = "";
-    boolean[] bindVector;
-    //    
-    Object paramValue=null; //store parameter values. either String for inline parameters or String[] for multi parameters
-	private Map<String, String> lovValues=null; //store value/friendly display string for lov parameters
-	
+	final static Logger logger = LoggerFactory.getLogger(ArtQueryParam.class);
+	String name = "";
+	String shortDescription = "";
+	String description = "";
+	String fieldClass = "";
+	String defaultValue = "";
+	String useLov = "";
+	String paramType = "";
+	String paramLabel = "";
+	String applyRulesToLov = "";
+	int queryId;
+	int fieldPosition = -1;
+	int lovQueryId;
+	int bindPosition = -1;
+	int chainedPosition;
+	int drilldownColumn;
+	int chainedValuePosition;
+	boolean isBind;
+	//variables to support bind parameters
+	String bindQuerySql = "";
+	boolean[] bindVector;
+	//    
+	Object paramValue = null; //store parameter values. either String for inline parameters or String[] for multi parameters
+	private Map<String, String> lovValues = null; //store value/friendly display string for lov parameters
 
-    /**
-     * 
-     */
-    public ArtQueryParam() {
-    }
+	/**
+	 *
+	 */
+	public ArtQueryParam() {
+	}
 
 	/**
 	 * Get value and friendly display string for lov parameters
+	 *
 	 * @return the lovValues
 	 */
 	public Map<String, String> getLovValues() {
@@ -83,6 +81,7 @@ public class ArtQueryParam implements Serializable{
 
 	/**
 	 * Store value and friendly display string for lov parameters
+	 *
 	 * @param lovValues the lovValues to set
 	 */
 	public void setLovValues(Map<String, String> lovValues) {
@@ -90,728 +89,820 @@ public class ArtQueryParam implements Serializable{
 	}
 
 	/**
-	 * Utility method to determine if the parameter uses an lov query for its values
-	 * @return the <code>false</code> is use_lov column has 'N'. <code>true</code> otherwise
+	 * Utility method to determine if the parameter uses an lov query for its
+	 * values
+	 *
+	 * @return the
+	 * <code>false</code> is use_lov column has 'N'.
+	 * <code>true</code> otherwise
 	 */
 	public boolean usesLov() {
 		boolean usesLov;
-		if(StringUtils.equals(useLov,"N")){
-			usesLov=false;
+		if (StringUtils.equals(useLov, "N")) {
+			usesLov = false;
 		} else {
-			usesLov=true;
+			usesLov = true;
 		}
-		
+
 		return usesLov;
 	}
 
-    /**
-     * 
-     * @return parameter value
-     */
-    public Object getParamValue() {
-        return paramValue;
-    }
+	/**
+	 * Utility method to determine, if the parameter is chained (it's value
+	 * depends on another one), the position of the parameter which determines
+	 * this parameter's value
+	 *
+	 * @return the position of the parameter which determines this parameter's
+	 * value
+	 */
+	public int getEffectiveChainedValuePosition() {
+		int position;
 
-    /**
-     * 
-     * @param value 
-     */
-    public void setParamValue(Object value) {
-        paramValue = value;
-    }
+		if (chainedValuePosition > 0) {
+			position = chainedValuePosition;
+		} else {
+			position = chainedPosition;
+		}
 
-    /**
-     * 
-     * @param value
-     */
-    public void setChainedValuePosition(int value) {
-        chainedValuePosition = value;
-    }
+		return position;
+	}
 
-    /**
-     * 
-     * @return chained value position
-     */
-    public int getChainedValuePosition() {
-        return chainedValuePosition;
-    }
+	/**
+	 *
+	 * @return parameter value
+	 */
+	public Object getParamValue() {
+		return paramValue;
+	}
 
-    /**
-     * 
-     * @param i
-     */
-    public void setDrilldownColumn(int i) {
-        drilldownColumn = i;
-    }
+	/**
+	 *
+	 * @param value
+	 */
+	public void setParamValue(Object value) {
+		paramValue = value;
+	}
 
-    /**
-     * 
-     * @return drill down column
-     */
-    public int getDrilldownColumn() {
-        return drilldownColumn;
-    }
+	/**
+	 *
+	 * @param value
+	 */
+	public void setChainedValuePosition(int value) {
+		chainedValuePosition = value;
+	}
 
-    /* Sets
-     */
-    /**
-     * 
-     * @param i
-     */
-    public void setLovQueryId(int i) {
-        lovQueryId = i;
-    }
+	/**
+	 *
+	 * @return chained value position
+	 */
+	public int getChainedValuePosition() {
+		return chainedValuePosition;
+	}
 
-    private void setFieldPosition(int i) { //Private!
-        fieldPosition = i;
-    }
+	/**
+	 *
+	 * @param i
+	 */
+	public void setDrilldownColumn(int i) {
+		drilldownColumn = i;
+	}
 
-    /**
-     * 
-     * @param i
-     */
-    public void setQueryId(int i) {
-        queryId = i;
-    }
+	/**
+	 *
+	 * @return drill down column
+	 */
+	public int getDrilldownColumn() {
+		return drilldownColumn;
+	}
 
-    /**
-     * 
-     * @param i
-     */
-    public void setBindPosition(int i) { // BIND position
-        bindPosition = i;
-    }
+	/*
+	 * Sets
+	 */
+	/**
+	 *
+	 * @param i
+	 */
+	public void setLovQueryId(int i) {
+		lovQueryId = i;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setName(String s) {
-        name = s;
-    }
+	private void setFieldPosition(int i) { //Private!
+		fieldPosition = i;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setShortDescription(String s) {
-        shortDescription = s;
-    }
+	/**
+	 *
+	 * @param i
+	 */
+	public void setQueryId(int i) {
+		queryId = i;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setDescription(String s) {
-        description = s;
-    }
+	/**
+	 *
+	 * @param i
+	 */
+	public void setBindPosition(int i) { // BIND position
+		bindPosition = i;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setApplyRulesToLov(String s) {
-        s = s.substring(0, 1);
-        applyRulesToLov = s;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setName(String s) {
+		name = s;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setFieldClass(String s) {
-        fieldClass = s;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setShortDescription(String s) {
+		shortDescription = s;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setDefaultValue(String s) {
-        defaultValue = s;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setDescription(String s) {
+		description = s;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setUseLov(String s) {
-        useLov = s;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setApplyRulesToLov(String s) {
+		s = s.substring(0, 1);
+		applyRulesToLov = s;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setParamType(String s) {
-        paramType = s;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setFieldClass(String s) {
+		fieldClass = s;
+	}
 
-    /**
-     * 
-     * @param s
-     */
-    public void setParamLabel(String s) {
-        paramLabel = s;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setDefaultValue(String s) {
+		defaultValue = s;
+	}
 
-    /**
-     * 
-     * @param i
-     */
-    public void setChainedPosition(int i) {
-        chainedPosition = i;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setUseLov(String s) {
+		useLov = s;
+	}
 
-    /* Gets
-     */
-    /**
-     * 
-     * @return query id for lov query
-     */
-    public int getLovQueryId() {
-        return lovQueryId;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setParamType(String s) {
+		paramType = s;
+	}
 
-    /**
-     * 
-     * @return parameter position
-     */
-    public int getFieldPosition() {
-        return fieldPosition;
-    }
+	/**
+	 *
+	 * @param s
+	 */
+	public void setParamLabel(String s) {
+		paramLabel = s;
+	}
 
-    /**
-     * 
-     * @return parent query id
-     */
-    public int getQueryId() {
-        return queryId;
-    }
+	/**
+	 *
+	 * @param i
+	 */
+	public void setChainedPosition(int i) {
+		chainedPosition = i;
+	}
 
-    /**
-     * 
-     * @return bind or chained param position
-     */
-    public int getBindPosition() { // BIND position
-        return bindPosition;
-    }
+	/*
+	 * Gets
+	 */
+	/**
+	 *
+	 * @return query id for lov query
+	 */
+	public int getLovQueryId() {
+		return lovQueryId;
+	}
 
-    /**
-     * 
-     * @return display name
-     */
-    public String getName() {
-        return name;
-    }
+	/**
+	 *
+	 * @return parameter position
+	 */
+	public int getFieldPosition() {
+		return fieldPosition;
+	}
 
-    /**
-     * 
-     * @return short description
-     */
-    public String getShortDescription() {
-        return shortDescription;
-    }
+	/**
+	 *
+	 * @return parent query id
+	 */
+	public int getQueryId() {
+		return queryId;
+	}
 
-    /**
-     * 
-     * @return description
-     */
-    public String getDescription() {
-        return description;
-    }
+	/**
+	 *
+	 * @return bind or chained param position
+	 */
+	public int getBindPosition() { // BIND position
+		return bindPosition;
+	}
 
-    /**
-     * 
-     * @return whether to use rules on the parameter's lov query
-     */
-    public String getApplyRulesToLov() {
-        return applyRulesToLov;
-    }
+	/**
+	 *
+	 * @return display name
+	 */
+	public String getName() {
+		return name;
+	}
 
-    /**
-     * 
-     * @return data type of parameter
-     */
-    public String getFieldClass() {
-        return fieldClass;
-    }
+	/**
+	 *
+	 * @return short description
+	 */
+	public String getShortDescription() {
+		return shortDescription;
+	}
 
-    /**
-     * 
-     * @return default value
-     */
-    public String getDefaultValue() {
-        return defaultValue;
-    }
+	/**
+	 *
+	 * @return description
+	 */
+	public String getDescription() {
+		return description;
+	}
 
-    /**
-     * 
-     * @return whether the parameter uses an lov
-     */
-    public String getUseLov() {
-        return useLov;
-    }
+	/**
+	 *
+	 * @return whether to use rules on the parameter's lov query
+	 */
+	public String getApplyRulesToLov() {
+		return applyRulesToLov;
+	}
 
-    /**
-     * 
-     * @return parameter type
-     */
-    public String getParamType() {
-        return paramType;
-    }
+	/**
+	 *
+	 * @return data type of parameter
+	 */
+	public String getFieldClass() {
+		return fieldClass;
+	}
 
-    /**
-     * 
-     * @return parameter label
-     */
-    public String getParamLabel() {
-        return paramLabel;
-    }
+	/**
+	 *
+	 * @return default value
+	 */
+	public String getDefaultValue() {
+		return defaultValue;
+	}
 
-    /**
-     * 
-     * @return chained param position
-     */
-    public int getChainedPosition() {
-        return chainedPosition;
-    }
+	/**
+	 *
+	 * @return whether the parameter uses an lov
+	 */
+	public String getUseLov() {
+		return useLov;
+	}
 
-    /**
-     * Create the object from an existing query param (qId, fId)
-     *
-     *
-     * @param conn 
-     * @param qId 
-     * @param fId 
-     * @return <code>true</code> if object populated successfully
-     */
-    public boolean create(Connection conn, int qId, int fId) {
-        boolean success = false;
+	/**
+	 *
+	 * @return parameter type
+	 */
+	public String getParamType() {
+		return paramType;
+	}
 
-        try {
-            String SQL = "SELECT QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
-                    + " ,FIELD_CLASS, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
-                    + " ,LOV_QUERY_ID, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION "
-                    + " FROM ART_QUERY_FIELDS "
-                    + " WHERE QUERY_ID = ? AND FIELD_POSITION = ?";
+	/**
+	 *
+	 * @return parameter label
+	 */
+	public String getParamLabel() {
+		return paramLabel;
+	}
 
-            PreparedStatement ps = conn.prepareStatement(SQL);
-            ps.setInt(1, qId);
-            ps.setInt(2, fId);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                setQueryId(rs.getInt("QUERY_ID"));
-                setFieldPosition(rs.getInt("FIELD_POSITION"));
-                setName(rs.getString("NAME"));
-                setShortDescription(rs.getString("SHORT_DESCRIPTION"));
-                setDescription(rs.getString("DESCRIPTION"));
-                setFieldClass(rs.getString("FIELD_CLASS"));
-                setDefaultValue(rs.getString("DEFAULT_VALUE"));
-                setUseLov(rs.getString("USE_LOV"));
-                setParamType(rs.getString("PARAM_TYPE"));
-                setParamLabel(rs.getString("PARAM_LABEL"));
-                setApplyRulesToLov(rs.getString("APPLY_RULES_TO_LOV"));
-                setLovQueryId(rs.getInt("LOV_QUERY_ID"));
-                setBindPosition(rs.getInt("CHAINED_PARAM_POSITION"));
-                setChainedPosition(rs.getInt("CHAINED_PARAM_POSITION"));
-                setDrilldownColumn(rs.getInt("DRILLDOWN_COLUMN"));
-                setChainedValuePosition(rs.getInt("CHAINED_VALUE_POSITION"));
+	/**
+	 *
+	 * @return chained param position
+	 */
+	public int getChainedPosition() {
+		return chainedPosition;
+	}
 
-                rs.close();
-                ps.close();
+	/**
+	 * Create the object from an existing query param (qId, fId)
+	 *
+	 *
+	 * @param conn
+	 * @param qId
+	 * @param fId
+	 * @return
+	 * <code>true</code> if object populated successfully
+	 */
+	public boolean create(Connection conn, int qId, int fId) {
+		boolean success = false;
 
-                success = true;
-            } else {
-                logger.warn("The query id {} does not exist",queryId);
-            }
-        } catch (SQLException e) {
-            logger.error("Error. Query id {}",queryId,e);
-        }
+		try {
+			String SQL = "SELECT QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
+					+ " ,FIELD_CLASS, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
+					+ " ,LOV_QUERY_ID, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION "
+					+ " FROM ART_QUERY_FIELDS "
+					+ " WHERE QUERY_ID = ? AND FIELD_POSITION = ?";
 
-        return success;
-    }
+			PreparedStatement ps = conn.prepareStatement(SQL);
+			ps.setInt(1, qId);
+			ps.setInt(2, fId);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				setQueryId(rs.getInt("QUERY_ID"));
+				setFieldPosition(rs.getInt("FIELD_POSITION"));
+				setName(rs.getString("NAME"));
+				setShortDescription(rs.getString("SHORT_DESCRIPTION"));
+				setDescription(rs.getString("DESCRIPTION"));
+				setFieldClass(rs.getString("FIELD_CLASS"));
+				setDefaultValue(rs.getString("DEFAULT_VALUE"));
+				setUseLov(rs.getString("USE_LOV"));
+				setParamType(rs.getString("PARAM_TYPE"));
+				setParamLabel(rs.getString("PARAM_LABEL"));
+				setApplyRulesToLov(rs.getString("APPLY_RULES_TO_LOV"));
+				setLovQueryId(rs.getInt("LOV_QUERY_ID"));
+				setBindPosition(rs.getInt("CHAINED_PARAM_POSITION"));
+				setChainedPosition(rs.getInt("CHAINED_PARAM_POSITION"));
+				setDrilldownColumn(rs.getInt("DRILLDOWN_COLUMN"));
+				setChainedValuePosition(rs.getInt("CHAINED_VALUE_POSITION"));
 
-    /**
-     * Update  the database
-     *
-     *
-     * @param conn 
-     * @return <code>true</code> if successful
-     */
-    public boolean update(Connection conn) {
-        // Delete
-        // and Insert
+				rs.close();
+				ps.close();
 
-        boolean success = false;
+				success = true;
+			} else {
+				logger.warn("The query id {} does not exist", queryId);
+			}
+		} catch (SQLException e) {
+			logger.error("Error. Query id {}", queryId, e);
+		}
 
-        try {
-            String SQL;
-            PreparedStatement ps;
+		return success;
+	}
 
-            java.util.Date utilDate = new java.util.Date();
-            java.sql.Date sysdate = new java.sql.Date(utilDate.getTime());
+	/**
+	 * Update the database
+	 *
+	 *
+	 * @param conn
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean update(Connection conn) {
+		// Delete
+		// and Insert
 
-            SQL = ("DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? AND FIELD_POSITION = ? ");
-            ps = conn.prepareStatement(SQL);
-            ps.setInt(1, queryId);
-            ps.setInt(2, fieldPosition);
-            ps.executeUpdate();
-            ps.close();
+		boolean success = false;
 
-            SQL = "INSERT INTO ART_QUERY_FIELDS "
-                    + " (QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
-                    + " ,FIELD_CLASS, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
-                    + " ,LOV_QUERY_ID, UPDATE_DATE, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION) "
-                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		try {
+			String SQL;
+			PreparedStatement ps;
 
-            ps = conn.prepareStatement(SQL);
-			
+			java.util.Date utilDate = new java.util.Date();
+			java.sql.Date sysdate = new java.sql.Date(utilDate.getTime());
+
+			SQL = ("DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? AND FIELD_POSITION = ? ");
+			ps = conn.prepareStatement(SQL);
+			ps.setInt(1, queryId);
+			ps.setInt(2, fieldPosition);
+			ps.executeUpdate();
+			ps.close();
+
+			SQL = "INSERT INTO ART_QUERY_FIELDS "
+					+ " (QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
+					+ " ,FIELD_CLASS, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
+					+ " ,LOV_QUERY_ID, UPDATE_DATE, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION) "
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+			ps = conn.prepareStatement(SQL);
+
 			//if name is empty string, save space. for error free database migrations using tools like PDI
-			if(StringUtils.isBlank(name)){
-				name=" ";
+			if (StringUtils.isBlank(name)) {
+				name = " ";
 			}
 
-            ps.setInt(1, getQueryId());
-            ps.setInt(2, getFieldPosition());
-            ps.setString(3, getName());
-            ps.setString(4, getShortDescription());
-            ps.setString(5, getDescription());
-            ps.setString(6, getFieldClass());
-            ps.setString(7, getDefaultValue());
-            ps.setString(8, getUseLov());
-            ps.setString(9, getParamType());
-            ps.setString(10, getParamLabel());
-            ps.setString(11, getApplyRulesToLov());
-            ps.setInt(12, getLovQueryId());
-            ps.setDate(13, sysdate);
-            ps.setInt(14, getChainedPosition());
-            ps.setInt(15, getDrilldownColumn());
-            ps.setInt(16, getChainedValuePosition());
+			ps.setInt(1, getQueryId());
+			ps.setInt(2, getFieldPosition());
+			ps.setString(3, getName());
+			ps.setString(4, getShortDescription());
+			ps.setString(5, getDescription());
+			ps.setString(6, getFieldClass());
+			ps.setString(7, getDefaultValue());
+			ps.setString(8, getUseLov());
+			ps.setString(9, getParamType());
+			ps.setString(10, getParamLabel());
+			ps.setString(11, getApplyRulesToLov());
+			ps.setInt(12, getLovQueryId());
+			ps.setDate(13, sysdate);
+			ps.setInt(14, getChainedPosition());
+			ps.setInt(15, getDrilldownColumn());
+			ps.setInt(16, getChainedValuePosition());
 
-            ps.executeUpdate();
-            ps.close();
+			ps.executeUpdate();
+			ps.close();
 
-            success = true;
-        } catch (SQLException e) {
-            logger.error("Error. Query id {}",queryId,e);
-        }
+			success = true;
+		} catch (SQLException e) {
+			logger.error("Error. Query id {}", queryId, e);
+		}
 
-        return success;
-    }
+		return success;
+	}
 
-    /**
-     * Insert
-     *
-     *
-     * @param conn
-     * @return <code>true</code> if successful
-     */
-    public boolean insert(Connection conn) {
-        // Get new Position
-        try {
-            String SQL;
-            PreparedStatement ps;
-            ResultSet rs;
+	/**
+	 * Insert
+	 *
+	 *
+	 * @param conn
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean insert(Connection conn) {
+		// Get new Position
+		try {
+			String SQL;
+			PreparedStatement ps;
+			ResultSet rs;
 
-            SQL = ("SELECT MAX(FIELD_POSITION) FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? ");
-            ps = conn.prepareStatement(SQL);
-            ps.setInt(1, queryId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                setFieldPosition(1 + rs.getInt(1));
-            }
-            rs.close();
-            ps.close();
-        } catch (Exception e) {
-            logger.error("Error. Query id {}",queryId,e);
-            return false;
-        }
-        return update(conn);
-    }
+			SQL = ("SELECT MAX(FIELD_POSITION) FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? ");
+			ps = conn.prepareStatement(SQL);
+			ps.setInt(1, queryId);
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				setFieldPosition(1 + rs.getInt(1));
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			logger.error("Error. Query id {}", queryId, e);
+			return false;
+		}
+		return update(conn);
+	}
 
-    /**
-     * Delete an existing param from the database
-     *
-     *
-     * @param conn
-     * @return  <code>true</code> if successful
-     */
-    public boolean delete(Connection conn) {        
-        boolean success = false;
+	/**
+	 * Delete an existing param from the database
+	 *
+	 *
+	 * @param conn
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean delete(Connection conn) {
+		boolean success = false;
 
-        try {
-            String SQL;
-            PreparedStatement ps;
+		try {
+			String SQL;
+			PreparedStatement ps;
 
-            // Delete Parameter
-            SQL = ("DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? AND FIELD_POSITION = ? ");
-            ps = conn.prepareStatement(SQL);
-            ps.setInt(1, queryId);
-            ps.setInt(2, fieldPosition);
-            ps.executeUpdate();
-            ps.close();
+			// Delete Parameter
+			SQL = ("DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? AND FIELD_POSITION = ? ");
+			ps = conn.prepareStatement(SQL);
+			ps.setInt(1, queryId);
+			ps.setInt(2, fieldPosition);
+			ps.executeUpdate();
+			ps.close();
 
-            // Fix ? index position of all the subsequent bind parameter (only if this param is a bind one
-            if (bindPosition != -1) {
-                SQL = ("UPDATE ART_QUERY_FIELDS SET CHAINED_PARAM_POSITION = (CHAINED_PARAM_POSITION-1) WHERE CHAINED_PARAM_POSITION > ? AND QUERY_ID = ?");
-                ps = conn.prepareStatement(SQL);
-                ps.setInt(1, bindPosition);
-                ps.setInt(2, queryId);
-                ps.executeUpdate();
-                ps.close();
-            }
+			// Fix ? index position of all the subsequent bind parameter (only if this param is a bind one
+			if (bindPosition != -1) {
+				SQL = ("UPDATE ART_QUERY_FIELDS SET CHAINED_PARAM_POSITION = (CHAINED_PARAM_POSITION-1) WHERE CHAINED_PARAM_POSITION > ? AND QUERY_ID = ?");
+				ps = conn.prepareStatement(SQL);
+				ps.setInt(1, bindPosition);
+				ps.setInt(2, queryId);
+				ps.executeUpdate();
+				ps.close();
+			}
 
-            // Fix the field position for subsequent parameters
-            SQL = ("UPDATE ART_QUERY_FIELDS SET FIELD_POSITION = (FIELD_POSITION-1) WHERE FIELD_POSITION > ? AND QUERY_ID = ?");
-            ps = conn.prepareStatement(SQL);
-            ps.setInt(1, fieldPosition);
-            ps.setInt(2, queryId);
-            ps.executeUpdate();
-            ps.close();
+			// Fix the field position for subsequent parameters
+			SQL = ("UPDATE ART_QUERY_FIELDS SET FIELD_POSITION = (FIELD_POSITION-1) WHERE FIELD_POSITION > ? AND QUERY_ID = ?");
+			ps = conn.prepareStatement(SQL);
+			ps.setInt(1, fieldPosition);
+			ps.setInt(2, queryId);
+			ps.executeUpdate();
+			ps.close();
 
-            success = true;
-        } catch (SQLException e) {
-            logger.error("Error. Query id {}",queryId,e);
-        }
+			success = true;
+		} catch (SQLException e) {
+			logger.error("Error. Query id {}", queryId, e);
+		}
 
-        return success;
-    }
+		return success;
+	}
 
-    /**
-     * Delete an existing parameter from the database
-     *
-     *
-     * @param conn 
-     * @return <code>true</code> if successful
-     */
-    public boolean moveUp(Connection conn) {
-        // Move Up
-        if (fieldPosition <= 1) {
-            return true; // it is already on top
-        }
+	/**
+	 * Delete an existing parameter from the database
+	 *
+	 *
+	 * @param conn
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean moveUp(Connection conn) {
+		// Move Up
+		if (fieldPosition <= 1) {
+			return true; // it is already on top
+		}
 
-        boolean success = false;
+		boolean success = false;
 
-        try {
-            String SQL;
-            PreparedStatement ps;
+		try {
+			String SQL;
+			PreparedStatement ps;
 
-            SQL = ("UPDATE ART_QUERY_FIELDS SET FIELD_POSITION = ? WHERE FIELD_POSITION = ? AND QUERY_ID = ?");
-            ps = conn.prepareStatement(SQL);
+			SQL = ("UPDATE ART_QUERY_FIELDS SET FIELD_POSITION = ? WHERE FIELD_POSITION = ? AND QUERY_ID = ?");
+			ps = conn.prepareStatement(SQL);
 
-            // Assign to *this* parameter the "swap" position 0
-            ps.setInt(1, 0);
-            ps.setInt(2, fieldPosition);
-            ps.setInt(3, queryId);
-            ps.addBatch();
+			// Assign to *this* parameter the "swap" position 0
+			ps.setInt(1, 0);
+			ps.setInt(2, fieldPosition);
+			ps.setInt(3, queryId);
+			ps.addBatch();
 
-            // Move down the previous one
-            ps.setInt(1, fieldPosition);
-            ps.setInt(2, (fieldPosition - 1));
-            ps.setInt(3, queryId);
-            ps.addBatch();
+			// Move down the previous one
+			ps.setInt(1, fieldPosition);
+			ps.setInt(2, (fieldPosition - 1));
+			ps.setInt(3, queryId);
+			ps.addBatch();
 
-            // Assign the right position to *this* parameter
-            ps.setInt(1, (fieldPosition - 1));
-            ps.setInt(2, 0);
-            ps.setInt(3, queryId);
-            ps.addBatch();
+			// Assign the right position to *this* parameter
+			ps.setInt(1, (fieldPosition - 1));
+			ps.setInt(2, 0);
+			ps.setInt(3, queryId);
+			ps.addBatch();
 
-            ps.executeBatch();
+			ps.executeBatch();
 
-            ps.close();
+			ps.close();
 
-            success = true;
-        } catch (SQLException e) {
-            logger.error("Error. Query id {}",queryId,e);
-        }
+			success = true;
+		} catch (SQLException e) {
+			logger.error("Error. Query id {}", queryId, e);
+		}
 
-        return success;
-    }
+		return success;
+	}
 
-    /**
-     * Prepare variables to be used for bind parameter manipulations
-     * 
-     * @param conn
-     * @param qId
-     * @return <code>true</code> if successful
-     */
-    public boolean prepareBindParams(Connection conn, int qId) {
-        boolean success = false;
+	/**
+	 * Prepare variables to be used for bind parameter manipulations
+	 *
+	 * @param conn
+	 * @param qId
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean prepareBindParams(Connection conn, int qId) {
+		boolean success = false;
 
-        try {
-            String psSQL = "SELECT TEXT_INFO FROM ART_ALL_SOURCES "
-                    + " WHERE OBJECT_ID = ?"
-                    + " ORDER BY LINE_NUMBER";
-            PreparedStatement ps = conn.prepareStatement(psSQL);
-            ps.setInt(1, qId);
-            ResultSet rs = ps.executeQuery();
+		try {
+			String psSQL = "SELECT TEXT_INFO FROM ART_ALL_SOURCES "
+					+ " WHERE OBJECT_ID = ?"
+					+ " ORDER BY LINE_NUMBER";
+			PreparedStatement ps = conn.prepareStatement(psSQL);
+			ps.setInt(1, qId);
+			ResultSet rs = ps.executeQuery();
 
-            StringBuilder SqlBuff = new StringBuilder(1024);
-            while (rs.next()) {
-                SqlBuff.append(rs.getString(1));
-            }
-            rs.close();
+			StringBuilder SqlBuff = new StringBuilder(1024);
+			while (rs.next()) {
+				SqlBuff.append(rs.getString(1));
+			}
+			rs.close();
 
-            bindQuerySql = SqlBuff.toString();
+			bindQuerySql = SqlBuff.toString();
 
-            // build a vector bv[] where bv[i] is true
-            // if the bind parameter i+1 is used.
-            int numOfBindInSQL = getNumberOfBindsInSQL();
-            boolean[] bv = new boolean[numOfBindInSQL + 1];
-            int i;
-            for (i = 0; i < numOfBindInSQL; i++) {
-                bv[i] = false;
-            }
+			// build a vector bv[] where bv[i] is true
+			// if the bind parameter i+1 is used.
+			int numOfBindInSQL = getNumberOfBindsInSQL();
+			boolean[] bv = new boolean[numOfBindInSQL + 1];
+			int i;
+			for (i = 0; i < numOfBindInSQL; i++) {
+				bv[i] = false;
+			}
 
-            psSQL = "SELECT CHAINED_PARAM_POSITION FROM ART_QUERY_FIELDS "
-                    + " WHERE QUERY_ID = ? "
-                    + " AND PARAM_TYPE = 'N' "
-                    + " ORDER BY CHAINED_PARAM_POSITION";
-            ps = conn.prepareStatement(psSQL);
-            ps.setInt(1, qId);
-            rs = ps.executeQuery();
-            for (i = 0; i < numOfBindInSQL && rs.next(); i++) {
-                bv[(rs.getInt(1) - 1)] = true;
-            }
-            bindVector = bv;
+			psSQL = "SELECT CHAINED_PARAM_POSITION FROM ART_QUERY_FIELDS "
+					+ " WHERE QUERY_ID = ? "
+					+ " AND PARAM_TYPE = 'N' "
+					+ " ORDER BY CHAINED_PARAM_POSITION";
+			ps = conn.prepareStatement(psSQL);
+			ps.setInt(1, qId);
+			rs = ps.executeQuery();
+			for (i = 0; i < numOfBindInSQL && rs.next(); i++) {
+				bv[(rs.getInt(1) - 1)] = true;
+			}
+			bindVector = bv;
 
-            success = true;
-        } catch (Exception e) {
-            logger.error("Error",e);
-        }
+			success = true;
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
 
-        return success;
-    }
+		return success;
+	}
 
-    /**
-     * 
-     * @return number of bind variables in the sql source
-     */
-    public int getNumberOfBindsInSQL() {
-        int index = 0;
-        int i;
-        for (i = 0; index >= 0; i++) {
-            index = bindQuerySql.indexOf("?", index + 1);
-        }
+	/**
+	 *
+	 * @return number of bind variables in the sql source
+	 */
+	public int getNumberOfBindsInSQL() {
+		int index = 0;
+		int i;
+		for (i = 0; index >= 0; i++) {
+			index = bindQuerySql.indexOf("?", index + 1);
+		}
 
-        return i - 1;
-    }
+		return i - 1;
+	}
 
-    /**
-     * 
-     * @param i
-     * @return <code>true</code> if bind position is free
-     */
-    public boolean isBindPositionFree(int i) {
-        return (!bindVector[i - 1]);
-    }
+	/**
+	 *
+	 * @param i
+	 * @return
+	 * <code>true</code> if bind position is free
+	 */
+	public boolean isBindPositionFree(int i) {
+		return (!bindVector[i - 1]);
+	}
 
-    /**
-     * 
-     * @param pos
-     * @return string around bind variable
-     */
-    public String getStringAroundBind(int pos) {
-        String result;
+	/**
+	 *
+	 * @param pos
+	 * @return string around bind variable
+	 */
+	public String getStringAroundBind(int pos) {
+		String result;
 
-        int index = 0;
-        for (int i = 0; i < pos && index >= 0; i++) {
-            index = bindQuerySql.indexOf("?", index + 1);
-        }
+		int index = 0;
+		for (int i = 0; i < pos && index >= 0; i++) {
+			index = bindQuerySql.indexOf("?", index + 1);
+		}
 
-        String s = "";
-        if (index >= 0) {
-            if (bindQuerySql.length() > 30) {
-                s = "..."
-                        + bindQuerySql.substring(
-                        ((index - 35) < 0 ? 0 : (index - 35)),
-                        ((index + 5) > bindQuerySql.length()) ? index + 1 : (index + 5))
-                        + "...";
-            }
-            s.replace('"', ' ');
-            result = s.replace('\n', ' ');
-        } else {
-            result = "ERROR";
-        }
+		String s = "";
+		if (index >= 0) {
+			if (bindQuerySql.length() > 30) {
+				s = "..."
+						+ bindQuerySql.substring(
+						((index - 35) < 0 ? 0 : (index - 35)),
+						((index + 5) > bindQuerySql.length()) ? index + 1 : (index + 5))
+						+ "...";
+			}
+			s.replace('"', ' ');
+			result = s.replace('\n', ' ');
+		} else {
+			result = "ERROR";
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-    /**
-     * Get a parameter's display name
-     * 
-     * @param qId
-     * @param htmlName
-     * @return display name
-     */
-    public String getDisplayName(int qId, String htmlName) {
-        String displayName = "";
+	/**
+	 * Get a parameter's display name
+	 *
+	 * @param qId
+	 * @param htmlName
+	 * @return display name
+	 */
+	public String getDisplayName(int qId, String htmlName) {
+		String displayName = "";
 
-        Connection conn = null;
+		Connection conn = null;
 
-        try {
-            conn = ArtDBCP.getConnection();
+		try {
+			conn = ArtDBCP.getConnection();
 
-            String sql;
-            PreparedStatement ps;
-            ResultSet rs;
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
 
-            String label = htmlName.substring(2);
-            NumberFormat f = new DecimalFormat("00");
+			String label = htmlName.substring(2);
+			NumberFormat f = new DecimalFormat("00");
 
-            if (htmlName.substring(0, 2).equals("P_") || !NumberUtils.isNumber(label)) {
-                //inline parameter or multi parameter that uses a label
+			if (htmlName.substring(0, 2).equals("P_") || !NumberUtils.isNumber(label)) {
+				//inline parameter or multi parameter that uses a label
 
-                sql = "SELECT FIELD_POSITION, NAME FROM ART_QUERY_FIELDS "
-                        + " WHERE QUERY_ID = ? AND PARAM_LABEL=?";
+				sql = "SELECT FIELD_POSITION, NAME FROM ART_QUERY_FIELDS "
+						+ " WHERE QUERY_ID = ? AND PARAM_LABEL=?";
 
-                ps = conn.prepareStatement(sql);
-                ps.setInt(1, qId);
-                ps.setString(2, label);
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, qId);
+				ps.setString(2, label);
 
-                rs = ps.executeQuery();
-                if (rs.next()) {
-                    displayName = f.format(rs.getInt("FIELD_POSITION")) + ". " + rs.getString("NAME");
-                }
-                ps.close();
-                rs.close();
-            } else {
-                //multi parameter that uses the field position
-                sql = "SELECT FIELD_POSITION, NAME FROM ART_QUERY_FIELDS "
-                        + " WHERE QUERY_ID = ? AND FIELD_POSITION=?";
+				rs = ps.executeQuery();
+				if (rs.next()) {
+					displayName = f.format(rs.getInt("FIELD_POSITION")) + ". " + rs.getString("NAME");
+				}
+				ps.close();
+				rs.close();
+			} else {
+				//multi parameter that uses the field position
+				sql = "SELECT FIELD_POSITION, NAME FROM ART_QUERY_FIELDS "
+						+ " WHERE QUERY_ID = ? AND FIELD_POSITION=?";
 
-                ps = conn.prepareStatement(sql);
-                ps.setInt(1, qId);
-                ps.setInt(2, Integer.parseInt(label));
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, qId);
+				ps.setInt(2, Integer.parseInt(label));
 
-                rs = ps.executeQuery();
-                if (rs.next()) {
-                    displayName = f.format(rs.getInt("FIELD_POSITION")) + ". " + rs.getString("NAME");
-                }
-                ps.close();
-                rs.close();
-            }
+				rs = ps.executeQuery();
+				if (rs.next()) {
+					displayName = f.format(rs.getInt("FIELD_POSITION")) + ". " + rs.getString("NAME");
+				}
+				ps.close();
+				rs.close();
+			}
 
-        } catch (Exception e) {
-            logger.error("Error",e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                logger.error("Error",e);
-            }
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 
-        }
+		}
 
-        if (displayName == null || displayName.equals("")) {
-            displayName = htmlName;
-        }
+		if (displayName == null || displayName.equals("")) {
+			displayName = htmlName;
+		}
 
-        return displayName;
-    }
-		
+		return displayName;
+	}
+
+	/**
+	 * Get a parameter's html name
+	 *
+	 * @param qId
+	 * @param htmlName
+	 * @return display name
+	 */
+	public String getHtmlName(int qId, int fieldPos) {
+		String htmlName = "";
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+
+			sql = "SELECT NAME, PARAM_LABEL, PARAM_TYPE FROM ART_QUERY_FIELDS "
+					+ " WHERE QUERY_ID = ? AND FIELD_POSITION=?";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, qId);
+			ps.setInt(2, fieldPos);
+
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				String label = rs.getString("PARAM_LABEL");
+				String type = rs.getString("PARAM_TYPE");
+
+				if (type.equals("I")) {
+					//inline param                    
+					htmlName = "P_" + label;
+				} else if (type.equals("M")) {
+					//multi param. can be either labelled (M_label) or non-labelled (M_1)
+					//only return M_label
+					htmlName = "M_" + label;
+				}
+			}
+			ps.close();
+			rs.close();
+
+
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+
+		}
+
+		return htmlName;
+	}
 }

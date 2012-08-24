@@ -18,16 +18,23 @@
  */
 package art.servlets;
 
-import art.utils.*;
-
-import java.io.*;
-import java.util.*;
-import java.sql.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import net.sourceforge.ajaxtags.xml.AjaxXmlBuilder; //to help build ajax xml response
+import art.utils.PreparedQuery;
+import art.utils.UserEntity;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.ResourceBundle;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.ajaxtags.servlets.BaseAjaxServlet;
-import org.apache.commons.lang.StringEscapeUtils; //to escape xml characters
+import net.sourceforge.ajaxtags.xml.AjaxXmlBuilder;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

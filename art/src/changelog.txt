@@ -2,6 +2,7 @@ ART 2.3.1
 * Fix NullPointerException on pdf output with null strings
 * Fix to enable error free charts with java 1.7
 * Increased axis labels remove_at value for charts
+* Fix to enable display of friendly parameter values for chained parameters
 
 ART 2.3
 * Added database type drop down field to help populate common jdbc details

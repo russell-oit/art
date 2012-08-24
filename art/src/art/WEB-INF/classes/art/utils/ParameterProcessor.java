@@ -26,6 +26,7 @@
 package art.utils;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
@@ -129,6 +130,20 @@ public class ParameterProcessor {
 							try {
 								PreparedQuery pq = new PreparedQuery();
 								pq.setQueryId(param.getLovQueryId());
+								//for chained parameters, handle #filter# parameter
+								int chainedPosition = param.getEffectiveChainedValuePosition();
+								if (chainedPosition > 0) {
+									//parameter chained on another parameter. get filter value
+									String valueParamHtmlName = param.getHtmlName(queryId, chainedPosition);
+									String filter = request.getParameter(valueParamHtmlName);
+									if (filter == null) {
+										//try M_position
+										filter = request.getParameter("M_" + chainedPosition);
+									}
+									Map<String, String> filterParam = new HashMap<String, String>();
+									filterParam.put("filter", filter);
+									pq.setInlineParams(filterParam);
+								}
 								Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
 								param.setLovValues(lov);
 							} catch (Exception e) {
@@ -167,7 +182,21 @@ public class ParameterProcessor {
 								//get all possible lov values.								
 								try {
 									PreparedQuery pq = new PreparedQuery();
-									pq.setQueryId(param.getLovQueryId());								
+									pq.setQueryId(param.getLovQueryId());
+									//for chained parameters, handle #filter# parameter
+									int chainedPosition = param.getEffectiveChainedValuePosition();
+									if (chainedPosition > 0) {
+										//parameter chained on another parameter. get filter value
+										String valueParamHtmlName = param.getHtmlName(queryId, chainedPosition);
+										String filter = request.getParameter(valueParamHtmlName);
+										if (filter == null) {
+											//try M_position
+											filter = request.getParameter("M_" + chainedPosition);
+										}
+										Map<String, String> filterParam = new HashMap<String, String>();
+										filterParam.put("filter", filter);
+										pq.setInlineParams(filterParam);
+									}
 									Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
 									param.setLovValues(lov);
 								} catch (Exception e) {
