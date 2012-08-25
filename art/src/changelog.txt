@@ -3,6 +3,8 @@ ART 2.3.1
 * Fix to enable error free charts with java 1.7
 * Increased axis labels remove_at value for charts
 * Fix to enable display of friendly parameter values for chained parameters
+* Modified string for chained multi parameter, all values, from ":: All items" to "All"
+* Fix for error on selecting all values option for chained multi parameter
 
 ART 2.3
 * Added database type drop down field to help populate common jdbc details

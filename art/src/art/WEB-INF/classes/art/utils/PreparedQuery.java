@@ -1118,8 +1118,8 @@ public class PreparedQuery {
 		 * propsMap.put(pair[0],pair[1]); } if (DEBUG) System.out.println("Art-
 		 * PROPS tag detected - Map is:\n" + propsMap);
 		 *
-		 * // replace the code in the SQL with the "" text // +3 is to handle </
-		 * and > chars around the IF end tag
+		 * // replace the code in the SQL with the "" text // +3 is to handle
+		 * </ and > chars around the IF end tag
 		 * sb.replace(xinfo.getStart(),xinfo.getEnd()+element.length()+3,""); if
 		 * (DEBUG) System.out.println("Art- PROPS tag detected - Remaining SQL
 		 * is:\n" + sb.toString());
@@ -1349,9 +1349,9 @@ public class PreparedQuery {
 
 		//check if query uses labelled multi parameters
 		boolean hasLabelledMultiParams = false;
-		String paramLabel;		
+		String paramLabel;
 		String querySql;
-				
+
 		querySql = sb.toString();
 		it = htmlParams.entrySet().iterator();
 		while (it.hasNext()) {
@@ -1445,9 +1445,9 @@ public class PreparedQuery {
 					if (foundPosition != -1) {
 						//replace parameter with all possible values
 						List<String> finalValuesList = getAllParameterValues(paramLabel); //return all values from the parameter's lov query
-						
+
 						if (finalValuesList != null && finalValuesList.size() > 0) {
-							
+
 							List<String> paramValuesList = new ArrayList<String>(); //list of parameter values as is. used by jasper reports and mdx queries
 							List<String> escapedValuesList = new ArrayList<String>(); //list of parameter values, possible escaped using single quotes. used by art queries and jxls queries
 
@@ -1600,7 +1600,8 @@ public class PreparedQuery {
 
 		try {
 			//get the lov query's sql
-			String sqlLovQuery = "SELECT AAS.TEXT_INFO, AQ.DATABASE_ID, AQ.QUERY_TYPE"
+			String sqlLovQuery = "SELECT AAS.TEXT_INFO, AQ.DATABASE_ID, AQ.QUERY_TYPE, "
+					+ " AQF.CHAINED_PARAM_POSITION, AQF.CHAINED_VALUE_POSITION "
 					+ " FROM ART_QUERY_FIELDS AQF, ART_ALL_SOURCES AAS, ART_QUERIES AQ "
 					+ " WHERE AQF.LOV_QUERY_ID = AAS.OBJECT_ID AND AAS.OBJECT_ID = AQ.QUERY_ID"
 					+ " AND AQF.QUERY_ID = ? "
@@ -1616,10 +1617,14 @@ public class PreparedQuery {
 
 			//build complete sql string for lov query
 			int lovQueryType = 0;
+			int chainedParamPosition=0;
+			int chainedValuePosition=0;
 			while (rsLovQuery.next()) {
 				queryBuffer.append(rsLovQuery.getString("TEXT_INFO"));
 				databaseId = rsLovQuery.getInt("DATABASE_ID");
 				lovQueryType = rsLovQuery.getInt("QUERY_TYPE");
+				chainedParamPosition = rsLovQuery.getInt("CHAINED_PARAM_POSITION");
+				chainedValuePosition = rsLovQuery.getInt("CHAINED_VALUE_POSITION");
 			}
 
 			if (queryBuffer.length() > 0) {
@@ -1637,7 +1642,66 @@ public class PreparedQuery {
 					//dynamic lov
 					connLov = ArtDBCP.getConnection(databaseId);
 					String lovSql = queryBuffer.toString();
-					lovSql = lovSql.replaceAll("(?i)#rules#", "1=1"); //replace rules if the label exists, with dummy condition. so that lov query executes without error
+
+					//replace rules if the label exists, with dummy condition. so that lov query executes without error
+					lovSql = lovSql.replaceAll("(?i)#rules#", "1=1");
+
+					//replace #filter# parameter if it exists, for chained parameters
+					int filterPosition;
+					if (chainedParamPosition > 0 && chainedValuePosition > 0) {
+						filterPosition = chainedValuePosition;
+					} else {
+						filterPosition = chainedParamPosition;
+					}
+					if (filterPosition > 0) {
+						//parameter chained on another parameter. get filter parameter html name
+						ArtQueryParam param = new ArtQueryParam();
+						String filterLabel;
+						String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
+						//get filter value. 						
+						if (StringUtils.startsWith(valueParamHtmlName, "P_")) {
+							filterLabel = valueParamHtmlName.substring(2);
+							String filterValue = inlineParams.get(filterLabel);
+							lovSql = lovSql.replaceAll("(?i)#filter#", filterValue);
+						} else if (StringUtils.startsWith(valueParamHtmlName, "M_")) {
+							ArtQueryParam filterParam = htmlParams.get(valueParamHtmlName);
+							if (filterParam != null) {
+								filterLabel = filterParam.getParamLabel();
+								String[] filterValues = multiParams.get(filterLabel);
+
+								List<String> escapedValuesList = new ArrayList<String>(); //list of parameter values, possible escaped using single quotes. 
+
+								String currentValue;
+								String escapedValue;
+								int parameterNumber;
+								String paramType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
+
+								paramType = param.getFieldClass();
+
+								//build string of values to go into IN clause of sql
+								for (parameterNumber = 0; parameterNumber < filterValues.length; parameterNumber++) {
+									currentValue = filterValues[parameterNumber];
+
+									//don't quote numbers. some databases won't do implicit conversion where column is numeric
+									//confirm that they are numbers to avoid sql injection                        
+									if (StringUtils.equals(paramType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
+										escapedValuesList.add(currentValue);
+									} else {
+										//escape and quote non-numbers
+										escapedValue = escapeSql(currentValue);
+										escapedValue = "'" + escapedValue + "'";
+										escapedValuesList.add(escapedValue);
+									}
+								}
+								//build comma separated list of values to use in the sql
+								String finalEscapedValues = StringUtils.join(escapedValuesList, ",");
+
+								//replace #filter# with parameter values
+								lovSql = lovSql.replaceAll("(?i)#filter#", finalEscapedValues);
+							}
+						}
+					}
+
 					psLovValues = connLov.prepareStatement(lovSql);
 					rsLovValues = psLovValues.executeQuery();
 

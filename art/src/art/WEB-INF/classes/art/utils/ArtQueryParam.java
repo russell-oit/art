@@ -92,8 +92,8 @@ public class ArtQueryParam implements Serializable {
 	 * Utility method to determine if the parameter uses an lov query for its
 	 * values
 	 *
-	 * @return the
-	 * <code>false</code> is use_lov column has 'N'.
+	 * @return
+	 * <code>false</code> if use_lov column has 'N'.
 	 * <code>true</code> otherwise
 	 */
 	public boolean usesLov() {
@@ -115,16 +115,36 @@ public class ArtQueryParam implements Serializable {
 	 * @return the position of the parameter which determines this parameter's
 	 * value
 	 */
-	public int getEffectiveChainedValuePosition() {
+	public int getFilterPosition() {
 		int position;
 
-		if (chainedValuePosition > 0) {
+		if (chainedPosition > 0 && chainedValuePosition > 0) {
+			//parameter is chained, but value doesn't come from the master parameter
 			position = chainedValuePosition;
 		} else {
 			position = chainedPosition;
 		}
 
 		return position;
+	}
+
+	/**
+	 * Utility method to determine if the parameter is chained (it's value
+	 * depends on another parameter)
+	 *
+	 * @return
+	 * <code>true</code> if parameter is chained
+	 */
+	public boolean isChained() {
+		boolean chained;
+
+		if (chainedPosition > 0) {
+			chained = true;
+		} else {
+			chained = false;
+		}
+
+		return chained;
 	}
 
 	/**
@@ -850,8 +870,8 @@ public class ArtQueryParam implements Serializable {
 	 * Get a parameter's html name
 	 *
 	 * @param qId
-	 * @param htmlName
-	 * @return display name
+	 * @param fieldPos
+	 * @return a parameter's html name
 	 */
 	public String getHtmlName(int qId, int fieldPos) {
 		String htmlName = "";
@@ -905,4 +925,6 @@ public class ArtQueryParam implements Serializable {
 
 		return htmlName;
 	}
+	
+	
 }

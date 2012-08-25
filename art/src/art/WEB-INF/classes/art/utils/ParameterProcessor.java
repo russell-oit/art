@@ -131,15 +131,12 @@ public class ParameterProcessor {
 								PreparedQuery pq = new PreparedQuery();
 								pq.setQueryId(param.getLovQueryId());
 								//for chained parameters, handle #filter# parameter
-								int chainedPosition = param.getEffectiveChainedValuePosition();
-								if (chainedPosition > 0) {
-									//parameter chained on another parameter. get filter value
-									String valueParamHtmlName = param.getHtmlName(queryId, chainedPosition);
-									String filter = request.getParameter(valueParamHtmlName);
-									if (filter == null) {
-										//try M_position
-										filter = request.getParameter("M_" + chainedPosition);
-									}
+								int filterPosition = param.getFilterPosition();
+								if (filterPosition > 0) {
+									//parameter chained on another parameter. get filter parameter html name
+									String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
+									//get filter value. use request because inline and multi param maps haven't been populated with all parameter values yet
+									String filter = request.getParameter(valueParamHtmlName); 									
 									Map<String, String> filterParam = new HashMap<String, String>();
 									filterParam.put("filter", filter);
 									pq.setInlineParams(filterParam);
@@ -184,15 +181,11 @@ public class ParameterProcessor {
 									PreparedQuery pq = new PreparedQuery();
 									pq.setQueryId(param.getLovQueryId());
 									//for chained parameters, handle #filter# parameter
-									int chainedPosition = param.getEffectiveChainedValuePosition();
-									if (chainedPosition > 0) {
+									int filterPosition = param.getFilterPosition();
+									if (filterPosition > 0) {
 										//parameter chained on another parameter. get filter value
-										String valueParamHtmlName = param.getHtmlName(queryId, chainedPosition);
-										String filter = request.getParameter(valueParamHtmlName);
-										if (filter == null) {
-											//try M_position
-											filter = request.getParameter("M_" + chainedPosition);
-										}
+										String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
+										String filter = request.getParameter(valueParamHtmlName);										
 										Map<String, String> filterParam = new HashMap<String, String>();
 										filterParam.put("filter", filter);
 										pq.setInlineParams(filterParam);
