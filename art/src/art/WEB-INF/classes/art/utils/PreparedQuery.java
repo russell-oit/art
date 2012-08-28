@@ -1251,6 +1251,10 @@ public class PreparedQuery {
 			return exp1.equals("");
 
 		} else if (op.equals("is not blank") || op.equals("is not null")) { // -------- is not empty string. "is not null" for backward compatibility
+			//enable use of same lov for chained and non-chained parameters
+			if(StringUtils.equals(exp1, "#filter#")){
+				exp1="";
+			}
 			return !exp1.equals("");
 
 		} else if (op.equals("starts with")) { // -------- startsWith

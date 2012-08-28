@@ -55,40 +55,7 @@ String help;
         <tr><td class="title" colspan="2" > Define Parameter </td></tr>
 
         <%
-        if (type.equals("BIND")){
-        %>
-        <input type="hidden" name="PARAM_TYPE" value="N">
-        <tr><td class="title" colspan="2" ><i>Bind  Parameter</i><br>
-            </td>
-        <tr><td class="attr" colspan="2" >
-                <small><span style="color:red"><b>Note:</b></span><br>
-                    <i><b>Bind</b> parameters are not supported.
-                        Please use <b>Inline</b> parameters instead.</i></small>
-            </td></tr>
-
-        <tr><td class="data" >Available bind parameters</td>
-            <td class="data">
-                <select name="BIND_POSITION" size="4" >
-                    <%
-					qp.prepareBindParams(conn,queryId);
-					int i = 0;
-					int numOfBind = qp.getNumberOfBindsInSQL();
-                    int actualBindPosition = qp.getBindPosition();
-                    for(i=1; i<=numOfBind;i++) {
-                      if (qp.isBindPositionFree(i) || (actualBindPosition==i) ){
-                    %>
-                    <option value="<%=i%>" <%=((actualBindPosition==i)?"SELECTED":"")%>>
-                        <%=qp.getStringAroundBind(i).replace('<','-').replace('>','-')%>
-                    </option>
-                    <%
-                       }
-                    }
-                    %>
-                </select>
-            </td>
-        </tr>
-        <%
-        } else if (type.equals("MULTI")) {
+		if (type.equals("MULTI")) {
         %>
         <input type="hidden" name="PARAM_TYPE" value="M">
         <tr><td class="title" colspan="2" ><i>Multi Parameter</i></td></tr>
@@ -96,7 +63,7 @@ String help;
             <td class="data"> <input type="text" name="PARAM_LABEL" size="40" maxlength="55" value="<%=qp.getParamLabel()%>"></td>
         </tr>
         <%
-        } else { // INLINE
+        } else if (type.equals("INLINE")) {
         %>
         <input type="hidden" name="PARAM_TYPE" value="I">
         <tr><td class="title" colspan="2" ><i>Inline Parameter</i></td></tr>
@@ -172,11 +139,11 @@ String help;
             <td class="data">
                 <select name="USE_LOV" size="1">
 					<%
-					if (!type.equals("MULTI")){ //default to No
+					if (type.equals("INLINE")){ //default to No for inline parameters
 						%>
                     <option value="N" <%=("N".equals(qp.getUseLov())?"selected":"")%>>No</option>
 					<option value="Y" <%=("Y".equals(qp.getUseLov())?"selected":"")%>>Yes</option>
-					<% } else { //multi parameter. default to Yes
+					<% } else if (type.equals("MULTI")) { //multi parameter. default to Yes
 					%>
 					<option value="Y" <%=("Y".equals(qp.getUseLov())?"selected":"")%>>Yes</option>
 					<option value="N" <%=("N".equals(qp.getUseLov())?"selected":"")%>>No</option>

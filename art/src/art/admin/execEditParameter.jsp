@@ -50,15 +50,15 @@
     <%   
  }
  ArtQueryParam qp = new ArtQueryParam();
- boolean bp = true;
+ boolean paramExists = true;
 
  try {
     if (MODIFY || DELETE || MOVEUP) { // get existent
-        bp = qp.create(conn, queryId, fieldPosition);
+        paramExists = qp.create(conn, queryId, fieldPosition);
     }
-    if (DELETE) { // delete and forward
-        bp = qp.delete(conn);
-	conn.commit();
+    if (DELETE) { // delete and go to manage parameters page
+		qp.delete(conn);
+		conn.commit();
 	%>
 	   <jsp:forward page="manageParameters.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
@@ -66,9 +66,9 @@
 	<%   
 	return;
     }
-    if (MOVEUP) { // moveUp
-        bp = qp.moveUp(conn);
-	conn.commit();
+    if (MOVEUP) { // moveUp and go to manage parameters page
+        qp.moveUp(conn);
+		conn.commit();
 	%>
 	   <jsp:forward page="manageParameters.jsp">
 	    <jsp:param name="QUERY_ID" value="<%= queryId %>"/>
@@ -76,59 +76,17 @@
 	<%   
 	return;
     }
-    boolean bind = request.getParameter("PARAM_TYPE").equals("N");
-    boolean inline = request.getParameter("PARAM_TYPE").equals("I");
     
-    if (inline) { // check if the inline label exists in the SQL code
-        ArtQuery aq = new ArtQuery();
-		aq.create(conn, queryId);
-		if (aq.getText().indexOf("#"+request.getParameter("PARAM_LABEL")+"#") == -1) {
-		  // label does not exists! forward to error page
-		  String msg = "The inline parameter <b>#"+request.getParameter("PARAM_LABEL")+"#</b> "+
-					   " does not exist in the SQL source.<br> The inline parameter label is " + 
-				   " case sensitive and it must match exactly the label in the SQL source";
-		  
-			  %>
-			 <jsp:forward page="error.jsp">
-				  <jsp:param name="MOD" value="Execute Update Parameter"/>
-				  <jsp:param name="ACT" value="Check inline paramaeter"/>
-				  <jsp:param name="MSG" value="<%=msg%>"/>
-				  <jsp:param name="NUM" value="200"/>
-			 </jsp:forward>
-			  <%   
-		}
-    }
-    
-    if (bp) {       
-       qp.setQueryId(Integer.parseInt(request.getParameter("QUERY_ID")));       
-              
-       if (bind) {
-		   // BIND
-		  if (request.getParameter("BIND_POSITION") == null){
-			  %>
-			 <jsp:forward page="error.jsp">
-				  <jsp:param name="MOD" value="Execute Update Parameter"/>
-				  <jsp:param name="ACT" value="Parsing values for bind parameter"/>
-				  <jsp:param name="MSG" value="You must select one parameter from the list"/>
-				  <jsp:param name="NUM" value="200"/>
-			 </jsp:forward>
-			  <%   
-
-		   }
-			  qp.setBindPosition(Integer.parseInt(request.getParameter("BIND_POSITION")));
-			  qp.setParamType("N");
-		   // ----- end BIND
-       } else {
-       // MULTI or INLINE
-          qp.setParamLabel(request.getParameter("PARAM_LABEL"));       
-       }
-              
+	//if we are here, either it's a new parameter creation or a parameter modification   
+    if (paramExists) {       
+       qp.setQueryId(Integer.parseInt(request.getParameter("QUERY_ID")));                                        
        qp.setParamType(request.getParameter("PARAM_TYPE"));       
        qp.setName(request.getParameter("NAME"));
        qp.setShortDescription(request.getParameter("SHORT_DESCRIPTION"));
        qp.setDescription(request.getParameter("DESCRIPTION"));
        qp.setFieldClass(request.getParameter("FIELD_CLASS"));
        qp.setDefaultValue(request.getParameter("DEFAULT_VALUE"));
+	   qp.setParamLabel(request.getParameter("PARAM_LABEL"));
 	   
 	   String useLov=request.getParameter("USE_LOV");
 	   String lovQueryId=request.getParameter("LOV_QUERY_ID");	   
@@ -163,8 +121,8 @@
 	   </jsp:forward>
 	<%   
     } else {
-     // revert to page error
-     conn.rollback();
+		//problem while creating or retrieving parameter definition     
+		conn.rollback();
 %>
    <jsp:forward page="error.jsp">
 	    <jsp:param name="MOD" value="Execute Update Parameter"/>

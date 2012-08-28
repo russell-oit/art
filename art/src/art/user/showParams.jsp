@@ -65,8 +65,9 @@ boolean hasParams=false;
                    paramChainedId=param.getChainedId();
                    paramId=param.getId();
 
-                   if ( paramClass.equals("INTEGER") || paramClass.equals("NUMBER") || paramClass.equals("DATE") || paramClass.equals("DATETIME") )
+                   if ( paramClass.equals("INTEGER") || paramClass.equals("NUMBER") || paramClass.equals("DATE") || paramClass.equals("DATETIME") ){
                       validateJS.append("ValidateValue('"+paramClass+"', '"+paramName+"', document.getElementById('"+paramId+"').value ) && ");
+					}
                 %>
                 <tr>
                     <td class="data">
