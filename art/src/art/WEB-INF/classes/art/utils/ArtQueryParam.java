@@ -39,7 +39,9 @@ import org.slf4j.LoggerFactory;
 public class ArtQueryParam implements Serializable {
 
 	private static final long serialVersionUID = 1L; //need to implement serializable to be used as a field in artgraph classes
+	
 	final static Logger logger = LoggerFactory.getLogger(ArtQueryParam.class);
+	
 	String name = "";
 	String shortDescription = "";
 	String description = "";
@@ -600,17 +602,7 @@ public class ArtQueryParam implements Serializable {
 			ps.setInt(2, fieldPosition);
 			ps.executeUpdate();
 			ps.close();
-
-			// Fix ? index position of all the subsequent bind parameter (only if this param is a bind one
-			if (bindPosition != -1) {
-				SQL = ("UPDATE ART_QUERY_FIELDS SET CHAINED_PARAM_POSITION = (CHAINED_PARAM_POSITION-1) WHERE CHAINED_PARAM_POSITION > ? AND QUERY_ID = ?");
-				ps = conn.prepareStatement(SQL);
-				ps.setInt(1, bindPosition);
-				ps.setInt(2, queryId);
-				ps.executeUpdate();
-				ps.close();
-			}
-
+			
 			// Fix the field position for subsequent parameters
 			SQL = ("UPDATE ART_QUERY_FIELDS SET FIELD_POSITION = (FIELD_POSITION-1) WHERE FIELD_POSITION > ? AND QUERY_ID = ?");
 			ps = conn.prepareStatement(SQL);

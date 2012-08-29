@@ -1336,7 +1336,8 @@ public class ArtQuery {
 
                         //allow filter value to come from any chained parameter, not necessarily the previous in the sequence
                         int valueId = rs.getInt("CHAINED_VALUE_POSITION");
-                        if (valueId > 0) {
+                        if (chainedId > 0 && valueId > 0) {
+							//chained parameter. gets it's value from the chained value parameter, not chained sequence parameter
                             chainedValueId = "P_" + rs.getString("QUERY_ID") + "_" + valueId;
                         } else {
                             //chained parameter gets it's value from the chained parameter sequence

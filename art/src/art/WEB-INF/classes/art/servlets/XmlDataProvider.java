@@ -132,8 +132,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             pq.setQueryId(queryId);
             
             // Get parameters
-            String filter = request.getParameter("filter");
-			String[] filter2=request.getParameterValues("filter");
+            String filter = request.getParameter("filter");			
             String isMulti = request.getParameter("isMulti");
 
             Map<String, String> inlineParams = new HashMap<String, String>();

@@ -56,6 +56,8 @@ boolean hasParams=false;
                 String paramHtmlName;
                 String paramChainedId;
                 String paramId;
+				String paramChainedValueId;
+				
                 while(it.hasNext()) {
                    hasParams=true;
                    ParamInterface param = (ParamInterface) it.next();
@@ -64,6 +66,7 @@ boolean hasParams=false;
                    paramName=param.getName();
                    paramChainedId=param.getChainedId();
                    paramId=param.getId();
+				   paramChainedValueId=param.getChainedValueId();
 
                    if ( paramClass.equals("INTEGER") || paramClass.equals("NUMBER") || paramClass.equals("DATE") || paramClass.equals("DATETIME") ){
                       validateJS.append("ValidateValue('"+paramClass+"', '"+paramName+"', document.getElementById('"+paramId+"').value ) && ");
@@ -80,9 +83,9 @@ boolean hasParams=false;
 						if (param.isChained()) {
                               String params = "";
                               if (paramHtmlName.startsWith("M_")) { // handle ALL_ITEMS in select
-                                 params = "action=lov,queryId="+paramClass+",isMulti=yes,filter={"+param.getChainedValueId()+"}";
+                                 params = "action=lov,queryId="+paramClass+",isMulti=yes,filter={"+paramChainedValueId+"}";
                               } else {
-                                 params = "action=lov,queryId="+paramClass+",filter={"+param.getChainedValueId()+"}";
+                                 params = "action=lov,queryId="+paramClass+",filter={"+paramChainedValueId+"}";
                               }
                               String dataProviderUrl = request.getContextPath()+"/XmlDataProvider";
                         %>
