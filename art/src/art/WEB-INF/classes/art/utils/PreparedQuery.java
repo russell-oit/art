@@ -1169,6 +1169,11 @@ public class PreparedQuery {
 				if (op.startsWith("#") && op.endsWith("#") && op.length() > 2) {
 					op = inlineParams.get(op.substring(1, op.length() - 1));
 				}
+			} else {
+				//enable use of same lov for chained and non-chained parameters
+				if(StringUtils.equals(exp1, "#filter#") && (StringUtils.equalsIgnoreCase(op, "is not null") || StringUtils.equalsIgnoreCase(op, "is not blank"))){
+					exp1="";
+				}
 			}
 
 			if (evaluateIF(exp1, op, exp2)) {
@@ -1250,11 +1255,7 @@ public class PreparedQuery {
 		} else if (op.equals("is blank") || op.equals("is null")) { // ------------ is empty string. "is null" for backward compatibility. exp can never be null string
 			return exp1.equals("");
 
-		} else if (op.equals("is not blank") || op.equals("is not null")) { // -------- is not empty string. "is not null" for backward compatibility
-			//enable use of same lov for chained and non-chained parameters
-			if(StringUtils.equals(exp1, "#filter#")){
-				exp1="";
-			}
+		} else if (op.equals("is not blank") || op.equals("is not null")) { // -------- is not empty string. "is not null" for backward compatibility			
 			return !exp1.equals("");
 
 		} else if (op.equals("starts with")) { // -------- startsWith
