@@ -957,7 +957,7 @@ public class ArtQuery {
 
             //build roles string from rule values
             if (rs.next()) {
-                StringBuffer tmpSb = new StringBuffer(64);
+                StringBuilder tmpSb = new StringBuilder(64);
 
                 String currentRule;
 

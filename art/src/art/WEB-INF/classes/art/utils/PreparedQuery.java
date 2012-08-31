@@ -49,7 +49,7 @@ public class PreparedQuery {
 	String username; //used to check query access rights, in applying rule values and replacing :username tag
 	int queryId;
 	int queryDatabaseId = -1;
-	StringBuffer sb;
+	StringBuilder sb;
 	Map<String, String> bindParams;
 	Map<String, String[]> multiParams;
 	Map<String, String> inlineParams;
@@ -73,7 +73,7 @@ public class PreparedQuery {
 	 *
 	 */
 	public PreparedQuery() {
-		sb = new StringBuffer(1024 * 2); // assume the average query is < 2kb
+		sb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
 
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
 		jasperMultiParams = new HashMap<String, List>(); //to populate hash map with multi parameter names and values
@@ -293,7 +293,7 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Fulfil the prepared statement with the bind parameters After this method,
+	 * Set the parameters in the prepared statement. After this method,
 	 * the prepared statement is ready to be executed on the target database
 	 *
 	 * @param ps
@@ -301,13 +301,12 @@ public class PreparedQuery {
 	 */
 	public void prepareStatement(PreparedStatement ps) throws ArtException {
 
-		// Apply Inline Parameters (or old Bind Parameters) to
-		// the  prepared statement
+		// Apply Inline Parameters to the prepared statement		 
 		try {
-			applyInlineParameters(ps); // work inline in the sb
+			applyInlineParameters(ps); 
 		} catch (Exception e) {
 			logger.error("Error", e);
-			throw new ArtException("<p>Error applying bind parameters to the query. Please contact the ART administrator. <br>Details:<code> " + e + "</code></p>");
+			throw new ArtException("<p>Error applying inline parameters to the query. Please contact the ART administrator. <br>Details:<code> " + e + "</code></p>");
 		}
 
 	}
@@ -698,7 +697,7 @@ public class PreparedQuery {
 
 		//re-initialize sb
 		sb = null;
-		sb = new StringBuffer(1024 * 2);
+		sb = new StringBuilder(1024 * 2);
 
 		if (isLov || adminSession) {
 			// don't check security for Lovs or during Admin session
@@ -846,7 +845,7 @@ public class PreparedQuery {
 	 * v 0.3 - Handle "LOOKUP" rule type, with a recursive approach v 0.2 -
 	 * Handle "ALL_ITEMS" rule value v 0.1 -
 	 */
-	private boolean applyRules(StringBuffer sb) throws SQLException {
+	private boolean applyRules(StringBuilder sb) throws SQLException {
 
 		logger.debug("applyRules");
 
@@ -886,7 +885,7 @@ public class PreparedQuery {
 		while (rsRules.next()) {
 			count++;
 
-			StringBuffer tmpSb;
+			StringBuilder tmpSb;
 			currentRule = rsRules.getString("RULE_NAME");
 			currentParamName = rsRules.getString("FIELD_NAME");
 			tmpSb = getRuleValuesList(conn, username, currentRule, 1);
@@ -960,10 +959,10 @@ public class PreparedQuery {
 	 * @return rule values
 	 * @throws SQLException
 	 */
-	public StringBuffer getRuleValuesList(Connection conn, String ruleUsername, String currentRule, int counter)
+	public StringBuilder getRuleValuesList(Connection conn, String ruleUsername, String currentRule, int counter)
 			throws SQLException {
 
-		StringBuffer tmpSb = new StringBuffer(64);
+		StringBuilder tmpSb = new StringBuilder(64);
 		boolean isAllItemsForThisRule = false;
 
 		// Exit after MAX_RECURSIVE_LOOKUP calls
@@ -1029,7 +1028,7 @@ public class PreparedQuery {
 	 * Inline parameters are substituted with ?, a TreeMap (treeInline) is built
 	 * to store the param position
 	 */
-	private void prepareInlineParameters(StringBuffer sb) throws SQLException {
+	private void prepareInlineParameters(StringBuilder sb) throws SQLException {
 		// Change applied by Giacomo Ferrari on 2005-09-23
 		//  to perform the padding during inline prameter replacement.
 		//  in order to leave unchanged the original length of SQL string
@@ -1099,14 +1098,21 @@ public class PreparedQuery {
 
 		}
 	}
+	
+	/**
+	 * Dynamic SQL is parsed, evaluated and the sb is modified according
+	 */
+	private void applyDynamicSQL(StringBuilder sb) throws ArtException {
+		applyDynamicSQL(sb,false);		
+	}
 
 	/**
 	 * Dynamic SQL is parsed, evaluated and the sb is modified according
 	 */
-	private void applyDynamicSQL(StringBuffer sb)
-			throws ArtException {
+	private void applyDynamicSQL(StringBuilder sb, boolean useFilterIfText) throws ArtException {			
 		String element, xmlText, exp1, exp2, op, tmp;
 		XmlInfo xinfo;
+					
 
 		/*
 		 * // <PROPS> element element= "PROPS"; xinfo =
@@ -1152,31 +1158,40 @@ public class PreparedQuery {
 			if (op == null) {
 				op = "";
 			}
+			
+			//expression and expression values may be different
+			String exp1Value=exp1;
+			String exp2Value=exp2;
+			String opValue=op;
 
 			//get inline params
 			if (inlineParams != null) {
 				// Get inline param value for exp1 (if it is an inline param)
 				if (exp1.startsWith("#") && exp1.endsWith("#") && exp1.length() > 2) {
-					exp1 = inlineParams.get(exp1.substring(1, exp1.length() - 1));
+					exp1Value = inlineParams.get(exp1.substring(1, exp1.length() - 1));
 				}
 
 				// Get inline param value for exp2 (if it is an inline param)
 				if (exp2.startsWith("#") && exp2.endsWith("#") && exp2.length() > 2) {
-					exp2 = inlineParams.get(exp2.substring(1, exp2.length() - 1));
+					exp2Value = inlineParams.get(exp2.substring(1, exp2.length() - 1));
 				}
 
 				// Get inline param value for op (if it is an inline param)
 				if (op.startsWith("#") && op.endsWith("#") && op.length() > 2) {
-					op = inlineParams.get(op.substring(1, op.length() - 1));
+					opValue = inlineParams.get(op.substring(1, op.length() - 1));
 				}
-			} else {
-				//enable use of same lov for chained and non-chained parameters
-				if(StringUtils.equals(exp1, "#filter#") && (StringUtils.equalsIgnoreCase(op, "is not null") || StringUtils.equalsIgnoreCase(op, "is not blank"))){
-					exp1="";
+			}	
+			
+			//enable use of same lov for chained and non-chained parameters			
+			if(StringUtils.equals(exp1, "#filter#") && (StringUtils.equalsIgnoreCase(op, "is not null") || StringUtils.equalsIgnoreCase(op, "is not blank"))){
+				if(useFilterIfText){
+					exp1Value="#filter#"; //any string. just so that if condition is returned
+				} else if(!useFilterIfText && inlineParams == null){
+					exp1Value=""; //empty string. so that else value is returned					
 				}
-			}
-
-			if (evaluateIF(exp1, op, exp2)) {
+			}				
+			
+			if (evaluateIF(exp1Value, opValue, exp2Value)) {
 				tmp = XmlParser.getXmlElementValue(xmlText, "TEXT");
 			} else {
 				tmp = XmlParser.getXmlElementValue(xmlText, "ELSETEXT");
@@ -1285,10 +1300,10 @@ public class PreparedQuery {
 		try {
 
 			conn = ArtDBCP.getConnection();
-			StringBuffer buffer = new StringBuffer(1024 * 2);
-			buffer.append(querySql);
+			StringBuilder builder = new StringBuilder(1024 * 2);
+			builder.append(querySql);
 
-			applyMultiParameters(buffer);
+			applyMultiParameters(builder);
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -1317,10 +1332,10 @@ public class PreparedQuery {
 		try {
 
 			conn = ArtDBCP.getConnection();
-			StringBuffer buffer = new StringBuffer(1024 * 2);
-			buffer.append(querySql);
+			StringBuilder builder = new StringBuilder(1024 * 2);
+			builder.append(querySql);
 
-			applyMultiParameters(buffer);
+			applyMultiParameters(builder);
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -1340,7 +1355,7 @@ public class PreparedQuery {
 	/**
 	 * Multi parameters as applied to the SQL
 	 */
-	private void applyMultiParameters(StringBuffer sb) throws SQLException {
+	private void applyMultiParameters(StringBuilder sb) throws SQLException {
 
 		logger.debug("applyMultiParameters");
 
@@ -1594,7 +1609,7 @@ public class PreparedQuery {
 
 		List<String> finalValuesList = new ArrayList<String>();
 
-		StringBuilder queryBuffer = new StringBuilder(512);
+		StringBuilder queryBuilder = new StringBuilder(512);
 
 		int databaseId = 0;
 		Connection connLov = null;
@@ -1625,19 +1640,19 @@ public class PreparedQuery {
 			int chainedParamPosition=0;
 			int chainedValuePosition=0;
 			while (rsLovQuery.next()) {
-				queryBuffer.append(rsLovQuery.getString("TEXT_INFO"));
+				queryBuilder.append(rsLovQuery.getString("TEXT_INFO"));
 				databaseId = rsLovQuery.getInt("DATABASE_ID");
 				lovQueryType = rsLovQuery.getInt("QUERY_TYPE");
 				chainedParamPosition = rsLovQuery.getInt("CHAINED_PARAM_POSITION");
 				chainedValuePosition = rsLovQuery.getInt("CHAINED_VALUE_POSITION");
 			}
 
-			if (queryBuffer.length() > 0) {
+			if (queryBuilder.length() > 0) {
 				//lov found. run lov to get and build all possible parameter values
 
 				if (lovQueryType == 120) {
 					//static lov. values coming from static values defined in sql source
-					String items = queryBuffer.toString();
+					String items = queryBuilder.toString();
 					String lines[] = items.split("\\r?\\n");
 					for (String line : lines) {
 						String[] values = line.trim().split("\\|");
@@ -1645,9 +1660,17 @@ public class PreparedQuery {
 					}
 				} else {
 					//dynamic lov
-					connLov = ArtDBCP.getConnection(databaseId);
-					String lovSql = queryBuffer.toString();
-
+										
+					//apply dynamic sql. in case same lov used for chained and no-chained parameters
+					try{
+						applyDynamicSQL(queryBuilder,true); //return if text if #filter# is not null is in query
+					} catch(ArtException e){
+						logger.error("Error",e);
+					}
+					
+					//perform more replacements
+					String lovSql = queryBuilder.toString();
+ 
 					//replace rules if the label exists, with dummy condition. so that lov query executes without error
 					lovSql = lovSql.replaceAll("(?i)#rules#", "1=1");
 
@@ -1707,6 +1730,7 @@ public class PreparedQuery {
 						}
 					}
 
+					connLov = ArtDBCP.getConnection(databaseId);
 					psLovValues = connLov.prepareStatement(lovSql);
 					rsLovValues = psLovValues.executeQuery();
 
@@ -1739,7 +1763,7 @@ public class PreparedQuery {
 		return finalValuesList;
 	}
 
-	private void replaceTag(StringBuffer sb, String fromText, String toText) {
+	private void replaceTag(StringBuilder sb, String fromText, String toText) {
 		int startPos = sb.toString().indexOf(fromText);
 		int fromTextLength = fromText.length();
 		int maxCount = 255; // just to avoid infinite loops...
@@ -1756,7 +1780,7 @@ public class PreparedQuery {
 	/**
 	 * Replace :TAGS
 	 */
-	private void applyTags(StringBuffer sb) {
+	private void applyTags(StringBuilder sb) {
 		/*
 		 * Update query :TAG
 		 */
@@ -1798,14 +1822,13 @@ public class PreparedQuery {
 
 	/**
 	 * Called by the prepareStatement() method. The prepared statement is
-	 * "fulfilled" with the parameters The query can use inline parameters OR
-	 * old-style bind parameters if the query uses both it is rejected.
+	 * "fulfilled" with the parameters 
 	 */
 	private void applyInlineParameters(PreparedStatement ps) throws SQLException, ArtException {
 
 		logger.debug("applyInlineParameters");
 
-		if (treeInline != null && !treeInline.isEmpty()) { // assume is inline
+		if (treeInline != null && !treeInline.isEmpty()) { 
 
 			Iterator paramNames = treeInline.values().iterator(); //contains parameters which were actually found and replaced in the sql source in the order they were found
 			int i = 0; //parameter index/order of appearance
@@ -1871,83 +1894,7 @@ public class PreparedQuery {
 
 			}
 
-		} else if (bindParams != null && !bindParams.isEmpty() && treeInline != null && treeInline.isEmpty()) { // support for old bind parameters
-
-			/**
-			 * Update the prepared statement. The name of a parameter is the
-			 * number (in the same order) of the "?" in the prepared statement,
-			 * prefixed with a 'P'. (i.e. P3 is the name of the 3rd '?' on the
-			 * prepared statement). A date (splitted in year, month, day) is
-			 * named with a 'PX_' followed by 'year' or 'month' or 'day', where
-			 * X is the position number of the '?' escapeSql function handles
-			 * special characters (as far, only "'")
-			 */
-			String name;
-
-			Iterator it = bindParams.entrySet().iterator();
-
-			while (it.hasNext()) {
-				// Get the parameter name (<-> name is Py or Py_year/month/day
-				Map.Entry entry = (Map.Entry) it.next();
-				name = (String) entry.getKey();
-
-				if (name.length() > 4 && (name.indexOf('_') != -1)) { // Is a DATE field: PX_year or PX_month or PX_day
-
-					// Check if it has been already set (there are three params per each date PX_year & PX_month &r PX_day)
-					// the if below is not needed as the enumeration reflects the hashmap content
-					if (bindParams.get(name) != null) {
-						name = name.substring(0, (name.indexOf('_'))); // stores the PX prefix
-						/*
-						 * Get all the three field (Y, M, D) that are needed to
-						 * create the current date parameter.
-						 */
-						int year = Integer.parseInt(bindParams.get(name + "_year"));
-						int month = (Integer.parseInt(bindParams.get(name + "_month"))) - 1; // Java Months begin from 0!!!
-						int day = Integer.parseInt(bindParams.get(name + "_day"));
-						// Remove the three Date parameters from the hash table in
-						// order to do not count them twice
-						bindParams.remove(name + "_year");
-						bindParams.remove(name + "_month");
-						bindParams.remove(name + "_day");
-
-						// Create a JAVA Date... (this is a mess!)
-						// Maybe: java.sql.Date sqlDate = java.sql.Date.valueOf(year + "-" + month + "-" + day);
-
-						GregorianCalendar cal = new GregorianCalendar(year, month, day);
-						java.util.Date utilDate = cal.getTime();
-						java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
-
-						// Set the prepared statement's date value                                                
-						logger.debug("Setting date: {}", name);
-						ps.setDate(Integer.parseInt(name.substring(1)), sqlDate);
-						logger.debug("Date set. First name={}", name);
-					} else {
-						logger.debug("Skipped date already set: {}", name);
-					}
-				} else { // VARCHAR/CHAR/INTEGER/NUMBER etc
-					// setString seems to work without problem with any
-					// sql type (NUMBER, INTEGER, VARCHAR, CHAR).
-					// BTW some further checks are needed,
-					// tested successfully works with mysql , pg, , oracle , db2 and MSSql
-					/*
-					 * Set the prepared statement's value
-					 */
-
-					logger.debug("Setting {}", name);
-					// escapeSql pads ' for buggy drivers. but this is probably an error as the driver should do this
-					//ps.setString( Integer.parseInt(name.substring(1)), escapeSql((String) bindParams.get(name)) );
-					ps.setString(Integer.parseInt(name.substring(1)), (bindParams.get(name)).trim());
-				}
-			} // End For parameterNumber
-		} else if (bindParams != null && !bindParams.isEmpty() && treeInline != null && !treeInline.isEmpty()) {
-			/*
-			 * both new inline and old bind parameters are present: reject the
-			 * query
-			 */
-			throw new ArtException("<p>This query uses both inline parameters and old bind parameters. <br>"
-					+ "Please remove the old-style bind parameters and replace them with inline parameters</p>");
-		}
-
+		} 
 	}
 
 	/**
@@ -2030,10 +1977,10 @@ public class PreparedQuery {
 		try {
 
 			conn = ArtDBCP.getConnection();
-			StringBuffer buffer = new StringBuffer(1024 * 2);
-			buffer.append(querySql);
+			StringBuilder builder = new StringBuilder(1024 * 2);
+			builder.append(querySql);
 
-			prepareInlineParameters(buffer);
+			prepareInlineParameters(builder);
 			applyInlineParameters(null);
 
 		} catch (Exception e) {
