@@ -1106,7 +1106,12 @@ public class ArtJob implements Job {
 
 						m.setSubject(subject);
 
-						String[] tosEmail = stringToArray(userEmail);
+						//set recipients
+						// by default send to the requester if to is not set
+						if (userEmail == null) {
+							userEmail = from;
+						}
+						String[] tosEmail = StringUtils.split(userEmail,";");
 						m.setTos(tosEmail);
 
 						m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
@@ -1304,9 +1309,14 @@ public class ArtJob implements Job {
 						}
 						m.setSubject(subject);
 
-						String[] tosEmail = stringToArray(userEmail);
+						//set recipients
+						// by default send to the requester if to is not set
+						if (userEmail == null) {
+							userEmail = from;
+						}
+						String[] tosEmail = StringUtils.split(userEmail,";");
 						m.setTos(tosEmail);
-
+												
 						m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
 						m.setFrom(from);
 
@@ -2363,36 +2373,6 @@ public class ArtJob implements Job {
 		stUpdate.close();
 
 		return newJobId;
-	}
-
-
-	/*
-	 * Convert ; separated list of smtp addresses to and array of strings
-	 */
-	private String[] stringToArray(String s) {
-		// by default send to the requester if to is not set
-		if (s == null) {
-			s = from;
-		}
-		StringTokenizer st = new StringTokenizer(s, ";");
-		ArrayList<String> v = new ArrayList<String>();
-		int i = 0;
-		while (st.hasMoreTokens()) {
-			String tm = st.nextToken().trim();
-
-			logger.debug("Job Id {}. Mail To: {}", jobId, tm);
-
-			v.add(tm);
-		}
-		Object[] o = v.toArray();
-		String[] t = new String[o.length];
-
-		for (i = 0; i < o.length; i++) {
-			t[i] = (String) o[i];
-
-			logger.debug("Job Id {}. Mail To: {}", jobId, t[i]);
-		}
-		return t;
 	}
 
 	private Mailer getMailer() {
