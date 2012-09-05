@@ -226,7 +226,13 @@ String resultMessage;
    <td class="jobdetails"><b><%=job.getJobName()%></b></td>  
    <td class="jobdetails"><%=displayJobType(jobType,messages)%></td>
    <td class="jobdetails"><%=timeTakenString%></td>
-   <td class="jobdetails" > <code><%=formatTimestamp(job.getLastEndDate(),locale)%></code>
+   <td class="jobdetails" >
+	   <%
+	 if(StringUtils.isBlank(timeTakenString)){
+		 out.println("");
+	 } else { %>
+	   <code><%=formatTimestamp(job.getLastEndDate(),locale)%></code>
+	   <% } %>
    </td>  
    <td class="jobdetails">
      <%

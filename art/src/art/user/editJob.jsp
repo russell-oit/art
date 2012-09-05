@@ -107,6 +107,12 @@ if (request.getParameter("subject").equals("")){
 if (request.getParameter("jobName").equals("")){
 	job.setJobName("");
 }
+if (request.getParameter("cc").equals("")){
+	job.setCc("");
+}
+if (request.getParameter("bcc").equals("")){
+	job.setBcc("");
+}
 %>
 
   <%
@@ -305,7 +311,7 @@ if (request.getParameter("jobName").equals("")){
 		job.save(); //for a new job, will generate a new job id
 
 		//grant/revoke access to the job. job needs to have been saved first so that a valid job id is available
-		if("Y".equals(job.getAllowSharing())){
+		if(StringUtils.equals("Y", job.getAllowSharing())){		
 			job.updateUserAccess(action,selectedUsers);
 			job.updateUserGroupAccess(action,selectedGroups);
 		}
@@ -725,6 +731,18 @@ function onClickSaveSchedule(t){
 		   <td class="data"> <%=messages.getString("mailTo")%> <br><small>(<%=messages.getString("mailToWarning")%>)</small> </td>
 		   <td class="data" colspan="2">
 			   <input type="text" name="tos" value="${job.tos}" size="60" maxlength="254">
+		   </td>
+	   </tr>
+	   <tr>
+		   <td class="data"> <%=messages.getString("mailCc")%> </td>
+		   <td class="data" colspan="2">
+			   <input type="text" name="cc" value="${job.cc}" size="60" maxlength="254">
+		   </td>
+	   </tr>
+	   <tr>
+		   <td class="data"> <%=messages.getString("mailBcc")%> </td>
+		   <td class="data" colspan="2">
+			   <input type="text" name="bcc" value="${job.bcc}" size="60" maxlength="254">
 		   </td>
 	   </tr>
 	   <tr>

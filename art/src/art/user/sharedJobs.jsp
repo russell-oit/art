@@ -133,7 +133,12 @@ String resultMessage;
    <td class="jobdetails"><%=displayJobType(job.getJobType(),messages)%></td>
    <td class="jobdetails"><%=timeTakenString%></td>
    <td class="jobdetails" >    	 
-	 <code><%=formatTimestamp(lastEndDate,locale)%></code>
+	 <%
+	 if(StringUtils.isBlank(timeTakenString)){
+		 out.println("");
+	 } else { %>
+	   <code><%=formatTimestamp(lastEndDate,locale)%></code>
+	   <% } %>
    </td>  
    <td class="jobdetails">
 <%

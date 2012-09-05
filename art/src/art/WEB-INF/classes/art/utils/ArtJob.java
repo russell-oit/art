@@ -143,6 +143,8 @@ public class ArtJob implements Job {
 	private boolean showGraphLabels;
 	private boolean showGraphDataPoints;
 	private String jobGraphOptions; //custom graph options defined for the job
+	private String cc;
+	private String bcc;
 	
 
 	/**
@@ -152,6 +154,34 @@ public class ArtJob implements Job {
 	 */
 	public ArtJob() {
 		exportPath = ArtDBCP.getExportPath();
+	}
+
+	/**
+	 * @return the cc
+	 */
+	public String getCc() {
+		return cc;
+	}
+
+	/**
+	 * @param cc the cc to set
+	 */
+	public void setCc(String cc) {
+		this.cc = cc;
+	}
+
+	/**
+	 * @return the bcc
+	 */
+	public String getBcc() {
+		return bcc;
+	}
+
+	/**
+	 * @param bcc the bcc to set
+	 */
+	public void setBcc(String bcc) {
+		this.bcc = bcc;
 	}
 
 	/**
@@ -944,13 +974,13 @@ public class ArtJob implements Job {
 			beforeExecution(conn);
 
 			//don't run job if query or job or job owner is disabled
-			if ("D".equals(jobOwnerStatus)) {
+			if (StringUtils.equals("D",jobOwnerStatus)) {
 				//job owner disabled. don't run job. just update jobs table with current status
 				fileName = "-Job Owner Disabled";
-			} else if ("D".equals(queryStatus)) {
+			} else if (StringUtils.equals("D",queryStatus)) {
 				//query disabled. don't run job. just update jobs table with current status
 				fileName = "-Query Disabled";
-			} else if ("N".equals(activeStatus)) {
+			} else if (StringUtils.equals("N",activeStatus)) {
 				//job disabled. don't run job. just update jobs table with current status
 				fileName = "-Job Disabled";
 			} else {
@@ -963,8 +993,8 @@ public class ArtJob implements Job {
 
 				boolean splitJob = false; //flag to determine if job will generate one file or multiple individualized files. to know which tables to update
 
-				if ("Y".equals(allowSharing)) {
-					if ("Y".equals(queryRulesFlag) && "Y".equals(allowSplitting)) {
+				if (StringUtils.equals("Y",allowSharing)) {
+					if (StringUtils.equals("Y",queryRulesFlag) && StringUtils.equals("Y",allowSplitting)) {
 						splitJob = true;
 					}
 
@@ -1106,13 +1136,14 @@ public class ArtJob implements Job {
 
 						m.setSubject(subject);
 
-						//set recipients
-						// by default send to the requester if to is not set
-						if (userEmail == null) {
-							userEmail = from;
-						}
+						//set recipients						
 						String[] tosEmail = StringUtils.split(userEmail,";");
 						m.setTos(tosEmail);
+						
+						String[] ccs=StringUtils.split(cc,";");
+						m.setCc(ccs);
+						String[] bccs=StringUtils.split(bcc,";");
+						m.setBcc(bccs);
 
 						m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
 						m.setFrom(from);
@@ -1285,16 +1316,24 @@ public class ArtJob implements Job {
 					// fileName now stores the file to mail or publish...                    
 					logger.debug("Job Id {}. File is: {}", jobId, fileName);
 
-					// what about max size of attachment? --> compensating control: there is a max row limit...
-					boolean generateEmail = false;
+										
+					//trim address fields
+					userEmail=StringUtils.strip(userEmail);
+					tos=StringUtils.strip(tos);
+					cc=StringUtils.strip(cc);
+					bcc=StringUtils.strip(bcc);
+					
+					boolean generateEmail = false;					
 					if (jobType == 3 || jobType == 8) {
 						//for split published jobs, tos should have a value to enable confirmation email for individual users
-						if (tos != null && tos.trim().length() > 4 && userEmail != null && userEmail.trim().length() > 4) {
+						if (!StringUtils.equals(tos,userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc)>4 || StringUtils.length(bcc)>4) && StringUtils.length(userEmail) > 4) {
+							generateEmail = true;
+						} else if (StringUtils.equals(tos,userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc)>4 || StringUtils.length(bcc)>4)) {
 							generateEmail = true;
 						}
 					} else {
 						//for non-publish jobs, if an email address is available, generate email
-						if (userEmail != null && userEmail.trim().length() > 4) {
+						if (StringUtils.length(userEmail) > 4 || StringUtils.length(cc)>4 || StringUtils.length(bcc)>4) {
 							generateEmail = true;
 						}
 					}
@@ -1309,13 +1348,14 @@ public class ArtJob implements Job {
 						}
 						m.setSubject(subject);
 
-						//set recipients
-						// by default send to the requester if to is not set
-						if (userEmail == null) {
-							userEmail = from;
-						}
+						//set recipients						
 						String[] tosEmail = StringUtils.split(userEmail,";");
 						m.setTos(tosEmail);
+						
+						String[] ccs=StringUtils.split(cc,";");
+						m.setCc(ccs);
+						String[] bccs=StringUtils.split(bcc,";");
+						m.setBcc(bccs);
 												
 						m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
 						m.setFrom(from);
@@ -1729,7 +1769,7 @@ public class ArtJob implements Job {
 					+ " , JOB_MINUTE = ? ,  JOB_HOUR = ? ,  JOB_DAY = ? ,  JOB_WEEKDAY= ? ,  JOB_MONTH = ? "
 					+ " , MAIL_TOS = ? ,  MAIL_FROM = ? ,  MESSAGE = ? ,  ENABLE_AUDIT = ? ,  ACTIVE_STATUS = ? , SUBJECT = ? "
 					+ " , NEXT_RUN_DATE=?, START_DATE=?, END_DATE=?, MIGRATED_TO_QUARTZ=?, ALLOW_SHARING=?, ALLOW_SPLITTING=? "
-					+ " , CACHED_TABLE_NAME =?, JOB_NAME=? "
+					+ " , CACHED_TABLE_NAME =?, JOB_NAME=?, MAIL_CC=?, MAIL_BCC=? "
 					+ " WHERE JOB_ID = " + jobId;
 
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -1771,10 +1811,13 @@ public class ArtJob implements Job {
 			ps.setString(21, allowSplitting);
 			ps.setString(22, cachedTableName);
 			ps.setString(23, jobName);
+			ps.setString(24,cc);
+			ps.setString(25,bcc);
 
 			ps.executeUpdate();
 			ps.close();
 
+			//save job parameters
 			if (inlineParams != null && multiParams != null) {
 				Iterator itInline = inlineParams.entrySet().iterator();
 				String name, value;
@@ -2008,7 +2051,7 @@ public class ArtJob implements Job {
 			String SQL = "SELECT aj.QUERY_ID, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE, aj.MAIL_TOS, aj.MAIL_FROM, aj.MESSAGE "
 					+ "    , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH, aj.ENABLE_AUDIT , aj.ACTIVE_STATUS AS JOB_ACTIVE_STATUS , aj.SUBJECT "
 					+ "    , aq.NAME AS QUERY_NAME, aq.QUERY_TYPE, aq.SHORT_DESCRIPTION, aq.X_AXIS_LABEL, aq.Y_AXIS_LABEL, aq.GRAPH_OPTIONS, aq.USES_RULES "
-					+ "    , aj.ALLOW_SHARING, aj.ALLOW_SPLITTING "
+					+ "    , aj.ALLOW_SHARING, aj.ALLOW_SPLITTING, aj.MAIL_CC, aj.MAIL_BCC "
 					+ "    , aj.NEXT_RUN_DATE, aj.START_DATE, aj.END_DATE, aj.MIGRATED_TO_QUARTZ, aq.ACTIVE_STATUS AS QUERY_ACTIVE_STATUS, aj.LAST_FILE_NAME "
 					+ "    , aj.CACHED_TABLE_NAME, aj.JOB_NAME, au.ACTIVE_STATUS AS OWNER_ACTIVE_STATUS "
 					+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USERS au"
@@ -2064,6 +2107,8 @@ public class ArtJob implements Job {
 				setJobName(rs.getString("JOB_NAME"));
 
 				jobOwnerStatus = rs.getString("OWNER_ACTIVE_STATUS");
+				cc=rs.getString("MAIL_CC");
+				bcc=rs.getString("MAIL_BCC");
 
 				//update from address in case the user's email address has changed
 				UserEntity ue = new UserEntity(username);

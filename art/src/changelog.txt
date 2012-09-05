@@ -1,3 +1,6 @@
+ART 2.4
+* Added cc and bcc fields for email jobs
+
 ART 2.3.1
 * Fix NullPointerException on pdf output with null strings
 * Fix to enable error free charts with java 1.7
