@@ -1,13 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<?xml version="1.0" encoding="UTF-8" ?> 
 
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+<configuration debug="false" scan="true">
 
-	<appender name="sysout" class="org.apache.log4j.ConsoleAppender">
-		<param name="target" value="System.out"/>
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[%p] %d{dd MMM yyyy HH:mm:ss.SSS} %t [%c]%n%m%n%n"/>
-		</layout>
+	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">		
+		<encoder>
+			<pattern>[%-5level] %d{dd MMM yyyy HH:mm:ss.SSS} |%thread| %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="CYCLIC" class="ch.qos.logback.core.read.CyclicBufferAppender">
+		<MaxSize>512</MaxSize>
 	</appender>
 
 
@@ -41,7 +43,7 @@
 
 	<root>
 		<level value="warn" />
-		<appender-ref ref="sysout" />
+		<appender-ref ref="stdout" />
 	</root>
 
-</log4j:configuration>
+</configuration>

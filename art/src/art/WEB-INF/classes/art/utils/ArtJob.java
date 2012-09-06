@@ -27,6 +27,7 @@
  on line 321, 376, 300 replaced charset name UTF8 to UTF-8 (utf-8 inline html should be ok now...
  2010-05-01 enrico/timothy added option to handle charts
  */
+
 package art.utils;
 
 import art.graph.ExportGraph;
@@ -87,6 +88,7 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  */
+
 public class ArtJob implements Job {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtJob.class);
