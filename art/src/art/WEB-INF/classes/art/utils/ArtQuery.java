@@ -602,7 +602,7 @@ public class ArtQuery {
                 }
 
                 //get query source
-                SQL = "SELECT TEXT_INFO FROM ART_ALL_SOURCES "
+                SQL = "SELECT SOURCE_INFO FROM ART_ALL_SOURCES "
                         + " WHERE OBJECT_ID = ?"
                         + " ORDER BY LINE_NUMBER";
                 ps2 = conn.prepareStatement(SQL);
@@ -713,9 +713,9 @@ public class ArtQuery {
             // Write the query in small segments
             // This guarantees portability across databases with different max VARCHAR sizes
 
-            SQLUpdate = ("INSERT INTO ART_ALL_SOURCES "
-                    + "(OBJECT_ID, OBJECT_GROUP_ID, LINE_NUMBER, TEXT_INFO)"
-                    + " values (?, ?, ?, ?)");
+            SQLUpdate = "INSERT INTO ART_ALL_SOURCES "
+                    + "(OBJECT_ID, LINE_NUMBER, SOURCE_INFO)"
+                    + " values (?, ?, ?)";
             ps = conn.prepareStatement(SQLUpdate);
 			
 			//if text is empty string, save space. for error free database migrations using tools like PDI
@@ -729,18 +729,17 @@ public class ArtQuery {
             int textLength = text.length();
 
             ps.setInt(1, queryId);
-            ps.setInt(2, groupId);
-                       
+                                   
             while (end < textLength) {
-                ps.setInt(3, step++);
-                ps.setString(4, text.substring(start, end));
+                ps.setInt(2, step++);
+                ps.setString(3, text.substring(start, end));
 
                 ps.addBatch();
                 start = end;
                 end = end + SOURCE_CHUNK_LENGTH;
             }
-            ps.setInt(3, step);
-            ps.setString(4, text.substring(start));
+            ps.setInt(2, step);
+            ps.setString(3, text.substring(start));
 
             ps.addBatch();
             ps.executeBatch();
@@ -1222,7 +1221,7 @@ public class ArtQuery {
             Statement st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             ResultSet rs;
 
-            String SqlQuery = "SELECT FIELD_POSITION, NAME, FIELD_CLASS, SHORT_DESCRIPTION, DESCRIPTION "
+            String SqlQuery = "SELECT FIELD_POSITION, NAME, PARAM_DATA_TYPE, SHORT_DESCRIPTION, DESCRIPTION "
                     + ", DEFAULT_VALUE, PARAM_TYPE, PARAM_LABEL, USE_LOV, LOV_QUERY_ID "
                     + ", APPLY_RULES_TO_LOV, CHAINED_PARAM_POSITION, QUERY_ID, CHAINED_VALUE_POSITION "
                     + " FROM ART_QUERY_FIELDS ";
@@ -1280,7 +1279,7 @@ public class ArtQuery {
                 String paramShortDescr = rs.getString("SHORT_DESCRIPTION");
                 String paramDescr = rs.getString("DESCRIPTION");
                 String paramPosition = rs.getString("FIELD_POSITION");
-                String paramClass = rs.getString("FIELD_CLASS").toUpperCase();
+                String paramDataType = rs.getString("PARAM_DATA_TYPE").toUpperCase();
                 String defaultValue = rs.getString("DEFAULT_VALUE");
 
                 boolean isLovParameter = !rs.getString("USE_LOV").equals("N");
@@ -1313,15 +1312,15 @@ public class ArtQuery {
                         //multi parameter that doesn't use LOV
                         paramList.add(new HtmlTextArea(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue));
                     } else {
-                        if (paramClass.equals("VARCHAR") || paramClass.equals("INTEGER") || paramClass.equals("NUMBER")) {
+                        if (paramDataType.equals("VARCHAR") || paramDataType.equals("INTEGER") || paramDataType.equals("NUMBER")) {
                             // Simple input text
-                            paramList.add(new HtmlTextInput(paramHtmlId, paramHtmlName, paramName, paramClass, paramShortDescr, paramDescr, defaultValue));
+                            paramList.add(new HtmlTextInput(paramHtmlId, paramHtmlName, paramName, paramDataType, paramShortDescr, paramDescr, defaultValue));
 
-                        } else if (paramClass.equals("DATE") || paramClass.equals("DATETIME")) {
+                        } else if (paramDataType.equals("DATE") || paramDataType.equals("DATETIME")) {
                             // Build date box  - bind date are not supported from 1.7beta1
-                            paramList.add(new HtmlDateInput(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue, paramClass));
+                            paramList.add(new HtmlDateInput(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue, paramDataType));
 
-                        } else if (paramClass.equals("TEXT")) {
+                        } else if (paramDataType.equals("TEXT")) {
                             // TextArea
                             paramList.add(new HtmlTextArea(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue));
                         }
@@ -2067,7 +2066,7 @@ public class ArtQuery {
             ResultSet rs;
 
             //get query source
-            sql = "SELECT TEXT_INFO FROM ART_ALL_SOURCES "
+            sql = "SELECT SOURCE_INFO FROM ART_ALL_SOURCES "
                     + " WHERE OBJECT_ID = ?"
                     + " ORDER BY LINE_NUMBER";
             ps = conn.prepareStatement(sql);

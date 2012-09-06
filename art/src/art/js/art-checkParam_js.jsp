@@ -7,12 +7,12 @@
 %>
 
 
-  function ValidateValue(fieldClass, fieldName, fieldValue){
-     if (fieldClass == "INTEGER") return ValidateInteger( fieldName, fieldValue);
-     if (fieldClass == "NUMBER" ) return ValidateNumber( fieldName, fieldValue);
+  function ValidateValue(fieldDataType, fieldName, fieldValue){
+     if (fieldDataType == "INTEGER") return ValidateInteger( fieldName, fieldValue);
+     if (fieldDataType == "NUMBER" ) return ValidateNumber( fieldName, fieldValue);
 
-	 if (fieldClass == "DATE" ) return validateDate( fieldName, fieldValue);
-	 if (fieldClass == "DATETIME" ) return validateDateTime( fieldName, fieldValue);
+	 if (fieldDataType == "DATE" ) return validateDate( fieldName, fieldValue);
+	 if (fieldDataType == "DATETIME" ) return validateDateTime( fieldName, fieldValue);
 
   }
 

@@ -2298,7 +2298,7 @@ public class ArtJob implements Job {
 					ArtQueryParam param = params.get(htmlName);
 					if (param != null) {
 						//for dynamic date values e.g. ADD... ensure what is used to execute the query is same as what is displayed
-						String paramDataType = param.getFieldClass();
+						String paramDataType = param.getParamDataType();
 						if (StringUtils.startsWith(paramDataType, "DATE")){							
 							String dateFormat;
 							if (paramDataType.equals("DATE")) {

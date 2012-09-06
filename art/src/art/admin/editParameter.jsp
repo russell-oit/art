@@ -1,25 +1,8 @@
-<%@ page import="java.sql.*,java.util.*,art.utils.*;" %>
+<%@ page import="java.sql.*,java.util.*,art.utils.*" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 <%
- boolean MODIFY = request.getParameter("PARAMACTION").equals("MODIFY");
- boolean NEW = request.getParameter("PARAMACTION").equals("NEW");
-
- int queryId = -1;
- int fieldPosition = -1;
- String type="";
-
- if (request.getParameter("QUERY_ID") != null) {
-    queryId = Integer.parseInt(request.getParameter("QUERY_ID"));
- }
- if (MODIFY && request.getParameter("FIELD_POSITION") != null) {
-    String s= request.getParameter("FIELD_POSITION");
-    type = s.substring(s.indexOf("_")+1); // can be BIND, MULTI or INLINE
-    fieldPosition = Integer.parseInt(s.substring(0,s.indexOf("_")));
- } else if (NEW) {
-    type = request.getParameter("NEWTYPE");
- }
-
  Connection conn = (Connection) session.getAttribute("SessionConn");
  if ( conn == null || conn.isClosed()) {
 %>
@@ -31,9 +14,15 @@
 </jsp:forward>
 <%
 }
+ 
+boolean MODIFY = request.getParameter("PARAMACTION").equals("MODIFY");
+ 
+int queryId = Integer.parseInt(request.getParameter("QUERY_ID"));
+int fieldPosition = -1;
 
 ArtQueryParam qp = new ArtQueryParam();
 if (MODIFY) {
+	fieldPosition = Integer.parseInt(request.getParameter("FIELD_POSITION")); //request parameter not availabe if new 
 	qp.create(conn, queryId, fieldPosition);
 }
 
@@ -41,39 +30,90 @@ String help;
 
 %>
 
+<script language="javascript" type="text/javascript">
+	<!-- Begin
+	function onTypeSelection() {
+		var paramType = document.getElementById("paramType").value;
+		
+		// reset use lov drop down
+		var useLov = document.getElementById("useLov");
+		useLov.options.length = 0; // reset the select
+		//
+		//reset data type drop down
+		var dataType = document.getElementById("paramDataType");
+		dataType.options.length = 0; // reset the select
+		   
+		if(paramType == 'M'){
+			//hide fields not relevant for multi parameters
+			document.getElementById("drilldownColumn").className="collapse";
+			
+			//default use lov to yes
+			var i=0;
+			useLov.options[i++] = new Option("Yes","Y");
+			useLov.options[i++] = new Option("No","N");
+			
+			//set available data types
+			i=0;
+			dataType.options[i++] = new Option("VARCHAR","VARCHAR");
+			dataType.options[i++] = new Option("NUMBER","NUMBER");
+		} else {
+			//inline parameter
+			document.getElementById("drilldownColumn").className="expand";
+			
+			//default use lov to no
+			var i=0;
+			useLov.options[i++] = new Option("No","N");
+			useLov.options[i++] = new Option("Yes","Y");	
+			
+			//set available data types
+			i=0;
+			dataType.options[i++] = new Option("VARCHAR","VARCHAR");
+			dataType.options[i++] = new Option("TEXT","TEXT");			
+			dataType.options[i++] = new Option("INTEGER","INTEGER");
+			dataType.options[i++] = new Option("NUMBER","NUMBER");
+			dataType.options[i++] = new Option("DATE","DATE");
+			dataType.options[i++] = new Option("DATETIME","DATETIME");
+		}
+		
+		//set use lov to saved value
+		var useLovValue="<%=qp.getUseLov()%>";			
+		for (var i = 0; i < useLov.options.length; i++) {				
+			if (useLov.options[i].value === useLovValue) {
+				useLov.selectedIndex = i;
+				break;
+			}
+		}
+		
+		//set data type to saved value
+		var dataTypeValue="<%=qp.getParamDataType()%>";			
+		for (var i = 0; i < dataType.options.length; i++) {				
+			if (dataType.options[i].value === dataTypeValue) {
+				dataType.selectedIndex = i;
+				break;
+			}
+		}
+	}
+</script>
+	
+
 <form action="execEditParameter.jsp" method="post">
     <input type="hidden" name="QUERY_ID" value="<%= request.getParameter("QUERY_ID")%>">
     <input type="hidden" name="PARAMACTION" value="<%= request.getParameter("PARAMACTION")%>">
-    <%
-    if (MODIFY) {
-    %>
-    <input type="hidden" name="FIELD_POSITION" value="<%= fieldPosition%>">
-    <%
-    }
-    %>
+	<input type="hidden" name="FIELD_POSITION" value="<%= fieldPosition%>">
+   
     <table align="center">
         <tr><td class="title" colspan="2" > Define Parameter </td></tr>
-
-        <%
-		if (type.equals("MULTI")) {
-        %>
-        <input type="hidden" name="PARAM_TYPE" value="M">
-        <tr><td class="title" colspan="2" ><i>Multi Parameter</i></td></tr>
-        <tr><td class="data">Parameter Label</td>
+       		
+		<tr><td class="data"> Parameter Type </td><td class="data">
+                <select name="PARAM_TYPE" id="paramType" size="1" onChange="javascript:onTypeSelection();">
+                    <option value="I" <%=("I".equals(qp.getParamType())?"selected":"")%>>Inline</option>                    
+                    <option value="M"  <%=("M".equals(qp.getParamType())?"selected":"") %>>Multi</option>                    
+                </select>
+            </td>
+        </tr>
+		<tr><td class="data"> Parameter Label <br><small>(without #, case sensitive)</small></td>
             <td class="data"> <input type="text" name="PARAM_LABEL" size="40" maxlength="55" value="<%=qp.getParamLabel()%>"></td>
         </tr>
-        <%
-        } else if (type.equals("INLINE")) {
-        %>
-        <input type="hidden" name="PARAM_TYPE" value="I">
-        <tr><td class="title" colspan="2" ><i>Inline Parameter</i></td></tr>
-        <tr><td class="data"> Parameter Label <br><small>(without #, case sensitive)</small></td>
-            <td class="data"> <input type="text" name="PARAM_LABEL" size="40" maxlength="55" value="<%=qp.getParamLabel()%>"></td>
-        </tr>
-        <%
-        }
-        %>
-
         <tr><td class="data"> Name (User Viewable) </td>
             <td class="data"> <input type="text" name="NAME" size="25" maxlength="25" value="<%=qp.getName()%>"> </td>
         </tr>
@@ -84,35 +124,14 @@ String help;
         <tr><td class="data"> Help Description </td>
             <td class="data"> <input type="text" name="DESCRIPTION" size="40" maxlength="120" value="<%=qp.getDescription()%>"> </td>
         </tr>
-        <%
-        if (type.equals("INLINE")){           
-        %>
-
+       
         <tr><td class="data"> Data Type </td><td class="data">
-                <select name="FIELD_CLASS" size="1">
-                    <option value="VARCHAR" <%=("VARCHAR".equals(qp.getFieldClass())?"selected":"")%>>VARCHAR</option>
-                    <option value="TEXT"    <%=("TEXT".equals(qp.getFieldClass())?"selected":"") %>>TEXT</option>
-                    <option value="INTEGER" <%=("INTEGER".equals(qp.getFieldClass())?"selected":"")%>>INTEGER</option>
-                    <option value="NUMBER"  <%=("NUMBER".equals(qp.getFieldClass())?"selected":"") %>>NUMBER</option>
-                    <option value="DATE"    <%=("DATE".equals(qp.getFieldClass())?"selected":"") %>>DATE</option>
-                    <option value="DATETIME" <%=("DATETIME".equals(qp.getFieldClass())?"selected":"") %>>DATETIME</option>
-                </select>
+                <select name="PARAM_DATA_TYPE" id="paramDataType" size="1">
+					<!-- populated dynamically. inline and multi parameters have different options -->
+                   </select>
             </td>
         </tr>
-		<%
-        } else if(type.equals("MULTI")) { //multi parameters are treated as either VARCHAR or NUMBER
-		%>
-		<tr><td class="data"> Data Type </td><td class="data">
-                <select name="FIELD_CLASS" size="1">
-                    <option value="VARCHAR" <%=("VARCHAR".equals(qp.getFieldClass())?"selected":"")%>>VARCHAR</option>                    
-                    <option value="NUMBER"  <%=("NUMBER".equals(qp.getFieldClass())?"selected":"") %>>NUMBER</option>                    
-                </select>
-            </td>
-        </tr>
-		<%
-		}
-        %>
-
+		
         <tr><td class="data"> Default Value
                 </td>
 				<%
@@ -122,14 +141,8 @@ String help;
 				}
 				%>
             <td class="data"> <input type="text" name="DEFAULT_VALUE" size="25" maxlength="80" value="<%=defaultValue%>">
-				<%
-				if(type.equals("INLINE")){
-					%>
-					<input type="button" class="buttonup" onclick="javascript:alert('Default DATE values\n\n1. For DATE parameters, use YYYY-MM-DD format (e.g. 2012-01-01) to set a specific default date.\n\n2. For DATETIME parameters, use YYYY-MM-DD HH:mm or YYYY-MM-DD HH:mm:ss  (e.g. 2012-01-30 23:15 or 2012-01-30 23:15:45).\n\n3. Leave blank to set the default date to the current date - i.e. when the query is executed.\n\n4. Use the following syntax to set an offset from current date:\n ADD DAYS|MONTHS|YEARS <number> \n e.g. ADD DAYS -5 -> set the date to 5 days in the past')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
-				<%
-					}
-				%>
-
+				
+			<input type="button" class="buttonup" onclick="javascript:alert('Default DATE values\n\n1. For DATE parameters, use YYYY-MM-DD format (e.g. 2012-01-01) to set a specific default date.\n\n2. For DATETIME parameters, use YYYY-MM-DD HH:mm or YYYY-MM-DD HH:mm:ss  (e.g. 2012-01-30 23:15 or 2012-01-30 23:15:45).\n\n3. Leave blank to set the default date to the current date - i.e. when the query is executed.\n\n4. Use the following syntax to set an offset from current date:\n ADD DAYS|MONTHS|YEARS <number> \n e.g. ADD DAYS -5 -> set the date to 5 days in the past')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">				
             </td>
         </tr>
 
@@ -137,20 +150,8 @@ String help;
                 <small>(Set to Yes if the parameter <br> should be picked from a list)</small>
             </td>
             <td class="data">
-                <select name="USE_LOV" size="1">
-					<%
-					if (type.equals("INLINE")){ //default to No for inline parameters
-						%>
-                    <option value="N" <%=("N".equals(qp.getUseLov())?"selected":"")%>>No</option>
-					<option value="Y" <%=("Y".equals(qp.getUseLov())?"selected":"")%>>Yes</option>
-					<% } else if (type.equals("MULTI")) { //multi parameter. default to Yes
-					%>
-					<option value="Y" <%=("Y".equals(qp.getUseLov())?"selected":"")%>>Yes</option>
-					<option value="N" <%=("N".equals(qp.getUseLov())?"selected":"")%>>No</option>
-
-					<%
-					}
-					%>
+                <select name="USE_LOV" id="useLov" size="1">
+					<!-- populated dynamically. inline and multi parameters have different order of the options -->
                 </select> </td>
         </tr>
 
@@ -227,13 +228,9 @@ String help;
 
             </td>
         </tr>
-
-        <%
-        if (type.equals("INLINE")){
-             //display drilldown column option
-        %>
+        
         <tr><td class="data"> Drill Down Column </td>
-            <td class="data"> <input type="text" name="DRILLDOWN_COLUMN" size="3" maxlength="2" value="<%=qp.getDrilldownColumn()%>">
+            <td class="data"> <input type="text" name="DRILLDOWN_COLUMN" id="drilldownColumn" size="3" maxlength="2" value="<%=qp.getDrilldownColumn()%>">
 
                 <% help="If this query is used as a drill down query, enter the column number of the parent query from which this parameter will get its value. Column numbering starts from 1." +
                "\\n\\nIf the parent query is a graph, the parameter will get the following values.\\nDrill down column 1 = data value\\nDrill down column 2 = category name" +
@@ -243,8 +240,7 @@ String help;
                 <input type="button" class="buttonup" onclick="javascript:alert('<%=help%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" />
             </td>
         </tr>
-        <%}%>
-
+       
         <tr>
             <td><input type="submit" value="Submit"></td>
             <td></td>
@@ -252,6 +248,10 @@ String help;
 
     </table>
 </form>
+			
+<script language="javascript" type="text/javascript">
+    onTypeSelection();
+</script>
 
 <%@ include file ="footer.html" %>
 

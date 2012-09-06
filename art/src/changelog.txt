@@ -1,5 +1,6 @@
 ART 2.4
 * Added cc and bcc fields for email jobs
+* Allow change of parameter between inline and multi
 
 ART 2.3.1
 * Fix NullPointerException on pdf output with null strings

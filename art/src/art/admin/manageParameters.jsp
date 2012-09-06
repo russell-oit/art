@@ -1,4 +1,5 @@
-<%@ page import="java.sql.*,java.util.*,art.utils.*;" %>
+<%@ page import="java.sql.*,java.util.*,art.utils.*" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 <script language="javascript">
@@ -16,7 +17,7 @@
 
     function deleteParam() {
         if (document.viewParam.FIELD_POSITION.selectedIndex>=0) {
-            if (window.confirm("Do you really want to delete this parameter?\nNote: For INLINE parameters you need to modify the query's SQL to remove the parameter label.")) {
+            if (window.confirm("Do you really want to delete this parameter?\nNote: You need to modify the query's SQL to remove the parameter label.")) {
                 document.viewParam.action="execEditParameter.jsp";
                 document.viewParam.PARAMACTION.value="DELETE";
                 document.viewParam.submit();
@@ -80,10 +81,10 @@ ArtQuery aq=new ArtQuery();
         */%>
         <tr><td class="title" colspan="2" > Edit Parameters </td></tr>
         <%/*
-           Show List of existent parameters
+           Show List of existing parameters
         */%>
         <tr><td colspan="2" class="data">
-                <small>Order - Param Type - Param Name - Label</small>
+                <small>Order - Type - Name - Label</small>
             </td>
         </tr>
         <tr><td colspan="2" class="data">
@@ -101,23 +102,16 @@ ArtQuery aq=new ArtQuery();
 						fieldPosition=param.getFieldPosition();
 						pType=param.getParamType();
 						
-						String paramType;
-						if (pType.equals("M")) {
+						String paramType="";
+						if (StringUtils.equals(pType,"M")) {
 							paramType="MULTI";
-						} else if (pType.equals("I")) {
+						} else if (StringUtils.equals(pType,"I")) {
 							paramType="INLINE";
-						} else {
-							paramType="BIND";
-						}
-						String multiFieldOrBindPos; // stores column name (MULTI) or bind position (BIND) or inline label (INLINE)
-						if (paramType.equals("BIND")) {
-							multiFieldOrBindPos = String.valueOf(param.getChainedPosition());
-						} else {
-							multiFieldOrBindPos = param.getParamLabel();
-						}
+						} 
+																
 						%>
-						<option value="<%=fieldPosition+"_"+paramType%>">
-							<%=fieldPosition%>-<%=paramType%>-<%=param.getName()%>-<%=multiFieldOrBindPos%>
+						<option value="<%=fieldPosition%>">
+							<%=fieldPosition%>-<%=paramType%>-<%=param.getName()%>-<%=param.getParamLabel()%>
 						</option>
 						<%
 					}
@@ -129,22 +123,15 @@ ArtQuery aq=new ArtQuery();
         </tr>
 
         <%/*
-           Show button  : delete, modify, new Bind Param, new Multi Param
+           Show buttons : delete, modify, new 
         */%>
         <tr><td colspan="2" class="data">
                 <input type="button" onclick="deleteParam()" value="Delete" name="ACTION">
                 &nbsp;<input type="button" onclick="updateParam()" value="Modify" name="ACTION">
+				&nbsp;<input type="button" onclick="createParam()" value="New" name="ACTION"> </td>
             </td>
         </tr>
-       
-        <tr><td colspan="2" class="data">                
-                <input type="radio"  name="NEWTYPE"  value="INLINE" checked >Inline
-                <input type="radio"  name="NEWTYPE"  value="MULTI" >Multi                
-                &nbsp;
-                <input type="button" onclick="createParam()" value="New" name="ACTION"> </td>
-            </td>
-            
-        </tr>
+              
         <tr>
             <td>&nbsp;</td>
         </tr>

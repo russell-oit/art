@@ -45,7 +45,7 @@ public class ArtQueryParam implements Serializable {
 	String name = "";
 	String shortDescription = "";
 	String description = "";
-	String fieldClass = "";
+	String paramDataType = "";
 	String defaultValue = "";
 	String useLov = "";
 	String paramType = "";
@@ -53,8 +53,7 @@ public class ArtQueryParam implements Serializable {
 	String applyRulesToLov = "";
 	int queryId;
 	int fieldPosition = -1;
-	int lovQueryId;
-	int bindPosition = -1;
+	int lovQueryId;	
 	int chainedPosition;
 	int drilldownColumn;
 	int chainedValuePosition;
@@ -105,7 +104,7 @@ public class ArtQueryParam implements Serializable {
 		} else {
 			usesLov = true;
 		}
-
+ 
 		return usesLov;
 	}
 
@@ -220,14 +219,7 @@ public class ArtQueryParam implements Serializable {
 		queryId = i;
 	}
 
-	/**
-	 *
-	 * @param i
-	 */
-	public void setBindPosition(int i) { // BIND position
-		bindPosition = i;
-	}
-
+	
 	/**
 	 *
 	 * @param s
@@ -265,8 +257,8 @@ public class ArtQueryParam implements Serializable {
 	 *
 	 * @param s
 	 */
-	public void setFieldClass(String s) {
-		fieldClass = s;
+	public void setParamDataType(String s) {
+		paramDataType = s;
 	}
 
 	/**
@@ -336,14 +328,7 @@ public class ArtQueryParam implements Serializable {
 		return queryId;
 	}
 
-	/**
-	 *
-	 * @return bind or chained param position
-	 */
-	public int getBindPosition() { // BIND position
-		return bindPosition;
-	}
-
+	
 	/**
 	 *
 	 * @return display name
@@ -380,8 +365,8 @@ public class ArtQueryParam implements Serializable {
 	 *
 	 * @return data type of parameter
 	 */
-	public String getFieldClass() {
-		return fieldClass;
+	public String getParamDataType() {
+		return paramDataType;
 	}
 
 	/**
@@ -439,7 +424,7 @@ public class ArtQueryParam implements Serializable {
 
 		try {
 			String SQL = "SELECT QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
-					+ " ,FIELD_CLASS, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
+					+ " ,PARAM_DATA_TYPE, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
 					+ " ,LOV_QUERY_ID, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION "
 					+ " FROM ART_QUERY_FIELDS "
 					+ " WHERE QUERY_ID = ? AND FIELD_POSITION = ?";
@@ -454,14 +439,13 @@ public class ArtQueryParam implements Serializable {
 				setName(rs.getString("NAME"));
 				setShortDescription(rs.getString("SHORT_DESCRIPTION"));
 				setDescription(rs.getString("DESCRIPTION"));
-				setFieldClass(rs.getString("FIELD_CLASS"));
+				setParamDataType(rs.getString("PARAM_DATA_TYPE"));
 				setDefaultValue(rs.getString("DEFAULT_VALUE"));
 				setUseLov(rs.getString("USE_LOV"));
 				setParamType(rs.getString("PARAM_TYPE"));
 				setParamLabel(rs.getString("PARAM_LABEL"));
 				setApplyRulesToLov(rs.getString("APPLY_RULES_TO_LOV"));
 				setLovQueryId(rs.getInt("LOV_QUERY_ID"));
-				setBindPosition(rs.getInt("CHAINED_PARAM_POSITION"));
 				setChainedPosition(rs.getInt("CHAINED_PARAM_POSITION"));
 				setDrilldownColumn(rs.getInt("DRILLDOWN_COLUMN"));
 				setChainedValuePosition(rs.getInt("CHAINED_VALUE_POSITION"));
@@ -510,7 +494,7 @@ public class ArtQueryParam implements Serializable {
 
 			SQL = "INSERT INTO ART_QUERY_FIELDS "
 					+ " (QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
-					+ " ,FIELD_CLASS, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
+					+ " ,PARAM_DATA_TYPE, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
 					+ " ,LOV_QUERY_ID, UPDATE_DATE, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION) "
 					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -526,7 +510,7 @@ public class ArtQueryParam implements Serializable {
 			ps.setString(3, getName());
 			ps.setString(4, getShortDescription());
 			ps.setString(5, getDescription());
-			ps.setString(6, getFieldClass());
+			ps.setString(6, getParamDataType());
 			ps.setString(7, getDefaultValue());
 			ps.setString(8, getUseLov());
 			ps.setString(9, getParamType());
@@ -670,117 +654,6 @@ public class ArtQueryParam implements Serializable {
 		}
 
 		return success;
-	}
-
-	/**
-	 * Prepare variables to be used for bind parameter manipulations
-	 *
-	 * @param conn
-	 * @param qId
-	 * @return
-	 * <code>true</code> if successful
-	 */
-	public boolean prepareBindParams(Connection conn, int qId) {
-		boolean success = false;
-
-		try {
-			String psSQL = "SELECT TEXT_INFO FROM ART_ALL_SOURCES "
-					+ " WHERE OBJECT_ID = ?"
-					+ " ORDER BY LINE_NUMBER";
-			PreparedStatement ps = conn.prepareStatement(psSQL);
-			ps.setInt(1, qId);
-			ResultSet rs = ps.executeQuery();
-
-			StringBuilder SqlBuff = new StringBuilder(1024);
-			while (rs.next()) {
-				SqlBuff.append(rs.getString(1));
-			}
-			rs.close();
-
-			bindQuerySql = SqlBuff.toString();
-
-			// build a vector bv[] where bv[i] is true
-			// if the bind parameter i+1 is used.
-			int numOfBindInSQL = getNumberOfBindsInSQL();
-			boolean[] bv = new boolean[numOfBindInSQL + 1];
-			int i;
-			for (i = 0; i < numOfBindInSQL; i++) {
-				bv[i] = false;
-			}
-
-			psSQL = "SELECT CHAINED_PARAM_POSITION FROM ART_QUERY_FIELDS "
-					+ " WHERE QUERY_ID = ? "
-					+ " AND PARAM_TYPE = 'N' "
-					+ " ORDER BY CHAINED_PARAM_POSITION";
-			ps = conn.prepareStatement(psSQL);
-			ps.setInt(1, qId);
-			rs = ps.executeQuery();
-			for (i = 0; i < numOfBindInSQL && rs.next(); i++) {
-				bv[(rs.getInt(1) - 1)] = true;
-			}
-			bindVector = bv;
-
-			success = true;
-		} catch (Exception e) {
-			logger.error("Error", e);
-		}
-
-		return success;
-	}
-
-	/**
-	 *
-	 * @return number of bind variables in the sql source
-	 */
-	public int getNumberOfBindsInSQL() {
-		int index = 0;
-		int i;
-		for (i = 0; index >= 0; i++) {
-			index = bindQuerySql.indexOf("?", index + 1);
-		}
-
-		return i - 1;
-	}
-
-	/**
-	 *
-	 * @param i
-	 * @return
-	 * <code>true</code> if bind position is free
-	 */
-	public boolean isBindPositionFree(int i) {
-		return (!bindVector[i - 1]);
-	}
-
-	/**
-	 *
-	 * @param pos
-	 * @return string around bind variable
-	 */
-	public String getStringAroundBind(int pos) {
-		String result;
-
-		int index = 0;
-		for (int i = 0; i < pos && index >= 0; i++) {
-			index = bindQuerySql.indexOf("?", index + 1);
-		}
-
-		String s = "";
-		if (index >= 0) {
-			if (bindQuerySql.length() > 30) {
-				s = "..."
-						+ bindQuerySql.substring(
-						((index - 35) < 0 ? 0 : (index - 35)),
-						((index + 5) > bindQuerySql.length()) ? index + 1 : (index + 5))
-						+ "...";
-			}
-			s.replace('"', ' ');
-			result = s.replace('\n', ' ');
-		} else {
-			result = "ERROR";
-		}
-
-		return result;
 	}
 
 	/**

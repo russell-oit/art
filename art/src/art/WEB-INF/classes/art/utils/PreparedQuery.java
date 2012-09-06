@@ -703,7 +703,7 @@ public class PreparedQuery {
 			// don't check security for Lovs or during Admin session
 			logger.debug("isLov = {}, adminSession = {}", isLov, adminSession);
 
-			stmt = "SELECT AAS.TEXT_INFO "
+			stmt = "SELECT AAS.SOURCE_INFO "
 					+ "  FROM ART_ALL_SOURCES AAS "
 					+ " WHERE AAS.OBJECT_ID = " + queryId + " "
 					+ " ORDER BY LINE_NUMBER";
@@ -718,7 +718,7 @@ public class PreparedQuery {
 			//User can execute query directly granted to him or his user group
 
 			//try access based on user's right to query
-			stmt = "SELECT AAS.TEXT_INFO "
+			stmt = "SELECT AAS.SOURCE_INFO "
 					+ "  FROM ART_ALL_SOURCES AAS, ART_USER_QUERIES AUQ "
 					+ " WHERE AAS.OBJECT_ID = ? "
 					+ " AND AUQ.USERNAME = ?"
@@ -738,7 +738,7 @@ public class PreparedQuery {
 
 			if (last_stmt_retrieved_rows == 0) {
 				//user doesn't have direct access to query. check if he belongs to a user group which has direct access to the query
-				stmt = "SELECT DISTINCT AAS.TEXT_INFO, AAS.LINE_NUMBER "
+				stmt = "SELECT DISTINCT AAS.SOURCE_INFO, AAS.LINE_NUMBER "
 						+ " FROM ART_ALL_SOURCES AAS, ART_USER_GROUP_QUERIES AUGQ "
 						+ " WHERE AAS.OBJECT_ID=AUGQ.QUERY_ID "
 						+ " AND AAS.OBJECT_ID = ? AND EXISTS "
@@ -764,11 +764,10 @@ public class PreparedQuery {
 			if (!viewingTextObject) {
 				if (last_stmt_retrieved_rows == 0) {
 					//user doesn't belong to a group with direct access to the query. check if user has access to the query's group
-					stmt = "SELECT AAS.TEXT_INFO "
-							+ "  FROM ART_ALL_SOURCES AAS, ART_USER_QUERY_GROUPS AUQG "
-							+ " WHERE AAS.OBJECT_ID = ? "
-							+ " AND AUQG.USERNAME= ? "
-							+ " AND AAS.OBJECT_GROUP_ID = AUQG.QUERY_GROUP_ID"
+					stmt = "SELECT AAS.SOURCE_INFO "
+							+ " FROM ART_ALL_SOURCES AAS, ART_USER_QUERY_GROUPS AUQG, ART_QUERIES aq "
+							+ " WHERE AAS.OBJECT_ID=aq.QUERY_ID AND aq.QUERY_GROUP_ID = AUQG.QUERY_GROUP_ID"
+							+ " AND AAS.OBJECT_ID = ? AND AUQG.USERNAME= ? "
 							+ " ORDER BY LINE_NUMBER";
 
 					//try access based on user's right to query group
@@ -785,9 +784,9 @@ public class PreparedQuery {
 
 				if (last_stmt_retrieved_rows == 0) {
 					//user doesn't have direct access to query group. check if he belongs to a user group which has direct access to the query group
-					stmt = "SELECT DISTINCT AAS.TEXT_INFO, AAS.LINE_NUMBER "
-							+ " FROM ART_ALL_SOURCES AAS, ART_USER_GROUP_GROUPS AUGG "
-							+ " WHERE AAS.OBJECT_GROUP_ID = AUGG.QUERY_GROUP_ID "
+					stmt = "SELECT DISTINCT AAS.SOURCE_INFO, AAS.LINE_NUMBER "
+							+ " FROM ART_ALL_SOURCES AAS, ART_USER_GROUP_GROUPS AUGG, ART_QUERIES aq "
+							+ " WHERE AAS.OBJECT_ID=aq.QUERY_ID AND aq.QUERY_GROUP_ID = AUGG.QUERY_GROUP_ID "
 							+ " AND AAS.OBJECT_ID = ? AND EXISTS "
 							+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ? "
 							+ " AND AUGA.USER_GROUP_ID = AUGG.USER_GROUP_ID) "
@@ -813,7 +812,7 @@ public class PreparedQuery {
 		if (last_stmt_retrieved_rows == 0) {
 			//no direct or group access. check if query is public. all users have access to public queries
 
-			stmt = "SELECT AAS.TEXT_INFO "
+			stmt = "SELECT AAS.SOURCE_INFO "
 					+ "  FROM ART_ALL_SOURCES AAS, ART_USER_QUERIES AUQ "
 					+ " WHERE AAS.OBJECT_ID = " + queryId + " "
 					+ " AND AUQ.USERNAME= 'public_user' "
@@ -1411,7 +1410,7 @@ public class PreparedQuery {
 				String paramType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
 
 				ArtQueryParam param = htmlParams.get(htmlName);
-				paramType = param.getFieldClass();
+				paramType = param.getParamDataType();
 
 				//build string of values to go into IN clause of sql
 				for (parameterNumber = 0; parameterNumber < paramValues.length; parameterNumber++) {
@@ -1458,7 +1457,7 @@ public class PreparedQuery {
 				if (htmlName.startsWith("M_")) {
 					ArtQueryParam param = (ArtQueryParam) entry.getValue();
 					paramLabel = param.getParamLabel();
-					String paramDataType = param.getFieldClass();
+					String paramDataType = param.getParamDataType();
 
 					//check if parameter is yet to be replaced
 					int foundPosition = querySql.toLowerCase().indexOf("#" + paramLabel.toLowerCase() + "#"); //use all lowercase to make find case insensitive
@@ -1526,7 +1525,7 @@ public class PreparedQuery {
 				//get param label. for non-labelled params, this is the column name
 				ArtQueryParam param = htmlParams.get(htmlName);
 				paramLabel = param.getParamLabel();
-				String paramDataType = param.getFieldClass();
+				String paramDataType = param.getParamDataType();
 
 				StringBuilder SqlAndParamIn = new StringBuilder(128);
 				SqlAndParamIn.append(" AND " + paramLabel + " IN (");
@@ -1620,7 +1619,7 @@ public class PreparedQuery {
 
 		try {
 			//get the lov query's sql
-			String sqlLovQuery = "SELECT AAS.TEXT_INFO, AQ.DATABASE_ID, AQ.QUERY_TYPE, "
+			String sqlLovQuery = "SELECT AAS.SOURCE_INFO, AQ.DATABASE_ID, AQ.QUERY_TYPE, "
 					+ " AQF.CHAINED_PARAM_POSITION, AQF.CHAINED_VALUE_POSITION "
 					+ " FROM ART_QUERY_FIELDS AQF, ART_ALL_SOURCES AAS, ART_QUERIES AQ "
 					+ " WHERE AQF.LOV_QUERY_ID = AAS.OBJECT_ID AND AAS.OBJECT_ID = AQ.QUERY_ID"
@@ -1640,7 +1639,7 @@ public class PreparedQuery {
 			int chainedParamPosition=0;
 			int chainedValuePosition=0;
 			while (rsLovQuery.next()) {
-				queryBuilder.append(rsLovQuery.getString("TEXT_INFO"));
+				queryBuilder.append(rsLovQuery.getString("SOURCE_INFO"));
 				databaseId = rsLovQuery.getInt("DATABASE_ID");
 				lovQueryType = rsLovQuery.getInt("QUERY_TYPE");
 				chainedParamPosition = rsLovQuery.getInt("CHAINED_PARAM_POSITION");
@@ -1704,7 +1703,7 @@ public class PreparedQuery {
 								int parameterNumber;
 								String paramType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
 
-								paramType = param.getFieldClass();
+								paramType = param.getParamDataType();
 
 								//build string of values to go into IN clause of sql
 								for (parameterNumber = 0; parameterNumber < filterValues.length; parameterNumber++) {
@@ -1847,7 +1846,7 @@ public class PreparedQuery {
 				ArtQueryParam aqp = htmlParams.get("P_" + paramName);
 				String paramDataType = "VARCHAR";
 				if (aqp != null) { //"filter" param used with chained params will not exist in htmlparams map
-					paramDataType = aqp.getFieldClass();
+					paramDataType = aqp.getParamDataType();
 				}
 
 				i++; //increment parameter index

@@ -123,7 +123,7 @@ public class ObjectUrl {
 	*/
 	private static String lookupParams(int objectId, Connection conn, boolean encodeUrl)  throws SQLException {
 		StringBuilder sb = new StringBuilder(254);
-		String sqlQuery = "SELECT PARAM_LABEL, DEFAULT_VALUE, PARAM_TYPE, CHAINED_PARAM_POSITION, FIELD_CLASS " +
+		String sqlQuery = "SELECT PARAM_LABEL, DEFAULT_VALUE, PARAM_TYPE, CHAINED_PARAM_POSITION, PARAM_DATA_TYPE " +
 		" FROM ART_QUERY_FIELDS " +
 		" WHERE QUERY_ID = ? ORDER BY FIELD_POSITION";
 
@@ -145,13 +145,7 @@ public class ObjectUrl {
 			paramType=rs.getString("PARAM_TYPE");
 			if ("I".equals(paramType)) { // inline
 				sb.append("&P_"+paramName+"="+paramValue);
-			} else if ("N".equals(paramType)) { // bind - for backward compatibility only
-				if (rs.getString("FIELD_CLASS").equals("DATE")) {
-					sb.append("&P"+rs.getInt(4)+"_year=1900&P"+rs.getInt(4)+"_month=1&P"+rs.getInt(4)+"_day=1");
-				} else {
-					sb.append("&P"+rs.getInt(4)+"="+paramValue);
-				}
-			}
+			} 
 		}
 		rs.close();
 		ps.close();
