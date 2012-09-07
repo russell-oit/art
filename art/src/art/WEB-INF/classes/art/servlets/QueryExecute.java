@@ -909,13 +909,13 @@ public class QueryExecute extends HttpServlet {
             } else { //  maxNumberOfRunningQueries reached
                 logger.warn("Query not executed. Max running queries reached. User={}, queryId={}", username, queryId);
 
-                request.setAttribute("errorMessage", "maxRunnningQueriesReaced");
+                request.setAttribute("errorMessage", messages.getString("maxRunnningQueriesReached"));
                 ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
             } // END maxNumberOfRunningQueries IF
 
         } else {
             //invalid session
-            request.setAttribute("errorMessage", "invalidSession");
+            request.setAttribute("errorMessage", messages.getString("invalidSession"));
             ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
         }
 

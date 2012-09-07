@@ -1,7 +1,8 @@
 ART 2.4
 * Added cc and bcc fields for email jobs
 * Allow change of parameter between inline and multi
-* Replaced log4j with logback logging framework
+* Use logback instead of log4j for error logging
+* Enable viewing of application logs from within the application
 
 ART 2.3.1
 * Fix NullPointerException on pdf output with null strings

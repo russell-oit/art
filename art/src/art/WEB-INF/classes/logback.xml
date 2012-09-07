@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?> 
 
-<configuration debug="false" scan="true">
+<configuration scan="true">
 
 	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">		
 		<encoder>
-			<pattern>[%-5level] %d{dd MMM yyyy HH:mm:ss.SSS} |%thread| %logger{36} - %msg%n</pattern>
+			<pattern>[%level] %d{dd MMM yyyy HH:mm:ss.SSS} |%thread| %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
 
+	<!-- appender used to display logs from application interface. name must be CYCLIC as per ViewLogs.java -->
 	<appender name="CYCLIC" class="ch.qos.logback.core.read.CyclicBufferAppender">
 		<MaxSize>512</MaxSize>
 	</appender>
@@ -44,6 +45,7 @@
 	<root>
 		<level value="warn" />
 		<appender-ref ref="stdout" />
+		<appender-ref ref="CYCLIC" />
 	</root>
 
 </configuration>

@@ -26,7 +26,4 @@
     </tr>
 </table>
 
-<%
-    java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
-%>
 <%@ include file ="footer.jsp" %>

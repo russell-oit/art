@@ -158,6 +158,10 @@
         <servlet-name>QueryExecute</servlet-name>
         <servlet-class>art.servlets.QueryExecute</servlet-class>
     </servlet>
+	<servlet>
+        <servlet-name>ViewLogs</servlet-name>
+        <servlet-class>art.servlets.ViewLogs</servlet-class>
+    </servlet>
     <!-- CeWolf -->
     <servlet>
         <servlet-name>CewolfServlet</servlet-name>
@@ -214,6 +218,11 @@
         <url-pattern>/user/QueryExecute</url-pattern>
         <url-pattern>/user/ExecuteQuery</url-pattern>
         <url-pattern>/servlet/QueryExecute</url-pattern>
+    </servlet-mapping>
+	<servlet-mapping>
+        <servlet-name>ViewLogs</servlet-name>
+        <url-pattern>/logs</url-pattern>
+        <url-pattern>/ViewLogs</url-pattern>
     </servlet-mapping>
     <!-- Define the default session timeout for your application,
           in minutes.  From a servlet or JSP page, you can modify
