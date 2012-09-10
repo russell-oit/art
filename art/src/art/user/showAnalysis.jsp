@@ -5,6 +5,7 @@
 	com.tonbeller.jpivot.olap.model.*,
 	com.tonbeller.jpivot.tags.OlapModelProxy"
 		 %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <% response.setHeader("Cache-control", "no-cache");%>
@@ -68,7 +69,7 @@
 	}
 
 	//check if user has access to this object
-	if ("D".equals(aq.getStatus())) {
+	if (StringUtils.equals(aq.getStatus(),"D")) {
 		conn.close();
 		%>
 		<jsp:forward page="error.jsp">
@@ -153,9 +154,9 @@
 
 		try {
 			url = new URL(xmlaUrl);
-			if(xmlaUsername!=null && xmlaUsername.length()>0){
+			if(StringUtils.length(xmlaUsername)>0){
 				xmlaUrl=url.getProtocol() + "://" + xmlaUsername;
-				if (xmlaPassword != null && xmlaPassword.length()>0) {
+				if (StringUtils.length(xmlaPassword)>0) {
 					xmlaUrl += ":" + xmlaPassword;
 				}
 				int port=url.getPort();

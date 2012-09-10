@@ -26,6 +26,7 @@ import net.sf.jasperreports.engine.fill.JRGzipVirtualizer;
 import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -278,11 +279,11 @@ public class jasperOutput {
             String fullFileNameWithoutExt = exportPath + fileName;
 
             //export report
-            if ("pdf".equals(outputFormat)) {
+            if (StringUtils.equals(outputFormat,"pdf")) {
                 fullFileName = fullFileNameWithoutExt + ".pdf";
                 fileName = fileName + ".pdf";
                 JasperExportManager.exportReportToPdfFile(jasperPrint, fullFileName);
-            } else if ("html".equals(outputFormat)) {
+            } else if (StringUtils.equals(outputFormat,"html")) {
                 fullFileName = fullFileNameWithoutExt + ".html";
                 fileName = fileName + ".html";
 
@@ -292,7 +293,7 @@ public class jasperOutput {
                 exporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, fullFileName);
 
                 exporter.exportReport();
-            } else if ("xls".equals(outputFormat)) {
+            } else if (StringUtils.equals(outputFormat,"xls")) {
                 fullFileName = fullFileNameWithoutExt + ".xls";
                 fileName = fileName + ".xls";
 
@@ -304,7 +305,7 @@ public class jasperOutput {
                 exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
 
                 exporter.exportReport();
-            } else if ("xlsx".equals(outputFormat)) {
+            } else if (StringUtils.equals(outputFormat,"xlsx")) {
                 fullFileName = fullFileNameWithoutExt + ".xlsx";
                 fileName = fileName + ".xlsx";
 

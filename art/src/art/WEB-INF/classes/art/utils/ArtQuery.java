@@ -404,7 +404,7 @@ public class ArtQuery {
      * @param s
      */
     public void setDescription(String s) {
-        if (s != null && s.length() > 2000) {
+        if (StringUtils.length(s) > 2000) {
             s = s.substring(0, 2000);
         }
         description = s;
@@ -965,7 +965,7 @@ public class ArtQuery {
                 tmpSb = pq.getRuleValuesList(conn, username, currentRule, 1);
                 if (tmpSb != null) {
                     String s = tmpSb.toString();
-                    if (s != null && s.length() > 1) {
+                    if (StringUtils.length(s) > 1) {
                         //user has some rule values
                         roles = s.substring(1); //actual values start from second character. first character is a comma (,)
                     }
@@ -1344,13 +1344,13 @@ public class ArtQuery {
                         }
                     }
                     int lovQueryId = rs.getInt("LOV_QUERY_ID");
-                    boolean useSmartRules;
-                    if ("Y".equals(rs.getString("APPLY_RULES_TO_LOV"))) {
-                        useSmartRules = true;
+                    boolean useRules;
+                    if (StringUtils.equals(rs.getString("APPLY_RULES_TO_LOV"),"Y")) {
+                        useRules = true;
                     } else {
-                        useSmartRules = false;
+                        useRules = false;
                     }
-                    paramList.add(new HtmlLovParam(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue, lovQueryId, chainedParamId, useSmartRules, username, chainedValueId));
+                    paramList.add(new HtmlLovParam(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue, lovQueryId, chainedParamId, useRules, username, chainedValueId));
                 }
             }
             rs.close();

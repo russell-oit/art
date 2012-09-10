@@ -689,7 +689,7 @@ public class ArtJob implements Job {
 	 * @param s
 	 */
 	public void setTos(String s) {
-		if (s != null && s.length() > 254) {
+		if (StringUtils.length(s) > 254) {
 			s = s.substring(0, 254);
 		}
 		tos = s;
@@ -716,7 +716,7 @@ public class ArtJob implements Job {
 	 * @param s
 	 */
 	public void setMessage(String s) {
-		if (s != null && s.length() > 4000) {
+		if (StringUtils.length(s) > 4000) {
 			s = s.substring(0, 4000);
 		}
 		message = s;
@@ -1320,10 +1320,10 @@ public class ArtJob implements Job {
 
 										
 					//trim address fields
-					userEmail=StringUtils.strip(userEmail);
-					tos=StringUtils.strip(tos);
-					cc=StringUtils.strip(cc);
-					bcc=StringUtils.strip(bcc);
+					userEmail=StringUtils.trim(userEmail);
+					tos=StringUtils.trim(tos);
+					cc=StringUtils.trim(cc);
+					bcc=StringUtils.trim(bcc);
 					
 					boolean generateEmail = false;					
 					if (jobType == 3 || jobType == 8) {
@@ -1585,7 +1585,7 @@ public class ArtJob implements Job {
 	//create job audit record
 	private void createAuditRecord(Connection conn, String user) {
 		try {
-			if ("Y".equals(enableAudit)) {
+			if (StringUtils.equals(enableAudit,"Y")) {
 				//generate unique key for this job run
 				jobAuditKey = generateKey();
 
@@ -1682,7 +1682,7 @@ public class ArtJob implements Job {
 			}
 
 			//update audit table if required
-			if ("Y".equals(enableAudit)) {
+			if (StringUtils.equals(enableAudit,"Y")) {
 				sqlString = "UPDATE ART_JOBS_AUDIT SET JOB_ACTION = 'E', END_DATE = ? WHERE JOB_AUDIT_KEY = ? AND JOB_ID = ?";
 				psAudit = conn.prepareStatement(sqlString);
 				psAudit.setTimestamp(1, now);
@@ -1735,7 +1735,7 @@ public class ArtJob implements Job {
 			}
 
 			//update audit table if required
-			if ("Y".equals(enableAudit)) {
+			if (StringUtils.equals(enableAudit,"Y")) {
 				sqlString = "UPDATE ART_JOBS_AUDIT SET JOB_ACTION = 'X' WHERE JOB_AUDIT_KEY = ? AND JOB_ID = ?";
 				psAudit = conn.prepareStatement(sqlString);
 				psAudit.setString(1, jobAuditKey);
@@ -2115,7 +2115,7 @@ public class ArtJob implements Job {
 				//update from address in case the user's email address has changed
 				UserEntity ue = new UserEntity(username);
 				String currentEmail = ue.getEmail();
-				if (currentEmail != null && currentEmail.trim().length() > 4) {
+				if (StringUtils.length(currentEmail) > 4) {
 					setFrom(currentEmail);
 				}
 			}
@@ -2210,9 +2210,9 @@ public class ArtJob implements Job {
 				sb.append("<br>");
 
 				//build hash tables
-				if ("I".equals(paramType)) {
+				if (StringUtils.equals(paramType,"I")) {
 					inlineParams.put(paramName, paramValue);
-				} else if ("M".equals(paramType)) {
+				} else if (StringUtils.equals(paramType,"M")) {
 					name = paramName;
 					sa.add(paramValue);
 					while (rs.next()) {
@@ -2247,7 +2247,7 @@ public class ArtJob implements Job {
 					}
 
 					multiParams.put(name, sa.getStringArray());
-				} else if ("O".equals(paramType)) {
+				} else if (StringUtils.equals(paramType,"O")) {
 					//other parameters					
 					if (StringUtils.equals(paramName, "_showParams")) {
 						//enable display of parameters in output
@@ -2429,7 +2429,7 @@ public class ArtJob implements Job {
 
 		Mailer m = new Mailer();
 		m.setSmtpHost(smtpServer);
-		if (smtpUsername != null && smtpPassword != null && smtpUsername.length() > 3) {
+		if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
 			m.setUsername(smtpUsername);
 			smtpPassword = Encrypter.decrypt(smtpPassword);
 			m.setPassword(smtpPassword);
@@ -2940,7 +2940,7 @@ public class ArtJob implements Job {
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				tmp = rs.getString("EMAIL");
-				if (tmp != null && tmp.length() > 4) {
+				if (StringUtils.length(tmp) > 4) {
 					emails = emails + tmp + ";";
 				}
 			}
@@ -2958,7 +2958,7 @@ public class ArtJob implements Job {
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				tmp = rs.getString("EMAIL");
-				if (tmp != null && tmp.length() > 4) {
+				if (StringUtils.length(tmp) > 4) {
 					emails = emails + tmp + ";";
 				}
 			}

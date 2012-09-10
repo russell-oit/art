@@ -32,6 +32,7 @@ import java.sql.*;
 import java.util.*;
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,7 +266,7 @@ public class ArtOutHandler {
                     }
 
                     openInNewWindow = drilldown.getOpenInNewWindow();
-                    if ("Y".equals(openInNewWindow) || openInNewWindow == null) {
+                    if (StringUtils.equals(openInNewWindow,"Y") || openInNewWindow == null) {
                         //open drill down in new window
                         o.addCellString("<a href=\"" + drilldownUrl + "\" target=\"_blank\">" + drilldownText + " </a>");
                     } else {

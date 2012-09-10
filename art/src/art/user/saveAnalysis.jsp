@@ -1,4 +1,6 @@
 <%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP,java.util.ResourceBundle,java.util.Calendar,java.text.SimpleDateFormat" %>
+<%@ page import="org.quartz.*,org.apache.commons.lang.StringUtils" %>
+
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <%@ include file ="header.jsp" %>
 
@@ -73,7 +75,7 @@
 		//overwrite query source with current mdx
 		//query details loaded. update query
 		aq.setText(mdx);
-		if (queryDescription != null && queryDescription.length() > 0) {
+		if (StringUtils.length(queryDescription) > 0) {
 			//update description
 			aq.setDescription(queryDescription);
 		}

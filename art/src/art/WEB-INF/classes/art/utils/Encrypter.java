@@ -16,6 +16,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -196,9 +197,9 @@ public class Encrypter {
 
         boolean verified = false;
 
-        if ("bcrypt".equals(algorithm)) {
+        if (StringUtils.equals(algorithm,"bcrypt")) {
             verified = BCrypt.checkpw(clearText, hashedPassword);
-        } else if (hashedPassword != null && hashedPassword.equals(HashPassword(clearText, algorithm))) {
+        } else if (StringUtils.equals(hashedPassword,HashPassword(clearText, algorithm))) {
             verified = true;
         }
 

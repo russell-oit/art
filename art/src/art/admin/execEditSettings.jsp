@@ -1,6 +1,7 @@
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtDBCP" %>
 <%@ page import="org.quartz.*,org.quartz.impl.*,com.lowagie.text.FontFactory" %>
+
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%  request.setCharacterEncoding("UTF-8"); %>
 <%
@@ -30,7 +31,7 @@ String password=request.getParameter("art_password");
 String url=request.getParameter("art_jdbc_url");
 String driver=request.getParameter("art_jdbc_driver");
 boolean useDefaultDatabase=false;
-if(url!=null && (url.toLowerCase().equals("default") || url.toLowerCase().equals("demo"))){
+if(StringUtils.equalsIgnoreCase(url,"default") || StringUtils.equalsIgnoreCase(url,"demo")){
 	useDefaultDatabase=true;
 	url=defaultArtUrl;
 	driver=defaultArtDriver;

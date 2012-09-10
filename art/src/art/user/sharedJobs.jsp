@@ -1,6 +1,6 @@
-<%@page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="java.util.*,art.utils.*,art.servlets.ArtDBCP" %>
-<%@ page import="java.text.*" %>
+<%@ page import="java.util.*,java.text.*,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <%@ include file ="header.jsp" %>
 
@@ -87,7 +87,7 @@ String resultMessage;
 		Map.Entry entry = (Map.Entry)it.next();
 		ArtJob job=(ArtJob)entry.getValue();
 		
-		if("Y".equals(job.getQueryRulesFlag()) && "Y".equals(job.getAllowSplitting())){
+		if(StringUtils.equals(job.getQueryRulesFlag(),"Y") && StringUtils.equals(job.getAllowSplitting(),"Y")){
 			splitJob=true;
 		} else {
 			splitJob=false;

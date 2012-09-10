@@ -1,4 +1,5 @@
-<%@ page import="java.sql.*,art.utils.*;" %>
+<%@ page import="java.sql.*,art.utils.*" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 <%
@@ -36,7 +37,7 @@ String act = "Get Query Header and SQL for query " + queryId;
 int queryGroupId = aq.getGroupId();
 int queryType=aq.getQueryType();
 boolean usesRules=false;
-if("Y".equals(aq.getUsesRules())){
+if(StringUtils.equals(aq.getUsesRules(),"Y")){
 	usesRules=true;
 }
 
@@ -155,18 +156,18 @@ if("Y".equals(aq.getUsesRules())){
                 <b>Hints:</b><br>
                 <ol>
                     <li><b>Header and SQL</b> <br>
-                        The header contains query properties like name, group, description, target database etc. while
+                        The header contains query properties like name, group, description, datasource etc. while
                         the SQL source is an SQL query that may contain
 						parameters or xml-style tags to create dynamic queries.
                     </li>
                     <li><b>Parameters</b><br>
                         Before executing a query, users will be prompted to enter values for query parameters.
-						The values
-						could be <i> varchar</i>,  <i> integer</i>,  <i> number</i>,  <i> date</i>
-						or values picked from a pop-up list. The latter can be a single value or a pool of values.
+						The values entered
+						could be of different data types e.g. <i> varchar</i>,  <i> integer</i>,  <i> number</i>,  <i> date</i>
+						or values could be picked from a pop-up list. The latter can be a single value or a set of values.
 						There are two types of parameters:
-						<i>inline</i> are #labels# in the SQL code;
-						<i>multi</i> are parameters (added at runtime) that match a pool of values (i.e. the string
+						<i>inline</i> are used to replace single values in the SQL code;
+						<i>multi</i> are used to replace a set of values in the SQL code; (i.e. the string
 						 '<i>table_column in (&lt;list of  selectedvalues&gt;)</i>' is added to the SQL just before executing
 						 the query).
                     </li>

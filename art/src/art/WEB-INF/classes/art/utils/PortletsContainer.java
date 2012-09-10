@@ -30,6 +30,7 @@ import art.servlets.ArtDBCP;
 import java.util.*;
 import java.sql.*;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,7 +218,7 @@ public class PortletsContainer {
 		String value = XmlParser.getXmlElementValue(portletXml, "ONLOAD"); 
 		
 		boolean executeOnLoad=true;
-		if(value!=null && value.toLowerCase().equals("false")){
+		if(StringUtils.equalsIgnoreCase(value,"false")){
 			executeOnLoad=false;
 		}
 		

@@ -1,4 +1,5 @@
-<%@ page import="java.sql.*,java.io.File,art.utils.*,art.servlets.ArtDBCP,org.apache.commons.lang.StringUtils;" %>
+<%@ page import="java.sql.*,java.io.File,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdminPlain.jsp" %>
 
 <%
@@ -83,10 +84,10 @@ if(!propsFile.exists()){
     css_skin               = ap.getProp("css_skin");
     
     //enable smooth upgrade from 2.1 to 2.2+
-    if("/art/css/art.css".equals(css_skin)){
+    if(StringUtils.equals(css_skin,"/art/css/art.css")){
         css_skin="/css/art.css";
     }
-    if("/art/images/artminiicon.png".equals(bottom_logo)){
+    if(StringUtils.equals(bottom_logo,"/art/images/artminiicon.png")){
         bottom_logo="/images/artminiicon.png";
     }
     

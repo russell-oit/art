@@ -528,7 +528,7 @@ function setCacheDatasources(s) {
 				%>
 				s.options[<%=i%>] = new Option("<%=dsName%>","<%=key%>");
 				<%
-				if (output != null && output.equals(""+key) ) {
+				if (StringUtils.equals(output,""+key) ) {
 					%> s.selectedIndex = <%=i%> <%
 				}
 				i++;
@@ -838,7 +838,7 @@ function onClickSaveSchedule(t){
 	  <tr>
        <td class="data" colspan="4"> <%=messages.getString("allowJobSharing")%>
            <select name="allowSharing" id="allowSharing" onChange="javascript:onChangeAllowSharing(this);">
-		   <% if("Y".equals(job.getAllowSharing())){ %>
+		   <% if(StringUtils.equals(job.getAllowSharing(),"Y")){ %>
 	      <option value="N"> No</option>
 	      <option value="Y" selected> Yes </option>
 		  <% } else { %>
@@ -849,8 +849,8 @@ function onClickSaveSchedule(t){
        &nbsp;&nbsp;
 	   <%=messages.getString("allowJobSplitting")%>
             <select name="allowSplitting" id="allowSplitting" >
-		   <% if("Y".equals(job.getAllowSharing())){
-		    if("Y".equals(job.getAllowSplitting())){ %>
+		   <% if(StringUtils.equals(job.getAllowSharing(),"Y")){
+		    if(StringUtils.equals(job.getAllowSplitting(),"Y")){ %>
 	      <option value="N"> No</option>
 	      <option value="Y" selected> Yes </option>
 		  <% } else { %>

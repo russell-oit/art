@@ -366,7 +366,7 @@ tinyMCE.init({
 					}
 					%>
                 </select>
-				<%=(isOnlyListGroupAvailable?"<small>With the LOV group you can only create List of Values for query parameters,<br> you need another group to create real queries/objects</small>":"")%>
+				<%=(isOnlyListGroupAvailable?"<small>With the LOV group you can only create List of Values for query parameters,<br> you need another group to create real queries</small>":"")%>
             </td>
         </tr>
         <tr><td class="data"> Name </td>

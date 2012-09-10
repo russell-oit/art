@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.sourceforge.ajaxtags.servlets.BaseAjaxServlet;
 import net.sourceforge.ajaxtags.xml.AjaxXmlBuilder;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,7 +178,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 
         int groupId = -1;
         String group = request.getParameter("groupId");
-        if (group != null && group.length() > 0) {
+        if (StringUtils.length(group) > 0) {
             groupId = Integer.parseInt(group);
         }
 
@@ -222,7 +223,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
                         + "WHERE  AQ.QUERY_GROUP_ID = ? "
                         + "ORDER BY AQ.NAME";
             } else {
-                // get only queries with Group and target Database matching the "junior" admin priviledges
+                // get only queries with Group and datasource matching the "junior" admin priviledges
                 sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
                         + " FROM ART_QUERIES AQ, "
                         + "      ART_ADMIN_PRIVILEGES APG, "
@@ -276,7 +277,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 
         int queryId = Integer.parseInt(request.getParameter("queryId"));
 
-        //use left outer join as dashboards, text objects etc don't have a target database
+        //use left outer join as dashboards, text objects etc don't have a datasource
         sqlQuery = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
                 + " aq.DESCRIPTION, aq.QUERY_TYPE, aq.UPDATE_DATE, "
                 + " ad.NAME AS DATABASE_NAME "
@@ -342,7 +343,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             builder.append(messages.getString("objectId") + " <b>" + rs.getInt("QUERY_ID") + "</b> <br>");
             builder.append(messages.getString("objectName") + " <b>" + rs.getString("NAME") + "</b> ");
             String shortDescription=rs.getString("SHORT_DESCRIPTION");
-            if(shortDescription!=null && shortDescription.trim().length()>0){
+            if(StringUtils.length(shortDescription)>0){
                 builder.append(":: <b>" + shortDescription + "</b>");
             }
             builder.append("<br>");
@@ -350,7 +351,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             builder.append(messages.getString("objectType") + " <b>" + type + "</b><br>");
             builder.append(messages.getString("updateDate") + " <b>" + rs.getString("UPDATE_DATE") + "</b><br>");
 
-            // dashboards, text objects, mondrian via xmla and ssas via xmla don't have a target database
+            // dashboards, text objects, mondrian via xmla and ssas via xmla don't have a datasource
             if (typeId != 111 && typeId != 110 && typeId != 113 && typeId != 114) {                 
                 builder.append(messages.getString("targetDatasource") + " <b>" + rs.getString("DATABASE_NAME") + "</b><br>");
             }

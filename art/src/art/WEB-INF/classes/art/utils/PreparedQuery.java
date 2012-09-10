@@ -58,7 +58,7 @@ public class PreparedQuery {
 	boolean useRules = false;
 	boolean isLov = false;
 	PreparedStatement psQuery; // this is the ps object produced by this query
-	Connection connQuery; // this is the connection to the target database for this query
+	Connection connQuery; // this is the connection to the datasource for this query
 	Connection conn; // connection to the art repository
 	String preparedStatementSQL; //final sql statement. if query has inline parameters, sql will still have ?
 	String queryStatus;
@@ -293,8 +293,8 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Set the parameters in the prepared statement. After this method,
-	 * the prepared statement is ready to be executed on the target database
+	 * Set the parameters in the prepared statement. After this method, the
+	 * prepared statement is ready to be executed on the target database
 	 *
 	 * @param ps
 	 * @throws ArtException
@@ -303,7 +303,7 @@ public class PreparedQuery {
 
 		// Apply Inline Parameters to the prepared statement		 
 		try {
-			applyInlineParameters(ps); 
+			applyInlineParameters(ps);
 		} catch (Exception e) {
 			logger.error("Error", e);
 			throw new ArtException("<p>Error applying inline parameters to the query. Please contact the ART administrator. <br>Details:<code> " + e + "</code></p>");
@@ -905,7 +905,7 @@ public class PreparedQuery {
 				// the tmpSb returned by applyRule begins with a ',' so we need a .substring(1)
 
 				String values = tmpSb.toString();
-				if (values == null || (values != null && values.length() == 0)) {
+				if (StringUtils.length(values) == 0) {
 					//user doesn't have values set for at least one rule that the query uses. values needed for all rules
 					successfullyApplied = false;
 					break;
@@ -1097,21 +1097,21 @@ public class PreparedQuery {
 
 		}
 	}
-	
+
 	/**
 	 * Dynamic SQL is parsed, evaluated and the sb is modified according
 	 */
 	private void applyDynamicSQL(StringBuilder sb) throws ArtException {
-		applyDynamicSQL(sb,false);		
+		applyDynamicSQL(sb, false);
 	}
 
 	/**
 	 * Dynamic SQL is parsed, evaluated and the sb is modified according
 	 */
-	private void applyDynamicSQL(StringBuilder sb, boolean useFilterIfText) throws ArtException {			
+	private void applyDynamicSQL(StringBuilder sb, boolean useFilterIfText) throws ArtException {
 		String element, xmlText, exp1, exp2, op, tmp;
 		XmlInfo xinfo;
-					
+
 
 		/*
 		 * // <PROPS> element element= "PROPS"; xinfo =
@@ -1157,11 +1157,11 @@ public class PreparedQuery {
 			if (op == null) {
 				op = "";
 			}
-			
+
 			//expression and expression values may be different
-			String exp1Value=exp1;
-			String exp2Value=exp2;
-			String opValue=op;
+			String exp1Value = exp1;
+			String exp2Value = exp2;
+			String opValue = op;
 
 			//get inline params
 			if (inlineParams != null) {
@@ -1179,17 +1179,17 @@ public class PreparedQuery {
 				if (op.startsWith("#") && op.endsWith("#") && op.length() > 2) {
 					opValue = inlineParams.get(op.substring(1, op.length() - 1));
 				}
-			}	
-			
+			}
+
 			//enable use of same lov for chained and non-chained parameters			
-			if(StringUtils.equals(exp1, "#filter#") && (StringUtils.equalsIgnoreCase(op, "is not null") || StringUtils.equalsIgnoreCase(op, "is not blank"))){
-				if(useFilterIfText){
-					exp1Value="#filter#"; //any string. just so that if condition is returned
-				} else if(!useFilterIfText && inlineParams == null){
-					exp1Value=""; //empty string. so that else value is returned					
+			if (StringUtils.equals(exp1, "#filter#") && (StringUtils.equalsIgnoreCase(op, "is not null") || StringUtils.equalsIgnoreCase(op, "is not blank"))) {
+				if (useFilterIfText) {
+					exp1Value = "#filter#"; //any string. just so that if condition is returned
+				} else if (!useFilterIfText && inlineParams == null) {
+					exp1Value = ""; //empty string. so that else value is returned					
 				}
-			}				
-			
+			}
+
 			if (evaluateIF(exp1Value, opValue, exp2Value)) {
 				tmp = XmlParser.getXmlElementValue(xmlText, "TEXT");
 			} else {
@@ -1459,9 +1459,8 @@ public class PreparedQuery {
 					paramLabel = param.getParamLabel();
 					String paramDataType = param.getParamDataType();
 
-					//check if parameter is yet to be replaced
-					int foundPosition = querySql.toLowerCase().indexOf("#" + paramLabel.toLowerCase() + "#"); //use all lowercase to make find case insensitive
-					if (foundPosition != -1) {
+					//check if parameter is yet to be replaced					
+					if (StringUtils.containsIgnoreCase(querySql,"#"+paramLabel+"#")) {
 						//replace parameter with all possible values
 						List<String> finalValuesList = getAllParameterValues(paramLabel); //return all values from the parameter's lov query
 
@@ -1636,8 +1635,8 @@ public class PreparedQuery {
 
 			//build complete sql string for lov query
 			int lovQueryType = 0;
-			int chainedParamPosition=0;
-			int chainedValuePosition=0;
+			int chainedParamPosition = 0;
+			int chainedValuePosition = 0;
 			while (rsLovQuery.next()) {
 				queryBuilder.append(rsLovQuery.getString("SOURCE_INFO"));
 				databaseId = rsLovQuery.getInt("DATABASE_ID");
@@ -1659,17 +1658,20 @@ public class PreparedQuery {
 					}
 				} else {
 					//dynamic lov
+					
+					//apply tags. in case they exist
+					applyTags(queryBuilder);
 										
 					//apply dynamic sql. in case same lov used for chained and no-chained parameters
-					try{
-						applyDynamicSQL(queryBuilder,true); //return if text if #filter# is not null is in query
-					} catch(ArtException e){
-						logger.error("Error",e);
+					try {
+						applyDynamicSQL(queryBuilder, true); //return if text if #filter# is not null is in query
+					} catch (ArtException e) {
+						logger.error("Error", e);
 					}
-					
+
 					//perform more replacements
 					String lovSql = queryBuilder.toString();
- 
+
 					//replace rules if the label exists, with dummy condition. so that lov query executes without error
 					lovSql = lovSql.replaceAll("(?i)#rules#", "1=1");
 
@@ -1691,6 +1693,7 @@ public class PreparedQuery {
 							String filterValue = inlineParams.get(filterLabel);
 							lovSql = lovSql.replaceAll("(?i)#filter#", filterValue);
 						} else if (StringUtils.startsWith(valueParamHtmlName, "M_")) {
+							//filter value can actually never come from multi parameter. limitation of ajaxtags
 							ArtQueryParam filterParam = htmlParams.get(valueParamHtmlName);
 							if (filterParam != null) {
 								filterLabel = filterParam.getParamLabel();
@@ -1762,32 +1765,25 @@ public class PreparedQuery {
 		return finalValuesList;
 	}
 
-	private void replaceTag(StringBuilder sb, String fromText, String toText) {
-		int startPos = sb.toString().indexOf(fromText);
-		int fromTextLength = fromText.length();
-		int maxCount = 255; // just to avoid infinite loops...
-
-		while (startPos != -1 && maxCount-- > 0) {
-			sb.replace(startPos, startPos + fromTextLength, " '" + toText + "' ");
-			startPos = sb.toString().indexOf(fromText);
-
-			logger.debug("Tag found. Sql query now is:\n{}", sb);
-		}
-
-	}
-
+	
 	/**
 	 * Replace :TAGS
 	 */
 	private void applyTags(StringBuilder sb) {
+		logger.debug("applyTags");
+		
 		/*
 		 * Update query :TAG
 		 */
 
+		String querySql = sb.toString();
+
+
 		/*
 		 * :USERNAME substitution with logged username
 		 */
-		replaceTag(sb, ":USERNAME", username);
+		querySql = querySql.replaceAll("(?i):username", "'" + username + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+
 
 		/*
 		 * :DATE substitution with current date in 'YYYY-MM-DD' format
@@ -1802,8 +1798,14 @@ public class PreparedQuery {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		String time = timeFormatter.format(today);
 
-		replaceTag(sb, ":DATE", date);
-		replaceTag(sb, ":TIME", time);
+		querySql = querySql.replaceAll("(?i):date", "'" + date + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+		querySql = querySql.replaceAll("(?i):time", "'" + time + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+
+		
+		//update sb with new sql
+		sb.replace(0, sb.length(), querySql);
+		
+		logger.debug("Sql query now is:\n{}", sb);
 
 
 		/*
@@ -1821,13 +1823,13 @@ public class PreparedQuery {
 
 	/**
 	 * Called by the prepareStatement() method. The prepared statement is
-	 * "fulfilled" with the parameters 
+	 * "fulfilled" with the parameters
 	 */
 	private void applyInlineParameters(PreparedStatement ps) throws SQLException, ArtException {
 
 		logger.debug("applyInlineParameters");
 
-		if (treeInline != null && !treeInline.isEmpty()) { 
+		if (treeInline != null && !treeInline.isEmpty()) {
 
 			Iterator paramNames = treeInline.values().iterator(); //contains parameters which were actually found and replaced in the sql source in the order they were found
 			int i = 0; //parameter index/order of appearance
@@ -1893,7 +1895,7 @@ public class PreparedQuery {
 
 			}
 
-		} 
+		}
 	}
 
 	/**

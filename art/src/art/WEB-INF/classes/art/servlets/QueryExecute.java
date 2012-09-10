@@ -52,6 +52,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -444,8 +445,7 @@ public class QueryExecute extends HttpServlet {
             int queryId=0;
 			int queryGroupId;
 			int queryType;  
-            String queryName;
-            int targetDatasourceId;
+            String queryName;            
             String xaxisLabel;
             String yaxisLabel;
             String graphOptions;
@@ -466,8 +466,7 @@ public class QueryExecute extends HttpServlet {
                 aq.create(conn, queryId);
 
                 queryName = aq.getName();
-                queryGroupId = aq.getGroupId();
-                targetDatasourceId = aq.getDatabaseId();
+                queryGroupId = aq.getGroupId();                
                 queryType = aq.getQueryType();
                 xaxisLabel = aq.getXaxisLabel();
                 yaxisLabel = aq.getYaxisLabel();
@@ -539,7 +538,7 @@ public class QueryExecute extends HttpServlet {
                     String contentType = o.getContentType();
                     response.setContentType(contentType);
                     // initialize the output stream - this is here
-                    // this need to appear after the response.setContent type!!!
+                    // this need to appear after response.setContent!!!
                     out = response.getWriter();
 
                     // the view mode drives if this servlet uses the std header&footer,
@@ -719,10 +718,14 @@ public class QueryExecute extends HttpServlet {
                         }
                     }
 
-                    // JavaScript code to write on status bar
+                    // JavaScript code to write status information
                     if (isFlushEnabled) {
                         out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
-                        out.println("<script language=\"JAVASCRIPT\">writeInfo(\"<b>" + queryName + "</b> :: " + ArtDBCP.getDataSource(targetDatasourceId).getName() + " :: " + startTimeString + "\");</script>");
+						String description="";
+						if(StringUtils.length(shortDescription)>0){
+							description=" ::" + shortDescription;
+						}
+                        out.println("<script language=\"JAVASCRIPT\">writeInfo(\"<b>" + queryName + "</b>" + description + " :: " + startTimeString + "\");</script>");
                         out.flush();
                     }
                     probe = 90;

@@ -1,4 +1,6 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP,art.params.*;" %>
+<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP,art.params.*" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <%@ include file ="header.jsp" %>
@@ -172,11 +174,11 @@ boolean hasParams=false;
                         </SELECT>
                         <br>
                          <% if(hasParams){
-                             if("N".equals(showParameters)) { %>
+                             if(StringUtils.equals(showParameters,"N")) { %>
                                 <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
-                            <%} else if("Y".equals(showParameters)) { %>
+                            <%} else if(StringUtils.equals(showParameters,"Y")) { %>
                                 <input type="checkbox" name="_showParams" checked> <%=messages.getString("showParams")%>
-                            <%} else if("A".equals(showParameters)) { %>
+                            <%} else if(StringUtils.equals(showParameters,"A")) { %>
                                 <input type="hidden" name="_showParams" value="true"> 
                             <%}
                           }                        
@@ -189,11 +191,11 @@ boolean hasParams=false;
                         %> <input type="hidden" name="viewMode" VALUE="html">
                         
                           <% if(hasParams){
-                             if("N".equals(showParameters)) { %>
+                             if(StringUtils.equals(showParameters,"N")) { %>
                                 <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
-                            <%} else if("Y".equals(showParameters)) { %>
+                            <%} else if(StringUtils.equals(showParameters,"Y")) { %>
                                 <input type="checkbox" name="_showParams" checked> <%=messages.getString("showParams")%>
-                            <%} else if("A".equals(showParameters)) { %>
+                            <%} else if(StringUtils.equals(showParameters,"A")) { %>
                                 <input type="hidden" name="_showParams" value="true"> 
                             <%}
                           }                        

@@ -1,4 +1,6 @@
 <%@ page import="java.io.*, javax.naming.*, art.servlets.ArtDBCP, java.util.*" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+
 <%  request.setCharacterEncoding("UTF-8"); %>
 <%
   /****************************************************************
@@ -29,16 +31,16 @@ if (username == null || password == null || password.equals("") ) {
    request.setAttribute("message",messages.getString("invalidAccount"));
 } else {
 			
-	if("simple".equals(ldapAuthType)){
+	if(StringUtils.equals(ldapAuthType,"simple")){
 		bindUsername="uid=" + username + "," + ldapUsersParentDn;			
 	} else {
 		bindUsername=username;
 	}
 	
-	if("simple".equals(ldapAuthType) || "ad-simple".equals(ldapAuthType)){
+	if(StringUtils.equals(ldapAuthType,"simple") || StringUtils.equals(ldapAuthType,"ad-simple")){
 		bindAuthType="simple";
 	}
-	if("digestmd5".equals(ldapAuthType) || "ad-digestmd5".equals(ldapAuthType)){
+	if(StringUtils.equals(ldapAuthType,"digestmd5") || StringUtils.equals(ldapAuthType,"ad-digestmd5")){
 		bindAuthType="DIGEST-MD5";
 	}
 	
@@ -54,7 +56,7 @@ if (username == null || password == null || password.equals("") ) {
 	   authEnv.put(Context.SECURITY_PRINCIPAL, bindUsername);
 	   authEnv.put(Context.SECURITY_CREDENTIALS, password);
 	   
-	   if(ldapRealm.length()>0 && ("digestmd5".equals(ldapAuthType) || "ad-digestmd5".equals(ldapAuthType))){
+	   if(ldapRealm.length()>0 && (StringUtils.equals(ldapAuthType,"digestmd5") || StringUtils.equals(ldapAuthType,"ad-digestmd5"))){
 		authEnv.put("java.naming.security.sasl.realm", ldapRealm);
 		}
 		

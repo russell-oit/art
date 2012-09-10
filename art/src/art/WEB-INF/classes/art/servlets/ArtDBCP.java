@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class that initializes target database connections and holds global
+ * Class that initializes datasource connections and holds global
  * variables.
  *
  * @author Enrico Liboni
@@ -189,11 +189,11 @@ public class ArtDBCP extends HttpServlet {
 		defaultMaxRows = Integer.parseInt(ctx.getInitParameter("defaultMaxRows"));
 		maxRunningQueries = Integer.parseInt(ctx.getInitParameter("maxNumberOfRunningQueries"));
 
-		if ("light".equals(ctx.getInitParameter("versionType"))) {
+		if (StringUtils.equals(ctx.getInitParameter("versionType"),"light")) {
 			artFullVersion = false;
 		}
 
-		if ("false".equals(ctx.getInitParameter("enableJobScheduling"))) {
+		if (StringUtils.equals(ctx.getInitParameter("enableJobScheduling"),"false")) {
 			schedulingEnabled = false;
 		}
 
@@ -336,7 +336,7 @@ public class ArtDBCP extends HttpServlet {
 		artdb.setLogToStandardOutput(true);
 		artdb.setMaxConnections(poolMaxConnections);
 		artdb.setDriver(art_jdbc_driver);
-		if (art_testsql != null && art_testsql.length() > 3) {
+		if (StringUtils.length(art_testsql) > 3) {
 			artdb.setTestSQL(art_testsql);
 		}
 
@@ -380,7 +380,7 @@ public class ArtDBCP extends HttpServlet {
 							pwd = Encrypter.decrypt(pwd.substring(2));
 						}
 						String testSQL = rs.getString("TEST_SQL");
-						if (testSQL != null && testSQL.length() > 3) {
+						if (StringUtils.length(testSQL) > 3) {
 							ds.setTestSQL(testSQL);
 						}
 						ds.setPassword(pwd);
@@ -400,9 +400,9 @@ public class ArtDBCP extends HttpServlet {
 							// (since ART db one has been already registered by the JVM)
 							try {
 								Class.forName(dbDriver).newInstance();
-								logger.info("Target Database JDBC Driver Registered: {}", dbDriver);
+								logger.info("Datasource JDBC Driver Registered: {}", dbDriver);
 							} catch (Exception e) {
-								logger.error("Error while registering Target Database Driver: {}", dbDriver, e);
+								logger.error("Error while registering Datasource Driver: {}", dbDriver, e);
 							}
 						}
 					}
@@ -496,7 +496,7 @@ public class ArtDBCP extends HttpServlet {
 		java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
 		Connection logConn = null;
 
-		if (message != null && message.length() > 4000) {
+		if (StringUtils.length(message) > 4000) {
 			message = message.substring(0, 4000);
 		}
 
@@ -543,7 +543,7 @@ public class ArtDBCP extends HttpServlet {
 		java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
 		Connection logConn = null;
 
-		if (message != null && message.length() > 4000) {
+		if (StringUtils.length(message) > 4000) {
 			message = message.substring(0, 4000);
 		}
 
@@ -591,11 +591,11 @@ public class ArtDBCP extends HttpServlet {
 	}
 
 	/**
-	 * Return a connection to the target database with a given ID from the
+	 * Return a connection to the datasource with a given ID from the
 	 * connection pool.
 	 *
-	 * @param i id of target database. 0 = ART repository.
-	 * @return connection to target database or null if connection doesn't exist
+	 * @param i id of datasource. 0 = ART repository.
+	 * @return connection to datasource or null if connection doesn't exist
 	 */
 	public static Connection getConnection(int i) {
 		Connection conn = null;
@@ -640,7 +640,7 @@ public class ArtDBCP extends HttpServlet {
 					for (Integer key : dataSources.keySet()) {
 						DataSource ds = dataSources.get(key);
 						if (ds != null) {
-							if (name != null && name.equalsIgnoreCase(ds.getName())) {
+							if (StringUtils.equalsIgnoreCase(name,ds.getName())) {
 								//this is the required datasource. get connection and exit loop
 								conn = ds.getConnection();
 								break;

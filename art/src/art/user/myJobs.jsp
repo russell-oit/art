@@ -1,4 +1,4 @@
-<%@page import="org.apache.commons.lang.StringUtils"%>
+<%@ page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="java.util.*,art.utils.*,art.servlets.ArtDBCP,org.quartz.*,java.text.*" %>
 <%@ page import="static org.quartz.JobBuilder.*" %>
 <%@ page import="static org.quartz.TriggerBuilder.*" %>
@@ -78,13 +78,11 @@ owner=request.getParameter("OWNER");
 	org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
 
 	boolean enableJobScheduling=true;
-	ServletContext ctx   = getServletConfig().getServletContext();
+	ServletContext ctx = getServletConfig().getServletContext();
 
-	if (ctx.getInitParameter("enableJobScheduling")!= null &&
-			ctx.getInitParameter("enableJobScheduling").equals("false") ) {
-		enableJobScheduling    = false;
+	if(StringUtils.equals(ctx.getInitParameter("enableJobScheduling"),"false")){
+		enableJobScheduling = false;
 	}
-		   
   
     if ( action.equals("run") ) { 
 	

@@ -1,6 +1,7 @@
-<%@page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,java.text.SimpleDateFormat,art.utils.*" %>
-<%@page import="org.jfree.chart.*,org.apache.commons.beanutils.*,org.apache.commons.lang.StringUtils" %>
-<%@page import="java.awt.Font" %>
+<%@ page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,java.text.SimpleDateFormat,art.utils.*" %>
+<%@ page import="org.jfree.chart.*,org.apache.commons.beanutils.*,java.awt.Font" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+
 <%@taglib uri='/WEB-INF/cewolf.tld' prefix='cewolf' %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -113,7 +114,7 @@
 	String target="_blank"; //default to showing links in new window
 	String openInNewWindow=graph.getOpenDrilldownInNewWindow();
 	if(hasDrilldown){
-		if("Y".equals(openInNewWindow) || openInNewWindow==null){
+		if(StringUtils.equals(openInNewWindow,"Y") || openInNewWindow==null){
 			//open in new window
 			target="_blank";
 		} else {

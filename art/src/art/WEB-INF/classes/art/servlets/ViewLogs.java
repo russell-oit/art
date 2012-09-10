@@ -34,6 +34,7 @@ public class ViewLogs extends HttpServlet {
 	HTMLLayout layout;
 	static String PATTERN = "%d%level%logger{30}%msg"; //"%d%thread%level%logger{25}%mdc{userid}%msg";
 	private final String CYCLIC_BUFFER_APPENDER_NAME = "CYCLIC"; //name of cyclic appender in logback.xml
+	UrlCssBuilder cssBuilder;
 
 	@Override
 	public void init() throws ServletException {
@@ -75,10 +76,12 @@ public class ViewLogs extends HttpServlet {
 
 		layout = new HTMLLayout();
 		layout.setContext(context);
-
 		layout.setPattern(PATTERN);
 		layout.setTitle("ART");
 		layout.start();
+		
+		cssBuilder = new UrlCssBuilder();
+		layout.setCssBuilder(cssBuilder); //cssbuilder must be set before call to layout.getfileheader
 	}
 
 	public boolean isResetResistant() {
@@ -122,15 +125,12 @@ public class ViewLogs extends HttpServlet {
 			reacquireCBA();
 			PrintWriter out = response.getWriter();
 			try {
-				UrlCssBuilder cssBuilder = new UrlCssBuilder();
-				cssBuilder.setUrl(request.getContextPath() + "/css/logback.css");
-				layout.setCssBuilder(cssBuilder);
-
-				out.append(layout.getFileHeader());
-				String localRef = request.getContextPath();
-				out.append("<h2>Last logging events</h2>");
+				String contextPath = request.getContextPath();
+				cssBuilder.setUrl(contextPath + "/css/logback.css");				
+				out.append(layout.getFileHeader());				
+				out.append("<h2>Recent Logging Events</h2>");
 				out.append("<table class=\"nav\">");
-				out.append("<tr><td class=\"sexy\"><a href=\"" + localRef
+				out.append("<tr><td class=\"sexy\"><a href=\"" + contextPath
 						+ "/user/showGroups.jsp\" class=\"sexy\">Main Page</a></td></tr>");
 				out.append("<tr><td class=\"sexy\"><a href=\"#bottom\" class=\"sexy\">Jump to bottom</a></td></tr>");
 				out.append("</table>");

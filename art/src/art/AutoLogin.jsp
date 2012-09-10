@@ -1,4 +1,6 @@
-<%@ page import="art.servlets.ArtDBCP;" %>
+<%@ page import="art.servlets.ArtDBCP" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page pageEncoding="UTF-8" %>
 
@@ -10,7 +12,7 @@
   String username = request.getRemoteUser();
   
   String message  = (String) request.getAttribute("message");
-  if (username !=null && username.length() > 0 && message == null) {     
+  if (StringUtils.length(username) > 0 && message == null) {     
      //user authenticated     
      session.setAttribute("username", username);
      
