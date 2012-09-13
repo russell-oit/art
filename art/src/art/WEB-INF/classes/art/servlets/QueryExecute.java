@@ -723,7 +723,7 @@ public class QueryExecute extends HttpServlet {
                         out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
 						String description="";
 						if(StringUtils.length(shortDescription)>0){
-							description=" ::" + shortDescription;
+							description=" :: " + shortDescription;
 						}
                         out.println("<script language=\"JAVASCRIPT\">writeInfo(\"<b>" + queryName + "</b>" + description + " :: " + startTimeString + "\");</script>");
                         out.flush();
