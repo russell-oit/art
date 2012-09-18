@@ -370,7 +370,7 @@ tinyMCE.init({
             </td>
         </tr>
         <tr><td class="data"> Name </td>
-            <td class="data"> <input type="text" name="NAME" size="25" maxlength="25" value="<%=aq.getName()%>"> </td>
+            <td class="data"> <input type="text" name="NAME" size="25" maxlength="50" value="<%=aq.getName()%>"> </td>
         </tr>
 
         <tr><td class="data"> Status </td>

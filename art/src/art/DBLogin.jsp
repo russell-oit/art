@@ -33,15 +33,15 @@
                 </c:if>
 
                 <tr>
-                    <td vAlign="center" align="right" width="50%"><%=messages.getString("username")%></td>
-                    <td vAlign="center" align="left" width="50%">
-                        <input id="username" maxLength="15" size="16" name="dbusername">
+                    <td vAlign="center" align="right" width="30%"><%=messages.getString("username")%></td>
+                    <td vAlign="center" align="left" width="70%">
+                        <input id="username" maxLength="30" size="25" name="dbusername">
                     </td>
                 </tr>
                 <tr>
-                    <td vAlign="center" align="right" width="50%"><%=messages.getString("password")%></td>
-                    <td vAlign="center" align="left" width="50%">
-                        <input id="password" type="password" maxLength="40" size="16" name="dbpassword">
+                    <td vAlign="center" align="right" width="30%"><%=messages.getString("password")%></td>
+                    <td vAlign="center" align="left" width="70%">
+                        <input id="password" type="password" maxLength="40" size="25" name="dbpassword">
                     </td>
                 </tr>
                 <tr>

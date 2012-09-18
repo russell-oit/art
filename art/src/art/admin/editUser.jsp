@@ -69,7 +69,7 @@ username=ue.getUsername();
 				edit="readonly";
 			}
 			%>
-			<td class="data"> <input type="text" name="USERNAME" value="<%=username%>" size="25" maxlength="15" <%=edit%> </td>
+			<td class="data"> <input type="text" name="USERNAME" value="<%=username%>" size="25" maxlength="30" <%=edit%> </td>
 		</tr>
 
 		<tr><td class="data"> Password </td>
