@@ -1407,10 +1407,10 @@ public class PreparedQuery {
 				String currentValue;
 				String escapedValue;
 				int parameterNumber;
-				String paramType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
+				String paramDataType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
 
 				ArtQueryParam param = htmlParams.get(htmlName);
-				paramType = param.getParamDataType();
+				paramDataType = param.getParamDataType();
 
 				//build string of values to go into IN clause of sql
 				for (parameterNumber = 0; parameterNumber < paramValues.length; parameterNumber++) {
@@ -1418,7 +1418,7 @@ public class PreparedQuery {
 
 					//don't quote numbers. some databases won't do implicit conversion where column is numeric
 					//confirm that they are numbers to avoid sql injection                        
-					if (StringUtils.equals(paramType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
+					if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
 						escapedValuesList.add(currentValue);
 					} else {
 						//escape and quote non-numbers
@@ -1704,9 +1704,9 @@ public class PreparedQuery {
 								String currentValue;
 								String escapedValue;
 								int parameterNumber;
-								String paramType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
+								String paramDataType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
 
-								paramType = param.getParamDataType();
+								paramDataType = param.getParamDataType();
 
 								//build string of values to go into IN clause of sql
 								for (parameterNumber = 0; parameterNumber < filterValues.length; parameterNumber++) {
@@ -1714,7 +1714,7 @@ public class PreparedQuery {
 
 									//don't quote numbers. some databases won't do implicit conversion where column is numeric
 									//confirm that they are numbers to avoid sql injection                        
-									if (StringUtils.equals(paramType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
+									if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
 										escapedValuesList.add(currentValue);
 									} else {
 										//escape and quote non-numbers
@@ -1885,8 +1885,7 @@ public class PreparedQuery {
 						ps.setTimestamp(i, new java.sql.Timestamp(dateValue.getTime()));
 					}
 					jasperInlineParams.put(paramName, dateValue);
-				} else {
-					//VARCHAR, TEXT
+				} else if (paramDataType.equals("VARCHAR") || paramDataType.equals("TEXT")){					
 					if (ps != null) {
 						ps.setString(i, paramValue);
 					}

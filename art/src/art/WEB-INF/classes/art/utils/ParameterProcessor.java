@@ -120,10 +120,11 @@ public class ParameterProcessor {
 					logger.debug("Adding inline parameter: {}", htmlName);
 
 					inlineParams.put(label, paramValue);
+					param.setParamValue(paramValue);
+					
 					if (showParams) {
 						//populate display params map
-						param.setParamValue(paramValue);
-
+					
 						//for lov parameters, show both parameter value and friendly value
 						if (param.usesLov()) {
 							//get all possible lov values.							
@@ -170,10 +171,11 @@ public class ParameterProcessor {
 							paramValues = lines;
 						}
 						multiParams.put(label, paramValues);
+						param.setParamValue(paramValues);
+						
 						if (showParams) {
 							//populate display params map                                                                                       
-							param.setParamValue(paramValues);
-
+							
 							//for lov parameters, show both parameter value and friendly value
 							if (param.usesLov()) {
 								//get all possible lov values.								

@@ -1,19 +1,19 @@
 package art.output;
 
 import art.servlets.ArtDBCP;
-import art.utils.ArtJxlsReportManager;
-import art.utils.ArtJxlsResultSetCollection;
-import art.utils.ArtQuery;
-import art.utils.PreparedQuery;
+import art.utils.*;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import net.sf.jxls.report.ReportManager;
 import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,7 @@ public class jxlsOutput {
      * @param inlineParams inline parameters
      * @param multiParams multi parameters
      */
-    public void createFile(ResultSet rs, int queryId, Map<String,String> inlineParams, Map<String,String[]> multiParams) {
+    public void createFile(ResultSet rs, int queryId, Map<String,String> inlineParams, Map<String,String[]> multiParams,Map<String, ArtQueryParam> htmlParams) {
         Connection connQuery = null;
         Connection connArt = null;
 
@@ -123,7 +123,36 @@ public class jxlsOutput {
 
             if (rs == null) {
                 //pass connection to template query
-                connQuery = ArtDBCP.getConnection(datasourceId);
+				
+				//use dynamic datasource if so configured
+				boolean useDynamicDatasource=false;
+				
+				Iterator it = htmlParams.entrySet().iterator();
+				while(it.hasNext()){
+					Map.Entry entry = (Map.Entry) it.next();
+					ArtQueryParam param = (ArtQueryParam) entry.getValue();
+					String paramDataType=param.getParamDataType();
+										
+					if(StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")){
+						useDynamicDatasource=true;
+						
+						//get dynamic connection to use
+						String paramValue=(String)param.getParamValue();
+						if(NumberUtils.isNumber(paramValue)){
+							//use datasource id
+							connQuery=ArtDBCP.getConnection(Integer.parseInt(paramValue));
+						} else {
+							//use datasource name
+							connQuery=ArtDBCP.getConnection(paramValue);
+						}
+						break;
+					}
+				}
+				
+                if(!useDynamicDatasource){
+					//not using dynamic datasource. use datasource defined on the query
+					connQuery = ArtDBCP.getConnection(datasourceId);
+				}
                 ReportManager reportManager = new ArtJxlsReportManager(connQuery);
                 beans.put("rm", reportManager);
             } else {

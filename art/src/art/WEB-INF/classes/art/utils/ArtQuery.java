@@ -1290,25 +1290,20 @@ public class ArtQuery {
                 // syntax is [param_type]_[param position]
                 // html names need to start with a letter, thus param_type is P or M or B
 
-                String paramHtmlId, paramHtmlName;
-                String paramType;
-
+                String paramHtmlId;
+				String paramHtmlName="";
+				
+                String paramType=rs.getString("PARAM_TYPE");
                 paramHtmlId = "P_" + rs.getString("QUERY_ID") + "_" + paramPosition;
-                if (rs.getString("PARAM_TYPE").equals("I")) { // inline
-                    paramHtmlName = "P_" + rs.getString("PARAM_LABEL"); // use P_ to maintain compatibility with params passed via URL to QueryExecute
-                    paramType = "INLINE";
-                } else if (rs.getString("PARAM_TYPE").equals("M")) { // multi                    
-                    paramHtmlName = "M_" + rs.getString("PARAM_LABEL"); //logic in parameterprocessor and preparedquery will prevent sql injection
-                    paramType = "MULTI";
-                } else { // obsolete bind param for backward compatibility
-                    paramHtmlName = "P" + rs.getString("CHAINED_PARAM_POSITION");
-                    isOldBind = true;
-                    paramType = "BIND";
-                }
+                if (StringUtils.equals(paramType,"I")) { // inline
+                    paramHtmlName = "P_" + rs.getString("PARAM_LABEL"); // use P_ to maintain compatibility with params passed via URL to QueryExecute                    
+                } else if (StringUtils.equals(paramType,"M")) { // multi                    
+                    paramHtmlName = "M_" + rs.getString("PARAM_LABEL"); //logic in parameterprocessor and preparedquery will prevent sql injection                    
+                } 
 
                 if (!isLovParameter) {
                     // Normal parameters where the user need to type in
-                    if (paramType.equals("MULTI")) {
+                    if (StringUtils.equals(paramType,"M")) {
                         //multi parameter that doesn't use LOV
                         paramList.add(new HtmlTextArea(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue));
                     } else {
@@ -2156,13 +2151,13 @@ public class ArtQuery {
                 label = rs.getString("PARAM_LABEL");
                 paramType = rs.getString("PARAM_TYPE");
 
-                if (paramType.equals("I")) {
+                if (StringUtils.equals(paramType,"I")) {
                     //inline param                    
                     htmlName = "P_" + label;
                     ArtQueryParam param = new ArtQueryParam();
                     param.create(conn, qId, position);
                     params.put(htmlName, param);                    
-                } else if (paramType.equals("M")) {
+                } else if (StringUtils.equals(paramType,"M")) {
                     //multi param. can be either labelled (M_label) or non-labelled (M_1)
                     //add entry for labelled param
                     htmlName = "M_" + label;

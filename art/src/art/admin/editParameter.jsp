@@ -56,7 +56,7 @@ String help;
 			i=0;
 			dataType.options[i++] = new Option("VARCHAR","VARCHAR");
 			dataType.options[i++] = new Option("NUMBER","NUMBER");
-		} else {
+		} else if(paramType == 'I') {
 			//inline parameter
 			document.getElementById("drilldownColumn").className="expand";
 			

@@ -2,6 +2,7 @@ package art.output;
 
 import art.servlets.ArtDBCP;
 import art.utils.ArtQuery;
+import art.utils.ArtQueryParam;
 import art.utils.PreparedQuery;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +11,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import net.sf.jasperreports.engine.*;
@@ -27,6 +29,7 @@ import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +117,7 @@ public class jasperOutput {
      * @param inlineParams inline parameters
      * @param multiParams multi parameters
      */
-    public void createFile(ResultSet rs, int queryId, Map<String,String> inlineParams, Map<String,String[]> multiParams) {
+    public void createFile(ResultSet rs, int queryId, Map<String,String> inlineParams, Map<String,String[]> multiParams, Map<String, ArtQueryParam> htmlParams) {
 
         Connection connQuery = null;
         Connection connArt = null;
@@ -249,7 +252,36 @@ public class jasperOutput {
             JasperPrint jasperPrint;
             if (rs == null) {
                 //use template query
-                connQuery = ArtDBCP.getConnection(datasourceId);
+				
+				//use dynamic datasource if so configured
+				boolean useDynamicDatasource=false;
+				
+				Iterator it = htmlParams.entrySet().iterator();
+				while(it.hasNext()){
+					Map.Entry entry = (Map.Entry) it.next();
+					ArtQueryParam param = (ArtQueryParam) entry.getValue();
+					String paramDataType=param.getParamDataType();
+										
+					if(StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")){
+						useDynamicDatasource=true;
+						
+						//get dynamic connection to use
+						String paramValue=(String)param.getParamValue();
+						if(NumberUtils.isNumber(paramValue)){
+							//use datasource id
+							connQuery=ArtDBCP.getConnection(Integer.parseInt(paramValue));
+						} else {
+							//use datasource name
+							connQuery=ArtDBCP.getConnection(paramValue);
+						}
+						break;
+					}
+				}
+				
+				if(!useDynamicDatasource){
+					//not using dynamic datasource. use datasource defined on the query
+					connQuery = ArtDBCP.getConnection(datasourceId);
+				}
                 jasperPrint = JasperFillManager.fillReport(jasperFileName, params, connQuery);
             } else {
                 //use recordset based on art query

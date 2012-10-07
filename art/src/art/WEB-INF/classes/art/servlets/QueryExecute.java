@@ -741,11 +741,11 @@ public class QueryExecute extends HttpServlet {
                         jasper.setWriter(out);
                         if (queryType == 115) {
                             //report will use query in the report template
-                            jasper.createFile(null, queryId, inlineParams, multiParams);
+                            jasper.createFile(null, queryId, inlineParams, multiParams,htmlParams);
                         } else {
                             //report will use data from art query
                             rs = pq.getResultSet();
-                            jasper.createFile(rs, queryId, inlineParams, multiParams);
+                            jasper.createFile(rs, queryId, inlineParams, multiParams,htmlParams);
                             numberOfRows = getNumberOfRows(rs);
                         }
                     } else if (queryType == 117 || queryType == 118) {
@@ -758,11 +758,11 @@ public class QueryExecute extends HttpServlet {
                         jxls.setWriter(out);
                         if (queryType == 117) {
                             //report will use query in the jxls template
-                            jxls.createFile(null, queryId, inlineParams, multiParams);
+                            jxls.createFile(null, queryId, inlineParams, multiParams,htmlParams);
                         } else {
                             //report will use data from art query
                             rs = pq.getResultSet();
-                            jxls.createFile(rs, queryId, inlineParams, multiParams);
+                            jxls.createFile(rs, queryId, inlineParams, multiParams,htmlParams);
                             numberOfRows = getNumberOfRows(rs);
                         }
                     } else {

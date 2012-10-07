@@ -92,6 +92,7 @@ import org.slf4j.LoggerFactory;
 public class ArtJob implements Job {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtJob.class);
+	
 	String username, outputFormat, tos, from, message, queryName, subject;
 	String enableAudit = "N";
 	String activeStatus = "A";
@@ -147,6 +148,7 @@ public class ArtJob implements Job {
 	private String jobGraphOptions; //custom graph options defined for the job
 	private String cc;
 	private String bcc;
+	Map<String, ArtQueryParam> htmlParams;
 	
 
 	/**
@@ -1230,10 +1232,10 @@ public class ArtJob implements Job {
 
 						if (queryType == 115) {
 							//report will use query in the report template
-							jasper.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams());
+							jasper.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
 						} else {
 							//report will use data from art query
-							jasper.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams());
+							jasper.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
 						}
 						fileName = jasper.getFileName();
 					} else if (queryType == 117 || queryType == 118) {
@@ -1245,10 +1247,10 @@ public class ArtJob implements Job {
 						
 						if (queryType == 117) {
 							//report will use query in the jxls template
-							jxls.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams());
+							jxls.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
 						} else {
 							//report will use data from art query
-							jxls.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams());
+							jxls.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
 						}
 						fileName = jxls.getFileName();
 					} else {
@@ -2171,9 +2173,13 @@ public class ArtJob implements Job {
 			multiParams = null;
 			inlineParams = null;
 			displayParams = null;
+			htmlParams=null;
 
 			multiParams = new HashMap<String, String[]>();
 			inlineParams = new HashMap<String, String>();
+			
+			ArtQuery aq = new ArtQuery();
+			htmlParams = aq.getHtmlParams(queryId);
 
 			conn = ArtDBCP.getConnection();
 
@@ -2278,14 +2284,11 @@ public class ArtJob implements Job {
 			} else {
 				parametersDisplayString = sb.toString();
 			}
-
+					
 			//enable show parameters in job output            
 			if (showParameters) {
 				displayParams = new TreeMap<Integer, ArtQueryParam>();
-
-				ArtQuery aq = new ArtQuery();
-				Map<String, ArtQueryParam> params = aq.getHtmlParams(queryId);
-
+				
 				Iterator it;
 				String htmlName;
 				String value;
@@ -2297,7 +2300,7 @@ public class ArtJob implements Job {
 					htmlName = "P_" + label;
 					value = (String) entry.getValue();
 
-					ArtQueryParam param = params.get(htmlName);
+					ArtQueryParam param = htmlParams.get(htmlName);
 					if (param != null) {
 						//for dynamic date values e.g. ADD... ensure what is used to execute the query is same as what is displayed
 						String paramDataType = param.getParamDataType();
@@ -2341,7 +2344,7 @@ public class ArtJob implements Job {
 					htmlName = "M_" + (String) entry.getKey();
 					values = (String[]) entry.getValue();
 
-					ArtQueryParam param = params.get(htmlName);
+					ArtQueryParam param = htmlParams.get(htmlName);
 					if (param != null) {
 						param.setParamValue(values);
 						
@@ -2387,16 +2390,16 @@ public class ArtJob implements Job {
 		//build parameter objects from parameters saved in the database
 		buildParameters();
 
-		PreparedQuery qp = new PreparedQuery();
-		qp.setUsername(user);
-		qp.setQueryId(queryId);
-		qp.setAdminSession(false);
-		qp.setInlineParams(inlineParams);
-		qp.setMultiParams(multiParams);
+		PreparedQuery pq = new PreparedQuery();
+		pq.setUsername(user);
+		pq.setQueryId(queryId);
+		pq.setAdminSession(false);
+		pq.setInlineParams(inlineParams);
+		pq.setMultiParams(multiParams);
 
 		logger.debug("Job Id {}. prepare() finished", jobId);
 
-		return qp;
+		return pq;
 
 	}
 
