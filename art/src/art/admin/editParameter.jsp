@@ -73,6 +73,7 @@ String help;
 			dataType.options[i++] = new Option("NUMBER","NUMBER");
 			dataType.options[i++] = new Option("DATE","DATE");
 			dataType.options[i++] = new Option("DATETIME","DATETIME");
+			dataType.options[i++] = new Option("DATASOURCE","DATASOURCE");
 		}
 		
 		//set use lov to saved value

@@ -284,7 +284,7 @@ public class PreparedQuery {
 				throw new ArtException("<p>Not able to get query. Are you sure you have been granted rights to execute this object?</p>");
 			}
 
-			if (queryStatus.equals("D") && !adminSession) {
+			if (StringUtils.equals(queryStatus, "D") && !adminSession) {
 				throw new ArtException("<p>Query is disabled. Please contact the ART administrator. </p>");
 			}
 		} catch (Exception e) {
@@ -425,7 +425,43 @@ public class PreparedQuery {
 		}
 
 		try {
-			connQuery = ArtDBCP.getConnection(queryDatabaseId);
+			//use dynamic datasource if so configured
+			boolean useDynamicDatasource = false;
+
+			if (htmlParams != null) {
+				//htmlparams passed from queryexecute or artjob has paramvalues set
+
+				Iterator it = htmlParams.entrySet().iterator();
+				while (it.hasNext()) {
+					Map.Entry entry = (Map.Entry) it.next();
+					ArtQueryParam param = (ArtQueryParam) entry.getValue();
+					String paramDataType = param.getParamDataType();
+
+					if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {
+						
+						//get dynamic connection to use
+						Object paramValueObject = param.getParamValue();
+						if (paramValueObject != null) {
+							useDynamicDatasource = true;
+							
+							String paramValue = (String) paramValueObject;
+							if (NumberUtils.isNumber(paramValue)) {
+								//use datasource id
+								connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
+							} else {
+								//use datasource name
+								connQuery = ArtDBCP.getConnection(paramValue);
+							}
+						}
+						break;
+					}
+				}
+			}
+
+			if (!useDynamicDatasource) {
+				//not using dynamic datasource. use datasource defined on the query
+				connQuery = ArtDBCP.getConnection(queryDatabaseId);
+			}
 
 			if (connQuery == null) {
 				throw new ArtException("Could not get database connection.");
@@ -1460,7 +1496,7 @@ public class PreparedQuery {
 					String paramDataType = param.getParamDataType();
 
 					//check if parameter is yet to be replaced					
-					if (StringUtils.containsIgnoreCase(querySql,"#"+paramLabel+"#")) {
+					if (StringUtils.containsIgnoreCase(querySql, "#" + paramLabel + "#")) {
 						//replace parameter with all possible values
 						List<String> finalValuesList = getAllParameterValues(paramLabel); //return all values from the parameter's lov query
 
@@ -1658,10 +1694,10 @@ public class PreparedQuery {
 					}
 				} else {
 					//dynamic lov
-					
+
 					//apply tags. in case they exist
 					applyTags(queryBuilder);
-										
+
 					//apply dynamic sql. in case same lov used for chained and no-chained parameters
 					try {
 						applyDynamicSQL(queryBuilder, true); //return if text if #filter# is not null is in query
@@ -1765,13 +1801,12 @@ public class PreparedQuery {
 		return finalValuesList;
 	}
 
-	
 	/**
 	 * Replace :TAGS
 	 */
 	private void applyTags(StringBuilder sb) {
 		logger.debug("applyTags");
-		
+
 		/*
 		 * Update query :TAG
 		 */
@@ -1801,10 +1836,10 @@ public class PreparedQuery {
 		querySql = querySql.replaceAll("(?i):date", "'" + date + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
 		querySql = querySql.replaceAll("(?i):time", "'" + time + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
 
-		
+
 		//update sb with new sql
 		sb.replace(0, sb.length(), querySql);
-		
+
 		logger.debug("Sql query now is:\n{}", sb);
 
 
@@ -1885,7 +1920,7 @@ public class PreparedQuery {
 						ps.setTimestamp(i, new java.sql.Timestamp(dateValue.getTime()));
 					}
 					jasperInlineParams.put(paramName, dateValue);
-				} else if (paramDataType.equals("VARCHAR") || paramDataType.equals("TEXT")){					
+				} else if (paramDataType.equals("VARCHAR") || paramDataType.equals("TEXT")) {
 					if (ps != null) {
 						ps.setString(i, paramValue);
 					}

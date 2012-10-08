@@ -2218,6 +2218,12 @@ public class ArtJob implements Job {
 				//build hash tables
 				if (StringUtils.equals(paramType,"I")) {
 					inlineParams.put(paramName, paramValue);
+					
+					//set parameter value in htmlparams map
+					ArtQueryParam aqp=htmlParams.get("P_" + paramName);
+					if(aqp!=null){
+						aqp.setParamValue(paramValue);
+					}
 				} else if (StringUtils.equals(paramType,"M")) {
 					name = paramName;
 					sa.add(paramValue);
@@ -2252,7 +2258,14 @@ public class ArtJob implements Job {
 						}
 					}
 
-					multiParams.put(name, sa.getStringArray());
+					String[] paramValues= sa.getStringArray();
+					multiParams.put(name,paramValues);
+					
+					//set parameter value in htmlparams map
+					ArtQueryParam aqp=htmlParams.get("M_" + paramName);
+					if(aqp!=null){
+						aqp.setParamValue(paramValues);
+					}
 				} else if (StringUtils.equals(paramType,"O")) {
 					//other parameters					
 					if (StringUtils.equals(paramName, "_showParams")) {

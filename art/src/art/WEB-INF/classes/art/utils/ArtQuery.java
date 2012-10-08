@@ -1272,7 +1272,7 @@ public class ArtQuery {
 
             rs = st.executeQuery(SqlQuery);
 
-            while (rs.next()) { // for each parameter of this query...
+            while (rs.next()) { // for each parameter of this query... 
 
                 // build the parameter object
                 String paramName = rs.getString("NAME");
@@ -1307,18 +1307,17 @@ public class ArtQuery {
                         //multi parameter that doesn't use LOV
                         paramList.add(new HtmlTextArea(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue));
                     } else {
-                        if (paramDataType.equals("VARCHAR") || paramDataType.equals("INTEGER") || paramDataType.equals("NUMBER")) {
-                            // Simple input text
-                            paramList.add(new HtmlTextInput(paramHtmlId, paramHtmlName, paramName, paramDataType, paramShortDescr, paramDescr, defaultValue));
-
-                        } else if (paramDataType.equals("DATE") || paramDataType.equals("DATETIME")) {
+                        if (paramDataType.equals("DATE") || paramDataType.equals("DATETIME")) {
                             // Build date box  - bind date are not supported from 1.7beta1
                             paramList.add(new HtmlDateInput(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue, paramDataType));
-
                         } else if (paramDataType.equals("TEXT")) {
                             // TextArea
                             paramList.add(new HtmlTextArea(paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue));
-                        }
+                        } else {
+							//VARCHAR, INTEGER, NUMBER, DATASOURCE
+							// Simple input text
+                            paramList.add(new HtmlTextInput(paramHtmlId, paramHtmlName, paramName, paramDataType, paramShortDescr, paramDescr, defaultValue));
+						}
                     }
                 } else {
                     // LOV parameters - values are retrieved from a query

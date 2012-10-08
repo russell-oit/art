@@ -127,25 +127,30 @@ public class jxlsOutput {
 				//use dynamic datasource if so configured
 				boolean useDynamicDatasource=false;
 				
-				Iterator it = htmlParams.entrySet().iterator();
-				while(it.hasNext()){
-					Map.Entry entry = (Map.Entry) it.next();
-					ArtQueryParam param = (ArtQueryParam) entry.getValue();
-					String paramDataType=param.getParamDataType();
-										
-					if(StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")){
-						useDynamicDatasource=true;
-						
-						//get dynamic connection to use
-						String paramValue=(String)param.getParamValue();
-						if(NumberUtils.isNumber(paramValue)){
-							//use datasource id
-							connQuery=ArtDBCP.getConnection(Integer.parseInt(paramValue));
-						} else {
-							//use datasource name
-							connQuery=ArtDBCP.getConnection(paramValue);
+				if (htmlParams != null) {
+					Iterator it = htmlParams.entrySet().iterator();
+					while (it.hasNext()) {
+						Map.Entry entry = (Map.Entry) it.next();
+						ArtQueryParam param = (ArtQueryParam) entry.getValue();
+						String paramDataType = param.getParamDataType();
+
+						if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {
+							//get dynamic connection to use
+							Object paramValueObject = param.getParamValue();
+							if (paramValueObject != null) {
+								useDynamicDatasource = true;
+
+								String paramValue = (String) paramValueObject;
+								if (NumberUtils.isNumber(paramValue)) {
+									//use datasource id
+									connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
+								} else {
+									//use datasource name
+									connQuery = ArtDBCP.getConnection(paramValue);
+								}
+							}
+							break;
 						}
-						break;
 					}
 				}
 				
