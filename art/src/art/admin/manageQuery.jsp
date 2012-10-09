@@ -130,7 +130,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
                 (using default parameter values)<br>
 
                 <% if(queryGroupId!=0 && queryType!=119 && queryType!=120 && queryType!= 111) { %>
-                <a href="<%=request.getContextPath()%><%=ObjectUrl.getParamsUrl(queryId)%>" target="_blank">Params page</a> <br>                
+                <a href="<%=request.getContextPath()%>/user/showParams.jsp?queryId=<%=queryId%>" target="_blank">Params page</a> <br>                
                 <br>
                 (if the object is granted to the <b>public_user</b> user,
                 the links work without authentication by appending <span style="color:red">&_public_user=true</span>)

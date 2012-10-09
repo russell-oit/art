@@ -146,9 +146,7 @@
                }
 			   
 			   
-				if (queryType== 101 || queryType == 102) { %>
-                        <input type="hidden" name="_isCrosstab" value="Y">
-                        <% } else if (queryType<0) { %>
+				if (queryType<0) { %>
                         <small>
                             <i><%=messages.getString("graphType")%></i>
                             <%=messages.getString("graph"+queryType)%>

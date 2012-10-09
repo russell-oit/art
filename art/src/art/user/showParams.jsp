@@ -19,7 +19,7 @@ String showParameters=aq.getShowParameters();
 
 String action;
 if(queryType==110){
-	action="showPortlets.jsp";
+	action="showDashboard.jsp";
 } else if(queryType==112 || queryType==113 || queryType==114){
 	action="showAnalysis.jsp";
 } else {
@@ -241,9 +241,7 @@ boolean hasParams=false;
 					   }//end switch
 
 
-					   if (queryType== 101 || queryType == 102) { %>
-                        <input type="hidden" name="_isCrosstab" VALUE="Y">
-                        <% } else if (queryType<0) { %>
+					   if (queryType<0) { %>
                         <small><i><%=messages.getString("graphType")%></i>
                             <%=messages.getString("graph"+queryType)%>                            
                             <br><i><%=messages.getString("graphSizeWH")%></i>

@@ -18,8 +18,8 @@
 */
 
 /** 
-* This object parses the portlet container XML definitions
-* and returns value to showPortlets.jsp page
+* This object parses the dashboard XML definitions
+* and returns value to showDashboard.jsp page
 *
 */
 
@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This object parses the portlet container(dashboard) XML definitions
- * and returns value to showPortlets.jsp page
+ * This object parses the dashboard XML definitions
+ * and returns value to showDashboard.jsp page
  * 
  * @author Enrico Liboni
  */
