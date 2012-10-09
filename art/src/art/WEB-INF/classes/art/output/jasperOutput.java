@@ -273,15 +273,16 @@ public class jasperOutput {
 							//get dynamic connection to use
 							Object paramValueObject = param.getParamValue();
 							if (paramValueObject != null) {
-								useDynamicDatasource = true;
-
 								String paramValue = (String) paramValueObject;
-								if (NumberUtils.isNumber(paramValue)) {
-									//use datasource id
-									connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
-								} else {
-									//use datasource name
-									connQuery = ArtDBCP.getConnection(paramValue);
+								if (StringUtils.isNotBlank(paramValue)) {
+									useDynamicDatasource = true;
+									if (NumberUtils.isNumber(paramValue)) {
+										//use datasource id
+										connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
+									} else {
+										//use datasource name
+										connQuery = ArtDBCP.getConnection(paramValue);
+									}
 								}
 							}
 							break;

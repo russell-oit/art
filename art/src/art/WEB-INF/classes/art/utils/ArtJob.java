@@ -2409,6 +2409,7 @@ public class ArtJob implements Job {
 		pq.setAdminSession(false);
 		pq.setInlineParams(inlineParams);
 		pq.setMultiParams(multiParams);
+		pq.setHtmlParams(htmlParams);
 
 		logger.debug("Job Id {}. prepare() finished", jobId);
 
