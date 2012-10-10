@@ -43,10 +43,12 @@ boolean hasParams=false;
 
         <form name="artparameters" id="paramForm" action="<%=action%>"  method="post">
 			<input type="hidden" name="queryId" VALUE="<%=queryId%>">
+			<input type="hidden" name="_isInline" id="_isInline" VALUE="true">
+			
             <table class="art" align="center">
                 <tr>
                     <td colspan="4" class="title" >
-                        <br> <b><%=queryName%></b> <br><br>
+                         <b><%=queryName%></b> <br>
                     </td>
                 </tr>
 
@@ -158,7 +160,7 @@ boolean hasParams=false;
                               case 0  :   // normal query
                               case 101:  // crosstab
                         %>    <span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
-                        <SELECT name="viewMode" size="1">
+                        <SELECT name="viewMode" id="viewMode" size="1">
                             <%
                             java.util.Iterator itVm = ArtDBCP.getUserViewModes().iterator();
                             while(itVm.hasNext()) {
@@ -188,9 +190,7 @@ boolean hasParams=false;
                         break;
                         case 103: // normal html
                         case 102: // xtab html
-                        %> <input type="hidden" name="viewMode" VALUE="html">
-                        
-                          <% if(hasParams){
+                         if(hasParams){
                              if(StringUtils.equals(showParameters,"N")) { %>
                                 <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
                             <%} else if(StringUtils.equals(showParameters,"Y")) { %>
@@ -207,7 +207,7 @@ boolean hasParams=false;
                         case 116:
                         %>
                         <span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
-                        <SELECT name="viewMode" size="1">
+                        <SELECT name="viewMode" id="viewMode" size="1">
                             <OPTION VALUE="pdf"><%=messages.getString("pdf")%></OPTION>
                             <OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
                             <OPTION VALUE="xlsx"><%=messages.getString("xlsx")%></OPTION>
@@ -223,7 +223,7 @@ boolean hasParams=false;
 					case 118:
 					%>
 					<span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
-					<SELECT name="viewMode" size="1">			     		
+					<SELECT name="viewMode" id="viewMode" size="1">			     		
 					<OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
 					 <% if (ue.getAdminLevel() >=5 && ArtDBCP.isSchedulingEnabled()) { %>
 					<OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
@@ -231,13 +231,7 @@ boolean hasParams=false;
 						 </SELECT>
 						 <%
 						 break;
-					  default:
-						if (queryType >0 && queryType <100 ) {
-							%>
-							<input type="hidden" name="viewMode" VALUE="HTMLREPORT">
-							<input type="hidden" name="SPLITCOL" VALUE="<%=queryType%>">
-							<%
-							}
+					  						
 					   }//end switch
 
 
@@ -250,7 +244,7 @@ boolean hasParams=false;
                         </small>
 
                         <span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
-                        <SELECT name="viewMode" size="1">
+                        <SELECT name="viewMode" id="viewMode" size="1">
                             <OPTION VALUE="GRAPH"><%=messages.getString("htmlPlain")%></OPTION>
                             <OPTION VALUE="PDFGRAPH"><%=messages.getString("pdf")%></OPTION>
                             <OPTION VALUE="PNGGRAPH"><%=messages.getString("png")%></OPTION>
@@ -294,8 +288,42 @@ boolean hasParams=false;
             </table>
         </form>
     </fieldset>
-
+						
 </div>
+							
+						
+<div id="response"></div>
+
+
+<script type="text/javascript">
+	
+jQuery(document).ready(function($){
+	$("#paramForm").submit(function(e){
+
+		var viewMode=document.getElementById("viewMode");
+		var selectedViewMode="";
+				
+		if(viewMode!=null){
+			var selectedViewMode = viewMode.options[viewMode.selectedIndex].value;
+		}
+		
+		var qt=<%=queryType%>;
+		
+		if(selectedViewMode!="SCHEDULE" && !(qt==112 || qt==113 || qt==114)){
+			//display results inline. don't display inline for scheduling or pivot tables			
+			e.preventDefault();
+
+			$form=$(this);
+			
+			$("#response").load("ExecuteQuery",$form.serialize());
+
+		}
+
+});  
+
+}); 
+
+</script>
 
 <%@ include file ="footer.jsp" %>
 

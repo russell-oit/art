@@ -217,5 +217,6 @@ function addEvent(elm, evType, fn, useCapture)
     return r;
   } else {
     alert("Handler could not be removed");
+	return false;
   }
 } 

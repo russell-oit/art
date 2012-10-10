@@ -131,18 +131,12 @@
                         break;
                         case 103: // normal html
                         case 102: // xtab html
-                        %> <input type="hidden" name="viewMode" value="html">
+                        %> 
                         <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
 
                         <%
                   break;
-                  default:
-                    if (queryType >1 && queryType <99 ) {
-                        %>
-                        <input type="hidden" name="viewMode" value="HTMLREPORT">
-                        <input type="hidden" name="SPLITCOL" value="<%=queryType%>">
-                        <%
-                    }
+                  
                }
 			   
 			   
@@ -152,8 +146,7 @@
                             <%=messages.getString("graph"+queryType)%>
                         </small>
                         <input type="hidden" name="_GRAPH_ID" value="<%=(queryType*(-1))%>">
-                        <input type="hidden" name="_GRAPH_SIZE" value="Default">
-                        <input type="hidden" name="viewMode" value="GRAPH">
+                        <input type="hidden" name="_GRAPH_SIZE" value="Default">                        
                         <input type="hidden" name="_showLegend" value="true">
                         <%}%>
                     </td>

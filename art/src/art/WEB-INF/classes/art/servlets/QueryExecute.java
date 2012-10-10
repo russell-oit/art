@@ -558,7 +558,7 @@ public class QueryExecute extends HttpServlet {
 			}
 
 			if (isFlushEnabled) {
-				ctx.getRequestDispatcher("/user/qeHeader.jsp").include(request, response);
+				ctx.getRequestDispatcher("/user/queryHeader.jsp").include(request, response);
 				out.flush();
 			}
 
@@ -844,7 +844,7 @@ public class QueryExecute extends HttpServlet {
 						} else {
 							//this is an update query
 							request.setAttribute("rowsUpdated", "" + rowsUpdated);
-							ctx.getRequestDispatcher("/user/qeUpdate.jsp").include(request, response);
+							ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
 						}
 					}
 
@@ -871,7 +871,7 @@ public class QueryExecute extends HttpServlet {
 							df.applyPattern("#,##0");
 							request.setAttribute("numberOfRows", df.format(numberOfRows));
 						}
-						ctx.getRequestDispatcher("/user/qeFooter.jsp").include(request, response);
+						ctx.getRequestDispatcher("/user/queryFooter.jsp").include(request, response);
 					}
 
 					ArtDBCP.log(username, "object", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);

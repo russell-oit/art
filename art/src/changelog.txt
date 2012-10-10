@@ -4,6 +4,7 @@ ART 2.4
 * Use logback instead of log4j for error logging
 * Enable viewing of application logs from within the application
 * Enable choosing of query datasource at runtime
+* Display query results in the show parameters page 
 
 ART 2.3.1
 * Fix NullPointerException on pdf output with null strings

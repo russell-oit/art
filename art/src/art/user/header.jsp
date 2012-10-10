@@ -18,14 +18,24 @@
 <c:if test="${empty param._mobile}">  
  <script type="text/javascript" src="<%= request.getContextPath() %>/js/prototype.js"></script>
  <script type="text/javascript" src="<%= request.getContextPath() %>/js/scriptaculous/scriptaculous.js"></script>
+ 
+  <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery.js"></script>
+ 
+ <script type="text/javascript">
+	jQuery.noConflict();
+</script>
+  
  <script type="text/javascript" src="<%= request.getContextPath() %>/js/ajaxtags.js"></script>
  <link rel="stylesheet" href="<%= request.getContextPath() %>/js/dhtmlgoodies_calendar/dhtmlgoodies_calendar.css" media="screen" />
+ 
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/table/mdxtable.css" />
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/navi/mdxnavi.css" />
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/form/xform.css" />
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/table/xtable.css" />
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/tree/xtree.css" />
   <script type="text/javascript" src="<%=request.getContextPath()%>/wcf/scroller.js"></script>
+  
+  <script type="text/javascript" src="<%= request.getContextPath() %>/js/gridtable.js"></script>
 </c:if> 
   
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>  

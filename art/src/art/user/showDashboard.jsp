@@ -2,7 +2,21 @@
 <%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP;" %>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <jsp:useBean id="pc" scope="request" class="art.utils.PortletsContainer" />
-<%@ include file ="header.jsp" %>
+
+<%
+//support display of results in the showparams page using jquery ajax
+java.util.ResourceBundle sdMessages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+
+boolean isInline=false;
+if(request.getParameter("_isInline")!=null){
+	isInline=true;
+}
+
+if(!isInline){ 	%>	
+	<%@ include file ="header.jsp" %>
+<% }
+%>
+
 
 <%
 int queryId=0;
@@ -44,10 +58,10 @@ String imgRefresh=contextPath + "/images/refresh.png";
 	  String title = pc.getPortletTitle(i,j);
 	  // add icon on portlet title
 	  if (!pc.getPortletOnLoad(i,j)) {
-	    title = title + "  <img src='" + contextPath + "/images/onLoadFalse.gif' title='"+messages.getString("portletOnLoadFalse")+"'/>";
+	    title = title + "  <img src='" + contextPath + "/images/onLoadFalse.gif' title='"+sdMessages.getString("portletOnLoadFalse")+"'/>";
 	  }
 	  if (refresh!=null) {
-	  title = title + " <img src='" + contextPath + "/images/clock_mini.gif' title='"+messages.getString("portletAutoRefresh")+" "+refresh+" "+messages.getString("seconds")+"'/> <small>"+refresh+"s</small>";	    
+	  title = title + " <img src='" + contextPath + "/images/clock_mini.gif' title='"+sdMessages.getString("portletAutoRefresh")+" "+refresh+" "+sdMessages.getString("seconds")+"'/> <small>"+refresh+"s</small>";	    
 	  }
 	  
 	  
@@ -95,5 +109,10 @@ String imgRefresh=contextPath + "/images/refresh.png";
  </tr>
 </table>
 </div> 
-<%@ include file ="footer.jsp" %>
+
+<%
+if(!isInline){ 	%>	
+	<%@ include file ="footer.jsp" %>
+<% }
+%>
 

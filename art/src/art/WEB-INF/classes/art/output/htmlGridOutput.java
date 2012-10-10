@@ -85,9 +85,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public void beginHeader() {
-		out.println("  <script type='text/javascript' src='../js/gridtable.js'></script>");
-
+	public void beginHeader() {		
 		// print parameters if they are available
 		if (displayParams != null && displayParams.size() > 0) {
 			out.println("<table border=\"0\" width=\"90%\"><tr><td>");
@@ -154,7 +152,11 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addHeaderCell(String s) {
-		out.println("  <th class=\"header\">" + s + "</th>");
+		String tmp="<a href='#' class='sortheader' "+ 
+        "onclick='ts_resortTable(this, "+0+");return false;'>" + 
+        s+"<span class='sortarrow'>&nbsp;&nbsp;&nbsp;</span></a>";
+		
+		out.println("  <th class=\"header\">" + tmp + "</th>");
 	}
 
 	@Override

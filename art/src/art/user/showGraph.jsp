@@ -126,7 +126,8 @@
     
   boolean isFragment = (request.getParameter("_isFragment")!= null?true:false);  // the html code will be rendered as an html fragmnet (without <html> and </html> tags)
   boolean isPlain    = (request.getParameter("_isPlain")!= null?true:false);
-  if (!isFragment && !isPlain) {
+  boolean isInline    = (request.getParameter("_isInline")!= null?true:false);
+  if (!isFragment && !isPlain && !isInline) {
 %>
     <%@ include file ="header.jsp" %>
 <%
@@ -359,7 +360,7 @@ String removeAt="10000";
  request.removeAttribute("artGraph");
  graph = null;
  
- if (!isFragment && ! isPlain) {    
+ if (!isFragment && !isPlain && !isInline) {    
     %><%@ include file ="footer.jsp" %><%
   } else if (isPlain) {
     %></html><%
