@@ -61,6 +61,7 @@ public class PreparedQuery {
 	Connection connQuery; // this is the connection to the datasource for this query
 	Connection conn; // connection to the art repository
 	String preparedStatementSQL; //final sql statement. if query has inline parameters, sql will still have ?
+	String finalSQL; //final sql statement. if query has inline parameters, sql will have query values
 	String queryStatus;
 	Map<String, List> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter name and value as corresponding object e.g. Double, Long. for jasper reports
@@ -199,7 +200,7 @@ public class PreparedQuery {
 	private String getQuerySQL() throws ArtException {
 
 		/*
-		 * Apply :Tags (:TAG are substituted with their values)
+		 * Apply :Tags (:TAGS are substituted with their values)
 		 */
 		try {
 			applyTags(sb); // work inline in the sb
@@ -221,7 +222,7 @@ public class PreparedQuery {
 
 		/*
 		 * Apply Inline Parameters (this must come after applyDynamicSQL)
-		 * (Inline parameters are transformed to BIND ones (?))
+		 * (Inline parameters are replaced with parameter placeholders (?))
 		 */
 		try {
 			if (inlineParams != null) {
@@ -235,7 +236,7 @@ public class PreparedQuery {
 
 		/*
 		 * Apply Multi Parameters to the query SQL (in the WHERE part new "AND
-		 * param in (<values>)" conditions are addedd if the query uses multi
+		 * param in (<values>)" conditions are added if the query uses multi
 		 * params)
 		 */
 		try {
@@ -250,8 +251,8 @@ public class PreparedQuery {
 		//apply rules after inline and multi parameters to accomodate hardcoded rules label #rules#
 
 		/*
-		 * Apply smart rules to the SQL (in the WHERE part new "AND param in
-		 * (<values>)" conditions are addedd if the query uses rules)
+		 * Apply rules to the SQL (in the WHERE part new "AND rule_column in
+		 * (<values>)" conditions are added if the query uses rules)
 		 */
 		if (useRules) {
 			try {
@@ -470,13 +471,13 @@ public class PreparedQuery {
 
 			psQuery = connQuery.prepareStatement(preparedStatementSQL, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
-			prepareStatement(psQuery); // this applies all the bind parameters (inline)
+			prepareStatement(psQuery); // this applies the inline parameter placeholders
 
 			return psQuery.execute();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
-			throw new ArtException("Error while running query. " + e + "<br>\nQuery SQL:\n" + preparedStatementSQL);
+			throw new ArtException("Error while running query. " + e + "<br>\nQuery SQL:\n" + finalSQL);
 		}
 
 	}
@@ -1106,24 +1107,19 @@ public class PreparedQuery {
 				while (startPos != -1 && startPos < sb.toString().length()) {
 					checker = treeInline.get(new Integer(startPos));
 
-					//if(DEBUG && checker!=null ) System.err.println(sNAME + ": ERROR: another parameter already stored at position " + startPos + ". Cannot store " +paramName+"! " );
 					if (checker != null) {
 						logger.warn("Another parameter already stored at position {}. Cannot store {}!", startPos, paramName);
 					}
 
 					treeInline.put(new Integer(startPos), paramName); // stores the param name and its position. The order of position will ensure correct substitution in applyInlineParameters()
 
-					//if(DEBUG) System.err.println(sNAME + ":Storing parameter "+paramName+" found at position: " + startPos);
 					logger.debug("Storing parameter {} found at position {}", paramName, startPos);
 
-					// replace inline label with ' ? ' plus the correct number of blanks so that total string length is not changes
-					// row replaced by the following one by Giacomo Ferrari on 2005-09-23
-					// sb.replace(startPos, startPos+paramName.length()+2, " ? "); //parseStringSQL(paramValue));
-					sb.replace(startPos, startPos + paramName.length() + 2, " ? " + blanks.substring(0, (paramName.length() + 2 - 3)));
+					// replace inline label with ' ? ' plus the correct number of blanks so that total string length is not changed
 					// +2 is to consider the #, -3 is the chars used by ' ? ' replacement
-
-					//if(DEBUG) System.err.println(sNAME + ": SQL is: \n--------------------" + sb.toString() + "\n--------------------");
-					//if(DEBUG) System.err.println(sNAME + ": SQL string length is: " + sb.toString().length());
+					sb.replace(startPos, startPos + paramName.length() + 2, " ? " + blanks.substring(0, (paramName.length() + 2 - 3)));
+					
+					logger.debug("Sql string is \n{}", sb.toString());
 					logger.debug("Sql string length is {}", sb.toString().length());
 
 					// find another occurence of the same param
@@ -1864,6 +1860,9 @@ public class PreparedQuery {
 	private void applyInlineParameters(PreparedStatement ps) throws SQLException, ArtException {
 
 		logger.debug("applyInlineParameters");
+		
+		//set final sql. replace parameter placeholders ( ? ) with actual parameter values passed to database
+		finalSQL=sb.toString();
 
 		if (treeInline != null && !treeInline.isEmpty()) {
 
@@ -1871,7 +1870,7 @@ public class PreparedQuery {
 			int i = 0; //parameter index/order of appearance
 			String paramName, paramValue;
 
-			java.util.Date dateValue;
+			java.util.Date dateValue=new java.util.Date();
 
 			if (htmlParams == null) {
 				ArtQuery aq = new ArtQuery();
@@ -1926,6 +1925,14 @@ public class PreparedQuery {
 						ps.setString(i, paramValue);
 					}
 					jasperInlineParams.put(paramName, paramValue);
+				}
+				
+				//set final sql. replace parameter placeholders ( ? ) with actual parameter values passed to database
+				if(StringUtils.contains(paramDataType, "DATE")){
+					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					finalSQL=StringUtils.replace(finalSQL, "?", "'" + df.format(dateValue) + "'", 1);
+				} else {
+					finalSQL=StringUtils.replace(finalSQL, "?", "'" + paramValue + "'", 1);
 				}
 
 			}

@@ -599,12 +599,12 @@ if(!propsFile.exists()){
 <tr>
         <td colspan="3" class="attr">Default Start page for ART:
 	   <select name="index_page_default">
-	     <option value="default"   <%= (index_page_default.equals("default")?"SELECTED":"") %>  >Default </option>
 	     <option value="login"     <%= (index_page_default.equals("login")?"SELECTED":"") %>    >Internal Login</option>
 	     <option value="LDAPLogin" <%= (index_page_default.equals("LDAPLogin")?"SELECTED":"") %>>LDAP Login</option>
 	     <option value="NTLogin"   <%= (index_page_default.equals("NTLogin")?"SELECTED":"") %>  >Windows Login</option>
 	     <option value="DBLogin"   <%= (index_page_default.equals("DBLogin")?"SELECTED":"") %>  >Database Login</option>
 	     <option value="AutoLogin" <%= (index_page_default.equals("AutoLogin")?"SELECTED":"") %>>Single Sign On</option>
+		 <option value="default"   <%= (index_page_default.equals("default")?"SELECTED":"") %>  >Default </option>
 	   </select>
 	</td>
 </tr>
