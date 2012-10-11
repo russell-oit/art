@@ -126,9 +126,9 @@ ArtQuery aq=new ArtQuery();
            Show buttons : delete, modify, new 
         */%>
         <tr><td colspan="2" class="data">
-                <input type="button" onclick="deleteParam()" value="Delete" name="ACTION">
-                &nbsp;<input type="button" onclick="updateParam()" value="Modify" name="ACTION">
-				&nbsp;<input type="button" onclick="createParam()" value="New" name="ACTION"> </td>
+                <input type="button" onclick="createParam()" value="New" name="ACTION">
+                &nbsp;<input type="button" onclick="updateParam()" value="Modify" name="ACTION">				
+				&nbsp;<input type="button" onclick="deleteParam()" value="Delete" name="ACTION">
             </td>
         </tr>
               

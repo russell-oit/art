@@ -79,7 +79,7 @@
    </table>
  <% } %>
   <div id="systemWorking" style="display: none;">
-    <img src="<%= request.getContextPath() %>/images/spinner.gif" />
+    <img src="<%= request.getContextPath() %>/images/spinner.gif" alt="Executing..." />
   </div>
 
  <hr width="100%" size="1">

@@ -3,6 +3,17 @@
 
 <script language="javascript">
     <!--
+	
+	function countSelected(list){
+        var count=0;
+        for(var i=0; i<list.options.length; i++ ){
+            if(list.options[i].selected){
+                count++;
+            }
+        }
+        
+        return count;
+    }
 
     function deleteRule() {
         if (document.viewRule.QUERY_RULES.selectedIndex>=0) {
@@ -12,7 +23,7 @@
                 document.viewRule.submit();
             } 
         } else {
-            alert("You must select a rule");
+            alert("Please select a rule");
         }
  
     }
@@ -23,7 +34,19 @@
 			document.viewRule.RULEACTION.value="NEW";
 			document.viewRule.submit();
 		} else {
-            alert("You must select a rule");
+            alert("Please select a rule");
+        }
+    }
+	
+	function modifyRule() {
+		if(countSelected(document.getElementById("queryRules"))>1){
+            alert("Please select a single rule");
+		} else if (document.viewRule.QUERY_RULES.selectedIndex>=0) {
+			document.viewRule.action="editQueryRule.jsp";
+			document.viewRule.RULEACTION.value="MODIFY";
+			document.viewRule.submit();
+		} else {
+            alert("Please select a rule");
         }
     }
 
@@ -50,6 +73,7 @@ String description;
 <form name="viewRule" method="post">
     <input type="hidden" name="QUERY_ID" value="<%= request.getParameter("QUERY_ID")%>">
     <input type="hidden" name="RULEACTION" >
+	
     <table align="center">        
         <tr><td class="title" colspan="2" > Edit Rule </td></tr>
 		
@@ -62,7 +86,7 @@ String description;
             </td>
         </tr>
         <tr><td colspan="2" class="data">
-                <select name="QUERY_RULES" size="4" multiple>
+                <select name="QUERY_RULES" id="queryRules" size="5" multiple>
                     <%                                  
 					 Map queryRules=aq.getQueryRules(queryId);
 					it = queryRules.entrySet().iterator();					                                             
@@ -82,17 +106,19 @@ String description;
                 </select>
 
         </tr>
-        <tr><td colspan="2" class="data">  <input type="button" onclick="deleteRule()" value="Delete">
-			<br><br>
+        <tr><td colspan="2" class="data"> 								
+				<input type="button" onclick="modifyRule()" value="Modify" name="ACTION">
+				&nbsp;<input type="button" onclick="deleteRule()" value="Delete" name="ACTION">
+			<br><br><br>
             </td>
         </tr>
 				
         <%/*
            Show List of rules that have not already been added to the query (for possible addition)
         */%>
-
+		
         <tr><td colspan="2" class="data">
-                <select name="RULE_NAME" size="4" >
+                <select name="RULE_NAME" size="5" >
                     <%
                     Map allRules=aq.getAvailableRules(queryId);
 					it = allRules.entrySet().iterator();	
@@ -112,7 +138,7 @@ String description;
             </td>
         </tr>
 
-        <tr><td colspan="2" class="data">  <input type="button" onclick="addRule()" value="New">
+        <tr><td colspan="2" class="data">  <input type="button" onclick="addRule()" value="New" name="ACTION">
 			<br><br>
             </td>
         </tr>

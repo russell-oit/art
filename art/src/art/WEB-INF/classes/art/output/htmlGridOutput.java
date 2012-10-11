@@ -152,12 +152,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public void addHeaderCell(String s) {
-		String tmp="<a href='#' class='sortheader' "+ 
-        "onclick='ts_resortTable(this, "+0+");return false;'>" + 
-        s+"<span class='sortarrow'>&nbsp;&nbsp;&nbsp;</span></a>";
-		
-		//out.println("  <th class=\"header\">" + tmp + "</th>");
+	public void addHeaderCell(String s) {		
 		out.println("  <th class=\"header\">" + s + "</th>");
 	}
 

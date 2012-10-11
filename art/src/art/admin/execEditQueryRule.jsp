@@ -1,9 +1,11 @@
-<%@ page import="java.sql.*,art.utils.*;" %>
+<%@ page import="java.sql.*,art.utils.*" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%  request.setCharacterEncoding("UTF-8"); %>
 
 <%
- boolean DELETE = request.getParameter("RULEACTION").equals("DELETE");
+String action = request.getParameter("RULEACTION");
  int queryId = Integer.parseInt(request.getParameter("QUERY_ID"));
  
  Connection conn = (Connection) session.getAttribute("SessionConn");
@@ -23,18 +25,24 @@
 	boolean actionSuccessful=true;
 	Rule ar=new Rule();
 
-    if (DELETE) {
+    if (StringUtils.equals(action, "DELETE")) {
         String[] values = request.getParameterValues("QUERY_RULES");
 
 	    for(int i=0; i<  values.length; i++) {
 			actionSuccessful=ar.deleteQueryRule(conn,queryId,values[i]);
 	    }
 
-    } else { //NEW
+    } else {
+		//MODIFY or NEW
 		ar.setQueryId(queryId);
 		ar.setFieldName(request.getParameter("FIELD_NAME"));
 		ar.setRuleName(request.getParameter("RULE_NAME"));
-        actionSuccessful=ar.insertQueryRule(conn);
+		
+		if (StringUtils.equals(action, "NEW")){
+			actionSuccessful=ar.insertQueryRule(conn);
+		} else {
+			actionSuccessful=ar.modifyQueryRuleColumn(conn);
+		}
     }
 
 	if(actionSuccessful){
@@ -51,7 +59,7 @@
 	   <jsp:forward page="error.jsp">
 			<jsp:param name="MOD" value="Execute Update Rule"/>
 			<jsp:param name="ACT" value="Modify Query Rules"/>
-			<jsp:param name="MSG" value="Unsuccessful NEW or DELETE"/>
+			<jsp:param name="MSG" value="Action unsuccessful"/>
 			<jsp:param name="NUM" value="200"/>
 	   </jsp:forward>
 		<%

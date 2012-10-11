@@ -24,7 +24,7 @@
                 document.manageQueries.submit();
             }
         } else {
-            alert("You need to select an object in order to delete it!");
+            alert("Please select an object");
         }
  
     }
@@ -37,7 +37,7 @@
             document.manageQueries.QUERYACTION.value="COPY";
             document.manageQueries.submit();
         } else {
-            alert("You need to select an object and specify a new name in order to copy it!");
+            alert("Please select an object and specify a new name for it");
         }
     }
 
@@ -54,7 +54,7 @@
             document.manageQueries.action="<%= request.getContextPath() %>/admin/manageQuery.jsp";
             document.manageQueries.submit();
         } else {
-            alert("You need to select an object in order to modify it!");
+            alert("Please select an object");
         }
     }
 

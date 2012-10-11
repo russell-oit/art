@@ -314,24 +314,37 @@ jQuery(document).ready(function($){
 			e.preventDefault();
 
 			$form=$(this);
-			
-			$("#response").load("ExecuteQuery",$form.serialize(),function(){
-				//jquery has finished successfully
-				
-				//make htmlgrid output sortable
-				if(selectedViewMode=="htmlGrid"){
-					forEach(document.getElementsByTagName('table'), function(table) {
-						if (table.className.search(/\bsortable\b/) != -1) {
-							sorttable.makeSortable(table);
-						}
-					});
+									
+			$("#response").load("ExecuteQuery",$form.serialize(),function(responseText, statusText, xhr){
+				//jquery load has finished
+								
+				if(statusText=="success"){
+					//make htmlgrid output sortable
+					if(selectedViewMode=="htmlGrid"){
+						forEach(document.getElementsByTagName('table'), function(table) {
+							if (table.className.search(/\bsortable\b/) != -1) {
+								sorttable.makeSortable(table);
+							}
+						});
+					}
+				} else if(statusText=="error"){
+					alert("An error occurred: " + xhr.status + " - " + xhr.statusText);
 				}
 								
 			});	
-						
+									
 		}
 
 });  
+
+//display spinner animation when any ajax activity happens
+$("#systemWorking").ajaxStart(function(){
+    $(this).show();
+ }).ajaxStop(function(){
+    $(this).hide();
+ }).ajaxError(function(){
+    $(this).hide();
+ });
 
 }); 
 

@@ -47,7 +47,7 @@ Iterator it;
 				inputType="text";
 			}
 			%>
-			<td class="data"> <input type="<%=inputType%>" name="GROUP_ID" value="<%=ug.getGroupId()%>" size="25" readonly </td>
+			<td class="data"> <input type="<%=inputType%>" name="GROUP_ID" value="<%=ug.getGroupId()%>" size="25" readonly> </td>
 		</tr>
 
 		<tr><td class="data"> Name </td>
