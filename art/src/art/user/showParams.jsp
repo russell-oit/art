@@ -315,13 +315,27 @@ jQuery(document).ready(function($){
 
 			$form=$(this);
 			
-			$("#response").load("ExecuteQuery",$form.serialize());
-
+			$("#response").load("ExecuteQuery",$form.serialize(),function(){
+				//jquery has finished successfully
+				
+				//make htmlgrid output sortable
+				if(selectedViewMode=="htmlGrid"){
+					forEach(document.getElementsByTagName('table'), function(table) {
+						if (table.className.search(/\bsortable\b/) != -1) {
+							sorttable.makeSortable(table);
+						}
+					});
+				}
+								
+			});	
+						
 		}
 
 });  
 
 }); 
+
+
 
 </script>
 

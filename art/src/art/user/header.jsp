@@ -35,7 +35,7 @@
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/tree/xtree.css" />
   <script type="text/javascript" src="<%=request.getContextPath()%>/wcf/scroller.js"></script>
   
-  <script type="text/javascript" src="<%= request.getContextPath() %>/js/gridtable.js"></script>
+  <script type="text/javascript" src="<%= request.getContextPath() %>/js/sorttable.js"></script>
 </c:if> 
   
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>  

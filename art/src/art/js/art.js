@@ -67,3 +67,28 @@ function showHide(item){
 function setClass(obj, cssName) {
      obj.className = cssName;
 }
+
+//for use with gridtables
+function highLight(obj, cssName) {
+  if ( obj.className != "slct"
+       && obj.className != "slct2"
+       )  {
+     obj.className = cssName;
+  } 
+}
+function selectRow(obj) {
+  if (obj.className != 'slct') {
+    obj.className = 'slct';      
+  } else {
+    obj.className = 'hiliterows';      
+  }
+}
+
+function selectRow2(obj) {
+  if (obj.className != 'slct2') {
+    obj.className = 'slct2';      
+  } else {
+    obj.className = 'hiliterows';      
+  }
+}
+//
