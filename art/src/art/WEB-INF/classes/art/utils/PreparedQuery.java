@@ -61,7 +61,7 @@ public class PreparedQuery {
 	Connection connQuery; // this is the connection to the datasource for this query
 	Connection conn; // connection to the art repository
 	String preparedStatementSQL; //final sql statement. if query has inline parameters, sql will still have ?
-	String finalSQL; //final sql statement. if query has inline parameters, sql will have query values
+	private String finalSQL=""; //final sql statement. if query has inline parameters, sql will have query values
 	String queryStatus;
 	Map<String, List> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter name and value as corresponding object e.g. Double, Long. for jasper reports
@@ -79,6 +79,20 @@ public class PreparedQuery {
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
 		jasperMultiParams = new HashMap<String, List>(); //to populate hash map with multi parameter names and values
 		jxlsMultiParams = new HashMap<String, String>(); //save parameters in special hash map for jxls reports        
+	}
+
+	/**
+	 * @return the finalSQL
+	 */
+	public String getFinalSQL() {
+		return finalSQL;
+	}
+
+	/**
+	 * @param finalSQL the finalSQL to set
+	 */
+	public void setFinalSQL(String finalSQL) {
+		this.finalSQL = finalSQL;
 	}
 
 	/**
@@ -1931,6 +1945,8 @@ public class PreparedQuery {
 				if(StringUtils.contains(paramDataType, "DATE")){
 					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 					finalSQL=StringUtils.replace(finalSQL, "?", "'" + df.format(dateValue) + "'", 1);
+				} else if(StringUtils.equals(paramDataType, "INTEGER") || StringUtils.equals(paramDataType, "NUMBER")){
+					finalSQL=StringUtils.replace(finalSQL, "?", paramValue , 1);
 				} else {
 					finalSQL=StringUtils.replace(finalSQL, "?", "'" + paramValue + "'", 1);
 				}

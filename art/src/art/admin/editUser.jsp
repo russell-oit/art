@@ -103,7 +103,7 @@ username=ue.getUsername();
 					<option value="5" <%=(adminLevel==5?"selected":"")%>>Normal User allowed to schedule jobs</option>
 					<%if(sessionAdminLevel>=30){%><option value="10" <%=(adminLevel==10?"selected":"")%>>Junior Admin (Query only)</option><%}%>
 					<%if(sessionAdminLevel>=30){%><option value="30" <%=(adminLevel==30?"selected":"")%>>Mid Admin (+ User privileges)</option><%}%>
-					<%if(sessionAdminLevel>=40){%><option value="40" <%=(adminLevel==40?"selected":"")%>>Admin (+ User setup)</option><%}%>
+					<%if(sessionAdminLevel>=40){%><option value="40" <%=(adminLevel==40?"selected":"")%>>Standard Admin (+ User setup)</option><%}%>
 					<%if(sessionAdminLevel>=80){%><option value="80" <%=(adminLevel==80?"selected":"")%>>Senior Admin (+ Databases, Groups, Rules, Cache etc.)</option><%}%>
 					<%if(sessionAdminLevel>=100){%><option value="100" <%=(adminLevel==100?"selected":"")%>>Super Admin  (manage everything)</option><%}%>
 				</select>

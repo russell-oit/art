@@ -214,11 +214,9 @@ public class QueryExecute extends HttpServlet {
 		return counter + 1; // number of rows
 	}
 
-	//generate graph object in preparation for it's display using the showGraph.jsp page
-	private ArtGraph artGraphOut(ResultSet rs, ResultSetMetaData rsmd, HttpServletRequest request,
-			String xLabel, String yLabel, String graphOptions, String shortDescr,
-			int queryId, int queryType, String queryName, String username,
-			Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
+	//prepare graph object for it's display using the showGraph.jsp page
+	private ArtGraph artGraphOut(ResultSetMetaData rsmd, HttpServletRequest request,
+			String graphOptions, String shortDescr, int queryType) throws SQLException {
 
 		ArtGraph o;
 
@@ -344,36 +342,11 @@ public class QueryExecute extends HttpServlet {
 		}
 
 		o.setTitle(shortDescr);
-		o.setXlabel(xLabel);
-		if (yLabel == null) {
-			yLabel = rsmd.getColumnLabel(1);
-		}
-		o.setYlabel(yLabel);
 		o.setWidth(width);
 		o.setHeight(height);
 		o.setSeriesName(rsmd.getColumnLabel(2));
 		o.setBgColor(bgColor);
 		o.setShowGraphData(showGraphData);
-
-		//add drill down queries
-		Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(queryId);
-
-		//build graph dataset
-		o.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
-
-		//enable file names to contain query name
-		//set base file name
-		java.util.Date today = new java.util.Date();
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-		String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtDBCP.getRandomString();
-		filename = ArtDBCP.cleanFileName(filename);
-		request.setAttribute("baseFileName", filename);
-
-		//allow direct url not to need _query_id
-		request.setAttribute("queryType", new Integer(queryType));
-
-		//allow use of both QUERY_ID and queryId in direct url
-		request.setAttribute("queryId", new Integer(queryId));
 
 		return o;
 	}
@@ -408,6 +381,12 @@ public class QueryExecute extends HttpServlet {
 			response.setHeader("Cache-control", "no-cache");
 		}
 
+		// check if output is being displayed within the showparams page
+		boolean isInline = false;
+		if (request.getParameter("_isInline") != null) {
+			isInline = true;
+		}
+
 		PrintWriter out = null; // this will be initialized according to the content type of the view mode
 		ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
@@ -431,7 +410,6 @@ public class QueryExecute extends HttpServlet {
 
 			//get query details. don't declare query variables at class level. causes issues with dashboards            
 			int queryId = 0;
-			int queryGroupId;
 			int queryType;
 			String queryName;
 			String xaxisLabel;
@@ -454,7 +432,6 @@ public class QueryExecute extends HttpServlet {
 				aq.create(conn, queryId);
 
 				queryName = aq.getName();
-				queryGroupId = aq.getGroupId();
 				queryType = aq.getQueryType();
 				xaxisLabel = aq.getXaxisLabel();
 				yaxisLabel = aq.getYaxisLabel();
@@ -472,7 +449,7 @@ public class QueryExecute extends HttpServlet {
 			request.setAttribute("queryName", queryName);
 
 			String viewMode = request.getParameter("viewMode");
-			if (viewMode == null || viewMode.equals("default")) {
+			if (viewMode == null || StringUtils.equalsIgnoreCase(viewMode, "default")) {
 				if (queryType < 0) {
 					//graph
 					viewMode = "graph";
@@ -497,13 +474,13 @@ public class QueryExecute extends HttpServlet {
 			 * Find if output allows this servlet to print the header&footer
 			 * (flush active or not)
 			 */
-			if (viewMode.toUpperCase().equals("SCHEDULE")) {
+			if (StringUtils.equalsIgnoreCase(viewMode, "SCHEDULE")) {
 				// forward to the editJob page
 				ctx.getRequestDispatcher("/user/editJob.jsp").forward(request, response);
 				return; // a return is needed otherwise the flow would proceed!
-			} else if (viewMode.toUpperCase().equals("GRAPH") || viewMode.toUpperCase().equals("PDFGRAPH") || viewMode.toUpperCase().equals("PNGGRAPH")) {
+			} else if (StringUtils.containsIgnoreCase(viewMode, "GRAPH")) {
 				isFlushEnabled = false; // graphs are created in memory and displayed by showGraph.jsp page
-			} else if (viewMode.toUpperCase().equals("HTMLREPORT")) {
+			} else if (StringUtils.equalsIgnoreCase(viewMode, "HTMLREPORT")) {
 				response.setContentType("text/html; charset=UTF-8");
 				out = response.getWriter();
 			} else if (queryType == 115 || queryType == 116 || queryType == 117 || queryType == 118) {
@@ -545,6 +522,12 @@ public class QueryExecute extends HttpServlet {
 					// the view mode drives if this servlet uses the std header&footer,
 					// if false the view mode needs to take care of all the output
 					isFlushEnabled = o.isDefaultHtmlHeaderAndFooterEnabled();
+
+					if (StringUtils.equalsIgnoreCase(viewMode, "htmlPlain") && isInline) {
+						//display query header and footer for htmlplain output inline in showparams page
+						isFlushEnabled = true;
+					}
+
 					if (isFragment) {
 						isFlushEnabled = false; // disable in any case header&footer if isFragment is true
 					}
@@ -634,7 +617,7 @@ public class QueryExecute extends HttpServlet {
 					 * P3_month = 3, P3_year=2008)
 					 *
 					 * The first step is to build the parameter lists
-                     ****************************************************************************
+					 * ***************************************************************************
 					 */
 					probe = 40;
 
@@ -654,6 +637,12 @@ public class QueryExecute extends HttpServlet {
 					 * request and fill the hashmaps that store the parameters
 					 */
 					Map<Integer, ArtQueryParam> displayParams = ParameterProcessor.processParameters(request, inlineParams, multiParams, queryId, htmlParams);
+					
+					//set showparams flag. flag not only determined by presense of _showParams. may also be true if query set to always show params
+					boolean showParams=false;
+					if(displayParams!=null){
+						showParams=true;
+					}
 
 					// Set the hash tables in the pq object
 					pq.setMultiParams(multiParams);
@@ -662,8 +651,7 @@ public class QueryExecute extends HttpServlet {
 					pq.setHtmlParams(htmlParams);
 
 					/*
-					 * END
-                     ************************************
+					 * END ***********************************
 					 */
 
 					probe = 50;
@@ -671,7 +659,7 @@ public class QueryExecute extends HttpServlet {
 					int resultSetType;
 					if (queryType == 116 || queryType == 118) {
 						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset in order to determine record count
-					} else if (viewMode.equals("HTMLREPORT")) {
+					} else if (StringUtils.equalsIgnoreCase(viewMode, "HTMLREPORT")) {
 						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 					} else if (queryType < 0) {
 						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
@@ -679,7 +667,7 @@ public class QueryExecute extends HttpServlet {
 						resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 					}
 
-					// JavaScript code to write on status bar
+					// JavaScript code to write status
 					if (isFlushEnabled) {
 						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryExecuting") + "\");</script>");
 						out.flush();
@@ -691,8 +679,7 @@ public class QueryExecute extends HttpServlet {
 					/*
 					 * *************
 					 ***************
-					 *****RUN IT**** **************
-                     **************
+					 *****RUN IT**** ************** *************
 					 */
 
 					isQuery = pq.execute(resultSetType);
@@ -708,6 +695,16 @@ public class QueryExecute extends HttpServlet {
 
 					endQueryTime = new java.util.Date().getTime();
 
+
+					//get final sql with parameter placeholders replaced with parameter values
+					String finalSQL = pq.getFinalSQL();
+
+					//determine if final sql should be shown
+					boolean showSQL = false;
+					if (request.getParameter("_showSQL") != null) {
+						showSQL = true;
+					}
+
 					//set output object properties if required
 					if (o != null) {
 						try {
@@ -718,7 +715,20 @@ public class QueryExecute extends HttpServlet {
 							o.setQueryName(queryName);
 							o.setFileUserName(username);
 							o.setExportPath(baseExportPath);
-							o.setDisplayParameters(displayParams);
+
+							//don't set displayparams for html view modes. parameters will be displayed by this servlet
+							if (!StringUtils.containsIgnoreCase(viewMode, "html")) {
+								o.setDisplayParameters(displayParams);
+							}
+
+							//ensure htmlplain output doesn't display parameters if inline
+							if (o instanceof htmlPlainOutput) {
+								htmlPlainOutput hpo = (htmlPlainOutput) o;
+								hpo.setDisplayInline(isInline);
+								
+								//ensure parameters are displayed if not in inline mode
+								hpo.setDisplayParameters(displayParams);
+							}
 
 						} catch (Exception e) {
 							logger.error("Error setting properties for class: {}", viewMode, e);
@@ -728,7 +738,7 @@ public class QueryExecute extends HttpServlet {
 						}
 					}
 
-					// JavaScript code to write status information
+					// display status information, parameters and final sql
 					if (isFlushEnabled) {
 						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
 						String description = "";
@@ -736,6 +746,17 @@ public class QueryExecute extends HttpServlet {
 							description = " :: " + shortDescription;
 						}
 						out.println("<script language=\"JAVASCRIPT\">writeInfo(\"<b>" + queryName + "</b>" + description + " :: " + startTimeString + "\");</script>");
+
+						//display parameters
+						if (showParams) {
+							ArtOutHandler.displayParameters(out, displayParams);
+						}
+
+						//display final sql
+						if (showSQL) {
+							ArtOutHandler.displayFinalSQL(out, finalSQL);
+						}
+
 						out.flush();
 					}
 					probe = 90;
@@ -789,7 +810,7 @@ public class QueryExecute extends HttpServlet {
 							rsmd = rs.getMetaData();
 
 							try {
-								if (viewMode.equals("HTMLREPORT")) {
+								if (StringUtils.equalsIgnoreCase(viewMode, "HTMLREPORT")) {
 									/*
 									 * HTML REPORT
 									 */
@@ -801,18 +822,59 @@ public class QueryExecute extends HttpServlet {
 									}
 									numberOfRows = htmlReportOut(out, rs, rsmd, splitCol);
 									probe = 100;
-								} else if (viewMode.toUpperCase().equals("GRAPH") || viewMode.toUpperCase().equals("PDFGRAPH") || viewMode.toUpperCase().equals("PNGGRAPH")) {
+								} else if (StringUtils.containsIgnoreCase(viewMode, "GRAPH")) {
 									/*
 									 * GRAPH
 									 */
 									probe = 105;
-									ArtGraph og = artGraphOut(rs, rsmd, request, xaxisLabel, yaxisLabel, graphOptions, shortDescription, queryId, queryType, queryName, username, inlineParams, multiParams);
-									og.setDisplayParameters(displayParams);
+									
+									//do initial preparation of graph object
+									ArtGraph og = artGraphOut(rsmd, request, graphOptions, shortDescription, queryType);
 
+									//set some graph properties
+									og.setXlabel(xaxisLabel);
+									if (yaxisLabel == null) {
+										yaxisLabel = rsmd.getColumnLabel(1);
+									}
+									og.setYlabel(yaxisLabel);
+
+									if (showParams) {
+										request.setAttribute("showParams", "true");
+										og.setDisplayParameters(displayParams);
+									}
+
+									//add drill down queries
+									Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(queryId);
+
+									//build graph dataset
+									og.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
+
+									//set other properties relevant for the graph display
+									if (showSQL) {
+										request.setAttribute("showSQL", "true");
+										request.setAttribute("finalSQL", finalSQL);
+									}
+
+									//enable file names to contain query name
+									//set base file name
+									java.util.Date today = new java.util.Date();
+									SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
+									String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtDBCP.getRandomString();
+									filename = ArtDBCP.cleanFileName(filename);
+									request.setAttribute("baseFileName", filename);
+
+									//allow direct url not to need _query_id
+									request.setAttribute("queryType", new Integer(queryType));
+
+									//allow use of both QUERY_ID and queryId in direct url
+									request.setAttribute("queryId", new Integer(queryId));
+
+									//pass graph object
 									request.setAttribute("artGraph", og);
+
 									probe = 110;
 								} else {
-									if (queryType==101 || queryType==102) {
+									if (queryType == 101 || queryType == 102) {
 										/*
 										 * CROSSTAB
 										 */
@@ -824,7 +886,7 @@ public class QueryExecute extends HttpServlet {
 
 										//add support for drill down queries
 										Map<Integer, DrilldownQuery> drilldownQueries = null;
-										if (viewMode.indexOf("html") >= 0) {
+										if (StringUtils.containsIgnoreCase(viewMode, "html")) {
 											//only drill down for html output. drill down query launched from hyperlink                                            
 											drilldownQueries = aq.getDrilldownQueries(queryId);
 										}
@@ -836,7 +898,7 @@ public class QueryExecute extends HttpServlet {
 							} catch (ArtException e) { // "known" exceptions
 								throw new ArtException(e.getMessage());
 							} catch (Exception e) {    // other "unknown" exceptions                                
-								str = "#E " + username + " - " + request.getRemoteAddr() + " - " + session.getId() + " " + " # " + queryGroupId + " - " + queryId;
+								str = "Error while running query ID " + queryId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
 								logger.error("Error: {}", str, e);
 								throw new ArtException(messages.getString("queryFetchException") + " <br>" + messages.getString("step") + ": " + probe + "<br>" + messages.getString("details") + "<code> " + e + "</code><br>" + messages.getString("contactSupport") + "</p>");
 							}
@@ -877,28 +939,24 @@ public class QueryExecute extends HttpServlet {
 					ArtDBCP.log(username, "object", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
 					probe = 200;
 
-					if (viewMode.toUpperCase().equals("GRAPH")) {
-						// Forward to the rendering page
-						request.setAttribute("outputToFile", "nofile");
-						ctx.getRequestDispatcher("/user/showGraph.jsp").forward(request, response);
-					}
+					if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
+						//graph. set output format and forward to the rendering page
+						if (StringUtils.equalsIgnoreCase(viewMode, "GRAPH")) {
+							//only display graph on the browser
+							request.setAttribute("outputToFile", "nofile");
+						} else if (StringUtils.equalsIgnoreCase(viewMode, "PDFGRAPH")) {
+							//additionally generate graph in a pdf file
+							request.setAttribute("outputToFile", "pdf");
+						} else if (StringUtils.equalsIgnoreCase(viewMode, "PNGGRAPH")) {
+							//additionally generate graph as a png file
+							request.setAttribute("outputToFile", "png");
+						}
 
-					//graph to pdf
-					if (viewMode.toUpperCase().equals("PDFGRAPH")) {
-						// Forward to the rendering page
-						request.setAttribute("outputToFile", "pdf");
-						ctx.getRequestDispatcher("/user/showGraph.jsp").forward(request, response);
-					}
-
-					//graph to png
-					if (viewMode.toUpperCase().equals("PNGGRAPH")) {
-						// Forward to the rendering page
-						request.setAttribute("outputToFile", "png");
 						ctx.getRequestDispatcher("/user/showGraph.jsp").forward(request, response);
 					}
 
 				} catch (Exception e) { // we can't dispatch this error to a new page since we need to know if this servlet has already flushed something                    
-					str = "Error while running query ID " + queryId + ", execution for user " + username + ", for session " + session.getId() + ", at position: " + probe;
+					str = "Error while running query ID " + queryId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
 					logger.error("Error: {}", str, e);
 
 					request.setAttribute("errorMessage", messages.getString("anException") + "<hr>" + messages.getString("step") + ":" + probe + "<br><code>" + e + "</code>");

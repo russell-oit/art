@@ -100,67 +100,11 @@ public class htmlDataTableOutput implements ArtOutputInterface {
         out.println("	} );");
         out.println("</script>	");
 
-        // print parameters if they are available
-        if (displayParams != null && displayParams.size()>0) {
-            out.println("<table border=\"0\" width=\"90%\"><tr><td>");
-            out.println("<div id=\"param_div\" width=\"90%\" align=\"center\" class=\"qeparams\">");
-            // decode the parameters handling multi ones
-            Iterator it = displayParams.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				ArtQueryParam param = (ArtQueryParam) entry.getValue();
-				String paramName = param.getName();
-				Object pValue = param.getParamValue();
-				String outputString;
+		//display parameters
+        ArtOutHandler.displayParameters(out, displayParams);
 
-				if (pValue instanceof String) {
-					String paramValue = (String) pValue;
-					outputString = paramName + ": " + paramValue + " <br> "; //default to displaying parameter value
-
-					if (param.usesLov()) {
-						//for lov parameters, show both parameter value and display string if any
-						Map<String, String> lov = param.getLovValues();
-						if (lov != null) {
-							//get friendly/display string for this value
-							String paramDisplayString = lov.get(paramValue);
-							if (!StringUtils.equals(paramValue, paramDisplayString)) {
-								//parameter value and display string differ. show both
-								outputString = paramName + ": " + paramDisplayString + " (" + paramValue + ") <br> ";
-							}
-						}
-					}
-					out.println(outputString);
-				} else if (pValue instanceof String[]) { // multi
-					String[] paramValues = (String[]) pValue;
-					outputString = paramName + ": " + StringUtils.join(paramValues, ", ") + " <br> "; //default to showing parameter values only
-
-					if (param.usesLov()) {
-						//for lov parameters, show both parameter value and display string if any
-						Map<String, String> lov = param.getLovValues();
-						if (lov != null) {
-							//get friendly/display string for all the parameter values
-							String[] paramDisplayStrings = new String[paramValues.length];
-							for (int i = 0; i < paramValues.length; i++) {
-								String value = paramValues[i];
-								String display = lov.get(value);
-								if (!StringUtils.equals(display, value)) {
-									//parameter value and display string differ. show both
-									paramDisplayStrings[i] = display + " (" + value + ")";
-								} else {
-									paramDisplayStrings[i] = value;
-								}
-							}
-							outputString = paramName + ": " + StringUtils.join(paramDisplayStrings, ", ") + " <br> ";
-						}
-					}
-					out.println(outputString);
-				}
-			}      
-            out.println("</div>");
-            out.println("</td></tr></table>");
-        }
-
-        out.println("<div style=\"border: 3px solid white\"><table  class=\"display\" id=\"" + tableId + "\">");
+		//start results table
+        out.println("<div style=\"border: 3px solid white\"><table class=\"display\" id=\"" + tableId + "\">");
         out.println(" <thead><tr>");
     }
 

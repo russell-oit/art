@@ -175,34 +175,10 @@ boolean hasParams=false;
 
                         </SELECT>
                         <br>
-                         <% if(hasParams){
-                             if(StringUtils.equals(showParameters,"N")) { %>
-                                <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
-                            <%} else if(StringUtils.equals(showParameters,"Y")) { %>
-                                <input type="checkbox" name="_showParams" checked> <%=messages.getString("showParams")%>
-                            <%} else if(StringUtils.equals(showParameters,"A")) { %>
-                                <input type="hidden" name="_showParams" value="true"> 
-                            <%}
-                          }                        
-                        %>
-
+                        
                         <%
                         break;
-                        case 103: // normal html
-                        case 102: // xtab html
-                         if(hasParams){
-                             if(StringUtils.equals(showParameters,"N")) { %>
-                                <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
-                            <%} else if(StringUtils.equals(showParameters,"Y")) { %>
-                                <input type="checkbox" name="_showParams" checked> <%=messages.getString("showParams")%>
-                            <%} else if(StringUtils.equals(showParameters,"A")) { %>
-                                <input type="hidden" name="_showParams" value="true"> 
-                            <%}
-                          }                        
-                        %>
-
-                        <%
-						break;
+                        
 						case 115: //jasper report
                         case 116:
                         %>
@@ -217,6 +193,7 @@ boolean hasParams=false;
                             <% } %>
 
                         </SELECT>
+							<br>
                         <%
                         break;
 					case 117: //jxls spreadsheet
@@ -229,13 +206,16 @@ boolean hasParams=false;
 					<OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
 					 <% } %>
 						 </SELECT>
+						 <br>
 						 <%
 						 break;
 					  						
 					   }//end switch
 
 
-					   if (queryType<0) { %>
+					   if (queryType<0) {
+						   //graph
+						 %>
                         <small><i><%=messages.getString("graphType")%></i>
                             <%=messages.getString("graph"+queryType)%>                            
                             <br><i><%=messages.getString("graphSizeWH")%></i>
@@ -260,7 +240,14 @@ boolean hasParams=false;
 						<input type="checkbox" name="_showGraphData" <%=(aq.isShowGraphData()?"checked":"")%> /><%=messages.getString("graphData")%>
 
                         <br><br>
-                         <% if(hasParams){
+                         
+							<%
+                         }
+						   
+						   //display show parameters and show sql options
+						   if (!(queryType == 110 || queryType==112 || queryType==113 || queryType==114 || queryType==115 || queryType==117)) {
+							//don't show these options for dashboards, pivot tables, jasper template queries, jxls template queries
+							   if(hasParams){
                              if("N".equals(showParameters)) { %>
                                 <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
                             <%} else if("Y".equals(showParameters)) { %>
@@ -268,8 +255,14 @@ boolean hasParams=false;
                             <%} else if("A".equals(showParameters)) { %>
                                 <input type="hidden" name="_showParams" value="true"> 
                             <%}
-                          }                        
-                         }
+                          }  
+							   if(adminLevel>5) {
+                        %>
+						&nbsp;<input type="checkbox" name="_showSQL"> <%=messages.getString("showSQL")%>
+												
+                        <%
+							}
+							   						   }
                         %>
 
                     </td>

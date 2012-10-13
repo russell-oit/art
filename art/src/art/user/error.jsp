@@ -6,7 +6,7 @@
  String headerOff = (String) request.getAttribute("headerOff");
  
  if(msg==null){
-        msg=request.getParameter("MSG");
+     msg=request.getParameter("MSG");
 }
  
  boolean isInline=false;
@@ -14,7 +14,7 @@ if(request.getParameter("_isInline")!=null){
 	isInline=true;
 }
 
- if (headerOff == null) {
+ if (headerOff == null &&!isInline) {
 %>
 <%@ include file ="header.jsp" %>
 <%}%>
