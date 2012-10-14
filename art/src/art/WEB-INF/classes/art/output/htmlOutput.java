@@ -3,6 +3,7 @@
  */
 package art.output;
 
+import art.servlets.ArtDBCP;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -126,7 +127,7 @@ public class htmlOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("<td class=\"" + (oddline ? "qeoddLeft" : "qeevenLeft") + "\" >" + d + "</td>");
+		out.println("<td class=\"" + (oddline ? "qeoddLeft" : "qeevenLeft") + "\" >" + ArtDBCP.getDateString(d) + "</td>");
 	}
 
 	@Override

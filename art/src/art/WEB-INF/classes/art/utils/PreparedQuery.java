@@ -1923,13 +1923,13 @@ public class PreparedQuery {
 					}
 					jasperInlineParams.put(paramName, Double.parseDouble(paramValue));
 				} else if (paramDataType.equals("DATE")) {
-					dateValue = setDefaultValueDate(paramValue);
+					dateValue = getDefaultValueDate(paramValue);
 					if (ps != null) {
 						ps.setDate(i, new java.sql.Date(dateValue.getTime()));
 					}
 					jasperInlineParams.put(paramName, dateValue);
 				} else if (paramDataType.equals("DATETIME")) {
-					dateValue = setDefaultValueDate(paramValue);
+					dateValue = getDefaultValueDate(paramValue);
 					if (ps != null) {
 						ps.setTimestamp(i, new java.sql.Timestamp(dateValue.getTime()));
 					}
@@ -1966,7 +1966,7 @@ public class PreparedQuery {
 	 * @param defaultValue
 	 * @return date object that corresponds to the given string
 	 */
-	public static java.util.Date setDefaultValueDate(String defaultValue) {
+	public static java.util.Date getDefaultValueDate(String defaultValue) {
 		/*
 		 * if default value has syntax "ADD DAYS|MONTHS|YEARS <integer>" or "Add
 		 * day|MoN|Year <integer>" set default value as sysdate plus an offset

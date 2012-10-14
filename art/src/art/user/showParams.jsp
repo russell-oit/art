@@ -274,7 +274,7 @@ boolean hasParams=false;
                         <%}%>
 
                         <div align="center" valign="middle">
-                            <input type="submit" onClick="javascript:return(<%= validateJS.toString()%> returnTrue() )" class="buttonup"  style="width:100px;" value="<%=messages.getString("executeQueryButton")%>">
+                            <input type="submit" name="execute" id="execute" onClick="javascript:return(<%= validateJS.toString()%> returnTrue() )" class="buttonup"  style="width:100px;" value="<%=messages.getString("executeQueryButton")%>">
                         </div>
                     </td>
                 </tr>
@@ -292,25 +292,28 @@ boolean hasParams=false;
 	
 jQuery(document).ready(function($){
 	$("#paramForm").submit(function(e){
-
+		
 		var viewMode=document.getElementById("viewMode");
 		var selectedViewMode="";
-				
+
 		if(viewMode!=null){
 			var selectedViewMode = viewMode.options[viewMode.selectedIndex].value;
 		}
-		
+
 		var qt=<%=queryType%>;
-		
+
 		if(selectedViewMode!="SCHEDULE" && !(qt==112 || qt==113 || qt==114)){
 			//display results inline. don't display inline for scheduling or pivot tables			
 			e.preventDefault();
 
 			$form=$(this);
-									
+			
+			//disable execute button
+			$('input[type="submit"]').attr('disabled','disabled');
+
 			$("#response").load("ExecuteQuery",$form.serialize(),function(responseText, statusText, xhr){
 				//jquery load has finished
-								
+
 				if(statusText=="success"){
 					//make htmlgrid output sortable
 					if(selectedViewMode=="htmlGrid"){
@@ -323,9 +326,12 @@ jQuery(document).ready(function($){
 				} else if(statusText=="error"){
 					alert("An error occurred: " + xhr.status + " - " + xhr.statusText);
 				}
-								
+				
+				//enable submit button
+				$('input[type="submit"]').removeAttr('disabled');
+
 			});	
-									
+
 		}
 
 });  

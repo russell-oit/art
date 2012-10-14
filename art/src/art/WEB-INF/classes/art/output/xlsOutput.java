@@ -252,7 +252,7 @@ public class xlsOutput implements ArtOutputInterface {
     public void addCellDate(java.util.Date d) {
         cell = row.createCell(cellNumber++);
         if (d != null) {
-            cell.setCellValue(d);
+            cell.setCellValue(ArtDBCP.getDateString(d));
             cell.setCellStyle(dateStyle);
         }
     }

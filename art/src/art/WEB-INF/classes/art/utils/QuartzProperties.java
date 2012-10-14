@@ -222,7 +222,7 @@ public class QuartzProperties {
                             props.setProperty(VALIDATION_QUERY, "select 1");
                         }
                 }
-            }
+            } 
         } catch (Exception e) {
             props = null;
             logger.error("Error", e);

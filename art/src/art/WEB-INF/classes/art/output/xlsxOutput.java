@@ -272,7 +272,7 @@ public class xlsxOutput implements ArtOutputInterface {
 				//output blank string
 				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
 			} else {
-				sw.createCell(cellNumber++, d, styles.get("date").getIndex());
+				sw.createCell(cellNumber++, ArtDBCP.getDateString(d), styles.get("date").getIndex());
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);

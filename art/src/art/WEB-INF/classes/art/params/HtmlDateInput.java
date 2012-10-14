@@ -69,7 +69,7 @@ public class HtmlDateInput implements ParamInterface {
         }
 
         //convert default value to a valid date string
-        Date defaultDate = PreparedQuery.setDefaultValueDate(defaultValue);
+        Date defaultDate = PreparedQuery.getDefaultValueDate(defaultValue);
         SimpleDateFormat dateFormatter = new SimpleDateFormat(defaultDateFormat);
         this.defaultValue = dateFormatter.format(defaultDate);
     }

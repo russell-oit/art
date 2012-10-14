@@ -165,23 +165,25 @@ while (names.hasMoreElements()) {
 		QuartzProperties qp=new QuartzProperties();
 		Properties props=qp.GetProperties();
 
-		//start quartz scheduler
-		SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
-		scheduler = schedulerFactory.getScheduler();
-		
-		if (ArtDBCP.isSchedulingEnabled()){
-			scheduler.start();
-		}
-		else {
-			scheduler.standby();
-		}
+		if(props!=null){
+			//start quartz scheduler
+			SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
+			scheduler = schedulerFactory.getScheduler();
 
-		//save scheduler, to make it accessible throughout the application
-		ArtDBCP.setScheduler(scheduler);
+			if (ArtDBCP.isSchedulingEnabled()){
+				scheduler.start();
+			}
+			else {
+				scheduler.standby();
+			}
 
-		//migrate jobs to quartz, if any exist that require migrating
-		ArtJob aj=new ArtJob();
-		aj.migrateJobsToQuartz();
+			//save scheduler, to make it accessible throughout the application
+			ArtDBCP.setScheduler(scheduler);
+
+			//migrate jobs to quartz, if any exist that require migrating
+			ArtJob aj=new ArtJob();
+			aj.migrateJobsToQuartz();
+		}
 	}
 	
 	//register pdf font if not already registered

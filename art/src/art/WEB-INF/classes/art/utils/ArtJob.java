@@ -2324,7 +2324,7 @@ public class ArtJob implements Job {
 							} else {
 								dateFormat = "yyyy-MM-dd HH:mm:ss";
 							}
-							java.util.Date defaultDate = PreparedQuery.setDefaultValueDate(value);
+							java.util.Date defaultDate = PreparedQuery.getDefaultValueDate(value);
 							SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 							value = dateFormatter.format(defaultDate);
 

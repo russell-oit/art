@@ -36,6 +36,7 @@ import art.utils.Encrypter;
 import com.lowagie.text.FontFactory;
 import java.io.File;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -47,8 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class that initializes datasource connections and holds global
- * variables.
+ * Class that initializes datasource connections and holds global variables.
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -80,8 +80,11 @@ public class ArtDBCP extends HttpServlet {
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
 	private static boolean pdfFontEmbedded = false; //determines if custom font should be embedded in the generated pdf
-	
-	
+	private static final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
+	private static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
+	private static String dateFormat = DEFAULT_DATE_FORMAT; //for date fields, format of date portion
+	private static String timeFormat = DEFAULT_TIME_FORMAT; //for date fields, format of time portion
+
 	/**
 	 * {@inheritDoc}
 	 *
@@ -97,7 +100,7 @@ public class ArtDBCP extends HttpServlet {
 
 		ctx = getServletConfig().getServletContext();
 
-		ArtDBCPInit();		
+		ArtDBCPInit();
 	}
 
 	/**
@@ -166,6 +169,18 @@ public class ArtDBCP extends HttpServlet {
 				pdfFontEmbedded = true;
 			}
 
+			//set date format
+			dateFormat = ap.getProp("date_format");
+			if(StringUtils.isBlank(dateFormat)){
+				dateFormat=DEFAULT_DATE_FORMAT;
+			}
+
+			//set time format
+			timeFormat = ap.getProp("time_format");
+			if(StringUtils.isBlank(timeFormat)){
+				timeFormat=DEFAULT_TIME_FORMAT;
+			}
+
 			artSettingsLoaded = true;
 
 		} else {
@@ -189,11 +204,11 @@ public class ArtDBCP extends HttpServlet {
 		defaultMaxRows = Integer.parseInt(ctx.getInitParameter("defaultMaxRows"));
 		maxRunningQueries = Integer.parseInt(ctx.getInitParameter("maxNumberOfRunningQueries"));
 
-		if (StringUtils.equals(ctx.getInitParameter("versionType"),"light")) {
+		if (StringUtils.equals(ctx.getInitParameter("versionType"), "light")) {
 			artFullVersion = false;
 		}
 
-		if (StringUtils.equals(ctx.getInitParameter("enableJobScheduling"),"false")) {
+		if (StringUtils.equals(ctx.getInitParameter("enableJobScheduling"), "false")) {
 			schedulingEnabled = false;
 		}
 
@@ -210,7 +225,7 @@ public class ArtDBCP extends HttpServlet {
 
 		//set art.properties file path
 		artPropertiesFilePath = appPath + sep + "WEB-INF" + sep + "art.properties";
-		
+
 		//Get user view modes from web.xml file. if a view mode is not in the user list, then it's hidden
 		StringTokenizer stCode = new StringTokenizer(ctx.getInitParameter("userViewModesList"), ",");
 		String token;
@@ -591,8 +606,8 @@ public class ArtDBCP extends HttpServlet {
 	}
 
 	/**
-	 * Return a connection to the datasource with a given ID from the
-	 * connection pool.
+	 * Return a connection to the datasource with a given ID from the connection
+	 * pool.
 	 *
 	 * @param i id of datasource. 0 = ART repository.
 	 * @return connection to datasource or null if connection doesn't exist
@@ -640,7 +655,7 @@ public class ArtDBCP extends HttpServlet {
 					for (Integer key : dataSources.keySet()) {
 						DataSource ds = dataSources.get(key);
 						if (ds != null) {
-							if (StringUtils.equalsIgnoreCase(name,ds.getName())) {
+							if (StringUtils.equalsIgnoreCase(name, ds.getName())) {
 								//this is the required datasource. get connection and exit loop
 								conn = ds.getConnection();
 								break;
@@ -940,5 +955,48 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static String getRandomString() {
 		return "-" + RandomStringUtils.randomAlphanumeric(10);
+	}
+
+	/**
+	 * Get string to be displayed in query output for a date field
+	 * @param dt
+	 * @return 
+	 */
+	public static String getDateString(java.util.Date dt) {
+		String dateString;
+
+		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS"); //use to check if time component is 0
+		SimpleDateFormat df = new SimpleDateFormat(dateFormat);
+		SimpleDateFormat dtf = new SimpleDateFormat(dateFormat + " " + timeFormat);
+		
+		if (dt==null) {
+			dateString="";
+		} else if (zf.format(dt).equals("00:00:00.000")) {
+			//time component is 0. don't display time component
+			dateString= df.format(dt);
+		} else {
+			//display both date and time
+			dateString= dtf.format(dt);
+		}
+		
+		return dateString;
+	}
+	
+	/**
+	 * Get a sort key string to be used for sorting dates in htmlgrid output
+	 * @param dt
+	 * @return 
+	 */
+	public static String getSortKey(java.util.Date dt){
+		String sortKey;
+		
+		if(dt==null){
+			sortKey="null";
+		} else {
+			SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss:SSS");
+			sortKey=sf.format(dt);
+		}
+		
+		return sortKey;
 	}
 }

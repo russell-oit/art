@@ -17,7 +17,7 @@
   }
   
   //NOTE: the html element names correspond to art setting values
-  //if they are changed, code that uses on those settings needs to be changed
+  //if they are changed, code that uses those settings needs to be changed
 
   String  administrator , smtp_server, smtp_username, smtp_password,
           art_username, art_password, art_jdbc_url, art_jdbc_driver, art_testsql, art_pooltimeout, msg;
@@ -43,6 +43,10 @@
 	 String pdf_font_file; //full path to a font file e.g. .ttf that contains the font to be used
 	 String pdf_font_encoding; //font encoding to be used
 	 String pdf_font_embedded; //whether font should be embedded in the generated pdf or not. embedding results in much larger files
+	 
+	 //new properties to enable custom date formats in query output
+	 String date_format;
+	 String time_format;
 
 
 String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
@@ -157,7 +161,17 @@ if(!propsFile.exists()){
 	}
 	pdf_font_embedded=ap.getProp("pdf_font_embedded");
 	if(pdf_font_embedded==null){
-		pdf_font_embedded="";
+		pdf_font_embedded="no";
+	}
+	
+	//new properties for custom date formats
+	date_format=ap.getProp("date_format");
+	if(date_format==null){
+		date_format="dd-MMM-yyyy";
+	}
+	time_format=ap.getProp("time_format");
+	if(time_format==null){
+		time_format="HH:mm:ss";
 	}
 
   } else {        
@@ -203,6 +217,9 @@ if(!propsFile.exists()){
 	pdf_font_encoding="";
 	pdf_font_embedded="no";
 
+	date_format="dd-MMM-yyyy";
+	time_format="HH:mm:ss";
+	
     %>
 	
     <p>
@@ -523,6 +540,32 @@ if(!propsFile.exists()){
 	   <%
 	   }
 	   %>
+	   
+	    <tr>
+        <td class="attr">Date Format</td>
+        <td class="data">
+			<input type="text" name="date_format" size="40" maxlength="30" value="<%=date_format%>">
+			<%
+			msg = "In query output, the format of the date portion of date fields" +
+					"\\n\\nExamples: \\ndd-MMM-yyyy (02-Aug-2012)\\ndd/MM/yyyy (02/08/2012)" +
+					"\\n\\nFormat strings are case sensitive";
+			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+	   
+	   <tr>
+        <td class="attr">Time Format</td>
+        <td class="data">
+			<input type="text" name="time_format" size="40" maxlength="20" value="<%=time_format%>">
+			<%
+			msg = "In query output, the format of the time portion of date fields" +
+					"\\n\\nExamples:\\nHH:mm:ss (21:59:59)\\nh:mm:ss.SSS a (9:59:59.786 PM)" +
+					"\\n\\nFormat strings are case sensitive";
+			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
 
    </table>
 	<br><br>

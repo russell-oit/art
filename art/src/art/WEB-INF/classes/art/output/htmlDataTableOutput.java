@@ -3,12 +3,11 @@
  */
 package art.output;
 
+import art.servlets.ArtDBCP;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.util.Iterator;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * JQuery DataTables html output mode
@@ -89,7 +88,11 @@ public class htmlDataTableOutput implements ArtOutputInterface {
     @Override
     public void beginHeader() {
         /* Code for datatables */
-        String props = "{aaSorting: []}";//{\"sPaginationType\":\"full_numbers\"}";
+        String props = "{aaSorting: []"
+				+ ", \"iDisplayLength\": 10"
+				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]"
+				+ "}";//{\"sPaginationType\":\"full_numbers\"}";
+		
         out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/datatables.css\" /> ");
         out.println("<script type=\"text/javascript\" language=\"javascript\" src=\"../js/jquery.js\"></script>");
         out.println("<script type=\"text/javascript\" language=\"javascript\" src=\"../js/jquery.dataTables.min.js\"></script>");

@@ -207,7 +207,7 @@ public class tsvZipOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		exportFileStrBuf.append("" + d + "\t");
+		exportFileStrBuf.append("" + ArtDBCP.getDateString(d) + "\t");
 	}
 
 	@Override

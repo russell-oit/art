@@ -3,12 +3,11 @@
  */
 package art.output;
 
+import art.servlets.ArtDBCP;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
-import java.util.Iterator;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Grid html output mode
@@ -132,7 +131,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td style=\"text-align: left\">" + d + "</td>");
+		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + ArtDBCP.getSortKey(d) + "\" >" + ArtDBCP.getDateString(d) + "</td>");
 	}
 
 	@Override

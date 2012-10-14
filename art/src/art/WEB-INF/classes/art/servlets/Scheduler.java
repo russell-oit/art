@@ -18,17 +18,14 @@
  */
 /**
  *
- * Description:
- *              Delete export and job files older than XX minutes
-
+ * Description: Delete export and job files older than XX minutes
  *
- * TODO:	Find a better way to avoid user to read all available
- *              export files. The workaround is to have a dummy index.html
-file so that the web server does not display all the content
-Anyway, this may not work on all servlet engine
  *
- * @author Enrico Liboni
- * @mail   enrico(at)computer.org
+ * TODO:	Find a better way to avoid user to read all available export files. The
+ * workaround is to have a dummy index.html file so that the web server does not
+ * display all the content Anyway, this may not work on all servlet engine
+ *
+ * @author Enrico Liboni @mail enrico(at)computer.org
  */
 package art.servlets;
 
@@ -50,324 +47,333 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to delete export and job files older than x minutes.
- * Also clears the mondrian cache every x hours.
- * 
+ * Class to delete export and job files older than x minutes. Also clears the
+ * mondrian cache every x hours.
+ *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
 public class Scheduler extends HttpServlet {
-    
-    private static final long serialVersionUID = 1L;
 
-    final static Logger logger = LoggerFactory.getLogger(Scheduler.class);
-    
-    static long INTERVAL_MINUTES = 5; // run clean every x minutes
-    static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
-    long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
-    long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
-    String base_export_path, art_username, art_password, art_jdbc_driver, art_jdbc_url;
-    final String MONDRIAN_CACHE_CLEARED_FILE_NAME = "mondrian-cache-cleared.txt"; //file to indicate when the mondrian cache was last cleared
-    
-    Timer t;
+	private static final long serialVersionUID = 1L;
+	final static Logger logger = LoggerFactory.getLogger(Scheduler.class);
+	static long INTERVAL_MINUTES = 5; // run clean every x minutes
+	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
+	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
+	long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
+	String base_export_path, art_username, art_password, art_jdbc_driver, art_jdbc_url;
+	final String MONDRIAN_CACHE_CLEARED_FILE_NAME = "mondrian-cache-cleared.txt"; //file to indicate when the mondrian cache was last cleared
+	Timer t;
 
-    /**
-     * Initialize quartz scheduler and clean files timer.
-     * 
-     * @param config servlet config
-     * @throws ServletException
-     */
-    @Override
-    public void init(ServletConfig config) throws ServletException {
+	/**
+	 * Initialize quartz scheduler and clean files timer.
+	 *
+	 * @param config servlet config
+	 * @throws ServletException
+	 */
+	@Override
+	public void init(ServletConfig config) throws ServletException {
 
-        try {
-            super.init(config);
+		try {
+			super.init(config);
 
-            logger.debug("ART Scheduler starting up");
-            
-            base_export_path=ArtDBCP.getExportPath();
-            
-            boolean propsFileLoaded;
-            propsFileLoaded = loadProperties();
+			logger.debug("ART Scheduler starting up");
 
-            if (propsFileLoaded) {
-                //get quartz properties object to use to instantiate a scheduler
-                QuartzProperties qp = new QuartzProperties();
-                Properties props = qp.GetProperties();
+			base_export_path = ArtDBCP.getExportPath();
 
-                //start quartz scheduler
-                SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
-                org.quartz.Scheduler scheduler = schedulerFactory.getScheduler();
+			boolean propsFileLoaded;
+			propsFileLoaded = loadProperties();
 
-                if (ArtDBCP.isSchedulingEnabled()) {
-                    scheduler.start();
-                } else {
-                    scheduler.standby();
-                }
+			if (propsFileLoaded) {
+				//get quartz properties object to use to instantiate a scheduler
+				QuartzProperties qp = new QuartzProperties();
+				Properties props = qp.GetProperties();
 
-                //save scheduler, to make it accessible throughout the application
-                ArtDBCP.setScheduler(scheduler);
+				if (props == null) {
+					logger.warn("Quartz properties not set. Job scheduling will not be possible");
+				} else {
+					//start quartz scheduler
+					SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
+					org.quartz.Scheduler scheduler = schedulerFactory.getScheduler();
 
-                //migrate existing jobs to quartz, if any exist from previous art versions                
-                ArtJob aj = new ArtJob();
-                aj.migrateJobsToQuartz();                
-            }
+					if (ArtDBCP.isSchedulingEnabled()) {
+						scheduler.start();
+					} else {
+						scheduler.standby();
+					}
 
-            t = new Timer(this);
-            t.start();
-            
-            logger.debug("ART clean thread running");
-        } catch (Exception e) {
-            logger.error("Error", e);
-        }
-    }
+					//save scheduler, to make it accessible throughout the application
+					ArtDBCP.setScheduler(scheduler);
 
-    /**
-     * Stop quartz scheduler and clean files timer.
-     */
-    @Override
-    public void destroy() {
-
-        try {
-            if (t != null) {
-                t.interrupt();
-                
-                logger.info("ART clean thread stopped");
-            }
-
-            //shutdown quartz scheduler
-            org.quartz.Scheduler scheduler = ArtDBCP.getScheduler();
-            if (scheduler != null) {
-                scheduler.shutdown();
-                Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
-            }            
-
-        } catch (Exception e) {
-            logger.error("Error", e);
-        }
-    }
-
-    /**
-     * Load system settings from art.properties file.
-     * 
-     * @return <code>true</code> if file is found. <code>false</code> if file is not found.
-     */
-    public boolean loadProperties() {
-        
-        logger.debug("Loading art.properties");
-		
-		String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
-		File propsFile=new File(propsFilePath);
-		if(!propsFile.exists()){
-			//art.properties doesn't exit. try art.props
-			String  sep = java.io.File.separator;
-			propsFilePath=ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
-		}
-		                
-        ArtProps ap = new ArtProps();
-
-        if (ap.load(propsFilePath)) { // file exists            
-            art_username = ap.getProp("art_username");
-            art_password = ap.getProp("art_password");
-            // de-obfuscate the password
-            art_password = Encrypter.decrypt(art_password);
-
-            art_jdbc_url = ap.getProp("art_jdbc_url");
-			if(StringUtils.isBlank(art_jdbc_url)){
-				art_jdbc_url=ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+					//migrate existing jobs to quartz, if any exist from previous art versions                
+					ArtJob aj = new ArtJob();
+					aj.migrateJobsToQuartz();
+				}
 			}
-            art_jdbc_driver = ap.getProp("art_jdbc_driver");
 
-            try {
-                Class.forName(art_jdbc_driver).newInstance();
-            } catch (Exception e) {
-                logger.error("Error while loading driver for ART repository: {}", art_jdbc_driver, e);
-            }
-           
-            return true;
-        } else {
-            logger.warn("art.properties file not found. Admin should define ART settings on first logon");
-            return false;
-        }
+			t = new Timer(this);
+			t.start();
 
-    }
+			logger.debug("ART clean thread running");
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
 
-    /**
-     * Delete old export or job files.
-     */
-    public void clean() {
-        
-        logger.debug("Running clean");
+	/**
+	 * Stop quartz scheduler and clean files timer.
+	 */
+	@Override
+	public void destroy() {
 
-        try {
-            // Delete old files in the export directory
-            File exportFiles = new File(base_export_path);
-            File[] fileNames = exportFiles.listFiles();
-            long lastModified;
-            long actualTime = new java.util.Date().getTime();
-            String fileName;
-            for (int i = 0; i < fileNames.length; i++) {
-                lastModified = fileNames[i].lastModified();
-                fileName = fileNames[i].getName();
-                // Delete the file if it is older than INTERVAL_DELETE_FILES
-                // and the name is not "index.html"
-                // This is a workaround in order to avoid a user to
-                // view all the export files though the browser...
-                if ((actualTime - lastModified) > INTERVAL_DELETE_FILES) {
-                    //delete directories that may be created by jasper report html output
-                    if (fileNames[i].isDirectory()) {
-                        if (!fileName.equals("jobs")) {
-                            deleteDirectory(fileNames[i]);
-                        }
-                    } else if (!fileName.equals("index.html") && !fileName.equals(MONDRIAN_CACHE_CLEARED_FILE_NAME)) {
-                        fileNames[i].delete();
-                    }
-                }
-            }
+		try {
+			if (t != null) {
+				t.interrupt();
 
-            // Delete old files in the export/jobs directory
-            long jobFilesRetentionPeriod = (long) ArtDBCP.getPublishedFilesRetentionPeriod(); //configured file retention period in days
-            jobFilesRetentionPeriod = jobFilesRetentionPeriod * 24 * 60 * 60 * 1000; //convert period defined in days to milliseconds
+				logger.info("ART clean thread stopped");
+			}
 
-            if (jobFilesRetentionPeriod > 0) {
-                exportFiles = new File(base_export_path + "jobs/");
-                fileNames = exportFiles.listFiles();
-                for (int i = 0; i < fileNames.length; i++) {
-                    lastModified = fileNames[i].lastModified();
-                    if ((actualTime - lastModified) > jobFilesRetentionPeriod) {
-                        //delete directories that may be created by jasper report html output
-                        if (fileNames[i].isDirectory()) {
-                            deleteDirectory(fileNames[i]);
-                        } else if (!fileNames[i].getName().equals("index.html")) {
-                            fileNames[i].delete();
-                        }
-                    }
-                }
-            }
+			//shutdown quartz scheduler
+			org.quartz.Scheduler scheduler = ArtDBCP.getScheduler();
+			if (scheduler != null) {
+				scheduler.shutdown();
+				Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
+			}
 
-            //clear mondrian cache as per configuration
-            if (ArtDBCP.isArtFullVersion()) {
-                clearMondrianCache();
-            }
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
 
-        } catch (Exception e) {
-            logger.error("Error", e);
-        }
+	/**
+	 * Load system settings from art.properties file.
+	 *
+	 * @return
+	 * <code>true</code> if file is found.
+	 * <code>false</code> if file is not found.
+	 */
+	public boolean loadProperties() {
 
-    }
+		logger.debug("Loading art.properties");
 
-    /**
-     * Delete directory, including all files and subdirectories under it.
-     * 
-     * @param path directory to delete
-     * @return <code>true</code> if directory deleted. <code>false</code> otherwise.
-     */
-    private boolean deleteDirectory(File path) {
-        logger.debug("Deleting directory: {}",path);
-        
-        if (path.exists()) {
-            File[] files = path.listFiles();
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isDirectory()) {
-                    deleteDirectory(files[i]);
-                } else {
-                    files[i].delete();
-                }
-            }
-        }
-        return (path.delete());
-    }
+		String propsFilePath = ArtDBCP.getArtPropertiesFilePath();
+		File propsFile = new File(propsFilePath);
+		if (!propsFile.exists()) {
+			//art.properties doesn't exit. try art.props
+			String sep = java.io.File.separator;
+			propsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
+		}
 
-    /**
-     * clear mondrian cache according to configured cache expiry
-     */
-    private void clearMondrianCache() {
-        logger.debug("Entering clear mondrian cache");
-        
-        long mondrianCacheExpiry; //cache expiry duration in milliseconds
+		ArtProps ap = new ArtProps();
 
-        mondrianCacheExpiry = (long) ArtDBCP.getMondrianCacheExpiry();
-        mondrianCacheExpiry = mondrianCacheExpiry * 60 * 60 * 1000; //convert period defined in hours to milliseconds
+		if (ap.load(propsFilePath)) { // file exists            
+			art_username = ap.getProp("art_username");
+			art_password = ap.getProp("art_password");
+			// de-obfuscate the password
+			art_password = Encrypter.decrypt(art_password);
 
-        if (mondrianCacheExpiry > 0) {
-            boolean clearCache = false;
-            long actualTime = new java.util.Date().getTime();
-            File cacheFile = new File(base_export_path + MONDRIAN_CACHE_CLEARED_FILE_NAME);
-            if (cacheFile.exists()) {
-                //check last modified date
-                long lastModified = cacheFile.lastModified();
-                if ((actualTime - lastModified) > mondrianCacheExpiry) {
-                    clearCache = true;
-                    cacheFile.delete();
-                }
-            } else {
-                clearCache = true;
-            }
+			art_jdbc_url = ap.getProp("art_jdbc_url");
+			if (StringUtils.isBlank(art_jdbc_url)) {
+				art_jdbc_url = ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+			}
+			art_jdbc_driver = ap.getProp("art_jdbc_driver");
 
-            if (clearCache) {
-                logger.debug("Actually clearing mondrian cache");
-                
-                //clear all mondrian caches
-                java.util.Iterator<mondrian.rolap.RolapSchema> schemaIterator = mondrian.rolap.RolapSchema.getRolapSchemas();
-                while (schemaIterator.hasNext()) {
-                    mondrian.rolap.RolapSchema schema = schemaIterator.next();
-                    mondrian.olap.CacheControl cacheControl = schema.getInternalConnection().getCacheControl(null);
+			try {
+				Class.forName(art_jdbc_driver).newInstance();
+			} catch (Exception e) {
+				logger.error("Error while loading driver for ART repository: {}", art_jdbc_driver, e);
+			}
 
-                    cacheControl.flushSchemaCache();
-                }
+			return true;
+		} else {
+			logger.warn("art.properties file not found. Admin should define ART settings on first logon");
+			return false;
+		}
 
-                BufferedWriter out;
-                try {
-                    //create file that indicates when the cache was last cleared
-                    out = new BufferedWriter(new FileWriter(base_export_path + MONDRIAN_CACHE_CLEARED_FILE_NAME));
-                    java.util.Date now = new java.util.Date();
-                    out.write(now.toString());
-                    out.close();
-                } catch (Exception e) {
-                    logger.error("Error", e);
-                }
-            }
+	}
 
-        }
-    }
+	/**
+	 * Delete old export or job files.
+	 */
+	public void clean() {
 
-    /**
-     * Get the interval between file cleaning runs.
-     * 
-     * @return the interval between file cleaning runs.
-     */
-    public long getInterval() {
-        return INTERVAL;
-    }
+		logger.debug("Running clean");
+
+		try {
+			// Delete old files in the export directory
+			File exportFiles = new File(base_export_path);
+			File[] fileNames = exportFiles.listFiles();
+			long lastModified;
+			long actualTime = new java.util.Date().getTime();
+			String fileName;
+			for (int i = 0; i < fileNames.length; i++) {
+				lastModified = fileNames[i].lastModified();
+				fileName = fileNames[i].getName();
+				// Delete the file if it is older than INTERVAL_DELETE_FILES
+				// and the name is not "index.html"
+				// This is a workaround in order to avoid a user to
+				// view all the export files though the browser...
+				if ((actualTime - lastModified) > INTERVAL_DELETE_FILES) {
+					//delete directories that may be created by jasper report html output
+					if (fileNames[i].isDirectory()) {
+						if (!fileName.equals("jobs")) {
+							deleteDirectory(fileNames[i]);
+						}
+					} else if (!fileName.equals("index.html") && !fileName.equals(MONDRIAN_CACHE_CLEARED_FILE_NAME)) {
+						fileNames[i].delete();
+					}
+				}
+			}
+
+			// Delete old files in the export/jobs directory
+			long jobFilesRetentionPeriod = (long) ArtDBCP.getPublishedFilesRetentionPeriod(); //configured file retention period in days
+			jobFilesRetentionPeriod = jobFilesRetentionPeriod * 24 * 60 * 60 * 1000; //convert period defined in days to milliseconds
+
+			if (jobFilesRetentionPeriod > 0) {
+				exportFiles = new File(base_export_path + "jobs/");
+				fileNames = exportFiles.listFiles();
+				for (int i = 0; i < fileNames.length; i++) {
+					lastModified = fileNames[i].lastModified();
+					if ((actualTime - lastModified) > jobFilesRetentionPeriod) {
+						//delete directories that may be created by jasper report html output
+						if (fileNames[i].isDirectory()) {
+							deleteDirectory(fileNames[i]);
+						} else if (!fileNames[i].getName().equals("index.html")) {
+							fileNames[i].delete();
+						}
+					}
+				}
+			}
+
+			//clear mondrian cache as per configuration
+			if (ArtDBCP.isArtFullVersion()) {
+				clearMondrianCache();
+			}
+
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+
+	}
+
+	/**
+	 * Delete directory, including all files and subdirectories under it.
+	 *
+	 * @param path directory to delete
+	 * @return
+	 * <code>true</code> if directory deleted.
+	 * <code>false</code> otherwise.
+	 */
+	private boolean deleteDirectory(File path) {
+		logger.debug("Deleting directory: {}", path);
+
+		if (path.exists()) {
+			File[] files = path.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				if (files[i].isDirectory()) {
+					deleteDirectory(files[i]);
+				} else {
+					files[i].delete();
+				}
+			}
+		}
+		return (path.delete());
+	}
+
+	/**
+	 * clear mondrian cache according to configured cache expiry
+	 */
+	private void clearMondrianCache() {
+		logger.debug("Entering clear mondrian cache");
+
+		long mondrianCacheExpiry; //cache expiry duration in milliseconds
+
+		mondrianCacheExpiry = (long) ArtDBCP.getMondrianCacheExpiry();
+		mondrianCacheExpiry = mondrianCacheExpiry * 60 * 60 * 1000; //convert period defined in hours to milliseconds
+
+		if (mondrianCacheExpiry > 0) {
+			boolean clearCache = false;
+			long actualTime = new java.util.Date().getTime();
+			File cacheFile = new File(base_export_path + MONDRIAN_CACHE_CLEARED_FILE_NAME);
+			if (cacheFile.exists()) {
+				//check last modified date
+				long lastModified = cacheFile.lastModified();
+				if ((actualTime - lastModified) > mondrianCacheExpiry) {
+					clearCache = true;
+					cacheFile.delete();
+				}
+			} else {
+				clearCache = true;
+			}
+
+			if (clearCache) {
+				logger.debug("Actually clearing mondrian cache");
+
+				//clear all mondrian caches
+				java.util.Iterator<mondrian.rolap.RolapSchema> schemaIterator = mondrian.rolap.RolapSchema.getRolapSchemas();
+				while (schemaIterator.hasNext()) {
+					mondrian.rolap.RolapSchema schema = schemaIterator.next();
+					mondrian.olap.CacheControl cacheControl = schema.getInternalConnection().getCacheControl(null);
+
+					cacheControl.flushSchemaCache();
+				}
+
+				BufferedWriter out;
+				try {
+					//create file that indicates when the cache was last cleared
+					out = new BufferedWriter(new FileWriter(base_export_path + MONDRIAN_CACHE_CLEARED_FILE_NAME));
+					java.util.Date now = new java.util.Date();
+					out.write(now.toString());
+					out.close();
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * Get the interval between file cleaning runs.
+	 *
+	 * @return the interval between file cleaning runs.
+	 */
+	public long getInterval() {
+		return INTERVAL;
+
+
+
+
+	}
 }
 
 //thread that runs scheduler clean method to delete old export and jobs files
 class Timer extends Thread {
 
-    art.servlets.Scheduler scheduler;
-    long interval;
+	art.servlets.Scheduler scheduler;
+	long interval;
 
-    public Timer(art.servlets.Scheduler s) {
-        scheduler = s;
-        interval = s.getInterval();
-    }
+	public Timer(art.servlets.Scheduler s) {
+		scheduler = s;
+		interval = s.getInterval();
+	}
 
-    @Override
-    public void run() {
-        try {
-            while (true) {
-                // get settings. art.properties must exist before cleaning in order to get configured durations
-                if (scheduler.loadProperties()) { // this returns false if art settings are not defined yet
-                    // clean old files in export path
-                    scheduler.clean();
-                }
-                sleep(interval);
-            }
-        } catch (InterruptedException e) {
-            // on interrupt, delete old files before exiting
-            if (scheduler.loadProperties()) {
-                scheduler.clean();
-            }
-        }
-    }
+	@Override
+	public void run() {
+		try {
+			while (true) {
+				// get settings. art.properties must exist before cleaning in order to get configured durations
+				if (scheduler.loadProperties()) { // this returns false if art settings are not defined yet
+					// clean old files in export path
+					scheduler.clean();
+				}
+				sleep(interval);
+			}
+		} catch (InterruptedException e) {
+			// on interrupt, delete old files before exiting
+			if (scheduler.loadProperties()) {
+				scheduler.clean();
+			}
+		}
+	}
 }

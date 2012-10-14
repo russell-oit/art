@@ -3,6 +3,7 @@
  */
 package art.output;
 
+import art.servlets.ArtDBCP;
 import art.servlets.XmlDataProvider;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
@@ -201,7 +202,7 @@ public class xmlOutput implements ArtOutputInterface {
 
     @Override
     public void addCellDate(Date d) {
-        out.println("<col type=\"date\">" + d + "</col>");
+        out.println("<col type=\"date\">" + ArtDBCP.getDateString(d) + "</col>");
     }
 
     @Override
@@ -231,6 +232,6 @@ public class xmlOutput implements ArtOutputInterface {
 
     @Override
     public boolean isDefaultHtmlHeaderAndFooterEnabled() {
-        return false; // if set to true, art will a standard html header&footer around the output
+        return false; // if set to true, art will add a standard html header&footer around the output
     }
 }

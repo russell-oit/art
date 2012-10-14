@@ -5,6 +5,7 @@
  */
 package art.output;
 
+import art.servlets.ArtDBCP;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -104,9 +105,11 @@ public class htmlPlainOutput implements ArtOutputInterface {
     public void beginHeader() {
 		out.println("<html>");
 		out.println("<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">");
-		out.println("<style>table { border-collapse: collapse; }\n td { background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; }\nbody { font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000; }</style>");
 		out.println("</head>");        
 		out.println("<body>");
+		
+		//style should be in the head section. put in body for correct display in email inline jobs
+		out.println("<style>table { border-collapse: collapse; }\n td { background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; }\nbody { font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000; }</style>");
 		
 		if(!displayInline){
 			//display parameters
@@ -152,7 +155,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void addCellDate(java.util.Date d) {
-        out.println(" <td>" + d + "</td>");
+        out.println(" <td>" + ArtDBCP.getDateString(d) + "</td>");
     }
 
     @Override
