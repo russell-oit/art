@@ -155,7 +155,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void addCellDate(java.util.Date d) {
-        out.println(" <td>" + ArtDBCP.getDateString(d) + "</td>");
+        out.println(" <td>" + ArtDBCP.getDateDisplayString(d) + "</td>");
     }
 
     @Override
@@ -185,7 +185,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
     }
 
     @Override
-    public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+    public boolean isShowQueryHeaderAndFooter() {
         return false;
     }
 }

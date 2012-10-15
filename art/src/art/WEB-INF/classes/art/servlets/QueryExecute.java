@@ -404,7 +404,7 @@ public class QueryExecute extends HttpServlet {
 			 * has to be redirected to another page (this is the case of graphs
 			 * and output modes that do not generate html)
 			 */
-			boolean isFlushEnabled = true; // default generic HTML output
+			boolean showHeaderAndFooter = true; // default generic HTML output
 			ArtOutputInterface o = null;
 			String str; //for error logging strings
 
@@ -479,7 +479,7 @@ public class QueryExecute extends HttpServlet {
 				ctx.getRequestDispatcher("/user/editJob.jsp").forward(request, response);
 				return; // a return is needed otherwise the flow would proceed!
 			} else if (StringUtils.containsIgnoreCase(viewMode, "GRAPH")) {
-				isFlushEnabled = false; // graphs are created in memory and displayed by showGraph.jsp page
+				showHeaderAndFooter = false; // graphs are created in memory and displayed by showGraph.jsp page
 			} else if (StringUtils.equalsIgnoreCase(viewMode, "HTMLREPORT")) {
 				response.setContentType("text/html; charset=UTF-8");
 				out = response.getWriter();
@@ -487,7 +487,7 @@ public class QueryExecute extends HttpServlet {
 				//jasper report or jxls spreadsheet
 				response.setContentType("text/html; charset=UTF-8");
 				out = response.getWriter();
-				isFlushEnabled = true;
+				showHeaderAndFooter = true;
 			} else if (queryType == 100) {
 				//update query
 				response.setContentType("text/html; charset=UTF-8");
@@ -521,15 +521,10 @@ public class QueryExecute extends HttpServlet {
 
 					// the view mode drives if this servlet uses the std header&footer,
 					// if false the view mode needs to take care of all the output
-					isFlushEnabled = o.isDefaultHtmlHeaderAndFooterEnabled();
-
-					if (StringUtils.equalsIgnoreCase(viewMode, "htmlPlain") && isInline) {
-						//display query header and footer for htmlplain output inline in showparams page
-						isFlushEnabled = true;
-					}
+					showHeaderAndFooter = o.isShowQueryHeaderAndFooter();
 
 					if (isFragment) {
-						isFlushEnabled = false; // disable in any case header&footer if isFragment is true
+						showHeaderAndFooter = false; // disable in any case header&footer if isFragment is true
 					}
 
 				} catch (Exception e) {
@@ -540,7 +535,7 @@ public class QueryExecute extends HttpServlet {
 				}
 			}
 
-			if (isFlushEnabled) {
+			if (showHeaderAndFooter) {
 				ctx.getRequestDispatcher("/user/queryHeader.jsp").include(request, response);
 				out.flush();
 			}
@@ -668,7 +663,7 @@ public class QueryExecute extends HttpServlet {
 					}
 
 					// JavaScript code to write status
-					if (isFlushEnabled) {
+					if (showHeaderAndFooter) {
 						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryExecuting") + "\");</script>");
 						out.flush();
 					}
@@ -729,6 +724,12 @@ public class QueryExecute extends HttpServlet {
 								//ensure parameters are displayed if not in inline mode
 								hpo.setDisplayParameters(displayParams);
 							}
+							
+							//enable localization for datatable output
+							if(o instanceof htmlDataTableOutput){
+								htmlDataTableOutput dt= (htmlDataTableOutput)o;
+								dt.setLanguage(request.getLocale().toString());
+							}
 
 						} catch (Exception e) {
 							logger.error("Error setting properties for class: {}", viewMode, e);
@@ -739,7 +740,7 @@ public class QueryExecute extends HttpServlet {
 					}
 
 					// display status information, parameters and final sql
-					if (isFlushEnabled) {
+					if (showHeaderAndFooter) {
 						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
 						String description = "";
 						if (StringUtils.length(shortDescription) > 0) {
@@ -925,7 +926,7 @@ public class QueryExecute extends HttpServlet {
 					DecimalFormat df = (DecimalFormat) nf;
 					df.applyPattern("#,##0.0##");
 
-					if (isFlushEnabled) {
+					if (showHeaderAndFooter) {
 						request.setAttribute("timeElapsed", df.format(preciseTotalTime) + " " + messages.getString("seconds"));
 						if (numberOfRows == -1) {
 							request.setAttribute("numberOfRows", "Unknown");
@@ -960,7 +961,7 @@ public class QueryExecute extends HttpServlet {
 					logger.error("Error: {}", str, e);
 
 					request.setAttribute("errorMessage", messages.getString("anException") + "<hr>" + messages.getString("step") + ":" + probe + "<br><code>" + e + "</code>");
-					if (isFlushEnabled) { // we already flushed something: let's include the page
+					if (showHeaderAndFooter) { // we already flushed something: let's include the page
 						request.setAttribute("headerOff", "true");
 						ctx.getRequestDispatcher("/user/error.jsp").include(request, response);
 					} else { // let's forward to the error page

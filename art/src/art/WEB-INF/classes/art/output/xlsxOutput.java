@@ -272,7 +272,7 @@ public class xlsxOutput implements ArtOutputInterface {
 				//output blank string
 				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
 			} else {
-				sw.createCell(cellNumber++, ArtDBCP.getDateString(d), styles.get("date").getIndex());
+				sw.createCell(cellNumber++, ArtDBCP.getDateDisplayString(d), styles.get("date").getIndex());
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -352,7 +352,7 @@ public class xlsxOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+	public boolean isShowQueryHeaderAndFooter() {
 		return true;
 	}
 

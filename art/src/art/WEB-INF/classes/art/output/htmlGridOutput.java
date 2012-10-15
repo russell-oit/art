@@ -131,7 +131,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + ArtDBCP.getSortKey(d) + "\" >" + ArtDBCP.getDateString(d) + "</td>");
+		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + ArtDBCP.getDateSortString(d) + "\" >" + ArtDBCP.getDateDisplayString(d) + "</td>");
 	}
 
 	@Override
@@ -162,7 +162,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+	public boolean isShowQueryHeaderAndFooter() {
 		return true;
 	}
 }

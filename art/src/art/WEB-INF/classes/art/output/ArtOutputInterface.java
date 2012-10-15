@@ -216,7 +216,7 @@ public interface ArtOutputInterface {
     /**     
     States if the standard html header and footer have to be printed to the output.
     <br>	If this method returns true, the QueryExecute servlet will print
-    the standard html header (with query&database name and status box) and footer (total
+    the standard html header (with query name and status box) and footer (total
     time elapsed).
     <br>	If it returns false, QueryExecute will not add anything around what it is printed
     by this object. 
@@ -232,5 +232,5 @@ public interface ArtOutputInterface {
      * 
      * @return <code>true</code> if standard query header and footer to be displayed
      */
-    public boolean isDefaultHtmlHeaderAndFooterEnabled();
+    public boolean isShowQueryHeaderAndFooter();
 }

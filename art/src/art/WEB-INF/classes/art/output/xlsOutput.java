@@ -252,7 +252,7 @@ public class xlsOutput implements ArtOutputInterface {
     public void addCellDate(java.util.Date d) {
         cell = row.createCell(cellNumber++);
         if (d != null) {
-            cell.setCellValue(ArtDBCP.getDateString(d));
+            cell.setCellValue(ArtDBCP.getDateDisplayString(d));
             cell.setCellStyle(dateStyle);
         }
     }
@@ -299,7 +299,7 @@ public class xlsOutput implements ArtOutputInterface {
     }
 
     @Override
-    public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+    public boolean isShowQueryHeaderAndFooter() {
         return true;
     }
 	

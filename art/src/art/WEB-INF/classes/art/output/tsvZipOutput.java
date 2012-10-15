@@ -207,7 +207,7 @@ public class tsvZipOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		exportFileStrBuf.append("" + ArtDBCP.getDateString(d) + "\t");
+		exportFileStrBuf.append("" + ArtDBCP.getDateDisplayString(d) + "\t");
 	}
 
 	@Override
@@ -271,7 +271,7 @@ public class tsvZipOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+	public boolean isShowQueryHeaderAndFooter() {
 		return true;
 	}
 

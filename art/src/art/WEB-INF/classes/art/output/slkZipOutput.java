@@ -261,7 +261,7 @@ public class slkZipOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(Date d) {
-		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + ArtDBCP.getDateString(d) + "\"\n");
+		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + ArtDBCP.getDateDisplayString(d) + "\"\n");
 	}
 
 	@Override
@@ -331,7 +331,7 @@ public class slkZipOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+	public boolean isShowQueryHeaderAndFooter() {
 		return true;
 	}
 

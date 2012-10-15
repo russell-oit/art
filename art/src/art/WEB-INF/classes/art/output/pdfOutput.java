@@ -298,7 +298,7 @@ public class pdfOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		cell = new PdfPCell(new Paragraph(fsBody.process(ArtDBCP.getDateString(d))));
+		cell = new PdfPCell(new Paragraph(fsBody.process(ArtDBCP.getDateDisplayString(d))));
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
 		cell.setGrayFill((oddline ? evengray : oddgray));
@@ -366,7 +366,7 @@ public class pdfOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+	public boolean isShowQueryHeaderAndFooter() {
 		return true;
 	}
 

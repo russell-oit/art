@@ -312,7 +312,7 @@ jQuery(document).ready(function($){
 			$('input[type="submit"]').attr('disabled','disabled');
 
 			$("#response").load("ExecuteQuery",$form.serialize(),function(responseText, statusText, xhr){
-				//jquery load has finished
+				//callback funtion for when jquery load has finished
 
 				if(statusText=="success"){
 					//make htmlgrid output sortable

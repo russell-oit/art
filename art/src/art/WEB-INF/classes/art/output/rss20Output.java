@@ -257,7 +257,7 @@ public class rss20Output implements ArtOutputInterface {
     }
 
     @Override
-    public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+    public boolean isShowQueryHeaderAndFooter() {
         return false; // if set to true, art will add standard html header&footer around the output
     }
 }

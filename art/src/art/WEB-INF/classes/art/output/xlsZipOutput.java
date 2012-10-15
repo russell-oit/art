@@ -265,7 +265,7 @@ public class xlsZipOutput implements ArtOutputInterface {
 	public void addCellDate(Date d) {
 		cell = row.createCell(cellNumber++);
 		if (d != null) {
-			cell.setCellValue(ArtDBCP.getDateString(d));
+			cell.setCellValue(ArtDBCP.getDateDisplayString(d));
 			cell.setCellStyle(dateStyle);
 		}
 	}
@@ -313,7 +313,7 @@ public class xlsZipOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+	public boolean isShowQueryHeaderAndFooter() {
 		return true;
 	}
 

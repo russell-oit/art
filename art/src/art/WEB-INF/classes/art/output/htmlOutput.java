@@ -127,7 +127,7 @@ public class htmlOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("<td class=\"" + (oddline ? "qeoddLeft" : "qeevenLeft") + "\" >" + ArtDBCP.getDateString(d) + "</td>");
+		out.println("<td class=\"" + (oddline ? "qeoddLeft" : "qeevenLeft") + "\" >" + ArtDBCP.getDateDisplayString(d) + "</td>");
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class htmlOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+	public boolean isShowQueryHeaderAndFooter() {
 		return true;
 	}
 }

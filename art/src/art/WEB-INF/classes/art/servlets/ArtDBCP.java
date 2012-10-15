@@ -962,7 +962,7 @@ public class ArtDBCP extends HttpServlet {
 	 * @param dt
 	 * @return 
 	 */
-	public static String getDateString(java.util.Date dt) {
+	public static String getDateDisplayString(java.util.Date dt) {
 		String dateString;
 
 		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS"); //use to check if time component is 0
@@ -983,11 +983,12 @@ public class ArtDBCP extends HttpServlet {
 	}
 	
 	/**
-	 * Get a sort key string to be used for sorting dates in htmlgrid output
+	 * Get a string to be used for correctly sorting dates irrespective of the
+	 * date format used to display dates
 	 * @param dt
 	 * @return 
 	 */
-	public static String getSortKey(java.util.Date dt){
+	public static String getDateSortString(java.util.Date dt){
 		String sortKey;
 		
 		if(dt==null){

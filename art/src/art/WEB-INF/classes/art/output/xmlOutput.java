@@ -202,7 +202,7 @@ public class xmlOutput implements ArtOutputInterface {
 
     @Override
     public void addCellDate(Date d) {
-        out.println("<col type=\"date\">" + ArtDBCP.getDateString(d) + "</col>");
+        out.println("<col type=\"date\">" + ArtDBCP.getDateDisplayString(d) + "</col>");
     }
 
     @Override
@@ -231,7 +231,7 @@ public class xmlOutput implements ArtOutputInterface {
     }
 
     @Override
-    public boolean isDefaultHtmlHeaderAndFooterEnabled() {
+    public boolean isShowQueryHeaderAndFooter() {
         return false; // if set to true, art will add a standard html header&footer around the output
     }
 }
