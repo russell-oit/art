@@ -23,6 +23,7 @@ try{
    // the authentication is successful
    session.setAttribute("username", username);
    // redirect:
+   session.removeAttribute("nextPage"); //remove nextpage attribute to prevent endless redirection to login page for /admin pages
    response.sendRedirect(nextPage);
    
 } catch (Exception e) { // Exception

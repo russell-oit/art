@@ -950,7 +950,7 @@ public class ArtQuery {
             String sql;
 
             //get rules for the current query
-            sql = "SELECT RULE_NAME, FIELD_NAME FROM ART_QUERY_RULES WHERE QUERY_ID=" + queryId;
+            sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE FROM ART_QUERY_RULES WHERE QUERY_ID=" + queryId;
             st = conn.createStatement();
             rs = st.executeQuery(sql);
 
@@ -959,10 +959,12 @@ public class ArtQuery {
                 StringBuilder tmpSb = new StringBuilder(64);
 
                 String currentRule;
+				String columnDataType;
 
                 currentRule = rs.getString("RULE_NAME");
+				columnDataType=rs.getString("FIELD_DATA_TYPE");
                 PreparedQuery pq = new PreparedQuery();
-                tmpSb = pq.getRuleValuesList(conn, username, currentRule, 1);
+                tmpSb = pq.getRuleValues(conn, username, currentRule, 1,columnDataType);
                 if (tmpSb != null) {
                     String s = tmpSb.toString();
                     if (StringUtils.length(s) > 1) {

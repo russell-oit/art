@@ -22,6 +22,7 @@ public class Rule {
 	String description = ""; //for query definition
 	int queryId; //for query rules
 	String fieldName =""; //for query rules
+	private String fieldDataType=""; //for query rules
 	String username; //for user rules
 	String ruleValue; //for user rules
 	String ruleType; //for user rules
@@ -30,6 +31,20 @@ public class Rule {
 	 *
 	 */
 	public Rule() {
+	}
+
+	/**
+	 * @return the fieldDataType
+	 */
+	public String getFieldDataType() {
+		return fieldDataType;
+	}
+
+	/**
+	 * @param fieldDataType the fieldDataType to set
+	 */
+	public void setFieldDataType(String fieldDataType) {
+		this.fieldDataType = fieldDataType;
 	}
 
 	/**
@@ -184,12 +199,13 @@ public class Rule {
 		boolean success = false;
 
 		try {
-			String sql = "INSERT INTO ART_QUERY_RULES (QUERY_ID, FIELD_NAME, RULE_NAME )VALUES ( ?, ?, ?) ";
+			String sql = "INSERT INTO ART_QUERY_RULES (QUERY_ID, FIELD_NAME, RULE_NAME, FIELD_DATA_TYPE )VALUES (?, ?, ?, ?) ";
 			PreparedStatement ps = conn.prepareStatement(sql);
 
 			ps.setInt(1, queryId);
 			ps.setString(2, fieldName);
 			ps.setString(3, ruleName);
+			ps.setString(4,fieldDataType);
 
 			ps.executeUpdate();
 			ps.close();
@@ -213,13 +229,14 @@ public class Rule {
 
 		try {
 			String sql = "UPDATE ART_QUERY_RULES "
-					+ " SET FIELD_NAME=? "
+					+ " SET FIELD_NAME=?, FIELD_DATA_TYPE=? "
 					+ " WHERE QUERY_ID=? AND RULE_NAME=?";
 			PreparedStatement ps = conn.prepareStatement(sql);
 
 			ps.setString(1, fieldName);
-			ps.setInt(2, queryId);
-			ps.setString(3, ruleName);
+			ps.setString(2,fieldDataType);
+			ps.setInt(3, queryId);
+			ps.setString(4, ruleName);
 
 			ps.executeUpdate();
 			ps.close();
@@ -250,7 +267,7 @@ public class Rule {
 		try {
 			conn = ArtDBCP.getConnection();
 
-			String sql = "SELECT FIELD_NAME "
+			String sql = "SELECT FIELD_NAME, FIELD_DATA_TYPE "
 					+ " FROM ART_QUERY_RULES "
 					+ " WHERE QUERY_ID=? AND RULE_NAME=?";
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -261,6 +278,7 @@ public class Rule {
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
 				fieldName = rs.getString("FIELD_NAME");
+				fieldDataType=rs.getString("FIELD_DATA_TYPE");
 			}
 			rs.close();
 			ps.close();

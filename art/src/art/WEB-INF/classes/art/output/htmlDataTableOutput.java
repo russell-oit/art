@@ -4,7 +4,6 @@
 package art.output;
 
 import art.servlets.ArtDBCP;
-import art.servlets.QueryExecute;
 import art.utils.ArtQueryParam;
 import java.io.File;
 import java.io.PrintWriter;
@@ -29,7 +28,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 	boolean oddline = true;
 	Map<Integer, ArtQueryParam> displayParams;
 	String tableId; // random identifier
-	private String language; //language to use for datatable e.g. en_US
+	private String language; //language to use for datatable. in locale format e.g. it, en, en_US
 
 	/**
 	 * Constructor
@@ -115,8 +114,8 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		//set language file to use for localization. language files to be put in the /js directory and to be named dataTables.xx_XX.txt	
 		//language file content examples at http://datatables.net/plug-ins/i18n
 		
-		//default to english
-		String languageSetting =""; // ", \"oLanguage\": {\"sUrl\": \"../js/dataTables.en.txt\"}";
+		//by default don't set the language file option. (will default to english - in jquery.dataTables.min.js)
+		String languageSetting =""; 
 
 		if (StringUtils.isNotBlank(language)) {
 			String languageFileName = "dataTables." + language + ".txt";
@@ -134,6 +133,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 				//+ ", \"bPaginate\": false"
 				//+ ", \"sScrollY\": \"200px\""
 				//+ ", \"bScrollCollapse\": true"
+				//+ ", \"bProcessing\": true"
 				+ languageSetting
 				+ ", \"iDisplayLength\": 10" //default item in show entries
 				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options

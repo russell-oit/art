@@ -4,6 +4,7 @@
   pageContext.setAttribute("_mobile", false); 
   pageContext.setAttribute("_login", false); 
   if (session.getAttribute("nextPage") != null) {
+	  //set next page to go to after login details entered
      String nextPage = response.encodeRedirectURL((String) session.getAttribute("nextPage")); 
 	 if ( nextPage.contains("_mobile=true") ) {
 	    pageContext.setAttribute("_mobile", true);
@@ -16,6 +17,7 @@
 	 }
      pageContext.setAttribute("nextPage",nextPage);
   } else {
+	  //default to start page
      pageContext.setAttribute("nextPage",request.getContextPath() + "/user/showGroups.jsp");
   }
   session.invalidate();

@@ -81,6 +81,7 @@ public final class AuthFilter implements Filter {
             HttpServletRequest hrequest = (HttpServletRequest) request;
             HttpServletResponse hresponse = (HttpServletResponse) response;
             HttpSession session = hrequest.getSession();
+			
             if (session.getAttribute("ue") == null) {
                 // Let's authenticate it
                 if (!ArtDBCP.isArtSettingsLoaded()) {
@@ -108,6 +109,8 @@ public final class AuthFilter implements Filter {
 								nextPage = nextPage + "?" + hrequest.getQueryString();
 							}
 							session.setAttribute("nextPage", nextPage);
+							
+							//display appropriate login page
 							forwardPage(hresponse, hrequest, msg);
 						}					
 					} catch (Exception e) {

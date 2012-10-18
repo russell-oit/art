@@ -191,7 +191,7 @@ if(!propsFile.exists()){
     mswin_domains      ="Domain1,Domain2,Domain3";
     jdbc_auth_driver   = "<a jdbc driver>";
     jdbc_auth_url      = "<a jdbc url>";
-    index_page_default = "default";
+    index_page_default = "login";
 
     bottom_logo	       = "/images/artminiicon.png";
     css_skin	       = "/css/art.css";

@@ -24,87 +24,86 @@ import javax.servlet.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** 
- * Filter applied on accessing admin directory files 
- * 
- * @author Enrico Liboni 
+/**
+ * Filter applied on accessing admin directory files
+ *
+ * @author Enrico Liboni
  */
 public final class AuthFilterAdmin implements Filter {
-    
-    final static Logger logger = LoggerFactory.getLogger(AuthFilterAdmin.class);
 
-    private FilterConfig filterConfig = null;
+	final static Logger logger = LoggerFactory.getLogger(AuthFilterAdmin.class);
+	private FilterConfig filterConfig = null;
 
-    /**
-     * 
-     */
-    @Override
-    public void destroy() {
-        this.filterConfig = null;
-    }
+	/**
+	 *
+	 */
+	@Override
+	public void destroy() {
+		this.filterConfig = null;
+	}
 
-    /**
-     * 
-     * @param filterConfig
-     * @throws ServletException
-     */
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        this.filterConfig = filterConfig;
-    }
+	/**
+	 *
+	 * @param filterConfig
+	 * @throws ServletException
+	 */
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		this.filterConfig = filterConfig;
+	}
 
-    /**
-     * Check if this is a valid admin session
-     * 
-     * @param request 
-     * @param response 
-     * @param chain  
-     * @throws IOException
-     * @throws ServletException  
-     */
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain chain)
-            throws IOException, ServletException {
+	/**
+	 * Check if this is a valid admin session
+	 *
+	 * @param request
+	 * @param response
+	 * @param chain
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response,
+			FilterChain chain)
+			throws IOException, ServletException {
 
-        if (request instanceof HttpServletRequest) {
-            HttpServletRequest hrequest = (HttpServletRequest) request;
-            HttpSession session = hrequest.getSession();
+		if (request instanceof HttpServletRequest) {
+			HttpServletRequest hrequest = (HttpServletRequest) request;
+			HttpSession session = hrequest.getSession();
 
-            if (ArtDBCP.isArtSettingsLoaded()) { // properties are defined
+			if (ArtDBCP.isArtSettingsLoaded()) { // properties are defined
 
-                if (session.getAttribute("AdminSession") != null) {
-                    // if the admin connection is not in the session 
-                    // get the connection and store it in the admin session 
-                    if (session.getAttribute("SessionConn") == null) {
-                        try {
-                            session.setAttribute("SessionConn", ArtDBCP.getAdminConnection());
-                        } catch (Exception e) {
-                            logger.error("Error while getting the connection to the ART repository",e);                            
-                            PrintWriter out = response.getWriter();
-                            out.println("<html> Error while getting the connection to the ART repository<br><code>" + e + "</code></html>");                                                        
-                        }
-                    }
-                    chain.doFilter(request, response);
-                } else {
-                    HttpServletResponse hresponse = (HttpServletResponse) response;
-                    java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
-                    //hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath()+"/login.jsp?message="+messages.getString("sessionExpired")));
-                    hrequest.setAttribute("message", messages.getString("sessionExpired"));
-                    String toPage = ArtDBCP.getArtSetting("index_page_default");
-                    if (toPage == null || toPage.equals("default")) {
-                        toPage = "login";
-                    }
-                    hrequest.getRequestDispatcher("/" + toPage + ".jsp").forward(hrequest, hresponse);
-                }
+				if (session.getAttribute("AdminSession") != null) {
+					// if the admin connection is not in the session 
+					// get the connection and store it in the admin session 
+					if (session.getAttribute("SessionConn") == null) {
+						try {
+							session.setAttribute("SessionConn", ArtDBCP.getAdminConnection());
+						} catch (Exception e) {
+							logger.error("Error while getting the connection to the ART repository", e);
+							PrintWriter out = response.getWriter();
+							out.println("<html> Error while getting the connection to the ART repository<br><code>" + e + "</code></html>");
+						}
+					}
+					chain.doFilter(request, response);
+				} else {
+					//display appropriate login page
+					HttpServletResponse hresponse = (HttpServletResponse) response;
+					java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
+					hrequest.setAttribute("message", messages.getString("sessionExpired"));
+					String toPage = ArtDBCP.getArtSetting("index_page_default");
+					if (toPage == null || toPage.equals("default")) {
+						toPage = "login";
+					}
+					hrequest.getRequestDispatcher("/" + toPage + ".jsp").forward(hrequest, hresponse);
+				}
 
-            } else {
-                // properties are not defined - this is the 1st logon (see execLogin.jsp)
-                session.setAttribute("AdminSession", "Y");
-                session.setAttribute("AdminLevel", new Integer(100));
-                session.setAttribute("AdminUsername", "art");
-                chain.doFilter(request, response);
-            }
-        }
-    }
+			} else {
+				// properties are not defined - this is the 1st logon (see execLogin.jsp)
+				session.setAttribute("AdminSession", "Y");
+				session.setAttribute("AdminLevel", new Integer(100));
+				session.setAttribute("AdminUsername", "art");
+				chain.doFilter(request, response);
+			}
+		}
+	}
 }

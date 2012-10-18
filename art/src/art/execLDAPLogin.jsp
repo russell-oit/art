@@ -71,6 +71,7 @@ if (username == null || password == null || password.equals("") ) {
 		   
 		   session.setAttribute("username", username);
 		   // redirect:
+		   session.removeAttribute("nextPage"); //remove nextpage attribute to prevent endless redirection to login page for /admin pages
 		   response.sendRedirect(nextPage);
 		   return;
 	   } catch (AuthenticationException authEx) {

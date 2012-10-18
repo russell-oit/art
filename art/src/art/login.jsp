@@ -2,7 +2,9 @@
 <%@ page pageEncoding="UTF-8" %>
 <%@ page import=" art.servlets.ArtDBCP;" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+
 <%@ include file ="renewSession.jsp" %>
+
 <html>
     <head>
         <title>ART - Login</title>
@@ -12,6 +14,7 @@
         <script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
     </head>
     <body onload="javascript:document.getElementById('username').focus();">
+		
         <table cellSpacing="1" cellPadding="5" width="300" height="300" border="0" class="art" valign="middle" align="center">
             <tr vAlign="center" align="middle">
                 <td class="title" colSpan="2" align="left"><img height="70" src="${pageContext.request.contextPath}/images/art-64px.jpg" alt="ART"></td>
@@ -23,6 +26,7 @@
             </tr>
 
             <form name="login" method="post" action="<%= pageContext.getAttribute("nextPage") %>">
+						
                 <c:if test="${( !empty requestScope.message) && (pageScope._login != true)}">
                     <tr>
                         <td colspan="2" align="center">

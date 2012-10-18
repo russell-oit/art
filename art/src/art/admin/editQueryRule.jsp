@@ -38,6 +38,14 @@ ar.loadQueryRuleColumn(queryId, ruleName);
             <td class="data"> <input type="text" name="FIELD_NAME" value="<%=ar.getFieldName()%>" size="40" maxlength="40">
             </td>
         </tr>
+		<tr><td class="data"> Data Type </td><td class="data">
+                <select name="FIELD_DATA_TYPE" size="1">
+					<option value="VARCHAR" <%=("VARCHAR".equals(ar.getFieldDataType())? "selected" : "")%>  >VARCHAR</option>
+					<option value="NUMBER" <%=("NUMBER".equals(ar.getFieldDataType())? "selected" : "")%>  >NUMBER</option>
+                   </select>
+				   <input type="button" class="buttonup" onclick="javascript:alert('Use NUMBER where the column data type is numeric, and VARCHAR for all other data types')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">				
+            </td>
+        </tr>
 
         <tr>
             <td><input type="submit" value="Submit"></td>

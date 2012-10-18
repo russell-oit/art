@@ -61,7 +61,7 @@ public class PreparedQuery {
 	Connection connQuery; // this is the connection to the datasource for this query
 	Connection conn; // connection to the art repository
 	String preparedStatementSQL; //final sql statement. if query has inline parameters, sql will still have ?
-	private String finalSQL=""; //final sql statement. if query has inline parameters, sql will have query values
+	private String finalSQL = ""; //final sql statement. if query has inline parameters, sql will have query values
 	String queryStatus;
 	Map<String, List> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter name and value as corresponding object e.g. Double, Long. for jasper reports
@@ -900,9 +900,11 @@ public class PreparedQuery {
 
 		logger.debug("applyRules");
 
-		String currentRule, currentParamName;
+		String ruleName;
+		String columnName;
+		String columnDataType;
 		Statement st; // Should I create a statement for each (nested) resultset???
-		ResultSet rsRules;
+		ResultSet rs;
 		int insertPosLast = 0;
 
 		boolean successfullyApplied = true; // use variable to return method value instead of having multiple return statements
@@ -918,7 +920,7 @@ public class PreparedQuery {
 
 		//check if using labelled rules 
 		int count = 0;
-		StringBuilder labelledValues = new StringBuilder(1024 * 2);
+		StringBuilder labelledValues = new StringBuilder(1024);
 		boolean usingLabelledRules = false;
 		String querySql = sb.toString();
 		int labelPosition = querySql.toLowerCase().indexOf("#rules#"); //use all lowercase to make find case insensitive
@@ -929,17 +931,19 @@ public class PreparedQuery {
 		// Get statement
 		st = conn.createStatement();
 		// Get rules for the current query
-		rsRules = st.executeQuery("SELECT RULE_NAME, FIELD_NAME FROM ART_QUERY_RULES WHERE QUERY_ID=" + queryId);
+		rs = st.executeQuery("SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE FROM ART_QUERY_RULES WHERE QUERY_ID=" + queryId);
 
 		// for each rule build and add the AND column IN (list) string to the query
 		// Note: if we don't have rules for this query, the sb is left untouched
-		while (rsRules.next()) {
+		while (rs.next()) {
 			count++;
 
 			StringBuilder tmpSb;
-			currentRule = rsRules.getString("RULE_NAME");
-			currentParamName = rsRules.getString("FIELD_NAME");
-			tmpSb = getRuleValuesList(conn, username, currentRule, 1);
+			ruleName = rs.getString("RULE_NAME");
+			columnName = rs.getString("FIELD_NAME");
+			columnDataType=rs.getString("FIELD_DATA_TYPE");
+			
+			tmpSb = getRuleValues(conn, username, ruleName, 1,columnDataType);
 			if (tmpSb == null) { // it is null only if 	ALL_ITEMS
 				//ALL_ITEMS. effectively means the rule doesn't apply
 				if (usingLabelledRules) {
@@ -951,11 +955,7 @@ public class PreparedQuery {
 					}
 				}
 			} else {
-				// Add the rule to the query (handle GROUP_BY and ORDER BY)
-				// NOTE: HAVING is not handled.
-				// tmpSb.toSting().substring(1) is the <list> of allowed values for the current rule,
-				// the tmpSb returned by applyRule begins with a ',' so we need a .substring(1)
-
+				// Add the rule to the query 
 				String values = tmpSb.toString();
 				if (StringUtils.length(values) == 0) {
 					//user doesn't have values set for at least one rule that the query uses. values needed for all rules
@@ -964,28 +964,35 @@ public class PreparedQuery {
 				} else {
 					if (usingLabelledRules) {
 						//using labelled rules. don't append AND before the first rule value
+						// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
 						if (count == 1) {
-							labelledValues.append(currentParamName + " in (" + values.substring(1) + ") ");
+							labelledValues.append(columnName + " in (" + values.substring(1) + ") ");
 						} else {
-							labelledValues.append(" AND " + currentParamName + " in (" + values.substring(1) + ") ");
+							labelledValues.append(" AND " + columnName + " in (" + values.substring(1) + ") ");
 						}
 					} else {
 						//append rule values for non-labelled rules
+
+						// Add the rule to the query (handle GROUP_BY and ORDER BY)
+						// NOTE: HAVING is not handled.
+						// tmpSb.toSting().substring(1) is the <list> of allowed values for the current rule,
+						// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
+
 						if (insertPosLast > 0) {
 							// We have a GROUP BY or an ORDER BY clause
 							// NOTE: sb changes dynamically
 
 							sb.insert(sb.length() - insertPosLast, " AND "
-									+ currentParamName + " in ( " + values.substring(1) + " ) ");
+									+ columnName + " in ( " + values.substring(1) + " ) ");
 						} else { //No group by or order by. We can just append
-							sb.append(" AND " + currentParamName + " in ( " + values.substring(1) + " ) ");
+							sb.append(" AND " + columnName + " in ( " + values.substring(1) + " ) ");
 						}
 					}
 				}
 			}
 		}
 
-		rsRules.close();
+		rs.close();
 		st.close();
 
 		//replace all occurrences of labelled rule with rule values
@@ -1010,7 +1017,7 @@ public class PreparedQuery {
 	 * @return rule values
 	 * @throws SQLException
 	 */
-	public StringBuilder getRuleValuesList(Connection conn, String ruleUsername, String currentRule, int counter)
+	public StringBuilder getRuleValues(Connection conn, String ruleUsername, String currentRule, int counter, String columnDataType)
 			throws SQLException {
 
 		StringBuilder tmpSb = new StringBuilder(64);
@@ -1043,13 +1050,20 @@ public class PreparedQuery {
 		//  Note: null TYPE is handled as EXACT
 
 		while (rsRuleValues.next() && !isAllItemsForThisRule) {
-			if (!StringUtils.equals(rsRuleValues.getString("RULE_VALUE"), "ALL_ITEMS")) {
+			String ruleValue=rsRuleValues.getString("RULE_VALUE");
+			if (!StringUtils.equals(ruleValue, "ALL_ITEMS")) {
 				if (StringUtils.equals(rsRuleValues.getString("RULE_TYPE"), "LOOKUP")) {
 					// if type is lookup the VALUE is the name
 					// to look up. Recursively call applyRule
-					tmpSb.append(getRuleValuesList(conn, rsRuleValues.getString("RULE_VALUE"), currentRule, ++counter).toString());
+					tmpSb.append(getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType).toString());
 				} else { // Normal EXACT type
-					tmpSb.append(",'" + escapeSql(rsRuleValues.getString("RULE_VALUE")) + "'");
+					if (StringUtils.equals(columnDataType, "NUMBER") && NumberUtils.isNumber(ruleValue)) {
+						//don't quote numbers
+						tmpSb.append("," + ruleValue);
+					} else {
+						//escape and quote non-numbers
+						tmpSb.append(",'" + escapeSql(ruleValue) + "'");
+					}
 				}
 			} else {
 				isAllItemsForThisRule = true;
@@ -1132,7 +1146,7 @@ public class PreparedQuery {
 					// replace inline label with ' ? ' plus the correct number of blanks so that total string length is not changed
 					// +2 is to consider the #, -3 is the chars used by ' ? ' replacement
 					sb.replace(startPos, startPos + paramName.length() + 2, " ? " + blanks.substring(0, (paramName.length() + 2 - 3)));
-					
+
 					logger.debug("Sql string is \n{}", sb.toString());
 					logger.debug("Sql string length is {}", sb.toString().length());
 
@@ -1466,6 +1480,7 @@ public class PreparedQuery {
 					//don't quote numbers. some databases won't do implicit conversion where column is numeric
 					//confirm that they are numbers to avoid sql injection                        
 					if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
+						//don't quote numbers
 						escapedValuesList.add(currentValue);
 					} else {
 						//escape and quote non-numbers
@@ -1874,9 +1889,9 @@ public class PreparedQuery {
 	private void applyInlineParameters(PreparedStatement ps) throws SQLException, ArtException {
 
 		logger.debug("applyInlineParameters");
-		
+
 		//set final sql. replace parameter placeholders ( ? ) with actual parameter values passed to database
-		finalSQL=sb.toString();
+		finalSQL = sb.toString();
 
 		if (treeInline != null && !treeInline.isEmpty()) {
 
@@ -1884,7 +1899,7 @@ public class PreparedQuery {
 			int i = 0; //parameter index/order of appearance
 			String paramName, paramValue;
 
-			java.util.Date dateValue=new java.util.Date();
+			java.util.Date dateValue = new java.util.Date();
 
 			if (htmlParams == null) {
 				ArtQuery aq = new ArtQuery();
@@ -1940,15 +1955,15 @@ public class PreparedQuery {
 					}
 					jasperInlineParams.put(paramName, paramValue);
 				}
-				
+
 				//set final sql. replace parameter placeholders ( ? ) with actual parameter values passed to database
-				if(StringUtils.contains(paramDataType, "DATE")){
-					SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					finalSQL=StringUtils.replace(finalSQL, "?", "'" + df.format(dateValue) + "'", 1);
-				} else if(StringUtils.equals(paramDataType, "INTEGER") || StringUtils.equals(paramDataType, "NUMBER")){
-					finalSQL=StringUtils.replace(finalSQL, "?", paramValue , 1);
+				if (StringUtils.contains(paramDataType, "DATE")) {
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					finalSQL = StringUtils.replace(finalSQL, "?", "'" + df.format(dateValue) + "'", 1);
+				} else if (StringUtils.equals(paramDataType, "INTEGER") || StringUtils.equals(paramDataType, "NUMBER")) {
+					finalSQL = StringUtils.replace(finalSQL, "?", paramValue, 1);
 				} else {
-					finalSQL=StringUtils.replace(finalSQL, "?", "'" + paramValue + "'", 1);
+					finalSQL = StringUtils.replace(finalSQL, "?", "'" + paramValue + "'", 1);
 				}
 
 			}

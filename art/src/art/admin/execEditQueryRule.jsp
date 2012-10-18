@@ -37,6 +37,7 @@ String action = request.getParameter("RULEACTION");
 		ar.setQueryId(queryId);
 		ar.setFieldName(request.getParameter("FIELD_NAME"));
 		ar.setRuleName(request.getParameter("RULE_NAME"));
+		ar.setFieldDataType(request.getParameter("FIELD_DATA_TYPE"));
 		
 		if (StringUtils.equals(action, "NEW")){
 			actionSuccessful=ar.insertQueryRule(conn);

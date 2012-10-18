@@ -6,8 +6,6 @@
 
 
 <%  
-  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
-  
   //let application server authenticate user using login credentials      
   String username = request.getRemoteUser();
   
@@ -17,8 +15,9 @@
      session.setAttribute("username", username);
      
      String nextPage = (String)  session.getAttribute("nextPage");
-     session.removeAttribute("nextPage");
-         // redirect and art will verify if the user is setup as an art user,
+     session.removeAttribute("nextPage"); //remove nextpage attribute to prevent endless redirection to login page for /admin pages
+	 
+     // redirect and art will verify if the user is setup as an art user,
      response.sendRedirect((nextPage!=null?nextPage:request.getContextPath()+"/user/showGroups.jsp"));
          // if not this AutoLogin page is invoked with a message and the code below is shown
 }  else {

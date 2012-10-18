@@ -9,6 +9,7 @@ ART 2.4
 * Enable display of final sql generated for a query
 * Enable setting of the format to be used for dates in query output
 * Added All option for datatable output
+* Improved handling of numeric rule values
 
 ART 2.3.1
 * Fix NullPointerException on pdf output with null strings

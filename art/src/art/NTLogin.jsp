@@ -2,7 +2,9 @@
 <%@ page import=" art.servlets.ArtDBCP;" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page pageEncoding="UTF-8" %>
+
 <%@ include file ="renewSession.jsp" %>
+
 <html>
     <head>
         <title>ART - Windows Login</title>
@@ -23,6 +25,7 @@
             </tr>
             <form name="login" method="post" action="${pageContext.request.contextPath}/execNTLogin.jsp">
                 <input type="hidden" name="nextPage" value="${pageScope.nextPage}">
+				
                 <c:if test="${( !empty requestScope.message) && (pageScope._login != true) }">
                     <tr>
                         <td colspan="2" align="center">
