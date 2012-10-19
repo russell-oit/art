@@ -150,7 +150,11 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-        out.println(" <td>" + i + "</td>");
+		String formattedValue = null;
+        if (i != null) {
+            formattedValue = nfPlain.format(i.longValue());
+        }
+        out.println(" <td>" + formattedValue + "</td>");
     }
 
     @Override

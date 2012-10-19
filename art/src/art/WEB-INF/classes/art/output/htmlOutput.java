@@ -122,7 +122,11 @@ public class htmlOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		out.println("<td align=\"right\" class=\"" + (oddline ? "qeodd" : "qeeven") + "\" >" + i + "</td>");
+		String formattedValue = null;
+		if (i != null) {
+			formattedValue = nfPlain.format(i.longValue());
+		}
+		out.println("<td align=\"right\" class=\"" + (oddline ? "qeodd" : "qeeven") + "\" >" + formattedValue + "</td>");
 	}
 
 	@Override

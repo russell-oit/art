@@ -126,7 +126,11 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		out.println("  <td align=\"right\">" + i + "</td>");
+		String formattedValue = null;
+		if (i != null) {
+			formattedValue = nfPlain.format(i.longValue());
+		}
+		out.println("  <td align=\"right\">" + formattedValue + "</td>");
 	}
 
 	@Override

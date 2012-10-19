@@ -44,7 +44,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
 		
 		nfSort=new DecimalFormat("#.#");
-		nfSort.setMinimumIntegerDigits(99); //ensure all numbers are pre-padded with zeros so that sorting works correctly
+		nfSort.setMinimumIntegerDigits(20); //ensure all numbers are pre-padded with zeros so that sorting works correctly
 		nfSort.setMaximumFractionDigits(99);
 		
 	}
