@@ -1,6 +1,6 @@
 <%
   /* Invalidate the current session to allow a new login but cache the nextPage
-     to reach after login if specified */
+     to go to after login if successful */
   pageContext.setAttribute("_mobile", false); 
   pageContext.setAttribute("_login", false); 
   if (session.getAttribute("nextPage") != null) {

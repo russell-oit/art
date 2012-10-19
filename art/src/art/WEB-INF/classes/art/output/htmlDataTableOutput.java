@@ -7,6 +7,7 @@ import art.servlets.ArtDBCP;
 import art.utils.ArtQueryParam;
 import java.io.File;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
@@ -29,6 +30,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 	Map<Integer, ArtQueryParam> displayParams;
 	String tableId; // random identifier
 	private String language; //language to use for datatable. in locale format e.g. it, en, en_US
+	DecimalFormat nfSort;
 
 	/**
 	 * Constructor
@@ -40,6 +42,11 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		nfPlain.setGroupingUsed(true);
 		nfPlain.setMaximumFractionDigits(99);
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
+		
+		nfSort=new DecimalFormat("#.#");
+		nfSort.setMinimumIntegerDigits(99); //ensure all numbers are pre-padded with zeros so that sorting works correctly
+		nfSort.setMaximumFractionDigits(99);
+		
 	}
 
 	/**
@@ -181,15 +188,24 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 	@Override
 	public void addCellDouble(Double d) {
 		String formattedValue = null;
+		String sortValue=null;
 		if (d != null) {
 			formattedValue = nfPlain.format(d.doubleValue());
+			sortValue = nfSort.format(d.doubleValue());
 		}
-		out.println("  <td align=\"right\">" + formattedValue + "</td>");
+		//display value in invisible span so that sorting can work correctly when there are numbers with the thousand separator e.g. 1,000
+		out.println("  <td align=\"right\"> <span style=\"display:none;\">" + sortValue + "</span>" + formattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		out.println("  <td align=\"right\">" + i + "</td>");
+		String formattedValue = null;
+		String sortValue=null;
+		if (i != null) {
+			formattedValue = nfPlain.format(i.longValue());
+			sortValue = nfSort.format(i.longValue());
+		}
+		out.println("  <td align=\"right\"> <span style=\"display:none;\">" + sortValue + "</span>" + formattedValue + "</td>");
 	}
 
 	@Override
