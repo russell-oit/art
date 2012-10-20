@@ -18,9 +18,13 @@
  */
 package art.servlets;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,10 +72,11 @@ public final class AuthFilterAdmin implements Filter {
 
 		if (request instanceof HttpServletRequest) {
 			HttpServletRequest hrequest = (HttpServletRequest) request;
+			HttpServletResponse hresponse = (HttpServletResponse) response;
 			HttpSession session = hrequest.getSession();
 
-			if (ArtDBCP.isArtSettingsLoaded()) { // properties are defined
-
+			if (ArtDBCP.isArtSettingsLoaded()) {
+				// settings are defined
 				if (session.getAttribute("AdminSession") != null) {
 					// if the admin connection is not in the session 
 					// get the connection and store it in the admin session 
@@ -86,24 +91,92 @@ public final class AuthFilterAdmin implements Filter {
 					}
 					chain.doFilter(request, response);
 				} else {
-					//display appropriate login page
-					HttpServletResponse hresponse = (HttpServletResponse) response;
-					java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
-					hrequest.setAttribute("message", messages.getString("sessionExpired"));
-					String toPage = ArtDBCP.getArtSetting("index_page_default");
-					if (toPage == null || toPage.equals("default")) {
-						toPage = "login";
+					//check if we have come from a login page
+					String username = hrequest.getParameter("username");
+					String password = hrequest.getParameter("password");
+					if (username == null) {
+						//we have not come from a login page. display appropriate login page
+						//remember the page the user tried to access in order to forward after the authentication
+						String nextPage = hrequest.getRequestURI();
+						if (hrequest.getQueryString() != null) {
+							nextPage = nextPage + "?" + hrequest.getQueryString();
+						}
+						session.setAttribute("nextPage", nextPage);
+
+						java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
+						forwardToLoginPage(hresponse, hrequest, messages.getString("sessionExpired"));
+					} else {
+						//we have come from a login page. authenticate
+						boolean isArtSuperUser = false;
+						try {
+							String msg = ArtDBCP.authenticateSession(hrequest);
+							if (msg == null) {
+								//no error messages. authentication succeeded
+								if (username.equals(ArtDBCP.getArtRepositoryUsername())
+										&& password.equals(ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+									// using repository username and password. Give user super admin privileges
+									// no need to authenticate it
+									isArtSuperUser = true;
+								}
+								if (isArtSuperUser) {
+									hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
+									return; //not needed but retained in case code changes later giving execution path after redirect
+								} else {
+									// auth ok
+									//ensure this is an admin user
+									if (session.getAttribute("AdminSession") != null) {
+										//this is an admin user
+										chain.doFilter(request, response);
+									} else {
+										//this is not an admin user. go to showGroups
+										hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/user/showGroups.jsp"));
+										return; //not needed but retained in case code changes later giving execution path after redirect
+									}
+								}
+							} else {
+								//authentication failed. display error message
+								//remember the page the user tried to access in order to forward after the authentication
+								String nextPage = hrequest.getRequestURI();
+								if (hrequest.getQueryString() != null) {
+									nextPage = nextPage + "?" + hrequest.getQueryString();
+								}
+								session.setAttribute("nextPage", nextPage);
+
+								//display appropriate login page
+								forwardToLoginPage(hresponse, hrequest, msg);
+							}
+						} catch (Exception e) {
+							logger.error("Error", e);
+							forwardToLoginPage(hresponse, hrequest, e.getMessage());
+						}
 					}
-					hrequest.getRequestDispatcher("/" + toPage + ".jsp").forward(hrequest, hresponse);
 				}
 
 			} else {
-				// properties are not defined - this is the 1st logon (see execLogin.jsp)
+				// settings are not defined - this is the 1st logon (see execLogin.jsp)
 				session.setAttribute("AdminSession", "Y");
 				session.setAttribute("AdminLevel", new Integer(100));
 				session.setAttribute("AdminUsername", "art");
 				chain.doFilter(request, response);
 			}
 		}
+	}
+
+	/**
+	 * Forward to the appropriate login page.
+	 *
+	 * @param hresponse http response
+	 * @param hrequest http request
+	 * @param msg message to display
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void forwardToLoginPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
+		hrequest.setAttribute("message", msg);
+		String toPage = ArtDBCP.getArtSetting("index_page_default");
+		if (toPage == null || toPage.equals("default")) {
+			toPage = "login";
+		}
+		hrequest.getRequestDispatcher("/" + toPage + ".jsp").forward(hrequest, hresponse);
 	}
 }

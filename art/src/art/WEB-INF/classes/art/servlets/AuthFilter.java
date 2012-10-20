@@ -18,14 +18,7 @@
  */
 package art.servlets;
 
-import art.utils.ArtException;
-import art.utils.Encrypter;
-import art.utils.UserEntity;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ResourceBundle;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,69 +27,76 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** 
- * Filter applied on accessing user directory files 
- * 
- * @author Enrico Liboni 
+/**
+ * Filter applied on accessing user directory files
+ *
+ * @author Enrico Liboni
  */
 public final class AuthFilter implements Filter {
 
-    final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
-	
-    private FilterConfig filterConfig = null;
-    private boolean isArtSuperUser;
+	final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
+	private FilterConfig filterConfig = null;
+	private boolean isArtRepositoryUser;
 
-    /**
-     * 
-     */
-    @Override
-    public void destroy() {
-        this.filterConfig = null;
-    }
+	/**
+	 *
+	 */
+	@Override
+	public void destroy() {
+		this.filterConfig = null;
+	}
 
-    /**
-     * 
-     * @param filterConfig
-     * @throws ServletException
-     */
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        this.filterConfig = filterConfig;
-    }
+	/**
+	 *
+	 * @param filterConfig
+	 * @throws ServletException
+	 */
+	@Override
+	public void init(FilterConfig filterConfig) throws ServletException {
+		this.filterConfig = filterConfig;
+	}
 
-    /**
-     * Check if this is a valid user session
-     * 
-     * @param request
-     * @param response
-     * @param chain
-     * @throws IOException
-     * @throws ServletException
-     */
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
+	/**
+	 * Check if this is a valid user session
+	 *
+	 * @param request
+	 * @param response
+	 * @param chain
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	@Override
+	public void doFilter(ServletRequest request, ServletResponse response,
+			FilterChain chain) throws IOException, ServletException {
 
-        if (request instanceof HttpServletRequest) {
-            HttpServletRequest hrequest = (HttpServletRequest) request;
-            HttpServletResponse hresponse = (HttpServletResponse) response;
-            HttpSession session = hrequest.getSession();
-			
-            if (session.getAttribute("ue") == null) {
-                // Let's authenticate it
-                if (!ArtDBCP.isArtSettingsLoaded()) {
-                    // properties not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
-                    hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
-                    //return; // !!!! this need to be here!!! //not needed anymore. else statement added
-                } else {
-					isArtSuperUser = false;
-					try {						
-						String msg=AuthenticateSession(hrequest);
-						if(msg==null){
-							//authentication succeeded. no error messages
-							if (isArtSuperUser) {
+		if (request instanceof HttpServletRequest) {
+			HttpServletRequest hrequest = (HttpServletRequest) request;
+			HttpServletResponse hresponse = (HttpServletResponse) response;
+			HttpSession session = hrequest.getSession();
+
+			if (session.getAttribute("ue") == null) {
+				// Let's authenticate it
+				if (!ArtDBCP.isArtSettingsLoaded()) {
+					// properties not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
+					hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
+					return; //not needed but retained in case code changes later giving execution path after redirect
+				} else {
+					isArtRepositoryUser = false;
+					try {
+						//String msg = AuthenticateSession(hrequest);
+						String msg = ArtDBCP.authenticateSession(hrequest);
+						if (msg == null) {
+							//no error messages. authentication succeeded
+							String username = hrequest.getParameter("username");
+							String password = hrequest.getParameter("password");
+							if (username.equals(ArtDBCP.getArtRepositoryUsername())
+									&& password.equals(ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+								// using repository username and password. 
+								isArtRepositoryUser = true;
+							}
+							if (isArtRepositoryUser) {
 								hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
-								//return; //not needed
+								return; //not needed but retained in case code changes later giving execution path after redirect
 							} else {
 								// auth ok
 								chain.doFilter(request, response);
@@ -109,213 +109,38 @@ public final class AuthFilter implements Filter {
 								nextPage = nextPage + "?" + hrequest.getQueryString();
 							}
 							session.setAttribute("nextPage", nextPage);
-							
+
 							//display appropriate login page
-							forwardPage(hresponse, hrequest, msg);
-						}					
+							forwardToLoginPage(hresponse, hrequest, msg);
+						}
 					} catch (Exception e) {
 						logger.error("Error", e);
-						forwardPage(hresponse, hrequest, e.getMessage());
+						forwardToLoginPage(hresponse, hrequest, e.getMessage());
 					}
 				}
-            } else {
-                // Already Authenticated
-                chain.doFilter(request, response);
-            }
-        }
-    }
-
-    /**
-     * Forward to the appropriate login page.
-     * 
-     * @param hresponse http response
-     * @param hrequest http request
-     * @param msg message to display
-     * @throws ServletException
-     * @throws IOException 
-     */
-    private void forwardPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
-        hrequest.setAttribute("message", msg);
-        String toPage = ArtDBCP.getArtSetting("index_page_default");
-        if (toPage == null || toPage.equals("default")) {
-            toPage = "login";
-        }
-        hrequest.getRequestDispatcher("/" + toPage + ".jsp").forward(hrequest, hresponse);
-    }
-
-    /**
-     * Authenticate the session.
-     * 
-     * @param request
-     * @throws ArtException if couldn't authenticate
-     * @throws Exception 
-     */
-    private String AuthenticateSession(HttpServletRequest request) throws Exception {
-
-        /* Logic (an exception is generated if any action goes wrong)
-        
-        if username/password are provided
-        -> check if they are for the ART superadmin
-        -> validate the credentials
-        else if username is in the session and the param 'external' is available
-        -> this is an "external authenticated" session
-        check if the username is an art user too
-        end
-        
-        create a UserEntity UE and store it in the session
-        store "username" attribute in the session as well
-        if is an admin session initialize Admin attributes
-         */
-		
-		String msg=null; //error message if authentication failure
-
-        HttpSession session = request.getSession();
-        ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
-
-        int adminlevel = -1;
-        boolean internalAuthentication = true;
-
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-
-        /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-        if (username!=null && password != null) {  // INTERNAL AUTHENTICATION ( a username and password is available)
-                        
-            // check if the credentials match the ART Reposority username/password
-            if (username.equals(ArtDBCP.getArtRepositoryUsername())
-                    && password.equals(ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
-                // this is the powerful ART super admin !
-                // no need to authenticate it
-                adminlevel = 100;
-                isArtSuperUser = true;
-                ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + adminlevel);
-            } else { // begin normal internal authentication
-				/*
-                 * Let's verify if username and password are valid
-                 */
-                Connection conn = null;
-                try {
-                    //default to using bcrypt instead of md5 for password hashing
-                    //password = digestString(password, "MD5");
-
-                    String SqlQuery = "SELECT ADMIN_LEVEL, PASSWORD, HASHING_ALGORITHM FROM ART_USERS "
-                            + "WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
-                    conn = ArtDBCP.getConnection();                    
-                    if (conn == null) {
-						// ART Repository Down !!!
-                        msg=messages.getString("invalidConnection");
-                    } else {
-						PreparedStatement ps = conn.prepareStatement(SqlQuery);
-						ps.setString(1, username);
-						ResultSet rs = ps.executeQuery();
-						if (rs.next()) {
-							//user exists. verify password
-							if (Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"))) {
-								// ----------------------------------------------------AUTHENTICATED!
-
-								adminlevel = rs.getInt("ADMIN_LEVEL");
-								session.setAttribute("username", username); // store username in the session
-								ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal, level: " + adminlevel);
-							} else {
-								//wrong password
-								ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
-								msg=messages.getString("invalidAccount");
-							}
-
-						} else {
-							//user doesn't exist
-							ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
-							msg=messages.getString("invalidAccount");
-						}
-						rs.close(); 
-						ps.close();
-					}                
-                } finally {
-                    try {
-                        if (conn != null) {
-                            conn.close();
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error", e);
-                    }
-                }
-            } // end internal authentication
-			/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-        } else if (session.getAttribute("username") != null) { // EXTERNAL AUTHENTICATION ( a username in session is available)
-			/* a username is already in the session, but the ue object is not
-             * let's get other info and authenticate it
-             */
-            Connection conn = null;
-            try {
-                username = (String) session.getAttribute("username");
-                String SqlQuery = ("SELECT ADMIN_LEVEL FROM ART_USERS "
-                        + " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL) ");
-                conn = ArtDBCP.getConnection();                
-                if (conn == null) {
-					// ART Repository Down !!!
-                    msg=messages.getString("invalidConnection");
-                } else {
-					PreparedStatement ps = conn.prepareStatement(SqlQuery);
-					ps.setString(1, username);
-					ResultSet rs = ps.executeQuery();
-					if (rs.next()) {
-						// ----------------------------------------------------AUTHENTICATED!
-
-						adminlevel = rs.getInt("ADMIN_LEVEL");
-						internalAuthentication = false;
-
-						ArtDBCP.log(username, "login", request.getRemoteAddr(), "external, level: " + adminlevel);
-					} else {
-						//external user not created in ART
-						ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "external, failed");
-						msg=messages.getString("invalidUser");
-					}
-					rs.close();
-					ps.close();
-				}            
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (Exception e) {
-                    logger.error("Error", e);
-                }
-            }
-        } else {
-            // if the request is for a public_user session
-            // create it...
-            if (request.getParameter("_public_user") != null) {
-                username = "public_user";
-
-                adminlevel = 0;
-                internalAuthentication = true;
-            } else {
-                // ... otherwise this is a session expired / unauthorized access attempt...
-                msg=messages.getString("sessionExpired");
-            }
-        }
-
-        // if the session is authenticated, Create the UserEntity object and store it in the session
-        if(msg==null){
-			//authentication successful
-			UserEntity ue = new UserEntity(username);
-
-			//override some properties
-			ue.setAdminLevel(adminlevel);
-			ue.setInternalAuth(internalAuthentication);
-
-			session.setAttribute("ue", ue);
-			session.setAttribute("username", username);
-
-			// Set admin session
-			if (adminlevel > 5) {
-				session.setAttribute("AdminSession", "Y");
-				session.setAttribute("AdminLevel", new Integer(adminlevel));
-				session.setAttribute("AdminUsername", username);
+			} else {
+				// Already Authenticated
+				chain.doFilter(request, response);
 			}
 		}
+	}
 
-		return msg;
-    }
+	/**
+	 * Forward to the appropriate login page.
+	 *
+	 * @param hresponse http response
+	 * @param hrequest http request
+	 * @param msg message to display
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void forwardToLoginPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
+		hrequest.setAttribute("message", msg);
+		String toPage = ArtDBCP.getArtSetting("index_page_default");
+		if (toPage == null || toPage.equals("default")) {
+			toPage = "login";
+		}
+		hrequest.getRequestDispatcher("/" + toPage + ".jsp").forward(hrequest, hresponse);
+	}
+
 }

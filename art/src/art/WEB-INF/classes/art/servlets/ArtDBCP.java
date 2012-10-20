@@ -33,6 +33,7 @@ package art.servlets;
 import art.dbcp.DataSource;
 import art.utils.ArtProps;
 import art.utils.Encrypter;
+import art.utils.UserEntity;
 import com.lowagie.text.FontFactory;
 import java.io.File;
 import java.sql.*;
@@ -42,6 +43,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -1000,4 +1003,179 @@ public class ArtDBCP extends HttpServlet {
 		
 		return sortKey;
 	}
+	
+	/**
+     * Authenticate the session.
+     * 
+     * @param request
+     * @throws ArtException if couldn't authenticate
+     * @throws Exception 
+     */
+    public static String authenticateSession(HttpServletRequest request) throws Exception {
+
+        /* Logic (an exception is generated if any action goes wrong)
+        
+        if username/password are provided
+        -> check if they are for the ART superadmin
+        -> validate the credentials
+        else if username is in the session and the param 'external' is available
+        -> this is an "external authenticated" session
+        check if the username is an art user too
+        end
+        
+        create a UserEntity UE and store it in the session
+        store "username" attribute in the session as well
+        if is an admin session initialize Admin attributes
+         */
+		
+		String msg=null; //error message if authentication failure
+
+        HttpSession session = request.getSession();
+        ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+
+        int adminlevel = -1;
+        boolean internalAuthentication = true;
+
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+        if (username!=null && password != null) {  // INTERNAL AUTHENTICATION ( a username and password is available)
+                        
+            // check if the credentials match the ART Reposority username/password
+            if (username.equals(ArtDBCP.getArtRepositoryUsername())
+                    && password.equals(ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+                // using repository username and password. Give user super admin privileges
+                // no need to authenticate it
+                adminlevel = 100;
+                ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + adminlevel);
+            } else { // begin normal internal authentication
+				/*
+                 * Let's verify if username and password are valid
+                 */
+                Connection conn = null;
+                try {
+                    //default to using bcrypt instead of md5 for password hashing
+                    //password = digestString(password, "MD5");
+
+                    String SqlQuery = "SELECT ADMIN_LEVEL, PASSWORD, HASHING_ALGORITHM FROM ART_USERS "
+                            + "WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
+                    conn = ArtDBCP.getConnection();                    
+                    if (conn == null) {
+						// ART Repository Down !!!
+                        msg=messages.getString("invalidConnection");
+                    } else {
+						PreparedStatement ps = conn.prepareStatement(SqlQuery);
+						ps.setString(1, username);
+						ResultSet rs = ps.executeQuery();
+						if (rs.next()) {
+							//user exists. verify password
+							if (Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"))) {
+								// ----------------------------------------------------AUTHENTICATED!
+
+								adminlevel = rs.getInt("ADMIN_LEVEL");
+								session.setAttribute("username", username); // store username in the session
+								ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal, level: " + adminlevel);
+							} else {
+								//wrong password
+								ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
+								msg=messages.getString("invalidAccount");
+							}
+
+						} else {
+							//user doesn't exist
+							ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
+							msg=messages.getString("invalidAccount");
+						}
+						rs.close(); 
+						ps.close();
+					}                
+                } finally {
+                    try {
+                        if (conn != null) {
+                            conn.close();
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error", e);
+                    }
+                }
+            } // end internal authentication
+			/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
+        } else if (session.getAttribute("username") != null) { // EXTERNAL AUTHENTICATION ( a username in session is available)
+			/* a username is already in the session, but the ue object is not
+             * let's get other info and authenticate it
+             */
+            Connection conn = null;
+            try {
+                username = (String) session.getAttribute("username");
+                String SqlQuery = ("SELECT ADMIN_LEVEL FROM ART_USERS "
+                        + " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL) ");
+                conn = ArtDBCP.getConnection();                
+                if (conn == null) {
+					// ART Repository Down !!!
+                    msg=messages.getString("invalidConnection");
+                } else {
+					PreparedStatement ps = conn.prepareStatement(SqlQuery);
+					ps.setString(1, username);
+					ResultSet rs = ps.executeQuery();
+					if (rs.next()) {
+						// ----------------------------------------------------AUTHENTICATED!
+
+						adminlevel = rs.getInt("ADMIN_LEVEL");
+						internalAuthentication = false;
+
+						ArtDBCP.log(username, "login", request.getRemoteAddr(), "external, level: " + adminlevel);
+					} else {
+						//external user not created in ART
+						ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "external, failed");
+						msg=messages.getString("invalidUser");
+					}
+					rs.close();
+					ps.close();
+				}            
+            } finally {
+                try {
+                    if (conn != null) {
+                        conn.close();
+                    }
+                } catch (Exception e) {
+                    logger.error("Error", e);
+                }
+            }
+        } else {
+            // if the request is for a public_user session
+            // create it...
+            if (request.getParameter("_public_user") != null) {
+                username = "public_user";
+
+                adminlevel = 0;
+                internalAuthentication = true;
+            } else {
+                // ... otherwise this is a session expired / unauthorized access attempt...
+                msg=messages.getString("sessionExpired");
+            }
+        }
+
+        // if the session is authenticated, Create the UserEntity object and store it in the session
+        if(msg==null){
+			//authentication successful
+			UserEntity ue = new UserEntity(username);
+
+			//override some properties
+			ue.setAdminLevel(adminlevel);
+			ue.setInternalAuth(internalAuthentication);
+
+			session.setAttribute("ue", ue);
+			session.setAttribute("username", username);
+
+			// Set admin session
+			if (adminlevel > 5) {
+				session.setAttribute("AdminSession", "Y");
+				session.setAttribute("AdminLevel", new Integer(adminlevel));
+				session.setAttribute("AdminUsername", username);
+			}
+		}
+
+		return msg;
+    }
 }

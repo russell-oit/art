@@ -313,6 +313,14 @@ jQuery(document).ready(function($){
 
 			$("#response").load("ExecuteQuery",$form.serialize(),function(responseText, statusText, xhr){
 				//callback funtion for when jquery load has finished
+				
+				//check if session expired
+				var user=document.getElementById("username");
+				if(user!=null){
+					//a login page is being displayed. session must have expired. redirect to enable user to login and start again
+					window.location="<%= request.getContextPath() %>/user/showGroups.jsp";
+					return;
+				}
 
 				if(statusText=="success"){
 					//make htmlgrid output sortable

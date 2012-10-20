@@ -51,8 +51,9 @@
                 </tr>
                 <tr>
                     <td vAlign="center" align="middle" colspan="2">
-                        <input type="submit" class="buttonup" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" style="width:100px;"
-                               value="<%=messages.getString("login")%>"> </td>
+						 <input type="submit" class="buttonup" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" style="width:100px;"
+                               value="<%=messages.getString("login")%>">
+                        </td>
                 </tr>
             </form>
 
