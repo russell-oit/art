@@ -57,13 +57,13 @@
                 <tr>
                     <td vAlign="center" align="right" width="30%"><%=messages.getString("username")%></td>
                     <td vAlign="center" align="left" width="70%">
-                        <input id="username" maxLength="30" size="25" name="ntusername">
+                        <input name="ntusername" id="ntusername" maxLength="30" size="25" >
                     </td>
                 </tr>
                 <tr>
                     <td vAlign="center" align="right" width="30%"><%=messages.getString("password")%></td>
                     <td vAlign="center" align="left" width="70%">
-                        <input id="password" type="password" maxLength="40" size="25" name="ntpassword">
+                        <input name="ntpassword" id="ntpassword" type="password" maxLength="40" size="25" >
                     </td>
                 </tr>
                 <tr>

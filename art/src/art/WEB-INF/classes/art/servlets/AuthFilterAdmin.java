@@ -94,31 +94,20 @@ public final class AuthFilterAdmin implements Filter {
 					//check if we have come from a login page
 					String username = hrequest.getParameter("username");
 					String password = hrequest.getParameter("password");
-					if (username == null) {
-						//we have not come from a login page. display appropriate login page
-						//remember the page the user tried to access in order to forward after the authentication
-						String nextPage = hrequest.getRequestURI();
-						if (hrequest.getQueryString() != null) {
-							nextPage = nextPage + "?" + hrequest.getQueryString();
-						}
-						session.setAttribute("nextPage", nextPage);
-
-						java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
-						forwardToLoginPage(hresponse, hrequest, messages.getString("sessionExpired"));
-					} else {
+					String sessionUser = (String) session.getAttribute("username");
+					if (username != null || (username==null && sessionUser!=null)) {
 						//we have come from a login page. authenticate
-						boolean isArtSuperUser = false;
+						boolean isArtRepositoryUser = false;
 						try {
 							String msg = ArtDBCP.authenticateSession(hrequest);
 							if (msg == null) {
 								//no error messages. authentication succeeded
-								if (username.equals(ArtDBCP.getArtRepositoryUsername())
-										&& password.equals(ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
-									// using repository username and password. Give user super admin privileges
-									// no need to authenticate it
-									isArtSuperUser = true;
+								if (StringUtils.equals(username, ArtDBCP.getArtRepositoryUsername())
+										&& StringUtils.equals(password, ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+									// using repository username and password
+									isArtRepositoryUser = true;
 								}
-								if (isArtSuperUser) {
+								if (isArtRepositoryUser) {
 									hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
 									return; //not needed but retained in case code changes later giving execution path after redirect
 								} else {
@@ -128,7 +117,7 @@ public final class AuthFilterAdmin implements Filter {
 										//this is an admin user
 										chain.doFilter(request, response);
 									} else {
-										//this is not an admin user. go to showGroups
+										//this is not an admin user. go to start page
 										hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/user/showGroups.jsp"));
 										return; //not needed but retained in case code changes later giving execution path after redirect
 									}
@@ -149,6 +138,17 @@ public final class AuthFilterAdmin implements Filter {
 							logger.error("Error", e);
 							forwardToLoginPage(hresponse, hrequest, e.getMessage());
 						}
+					} else {
+						//we have not come from a login page. display appropriate login page
+						//remember the page the user tried to access in order to forward after the authentication
+						String nextPage = hrequest.getRequestURI();
+						if (hrequest.getQueryString() != null) {
+							nextPage = nextPage + "?" + hrequest.getQueryString();
+						}
+						session.setAttribute("nextPage", nextPage);
+
+						java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
+						forwardToLoginPage(hresponse, hrequest, messages.getString("sessionExpired"));
 					}
 				}
 

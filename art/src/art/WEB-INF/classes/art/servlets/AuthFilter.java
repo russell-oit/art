@@ -75,7 +75,7 @@ public final class AuthFilter implements Filter {
 			HttpSession session = hrequest.getSession();
 
 			if (session.getAttribute("ue") == null) {
-				// Let's authenticate it
+				//Let's authenticate it
 				if (!ArtDBCP.isArtSettingsLoaded()) {
 					// properties not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
 					hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
@@ -89,8 +89,8 @@ public final class AuthFilter implements Filter {
 							//no error messages. authentication succeeded
 							String username = hrequest.getParameter("username");
 							String password = hrequest.getParameter("password");
-							if (username.equals(ArtDBCP.getArtRepositoryUsername())
-									&& password.equals(ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+							if (StringUtils.equals(username,ArtDBCP.getArtRepositoryUsername())
+									&& StringUtils.equals(password,ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 								// using repository username and password. 
 								isArtRepositoryUser = true;
 							}

@@ -174,14 +174,14 @@ public class ArtDBCP extends HttpServlet {
 
 			//set date format
 			dateFormat = ap.getProp("date_format");
-			if(StringUtils.isBlank(dateFormat)){
-				dateFormat=DEFAULT_DATE_FORMAT;
+			if (StringUtils.isBlank(dateFormat)) {
+				dateFormat = DEFAULT_DATE_FORMAT;
 			}
 
 			//set time format
 			timeFormat = ap.getProp("time_format");
-			if(StringUtils.isBlank(timeFormat)){
-				timeFormat=DEFAULT_TIME_FORMAT;
+			if (StringUtils.isBlank(timeFormat)) {
+				timeFormat = DEFAULT_TIME_FORMAT;
 			}
 
 			artSettingsLoaded = true;
@@ -962,8 +962,9 @@ public class ArtDBCP extends HttpServlet {
 
 	/**
 	 * Get string to be displayed in query output for a date field
+	 *
 	 * @param dt
-	 * @return 
+	 * @return
 	 */
 	public static String getDateDisplayString(java.util.Date dt) {
 		String dateString;
@@ -971,100 +972,102 @@ public class ArtDBCP extends HttpServlet {
 		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS"); //use to check if time component is 0
 		SimpleDateFormat df = new SimpleDateFormat(dateFormat);
 		SimpleDateFormat dtf = new SimpleDateFormat(dateFormat + " " + timeFormat);
-		
-		if (dt==null) {
-			dateString="";
+
+		if (dt == null) {
+			dateString = "";
 		} else if (zf.format(dt).equals("00:00:00.000")) {
 			//time component is 0. don't display time component
-			dateString= df.format(dt);
+			dateString = df.format(dt);
 		} else {
 			//display both date and time
-			dateString= dtf.format(dt);
+			dateString = dtf.format(dt);
 		}
-		
+
 		return dateString;
 	}
-	
+
 	/**
 	 * Get a string to be used for correctly sorting dates irrespective of the
 	 * date format used to display dates
+	 *
 	 * @param dt
-	 * @return 
+	 * @return
 	 */
-	public static String getDateSortString(java.util.Date dt){
+	public static String getDateSortString(java.util.Date dt) {
 		String sortKey;
-		
-		if(dt==null){
-			sortKey="null";
+
+		if (dt == null) {
+			sortKey = "null";
 		} else {
 			SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss:SSS");
-			sortKey=sf.format(dt);
+			sortKey = sf.format(dt);
 		}
-		
+
 		return sortKey;
 	}
-	
+
 	/**
-     * Authenticate the session.
-     * 
-     * @param request
-     * @throws ArtException if couldn't authenticate
-     * @throws Exception 
-     */
-    public static String authenticateSession(HttpServletRequest request) throws Exception {
+	 * Authenticate the session.
+	 *
+	 * @param request
+	 * @throws ArtException if couldn't authenticate
+	 * @throws Exception
+	 */
+	public static String authenticateSession(HttpServletRequest request) throws Exception {
 
-        /* Logic (an exception is generated if any action goes wrong)
-        
-        if username/password are provided
-        -> check if they are for the ART superadmin
-        -> validate the credentials
-        else if username is in the session and the param 'external' is available
-        -> this is an "external authenticated" session
-        check if the username is an art user too
-        end
-        
-        create a UserEntity UE and store it in the session
-        store "username" attribute in the session as well
-        if is an admin session initialize Admin attributes
-         */
-		
-		String msg=null; //error message if authentication failure
+		/*
+		 * Logic (an exception is generated if any action goes wrong)
+		 *
+		 * if username/password are provided -> check if they are for the ART
+		 * superadmin -> validate the credentials else if username is in the
+		 * session and the param 'external' is available -> this is an "external
+		 * authenticated" session check if the username is an art user too end
+		 *
+		 * create a UserEntity UE and store it in the session store "username"
+		 * attribute in the session as well if is an admin session initialize
+		 * Admin attributes
+		 */
 
-        HttpSession session = request.getSession();
-        ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+		String msg = null; //error message if authentication failure
 
-        int adminlevel = -1;
-        boolean internalAuthentication = true;
+		HttpSession session = request.getSession();
+		ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+		int adminlevel = -1;
+		boolean internalAuthentication = true;
 
-        /* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-        if (username!=null && password != null) {  // INTERNAL AUTHENTICATION ( a username and password is available)
-                        
-            // check if the credentials match the ART Reposority username/password
-            if (username.equals(ArtDBCP.getArtRepositoryUsername())
-                    && password.equals(ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
-                // using repository username and password. Give user super admin privileges
-                // no need to authenticate it
-                adminlevel = 100;
-                ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + adminlevel);
-            } else { // begin normal internal authentication
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+
+		/*
+		 * *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+		 * ***
+		 */
+		if (username != null && password != null) {  // INTERNAL AUTHENTICATION ( a username and password is available)
+
+			// check if the credentials match the ART Reposority username/password
+			if (StringUtils.equals(username, ArtDBCP.getArtRepositoryUsername())
+					&& StringUtils.equals(password, ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+				// using repository username and password. Give user super admin privileges
+				// no need to authenticate it
+				adminlevel = 100;
+				ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + adminlevel);
+			} else { // begin normal internal authentication
 				/*
-                 * Let's verify if username and password are valid
-                 */
-                Connection conn = null;
-                try {
-                    //default to using bcrypt instead of md5 for password hashing
-                    //password = digestString(password, "MD5");
+				 * Let's verify if username and password are valid
+				 */
+				Connection conn = null;
+				try {
+					//default to using bcrypt instead of md5 for password hashing
+					//password = digestString(password, "MD5");
 
-                    String SqlQuery = "SELECT ADMIN_LEVEL, PASSWORD, HASHING_ALGORITHM FROM ART_USERS "
-                            + "WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
-                    conn = ArtDBCP.getConnection();                    
-                    if (conn == null) {
+					String SqlQuery = "SELECT ADMIN_LEVEL, PASSWORD, HASHING_ALGORITHM FROM ART_USERS "
+							+ "WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
+					conn = ArtDBCP.getConnection();
+					if (conn == null) {
 						// ART Repository Down !!!
-                        msg=messages.getString("invalidConnection");
-                    } else {
+						msg = messages.getString("invalidConnection");
+					} else {
 						PreparedStatement ps = conn.prepareStatement(SqlQuery);
 						ps.setString(1, username);
 						ResultSet rs = ps.executeQuery();
@@ -1079,42 +1082,46 @@ public class ArtDBCP extends HttpServlet {
 							} else {
 								//wrong password
 								ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
-								msg=messages.getString("invalidAccount");
+								msg = messages.getString("invalidAccount");
 							}
 
 						} else {
 							//user doesn't exist
 							ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
-							msg=messages.getString("invalidAccount");
+							msg = messages.getString("invalidAccount");
 						}
-						rs.close(); 
+						rs.close();
 						ps.close();
-					}                
-                } finally {
-                    try {
-                        if (conn != null) {
-                            conn.close();
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error", e);
-                    }
-                }
-            } // end internal authentication
-			/* *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-        } else if (session.getAttribute("username") != null) { // EXTERNAL AUTHENTICATION ( a username in session is available)
-			/* a username is already in the session, but the ue object is not
-             * let's get other info and authenticate it
-             */
-            Connection conn = null;
-            try {
-                username = (String) session.getAttribute("username");
-                String SqlQuery = ("SELECT ADMIN_LEVEL FROM ART_USERS "
-                        + " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL) ");
-                conn = ArtDBCP.getConnection();                
-                if (conn == null) {
+					}
+				} finally {
+					try {
+						if (conn != null) {
+							conn.close();
+						}
+					} catch (Exception e) {
+						logger.error("Error", e);
+					}
+				}
+			} // end internal authentication
+			/*
+			 * *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+			 * *** ***
+			 */
+		} else if (session.getAttribute("username") != null) { // EXTERNAL AUTHENTICATION ( a username in session is available)
+			/*
+			 * a username is already in the session, but the ue object is not
+			 * let's get other info and authenticate it
+			 */
+			Connection conn = null;
+			try {
+				username = (String) session.getAttribute("username");
+				String SqlQuery = ("SELECT ADMIN_LEVEL FROM ART_USERS "
+						+ " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL) ");
+				conn = ArtDBCP.getConnection();
+				if (conn == null) {
 					// ART Repository Down !!!
-                    msg=messages.getString("invalidConnection");
-                } else {
+					msg = messages.getString("invalidConnection");
+				} else {
 					PreparedStatement ps = conn.prepareStatement(SqlQuery);
 					ps.setString(1, username);
 					ResultSet rs = ps.executeQuery();
@@ -1128,36 +1135,36 @@ public class ArtDBCP extends HttpServlet {
 					} else {
 						//external user not created in ART
 						ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "external, failed");
-						msg=messages.getString("invalidUser");
+						msg = messages.getString("invalidUser");
 					}
 					rs.close();
 					ps.close();
-				}            
-            } finally {
-                try {
-                    if (conn != null) {
-                        conn.close();
-                    }
-                } catch (Exception e) {
-                    logger.error("Error", e);
-                }
-            }
-        } else {
-            // if the request is for a public_user session
-            // create it...
-            if (request.getParameter("_public_user") != null) {
-                username = "public_user";
+				}
+			} finally {
+				try {
+					if (conn != null) {
+						conn.close();
+					}
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
+			}
+		} else {
+			// if the request is for a public_user session
+			// create it...
+			if (request.getParameter("_public_user") != null) {
+				username = "public_user";
 
-                adminlevel = 0;
-                internalAuthentication = true;
-            } else {
-                // ... otherwise this is a session expired / unauthorized access attempt...
-                msg=messages.getString("sessionExpired");
-            }
-        }
+				adminlevel = 0;
+				internalAuthentication = true;
+			} else {
+				// ... otherwise this is a session expired / unauthorized access attempt...
+				msg = messages.getString("sessionExpired");
+			}
+		}
 
-        // if the session is authenticated, Create the UserEntity object and store it in the session
-        if(msg==null){
+		// if the session is authenticated, Create the UserEntity object and store it in the session
+		if (msg == null) {
 			//authentication successful
 			UserEntity ue = new UserEntity(username);
 
@@ -1177,5 +1184,13 @@ public class ArtDBCP extends HttpServlet {
 		}
 
 		return msg;
-    }
+	}
+
+	public static int getRandomNumber(int minimum, int maximum) {
+		Random rn = new Random();
+		int range = maximum - minimum + 1;
+		int randomNum = rn.nextInt(range) + minimum;
+		
+		return randomNum;
+	}
 }

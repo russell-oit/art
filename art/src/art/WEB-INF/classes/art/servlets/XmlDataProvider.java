@@ -408,33 +408,18 @@ public class XmlDataProvider extends BaseAjaxServlet {
                 String weekday;
 
                 minute = rs.getString("JOB_MINUTE");
-                if (minute == null || minute.length() == 0) {
-                    minute = "0";
-                }
                 builder.addItem("minute", minute);
 
                 hour = rs.getString("JOB_HOUR");
-                if (hour == null || hour.length() == 0) {
-                    hour = "3";
-                }
                 builder.addItem("hour", hour);
 
                 day = rs.getString("JOB_DAY");
-                if (day == null || day.length() == 0) {
-                    day = "1";
-                }
                 builder.addItem("day", day);
 
                 month = rs.getString("JOB_MONTH");
-                if (month == null || month.length() == 0) {
-                    month = "*";
-                }
                 builder.addItem("month", month);
 
                 weekday = rs.getString("JOB_WEEKDAY");
-                if (weekday == null || weekday.length() == 0) {
-                    weekday = "?";
-                }
                 builder.addItem("weekday", weekday);
             }
             ps.close();

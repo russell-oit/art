@@ -127,17 +127,21 @@ if (request.getParameter("bcc").equals("")){
 	String weekday;
 	String month;
 	String second="0"; //seconds always 0
+	String actualHour; //allow hour and minute to be left blank, in which case random values are used
+	String actualMinute; //allow hour and minute to be left blank, in which case random values are used
 
   minute=job.getMinute().replaceAll(" ", ""); // cron fields shouldn't have any spaces in them
+  actualMinute=minute;
   if (minute.length()==0){
-	//no minute defined. default to 0
-	minute="0";
+	//no minute defined. use random value
+	minute=String.valueOf(ArtDBCP.getRandomNumber(0, 59));
 	}
 
 	hour=job.getHour().replaceAll(" ", "");
+	actualHour=hour;
   if (hour.length()==0){
-	//no hour defined. default to 3am. to avoid possible job misses due to daylight savings between midnight and 3am
-	hour="3";
+	//no hour defined. use random value
+	hour=String.valueOf(ArtDBCP.getRandomNumber(3, 7));
 	}
 
 	month=job.getMonth().replaceAll(" ", "");
@@ -353,8 +357,8 @@ if (request.getParameter("bcc").equals("")){
 		//save schedule details
 		if(saveSchedule!=null){
 			//we are saving the schedule
-			schedule.setMinute(minute);
-			schedule.setHour(hour);
+			schedule.setMinute(actualMinute);
+			schedule.setHour(actualHour);
 			schedule.setDay(day);
 			schedule.setMonth(month);
 			schedule.setWeekday(weekday);

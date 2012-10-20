@@ -46,11 +46,15 @@ if (action.equals("MODIFY")){
 		</tr>
 
 		<tr><td class="data"> Minute </td>
-			<td class="data"> <input type="text" name="MINUTE" value="<%=schedule.getMinute()%>" size="25" maxlength="100"> </td>
+			<td class="data"> <input type="text" name="MINUTE" value="<%=schedule.getMinute()%>" size="25" maxlength="100">
+			<input type="button" class="buttonup" onclick="javascript:alert('Leave blank to use a random value')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">				
+			</td>
 		</tr>
 
 		<tr><td class="data"> Hour </td>
-			<td class="data"> <input type="text" name="HOUR" value="<%=schedule.getHour()%>" size="25" maxlength="100"> </td>
+			<td class="data"> <input type="text" name="HOUR" value="<%=schedule.getHour()%>" size="25" maxlength="100">
+			<input type="button" class="buttonup" onclick="javascript:alert('Leave blank to use a random value between 3-7 am')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">				
+			</td>
 		</tr>
 
 		<tr><td class="data"> Day (Day of the month) </td>
