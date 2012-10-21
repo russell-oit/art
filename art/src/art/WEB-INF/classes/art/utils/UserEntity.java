@@ -24,6 +24,7 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
+import java.io.Serializable;
 
 import java.sql.*;
 import java.text.Collator;
@@ -37,8 +38,9 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class UserEntity {
+public class UserEntity implements Serializable {
 
+	private static final long serialVersionUID = 1L; //implement serializable to enable ue object in session to be serialized
     final static Logger logger = LoggerFactory.getLogger(UserEntity.class);
     String username = "";
     String email = "";
