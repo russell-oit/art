@@ -7,6 +7,7 @@
 --          . rename text_info field in art_all_sources
 --          . rename field_class field in art_query_fields
 --          . improve handling or numeric rule values
+--          . support dynamic recipients for jobs
 --
 -- ------------------------------------------------
 
@@ -33,6 +34,9 @@ ALTER TABLE ART_QUERY_FIELDS DROP COLUMN FIELD_CLASS;
 
 -- improve handling or numeric rule values
 ALTER TABLE ART_QUERY_RULES ADD FIELD_DATA_TYPE VARCHAR(15);
+
+-- support dynamic recipients for jobs
+ALTER TABLE ART_JOBS ADD RECIPIENTS_QUERY_ID INTEGER;
 
 
 

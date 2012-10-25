@@ -284,6 +284,11 @@ tinyMCE.init({
                 document.getElementById("dbId").className="collapse";
                 document.getElementById("showParameters").className="collapse";
             }
+			
+			if(i==121){
+                //dynamic job recepients query
+                document.getElementById("usesRules").className="collapse";
+            }
 		}
 
 		//use different textarea for text objects
@@ -411,6 +416,7 @@ tinyMCE.init({
                     
                     <option value="119" <%=(currentStringValue.equals("119")?"SELECTED":"")%>>LOV: Dynamic</option>
                     <option value="120" <%=(currentStringValue.equals("120")?"SELECTED":"")%>>LOV: Static</option>
+					<option value="121" <%=(currentStringValue.equals("121")?"SELECTED":"")%>>Dynamic Job Recipients</option>
 
                     <option value="110" <%=(currentStringValue.equals("110")?"SELECTED":"")%>>Dashboard</option>
                     <option value="111" <%=(currentStringValue.equals("111")?"SELECTED":"")%>>Text</option>

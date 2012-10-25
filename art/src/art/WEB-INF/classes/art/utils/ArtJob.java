@@ -27,7 +27,6 @@
  on line 321, 376, 300 replaced charset name UTF8 to UTF-8 (utf-8 inline html should be ok now...
  2010-05-01 enrico/timothy added option to handle charts
  */
-
 package art.utils;
 
 import art.graph.ExportGraph;
@@ -42,9 +41,9 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import org.apache.commons.lang.StringUtils;
+import org.quartz.*;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
-import org.quartz.*;
 import static org.quartz.JobKey.jobKey;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
@@ -88,11 +87,9 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  */
-
 public class ArtJob implements Job {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtJob.class);
-	
 	String username, outputFormat, tos, from, message, queryName, subject;
 	String enableAudit = "N";
 	String activeStatus = "A";
@@ -149,7 +146,7 @@ public class ArtJob implements Job {
 	private String cc;
 	private String bcc;
 	Map<String, ArtQueryParam> htmlParams;
-	
+	private int recipientsQueryId; //to support dynamic recipients
 
 	/**
 	 * Instantiate a new "empty" Job (to insert/save) A new Job is created. Use
@@ -158,6 +155,20 @@ public class ArtJob implements Job {
 	 */
 	public ArtJob() {
 		exportPath = ArtDBCP.getExportPath();
+	}
+
+	/**
+	 * @return the recepientsQueryId
+	 */
+	public int getRecipientsQueryId() {
+		return recipientsQueryId;
+	}
+
+	/**
+	 * @param recepientsQueryId the recepientsQueryId to set
+	 */
+	public void setRecipientsQueryId(int recipientsQueryId) {
+		this.recipientsQueryId = recipientsQueryId;
 	}
 
 	/**
@@ -190,6 +201,7 @@ public class ArtJob implements Job {
 
 	/**
 	 * Get the custom graph options defined for the job
+	 *
 	 * @return the custom graph options defined for the job
 	 */
 	public String getJobGraphOptions() {
@@ -198,6 +210,7 @@ public class ArtJob implements Job {
 
 	/**
 	 * Set the custom graph options defined for the job
+	 *
 	 * @param jobGraphOptions the custom graph options defined for the job
 	 */
 	public void setJobGraphOptions(String jobGraphOptions) {
@@ -206,6 +219,7 @@ public class ArtJob implements Job {
 
 	/**
 	 * Determine if graph legend should be shown
+	 *
 	 * @return
 	 */
 	public boolean isShowGraphLegend() {
@@ -214,6 +228,7 @@ public class ArtJob implements Job {
 
 	/**
 	 * Determine if graph legend should be shown
+	 *
 	 * @param showGraphLegend
 	 */
 	public void setShowGraphLegend(boolean showGraphLegend) {
@@ -222,6 +237,7 @@ public class ArtJob implements Job {
 
 	/**
 	 * Determine if graph labels should be shown
+	 *
 	 * @return
 	 */
 	public boolean isShowGraphLabels() {
@@ -230,6 +246,7 @@ public class ArtJob implements Job {
 
 	/**
 	 * Determine if graph labels should be shown
+	 *
 	 * @param showGraphLabels
 	 */
 	public void setShowGraphLabels(boolean showGraphLabels) {
@@ -238,6 +255,7 @@ public class ArtJob implements Job {
 
 	/**
 	 * Determine if graph data points should be shown
+	 *
 	 * @return
 	 */
 	public boolean isShowGraphDataPoints() {
@@ -246,33 +264,35 @@ public class ArtJob implements Job {
 
 	/**
 	 * Determine if graph data points should be shown
+	 *
 	 * @param showGraphDataPoints
 	 */
 	public void setShowGraphDataPoints(boolean showGraphDataPoints) {
 		this.showGraphDataPoints = showGraphDataPoints;
 	}
-	
+
 	/**
 	 * Determine if graph data should be shown below graph for pdf output
+	 *
 	 * @param value <code>true</code> is graph data should be shown in output
 	 */
-	public void setShowGraphData(boolean value){
-		showGraphData=value;
+	public void setShowGraphData(boolean value) {
+		showGraphData = value;
 	}
-	
+
 	/**
 	 * Determine if graph data should be shown below graph for pdf output
+	 *
 	 * @return <code>true</code> is graph data should be shown in output
 	 */
-	public boolean isShowGraphData(){
+	public boolean isShowGraphData() {
 		return showGraphData;
 	}
 
 	/**
 	 * Determine is parameters should be shown in output
 	 *
-	 * @param value
-	 * <code>true</code> is parameters should be shown in output
+	 * @param value <code>true</code> is parameters should be shown in output
 	 */
 	public void setShowParameters(boolean value) {
 		showParameters = value;
@@ -281,8 +301,7 @@ public class ArtJob implements Job {
 	/**
 	 * Determine is parameters should be shown in output
 	 *
-	 * @return
-	 * <code>true</code> is parameters should be shown in output
+	 * @return <code>true</code> is parameters should be shown in output
 	 */
 	public boolean isShowParameters() {
 		return showParameters;
@@ -594,8 +613,8 @@ public class ArtJob implements Job {
 	//
 
 	//generate jobAuditKey to be used to identify a job run in the audit table
-	private String generateKey() {		
-		return UUID.randomUUID().toString(); 		
+	private String generateKey() {
+		return UUID.randomUUID().toString();
 	}
 
 	/**
@@ -945,22 +964,23 @@ public class ArtJob implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobDataMap dataMap = null;
 
+		int tempJobId = 0;
 		if (context != null) {
 			dataMap = context.getMergedJobDataMap();
-			int tempJobId;
 			tempJobId = dataMap.getInt("jobid");
 
-			logger.debug("Attempting to load Job id {}", tempJobId);
+			logger.debug("Attempting to load Job Id {}", tempJobId);
 
 			load(tempJobId);
 		}
 
 		if (jobId == -1) {
 			//job not found. exit
+			logger.debug("Job Id {} not found", tempJobId);
 			return;
 		}
 
-		logger.debug("Job id {} running...", jobId);
+		logger.debug("Job Id {} running...", jobId);
 
 		Connection conn = null;
 
@@ -978,77 +998,23 @@ public class ArtJob implements Job {
 			beforeExecution(conn);
 
 			//don't run job if query or job or job owner is disabled
-			if (StringUtils.equals("D",jobOwnerStatus)) {
+			if (StringUtils.equals("D", jobOwnerStatus)) {
 				//job owner disabled. don't run job. just update jobs table with current status
 				fileName = "-Job Owner Disabled";
-			} else if (StringUtils.equals("D",queryStatus)) {
+			} else if (StringUtils.equals("D", queryStatus)) {
 				//query disabled. don't run job. just update jobs table with current status
 				fileName = "-Query Disabled";
-			} else if (StringUtils.equals("N",activeStatus)) {
+			} else if (StringUtils.equals("N", activeStatus)) {
 				//job disabled. don't run job. just update jobs table with current status
 				fileName = "-Job Disabled";
 			} else {
-				//run job. if job isn't shared, generate single output
-				//if job is shared and doesn't use rules, generate single output to be used by all users
-				//if job is shared and uses rules, generate multiple, individualized output for each shared user
-
-				int userCount = 0; //number of shared users
-				String ownerFileName = null; //for shared jobs, ensure the jobs table has the job owner's file
-
-				boolean splitJob = false; //flag to determine if job will generate one file or multiple individualized files. to know which tables to update
-
-				if (StringUtils.equals("Y",allowSharing)) {
-					if (StringUtils.equals("Y",queryRulesFlag) && StringUtils.equals("Y",allowSplitting)) {
-						splitJob = true;
-					}
-
-					if (splitJob) {
-						//generate individualized output for all shared users
-
-						//update shared jobs table with users who have access through group membership. so that users newly added to a group can get their own output
-						addSharedJobUsers(conn, jobId);
-
-						//get users to generate output for
-						String usersSQL = "SELECT ASJ.USERNAME, AU.EMAIL "
-								+ " FROM ART_SHARED_JOBS ASJ, ART_USERS AU "
-								+ " WHERE ASJ.USERNAME = AU.USERNAME "
-								+ " AND ASJ.JOB_ID = ? AND AU.ACTIVE_STATUS='A'";
-
-						PreparedStatement ps = conn.prepareStatement(usersSQL);
-						ps.setInt(1, jobId);
-
-						ResultSet rs = ps.executeQuery();
-						while (rs.next()) {
-							userCount += 1;
-							runJob(conn, false, rs.getString("USERNAME"), rs.getString("EMAIL"));
-							//ensure that the job owner's output version is saved in the jobs table
-							if (username.equals(rs.getString("USERNAME"))) {
-								ownerFileName = fileName;
-							}
-						}
-						rs.close();
-						ps.close();
-
-						if (userCount == 0) {
-							//no shared users defined yet. generate one file for the job owner
-							runJob(conn, true, username, tos);
-						}
-					} else {
-						//generate one single output to be used by all users
-						String emails = getSharedJobEmails();
-						runJob(conn, true, username, emails);
-					}
+				//run job. handle dynamic recipients
+				if (recipientsQueryId > 0) {
+					//job has dynamic recipients
+					runDynamicRecipientsJob(conn);
 				} else {
-					//job isn't shared. generate one file for the job owner
-					runJob(conn, true, username, tos);
-				}
-
-				//ensure jobs table always has job owner's file, or a note if no output was produced for the job owner
-				if (ownerFileName != null) {
-					fileName = ownerFileName;
-				} else if (splitJob && userCount > 0 && ownerFileName == null) {
-					//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
-					fileName = "-Job Shared";
+					//job doesn't have dynamic recipients
+					runNormalJob(conn);
 				}
 			}
 
@@ -1066,6 +1032,127 @@ public class ArtJob implements Job {
 		}
 	}
 
+	private void runDynamicRecipientsJob(Connection conn) {
+
+		PreparedQuery recipientsQuery = null; //recipients query
+		try {
+			//get recipient data
+			recipientsQuery = prepareQuery(username, recipientsQueryId, false);
+
+			recipientsQuery.setAdminSession(true); //don't check security
+			recipientsQuery.execute();
+
+			ResultSet rs = recipientsQuery.getResultSet();
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+
+			if (columnCount == 1) {
+				//only email column. add dynamic recipient emails to Tos and run like normal job
+				ArrayList<String> emailsList = new ArrayList<String>();
+				while (rs.next()) {
+					emailsList.add(rs.getString(1)); //first column has email addresses
+				}
+				rs.close();
+
+				if (emailsList.size() > 0) {
+					String emails = StringUtils.join(emailsList, ";");
+					runNormalJob(conn, emails);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			if (recipientsQuery != null) {
+				recipientsQuery.close();
+			}
+		}
+	}
+
+	private void runNormalJob(Connection conn) {
+		runNormalJob(conn, null);
+	}
+
+	private void runNormalJob(Connection conn, String dynamicRecipients) {
+		//run job. if job isn't shared, generate single output
+		//if job is shared and doesn't use rules, generate single output to be used by all users
+		//if job is shared and uses rules, generate multiple, individualized output for each shared user
+
+		try {
+
+			int userCount = 0; //number of shared users
+			String ownerFileName = null; //for shared jobs, ensure the jobs table has the job owner's file
+
+			boolean splitJob = false; //flag to determine if job will generate one file or multiple individualized files. to know which tables to update
+
+			if (StringUtils.equals("Y", allowSharing)) {
+				if (StringUtils.equals("Y", queryRulesFlag) && StringUtils.equals("Y", allowSplitting)) {
+					splitJob = true;
+				}
+
+				if (splitJob) {
+					//generate individualized output for all shared users
+
+					//update shared jobs table with users who have access through group membership. so that users newly added to a group can get their own output
+					addSharedJobUsers(conn, jobId);
+
+					//get users to generate output for
+					String usersSQL = "SELECT ASJ.USERNAME, AU.EMAIL "
+							+ " FROM ART_SHARED_JOBS ASJ, ART_USERS AU "
+							+ " WHERE ASJ.USERNAME = AU.USERNAME "
+							+ " AND ASJ.JOB_ID = ? AND AU.ACTIVE_STATUS='A'";
+
+					PreparedStatement ps = conn.prepareStatement(usersSQL);
+					ps.setInt(1, jobId);
+
+					ResultSet rs = ps.executeQuery();
+					while (rs.next()) {
+						userCount += 1;
+						runJob(conn, false, rs.getString("USERNAME"), rs.getString("EMAIL"));
+						//ensure that the job owner's output version is saved in the jobs table
+						if (username.equals(rs.getString("USERNAME"))) {
+							ownerFileName = fileName;
+						}
+					}
+					rs.close();
+					ps.close();
+
+					if (userCount == 0) {
+						//no shared users defined yet. generate one file for the job owner
+						String emails = tos;
+						if (dynamicRecipients != null) {
+							emails = emails + ";" + dynamicRecipients;
+						}
+						runJob(conn, true, username, emails);
+					}
+				} else {
+					//generate one single output to be used by all users
+					String emails = getSharedJobEmails();
+					if (dynamicRecipients != null) {
+						emails = emails + ";" + dynamicRecipients;
+					}
+					runJob(conn, true, username, emails);
+				}
+			} else {
+				//job isn't shared. generate one file for the job owner
+				String emails = tos;
+				if (dynamicRecipients != null) {
+					emails = emails + ";" + dynamicRecipients;
+				}
+				runJob(conn, true, username, emails);
+			}
+
+			//ensure jobs table always has job owner's file, or a note if no output was produced for the job owner
+			if (ownerFileName != null) {
+				fileName = ownerFileName;
+			} else if (splitJob && userCount > 0 && ownerFileName == null) {
+				//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
+				fileName = "-Job Shared";
+			}
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+	}
+
 	//run job
 	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail) {
 		//set job start date. relevant for split jobs
@@ -1079,13 +1166,13 @@ public class ArtJob implements Job {
 		createAuditRecord(conn, user);
 
 		try {
-			pq = prepare(user);
+			pq = prepareQuery(user);
 
 			//for split jobs, don't check security for shared users. they have been allowed access to the output
 			if (!singleOutput) {
 				pq.setAdminSession(true);
 			}
-			
+
 			int resultSetType;
 			if (queryType < 0) {
 				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
@@ -1141,12 +1228,12 @@ public class ArtJob implements Job {
 						m.setSubject(subject);
 
 						//set recipients						
-						String[] tosEmail = StringUtils.split(userEmail,";");
+						String[] tosEmail = StringUtils.split(userEmail, ";");
 						m.setTos(tosEmail);
-						
-						String[] ccs=StringUtils.split(cc,";");
+
+						String[] ccs = StringUtils.split(cc, ";");
 						m.setCc(ccs);
-						String[] bccs=StringUtils.split(bcc,";");
+						String[] bccs = StringUtils.split(bcc, ";");
 						m.setBcc(bccs);
 
 						m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
@@ -1184,9 +1271,9 @@ public class ArtJob implements Job {
 
 				if (jobType == 6 || jobType == 7 || jobType == 8) {
 					//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
-					PreparedQuery pqCount = prepare(user);
+					PreparedQuery pqCount = prepareQuery(user);
 					pqCount.setAdminSession(true);
-					pqCount.execute(ResultSet.TYPE_FORWARD_ONLY);
+					pqCount.execute();
 					ResultSet rsCount = pqCount.getResultSet();
 					if (!rsCount.next()) {
 						//no records
@@ -1200,8 +1287,8 @@ public class ArtJob implements Job {
 				if (generateOutput) {
 					String sep = java.io.File.separator;
 					String jobsPath = exportPath + "jobs" + sep;
-					String jobFileUsername="JobId" + jobId;
-					
+					String jobFileUsername = "JobId" + jobId;
+
 					if (queryType < 0) {
 						//save charts to file
 						ExportGraph eg = new ExportGraph();
@@ -1211,15 +1298,15 @@ public class ArtJob implements Job {
 						eg.setOutputFormat(outputFormat); // png or pdf
 						eg.setXlabel(xaxisLabel);
 						eg.setYlabel(yaxisLabel);
-						eg.setTitle(queryShortDescription);						
+						eg.setTitle(queryShortDescription);
 						eg.setShowData(showGraphData); //enable display of graph data below graph for pdf graph output
 						eg.setDisplayParameters(displayParams); //enable display of graph parameters above graph for pdf graph output
 						eg.setShowDataPoints(showGraphDataPoints);
 						eg.setShowLegend(showGraphLegend);
 						eg.setShowLabels(showGraphLabels);
-						eg.setQueryId(queryId);	
+						eg.setQueryId(queryId);
 						eg.setGraphOptions(jobGraphOptions);
-												
+
 						eg.createFile(rs, queryType);
 						fileName = eg.getFileName();
 					} else if (queryType == 115 || queryType == 116) {
@@ -1232,10 +1319,10 @@ public class ArtJob implements Job {
 
 						if (queryType == 115) {
 							//report will use query in the report template
-							jasper.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
+							jasper.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						} else {
 							//report will use data from art query
-							jasper.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
+							jasper.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						}
 						fileName = jasper.getFileName();
 					} else if (queryType == 117 || queryType == 118) {
@@ -1244,13 +1331,13 @@ public class ArtJob implements Job {
 						jxls.setQueryName(queryName);
 						jxls.setFileUserName(jobFileUsername);
 						jxls.setExportPath(jobsPath);
-						
+
 						if (queryType == 117) {
 							//report will use query in the jxls template
-							jxls.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
+							jxls.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						} else {
 							//report will use data from art query
-							jxls.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(),htmlParams);
+							jxls.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						}
 						fileName = jxls.getFileName();
 					} else {
@@ -1269,7 +1356,7 @@ public class ArtJob implements Job {
 						PrintWriter out = null;
 						boolean printWriterUsed = false;
 
-						if (outputFormat.indexOf("html") >= 0 || outputFormat.indexOf("xml") >= 0 || outputFormat.indexOf("rss") >= 0) {							
+						if (outputFormat.indexOf("html") >= 0 || outputFormat.indexOf("xml") >= 0 || outputFormat.indexOf("rss") >= 0) {
 							if (outputFormat.indexOf("html") >= 0) {
 								queryName = ArtDBCP.cleanFileName(queryName);
 								SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
@@ -1320,24 +1407,24 @@ public class ArtJob implements Job {
 					// fileName now stores the file to mail or publish...                    
 					logger.debug("Job Id {}. File is: {}", jobId, fileName);
 
-										
+
 					//trim address fields
-					userEmail=StringUtils.trim(userEmail);
-					tos=StringUtils.trim(tos);
-					cc=StringUtils.trim(cc);
-					bcc=StringUtils.trim(bcc);
-					
-					boolean generateEmail = false;					
+					userEmail = StringUtils.trim(userEmail);
+					tos = StringUtils.trim(tos);
+					cc = StringUtils.trim(cc);
+					bcc = StringUtils.trim(bcc);
+
+					boolean generateEmail = false;
 					if (jobType == 3 || jobType == 8) {
 						//for split published jobs, tos should have a value to enable confirmation email for individual users
-						if (!StringUtils.equals(tos,userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc)>4 || StringUtils.length(bcc)>4) && StringUtils.length(userEmail) > 4) {
+						if (!StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4) && StringUtils.length(userEmail) > 4) {
 							generateEmail = true;
-						} else if (StringUtils.equals(tos,userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc)>4 || StringUtils.length(bcc)>4)) {
+						} else if (StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)) {
 							generateEmail = true;
 						}
 					} else {
 						//for non-publish jobs, if an email address is available, generate email
-						if (StringUtils.length(userEmail) > 4 || StringUtils.length(cc)>4 || StringUtils.length(bcc)>4) {
+						if (StringUtils.length(userEmail) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4) {
 							generateEmail = true;
 						}
 					}
@@ -1353,14 +1440,14 @@ public class ArtJob implements Job {
 						m.setSubject(subject);
 
 						//set recipients						
-						String[] tosEmail = StringUtils.split(userEmail,";");
+						String[] tosEmail = StringUtils.split(userEmail, ";");
 						m.setTos(tosEmail);
-						
-						String[] ccs=StringUtils.split(cc,";");
+
+						String[] ccs = StringUtils.split(cc, ";");
 						m.setCc(ccs);
-						String[] bccs=StringUtils.split(bcc,";");
+						String[] bccs = StringUtils.split(bcc, ";");
 						m.setBcc(bccs);
-												
+
 						m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
 						m.setFrom(from);
 
@@ -1410,8 +1497,8 @@ public class ArtJob implements Job {
 							}
 						} else {
 							//publish job reminder email. separate file link and message with a newline character
-							if(mailSent){
-								fileName=fileName + System.getProperty("line.separator") + "<p>Reminder email sent</p>";
+							if (mailSent) {
+								fileName = fileName + System.getProperty("line.separator") + "<p>Reminder email sent</p>";
 							} else {
 								fileName = fileName + System.getProperty("line.separator") + "<p>Error when sending reminder email <br>" + m.getSendError() + "</p>";
 							}
@@ -1587,7 +1674,7 @@ public class ArtJob implements Job {
 	//create job audit record
 	private void createAuditRecord(Connection conn, String user) {
 		try {
-			if (StringUtils.equals(enableAudit,"Y")) {
+			if (StringUtils.equals(enableAudit, "Y")) {
 				//generate unique key for this job run
 				jobAuditKey = generateKey();
 
@@ -1684,7 +1771,7 @@ public class ArtJob implements Job {
 			}
 
 			//update audit table if required
-			if (StringUtils.equals(enableAudit,"Y")) {
+			if (StringUtils.equals(enableAudit, "Y")) {
 				sqlString = "UPDATE ART_JOBS_AUDIT SET JOB_ACTION = 'E', END_DATE = ? WHERE JOB_AUDIT_KEY = ? AND JOB_ID = ?";
 				psAudit = conn.prepareStatement(sqlString);
 				psAudit.setTimestamp(1, now);
@@ -1737,7 +1824,7 @@ public class ArtJob implements Job {
 			}
 
 			//update audit table if required
-			if (StringUtils.equals(enableAudit,"Y")) {
+			if (StringUtils.equals(enableAudit, "Y")) {
 				sqlString = "UPDATE ART_JOBS_AUDIT SET JOB_ACTION = 'X' WHERE JOB_AUDIT_KEY = ? AND JOB_ID = ?";
 				psAudit = conn.prepareStatement(sqlString);
 				psAudit.setString(1, jobAuditKey);
@@ -1773,7 +1860,7 @@ public class ArtJob implements Job {
 					+ " , JOB_MINUTE = ? ,  JOB_HOUR = ? ,  JOB_DAY = ? ,  JOB_WEEKDAY= ? ,  JOB_MONTH = ? "
 					+ " , MAIL_TOS = ? ,  MAIL_FROM = ? ,  MESSAGE = ? ,  ENABLE_AUDIT = ? ,  ACTIVE_STATUS = ? , SUBJECT = ? "
 					+ " , NEXT_RUN_DATE=?, START_DATE=?, END_DATE=?, MIGRATED_TO_QUARTZ=?, ALLOW_SHARING=?, ALLOW_SPLITTING=? "
-					+ " , CACHED_TABLE_NAME =?, JOB_NAME=?, MAIL_CC=?, MAIL_BCC=? "
+					+ " , CACHED_TABLE_NAME =?, JOB_NAME=?, MAIL_CC=?, MAIL_BCC=?, RECIPIENTS_QUERY_ID=? "
 					+ " WHERE JOB_ID = " + jobId;
 
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -1815,8 +1902,9 @@ public class ArtJob implements Job {
 			ps.setString(21, allowSplitting);
 			ps.setString(22, cachedTableName);
 			ps.setString(23, jobName);
-			ps.setString(24,cc);
-			ps.setString(25,bcc);
+			ps.setString(24, cc);
+			ps.setString(25, bcc);
+			ps.setInt(26, recipientsQueryId);
 
 			ps.executeUpdate();
 			ps.close();
@@ -1871,7 +1959,7 @@ public class ArtJob implements Job {
 				ps.executeUpdate();
 				ps.close();
 			}
-			
+
 			//enable show graph data in pdf output
 			if (showGraphData) {
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
@@ -1885,7 +1973,7 @@ public class ArtJob implements Job {
 				ps.executeUpdate();
 				ps.close();
 			}
-			
+
 			//enable custom graph settings
 			if (showGraphDataPoints) {
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
@@ -2055,7 +2143,7 @@ public class ArtJob implements Job {
 			String SQL = "SELECT aj.QUERY_ID, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE, aj.MAIL_TOS, aj.MAIL_FROM, aj.MESSAGE "
 					+ "    , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH, aj.ENABLE_AUDIT , aj.ACTIVE_STATUS AS JOB_ACTIVE_STATUS , aj.SUBJECT "
 					+ "    , aq.NAME AS QUERY_NAME, aq.QUERY_TYPE, aq.SHORT_DESCRIPTION, aq.X_AXIS_LABEL, aq.Y_AXIS_LABEL, aq.GRAPH_OPTIONS, aq.USES_RULES "
-					+ "    , aj.ALLOW_SHARING, aj.ALLOW_SPLITTING, aj.MAIL_CC, aj.MAIL_BCC "
+					+ "    , aj.ALLOW_SHARING, aj.ALLOW_SPLITTING, aj.MAIL_CC, aj.MAIL_BCC, aj.RECIPIENTS_QUERY_ID "
 					+ "    , aj.NEXT_RUN_DATE, aj.START_DATE, aj.END_DATE, aj.MIGRATED_TO_QUARTZ, aq.ACTIVE_STATUS AS QUERY_ACTIVE_STATUS, aj.LAST_FILE_NAME "
 					+ "    , aj.CACHED_TABLE_NAME, aj.JOB_NAME, au.ACTIVE_STATUS AS OWNER_ACTIVE_STATUS "
 					+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USERS au"
@@ -2111,8 +2199,9 @@ public class ArtJob implements Job {
 				setJobName(rs.getString("JOB_NAME"));
 
 				jobOwnerStatus = rs.getString("OWNER_ACTIVE_STATUS");
-				cc=rs.getString("MAIL_CC");
-				bcc=rs.getString("MAIL_BCC");
+				cc = rs.getString("MAIL_CC");
+				bcc = rs.getString("MAIL_BCC");
+				recipientsQueryId = rs.getInt("RECIPIENTS_QUERY_ID");
 
 				//update from address in case the user's email address has changed
 				UserEntity ue = new UserEntity(username);
@@ -2161,10 +2250,14 @@ public class ArtJob implements Job {
 		multiParams = hashMulti;
 	}
 
+	public void buildParameters() {
+		buildParameters(queryId);
+	}
+
 	/**
 	 * Build job parameters
 	 */
-	public void buildParameters() {
+	public void buildParameters(int qId) {
 
 		Connection conn = null;
 
@@ -2173,13 +2266,13 @@ public class ArtJob implements Job {
 			multiParams = null;
 			inlineParams = null;
 			displayParams = null;
-			htmlParams=null;
+			htmlParams = null;
 
 			multiParams = new HashMap<String, String[]>();
 			inlineParams = new HashMap<String, String>();
-			
+
 			ArtQuery aq = new ArtQuery();
-			htmlParams = aq.getHtmlParams(queryId);
+			htmlParams = aq.getHtmlParams(qId);
 
 			conn = ArtDBCP.getConnection();
 
@@ -2216,20 +2309,20 @@ public class ArtJob implements Job {
 				sb.append("<br>");
 
 				//build hash tables
-				if (StringUtils.equals(paramType,"I")) {
+				if (StringUtils.equals(paramType, "I")) {
 					inlineParams.put(paramName, paramValue);
-					
+
 					//set parameter value in htmlparams map
-					ArtQueryParam aqp=htmlParams.get("P_" + paramName);
-					if(aqp!=null){
+					ArtQueryParam aqp = htmlParams.get("P_" + paramName);
+					if (aqp != null) {
 						aqp.setParamValue(paramValue);
 					}
-				} else if (StringUtils.equals(paramType,"M")) {
+				} else if (StringUtils.equals(paramType, "M")) {
 					name = paramName;
 					sa.add(paramValue);
 					while (rs.next()) {
 						logger.debug("Job Id {}. Multi parameter: {}", jobId, name);
-						
+
 						paramName = rs.getString("PARAM_NAME");
 						paramValue = rs.getString("PARAM_VALUE");
 
@@ -2258,34 +2351,34 @@ public class ArtJob implements Job {
 						}
 					}
 
-					String[] paramValues= sa.getStringArray();
-					multiParams.put(name,paramValues);
-					
+					String[] paramValues = sa.getStringArray();
+					multiParams.put(name, paramValues);
+
 					//set parameter value in htmlparams map
-					ArtQueryParam aqp=htmlParams.get("M_" + paramName);
-					if(aqp!=null){
+					ArtQueryParam aqp = htmlParams.get("M_" + paramName);
+					if (aqp != null) {
 						aqp.setParamValue(paramValues);
 					}
-				} else if (StringUtils.equals(paramType,"O")) {
+				} else if (StringUtils.equals(paramType, "O")) {
 					//other parameters					
 					if (StringUtils.equals(paramName, "_showParams")) {
 						//enable display of parameters in output
 						showParameters = true;
-					} else if(StringUtils.equals(paramName, "_showGraphData")){
+					} else if (StringUtils.equals(paramName, "_showGraphData")) {
 						//enable display of graph data in pdf graph output
-						showGraphData=true;
-					} else if(StringUtils.equals(paramName, "_showGraphDataPoints")){
+						showGraphData = true;
+					} else if (StringUtils.equals(paramName, "_showGraphDataPoints")) {
 						//enable display of graph data points
-						showGraphDataPoints=true;
-					} else if(StringUtils.equals(paramName, "_showGraphLegend")){
+						showGraphDataPoints = true;
+					} else if (StringUtils.equals(paramName, "_showGraphLegend")) {
 						//enable display of graph legend
-						showGraphLegend=true;
-					} else if(StringUtils.equals(paramName, "_showGraphLabels")){
+						showGraphLegend = true;
+					} else if (StringUtils.equals(paramName, "_showGraphLabels")) {
 						//enable display of graph labels
-						showGraphLabels=true;
-					} else if(StringUtils.equals(paramName, "_graphOptions")){
+						showGraphLabels = true;
+					} else if (StringUtils.equals(paramName, "_graphOptions")) {
 						//enable use of custom graph options
-						jobGraphOptions=paramValue;
+						jobGraphOptions = paramValue;
 					}
 				}
 			}
@@ -2297,11 +2390,11 @@ public class ArtJob implements Job {
 			} else {
 				parametersDisplayString = sb.toString();
 			}
-					
+
 			//enable show parameters in job output            
 			if (showParameters) {
 				displayParams = new TreeMap<Integer, ArtQueryParam>();
-				
+
 				Iterator it;
 				String htmlName;
 				String value;
@@ -2317,7 +2410,7 @@ public class ArtJob implements Job {
 					if (param != null) {
 						//for dynamic date values e.g. ADD... ensure what is used to execute the query is same as what is displayed
 						String paramDataType = param.getParamDataType();
-						if (StringUtils.startsWith(paramDataType, "DATE")){							
+						if (StringUtils.startsWith(paramDataType, "DATE")) {
 							String dateFormat;
 							if (paramDataType.equals("DATE")) {
 								dateFormat = "yyyy-MM-dd";
@@ -2332,7 +2425,7 @@ public class ArtJob implements Job {
 							inlineParams.put(label, value);
 						}
 						param.setParamValue(value);
-						
+
 						//for lov parameters, show both parameter value and friendly value
 						if (param.usesLov()) {
 							//get all possible lov values.							
@@ -2360,7 +2453,7 @@ public class ArtJob implements Job {
 					ArtQueryParam param = htmlParams.get(htmlName);
 					if (param != null) {
 						param.setParamValue(values);
-						
+
 						//for lov parameters, show both parameter value and friendly value
 						if (param.usesLov()) {
 							//get all possible lov values.							
@@ -2373,7 +2466,7 @@ public class ArtJob implements Job {
 								logger.error("Error", e);
 							}
 						}
-						
+
 						displayParams.put(param.getFieldPosition(), param);
 					}
 
@@ -2393,19 +2486,25 @@ public class ArtJob implements Job {
 
 	}
 
+	private PreparedQuery prepareQuery(String user) throws SQLException {
+		return prepareQuery(user, queryId, true);
+	}
+
 	/**
 	 * Prepares a job for its execution Loads additional info needed to execute
 	 * (immediately) the job (query id, datasource etc).
 	 */
-	private PreparedQuery prepare(String user) throws SQLException {
+	private PreparedQuery prepareQuery(String user, int qId, boolean buildParams) throws SQLException {
 		logger.debug("Job Id {}. prepare()", jobId);
 
 		//build parameter objects from parameters saved in the database
-		buildParameters();
+		if (buildParams) {
+			buildParameters(qId);
+		}
 
 		PreparedQuery pq = new PreparedQuery();
 		pq.setUsername(user);
-		pq.setQueryId(queryId);
+		pq.setQueryId(qId);
 		pq.setAdminSession(false);
 		pq.setInlineParams(inlineParams);
 		pq.setMultiParams(multiParams);
@@ -2482,7 +2581,7 @@ public class ArtJob implements Job {
 			String oldJobsSqlString;
 			String updateJobSqlString;
 			PreparedStatement psUpdate;
-			
+
 			//prepare statement for updating migration status			
 			updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y', NEXT_RUN_DATE=? "
 					+ ", JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
@@ -2491,7 +2590,7 @@ public class ArtJob implements Job {
 
 			//determine the jobs to migrate
 			oldJobsSqlString = "SELECT JOB_ID, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_WEEKDAY, JOB_MONTH FROM ART_JOBS WHERE MIGRATED_TO_QUARTZ='N'";
-			
+
 			PreparedStatement ps = conn.prepareStatement(oldJobsSqlString);
 			ResultSet rs = ps.executeQuery();
 
@@ -2618,7 +2717,7 @@ public class ArtJob implements Job {
 				psUpdate.executeBatch(); //run any remaining updates																
 			}
 			psUpdate.close();
-			
+
 			rs.close();
 			ps.close();
 
@@ -2630,7 +2729,7 @@ public class ArtJob implements Job {
 			logger.error("Error", e);
 		} finally {
 			try {
-				if (conn != null) {					
+				if (conn != null) {
 					conn.close();
 				}
 			} catch (SQLException e) {

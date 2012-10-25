@@ -126,7 +126,7 @@ ALTER TABLE ART_QUERY_GROUPS ADD CONSTRAINT art_query_groups_uc_name UNIQUE (NAM
 -- 112 = mondrian cube, 113 = mondrian cube via xmla, 114 = sql server analysis services cube via xmla
 -- 115 = jasper report with template query, 116 = jasper report with art query
 -- 117 = jxls spreadsheet with template query, 118 = jxls spreadsheet with art query
--- 119 = dynamic lov, 1120 = static lov
+-- 119 = dynamic lov, 120 = static lov, 121 = dynamic job recipients
 -- Query types for graphs:
 -- -1 = XY, -2 = Pie , -3 = Horizontal bar, -4 = Vertical bar, -5 = Line
 -- -6 = Time series, -7 = Date series, -8 = stacked vertical bar, -9 = stacked horizontal bar
@@ -320,7 +320,8 @@ CREATE TABLE ART_JOBS
 	ACTIVE_STATUS          VARCHAR(1) NOT NULL, 
 	ENABLE_AUDIT        VARCHAR(1) NOT NULL,				
 	ALLOW_SHARING VARCHAR(1),
-	ALLOW_SPLITTING VARCHAR(1),	
+	ALLOW_SPLITTING VARCHAR(1),
+	RECIPIENTS_QUERY_ID INTEGER,
 	MIGRATED_TO_QUARTZ VARCHAR(1)	
 );
 

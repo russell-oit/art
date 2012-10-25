@@ -796,12 +796,12 @@ public class UserEntity implements Serializable {
             PreparedStatement ps;
             ResultSet rs;
 
-            // User can run queries directly granted to him
+            // User can run queries directly granted to him. don't show static lov, dynamic lov or dynamic job recipient queries
             sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME "
                     + " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ "
                     + " WHERE AUQ.QUERY_ID=AQ.QUERY_ID "
                     + " AND AUQ.USERNAME=? AND AQ.QUERY_GROUP_ID=? "
-                    + " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
+                    + " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
                     + " AND AQ.ACTIVE_STATUS = 'A' "; // show only active queries
 
 
@@ -820,7 +820,7 @@ public class UserEntity implements Serializable {
             sqlQuery = "SELECT DISTINCT AQ.QUERY_ID, AQ.NAME "
                     + " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ "
                     + " WHERE AUGQ.QUERY_ID = AQ.QUERY_ID "
-                    + " AND AQ.ACTIVE_STATUS = 'A' AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
+                    + " AND AQ.ACTIVE_STATUS = 'A' AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
                     + " AND AQ.QUERY_GROUP_ID = ? AND EXISTS "
                     + " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ?"
                     + " AND AUGA.USER_GROUP_ID=AUGQ.USER_GROUP_ID)";
@@ -841,7 +841,7 @@ public class UserEntity implements Serializable {
                     + " FROM ART_USER_QUERY_GROUPS AUQG, ART_QUERIES AQ "
                     + " WHERE AUQG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
                     + " AND AUQG.USERNAME=? AND AQ.QUERY_GROUP_ID = ? "
-                    + " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
+                    + " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
                     + " AND AQ.ACTIVE_STATUS = 'A' "; // show only active queries
 
 
@@ -860,7 +860,7 @@ public class UserEntity implements Serializable {
             sqlQuery = "SELECT DISTINCT AQ.QUERY_ID, AQ.NAME "
                     + " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERIES AQ "
                     + " WHERE AUGG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
-                    + " AND AQ.ACTIVE_STATUS = 'A' AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
+                    + " AND AQ.ACTIVE_STATUS = 'A' AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
                     + " AND AQ.QUERY_GROUP_ID = ? AND EXISTS "
                     + " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ?"
                     + " AND AUGA.USER_GROUP_ID=AUGG.USER_GROUP_ID)";

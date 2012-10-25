@@ -334,7 +334,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
                     } else if (typeId < 0) {
                         type = messages.getString("graphQuery");
                     } else {
-                        type = "unknown...";
+                        type = "Unknown...";
                     }
             }
 

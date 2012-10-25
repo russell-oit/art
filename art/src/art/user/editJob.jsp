@@ -737,6 +737,31 @@ function onClickSaveSchedule(t){
 			   <input type="text" name="tos" value="${job.tos}" size="60" maxlength="254">
 		   </td>
 	   </tr>
+	    <tr>
+		   <td class="data"> <%=messages.getString("mailRecipients")%> </td>
+		   <td class="data" colspan="2">
+			  <select name="recipientsQueryId">
+		   <option value="0" <c:if test="${job.recipientsQueryId == 0}">selected</c:if>> None </option>
+	      <%
+//load dynaic recipient queries
+   
+	ArtQuery aq=new ArtQuery();
+   Map<Integer,String> rq=aq.getDynamicRecipientQueries();
+    it = rq.entrySet().iterator();
+	Integer recipientQueryId;
+	String recipientQueryName;
+	while(it.hasNext()) {
+		Map.Entry entry = (Map.Entry)it.next();
+		recipientQueryId= (Integer) entry.getKey();
+		recipientQueryName= (String) entry.getValue();
+		%>
+   <option value="<%=recipientQueryId%>" <%=job.getRecipientsQueryId()==recipientQueryId?"selected":""%>><%=recipientQueryName%></option>
+   <%
+   }
+   %>
+	   </select>
+		   </td>
+	   </tr>
 	   <tr>
 		   <td class="data"> <%=messages.getString("mailCc")%> </td>
 		   <td class="data" colspan="2">

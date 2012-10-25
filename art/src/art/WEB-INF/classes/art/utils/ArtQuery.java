@@ -2238,5 +2238,50 @@ public class ArtQuery {
 
         return alwaysShow;
 	}
+	
+	/**
+	 * Get all dynamic job recipient queries
+	 *
+	 * @return all dynamic job recipient queries
+	 */
+	public Map<Integer, String> getDynamicRecipientQueries() {
+		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+
+			sql = "SELECT QUERY_ID, NAME "
+					+ " FROM ART_QUERIES "
+					+ " WHERE QUERY_TYPE=121";
+
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				Integer qId=new Integer(rs.getInt("QUERY_ID"));
+				String name=rs.getString("NAME");
+				map.put(qId, name);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return map;
+	}
    
 }
