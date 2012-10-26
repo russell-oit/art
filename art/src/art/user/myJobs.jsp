@@ -259,7 +259,7 @@ out.println(resultMessage);
    <td class="jobdetails" width="60px"> 
      <a href="./myJobs.jsp?action=delete&jobId=<%=jobId%>" onClick="return confirm('<%=messages.getString("onDeleteJob")%> <%=jobId%>?')"><img src="<%= request.getContextPath() %>/images/delete.png" title="<%=messages.getString("delete")%>" border="0"></a>
      
-     <a href="./editJob.jsp?jobId=<%=jobId%>&QUERY_NAME=<%=queryName%>&QUERY_TYPE=<%=job.getQueryType()%>"><img src="<%= request.getContextPath() %>/images/edit-10px.png" title="<%=messages.getString("edit")%>" border="0"></a>
+     <a href="./editJob.jsp?jobId=<%=jobId%>"><img src="<%= request.getContextPath() %>/images/edit-10px.png" title="<%=messages.getString("edit")%>" border="0"></a>
      
      <% if (jobRunningId != jobId) { %>
      <a href="./myJobs.jsp?action=run&jobId=<%=jobId%>"><img src="<%= request.getContextPath() %>/images/play.png" title="<%=messages.getString("runNow")%>" border="0"></a>
@@ -449,7 +449,7 @@ out.println(resultMessage);
    <td class="jobdetails" width="60px"> 
      <a href="./myJobs.jsp?action=delete&jobId=<%=jobId%>&OWNER=<%=jobOwner%>" onClick="return confirm('<%=messages.getString("onDeleteJob")%> <%=jobId%>?')"><img src="<%= request.getContextPath() %>/images/delete.png" title="<%=messages.getString("delete")%>" border="0"></a>
      
-     <a href="./editJob.jsp?jobId=<%=jobId%>&QUERY_NAME=<%=queryName%>&QUERY_TYPE=<%=job.getQueryType()%>&OWNER=<%=jobOwner%>"><img src="<%= request.getContextPath() %>/images/edit-10px.png" title="<%=messages.getString("edit")%>" border="0"></a>
+     <a href="./editJob.jsp?jobId=<%=jobId%>&OWNER=<%=jobOwner%>"><img src="<%= request.getContextPath() %>/images/edit-10px.png" title="<%=messages.getString("edit")%>" border="0"></a>
      
      <% if (jobRunningId != jobId) { %>
      <a href="./myJobs.jsp?action=run&jobId=<%=jobId%>"><img src="<%= request.getContextPath() %>/images/play.png" title="<%=messages.getString("runNow")%>" border="0"></a>

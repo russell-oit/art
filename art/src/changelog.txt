@@ -11,7 +11,9 @@ ART 2.4
 * Added All option for datatable output
 * Improved handling of numeric rule values
 * Sort numeric columns correctly in datatable view mode
-
+* Made DataTable the default view mode
+* Allow to see who job is currently shared with
+* Enable jobs to be emailed to a dynamic list of people
 
 ART 2.3.1
 * Fix NullPointerException on pdf output with null strings

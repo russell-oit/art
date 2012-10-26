@@ -1050,7 +1050,10 @@ public class ArtJob implements Job {
 				//only email column. add dynamic recipient emails to Tos and run like normal job
 				ArrayList<String> emailsList = new ArrayList<String>();
 				while (rs.next()) {
-					emailsList.add(rs.getString(1)); //first column has email addresses
+					String email = rs.getString(1); //first column has email addresses
+					if (StringUtils.length(email) > 4) {
+						emailsList.add(email);
+					}
 				}
 				rs.close();
 
@@ -1084,8 +1087,8 @@ public class ArtJob implements Job {
 
 			boolean splitJob = false; //flag to determine if job will generate one file or multiple individualized files. to know which tables to update
 
-			if (StringUtils.equals("Y", allowSharing)) {
-				if (StringUtils.equals("Y", queryRulesFlag) && StringUtils.equals("Y", allowSplitting)) {
+			if (StringUtils.equals(allowSharing, "Y")) {
+				if (StringUtils.equals(queryRulesFlag, "Y") && StringUtils.equals(allowSplitting, "Y")) {
 					splitJob = true;
 				}
 
@@ -1204,54 +1207,92 @@ public class ArtJob implements Job {
 
 			boolean mailSent; //use to check if email was successfully sent
 
+			//trim address fields. to aid in checking if emails are configured
+			userEmail = StringUtils.trim(userEmail);
+			tos = StringUtils.trim(tos);
+			cc = StringUtils.trim(cc);
+			bcc = StringUtils.trim(bcc);
+
+			//determine if emailing is required and emails are configured
+			boolean generateEmail = false;
+			if (jobType == 3 || jobType == 8) {
+				//for split published jobs, tos should have a value to enable confirmation email for individual users
+				if (!StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4) && StringUtils.length(userEmail) > 4) {
+					generateEmail = true;
+				} else if (StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)) {
+					generateEmail = true;
+				}
+			} else {
+				//for non-publish jobs, if an email address is available, generate email
+				if (StringUtils.length(userEmail) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4) {
+					generateEmail = true;
+				}
+			}
+
+			//set email fields
+			String[] tosEmail = null;
+			String[] ccs = null;
+			String[] bccs = null;
+			if (generateEmail) {
+				tosEmail = StringUtils.split(userEmail, ";");
+				ccs = StringUtils.split(cc, ";");
+				bccs = StringUtils.split(bcc, ";");
+
+				logger.debug("Job Id {}. to: {}", jobId, userEmail);
+				logger.debug("Job Id {}. cc: {}", jobId, cc);
+				logger.debug("Job Id {}. bcc: {}", jobId, bcc);
+			}
+
 			if (jobType == 1) {
 				/*
 				 * ALERT if the resultset is not null and the first column is a
 				 * positive integer => send the alert email
 				 */
 
-				fileName = "-No Alert";
+				//only run alert query if we have some emails configured
+				if (generateEmail) {
+					fileName = "-No Alert";
 
-				ResultSet rs = pq.getResultSet();
-				if (rs.next()) {
-					int value = rs.getInt(1);
-					if (value > 0) {
-						logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
+					ResultSet rs = pq.getResultSet();
+					if (rs.next()) {
+						int value = rs.getInt(1);
+						if (value > 0) {
+							logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
 
-						Mailer m = getMailer();
+							Mailer m = getMailer();
 
-						// compatibility with Art pre 1.8 where subject was not editable
-						if (subject == null) {
-							subject = "ART Alert: " + jobName + " (Job " + jobId + ")";
-						}
+							// compatibility with Art pre 1.8 where subject was not editable
+							if (subject == null) {
+								subject = "ART Alert: " + jobName + " (Job " + jobId + ")";
+							}
 
-						m.setSubject(subject);
+							m.setSubject(subject);
 
-						//set recipients						
-						String[] tosEmail = StringUtils.split(userEmail, ";");
-						m.setTos(tosEmail);
+							//set recipients						
+							m.setTos(tosEmail);
+							m.setCc(ccs);
+							m.setBcc(bccs);
 
-						String[] ccs = StringUtils.split(cc, ";");
-						m.setCc(ccs);
-						String[] bccs = StringUtils.split(bcc, ";");
-						m.setBcc(bccs);
+							m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
+							m.setFrom(from);
+							m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
 
-						m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
-						m.setFrom(from);
-						m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
+							mailSent = m.send(); //check return value to determine if email sent successfully
+							if (mailSent) {
+								fileName = "-Alert Sent";
+							} else {
+								fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
+							}
 
-						mailSent = m.send(); //check return value to determine if email sent successfully
-						if (mailSent) {
-							fileName = "-Alert Sent";
 						} else {
-							fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
+							logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
 						}
-
 					} else {
-						logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
+						logger.debug("Job Id {} - Empty resultset for alert", jobId);
 					}
 				} else {
-					logger.debug("Job Id {} - Empty resultset for alert", jobId);
+					//no emails configured
+					fileName = "-No emails configured";
 				}
 			} else if (jobType == 2 || jobType == 3 || jobType == 5 || jobType == 6 || jobType == 7 || jobType == 8) {
 				/*
@@ -1282,6 +1323,15 @@ public class ArtJob implements Job {
 					}
 					rsCount.close();
 					pqCount.close();
+				}
+
+				//for emailing jobs, only run query if some emails are configured
+				if (jobType == 2 || jobType == 5 || jobType == 6 || jobType == 7) {
+					//email attachment, email inline, conditional email attachment, conditional email inline
+					if (!generateEmail) {
+						generateOutput = false;
+						fileName = "-No emails configured";
+					}
 				}
 
 				if (generateOutput) {
@@ -1407,28 +1457,6 @@ public class ArtJob implements Job {
 					// fileName now stores the file to mail or publish...                    
 					logger.debug("Job Id {}. File is: {}", jobId, fileName);
 
-
-					//trim address fields
-					userEmail = StringUtils.trim(userEmail);
-					tos = StringUtils.trim(tos);
-					cc = StringUtils.trim(cc);
-					bcc = StringUtils.trim(bcc);
-
-					boolean generateEmail = false;
-					if (jobType == 3 || jobType == 8) {
-						//for split published jobs, tos should have a value to enable confirmation email for individual users
-						if (!StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4) && StringUtils.length(userEmail) > 4) {
-							generateEmail = true;
-						} else if (StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)) {
-							generateEmail = true;
-						}
-					} else {
-						//for non-publish jobs, if an email address is available, generate email
-						if (StringUtils.length(userEmail) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4) {
-							generateEmail = true;
-						}
-					}
-
 					if (generateEmail) {
 						//some kind of emailing required
 						Mailer m = getMailer();
@@ -1440,12 +1468,8 @@ public class ArtJob implements Job {
 						m.setSubject(subject);
 
 						//set recipients						
-						String[] tosEmail = StringUtils.split(userEmail, ";");
 						m.setTos(tosEmail);
-
-						String[] ccs = StringUtils.split(cc, ";");
 						m.setCc(ccs);
-						String[] bccs = StringUtils.split(bcc, ";");
 						m.setBcc(bccs);
 
 						m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
@@ -1487,13 +1511,17 @@ public class ArtJob implements Job {
 						mailSent = m.send();
 						if (jobType == 2 || jobType == 5 || jobType == 6 || jobType == 7) {
 							// delete the file since it has
-							// been sent via email (for jobType = 3 it is deleted by the scheduler)
+							// been sent via email (for publish jobs it is deleted by the scheduler)
 							File f = new File(fileName);
 							f.delete();
 							if (mailSent) {
 								fileName = "-File has been emailed";
 							} else {
-								fileName = "-Error when sending email <p>" + m.getSendError() + "</p>";
+								//if multiple recipients, some might have succeeded. no way of knowing which
+								fileName = "-Error when sending emails. Some may have succeeded. "
+										+ " <p>" + m.getSendError() + "</p>"
+										+ " <p>Complete address list:<br>To: " + userEmail + "<br>Cc: " + cc + "<br>Bcc: " + bcc + "</p>";
+
 							}
 						} else {
 							//publish job reminder email. separate file link and message with a newline character
@@ -3095,6 +3123,104 @@ public class ArtJob implements Job {
 		emails = emails + tos;
 
 		return emails;
+	}
 
+	/**
+	 * Get an indicator of which users this job has been shared with
+	 *
+	 * @return an indicator of which users this job has been shared with
+	 */
+	public Map getSharedUsers() {
+		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+			String tmp;
+			Integer count = 0;
+
+			sql = "SELECT DISTINCT USERNAME "
+					+ " FROM ART_SHARED_JOBS "
+					+ " WHERE JOB_ID=? "
+					+ " ORDER BY USERNAME";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, jobId);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				count++;
+				tmp = rs.getString("USERNAME");
+				map.put(count, tmp);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return map;
+	}
+
+	/**
+	 * Get an indicator of which user groups this job has been shared with
+	 *
+	 * @return an indicator of which user groups this job has been shared with
+	 */
+	public Map getSharedUserGroups() {
+		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+			String tmp;
+			Integer count = 0;
+
+			sql = "SELECT DISTINCT aug.NAME "
+					+ " FROM ART_USER_GROUP_JOBS augj, ART_USER_GROUPS aug "
+					+ " WHERE augj.USER_GROUP_ID=aug.USER_GROUP_ID"
+					+ " AND augj.JOB_ID=? "
+					+ " ORDER BY aug.NAME";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, jobId);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				count++;
+				tmp = rs.getString("NAME");
+				map.put(count, tmp);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return map;
 	}
 }

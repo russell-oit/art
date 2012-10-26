@@ -38,7 +38,25 @@ onChangeAllowSharing(document.getElementById("allowSharing"));
 <%
 
 String msg="";
-String queryName=request.getParameter("QUERY_NAME");
+
+int queryId=0;
+//support queryId as well as existing QUERY_ID
+String queryIdString = request.getParameter("queryId");
+String queryIdString2 = request.getParameter("QUERY_ID");
+if (queryIdString != null) {
+	queryId = Integer.parseInt(queryIdString);
+} else if (queryIdString2 != null) {
+	queryId = Integer.parseInt(queryIdString2);
+}
+if(queryId==0){
+	//get query id from job
+	queryId=job.getQueryId();
+}
+ArtQuery aq=new ArtQuery();
+aq.create(queryId,false);
+
+String queryName=aq.getName();
+int queryType=aq.getQueryType();
 
 //make sure correct from address is displayed, in case of an admin managing another person's job
 String email;
@@ -380,12 +398,11 @@ if (request.getParameter("bcc").equals("")){
 
 </c:if>
 
-<c:if test="${!empty param.QUERY_ID}">
+<c:if test="${!empty param.fromShowParams}">
  <% // called from showParams.jsp,
  // need to empty the job object that might have ben cached in the session
  job.reset();
  // and to set the params in the ArtJob
- int queryId=Integer.parseInt(request.getParameter("QUERY_ID"));
  Map<String,String[]> multiParams  = new HashMap<String,String[]>();
  Map<String,String> inlineParams = new HashMap<String,String>(); 
  ParameterProcessor.processParameters(request, inlineParams, multiParams, queryId);
@@ -600,14 +617,6 @@ function onClickSaveSchedule(t){
     <input type="hidden" name="queryId" value="${param.QUERY_ID}">
    </c:if>
 
-      <c:if test="${!empty param.QUERY_NAME }">
-    <input type="hidden" name="QUERY_NAME" value="${param.QUERY_NAME}">
-   </c:if>
-
-    <c:if test="${!empty param.QUERY_TYPE}">
-    <input type="hidden" name="QUERY_TYPE" value="${param.QUERY_TYPE}">
-   </c:if>
-
    <%
    if(owner!=null && adminLevel==100){ %>
     <input type="hidden" name="OWNER" value="<%=owner%>">
@@ -616,58 +625,53 @@ function onClickSaveSchedule(t){
  <table align="center" width="60%">
 
   <tr><td class="title" colspan="4" >
-  <c:choose>
-	<c:when test="${job.jobId<=0}">
-		<i><%=messages.getString("scheduleNew")%><br>
-	</c:when>
-	<c:otherwise>
-		<i><%=messages.getString("editJob")%><br>
-	</c:otherwise>
-	</c:choose>
-  <%=queryName%>
-  </i></td></tr>
+		  <%=messages.getString("defineJob")%>
+	 </td>
+  </tr>
 
   <tr><td class="action" colspan="4" ><i><%=messages.getString("jobInfo")%></i></td></tr>
 	<tr>
 		<td class="data" colspan="4">
 			<%=messages.getString("jobName")%>
 			<input type="text" name="jobName" value="${job.jobName}" size="40" maxlength="50">
+			&nbsp;&nbsp;
+			<%=messages.getString("queryName")%>:&nbsp;<%=queryName%>
 		</td>
 	</tr>
     <tr>
        <td class="data">
 	    <%=messages.getString("jobType")%> <br/>
 		<c:choose>
-			<c:when test="${param.QUERY_TYPE<0}">
-	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=request.getParameter("QUERY_TYPE")%>);">
+			<c:when test="<%=queryType<0%>">
+	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);">
 			      <option value="2" <c:if test="${job.jobType == 2}">SELECTED</c:if>> <%=messages.getString("jobTypeEmailAttachment")%> </option>
 			      <option value="3" <c:if test="${job.jobType == 3}">SELECTED</c:if>> <%=messages.getString("jobTypePublish")%>  </option>
 					<option value="6" <c:if test="${job.jobType == 6}">SELECTED</c:if>> <%=messages.getString("jobTypeCondEmailAttachment")%> </option>
 			      <option value="8" <c:if test="${job.jobType == 8}">SELECTED</c:if>> <%=messages.getString("jobTypeCondPublish")%>  </option>
 				</select>
 			</c:when>
-			<c:when test="${param.QUERY_TYPE==115}">
-	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=request.getParameter("QUERY_TYPE")%>);">
+			<c:when test="<%=queryType==115%>">
+	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);">
 			      <option value="2" <c:if test="${job.jobType == 2}">SELECTED</c:if>> <%=messages.getString("jobTypeEmailAttachment")%> </option>
 			      <option value="3" <c:if test="${job.jobType == 3}">SELECTED</c:if>> <%=messages.getString("jobTypePublish")%>  </option>
 				</select>
 			</c:when>
-			<c:when test="${param.QUERY_TYPE==116}">
-	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=request.getParameter("QUERY_TYPE")%>);">
+			<c:when test="<%=queryType==116%>">
+	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);">
 			      <option value="2" <c:if test="${job.jobType == 2}">SELECTED</c:if>> <%=messages.getString("jobTypeEmailAttachment")%> </option>
 			      <option value="3" <c:if test="${job.jobType == 3}">SELECTED</c:if>> <%=messages.getString("jobTypePublish")%>  </option>
 					<option value="6" <c:if test="${job.jobType == 6}">SELECTED</c:if>> <%=messages.getString("jobTypeCondEmailAttachment")%> </option>
 			      <option value="8" <c:if test="${job.jobType == 8}">SELECTED</c:if>> <%=messages.getString("jobTypeCondPublish")%>  </option>
 				</select>
 			</c:when>
-			<c:when test="${param.QUERY_TYPE==117}">
-	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=request.getParameter("QUERY_TYPE")%>);">
+			<c:when test="<%=queryType==117%>">
+	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);">
 			      <option value="2" <c:if test="${job.jobType == 2}">SELECTED</c:if>> <%=messages.getString("jobTypeEmailAttachment")%> </option>
 			      <option value="3" <c:if test="${job.jobType == 3}">SELECTED</c:if>> <%=messages.getString("jobTypePublish")%>  </option>
 				</select>
 			</c:when>
-			<c:when test="${param.QUERY_TYPE==118}">
-	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=request.getParameter("QUERY_TYPE")%>);">
+			<c:when test="<%=queryType==118%>">
+	           <select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);">
 			      <option value="2" <c:if test="${job.jobType == 2}">SELECTED</c:if>> <%=messages.getString("jobTypeEmailAttachment")%> </option>
 			      <option value="3" <c:if test="${job.jobType == 3}">SELECTED</c:if>> <%=messages.getString("jobTypePublish")%>  </option>
 					<option value="6" <c:if test="${job.jobType == 6}">SELECTED</c:if>> <%=messages.getString("jobTypeCondEmailAttachment")%> </option>
@@ -675,7 +679,7 @@ function onClickSaveSchedule(t){
 				</select>
 			</c:when>
 			<c:otherwise>
-				<select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=request.getParameter("QUERY_TYPE")%>);">
+				<select name="jobType" id="jobTypeId" onChange="javascript:onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);">
 			      <option value="2" <c:if test="${job.jobType == 2}">SELECTED</c:if>> <%=messages.getString("jobTypeEmailAttachment")%> </option>
 			      <option value="5" <c:if test="${job.jobType == 5}">SELECTED</c:if>> <%=messages.getString("jobTypeEmailInline")%> </option>
                   <option value="1" <c:if test="${job.jobType == 1}">SELECTED</c:if>> <%=messages.getString("jobTypeAlert")%> </option>			      
@@ -743,9 +747,7 @@ function onClickSaveSchedule(t){
 			  <select name="recipientsQueryId">
 		   <option value="0" <c:if test="${job.recipientsQueryId == 0}">selected</c:if>> None </option>
 	      <%
-//load dynaic recipient queries
-   
-	ArtQuery aq=new ArtQuery();
+//load dynamic recipient queries
    Map<Integer,String> rq=aq.getDynamicRecipientQueries();
     it = rq.entrySet().iterator();
 	Integer recipientQueryId;
@@ -790,7 +792,7 @@ function onClickSaveSchedule(t){
  </div>
 
  <script language="javascript">
-	onChangeJobType(document.getElementById('jobTypeId'),${param.QUERY_TYPE});
+	onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);
  </script>
 
  <table align="center" width="60%">
@@ -964,6 +966,46 @@ function onClickSaveSchedule(t){
 	</select>
    </td>
    </tr>
+   		<tr><td colspan="4" class="data"> Current Assignment </td></tr>
+		<tr>            
+            <td colspan="2" class="data2">                
+				<%				
+				Map map;
+				map=job.getSharedUsers();
+				if(map.size()>0){
+					%>
+					<b>Users</b><br>
+					<%
+					it = map.entrySet().iterator();					
+					while(it.hasNext()) {
+						Map.Entry entry = (Map.Entry)it.next();
+						%>
+						<%=entry.getValue()%> <br>
+						<%
+					}
+					%>
+					<br>
+					<%
+				}
+				%>    
+
+				<%				
+				map=job.getSharedUserGroups();
+				if(map.size()>0){
+					%>
+					<b>User Groups</b><br>
+					<%
+					it = map.entrySet().iterator();					
+					while(it.hasNext()) {
+						Map.Entry entry = (Map.Entry)it.next();
+						%>
+						<%=entry.getValue()%> <br>
+						<%
+					} 
+				}
+				%>    
+            </td>
+        </tr>
    </table>
 	  </div>
 

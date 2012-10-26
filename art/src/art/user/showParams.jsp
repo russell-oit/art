@@ -42,8 +42,9 @@ boolean hasParams=false;
         <legend><%=messages.getString("enterParams") %></legend>
 
         <form name="artparameters" id="paramForm" action="<%=action%>"  method="post">
-			<input type="hidden" name="queryId" VALUE="<%=queryId%>">
+			<input type="hidden" name="queryId" value="<%=queryId%>">
 			<input type="hidden" name="_isInline" id="_isInline" VALUE="true">
+			<input type="hidden" name="fromShowParams" value="true">
 			
             <table class="art" align="center">
                 <tr>
@@ -244,9 +245,8 @@ boolean hasParams=false;
 							<%
                          }
 						   
-						   //display show parameters and show sql options
+						   //display show parameters and show sql options. don't show these options for dashboards, pivot tables, jasper template queries, jxls template queries
 						   if (!(queryType == 110 || queryType==112 || queryType==113 || queryType==114 || queryType==115 || queryType==117)) {
-							//don't show these options for dashboards, pivot tables, jasper template queries, jxls template queries
 							   if(hasParams){
                              if("N".equals(showParameters)) { %>
                                 <input type="checkbox" name="_showParams"> <%=messages.getString("showParams")%>
@@ -262,17 +262,12 @@ boolean hasParams=false;
 												
                         <%
 							}
-							   						   }
+						}
+						} 
                         %>
 
                     </td>
                     <td colspan="2" class="attr">
-                        <input type="hidden" name="QUERY_ID" VALUE="<%=queryId%>">
-						<INPUT TYPE="hidden" name="QUERY_NAME" VALUE="<%=queryName%>">
-						<INPUT TYPE="hidden" name="QUERY_TYPE" VALUE="<%=queryType%>">
-
-                        <%}%>
-
                         <div align="center" valign="middle">
                             <input type="submit" name="execute" id="execute" onClick="javascript:return(<%= validateJS.toString()%> returnTrue() )" class="buttonup"  style="width:100px;" value="<%=messages.getString("executeQueryButton")%>">
                         </div>

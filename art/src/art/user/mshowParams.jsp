@@ -48,6 +48,7 @@
         <legend><%=messages.getString("enterParams") %></legend>
 
         <form name="artparameters" id="paramForm" action="ExecuteQuery"  method="post">
+			<input type="hidden" name="queryId" value="<%=queryId%>">
             <input type="hidden" name="_mobile" value="true">
 
             <table class="art" align="Center" >
@@ -153,10 +154,6 @@
                 </tr>
                 <tr>
                     <td colspan="3" class="data">
-                        <input type="hidden" name="QUERY_ID" value="<%=queryId%>">
-						<INPUT TYPE=hidden name="QUERY_NAME" VALUE="<%=queryName%>">						
-						<INPUT TYPE=hidden name="QUERY_TYPE" VALUE="<%=queryType%>">
-
                         <div align="center" valign="middle">
                             <input type="submit" onClick="javascript:return(<%= validateJS.toString()%> returnTrue() )" class="buttonup"  style="width:100px;" value="<%=messages.getString("executeQueryButton")%>">
                         </div>

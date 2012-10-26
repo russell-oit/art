@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -29,8 +30,8 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 	boolean oddline = true;
 	Map<Integer, ArtQueryParam> displayParams;
 	String tableId; // random identifier
-	private String language; //language to use for datatable. in locale format e.g. it, en, en_US
 	DecimalFormat nfSort;
+	private Locale locale; //locale to use for datatable. determines language used to display datatable strings
 
 	/**
 	 * Constructor
@@ -50,17 +51,17 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 	}
 
 	/**
-	 * @return the language
+	 * @return the locale
 	 */
-	public String getLanguage() {
-		return language;
+	public Locale getLocale() {
+		return locale;
 	}
 
 	/**
-	 * @param language the language to set
+	 * @param locale the locale to set
 	 */
-	public void setLanguage(String language) {
-		this.language = language;
+	public void setLocale(Locale locale) {
+		this.locale = locale;
 	}
 
 	@Override
@@ -123,6 +124,11 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		
 		//by default don't set the language file option. (will default to english - in jquery.dataTables.min.js)
 		String languageSetting =""; 
+		
+		String language="";
+		if(locale!=null){
+			language=locale.toString(); //e.g. en, en-us, it, fr etc
+		}
 
 		if (StringUtils.isNotBlank(language)) {
 			String languageFileName = "dataTables." + language + ".txt";
@@ -142,7 +148,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 				//+ ", \"bScrollCollapse\": true"
 				//+ ", \"bProcessing\": true"
 				+ languageSetting
-				+ ", \"iDisplayLength\": 10" //default item in show entries
+				+ ", \"iDisplayLength\": 25" //default item in show entries
 				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
 				+ "}";
 

@@ -728,7 +728,7 @@ public class QueryExecute extends HttpServlet {
 							//enable localization for datatable output
 							if(o instanceof htmlDataTableOutput){
 								htmlDataTableOutput dt= (htmlDataTableOutput)o;
-								dt.setLanguage(request.getLocale().toString());
+								dt.setLocale(request.getLocale());
 							}
 
 						} catch (Exception e) {

@@ -30,7 +30,7 @@
 	    The order will be respected in the list viewable to users. First one is the default.
 	    Note: for every new mode a proper message entry must be added in art_messages.properties file</description>
         <param-name>userViewModesList</param-name>
-        <param-value>htmlGrid,htmlDataTable,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip</param-value>
+        <param-value>htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip</param-value>
     </context-param>
     <!-- Scheduling -->
     <context-param>
