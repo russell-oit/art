@@ -40,6 +40,9 @@ import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.*;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -1032,6 +1035,25 @@ public class ArtJob implements Job {
 		}
 	}
 
+	private boolean hasColumn(ResultSet rs, String columnName) {
+		boolean hasColumn = false;
+
+		try {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columns = rsmd.getColumnCount();
+			for (int x = 1; x <= columns; x++) {
+				if (columnName.equals(rsmd.getColumnName(x))) {
+					hasColumn = true;
+					break;
+				}
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
+
+		return hasColumn;
+	}
+
 	private void runDynamicRecipientsJob(Connection conn) {
 
 		PreparedQuery recipientsQuery = null; //recipients query
@@ -1060,6 +1082,48 @@ public class ArtJob implements Job {
 				if (emailsList.size() > 0) {
 					String emails = StringUtils.join(emailsList, ";");
 					runNormalJob(conn, emails);
+				}
+			} else if (columnCount > 1) {
+				//personalization fields present
+				//Get the column names. column indices start from 1
+				ArrayList<String> columnList = new ArrayList<String>();
+				for (int i = 1; i < columnCount + 1; i++) {
+					String columnName = rsmd.getColumnLabel(i); //use alias if available
+					columnList.add(columnName);
+				}
+				final String RECIPIENT_ID_COLUMN = "recipient_identifier"; //column name in data query that contains recipient identifier column
+				final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
+				final String RECIPIENT_LABEL = "#recipient#"; //label for recipient in data query
+
+				if (columnList.contains(RECIPIENT_COLUMN) && columnList.contains(RECIPIENT_ID_COLUMN)) {
+					//separate emails, different email message, different report data
+				} else {
+					//separate emails, different email message, same report data
+					Map<String, Map> recipients = new HashMap<String, Map>();
+					while (rs.next()) {
+						String email = rs.getString(1); //first column has email addresses
+						Map<String, String> recipientColumns = new HashMap<String, String>();
+						String columnName;
+						String columnValue;
+						for (int i = 1; i < columnCount; i++) {
+							columnName = rsmd.getColumnLabel(i); //use column alias if available
+
+							//column name must exist otherwise rs.getString will throw an exception
+							if (rs.getString(columnName) == null) {
+								columnValue = "";
+							} else {
+								columnValue = rs.getString(columnName);
+							}
+							recipientColumns.put(columnName, columnValue);
+						}
+
+						recipients.put(email, recipientColumns);
+
+					}
+					rs.close();
+
+					//run job
+					runJob(conn, true, username, tos, recipients);
 				}
 			}
 		} catch (Exception e) {
@@ -1156,8 +1220,12 @@ public class ArtJob implements Job {
 		}
 	}
 
-	//run job
 	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail) {
+		runJob(conn, singleOutput, user, userEmail, null);
+	}
+
+	//run job
+	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail, Map<String, Map> recipientDetails) {
 		//set job start date. relevant for split jobs
 		jobStartDate = new java.sql.Timestamp(new java.util.Date().getTime());
 
@@ -1250,7 +1318,7 @@ public class ArtJob implements Job {
 				 */
 
 				//only run alert query if we have some emails configured
-				if (generateEmail) {
+				if (generateEmail || recipientDetails != null) {
 					fileName = "-No Alert";
 
 					ResultSet rs = pq.getResultSet();
@@ -1259,36 +1327,79 @@ public class ArtJob implements Job {
 						if (value > 0) {
 							logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
 
-							Mailer m = getMailer();
-
 							// compatibility with Art pre 1.8 where subject was not editable
 							if (subject == null) {
 								subject = "ART Alert: " + jobName + " (Job " + jobId + ")";
 							}
 
-							m.setSubject(subject);
+							//send customized emails to dynamic recipients
+							if (recipientDetails != null) {
+								Mailer m = getMailer();
 
-							//set recipients						
-							m.setTos(tosEmail);
-							m.setCc(ccs);
-							m.setBcc(bccs);
+								Iterator it = recipientDetails.entrySet().iterator();
+								while (it.hasNext()) {
+									Map.Entry entry = (Map.Entry) it.next();
+									String email = (String) entry.getKey();
+									Map<String, String> recipientColumns = (Map<String, String>) entry.getValue();
 
-							m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
-							m.setFrom(from);
-							m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
+									m.setSubject(subject);
+									m.setToForce(email);
+									m.setType("text/html;charset=utf-8");
+									m.setFrom(from);
 
-							mailSent = m.send(); //check return value to determine if email sent successfully
-							if (mailSent) {
-								fileName = "-Alert Sent";
-							} else {
-								fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
+									//customize message by replacing field labels with values for this recipient
+									String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
+									if (customMessage == null) {
+										customMessage = "";
+									}
+
+									if (StringUtils.isNotBlank(customMessage)) {
+										Iterator it2 = recipientColumns.entrySet().iterator();
+										while (it2.hasNext()) {
+											Map.Entry entry2 = (Map.Entry) it2.next();
+											String columnName = (String) entry2.getKey();
+											String columnValue = (String) entry2.getValue();
+
+											customMessage = customMessage.replaceAll("(?i)#" + columnName + "#", columnValue); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+										}
+									}
+
+									//set custom message
+									m.setMessage("<html>" + customMessage + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
+
+									//send email for this recipient
+									m.send();
+								}
 							}
 
+							if (generateEmail) {
+								//send email to normal recipients
+								Mailer m = getMailer();
+
+								m.setSubject(subject);
+
+								//set recipients						
+								m.setTos(tosEmail);
+								m.setCc(ccs);
+								m.setBcc(bccs);
+
+								m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
+								m.setFrom(from);
+								m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job " + jobId + ")</small></html>");
+
+								mailSent = m.send(); //check return value to determine if email sent successfully
+								if (mailSent) {
+									fileName = "-Alert Sent";
+								} else {
+									fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
+								}
+
+							} else {
+								logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
+							}
 						} else {
-							logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
+							logger.debug("Job Id {} - Empty resultset for alert", jobId);
 						}
-					} else {
-						logger.debug("Job Id {} - Empty resultset for alert", jobId);
 					}
 				} else {
 					//no emails configured
@@ -1328,7 +1439,7 @@ public class ArtJob implements Job {
 				//for emailing jobs, only run query if some emails are configured
 				if (jobType == 2 || jobType == 5 || jobType == 6 || jobType == 7) {
 					//email attachment, email inline, conditional email attachment, conditional email inline
-					if (!generateEmail) {
+					if (!generateEmail && recipientDetails == null) {
 						generateOutput = false;
 						fileName = "-No emails configured";
 					}
@@ -1457,78 +1568,155 @@ public class ArtJob implements Job {
 					// fileName now stores the file to mail or publish...                    
 					logger.debug("Job Id {}. File is: {}", jobId, fileName);
 
-					if (generateEmail) {
+					if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
-						Mailer m = getMailer();
 
 						// compatibility with Art pre 1.8 where subject was not editable
 						if (subject == null) {
 							subject = "ART Scheduler: " + jobName + " (Job " + jobId + ")";
 						}
-						m.setSubject(subject);
 
-						//set recipients						
-						m.setTos(tosEmail);
-						m.setCc(ccs);
-						m.setBcc(bccs);
+						//send customized emails to dynamic recipients
+						if (recipientDetails != null) {
+							Mailer m = getMailer();
 
-						m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
-						m.setFrom(from);
+							Iterator it = recipientDetails.entrySet().iterator();
+							while (it.hasNext()) {
+								Map.Entry entry = (Map.Entry) it.next();
+								String email = (String) entry.getKey();
+								Map<String, String> recipientColumns = (Map<String, String>) entry.getValue();
 
-						if (StringUtils.isBlank(message)) {
-							message = "&nbsp;"; //if message is blank, ensure there's a space before the hr
-						}
+								m.setSubject(subject);
+								m.setToForce(email);
+								m.setType("text/html;charset=utf-8");
+								m.setFrom(from);
 
-						if (jobType == 2 || jobType == 6) {
-							// e-mail output as attachment
-							List<File> l = new ArrayList<File>();
-							l.add(new File(fileName));
-							m.setAttachments(l);
-							m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
-						} else if (jobType == 5 || jobType == 7) {
-							// inline html within email
-							// read the file and include it in the HTML message
-							FileInputStream fis = new FileInputStream(fileName);
-							byte fileBytes[] = new byte[fis.available()];
-							fis.read(fileBytes);
-							// convert the file to a string and get only the html table
-							String htmlTable = new String(fileBytes, "UTF-8");
-							//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
-							htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
-							m.setMessage("<html>" + message + "<hr>" + htmlTable + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
-							fis.close();
-						} else { // publish
-							int retentionPeriod = ArtDBCP.getPublishedFilesRetentionPeriod();
+								//customize message by replacing field labels with values for this recipient
+								String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
+								if (customMessage == null) {
+									customMessage = "";
+								}
 
-							if (retentionPeriod == 0) {
-								m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published. (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
-							} else {
-								m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published and will be available for the following number of days: " + retentionPeriod + " (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+								if (StringUtils.isNotBlank(customMessage)) {
+									Iterator it2 = recipientColumns.entrySet().iterator();
+									while (it2.hasNext()) {
+										Map.Entry entry2 = (Map.Entry) it2.next();
+										String columnName = (String) entry2.getKey();
+										String columnValue = (String) entry2.getValue();
+
+										String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
+										String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
+										customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString);
+									}
+								}
+
+								if (StringUtils.isBlank(customMessage)) {
+									customMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
+								}
+
+								//set custom message
+								if (jobType == 2 || jobType == 6) {
+									// e-mail output as attachment
+									List<File> l = new ArrayList<File>();
+									l.add(new File(fileName));
+									m.setAttachments(l);
+									m.setMessage("<html>" + customMessage + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+								} else if (jobType == 5 || jobType == 7) {
+									// inline html within email
+									// read the file and include it in the HTML message
+									FileInputStream fis = new FileInputStream(fileName);
+									byte fileBytes[] = new byte[fis.available()];
+									fis.read(fileBytes);
+									// convert the file to a string and get only the html table
+									String htmlTable = new String(fileBytes, "UTF-8");
+									//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
+									htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
+									m.setMessage("<html>" + customMessage + "<hr>" + htmlTable + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+									fis.close();
+								} else { // publish
+									int retentionPeriod = ArtDBCP.getPublishedFilesRetentionPeriod();
+
+									if (retentionPeriod == 0) {
+										m.setMessage("<html>" + customMessage + "<hr><small>This is an automatically generated message. Report has been published. (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+									} else {
+										m.setMessage("<html>" + customMessage + "<hr><small>This is an automatically generated message. Report has been published and will be available for the following number of days: " + retentionPeriod + " (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+									}
+								}
+
+								//send email for this recipient
+								m.send();
 							}
 						}
 
-						//check if mail was successfully sent
-						mailSent = m.send();
-						if (jobType == 2 || jobType == 5 || jobType == 6 || jobType == 7) {
-							// delete the file since it has
-							// been sent via email (for publish jobs it is deleted by the scheduler)
-							File f = new File(fileName);
-							f.delete();
-							if (mailSent) {
-								fileName = "-File has been emailed";
-							} else {
-								//if multiple recipients, some might have succeeded. no way of knowing which
-								fileName = "-Error when sending emails. Some may have succeeded. "
-										+ " <p>" + m.getSendError() + "</p>"
-										+ " <p>Complete address list:<br>To: " + userEmail + "<br>Cc: " + cc + "<br>Bcc: " + bcc + "</p>";
+						//send email to normal recipients
+						if (generateEmail) {
+							Mailer m = getMailer();
 
+							m.setSubject(subject);
+
+							//set recipients						
+							m.setTos(tosEmail);
+							m.setCc(ccs);
+							m.setBcc(bccs);
+
+							m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
+							m.setFrom(from);
+
+							if (StringUtils.isBlank(message)) {
+								message = "&nbsp;"; //if message is blank, ensure there's a space before the hr
 							}
-						} else {
-							//publish job reminder email. separate file link and message with a newline character
-							if (mailSent) {
-								fileName = fileName + System.getProperty("line.separator") + "<p>Reminder email sent</p>";
+
+							if (jobType == 2 || jobType == 6) {
+								// e-mail output as attachment
+								List<File> l = new ArrayList<File>();
+								l.add(new File(fileName));
+								m.setAttachments(l);
+								m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+							} else if (jobType == 5 || jobType == 7) {
+								// inline html within email
+								// read the file and include it in the HTML message
+								FileInputStream fis = new FileInputStream(fileName);
+								byte fileBytes[] = new byte[fis.available()];
+								fis.read(fileBytes);
+								// convert the file to a string and get only the html table
+								String htmlTable = new String(fileBytes, "UTF-8");
+								//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
+								htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
+								m.setMessage("<html>" + message + "<hr>" + htmlTable + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+								fis.close();
+							} else { // publish
+								int retentionPeriod = ArtDBCP.getPublishedFilesRetentionPeriod();
+
+								if (retentionPeriod == 0) {
+									m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published. (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+								} else {
+									m.setMessage("<html>" + message + "<hr><small>This is an automatically generated message. Report has been published and will be available for the following number of days: " + retentionPeriod + " (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+								}
+							}
+
+							//check if mail was successfully sent
+							mailSent = m.send();
+							if (jobType == 2 || jobType == 5 || jobType == 6 || jobType == 7) {
+								// delete the file since it has
+								// been sent via email (for publish jobs it is deleted by the scheduler)
+								File f = new File(fileName);
+								f.delete();
+								if (mailSent) {
+									fileName = "-File has been emailed";
+								} else {
+									//if multiple recipients, some might have succeeded. no way of knowing which
+									fileName = "-Error when sending emails. Some may have succeeded. "
+											+ " <p>" + m.getSendError() + "</p>"
+											+ " <p>Complete address list:<br>To: " + userEmail + "<br>Cc: " + cc + "</p>";
+
+								}
 							} else {
-								fileName = fileName + System.getProperty("line.separator") + "<p>Error when sending reminder email <br>" + m.getSendError() + "</p>";
+								//publish job reminder email. separate file link and message with a newline character
+								if (mailSent) {
+									fileName = fileName + System.getProperty("line.separator") + "<p>Reminder email sent</p>";
+								} else {
+									fileName = fileName + System.getProperty("line.separator") + "<p>Error when sending reminder email <br>" + m.getSendError() + "</p>";
+								}
 							}
 						}
 					}

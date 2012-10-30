@@ -1970,7 +1970,7 @@ public class ArtQuery {
             StringBuilder tmp = new StringBuilder();
             ResultSet rs;
             ResultSetMetaData rsmd;
-            int i = 0;
+            int i;
             int count = 0;
 
             ps = conn.prepareStatement(SQL);

@@ -613,9 +613,7 @@ function onClickSaveSchedule(t){
  <form onsubmit="return validateTinyMCE('mceedit', 4000);"  action="<%= request.getContextPath() %>/user/editJob.jsp?" name="JOB_FORM" method="post">
    <input type="hidden" name="action" value="save">
 
-   <c:if test="${!empty param.QUERY_ID }">
-    <input type="hidden" name="queryId" value="${param.QUERY_ID}">
-   </c:if>
+   <input type="hidden" name="queryId" value="<%=queryId%>">
 
    <%
    if(owner!=null && adminLevel==100){ %>
