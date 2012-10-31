@@ -30,6 +30,8 @@ import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -279,7 +281,7 @@ public class PreparedQuery {
 		} else {
 			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
 			String querySql = sb.toString();
-			querySql = querySql.replaceAll("(?i)#rules#", "1=1"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+			querySql = querySql.replaceAll("(?iu)#rules#", "1=1");
 
 			//update sb with new sql
 			sb.replace(0, sb.length(), querySql);
@@ -333,8 +335,7 @@ public class PreparedQuery {
 	/**
 	 * execute overload with a default resultset type
 	 *
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 * @throws ArtException
 	 */
 	public boolean execute() throws ArtException {
@@ -345,8 +346,7 @@ public class PreparedQuery {
 	/**
 	 * execute overload with a given resultset type
 	 *
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 * @throws ArtException
 	 */
 	public boolean execute(int resultSetType) throws ArtException {
@@ -356,8 +356,7 @@ public class PreparedQuery {
 	/**
 	 * execute overload with use rules setting
 	 *
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 * @throws ArtException
 	 */
 	public boolean execute(boolean newUseRules) throws ArtException {
@@ -369,8 +368,7 @@ public class PreparedQuery {
 	 * Execute the Query sql
 	 *
 	 * @param resultSetType
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 * @throws ArtException if error occurred while running the query or user
 	 * doesn't have access to query
 	 */
@@ -541,8 +539,7 @@ public class PreparedQuery {
 	/**
 	 * Execute and get the result set for this query
 	 *
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 * @throws SQLException
 	 * @throws ArtException
 	 */
@@ -553,8 +550,7 @@ public class PreparedQuery {
 	/**
 	 * Execute and get the result set for this query
 	 *
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 * @throws SQLException
 	 * @throws ArtException
 	 */
@@ -565,8 +561,7 @@ public class PreparedQuery {
 	/**
 	 * Execute and get the result set for this query
 	 *
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 * @throws SQLException
 	 * @throws ArtException
 	 */
@@ -664,10 +659,8 @@ public class PreparedQuery {
 	 *
 	 * @param uname
 	 * @param qid
-	 * @param admin
-	 * <code>true</code> if this is an admin session
-	 * @return
-	 * <code>true</code> if user can execute the query
+	 * @param admin <code>true</code> if this is an admin session
+	 * @return <code>true</code> if user can execute the query
 	 */
 	public boolean canExecuteQuery(String uname, int qid, boolean admin) {
 		username = uname;
@@ -683,8 +676,7 @@ public class PreparedQuery {
 	 *
 	 * @param uname
 	 * @param qid
-	 * @return
-	 * <code>true</code> if user can edit the text object
+	 * @return <code>true</code> if user can edit the text object
 	 */
 	public boolean canEditTextObject(String uname, int qid) {
 		username = uname;
@@ -698,8 +690,7 @@ public class PreparedQuery {
 
 	/**
 	 *
-	 * @return
-	 * <code>true</code> if user can execute this query
+	 * @return <code>true</code> if user can execute this query
 	 */
 	public boolean canExecuteQuery() {
 		boolean canExecute = false;
@@ -941,9 +932,9 @@ public class PreparedQuery {
 			StringBuilder tmpSb;
 			ruleName = rs.getString("RULE_NAME");
 			columnName = rs.getString("FIELD_NAME");
-			columnDataType=rs.getString("FIELD_DATA_TYPE");
-			
-			tmpSb = getRuleValues(conn, username, ruleName, 1,columnDataType);
+			columnDataType = rs.getString("FIELD_DATA_TYPE");
+
+			tmpSb = getRuleValues(conn, username, ruleName, 1, columnDataType);
 			if (tmpSb == null) { // it is null only if 	ALL_ITEMS
 				//ALL_ITEMS. effectively means the rule doesn't apply
 				if (usingLabelledRules) {
@@ -998,7 +989,8 @@ public class PreparedQuery {
 		//replace all occurrences of labelled rule with rule values
 		if (usingLabelledRules) {
 			//replace rule values
-			querySql = querySql.replaceAll("(?i)#rules#", labelledValues.toString()); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+			String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
+			querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
 			//update sb with new sql
 			sb.replace(0, sb.length(), querySql);
 		}
@@ -1050,7 +1042,7 @@ public class PreparedQuery {
 		//  Note: null TYPE is handled as EXACT
 
 		while (rsRuleValues.next() && !isAllItemsForThisRule) {
-			String ruleValue=rsRuleValues.getString("RULE_VALUE");
+			String ruleValue = rsRuleValues.getString("RULE_VALUE");
 			if (!StringUtils.equals(ruleValue, "ALL_ITEMS")) {
 				if (StringUtils.equals(rsRuleValues.getString("RULE_TYPE"), "LOOKUP")) {
 					// if type is lookup the VALUE is the name
@@ -1114,7 +1106,10 @@ public class PreparedQuery {
 				Map.Entry entry = (Map.Entry) it.next();
 				paramName = (String) entry.getKey();
 				paramValue = inlineParams.get(paramName);
-				querySql = querySql.replaceAll("(?i)#" + paramName + "#", paramValue); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+
+				String searchString = Pattern.quote("#" + paramName + "#"); //quote in case it contains special regex characters
+				String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
+				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 			}
 
 			//update sb with new sql
@@ -1504,11 +1499,15 @@ public class PreparedQuery {
 				jxlsMultiParams.put(paramLabel, finalEscapedValues);
 
 				//replace all occurrences of labelled multi parameter with valid sql syntax
+				String replaceValue;
 				if (queryType == 112 || queryType == 113 || queryType == 114) {
-					querySql = querySql.replaceAll("(?i)#" + paramLabel + "#", StringUtils.join(paramValuesList, ",")); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+					replaceValue = StringUtils.join(paramValuesList, ",");
 				} else {
-					querySql = querySql.replaceAll("(?i)#" + paramLabel + "#", finalEscapedValues); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+					replaceValue = finalEscapedValues;
 				}
+				String searchString = Pattern.quote("#" + paramLabel + "#"); //quote in case it contains special regex characters
+				String replaceString = Matcher.quoteReplacement(replaceValue); //quote in case it contains special regex characters
+				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 			}
 
 			//replace any multi parameters that haven't been replaced yet. these are the ones where ALL_ITEMS was selected or all values are to be used
@@ -1561,11 +1560,15 @@ public class PreparedQuery {
 							jxlsMultiParams.put(paramLabel, finalEscapedValues);
 
 							//replace all occurrences of labelled multi parameter with valid sql syntax
+							String replaceValue;
 							if (queryType == 112 || queryType == 113 || queryType == 114) {
-								querySql = querySql.replaceAll("(?i)#" + paramLabel + "#", StringUtils.join(finalValuesList, ",")); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+								replaceValue = StringUtils.join(finalValuesList, ",");
 							} else {
-								querySql = querySql.replaceAll("(?i)#" + paramLabel + "#", finalEscapedValues); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+								replaceValue = finalEscapedValues;
 							}
+							String searchString = Pattern.quote("#" + paramLabel + "#"); //quote in case it contains special regex characters
+							String replaceString = Matcher.quoteReplacement(replaceValue); //quote in case it contains special regex characters
+							querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 						}
 					}
 				}
@@ -1735,7 +1738,7 @@ public class PreparedQuery {
 					String lovSql = queryBuilder.toString();
 
 					//replace rules if the label exists, with dummy condition. so that lov query executes without error
-					lovSql = lovSql.replaceAll("(?i)#rules#", "1=1");
+					lovSql = lovSql.replaceAll("(?iu)#rules#", "1=1");
 
 					//replace #filter# parameter if it exists, for chained parameters
 					int filterPosition;
@@ -1753,7 +1756,9 @@ public class PreparedQuery {
 						if (StringUtils.startsWith(valueParamHtmlName, "P_")) {
 							filterLabel = valueParamHtmlName.substring(2);
 							String filterValue = inlineParams.get(filterLabel);
-							lovSql = lovSql.replaceAll("(?i)#filter#", filterValue);
+
+							String replaceString = Matcher.quoteReplacement(filterValue); //quote in case it contains special regex characters
+							lovSql = lovSql.replaceAll("(?iu)#filter#", replaceString);
 						} else if (StringUtils.startsWith(valueParamHtmlName, "M_")) {
 							//filter value can actually never come from multi parameter. limitation of ajaxtags
 							ArtQueryParam filterParam = htmlParams.get(valueParamHtmlName);
@@ -1789,7 +1794,8 @@ public class PreparedQuery {
 								String finalEscapedValues = StringUtils.join(escapedValuesList, ",");
 
 								//replace #filter# with parameter values
-								lovSql = lovSql.replaceAll("(?i)#filter#", finalEscapedValues);
+								String replaceString = Matcher.quoteReplacement(finalEscapedValues); //quote in case it contains special regex characters
+								lovSql = lovSql.replaceAll("(?iu)#filter#", replaceString);
 							}
 						}
 					}
@@ -1843,7 +1849,9 @@ public class PreparedQuery {
 		/*
 		 * :USERNAME substitution with logged username
 		 */
-		querySql = querySql.replaceAll("(?i):username", "'" + username + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+		String searchString = Pattern.quote(":username"); //quote in case it contains special regex characters
+		String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
+		querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 
 
 		/*
@@ -1859,8 +1867,8 @@ public class PreparedQuery {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		String time = timeFormatter.format(today);
 
-		querySql = querySql.replaceAll("(?i):date", "'" + date + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
-		querySql = querySql.replaceAll("(?i):time", "'" + time + "'"); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+		querySql = querySql.replaceAll("(?iu):date", "'" + date + "'"); 
+		querySql = querySql.replaceAll("(?iu):time", "'" + time + "'"); 
 
 
 		//update sb with new sql

@@ -1105,7 +1105,7 @@ public class ArtJob implements Job {
 						Map<String, String> recipientColumns = new HashMap<String, String>();
 						String columnName;
 						String columnValue;
-						for (int i = 1; i < columnCount; i++) {
+						for (int i = 1; i <= columnCount; i++) { //column numbering starts from 1 not 0
 							columnName = rsmd.getColumnLabel(i); //use column alias if available
 
 							//column name must exist otherwise rs.getString will throw an exception
@@ -1360,7 +1360,9 @@ public class ArtJob implements Job {
 											String columnName = (String) entry2.getKey();
 											String columnValue = (String) entry2.getValue();
 
-											customMessage = customMessage.replaceAll("(?i)#" + columnName + "#", columnValue); //(?i) makes regex case insensitive. first parameter of replaceall is a regex expression.
+											String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
+											String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
+											customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 										}
 									}
 
@@ -1606,7 +1608,7 @@ public class ArtJob implements Job {
 
 										String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
 										String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
-										customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString);
+										customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 									}
 								}
 
