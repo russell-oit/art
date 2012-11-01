@@ -2,6 +2,7 @@ package art.output;
 
 import art.servlets.ArtDBCP;
 import art.utils.*;
+import java.io.File;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -108,105 +109,113 @@ public class jxlsOutput {
 			datasourceId = aq.getDatabaseId();
 			querySql = aq.getText();
 
-			//set report parameters
-			HashMap<String, String> iParams = new HashMap<String, String>();
-			iParams.putAll(inlineParams); //pass any inline parameters
-
-			//process multi parameters to obtain parameter names instead of parameter identifiers
-			HashMap<String, String> mParams = new HashMap<String, String>();
-			PreparedQuery pq = new PreparedQuery();
-			pq.setQueryId(queryId);
-			pq.setMultiParams(multiParams);
-			mParams.putAll(pq.getJxlsMultiParams(querySql));
-
-			//set objects to be passed to jxls
-			Map<String, Object> beans = new HashMap<String, Object>();
-			beans.put("inlineParams", iParams);
-			beans.put("multiParams", mParams);
-
-			if (rs == null) {
-				//pass connection to template query
-
-				//use dynamic datasource if so configured
-				boolean useDynamicDatasource = false;
-
-				if (htmlParams != null) {
-					Iterator it = htmlParams.entrySet().iterator();
-					while (it.hasNext()) {
-						Map.Entry entry = (Map.Entry) it.next();
-						ArtQueryParam param = (ArtQueryParam) entry.getValue();
-						String paramDataType = param.getParamDataType();
-
-						if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {
-							//get dynamic connection to use
-							Object paramValueObject = param.getParamValue();
-							if (paramValueObject != null) {
-								String paramValue = (String) paramValueObject;
-								if (StringUtils.isNotBlank(paramValue)) {
-									useDynamicDatasource = true;
-									if (NumberUtils.isNumber(paramValue)) {
-										//use datasource id
-										connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
-									} else {
-										//use datasource name
-										connQuery = ArtDBCP.getConnection(paramValue);
-									}
-								}
-							}
-							break;
-						}
-					}
-				}
-
-				if (!useDynamicDatasource) {
-					//not using dynamic datasource. use datasource defined on the query
-					connQuery = ArtDBCP.getConnection(datasourceId);
-				}
-				ReportManager reportManager = new ArtJxlsReportManager(connQuery);
-				beans.put("rm", reportManager);
-			} else {
-				//use recordset based on art query 
-				ArtJxlsResultSetCollection rsc = new ArtJxlsResultSetCollection(rs, false, true);
-				beans.put("results", rsc);
-			}
-
-			//Build output filename 
-			Calendar cal = Calendar.getInstance();
-			java.util.Date today = cal.getTime();
-
-			String dateFormat = "yyyy_MM_dd";
-			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-			y_m_d = dateFormatter.format(today);
-
-			String timeFormat = "HH_mm_ss";
-			SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
-			h_m_s = timeFormatter.format(today);
-
-			index = templateFileName.lastIndexOf(".");
-			if (index > -1) {
-				//extension may be xlsx
-				extension = templateFileName.substring(index);
-			}
-
-			String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + extension;
-			fileName = ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename
-			fullOutputFileName = exportPath + fileName;
-
 			templatesPath = ArtDBCP.getTemplatesPath();
 			fullTemplateFileName = templatesPath + templateFileName;
 
-			//generate output
-			XLSTransformer transformer = new XLSTransformer();
-			transformer.transformXLS(fullTemplateFileName, beans, fullOutputFileName);
+			//only proceed if template file available
+			File templateFile = new File(fullTemplateFileName);
+			if (!templateFile.exists()) {
+				//template file doesn't exist.
+				logger.warn("Template file not found: {}", fullTemplateFileName);
+			} else {
 
-			//display link to access report if run interactively			
-			if (htmlout != null) {
-				htmlout.println("<p><div align=\"Center\"><table border=\"0\" width=\"90%\">");
-				htmlout.println("<tr><td colspan=2 class=\"data\" align=\"center\" >"
-						+ "<a  type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
-						+ fileName + "</a>"
-						+ "</td></tr>");
-				htmlout.println("</table></div></p>");
+				//set report parameters
+				HashMap<String, String> iParams = new HashMap<String, String>();
+				iParams.putAll(inlineParams); //pass any inline parameters
+
+				//process multi parameters to obtain parameter names instead of parameter identifiers
+				HashMap<String, String> mParams = new HashMap<String, String>();
+				PreparedQuery pq = new PreparedQuery();
+				pq.setQueryId(queryId);
+				pq.setMultiParams(multiParams);
+				mParams.putAll(pq.getJxlsMultiParams(querySql));
+
+				//set objects to be passed to jxls
+				Map<String, Object> beans = new HashMap<String, Object>();
+				beans.put("inlineParams", iParams);
+				beans.put("multiParams", mParams);
+
+				if (rs == null) {
+					//pass connection to template query
+
+					//use dynamic datasource if so configured
+					boolean useDynamicDatasource = false;
+
+					if (htmlParams != null) {
+						Iterator it = htmlParams.entrySet().iterator();
+						while (it.hasNext()) {
+							Map.Entry entry = (Map.Entry) it.next();
+							ArtQueryParam param = (ArtQueryParam) entry.getValue();
+							String paramDataType = param.getParamDataType();
+
+							if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {
+								//get dynamic connection to use
+								Object paramValueObject = param.getParamValue();
+								if (paramValueObject != null) {
+									String paramValue = (String) paramValueObject;
+									if (StringUtils.isNotBlank(paramValue)) {
+										useDynamicDatasource = true;
+										if (NumberUtils.isNumber(paramValue)) {
+											//use datasource id
+											connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
+										} else {
+											//use datasource name
+											connQuery = ArtDBCP.getConnection(paramValue);
+										}
+									}
+								}
+								break;
+							}
+						}
+					}
+
+					if (!useDynamicDatasource) {
+						//not using dynamic datasource. use datasource defined on the query
+						connQuery = ArtDBCP.getConnection(datasourceId);
+					}
+					ReportManager reportManager = new ArtJxlsReportManager(connQuery);
+					beans.put("rm", reportManager);
+				} else {
+					//use recordset based on art query 
+					ArtJxlsResultSetCollection rsc = new ArtJxlsResultSetCollection(rs, false, true);
+					beans.put("results", rsc);
+				}
+
+				//Build output filename 
+				Calendar cal = Calendar.getInstance();
+				java.util.Date today = cal.getTime();
+
+				String dateFormat = "yyyy_MM_dd";
+				SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+				y_m_d = dateFormatter.format(today);
+
+				String timeFormat = "HH_mm_ss";
+				SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
+				h_m_s = timeFormatter.format(today);
+
+				index = templateFileName.lastIndexOf(".");
+				if (index > -1) {
+					//extension may be xlsx
+					extension = templateFileName.substring(index);
+				}
+
+				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + extension;
+				fileName = ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename
+				fullOutputFileName = exportPath + fileName;
+
+				//generate output
+				XLSTransformer transformer = new XLSTransformer();
+				transformer.transformXLS(fullTemplateFileName, beans, fullOutputFileName);
+
+				//display link to access report if run interactively			
+				if (htmlout != null) {
+					htmlout.println("<p><div align=\"Center\"><table border=\"0\" width=\"90%\">");
+					htmlout.println("<tr><td colspan=2 class=\"data\" align=\"center\" >"
+							+ "<a  type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
+							+ fileName + "</a>"
+							+ "</td></tr>");
+					htmlout.println("</table></div></p>");
+				}
 			}
 
 		} catch (Exception e) {
