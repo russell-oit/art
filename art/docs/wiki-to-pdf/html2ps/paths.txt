@@ -1,0 +1,13 @@
+set the correct paths for the following
+
+html2ps
+==========
+eval 'exec C:\Perl\bin\perl.exe -S $0 "$@"'
+$globrc='C:\toa\Projects\ART\Manuals\automated\html2ps\html2psrc';
+$ug='C:\toa\Projects\ART\Manuals\automated\html2ps\html2ps.html';
+
+
+html2psrc
+==========
+path: "C:\Program Files (x86)\ImageMagick-6.7.4-Q16;C:\Program Files\gs\gs9.04\bin";
+file: "C:\toa\Projects\ART\Manuals\automated\html2ps\hyphen.tex";

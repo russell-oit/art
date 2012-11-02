@@ -1,0 +1,16 @@
+@echo off
+
+echo converting features...
+call convert-features
+
+echo converting tips...
+call convert-tips
+
+echo converting upgrading...
+call convert-upgrading
+
+echo converting installing...
+call convert-installing
+
+echo converting manual...
+call convert-manual
