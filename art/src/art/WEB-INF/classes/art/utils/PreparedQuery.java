@@ -71,6 +71,11 @@ public class PreparedQuery {
 	int queryType; //to enable special handling of template queries where sql source is not executed
 	boolean viewingTextObject = false; //flag used to check if user has rights to edit a text object
 	Map<String, ArtQueryParam> htmlParams; //all the queries parameters, with the html name as the key
+	private boolean recipientFilterPresent; //dynamic recipient filter label present
+	private final String RECIPIENT_LABEL = "#recipient#"; //for dynamic recipients, label for recipient in data query
+	private String recipientColumn;
+	private String recipientId;
+	private String recipientIdType = "VARCHAR";
 
 	/**
 	 *
@@ -81,6 +86,66 @@ public class PreparedQuery {
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
 		jasperMultiParams = new HashMap<String, List>(); //to populate hash map with multi parameter names and values
 		jxlsMultiParams = new HashMap<String, String>(); //save parameters in special hash map for jxls reports        
+	}
+
+	/**
+	 * @return the recipientIdType
+	 */
+	public String getRecipientIdType() {
+		return recipientIdType;
+	}
+
+	/**
+	 * @param recipientIdType the recipientIdType to set
+	 */
+	public void setRecipientIdType(String recipientIdType) {
+		this.recipientIdType = recipientIdType;
+	}
+
+	/**
+	 * @return the recipientColumn
+	 */
+	public String getRecipientColumn() {
+		return recipientColumn;
+	}
+
+	/**
+	 * @param recipientColumn the recipientColumn to set
+	 */
+	public void setRecipientColumn(String recipientColumn) {
+		this.recipientColumn = recipientColumn;
+	}
+
+	/**
+	 * @return the recipientId
+	 */
+	public String getRecipientId() {
+		return recipientId;
+	}
+
+	/**
+	 * @param recipientId the recipientId to set
+	 */
+	public void setRecipientId(String recipientId) {
+		this.recipientId = recipientId;
+	}
+
+	/**
+	 * Get the value of recipientFilterPresent
+	 *
+	 * @return the value of recipientFilterPresent
+	 */
+	public boolean isRecipientFilterPresent() {
+		return recipientFilterPresent;
+	}
+
+	/**
+	 * Set the value of recipientFilterPresent
+	 *
+	 * @param recipientFilterPresent new value of recipientFilterPresent
+	 */
+	public void setRecipientFilterPresent(boolean recipientFilterPresent) {
+		this.recipientFilterPresent = recipientFilterPresent;
 	}
 
 	/**
@@ -241,9 +306,7 @@ public class PreparedQuery {
 		 * (Inline parameters are replaced with parameter placeholders (?))
 		 */
 		try {
-			if (inlineParams != null) {
-				prepareInlineParameters(sb); // work inline in the sb
-			}
+			prepareInlineParameters(sb); // work inline in the sb
 		} catch (Exception e) {
 			logger.error("Error", e);
 			throw new ArtException("<p>Error applying inline parameters to the query. Please contact the ART administrator. <br>Details:<code> " + e + "</code></p>");
@@ -256,9 +319,7 @@ public class PreparedQuery {
 		 * params)
 		 */
 		try {
-			if (multiParams != null) {
-				applyMultiParameters(sb); // work inline in the sb
-			}
+			applyMultiParameters(sb); // work inline in the sb
 		} catch (Exception e) {
 			logger.error("Error", e);
 			throw new ArtException("<p>Error applying multi parameters to the query. Please contact the ART administrator. <br>Details:<code> " + e + "</code></p>");
@@ -270,27 +331,54 @@ public class PreparedQuery {
 		 * Apply rules to the SQL (in the WHERE part new "AND rule_column in
 		 * (<values>)" conditions are added if the query uses rules)
 		 */
-		if (useRules) {
-			try {
-				if (!applyRules(sb)) {
-					throw new ArtException("<p>Error applying rules to the query. You likely have not been assigned values for the rules used by the query. Please contact the ART administrator. </p>");
-				}
-			} catch (Exception e) {
-				throw new ArtException("<p>Error applying rules to the query. Please contact the ART administrator.<br>Details:<code> " + e + "</code></p>");
+		try {
+			if (!applyRules(sb)) {
+				throw new ArtException("<p>Error applying rules to the query. You likely have not been assigned values for the rules used by the query. Please contact the ART administrator. </p>");
 			}
-		} else {
-			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
-			String querySql = sb.toString();
-			querySql = querySql.replaceAll("(?iu)#rules#", "1=1");
-
-			//update sb with new sql
-			sb.replace(0, sb.length(), querySql);
+		} catch (Exception e) {
+			throw new ArtException("<p>Error applying rules to the query. Please contact the ART administrator.<br>Details:<code> " + e + "</code></p>");
 		}
+
+		//handle dynamic recipient label
+		applyDynamicRecipient(sb);
 
 		logger.debug("Sql query now is:\n{}", sb.toString());
 
 		return sb.toString();
 
+	}
+
+	private void applyDynamicRecipient(StringBuilder sb) {
+		if (recipientFilterPresent) {
+			//replace #recipient# label with recipient values
+			if (recipientColumn != null && recipientId != null) {
+				String recipientValue;
+				if (StringUtils.equalsIgnoreCase(recipientIdType, "NUMBER") && NumberUtils.isNumber(recipientId)) {
+					//don't quote recipient id
+					recipientValue = recipientId;
+				} else {
+					//quote recipient id
+					recipientValue = "'" + escapeSql(recipientId) + "'";
+				}
+				String replaceString = recipientColumn + "=" + recipientValue;
+
+				String querySql = sb.toString();
+				String searchString = Pattern.quote(RECIPIENT_LABEL);
+				replaceString = Matcher.quoteReplacement(replaceString);
+				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString);
+
+				//update sb with new sql
+				sb.replace(0, sb.length(), querySql);
+			}
+		} else {
+			//ignore #recipient# label
+			String querySql = sb.toString();
+			String searchString = Pattern.quote(RECIPIENT_LABEL);
+			querySql = querySql.replaceAll("(?iu)" + searchString, "1=1");
+
+			//update sb with new sql
+			sb.replace(0, sb.length(), querySql);
+		}
 	}
 
 	//determine if the user can execute the query. Exception thrown if user can't excecute query
@@ -900,6 +988,18 @@ public class PreparedQuery {
 
 		boolean successfullyApplied = true; // use variable to return method value instead of having multiple return statements
 
+		if (!useRules) {
+			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
+			String querySql = sb.toString();
+			querySql = querySql.replaceAll("(?iu)#rules#", "1=1");
+
+			//update sb with new sql
+			sb.replace(0, sb.length(), querySql);
+
+			return true; //don't process any further
+		}
+
+
 		// Determine if we have a GROUP BY or an ORDER BY
 		int grb = sb.toString().lastIndexOf("GROUP BY");
 		int orb = sb.toString().lastIndexOf("ORDER BY");
@@ -1093,6 +1193,10 @@ public class PreparedQuery {
 
 		String paramName;
 		int startPos;
+
+		if (inlineParams == null) {
+			return;
+		}
 
 		treeInline = new TreeMap<Integer, String>();
 
@@ -1413,6 +1517,10 @@ public class PreparedQuery {
 	private void applyMultiParameters(StringBuilder sb) throws SQLException {
 
 		logger.debug("applyMultiParameters");
+
+		if (multiParams == null) {
+			return;
+		}
 
 		Iterator it;
 
@@ -1867,8 +1975,8 @@ public class PreparedQuery {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		String time = timeFormatter.format(today);
 
-		querySql = querySql.replaceAll("(?iu):date", "'" + date + "'"); 
-		querySql = querySql.replaceAll("(?iu):time", "'" + time + "'"); 
+		querySql = querySql.replaceAll("(?iu):date", "'" + date + "'");
+		querySql = querySql.replaceAll("(?iu):time", "'" + time + "'");
 
 
 		//update sb with new sql

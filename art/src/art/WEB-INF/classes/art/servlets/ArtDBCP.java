@@ -26,7 +26,8 @@
  *
  *
  * @version 1.1
- * @author Enrico Liboni @mail enrico(at)computer.org Last changes: Logging
+ * @author Enrico Liboni
+ * @mail enrico(at)computer.org Last changes: Logging
  */
 package art.servlets;
 
@@ -87,6 +88,9 @@ public class ArtDBCP extends HttpServlet {
 	private static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 	private static String dateFormat = DEFAULT_DATE_FORMAT; //for date fields, format of date portion
 	private static String timeFormat = DEFAULT_TIME_FORMAT; //for date fields, format of time portion
+	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
+	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
+	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
 
 	/**
 	 * {@inheritDoc}
@@ -125,9 +129,7 @@ public class ArtDBCP extends HttpServlet {
 	/**
 	 * Load art.properties file and initialize variables
 	 *
-	 * @return
-	 * <code>true</code> if file found.
-	 * <code>false</code> otherwise.
+	 * @return <code>true</code> if file found. <code>false</code> otherwise.
 	 */
 	public static boolean loadArtSettings() {
 		logger.debug("Loading art.properties file");
@@ -485,8 +487,7 @@ public class ArtDBCP extends HttpServlet {
 	/**
 	 * Determine whether a custom font should be used in pdf output
 	 *
-	 * @return
-	 * <code>true</code> if a custom font should be used in pdf output
+	 * @return <code>true</code> if a custom font should be used in pdf output
 	 */
 	public static boolean isUseCustomPdfFont() {
 		return useCustomPdfFont;
@@ -495,8 +496,7 @@ public class ArtDBCP extends HttpServlet {
 	/**
 	 * Determine if the custom pdf font should be embedded in the generated pdf
 	 *
-	 * @return
-	 * <code>true</code> if the custom pdf font should be embedded
+	 * @return <code>true</code> if the custom pdf font should be embedded
 	 */
 	public static boolean isPdfFontEmbedded() {
 		return pdfFontEmbedded;
@@ -599,10 +599,8 @@ public class ArtDBCP extends HttpServlet {
 	/**
 	 * Determine if art.props file is available and settings have been loaded.
 	 *
-	 * @return
-	 * <code>true</code> if file is available and settings have been loaded
-	 * correctly.
-	 * <code>false</code> otherwise.
+	 * @return <code>true</code> if file is available and settings have been
+	 * loaded correctly. <code>false</code> otherwise.
 	 */
 	public static boolean isArtSettingsLoaded() {
 		return artSettingsLoaded; // is false if art.props is not defined
@@ -803,8 +801,7 @@ public class ArtDBCP extends HttpServlet {
 	/**
 	 * Determine if job scheduling is enabled.
 	 *
-	 * @return
-	 * <code>true</code> if job scheduling is enabled
+	 * @return <code>true</code> if job scheduling is enabled
 	 */
 	public static boolean isSchedulingEnabled() {
 		return schedulingEnabled;
@@ -824,8 +821,7 @@ public class ArtDBCP extends HttpServlet {
 	/**
 	 * Determine if this is the full or light version.
 	 *
-	 * @return
-	 * <code>true</code> if this is the full version
+	 * @return <code>true</code> if this is the full version
 	 */
 	public static boolean isArtFullVersion() {
 		return artFullVersion;
@@ -1190,7 +1186,7 @@ public class ArtDBCP extends HttpServlet {
 		Random rn = new Random();
 		int range = maximum - minimum + 1;
 		int randomNum = rn.nextInt(range) + minimum;
-		
+
 		return randomNum;
 	}
 }
