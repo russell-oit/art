@@ -156,7 +156,7 @@
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserRules.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
 			Rule Values
 			</td>
-		    <td class="data"> Set rule values for users</td></tr>
+		    <td class="data"> Set rule values for users/user groups</td></tr>
    <%
 		}
 		/*

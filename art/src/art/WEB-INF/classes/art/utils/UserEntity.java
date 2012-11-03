@@ -1592,62 +1592,6 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Get rule values for a given user and rule
-     * 
-     * @param user
-     * @param ruleName
-     * @return rule values for a given user and rule
-     */
-    public Map getRuleValues(String user, String ruleName) {
-        TreeMap<Integer, Rule> map = new TreeMap<Integer, Rule>();
-
-        Connection conn = null;
-
-        try {
-            conn = ArtDBCP.getConnection();
-
-            String sql;
-            PreparedStatement ps;
-            ResultSet rs;
-            Integer count = 0;
-
-            sql = "SELECT AUR.RULE_TYPE, AUR.RULE_VALUE "
-                    + " FROM ART_RULES AR, ART_USER_RULES AUR "
-                    + " WHERE AUR.RULE_NAME = AR.RULE_NAME "
-                    + " AND AUR.USERNAME = ? "
-                    + " AND AUR.RULE_NAME = ? "
-                    + " ORDER BY AUR.RULE_TYPE, AUR.RULE_VALUE";
-
-            ps = conn.prepareStatement(sql);
-            ps.setString(1, user);
-            ps.setString(2, ruleName);
-
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                count++;
-                Rule rule = new Rule();
-                rule.setRuleType(rs.getString("RULE_TYPE"));
-                rule.setRuleValue(rs.getString("RULE_VALUE"));
-                map.put(count, rule);
-            }
-            rs.close();
-            ps.close();
-        } catch (Exception e) {
-            logger.error("Error", e);
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                logger.error("Error", e);
-            }
-        }
-
-        return map;
-    }
-
-    /**
      * Get all queries
      * 
      * @param level

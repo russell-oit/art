@@ -979,15 +979,6 @@ public class PreparedQuery {
 
 		logger.debug("applyRules");
 
-		String ruleName;
-		String columnName;
-		String columnDataType;
-		Statement st; // Should I create a statement for each (nested) resultset???
-		ResultSet rs;
-		int insertPosLast = 0;
-
-		boolean successfullyApplied = true; // use variable to return method value instead of having multiple return statements
-
 		if (!useRules) {
 			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
 			String querySql = sb.toString();
@@ -999,6 +990,14 @@ public class PreparedQuery {
 			return true; //don't process any further
 		}
 
+		String ruleName;
+		String columnName;
+		String columnDataType;
+		Statement st; // Should I create a statement for each (nested) resultset???
+		ResultSet rs;
+		int insertPosLast = 0;
+
+		boolean successfullyApplied = true; // use variable to return method value instead of having multiple return statements
 
 		// Determine if we have a GROUP BY or an ORDER BY
 		int grb = sb.toString().lastIndexOf("GROUP BY");
@@ -1035,6 +1034,7 @@ public class PreparedQuery {
 			columnDataType = rs.getString("FIELD_DATA_TYPE");
 
 			tmpSb = getRuleValues(conn, username, ruleName, 1, columnDataType);
+			String groupValues = getGroupRuleValues(ruleName, columnName, columnDataType);
 			if (tmpSb == null) { // it is null only if 	ALL_ITEMS
 				//ALL_ITEMS. effectively means the rule doesn't apply
 				if (usingLabelledRules) {
@@ -1053,13 +1053,19 @@ public class PreparedQuery {
 					successfullyApplied = false;
 					break;
 				} else {
+					String groupCondition="";
+					if(StringUtils.length(groupValues)>0){
+						groupCondition=" OR (" + groupValues + ")"; // ( user values OR (user group values) )
+					}
+					String condition="( " + columnName + " in (" + values.substring(1) + ")" + groupCondition + " )";
+					
 					if (usingLabelledRules) {
 						//using labelled rules. don't append AND before the first rule value
 						// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
 						if (count == 1) {
-							labelledValues.append(columnName + " in (" + values.substring(1) + ") ");
+							labelledValues.append(condition);
 						} else {
-							labelledValues.append(" AND " + columnName + " in (" + values.substring(1) + ") ");
+							labelledValues.append(" AND " + condition);
 						}
 					} else {
 						//append rule values for non-labelled rules
@@ -1073,10 +1079,9 @@ public class PreparedQuery {
 							// We have a GROUP BY or an ORDER BY clause
 							// NOTE: sb changes dynamically
 
-							sb.insert(sb.length() - insertPosLast, " AND "
-									+ columnName + " in ( " + values.substring(1) + " ) ");
+							sb.insert(sb.length() - insertPosLast, " AND " + condition);
 						} else { //No group by or order by. We can just append
-							sb.append(" AND " + columnName + " in ( " + values.substring(1) + " ) ");
+							sb.append(" AND " + condition);
 						}
 					}
 				}
@@ -1100,7 +1105,7 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Apply a rule for a user
+	 * Get rule values for a user
 	 *
 	 * @param conn
 	 * @param ruleUsername
@@ -1124,29 +1129,41 @@ public class PreparedQuery {
 		}
 
 		// Retrieve user's rule value for this rule
-		// select value from art_user_rules where username = [username] and rule = [rule]
 		PreparedStatement ps;
-		ResultSet rsRuleValues;
-		String sql = "SELECT RULE_VALUE, RULE_TYPE "
-				+ " FROM ART_USER_RULES "
-				+ " WHERE USERNAME = ? AND RULE_NAME = ?";
+		ResultSet rs;
+		String sql;
 
-		ps = conn.prepareStatement(sql);
-		ps.setString(1, ruleUsername);
-		ps.setString(2, currentRule);
+		if (NumberUtils.isNumber(ruleUsername)) {
+			//get values from user group
+			sql = "SELECT RULE_VALUE, RULE_TYPE "
+					+ " FROM ART_USER_GROUP_RULES "
+					+ " WHERE USER_GROUP_ID = ? AND RULE_NAME = ?";
 
-		rsRuleValues = ps.executeQuery();
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, Integer.parseInt(ruleUsername));
+			ps.setString(2, currentRule);
+		} else {
+			//get values from user
+			sql = "SELECT RULE_VALUE, RULE_TYPE "
+					+ " FROM ART_USER_RULES "
+					+ " WHERE USERNAME = ? AND RULE_NAME = ?";
+
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, ruleUsername);
+			ps.setString(2, currentRule);
+		}
+
+		rs = ps.executeQuery();
 
 		// Build the tmp string, handle ALL_ITEMS and
 		// Recursively call applyRule() for LOOKUP
 		//  Note: null TYPE is handled as EXACT
-
-		while (rsRuleValues.next() && !isAllItemsForThisRule) {
-			String ruleValue = rsRuleValues.getString("RULE_VALUE");
+		while (rs.next() && !isAllItemsForThisRule) {
+			String ruleValue = rs.getString("RULE_VALUE");
 			if (!StringUtils.equals(ruleValue, "ALL_ITEMS")) {
-				if (StringUtils.equals(rsRuleValues.getString("RULE_TYPE"), "LOOKUP")) {
+				if (StringUtils.equals(rs.getString("RULE_TYPE"), "LOOKUP")) {
 					// if type is lookup the VALUE is the name
-					// to look up. Recursively call applyRule
+					// to look up. Recursively call getRuleValues
 					tmpSb.append(getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType).toString());
 				} else { // Normal EXACT type
 					if (StringUtils.equals(columnDataType, "NUMBER") && NumberUtils.isNumber(ruleValue)) {
@@ -1162,20 +1179,80 @@ public class PreparedQuery {
 			}
 		}
 		ps.close();
-		rsRuleValues.close();
+		rs.close();
 
 		if (!isAllItemsForThisRule) {
 			// return the <list> for the current rule and user
 			return tmpSb;
 		}
+
 		return null;
 	}
 
-	/*
-	 * END Smart Rules Code ;)
+	/**
+	 * Get rule values for the user's user groups
 	 *
-	 ****************
+	 * @param columnName
+	 * @param columnDataType
+	 * @return
 	 */
+	private String getGroupRuleValues(String ruleName, String columnName, String columnDataType) throws SQLException {
+
+		//get user's user groups
+		PreparedStatement ps;
+		ResultSet rs;
+		String sql;
+
+		sql = "SELECT USER_GROUP_ID "
+				+ " FROM ART_USER_GROUP_ASSIGNMENT "
+				+ " WHERE USERNAME=? ";
+
+		ps = conn.prepareStatement(sql);
+		ps.setString(1, username);
+		
+		rs = ps.executeQuery();
+		
+		int count=0;
+		StringBuilder valuesSb=new StringBuilder(512);
+		
+		while (rs.next()) {
+			//for each group, get the group's rule values
+			String userGroupId=rs.getString("USER_GROUP_ID");
+			StringBuilder tmpSb = getRuleValues(conn, userGroupId, ruleName, 1, columnDataType);
+			
+			String condition;
+			if(tmpSb==null){
+				//rule value defined for this group as ALL_ITEMS
+				condition=" 1=1 ";
+			} else {
+				if(tmpSb.length()==0){
+					//no values defined for this rule for this group
+					condition="";
+				} else {
+					//some values defined for this rule for this group
+					String groupValues=tmpSb.toString().substring(1); //first character returned from getRuleValues is ,
+					condition=columnName + " in(" + groupValues + ") ";
+				}
+			}
+			
+			//build group values string
+			if(StringUtils.length(condition)>0){
+				//some rule value defined for this group
+				count++;
+				
+				if(count==1){
+					valuesSb.append(condition);
+				} else {
+					valuesSb.append(" OR " + condition);
+				}
+			}
+		}
+		ps.close();
+		rs.close();
+		
+		return valuesSb.toString();
+	}
+
 	// escape the ' char in a parameter value (used in multi params)
 	private String escapeSql(String s) {
 		return StringEscapeUtils.escapeSql(s);

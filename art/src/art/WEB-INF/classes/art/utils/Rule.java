@@ -26,11 +26,26 @@ public class Rule {
 	String username; //for user rules
 	String ruleValue; //for user rules
 	String ruleType; //for user rules
+	private int userGroupId; //for user group rules
 
 	/**
 	 *
 	 */
 	public Rule() {
+	}
+
+	/**
+	 * @return the userGroupId
+	 */
+	public int getUserGroupId() {
+		return userGroupId;
+	}
+
+	/**
+	 * @param userGroupId the userGroupId to set
+	 */
+	public void setUserGroupId(int userGroupId) {
+		this.userGroupId = userGroupId;
 	}
 
 	/**
@@ -499,6 +514,47 @@ public class Rule {
 
 		return success;
 	}
+	
+	/**
+	 * Insert a rule value for a given user group
+	 *
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean insertUserGroupRuleValue() {
+		boolean success = false;
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql = "INSERT INTO ART_USER_GROUP_RULES (RULE_NAME, USER_GROUP_ID, RULE_TYPE, RULE_VALUE) "
+					+ " VALUES (?, ?, ?, ?)";
+
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, ruleName);
+			ps.setInt(2, userGroupId);
+			ps.setString(3, ruleType);
+			ps.setString(4, ruleValue);
+
+			ps.executeUpdate();
+			ps.close();
+			success = true;
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return success;
+	}
 
 	/**
 	 * Update a rule value for a given user
@@ -544,6 +600,52 @@ public class Rule {
 
 		return success;
 	}
+	
+	/**
+	 * Update a rule value for a given user group
+	 *
+	 * @param oldType
+	 * @param oldValue
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean updateUserGroupRuleValue(String oldType, String oldValue) {
+		boolean success = false;
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql = "UPDATE ART_USER_GROUP_RULES SET RULE_TYPE = ? , RULE_VALUE = ?  "
+					+ " WHERE RULE_NAME = ? AND USER_GROUP_ID = ? AND RULE_TYPE = ? AND RULE_VALUE = ?";
+
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, ruleType);
+			ps.setString(2, ruleValue);
+			ps.setString(3, ruleName);
+			ps.setInt(4, userGroupId);
+			ps.setString(5, oldType);
+			ps.setString(6, oldValue);
+
+			ps.executeUpdate();
+			ps.close();
+			success = true;
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return success;
+	}
+
 
 	/**
 	 * Delete a rule value for a given user
@@ -573,6 +675,55 @@ public class Rule {
 
 			ps.setString(1, rName);
 			ps.setString(2, user);
+			ps.setString(3, rType);
+			ps.setString(4, rValue);
+
+			ps.executeUpdate();
+			ps.close();
+			success = true;
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return success;
+	}
+	
+	/**
+	 * Delete a rule value for a given user group
+	 *
+	 * @param user
+	 * @param rName
+	 * @param rType
+	 * @param rValue
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean deleteUserGroupRuleValue(int gId, String rName, String rType, String rValue) {
+		boolean success = false;
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql = "DELETE FROM ART_USER_GROUP_RULES "
+					+ " WHERE RULE_NAME = ?  "
+					+ " AND USER_GROUP_ID = ? "
+					+ " AND RULE_TYPE = ? "
+					+ " AND RULE_VALUE = ? ";
+
+			PreparedStatement ps = conn.prepareStatement(sql);
+
+			ps.setString(1, rName);
+			ps.setInt(2, gId);
 			ps.setString(3, rType);
 			ps.setString(4, rValue);
 
@@ -735,6 +886,54 @@ public class Rule {
 
 		return map;
 	}
+	
+	/**
+	 * Get an indicator of which user groups have values defined for which rules
+	 *
+	 * @return an indicator of which users have values defined for which rules
+	 */
+	public Map getUserGroupRuleAssignment() {
+		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+			String tmp;
+			Integer count = 0;
+
+			sql = "SELECT DISTINCT aug.NAME, augr.RULE_NAME "
+					+ " FROM ART_USER_GROUP_RULES augr, ART_USER_GROUPS aug "
+					+ " WHERE augr.USER_GROUP_ID=aug.USER_GROUP_ID";
+
+			ps = conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				count++;
+				tmp = rs.getString("NAME") + " - " + rs.getString("RULE_NAME");
+				map.put(count, tmp);
+			}
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return map;
+	}
+
 
 	/**
 	 * Delete all rule values for a given user
@@ -777,4 +976,158 @@ public class Rule {
 
 		return success;
 	}
+	
+	/**
+	 * Delete all rule values for a given user group
+	 *
+	 * @param user
+	 * @param rName
+	 * @return
+	 * <code>true</code> if successful
+	 */
+	public boolean deleteUserGroupRule(int gId, String rName) {
+		boolean success = false;
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql = "DELETE FROM ART_USER_GROUP_RULES "
+					+ " WHERE RULE_NAME = ? AND USER_GROUP_ID = ? ";
+
+			PreparedStatement ps = conn.prepareStatement(sql);
+
+			ps.setString(1, rName);
+			ps.setInt(2, gId);
+
+			ps.executeUpdate();
+			ps.close();
+			success = true;
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return success;
+	}
+	
+	/**
+     * Get rule values for a given user and rule
+     * 
+     * @param user
+     * @param rName
+     * @return rule values for a given user and rule
+     */
+    public Map getRuleValues(String user, String rName) {
+        TreeMap<Integer, Rule> map = new TreeMap<Integer, Rule>();
+
+        Connection conn = null;
+
+        try {
+            conn = ArtDBCP.getConnection();
+
+            String sql;
+            PreparedStatement ps;
+            ResultSet rs;
+            Integer count = 0;
+
+            sql = "SELECT AUR.RULE_TYPE, AUR.RULE_VALUE "
+                    + " FROM ART_RULES AR, ART_USER_RULES AUR "
+                    + " WHERE AUR.RULE_NAME = AR.RULE_NAME "
+                    + " AND AUR.USERNAME = ? "
+                    + " AND AUR.RULE_NAME = ? "
+                    + " ORDER BY AUR.RULE_TYPE, AUR.RULE_VALUE";
+
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, user);
+            ps.setString(2, rName);
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                count++;
+                Rule rule = new Rule();
+                rule.setRuleType(rs.getString("RULE_TYPE"));
+                rule.setRuleValue(rs.getString("RULE_VALUE"));
+                map.put(count, rule);
+            }
+            rs.close();
+            ps.close();
+        } catch (Exception e) {
+            logger.error("Error", e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                logger.error("Error", e);
+            }
+        }
+
+        return map;
+    }
+	
+	/**
+     * Get rule values for a given user group and rule
+     * 
+     * @param user
+     * @param rName
+     * @return rule values for a given user and rule
+     */
+    public Map getRuleValues(int gId, String rName) {
+        TreeMap<Integer, Rule> map = new TreeMap<Integer, Rule>();
+
+        Connection conn = null;
+
+        try {
+            conn = ArtDBCP.getConnection();
+
+            String sql;
+            PreparedStatement ps;
+            ResultSet rs;
+            Integer count = 0;
+
+            sql = "SELECT augr.RULE_TYPE, augr.RULE_VALUE "
+                    + " FROM ART_RULES ar, ART_USER_GROUP_RULES augr "
+                    + " WHERE augr.RULE_NAME = ar.RULE_NAME "
+                    + " AND augr.USER_GROUP_ID = ? "
+                    + " AND augr.RULE_NAME = ? "
+                    + " ORDER BY augr.RULE_TYPE, augr.RULE_VALUE";
+
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, gId);
+            ps.setString(2, rName);
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                count++;
+                Rule rule = new Rule();
+                rule.setRuleType(rs.getString("RULE_TYPE"));
+                rule.setRuleValue(rs.getString("RULE_VALUE"));
+                map.put(count, rule);
+            }
+            rs.close();
+            ps.close();
+        } catch (Exception e) {
+            logger.error("Error", e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                logger.error("Error", e);
+            }
+        }
+
+        return map;
+    }
 }

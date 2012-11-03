@@ -1,10 +1,9 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-
 import java.sql.*;
+import java.text.Collator;
 import java.util.*;
-import java.text.Collator; //for ordering of strings
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -476,7 +475,7 @@ public class UserGroup {
             String tmp;
             Integer count = 0;
 
-            sql = "SELECT AUGA.USERNAME, AUG.NAME "
+            sql = "SELECT AUG.NAME "
                     + " FROM ART_USER_GROUP_ASSIGNMENT AUGA,ART_USER_GROUPS AUG "
                     + " WHERE AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID "
                     + " AND AUGA.USERNAME=? "
@@ -625,5 +624,49 @@ public class UserGroup {
                 logger.error("Error", e);
             }
         }
+    }
+	
+	/**
+     * Get the name of a given user group
+     * 
+     * @return an indicator of which users belong to this user groups
+     */
+    public String getUserGroupName(int gId) {
+        String gName="";
+
+        Connection conn = null;
+
+        try {
+            conn = ArtDBCP.getConnection();
+
+            String sql;
+            PreparedStatement ps;
+            ResultSet rs;
+
+            sql = "SELECT NAME "
+                    + " FROM ART_USER_GROUPS "
+                    + " WHERE USER_GROUP_ID=? ";
+
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, gId);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                gName = rs.getString("NAME");
+            }
+            rs.close();
+            ps.close();
+        } catch (Exception e) {
+            logger.error("Error", e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+                logger.error("Error", e);
+            }
+        }
+
+        return gName;
     }
 }

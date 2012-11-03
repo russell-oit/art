@@ -18,9 +18,16 @@
 String action = request.getParameter("ACTION");
 String ruleName=request.getParameter("RULE_NAME");
 String username=request.getParameter("USERNAME");
+String userGroup=request.getParameter("USER_GROUP");
+String userGroupName=request.getParameter("USER_GROUP_NAME");
 String ruleTypeValue=request.getParameter("RULE_TYPE_VALUE");
 String ruleType="";
 String ruleValue="";
+
+int groupId=0;
+if(userGroup!=null){
+	groupId=Integer.parseInt(userGroup);
+}
 
 if(!action.equals("ADD")){
 	//either modify or delete
@@ -32,8 +39,13 @@ if(!action.equals("ADD")){
 Rule rule=new Rule();
 
 if (action.equals("DELETE")){
-	rule.deleteUserRuleValue(username,ruleName,ruleType,ruleValue);
-	response.sendRedirect("manageUserRules2.jsp?USERNAME="+username+"&RULE_NAME="+ruleName);
+	if(username!=null){
+		rule.deleteUserRuleValue(username,ruleName,ruleType,ruleValue);
+		response.sendRedirect("manageUserRules2.jsp?USERNAME="+username+"&RULE_NAME="+ruleName);
+	} else if(userGroup!=null){
+		rule.deleteUserGroupRuleValue(groupId,ruleName,ruleType,ruleValue);
+		response.sendRedirect("manageUserRules2.jsp?USER_GROUP="+groupId+"&RULE_NAME="+ruleName);
+	}
 	return;
 }
 
@@ -42,7 +54,13 @@ if (action.equals("DELETE")){
 
 <form name="editUserRule" method="post" action="execEditUserRule.jsp">
 	<input type="hidden" name="ACTION" value="<%=action%>">
-	<input type="hidden" name="USERNAME" value="<%=username%>">
+	
+	<%if(username!=null){%>
+		<input type="hidden" name="USERNAME" value="<%=username%>">
+	<%} else if(userGroup!=null){%>
+		<input type="hidden" name="USER_GROUP" value="<%=userGroup%>">
+		<input type="hidden" name="USER_GROUP_NAME" value="<%=userGroupName%>">
+	<%}%>
 	<input type="hidden" name="RULE_NAME" value="<%=ruleName%>">
 	<input type="hidden" name="OLD_RULE_TYPE" value="<%=ruleType%>">
 	<input type="hidden" name="OLD_RULE_VALUE" value="<%=ruleValue%>">
@@ -52,7 +70,13 @@ if (action.equals("DELETE")){
 			<td class="title" colspan="2">Manage Rule Values</td>
 		</tr>
 		<tr>
-			<td class="data" colspan="2"><b>Rule:</b> <%=ruleName%> <br> <b>User:</b> <%=username%> <br><br>Set the rule value</td>
+			<td class="data" colspan="2"><b>Rule:</b> <%=ruleName%> <br>
+				<%if(username!=null){%>
+				<b>User:</b> <%=username%> 
+				<%} else if(userGroup!=null){%>
+				<b>User Group:</b> <%=userGroupName%> 
+				<%}%>
+				<br><br>Set the rule value</td>
 		</tr>
 
 	    <tr>

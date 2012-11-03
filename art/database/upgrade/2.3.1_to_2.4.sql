@@ -8,6 +8,7 @@
 --          . rename field_class field in art_query_fields
 --          . improve handling or numeric rule values
 --          . support dynamic recipients for jobs
+--          . support rule values for user groups
 --
 -- ------------------------------------------------
 
@@ -37,6 +38,15 @@ ALTER TABLE ART_QUERY_RULES ADD FIELD_DATA_TYPE VARCHAR(15);
 
 -- support dynamic recipients for jobs
 ALTER TABLE ART_JOBS ADD RECIPIENTS_QUERY_ID INTEGER;
+
+-- support rule values for user groups
+CREATE TABLE ART_USER_GROUP_RULES
+(  
+	USER_GROUP_ID INTEGER  NOT NULL,
+	RULE_NAME         VARCHAR(15)   NOT NULL, 
+	RULE_VALUE        VARCHAR(25)   NOT NULL,
+	RULE_TYPE		  VARCHAR(6)	
+);
 
 
 

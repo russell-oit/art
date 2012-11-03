@@ -14,6 +14,7 @@ ART 2.4
 * Made DataTable the default view mode
 * Allow to see who job is currently shared with
 * Enable jobs to be emailed to a dynamic list of people
+* Allow rule values to be defined for user groups
 
 ART 2.3.1
 * Fix NullPointerException on pdf output with null strings

@@ -27,6 +27,7 @@
 -- DROP TABLE ART_ALL_SOURCES;
 -- DROP TABLE ART_QUERY_RULES;
 -- DROP TABLE ART_USER_RULES;
+-- DROP TABLE ART_USER_GROUP_RULES;
 -- DROP TABLE ART_JOBS_PARAMETERS;
 -- DROP TABLE ART_JOBS_AUDIT;
 -- DROP TABLE ART_SHARED_JOBS;
@@ -67,7 +68,7 @@ INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) VALUES('database version',
 -- Stores user info
 
 -- ADMIN_LEVEL: 0= normal user, 5 = normal user who can schedule jobs
--- 10 = junior admin, 30 = mid admin, 40 = admin, 80 = senior admin, 100 = super admin
+-- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin, 100 = super admin
 
 CREATE TABLE ART_USERS
 (
@@ -269,12 +270,24 @@ CREATE TABLE ART_QUERY_RULES
 
 
 -- ART_USER_RULES
--- Stores rules-users relationships
+-- Stores rule values for users
 -- RULE_TYPE can be EXACT or LOOKUP
  
 CREATE TABLE ART_USER_RULES
 (  
 	USERNAME          VARCHAR(15)   NOT NULL,
+	RULE_NAME         VARCHAR(15)   NOT NULL, 
+	RULE_VALUE        VARCHAR(25)   NOT NULL,
+	RULE_TYPE		  VARCHAR(6)	
+);
+
+-- ART_USER_GROUP_RULES
+-- Stores rule values for user groups
+-- RULE_TYPE can be EXACT or LOOKUP
+ 
+CREATE TABLE ART_USER_GROUP_RULES
+(  
+	USER_GROUP_ID INTEGER  NOT NULL,
 	RULE_NAME         VARCHAR(15)   NOT NULL, 
 	RULE_VALUE        VARCHAR(25)   NOT NULL,
 	RULE_TYPE		  VARCHAR(6)	

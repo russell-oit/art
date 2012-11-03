@@ -3,11 +3,31 @@
 
 
 <script type="text/javascript">
+	
+	function countSelected(list){
+        var count=0;
+        for(var i=0; i<list.options.length; i++ ){
+            if(list.options[i].selected){
+                count++;
+            }
+        }
+        
+        return count;
+    }
     
     function goToEdit() {		
 		//ensure minimum number of items are selected
-		if (document.manageUserRules.USERNAME.selectedIndex<0) {
-			alert("Please select a user");	
+		if(countSelected(document.getElementById("username"))>1){
+            alert("Please select a single user");
+		} else if(countSelected(document.getElementById("userGroup"))>1){
+            alert("Please select a single user group");
+		} else if (countSelected(document.getElementById("username"))==1 && countSelected(document.getElementById("userGroup"))==1) {
+			alert("Please select either a user or a user group");
+			//clear selected items to enable change of selections
+			document.manageUserRules.USERNAME.selectedIndex=-1;
+			document.manageUserRules.USER_GROUP.selectedIndex=-1;
+		} else if (document.manageUserRules.USERNAME.selectedIndex<0 && document.manageUserRules.USER_GROUP.selectedIndex<0) {
+			alert("Please select a user or user group");	
 		} else if (document.manageUserRules.RULE_NAME.selectedIndex<0) {
 			alert("Please select a rule");
 		} else {
@@ -17,8 +37,8 @@
 	
 	function deleteUserRule() {		
 		//ensure minimum number of items are selected
-		if (document.manageUserRules.USERNAME.selectedIndex<0) {
-			alert("Please select a user");	
+		if (document.manageUserRules.USERNAME.selectedIndex<0 && document.manageUserRules.USER_GROUP.selectedIndex<0) {
+			alert("Please select a user or user group");	
 		} else if (document.manageUserRules.RULE_NAME.selectedIndex<0) {
 			alert("Please select a rule");
 		} else {
@@ -47,7 +67,7 @@ String name;
 		<tr>
             <td class="data"> User </td>
             <td class="data">
-                <select name="USERNAME" size="10">
+                <select name="USERNAME" id="username" size="5">
                     <%		
 					UserEntity ue=new UserEntity();
 					List<String> usernames=ue.getAllUsernames();
@@ -63,10 +83,30 @@ String name;
             </td>
         </tr>
 		
+		<tr>
+            <td class="data"> User Group </td>
+            <td class="data">
+                <select name="USER_GROUP" id="userGroup" size="5">
+                    <%
+					UserGroup ug=new UserGroup();
+					Map userGroups=ug.getAllUserGroupNames();
+					it = userGroups.entrySet().iterator();
+					while(it.hasNext()) {
+						Map.Entry entry = (Map.Entry)it.next();
+						%>
+						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
+						<%
+					}
+					%>
+                </select>
+            </td>
+        </tr>
+
+		
 		 <tr>
             <td class="data"> Rule </td>
             <td class="data">
-                <select name="RULE_NAME" size="10">
+                <select name="RULE_NAME" id="ruleName" size="10">
                     <%					
 					Rule rule=new Rule();
 					List<String> rules=rule.getAllRuleNames();
@@ -96,14 +136,38 @@ String name;
             <td colspan="2" class="data2">                
 				<%				
 				Map map=rule.getUserRuleAssignment();
-				it = map.entrySet().iterator();					
-				while(it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
+				if(map.size()>0){
 					%>
-					<%=entry.getValue()%> <br>
+					<b>Users</b><br>
 					<%
-				} 
-				%>                
+					it = map.entrySet().iterator();					
+					while(it.hasNext()) {
+						Map.Entry entry = (Map.Entry)it.next();
+						%>
+						<%=entry.getValue()%> <br>
+						<%
+					}
+					%>
+					<br>
+					<%
+				}
+				%>  
+				
+				<%				
+				map=rule.getUserGroupRuleAssignment();
+				if(map.size()>0){
+					%>
+					<b>User Groups</b><br>
+					<%
+					it = map.entrySet().iterator();					
+					while(it.hasNext()) {
+						Map.Entry entry = (Map.Entry)it.next();
+						%>
+						<%=entry.getValue()%> <br>
+						<%
+					}
+				}
+				%>     
             </td>
         </tr>
 				        
