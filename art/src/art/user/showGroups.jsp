@@ -1,6 +1,7 @@
 <%@ page import="java.util.*, art.servlets.ArtDBCP;" %>
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
+
 <%@ include file ="header.jsp" %>
 
 <c:remove var="job" scope="session" />
@@ -22,17 +23,6 @@ function setAction() {
 	return true;
 }
 
-function voidGroupSelection() {
- for (var i=0; i<document.getElementById("groupId").length; i++) {
-            document.getElementById("groupId").options[i].selected = false
-            document.getElementById("groupId").selectedIndex = -1;
-	 }
-}
-//void the group selection when page has finished to load
-// this is to avoid the back browser issue with ajax chained values
-// i.e. the group would appear as selected but item list empty
-
-//window.onload = voidGroupSelection; //using executeOnLoad on ajax:select ensures items are always available. Also enables default object group feature
 -->
 
 </script>

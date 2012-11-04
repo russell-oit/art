@@ -29,6 +29,8 @@ if(queryType==110){
 int adminLevel=ue.getAdminLevel();
 boolean hasParams=false;
 
+boolean showResultsInline=true; //can be modified in case show inline behaviour is not desired
+
 %>
 
 <script type="text/javascript" src="<%= request.getContextPath() %>/js/date.js"></script>
@@ -42,9 +44,12 @@ boolean hasParams=false;
         <legend><%=messages.getString("enterParams") %></legend>
 
         <form name="artparameters" id="paramForm" action="<%=action%>"  method="post">
-			<input type="hidden" name="queryId" value="<%=queryId%>">
-			<input type="hidden" name="_isInline" id="_isInline" VALUE="true">
+			<input type="hidden" name="queryId" value="<%=queryId%>">			
 			<input type="hidden" name="fromShowParams" value="true">
+			
+			<%if(showResultsInline){%>
+			<input type="hidden" name="_isInline" id="_isInline" VALUE="true">
+			<%}%>
 			
             <table class="art" align="center">
                 <tr>
@@ -296,8 +301,9 @@ jQuery(document).ready(function($){
 		}
 
 		var qt=<%=queryType%>;
+		var showInline=<%=showResultsInline%>;
 
-		if(selectedViewMode!="SCHEDULE" && !(qt==112 || qt==113 || qt==114)){
+		if(showInline && selectedViewMode!="SCHEDULE" && !(qt==112 || qt==113 || qt==114)){
 			//display results inline. don't display inline for scheduling or pivot tables			
 			e.preventDefault();
 
