@@ -343,6 +343,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             builder.append(messages.getString("objectId") + " <b>" + rs.getInt("QUERY_ID") + "</b> <br>");
             builder.append(messages.getString("objectName") + " <b>" + rs.getString("NAME") + "</b> ");
             String shortDescription=rs.getString("SHORT_DESCRIPTION");
+			shortDescription=StringUtils.trim(shortDescription);
             if(StringUtils.length(shortDescription)>0){
                 builder.append(":: <b>" + shortDescription + "</b>");
             }

@@ -1048,16 +1048,32 @@ public class PreparedQuery {
 			} else {
 				// Add the rule to the query 
 				String values = tmpSb.toString();
-				if (StringUtils.length(values) == 0) {
+				if (StringUtils.length(values) == 0 && StringUtils.length(groupValues)==0) {
 					//user doesn't have values set for at least one rule that the query uses. values needed for all rules
 					successfullyApplied = false;
 					break;
 				} else {
+					String condition="";
+					if(StringUtils.length(values)>0){
+						condition=columnName + " in (" + values.substring(1) + ")";
+					}
 					String groupCondition="";
 					if(StringUtils.length(groupValues)>0){
-						groupCondition=" OR (" + groupValues + ")"; // ( user values OR (user group values) )
+						groupCondition=groupValues; 
 					}
-					String condition="( " + columnName + " in (" + values.substring(1) + ")" + groupCondition + " )";
+					
+					if(StringUtils.length(condition)>0){
+						//rule values defined for user
+						if(StringUtils.length(groupCondition)>0){
+							groupCondition=" OR " + groupCondition;
+						}
+						condition=condition + groupCondition; // ( user values OR (user group values) )
+					} else {
+						//no rule values for user. use user group values
+						condition=groupCondition;
+					}
+					
+					condition=" ( " + condition + " ) "; //enclose this rule values in brackets to treat it as a single condition
 					
 					if (usingLabelledRules) {
 						//using labelled rules. don't append AND before the first rule value
@@ -1125,7 +1141,7 @@ public class PreparedQuery {
 		// and viceversa
 		if (counter > MAX_RECURSIVE_LOOKUP) {
 			logger.warn("TOO MANY LOOPS - exiting");
-			return null;
+			return new StringBuilder("TOO MANY LOOPS");
 		}
 
 		// Retrieve user's rule value for this rule
@@ -1164,7 +1180,18 @@ public class PreparedQuery {
 				if (StringUtils.equals(rs.getString("RULE_TYPE"), "LOOKUP")) {
 					// if type is lookup the VALUE is the name
 					// to look up. Recursively call getRuleValues
-					tmpSb.append(getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType).toString());
+					StringBuilder lookupSb=getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType);
+					if(lookupSb==null){
+						//all values
+						isAllItemsForThisRule = true;
+						break;
+					} else {
+						String values=lookupSb.toString();
+						if(StringUtils.equals(values, "TOO MANY LOOPS")){
+							values="";
+						}
+						tmpSb.append(values);
+					}
 				} else { // Normal EXACT type
 					if (StringUtils.equals(columnDataType, "NUMBER") && NumberUtils.isNumber(ruleValue)) {
 						//don't quote numbers
@@ -1176,6 +1203,7 @@ public class PreparedQuery {
 				}
 			} else {
 				isAllItemsForThisRule = true;
+				break;
 			}
 		}
 		ps.close();

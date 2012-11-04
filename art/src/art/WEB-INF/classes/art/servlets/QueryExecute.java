@@ -743,6 +743,7 @@ public class QueryExecute extends HttpServlet {
 					if (showHeaderAndFooter) {
 						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
 						String description = "";
+						shortDescription=StringUtils.trim(shortDescription);
 						if (StringUtils.length(shortDescription) > 0) {
 							description = " :: " + shortDescription;
 						}

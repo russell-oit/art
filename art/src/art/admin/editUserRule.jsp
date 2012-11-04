@@ -108,8 +108,8 @@ if (action.equals("DELETE")){
         <td>
             <ul>
                 <li>If you use the type <b>Lookup</b> you must specify the rule value as the username of the user
-				you want to reference for this rule (i.e. the selected user will use the same rule values
-				as the looked up user).
+				you want to reference for this rule, or the id of the user group you want to reference (i.e. the selected user will use the same rule values
+				as the looked up user or user group).
                 </li>
                 <li>
 				Use the rule type <b>Exact</b> and value <b>ALL_ITEMS</b> if you want the user to be able to retrieve
