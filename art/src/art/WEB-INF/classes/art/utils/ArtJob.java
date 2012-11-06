@@ -1092,7 +1092,7 @@ public class ArtJob implements Job {
 						}
 
 						if (StringUtils.length(email) > 4) {
-							Map<String, Map> recipient = new HashMap<String, Map>();
+							Map<String, Map<String,String>> recipient = new HashMap<String, Map<String,String>>();
 							recipient.put(email, recipientColumns);
 
 							//run job for this recipient
@@ -1105,7 +1105,7 @@ public class ArtJob implements Job {
 					runNormalJob(conn);
 				} else {
 					//separate emails, different email message, same report data
-					Map<String, Map> recipients = new HashMap<String, Map>();
+					Map<String, Map<String,String>> recipients = new HashMap<String, Map<String,String>>();
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses
 						Map<String, String> recipientColumns = new HashMap<String, String>();
@@ -1230,13 +1230,13 @@ public class ArtJob implements Job {
 		runJob(conn, singleOutput, user, userEmail, null, false);
 	}
 
-	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail, Map<String, Map> recipientDetails) {
+	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail, Map<String, Map<String,String>> recipientDetails) {
 		runJob(conn, singleOutput, user, userEmail, recipientDetails, false);
 	}
 
 	//run job
 	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail,
-			Map<String, Map> recipientDetails, boolean recipientFilterPresent) {
+			Map<String, Map<String,String>> recipientDetails, boolean recipientFilterPresent) {
 		//set job start date. relevant for split jobs
 		jobStartDate = new java.sql.Timestamp(new java.util.Date().getTime());
 
@@ -1258,7 +1258,7 @@ public class ArtJob implements Job {
 			if (recipientFilterPresent) {
 				//enable report data to be filtered/different for each recipient
 				pq.setRecipientFilterPresent(recipientFilterPresent);
-				for (Map.Entry<String, Map> entry : recipientDetails.entrySet()) {
+				for (Map.Entry<String, Map<String,String>> entry : recipientDetails.entrySet()) {
 					//map should only have one value if filter present
 					Map<String, String> recipientColumns = entry.getValue();
 					pq.setRecipientColumn(recipientColumns.get(ArtDBCP.RECIPIENT_COLUMN));
@@ -1359,11 +1359,9 @@ public class ArtJob implements Job {
 							if (recipientDetails != null) {
 								Mailer m = getMailer();
 
-								Iterator it = recipientDetails.entrySet().iterator();
-								while (it.hasNext()) {
-									Map.Entry entry = (Map.Entry) it.next();
-									String email = (String) entry.getKey();
-									Map<String, String> recipientColumns = (Map<String, String>) entry.getValue();
+								for (Map.Entry<String, Map<String,String>> entry : recipientDetails.entrySet()) {
+									String email = entry.getKey();
+									Map<String, String> recipientColumns =  entry.getValue();
 
 									//customize message by replacing field labels with values for this recipient
 									String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
@@ -1372,11 +1370,9 @@ public class ArtJob implements Job {
 									}
 
 									if (StringUtils.isNotBlank(customMessage)) {
-										Iterator it2 = recipientColumns.entrySet().iterator();
-										while (it2.hasNext()) {
-											Map.Entry entry2 = (Map.Entry) it2.next();
-											String columnName = (String) entry2.getKey();
-											String columnValue = (String) entry2.getValue();
+										for (Map.Entry<String, String> entry2 : recipientColumns.entrySet()) {
+											String columnName = entry2.getKey();
+											String columnValue = entry2.getValue();
 
 											String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
 											String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
@@ -1602,11 +1598,9 @@ public class ArtJob implements Job {
 						if (recipientDetails != null) {
 							Mailer m = getMailer();
 
-							Iterator it = recipientDetails.entrySet().iterator();
-							while (it.hasNext()) {
-								Map.Entry entry = (Map.Entry) it.next();
-								String email = (String) entry.getKey();
-								Map<String, String> recipientColumns = (Map<String, String>) entry.getValue();
+							for (Map.Entry<String, Map<String,String>> entry : recipientDetails.entrySet()) {
+								String email = entry.getKey();
+								Map<String, String> recipientColumns = entry.getValue();
 
 								//customize message by replacing field labels with values for this recipient
 								String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
@@ -1615,11 +1609,9 @@ public class ArtJob implements Job {
 								}
 
 								if (StringUtils.isNotBlank(customMessage)) {
-									Iterator it2 = recipientColumns.entrySet().iterator();
-									while (it2.hasNext()) {
-										Map.Entry entry2 = (Map.Entry) it2.next();
-										String columnName = (String) entry2.getKey();
-										String columnValue = (String) entry2.getValue();
+									for (Map.Entry<String, String> entry2 : recipientColumns.entrySet()) {
+										String columnName = entry2.getKey();
+										String columnValue = entry2.getValue();
 
 										String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
 										String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters

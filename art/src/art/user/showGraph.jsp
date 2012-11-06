@@ -226,7 +226,8 @@ String removeAt="10000";
        <cewolf:chartpostprocessor id="labelRotation">
 		<cewolf:param name="rotate_at" value="<%=rotateAt%>" />
 		<cewolf:param name="remove_at" value="<%=removeAt%>" />
-	</cewolf:chartpostprocessor> 	     
+	</cewolf:chartpostprocessor> 
+	   
    </cewolf:chart>
    
    <cewolf:img chartid="<%=graphElementId%>" 

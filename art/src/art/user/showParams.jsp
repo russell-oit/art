@@ -144,10 +144,12 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
 
                 <% } %>
                 <tr>
-                    <td colspan="2" class="attr">
-                        <%
+					<%
                         if (queryType == 110 || queryType==112 || queryType==113 || queryType==114) {
 							//dashboards and pivot tables don't have view modes
+							%>
+							<td colspan="2" class="attr">
+							<%
 							if(queryType==110){ //dashboard
 							%>
 							<%=messages.getString("portletObject")%>
@@ -157,11 +159,12 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
 								<%
 							}
 							%>
-
-                    </td>
-                    <td colspan="2" class="data">
+						</td>
                         <%
                         } else {
+						%>
+						<td colspan="2" class="data">
+						<%
                            switch ( queryType ) {
                               case 0  :   // normal query
                               case 101:  // crosstab

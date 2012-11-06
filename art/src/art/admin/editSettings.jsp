@@ -410,16 +410,22 @@ if(!propsFile.exists()){
         <td class="data"><input type="text" name="bottom_logo" size="40" maxlength="120" value="<%=bottom_logo%>"></td>
        </tr>
        <tr>
-        <td class="attr">SMTP Username
-		         &nbsp;<a href="javascript:alert('Leave empty if your SMTP server does not require authentication');">note</a>
-	</td>
-        <td class="data"><input type="text" name="smtp_username" size="40" maxlength="120" value="<%=smtp_username%>"></td>
+        <td class="attr">SMTP Username</td>
+        <td class="data"><input type="text" name="smtp_username" size="40" maxlength="120" value="<%=smtp_username%>">
+			<%
+         msg = msg = "Leave empty if your SMTP server does not require authentication";
+         %>
+        <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
        </tr>
        <tr>
-        <td class="attr">SMTP Password
-			 &nbsp;<a href="javascript:alert('Leave empty if your SMTP server does not require authentication');">note</a>
-	</td>
-        <td class="data"><input type="password" name="smtp_password" size="40" maxlength="120" value="<%=smtp_password%>"></td>
+        <td class="attr">SMTP Password</td>
+        <td class="data"><input type="password" name="smtp_password" size="40" maxlength="120" value="<%=smtp_password%>">
+			<%
+         msg = msg = "Leave empty if your SMTP server does not require authentication";
+         %>
+        <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
        </tr>
 
 	   <tr>
@@ -521,10 +527,13 @@ if(!propsFile.exists()){
        </tr>
 	   
        <tr>
-        <td class="attr">RSS Link
-			 &nbsp;<a href="javascript:alert('If you plan to use ART to generate RSS feeds you should specify the proper RSS link URL, i.e. the URL to the website corresponding to the channel.');">note</a>
-	    </td>
-        <td class="data"><input type="text" name="rss_link" size="40" maxlength="120" value="<%=rss_link%>"></td>
+        <td class="attr">RSS Link</td>
+        <td class="data"><input type="text" name="rss_link" size="40" maxlength="120" value="<%=rss_link%>">
+			<%
+			msg ="If you plan to use ART to generate RSS feeds you should specify the proper RSS link URL, i.e. the URL to the website corresponding to the channel.";
+			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
        </tr>
 
 	   <%
