@@ -67,7 +67,7 @@ if (action.equals("DELETE")){
 
 	<table align="center">
 		<tr>
-			<td class="title" colspan="2">Manage Rule Values</td>
+			<td class="title" colspan="2">Define Rule Values</td>
 		</tr>
 		<tr>
 			<td class="data" colspan="2"><b>Rule:</b> <%=ruleName%> <br>

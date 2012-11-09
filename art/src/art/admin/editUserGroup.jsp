@@ -33,12 +33,9 @@ Iterator it;
 
 	<table align="center">
 		<tr>
-			<td class="title" colspan="2">Manage User Groups</td>
+			<td class="title" colspan="2">Define User Group</td>
 		</tr>
-		<tr>
-			<td class="data" colspan="2"><b>Group Definition</b></td>
-		</tr>
-
+		
 	    <tr>
 			<td class="data"> ID </td>
 			<%

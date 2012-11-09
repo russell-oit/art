@@ -27,12 +27,9 @@ if (action.equals("MODIFY")){
 	
 	<table align="center">		
 		<tr>
-			<td class="title" colspan="2"> Manage Job Schedules</td>
+			<td class="title" colspan="2">Define Schedule</td>
 		</tr>
-		<tr>
-			<td class="data" colspan="2"><b>Schedule Definition</b></td>
-		</tr>
-		
+				
 	    <tr>
 			<td class="data"> Schedule Name </td> 
 			<%

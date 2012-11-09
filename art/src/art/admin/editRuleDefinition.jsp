@@ -49,12 +49,9 @@ if (action.equals("MODIFY")){
 	
 	<table align="center">		
 		<tr>
-			<td class="title" colspan="2">Manage Rule Definitions</td>
+			<td class="title" colspan="2">Define Rule</td>
 		</tr>
-		<tr>
-			<td class="data" colspan="2"><b>Rule Definition</b></td>
-		</tr>
-		
+				
 	    <tr>
 			<td class="data"> Rule Name </td> 
 			<%

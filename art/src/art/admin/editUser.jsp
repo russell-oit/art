@@ -55,12 +55,9 @@ username=ue.getUsername();
 
 	<table align="center">
 		<tr>
-			<td class="title" colspan="2">Manage Users</td>
+			<td class="title" colspan="2">Define User</td>
 		</tr>
-		<tr>
-			<td class="data" colspan="2"><b>User Definition</b></td>
-		</tr>
-
+		
 	    <tr>
 			<td class="data"> Username </td>
 			<%

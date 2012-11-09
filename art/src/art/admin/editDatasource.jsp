@@ -86,12 +86,9 @@ String msg;
 	
 	<table align="center">		
 		<tr>
-			<td class="title" colspan="2">Manage Datasources</td>
+			<td class="title" colspan="2">Define Datasource</td>
 		</tr>
-		<tr>
-			<td class="data" colspan="2"><b>Datasource Definition</b></td>
-		</tr>
-		
+				
 	    <tr>
 			<td class="data"> ID </td> 
 			<%			
