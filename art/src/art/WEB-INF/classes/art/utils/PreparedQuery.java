@@ -1480,11 +1480,11 @@ public class PreparedQuery {
 	 */
 	private boolean evaluateIF(String exp1, String op, String exp2)
 			throws ArtException {
-		// transform null in empty strings
+		// transform null to empty strings
 		if (op == null) {
 			op = "";
 		} else {
-			op.trim().toLowerCase();
+			op=op.trim().toLowerCase();
 		}
 		//although since exp1,exp2 come from a parameter values, they can never be null. maybe only empty string
 		if (exp1 == null) {
