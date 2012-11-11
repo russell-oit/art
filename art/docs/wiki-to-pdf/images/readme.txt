@@ -1,0 +1,1 @@
+folder to contain images used in the manual
