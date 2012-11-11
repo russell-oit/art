@@ -93,7 +93,7 @@ username=ue.getUsername();
 			<td class="data"> <input type="text" name="EMAIL" value="<%=ue.getEmail()%>" size="40" maxlength="40"> </td>
 		</tr>
 
-		<tr><td class="data"> Admin Level</td>
+		<tr><td class="data"> Access Level</td>
 			<td class="data">
 				<select name="ADMIN_LEVEL" size="7">
 					<option value="0" <%=(adminLevel==0?"selected":"")%>>Normal User</option>
