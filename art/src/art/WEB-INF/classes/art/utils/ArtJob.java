@@ -40,9 +40,8 @@ import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.quartz.*;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -1655,9 +1654,13 @@ public class ArtJob implements Job {
 									fileName = "-File has been emailed";
 								} else {
 									//if multiple recipients, some might have succeeded. no way of knowing which
-									fileName = "-Error when sending emails. Some may have succeeded. "
+									fileName = "-Error when sending some emails."
+											+ " <p>" + m.getSendError() + "</p>";
+									
+									String msg= "Error when sending some emails."
 											+ " <p>" + m.getSendError() + "</p>"
-											+ " <p>Complete address list:<br>To: " + userEmail + "<br>Cc: " + cc + "</p>";
+											+ " <p>Complete address list:<br> To: " + userEmail + "<br> Cc: " + cc + "<br> Bcc: " + bcc + "</p>";
+									logger.warn(msg);
 
 								}
 							} else {

@@ -84,7 +84,7 @@ dq.create(queryId,queryPosition);
             </td>
         </tr>
 
-        <tr><td class="data"> Output Format </td>
+        <tr><td class="data"> View Mode </td>
             <td class="data">
                 <select name="OUTPUT_FORMAT" size="1">
 					<%

@@ -324,6 +324,7 @@ tinyMCE.init({
      }
     %>
     <table align="center">
+		<tr><td class="title" colspan="2" >Define Query</td></tr>
         <tr><td class="title" colspan="2" > Header</td></tr>
         <tr><td class="data"> Object ID </td>
 			<%
