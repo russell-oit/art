@@ -23,6 +23,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
@@ -222,7 +223,6 @@ public class ExportGraph {
 		JFreeChart chart = null;
 		int width;
 		int height;
-		String seriesName;
 		ResultSetMetaData rsmd;
 		boolean showTooltips = false;
 		boolean showUrls = false;
@@ -270,7 +270,6 @@ public class ExportGraph {
 
 			//set chart options									
 			rsmd = rs.getMetaData();
-			seriesName = rsmd.getColumnLabel(2);
 
 			if (ylabel == null) {
 				ylabel = rsmd.getColumnLabel(1);
@@ -328,7 +327,7 @@ public class ExportGraph {
 					//create dataset for the xy chart
 					ArtXY xyChart = new ArtXY();
 
-					xyChart.setSeriesName(seriesName);
+					xyChart.setSeriesName(rsmd.getColumnLabel(2));
 					xyChart.prepareDataset(rs);
 
 					XYSeriesCollection xyDataset = (XYSeriesCollection) xyChart.produceDataset(null);
@@ -423,6 +422,28 @@ public class ExportGraph {
 					speedometerChart.finalizePlot(speedometerPlot);
 
 					break;
+				case -11:
+					//bubble chart
+					
+					//create dataset for speedometer chart
+					ArtBubbleChart bubble = new ArtBubbleChart();
+					bubble.setSeriesName(rsmd.getColumnLabel(3));
+					bubble.prepareDataset(rs);
+					DefaultXYZDataset bubbleDataset = (DefaultXYZDataset) bubble.produceDataset(null);
+					
+					//create chart
+					chart=ChartFactory.createBubbleChart(title, xlabel, ylabel, bubbleDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+					
+					XYPlot bubblePlot = (XYPlot) chart.getPlot();
+
+					//set y axis range if required
+					if (from != 0 && to != 0) {
+						NumberAxis rangeAxis = (NumberAxis) bubblePlot.getRangeAxis();
+						rangeAxis.setRange(from, to);
+					}
+					
+					break;
+					
 				default:
 					//charts that use the category dataset. bar and line graphs	
 

@@ -15,7 +15,8 @@
   response.setHeader("Cache-control","no-cache");
 
   String graphType[] = {"xy","pie3d","horizontalBar3D","verticalBar3D","line"
-                        ,"timeseries","timeseries","stackedVerticalBar3d","stackedHorizontalBar3d","meter"};
+                        ,"timeseries","timeseries","stackedVerticalBar3d","stackedHorizontalBar3d"
+						,"meter","bubble"};
 						  
   //get query type from attribute so that it doesn't have to be specified in direct url 
   Integer graphIdInteger = (Integer)request.getAttribute("queryType");

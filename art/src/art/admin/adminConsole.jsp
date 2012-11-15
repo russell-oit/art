@@ -5,7 +5,7 @@
 
        <table align="center">
        <tr><td class="title" colspan="2" align="center">
-            <br>ART Admin Console<br><img src="../images/settings-64px.jpg"> </td></tr>
+            <br>Admin Console<br><img src="../images/settings-64px.jpg"> </td></tr>
 
    <%
           int adminLevel = ((Integer) session.getAttribute("AdminLevel") ).intValue();

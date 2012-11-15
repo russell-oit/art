@@ -436,6 +436,7 @@ tinyMCE.init({
                     <option value="-6" <%=(currentStringValue.equals("-6")?"SELECTED":"")%>>Graph: Time Series</option>
                     <option value="-7" <%=(currentStringValue.equals("-7")?"SELECTED":"")%>>Graph: Date Series</option>
                     <option value="-10" <%=(currentStringValue.equals("-10")?"SELECTED":"")%>>Graph: Speedometer</option>
+					<option value="-11" <%=(currentStringValue.equals("-11")?"SELECTED":"")%>>Graph: Bubble Chart</option>
 
 					<%
 					if(ArtDBCP.isArtFullVersion()){
