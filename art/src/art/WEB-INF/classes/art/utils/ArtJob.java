@@ -89,8 +89,9 @@ import org.slf4j.LoggerFactory;
  * </pre>
  *
  */
-public class ArtJob implements Job {
+public class ArtJob implements Job, Serializable {
 
+	private static final long serialVersionUID = 2L; //implement serializable to enable job object in session to be serialized
 	final static Logger logger = LoggerFactory.getLogger(ArtJob.class);
 	String username, outputFormat, tos, from, message, queryName, subject;
 	String enableAudit = "N";
@@ -1091,7 +1092,7 @@ public class ArtJob implements Job {
 						}
 
 						if (StringUtils.length(email) > 4) {
-							Map<String, Map<String,String>> recipient = new HashMap<String, Map<String,String>>();
+							Map<String, Map<String, String>> recipient = new HashMap<String, Map<String, String>>();
 							recipient.put(email, recipientColumns);
 
 							//run job for this recipient
@@ -1104,7 +1105,7 @@ public class ArtJob implements Job {
 					runNormalJob(conn);
 				} else {
 					//separate emails, different email message, same report data
-					Map<String, Map<String,String>> recipients = new HashMap<String, Map<String,String>>();
+					Map<String, Map<String, String>> recipients = new HashMap<String, Map<String, String>>();
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses
 						Map<String, String> recipientColumns = new HashMap<String, String>();
@@ -1229,13 +1230,13 @@ public class ArtJob implements Job {
 		runJob(conn, singleOutput, user, userEmail, null, false);
 	}
 
-	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail, Map<String, Map<String,String>> recipientDetails) {
+	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail, Map<String, Map<String, String>> recipientDetails) {
 		runJob(conn, singleOutput, user, userEmail, recipientDetails, false);
 	}
 
 	//run job
 	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail,
-			Map<String, Map<String,String>> recipientDetails, boolean recipientFilterPresent) {
+			Map<String, Map<String, String>> recipientDetails, boolean recipientFilterPresent) {
 		//set job start date. relevant for split jobs
 		jobStartDate = new java.sql.Timestamp(new java.util.Date().getTime());
 
@@ -1257,7 +1258,7 @@ public class ArtJob implements Job {
 			if (recipientFilterPresent) {
 				//enable report data to be filtered/different for each recipient
 				pq.setRecipientFilterPresent(recipientFilterPresent);
-				for (Map.Entry<String, Map<String,String>> entry : recipientDetails.entrySet()) {
+				for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 					//map should only have one value if filter present
 					Map<String, String> recipientColumns = entry.getValue();
 					pq.setRecipientColumn(recipientColumns.get(ArtDBCP.RECIPIENT_COLUMN));
@@ -1358,9 +1359,9 @@ public class ArtJob implements Job {
 							if (recipientDetails != null) {
 								Mailer m = getMailer();
 
-								for (Map.Entry<String, Map<String,String>> entry : recipientDetails.entrySet()) {
+								for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 									String email = entry.getKey();
-									Map<String, String> recipientColumns =  entry.getValue();
+									Map<String, String> recipientColumns = entry.getValue();
 
 									//customize message by replacing field labels with values for this recipient
 									String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
@@ -1597,7 +1598,7 @@ public class ArtJob implements Job {
 						if (recipientDetails != null) {
 							Mailer m = getMailer();
 
-							for (Map.Entry<String, Map<String,String>> entry : recipientDetails.entrySet()) {
+							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 								String email = entry.getKey();
 								Map<String, String> recipientColumns = entry.getValue();
 
@@ -1656,8 +1657,8 @@ public class ArtJob implements Job {
 									//if multiple recipients, some might have succeeded. no way of knowing which
 									fileName = "-Error when sending some emails."
 											+ " <p>" + m.getSendError() + "</p>";
-									
-									String msg= "Error when sending some emails."
+
+									String msg = "Error when sending some emails."
 											+ " <p>" + m.getSendError() + "</p>"
 											+ " <p>Complete address list:<br> To: " + userEmail + "<br> Cc: " + cc + "<br> Bcc: " + bcc + "</p>";
 									logger.warn(msg);
