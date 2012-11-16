@@ -335,6 +335,10 @@ jQuery(document).ready(function($){
 							}
 						});
 					}
+					
+					//ensure tooltips are displayed for charts
+					olLoaded=1;
+					overlib();
 				} else if(statusText=="error"){
 					alert("An error occurred: " + xhr.status + " - " + xhr.statusText);
 				}
@@ -343,7 +347,7 @@ jQuery(document).ready(function($){
 				$('input[type="submit"]').removeAttr('disabled');
 
 			});	
-
+			
 		}
 
 });  
@@ -356,7 +360,7 @@ $("#systemWorking").ajaxStart(function(){
  }).ajaxError(function(){
     $(this).hide();
  });
-
+ 
 }); 
 
 

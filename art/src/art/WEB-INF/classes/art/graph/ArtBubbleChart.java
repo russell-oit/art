@@ -6,12 +6,17 @@ import art.utils.DrilldownQuery;
 import de.laures.cewolf.ChartPostProcessor;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.DatasetProducer;
+import de.laures.cewolf.links.XYItemLinkGenerator;
+import de.laures.cewolf.tooltips.XYToolTipGenerator;
+import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,10 +28,15 @@ import org.apache.commons.lang.ArrayUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.labels.BubbleXYItemLabelGenerator;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.DefaultXYZDataset;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
+import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +45,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Timothy Anyona
  */
-public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProcessor, Serializable {
+public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProcessor, 
+		Serializable, XYToolTipGenerator, XYItemLinkGenerator {
 	
 	 private static final long serialVersionUID = 1L;
     
@@ -52,7 +63,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
     String bgColor = "#FFFFFF";
     boolean useHyperLinks = false;
     boolean hasDrilldown = false;
-    boolean hasTooltips = false;
+    boolean hasTooltips = true;
     double minValue;
     double maxValue;
     String openDrilldownInNewWindow;
@@ -363,15 +374,26 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
             rangeAxis.setRange(from, to);
         }
 
-//        //set grid lines to light grey so that they are visible with a default plot background colour of white
-//        plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
-//        plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+        //set grid lines to light grey so that they are visible with a default plot background colour of white
+        plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+        plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 
-        //allow highlighting of data points
-        boolean showPoints = (Boolean) params.get("showPoints");
-        if (showPoints) {
-            XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-            renderer.setBaseShapesVisible(true);
+		// turn on or off data labels. by default labels are not displayed
+        String labelFormat = (String) params.get("labelFormat");
+        if (!labelFormat.equals("off")) {
+            //display labels with data values
+
+            DecimalFormat valueFormatter;
+            NumberFormat nf = NumberFormat.getInstance();
+            valueFormatter = (DecimalFormat) nf;
+
+            XYItemRenderer renderer = plot.getRenderer(); // XYBubbleRenderer implements XYItemRenderer
+            BubbleXYItemLabelGenerator generator = new BubbleXYItemLabelGenerator(labelFormat, valueFormatter, valueFormatter, valueFormatter);
+            renderer.setBaseItemLabelGenerator(generator);
+            renderer.setBaseItemLabelsVisible(true);
+
+            renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
+            renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
         }
 
         // Output to file if required     	  
@@ -388,5 +410,63 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
             }
         }
 	}
-	
+
+	@Override
+	public String generateToolTip(XYDataset xyd, int series, int index) {
+		//display formatted values
+		
+        //format x value
+        double xValue;
+        DecimalFormat valueFormatter;
+        String formattedXValue;
+
+        //get data value to be used as tooltip
+        xValue = dataset.getXValue(series, index);
+
+        //format value. use numberformat factory method to set formatting according to the default locale	   		
+        NumberFormat nf = NumberFormat.getInstance();
+        valueFormatter = (DecimalFormat) nf;
+
+        formattedXValue = valueFormatter.format(xValue);
+
+        //format y value
+        double yValue;
+        String formattedYValue;
+        yValue = dataset.getYValue(series, index);
+        formattedYValue = valueFormatter.format(yValue);
+		
+		//format z value
+        double zValue;
+        String formattedZValue;
+        zValue = dataset.getZValue(series, index);
+        formattedZValue = valueFormatter.format(zValue);
+
+        //return final tooltip text	   
+        return formattedXValue + ", " + formattedYValue + ", " + formattedZValue;
+	}
+
+	@Override
+	public String generateLink(Object data, int series, int item) {
+		String link = "";
+        XYZDataset tmpDataset;
+        double yValue;
+        double xValue;
+		double zValue;
+        String key;
+
+        if (useHyperLinks) {
+            link = hyperLinks.get(item);
+        } else if (hasDrilldown) {
+            tmpDataset = (XYZDataset) data;
+			yValue = tmpDataset.getYValue(series, item);
+			xValue = tmpDataset.getXValue(series, item);
+			zValue = tmpDataset.getZValue(series, item);
+
+            key = String.valueOf(zValue) + String.valueOf(yValue) + String.valueOf(xValue);
+            link = drilldownLinks.get(key);
+        }
+
+        return link;
+	}
+
 }

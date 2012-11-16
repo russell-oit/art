@@ -1,3 +1,7 @@
+ART 2.5
+* Support for bubble charts
+* Fix to enable display of chart tooltips when charts displayed inline
+
 ART 2.4
 * Added cc and bcc fields for email jobs
 * Allow change of parameter between inline and multi

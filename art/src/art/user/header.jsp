@@ -41,6 +41,8 @@
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>  
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + art.servlets.ArtDBCP.getArtSetting("css_skin")%>" />      
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/ajaxtags-art.css" /> 
+  
+  <script type="text/javascript" src="<%= request.getContextPath() %>/js/overlib.js"></script>
        
 </head>
 <body>

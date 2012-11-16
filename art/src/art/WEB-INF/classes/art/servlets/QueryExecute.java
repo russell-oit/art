@@ -236,6 +236,9 @@ public class QueryExecute extends HttpServlet {
 			case 10:
 				o = new ArtSpeedometer();
 				break;
+			case 11:
+				o=new ArtBubbleChart();
+				break;
 			default: //3-5, 8,9
 				o = new ArtCategorySeries();
 		}

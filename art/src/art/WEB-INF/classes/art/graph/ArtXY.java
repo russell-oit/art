@@ -71,7 +71,8 @@ the third column must be a String (an hyperlink).
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, ChartPostProcessor, XYToolTipGenerator, Serializable {
+public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, ChartPostProcessor, 
+		XYToolTipGenerator, Serializable {
     //classes implementing chartpostprocessor need to be serializable to use cewolf 1.1+
 
     private static final long serialVersionUID = 1L;
