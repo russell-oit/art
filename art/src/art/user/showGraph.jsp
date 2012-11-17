@@ -146,7 +146,9 @@
 %>
     <%@ include file ="header.jsp" %>
 <%
-  } else if (isPlain) { out.println("<html>"); }
+  } else if (isPlain) {
+	  out.println("<html>");
+  }
 
 /*
  this is to show this page just after the user clicked on the submit button
@@ -178,7 +180,6 @@ ChartFactory.setChartTheme(chartTheme);
 				
 //display parameters
 PrintWriter htmlout=response.getWriter();
-
 
 if(showParams){
 	ArtOutHandler.displayParameters(htmlout, graph.getDisplayParameters());
@@ -261,6 +262,11 @@ String removeAt="10000";
 
   <% }  %>
   
+<p>
+<br>
+<div align="center">
+<table border="0" width="90%">
+  
   <%	
 	if(graph.isShowGraphData()){
 		RowSetDynaClass graphData=graph.getGraphData();
@@ -269,12 +275,7 @@ String removeAt="10000";
 			DynaProperty[] dynaProperties = null;
 			String columnName;
 			String columnValue;
-			%>
-			<p>
-			<br>
-			<div align="center">
-			<table border="0" width="90%">	
-			<%
+			
 			for(int i=0;i<rows.size();i++){
 				DynaBean row=(DynaBean)rows.get(i);
 				if (i==0) {
@@ -309,9 +310,10 @@ String removeAt="10000";
 		}
 	}
 	%>
+	
 	</table>
-			</div>
-	</p>
+	</div>
+</p>
 
 
   </td>

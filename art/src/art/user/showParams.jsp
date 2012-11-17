@@ -337,8 +337,10 @@ jQuery(document).ready(function($){
 					}
 					
 					//ensure tooltips are displayed for charts
-					olLoaded=1;
-					overlib();
+					if(qt<0 || qt==110){
+						olLoaded=1;
+						overlib('');
+					}
 				} else if(statusText=="error"){
 					alert("An error occurred: " + xhr.status + " - " + xhr.statusText);
 				}

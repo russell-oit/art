@@ -94,6 +94,8 @@ String help;
 			}
 		}
 	}
+	
+	//-->
 </script>
 	
 

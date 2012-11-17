@@ -71,8 +71,7 @@ public class ExportGraph {
 	/**
 	 * Determine if legend should be shown
 	 *
-	 * @param showLegend
-	 * <code>true</true> if legend should be shown
+	 * @param showLegend 	 <code>true</true> if legend should be shown
 	 */
 	public void setShowLegend(boolean showLegend) {
 		this.showLegend = showLegend;
@@ -81,8 +80,7 @@ public class ExportGraph {
 	/**
 	 * Determine if labels should be shown
 	 *
-	 * @param showLabels
-	 * <code>true</true> if labels should be shown
+	 * @param showLabels 	 <code>true</true> if labels should be shown
 	 */
 	public void setShowLabels(boolean showLabels) {
 		this.showLabels = showLabels;
@@ -91,8 +89,7 @@ public class ExportGraph {
 	/**
 	 * Determine if data points should be highlighted
 	 *
-	 * @param showDataPoints
-	 * <code>true</true> if data points should be highlighted
+	 * @param showDataPoints 	 <code>true</true> if data points should be highlighted
 	 */
 	public void setShowDataPoints(boolean showDataPoints) {
 		this.showDataPoints = showDataPoints;
@@ -270,6 +267,7 @@ public class ExportGraph {
 
 			//set chart options									
 			rsmd = rs.getMetaData();
+			String seriesName = rsmd.getColumnLabel(2);
 
 			if (ylabel == null) {
 				ylabel = rsmd.getColumnLabel(1);
@@ -306,6 +304,7 @@ public class ExportGraph {
 
 					//create dataset for the pie chart
 					ArtPie pieChart = new ArtPie();
+					pieChart.setSeriesName(seriesName);
 					pieChart.prepareDataset(rs);
 					DefaultPieDataset pieDataset = (DefaultPieDataset) pieChart.produceDataset(null);
 
@@ -326,8 +325,7 @@ public class ExportGraph {
 
 					//create dataset for the xy chart
 					ArtXY xyChart = new ArtXY();
-
-					xyChart.setSeriesName(rsmd.getColumnLabel(2));
+					xyChart.setSeriesName(seriesName);
 					xyChart.prepareDataset(rs);
 
 					XYSeriesCollection xyDataset = (XYSeriesCollection) xyChart.produceDataset(null);
@@ -355,6 +353,7 @@ public class ExportGraph {
 
 					//create dataset for time series chart
 					ArtTimeSeries timeSeriesChart = new ArtTimeSeries();
+					timeSeriesChart.setSeriesName(seriesName);
 					timeSeriesChart.prepareDataset(rs);
 					TimeSeriesCollection timeSeriesDataset = (TimeSeriesCollection) timeSeriesChart.produceDataset(null);
 
@@ -381,6 +380,7 @@ public class ExportGraph {
 
 					//create dataset for date series chart
 					ArtDateSeries dateSeriesChart = new ArtDateSeries();
+					dateSeriesChart.setSeriesName(seriesName);
 					dateSeriesChart.prepareDataset(rs);
 					TimeSeriesCollection dateSeriesDataset = (TimeSeriesCollection) dateSeriesChart.produceDataset(null);
 
@@ -424,16 +424,16 @@ public class ExportGraph {
 					break;
 				case -11:
 					//bubble chart
-					
+
 					//create dataset for speedometer chart
 					ArtBubbleChart bubble = new ArtBubbleChart();
-					bubble.setSeriesName(rsmd.getColumnLabel(3));
+					bubble.setSeriesName(seriesName);
 					bubble.prepareDataset(rs);
 					DefaultXYZDataset bubbleDataset = (DefaultXYZDataset) bubble.produceDataset(null);
-					
+
 					//create chart
-					chart=ChartFactory.createBubbleChart(title, xlabel, ylabel, bubbleDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
-					
+					chart = ChartFactory.createBubbleChart(title, xlabel, ylabel, bubbleDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+
 					XYPlot bubblePlot = (XYPlot) chart.getPlot();
 
 					//set y axis range if required
@@ -441,14 +441,15 @@ public class ExportGraph {
 						NumberAxis rangeAxis = (NumberAxis) bubblePlot.getRangeAxis();
 						rangeAxis.setRange(from, to);
 					}
-					
+
 					break;
-					
+
 				default:
 					//charts that use the category dataset. bar and line graphs	
 
 					//create dataset for chart
 					ArtCategorySeries categoryChart = new ArtCategorySeries();
+					categoryChart.setSeriesName(seriesName);
 					categoryChart.prepareDataset(rs);
 					DefaultCategoryDataset chartDataset = (DefaultCategoryDataset) categoryChart.produceDataset(null);
 
@@ -576,37 +577,42 @@ public class ExportGraph {
 		Axis axis = null;
 		int numValues = 0;
 
-		if (plot instanceof CategoryPlot) {
-			axis = ((CategoryPlot) plot).getDomainAxis();
-			numValues = ((CategoryPlot) plot).getDataset().getRowCount();
-		} else if (plot instanceof XYPlot) {
-			axis = ((XYPlot) plot).getDomainAxis();
-			numValues = ((XYPlot) plot).getDataset().getItemCount(0);
-		} else if (plot instanceof FastScatterPlot) {
-			axis = ((FastScatterPlot) plot).getDomainAxis();
-			numValues = ((FastScatterPlot) plot).getData()[0].length;
-		}
+		try {
 
-		if (axis instanceof CategoryAxis) {
-			CategoryAxis catAxis = (CategoryAxis) axis;
+			if (plot instanceof CategoryPlot) {
+				axis = ((CategoryPlot) plot).getDomainAxis();
+				numValues = ((CategoryPlot) plot).getDataset().getRowCount();
+			} else if (plot instanceof XYPlot) {
+				axis = ((XYPlot) plot).getDomainAxis();
+				numValues = ((XYPlot) plot).getDataset().getItemCount(0);
+			} else if (plot instanceof FastScatterPlot) {
+				axis = ((FastScatterPlot) plot).getDomainAxis();
+				numValues = ((FastScatterPlot) plot).getData()[0].length;
+			}
 
-			if (rotateThreshold > 0) {
-				if (numValues >= rotateThreshold) {
-					catAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
-				} else {
-					catAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
+			if (axis instanceof CategoryAxis) {
+				CategoryAxis catAxis = (CategoryAxis) axis;
+
+				if (rotateThreshold > 0) {
+					if (numValues >= rotateThreshold) {
+						catAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+					} else {
+						catAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
+					}
+				}
+			} else if (axis instanceof ValueAxis) {
+				ValueAxis valueAxis = (ValueAxis) axis;
+
+				if (rotateThreshold > 0) {
+					valueAxis.setVerticalTickLabels(numValues >= rotateThreshold);
 				}
 			}
-		} else if (axis instanceof ValueAxis) {
-			ValueAxis valueAxis = (ValueAxis) axis;
 
-			if (rotateThreshold > 0) {
-				valueAxis.setVerticalTickLabels(numValues >= rotateThreshold);
+			if ((axis != null) && (removeThreshold > 0)) {
+				axis.setTickLabelsVisible(numValues < removeThreshold);
 			}
-		}
-
-		if ((axis != null) && (removeThreshold > 0)) {
-			axis.setTickLabelsVisible(numValues < removeThreshold);
+		} catch (Exception e) {
+			logger.error("Error", e);
 		}
 	}
 }

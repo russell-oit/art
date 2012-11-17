@@ -1,4 +1,3 @@
-
 package art.graph;
 
 import art.utils.ArtQueryParam;
@@ -28,53 +27,48 @@ import org.apache.commons.lang.ArrayUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.labels.BubbleXYItemLabelGenerator;
-import org.jfree.chart.labels.ItemLabelAnchor;
-import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
-import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Class to render bubble charts
- * 
+ *
  * @author Timothy Anyona
  */
-public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProcessor, 
+public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProcessor,
 		Serializable, XYToolTipGenerator, XYItemLinkGenerator {
-	
-	 private static final long serialVersionUID = 1L;
-    
-    final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
-	
+
+	private static final long serialVersionUID = 1L;
+	final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
 	String title = "Title";
-    String xlabel = "X label";
-    String ylabel = "Y label";
-    String seriesName = "Series";
+	String xlabel = "X label";
+	String ylabel = "Y label";
+	String seriesName = "Series";
 	ArrayList<String> hyperLinks;
 	HashMap<String, String> drilldownLinks;
-    int height = 300;
-    int width = 500;
-    String bgColor = "#FFFFFF";
-    boolean useHyperLinks = false;
-    boolean hasDrilldown = false;
-    boolean hasTooltips = true;
-    double minValue;
-    double maxValue;
-    String openDrilldownInNewWindow;
-    DefaultXYZDataset dataset = new DefaultXYZDataset();
-	Map<Integer,ArtQueryParam> displayParameters=null;
-	boolean showGraphData=false;
+	int height = 300;
+	int width = 500;
+	String bgColor = "#FFFFFF";
+	boolean useHyperLinks = false;
+	boolean hasDrilldown = false;
+	boolean hasTooltips = true;
+	double minValue;
+	double maxValue;
+	String openDrilldownInNewWindow;
+	DefaultXYZDataset dataset = new DefaultXYZDataset();
+	Map<Integer, ArtQueryParam> displayParameters = null;
+	boolean showGraphData = false;
 	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
+	int columnCount; //resultset can have extra column with actual z value
+	ArrayList<Double> actualZValues = new ArrayList<Double>();
 
 	@Override
 	public void setTitle(String title) {
-		this.title=title;
+		this.title = title;
 	}
 
 	@Override
@@ -84,7 +78,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setXlabel(String xlabel) {
-		this.xlabel=xlabel;
+		this.xlabel = xlabel;
 	}
 
 	@Override
@@ -94,7 +88,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setYlabel(String ylabel) {
-		this.ylabel=ylabel;
+		this.ylabel = ylabel;
 	}
 
 	@Override
@@ -104,12 +98,12 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setSeriesName(String seriesName) {
-		this.seriesName=seriesName;
+		this.seriesName = seriesName;
 	}
 
 	@Override
 	public void setWidth(int width) {
-		this.width=width;
+		this.width = width;
 	}
 
 	@Override
@@ -119,7 +113,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setHeight(int height) {
-		this.height=height;
+		this.height = height;
 	}
 
 	@Override
@@ -129,7 +123,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setBgColor(String bgColor) {
-		this.bgColor=bgColor;
+		this.bgColor = bgColor;
 	}
 
 	@Override
@@ -139,7 +133,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setUseHyperLinks(boolean b) {
-		this.useHyperLinks=b;
+		this.useHyperLinks = b;
 	}
 
 	@Override
@@ -149,146 +143,157 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void prepareDataset(ResultSet rs, Map<Integer, DrilldownQuery> drilldownQueries, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
+
+		if (useHyperLinks) {
+			hyperLinks = new ArrayList<String>(100);
+		}
+
+		//add support for drill down queries
+		DrilldownQuery drilldown = null;
+		if (drilldownQueries != null && drilldownQueries.size() > 0) {
+			hasDrilldown = true;
+			drilldownLinks = new HashMap<String, String>();
+
+			//only use the first drill down query
+			Iterator it = drilldownQueries.entrySet().iterator();
+			if (it.hasNext()) {
+				Map.Entry entry = (Map.Entry) it.next();
+				drilldown = (DrilldownQuery) entry.getValue();
+
+				openDrilldownInNewWindow = drilldown.getOpenInNewWindow();
+			}
+		}
+
+		String drilldownUrl;
+		String outputFormat;
+		int drilldownQueryId;
+		List<ArtQueryParam> drilldownParams;
+		String paramString;
+		String key;
+
+		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
+		HashMap<String, String> params = new HashMap<String, String>();
+		String paramLabel;
+		String paramValue;
+
+		double x, y, z;
+		double actualZ=0; //may contain actual bubble value, in case z value is much larger than y value
+		ArrayList<Double> xValues = new ArrayList<Double>();
+		ArrayList<Double> yValues = new ArrayList<Double>();
+		ArrayList<Double> zValues = new ArrayList<Double>();
 		
-        if (useHyperLinks) {
-            hyperLinks = new ArrayList<String>(100);
-        }
+		columnCount=rs.getMetaData().getColumnCount();
 
-        //add support for drill down queries
-        DrilldownQuery drilldown = null;
-        if (drilldownQueries != null && drilldownQueries.size() > 0) {
-            hasDrilldown = true;
-            drilldownLinks = new HashMap<String, String>();
-
-            //only use the first drill down query
-            Iterator it = drilldownQueries.entrySet().iterator();
-            if (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                drilldown = (DrilldownQuery) entry.getValue();
-
-                openDrilldownInNewWindow = drilldown.getOpenInNewWindow();
-            }
-        }
-
-        String drilldownUrl;
-        String outputFormat;
-        int drilldownQueryId;
-        List<ArtQueryParam> drilldownParams;
-        String paramString;
-        String key;
-
-        //store parameter names so that parent parameters with the same name as in the drilldown query are omitted
-        HashMap<String, String> params = new HashMap<String, String>();
-        String paramLabel;
-        String paramValue;
-		
-        double x, y, z;
-		ArrayList<Double> xValues=new ArrayList<Double>();
-		ArrayList<Double> yValues=new ArrayList<Double>();
-		ArrayList<Double> zValues=new ArrayList<Double>();
-
-        while (rs.next()) {
-            x = rs.getDouble(1);
-            y = rs.getDouble(2);
-			z = rs.getDouble(3);
+		while (rs.next()) {
+			x = rs.getDouble(1);
+			y = rs.getDouble(2);
+			z = rs.getDouble(3); //bubble value may be normalized to the y axis values so that bubbles aren't too large
 			xValues.add(new Double(rs.getDouble(1)));
 			yValues.add(new Double(rs.getDouble(2)));
 			zValues.add(new Double(rs.getDouble(3)));
-            
-            if (useHyperLinks) {
-                hyperLinks.add(rs.getString(4));
-            }
+			
+			if(columnCount>=4){
+				actualZ=rs.getDouble(4);
+			}
+			actualZValues.add(new Double(actualZ));
+			
+			if (useHyperLinks) {
+				hyperLinks.add(rs.getString(5)); //if use LINKs, must have 5 columns - actualZ column, then link column
+			} 
 
-            //set drill down hyperlinks
-            if (drilldown != null) {
-                drilldownQueryId = drilldown.getDrilldownQueryId();
-                outputFormat = drilldown.getOutputFormat();
-                if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-                    drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
-                } else {
-                    drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
-                }
+			//set drill down hyperlinks
+			if (drilldown != null) {
+				drilldownQueryId = drilldown.getDrilldownQueryId();
+				outputFormat = drilldown.getOutputFormat();
+				if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+					drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
+				} else {
+					drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
+				}
 
-                drilldownParams = drilldown.getDrilldownParams();
-                if (drilldownParams != null) {
-                    Iterator it2 = drilldownParams.iterator();
-                    while (it2.hasNext()) {
-                        ArtQueryParam param = (ArtQueryParam) it2.next();
-                        //drill down on col 1 = data value (y value). drill down on col 2 = category (x value)
+				drilldownParams = drilldown.getDrilldownParams();
+				if (drilldownParams != null) {
+					Iterator it2 = drilldownParams.iterator();
+					while (it2.hasNext()) {
+						ArtQueryParam param = (ArtQueryParam) it2.next();
+						//drill down on col 1 = data value (y value). drill down on col 2 = category (x value)
 						//drill down on col 3 = series name. (only one series is possible)
-                        paramLabel = param.getParamLabel();
-                        paramString = "&P_" + paramLabel + "=";
-                        if (param.getDrilldownColumn() == 1) {
-                            paramString = paramString + z;
-                        } else if (param.getDrilldownColumn() == 2) {
-                            paramString = paramString + y;
-                        } else if (param.getDrilldownColumn() == 3) {
-                            paramString = paramString + x;
-						} else {
-                            paramValue = seriesName;
-                            try {
-                                paramValue = URLEncoder.encode(paramValue, "UTF-8");
-                            } catch (UnsupportedEncodingException e) {
-                                logger.warn("UTF-8 encoding not supported", e);
-                            }
-                            paramString = paramString + paramValue;
-                        }
-                        drilldownUrl = drilldownUrl + paramString;
-                        params.put(paramLabel, paramLabel);
-                    }
-                }
+						//drill down on col 4 = bubble value (z value). drill down on col 5 = actual bubble value (actual z value)
+						paramLabel = param.getParamLabel();
+						paramString = "&P_" + paramLabel + "=";
+						if (param.getDrilldownColumn() == 1) {
+							paramString = paramString + y;
+						} else if (param.getDrilldownColumn() == 2) {
+							paramString = paramString + x;
+						} else if (param.getDrilldownColumn() == 3) {
+							paramValue = seriesName;
+							try {
+								paramValue = URLEncoder.encode(paramValue, "UTF-8");
+							} catch (UnsupportedEncodingException e) {
+								logger.warn("UTF-8 encoding not supported", e);
+							}
+							paramString = paramString + paramValue;
+						} else if (param.getDrilldownColumn() == 4) {
+							paramString = paramString + z;
+						} else if (param.getDrilldownColumn() == 5) {
+							paramString = paramString + actualZ;
+						}
+						drilldownUrl = drilldownUrl + paramString;
+						params.put(paramLabel, paramLabel);
+					}
+				}
 
-                //add parameters from parent query										
-                if (inlineParams != null) {
-                    Iterator itInline = inlineParams.entrySet().iterator();
-                    while (itInline.hasNext()) {
-                        Map.Entry entryInline = (Map.Entry) itInline.next();
-                        paramLabel = (String) entryInline.getKey();
-                        paramValue = (String) entryInline.getValue();
-                        //add parameter only if one with a similar name doesn't already exist in the drill down parameters
-                        if (!params.containsKey(paramLabel)) {
-                            try {
-                                paramValue = URLEncoder.encode(paramValue, "UTF-8");
-                            } catch (UnsupportedEncodingException e) {
-                                logger.warn("UTF-8 encoding not supported", e);
-                            }
-                            paramString = "&P_" + paramLabel + "=" + paramValue;
-                            drilldownUrl = drilldownUrl + paramString;
-                        }
-                    }
-                }
+				//add parameters from parent query										
+				if (inlineParams != null) {
+					Iterator itInline = inlineParams.entrySet().iterator();
+					while (itInline.hasNext()) {
+						Map.Entry entryInline = (Map.Entry) itInline.next();
+						paramLabel = (String) entryInline.getKey();
+						paramValue = (String) entryInline.getValue();
+						//add parameter only if one with a similar name doesn't already exist in the drill down parameters
+						if (!params.containsKey(paramLabel)) {
+							try {
+								paramValue = URLEncoder.encode(paramValue, "UTF-8");
+							} catch (UnsupportedEncodingException e) {
+								logger.warn("UTF-8 encoding not supported", e);
+							}
+							paramString = "&P_" + paramLabel + "=" + paramValue;
+							drilldownUrl = drilldownUrl + paramString;
+						}
+					}
+				}
 
-                if (multiParams != null) {
-                    String[] paramValues;
-                    Iterator itMulti = multiParams.entrySet().iterator();
-                    while (itMulti.hasNext()) {
-                        Map.Entry entryMulti = (Map.Entry) itMulti.next();
-                        paramLabel = (String) entryMulti.getKey();
-                        paramValues = (String[]) entryMulti.getValue();
-                        for (String param : paramValues) {
-                            try {
-                                param = URLEncoder.encode(param, "UTF-8");
-                            } catch (UnsupportedEncodingException e) {
-                                logger.warn("UTF-8 encoding not supported", e);
-                            }
-                            paramString = "&M_" + paramLabel + "=" + param;
-                            drilldownUrl = drilldownUrl + paramString;
-                        }
-                    }
-                }
+				if (multiParams != null) {
+					String[] paramValues;
+					Iterator itMulti = multiParams.entrySet().iterator();
+					while (itMulti.hasNext()) {
+						Map.Entry entryMulti = (Map.Entry) itMulti.next();
+						paramLabel = (String) entryMulti.getKey();
+						paramValues = (String[]) entryMulti.getValue();
+						for (String param : paramValues) {
+							try {
+								param = URLEncoder.encode(param, "UTF-8");
+							} catch (UnsupportedEncodingException e) {
+								logger.warn("UTF-8 encoding not supported", e);
+							}
+							paramString = "&M_" + paramLabel + "=" + param;
+							drilldownUrl = drilldownUrl + paramString;
+						}
+					}
+				}
 
-                //use y data value and x data value to identify url in hashmap. to ensure correct link will be returned in generatelink. 
-                key = String.valueOf(z) + String.valueOf(y) + String.valueOf(x);
-                drilldownLinks.put(key, drilldownUrl);
-            }
-        }
+				//use y data value and x data value and z data value to identify url in hashmap. to ensure correct link will be returned in generatelink. 
+				key = String.valueOf(y) + String.valueOf(x) + String.valueOf(z) + String.valueOf(actualZ);
+				drilldownLinks.put(key, drilldownUrl);
+			}
+		}
 
 		double[] xArray = ArrayUtils.toPrimitive(xValues.toArray(new Double[0]));
 		double[] yArray = ArrayUtils.toPrimitive(yValues.toArray(new Double[0]));
 		double[] zArray = ArrayUtils.toPrimitive(zValues.toArray(new Double[0]));
-		double[][] data = new double[][]{ xArray, yArray, zArray}; 
+		double[][] data = new double[][]{xArray, yArray, zArray};
 		dataset.addSeries(seriesName, data);
-		
+
 		//store data for potential use in pdf output
 		if (showGraphData) {
 			int rsType = rs.getType();
@@ -297,9 +302,9 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 			}
 			graphData = new RowSetDynaClass(rs, false, true);
 		} else {
-			graphData=null;
+			graphData = null;
 		}
-		
+
 	}
 
 	@Override
@@ -324,7 +329,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setShowGraphData(boolean value) {
-		showGraphData=value;
+		showGraphData = value;
 	}
 
 	@Override
@@ -339,7 +344,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public void setDisplayParameters(Map<Integer, ArtQueryParam> value) {
-		displayParameters=value;
+		displayParameters = value;
 	}
 
 	@Override
@@ -366,107 +371,98 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 	public void processChart(Object chart, Map params) {
 		XYPlot plot = (XYPlot) ((JFreeChart) chart).getPlot();
 
-        //allow setting of y axis range
-        if (params.get("from") != null && params.get("to") != null) {
-            NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-            int from = Integer.parseInt((String) params.get("from"));
-            int to = Integer.parseInt((String) params.get("to"));
-            rangeAxis.setRange(from, to);
-        }
+		//allow setting of y axis range
+		if (params.get("from") != null && params.get("to") != null) {
+			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+			int from = Integer.parseInt((String) params.get("from"));
+			int to = Integer.parseInt((String) params.get("to"));
+			rangeAxis.setRange(from, to);
+		}
 
-        //set grid lines to light grey so that they are visible with a default plot background colour of white
-        plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
-        plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+		//set grid lines to light grey so that they are visible with a default plot background colour of white
+		plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 
-		// turn on or off data labels. by default labels are not displayed
-        String labelFormat = (String) params.get("labelFormat");
-        if (!labelFormat.equals("off")) {
-            //display labels with data values
-
-            DecimalFormat valueFormatter;
-            NumberFormat nf = NumberFormat.getInstance();
-            valueFormatter = (DecimalFormat) nf;
-
-            XYItemRenderer renderer = plot.getRenderer(); // XYBubbleRenderer implements XYItemRenderer
-            BubbleXYItemLabelGenerator generator = new BubbleXYItemLabelGenerator(labelFormat, valueFormatter, valueFormatter, valueFormatter);
-            renderer.setBaseItemLabelGenerator(generator);
-            renderer.setBaseItemLabelsVisible(true);
-
-            renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
-            renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
-        }
-
-        // Output to file if required     	  
-        String outputToFile = (String) params.get("outputToFile");
-        String fileName = (String) params.get("fullFileName");
-        if (outputToFile.equals("pdf")) {
-            PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
-        } else if (outputToFile.equals("png")) {
-            //save chart as png file									            
-            try {
-                ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
-            } catch (Exception e) {
-                logger.error("Error",e);
-            }
-        }
+		// Output to file if required     	  
+		String outputToFile = (String) params.get("outputToFile");
+		String fileName = (String) params.get("fullFileName");
+		if (outputToFile.equals("pdf")) {
+			PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
+		} else if (outputToFile.equals("png")) {
+			//save chart as png file									            
+			try {
+				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
 	}
 
 	@Override
 	public String generateToolTip(XYDataset xyd, int series, int index) {
 		//display formatted values
-		
-        //format x value
-        double xValue;
-        DecimalFormat valueFormatter;
-        String formattedXValue;
 
-        //get data value to be used as tooltip
-        xValue = dataset.getXValue(series, index);
+		//format x value
+		double xValue;
+		DecimalFormat valueFormatter;
+		String formattedXValue;
 
-        //format value. use numberformat factory method to set formatting according to the default locale	   		
-        NumberFormat nf = NumberFormat.getInstance();
-        valueFormatter = (DecimalFormat) nf;
+		//get data value to be used as tooltip
+		xValue = dataset.getXValue(series, index);
 
-        formattedXValue = valueFormatter.format(xValue);
+		//format value. use numberformat factory method to set formatting according to the default locale	   		
+		NumberFormat nf = NumberFormat.getInstance();
+		valueFormatter = (DecimalFormat) nf;
 
-        //format y value
-        double yValue;
-        String formattedYValue;
-        yValue = dataset.getYValue(series, index);
-        formattedYValue = valueFormatter.format(yValue);
-		
+		formattedXValue = valueFormatter.format(xValue);
+
+		//format y value
+		double yValue;
+		String formattedYValue;
+		yValue = dataset.getYValue(series, index);
+		formattedYValue = valueFormatter.format(yValue);
+
 		//format z value
-        double zValue;
-        String formattedZValue;
-        zValue = dataset.getZValue(series, index);
-        formattedZValue = valueFormatter.format(zValue);
+		double zValue;
+		String formattedZValue;
+		
+		if(columnCount==3){
+			//use z value column
+			zValue = dataset.getZValue(series, index);
+		} else {
+			//use actual z value column
+			zValue=actualZValues.get(index);
+		}
+		formattedZValue = valueFormatter.format(zValue);
 
-        //return final tooltip text	   
-        return formattedXValue + ", " + formattedYValue + ", " + formattedZValue;
+		//return final tooltip text	   
+		return formattedXValue + ", " + formattedYValue + ", " + formattedZValue;
 	}
 
 	@Override
 	public String generateLink(Object data, int series, int item) {
 		String link = "";
-        XYZDataset tmpDataset;
-        double yValue;
-        double xValue;
-		double zValue;
-        String key;
 
-        if (useHyperLinks) {
-            link = hyperLinks.get(item);
-        } else if (hasDrilldown) {
-            tmpDataset = (XYZDataset) data;
-			yValue = tmpDataset.getYValue(series, item);
-			xValue = tmpDataset.getXValue(series, item);
-			zValue = tmpDataset.getZValue(series, item);
+		if (useHyperLinks) {
+			link = hyperLinks.get(item);
+		} else if (hasDrilldown) {
+			double y;
+			double x;
+			double z;
+			double actualZ;
+			String key;
 
-            key = String.valueOf(zValue) + String.valueOf(yValue) + String.valueOf(xValue);
-            link = drilldownLinks.get(key);
-        }
+			XYZDataset tmpDataset = (XYZDataset) data; //or use dataset variable of the class
+			y = tmpDataset.getYValue(series, item);
+			x = tmpDataset.getXValue(series, item);
+			z = tmpDataset.getZValue(series, item);
+			
+			actualZ=actualZValues.get(item).intValue();
 
-        return link;
+			key = String.valueOf(y) + String.valueOf(x) + String.valueOf(z) + String.valueOf(actualZ);
+			link = drilldownLinks.get(key);
+		}
+
+		return link;
 	}
-
 }
