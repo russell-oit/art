@@ -376,7 +376,7 @@ tinyMCE.init({
             </td>
         </tr>
         <tr><td class="data"> Name </td>
-            <td class="data"> <input type="text" name="NAME" size="25" maxlength="50" value="<%=aq.getName()%>"> </td>
+            <td class="data"> <input type="text" name="NAME" size="30" maxlength="50" value="<%=aq.getName()%>"> </td>
         </tr>
 
         <tr><td class="data"> Status </td>
@@ -405,7 +405,7 @@ tinyMCE.init({
         </tr>
 
         <tr><td class="data"> Contact Person </td>
-            <td class="data"> <input type="text" name="CONTACT_PERSON" size="25" maxlength="20" value="<%=aq.getContactPerson()%>"> </td>
+            <td class="data"> <input type="text" name="CONTACT_PERSON" size="30" maxlength="20" value="<%=aq.getContactPerson()%>"> </td>
         </tr>
         
         <tr><td class="data"> Type</td>
@@ -545,7 +545,7 @@ tinyMCE.init({
 			</td>
 			<td class="data">
 				<div id="div_xaxis2">
-					<input type="text" name="xaxisLabel" size="25" maxlength="50" value="<%=aq.getXaxisLabel()%>">
+					<input type="text" name="xaxisLabel" size="30" maxlength="50" value="<%=aq.getXaxisLabel()%>">
 				</div>
 			</td>
 		</tr>
@@ -557,7 +557,7 @@ tinyMCE.init({
 			</td>
 			<td class="data">
 				<div id="div_yaxis2">
-					<input type="text" name="yaxisLabel" size="25" maxlength="50" value="<%=aq.getYaxisLabel()%>">
+					<input type="text" name="yaxisLabel" size="30" maxlength="50" value="<%=aq.getYaxisLabel()%>">
 				</div>
 			</td>
 		</tr>
@@ -599,7 +599,7 @@ tinyMCE.init({
 		</td>
         <td class="data">
 			<div id="div_template2">
-				<input type="text" name="template_filename" size="25" maxlength="100" value="<%=aq.getTemplate()%>"> <br>
+				<input type="text" name="template_filename" size="30" maxlength="100" value="<%=aq.getTemplate()%>"> <br>
 				<input type="file" name="template" id="template" size="40">
 				<%
 				helpText="Select the path of the mondrian schema xml file or jasper reports file or jXLS template file to use. Alternatively, type the file name in the textbox above to reuse an already uploaded file.";
@@ -640,7 +640,7 @@ tinyMCE.init({
 		</td>
         <td class="data">
 			<div id="div_xmla_catalog2">
-				<input type="text" name="xmla_catalog" id="xmla_catalog" size="25" maxlength="50" value="<%=aq.getXmlaCatalog()%>">
+				<input type="text" name="xmla_catalog" id="xmla_catalog" size="30" maxlength="50" value="<%=aq.getXmlaCatalog()%>">
 				<%
 				helpText="For Microsoft XMLA, this is the SSAS database name";
 				%>
@@ -662,7 +662,7 @@ tinyMCE.init({
 					currentStringValue="";
 				}
 				%>
-				<input type="text" name="xmla_username" id="xmla_username" size="25" maxlength="50" value="<%=currentStringValue%>">
+				<input type="text" name="xmla_username" id="xmla_username" size="30" maxlength="50" value="<%=currentStringValue%>">
 				<%
 				helpText="Optional. May be required if using Microsoft XMLA and the server requires basic authentication.";
 				%>
@@ -686,7 +686,7 @@ tinyMCE.init({
 					password=Encrypter.decrypt(password);
 				}
 				%>				
-				<input type="password" name="xmla_password" id="xmla_password" size="25" maxlength="50" value="<%=password%>">
+				<input type="password" name="xmla_password" id="xmla_password" size="30" maxlength="50" value="<%=password%>">
 			</div>
 		</td>
     </tr>
@@ -800,6 +800,8 @@ tinyMCE.init({
                         <br />50,"#00FF00","Normal",
                         <br />80,"#FFFF00","Warning",
                         <br />100,"#FF0000","Critical"
+						
+						<br><br><b>Bubble</b>: <br><i> SELECT Value1, Value2 "Series Name", Value3 FROM ...</i> (data type: number, number, number )
 
                     </li>
                 </ul>

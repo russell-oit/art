@@ -55,7 +55,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
                 <input type="submit" value="Header and Source">
             </form>
         </td>
-        <td class="data"> Edit header and source code</td></tr>
+        <td class="data"> Edit Header and Source code</td></tr>
 
     <%
      if (queryGroupId!=0 && (queryType<110 || (queryType>=112 && queryType<=118))) {
