@@ -370,15 +370,16 @@ public class PreparedQuery {
 				//update sb with new sql
 				sb.replace(0, sb.length(), querySql);
 			}
-		} else {
-			//ignore #recipient# label
-			String querySql = sb.toString();
-			String searchString = Pattern.quote(RECIPIENT_LABEL);
-			querySql = querySql.replaceAll("(?iu)" + searchString, "1=1");
+		} 
+		
+		//ignore #recipient# label if it is still there
+		String querySql = sb.toString();
+		String searchString = Pattern.quote(RECIPIENT_LABEL);
+		querySql = querySql.replaceAll("(?iu)" + searchString, "1=1");
 
-			//update sb with new sql
-			sb.replace(0, sb.length(), querySql);
-		}
+		//update sb with new sql
+		sb.replace(0, sb.length(), querySql);
+		
 	}
 
 	//determine if the user can execute the query. Exception thrown if user can't excecute query
@@ -569,6 +570,8 @@ public class PreparedQuery {
 				throw new ArtException("Could not get database connection.");
 			}
 
+			finalSQL=preparedStatementSQL; //set final sql in case error occurs before execute
+			
 			psQuery = connQuery.prepareStatement(preparedStatementSQL, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 			prepareStatement(psQuery); // this applies the inline parameter placeholders

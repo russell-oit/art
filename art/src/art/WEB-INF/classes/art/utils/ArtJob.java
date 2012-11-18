@@ -1070,7 +1070,10 @@ public class ArtJob implements Job, Serializable {
 				ArrayList<String> columnList = new ArrayList<String>();
 				for (int i = 1; i < columnCount + 1; i++) {
 					String columnName = rsmd.getColumnLabel(i); //use alias if available
-					columnList.add(columnName);
+
+					//store column names in lowercase to ensure special columns are found by list.contains()
+					//some RDBMSs make all column names uppercase					
+					columnList.add(columnName.toLowerCase());
 				}
 
 				if (columnList.contains(ArtDBCP.RECIPIENT_COLUMN) && columnList.contains(ArtDBCP.RECIPIENT_ID)) {
@@ -1088,7 +1091,7 @@ public class ArtJob implements Job, Serializable {
 							} else {
 								columnValue = rs.getString(columnName);
 							}
-							recipientColumns.put(columnName, columnValue);
+							recipientColumns.put(columnName.toLowerCase(), columnValue); //use lowercase so that special columns are found
 						}
 
 						if (StringUtils.length(email) > 4) {
@@ -1102,7 +1105,9 @@ public class ArtJob implements Job, Serializable {
 					rs.close();
 
 					//run normal job in case tos, cc etc configured
-					runNormalJob(conn);
+					if (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4) {
+						runNormalJob(conn);
+					}
 				} else {
 					//separate emails, different email message, same report data
 					Map<String, Map<String, String>> recipients = new HashMap<String, Map<String, String>>();
@@ -1296,7 +1301,7 @@ public class ArtJob implements Job, Serializable {
 			 * result set in the cache database (drop/insert)
 			 */
 
-			boolean mailSent; //use to check if email was successfully sent
+			boolean mailSent = false; //use to check if email was successfully sent
 
 			//trim address fields. to aid in checking if emails are configured
 			userEmail = StringUtils.trim(userEmail);
@@ -1385,12 +1390,18 @@ public class ArtJob implements Job, Serializable {
 									m.setToForce(email);
 
 									//send email for this recipient
-									m.send();
+									mailSent = m.send();
 								}
 
 								if (recipientFilterPresent) {
 									//don't run normal email job after filtered email sent
 									generateEmail = false;
+
+									if (mailSent) {
+										fileName = "-Alert Sent";
+									} else {
+										fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
+									}
 								}
 							}
 
@@ -1624,12 +1635,28 @@ public class ArtJob implements Job, Serializable {
 								m.setToForce(email);
 
 								//send email for this recipient
-								m.send();
+								mailSent = m.send();
 							}
 
 							if (recipientFilterPresent) {
 								//don't run normal email job after filtered email sent
 								generateEmail = false;
+
+								File f = new File(fileName);
+								f.delete();
+								if (mailSent) {
+									fileName = "-File has been emailed";
+								} else {
+									//if multiple recipients, some might have succeeded. no way of knowing which
+									fileName = "-Error when sending some emails."
+											+ " <p>" + m.getSendError() + "</p>";
+
+									String msg = "Error when sending some emails."
+											+ " <p>" + m.getSendError() + "</p>"
+											+ " <p>Complete address list:<br> To: " + userEmail + "<br> Cc: " + cc + "<br> Bcc: " + bcc + "</p>";
+									logger.warn(msg);
+
+								}
 							}
 						}
 
