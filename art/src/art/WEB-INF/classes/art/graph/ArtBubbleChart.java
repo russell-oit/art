@@ -177,7 +177,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		String paramValue;
 
 		double x, y, z;
-		double actualZ=0; //may contain actual bubble value, in case z value is much larger than y value
+		double actualZ; //may contain real world data bubble/z value, in case z value is much larger than y value
 		ArrayList<Double> xValues = new ArrayList<Double>();
 		ArrayList<Double> yValues = new ArrayList<Double>();
 		ArrayList<Double> zValues = new ArrayList<Double>();
@@ -187,14 +187,16 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		while (rs.next()) {
 			x = rs.getDouble(1);
 			y = rs.getDouble(2);
-			z = rs.getDouble(3); //bubble value may be normalized to the y axis values so that bubbles aren't too large
-			xValues.add(new Double(rs.getDouble(1)));
-			yValues.add(new Double(rs.getDouble(2)));
-			zValues.add(new Double(rs.getDouble(3)));
+			actualZ = rs.getDouble(3); 
 			
 			if(columnCount>=4){
-				actualZ=rs.getDouble(4);
+				z=rs.getDouble(4); //bubble value may be normalized to the y axis values so that bubbles aren't too large
+			} else {
+				z=actualZ;
 			}
+			xValues.add(new Double(x));
+			yValues.add(new Double(y));
+			zValues.add(new Double(z));
 			actualZValues.add(new Double(actualZ));
 			
 			if (useHyperLinks) {
@@ -218,7 +220,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 						ArtQueryParam param = (ArtQueryParam) it2.next();
 						//drill down on col 1 = data value (y value). drill down on col 2 = category (x value)
 						//drill down on col 3 = series name. (only one series is possible)
-						//drill down on col 4 = bubble value (z value). drill down on col 5 = actual bubble value (actual z value)
+						//drill down on col 4 = actual bubble value (actual z value)
 						paramLabel = param.getParamLabel();
 						paramString = "&P_" + paramLabel + "=";
 						if (param.getDrilldownColumn() == 1) {
@@ -234,8 +236,6 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 							}
 							paramString = paramString + paramValue;
 						} else if (param.getDrilldownColumn() == 4) {
-							paramString = paramString + z;
-						} else if (param.getDrilldownColumn() == 5) {
 							paramString = paramString + actualZ;
 						}
 						drilldownUrl = drilldownUrl + paramString;
@@ -283,7 +283,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 				}
 
 				//use y data value and x data value and z data value to identify url in hashmap. to ensure correct link will be returned in generatelink. 
-				key = String.valueOf(y) + String.valueOf(x) + String.valueOf(z) + String.valueOf(actualZ);
+				key = String.valueOf(y) + String.valueOf(x) + String.valueOf(actualZ);
 				drilldownLinks.put(key, drilldownUrl);
 			}
 		}
@@ -427,10 +427,10 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		String formattedZValue;
 		
 		if(columnCount==3){
-			//use z value column
+			//use z value in dataset (it will contain actual z value)
 			zValue = dataset.getZValue(series, index);
 		} else {
-			//use actual z value column
+			//use actual z value (z value in dataset contains a normalised value)
 			zValue=actualZValues.get(index);
 		}
 		formattedZValue = valueFormatter.format(zValue);
@@ -448,18 +448,16 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		} else if (hasDrilldown) {
 			double y;
 			double x;
-			double z;
 			double actualZ;
 			String key;
 
 			XYZDataset tmpDataset = (XYZDataset) data; //or use dataset variable of the class
 			y = tmpDataset.getYValue(series, item);
 			x = tmpDataset.getXValue(series, item);
-			z = tmpDataset.getZValue(series, item);
 			
 			actualZ=actualZValues.get(item).intValue();
 
-			key = String.valueOf(y) + String.valueOf(x) + String.valueOf(z) + String.valueOf(actualZ);
+			key = String.valueOf(y) + String.valueOf(x) + String.valueOf(actualZ);
 			link = drilldownLinks.get(key);
 		}
 

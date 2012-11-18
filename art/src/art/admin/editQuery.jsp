@@ -801,7 +801,7 @@ tinyMCE.init({
                         <br />80,"#FFFF00","Warning",
                         <br />100,"#FF0000","Critical"
 						
-						<br><br><b>Bubble</b>: <br><i> SELECT Value1, Value2 "Series Name", Value3 FROM ...</i> (data type: number, number, number )
+						<br><br><b>Bubble</b>: <br><i> SELECT Value1, Value2 "Series Name", Value3 [, normalisedValue3] FROM ...</i> (data type: number, number, number [,number] )
 
                     </li>
                 </ul>
