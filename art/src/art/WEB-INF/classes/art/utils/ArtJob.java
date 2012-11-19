@@ -1396,12 +1396,13 @@ public class ArtJob implements Job, Serializable {
 								if (recipientFilterPresent) {
 									//don't run normal email job after filtered email sent
 									generateEmail = false;
+								}
 
-									if (mailSent) {
-										fileName = "-Alert Sent";
-									} else {
-										fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
-									}
+								//set filename to status of last recipient email sent
+								if (mailSent) {
+									fileName = "-Alert Sent";
+								} else {
+									fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
 								}
 							}
 
@@ -1594,7 +1595,7 @@ public class ArtJob implements Job, Serializable {
 						}
 					}
 
-					// fileName now stores the file to mail or publish...                    
+					// fileName now stores the file to email or publish...                    
 					logger.debug("Job Id {}. File is: {}", jobId, fileName);
 
 					if (generateEmail || recipientDetails != null) {
@@ -1608,9 +1609,11 @@ public class ArtJob implements Job, Serializable {
 						//send customized emails to dynamic recipients
 						if (recipientDetails != null) {
 							Mailer m = getMailer();
+							
+							String email="";
 
 							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
-								String email = entry.getKey();
+								email = entry.getKey();
 								Map<String, String> recipientColumns = entry.getValue();
 
 								//customize message by replacing field labels with values for this recipient
@@ -1641,22 +1644,22 @@ public class ArtJob implements Job, Serializable {
 							if (recipientFilterPresent) {
 								//don't run normal email job after filtered email sent
 								generateEmail = false;
+							}
 
-								File f = new File(fileName);
-								f.delete();
-								if (mailSent) {
-									fileName = "-File has been emailed";
-								} else {
-									//if multiple recipients, some might have succeeded. no way of knowing which
-									fileName = "-Error when sending some emails."
-											+ " <p>" + m.getSendError() + "</p>";
+							//set filename to status of last recipient email sent
+							File f = new File(fileName);
+							f.delete();
+							if (mailSent) {
+								fileName = "-File has been emailed";
+							} else {
+								//if multiple recipients, some might have succeeded. no way of knowing which
+								fileName = "-Error when sending some emails."
+										+ " <p>" + m.getSendError() + "</p>";
 
-									String msg = "Error when sending some emails."
-											+ " <p>" + m.getSendError() + "</p>"
-											+ " <p>Complete address list:<br> To: " + userEmail + "<br> Cc: " + cc + "<br> Bcc: " + bcc + "</p>";
-									logger.warn(msg);
-
-								}
+								String msg = "Error when sending some emails."
+										+ " \n" + m.getSendError()
+										+ " \n To: " + email;
+								logger.warn(msg);
 							}
 						}
 
@@ -1686,8 +1689,8 @@ public class ArtJob implements Job, Serializable {
 											+ " <p>" + m.getSendError() + "</p>";
 
 									String msg = "Error when sending some emails."
-											+ " <p>" + m.getSendError() + "</p>"
-											+ " <p>Complete address list:<br> To: " + userEmail + "<br> Cc: " + cc + "<br> Bcc: " + bcc + "</p>";
+										+ " \n" + m.getSendError()
+										+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
 									logger.warn(msg);
 
 								}
