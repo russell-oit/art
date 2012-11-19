@@ -661,8 +661,8 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
         if (params.get("from") != null && params.get("to") != null) {
             NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-            int from = Integer.parseInt((String) params.get("from"));
-            int to = Integer.parseInt((String) params.get("to"));
+            Integer from = (Integer)params.get("from");
+			Integer to = (Integer)params.get("to");
             rangeAxis.setRange(from, to);
         }
 

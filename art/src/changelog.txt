@@ -3,6 +3,7 @@ ART 2.4.1
 * Fix for chart tooltips not displaying when charts displayed inline
 * Fix for issue preventing creation/modification of parameters in IE
 * Fix for charts not displaying in IE8 when charts displayed inline
+* Fix for charts not displaying when y axis range is specified
 
 ART 2.4
 * Added cc and bcc fields for email jobs
