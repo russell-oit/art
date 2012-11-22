@@ -118,22 +118,19 @@ public class jxlsOutput {
 				//template file doesn't exist.
 				logger.warn("Template file not found: {}", fullTemplateFileName);
 			} else {
-
-				//set report parameters
-				HashMap<String, String> iParams = new HashMap<String, String>();
-				iParams.putAll(inlineParams); //pass any inline parameters
-
-				//process multi parameters to obtain parameter names instead of parameter identifiers
+				//set objects to be passed to jxls
+				Map<String, Object> beans = new HashMap<String, Object>();
+				
+				//process multi parameters to obtain parameter labels instead of parameter identifiers
 				HashMap<String, String> mParams = new HashMap<String, String>();
 				PreparedQuery pq = new PreparedQuery();
 				pq.setQueryId(queryId);
 				pq.setMultiParams(multiParams);
 				mParams.putAll(pq.getJxlsMultiParams(querySql));
-
-				//set objects to be passed to jxls
-				Map<String, Object> beans = new HashMap<String, Object>();
-				beans.put("inlineParams", iParams);
-				beans.put("multiParams", mParams);
+				
+				//pass parameters 
+				beans.putAll(inlineParams);
+				beans.putAll(mParams);
 
 				if (rs == null) {
 					//pass connection to template query

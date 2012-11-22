@@ -2,7 +2,6 @@ package art.utils;
 
 import java.sql.*;
 import java.util.*;
-
 import org.apache.commons.beanutils.ResultSetDynaClass;
 
 

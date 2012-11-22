@@ -66,8 +66,8 @@ public class PreparedQuery {
 	private String finalSQL = ""; //final sql statement. if query has inline parameters, sql will have query values
 	String queryStatus;
 	Map<String, List> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
-	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter name and value as corresponding object e.g. Double, Long. for jasper reports
-	Map<String, String> jxlsMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jxls reports
+	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter label and value as corresponding object e.g. Double, Long. for jasper reports
+	Map<String, String> jxlsMultiParams; //hash map will contain multi parameter label and values instead of parameter id e.g. M_2 and string array of values. for jxls reports
 	int queryType; //to enable special handling of template queries where sql source is not executed
 	boolean viewingTextObject = false; //flag used to check if user has rights to edit a text object
 	Map<String, ArtQueryParam> htmlParams; //all the queries parameters, with the html name as the key
@@ -1588,7 +1588,7 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Process multi parameters and generate a map with parameter name and
+	 * Process multi parameters and generate a map with parameter label and
 	 * values. To be used for jxls reports
 	 *
 	 * @param querySql

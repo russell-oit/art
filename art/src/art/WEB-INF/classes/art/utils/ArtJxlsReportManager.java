@@ -1,12 +1,10 @@
 package art.utils;
 
+import art.servlets.ArtDBCP;
 import java.sql.*;
 import java.util.*;
-
-import art.servlets.ArtDBCP;
-
-import org.apache.commons.beanutils.RowSetDynaClass;
 import net.sf.jxls.report.ReportManager;
+import org.apache.commons.beanutils.RowSetDynaClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
