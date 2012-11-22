@@ -47,7 +47,7 @@
 			<fileset dir="." includes="**/*.class"/>			
 			<fileset dir="." includes="export/*" excludes="export/index.html"/>
 			<fileset dir="." includes="export/jobs/*" excludes="export/jobs/index.html"/>
-			<fileset dir="." includes="WEB-INF/templates/*" excludes="readme.txt,sample-*.*"/>
+			<fileset dir="WEB-INF/templates/" excludes="readme.txt,sample-*.*"/>
 		</delete>
 	</target>
 
