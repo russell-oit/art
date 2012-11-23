@@ -208,4 +208,4 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
 
 </table>
 </p>
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>

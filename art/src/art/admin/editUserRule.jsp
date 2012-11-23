@@ -123,4 +123,4 @@ if (action.equals("DELETE")){
 
 
 
-<%@ include file="footer.html" %>
+<%@ include file="/user/footer.jsp" %>

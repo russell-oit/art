@@ -146,7 +146,7 @@ public class QueryExecute extends HttpServlet {
 
 		while (rs.next() && counter < defaultMaxRows) {
 			// Separators
-			out.println("<br><hr width=\"90%\" size=\"1\"><br>");
+			out.println("<br><hr style=\"width:90%;height:1px\"><br>");
 
 			// Output Main Header and Main Data
 			o.header(90);

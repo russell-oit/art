@@ -36,6 +36,7 @@ onChangeAllowSharing(document.getElementById("allowSharing"));
 </script>
 
 <%
+String help;
 
 String msg="";
 
@@ -730,7 +731,13 @@ function onClickSaveSchedule(t){
 	   <tr><td class="action" colspan="4" ><i><%=messages.getString("jobEmailMessage")%></i></td></tr>
 	   <tr>
 		   <td class="data"> <%=messages.getString("mailFrom")%> </td>
-		   <td class="data" colspan="2"> <input type="text" name="from" value="<%=email%>" size="30" readonly>
+		   <td class="data" colspan="2">
+			   <input type="text" name="from" value="<%=email%>" size="30" readonly>
+			   <%
+			   help = "Your email address as configured in the user definition." +
+					   "\\nIf it is blank, emails will not be sent successfully.";
+			   %>
+        <input type="button" class="buttonup" onClick="alert('<%=help%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		   </td>
 	   </tr>
 	   <tr>

@@ -63,4 +63,4 @@
     </table>    
 </form>
 
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>

@@ -71,7 +71,7 @@
      </span>
  <% } %>
 
- <hr width="100%" size="1">
+ <hr style="width:100%;height:1px">
  
  </c:if>
  <c:if test="${!empty param._mobile}">  

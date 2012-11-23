@@ -695,5 +695,5 @@ ServletContext ctx   = getServletConfig().getServletContext();
   </table>
  </p>
 </pre>
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>
 

@@ -25,7 +25,7 @@ if (action.equals("DELETE")){
 		}
 		out.println("</pre>");
 		%>
-		<%@ include file="footer.html" %>
+		<%@ include file="/user/footer.jsp" %>
 		<%
 		return;
 	} else {
@@ -75,4 +75,4 @@ if (action.equals("MODIFY")){
 </form>
 
 
-<%@ include file="footer.html" %>
+<%@ include file="/user/footer.jsp" %>

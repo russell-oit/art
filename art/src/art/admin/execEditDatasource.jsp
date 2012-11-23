@@ -80,6 +80,6 @@ ArtDBCP.refreshConnections();
 	<a href="manageDatasources.jsp">Finish</a>
 </div>
 
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>
 
 

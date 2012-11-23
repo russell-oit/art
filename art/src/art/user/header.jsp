@@ -20,6 +20,7 @@
  <script type="text/javascript" src="<%= request.getContextPath() %>/js/scriptaculous/scriptaculous.js"></script>
  
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery.js"></script>
+  <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery.form.js"></script>
  
  <script type="text/javascript">
 	jQuery.noConflict();
@@ -84,7 +85,7 @@
     <img src="<%= request.getContextPath() %>/images/spinner.gif" alt="Executing..." />
   </div>
 
- <hr width="100%" size="1">
+ <hr style="width:100%;height:1px">
  
  </c:if>
  <c:if test="${!empty param._mobile}">  

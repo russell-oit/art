@@ -140,4 +140,4 @@ ArtQuery aq=new ArtQuery();
     </table>
 </form>
 
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>

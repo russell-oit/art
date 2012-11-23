@@ -26,7 +26,7 @@ if (action.equals("DELETE")){
 			out.println("The user <b>" + rule.getUsername() + "</b> references user <i>" + username + "</i> for the rule <b>" + rule.getRuleName() + "</b>");
 		}
 		%>
-		<%@ include file="footer.html" %>
+		<%@ include file="/user/footer.jsp" %>
 		<%
 		return;
 	} else {
@@ -244,4 +244,4 @@ username=ue.getUsername();
     </div>
 
 
-<%@ include file="footer.html" %>
+<%@ include file="/user/footer.jsp" %>

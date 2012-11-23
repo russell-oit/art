@@ -29,7 +29,7 @@ if (action.equals("DELETE")){
 		}
 		out.println("</pre>");
 		%>
-		<%@ include file="footer.html" %>
+		<%@ include file="/user/footer.jsp" %>
 		<%
 		return;
 	} else {
@@ -194,4 +194,4 @@ String msg;
 	
 </form>
 
-<%@ include file="footer.html" %>
+<%@ include file="/user/footer.jsp" %>

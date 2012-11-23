@@ -42,7 +42,7 @@
   </td>
  </tr>
 </table>
-<hr width="100%" size="1">
+<hr style="width:100%;height:1px">
 <p>
 <table align="center">
  <tr>
@@ -55,6 +55,6 @@
  </tr>
 </table>
 </p>
-<%@ include file ="user/footer.jsp" %>
+<%@ include file ="/user/footer.jsp" %>
 
 

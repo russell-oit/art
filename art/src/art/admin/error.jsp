@@ -54,5 +54,5 @@
         </td></tr>
 </table>
 </p>
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>
 

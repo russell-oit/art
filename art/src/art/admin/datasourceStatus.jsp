@@ -44,4 +44,4 @@ if (action!=null && request.getSession().getAttribute("AdminSession")!=null) {
 %>
 
 
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>

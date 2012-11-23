@@ -52,5 +52,5 @@
             </tr>
         </table>
 
-        <hr width="100%" size="2">
+        <hr style="width:100%;height:2px">
 

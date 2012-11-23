@@ -74,4 +74,4 @@ if (action.equals("MODIFY")){
 
 <%@ include file="/user/scheduleHelp.html" %>
 
-<%@ include file="footer.html" %>
+<%@ include file="/user/footer.jsp" %>

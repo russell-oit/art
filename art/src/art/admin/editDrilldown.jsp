@@ -131,5 +131,5 @@ dq.create(queryId,queryPosition);
 </form> 
 
 
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>
 

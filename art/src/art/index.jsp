@@ -36,7 +36,7 @@ return;
         </script>
     </head>
     <body>
-        <hr width="100%" size="2">
+        <hr style="width:100%;height:2px">
 
         <div>
             <br>
@@ -64,7 +64,7 @@ return;
 
         <div>
             <br>
-            <hr width="100%" size="2">
+            <hr style="width:100%;height:2px">
         </div>
     </body>
 </html>

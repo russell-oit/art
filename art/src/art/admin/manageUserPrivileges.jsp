@@ -152,4 +152,4 @@ String username=(String) session.getAttribute("AdminUsername");
 
 
 
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>

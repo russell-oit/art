@@ -256,5 +256,5 @@ String help;
     onTypeSelection();
 </script>
 
-<%@ include file ="footer.html" %>
+<%@ include file ="/user/footer.jsp" %>
 
