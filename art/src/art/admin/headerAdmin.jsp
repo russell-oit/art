@@ -3,6 +3,11 @@
 
 <%	
  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+  art.utils.UserEntity ue2 = (art.utils.UserEntity) session.getAttribute("ue");
+ int accessLevel=0;
+ if(ue2!=null){
+	accessLevel=ue2.getAdminLevel(); 
+ }
 %>
 
 <html>
@@ -25,15 +30,21 @@
     <body>
         <table width="100%"  class="art" cellpadding="0" cellspacing="0">
             <tr>
-                <td align="left" class="attr" >
-                    <a href="<%= request.getContextPath() %>/admin/adminConsole.jsp">Admin Console</a>
+                <td class="attr" align="left" width="50%">
+                    &nbsp;<a href="<%= request.getContextPath() %>/admin/adminConsole.jsp" ><img src="<%= request.getContextPath() %>/images/admin.png" title="Admin Console" border="0" /></a>
 
                     <% if (session.getAttribute("username") != null) {%>
 
-                    :: <a href="<%= request.getContextPath() %>/user/showGroups.jsp">Start Page</a>
-                    <% } %>
+                    :: <a href="<%= request.getContextPath() %>/user/showGroups.jsp"><img src="<%= request.getContextPath() %>/images/back-home.png" title="<%=messages.getString("startLink")%>" border="0" /></a> 
+					:: <a href="<%= request.getContextPath() %>/user/myJobs.jsp" ><img src="<%= request.getContextPath() %>/images/jobs.png" title="<%=messages.getString("myJobsLink")%>" border="0" /></a>
+					:: <a href="<%= request.getContextPath() %>/user/sharedJobs.jsp"> <img src="<%= request.getContextPath() %>/images/shared-jobs.png" title="<%=messages.getString("sharedJobsLink")%>" border="0" /></a>
+					
+					<% if (accessLevel == 100) {%>
+					:: <a href="<%= request.getContextPath() %>/logs" ><img src="<%= request.getContextPath() %>/images/logs.png" title="<%=messages.getString("logsLink")%>" border="0" /></a>
+					<% }
+					}%>
 
-                    :: <a href="<%= request.getContextPath() %>/logOff.jsp">Log Off</a>
+                    :: <a href="<%= request.getContextPath() %>/logOff.jsp"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOffLink")%>" border="0" /></a>
                     <img src="<%= request.getContextPath() %>/images/vertical_16px.gif">
                 </td>
                 <td class="attr" align="right" width="50%">
@@ -43,10 +54,9 @@
                     </span>
                     <img src="<%= request.getContextPath() %>/images/vertical_16px.gif">
 
-                    <% if (session.getAttribute("ue") != null) {
-					art.utils.UserEntity ue = ( art.utils.UserEntity) session.getAttribute("ue");%>
-                    <%= ue.getUsername()%>
-                    :: Logged in at <%=java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT,request.getLocale()).format(ue.getLoginDate())%>
+                    <% if (ue2 != null) { %>
+                    <%= ue2.getUsername()%>
+                    :: Logged in at <%=java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT,request.getLocale()).format(ue2.getLoginDate())%>
                     <% } %>
                 </td>
             </tr>

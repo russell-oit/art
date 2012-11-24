@@ -1,6 +1,6 @@
 <%@ page import="java.sql.*,java.io.File,art.utils.*,art.servlets.ArtDBCP" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ include file ="headerAdminPlain.jsp" %>
+<%@ include file ="headerAdmin.jsp" %>
 
 <%
   String isValidAdminSession = (String) session.getAttribute("AdminSession");
@@ -271,7 +271,7 @@ if(!propsFile.exists()){
 			urlElement.value="demo";
 		} else if(dbType == "hsqldb-server"){
 			driverElement.value="org.hsqldb.jdbcDriver";
-			urlElement.value="jdbc:hsqldb:hsql://<server_name>:9001:<database_name>";
+			urlElement.value="jdbc:hsqldb:hsql://<server_name>:9001/<database_name>";
 		}
 	}
 </script>
@@ -374,6 +374,8 @@ if(!propsFile.exists()){
    <tr><td class="attr"> ART Administrator Email</td>
        <td class="data">
          <input type="text" name="administrator" size="60" maxlength="120" value="<%=administrator%>">
+		 <%msg = "Appears in the ART Support link in the footer of ART pages"; %>
+		<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
        </td>
    </tr>
 
