@@ -422,24 +422,31 @@ public class ExportGraph {
 					speedometerChart.finalizePlot(speedometerPlot);
 
 					break;
-				case -11:
-					//bubble chart
+				case -11: //bubble chart
+				case -12: //heat map
 
-					//create dataset for speedometer chart
-					ArtBubbleChart bubble = new ArtBubbleChart();
-					bubble.setSeriesName(seriesName);
-					bubble.prepareDataset(rs);
-					DefaultXYZDataset bubbleDataset = (DefaultXYZDataset) bubble.produceDataset(null);
+					//bubble chart or heat map chart
 
-					//create chart
-					chart = ChartFactory.createBubbleChart(title, xlabel, ylabel, bubbleDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+					//create dataset 
+					ArtXYZChart xyz = new ArtXYZChart();
+					xyz.setSeriesName(seriesName);
+					xyz.setQueryType(queryType);
+					xyz.prepareDataset(rs);
+					DefaultXYZDataset xyzDataset = (DefaultXYZDataset) xyz.produceDataset(null);
 
-					XYPlot bubblePlot = (XYPlot) chart.getPlot();
+					//todo: implement code for creating heat map
 
-					//set y axis range if required
-					if (from != 0 && to != 0) {
-						NumberAxis rangeAxis = (NumberAxis) bubblePlot.getRangeAxis();
-						rangeAxis.setRange(from, to);
+					if (queryType == -11) {
+						//create chart
+						chart = ChartFactory.createBubbleChart(title, xlabel, ylabel, xyzDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+
+						XYPlot bubblePlot = (XYPlot) chart.getPlot();
+
+						//set y axis range if required
+						if (from != 0 && to != 0) {
+							NumberAxis rangeAxis = (NumberAxis) bubblePlot.getRangeAxis();
+							rangeAxis.setRange(from, to);
+						}
 					}
 
 					break;

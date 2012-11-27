@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProcessor,
+public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcessor,
 		Serializable, XYToolTipGenerator, XYItemLinkGenerator {
 
 	private static final long serialVersionUID = 1L;
@@ -67,7 +67,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 	ArrayList<Double> actualZValues = new ArrayList<Double>();
 	int queryType;
 
-	public ArtBubbleChart() {
+	public ArtXYZChart() {
 	}
 
 	@Override

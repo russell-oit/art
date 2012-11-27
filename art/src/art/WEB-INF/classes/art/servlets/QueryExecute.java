@@ -220,24 +220,26 @@ public class QueryExecute extends HttpServlet {
 
 		ArtGraph o;
 
-		switch (Math.abs(queryType)) {
-			case 1:
+		switch (queryType) {
+			case -1:
 				o = new ArtXY();
 				break;
-			case 2:
+			case -2:
 				o = new ArtPie();
 				break;
-			case 6:
+			case -6:
 				o = new ArtTimeSeries();
 				break;
-			case 7:
+			case -7:
 				o = new ArtDateSeries();
 				break; //  this line was missing... added thanks to anonymous post in sf
-			case 10:
+			case -10:
 				o = new ArtSpeedometer();
 				break;
-			case 11:
-				o=new ArtBubbleChart();
+			case -11:
+			case -12:
+				o=new ArtXYZChart();
+				o.setQueryType(queryType);
 				break;
 			default: //3-5, 8,9
 				o = new ArtCategorySeries();
