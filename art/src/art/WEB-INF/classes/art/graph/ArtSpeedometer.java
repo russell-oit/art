@@ -2,6 +2,7 @@ package art.graph;
 
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
+import com.mysql.jdbc.StringUtils;
 import de.laures.cewolf.ChartPostProcessor;
 import de.laures.cewolf.DatasetProducer;
 import java.awt.BasicStroke;
@@ -11,6 +12,7 @@ import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.beanutils.RowSetDynaClass;
@@ -24,320 +26,323 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to generate speedometer chart.
-Query should be in the form <p>
-
-<code>select dataValue, minValue, maxValue, unitsDescription, ranges </code> <br><br>
-<b>ranges</b> represent optional sections and a range has 3 columns i.e. rangeUpperValue, rangeColour, rangeDescription
- * </p>
-
-<b>Example</b>
+ * Class to generate speedometer chart. Query should be in the form <p>
+ *
+ * <code>select dataValue, minValue, maxValue, unitsDescription, ranges </code>
+ * <br><br> <b>ranges</b> represent optional sections and a range has 3 columns
+ * i.e. rangeUpperValue, rangeColour, rangeDescription </p>
+ *
+ * <b>Example</b>
  * <pre>
  * <code>
-select 45, 0, 100, "Units",
-50,"#00FF00","Normal",
-80,"#FFFF00","Warning",
-100,"#FF0000","Critical"
+ * select 45, 0, 100, "Units",
+ * 50,"#00FF00","Normal",
+ * 80,"#FFFF00","Warning",
+ * 100,"#FF0000","Critical"
  * </code>
  * </pre>
- * 
+ *
  * @author Timothy Anyona
  */
 public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProcessor, Serializable {
 
-    private static final long serialVersionUID = 1L;
-    
-    final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
-        
-    String title = "Title";
-    String xlabel = "Not Used";
-    String ylabel = "Not Used";
-    String seriesName = "Not Used";
-    int height = 300;
-    int width = 500;
-    String bgColor = "#FFFFFF";
-    boolean useHyperLinks = false;
-    boolean hasDrilldown = false;
-    boolean hasTooltips = false;
-    double minValue;
-    double maxValue;
-    String unitsDescription;
-    TreeMap<Integer, Double> rangeValues;
-    TreeMap<Integer, String> rangeColors;
-    TreeMap<Integer, String> rangeDescriptions;
-    TreeMap<Integer, Range> rangeRanges;
-    int rangeCount;
-    String openDrilldownInNewWindow;
-    DefaultValueDataset dataset = new DefaultValueDataset();
-	Map<Integer,ArtQueryParam> displayParameters=null; //to enable display of graph parameters in pdf output
-	    
+	private static final long serialVersionUID = 1L;
+	final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
+	String title = "Title";
+	String xlabel = "Not Used";
+	String ylabel = "Not Used";
+	String seriesName = "Not Used";
+	int height = 300;
+	int width = 500;
+	String bgColor = "#FFFFFF";
+	boolean useHyperLinks = false;
+	boolean hasDrilldown = false;
+	boolean hasTooltips = false;
+	double minValue;
+	double maxValue;
+	String unitsDescription;
+	TreeMap<Integer, Double> rangeValues;
+	TreeMap<Integer, String> rangeColors;
+	TreeMap<Integer, String> rangeDescriptions;
+	TreeMap<Integer, Range> rangeRanges;
+	int rangeCount;
+	String openDrilldownInNewWindow;
+	DefaultValueDataset dataset = new DefaultValueDataset();
+	Map<Integer, ArtQueryParam> displayParameters = null; //to enable display of graph parameters in pdf output
 
-    /**
-     * Constructor
-     */
-    public ArtSpeedometer() {
-    }
-	
-	@Override
-	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
-		displayParameters=value;
+	/**
+	 * Constructor
+	 */
+	public ArtSpeedometer() {
 	}
 	
 	@Override
-	public Map<Integer,ArtQueryParam> getDisplayParameters(){
+	public void setQueryType(int queryType) {
+		//not used
+	}
+
+	@Override
+	public void setDisplayParameters(Map<Integer, ArtQueryParam> value) {
+		displayParameters = value;
+	}
+
+	@Override
+	public Map<Integer, ArtQueryParam> getDisplayParameters() {
 		return displayParameters;
 	}
-	
+
 	@Override
-	public RowSetDynaClass getGraphData(){
+	public RowSetDynaClass getGraphData() {
 		return null; //never show data for speedometer chart
 	}
-	
+
 	@Override
-	public void setShowGraphData(boolean value){
+	public void setShowGraphData(boolean value) {
 		//do nothing. for speedometer never show data. doesn't make sense
 	}
-	
+
 	@Override
-	public boolean isShowGraphData(){
+	public boolean isShowGraphData() {
 		return false; //for speedometer never show data. doesn't make sense
 	}
-   
-    @Override
-    public String getOpenDrilldownInNewWindow() {
-        return openDrilldownInNewWindow;
-    }
 
-    @Override
-    public boolean getHasTooltips() {
-        return hasTooltips;
-    }
+	@Override
+	public String getOpenDrilldownInNewWindow() {
+		return openDrilldownInNewWindow;
+	}
 
-    @Override
-    public boolean getHasDrilldown() {
-        return hasDrilldown;
-    }
+	@Override
+	public boolean getHasTooltips() {
+		return hasTooltips;
+	}
 
-    @Override
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	@Override
+	public boolean getHasDrilldown() {
+		return hasDrilldown;
+	}
 
-    @Override
-    public String getTitle() {
-        return title;
-    }
+	@Override
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    @Override
-    public void setXlabel(String xlabel) {
-        this.xlabel = xlabel;
-    }
+	@Override
+	public String getTitle() {
+		return title;
+	}
 
-    @Override
-    public String getXlabel() {
-        return xlabel;
-    }
+	@Override
+	public void setXlabel(String xlabel) {
+		this.xlabel = xlabel;
+	}
 
-    @Override
-    public void setYlabel(String value) {
-        this.ylabel = value;
-    }
+	@Override
+	public String getXlabel() {
+		return xlabel;
+	}
 
-    @Override
-    public String getYlabel() {
-        return ylabel;
-    }
+	@Override
+	public void setYlabel(String value) {
+		this.ylabel = value;
+	}
 
-    @Override
-    public void setSeriesName(String value) {
-        this.seriesName = value;
-    }
+	@Override
+	public String getYlabel() {
+		return ylabel;
+	}
 
-    @Override
-    public void setWidth(int value) {
-        this.width = value;
-    }
+	@Override
+	public void setSeriesName(String value) {
+		this.seriesName = value;
+	}
 
-    @Override
-    public int getWidth() {
-        return width;
-    }
+	@Override
+	public void setWidth(int value) {
+		this.width = value;
+	}
 
-    @Override
-    public void setHeight(int value) {
-        this.height = value;
-    }
+	@Override
+	public int getWidth() {
+		return width;
+	}
 
-    @Override
-    public int getHeight() {
-        return height;
-    }
+	@Override
+	public void setHeight(int value) {
+		this.height = value;
+	}
 
-    @Override
-    public void setBgColor(String value) {
-        this.bgColor = value;
-    }
+	@Override
+	public int getHeight() {
+		return height;
+	}
 
-    @Override
-    public String getBgColor() {
-        return bgColor;
-    }
+	@Override
+	public void setBgColor(String value) {
+		this.bgColor = value;
+	}
 
-    @Override
-    public void setUseHyperLinks(boolean b) {
-        this.useHyperLinks = b;
-    }
+	@Override
+	public String getBgColor() {
+		return bgColor;
+	}
 
-    @Override
-    public boolean getUseHyperLinks() {
-        return useHyperLinks;
-    }
+	@Override
+	public void setUseHyperLinks(boolean b) {
+		this.useHyperLinks = b;
+	}
 
-    //overload used by exportgraph class. no drill down for scheduled charts
-    @Override
-    public void prepareDataset(ResultSet rs) throws SQLException {
-        prepareDataset(rs, null, null, null);
-    }
+	@Override
+	public boolean getUseHyperLinks() {
+		return useHyperLinks;
+	}
 
-    //prepare graph data structures with query results
-    @Override
-    public void prepareDataset(ResultSet rs, Map<Integer, DrilldownQuery> drilldownQueries, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
+	//overload used by exportgraph class. no drill down for scheduled charts
+	@Override
+	public void prepareDataset(ResultSet rs) throws SQLException {
+		prepareDataset(rs, null, null, null);
+	}
 
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int columnCount = rsmd.getColumnCount();
+	//prepare graph data structures with query results
+	@Override
+	public void prepareDataset(ResultSet rs, Map<Integer, DrilldownQuery> drilldownQueries, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
 
-        if (rs.next()) {
-            dataset.setValue(rs.getDouble(1));
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
 
-            minValue = rs.getDouble(2);
-            maxValue = rs.getDouble(3);
-            unitsDescription = rs.getString(4);
+		if (rs.next()) {
+			dataset.setValue(rs.getDouble(1));
 
-            if (columnCount > 4) {
-                //ranges have been specified
-                rangeValues = new TreeMap<Integer, Double>();
-                rangeColors = new TreeMap<Integer, String>();
-                rangeDescriptions = new TreeMap<Integer, String>();
-                rangeRanges = new TreeMap<Integer, Range>();
-                Integer key;
-                rangeCount = 0;
-                int i;
-                for (i = 5; i < columnCount; i += 3) {
-                    rangeCount++;
-                    key = new Integer(rangeCount);
-                    rangeValues.put(key, rs.getDouble(i));
-                    rangeColors.put(key, rs.getString(i + 1));
-                    rangeDescriptions.put(key, rs.getString(i + 2));
-                }
+			minValue = rs.getDouble(2);
+			maxValue = rs.getDouble(3);
+			unitsDescription = rs.getString(4);
 
-                //build chart ranges
-                double rangeMin;
-                double rangeMax;
-                for (i = 1; i <= rangeCount; i++) {
-                    key = new Integer(i);
-                    if (i == 1) {
-                        rangeMin = minValue;
-                        rangeMax = rangeValues.get(key);
-                    } else {
-                        rangeMin = rangeValues.get(key - 1);
-                        rangeMax = rangeValues.get(key);
-                    }
-                    Range range = new Range(rangeMin, rangeMax);
-                    rangeRanges.put(key, range);
-                }
-            }
-        }
-    }
+			if (columnCount > 4) {
+				//ranges have been specified
+				rangeValues = new TreeMap<Integer, Double>();
+				rangeColors = new TreeMap<Integer, String>();
+				rangeDescriptions = new TreeMap<Integer, String>();
+				rangeRanges = new TreeMap<Integer, Range>();
+				Integer key;
+				rangeCount = 0;
+				for (int i = 5; i <= columnCount; i++) {
+					String rangeSpec = rs.getString(i);
+					List<String> rangeDetails = StringUtils.split(rangeSpec, ":", false);
+					if (rangeDetails.size() == 3) {
+						rangeCount++;
+						key = new Integer(rangeCount);
+						rangeValues.put(key, Double.valueOf(rangeDetails.get(0)));
+						rangeColors.put(key, rangeDetails.get(1));
+						rangeDescriptions.put(key, rangeDetails.get(2));
+					}
+				}
 
-    /**
-     * 
-     * @param params
-     * @return dataset to be used for rendering the chart
-     */
-    @Override
-    public Object produceDataset(Map params) {
-        return dataset;
-    }
+				//build chart ranges
+				double rangeMin;
+				double rangeMax;
+				for (int i = 1; i <= rangeCount; i++) {
+					key = new Integer(i);
+					if (i == 1) {
+						rangeMin = minValue;
+						rangeMax = rangeValues.get(key);
+					} else {
+						rangeMin = rangeValues.get(key - 1);
+						rangeMax = rangeValues.get(key);
+					}
+					Range range = new Range(rangeMin, rangeMax);
+					rangeRanges.put(key, range);
+				}
+			}
+		}
+	}
 
-    
-    /**
-     * 
-     * @return identifier for this producer class
-     */
-    @Override
-    public String getProducerId() {
-        return "SpeedometerDataProducer";
-    }
+	/**
+	 *
+	 * @param params
+	 * @return dataset to be used for rendering the chart
+	 */
+	@Override
+	public Object produceDataset(Map params) {
+		return dataset;
+	}
 
-    /**
-     * 
-     * @param params
-     * @param since
-     * @return <code>true</code> if the data for the chart has expired
-     */
-    @Override
-    public boolean hasExpired(Map params, java.util.Date since) {
-        return true;
-    }
+	/**
+	 *
+	 * @return identifier for this producer class
+	 */
+	@Override
+	public String getProducerId() {
+		return "SpeedometerDataProducer";
+	}
 
-    /**
-     * 
-     * @param ch
-     * @param params
-     */
-    @Override
-    public void processChart(Object ch, Map params) {
-        JFreeChart chart = (JFreeChart) ch;
-        MeterPlot plot = (MeterPlot) chart.getPlot();
+	/**
+	 *
+	 * @param params
+	 * @param since
+	 * @return <code>true</code> if the data for the chart has expired
+	 */
+	@Override
+	public boolean hasExpired(Map params, java.util.Date since) {
+		return true;
+	}
 
-        finalizePlot(plot);
+	/**
+	 *
+	 * @param ch
+	 * @param params
+	 */
+	@Override
+	public void processChart(Object ch, Map params) {
+		JFreeChart chart = (JFreeChart) ch;
+		MeterPlot plot = (MeterPlot) chart.getPlot();
 
-        boolean showLegend = (Boolean) params.get("showLegend");
-        if (!showLegend) {
-            chart.removeLegend();
-        }
+		finalizePlot(plot);
 
-        // Output to file if required     	  
-        String outputToFile = (String) params.get("outputToFile");
-        String fileName = (String) params.get("fullFileName");
-        if (outputToFile.equals("pdf")) {
-            PdfGraph.createPdf(chart, fileName, title, null, displayParameters);
-        } else if (outputToFile.equals("png")) {
-            //save chart as png file									            
-            try {
-                ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);
-            } catch (Exception e) {
-                logger.error("Error",e);
-            }
-        }
-    }
+		boolean showLegend = (Boolean) params.get("showLegend");
+		if (!showLegend) {
+			chart.removeLegend();
+		}
 
-    //finalize the plot including adding ranges, units description and custom formatting
-    //put code in a method so that it can be used from exportgraph
-    /**
-     * 
-     * @param plot
-     */
-    public void finalizePlot(MeterPlot plot) {
-        plot.setRange(new Range(minValue, maxValue));
-        plot.setUnits(unitsDescription);
+		// Output to file if required     	  
+		String outputToFile = (String) params.get("outputToFile");
+		String fileName = (String) params.get("fullFileName");
+		if (outputToFile.equals("pdf")) {
+			PdfGraph.createPdf(chart, fileName, title, null, displayParameters);
+		} else if (outputToFile.equals("png")) {
+			//save chart as png file									            
+			try {
+				ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+	}
+
+	//finalize the plot including adding ranges, units description and custom formatting
+	//put code in a method so that it can be used from exportgraph
+	/**
+	 *
+	 * @param plot
+	 */
+	public void finalizePlot(MeterPlot plot) {
+		plot.setRange(new Range(minValue, maxValue));
+		plot.setUnits(unitsDescription);
 
 		plot.setBackgroundPaint(Color.lightGray);
-        plot.setNeedlePaint(Color.darkGray);
+		plot.setNeedlePaint(Color.darkGray);
 
-        //set ranges
-        int i;
-        String description;
-        Color rangeColor;
-        for (i = 1; i <= rangeCount; i++) {
-            description = rangeDescriptions.get(i);
-            rangeColor = Color.decode(rangeColors.get(i));
-            MeterInterval interval = new MeterInterval(description, rangeRanges.get(i), rangeColor, new BasicStroke(2.0F), null);
-            plot.addInterval(interval);
-        }
+		//set ranges
+		int i;
+		String description;
+		Color rangeColor;
+		for (i = 1; i <= rangeCount; i++) {
+			description = rangeDescriptions.get(i);
+			rangeColor = Color.decode(rangeColors.get(i));
+			MeterInterval interval = new MeterInterval(description, rangeRanges.get(i), rangeColor, new BasicStroke(2.0F), null);
+			plot.addInterval(interval);
+		}
 
-        //set tick interval. display interval every 10 percent. by default ticks are displayed every 10 units. can be too many with large values
-        double tickInterval = (maxValue - minValue) / 10.0;
-        plot.setTickSize(tickInterval);
-    }
+		//set tick interval. display interval every 10 percent. by default ticks are displayed every 10 units. can be too many with large values
+		double tickInterval = (maxValue - minValue) / 10.0;
+		plot.setTickSize(tickInterval);
+	}
 }

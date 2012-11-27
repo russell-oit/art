@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to render bubble charts
+ * Class to render bubble charts and heat map charts
  *
  * @author Timothy Anyona
  */
@@ -65,6 +65,15 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
 	int columnCount; //resultset can have extra column with actual z value
 	ArrayList<Double> actualZValues = new ArrayList<Double>();
+	int queryType;
+
+	public ArtBubbleChart() {
+	}
+
+	@Override
+	public void setQueryType(int queryType) {
+		this.queryType = queryType;
+	}
 
 	@Override
 	public void setTitle(String title) {
@@ -181,27 +190,29 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		ArrayList<Double> xValues = new ArrayList<Double>();
 		ArrayList<Double> yValues = new ArrayList<Double>();
 		ArrayList<Double> zValues = new ArrayList<Double>();
-		
-		columnCount=rs.getMetaData().getColumnCount();
+
+		columnCount = rs.getMetaData().getColumnCount();
 
 		while (rs.next()) {
 			x = rs.getDouble(1);
 			y = rs.getDouble(2);
-			actualZ = rs.getDouble(3); 
-			
-			if(columnCount>=4){
-				z=rs.getDouble(4); //bubble value may be normalized to the y axis values so that bubbles aren't too large
-			} else {
-				z=actualZ;
+			z = rs.getDouble(3);
+			actualZ = z;
+
+			if (queryType == 11) {
+				//bubble chart
+				if (columnCount >= 4) {
+					z = rs.getDouble(4); //bubble value may be normalized to the y axis values so that bubbles aren't too large
+				}
 			}
 			xValues.add(new Double(x));
 			yValues.add(new Double(y));
 			zValues.add(new Double(z));
 			actualZValues.add(new Double(actualZ));
-			
+
 			if (useHyperLinks) {
 				hyperLinks.add(rs.getString(5)); //if use LINKs, must have 5 columns - actualZ column, then link column
-			} 
+			}
 
 			//set drill down hyperlinks
 			if (drilldown != null) {
@@ -364,7 +375,7 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 
 	@Override
 	public String getProducerId() {
-		return "BubbleDataProducer";
+		return "XYZDataProducer";
 	}
 
 	@Override
@@ -374,8 +385,8 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		//allow setting of y axis range
 		if (params.get("from") != null && params.get("to") != null) {
 			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-			Integer from = (Integer)params.get("from");
-			Integer to = (Integer)params.get("to");
+			Integer from = (Integer) params.get("from");
+			Integer to = (Integer) params.get("to");
 			rangeAxis.setRange(from, to);
 		}
 
@@ -425,13 +436,15 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		//format z value
 		double zValue;
 		String formattedZValue;
-		
-		if(columnCount==3){
-			//use z value in dataset (it will contain actual z value)
-			zValue = dataset.getZValue(series, index);
-		} else {
-			//use actual z value (z value in dataset contains a normalised value)
-			zValue=actualZValues.get(index);
+
+		zValue = dataset.getZValue(series, index);
+
+		if (queryType == 11) {
+			//bubble chart
+			if (columnCount >= 4) {
+				//use actual z value (z value in dataset contains a normalised value)
+				zValue = actualZValues.get(index);
+			}
 		}
 		formattedZValue = valueFormatter.format(zValue);
 
@@ -448,14 +461,20 @@ public class ArtBubbleChart implements ArtGraph, DatasetProducer, ChartPostProce
 		} else if (hasDrilldown) {
 			double y;
 			double x;
+			double z;
 			double actualZ;
 			String key;
 
 			XYZDataset tmpDataset = (XYZDataset) data; //or use dataset variable of the class
 			y = tmpDataset.getYValue(series, item);
 			x = tmpDataset.getXValue(series, item);
-			
-			actualZ=actualZValues.get(item).intValue();
+			z = tmpDataset.getZValue(series, item);
+			actualZ = z;
+
+			if (queryType == 11) {
+				//bubble chart
+				actualZ = actualZValues.get(item).intValue();
+			}
 
 			key = String.valueOf(y) + String.valueOf(x) + String.valueOf(actualZ);
 			link = drilldownLinks.get(key);

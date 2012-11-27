@@ -133,6 +133,11 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
     }
 	
 	@Override
+	public void setQueryType(int queryType) {
+		//not used
+	}
+	
+	@Override
 	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
 		displayParameters=value;
 	}
@@ -323,7 +328,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
             }
 
             while (rs.next()) {
-                //Categiory data set: addValue(value,series,category)
+                //Category data set: addValue(value,series,category)
 
                 category = rs.getString(1);
                 for (series = 0; series < seriesNames.length; series++) {

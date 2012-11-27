@@ -105,6 +105,11 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
     }
 	
 	@Override
+	public void setQueryType(int queryType) {
+		//not used
+	}
+	
+	@Override
 	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
 		displayParameters=value;
 	}

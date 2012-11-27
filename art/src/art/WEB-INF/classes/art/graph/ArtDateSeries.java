@@ -123,6 +123,11 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
     }
 	
 	@Override
+	public void setQueryType(int queryType) {
+		//not used
+	}
+	
+	@Override
 	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
 		displayParameters=value;
 	}

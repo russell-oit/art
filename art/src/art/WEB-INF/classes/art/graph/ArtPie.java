@@ -85,6 +85,11 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	}
 	
 	@Override
+	public void setQueryType(int queryType) {
+		//not used
+	}
+	
+	@Override
 	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
 		displayParameters=value;
 	}

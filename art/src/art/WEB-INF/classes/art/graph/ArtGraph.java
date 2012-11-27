@@ -247,5 +247,12 @@ public interface ArtGraph {
 	 * @return parameters to be displayed with the graph output
 	 */
 	public Map<Integer,ArtQueryParam> getDisplayParameters();
+	
+	/**
+	 * Set the query type
+	 * Useful for classes which generate charts for multiple query types
+	 * @param queryType 
+	 */
+	public void setQueryType(int queryType);
          
 }

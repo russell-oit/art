@@ -136,7 +136,7 @@ ALTER TABLE ART_QUERY_GROUPS ADD CONSTRAINT art_query_groups_uc_name UNIQUE (NAM
 -- Query types for graphs:
 -- -1 = XY, -2 = Pie , -3 = Horizontal bar, -4 = Vertical bar, -5 = Line
 -- -6 = Time series, -7 = Date series, -8 = stacked vertical bar, -9 = stacked horizontal bar
--- -10 = speedometer, -11 = Bubble chart
+-- -10 = speedometer, -11 = Bubble chart, -12 = Heat Map
 
 CREATE TABLE ART_QUERIES
 (
