@@ -697,9 +697,14 @@ public class QueryExecute extends HttpServlet {
 					//get final sql with parameter placeholders replaced with parameter values
 					String finalSQL = pq.getFinalSQL();
 
-					//determine if final sql should be shown
+					//determine if final sql should be shown. only admins can see sql
 					boolean showSQL = false;
-					if (request.getParameter("_showSQL") != null) {
+					int accessLevel=0;
+					UserEntity ue=(UserEntity)session.getAttribute("ue");
+					if(ue!=null){
+						accessLevel=ue.getAdminLevel();
+					}
+					if (request.getParameter("_showSQL") != null && accessLevel>5) {
 						showSQL = true;
 					}
 

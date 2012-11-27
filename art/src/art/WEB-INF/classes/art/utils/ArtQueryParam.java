@@ -57,18 +57,47 @@ public class ArtQueryParam implements Serializable {
 	int chainedPosition;
 	int drilldownColumn;
 	int chainedValuePosition;
-	boolean isBind;
-	//variables to support bind parameters
-	String bindQuerySql = "";
-	boolean[] bindVector;
-	//    
 	Object paramValue = null; //store parameter values. either String for inline parameters or String[] for multi parameters
 	private Map<String, String> lovValues = null; //store value/friendly display string for lov parameters
+	private String directSubstitution="N";
 
 	/**
 	 *
 	 */
 	public ArtQueryParam() {
+	}
+
+	/**
+	 * @return the directSubstitution
+	 */
+	public String getDirectSubstitution() {
+		return directSubstitution;
+	}
+
+	/**
+	 * @param directSubstitution the directSubstitution to set
+	 */
+	public void setDirectSubstitution(String directSubstitution) {
+		this.directSubstitution = directSubstitution;
+	}
+	
+	/**
+	 * Utility method to determine if the parameter uses a direct substitution
+	 * values
+	 *
+	 * @return
+	 * <code>true</code> if direct_substitution column has 'Y'.
+	 * <code>false</code> otherwise
+	 */
+	public boolean usesDirectSubstitution() {
+		boolean useDirectSubstitution;
+		if (StringUtils.equals(directSubstitution, "Y")) {
+			useDirectSubstitution = true;
+		} else {
+			useDirectSubstitution = false;
+		}
+ 
+		return useDirectSubstitution;
 	}
 
 	/**
@@ -426,6 +455,7 @@ public class ArtQueryParam implements Serializable {
 			String SQL = "SELECT QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
 					+ " ,PARAM_DATA_TYPE, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
 					+ " ,LOV_QUERY_ID, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION "
+					+ " ,DIRECT_SUBSTITUTION "
 					+ " FROM ART_QUERY_FIELDS "
 					+ " WHERE QUERY_ID = ? AND FIELD_POSITION = ?";
 
@@ -449,6 +479,7 @@ public class ArtQueryParam implements Serializable {
 				setChainedPosition(rs.getInt("CHAINED_PARAM_POSITION"));
 				setDrilldownColumn(rs.getInt("DRILLDOWN_COLUMN"));
 				setChainedValuePosition(rs.getInt("CHAINED_VALUE_POSITION"));
+				directSubstitution=rs.getString("DIRECT_SUBSTITUTION");
 
 				rs.close();
 				ps.close();
@@ -495,8 +526,9 @@ public class ArtQueryParam implements Serializable {
 			SQL = "INSERT INTO ART_QUERY_FIELDS "
 					+ " (QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
 					+ " ,PARAM_DATA_TYPE, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
-					+ " ,LOV_QUERY_ID, UPDATE_DATE, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION) "
-					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ " ,LOV_QUERY_ID, UPDATE_DATE, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN "
+					+ " ,CHAINED_VALUE_POSITION, DIRECT_SUBSTITUTION) "
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 			ps = conn.prepareStatement(SQL);
 
@@ -521,6 +553,7 @@ public class ArtQueryParam implements Serializable {
 			ps.setInt(14, getChainedPosition());
 			ps.setInt(15, getDrilldownColumn());
 			ps.setInt(16, getChainedValuePosition());
+			ps.setString(17,directSubstitution);
 
 			ps.executeUpdate();
 			ps.close();

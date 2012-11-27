@@ -73,6 +73,7 @@
 	//if we are here, either it's a new parameter creation or a parameter modification (and not move up)  
     if (paramExists) {    
 		String paramType=request.getParameter("PARAM_TYPE");
+		
        qp.setQueryId(Integer.parseInt(request.getParameter("QUERY_ID")));                                        
        qp.setParamType(paramType);       
        qp.setName(request.getParameter("NAME"));
@@ -99,6 +100,11 @@
 		qp.setDrilldownColumn(Integer.parseInt(request.getParameter("DRILLDOWN_COLUMN"))); //save new drill down column property
 		}
 		qp.setChainedValuePosition(Integer.parseInt(request.getParameter("CHAINED_VALUE_POSITION")));
+		
+		//save drill down column for inline parameter. not relevant for multi parameter
+	   if(StringUtils.equals(paramType,"I")){
+		   qp.setDirectSubstitution(request.getParameter("DIRECT_SUBSTITUTION"));
+	   }
 
        if (MODIFY) {
           // the field position is already in the object as we created it: qp.create	  

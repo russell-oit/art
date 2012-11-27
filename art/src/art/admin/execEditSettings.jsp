@@ -22,7 +22,7 @@
 String baseDir = ArtDBCP.getAppPath();
 String sep = java.io.File.separator;
 String propsFile = ArtDBCP.getArtPropertiesFilePath();
-String defaultArtUrl = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;hsqldb.write_delay=false";
+String defaultArtUrl = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
 String defaultArtDriver="org.hsqldb.jdbcDriver";
 ArtProps ap = new ArtProps();
 
@@ -105,8 +105,8 @@ while (names.hasMoreElements()) {
     */
     if (useDefaultDatabase) {
 		System.out.println("ART - execEditSettings.jsp: Updating ART demo...");
-		String defaultDB_url = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;hsqldb.write_delay=false";
-		String sampleDB_url  = "jdbc:hsqldb:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"SampleDB;shutdown=true;hsqldb.write_delay=false";
+		String defaultDB_url = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
+		String sampleDB_url  = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
 		Statement st = c.createStatement();
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+defaultDB_url+"' , PASSWORD='"+artRepositoryEncryptedPassword+"' WHERE DATABASE_ID=2");
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+sampleDB_url+"' WHERE DATABASE_ID=1");

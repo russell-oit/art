@@ -78,7 +78,7 @@ String msg;
 			urlElement.value="";
 		} else if(dbType == "hsqldb-server"){
 			driverElement.value="org.hsqldb.jdbcDriver";
-			urlElement.value="jdbc:hsqldb:hsql://<server_name>:9001/<database_name>";
+			urlElement.value="jdbc:hsqldb:hsql://<server_name>:9001/<database_alias>";
 		}
 	}
 </script>

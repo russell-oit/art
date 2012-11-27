@@ -46,6 +46,7 @@ String help;
 		if(paramType == 'M'){
 			//hide fields not relevant for multi parameters
 			document.getElementById("drilldownColumn").className="collapse";
+			document.getElementById("directSubstitution").className="collapse";
 			
 			//default use lov to yes
 			var i=0;
@@ -57,8 +58,9 @@ String help;
 			dataType.options[i++] = new Option("VARCHAR","VARCHAR");
 			dataType.options[i++] = new Option("NUMBER","NUMBER");
 		} else if(paramType == 'I') {
-			//inline parameter
+			//inline parameter. unhide fields that may have been hidden for multi parameter
 			document.getElementById("drilldownColumn").className="expand";
+			document.getElementById("directSubstitution").className="expand";
 			
 			//default use lov to no
 			var i=0;
@@ -242,6 +244,21 @@ String help;
 
                 <input type="button" class="buttonup" onclick="javascript:alert('<%=help%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" />
             </td>
+        </tr>
+		
+		<tr><td class="data"> Direct Substitution</td>
+            <td class="data">
+                <select name="DIRECT_SUBSTITUTION" id="directSubstitution" size="1">
+                    <option value="N" <%=("N".equals(qp.getDirectSubstitution())? "selected" : "")%>  >No</option>
+					<option value="Y" <%=("Y".equals(qp.getDirectSubstitution())? "selected" : "")%>  >Yes</option>
+                </select>
+				
+				<% help="** WARNING ** \\n\\nUsing direct substitution offers no sql escaping for parameter values, " +
+               "and therefore increases the risk of sql injection attacks on the target database.";
+                %>
+
+                <input type="button" class="buttonup" onclick="javascript:alert('<%=help%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" />
+			</td>
         </tr>
        
         <tr>

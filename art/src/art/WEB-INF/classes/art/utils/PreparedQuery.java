@@ -306,7 +306,7 @@ public class PreparedQuery {
 		 * (Inline parameters are replaced with parameter placeholders (?))
 		 */
 		try {
-			prepareInlineParameters(sb); // work inline in the sb
+			applyInlineParameters(sb); // work inline in the sb
 		} catch (Exception e) {
 			logger.error("Error", e);
 			throw new ArtException("<p>Error applying inline parameters to the query. Please contact the ART administrator. <br>Details:<code> " + e + "</code></p>");
@@ -370,8 +370,8 @@ public class PreparedQuery {
 				//update sb with new sql
 				sb.replace(0, sb.length(), querySql);
 			}
-		} 
-		
+		}
+
 		//ignore #recipient# label if it is still there
 		String querySql = sb.toString();
 		String searchString = Pattern.quote(RECIPIENT_LABEL);
@@ -379,7 +379,7 @@ public class PreparedQuery {
 
 		//update sb with new sql
 		sb.replace(0, sb.length(), querySql);
-		
+
 	}
 
 	//determine if the user can execute the query. Exception thrown if user can't excecute query
@@ -409,7 +409,7 @@ public class PreparedQuery {
 
 		// Apply Inline Parameters to the prepared statement		 
 		try {
-			applyInlineParameters(ps);
+			prepareInlineParameters(ps);
 		} catch (Exception e) {
 			logger.error("Error", e);
 			throw new ArtException("<p>Error applying inline parameters to the query. Please contact the ART administrator. <br>Details:<code> " + e + "</code></p>");
@@ -570,8 +570,8 @@ public class PreparedQuery {
 				throw new ArtException("Could not get database connection.");
 			}
 
-			finalSQL=preparedStatementSQL; //set final sql in case error occurs before execute
-			
+			finalSQL = preparedStatementSQL; //set final sql in case error occurs before execute
+
 			psQuery = connQuery.prepareStatement(preparedStatementSQL, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 			prepareStatement(psQuery); // this applies the inline parameter placeholders
@@ -1051,33 +1051,33 @@ public class PreparedQuery {
 			} else {
 				// Add the rule to the query 
 				String values = tmpSb.toString();
-				if (StringUtils.length(values) == 0 && StringUtils.length(groupValues)==0) {
+				if (StringUtils.length(values) == 0 && StringUtils.length(groupValues) == 0) {
 					//user doesn't have values set for at least one rule that the query uses. values needed for all rules
 					successfullyApplied = false;
 					break;
 				} else {
-					String condition="";
-					if(StringUtils.length(values)>0){
-						condition=columnName + " in (" + values.substring(1) + ")";
+					String condition = "";
+					if (StringUtils.length(values) > 0) {
+						condition = columnName + " in (" + values.substring(1) + ")";
 					}
-					String groupCondition="";
-					if(StringUtils.length(groupValues)>0){
-						groupCondition=groupValues; 
+					String groupCondition = "";
+					if (StringUtils.length(groupValues) > 0) {
+						groupCondition = groupValues;
 					}
-					
-					if(StringUtils.length(condition)>0){
+
+					if (StringUtils.length(condition) > 0) {
 						//rule values defined for user
-						if(StringUtils.length(groupCondition)>0){
-							groupCondition=" OR " + groupCondition;
+						if (StringUtils.length(groupCondition) > 0) {
+							groupCondition = " OR " + groupCondition;
 						}
-						condition=condition + groupCondition; // ( user values OR (user group values) )
+						condition = condition + groupCondition; // ( user values OR (user group values) )
 					} else {
 						//no rule values for user. use user group values
-						condition=groupCondition;
+						condition = groupCondition;
 					}
-					
-					condition=" ( " + condition + " ) "; //enclose this rule values in brackets to treat it as a single condition
-					
+
+					condition = " ( " + condition + " ) "; //enclose this rule values in brackets to treat it as a single condition
+
 					if (usingLabelledRules) {
 						//using labelled rules. don't append AND before the first rule value
 						// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
@@ -1183,15 +1183,15 @@ public class PreparedQuery {
 				if (StringUtils.equals(rs.getString("RULE_TYPE"), "LOOKUP")) {
 					// if type is lookup the VALUE is the name
 					// to look up. Recursively call getRuleValues
-					StringBuilder lookupSb=getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType);
-					if(lookupSb==null){
+					StringBuilder lookupSb = getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType);
+					if (lookupSb == null) {
 						//all values
 						isAllItemsForThisRule = true;
 						break;
 					} else {
-						String values=lookupSb.toString();
-						if(StringUtils.equals(values, "TOO MANY LOOPS")){
-							values="";
+						String values = lookupSb.toString();
+						if (StringUtils.equals(values, "TOO MANY LOOPS")) {
+							values = "";
 						}
 						tmpSb.append(values);
 					}
@@ -1240,38 +1240,38 @@ public class PreparedQuery {
 
 		ps = conn.prepareStatement(sql);
 		ps.setString(1, username);
-		
+
 		rs = ps.executeQuery();
-		
-		int count=0;
-		StringBuilder valuesSb=new StringBuilder(512);
-		
+
+		int count = 0;
+		StringBuilder valuesSb = new StringBuilder(512);
+
 		while (rs.next()) {
 			//for each group, get the group's rule values
-			String userGroupId=rs.getString("USER_GROUP_ID");
+			String userGroupId = rs.getString("USER_GROUP_ID");
 			StringBuilder tmpSb = getRuleValues(conn, userGroupId, ruleName, 1, columnDataType);
-			
+
 			String condition;
-			if(tmpSb==null){
+			if (tmpSb == null) {
 				//rule value defined for this group as ALL_ITEMS
-				condition=" 1=1 ";
+				condition = " 1=1 ";
 			} else {
-				if(tmpSb.length()==0){
+				if (tmpSb.length() == 0) {
 					//no values defined for this rule for this group
-					condition="";
+					condition = "";
 				} else {
 					//some values defined for this rule for this group
-					String groupValues=tmpSb.toString().substring(1); //first character returned from getRuleValues is ,
-					condition=columnName + " in(" + groupValues + ") ";
+					String groupValues = tmpSb.toString().substring(1); //first character returned from getRuleValues is ,
+					condition = columnName + " in(" + groupValues + ") ";
 				}
 			}
-			
+
 			//build group values string
-			if(StringUtils.length(condition)>0){
+			if (StringUtils.length(condition) > 0) {
 				//some rule value defined for this group
 				count++;
-				
-				if(count==1){
+
+				if (count == 1) {
 					valuesSb.append(condition);
 				} else {
 					valuesSb.append(" OR " + condition);
@@ -1280,7 +1280,7 @@ public class PreparedQuery {
 		}
 		ps.close();
 		rs.close();
-		
+
 		return valuesSb.toString();
 	}
 
@@ -1293,33 +1293,31 @@ public class PreparedQuery {
 	 * Inline parameters are substituted with ?, a TreeMap (treeInline) is built
 	 * to store the param position
 	 */
-	private void prepareInlineParameters(StringBuilder sb) throws SQLException {
+	private void applyInlineParameters(StringBuilder sb) throws SQLException {
 		// Change applied by Giacomo Ferrari on 2005-09-23
 		//  to perform the padding during inline prameter replacement.
 		//  in order to leave unchanged the original length of SQL string
 		final String blanks = "                                                       "; //any length as long as we don't have a parameter label of longer length
 
-		String paramName;
-		int startPos;
 
 		if (inlineParams == null) {
 			return;
 		}
 
-		treeInline = new TreeMap<Integer, String>();
+		String paramLabel;
+		String paramValue;
+		int startPos;
 
-		String querySql = sb.toString();
-		Iterator it = inlineParams.entrySet().iterator();
+		treeInline = new TreeMap<Integer, String>();
 
 		if (queryType == 112 || queryType == 113 || queryType == 114) {
 			//mdx query		
-			String paramValue;
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				paramName = (String) entry.getKey();
-				paramValue = inlineParams.get(paramName);
+			String querySql = sb.toString();
+			for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
+				paramLabel = entry.getKey();
+				paramValue = entry.getValue();
 
-				String searchString = Pattern.quote("#" + paramName + "#"); //quote in case it contains special regex characters
+				String searchString = Pattern.quote("#" + paramLabel + "#"); //quote in case it contains special regex characters
 				String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
 				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 			}
@@ -1327,15 +1325,39 @@ public class PreparedQuery {
 			//update sb with new sql
 			sb.replace(0, sb.length(), querySql);
 		} else {
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				paramName = (String) entry.getKey();  // inline label without #
+			//replace all inline parameters that use direct substitution first
+			if (htmlParams == null) {
+				ArtQuery aq = new ArtQuery();
+				htmlParams = aq.getHtmlParams(queryId);
+			}
 
-				//replace occurrences of param labels with ? one by one so that correct ps.set methods are used in applyInlineParameters()
+			for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
+				paramLabel = entry.getKey();
+				paramValue = entry.getValue();
+				ArtQueryParam param = htmlParams.get("P_" + paramLabel);
+				if (param != null) {
+					if (param.usesDirectSubstitution()) {
+						String querySql = sb.toString();
+
+						String searchString = Pattern.quote("#" + paramLabel + "#"); //quote in case it contains special regex characters
+						String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
+						querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+
+						//update sb with new sql
+						sb.replace(0, sb.length(), querySql);
+					}
+				}
+			}
+
+			//replace other inline parameters
+			for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
+				paramLabel = entry.getKey();  // inline label without #
+
+				//replace occurrences of param labels with ? one by one so that correct ps.set methods are used in prepareInlineParameters()
 				//can't do replaceAll because there will be a mismatch with the ps.set methods
 
-				startPos = sb.toString().indexOf("#" + paramName + "#"); //find #label#
-				Object checker = null;
+				startPos = sb.toString().indexOf("#" + paramLabel + "#"); //find #label#
+				Object checker;
 
 				// increased maximum to avoid loop from 30 to 200 by Giacomo Ferrari on 2005-09-23
 				// while (startPos != -1 && i++<30) {
@@ -1343,24 +1365,23 @@ public class PreparedQuery {
 					checker = treeInline.get(new Integer(startPos));
 
 					if (checker != null) {
-						logger.warn("Another parameter already stored at position {}. Cannot store {}!", startPos, paramName);
+						logger.warn("Another parameter already stored at position {}. Cannot store {}!", startPos, paramLabel);
 					}
 
-					treeInline.put(new Integer(startPos), paramName); // stores the param name and its position. The order of position will ensure correct substitution in applyInlineParameters()
+					treeInline.put(new Integer(startPos), paramLabel); // stores the param name and its position. The order of position will ensure correct substitution in applyInlineParameters()
 
-					logger.debug("Storing parameter {} found at position {}", paramName, startPos);
+					logger.debug("Storing parameter {} found at position {}", paramLabel, startPos);
 
 					// replace inline label with ' ? ' plus the correct number of blanks so that total string length is not changed
 					// +2 is to consider the #, -3 is the chars used by ' ? ' replacement
-					sb.replace(startPos, startPos + paramName.length() + 2, " ? " + blanks.substring(0, (paramName.length() + 2 - 3)));
+					sb.replace(startPos, startPos + paramLabel.length() + 2, " ? " + blanks.substring(0, (paramLabel.length() + 2 - 3)));
 
 					logger.debug("Sql string is \n{}", sb.toString());
 					logger.debug("Sql string length is {}", sb.toString().length());
 
 					// find another occurence of the same param
-					startPos = sb.toString().indexOf("#" + paramName + "#", startPos + paramName.length() + 2);
+					startPos = sb.toString().indexOf("#" + paramLabel + "#", startPos + paramLabel.length() + 2);
 				}
-
 			}
 
 		}
@@ -1487,7 +1508,7 @@ public class PreparedQuery {
 		if (op == null) {
 			op = "";
 		} else {
-			op=op.trim().toLowerCase();
+			op = op.trim().toLowerCase();
 		}
 		//although since exp1,exp2 come from a parameter values, they can never be null. maybe only empty string
 		if (exp1 == null) {
@@ -2110,9 +2131,9 @@ public class PreparedQuery {
 	 * Called by the prepareStatement() method. The prepared statement is
 	 * "fulfilled" with the parameters
 	 */
-	private void applyInlineParameters(PreparedStatement ps) throws SQLException, ArtException {
+	private void prepareInlineParameters(PreparedStatement ps) throws SQLException, ArtException {
 
-		logger.debug("applyInlineParameters");
+		logger.debug("prepareInlineParameters");
 
 		//set final sql. replace parameter placeholders ( ? ) with actual parameter values passed to database
 		finalSQL = sb.toString();
@@ -2187,7 +2208,7 @@ public class PreparedQuery {
 				} else if (StringUtils.equals(paramDataType, "INTEGER") || StringUtils.equals(paramDataType, "NUMBER")) {
 					finalSQL = StringUtils.replace(finalSQL, "?", paramValue, 1);
 				} else {
-					finalSQL = StringUtils.replace(finalSQL, "?", "'" + paramValue + "'", 1);
+					finalSQL = StringUtils.replace(finalSQL, "?", "'" + escapeSql(paramValue) + "'", 1);
 				}
 
 			}
@@ -2278,7 +2299,7 @@ public class PreparedQuery {
 			StringBuilder builder = new StringBuilder(1024 * 2);
 			builder.append(querySql);
 
-			prepareInlineParameters(builder);
+			applyInlineParameters(builder);
 			applyInlineParameters(null);
 
 		} catch (Exception e) {

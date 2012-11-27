@@ -271,14 +271,14 @@ if(!propsFile.exists()){
 			urlElement.value="demo";
 		} else if(dbType == "hsqldb-server"){
 			driverElement.value="org.hsqldb.jdbcDriver";
-			urlElement.value="jdbc:hsqldb:hsql://<server_name>:9001/<database_name>";
+			urlElement.value="jdbc:hsqldb:hsql://<server_name>:9001/<database_alias>";
 		}
 	}
 </script>
 
 <form action="execEditSettings.jsp" method="post">
  <table align="center" width="60%">
-  <tr><td class="title" colspan="2" > ART Settings </td></tr>
+  <tr><td class="title" colspan="2" >Settings </td></tr>
   <tr><td class="Data" colspan="2" > Specify <i>ART Repository</i> connection parameters and other settings </td></tr>
 
    <tr><td class="attr"> ART Database Username</td>
@@ -412,7 +412,7 @@ if(!propsFile.exists()){
         <td class="data"><input type="text" name="css_skin" size="40" maxlength="120" value="<%=css_skin%>"></td>
        </tr>
        <tr>
-        <td class="attr">Bottom page logo</td>
+        <td class="attr">Page Footer Logo</td>
         <td class="data"><input type="text" name="bottom_logo" size="40" maxlength="120" value="<%=bottom_logo%>"></td>
        </tr>
        <tr>
@@ -655,7 +655,7 @@ if(!propsFile.exists()){
        </tr>
 
 <tr>
-        <td colspan="3" class="attr">Default Start page for ART:
+        <td colspan="3" class="attr">Login Page:
 	   <select name="index_page_default">
 	     <option value="login"     <%= (index_page_default.equals("login")?"SELECTED":"") %>    >Internal Login</option>
 	     <option value="LDAPLogin" <%= (index_page_default.equals("LDAPLogin")?"SELECTED":"") %>>LDAP Login</option>
@@ -674,8 +674,7 @@ if(!propsFile.exists()){
    </tr>
 
    <tr>
-    <td><input type="submit" value="Submit"></td>
-    <td style="font-size:10pt"><p align="right"><a href="adminConsole.jsp"> Cancel</a> </p></td>
+    <td colspan="2"><input type="submit" value="Submit"></td>
    </tr>
 
  </table>
