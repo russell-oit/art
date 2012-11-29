@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
  * Class to generate speedometer chart. Query should be in the form <p>
  *
  * <code>select dataValue, minValue, maxValue, unitsDescription, ranges </code>
- * <br><br> <b>ranges</b> represent optional sections and a range has 3 columns
- * i.e. rangeUpperValue, rangeColour, rangeDescription </p>
+ * <br><br> <b>ranges</b> optional columns and each range has 3 values separated
+ * by : i.e. rangeUpperValue:rangeColour:rangeDescription </p>
  *
  * <b>Example</b>
  * <pre>
@@ -75,7 +75,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 	 */
 	public ArtSpeedometer() {
 	}
-	
+
 	@Override
 	public void setQueryType(int queryType) {
 		//not used
@@ -230,7 +230,16 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 					if (rangeDetails.size() == 3) {
 						rangeCount++;
 						key = new Integer(rangeCount);
-						rangeValues.put(key, Double.valueOf(rangeDetails.get(0)));
+						String valuePart = rangeDetails.get(0);
+						double rangeValue;
+						if (valuePart.endsWith("%")) {
+							rangeValue = Double.parseDouble(valuePart.substring(0, valuePart.length() - 1));
+							rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0D;
+						} else {
+							rangeValue=Double.parseDouble(valuePart);
+						}
+
+						rangeValues.put(key, new Double(rangeValue));
 						rangeColors.put(key, rangeDetails.get(1));
 						rangeDescriptions.put(key, rangeDetails.get(2));
 					}

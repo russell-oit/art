@@ -8,6 +8,7 @@
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <jsp:useBean id="lineRenderer" class="de.laures.cewolf.cpp.LineRendererProcessor" />
 <jsp:useBean id="labelRotation" class="de.laures.cewolf.cpp.RotatedAxisLabels" />
+<jsp:useBean id="heatmapPP" class="de.laures.cewolf.cpp.HeatmapEnhancer" />
 
 
 <%
@@ -16,12 +17,12 @@
 
   String graphType[] = {"xy","pie3d","horizontalBar3D","verticalBar3D","line"
                         ,"timeseries","timeseries","stackedVerticalBar3d","stackedHorizontalBar3d"
-						,"meter","bubble"};
+						,"meter","bubble","heatmap"};
 						  
   //get query type from attribute so that it doesn't have to be specified in direct url 
-  Integer graphIdInteger = (Integer)request.getAttribute("queryType");
-  int graphId=graphIdInteger.intValue();
-  graphId=Math.abs(graphId);
+  Integer queryTypeInteger = (Integer)request.getAttribute("queryType");
+  int queryType=queryTypeInteger.intValue();
+  int graphId=Math.abs(queryType);
   
   Integer queryId = (Integer) request.getAttribute("queryId");
 
@@ -91,7 +92,8 @@
 		fullFileName= ArtDBCP.getExportPath() + fileName;
 	}
 	
-	  // Labels
+// Labels
+	String heatmapShowLabels="false";
   String labelFormat;
   final String LABELS_OFF="off";
   final String CATEGORY_LABEL_FORMAT="{2}";
@@ -117,12 +119,14 @@
   if (request.getAttribute("_nolabels") != null){
 	labelFormat = LABELS_OFF;
 	} 
+  
 	if (request.getAttribute("_showlabels") != null){
 		if(graphId==2){
 			labelFormat= pieLabelFormat;
 		} else {
 			labelFormat=CATEGORY_LABEL_FORMAT;
 		}
+		heatmapShowLabels="true";
 	}
 	
 	//make target configurable, mainly for drill down queries
@@ -194,6 +198,8 @@ if (showSQL) {
 String rotateAt="5";
 String removeAt="10000";
 
+String hmUpperBound="20";
+
 %>
 
 <p>
@@ -229,6 +235,16 @@ String removeAt="10000";
 		<cewolf:param name="rotate_at" value="<%=rotateAt%>" />
 		<cewolf:param name="remove_at" value="<%=removeAt%>" />
 	</cewolf:chartpostprocessor> 
+	   
+	   <% if(queryType==-12){ %>
+	   <cewolf:chartpostprocessor id="heatmapPP">
+        <cewolf:param name="xLabel" value="<%=graph.getXlabel()%>"/>
+        <cewolf:param name="yLabel" value="<%=graph.getYlabel()%>"/>
+		<cewolf:param name="showItemLabels" value="<%=heatmapShowLabels%>"/>
+        <cewolf:param name="upperBound" value="<%=hmUpperBound%>"/>
+    </cewolf:chartpostprocessor>
+	   
+	   <%} %>
 	   
    </cewolf:chart>
    

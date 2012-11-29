@@ -7,6 +7,7 @@ ART 2.4.1
 * Fix for charts not displaying when y axis range is specified
 * Have admin pages use the same header and footer contents as user pages
 * Modified syntax for speedometer chart ranges
+* Allow use of percentage values in speedometer chart ranges
 
 ART 2.4
 * Added cc and bcc fields for email jobs

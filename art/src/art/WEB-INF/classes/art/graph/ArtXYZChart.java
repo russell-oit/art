@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to render bubble charts and heat map charts
+ * Class to render bubble charts and heat map charts (both use XYZDataset)
  *
  * @author Timothy Anyona
  */
@@ -66,6 +66,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	int columnCount; //resultset can have extra column with actual z value
 	ArrayList<Double> actualZValues = new ArrayList<Double>();
 	int queryType;
+	
 
 	public ArtXYZChart() {
 	}
@@ -192,14 +193,14 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 		ArrayList<Double> zValues = new ArrayList<Double>();
 
 		columnCount = rs.getMetaData().getColumnCount();
-
+		
 		while (rs.next()) {
 			x = rs.getDouble(1);
 			y = rs.getDouble(2);
 			z = rs.getDouble(3);
 			actualZ = z;
 
-			if (queryType == 11) {
+			if (queryType == -11) {
 				//bubble chart
 				if (columnCount >= 4) {
 					z = rs.getDouble(4); //bubble value may be normalized to the y axis values so that bubbles aren't too large
@@ -439,7 +440,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 
 		zValue = dataset.getZValue(series, index);
 
-		if (queryType == 11) {
+		if (queryType == -11) {
 			//bubble chart
 			if (columnCount >= 4) {
 				//use actual z value (z value in dataset contains a normalised value)
@@ -471,7 +472,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 			z = tmpDataset.getZValue(series, item);
 			actualZ = z;
 
-			if (queryType == 11) {
+			if (queryType == -11) {
 				//bubble chart
 				actualZ = actualZValues.get(item).intValue();
 			}

@@ -437,6 +437,7 @@ tinyMCE.init({
                     <option value="-7" <%=(currentStringValue.equals("-7")?"SELECTED":"")%>>Graph: Date Series</option>
                     <option value="-10" <%=(currentStringValue.equals("-10")?"SELECTED":"")%>>Graph: Speedometer</option>
 					<option value="-11" <%=(currentStringValue.equals("-11")?"SELECTED":"")%>>Graph: Bubble Chart</option>
+					<option value="-12" <%=(currentStringValue.equals("-12")?"SELECTED":"")%>>Graph: Heat Map</option>
 
 					<%
 					if(ArtDBCP.isArtFullVersion()){
@@ -795,10 +796,11 @@ tinyMCE.init({
                         <br><br><b>Speedometer</b>: <br>
                         <i>SELECT DataValue, MinValue, MaxValue, UnitsDescription [, Range1, Range2, ...] FROM ...</i> (data type: number, number, number, string)
                         <br />Ranges represent optional columns and each range has 3 values separated by :  i.e. RangeUpperValue:RangeColour:RangeDescription (data type: number, string, string)
+						RangeUpperValue can be a percentage.
                         <br />Example:
                         <br />SELECT 45, 0, 100, "Units",
                         <br />"50:#00FF00:Normal",
-                        <br />"80:#FFFF00:Warning",
+                        <br />"80%:#FFFF00:Warning",
                         <br />"100:#FF0000:Critical"
 						
 						<br><br><b>Bubble</b>: <br><i> SELECT Value1, Value2 "Series Name", Value3 [, normalisedValue3] FROM ...</i> (data type: number, number, number [,number] )
