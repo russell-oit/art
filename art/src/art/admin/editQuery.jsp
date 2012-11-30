@@ -437,7 +437,7 @@ tinyMCE.init({
                     <option value="-7" <%=(currentStringValue.equals("-7")?"SELECTED":"")%>>Graph: Date Series</option>
                     <option value="-10" <%=(currentStringValue.equals("-10")?"SELECTED":"")%>>Graph: Speedometer</option>
 					<option value="-11" <%=(currentStringValue.equals("-11")?"SELECTED":"")%>>Graph: Bubble Chart</option>
-					<option value="-12" <%=(currentStringValue.equals("-12")?"SELECTED":"")%>>Graph: Heat Map</option>
+					<option value="-12" <%=(currentStringValue.equals("-12")?"SELECTED":"")%>>Graph: Heat Map (experimental)</option>
 
 					<%
 					if(ArtDBCP.isArtFullVersion()){
@@ -781,13 +781,16 @@ tinyMCE.init({
                         <i>Graph</i>: Chart the result set. See below for the query layout.<br>
 
                         <br><b>XY</b>: <br><i> SELECT Value1, Value2 "Series Name" FROM ...</i> (data type: number, number )
-                        <br><br><b>Pie</b>: <br><i> SELECT Category, Value FROM ...</i> (data type: string, number )
-                        <br><br><b>Bars/Line</b>:
+                        
+						<br><br><b>Pie</b>: <br><i> SELECT Category, Value FROM ...</i> (data type: string, number )
+                        
+						<br><br><b>Bars/Line</b>:
                         <br>Static Series
                         <br><i> SELECT Item, Value1 "Series1 Name" [, Value2, ...]  FROM ...</i> (data type: string, number, [, number, ...] )
                         <br>Dynamic Series
                         <br><i> SELECT Item, SeriesName, Value  FROM ...</i> (data type: string, string, number)
-                        <br><br><b>Time/Date Series</b>:
+                        
+						<br><br><b>Time/Date Series</b>:
                         <br>Static Series
                         <br><i> SELECT Timestamp|Date, Value1 "Series1 Name" [, Value2, ...]  FROM ...</i> (data type: timestamp|date, number, [, number, ...] ). Date must be unique.
                         <br>Dynamic Series
@@ -798,12 +801,20 @@ tinyMCE.init({
                         <br />Ranges represent optional columns and each range has 3 values separated by :  i.e. RangeUpperValue:RangeColour:RangeDescription (data type: number, string, string)
 						RangeUpperValue can be a percentage.
                         <br />Example:
-                        <br />SELECT 45, 0, 100, "Units",
+                        <br />SELECT reading, 0, 100, "degrees",
                         <br />"50:#00FF00:Normal",
                         <br />"80%:#FFFF00:Warning",
                         <br />"100:#FF0000:Critical"
+						<br />FROM temperature_reading
 						
 						<br><br><b>Bubble</b>: <br><i> SELECT Value1, Value2 "Series Name", Value3 [, normalisedValue3] FROM ...</i> (data type: number, number, number [,number] )
+						
+						<br><br><b>Heat Map</b>: <br>
+                        <i>SELECT Value1, Value2, Value3 [, Option1, Option2, ...] FROM ...</i> (data type: number, number, number [,string, string, ...)
+                        <br>The option columns are used to configure the chart and are in the form &lt;option&gt;=&lt;value&gt;. See the Admin Manual for possible options.
+                        <br />Example:
+                        <br />SELECT x, y, z, "upperBound=100",
+						<br />FROM myvalues
 
                     </li>
                 </ul>

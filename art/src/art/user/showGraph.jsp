@@ -93,7 +93,7 @@
 	}
 	
 // Labels
-	String heatmapShowLabels="false";
+	String showLabels="false";
   String labelFormat;
   final String LABELS_OFF="off";
   final String CATEGORY_LABEL_FORMAT="{2}";
@@ -126,7 +126,7 @@
 		} else {
 			labelFormat=CATEGORY_LABEL_FORMAT;
 		}
-		heatmapShowLabels="true";
+		showLabels="true";
 	}
 	
 	//make target configurable, mainly for drill down queries
@@ -198,8 +198,6 @@ if (showSQL) {
 String rotateAt="5";
 String removeAt="10000";
 
-String hmUpperBound="20";
-
 %>
 
 <p>
@@ -236,12 +234,24 @@ String hmUpperBound="20";
 		<cewolf:param name="remove_at" value="<%=removeAt%>" />
 	</cewolf:chartpostprocessor> 
 	   
-	   <% if(queryType==-12){ %>
+	   <% if(queryType==-12){
+		   ArtXYZChart heatmap=(ArtXYZChart)graph;
+		   Map<String,String> options=heatmap.getHeatmapOptions();
+		   %>
 	   <cewolf:chartpostprocessor id="heatmapPP">
         <cewolf:param name="xLabel" value="<%=graph.getXlabel()%>"/>
         <cewolf:param name="yLabel" value="<%=graph.getYlabel()%>"/>
-		<cewolf:param name="showItemLabels" value="<%=heatmapShowLabels%>"/>
-        <cewolf:param name="upperBound" value="<%=hmUpperBound%>"/>
+		<cewolf:param name="showItemLabels" value="<%=showLabels%>"/>
+		%>
+		<%
+		for(Map.Entry<String,String> entry: options.entrySet()){
+			String option=entry.getKey();
+			String value=entry.getValue();
+			%>
+			<cewolf:param name="<%=option%>" value="<%=value%>"/>
+			<%
+		}
+        %>
     </cewolf:chartpostprocessor>
 	   
 	   <%} %>

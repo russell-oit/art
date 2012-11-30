@@ -226,14 +226,14 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 				rangeCount = 0;
 				for (int i = 5; i <= columnCount; i++) {
 					String rangeSpec = rs.getString(i);
-					List<String> rangeDetails = StringUtils.split(rangeSpec, ":", false);
+					List<String> rangeDetails = StringUtils.split(rangeSpec, ":", true);
 					if (rangeDetails.size() == 3) {
 						rangeCount++;
 						key = new Integer(rangeCount);
 						String valuePart = rangeDetails.get(0);
 						double rangeValue;
-						if (valuePart.endsWith("%")) {
-							rangeValue = Double.parseDouble(valuePart.substring(0, valuePart.length() - 1));
+						if (valuePart.contains("%")) {
+							rangeValue = Double.parseDouble(valuePart.replace("%",""));
 							rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0D;
 						} else {
 							rangeValue=Double.parseDouble(valuePart);

@@ -2,6 +2,7 @@ package art.graph;
 
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
+import com.mysql.jdbc.StringUtils;
 import de.laures.cewolf.ChartPostProcessor;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.DatasetProducer;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -66,9 +68,14 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	int columnCount; //resultset can have extra column with actual z value
 	ArrayList<Double> actualZValues = new ArrayList<Double>();
 	int queryType;
-	
+	Map<String, String> heatmapOptions = new HashMap<String, String>(); //options used by cewolf heatmap postprocessor
 
+	
 	public ArtXYZChart() {
+	}
+	
+	public Map<String, String> getHeatmapOptions(){
+		return heatmapOptions;
 	}
 
 	@Override
@@ -192,9 +199,13 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 		ArrayList<Double> yValues = new ArrayList<Double>();
 		ArrayList<Double> zValues = new ArrayList<Double>();
 
-		columnCount = rs.getMetaData().getColumnCount();
-		
+		ResultSetMetaData rsmd = rs.getMetaData();
+		columnCount = rsmd.getColumnCount();
+		int rowCount = 0;
+
 		while (rs.next()) {
+			rowCount++;
+
 			x = rs.getDouble(1);
 			y = rs.getDouble(2);
 			z = rs.getDouble(3);
@@ -205,14 +216,29 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 				if (columnCount >= 4) {
 					z = rs.getDouble(4); //bubble value may be normalized to the y axis values so that bubbles aren't too large
 				}
+
+				if (useHyperLinks) {
+					hyperLinks.add(rs.getString(5)); //if use LINKs, must have 5 columns - actualZ column, then link column
+				}
 			}
+			
+			//set values
 			xValues.add(new Double(x));
 			yValues.add(new Double(y));
 			zValues.add(new Double(z));
 			actualZValues.add(new Double(actualZ));
 
-			if (useHyperLinks) {
-				hyperLinks.add(rs.getString(5)); //if use LINKs, must have 5 columns - actualZ column, then link column
+			//set heat map options
+			if (queryType == -12) {
+				if (rowCount == 1) {
+					for (int i = 4; i <= columnCount; i++) {
+						String optionSpec=rs.getString(i);
+						List<String> optionDetails = StringUtils.split(optionSpec, "=", true);
+						if(optionDetails.size()==2){
+							heatmapOptions.put(optionDetails.get(0), optionDetails.get(1));
+						}
+					}
+				}
 			}
 
 			//set drill down hyperlinks
