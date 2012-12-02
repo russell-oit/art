@@ -58,8 +58,7 @@
 		<delete file="${dist}/art.war"/>
 		<zip    destfile="${dist}/art.war" basedir="${dist}"
 
-		excludes="WEB-INF/*.props
-		,WEB-INF/templates/*		
+		excludes="WEB-INF/art.properties				
 		,*.war
 		,export/*-*.*
 		,export/jobs/J*"
@@ -74,8 +73,7 @@
 		<delete file="${dist}/art-light.war"/>
 		<zip  destfile="${dist}/art-light.war" basedir="${dist}"
 
-		excludes="WEB-INF/*.props
-		,WEB-INF/templates/*		
+		excludes="WEB-INF/art.properties			
 		,*.war
 		,export/*-*.*
 		,export/jobs/J*
