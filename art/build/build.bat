@@ -15,11 +15,9 @@ rem copy release package readme
 copy /Y C:\toa\Projects\ART\Nightly\hg\art\build\art-nightly\readme.txt C:\toa\Projects\ART\Nightly\art-nightly
 
 rem update docs
-rmdir /S /Q C:\toa\Projects\ART\Nightly\art-nightly\docs
 mkdir C:\toa\Projects\ART\Nightly\art-nightly\docs
 copy /Y C:\toa\Projects\ART\Nightly\hg\art\docs\*.pdf C:\toa\Projects\ART\Nightly\art-nightly\docs
 
 rem update database scripts
-rmdir /S /Q C:\toa\Projects\ART\Nightly\art-nightly\database
 mkdir C:\toa\Projects\ART\Nightly\art-nightly\database
 xcopy /Y /E C:\toa\Projects\ART\Nightly\hg\art\database C:\toa\Projects\ART\Nightly\art-nightly\database
