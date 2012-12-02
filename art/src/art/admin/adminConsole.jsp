@@ -32,7 +32,7 @@
 		    /*
 		     *   Manage Datasources
 		     */
-		if (adminLevel >40) {
+		if (adminLevel >=80) {
 			//senior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageDatasources.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -47,7 +47,7 @@
 		    /*
 		     *   Manage Object Groups
 		     */
-		if (adminLevel >40) {
+		if (adminLevel >=80) {
 			//senior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageObjectGroups.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -59,7 +59,7 @@
 		    /*
 		     *   Manage Queries
 		     */
-		if (adminLevel >5) {
+		if (adminLevel >=10) {
 			//junior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageQueries.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -74,8 +74,8 @@
 		    /*
 		     *   Manage User Groups
 		     */
-		if (adminLevel >30) {
-			//standardd admin and above
+		if (adminLevel >=40) {
+			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserGroups.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
 			User Groups
@@ -86,8 +86,8 @@
 		    /*
 		     *   Manage Users
 		     */
-		if (adminLevel >30) {
-			//standardd admin and above
+		if (adminLevel >=40) {
+			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUsers.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
 			Users
@@ -98,7 +98,7 @@
 		    /*
 		     *   Manage User-User Group Membership
 		     */
-		if (adminLevel > 10) {
+		if (adminLevel >=30) {
 			//mid admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserGroupAssignment.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -113,7 +113,7 @@
 		    /*
 		     *   Manage User/User Group Privileges
 		     */
-		if (adminLevel > 10) {
+		if (adminLevel >= 30) {
 			//mid admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserPrivileges.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -125,7 +125,7 @@
 		    /*
 		     *   Manage Admin Privileges
 		     */
-		if (adminLevel >30) {
+		if (adminLevel >=40) {
 			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageAdminPrivileges.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -137,7 +137,7 @@
 		    /*
 		     *   Manage Rules
 		     */
-		if (adminLevel >40) {
+		if (adminLevel >=80) {
 			//senior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageRuleDefinitions.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -150,7 +150,7 @@
 		    /*
 		     *   Manage Rule values for given users
 		     */
-		if (adminLevel >30) {
+		if (adminLevel >=40) {
 			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserRules.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -162,7 +162,7 @@
 		/*
 		     *   Manage Shared Jobs
 		     */
-		if (adminLevel >5) {
+		if (adminLevel >=10) {
 			//junior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageSharedJobs.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -175,7 +175,7 @@
 		/*
 		     *   Manage Job Schedules
 		     */
-		if (adminLevel >5) {
+		if (adminLevel >=10) {
 			//junior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageJobSchedules.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">

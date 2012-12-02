@@ -400,7 +400,10 @@ CREATE TABLE ART_LOGS
 
 
 -- ART_SHARED_JOBS
--- Stores users who have been given access to a job's output
+-- Stores details of split jobs, where a job uses rules and individualized output is produced for each user the job is shared with
+
+-- USER_GROUP_ID: used to indicate if job was shared via user group. To enable deletion of split job records where
+-- access was granted via user group, when a user is removed from a group.
 
 CREATE TABLE ART_SHARED_JOBS
 (

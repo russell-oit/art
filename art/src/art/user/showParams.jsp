@@ -264,7 +264,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                                 <input type="hidden" name="_showParams" value="true"> 
                             <%}
                           }  
-							   if(adminLevel>5) {
+							   if(adminLevel>=10) {
                         %>
 						&nbsp;<input type="checkbox" name="_showSQL"> <%=messages.getString("showSQL")%>
 												

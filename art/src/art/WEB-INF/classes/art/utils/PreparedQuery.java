@@ -1338,6 +1338,9 @@ public class PreparedQuery {
 				if (param != null) {
 					if (param.usesDirectSubstitution()) {
 						String querySql = sb.toString();
+						
+						//some precaution
+						paramValue=paramValue.replace("'", "''").replace("--", "").replace(";","");
 
 						String searchString = Pattern.quote("#" + paramLabel + "#"); //quote in case it contains special regex characters
 						String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
@@ -1368,7 +1371,7 @@ public class PreparedQuery {
 						logger.warn("Another parameter already stored at position {}. Cannot store {}!", startPos, paramLabel);
 					}
 
-					treeInline.put(new Integer(startPos), paramLabel); // stores the param name and its position. The order of position will ensure correct substitution in applyInlineParameters()
+					treeInline.put(new Integer(startPos), paramLabel); // stores the param name and its position. The order of position will ensure correct substitution in prepareInlineParameters()
 
 					logger.debug("Storing parameter {} found at position {}", paramLabel, startPos);
 
@@ -2300,7 +2303,7 @@ public class PreparedQuery {
 			builder.append(querySql);
 
 			applyInlineParameters(builder);
-			applyInlineParameters(null);
+			prepareInlineParameters(null);
 
 		} catch (Exception e) {
 			logger.error("Error", e);

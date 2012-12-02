@@ -20,7 +20,7 @@ owner=request.getParameter("OWNER");
 if(owner==null){ %>
 	<jsp:setProperty name="job" property="username" value="<%=ue.getUsername()%>" />
 	<jsp:setProperty name="job" property="*" />
-<% } else if(owner!=null && adminLevel==100){ %>
+<% } else if(owner!=null && adminLevel>=80){ %>
 		<jsp:setProperty name="job" property="username" value="<%=owner%>" />
 	<jsp:setProperty name="job" property="*" />
 <% } %>
@@ -62,7 +62,7 @@ int queryType=aq.getQueryType();
 //make sure correct from address is displayed, in case of an admin managing another person's job
 String email;
 email=ue.getEmail();
-if(owner!=null && adminLevel==100){
+if(owner!=null && adminLevel>=80){
 	email=job.getFrom();
 }
 
@@ -617,7 +617,7 @@ function onClickSaveSchedule(t){
    <input type="hidden" name="queryId" value="<%=queryId%>">
 
    <%
-   if(owner!=null && adminLevel==100){ %>
+   if(owner!=null && adminLevel>=80){ %>
     <input type="hidden" name="OWNER" value="<%=owner%>">
    <%}%>
 
