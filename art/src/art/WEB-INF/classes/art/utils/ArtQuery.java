@@ -52,8 +52,8 @@ public class ArtQuery {
 	boolean showGraphData;
 	int graphWidth = 400;
 	int graphHeight = 300;
-	int graphYMin;
-	int graphYMax;
+	double graphYMin;
+	double graphYMax;
 	String graphBgColor = "#FFFFFF";
 	String showParameters = "N"; //allow show parameters to be selected by default
 	//properties not used in query creation
@@ -183,7 +183,7 @@ public class ArtQuery {
 	 *
 	 * @return min y-axis value for graph
 	 */
-	public int getGraphYMin() {
+	public double getGraphYMin() {
 		return graphYMin;
 	}
 
@@ -191,7 +191,7 @@ public class ArtQuery {
 	 *
 	 * @return max y-axis value for graph
 	 */
-	public int getGraphYMax() {
+	public double getGraphYMax() {
 		return graphYMax;
 	}
 
@@ -786,25 +786,25 @@ public class ArtQuery {
 
 			if (rs.next()) {
 				newQueryId = 1 + rs.getInt(1);
+
+				String SQL = "INSERT INTO ART_QUERIES ( "
+						+ "   QUERY_GROUP_ID, QUERY_ID, NAME "
+						+ " , SHORT_DESCRIPTION, DESCRIPTION, USES_RULES "
+						+ " , DATABASE_ID, QUERY_TYPE "
+						+ " ) VALUES ( "
+						+ "  0,?,? "
+						+ " ,'-','-','N' "
+						+ " , -1,0)";
+				PreparedStatement ps = conn.prepareStatement(SQL);
+				ps.setInt(1, newQueryId);
+				ps.setString(2, ":allocating:" + newQueryId);
+
+				// insert the "dummy" row so the newQueryId cannot be used by others
+				ps.executeUpdate();
+				ps.close();
 			} else {
 				logger.warn("Query allocateNewId failed");
-				return -1;
 			}
-			String SQL = "INSERT INTO ART_QUERIES ( "
-					+ "   QUERY_GROUP_ID, QUERY_ID, NAME "
-					+ " , SHORT_DESCRIPTION, DESCRIPTION, USES_RULES "
-					+ " , DATABASE_ID, QUERY_TYPE "
-					+ " ) VALUES ( "
-					+ "  0,?,? "
-					+ " ,'-','-','N' "
-					+ " , -1,0)";
-			PreparedStatement ps = conn.prepareStatement(SQL);
-			ps.setInt(1, newQueryId);
-			ps.setString(2, ":allocating:" + newQueryId);
-
-			// insert the "dummy" row so the newQueryId cannot be used by others
-			ps.executeUpdate();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 			newQueryId = -1;
@@ -956,7 +956,7 @@ public class ArtQuery {
 
 			//build roles string from rule values
 			if (rs.next()) {
-				StringBuilder tmpSb = new StringBuilder(64);
+				StringBuilder tmpSb;
 
 				String currentRule;
 				String columnDataType;
@@ -1058,8 +1058,8 @@ public class ArtQuery {
 						graphHeight = Integer.parseInt(token.substring(idx + 1));
 					} else if (token.indexOf(":") != -1) {
 						int idx = token.indexOf(":");
-						graphYMin = Integer.parseInt(token.substring(0, idx));
-						graphYMax = Integer.parseInt(token.substring(idx + 1));
+						graphYMin = Double.parseDouble(token.substring(0, idx));
+						graphYMax = Double.parseDouble(token.substring(idx + 1));
 					} else if (token.startsWith("#")) {
 						graphBgColor = token;
 					}

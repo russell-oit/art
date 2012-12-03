@@ -292,8 +292,8 @@ public class QueryExecute extends HttpServlet {
 		aq.setQueryType(queryType);
 		aq.setGraphDisplayOptions(tmp, usingShortDescription);
 
-		int yMin = aq.getGraphYMin();
-		int yMax = aq.getGraphYMax();
+		double yMin = aq.getGraphYMin();
+		double yMax = aq.getGraphYMax();
 		width = aq.getGraphWidth();
 		height = aq.getGraphHeight();
 		bgColor = aq.getGraphBgColor();
@@ -303,8 +303,8 @@ public class QueryExecute extends HttpServlet {
 		boolean showGraphData = aq.isShowGraphData();
 
 		if (yMin < yMax) {
-			request.setAttribute("_from", new Integer(yMin));
-			request.setAttribute("_to", new Integer(yMax));
+			request.setAttribute("_from", new Double(yMin));
+			request.setAttribute("_to", new Double(yMax));
 		}
 
 		if (!showLegend) {

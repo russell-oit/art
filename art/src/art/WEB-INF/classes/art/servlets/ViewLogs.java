@@ -79,7 +79,7 @@ public class ViewLogs extends HttpServlet {
 		layout.setPattern(PATTERN);
 		layout.setTitle("ART");
 		layout.start();
-		
+
 		cssBuilder = new UrlCssBuilder();
 		layout.setCssBuilder(cssBuilder); //cssbuilder must be set before call to layout.getfileheader
 	}
@@ -103,7 +103,7 @@ public class ViewLogs extends HttpServlet {
 	 */
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+
 		response.setContentType("text/html;charset=UTF-8");
 
 		HttpSession session = request.getSession(true);
@@ -118,16 +118,14 @@ public class ViewLogs extends HttpServlet {
 				toPage = "login";
 			}
 			request.getRequestDispatcher("/" + toPage + ".jsp").forward(request, response);
-		} else if(ue.getAdminLevel()!=100){
-			//only allow full admins to view logs
-			request.getRequestDispatcher("/user/showGroups.jsp").forward(request, response);
-		} else {
+		} else if (ue.getAdminLevel() >= 10) {
+			//only allow admins to view logs
 			reacquireCBA();
 			PrintWriter out = response.getWriter();
 			try {
 				String contextPath = request.getContextPath();
-				cssBuilder.setUrl(contextPath + "/css/logback.css");				
-				out.append(layout.getFileHeader());				
+				cssBuilder.setUrl(contextPath + "/css/logback.css");
+				out.append(layout.getFileHeader());
 				out.append("<h2>Recent Logging Events</h2>");
 				out.append("<table class=\"nav\">");
 				out.append("<tr><td class=\"sexy\"><a href=\"" + contextPath
@@ -141,7 +139,7 @@ public class ViewLogs extends HttpServlet {
 				printLogs(out);
 
 				out.append(layout.getPresentationFooter());
-				
+
 				out.append("<a name=\"bottom\" />");
 				out.append("</div>");
 
@@ -151,6 +149,9 @@ public class ViewLogs extends HttpServlet {
 			} finally {
 				out.close();
 			}
+		} else {
+			//only allow admins to view logs
+			request.getRequestDispatcher("/user/showGroups.jsp").forward(request, response);
 		}
 	}
 

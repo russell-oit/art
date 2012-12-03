@@ -664,12 +664,13 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
     public void processChart(Object chart, Map params) {
         XYPlot plot = (XYPlot) ((JFreeChart) chart).getPlot();
 
-        if (params.get("from") != null && params.get("to") != null) {
-            NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-            Integer from = (Integer)params.get("from");
-			Integer to = (Integer)params.get("to");
-            rangeAxis.setRange(from, to);
-        }
+        //set y axis range if required
+		if (params.get("from") != null && params.get("to") != null) {
+			Double from = (Double) params.get("from");
+			Double to = (Double) params.get("to");
+			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+			rangeAxis.setRange(from, to);
+		}
 
         //set grid lines to light grey so that they are visible with a default plot background colour of white
         plot.setRangeGridlinePaint(Color.LIGHT_GRAY);

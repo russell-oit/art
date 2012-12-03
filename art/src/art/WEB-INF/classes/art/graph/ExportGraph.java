@@ -224,8 +224,8 @@ public class ExportGraph {
 		boolean showTooltips = false;
 		boolean showUrls = false;
 		String bgColor;
-		int from; //y axis range minimum
-		int to; //y axis range maximum
+		double from; //y axis range minimum
+		double to; //y axis range maximum
 
 		ChartTheme currentChartTheme = null;
 		BarPainter currentBarPainter = null;

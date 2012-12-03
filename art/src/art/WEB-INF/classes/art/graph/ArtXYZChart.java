@@ -409,11 +409,11 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	public void processChart(Object chart, Map params) {
 		XYPlot plot = (XYPlot) ((JFreeChart) chart).getPlot();
 
-		//allow setting of y axis range
+		//set y axis range if required
 		if (params.get("from") != null && params.get("to") != null) {
+			Double from = (Double) params.get("from");
+			Double to = (Double) params.get("to");
 			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-			Integer from = (Integer) params.get("from");
-			Integer to = (Integer) params.get("to");
 			rangeAxis.setRange(from, to);
 		}
 

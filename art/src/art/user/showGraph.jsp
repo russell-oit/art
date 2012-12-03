@@ -45,8 +45,8 @@
   boolean hasDrilldown=graph.getHasDrilldown();
 		  
    // y axis data range
-  Integer from = (Integer) request.getAttribute("_from");
-  Integer to = (Integer) request.getAttribute("_to");
+  Double from = (Double) request.getAttribute("_from");
+  Double to = (Double) request.getAttribute("_to");
     
   // legend
   boolean showLegend = true;

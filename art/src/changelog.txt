@@ -1,3 +1,7 @@
+ART 2.5
+* Support for case sensitive operators for dynamic queries
+* Allow use of decimals when specifying y axis range
+
 ART 2.4.1
 * Support for bubble charts
 * Support for heat map charts (experimental)

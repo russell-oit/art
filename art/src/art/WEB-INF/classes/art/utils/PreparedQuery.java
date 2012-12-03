@@ -1338,9 +1338,11 @@ public class PreparedQuery {
 				if (param != null) {
 					if (param.usesDirectSubstitution()) {
 						String querySql = sb.toString();
-						
+
 						//some precaution
-						paramValue=paramValue.replace("'", "''").replace("--", "").replace(";","");
+						if (paramValue != null) { //can be null if htmlparams was null and was created here
+							paramValue = paramValue.replace("'", "''").replace("--", "").replace(";", "");
+						}
 
 						String searchString = Pattern.quote("#" + paramLabel + "#"); //quote in case it contains special regex characters
 						String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
@@ -1513,17 +1515,21 @@ public class PreparedQuery {
 		} else {
 			op = op.trim().toLowerCase();
 		}
-		//although since exp1,exp2 come from a parameter values, they can never be null. maybe only empty string
+		//although since exp1,exp2 come from parameter values, they can never be null. maybe only empty string
 		if (exp1 == null) {
 			exp1 = "";
-		} else {
-			exp1 = exp1.trim().toLowerCase();
 		}
 		if (exp2 == null) {
 			exp2 = "";
-		} else {
-			exp2 = exp2.trim().toLowerCase();
 		}
+
+		//enable case sensitive comparisons
+		String csExp1 = exp1;
+		String csExp2 = exp2;
+
+		//make operands lowercase for case insensitive comparisons
+		exp1 = exp1.trim().toLowerCase();
+		exp2 = exp2.trim().toLowerCase();
 
 		//evaluate conditions
 		if (op.equals("eq") || op.equals("equals")) { // -- equals
@@ -1572,6 +1578,27 @@ public class PreparedQuery {
 
 		} else if (op.equals("contains")) { // ----------- contains
 			return (exp1.indexOf(exp2) != -1 ? true : false);
+
+		} else if (op.equals("eq cs") || op.equals("equals cs")) { // -- equals case sensitive
+			return csExp1.equals(csExp2);
+
+		} else if (op.equals("neq cs") || op.equals("not equals cs")) { // -- not equals case sensitive
+			return !csExp1.equals(csExp2);
+
+		} else if (op.equals("la cs")) { // ----------------- less than  (alpha) case sensitive
+			return (csExp1.compareTo(csExp2) < 0 ? true : false);
+
+		} else if (op.equals("ga cs")) { // ----------------- great than (alpha) case sensitive
+			return (csExp1.compareTo(csExp2) > 0 ? true : false);
+
+		} else if (op.equals("starts with cs")) { // -------- startsWith case sensitive
+			return csExp1.startsWith(csExp2);
+
+		} else if (op.equals("ends with cs")) { // ---------- ensWith case sensitive
+			return csExp1.endsWith(csExp2);
+
+		} else if (op.equals("contains cs")) { // ----------- contains case sensitive
+			return (csExp1.indexOf(csExp2) != -1 ? true : false);
 
 		} else {
 			throw new ArtException("<br>Not able to evaluate IF condition, the operator &lt;OP&gt;" + op + "&lt;/OP&gt; is not recognized");
