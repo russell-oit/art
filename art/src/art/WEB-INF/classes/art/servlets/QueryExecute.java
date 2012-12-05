@@ -841,25 +841,25 @@ public class QueryExecute extends HttpServlet {
 									probe = 105;
 									
 									//do initial preparation of graph object
-									ArtGraph og = artGraphOut(rsmd, request, graphOptions, shortDescription, queryType);
+									ArtGraph ag = artGraphOut(rsmd, request, graphOptions, shortDescription, queryType);
 
 									//set some graph properties
-									og.setXlabel(xaxisLabel);
+									ag.setXlabel(xaxisLabel);
 									if (yaxisLabel == null) {
 										yaxisLabel = rsmd.getColumnLabel(1);
 									}
-									og.setYlabel(yaxisLabel);
+									ag.setYlabel(yaxisLabel);
 
 									if (showParams) {
 										request.setAttribute("showParams", "true");
-										og.setDisplayParameters(displayParams);
+										ag.setDisplayParameters(displayParams);
 									}
 
 									//add drill down queries
 									Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(queryId);
 
 									//build graph dataset
-									og.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
+									ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
 
 									//set other properties relevant for the graph display
 									if (showSQL) {
@@ -882,7 +882,7 @@ public class QueryExecute extends HttpServlet {
 									request.setAttribute("queryId", new Integer(queryId));
 
 									//pass graph object
-									request.setAttribute("artGraph", og);
+									request.setAttribute("artGraph", ag);
 
 									probe = 110;
 								} else {

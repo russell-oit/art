@@ -56,8 +56,8 @@ Iterator it;
             <td class="data">
                 <select name="QUERY_GROUPS" size="5" multiple>
                     <%
-					ObjectGroup og=new ObjectGroup();
-					Map groups=og.getAllQueryGroupNames();
+					QueryGroup qg=new QueryGroup();
+					Map groups=qg.getAllQueryGroupNames();
 					it = groups.entrySet().iterator();					
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();

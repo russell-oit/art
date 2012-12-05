@@ -66,8 +66,8 @@ Iterator it;
 					Integer queryGroupId;
 					String selected;
 
-					ObjectGroup og=new ObjectGroup();
-					Map groups=og.getAllQueryGroupNames();
+					QueryGroup qg=new QueryGroup();
+					Map groups=qg.getAllQueryGroupNames();
 					it = groups.entrySet().iterator();
 
 					while(it.hasNext()) {

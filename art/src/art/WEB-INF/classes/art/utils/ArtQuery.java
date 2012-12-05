@@ -1569,10 +1569,10 @@ public class ArtQuery {
 	 * @param uname
 	 * @return query groups that junior and senior admins can see
 	 */
-	public Map getAdminObjectGroups(int level, String uname) {
+	public Map getAdminQueryGroups(int level, String uname) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
-		TreeMap<String, ObjectGroup> map = new TreeMap<String, ObjectGroup>(stringCollator);
+		TreeMap<String, QueryGroup> map = new TreeMap<String, QueryGroup>(stringCollator);
 
 		Connection conn = null;
 
@@ -1602,12 +1602,12 @@ public class ArtQuery {
 
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				ObjectGroup og = new ObjectGroup();
+				QueryGroup qg = new QueryGroup();
 				groupName = rs.getString("NAME");
-				og.setName(groupName);
-				og.setGroupId(rs.getInt("QUERY_GROUP_ID"));
-				og.setDescription(rs.getString("DESCRIPTION"));
-				map.put(groupName, og);
+				qg.setName(groupName);
+				qg.setGroupId(rs.getInt("QUERY_GROUP_ID"));
+				qg.setDescription(rs.getString("DESCRIPTION"));
+				map.put(groupName, qg);
 			}
 			ps.close();
 			rs.close();
@@ -1634,7 +1634,7 @@ public class ArtQuery {
 	 * @param uname
 	 * @return query groups that junior and senior admins can see
 	 */
-	public Map getAdminObjectGroupsList(int level, String uname) {
+	public Map getAdminQueryGroupsList(int level, String uname) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);

@@ -4,7 +4,7 @@
 <%
 String action=request.getParameter("ACTION");
 
-ObjectGroup group=new ObjectGroup();
+QueryGroup group=new QueryGroup();
 
 group.setGroupId(Integer.parseInt(request.getParameter("GROUP_ID")));
 group.setName(request.getParameter("GROUP_NAME").trim());

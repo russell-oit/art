@@ -350,15 +350,15 @@ tinyMCE.init({
                     boolean isOnlyListGroupAvailable = true;
 					int gId;
 					String groupName;
-					ObjectGroup og;
-					Map groups=aq.getAdminObjectGroups(accessLevel,username);
+					QueryGroup qg;
+					Map groups=aq.getAdminQueryGroups(accessLevel,username);
 					it = groups.entrySet().iterator();
 					while (it.hasNext()) {
 						counterGroups++;
 						Map.Entry entry = (Map.Entry)it.next();
-						og=(ObjectGroup)entry.getValue();
-						gId=og.getGroupId();
-						groupName=og.getName();
+						qg=(QueryGroup)entry.getValue();
+						gId=qg.getGroupId();
+						groupName=qg.getName();
 
 						if (gId != 0){
 							isOnlyListGroupAvailable = false;

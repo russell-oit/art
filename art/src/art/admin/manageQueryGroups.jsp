@@ -5,12 +5,12 @@
 <script type="text/javascript">
     
     function goToEdit() {
-		if(document.manageObjectGroups.ACTION.value=="ADD"){
-			document.manageObjectGroups.submit();
+		if(document.manageQueryGroups.ACTION.value=="ADD"){
+			document.manageQueryGroups.submit();
 		} else {
 			//modify or delete. a group must be selected
-			if (document.manageObjectGroups.GROUP_ID.selectedIndex>=0) {				
-				document.manageObjectGroups.submit();
+			if (document.manageQueryGroups.GROUP_ID.selectedIndex>=0) {				
+				document.manageQueryGroups.submit();
 			} else {
 				alert("Please select a group");
 			}
@@ -20,7 +20,7 @@
 </script>
 
 
-<form name="manageObjectGroups" method="post" action="editQueryGroup.jsp">
+<form name="manageQueryGroups" method="post" action="editQueryGroup.jsp">
     <table align="center">
         <tr>
 			<td class="title" colspan="2"> Manage Query Groups </td>
@@ -33,8 +33,8 @@
             <td class="data">
                 <select name="GROUP_ID" size="10">
                     <%
-					ObjectGroup og=new ObjectGroup();
-					Map groups=og.getAllQueryGroupNames();
+					QueryGroup qg=new QueryGroup();
+					Map groups=qg.getAllQueryGroupNames();
 					Iterator it = groups.entrySet().iterator();					
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();

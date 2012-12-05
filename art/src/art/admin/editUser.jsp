@@ -118,8 +118,8 @@ username=ue.getUsername();
 					Integer queryGroupId;
 					String selected;
 
-					ObjectGroup og=new ObjectGroup();
-					Map queryGroups=og.getAllQueryGroupNames();
+					QueryGroup qg=new QueryGroup();
+					Map queryGroups=qg.getAllQueryGroupNames();
 					it = queryGroups.entrySet().iterator();
 
 					while(it.hasNext()) {

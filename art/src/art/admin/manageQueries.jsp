@@ -108,17 +108,17 @@
 					String username=(String) session.getAttribute("AdminUsername");
 																									
 					ArtQuery aq=new ArtQuery();
-					Map groups=aq.getAdminObjectGroups(accessLevel,username);
+					Map groups=aq.getAdminQueryGroups(accessLevel,username);
 					Iterator it = groups.entrySet().iterator();
-					int objectGroupId; 
+					int queryGroupId; 
 					
 					while (it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();
-						ObjectGroup og=(ObjectGroup)entry.getValue();
-                        objectGroupId=og.getGroupId();						
+						QueryGroup qg=(QueryGroup)entry.getValue();
+                        queryGroupId=qg.getGroupId();						
 						%>
-						<option value="<%=objectGroupId%>">
-							<%=og.getName() + " - " + og.getDescription() +" (" + objectGroupId + ")" %>
+						<option value="<%=queryGroupId%>">
+							<%=qg.getName() + " - " + qg.getDescription() +" (" + queryGroupId + ")" %>
 						</option>
 						<%
 					 }                 

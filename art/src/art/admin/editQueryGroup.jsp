@@ -10,7 +10,7 @@ if(groupIdString!=null){
 	groupId=Integer.parseInt(groupIdString);
 }
 
-ObjectGroup group=new ObjectGroup();
+QueryGroup group=new QueryGroup();
 
 if (action.equals("DELETE")){
 	//check if queries exist in this group
@@ -48,7 +48,7 @@ if (action.equals("MODIFY")){
 %>
 
 
-<form name="editObjectGroup" method="post" action="execEditQueryGroup.jsp">
+<form name="editQueryGroup" method="post" action="execEditQueryGroup.jsp">
 	<input type="hidden" name="ACTION" value="<%=action%>">
 
 	<table align="center">

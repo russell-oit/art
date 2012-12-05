@@ -94,7 +94,7 @@ String username=(String) session.getAttribute("AdminUsername");
                 <select name="QUERY_GROUPS" size="5" multiple>
                     <%
 					ArtQuery aq=new ArtQuery();
-					Map queryGroups=aq.getAdminObjectGroupsList(accessLevel,username);
+					Map queryGroups=aq.getAdminQueryGroupsList(accessLevel,username);
 					it = queryGroups.entrySet().iterator();
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();

@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Timothy Anyona
  */
-public class ObjectGroup {
+public class QueryGroup {
 
-    final static Logger logger = LoggerFactory.getLogger(ObjectGroup.class);
+    final static Logger logger = LoggerFactory.getLogger(QueryGroup.class);
     int groupId = -1;
     String name = "";
     String description = "";
@@ -22,7 +22,7 @@ public class ObjectGroup {
     /**
      * 
      */
-    public ObjectGroup() {
+    public QueryGroup() {
     }
 
     /**

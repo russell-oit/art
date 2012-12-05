@@ -1364,10 +1364,10 @@ public class UserEntity implements Serializable {
      * 
      * @param action
      * @param admins
-     * @param objectGroups
+     * @param queryGroups
      * @param datasources
      */
-    public void updateJuniorAdminPrivileges(String action, String[] admins, String[] objectGroups, String[] datasources) {
+    public void updateJuniorAdminPrivileges(String action, String[] admins, String[] queryGroups, String[] datasources) {
 
         if (action == null || admins == null) {
             return;
@@ -1395,16 +1395,16 @@ public class UserEntity implements Serializable {
 
             for (int i = 0; i < admins.length; i++) {
                 //update query group privileges
-                if (objectGroups != null) {
-                    for (int j = 0; j < objectGroups.length; j++) {
+                if (queryGroups != null) {
+                    for (int j = 0; j < queryGroups.length; j++) {
                         psGroup.setString(1, admins[i]);
-                        psGroup.setInt(2, Integer.parseInt(objectGroups[j]));
+                        psGroup.setInt(2, Integer.parseInt(queryGroups[j]));
                         try {
                             psGroup.executeUpdate();
                         } catch (SQLIntegrityConstraintViolationException e) {
-                            logger.info("Admin {} already has access to Query Group ID {}", admins[i], objectGroups[j]);
+                            logger.info("Admin {} already has access to Query Group ID {}", admins[i], queryGroups[j]);
                         } catch (SQLException e) {
-                            logger.error("Error updating admin privileges. Query Group ID={}, Admin={}", new Object[]{objectGroups[j], admins[i], e});
+                            logger.error("Error updating admin privileges. Query Group ID={}, Admin={}", new Object[]{queryGroups[j], admins[i], e});
                         }
                     }
                 }
