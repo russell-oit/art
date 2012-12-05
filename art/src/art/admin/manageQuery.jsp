@@ -126,7 +126,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
             
             <% if(queryType!=120) { //don't provide link to execute static lov %> 
             <small>Direct URLs <br>
-                <a href="<%=request.getContextPath()%><%=ObjectUrl.getExecuteUrl(queryId, true)%>" target="_blank">Execute</a>
+                <a href="<%=request.getContextPath()%><%=QueryUrl.getExecuteUrl(queryId, true)%>" target="_blank">Execute</a>
                 (using default parameter values)<br>
 
                 <% if(queryGroupId!=0 && queryType!=119 && queryType!=120 && queryType!= 111) { %>

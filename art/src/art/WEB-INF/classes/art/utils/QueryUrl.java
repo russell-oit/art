@@ -35,14 +35,14 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class ObjectUrl {
+public class QueryUrl {
 
-	final static Logger logger = LoggerFactory.getLogger(ObjectUrl.class);
+	final static Logger logger = LoggerFactory.getLogger(QueryUrl.class);
 
 	/**
 	 *
 	 */
-	public ObjectUrl() {
+	public QueryUrl() {
 	}
 
 	/**

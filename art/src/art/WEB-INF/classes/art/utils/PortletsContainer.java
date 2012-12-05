@@ -182,7 +182,7 @@ public class PortletsContainer {
 					getDefaultParameters = false; // the URL has parameters, thus we'll not get the defaults
 				}
 			}
-			link = ObjectUrl.getExecuteUrl(Integer.parseInt(link), false, getDefaultParameters) +"&_isFragment=Y";
+			link = QueryUrl.getExecuteUrl(Integer.parseInt(link), false, getDefaultParameters) +"&_isFragment=Y";
 			return request.getContextPath() + link  + linkSb.toString();
 		}
 	}
