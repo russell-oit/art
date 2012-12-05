@@ -156,7 +156,7 @@ public class PortletsContainer {
 
 	/** Returns the link to embed in the portlet.
 	*  It can be a absolute URL (specified within the <URL> tag)
-	*  or the link to execute an Art Object (query, graph, text)
+	*  or the link to execute an ART query
      * 
      * @param col
      * @param row 

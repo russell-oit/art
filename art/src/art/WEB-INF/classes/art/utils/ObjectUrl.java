@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * Class to construct the default URL to execute an ART query
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class ObjectUrl {
 
