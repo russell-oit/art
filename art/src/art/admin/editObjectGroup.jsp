@@ -16,8 +16,8 @@ if (action.equals("DELETE")){
 	//check if queries exist in this group
 	Map queries=group.getLinkedQueries(groupId);
 	if(queries.size()>0){
-		out.println("<pre>Error: There are objects in the group you want to delete.");
-		out.println("       Delete the following objects or change their group");
+		out.println("<pre>Error: There are queries in the group you want to delete.");
+		out.println("       Delete the following queries or change their group");
 		out.println("       in order to be able to delete this group: ");
 		out.println();
 
@@ -35,7 +35,7 @@ if (action.equals("DELETE")){
 	} else {
 		//no queries in this group. delete group
 		group.delete(groupId);
-		response.sendRedirect("manageObjectGroups.jsp");
+		response.sendRedirect("manageQueryGroups.jsp");
 		return;
 	}
 }
@@ -48,17 +48,14 @@ if (action.equals("MODIFY")){
 %>
 
 
-<form name="editObjectGroup" method="post" action="execEditObjectGroup.jsp">
+<form name="editObjectGroup" method="post" action="execEditQueryGroup.jsp">
 	<input type="hidden" name="ACTION" value="<%=action%>">
 
 	<table align="center">
 		<tr>
-			<td class="title" colspan="2">Manage Object Groups</td>
+			<td class="title" colspan="2">Define Query Group</td>
 		</tr>
-		<tr>
-			<td class="data" colspan="2"><b>Group Definition</b></td>
-		</tr>
-
+		
 	    <tr>
 			<td class="data"> ID </td>
 			<%

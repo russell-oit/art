@@ -11,7 +11,7 @@ UserGroup group=new UserGroup();
 group.setGroupId(Integer.parseInt(request.getParameter("GROUP_ID")));
 group.setName(request.getParameter("GROUP_NAME").trim());
 group.setDescription(request.getParameter("GROUP_DESCRIPTION").trim());
-group.setDefaultObjectGroup(Integer.parseInt(request.getParameter("DEFAULT_OBJECT_GROUP")));
+group.setDefaultQueryGroup(Integer.parseInt(request.getParameter("DEFAULT_QUERY_GROUP")));
 
 if (action.equals("ADD")){	
 	group.insert();

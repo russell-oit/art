@@ -29,7 +29,7 @@ if(queryIdString!=null){
 }
   
    pc.setObjectId(queryId);
-   ArtDBCP.log(ue.getUsername(), "object", request.getRemoteAddr(), queryId, 0, 0, "dashboard");
+   ArtDBCP.log(ue.getUsername(), "query", request.getRemoteAddr(), queryId, 0, 0, "dashboard");
    
    String contextPath=request.getContextPath();
    

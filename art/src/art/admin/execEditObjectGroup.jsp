@@ -16,7 +16,7 @@ if (action.equals("ADD")){
 	group.update();
 }
 
-response.sendRedirect("manageObjectGroups.jsp");
+response.sendRedirect("manageQueryGroups.jsp");
 %>
 
 

@@ -20,21 +20,21 @@
 </script>
 
 
-<form name="manageObjectGroups" method="post" action="editObjectGroup.jsp">
+<form name="manageObjectGroups" method="post" action="editQueryGroup.jsp">
     <table align="center">
         <tr>
-			<td class="title" colspan="2"> Manage Object Groups </td>
+			<td class="title" colspan="2"> Manage Query Groups </td>
         </tr>
         <tr>
-            <td class="data" colspan="2"> <b>Add/Modify/Delete Object Groups </b> </td>
+            <td class="data" colspan="2"> <b>Add/Modify/Delete Query Groups </b> </td>
         </tr>
         <tr>
-            <td class="data"> Object Group </td>
+            <td class="data"> Query Group </td>
             <td class="data">
                 <select name="GROUP_ID" size="10">
                     <%
 					ObjectGroup og=new ObjectGroup();
-					Map groups=og.getAllObjectGroupNames();
+					Map groups=og.getAllQueryGroupNames();
 					Iterator it = groups.entrySet().iterator();					
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();

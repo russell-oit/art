@@ -69,7 +69,7 @@ public class PreparedQuery {
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter label and value as corresponding object e.g. Double, Long. for jasper reports
 	Map<String, String> jxlsMultiParams; //hash map will contain multi parameter label and values instead of parameter id e.g. M_2 and string array of values. for jxls reports
 	int queryType; //to enable special handling of template queries where sql source is not executed
-	boolean viewingTextObject = false; //flag used to check if user has rights to edit a text object
+	boolean viewingTextObject = false; //flag used to check if user has rights to edit a text query
 	Map<String, ArtQueryParam> htmlParams; //all the queries parameters, with the html name as the key
 	private boolean recipientFilterPresent; //dynamic recipient filter label present
 	private final String RECIPIENT_LABEL = "#recipient#"; //for dynamic recipients, label for recipient in data query
@@ -762,12 +762,12 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Determine if a user can edit a text object. User needs direct access to
+	 * Determine if a user can edit a text query. User needs direct access to
 	 * edit it
 	 *
 	 * @param uname
 	 * @param qid
-	 * @return <code>true</code> if user can edit the text object
+	 * @return <code>true</code> if user can edit the text query
 	 */
 	public boolean canEditTextObject(String uname, int qid) {
 		username = uname;
@@ -893,8 +893,8 @@ public class PreparedQuery {
 				rs.close();
 			}
 
-			//User can also execute all queries in an object group he has been assigned to
-			//text objects must be assigned direct access
+			//User can also execute all queries in a query group he has been assigned to
+			//text querys must be assigned direct access
 			if (!viewingTextObject) {
 				if (last_stmt_retrieved_rows == 0) {
 					//user doesn't belong to a group with direct access to the query. check if user has access to the query's group

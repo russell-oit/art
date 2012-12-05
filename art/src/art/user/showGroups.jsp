@@ -40,9 +40,9 @@ function setAction() {
        <% // this allows to focus public_user in one group only
          Map<String,Integer> groups;
 	 if (request.getParameter("groupId") == null)  {
-             groups = ue.getDisplayObjectGroups();
+             groups = ue.getAvailableQueryGroups();
          } else  {
-             groups = ue.getDisplayObjectGroup(Integer.parseInt(request.getParameter("groupId")));
+             groups = ue.getAvailableQueryGroup(Integer.parseInt(request.getParameter("groupId")));
          }
 
        %>
@@ -51,7 +51,7 @@ function setAction() {
         <%
     Iterator it2 = groups.entrySet().iterator();
 	Integer groupId;
-	int defaultGroup=ue.getDefaultObjectGroup();	
+	int defaultGroup=ue.getDefaultQueryGroup();	
 	while(it2.hasNext()) {
 		Map.Entry entry = (Map.Entry)it2.next();
 		groupId=(Integer)entry.getValue();

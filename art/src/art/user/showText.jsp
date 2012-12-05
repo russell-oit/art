@@ -44,15 +44,15 @@ if(!queryExists){
    <%
 }
 
-ArtDBCP.log(username, "object", request.getRemoteAddr(), queryId, 0, 0, "text");
+ArtDBCP.log(username, "query", request.getRemoteAddr(), queryId, 0, 0, "text");
 
 String queryText;
 int queryType=aq.getQueryType();
 if(queryType==111){
 	queryText=aq.getText();
 } else {
-	//not a text object query
-	queryText="Query ID " + queryId + " is not a text object";
+	//not a text query query
+	queryText="Query ID " + queryId + " is not a text query";
 }
 %>
 

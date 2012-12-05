@@ -56,30 +56,30 @@ Iterator it;
 		</tr>
 
 		<tr>
-            <td class="data"> Default Object Group </td>
+            <td class="data"> Default Query Group </td>
             <td class="data">
-                <select name="DEFAULT_OBJECT_GROUP" size="1">
+                <select name="DEFAULT_QUERY_GROUP" size="1">
 					<option value="-1">No Default</option>
                     <%
-					int defaultObjectGroup=ug.getDefaultObjectGroup();
+					int defaultQueryGroup=ug.getDefaultQueryGroup();
 
-					Integer objectGroupId;
+					Integer queryGroupId;
 					String selected;
 
 					ObjectGroup og=new ObjectGroup();
-					Map groups=og.getAllObjectGroupNames();
+					Map groups=og.getAllQueryGroupNames();
 					it = groups.entrySet().iterator();
 
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();
-						objectGroupId=(Integer)entry.getValue();
-						if(objectGroupId==defaultObjectGroup){
+						queryGroupId=(Integer)entry.getValue();
+						if(queryGroupId==defaultQueryGroup){
 							selected="selected";
 						} else {
 							selected="";
 						}
 
-						if(objectGroupId!=0){
+						if(queryGroupId!=0){
 							%>
 							<option value="<%=entry.getValue()%>" <%=selected%> ><%=entry.getKey()%></option>
 							<%

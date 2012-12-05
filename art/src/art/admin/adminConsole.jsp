@@ -8,8 +8,8 @@
             <br>Admin Console<br><img src="../images/settings-64px.jpg"> </td></tr>
 
    <%
-          int adminLevel = ((Integer) session.getAttribute("AdminLevel") ).intValue();
-	  if (adminLevel == 100) {
+          int accessLevel = ((Integer) session.getAttribute("AdminLevel") ).intValue();
+	  if (accessLevel == 100) {
 		  //super admin
    %>
 
@@ -32,7 +32,7 @@
 		    /*
 		     *   Manage Datasources
 		     */
-		if (adminLevel >=80) {
+		if (accessLevel >=80) {
 			//senior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageDatasources.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -45,28 +45,28 @@
 		}
 
 		    /*
-		     *   Manage Object Groups
+		     *   Manage Query Groups
 		     */
-		if (adminLevel >=80) {
+		if (accessLevel >=80) {
 			//senior admin and above
    %>
-		    <tr><td class="artLink" onclick="javascript:parent.location='manageObjectGroups.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
-			Object Groups
+		    <tr><td class="artLink" onclick="javascript:parent.location='manageQueryGroups.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
+			Query Groups
 			</td>
-            <td class="data"> Define Groups to which objects belong</td></tr>
+            <td class="data"> Define Groups to which queries belong</td></tr>
    <%
 		}
 		    /*
 		     *   Manage Queries
 		     */
-		if (adminLevel >=10) {
+		if (accessLevel >=10) {
 			//junior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageQueries.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
-			Objects
+			Queries
 			</td>
-		    <td class="data"> <span style="color:red">Manage Queries, Dashboards, Text objects</span> <br>
-			  <small> create, update, delete, copy SQL queries, dashboards or text objects
+		    <td class="data"> <span style="color:red">Manage Queries</span> <br>
+			  <small> create, update, delete, copy queries 
 			   </small>
 		   </td></tr>
    <%
@@ -74,7 +74,7 @@
 		    /*
 		     *   Manage User Groups
 		     */
-		if (adminLevel >=40) {
+		if (accessLevel >=40) {
 			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserGroups.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -86,7 +86,7 @@
 		    /*
 		     *   Manage Users
 		     */
-		if (adminLevel >=40) {
+		if (accessLevel >=40) {
 			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUsers.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -98,7 +98,7 @@
 		    /*
 		     *   Manage User-User Group Membership
 		     */
-		if (adminLevel >=30) {
+		if (accessLevel >=30) {
 			//mid admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserGroupAssignment.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -113,31 +113,31 @@
 		    /*
 		     *   Manage User/User Group Privileges
 		     */
-		if (adminLevel >= 30) {
+		if (accessLevel >= 30) {
 			//mid admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserPrivileges.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
                     User/User Group Privileges &nbsp;&nbsp;
 			</td>
-		    <td class="data"> Grant/Revoke to users/user groups the right to access objects/object groups</td></tr>
+		    <td class="data"> Grant/Revoke to users/user groups the right to access queries/query groups</td></tr>
    <%
 		}
 		    /*
 		     *   Manage Admin Privileges
 		     */
-		if (adminLevel >=40) {
+		if (accessLevel >=40) {
 			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageAdminPrivileges.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
 			Admin Privileges
 			</td>
-		    <td class="data"> Grant/Revoke to junior/mid Admins the right to act on groups and datasources </td></tr>
+		    <td class="data"> Grant/Revoke to junior/mid Admins the right to act on query groups and datasources </td></tr>
    <%
 		}
 		    /*
 		     *   Manage Rules
 		     */
-		if (adminLevel >=80) {
+		if (accessLevel >=80) {
 			//senior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageRuleDefinitions.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -150,7 +150,7 @@
 		    /*
 		     *   Manage Rule values for given users
 		     */
-		if (adminLevel >=40) {
+		if (accessLevel >=40) {
 			//standard admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageUserRules.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -162,7 +162,7 @@
 		/*
 		     *   Manage Shared Jobs
 		     */
-		if (adminLevel >=10) {
+		if (accessLevel >=10) {
 			//junior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageSharedJobs.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
@@ -175,7 +175,7 @@
 		/*
 		     *   Manage Job Schedules
 		     */
-		if (adminLevel >=10) {
+		if (accessLevel >=10) {
 			//junior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageJobSchedules.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">

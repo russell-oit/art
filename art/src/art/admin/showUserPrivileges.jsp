@@ -15,10 +15,10 @@ Iterator it;
             <td colspan="2" class="data2">                
 				<%				
 				Map map;
-				map=ue.getObjectGroupAssignment();
+				map=ue.getQueryGroupAssignment();
 				if(map.size()>0){
 					%>
-					<b>Object Groups</b><br>
+					<b>Query Groups</b><br>
 					<%
 					it = map.entrySet().iterator();					
 					while(it.hasNext()) {
@@ -34,10 +34,10 @@ Iterator it;
 				%>    
 
 				<%				
-				map=ue.getObjectAssignment();
+				map=ue.getQueryAssignment();
 				if(map.size()>0){
 					%>
-					<b>Objects</b><br>
+					<b>Queries</b><br>
 					<%
 					it = map.entrySet().iterator();					
 					while(it.hasNext()) {

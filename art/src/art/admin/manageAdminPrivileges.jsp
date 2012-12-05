@@ -8,8 +8,8 @@
 		//ensure minimum number of items are selected
 		if (document.manageAdminPrivileges.ADMINS.selectedIndex<0) {
 			alert("Please select at least one admin");	
-		} else if (document.manageAdminPrivileges.OBJECT_GROUPS.selectedIndex<0 && document.manageAdminPrivileges.DATASOURCES.selectedIndex<0) {
-			alert("Please select at least one object group or datasource");
+		} else if (document.manageAdminPrivileges.QUERY_GROUPS.selectedIndex<0 && document.manageAdminPrivileges.DATASOURCES.selectedIndex<0) {
+			alert("Please select at least one query group or datasource");
 		} else {
 			document.manageAdminPrivileges.submit();
 		}		
@@ -29,7 +29,7 @@ Iterator it;
 			<td class="title" colspan="2"> Manage Privileges for Mid/Junior Admins </td>
         </tr>
         <tr>
-            <td class="data" colspan="2"> Specify Object Groups and Datasources that Mid and Junior Admins can work with </td>
+            <td class="data" colspan="2"> Specify Query Groups and Datasources that Mid and Junior Admins can work with </td>
         </tr>
 		
 		<tr>
@@ -52,12 +52,12 @@ Iterator it;
         </tr>
 		
 		<tr>
-            <td class="data"> Object Groups </td>
+            <td class="data"> Query Groups </td>
             <td class="data">
-                <select name="OBJECT_GROUPS" size="5" multiple>
+                <select name="QUERY_GROUPS" size="5" multiple>
                     <%
 					ObjectGroup og=new ObjectGroup();
-					Map groups=og.getAllObjectGroupNames();
+					Map groups=og.getAllQueryGroupNames();
 					it = groups.entrySet().iterator();					
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();
@@ -111,7 +111,7 @@ Iterator it;
 				map=ue.getJuniorAdminGroupAssignment();
 				if(map.size()>0){
 					%>
-					<b>Groups</b><br>
+					<b>Query Groups</b><br>
 					<%
 					it = map.entrySet().iterator();					
 					while(it.hasNext()) {

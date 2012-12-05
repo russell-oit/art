@@ -5,7 +5,7 @@
 String action=request.getParameter("ACTION");
 
 String[] admins = request.getParameterValues("ADMINS");
-String[] groups = request.getParameterValues("OBJECT_GROUPS"); 
+String[] groups = request.getParameterValues("QUERY_GROUPS"); 
 String[] datasources = request.getParameterValues("DATASOURCES");
 
 UserEntity ue=new UserEntity();

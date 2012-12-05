@@ -3,10 +3,10 @@
 
 <%	
  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
-  art.utils.UserEntity ue2 = (art.utils.UserEntity) session.getAttribute("ue");
- int accessLevel=0;
- if(ue2!=null){
-	accessLevel=ue2.getAdminLevel(); 
+  art.utils.UserEntity ueHeader = (art.utils.UserEntity) session.getAttribute("ue");
+ int accessLevelHeader=0;
+ if(ueHeader!=null){
+	accessLevelHeader=ueHeader.getAccessLevel(); 
  }
 %>
 
@@ -39,7 +39,7 @@
 					:: <a href="<%= request.getContextPath() %>/user/myJobs.jsp" ><img src="<%= request.getContextPath() %>/images/jobs.png" title="<%=messages.getString("myJobsLink")%>" border="0" /></a>
 					:: <a href="<%= request.getContextPath() %>/user/sharedJobs.jsp"> <img src="<%= request.getContextPath() %>/images/shared-jobs.png" title="<%=messages.getString("sharedJobsLink")%>" border="0" /></a>
 					
-					<% if (accessLevel == 100) {%>
+					<% if (accessLevelHeader == 100) {%>
 					:: <a href="<%= request.getContextPath() %>/logs" ><img src="<%= request.getContextPath() %>/images/logs.png" title="<%=messages.getString("logsLink")%>" border="0" /></a>
 					<% }
 					}%>
@@ -54,9 +54,9 @@
                     </span>
                     <img src="<%= request.getContextPath() %>/images/vertical_16px.gif">
 
-                    <% if (ue2 != null) { %>
-                    <%= ue2.getUsername()%>
-                    :: Logged in at <%=java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT,request.getLocale()).format(ue2.getLoginDate())%>
+                    <% if (ueHeader != null) { %>
+                    <%= ueHeader.getUsername()%>
+                    :: Logged in at <%=java.text.DateFormat.getTimeInstance(java.text.DateFormat.SHORT,request.getLocale()).format(ueHeader.getLoginDate())%>
                     <% } %>
                 </td>
             </tr>

@@ -45,7 +45,7 @@ if(!queryExists){
 
 PreparedQuery pq=new PreparedQuery();
 boolean canEdit=pq.canEditTextObject(ue.getUsername(),queryId);
- if (canEdit || ue.getAdminLevel() > 5 ) {
+ if (canEdit || ue.getAccessLevel() >= 10 ) {
 	aq.setShortDescription(description);
 	aq.setText(text);
     aq.update(conn);

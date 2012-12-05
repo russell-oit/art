@@ -34,7 +34,7 @@ if (MODIFY) {
 
 String helpText;
 
-int adminLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
+int accessLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
 String username=(String) session.getAttribute("AdminUsername");
 
 Iterator it;
@@ -58,7 +58,7 @@ tinyMCE.init({
 	function onTypeSelection() {
 		i = document.getElementById("typeId").value;
 		if (i == 110 || i == 111) {
-            //dashboard or text object
+            //dashboard or text query
 			document.getElementById("querydiv").className="collapse";
 			document.getElementById("portletdiv").className="expand";
 
@@ -70,7 +70,7 @@ tinyMCE.init({
 				document.getElementById("xmlcode").className="expand";
 				document.getElementById("textcode").className="collapse";
 			} else {
-                //text object
+                //text query
 				document.getElementById("xmlcode").className="collapse";
 				document.getElementById("textcode").className="expand";
 			}
@@ -291,7 +291,7 @@ tinyMCE.init({
             }
 		}
 
-		//use different textarea for text objects
+		//use different textarea for text querys
 		if (i == 111) {
 			// disable the area to avoid it to be submitted
 			document.getElementById("sourceTextArea").disabled=true;
@@ -326,7 +326,7 @@ tinyMCE.init({
     <table align="center">
 		<tr><td class="title" colspan="2" >Define Query</td></tr>
         <tr><td class="title" colspan="2" > Header</td></tr>
-        <tr><td class="data"> Object ID </td>
+        <tr><td class="data"> ID </td>
 			<%
 			if(queryId==-1){
 				currentStringValue="Auto";
@@ -351,7 +351,7 @@ tinyMCE.init({
 					int gId;
 					String groupName;
 					ObjectGroup og;
-					Map groups=aq.getAdminObjectGroups(adminLevel,username);
+					Map groups=aq.getAdminObjectGroups(accessLevel,username);
 					it = groups.entrySet().iterator();
 					while (it.hasNext()) {
 						counterGroups++;
@@ -480,7 +480,7 @@ tinyMCE.init({
 					int counterDatasources=0;
 					int dbId;
 					String dbName;
-					Map dbs=aq.getAdminDatasources(adminLevel,username);
+					Map dbs=aq.getAdminDatasources(accessLevel,username);
 					it = dbs.entrySet().iterator();
 					while (it.hasNext()) {
 						counterDatasources++;
@@ -506,7 +506,7 @@ tinyMCE.init({
         <tr>
             <td class="data" colspan="2" >
                 <span style="color:red"><b>Error:</b></span> <br>
-                At least one Datasource and one Object Group need to be available in order to manage objects.
+                At least one Datasource and one Query Group need to be available in order to manage queries.
             </td>
         </tr>
     </table>
@@ -833,7 +833,7 @@ tinyMCE.init({
                     <b>Notes:</b> <br>
                     <ul>
                         <li><b>Dashboard</b><br>
-                            Any ART query, graph or text object can be considered a portlet, i.e.
+                            Any ART query, graph or text query can be considered a portlet, i.e.
 	a small embeddable frame within a web page.
 	A Dashboard is an object that allows you to group portlets in a
 	single page.<br>
@@ -849,7 +849,7 @@ tinyMCE.init({
 <!-- column size: auto|small|medium|large -->
 <SIZE>medium</SIZE>
 <!-- create a new portlet within this column
-     to embed an art object (query, graph, text) -->
+     to embed an ART query (tabular, graph, text) -->
 <PORTLET>
 <TITLE>Portlet title</TITLE>
  <!-- (optional, default is true) load content when page appears -->
@@ -873,12 +873,12 @@ tinyMCE.init({
 
                         </li>
                         <li><b>Text</b><br>
-                            A text object is just an html fragment (without the &lt;html&gt; tags) that
+                            A text query is just an html fragment (without the &lt;html&gt; tags) that
 	can be rendered stand-alone or in a dashboard. <br>
-	A text object can be viewed by any user and can be edited by users that have
-	been granted access to it. With the latter, an edit link appears at the bottom of the text
-	when the user views it. This allows one to edit the content using a in-browser html/javascript
-	WYSIWYG editor (uses the TinyMCE Editor).
+	A text query can be viewed by any user and can be edited by users that have
+	been granted access to it. With the latter, an edit link appears at the bottom right of the page
+	when the user views it. This allows one to edit the content using a 
+	WYSIWYG editor.
                         </li>
                     </ul>
             </td>

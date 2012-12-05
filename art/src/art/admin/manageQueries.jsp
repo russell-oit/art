@@ -18,26 +18,26 @@
     function deleteQuery() {
 
         if ( document.getElementById("queryId").value > 0 ) {
-            if (window.confirm("Do you really want to delete the selected object(s)?")) {
+            if (window.confirm("Do you really want to delete the selected queries?")) {
                 document.manageQueries.action="execManageQueries.jsp";
                 document.manageQueries.QUERYACTION.value="DELETE";
                 document.manageQueries.submit();
             }
         } else {
-            alert("Please select an object");
+            alert("Please select a query");
         }
  
     }
 
     function copyQuery() {
         if(countSelected(document.getElementById("queryId"))>1){
-            alert("Please select a single object");
+            alert("Please select a single query");
         } else if ( document.getElementById("queryId").value > 0 && document.getElementById("newName").value != "" && document.getElementById("newName").value != "New Name") {
             document.manageQueries.action="execManageQueries.jsp";
             document.manageQueries.QUERYACTION.value="COPY";
             document.manageQueries.submit();
         } else {
-            alert("Please select an object and specify a new name for it");
+            alert("Please select a query and specify a new name for it");
         }
     }
 
@@ -49,12 +49,12 @@
 
     function updateQuery() {
         if(countSelected(document.getElementById("queryId"))>1){
-            alert("Please select a single object");
+            alert("Please select a single query");
         } else if ( document.getElementById("queryId").value > 0 ) {
             document.manageQueries.action="<%= request.getContextPath() %>/admin/manageQuery.jsp";
             document.manageQueries.submit();
         } else {
-            alert("Please select an object");
+            alert("Please select a query");
         }
     }
 
@@ -84,19 +84,19 @@
     <table align="center" class="art">       
         <tr>
 			<td class="title" colspan="2">
-				<br>Object Management Console <br> <img src="<%=request.getContextPath()%>/images/queries-64px.jpg">
+				<br>Query Management Console <br> <img src="<%=request.getContextPath()%>/images/queries-64px.jpg">
 			</td>
 		</tr>
 
         <tr>
             <td class="attr" colspan="2" align="center">
-                <input type="button" onclick="newQuery()" value="Create New Object">
+                <input type="button" onclick="newQuery()" value="Create New Query">
             </td>
         </tr>
        
         <tr>
             <td  class="attr" colspan="2" >
-                Select object to modify/delete/copy
+                Select query to modify/delete/copy
             </td>
         </tr>
         <tr>
@@ -104,11 +104,11 @@
                 <select id="groupId" name="GROUP_ID">
                     <option value="-1">Select Group</option>
                     <%
-                    int adminLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
+                    int accessLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
 					String username=(String) session.getAttribute("AdminUsername");
 																									
 					ArtQuery aq=new ArtQuery();
-					Map groups=aq.getAdminObjectGroups(adminLevel,username);
+					Map groups=aq.getAdminObjectGroups(accessLevel,username);
 					Iterator it = groups.entrySet().iterator();
 					int objectGroupId; 
 					
@@ -133,16 +133,28 @@
             </td>
         </tr>
         <tr>
-            <td align="right" width="50%">Modify selected</td>
-            <td align="left" width="50%">  <input type="button" onclick="updateQuery()" value="Modify"> </td>
+            <td align="right" width="50%">
+				&nbsp;
+			</td>
+            <td align="left">
+				<input type="button" onclick="updateQuery()" value="Modify">
+			</td>
         </tr>
         <tr>
-            <td align="right">Delete selected</td>
-            <td align="left">  <input type="button" onclick="deleteQuery()" value="Delete"> </td>
+			<td align="right" width="50%">
+				&nbsp;
+			</td>
+            <td align="left">
+				<input type="button" onclick="deleteQuery()" value="Delete"
+			</td>
         </tr>
         <tr>
-            <td align="right"><input type="text" size="20"  maxlength="25" value="New Name" name="NEW_QUERY_NAME" id="newName"> </td>
-            <td align="left">  <input type="button" onclick="copyQuery()" value="Copy"> </td>
+            <td align="right" width="50%">
+				<input type="text" size="20"  maxlength="25" value="New Name" name="NEW_QUERY_NAME" id="newName">
+			</td>
+            <td align="left">
+				<input type="button" onclick="copyQuery()" value="Copy">
+			</td>
         </tr>
 
     </table>

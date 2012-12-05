@@ -9,8 +9,8 @@
 		if (document.manageUserPrivileges.USERS.selectedIndex<0 && document.manageUserPrivileges.USER_GROUPS.selectedIndex<0) {
 			alert("Please select at least one user or user group");
 			return false;
-		} else if (document.manageUserPrivileges.OBJECTS.selectedIndex<0 && document.manageUserPrivileges.OBJECT_GROUPS.selectedIndex<0) {
-			alert("Please select at least one object or object group");
+		} else if (document.manageUserPrivileges.QUERIES.selectedIndex<0 && document.manageUserPrivileges.QUERY_GROUPS.selectedIndex<0) {
+			alert("Please select at least one query or query group");
 			return false;
 		}
     }
@@ -20,8 +20,8 @@
         //clear selected items to enable change of selections
         document.manageUserPrivileges.USERS.selectedIndex=-1;
         document.manageUserPrivileges.USER_GROUPS.selectedIndex=-1;
-        document.manageUserPrivileges.OBJECTS.selectedIndex=-1;
-        document.manageUserPrivileges.OBJECT_GROUPS.selectedIndex=-1;
+        document.manageUserPrivileges.QUERIES.selectedIndex=-1;
+        document.manageUserPrivileges.QUERY_GROUPS.selectedIndex=-1;
     }
 
 
@@ -35,7 +35,7 @@ $jQuery(document).ready(function() {
 <%
 UserEntity ue=new UserEntity();
 Iterator it;
-int adminLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
+int accessLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
 String username=(String) session.getAttribute("AdminUsername");
 %>
 
@@ -45,7 +45,7 @@ String username=(String) session.getAttribute("AdminUsername");
 			<td class="title" colspan="2"> Manage User/User Group Privileges </td>
         </tr>
         <tr>
-            <td class="data" colspan="2"> Select users/user groups and the objects/object groups to grant/revoke access </td>
+            <td class="data" colspan="2"> Select users/user groups and the queries/query groups to grant/revoke access </td>
         </tr>
 
 		<tr>
@@ -89,13 +89,13 @@ String username=(String) session.getAttribute("AdminUsername");
 		<tr><td colspan="2">&nbsp;</td></tr>
 
 		<tr>
-            <td class="data"> Object Groups </td>
+            <td class="data"> Query Groups </td>
             <td class="data">
-                <select name="OBJECT_GROUPS" size="5" multiple>
+                <select name="QUERY_GROUPS" size="5" multiple>
                     <%
 					ArtQuery aq=new ArtQuery();
-					Map objectGroups=aq.getAdminObjectGroupsList(adminLevel,username);
-					it = objectGroups.entrySet().iterator();
+					Map queryGroups=aq.getAdminObjectGroupsList(accessLevel,username);
+					it = queryGroups.entrySet().iterator();
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();
 						%>
@@ -108,12 +108,12 @@ String username=(String) session.getAttribute("AdminUsername");
         </tr>
 
 		 <tr>
-            <td class="data"> Objects <br><small>[Object Group Name] object name (id) </small> </td>
+            <td class="data"> Queries <br><small>[Query Group] query name (id) </small> </td>
             <td class="data">
-                <select name="OBJECTS" size="10" multiple>
+                <select name="QUERIES" size="10" multiple>
                     <%
-					Map objects=ue.getAdminQueries(adminLevel,username);
-					it = objects.entrySet().iterator();
+					Map queries=ue.getAdminQueries(accessLevel,username);
+					it = queries.entrySet().iterator();
 					int queryId;
 
 					while (it.hasNext()) {

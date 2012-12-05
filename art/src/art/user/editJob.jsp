@@ -13,14 +13,14 @@
 <%@ include file ="header.jsp" %>
 
 <%
-int adminLevel = ue.getAdminLevel();
+int accessLevel = ue.getAccessLevel();
 String owner;
 owner=request.getParameter("OWNER");
 
 if(owner==null){ %>
 	<jsp:setProperty name="job" property="username" value="<%=ue.getUsername()%>" />
 	<jsp:setProperty name="job" property="*" />
-<% } else if(owner!=null && adminLevel>=80){ %>
+<% } else if(owner!=null && accessLevel>=80){ %>
 		<jsp:setProperty name="job" property="username" value="<%=owner%>" />
 	<jsp:setProperty name="job" property="*" />
 <% } %>
@@ -62,7 +62,7 @@ int queryType=aq.getQueryType();
 //make sure correct from address is displayed, in case of an admin managing another person's job
 String email;
 email=ue.getEmail();
-if(owner!=null && adminLevel>=80){
+if(owner!=null && accessLevel>=80){
 	email=job.getFrom();
 }
 
@@ -539,7 +539,7 @@ function setCacheDatasources(s) {
 	<%
 	// show this javascript function only for ADMINS to avoid sharing
 	// database ids/names in the page html code to every user enabled to schedule jobs
-	if(adminLevel>79){
+	if(accessLevel>79){
 	    String output = job.getOutputFormat();
 		HashMap<Integer,art.dbcp.DataSource> dataSources = ArtDBCP.getDataSources();
 		int i =0;
@@ -617,7 +617,7 @@ function onClickSaveSchedule(t){
    <input type="hidden" name="queryId" value="<%=queryId%>">
 
    <%
-   if(owner!=null && adminLevel>=80){ %>
+   if(owner!=null && accessLevel>=80){ %>
     <input type="hidden" name="OWNER" value="<%=owner%>">
    <%}%>
 
@@ -687,7 +687,7 @@ function onClickSaveSchedule(t){
 				  <option value="6" <c:if test="${job.jobType == 6}">SELECTED</c:if>> <%=messages.getString("jobTypeCondEmailAttachment")%> </option>
 				  <option value="7" <c:if test="${job.jobType == 7}">SELECTED</c:if>> <%=messages.getString("jobTypeCondEmailInline")%> </option>
 				  <option value="8" <c:if test="${job.jobType == 8}">SELECTED</c:if>> <%=messages.getString("jobTypeCondPublish")%>  </option>
-				  <% if(adminLevel>79){ %>
+				  <% if(accessLevel>79){ %>
 					<option value="9" <c:if test="${job.jobType == 9}">SELECTED</c:if>> <%=messages.getString("jobTypeCacheResultAppend")%> </option>
 					<option value="10" <c:if test="${job.jobType == 10}">SELECTED</c:if>> <%=messages.getString("jobTypeCacheResultDeleteInsert")%>  </option>
 				  <% } %>

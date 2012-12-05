@@ -45,11 +45,11 @@ public class UserEntity implements Serializable {
     String username = "";
     String email = "";
     boolean internalAuth;
-    int adminLevel;
+    int accessLevel;
     java.util.Date loginDate;
     String fullName = "";
     String activeStatus;
-    int defaultObjectGroup = -1;
+    int defaultQueryGroup = -1;
     String canChangePasswordString;
     boolean canChangePassword = true;
     String password;
@@ -121,18 +121,18 @@ public class UserEntity implements Serializable {
 
     /**
      * 
-     * @return default object group
+     * @return default query group
      */
-    public int getDefaultObjectGroup() {
-        return defaultObjectGroup;
+    public int getDefaultQueryGroup() {
+        return defaultQueryGroup;
     }
 
     /**
      * 
      * @param value
      */
-    public void setDefaultObjectGroup(int value) {
-        defaultObjectGroup = value;
+    public void setDefaultQueryGroup(int value) {
+        defaultQueryGroup = value;
     }
 
     /**
@@ -246,16 +246,16 @@ public class UserEntity implements Serializable {
      * 
      * @param i
      */
-    public void setAdminLevel(int i) {
-        adminLevel = i;
+    public void setAccessLevel(int i) {
+        accessLevel = i;
     }
 
     /**
      * 
-     * @return admin level
+     * @return access level
      */
-    public int getAdminLevel() {
-        return adminLevel;
+    public int getAccessLevel() {
+        return accessLevel;
     }
 
     /**
@@ -279,8 +279,8 @@ public class UserEntity implements Serializable {
         try {
             conn = ArtDBCP.getConnection();
 
-            String SqlQuery = "SELECT EMAIL,ADMIN_LEVEL,FULL_NAME,ACTIVE_STATUS, PASSWORD "
-                    + " ,DEFAULT_OBJECT_GROUP,CAN_CHANGE_PASSWORD, HASHING_ALGORITHM "
+            String SqlQuery = "SELECT EMAIL,ACCESS_LEVEL,FULL_NAME,ACTIVE_STATUS, PASSWORD "
+                    + " ,DEFAULT_QUERY_GROUP,CAN_CHANGE_PASSWORD, HASHING_ALGORITHM "
                     + " FROM ART_USERS "
                     + " WHERE USERNAME = ? ";
 
@@ -288,11 +288,11 @@ public class UserEntity implements Serializable {
             ps.setString(1, user);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                setAdminLevel(rs.getInt("ADMIN_LEVEL"));
+                setAccessLevel(rs.getInt("ACCESS_LEVEL"));
                 setEmail(rs.getString("EMAIL"));
                 setFullName(rs.getString("FULL_NAME"));
                 setActiveStatus(rs.getString("ACTIVE_STATUS"));
-                setDefaultObjectGroup(rs.getInt("DEFAULT_OBJECT_GROUP"));
+                setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
                 canChangePasswordString = rs.getString("CAN_CHANGE_PASSWORD");
                 password = rs.getString("PASSWORD");
                 hashingAlgorithm = rs.getString("HASHING_ALGORITHM");
@@ -300,9 +300,9 @@ public class UserEntity implements Serializable {
             rs.close();
             ps.close();
 
-            if (defaultObjectGroup <= 0) {
-                //no default object group at user level. Use default for first user group, if exists
-                SqlQuery = "SELECT AUG.DEFAULT_OBJECT_GROUP "
+            if (defaultQueryGroup <= 0) {
+                //no default query group at user level. Use default for first user group, if exists
+                SqlQuery = "SELECT AUG.DEFAULT_QUERY_GROUP "
                         + " FROM ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUPS AUG "
                         + " WHERE AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID "
                         + " AND AUGA.USERNAME=? "
@@ -312,8 +312,8 @@ public class UserEntity implements Serializable {
                 ps.setString(1, user);
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    setDefaultObjectGroup(rs.getInt("DEFAULT_OBJECT_GROUP"));
-                    if (defaultObjectGroup > 0) {
+                    setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+                    if (defaultQueryGroup > 0) {
                         //first default found. use this
                         break;
                     }
@@ -364,7 +364,7 @@ public class UserEntity implements Serializable {
             java.sql.Date sysdate = new java.sql.Date(now.getTime());
 
             String sql = "INSERT INTO ART_USERS (USERNAME,PASSWORD,EMAIL,FULL_NAME,ACTIVE_STATUS "
-                    + ",ADMIN_LEVEL, UPDATE_DATE, DEFAULT_OBJECT_GROUP, CAN_CHANGE_PASSWORD, HASHING_ALGORITHM) "
+                    + ",ACCESS_LEVEL, UPDATE_DATE, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, HASHING_ALGORITHM) "
                     + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -373,9 +373,9 @@ public class UserEntity implements Serializable {
             ps.setString(3, email);
             ps.setString(4, fullName);
             ps.setString(5, activeStatus);
-            ps.setInt(6, adminLevel);
+            ps.setInt(6, accessLevel);
             ps.setDate(7, sysdate);
-            ps.setInt(8, defaultObjectGroup);
+            ps.setInt(8, defaultQueryGroup);
             ps.setString(9, canChangePasswordString);
             ps.setString(10, hashingAlgorithm);
 
@@ -417,8 +417,8 @@ public class UserEntity implements Serializable {
             java.sql.Date sysdate = new java.sql.Date(now.getTime());
 
             if (password.equals("")) {
-                sql = "UPDATE ART_USERS SET EMAIL = ? , FULL_NAME = ? , ACTIVE_STATUS = ?, ADMIN_LEVEL = ? , UPDATE_DATE = ? "
-                        + ",DEFAULT_OBJECT_GROUP = ?, CAN_CHANGE_PASSWORD = ? "
+                sql = "UPDATE ART_USERS SET EMAIL = ? , FULL_NAME = ? , ACTIVE_STATUS = ?, ACCESS_LEVEL = ? , UPDATE_DATE = ? "
+                        + ",DEFAULT_QUERY_GROUP = ?, CAN_CHANGE_PASSWORD = ? "
                         + " WHERE USERNAME = ?";
 
                 ps = conn.prepareStatement(sql);
@@ -426,14 +426,14 @@ public class UserEntity implements Serializable {
                 ps.setString(1, email);
                 ps.setString(2, fullName);
                 ps.setString(3, activeStatus);
-                ps.setInt(4, adminLevel);
+                ps.setInt(4, accessLevel);
                 ps.setDate(5, sysdate);
-                ps.setInt(6, defaultObjectGroup);
+                ps.setInt(6, defaultQueryGroup);
                 ps.setString(7, canChangePasswordString);
                 ps.setString(8, username);
             } else {
-                sql = "UPDATE ART_USERS SET PASSWORD = ?, EMAIL = ? , FULL_NAME = ? ,  ACTIVE_STATUS = ?, ADMIN_LEVEL = ? , UPDATE_DATE = ? "
-                        + ",DEFAULT_OBJECT_GROUP = ?, CAN_CHANGE_PASSWORD = ?, HASHING_ALGORITHM=? "
+                sql = "UPDATE ART_USERS SET PASSWORD = ?, EMAIL = ? , FULL_NAME = ? ,  ACTIVE_STATUS = ?, ACCESS_LEVEL = ? , UPDATE_DATE = ? "
+                        + ",DEFAULT_QUERY_GROUP = ?, CAN_CHANGE_PASSWORD = ?, HASHING_ALGORITHM=? "
                         + " WHERE USERNAME = ? ";
 
                 ps = conn.prepareStatement(sql);
@@ -442,9 +442,9 @@ public class UserEntity implements Serializable {
                 ps.setString(2, email);
                 ps.setString(3, fullName);
                 ps.setString(4, activeStatus);
-                ps.setInt(5, adminLevel);
+                ps.setInt(5, accessLevel);
                 ps.setDate(6, sysdate);
-                ps.setInt(7, defaultObjectGroup);
+                ps.setInt(7, defaultQueryGroup);
                 ps.setString(8, canChangePasswordString);
                 ps.setString(9, hashingAlgorithm);
                 ps.setString(10, username);
@@ -492,7 +492,7 @@ public class UserEntity implements Serializable {
             ps.setString(1, uName);
             ps.executeUpdate();
 
-            //delete user-object group relationships
+            //delete user-query group relationships
             sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USERNAME=?";
             ps = conn.prepareStatement(sql);
             ps.setString(1, uName);
@@ -621,20 +621,21 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Get all object groups the user has access to
+     * Get all query groups the user has access to
      * 
-     * @return all object groups the user has access to
+     * @return all query groups the user has access to
      */
-    public Map getObjectGroups() {
-        return getObjectGroup(-1);
+    public Map getQueryGroups() {
+        return getQueryGroup(-1);
     }
 
     /**
-     * 
+     * get groups that user has explicity rights to see
+	 * 
      * @param groupId
-     * @return all groups the user has access to
+     * @return all query groups that user has explicity rights to see
      */
-    public Map<String, Integer> getObjectGroup(int groupId) {
+    public Map<String, Integer> getQueryGroup(int groupId) {
         // if groupId = -1 returns all groups the user has access to
 
         Collator stringCollator = Collator.getInstance();
@@ -650,7 +651,7 @@ public class UserEntity implements Serializable {
             ResultSet rs;
 
             String SqlQuery = "SELECT aqg.QUERY_GROUP_ID , aqg.NAME "
-                    + " FROM ART_USER_QUERY_GROUPS auqg , ART_QUERY_GROUPS  aqg "
+                    + " FROM ART_USER_QUERY_GROUPS auqg , ART_QUERY_GROUPS aqg "
                     + " WHERE auqg.USERNAME = ? "
                     + " AND auqg.QUERY_GROUP_ID = aqg.QUERY_GROUP_ID "
                     + (groupId == -1 ? "" : ("AND aqg.QUERY_GROUP_ID =" + groupId))
@@ -700,24 +701,24 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Get all object groups the user should be able to see. may have more items that he has direct access to
+     * Get all query groups the user should be able to see. may have more items that he has direct access to
      * 
-     * @return object groups that should be displayed on the start page
+     * @return query groups that should be displayed on the start page
      */
-    public Map<String, Integer> getDisplayObjectGroups() {
-        return getDisplayObjectGroup(-1);
+    public Map<String, Integer> getAvailableQueryGroups() {
+        return getAvailableQueryGroup(-1);
     }
 
     /**
      * 
      * @param groupId
-     * @return object groups that should be displayed on the start page
+     * @return query groups that should be displayed on the start page
      */
-    public Map<String, Integer> getDisplayObjectGroup(int groupId) {
+    public Map<String, Integer> getAvailableQueryGroup(int groupId) {
         Map<String, Integer> map;
 
         //get groups that user has explicity rights to see
-        map = getObjectGroup(groupId);
+        map = getQueryGroup(groupId);
 
         //add groups where user has right to query but not to group
         Connection conn = null;
@@ -778,12 +779,12 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Returns the objects the user can see in selected group
+     * Returns the queries the user can see in the given group
      * 
      * @param groupId
-     * @return the objects the user can see in selected group
+     * @return the queries the user can see in the given group
      */
-    public Map getObjects(int groupId) {
+    public Map getAvailableQueries(int groupId) {
         Collator stringCollator = Collator.getInstance();
         stringCollator.setStrength(Collator.TERTIARY); //order by case
         TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
@@ -836,7 +837,7 @@ public class UserEntity implements Serializable {
             ps.close();
             rs.close();
 
-            // user can run all objects in the groups he is assigned to
+            // user can run all queries in the query groups he has access to
             sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME "
                     + " FROM ART_USER_QUERY_GROUPS AUQG, ART_QUERIES AQ "
                     + " WHERE AUQG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
@@ -856,7 +857,7 @@ public class UserEntity implements Serializable {
             ps.close();
             rs.close();
 
-            //add queries to which user has access through user group membership
+            //user can run all queries in the query groups his user groups have access to
             sqlQuery = "SELECT DISTINCT AQ.QUERY_ID, AQ.NAME "
                     + " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERIES AQ "
                     + " WHERE AUGG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
@@ -1227,7 +1228,7 @@ public class UserEntity implements Serializable {
             conn = ArtDBCP.getConnection();
             Statement st = conn.createStatement();
             String SqlQuery = "SELECT USERNAME FROM ART_USERS "
-                    + " WHERE ADMIN_LEVEL BETWEEN 10 AND 30";
+                    + " WHERE ACCESS_LEVEL BETWEEN 10 AND 30";
 
             ResultSet rs = st.executeQuery(SqlQuery);
             while (rs.next()) {
@@ -1359,7 +1360,7 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Grant or revoke access to object groups and datasources for junior and mid admins
+     * Grant or revoke access to query groups and datasources for junior and mid admins
      * 
      * @param action
      * @param admins
@@ -1393,7 +1394,7 @@ public class UserEntity implements Serializable {
             psDatasource = conn.prepareStatement(sqlDatasource);
 
             for (int i = 0; i < admins.length; i++) {
-                //update object group privileges
+                //update query group privileges
                 if (objectGroups != null) {
                     for (int j = 0; j < objectGroups.length; j++) {
                         psGroup.setString(1, admins[i]);
@@ -1401,9 +1402,9 @@ public class UserEntity implements Serializable {
                         try {
                             psGroup.executeUpdate();
                         } catch (SQLIntegrityConstraintViolationException e) {
-                            logger.info("Admin {} already has access to Object Group ID {}", admins[i], objectGroups[j]);
+                            logger.info("Admin {} already has access to Query Group ID {}", admins[i], objectGroups[j]);
                         } catch (SQLException e) {
-                            logger.error("Error updating admin privileges. Object Group ID={}, Admin={}", new Object[]{objectGroups[j], admins[i], e});
+                            logger.error("Error updating admin privileges. Query Group ID={}, Admin={}", new Object[]{objectGroups[j], admins[i], e});
                         }
                     }
                 }
@@ -1439,9 +1440,9 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Get an indicator of which junior and mid admins have access to which object groups
+     * Get an indicator of which junior and mid admins have access to which query groups
      * 
-     * @return an indicator of which junior and mid admins have access to which object groups
+     * @return an indicator of which junior and mid admins have access to which query groups
      */
     public Map getJuniorAdminGroupAssignment() {
         TreeMap<Integer, String> map = new TreeMap<Integer, String>();
@@ -1659,14 +1660,14 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Grant or revoke access to objects and object groups given users
+     * Grant or revoke access to queries and query groups for given users
      * 
      * @param action
      * @param users
-     * @param objects
-     * @param objectGroups
+     * @param queries
+     * @param queryGroups
      */
-    public void updateUserPrivileges(String action, String[] users, String[] objects, String[] objectGroups) {
+    public void updateUserPrivileges(String action, String[] users, String[] queries, String[] queryGroups) {
 
         if (action == null || users == null) {
             return;
@@ -1693,32 +1694,32 @@ public class UserEntity implements Serializable {
             psObject = conn.prepareStatement(sqlObject);
 
             for (int i = 0; i < users.length; i++) {
-                //update object group privileges
-                if (objectGroups != null) {
-                    for (int j = 0; j < objectGroups.length; j++) {
+                //update query group privileges
+                if (queryGroups != null) {
+                    for (int j = 0; j < queryGroups.length; j++) {
                         psGroup.setString(1, users[i]);
-                        psGroup.setInt(2, Integer.parseInt(objectGroups[j]));
+                        psGroup.setInt(2, Integer.parseInt(queryGroups[j]));
                         try {
                             psGroup.executeUpdate();
                         } catch (SQLIntegrityConstraintViolationException e) {
-                            logger.info("Access to Object Group ID {} already granted to User {}", objectGroups[j], users[i]);
+                            logger.info("Access to Query Group ID {} already granted to User {}", queryGroups[j], users[i]);
                         } catch (SQLException e) {
-                            logger.error("Error updating user privileges. Object Group ID={}, User={}", new Object[]{objectGroups[j], users[i], e});
+                            logger.error("Error updating user privileges. Query Group ID={}, User={}", new Object[]{queryGroups[j], users[i], e});
                         }
                     }
                 }
 
                 //update object privileges
-                if (objects != null) {
-                    for (int j = 0; j < objects.length; j++) {
+                if (queries != null) {
+                    for (int j = 0; j < queries.length; j++) {
                         psObject.setString(1, users[i]);
-                        psObject.setInt(2, Integer.parseInt(objects[j]));
+                        psObject.setInt(2, Integer.parseInt(queries[j]));
                         try {
                             psObject.executeUpdate();
                         } catch (SQLIntegrityConstraintViolationException e) {
-                            logger.info("Access to Query ID {} already granted to User {}", objects[j], users[i]);
+                            logger.info("Access to Query ID {} already granted to User {}", queries[j], users[i]);
                         } catch (SQLException e) {
-                            logger.error("Error updating user privileges. Query ID={}, User={}", new Object[]{objects[j], users[i], e});
+                            logger.error("Error updating user privileges. Query ID={}, User={}", new Object[]{queries[j], users[i], e});
                         }
                     }
                 }
@@ -1739,14 +1740,14 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Grant or revoke access to objects and object groups given user groups
+     * Grant or revoke access to queries and query groups for given user groups
      * 
      * @param action
      * @param userGroups
-     * @param objects
-     * @param objectGroups
+     * @param queries
+     * @param queryGroups
      */
-    public void updateUserGroupPrivileges(String action, String[] userGroups, String[] objects, String[] objectGroups) {
+    public void updateUserGroupPrivileges(String action, String[] userGroups, String[] queries, String[] queryGroups) {
 
         if (action == null || userGroups == null) {
             return;
@@ -1773,32 +1774,32 @@ public class UserEntity implements Serializable {
             psObject = conn.prepareStatement(sqlObject);
 
             for (int i = 0; i < userGroups.length; i++) {
-                //update object group privileges
-                if (objectGroups != null) {
-                    for (int j = 0; j < objectGroups.length; j++) {
+                //update query group privileges
+                if (queryGroups != null) {
+                    for (int j = 0; j < queryGroups.length; j++) {
                         psGroup.setInt(1, Integer.parseInt(userGroups[i]));
-                        psGroup.setInt(2, Integer.parseInt(objectGroups[j]));
+                        psGroup.setInt(2, Integer.parseInt(queryGroups[j]));
                         try {
                             psGroup.executeUpdate();
                         } catch (SQLIntegrityConstraintViolationException e) {
-                            logger.info("Access to Object Group ID {} already granted to User Group ID {}", objectGroups[j], userGroups[i]);
+                            logger.info("Access to Query Group ID {} already granted to User Group ID {}", queryGroups[j], userGroups[i]);
                         } catch (SQLException e) {
-                            logger.error("Error updating user privileges. Object Group ID={}, User Group ID={}", new Object[]{objectGroups[j], userGroups[i], e});
+                            logger.error("Error updating user privileges. Query Group ID={}, User Group ID={}", new Object[]{queryGroups[j], userGroups[i], e});
                         }
                     }
                 }
 
                 //update object privileges
-                if (objects != null) {
-                    for (int j = 0; j < objects.length; j++) {
+                if (queries != null) {
+                    for (int j = 0; j < queries.length; j++) {
                         psObject.setInt(1, Integer.parseInt(userGroups[i]));
-                        psObject.setInt(2, Integer.parseInt(objects[j]));
+                        psObject.setInt(2, Integer.parseInt(queries[j]));
                         try {
                             psObject.executeUpdate();
                         } catch (SQLIntegrityConstraintViolationException e) {
-                            logger.info("Access to Query ID {} already granted to User Group ID {}", objects[j], userGroups[i]);
+                            logger.info("Access to Query ID {} already granted to User Group ID {}", queries[j], userGroups[i]);
                         } catch (SQLException e) {
-                            logger.error("Error updating user privileges. Query ID={}, User Group ID={}", new Object[]{objects[j], userGroups[i], e});
+                            logger.error("Error updating user privileges. Query ID={}, User Group ID={}", new Object[]{queries[j], userGroups[i], e});
                         }
                     }
                 }
@@ -1819,11 +1820,11 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Get an indicator of which users and user groups have access to which object groups
+     * Get an indicator of which users and user groups have access to which query groups
      * 
-     * @return an indicator of which users and user groups have access to which object groups
+     * @return an indicator of which users and user groups have access to which query groups
      */
-    public Map getObjectGroupAssignment() {
+    public Map getQueryGroupAssignment() {
         TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
         Connection conn = null;
@@ -1838,7 +1839,7 @@ public class UserEntity implements Serializable {
             Integer count = 0;
 
             //add user group assignments
-            sql = "SELECT AUG.NAME AS USER_GROUP,AQG.NAME AS OBJECT_GROUP "
+            sql = "SELECT AUG.NAME AS USER_GROUP,AQG.NAME AS QUERY_GROUP "
                     + " FROM ART_USER_GROUP_GROUPS AUGG, ART_USER_GROUPS AUG, ART_QUERY_GROUPS AQG "
                     + " WHERE AUGG.USER_GROUP_ID=AUG.USER_GROUP_ID "
                     + " AND AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
@@ -1848,14 +1849,14 @@ public class UserEntity implements Serializable {
             rs = ps.executeQuery();
             while (rs.next()) {
                 count++;
-                tmp = "[" + rs.getString("USER_GROUP") + "] - " + rs.getString("OBJECT_GROUP");
+                tmp = "[" + rs.getString("USER_GROUP") + "] - " + rs.getString("QUERY_GROUP");
                 map.put(count, tmp);
             }
             rs.close();
             ps.close();
 
             //add user assignments
-            sql = "SELECT AUQG.USERNAME, AQG.NAME AS OBJECT_GROUP "
+            sql = "SELECT AUQG.USERNAME, AQG.NAME AS QUERY_GROUP "
                     + " FROM ART_USER_QUERY_GROUPS AUQG, ART_QUERY_GROUPS AQG "
                     + " WHERE AUQG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
                     + " ORDER BY AUQG.USERNAME";
@@ -1864,7 +1865,7 @@ public class UserEntity implements Serializable {
             rs = ps.executeQuery();
             while (rs.next()) {
                 count++;
-                tmp = rs.getString("USERNAME") + " - " + rs.getString("OBJECT_GROUP");
+                tmp = rs.getString("USERNAME") + " - " + rs.getString("QUERY_GROUP");
                 map.put(count, tmp);
             }
             rs.close();
@@ -1885,11 +1886,11 @@ public class UserEntity implements Serializable {
     }
 
     /**
-     * Get an indicator of which users and user groups have access to which objects
+     * Get an indicator of which users and user groups have access to which queries
      * 
-     * @return an indicator of which users and user groups have access to which objects
+     * @return an indicator of which users and user groups have access to which queries
      */
-    public Map getObjectAssignment() {
+    public Map getQueryAssignment() {
         TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
         Connection conn = null;

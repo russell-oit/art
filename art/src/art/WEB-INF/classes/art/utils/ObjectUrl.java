@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to construct the default URL to execute an ART object
+ * Class to construct the default URL to execute an ART query
  *
  * @author Enrico Liboni
  */
@@ -45,47 +45,47 @@ public class ObjectUrl {
 	}
 
 	/**
-	 * Returns the URL to directly execute the object.
+	 * Returns the URL to directly execute the query.
 	 *
-	 * If objects have parameters, the default values are used
+	 * If queries have parameters, the default values are used
 	 *
-	 * @param objectId
+	 * @param queryId
 	 * @param encodeUrl
-	 * @return the URL to directly execute the object
+	 * @return the URL to directly execute the query
 	 * @throws ArtException
 	 */
-	public static String getExecuteUrl(int objectId, boolean encodeUrl) throws ArtException {
-		return getExecuteUrl(objectId, encodeUrl, true);
+	public static String getExecuteUrl(int queryId, boolean encodeUrl) throws ArtException {
+		return getExecuteUrl(queryId, encodeUrl, true);
 	}
 
 	/**
-	 * Returns the URL to directly execute the object.
+	 * Returns the URL to directly execute the query.
 	 *
-	 * getDefaulParams stares if the URL should contain the default parameters
+	 * getDefaulParams determines if the URL should contain the default parameters
 	 * or not
 	 *
-	 * @param objectId
+	 * @param queryId
 	 * @param encodeUrl
 	 * @param getDefaultParams
 	 * @return the URL to directly execute the object
 	 * @throws ArtException
 	 */
-	public static String getExecuteUrl(int objectId, boolean encodeUrl, boolean getDefaultParams) throws ArtException {
+	public static String getExecuteUrl(int queryId, boolean encodeUrl, boolean getDefaultParams) throws ArtException {
 		Connection conn = null;
 		
-		String url = "/user/ExecuteQuery?queryId=" + objectId;
+		String url = "/user/ExecuteQuery?queryId=" + queryId;
 
 		try {
 			conn = ArtDBCP.getConnection();
 			
 			if (getDefaultParams) {
 				//add parameters to url
-				url = url + lookupParams(objectId, conn, encodeUrl);
+				url = url + lookupParams(queryId, conn, encodeUrl);
 			}
 
 		} catch (Exception e) {
 			logger.error("Error", e);
-			throw new ArtException("Error while initializing query url. Query id: " + objectId + " Exception: " + e);
+			throw new ArtException("Error while initializing query url. Query id: " + queryId + " Exception: " + e);
 		} finally {
 			try {
 				if (conn != null) {
@@ -93,7 +93,7 @@ public class ObjectUrl {
 				}
 			} catch (SQLException e) {
 				logger.error("Error", e);
-				throw new ArtException("Not able to close connection properly for object url. Query id: " + objectId);
+				throw new ArtException("Not able to close connection properly for object url. Query id: " + queryId);
 			}
 		}
 

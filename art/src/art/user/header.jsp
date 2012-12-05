@@ -5,8 +5,9 @@
 <%	
 //note that variables will be defined in files that include this one, so duplicate variable names may result
  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+ 
  art.utils.UserEntity ueHeader = (art.utils.UserEntity) session.getAttribute("ue");
- int accessLevelHeader=ueHeader.getAdminLevel();
+ int accessLevelHeader=ueHeader.getAccessLevel();
  String usernameHeader=ueHeader.getUsername();
 %>
 

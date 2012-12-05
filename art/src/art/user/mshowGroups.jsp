@@ -14,7 +14,7 @@
       <label for="groupId"><%=messages.getString("availableGroups")%></label><br>
       <form name="queryForm" method="get" action="mshowGroups.jsp">
        <select name="groupId" >
-        <c:forEach var='item' items='<%=ue.getDisplayObjectGroups()%>'>
+        <c:forEach var='item' items='<%=ue.getAvailableQueryGroups()%>'>
 	    <option value="${item.value}">${item.key}</option>
         </c:forEach>
    <% } else {
@@ -23,7 +23,7 @@
       <label for="groupId"><%=messages.getString("availableItems")%></label><br>
       <form name="queryForm" method="get" action="mshowParams.jsp">
           <select name="queryId" >
-          <c:forEach var='item' items='<%=ue.getObjects(groupId)%>'>
+          <c:forEach var='item' items='<%=ue.getAvailableQueries(groupId)%>'>
 	      <option value="${item.value}">${item.key}</option>
           </c:forEach>
    <% } %>

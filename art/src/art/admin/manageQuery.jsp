@@ -45,7 +45,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
 
 <p>
 <table align="center">
-    <tr><td class="title" colspan="2" > Object Editor </td></tr>
+    <tr><td class="title" colspan="2" > Query Editor </td></tr>
 
     <tr><td class="attr" >
             <form method="post" action="editQuery.jsp" class="data">
@@ -68,7 +68,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
                 <input type="submit" value="Parameters">
             </form>
         </td>
-        <td class="data"> Edit Query Parameters</td></tr>
+        <td class="data"> Edit Parameters</td></tr>
 
     <%
      }
@@ -81,7 +81,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
                 <input type="submit" value="Rules">
             </form>
         </td>
-        <td class="data"> Edit Query Rules</td></tr>
+        <td class="data"> Edit Rules</td></tr>
         <%
          }
         %>
@@ -108,7 +108,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
     <table>
         <tr><td>
                 <form name="backToartQueryConsole" method="get" action="manageQueries.jsp">
-                    <input type="submit"  value=" << " name="backQuery"><span style="font-size:80%">&nbsp;Back to Object Management Console</span>
+                    <input type="submit"  value=" << " name="backQuery"><span style="font-size:80%">&nbsp;Back to Query Management Console</span>
                 </form>
             </td></tr>
     </table>
@@ -132,7 +132,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
                 <% if(queryGroupId!=0 && queryType!=119 && queryType!=120 && queryType!= 111) { %>
                 <a href="<%=request.getContextPath()%>/user/showParams.jsp?queryId=<%=queryId%>" target="_blank">Params page</a> <br>                
                 <br>
-                (if the object is granted to the <b>public_user</b> user,
+                (if the query is granted to the <b>public_user</b> user,
                 the links work without authentication by appending <span style="color:red">&_public_user=true</span>)
                 <% } %>
             </small>

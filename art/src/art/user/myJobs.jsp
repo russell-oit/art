@@ -61,7 +61,7 @@ String description="";
 Locale locale=request.getLocale();
 
  String msg = request.getParameter("MESSAGE");
- int adminLevel = ue.getAdminLevel();
+ int accessLevel = ue.getAccessLevel();
  
 String owner;
 owner=request.getParameter("OWNER");
@@ -120,7 +120,7 @@ owner=request.getParameter("OWNER");
         ArtJob aj = new ArtJob();
 	   
 	   //allow admin to manage all jobs
-	   if(owner!=null && adminLevel>=80){
+	   if(owner!=null && accessLevel>=80){
 	       aj.load(jobId, owner);
 		} else {
 			aj.load(jobId, ue.getUsername());
@@ -353,7 +353,7 @@ out.println(resultMessage);
  
 <%   
 //allow admin to manage all jobs
-if(adminLevel>=80){
+if(accessLevel>=80){
 %>
     <table align="center" width="95%">
   <tr>

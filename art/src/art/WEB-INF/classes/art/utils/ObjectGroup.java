@@ -1,15 +1,14 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-
 import java.sql.*;
+import java.text.Collator;
 import java.util.*;
-import java.text.Collator; //for ordering of strings
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * class to represent object groups
+ * class to represent query groups
  * 
  * @author Timothy Anyona
  */
@@ -303,11 +302,11 @@ public class ObjectGroup {
     }
 
     /**
-     * Get id and name for all object groups
+     * Get id and name for all query groups
      * 
-     * @return id and name for all object groups
+     * @return id and name for all query groups
      */
-    public Map getAllObjectGroupNames() {
+    public Map getAllQueryGroupNames() {
         Collator stringCollator = Collator.getInstance();
         stringCollator.setStrength(Collator.TERTIARY); //order by case
         TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);

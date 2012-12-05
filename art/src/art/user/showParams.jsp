@@ -26,7 +26,7 @@ if(queryType==110){
 	action="ExecuteQuery";
 }
 
-int adminLevel=ue.getAdminLevel();
+int accessLevel=ue.getAccessLevel();
 boolean hasParams=false;
 
 boolean showResultsInline=true; //can be modified in case show inline behaviour is not desired
@@ -178,7 +178,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                             <OPTION VALUE="<%=viewMode%>"> <%=messages.getString(viewMode)%> </OPTION>
                             <% } %>
 
-                            <% if (adminLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <% } %>
 
@@ -197,7 +197,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                             <OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
                             <OPTION VALUE="xlsx"><%=messages.getString("xlsx")%></OPTION>
                             <OPTION VALUE="html"><%=messages.getString("htmlJasper")%></OPTION>
-                            <% if (adminLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <% } %>
 
@@ -211,7 +211,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
 					<span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
 					<SELECT name="viewMode" id="viewMode" size="1">			     		
 					<OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
-					 <% if (ue.getAdminLevel() >=5 && ArtDBCP.isSchedulingEnabled()) { %>
+					 <% if (ue.getAccessLevel() >=5 && ArtDBCP.isSchedulingEnabled()) { %>
 					<OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
 					 <% } %>
 						 </SELECT>
@@ -237,7 +237,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                             <OPTION VALUE="GRAPH"><%=messages.getString("htmlPlain")%></OPTION>
                             <OPTION VALUE="PDFGRAPH"><%=messages.getString("pdf")%></OPTION>
                             <OPTION VALUE="PNGGRAPH"><%=messages.getString("png")%></OPTION>
-                            <% if (adminLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <%}%>
                         </SELECT>
@@ -264,7 +264,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                                 <input type="hidden" name="_showParams" value="true"> 
                             <%}
                           }  
-							   if(adminLevel>=10) {
+							   if(accessLevel>=10) {
                         %>
 						&nbsp;<input type="checkbox" name="_showSQL"> <%=messages.getString("showSQL")%>
 												

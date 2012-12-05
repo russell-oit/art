@@ -129,7 +129,7 @@ public class ArtQuery {
 
 	/**
 	 *
-	 * @return object group name
+	 * @return query group name
 	 */
 	public String getGroupName() {
 		return groupName;
@@ -456,7 +456,7 @@ public class ArtQuery {
 
 	/**
 	 *
-	 * @return object group id
+	 * @return query group id
 	 */
 	public int getGroupId() {
 		return groupId;
@@ -1563,11 +1563,11 @@ public class ArtQuery {
 	}
 
 	/**
-	 * Get object groups that junior and senior admins can see
+	 * Get query groups that junior and senior admins can see
 	 *
 	 * @param level
 	 * @param uname
-	 * @return object groups that junior and senior admins can see
+	 * @return query groups that junior and senior admins can see
 	 */
 	public Map getAdminObjectGroups(int level, String uname) {
 		Collator stringCollator = Collator.getInstance();
@@ -1585,12 +1585,12 @@ public class ArtQuery {
 			String groupName;
 
 			if (level > 30) {
-				//get all object groups
+				//get all query groups
 				sql = "SELECT AG.QUERY_GROUP_ID, AG.NAME, AG.DESCRIPTION"
 						+ " FROM ART_QUERY_GROUPS AG ";
 				ps = conn.prepareStatement(sql);
 			} else {
-				// get only object groups matching the "junior" admin priviledges
+				// get only query groups matching the "junior" admin priviledges
 				sql = "SELECT AG.QUERY_GROUP_ID, AG.NAME, AG.DESCRIPTION"
 						+ " FROM ART_QUERY_GROUPS AG, ART_ADMIN_PRIVILEGES APG "
 						+ " WHERE AG.QUERY_GROUP_ID = APG.VALUE_ID "
@@ -1628,11 +1628,11 @@ public class ArtQuery {
 	}
 
 	/**
-	 * Get object groups that junior and senior admins can see
+	 * Get query groups that junior and senior admins can see
 	 *
 	 * @param level
 	 * @param uname
-	 * @return object groups that junior and senior admins can see
+	 * @return query groups that junior and senior admins can see
 	 */
 	public Map getAdminObjectGroupsList(int level, String uname) {
 		Collator stringCollator = Collator.getInstance();
@@ -1649,11 +1649,11 @@ public class ArtQuery {
 			ResultSet rs;
 
 			if (level > 30) {
-				//get all object groups
+				//get all query groups
 				sql = "SELECT QUERY_GROUP_ID, NAME FROM ART_QUERY_GROUPS";
 				ps = conn.prepareStatement(sql);
 			} else {
-				// get only object groups matching the "junior" admin priviledges
+				// get only query groups matching the "junior" admin priviledges
 				sql = "SELECT AG.QUERY_GROUP_ID, AG.NAME  "
 						+ " FROM ART_QUERY_GROUPS AG, ART_ADMIN_PRIVILEGES AP "
 						+ " WHERE AG.QUERY_GROUP_ID = AP.VALUE_ID "

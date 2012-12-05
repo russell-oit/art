@@ -72,7 +72,7 @@ INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) VALUES('database version',
 -- ART_USERS 
 -- Stores user info
 
--- ADMIN_LEVEL: 0= normal user, 5 = normal user who can schedule jobs
+-- ACCESS_LEVEL: 0= normal user, 5 = normal user who can schedule jobs
 -- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin, 100 = super admin
 
 CREATE TABLE ART_USERS
@@ -82,8 +82,8 @@ CREATE TABLE ART_USERS
 	HASHING_ALGORITHM VARCHAR(20) NOT NULL,
 	FULL_NAME   VARCHAR(40),  
 	EMAIL       VARCHAR(40),    
-	ADMIN_LEVEL        INTEGER,
-	DEFAULT_OBJECT_GROUP INTEGER,
+	ACCESS_LEVEL        INTEGER,
+	DEFAULT_QUERY_GROUP INTEGER,
 	CAN_CHANGE_PASSWORD VARCHAR(1), 
 	ACTIVE_STATUS    VARCHAR(1), 
 	UPDATE_DATE    DATE  
@@ -379,10 +379,10 @@ CREATE TABLE ART_JOBS_AUDIT
 
 		
 -- ART_LOGS
--- Stores log information e.g. logins and object execution
+-- Stores log information e.g. logins and query execution
 
 -- LOG_TYPE: login = successful login, loginerr = unsuccessful login attempt
--- object = interactive query execution, upload = template file uploaded when creating query that uses a template file
+-- query = interactive query execution, upload = template file uploaded when creating query that uses a template file
 -- TOTAL_TIME: total execution time in secs, including fetch time and display time
 -- FETCH_TIME: time elapsed from when the query is submitted to when the database returns 1st row
 
@@ -392,7 +392,7 @@ CREATE TABLE ART_LOGS
 	USERNAME    VARCHAR(30) NOT NULL,
 	LOG_TYPE        VARCHAR(15) NOT NULL, 
 	IP          VARCHAR(15), 
-	OBJECT_ID   INTEGER,
+	QUERY_ID   INTEGER,
 	TOTAL_TIME  INTEGER, 
 	FETCH_TIME  INTEGER, 
 	MESSAGE     VARCHAR(4000) 
@@ -439,7 +439,7 @@ CREATE TABLE ART_USER_GROUPS
 	USER_GROUP_ID INTEGER NOT NULL PRIMARY KEY,
 	NAME VARCHAR(30) NOT NULL,
 	DESCRIPTION VARCHAR(50),
-	DEFAULT_OBJECT_GROUP INTEGER	
+	DEFAULT_QUERY_GROUP INTEGER	
 );
 -- create unique constraints
 ALTER TABLE ART_USER_GROUPS ADD CONSTRAINT art_user_groups_uc_name UNIQUE (NAME);
@@ -509,7 +509,7 @@ CREATE TABLE ART_DRILLDOWN_QUERIES
 -- Default Data
 --
  
--- test object group
+-- test query group
 INSERT INTO ART_QUERY_GROUPS (QUERY_GROUP_ID,NAME,DESCRIPTION) VALUES
 (1, 'Test' , 'Test Group');
  

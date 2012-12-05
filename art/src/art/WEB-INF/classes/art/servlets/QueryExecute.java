@@ -704,7 +704,7 @@ public class QueryExecute extends HttpServlet {
 					int accessLevel=0;
 					UserEntity ue=(UserEntity)session.getAttribute("ue");
 					if(ue!=null){
-						accessLevel=ue.getAdminLevel();
+						accessLevel=ue.getAccessLevel();
 					}
 					if (request.getParameter("_showSQL") != null && accessLevel>5) {
 						showSQL = true;
@@ -948,7 +948,7 @@ public class QueryExecute extends HttpServlet {
 						ctx.getRequestDispatcher("/user/queryFooter.jsp").include(request, response);
 					}
 
-					ArtDBCP.log(username, "object", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
+					ArtDBCP.log(username, "query", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
 					probe = 200;
 
 					if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
@@ -1047,7 +1047,7 @@ public class QueryExecute extends HttpServlet {
 			UserEntity ue = new UserEntity();
 			ue.setUsername("public_user");
 
-			ue.setAdminLevel(0);
+			ue.setAccessLevel(0);
 			ue.setInternalAuth(true);
 
 			session.setAttribute("ue", ue);

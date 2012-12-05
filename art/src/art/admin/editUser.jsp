@@ -5,7 +5,7 @@
 <%
 String action = request.getParameter("ACTION");
 String username=request.getParameter("USERNAME");
-int sessionAdminLevel = ((Integer)session.getAttribute("AdminLevel")).intValue();
+int sessionAccessLevel = ((Integer)session.getAttribute("AdminLevel")).intValue();
 
 UserEntity ue=new UserEntity();
 
@@ -45,7 +45,7 @@ if (action.equals("MODIFY")){
 
 UserGroup ug=new UserGroup();
 Iterator it;
-int adminLevel=ue.getAdminLevel();
+int accessLevel=ue.getAccessLevel();
 username=ue.getUsername();
 %>
 
@@ -95,43 +95,43 @@ username=ue.getUsername();
 
 		<tr><td class="data"> Access Level</td>
 			<td class="data">
-				<select name="ADMIN_LEVEL" size="7">
-					<option value="0" <%=(adminLevel==0?"selected":"")%>>Normal User</option>
-					<option value="5" <%=(adminLevel==5?"selected":"")%>>Normal User allowed to schedule jobs</option>
-					<%if(sessionAdminLevel>=30){%><option value="10" <%=(adminLevel==10?"selected":"")%>>Junior Admin (Query only)</option><%}%>
-					<%if(sessionAdminLevel>=30){%><option value="30" <%=(adminLevel==30?"selected":"")%>>Mid Admin (+ User privileges)</option><%}%>
-					<%if(sessionAdminLevel>=40){%><option value="40" <%=(adminLevel==40?"selected":"")%>>Standard Admin (+ User setup)</option><%}%>
-					<%if(sessionAdminLevel>=80){%><option value="80" <%=(adminLevel==80?"selected":"")%>>Senior Admin (+ Databases, Groups, Rules, Cache etc.)</option><%}%>
-					<%if(sessionAdminLevel>=100){%><option value="100" <%=(adminLevel==100?"selected":"")%>>Super Admin  (manage everything)</option><%}%>
+				<select name="ACCESS_LEVEL" size="7">
+					<option value="0" <%=(accessLevel==0?"selected":"")%>>Normal User</option>
+					<option value="5" <%=(accessLevel==5?"selected":"")%>>Normal User allowed to schedule jobs</option>
+					<%if(sessionAccessLevel>=30){%><option value="10" <%=(accessLevel==10?"selected":"")%>>Junior Admin (Query only)</option><%}%>
+					<%if(sessionAccessLevel>=30){%><option value="30" <%=(accessLevel==30?"selected":"")%>>Mid Admin (+ User privileges)</option><%}%>
+					<%if(sessionAccessLevel>=40){%><option value="40" <%=(accessLevel==40?"selected":"")%>>Standard Admin (+ User setup)</option><%}%>
+					<%if(sessionAccessLevel>=80){%><option value="80" <%=(accessLevel==80?"selected":"")%>>Senior Admin (+ Databases, Groups, Rules, Cache etc.)</option><%}%>
+					<%if(sessionAccessLevel>=100){%><option value="100" <%=(accessLevel==100?"selected":"")%>>Super Admin  (manage everything)</option><%}%>
 				</select>
 			</td>
 		</tr>
 
 		<tr>
-            <td class="data"> Default Object Group </td>
+            <td class="data"> Default Query Group </td>
             <td class="data">
-                <select name="DEFAULT_OBJECT_GROUP">
+                <select name="DEFAULT_QUERY_GROUP">
 					<option value="-1">No Default</option>
                     <%
-					int defaultObjectGroup=ue.getDefaultObjectGroup();
+					int defaultQueryGroup=ue.getDefaultQueryGroup();
 
-					Integer objectGroupId;
+					Integer queryGroupId;
 					String selected;
 
 					ObjectGroup og=new ObjectGroup();
-					Map objectGroups=og.getAllObjectGroupNames();
-					it = objectGroups.entrySet().iterator();
+					Map queryGroups=og.getAllQueryGroupNames();
+					it = queryGroups.entrySet().iterator();
 
 					while(it.hasNext()) {
 						Map.Entry entry = (Map.Entry)it.next();
-						objectGroupId=(Integer)entry.getValue();
-						if(objectGroupId==defaultObjectGroup){
+						queryGroupId=(Integer)entry.getValue();
+						if(queryGroupId==defaultQueryGroup){
 							selected="selected";
 						} else {
 							selected="";
 						}
 
-						if(objectGroupId!=0){
+						if(queryGroupId!=0){
 							%>
 							<option value="<%=entry.getValue()%>" <%=selected%> ><%=entry.getKey()%></option>
 							<%
@@ -200,7 +200,7 @@ username=ue.getUsername();
 		<tr><td colspan="2">&nbsp;</td></tr>
 
 		<%
-		if(sessionAdminLevel>adminLevel || sessionAdminLevel==100){
+		if(sessionAccessLevel>accessLevel || sessionAccessLevel==100){
 			%>
 			<tr>
 				<td class="data" colspan="2"> <input type="submit" value="Submit"> </td>

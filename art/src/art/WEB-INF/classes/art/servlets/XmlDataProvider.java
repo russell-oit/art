@@ -184,7 +184,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 
         if (groupId != -1) {
             UserEntity ue = (UserEntity) request.getSession().getAttribute("ue");
-            Map map = ue.getObjects(groupId);
+            Map map = ue.getAvailableQueries(groupId);
 
             Iterator it = map.entrySet().iterator();
             while (it.hasNext()) {
@@ -212,12 +212,12 @@ public class XmlDataProvider extends BaseAjaxServlet {
         AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
         response.setContentType("text/xml;charset=utf-8");
-        int adminLevel = ((Integer) request.getSession().getAttribute("AdminLevel")).intValue();
+        int accessLevel = ((Integer) request.getSession().getAttribute("AdminLevel")).intValue();
 
         int groupId = Integer.parseInt(request.getParameter("groupId"));
         if (groupId != -1) {
 
-            if (adminLevel > 30) {
+            if (accessLevel > 30) {
                 sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
                         + " FROM ART_QUERIES AQ "
                         + "WHERE  AQ.QUERY_GROUP_ID = ? "
@@ -241,7 +241,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             PreparedStatement ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, groupId);
 
-            if (adminLevel <= 30) {
+            if (accessLevel <= 30) {
                 ps.setString(2, username);
                 ps.setString(3, username);
             }
@@ -277,7 +277,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 
         int queryId = Integer.parseInt(request.getParameter("queryId"));
 
-        //use left outer join as dashboards, text objects etc don't have a datasource
+        //use left outer join as dashboards, text queries etc don't have a datasource
         sqlQuery = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
                 + " aq.DESCRIPTION, aq.QUERY_TYPE, aq.UPDATE_DATE, "
                 + " ad.NAME AS DATABASE_NAME "
@@ -352,7 +352,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             builder.append(messages.getString("objectType") + " <b>" + type + "</b><br>");
             builder.append(messages.getString("updateDate") + " <b>" + rs.getString("UPDATE_DATE") + "</b><br>");
 
-            // dashboards, text objects, mondrian via xmla and ssas via xmla don't have a datasource
+            // dashboards, text querys, mondrian via xmla and ssas via xmla don't have a datasource
             if (typeId != 111 && typeId != 110 && typeId != 113 && typeId != 114) {                 
                 builder.append(messages.getString("targetDatasource") + " <b>" + rs.getString("DATABASE_NAME") + "</b><br>");
             }

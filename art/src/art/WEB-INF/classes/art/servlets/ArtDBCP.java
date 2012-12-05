@@ -547,17 +547,17 @@ public class ArtDBCP extends HttpServlet {
 	}
 
 	/**
-	 * Log object execution to the ART_LOGS table.
+	 * Log some action to the ART_LOGS table.
 	 *
 	 * @param user username of user who executed the query
-	 * @param type "object"
+	 * @param type type of event
 	 * @param ip ip address from which query was run
-	 * @param objectId id of the query that was run
+	 * @param queryId id of the query that was run
 	 * @param totalTime total time to execute the query and display the results
 	 * @param fetchTime time to fetch the results from the database
 	 * @param message log message
 	 */
-	public static void log(String user, String type, String ip, int objectId, long totalTime, long fetchTime, String message) {
+	public static void log(String user, String type, String ip, int queryId, long totalTime, long fetchTime, String message) {
 		java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
 		Connection logConn = null;
 
@@ -568,7 +568,7 @@ public class ArtDBCP extends HttpServlet {
 		try {
 			logConn = getConnection();
 			String SQLUpdate = "INSERT INTO ART_LOGS"
-					+ " (UPDATE_TIME, USERNAME, LOG_TYPE, IP, OBJECT_ID, TOTAL_TIME, FETCH_TIME, MESSAGE) "
+					+ " (UPDATE_TIME, USERNAME, LOG_TYPE, IP, QUERY_ID, TOTAL_TIME, FETCH_TIME, MESSAGE) "
 					+ " values (?,?,?,?,?,?,?,?) ";
 
 			PreparedStatement psUpdate = logConn.prepareStatement(SQLUpdate);
@@ -576,7 +576,7 @@ public class ArtDBCP extends HttpServlet {
 			psUpdate.setString(2, user);
 			psUpdate.setString(3, type);
 			psUpdate.setString(4, ip);
-			psUpdate.setInt(5, objectId);
+			psUpdate.setInt(5, queryId);
 			psUpdate.setInt(6, (int) totalTime);
 			psUpdate.setInt(7, (int) fetchTime);
 			psUpdate.setString(8, message);
@@ -597,7 +597,7 @@ public class ArtDBCP extends HttpServlet {
 	}
 
 	/**
-	 * Determine if art.props file is available and settings have been loaded.
+	 * Determine if art.properties file is available and settings have been loaded.
 	 *
 	 * @return <code>true</code> if file is available and settings have been
 	 * loaded correctly. <code>false</code> otherwise.
@@ -1029,7 +1029,7 @@ public class ArtDBCP extends HttpServlet {
 		HttpSession session = request.getSession();
 		ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
-		int adminlevel = -1;
+		int accessLevel = -1;
 		boolean internalAuthentication = true;
 
 		String username = request.getParameter("username");
@@ -1046,8 +1046,8 @@ public class ArtDBCP extends HttpServlet {
 					&& StringUtils.equals(password, ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 				// using repository username and password. Give user super admin privileges
 				// no need to authenticate it
-				adminlevel = 100;
-				ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + adminlevel);
+				accessLevel = 100;
+				ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + accessLevel);
 			} else { // begin normal internal authentication
 				/*
 				 * Let's verify if username and password are valid
@@ -1057,7 +1057,7 @@ public class ArtDBCP extends HttpServlet {
 					//default to using bcrypt instead of md5 for password hashing
 					//password = digestString(password, "MD5");
 
-					String SqlQuery = "SELECT ADMIN_LEVEL, PASSWORD, HASHING_ALGORITHM FROM ART_USERS "
+					String SqlQuery = "SELECT ACCESS_LEVEL, PASSWORD, HASHING_ALGORITHM FROM ART_USERS "
 							+ "WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
 					conn = ArtDBCP.getConnection();
 					if (conn == null) {
@@ -1072,9 +1072,9 @@ public class ArtDBCP extends HttpServlet {
 							if (Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"))) {
 								// ----------------------------------------------------AUTHENTICATED!
 
-								adminlevel = rs.getInt("ADMIN_LEVEL");
+								accessLevel = rs.getInt("ACCESS_LEVEL");
 								session.setAttribute("username", username); // store username in the session
-								ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal, level: " + adminlevel);
+								ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal, level: " + accessLevel);
 							} else {
 								//wrong password
 								ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
@@ -1111,7 +1111,7 @@ public class ArtDBCP extends HttpServlet {
 			Connection conn = null;
 			try {
 				username = (String) session.getAttribute("username");
-				String SqlQuery = ("SELECT ADMIN_LEVEL FROM ART_USERS "
+				String SqlQuery = ("SELECT ACCESS_LEVEL FROM ART_USERS "
 						+ " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL) ");
 				conn = ArtDBCP.getConnection();
 				if (conn == null) {
@@ -1124,10 +1124,10 @@ public class ArtDBCP extends HttpServlet {
 					if (rs.next()) {
 						// ----------------------------------------------------AUTHENTICATED!
 
-						adminlevel = rs.getInt("ADMIN_LEVEL");
+						accessLevel = rs.getInt("ACCESS_LEVEL");
 						internalAuthentication = false;
 
-						ArtDBCP.log(username, "login", request.getRemoteAddr(), "external, level: " + adminlevel);
+						ArtDBCP.log(username, "login", request.getRemoteAddr(), "external, level: " + accessLevel);
 					} else {
 						//external user not created in ART
 						ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "external, failed");
@@ -1151,7 +1151,7 @@ public class ArtDBCP extends HttpServlet {
 			if (request.getParameter("_public_user") != null) {
 				username = "public_user";
 
-				adminlevel = 0;
+				accessLevel = 0;
 				internalAuthentication = true;
 			} else {
 				// ... otherwise this is a session expired / unauthorized access attempt...
@@ -1165,16 +1165,16 @@ public class ArtDBCP extends HttpServlet {
 			UserEntity ue = new UserEntity(username);
 
 			//override some properties
-			ue.setAdminLevel(adminlevel);
+			ue.setAccessLevel(accessLevel);
 			ue.setInternalAuth(internalAuthentication);
 
 			session.setAttribute("ue", ue);
 			session.setAttribute("username", username);
 
 			// Set admin session
-			if (adminlevel > 5) {
+			if (accessLevel >= 10) {
 				session.setAttribute("AdminSession", "Y");
-				session.setAttribute("AdminLevel", new Integer(adminlevel));
+				session.setAttribute("AdminLevel", new Integer(accessLevel));
 				session.setAttribute("AdminUsername", username);
 			}
 		}

@@ -18,7 +18,7 @@ public class UserGroup {
     int groupId = -1;
     String name = "";
     String description = "";
-    int defaultObjectGroup = -1;
+    int defaultQueryGroup = -1;
 
     /**
      * 
@@ -30,16 +30,16 @@ public class UserGroup {
      * 
      * @param value
      */
-    public void setDefaultObjectGroup(int value) {
-        defaultObjectGroup = value;
+    public void setDefaultQueryGroup(int value) {
+        defaultQueryGroup = value;
     }
 
     /**
      * 
-     * @return default object group
+     * @return default query group
      */
-    public int getDefaultObjectGroup() {
-        return defaultObjectGroup;
+    public int getDefaultQueryGroup() {
+        return defaultQueryGroup;
     }
 
     /**
@@ -104,7 +104,7 @@ public class UserGroup {
         try {
             conn = ArtDBCP.getConnection();
 
-            String sql = "SELECT USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_OBJECT_GROUP "
+            String sql = "SELECT USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP "
                     + " FROM ART_USER_GROUPS "
                     + " WHERE USER_GROUP_ID = ?";
 
@@ -116,7 +116,7 @@ public class UserGroup {
                 groupId = rs.getInt("USER_GROUP_ID");
                 name = rs.getString("NAME");
                 description = rs.getString("DESCRIPTION");
-                defaultObjectGroup = rs.getInt("DEFAULT_OBJECT_GROUP");
+                defaultQueryGroup = rs.getInt("DEFAULT_QUERY_GROUP");
             }
             rs.close();
             ps.close();
@@ -209,14 +209,14 @@ public class UserGroup {
             ps.close();
 
             //insert new group
-            sql = "INSERT INTO ART_USER_GROUPS (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_OBJECT_GROUP) "
+            sql = "INSERT INTO ART_USER_GROUPS (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP) "
                     + " VALUES (?,?,?,?)";
 
             ps = conn.prepareStatement(sql);
             ps.setInt(1, groupId);
             ps.setString(2, name);
             ps.setString(3, description);
-            ps.setInt(4, defaultObjectGroup);
+            ps.setInt(4, defaultQueryGroup);
 
             ps.executeUpdate();
             ps.close();
@@ -250,13 +250,13 @@ public class UserGroup {
             conn = ArtDBCP.getConnection();
 
             String sql = "UPDATE ART_USER_GROUPS SET "
-                    + "  NAME = ?, DESCRIPTION = ?, DEFAULT_OBJECT_GROUP=? "
+                    + "  NAME = ?, DESCRIPTION = ?, DEFAULT_QUERY_GROUP=? "
                     + " WHERE USER_GROUP_ID = ? ";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, name);
             ps.setString(2, description);
-            ps.setInt(3, defaultObjectGroup);
+            ps.setInt(3, defaultQueryGroup);
             ps.setInt(4, groupId);
 
             ps.executeUpdate();

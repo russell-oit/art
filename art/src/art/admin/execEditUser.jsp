@@ -19,9 +19,9 @@ ue.setHashingAlgorithm(ArtDBCP.getPasswordHashingAlgorithm());
 ue.setActiveStatus(request.getParameter("STATUS"));
 ue.setFullName(request.getParameter("FULL_NAME").trim());
 ue.setEmail(request.getParameter("EMAIL").trim());
-ue.setAdminLevel(Integer.parseInt(request.getParameter("ADMIN_LEVEL")));
+ue.setAccessLevel(Integer.parseInt(request.getParameter("ACCESS_LEVEL")));
 ue.setCanChangePasswordString(request.getParameter("CAN_CHANGE_PASSWORD"));
-ue.setDefaultObjectGroup(Integer.parseInt(request.getParameter("DEFAULT_OBJECT_GROUP")));
+ue.setDefaultQueryGroup(Integer.parseInt(request.getParameter("DEFAULT_QUERY_GROUP")));
 
 if (action.equals("ADD")){
 	ue.insert();
