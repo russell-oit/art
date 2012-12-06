@@ -5,6 +5,8 @@
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
 <%
+java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+
 try{
 
 int queryId=0;
@@ -56,12 +58,12 @@ boolean canEdit=pq.canEditTextObject(ue.getUsername(),queryId);
        <jsp:param name="justSaved" value="Text Updated"/>
     </jsp:forward>
 
-<% } else { %>  You do not have rights to edit this object <% } %>
+<% } else { %>  <%=messages.getString("noRightsToEditQuery")%> <% } %>
 
 <%
 conn.close();
 } catch (Exception e) { 
-%> Exception <%=e%>
+%> <%=messages.getString("exception")%> <%=e%>
 <%
   }
  %>

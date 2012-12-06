@@ -244,18 +244,18 @@ if (request.getParameter("bcc").equals("")){
 	if(saveSchedule!=null){
 		//we are saving the schedule
 		if(StringUtils.isBlank(scheduleName)){
-			msg="Schedule must have a name";
+			msg=messages.getString("scheduleMustHaveName");
 		} else if(schedule.exists(scheduleName)){
-			msg="Schedule name exists. Change the name or un-check the save schedule option";
+			msg=messages.getString("scheduleNameExists");
 		}
 	}
 
 	if(startDateValid==false){
-		msg="Invalid start date. Date should be in the format YYYY-MM-DD";
+		msg=messages.getString("invalidStartDate");
 	} else if(endDateValid==false){
-		msg="Invalid end date. Date should be in the format YYYY-MM-DD";
+		msg=messages.getString("invalidEndDate");
 	} else if (!CronExpression.isValidExpression(cronString)){
-		msg="Invalid job schedule";
+		msg=messages.getString("invalidSchedule");
 	}
 		
 	if(msg.equals("")){
@@ -294,7 +294,7 @@ if (request.getParameter("bcc").equals("")){
 
 		//check if start date after end date
 		if(endDate!=null && startDate.after(endDate)){
-			msg="Start Date is after End Date. Consider changing the End Date";
+			msg=messages.getString("startDateAfterEndDate");
 		}
 	}
 	
@@ -311,7 +311,7 @@ if (request.getParameter("bcc").equals("")){
 	nextRunDate=tempTrigger.getFireTimeAfter(new java.util.Date());
 
 		if (nextRunDate==null){
-			msg="Job will never execute. Please change the schedule details";
+			msg=messages.getString("jobWillNeverExecute");
 		}
 	}
 	
@@ -702,7 +702,7 @@ function onClickSaveSchedule(t){
 	    <select name="outputFormat" id="outputTypeId">
 		</select>
 		<div id="cacheDiv" class="collapse">
-			Cached Table Name <input type="button" class="buttonup" onClick="javascript:alert('<%=messages.getString("jobCachedTableHelp")%>');" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			<%=messages.getString("cachedTableName")%> <input type="button" class="buttonup" onClick="javascript:alert('<%=messages.getString("jobCachedTableHelp")%>');" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 			<br/>
 			<input type="text" name="cachedTableName" value="${job.cachedTableName}" size="24" maxlength="30">
 		</div>
@@ -734,8 +734,7 @@ function onClickSaveSchedule(t){
 		   <td class="data" colspan="2">
 			   <input type="text" name="from" value="<%=email%>" size="30" readonly>
 			   <%
-			   help = "Your email address as configured in the user definition." +
-					   "\\nIf it is blank, emails will not be sent successfully.";
+			   help = messages.getString("mailFromHelp");
 			   %>
         <input type="button" class="buttonup" onClick="alert('<%=help%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		   </td>
@@ -906,7 +905,7 @@ function onClickSaveSchedule(t){
 	 <table align="center" width="60%">
    <tr>
    <td class="data">
-   Select users to share the job with
+   <%=messages.getString("selectUsersToShareJobWith")%>
    </td>
    <td class="data">
    <select name="sharedUsers" size="5" multiple>
@@ -933,7 +932,7 @@ function onClickSaveSchedule(t){
 	</td>
 
 	<td class="data">
-	Select user groups to share the job with
+	<%=messages.getString("selectUserGroupsToShareJobWith")%>
 	</td>
 	<td class="data">
 	<select name="sharedUserGroups" size="5" multiple>
@@ -966,12 +965,12 @@ function onClickSaveSchedule(t){
 	<td colspan="4" style="color:#003366;">
 	Action:
 	<select name="sharedUsersAction">
-	<option value="GRANT" <%="GRANT".equals(action)?"selected":""%> >GRANT </option>
-	<option value="REVOKE" <%="REVOKE".equals(action)?"selected":""%> >REVOKE </option>
+	<option value="GRANT" <%="GRANT".equals(action)?"selected":""%> > <%=messages.getString("grant")%> </option>
+	<option value="REVOKE" <%="REVOKE".equals(action)?"selected":""%> > <%=messages.getString("revoke")%> </option>
 	</select>
    </td>
    </tr>
-   		<tr><td colspan="4" class="data"> Current Assignment </td></tr>
+   		<tr><td colspan="4" class="data"> <%=messages.getString("currentAssignment")%> </td></tr>
 		<tr>            
             <td colspan="2" class="data2">                
 				<%				

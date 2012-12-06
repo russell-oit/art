@@ -18,7 +18,7 @@
         <table  class="art" width="100%">
             <tr>
                 <td class="attr" align="left" width="50%">
-                    Text Editor
+                    <%=messages.getString("textEditor")%>
                 </td>
                 <td class="attr" align="right" width="50%">
                     <%= ue.getUsername()%>
@@ -99,7 +99,7 @@ if(queryType==111){
 
 <div align="center">
     <form method="post" action="execEditText.jsp">
-        Description: <input type="text" name="description" value="<%=aq.getShortDescription()%>" size="40" maxlength="254">
+        <%=messages.getString("description")%> <input type="text" name="description" value="<%=aq.getShortDescription()%>" size="40" maxlength="254">
         <p>
             <textarea name="text" id="mceedit" cols="80" rows="25"><%=queryText%></textarea>
         </p>
@@ -107,7 +107,7 @@ if(queryType==111){
         <div align="center">
             <% if (request.getParameter("justSaved") != null) { %>
             <small>
-                Saved at:
+                <%=messages.getString("savedAt")%> 
                 <%= java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM,java.text.DateFormat.MEDIUM,request.getLocale()).format(new java.util.Date())%>
             </small>
             <br>

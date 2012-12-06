@@ -21,11 +21,11 @@ if(request.getParameter("_isInline")!=null){
 
 <table align="center">
     <tr>
-        <td colspan="2" class="data" align="center"> <span style="color:red"><b>Error! </b></span>
+        <td colspan="2" class="data" align="center"> <span style="color:red"><b> <%=messages.getString("error")%> </b></span>
         </td>
     </tr>
     <tr>
-        <td class="attr"> Message:
+        <td class="attr"> <%=messages.getString("message")%>
         </td>
         <td class="data"> <%=msg%>
         </td>

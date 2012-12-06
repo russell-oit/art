@@ -7,7 +7,7 @@
 <%
 String msg;
 
-msg="JPivot had an error...<br><br>";
+msg=messages.getString("jpivotError");
 
         Throwable e = (Throwable) request.getAttribute("javax.servlet.jsp.jspException");
       while (e != null) {	  
@@ -22,11 +22,11 @@ msg="JPivot had an error...<br><br>";
 
  <table align=center>
   <tr>
-    <td colspan=2 class=data align=center> <b><span style="color:red">Error! </span></b> 
+    <td colspan=2 class=data align=center> <b><span style="color:red"> <%=messages.getString("error")%> </span></b> 
     </td>
   </tr>
   <tr>
-    <td class=attr> Message:
+    <td class=attr> <%=messages.getString("message")%>
     </td>
     <td class=data> <%=msg%>
     </td>

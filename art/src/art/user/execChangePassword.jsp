@@ -52,7 +52,7 @@ boolean canChangePassword=ue.isCanChangePassword();
 	       <td class="title"><%=messages.getString("passwordChangeFailed")%> </td>
 	       </tr>
 	       <tr>
-	       <td class="attr"> Error occurred </td>
+	       <td class="attr"> <%=messages.getString("errorOccurred")%> </td>
 	   <%
 	}	
   } 

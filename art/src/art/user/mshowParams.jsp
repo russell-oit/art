@@ -31,7 +31,7 @@
 
 <c:forEach var='parameter' items='${aq.paramList}'>
     <c:if test="${parameter.chained}">
-        <b>Chained parameters are not supported in Handset Devices</b>
+        <b><%=messages.getString("chainedParametersNotSupported")%></b>
         <% notSupported = true; %>
     </html>
 </c:if>
@@ -45,7 +45,7 @@
 <div id="params">
 
     <fieldset>
-        <legend><%=messages.getString("enterParams") %></legend>
+        <legend><%=messages.getString("enterParams")%></legend>
 
         <form name="artparameters" id="paramForm" action="ExecuteQuery"  method="post">
 			<input type="hidden" name="queryId" value="<%=queryId%>">

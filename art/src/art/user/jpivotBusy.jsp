@@ -84,14 +84,14 @@
 
  <table align=center>
   <tr>
-    <td colspan=2 class=data align=center> <b><span style="color:red">Query executing... Please wait.</span></b>
+    <td colspan=2 class=data align=center> <b><span style="color:red"><%=messages.getString("jpivotQueryWait")%></span></b>
 	<img src="<%= request.getContextPath() %>/images/spinner.gif">
     </td>
   </tr>
   <tr>
-    <td class=attr> Message:
+    <td class=attr> <%=messages.getString("message")%>
     </td>
-    <td class=data>Please wait until your results are computed.
+    <td class=data><%=messages.getString("jpivotResultsWait")%>
     </td>
   </tr>
  </table>

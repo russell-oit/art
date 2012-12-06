@@ -70,7 +70,7 @@
 <%
 	}
 
-	String msg = "Pivot Table Saved";
+	String msg = messages.getString("pivotTableSaved");
 	if (overwriting) {
 		//overwrite query source with current mdx
 		//query details loaded. update query
@@ -83,7 +83,7 @@
 	} else if (deleting) {
 		//delete query
 		aq.delete();
-		msg = "Pivot Table Deleted";
+		msg = messages.getString("pivotTableDeleted");
 	} else {
 		//create new query based on current query
 		ArtQuery newQuery = new ArtQuery();

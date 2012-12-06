@@ -73,7 +73,7 @@ if (canEdit && request.getParameter("_mobile") == null ) { %>
 <% }
 
 } catch (Exception e) { %>
- Exception <%=e%>
+ <%=messages.getString("exception")%> <%=e%>
 <%}%>
 
 <%@ include file="footer.jsp" %>
