@@ -158,6 +158,33 @@
 	<jsp:param name="NUM" value="0"/>
 </jsp:forward>
 <%		}
+	
+	//check upload file type
+	if(fileName.length()>0){
+		String extension="";
+		int index = fileName.lastIndexOf(".");
+		if (index > -1) {
+			extension = fileName.substring(index);
+			extension=extension.toLowerCase();
+		}
+		
+		List<String> validExtensions=new ArrayList<String>();
+		validExtensions.add(".xml");
+		validExtensions.add(".jrxml");
+		validExtensions.add(".jasper");
+		validExtensions.add(".xls");
+		validExtensions.add(".xlsx");
+		
+			if (!validExtensions.contains(extension)) {
+		%>
+		<jsp:forward page="error.jsp">
+			<jsp:param name="MOD" value="Execute Update Query"/>
+			<jsp:param name="ACT" value="Template type"/>
+			<jsp:param name="MSG" value="Invalid template file type. Please upload a different file."/>
+			<jsp:param name="NUM" value="0"/>
+		</jsp:forward>
+		<%		}
+	}
 
 	Connection conn = (Connection) session.getAttribute("SessionConn");
 	if (conn == null || conn.isClosed()) {
@@ -165,7 +192,7 @@
 <jsp:forward page="error.jsp">
 	<jsp:param name="MOD" value="Execute Update Query"/>
 	<jsp:param name="ACT" value="Get connection from session"/>
-	<jsp:param name="MSG" value="Database connection not valid. Please log in again"/>
+	<jsp:param name="MSG" value="Database connection not valid. Please log in again."/>
 	<jsp:param name="NUM" value="100"/>
 </jsp:forward>
 <%		}

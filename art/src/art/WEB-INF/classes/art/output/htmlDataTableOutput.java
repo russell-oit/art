@@ -148,7 +148,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 				//+ ", \"bScrollCollapse\": true"
 				//+ ", \"bProcessing\": true"
 				+ languageSetting
-				+ ", \"iDisplayLength\": 25" //default item in show entries
+				+ ", \"iDisplayLength\": 50" //default item in show entries e.g. -1
 				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
 				+ "}";
 

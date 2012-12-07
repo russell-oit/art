@@ -532,11 +532,6 @@ public class ArtQueryParam implements Serializable {
 
 			ps = conn.prepareStatement(SQL);
 
-			//if name is empty string, save space. for error free database migrations using tools like PDI
-			if (StringUtils.isBlank(name)) {
-				name = " ";
-			}
-
 			ps.setInt(1, getQueryId());
 			ps.setInt(2, getFieldPosition());
 			ps.setString(3, getName());

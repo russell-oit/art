@@ -5,6 +5,8 @@ Used in showParams.jsp page to display varchar, integer and number parameters
  */
 package art.params;
 
+import java.util.ResourceBundle;
+
 /**
  * Class to display VARCHAR, INTEGER and NUMBER parameters.
  * 
@@ -104,4 +106,9 @@ public class HtmlTextInput implements ParamInterface {
     public String getDescr() {
         return paramDescr;
     }
+
+	@Override
+	public void setMessages(ResourceBundle msgs) {
+		//not used
+	}
 }

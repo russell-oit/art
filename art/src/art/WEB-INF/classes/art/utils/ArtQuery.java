@@ -718,9 +718,8 @@ public class ArtQuery {
 					+ " values (?, ?, ?)";
 			ps = conn.prepareStatement(SQLUpdate);
 
-			//if text is empty string, save space. for error free database migrations using tools like PDI
-			if (StringUtils.isBlank(text)) {
-				text = " ";
+			if(text==null){
+				text="";
 			}
 
 			int start = 0;

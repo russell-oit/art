@@ -11,6 +11,7 @@ package art.params;
 import art.utils.PreparedQuery;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ResourceBundle;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -144,4 +145,9 @@ public class HtmlDateInput implements ParamInterface {
     public String getDescr() {
         return paramDescr;
     }
+
+	@Override
+	public void setMessages(ResourceBundle msgs) {
+		//note used
+	}
 }

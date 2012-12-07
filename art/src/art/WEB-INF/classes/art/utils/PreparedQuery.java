@@ -894,7 +894,7 @@ public class PreparedQuery {
 			}
 
 			//User can also execute all queries in a query group he has been assigned to
-			//text querys must be assigned direct access
+			//text queries must be assigned direct access
 			if (!viewingTextObject) {
 				if (last_stmt_retrieved_rows == 0) {
 					//user doesn't belong to a group with direct access to the query. check if user has access to the query's group
@@ -2241,6 +2241,12 @@ public class PreparedQuery {
 					finalSQL = StringUtils.replace(finalSQL, "?", "'" + escapeSql(paramValue) + "'", 1);
 				}
 
+			}
+			
+			if(finalSQL.indexOf("?")>-1){
+				//likely that replacement of ? doesn't reflect generated query e.g. if multi param value had ? in it
+				//leave preparedstatement as it was to avoid having misleading final sql
+				finalSQL=sb.toString();
 			}
 
 		}

@@ -71,6 +71,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                 while(it.hasNext()) {
                    hasParams=true;
                    ParamInterface param = (ParamInterface) it.next();
+				   param.setMessages(messages); //enable localisation "All" string for lovs
                    paramHtmlName=param.getHtmlName();
                    paramClass=param.getParamClass();
                    paramName=param.getName();

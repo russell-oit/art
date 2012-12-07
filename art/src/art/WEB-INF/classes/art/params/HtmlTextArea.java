@@ -5,6 +5,8 @@ Used in showParams.jsp page to display TEXT parameters or multi parameters that 
  */
 package art.params;
 
+import java.util.ResourceBundle;
+
 /**
  * Class to display TEXT parameters or multi parameters that don't use LOVs.
  * 
@@ -106,4 +108,9 @@ public class HtmlTextArea implements ParamInterface {
     public String getDescr() {
         return paramDescr;
     }
+
+	@Override
+	public void setMessages(ResourceBundle msgs) {
+		//not used
+	}
 }

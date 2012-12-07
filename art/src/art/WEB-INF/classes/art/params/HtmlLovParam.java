@@ -11,6 +11,7 @@ package art.params;
 import art.utils.PreparedQuery;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.ResourceBundle;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ public class HtmlLovParam implements ParamInterface {
     boolean isMulti = false;
     int lovQueryId;
     String chainedValueId;
+	ResourceBundle messages;
 
     /**
      * Constructor.
@@ -176,7 +178,11 @@ public class HtmlLovParam implements ParamInterface {
                 } else {
                     selected = "";
                 }
-                sb.append("<option value=\"ALL_ITEMS\" " + selected + ">All</option>");
+				String allString="All";
+				if(messages!=null){
+					allString=messages.getString("allItems");
+				}
+                sb.append("<option value=\"ALL_ITEMS\" " + selected + ">" + allString + "</option>");
             }
 
             Map<String,String> lov = pq.executeLovQuery(useRules); //override lov use rules setting with setting defined in the parameter definition
@@ -213,4 +219,9 @@ public class HtmlLovParam implements ParamInterface {
 
         return values;
     }
+
+	@Override
+	public void setMessages(ResourceBundle msgs) {
+		messages=msgs;
+	}
 }

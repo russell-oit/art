@@ -121,10 +121,10 @@ public class ParameterProcessor {
 
 					inlineParams.put(label, paramValue);
 					param.setParamValue(paramValue);
-					
+
 					if (showParams) {
 						//populate display params map
-					
+
 						//for lov parameters, show both parameter value and friendly value
 						if (param.usesLov()) {
 							//get all possible lov values.							
@@ -137,7 +137,7 @@ public class ParameterProcessor {
 									//parameter chained on another parameter. get filter parameter html name
 									String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
 									//get filter value. use request because inline and multi param maps haven't been populated with all parameter values yet
-									String filter = request.getParameter(valueParamHtmlName); 									
+									String filter = request.getParameter(valueParamHtmlName);
 									Map<String, String> filterParam = new HashMap<String, String>();
 									filterParam.put("filter", filter);
 									pq.setInlineParams(filterParam);
@@ -165,17 +165,17 @@ public class ParameterProcessor {
 						logger.debug("Adding multi parameter: {}", htmlName);
 
 						//check if this is a multi parameter that doesn't use an LOV
-						String lines[] = firstValue.split("\\r?\\n");
-						if (lines.length > 1) {
+						if (!param.usesLov()) {
 							//multi param that doesn't use LOV contains values separated by newlines
+							String lines[] = firstValue.split("\\r?\\n");
 							paramValues = lines;
 						}
 						multiParams.put(label, paramValues);
 						param.setParamValue(paramValues);
-						
+
 						if (showParams) {
 							//populate display params map                                                                                       
-							
+
 							//for lov parameters, show both parameter value and friendly value
 							if (param.usesLov()) {
 								//get all possible lov values.								
@@ -187,7 +187,7 @@ public class ParameterProcessor {
 									if (filterPosition > 0) {
 										//parameter chained on another parameter. get filter value
 										String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
-										String filter = request.getParameter(valueParamHtmlName);										
+										String filter = request.getParameter(valueParamHtmlName);
 										Map<String, String> filterParam = new HashMap<String, String>();
 										filterParam.put("filter", filter);
 										pq.setInlineParams(filterParam);

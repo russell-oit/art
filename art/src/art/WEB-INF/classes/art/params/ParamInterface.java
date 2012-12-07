@@ -77,4 +77,11 @@ public interface ParamInterface {
      * @return the html object id of the object that will drive the parameter's value.
      */
     public String getChainedValueId();
+	
+	/**
+	 * Set resource bundle with localised string.
+	 * To enable display of localised "All" string
+	 * @param msgs 
+	 */
+	public void setMessages(java.util.ResourceBundle msgs);
 }
