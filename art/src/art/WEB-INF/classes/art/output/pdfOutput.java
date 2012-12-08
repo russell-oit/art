@@ -419,7 +419,6 @@ public class pdfOutput implements ArtOutputInterface {
 
 		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".pdf";
 		filename = ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
-
 		fullFileName = exportPath + filename;
 	}
 

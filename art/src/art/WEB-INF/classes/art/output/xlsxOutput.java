@@ -413,9 +413,9 @@ public class xlsxOutput implements ArtOutputInterface {
 		h_m_s = timeFormatter.format(today);
 
 		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
-
+		baseName = ArtDBCP.cleanFileName(baseName);
+		
 		filename = baseName + ".xlsx";
-		filename = ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename;
 		templateFileName = exportPath + "template-" + filename;
 		xmlFileName = exportPath + "xml-" + baseName + ".xml";

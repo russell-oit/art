@@ -137,7 +137,7 @@ public class ExportGraph {
 	 * @param s query name to be used in the filename
 	 */
 	public void setQueryName(String s) {
-		queryName = ArtDBCP.cleanFileName(s);
+		queryName = s;
 	}
 
 	/**
@@ -205,8 +205,11 @@ public class ExportGraph {
 		String timeFormat = "HH_mm_ss";
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
+		
+		fullFileNameWithoutExt=fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
+		fullFileNameWithoutExt=ArtDBCP.cleanFileName(fullFileNameWithoutExt);
 
-		fullFileNameWithoutExt = exportPath + fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
+		fullFileNameWithoutExt = exportPath + fullFileNameWithoutExt;
 	}
 
 	/**

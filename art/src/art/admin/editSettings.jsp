@@ -407,14 +407,11 @@ if(!propsFile.exists()){
      <!-- - ---------------------------------------- - -->
      <div id="optional_div" class="collapse">
       <table>
-       <tr>
-        <td class="attr">ART CSS (skin)</td>
-        <td class="data"><input type="text" name="css_skin" size="40" maxlength="120" value="<%=css_skin%>"></td>
-       </tr>
-       <tr>
-        <td class="attr">Page Footer Logo</td>
-        <td class="data"><input type="text" name="bottom_logo" size="40" maxlength="120" value="<%=bottom_logo%>"></td>
-       </tr>
+		   
+	    <tr>
+			   <td colspan="2" class="data2">SMTP</td>
+		   </tr>
+		   
        <tr>
         <td class="attr">SMTP Username</td>
         <td class="data"><input type="text" name="smtp_username" size="40" maxlength="120" value="<%=smtp_username%>">
@@ -450,17 +447,12 @@ if(!propsFile.exists()){
        </tr>
 
        <tr>
-        <td colspan="2" class="attr">Show standard header and footer in public_user sessions
-	   <select name="header_with_public_user">
-	     <option value="no"   <%= (header_with_public_user.equals("no")?"SELECTED":"") %>  >No </option>
-	     <option value="yes"  <%= (header_with_public_user.equals("yes")?"SELECTED":"") %> >Yes</option>
-	   </select>
-	</td>
-       </tr>
+			   <td colspan="2" class="data2">PDF</td>
+		   </tr>
 	   
        <tr>
         <td class="attr">PDF Document Page Size</td>
-		<td>
+		<td class="data">
 	   <select name="page_size">
 	     <option value="1"   <%= (page_size.equals("1")?"SELECTED":"") %>  >A4 </option>
 	     <option value="2"   <%= (page_size.equals("2")?"SELECTED":"") %>  >A4 Landscape </option>
@@ -532,7 +524,28 @@ if(!propsFile.exists()){
 		</td>
        </tr>
 	   
+	   <tr>
+			   <td colspan="2" class="data2">General</td>
+		   </tr>
        <tr>
+        <td class="attr">ART CSS (skin)</td>
+        <td class="data"><input type="text" name="css_skin" size="40" maxlength="120" value="<%=css_skin%>"></td>
+       </tr>
+       <tr>
+        <td class="attr">Page Footer Logo</td>
+        <td class="data"><input type="text" name="bottom_logo" size="40" maxlength="120" value="<%=bottom_logo%>"></td>
+       </tr>
+	   
+	   <tr>
+        <td colspan="2" class="attr">Show standard header and footer in public_user sessions
+	   <select name="header_with_public_user">
+	     <option value="no"   <%= (header_with_public_user.equals("no")?"SELECTED":"") %>  >No </option>
+	     <option value="yes"  <%= (header_with_public_user.equals("yes")?"SELECTED":"") %> >Yes</option>
+	   </select>
+	</td>
+       </tr>
+	   
+	   <tr>
         <td class="attr">RSS Link</td>
         <td class="data"><input type="text" name="rss_link" size="40" maxlength="120" value="<%=rss_link%>">
 			<%
@@ -581,12 +594,14 @@ if(!propsFile.exists()){
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
        </tr>
+	   
+       
 
    </table>
 	<br><br>
 		<div style="text-align:center"><b>External Authentication</b></div>
       <p align="justify">
-       Edit the values below to use external authentication sources to authenticate ART users.<br><br>
+       Configure the fields below if you would like to use an external authentication source to authenticate ART users.<br><br>
 
 		<b>Note:</b> If you are unable to log in while using an external authentication source e.g. due
 		to a configuration problem, you can always log in using the <i>Internal Login</i> link provided on the
@@ -687,7 +702,7 @@ ServletContext ctx   = getServletConfig().getServletContext();
  <p>
   <table align="center">
    <tr><td colspan="2" class="title"> Servlet Context Properties </td></tr>
-   <tr><td class="data">ART Files Path</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>   
+   <tr><td class="data">ART Path</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>   
    <tr><td class="data">Server Info</td><td><code> <%=ctx.getServerInfo()%></code></td></tr>
    <tr><td class="data">Servlet API Supported</td><td><code> <%=ctx.getMajorVersion()%>.<%= ctx.getMinorVersion()%></code> </td></tr>
    <tr><td class="data">Java Vendor</td><td><code> <%=System.getProperty("java.vendor")%></code> </td></tr>

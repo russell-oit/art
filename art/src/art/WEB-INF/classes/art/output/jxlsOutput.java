@@ -112,22 +112,29 @@ public class jxlsOutput {
 			templatesPath = ArtDBCP.getTemplatesPath();
 			fullTemplateFileName = templatesPath + templateFileName;
 
+			String interactiveLink;
+
 			//only proceed if template file available
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
 				//template file doesn't exist.
 				logger.warn("Template file not found: {}", fullTemplateFileName);
+
+				fullOutputFileName = "-Template file not found";
+
+				//display error message instead of link when running query interactively
+				interactiveLink = "Template file not found. Please contact the ART administrator.";
 			} else {
 				//set objects to be passed to jxls
 				Map<String, Object> beans = new HashMap<String, Object>();
-				
+
 				//process multi parameters to obtain parameter labels instead of parameter identifiers
 				HashMap<String, String> mParams = new HashMap<String, String>();
 				PreparedQuery pq = new PreparedQuery();
 				pq.setQueryId(queryId);
 				pq.setMultiParams(multiParams);
 				mParams.putAll(pq.getJxlsMultiParams(querySql));
-				
+
 				//pass parameters 
 				beans.putAll(inlineParams);
 				beans.putAll(mParams);
@@ -204,15 +211,17 @@ public class jxlsOutput {
 				XLSTransformer transformer = new XLSTransformer();
 				transformer.transformXLS(fullTemplateFileName, beans, fullOutputFileName);
 
-				//display link to access report if run interactively			
-				if (htmlout != null) {
-					htmlout.println("<p><div align=\"Center\"><table border=\"0\" width=\"90%\">");
-					htmlout.println("<tr><td colspan=2 class=\"data\" align=\"center\" >"
-							+ "<a  type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
-							+ fileName + "</a>"
-							+ "</td></tr>");
-					htmlout.println("</table></div></p>");
-				}
+				interactiveLink = "<a type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
+						+ fileName + "</a>";
+			}
+
+			//display link to access report if run interactively
+			if (htmlout != null) {
+				htmlout.println("<p><div align=\"center\"><table border=\"0\" width=\"90%\">");
+				htmlout.println("<tr><td colspan=\"2\" class=\"data\" align=\"center\" >"
+						+ interactiveLink
+						+ "</td></tr>");
+				htmlout.println("</table></div></p>");
 			}
 
 		} catch (Exception e) {

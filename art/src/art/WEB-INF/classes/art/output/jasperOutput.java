@@ -161,10 +161,17 @@ public class jasperOutput {
 			File jasperFile = new File(jasperFileName);
 			File jrxmlFile = new File(jrxmlFileName);
 
+			String interactiveLink;
+
 			//only proceed if template file available
 			if (!jasperFile.exists() && !jrxmlFile.exists()) {
 				//template file doesn't exist.
-				logger.warn("Template file not found: {} (.jrxml or .jasper)", templatesPath + baseFileName);
+				logger.warn("Template file not found: {}.jrxml", templatesPath + baseFileName);
+
+				fullFileName = "-Template file not found";
+				
+				//display error message instead of link when running query interactively
+				interactiveLink = "Template file not found. Please contact the ART administrator.";
 			} else {
 				if (!jasperFile.exists() || (jasperFile.lastModified() < jrxmlFile.lastModified())) {
 					//compile jrxml file to generate jasper file if it doesn't exist or recompile it if jrxml is newer than jasper file
@@ -369,15 +376,18 @@ public class jasperOutput {
 					exporter.exportReport();
 				}
 
-				//display link to access report if run interactively
-				if (htmlout != null) {
-					htmlout.println("<p><div align=\"center\"><table border=\"0\" width=\"90%\">");
-					htmlout.println("<tr><td colspan=\"2\" class=\"data\" align=\"center\" >"
-							+ "<a type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
-							+ fileName + "</a>"
-							+ "</td></tr>");
-					htmlout.println("</table></div></p>");
-				}
+				interactiveLink = "<a type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
+						+ fileName + "</a>";
+
+			}
+
+			//display link to access report if run interactively
+			if (htmlout != null) {
+				htmlout.println("<p><div align=\"center\"><table border=\"0\" width=\"90%\">");
+				htmlout.println("<tr><td colspan=\"2\" class=\"data\" align=\"center\" >"
+						+ interactiveLink
+						+ "</td></tr>");
+				htmlout.println("</table></div></p>");
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);

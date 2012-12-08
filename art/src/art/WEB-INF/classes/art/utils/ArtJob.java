@@ -1549,14 +1549,18 @@ public class ArtJob implements Job, Serializable {
 
 						if (outputFormat.indexOf("html") >= 0 || outputFormat.indexOf("xml") >= 0 || outputFormat.indexOf("rss") >= 0) {
 							if (outputFormat.indexOf("html") >= 0) {
-								queryName = ArtDBCP.cleanFileName(queryName);
 								SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
 								String datePart = dateFormatter.format(new java.util.Date());
 
-								fileName = jobsPath + jobFileUsername + "-" + queryName + "-" + datePart + ArtDBCP.getRandomString() + ".html";
+								fileName = jobFileUsername + "-" + queryName + "-" + datePart + ArtDBCP.getRandomString() + ".html";
+								fileName = ArtDBCP.cleanFileName(fileName);
+								fileName = jobsPath + fileName;
+
 							} else {
 								//xml or rss
-								fileName = jobsPath + jobFileUsername + ".html";
+								fileName=jobFileUsername + ".html";
+								fileName = ArtDBCP.cleanFileName(fileName);
+								fileName = jobsPath + fileName;
 							}
 							fos = new FileOutputStream(fileName);
 							out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
@@ -1609,8 +1613,8 @@ public class ArtJob implements Job, Serializable {
 						//send customized emails to dynamic recipients
 						if (recipientDetails != null) {
 							Mailer m = getMailer();
-							
-							String email="";
+
+							String email = "";
 
 							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 								email = entry.getKey();
@@ -1689,8 +1693,8 @@ public class ArtJob implements Job, Serializable {
 											+ " <p>" + m.getSendError() + "</p>";
 
 									String msg = "Error when sending some emails."
-										+ " \n" + m.getSendError()
-										+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
+											+ " \n" + m.getSendError()
+											+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
 									logger.warn(msg);
 
 								}
@@ -2001,7 +2005,7 @@ public class ArtJob implements Job, Serializable {
 		try {
 			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
 
-			//Update LAST_END_DATE and FILENAME in ART_JOBS table
+			//Update LAST_END_DATE and LAST_FILE_NAME in ART_JOBS table
 			//for shared users, update the shared jobs table
 			String sqlString;
 			PreparedStatement psShared;
@@ -2052,7 +2056,7 @@ public class ArtJob implements Job, Serializable {
 		try {
 			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
 
-			// Update LAST_END_DATE and FILENAME in ART_JOBS table
+			// Update LAST_END_DATE and LAST_FILE_NAME in ART_JOBS table
 			//for shared users, update the shared jobs table
 			String sqlString;
 			PreparedStatement psShared;
