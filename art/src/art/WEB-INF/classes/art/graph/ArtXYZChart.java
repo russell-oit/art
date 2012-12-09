@@ -238,6 +238,11 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 							heatmapOptions.put(optionDetails.get(0), optionDetails.get(1));
 						}
 					}
+					
+					//allow specifying only the upper colour, for 2 colour schemes. set lower colour to white
+					if(heatmapOptions.containsKey("upperColor") && !heatmapOptions.containsKey("lowerColor")){
+						heatmapOptions.put("lowerColor","#FFFFFF");
+					}
 				}
 			}
 
