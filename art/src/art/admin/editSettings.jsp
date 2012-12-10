@@ -256,7 +256,7 @@ if(!propsFile.exists()){
 			urlElement.value="jdbc:postgresql://<server_name>/<database_name>";
 		} else if(dbType == "hsqldb-standalone"){
 			driverElement.value="org.hsqldb.jdbcDriver";
-			urlElement.value="jdbc:hsqldb:<file_path>;shutdown=true;hsqldb.write_delay=false";
+			urlElement.value="jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";
 		} else if(dbType == "sqlserver-ms"){
 			driverElement.value="com.microsoft.sqlserver.jdbc.SQLServerDriver";
 			urlElement.value="jdbc:sqlserver://<server_name>;databaseName=<database_name>";

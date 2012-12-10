@@ -1558,7 +1558,7 @@ public class ArtJob implements Job, Serializable {
 
 							} else {
 								//xml or rss
-								fileName=jobFileUsername + ".html";
+								fileName = jobFileUsername + ".html";
 								fileName = ArtDBCP.cleanFileName(fileName);
 								fileName = jobsPath + fileName;
 							}
@@ -1976,7 +1976,16 @@ public class ArtJob implements Job, Serializable {
 			if (fileName.startsWith("-")) {
 				finalFileName = fileName;
 			} else {
-				finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
+				//file name may have extra text after it, for publish job reminder email status
+				String newline=System.getProperty("line.separator");
+				if (fileName.indexOf(newline) > -1) {
+					// filename has full path to file. save only filename
+					finalFileName=StringUtils.substringBefore(fileName, newline); //file path
+					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // only filename
+					finalFileName = finalFileName + newline + StringUtils.substringAfter(fileName, newline); //add message
+				} else {
+					finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
+				}
 			}
 			// make sure we do not exceed the table col limit
 			if (finalFileName.length() > 4000) {
@@ -2013,7 +2022,22 @@ public class ArtJob implements Job, Serializable {
 			String finalFileName;
 
 			String sep = java.io.File.separator;
-			finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
+			
+			if (fileName.startsWith("-")) {
+				finalFileName = fileName;
+			} else {
+				//file name may have extra text after it, for publish job reminder email status
+				String newline=System.getProperty("line.separator");
+				if (fileName.indexOf(newline) > -1) {
+					// filename has full path to file. save only filename
+					finalFileName=StringUtils.substringBefore(fileName, newline); //file path
+					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // only filename
+					finalFileName = finalFileName + newline + StringUtils.substringAfter(fileName, newline); //add message
+				} else {
+					finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
+				}
+			}
+			
 			if (finalFileName.length() > 4000) {
 				finalFileName = finalFileName.substring(0, 4000);
 			}
@@ -2173,12 +2197,15 @@ public class ArtJob implements Job, Serializable {
 			ps.close();
 
 			//save job parameters
-			if (inlineParams != null && multiParams != null) {
+			String name, value;
+			
+			//save inline parameters
+			if (inlineParams != null) {
 				Iterator itInline = inlineParams.entrySet().iterator();
-				String name, value;
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
 						+ " VALUES (?,?,?,?)";
 				ps = conn.prepareStatement(sql);
+				boolean batchEmpty = true; //to ensure addBatch is only called if the batch is not empty. hsqldb throws an exception
 				while (itInline.hasNext()) {
 					Map.Entry entry = (Map.Entry) itInline.next();
 					name = (String) entry.getKey();
@@ -2188,10 +2215,23 @@ public class ArtJob implements Job, Serializable {
 					ps.setString(3, name);
 					ps.setString(4, value);
 					ps.addBatch();
+					batchEmpty = false;
 				}
 
+				if (!batchEmpty) {
+					ps.executeBatch();
+				}
+				ps.close();
+			}
+			
+			//save multi parameters
+			if (multiParams != null) {
 				Iterator itMulti = multiParams.entrySet().iterator();
+				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
+						+ " VALUES (?,?,?,?)";
+				ps = conn.prepareStatement(sql);
 				String values[];
+				boolean batchEmpty = true; //to ensure addBatch is only called if the batch is not empty. hsqldb throws an exception
 				while (itMulti.hasNext()) {
 					Map.Entry entry = (Map.Entry) itMulti.next();
 					name = (String) entry.getKey();
@@ -2202,13 +2242,16 @@ public class ArtJob implements Job, Serializable {
 						ps.setString(3, name);
 						ps.setString(4, values[j]);
 						ps.addBatch();
+						batchEmpty = false;
 					}
 				}
-
-				ps.executeBatch();
+				
+				if (!batchEmpty) {
+					ps.executeBatch();
+				}
 				ps.close();
 			}
-
+			
 			//enable show parameters in job output
 			if (showParameters) {
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "

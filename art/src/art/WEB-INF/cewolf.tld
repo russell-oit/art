@@ -408,7 +408,7 @@
 		Type of the chart. One of area, areaxy, horizontalbar, horizontalbar3d, line, pie, scatter,
 		stackedhorizontalbar, stackedverticalbar, stackedverticalbar3d, timeseries, verticalbar,
 		verticalbar3d, xy, candlestick, highlow, gantt, wind, signal, verticalxybar, pie3d, spline,
-		histogram, meter, thermometer, dial, compass, spiderweb, bubble, wafer
+		histogram, meter, thermometer, dial, compass, spiderweb, bubble, wafer, heatmap
 	  </description>
       <name>type</name>
       <required>true</required>

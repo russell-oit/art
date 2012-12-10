@@ -1,4 +1,5 @@
 ART 2.5
+* Fix for invalid publish job link on linux when reminder email specified
 * Support for case sensitive operators for dynamic queries
 * Allow use of decimals when specifying y axis range
 * Renamed "Objects" to "Queries" and "Object Groups" to "Query Groups"
