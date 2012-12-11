@@ -511,7 +511,7 @@ public class UserEntity implements Serializable {
             ps.executeUpdate();
 
             //delete user-shared job relationships
-            sql = "DELETE FROM ART_SHARED_JOBS WHERE USERNAME=?";
+            sql = "DELETE FROM ART_USER_JOBS WHERE USERNAME=?";
             ps = conn.prepareStatement(sql);
             ps.setString(1, uName);
             ps.executeUpdate();
@@ -580,7 +580,7 @@ public class UserEntity implements Serializable {
             ps = conn.prepareStatement(sql);
 
             //allow for deleting of split jobs where access was granted via group membership
-            String sqlSplitJobs = "DELETE FROM ART_SHARED_JOBS WHERE USERNAME = ? AND USER_GROUP_ID = ?";
+            String sqlSplitJobs = "DELETE FROM ART_USER_JOBS WHERE USERNAME = ? AND USER_GROUP_ID = ?";
             PreparedStatement psSplitJobs = conn.prepareStatement(sqlSplitJobs);
 
             for (int i = 0; i < userGroups.length; i++) {
@@ -958,12 +958,12 @@ public class UserEntity implements Serializable {
             //get jobs user has direct access to. both split and non-split jobs
             sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE, aj.SUBJECT, aq.USES_RULES, aj.ALLOW_SPLITTING "
                     + " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE, aj.CACHED_TABLE_NAME "
-                    + " ,asj.LAST_FILE_NAME AS SHARED_FILE_NAME, asj.LAST_START_DATE AS SHARED_START_DATE "
+                    + " ,auj.LAST_FILE_NAME AS SHARED_FILE_NAME, auj.LAST_START_DATE AS SHARED_START_DATE "
                     + " ,aj.LAST_END_DATE, aj.OUTPUT_FORMAT, aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE "
-                    + " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH, asj.LAST_END_DATE AS SHARED_END_DATE "
-                    + " FROM ART_JOBS aj, ART_QUERIES aq, ART_SHARED_JOBS asj "
-                    + " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID=asj.JOB_ID "
-                    + " AND asj.USERNAME = ? AND aj.USERNAME <> ?";
+                    + " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH, auj.LAST_END_DATE AS SHARED_END_DATE "
+                    + " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_JOBS auj "
+                    + " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID=auj.JOB_ID "
+                    + " AND auj.USERNAME = ? AND aj.USERNAME <> ?";
 
             ps = conn.prepareStatement(sql);
             ps.setString(1, username);

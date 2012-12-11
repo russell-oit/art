@@ -143,7 +143,6 @@ int jobId;
 int jobType;
 String queryName;
 String lastFileName;
-String lines[];
 String resultMessage;
 %>
 
@@ -241,12 +240,13 @@ String resultMessage;
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		lines = lastFileName.split("\\r?\\n");
 		resultMessage="";
-		if (lines.length > 1) {
-			//publish jobs can have file link and message
-			lastFileName=lines[0];
-			resultMessage=lines[1];
+		if (lastFileName.indexOf("\n") > -1) {
+			// publish jobs can have file link and message separated by newline (\n)
+			String result=lastFileName;
+			lastFileName = StringUtils.substringBefore(lastFileName, "\n"); //get file name
+			lastFileName = StringUtils.replace(lastFileName, "\r", ""); //on windows pre-2.5, filenames had \\r\\n
+			resultMessage = StringUtils.substringAfter(result, "\n"); //message
 		}	
 	   %>
         <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>		
@@ -431,12 +431,13 @@ if(accessLevel>=80){
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		lines = lastFileName.split("\\r?\\n");
 		resultMessage="";
-		if (lines.length > 1) {
-			//publish jobs can have file link and message
-			lastFileName=lines[0];
-			resultMessage=lines[1];
+		if (lastFileName.indexOf("\\n") > -1) {
+			// publish jobs can have file link and message separated by newline
+			String result=lastFileName;
+			lastFileName = StringUtils.substringBefore(lastFileName, "\\n"); //get file name
+			lastFileName = StringUtils.replace(lastFileName, "\\r", ""); //on windows pre-2.5, filenames had \\r\\n
+			resultMessage = StringUtils.substringAfter(result, "\\n"); //message
 		}	
 	   %>
         <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>		

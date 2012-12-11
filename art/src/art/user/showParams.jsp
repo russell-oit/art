@@ -153,10 +153,10 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
 							<%
 							if(queryType==110){ //dashboard
 							%>
-							<%=messages.getString("portletObject")%>
+							<%=messages.getString("dashboardQuery")%>
 							<%} else { //pivot table
 							%>
-								<%=messages.getString("pivotTableObject")%>
+								<%=messages.getString("pivotTableQuery")%>
 								<%
 							}
 							%>

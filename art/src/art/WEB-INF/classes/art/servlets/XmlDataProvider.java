@@ -310,23 +310,23 @@ public class XmlDataProvider extends BaseAjaxServlet {
                     type = messages.getString("tabularwebQuery");
                     break;
                 case 110:
-                    type = messages.getString("portletObject");
+                    type = messages.getString("dashboardQuery");
                     break;
                 case 111:
-                    type = messages.getString("textObject");
+                    type = messages.getString("textQuery");
                     break;
                 case 112:
                 case 113:
                 case 114:
-                    type = messages.getString("pivotTableObject");
+                    type = messages.getString("pivotTableQuery");
                     break;
                 case 115:
                 case 116:
-                    type = messages.getString("jasperReportObject");
+                    type = messages.getString("jasperReportQuery");
                     break;
                 case 117:
                 case 118:
-                    type = messages.getString("jxlsReportObject");
+                    type = messages.getString("jxlsQuery");
                     break;
                 default:
                     if (typeId > 0 && typeId < 99) {

@@ -331,7 +331,7 @@ public class UserGroup {
             PreparedStatement ps = conn.prepareStatement(sql);
 
             //allow for deleting of split jobs where access was granted to the user via group membership			
-            String sqlSplitJob = "DELETE FROM ART_SHARED_JOBS WHERE USERNAME = ? AND USER_GROUP_ID = ?";
+            String sqlSplitJob = "DELETE FROM ART_USER_JOBS WHERE USERNAME = ? AND USER_GROUP_ID = ?";
             PreparedStatement psSplitJob = conn.prepareStatement(sqlSplitJob);
 
             if (users != null) {
@@ -584,7 +584,7 @@ public class UserGroup {
             ps = conn.prepareStatement(sql);
 
             //allow for deleting of split jobs where access was granted via group membership			
-            String sqlRemove = "DELETE FROM ART_SHARED_JOBS WHERE USERNAME = ? AND USER_GROUP_ID = ?";
+            String sqlRemove = "DELETE FROM ART_USER_JOBS WHERE USERNAME = ? AND USER_GROUP_ID = ?";
             PreparedStatement psRemove = conn.prepareStatement(sqlRemove);
 
             for (int i = 0; i < users.length; i++) {

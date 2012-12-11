@@ -150,6 +150,8 @@ public class ArtJob implements Job, Serializable {
 	private String bcc;
 	Map<String, ArtQueryParam> htmlParams;
 	private int recipientsQueryId; //to support dynamic recipients
+	
+	final String RESULT_SEPARATOR="\n"; //newline character to use to separate result filename and result message where a message exists
 
 	/**
 	 * Instantiate a new "empty" Job (to insert/save) A new Job is created. Use
@@ -1174,10 +1176,10 @@ public class ArtJob implements Job, Serializable {
 					addSharedJobUsers(conn, jobId);
 
 					//get users to generate output for
-					String usersSQL = "SELECT ASJ.USERNAME, AU.EMAIL "
-							+ " FROM ART_SHARED_JOBS ASJ, ART_USERS AU "
-							+ " WHERE ASJ.USERNAME = AU.USERNAME "
-							+ " AND ASJ.JOB_ID = ? AND AU.ACTIVE_STATUS='A'";
+					String usersSQL = "SELECT auj.USERNAME, AU.EMAIL "
+							+ " FROM ART_USER_JOBS auj, ART_USERS AU "
+							+ " WHERE auj.USERNAME = AU.USERNAME "
+							+ " AND auj.JOB_ID = ? AND AU.ACTIVE_STATUS='A'";
 
 					PreparedStatement ps = conn.prepareStatement(usersSQL);
 					ps.setInt(1, jobId);
@@ -1699,11 +1701,11 @@ public class ArtJob implements Job, Serializable {
 
 								}
 							} else {
-								//publish job reminder email. separate file link and message with a newline character
+								//publish job reminder email. separate file link and message with a newline character (\n)
 								if (mailSent) {
-									fileName = fileName + System.getProperty("line.separator") + "<p>Reminder email sent</p>";
+									fileName = fileName + RESULT_SEPARATOR + "<p>Reminder email sent</p>";
 								} else {
-									fileName = fileName + System.getProperty("line.separator") + "<p>Error when sending reminder email <br>" + m.getSendError() + "</p>";
+									fileName = fileName + RESULT_SEPARATOR + "<p>Error when sending reminder email <br><br>" + m.getSendError() + "</p>";
 								}
 							}
 						}
@@ -1827,15 +1829,15 @@ public class ArtJob implements Job, Serializable {
 					+ " WHERE AU.USERNAME = AUGA.USERNAME AND AUGA.USER_GROUP_ID = AUGJ.USER_GROUP_ID "
 					+ " AND AUGJ.JOB_ID = ? "
 					+ " AND NOT EXISTS "
-					+ " (SELECT * FROM ART_SHARED_JOBS ASJ "
-					+ " WHERE ASJ.USERNAME = AU.USERNAME AND ASJ.JOB_ID = ?)";
+					+ " (SELECT * FROM ART_USER_JOBS auj "
+					+ " WHERE auj.USERNAME = AU.USERNAME AND auj.JOB_ID = ?)";
 
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, jId);
 			ps.setInt(2, jId);
 			rs = ps.executeQuery();
 
-			sql = "INSERT INTO ART_SHARED_JOBS (JOB_ID, USERNAME, USER_GROUP_ID) VALUES (?,?,?)";
+			sql = "INSERT INTO ART_USER_JOBS (JOB_ID, USERNAME, USER_GROUP_ID) VALUES (?,?,?)";
 
 			psInsert = conn.prepareStatement(sql);
 			while (rs.next()) {
@@ -1875,10 +1877,10 @@ public class ArtJob implements Job, Serializable {
 
 		try {
 			//get users who should be denied access to the job because their group has been denied access
-			sql = "SELECT ASJ.USERNAME "
-					+ " FROM ART_SHARED_JOBS ASJ, ART_USER_GROUP_JOBS AUGJ "
-					+ " WHERE ASJ.JOB_ID = AUGJ.JOB_ID "
-					+ " AND ASJ.JOB_ID = ? "
+			sql = "SELECT auj.USERNAME "
+					+ " FROM ART_USER_JOBS auj, ART_USER_GROUP_JOBS AUGJ "
+					+ " WHERE auj.JOB_ID = AUGJ.JOB_ID "
+					+ " AND auj.JOB_ID = ? "
 					+ " AND EXISTS "
 					+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
 					+ " WHERE AUGA.USER_GROUP_ID=AUGJ.USER_GROUP_ID "
@@ -1889,8 +1891,8 @@ public class ArtJob implements Job, Serializable {
 			ps.setInt(2, groupId);
 			rs = ps.executeQuery();
 
-			//delete records from the shared jobs table
-			sql = "DELETE FROM ART_SHARED_JOBS WHERE JOB_ID = ? AND USERNAME = ?";
+			//delete records from the art_user_jobs table
+			sql = "DELETE FROM ART_USER_JOBS WHERE JOB_ID = ? AND USERNAME = ?";
 			psDelete = conn.prepareStatement(sql);
 			while (rs.next()) {
 				try {
@@ -1977,12 +1979,11 @@ public class ArtJob implements Job, Serializable {
 				finalFileName = fileName;
 			} else {
 				//file name may have extra text after it, for publish job reminder email status
-				String newline=System.getProperty("line.separator");
-				if (fileName.indexOf(newline) > -1) {
+				if (fileName.indexOf(RESULT_SEPARATOR) > -1) {
 					// filename has full path to file. save only filename
-					finalFileName=StringUtils.substringBefore(fileName, newline); //file path
-					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // only filename
-					finalFileName = finalFileName + newline + StringUtils.substringAfter(fileName, newline); //add message
+					finalFileName = StringUtils.substringBefore(fileName, RESULT_SEPARATOR); //get full file path
+					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // get only filename
+					finalFileName = finalFileName + RESULT_SEPARATOR + StringUtils.substringAfter(fileName, RESULT_SEPARATOR); //filename + message
 				} else {
 					finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
 				}
@@ -2022,29 +2023,28 @@ public class ArtJob implements Job, Serializable {
 			String finalFileName;
 
 			String sep = java.io.File.separator;
-			
+
 			if (fileName.startsWith("-")) {
 				finalFileName = fileName;
 			} else {
 				//file name may have extra text after it, for publish job reminder email status
-				String newline=System.getProperty("line.separator");
-				if (fileName.indexOf(newline) > -1) {
+				if (fileName.indexOf(RESULT_SEPARATOR) > -1) {
 					// filename has full path to file. save only filename
-					finalFileName=StringUtils.substringBefore(fileName, newline); //file path
-					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // only filename
-					finalFileName = finalFileName + newline + StringUtils.substringAfter(fileName, newline); //add message
+					finalFileName = StringUtils.substringBefore(fileName, RESULT_SEPARATOR); //get full file path
+					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // get only filename
+					finalFileName = finalFileName + RESULT_SEPARATOR + StringUtils.substringAfter(fileName, RESULT_SEPARATOR); //filename + message
 				} else {
 					finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
 				}
 			}
-			
+
 			if (finalFileName.length() > 4000) {
 				finalFileName = finalFileName.substring(0, 4000);
 			}
 
 			//no need to update jobs table for single output. aftercomplete will do the final update to the jobs table
 			if (!singleOutput) {
-				sqlString = "UPDATE ART_SHARED_JOBS SET LAST_FILE_NAME = ?, LAST_START_DATE = ?, LAST_END_DATE = ? "
+				sqlString = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?, LAST_START_DATE = ?, LAST_END_DATE = ? "
 						+ " WHERE JOB_ID = ? AND USERNAME = ?";
 				psShared = conn.prepareStatement(sqlString);
 
@@ -2097,7 +2097,7 @@ public class ArtJob implements Job, Serializable {
 
 			//no need to update jobs table for single output. aftercomplete will do the final update to the jobs table
 			if (!singleOutput) {
-				sqlString = "UPDATE ART_SHARED_JOBS SET LAST_FILE_NAME = ?, LAST_START_DATE = ?, LAST_END_DATE = ? "
+				sqlString = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?, LAST_START_DATE = ?, LAST_END_DATE = ? "
 						+ " WHERE JOB_ID = ? AND USERNAME = ?";
 				psShared = conn.prepareStatement(sqlString);
 
@@ -2198,7 +2198,7 @@ public class ArtJob implements Job, Serializable {
 
 			//save job parameters
 			String name, value;
-			
+
 			//save inline parameters
 			if (inlineParams != null) {
 				Iterator itInline = inlineParams.entrySet().iterator();
@@ -2223,7 +2223,7 @@ public class ArtJob implements Job, Serializable {
 				}
 				ps.close();
 			}
-			
+
 			//save multi parameters
 			if (multiParams != null) {
 				Iterator itMulti = multiParams.entrySet().iterator();
@@ -2245,13 +2245,13 @@ public class ArtJob implements Job, Serializable {
 						batchEmpty = false;
 					}
 				}
-				
+
 				if (!batchEmpty) {
 					ps.executeBatch();
 				}
 				ps.close();
 			}
-			
+
 			//enable show parameters in job output
 			if (showParameters) {
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
@@ -2380,13 +2380,13 @@ public class ArtJob implements Job, Serializable {
 				ps.setInt(1, jobId);
 				ps.executeUpdate();
 
-				//delete any shared jobs that may exist
-				SQL = "DELETE FROM ART_SHARED_JOBS WHERE JOB_ID = ? ";
+				//delete user-jobs records
+				SQL = "DELETE FROM ART_USER_JOBS WHERE JOB_ID = ? ";
 				ps = conn.prepareStatement(SQL);
 				ps.setInt(1, jobId);
 				ps.executeUpdate();
 
-				//delete user group-shared jobs records
+				//delete user group-jobs records
 				SQL = "DELETE FROM ART_USER_GROUP_JOBS WHERE JOB_ID = ? ";
 				ps = conn.prepareStatement(SQL);
 				ps.setInt(1, jobId);
@@ -3065,9 +3065,9 @@ public class ArtJob implements Job, Serializable {
 			PreparedStatement ps;
 
 			if (action.equals("GRANT")) {
-				sql = "INSERT INTO ART_SHARED_JOBS (USERNAME,JOB_ID) VALUES(?, ?)";
+				sql = "INSERT INTO ART_USER_JOBS (USERNAME,JOB_ID) VALUES(?, ?)";
 			} else {
-				sql = "DELETE FROM ART_SHARED_JOBS WHERE USERNAME = ? AND JOB_ID = ?";
+				sql = "DELETE FROM ART_USER_JOBS WHERE USERNAME = ? AND JOB_ID = ?";
 			}
 
 			ps = conn.prepareStatement(sql);
@@ -3119,9 +3119,9 @@ public class ArtJob implements Job, Serializable {
 			PreparedStatement ps;
 
 			if (action.equals("GRANT")) {
-				sql = "INSERT INTO ART_SHARED_JOBS (USERNAME, JOB_ID) values (? , ? )";
+				sql = "INSERT INTO ART_USER_JOBS (USERNAME, JOB_ID) values (? , ? )";
 			} else {
-				sql = "DELETE FROM ART_SHARED_JOBS WHERE USERNAME = ? AND JOB_ID = ?";
+				sql = "DELETE FROM ART_USER_JOBS WHERE USERNAME = ? AND JOB_ID = ?";
 			}
 
 			ps = conn.prepareStatement(sql);
@@ -3290,10 +3290,10 @@ public class ArtJob implements Job, Serializable {
 			Integer count = 0; //to ensure items are displayed starting with users then user groups
 
 			//get jobs which have been shared with users
-			sql = "SELECT ASJ.USERNAME, AJ.JOB_ID, AJ.JOB_NAME "
-					+ " FROM ART_SHARED_JOBS ASJ, ART_JOBS AJ "
-					+ " WHERE ASJ.JOB_ID=AJ.JOB_ID "
-					+ " ORDER BY ASJ.USERNAME";
+			sql = "SELECT auj.USERNAME, AJ.JOB_ID, AJ.JOB_NAME "
+					+ " FROM ART_USER_JOBS auj, ART_JOBS AJ "
+					+ " WHERE auj.JOB_ID=AJ.JOB_ID "
+					+ " ORDER BY auj.USERNAME";
 
 			ps = conn.prepareStatement(sql);
 			rs = ps.executeQuery();
@@ -3371,9 +3371,9 @@ public class ArtJob implements Job, Serializable {
 
 			//get emails from shared users
 			sql = " SELECT DISTINCT AU.EMAIL "
-					+ " FROM ART_SHARED_JOBS ASJ, ART_USERS AU "
-					+ " WHERE ASJ.USERNAME=AU.USERNAME "
-					+ " AND ASJ.JOB_ID=?";
+					+ " FROM ART_USER_JOBS auj, ART_USERS AU "
+					+ " WHERE auj.USERNAME=AU.USERNAME "
+					+ " AND auj.JOB_ID=?";
 
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, jobId);
@@ -3423,7 +3423,7 @@ public class ArtJob implements Job, Serializable {
 			Integer count = 0;
 
 			sql = "SELECT DISTINCT USERNAME "
-					+ " FROM ART_SHARED_JOBS "
+					+ " FROM ART_USER_JOBS "
 					+ " WHERE JOB_ID=? "
 					+ " ORDER BY USERNAME";
 
