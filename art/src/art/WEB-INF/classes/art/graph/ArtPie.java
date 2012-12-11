@@ -61,8 +61,8 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(ArtPie.class);
 	String title = "Title";
-	String xlabel = "x Label";
-	String ylabel = "y Label";
+	String xAxisLabel = "x Label";
+	String yAxisLabel = "y Label";
 	String seriesName = "Series Name";
 	java.util.HashMap<String, String> hyperLinks;
 	int height = 300;
@@ -140,23 +140,23 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	}
 
 	@Override
-	public void setXlabel(String xlabel) {
-		this.xlabel = xlabel;
+	public void setXAxisLabel(String xlabel) {
+		this.xAxisLabel = xlabel;
 	}
 
 	@Override
-	public String getXlabel() {
-		return xlabel;
+	public String getXAxisLabel() {
+		return xAxisLabel;
 	}
 
 	@Override
-	public void setYlabel(String ylabel) {
-		this.ylabel = ylabel;
+	public void setYAxisLabel(String ylabel) {
+		this.yAxisLabel = ylabel;
 	}
 
 	@Override
-	public String getYlabel() {
-		return ylabel;
+	public String getYAxisLabel() {
+		return yAxisLabel;
 	}
 
 	@Override

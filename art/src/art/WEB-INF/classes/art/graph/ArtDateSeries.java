@@ -98,8 +98,8 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
     final static Logger logger = LoggerFactory.getLogger(ArtDateSeries.class);
         
     String title = "Title";
-    String xlabel = "x Label";
-    String ylabel = "y Label";
+    String xAxisLabel = "x Label";
+    String yAxisLabel = "y Label";
     String seriesName = "Not Used";
     ArrayList<String> hyperLinks;
     int height = 300;
@@ -178,23 +178,23 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
     }
 
     @Override
-    public void setXlabel(String xlabel) {
-        this.xlabel = xlabel;
+    public void setXAxisLabel(String xlabel) {
+        this.xAxisLabel = xlabel;
     }
 
     @Override
-    public String getXlabel() {
-        return xlabel;
+    public String getXAxisLabel() {
+        return xAxisLabel;
     }
 
     @Override
-    public void setYlabel(String ylabel) {
-        this.ylabel = ylabel;
+    public void setYAxisLabel(String ylabel) {
+        this.yAxisLabel = ylabel;
     }
 
     @Override
-    public String getYlabel() {
-        return ylabel;
+    public String getYAxisLabel() {
+        return yAxisLabel;
     }
 
     @Override

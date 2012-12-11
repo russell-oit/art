@@ -49,8 +49,8 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
 	String title = "Title";
-	String xlabel = "Not Used";
-	String ylabel = "Not Used";
+	String xAxisLabel = "Not Used";
+	String yAxisLabel = "Not Used";
 	String seriesName = "Not Used";
 	int height = 300;
 	int width = 500;
@@ -132,23 +132,23 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 	}
 
 	@Override
-	public void setXlabel(String xlabel) {
-		this.xlabel = xlabel;
+	public void setXAxisLabel(String xlabel) {
+		this.xAxisLabel = xlabel;
 	}
 
 	@Override
-	public String getXlabel() {
-		return xlabel;
+	public String getXAxisLabel() {
+		return xAxisLabel;
 	}
 
 	@Override
-	public void setYlabel(String value) {
-		this.ylabel = value;
+	public void setYAxisLabel(String value) {
+		this.yAxisLabel = value;
 	}
 
 	@Override
-	public String getYlabel() {
-		return ylabel;
+	public String getYAxisLabel() {
+		return yAxisLabel;
 	}
 
 	@Override

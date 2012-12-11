@@ -3,6 +3,9 @@ package art.graph;
 import art.servlets.ArtDBCP;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
+import de.laures.cewolf.cpp.HeatmapEnhancer;
+import de.laures.cewolf.cpp.RotatedAxisLabels;
+import de.laures.cewolf.taglib.CewolfChartFactory;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.File;
@@ -11,6 +14,7 @@ import java.sql.ResultSetMetaData;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.jfree.chart.*;
@@ -47,8 +51,8 @@ public class ExportGraph {
 	String outputFormat;
 	String y_m_d;
 	String h_m_s;
-	String xlabel;
-	String ylabel;
+	String xAxisLabel;
+	String yAxisLabel;
 	String graphOptions;
 	String title;
 	String exportPath;
@@ -163,8 +167,8 @@ public class ExportGraph {
 	 *
 	 * @param value x-axis label
 	 */
-	public void setXlabel(String value) {
-		xlabel = value;
+	public void setXAxisLabel(String value) {
+		xAxisLabel = value;
 	}
 
 	/**
@@ -172,8 +176,8 @@ public class ExportGraph {
 	 *
 	 * @param value y-axis label
 	 */
-	public void setYlabel(String value) {
-		ylabel = value;
+	public void setYAxisLabel(String value) {
+		yAxisLabel = value;
 	}
 
 	/**
@@ -272,8 +276,8 @@ public class ExportGraph {
 			rsmd = rs.getMetaData();
 			String seriesName = rsmd.getColumnLabel(2);
 
-			if (ylabel == null) {
-				ylabel = rsmd.getColumnLabel(1);
+			if (yAxisLabel == null) {
+				yAxisLabel = rsmd.getColumnLabel(1);
 			}
 
 			//process graph options	string to get custom width, height (only used for png output), bgcolour, y-min, y-max			
@@ -334,7 +338,7 @@ public class ExportGraph {
 					XYSeriesCollection xyDataset = (XYSeriesCollection) xyChart.produceDataset(null);
 
 					//create chart								
-					chart = ChartFactory.createXYLineChart(title, xlabel, ylabel, xyDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+					chart = ChartFactory.createXYLineChart(title, xAxisLabel, yAxisLabel, xyDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 
 					XYPlot xyPlot = (XYPlot) chart.getPlot();
 
@@ -361,7 +365,7 @@ public class ExportGraph {
 					TimeSeriesCollection timeSeriesDataset = (TimeSeriesCollection) timeSeriesChart.produceDataset(null);
 
 					//create chart				
-					chart = ChartFactory.createTimeSeriesChart(title, xlabel, ylabel, timeSeriesDataset, showLegend, showTooltips, showUrls);
+					chart = ChartFactory.createTimeSeriesChart(title, xAxisLabel, yAxisLabel, timeSeriesDataset, showLegend, showTooltips, showUrls);
 
 					XYPlot timePlot = (XYPlot) chart.getPlot();
 
@@ -388,7 +392,7 @@ public class ExportGraph {
 					TimeSeriesCollection dateSeriesDataset = (TimeSeriesCollection) dateSeriesChart.produceDataset(null);
 
 					//create chart				
-					chart = ChartFactory.createTimeSeriesChart(title, xlabel, ylabel, dateSeriesDataset, showLegend, showTooltips, showUrls);
+					chart = ChartFactory.createTimeSeriesChart(title, xAxisLabel, yAxisLabel, dateSeriesDataset, showLegend, showTooltips, showUrls);
 
 					XYPlot datePlot = (XYPlot) chart.getPlot();
 
@@ -437,17 +441,33 @@ public class ExportGraph {
 					xyz.prepareDataset(rs);
 					DefaultXYZDataset xyzDataset = (DefaultXYZDataset) xyz.produceDataset(null);
 
-					//todo: implement code for creating heat map
-
 					if (queryType == -11) {
+						//bubble chart
+						
 						//create chart
-						chart = ChartFactory.createBubbleChart(title, xlabel, ylabel, xyzDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
-
-						XYPlot bubblePlot = (XYPlot) chart.getPlot();
+						chart = ChartFactory.createBubbleChart(title, xAxisLabel, yAxisLabel, xyzDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 
 						//set y axis range if required
+						XYPlot bubblePlot = (XYPlot) chart.getPlot();
 						if (from != 0 && to != 0) {
 							NumberAxis rangeAxis = (NumberAxis) bubblePlot.getRangeAxis();
+							rangeAxis.setRange(from, to);
+						}
+					} else if (queryType == -12) {
+						//heat map
+						
+						//create chart
+						chart=CewolfChartFactory.getChartInstance("heatmap", title, xAxisLabel, yAxisLabel, xyzDataset, showLegend);
+						
+						//process chart
+						Map<String, String> heatmapOptions=xyz.getHeatmapOptions();
+						HeatmapEnhancer heatmapPP=new HeatmapEnhancer();
+						heatmapPP.processChart(chart, heatmapOptions);
+						
+						//set y axis range if required
+						XYPlot heatmapPlot = (XYPlot) chart.getPlot();
+						if (from != 0 && to != 0) {
+							NumberAxis rangeAxis = (NumberAxis) heatmapPlot.getRangeAxis();
 							rangeAxis.setRange(from, to);
 						}
 					}
@@ -467,15 +487,15 @@ public class ExportGraph {
 					switch (queryType) {
 						case -3:
 							//horizontal bar graph 3d
-							chart = ChartFactory.createBarChart3D(title, xlabel, ylabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
+							chart = ChartFactory.createBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
 							break;
 						case -4:
 							//vertical bar graph 3d
-							chart = ChartFactory.createBarChart3D(title, xlabel, ylabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+							chart = ChartFactory.createBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 							break;
 						case -5:
 							//line graph
-							chart = ChartFactory.createLineChart(title, xlabel, ylabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+							chart = ChartFactory.createLineChart(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 
 							//show data points if required
 							if (showDataPoints) {
@@ -486,11 +506,11 @@ public class ExportGraph {
 							break;
 						case -8:
 							//stacked vertical bar graph 3d
-							chart = ChartFactory.createStackedBarChart3D(title, xlabel, ylabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+							chart = ChartFactory.createStackedBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 							break;
 						case -9:
 							//stacked horizontal bar graph 3d
-							chart = ChartFactory.createStackedBarChart3D(title, xlabel, ylabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
+							chart = ChartFactory.createStackedBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
 							break;
 					}
 
@@ -531,8 +551,15 @@ public class ExportGraph {
 				chart.setBackgroundPaint(Color.decode(bgColor));
 
 				//display x-axis labels vertically if too many categories present
-				rotateAxis(chart);
-
+				RotatedAxisLabels labelRotation=new RotatedAxisLabels();
+				
+				//set rotate_at and remove_at parameters. set to same as in showGraph.jsp
+				Map<String,String> params=new HashMap<String,String>();
+				params.put("rotate_at","5");
+				params.put("remove_at","10000");
+				labelRotation.processChart(chart, params);
+				
+				
 				if (outputFormat.equals("png")) {
 					fullFileName = fullFileNameWithoutExt + ".png";
 					ChartUtilities.saveChartAsPNG(new File(fullFileName), chart, width, height);
@@ -573,56 +600,4 @@ public class ExportGraph {
 		}
 	}
 
-	/**
-	 * Display x-axis labels vertically if the chart has many categories Code
-	 * from cewolf RotatedAxisLabels.java
-	 *
-	 * @param chart
-	 */
-	private void rotateAxis(JFreeChart chart) {
-		final int rotateThreshold = 5; //number of x-axis categories above which x-axis labels will be displayed vertically
-		final int removeThreshold = 50; //number of x-axis categories above which x-axis labels will be removed (not displayed)
-
-		Plot plot = chart.getPlot();
-		Axis axis = null;
-		int numValues = 0;
-
-		try {
-
-			if (plot instanceof CategoryPlot) {
-				axis = ((CategoryPlot) plot).getDomainAxis();
-				numValues = ((CategoryPlot) plot).getDataset().getRowCount();
-			} else if (plot instanceof XYPlot) {
-				axis = ((XYPlot) plot).getDomainAxis();
-				numValues = ((XYPlot) plot).getDataset().getItemCount(0);
-			} else if (plot instanceof FastScatterPlot) {
-				axis = ((FastScatterPlot) plot).getDomainAxis();
-				numValues = ((FastScatterPlot) plot).getData()[0].length;
-			}
-
-			if (axis instanceof CategoryAxis) {
-				CategoryAxis catAxis = (CategoryAxis) axis;
-
-				if (rotateThreshold > 0) {
-					if (numValues >= rotateThreshold) {
-						catAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
-					} else {
-						catAxis.setCategoryLabelPositions(CategoryLabelPositions.STANDARD);
-					}
-				}
-			} else if (axis instanceof ValueAxis) {
-				ValueAxis valueAxis = (ValueAxis) axis;
-
-				if (rotateThreshold > 0) {
-					valueAxis.setVerticalTickLabels(numValues >= rotateThreshold);
-				}
-			}
-
-			if ((axis != null) && (removeThreshold > 0)) {
-				axis.setTickLabelsVisible(numValues < removeThreshold);
-			}
-		} catch (Exception e) {
-			logger.error("Error", e);
-		}
-	}
 }

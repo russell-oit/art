@@ -32,8 +32,8 @@ Initialize the object:
 <pre>
 ArtGraph o = new artTime();
 o.setTitle("title");
-o.setXlabel("x label");
-o.setYlabel("y label");
+o.setXAxislabel("x label");
+o.setYAxislabel("y label");
 o.setWidth(400);
 o.setHeight(300);
 o.setBgColor(bgColor);
@@ -57,8 +57,8 @@ Use the cewolf tag to display the graph:
 id="artGraph" 
 title="&lt;%=o.getTitle()%&gt;" 
 type="timeseries" 
-xaxislabel="&lt;%=o.getXlabel()%&gt;" 
-yaxislabel="&lt;%=o.getYlabel()%&gt;"&gt;
+xaxislabel="&lt;%=o.getXAxislabel()%&gt;" 
+yaxislabel="&lt;%=o.getYAxislabel()%&gt;"&gt;
 &lt;cewolf:colorpaint color="&lt;%=o.getBgColor()%&gt;"/&gt;
 &lt;cewolf:data&gt;
 &lt;cewolf:producer id="artGraphData"/&gt;
@@ -102,25 +102,25 @@ public interface ArtGraph {
      * Set the x-axis label.
      * @param xlabel x-axis label
      */
-    public void setXlabel(String xlabel);
+    public void setXAxisLabel(String xlabel);
 
     /**
      * Get the x-axis label.
      * @return x-axis label
      */
-    public String getXlabel();
+    public String getXAxisLabel();
 
     /**
      * Set the y-axis label
      * @param ylabel y-axis label
      */
-    public void setYlabel(String ylabel);
+    public void setYAxisLabel(String ylabel);
 
     /**
      * Get the y-axis label
      * @return y-axis label
      */
-    public String getYlabel();
+    public String getYAxisLabel();
 
     /**
      * Set the series name

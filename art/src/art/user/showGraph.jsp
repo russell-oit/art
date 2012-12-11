@@ -211,8 +211,8 @@ String removeAt="10000";
        type="<%=graphType[graphId-1]%>" 
        showlegend="<%=showLegend%>"
 	   plotbackgroundcolor="#FFFFFF"
-       xaxislabel="<%=graph.getXlabel()%>" 
-       yaxislabel="<%=graph.getYlabel()%>">
+       xaxislabel="<%=graph.getXAxisLabel()%>" 
+       yaxislabel="<%=graph.getYAxisLabel()%>">
        <cewolf:colorpaint color="<%=graph.getBgColor()%>"/>
 	   
        <cewolf:data>
@@ -239,8 +239,8 @@ String removeAt="10000";
 		   Map<String,String> options=heatmap.getHeatmapOptions();
 		   %>
 	   <cewolf:chartpostprocessor id="heatmapPP">
-        <cewolf:param name="xLabel" value="<%=graph.getXlabel()%>"/>
-        <cewolf:param name="yLabel" value="<%=graph.getYlabel()%>"/>
+        <cewolf:param name="xLabel" value="<%=graph.getXAxisLabel()%>"/>
+        <cewolf:param name="yLabel" value="<%=graph.getYAxisLabel()%>"/>
 		<cewolf:param name="showItemLabels" value="<%=showLabels%>"/>
 		%>
 		<%

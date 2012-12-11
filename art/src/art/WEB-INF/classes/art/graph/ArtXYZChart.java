@@ -47,8 +47,8 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
 	String title = "Title";
-	String xlabel = "X label";
-	String ylabel = "Y label";
+	String xAxisLabel = "X label";
+	String yAxisLabel = "Y label";
 	String seriesName = "Series";
 	ArrayList<String> hyperLinks;
 	HashMap<String, String> drilldownLinks;
@@ -94,23 +94,23 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	}
 
 	@Override
-	public void setXlabel(String xlabel) {
-		this.xlabel = xlabel;
+	public void setXAxisLabel(String xlabel) {
+		this.xAxisLabel = xlabel;
 	}
 
 	@Override
-	public String getXlabel() {
-		return xlabel;
+	public String getXAxisLabel() {
+		return xAxisLabel;
 	}
 
 	@Override
-	public void setYlabel(String ylabel) {
-		this.ylabel = ylabel;
+	public void setYAxisLabel(String ylabel) {
+		this.yAxisLabel = ylabel;
 	}
 
 	@Override
-	public String getYlabel() {
-		return ylabel;
+	public String getYAxisLabel() {
+		return yAxisLabel;
 	}
 
 	@Override

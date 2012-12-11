@@ -417,8 +417,8 @@ public class QueryExecute extends HttpServlet {
 			int queryId = 0;
 			int queryType;
 			String queryName;
-			String xaxisLabel;
-			String yaxisLabel;
+			String xAxisLabel;
+			String yAxisLabel;
 			String graphOptions;
 			String shortDescription;
 
@@ -438,8 +438,8 @@ public class QueryExecute extends HttpServlet {
 
 				queryName = aq.getName();
 				queryType = aq.getQueryType();
-				xaxisLabel = aq.getXaxisLabel();
-				yaxisLabel = aq.getYaxisLabel();
+				xAxisLabel = aq.getXaxisLabel();
+				yAxisLabel = aq.getYaxisLabel();
 				graphOptions = aq.getGraphOptions();
 				shortDescription = aq.getShortDescription();
 
@@ -844,11 +844,11 @@ public class QueryExecute extends HttpServlet {
 									ArtGraph ag = artGraphOut(rsmd, request, graphOptions, shortDescription, queryType);
 
 									//set some graph properties
-									ag.setXlabel(xaxisLabel);
-									if (yaxisLabel == null) {
-										yaxisLabel = rsmd.getColumnLabel(1);
+									ag.setXAxisLabel(xAxisLabel);
+									if (yAxisLabel == null) {
+										yAxisLabel = rsmd.getColumnLabel(1);
 									}
-									ag.setYlabel(yaxisLabel);
+									ag.setYAxisLabel(yAxisLabel);
 
 									if (showParams) {
 										request.setAttribute("showParams", "true");

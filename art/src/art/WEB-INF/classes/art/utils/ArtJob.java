@@ -1487,8 +1487,8 @@ public class ArtJob implements Job, Serializable {
 						eg.setQueryName(queryName);
 						eg.setExportPath(jobsPath);
 						eg.setOutputFormat(outputFormat); // png or pdf
-						eg.setXlabel(xaxisLabel);
-						eg.setYlabel(yaxisLabel);
+						eg.setXAxisLabel(xaxisLabel);
+						eg.setYAxisLabel(yaxisLabel);
 						eg.setTitle(queryShortDescription);
 						eg.setShowData(showGraphData); //enable display of graph data below graph for pdf graph output
 						eg.setDisplayParameters(displayParams); //enable display of graph parameters above graph for pdf graph output
