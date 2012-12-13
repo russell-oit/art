@@ -5,6 +5,7 @@
 --          . Change "admin level" for users to "access level"
 --          . rename "object" to "query"
 --          . rename art_shared_jobs table to art_user_jobs
+--          . support job archives
 --
 -- ------------------------------------------------
 
@@ -44,6 +45,21 @@ CREATE TABLE ART_USER_JOBS
 
 INSERT INTO ART_USER_JOBS (JOB_ID, USERNAME, USER_GROUP_ID, LAST_FILE_NAME, LAST_START_DATE, LAST_END_DATE)
 SELECT JOB_ID, USERNAME, USER_GROUP_ID, LAST_FILE_NAME, LAST_START_DATE, LAST_END_DATE FROM ART_SHARED_JOBS;
+
+-- support job archives
+ALTER TABLE ART_JOBS ADD RUNS_TO_ARCHIVE INTEGER;
+
+CREATE TABLE ART_JOB_ARCHIVES
+(
+	ARCHIVE_ID VARCHAR(100) NOT NULL PRIMARY KEY,
+	JOB_ID INTEGER NOT NULL,
+	USERNAME VARCHAR(30) NOT NULL,
+	USER_GROUP_ID INTEGER,
+	LAST_FILE_NAME VARCHAR(4000),
+	LAST_START_DATE TIMESTAMP NULL,
+	LAST_END_DATE TIMESTAMP NULL,
+	JOB_SHARED VARCHAR(1)
+);
 
 
 

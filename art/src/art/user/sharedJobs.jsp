@@ -51,18 +51,15 @@ String description="";
 Locale locale=request.getLocale();
 String resultMessage;
 
-  boolean splitJob=false; //for split jobs, get last start date and file name from shared jobs table
+boolean splitJob=false; //for split jobs, get last start date and file name from art_user_jobs table
   
  try {
-	//get shared jobs user has access to
-	Map jobs;
-	jobs=ue.getSharedJobs();
-    Iterator it = jobs.entrySet().iterator();
+	
 %>
 
  <table align="center" width="50%">
 
-  <tr><td class="title"><%=messages.getString("sharedJobsList")%></td></tr>  
+  <tr><td class="title"><%=messages.getString("sharedJobs")%></td></tr>  
 
   <tr><td class="action"><code><%= java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM,java.text.DateFormat.MEDIUM,request.getLocale()).format(new java.util.Date())%></code>
       &nbsp;<a href="<%= request.getContextPath() %>/user/sharedJobs.jsp"><img src="<%= request.getContextPath() %>/images/listrefresh.png" title="<%=messages.getString("refresh")%>" border="0"></a></td></tr>   
@@ -82,9 +79,11 @@ String resultMessage;
   </tr>
   
   <%
-    while(it.hasNext()) {
-		Map.Entry entry = (Map.Entry)it.next();
-		ArtJob job=(ArtJob)entry.getValue();
+  //get shared jobs user has access to
+	Map<Integer,ArtJob> jobs=ue.getSharedJobs();
+	
+    for (Map.Entry<Integer, ArtJob> entry : jobs.entrySet()) {
+		ArtJob job=entry.getValue();
 		
 		if(StringUtils.equals(job.getQueryRulesFlag(),"Y") && StringUtils.equals(job.getAllowSplitting(),"Y")){
 			splitJob=true;
@@ -94,7 +93,7 @@ String resultMessage;
         
         java.util.Date lastEndDate;   
    if(splitJob){
-	//split job. get date from the shared jobs table
+	//split job. get date from the art_user_jobs table
 		lastEndDate=job.getSharedLastEndDate();
 	} else {
 		//get value from jobs table
@@ -143,7 +142,7 @@ String resultMessage;
 <%
 	String fileName;   
     if(splitJob){
-	//split job. get file name from the shared jobs table
+	//split job. get file name from the art_user_jobs table
 		fileName=job.getSharedFileName();
 	} else {
 		//get value from jobs table
@@ -230,6 +229,7 @@ out.println(resultMessage);
               </td>
              </tr>
             </table>
+			
 	</td>
   </tr>
 

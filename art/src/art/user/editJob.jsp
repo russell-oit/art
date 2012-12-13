@@ -450,7 +450,7 @@ tinyMCE.init({
 
 <script language="Javascript">
 <!-- Begin
-function onChangeJobType(t,queryType) {
+function onChangeJobType(jobType,queryType) {
    // initiate output types
    var s = document.getElementById("outputTypeId");
    s.options.length = 0; // reset the select
@@ -462,9 +462,6 @@ function onChangeJobType(t,queryType) {
 		<c:if test="${job.outputFormat == 'pdf'}">s.selectedIndex = i-1;</c:if>
 		s.options[i++] = new Option("<%=messages.getString("png")%>","png");
 		<c:if test="${job.outputFormat == 'png'}">s.selectedIndex = i-1;</c:if>
-
-        document.getElementById("emailDiv").className="expand";
-		document.getElementById("cacheDiv").className="collapse";
 	} else if(queryType==115 || queryType==116){
 		//for jasper reports, enable pdf, xls, xlsx output only
 		s.options[i++] = new Option("<%=messages.getString("pdf")%>","pdf");
@@ -473,24 +470,16 @@ function onChangeJobType(t,queryType) {
 		<c:if test="${job.outputFormat == 'xls'}">s.selectedIndex = i-1;</c:if>
 		s.options[i++] = new Option("<%=messages.getString("xlsx")%>","xlsx");
 		<c:if test="${job.outputFormat == 'xlsx'}">s.selectedIndex = i-1;</c:if>
-
-        document.getElementById("emailDiv").className="expand";
-		document.getElementById("cacheDiv").className="collapse";
 	} else if(queryType==117 || queryType==118){
 		//for jxls spreadsheets, only enable xls output
 		s.options[i++] = new Option("<%=messages.getString("xls")%>","xls");
 		<c:if test="${job.outputFormat == 'xls'}">s.selectedIndex = i-1;</c:if>
-        document.getElementById("emailDiv").className="expand";
-		document.getElementById("cacheDiv").className="collapse";
 	} else {
-		if (t.value == 5  ) { // only html is allowed inline emails
+		if (jobType.value == 5  ) { // only html is allowed inline emails
 			s.options[i] = new Option("<%=messages.getString("htmlPlain")%>","htmlPlain");
 			<c:if test="${job.outputFormat == 'htmlPlain'}">s.selectedIndex = i;</c:if>
-
-			document.getElementById("emailDiv").className="expand";
-			document.getElementById("cacheDiv").className="collapse";
 		}
-		if (t.value == 2  || t.value == 3 || t.value == 6 || t.value == 8 ) {
+		if (jobType.value == 2  || jobType.value == 3 || jobType.value == 6 || jobType.value == 8 ) {
 			s.options[i++] = new Option("<%=messages.getString("htmlPlain")%>","htmlPlain");
 			<c:if test="${job.outputFormat == 'htmlPlain'}">s.selectedIndex = i-1;</c:if>
 			s.options[i++] = new Option("<%=messages.getString("xlsZip")%>","xlsZip");
@@ -512,25 +501,34 @@ function onChangeJobType(t,queryType) {
 			<c:if test="${job.outputFormat == 'tsvZip'}">s.selectedIndex = i-1;</c:if>
 			s.options[i++] = new Option("<%=messages.getString("tsvGz")%>","tsvGz");
 			<c:if test="${job.outputFormat == 'tsvGz'}">s.selectedIndex = i-1;</c:if>
-
-			document.getElementById("emailDiv").className="expand";
-			document.getElementById("cacheDiv").className="collapse";
 		}
-		if (t.value == 1 ) { // type: alert
+		if (jobType.value == 1 ) { // alert
 			s.options[0] = new Option("-","-");
-			document.getElementById("emailDiv").className="expand";
-			document.getElementById("cacheDiv").className="collapse";
 		}
-		if (t.value == 4) { // type: execute only
+		if (jobType.value == 4) { // just run it
 			s.options[0] = new Option("-","-");
-			document.getElementById("emailDiv").className="collapse";
-			document.getElementById("cacheDiv").className="collapse";
 		}
-		if (t.value == 9 || t.value == 10 ) {
+		if (jobType.value == 9 || jobType.value == 10 ) {
 			setCacheDatasources(s);
-			document.getElementById("emailDiv").className="collapse";
-			document.getElementById("cacheDiv").className="expand";
 		}
+	}
+	
+	//expand/collapse divs
+	if (jobType.value == 9 || jobType.value == 10 ) {
+		document.getElementById("emailDiv").className="collapse";
+		document.getElementById("cacheDiv").className="expand";
+	} else if (jobType.value == 4) {
+		document.getElementById("emailDiv").className="collapse";
+		document.getElementById("cacheDiv").className="collapse";
+	} else {
+		document.getElementById("emailDiv").className="expand";
+		document.getElementById("cacheDiv").className="collapse";
+	}
+	
+	if (jobType.value == 3 || jobType.value == 8 ) {
+		document.getElementById("runsDiv").className="expand";
+	} else {
+		document.getElementById("runsDiv").className="collapse";
 	}
 
 }
@@ -725,6 +723,15 @@ function onClickSaveSchedule(t){
        </td>
 
    </tr>
+   
+    <tr>
+		<td class="data" colspan="4" >
+			<div id="runsDiv" class="collapse">
+				<%=messages.getString("runsToArchive")%>
+				<input type="text" name="runsToArchive" value="${job.runsToArchive}" size="3" maxlength="3">
+			</div>
+		</td>
+	</tr>
  </table>
 	<div id="emailDiv" class="collapse">
 	 <table align="center" width="60%">
@@ -974,7 +981,7 @@ function onClickSaveSchedule(t){
 		<tr>            
             <td colspan="2" class="data2">                
 				<%				
-				Map map;
+				Map<Integer,String> map;
 				map=job.getSharedUsers();
 				if(map.size()>0){
 					%>

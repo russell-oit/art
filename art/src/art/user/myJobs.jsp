@@ -136,8 +136,7 @@ owner=request.getParameter("OWNER");
     }
  }
  
-Map myJobs=ue.getJobs();
-Iterator it;
+Map<Integer,ArtJob> myJobs=ue.getJobs();
 	
 int jobId;
 int jobType;
@@ -148,7 +147,7 @@ String resultMessage;
 
  <table align="center" width="50%">
 
-  <tr><td class="title"><%=messages.getString("scheduleJobList")%></td></tr>  
+  <tr><td class="title"><%=messages.getString("myJobs")%></td></tr>  
 
   <tr><td class="action"><code><%= java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM,java.text.DateFormat.MEDIUM,request.getLocale()).format(new java.util.Date())%></code>
       &nbsp;<a href="<%= request.getContextPath() %>/user/myJobs.jsp"><img src="<%= request.getContextPath() %>/images/listrefresh.png" title="<%=messages.getString("refresh")%>" border="0"></a></td></tr>  
@@ -182,10 +181,8 @@ String resultMessage;
   <td class="attr" width="60px">&nbsp;</td>
   </tr>
   <%
-	it = myJobs.entrySet().iterator();
-    while(it.hasNext()) {
-		Map.Entry entry = (Map.Entry)it.next();
-		ArtJob job=(ArtJob)entry.getValue();
+    for (Map.Entry<Integer, ArtJob> entry : myJobs.entrySet()) {
+		ArtJob job=entry.getValue();
 		
 		jobId=job.getJobId();
 		jobType=job.getJobType();
@@ -378,12 +375,10 @@ if(accessLevel>=80){
   <td class="attr" width="60px">&nbsp;</td>
   </tr>
   <%
-	Map otherJobs=ue.getOtherJobs();
+	Map<String,ArtJob> otherJobs=ue.getOtherJobs();
 	String jobOwner;
-    it = otherJobs.entrySet().iterator();
-    while(it.hasNext()) {
-		Map.Entry entry = (Map.Entry)it.next();
-		ArtJob job=(ArtJob)entry.getValue();
+    for (Map.Entry<String, ArtJob> entry : otherJobs.entrySet()) {
+		ArtJob job = entry.getValue();
 		
 		jobId=job.getJobId();
 		jobType=job.getJobType();
