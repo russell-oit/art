@@ -334,9 +334,7 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
                         drilldownParams = drilldown.getDrilldownParams();
                         if (drilldownParams != null) {
-                            Iterator it2 = drilldownParams.iterator();
-                            while (it2.hasNext()) {
-                                ArtQueryParam param = (ArtQueryParam) it2.next();
+                            for(ArtQueryParam param : drilldownParams) {
                                 //drill down on col 1 = drill on data value. drill down on col 2 = category (timestamp). drill down on col 3 = series name
                                 paramLabel = param.getParamLabel();
                                 paramString = "&P_" + paramLabel + "=";
@@ -366,11 +364,9 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
                         //add parameters from parent query										
                         if (inlineParams != null) {
-                            Iterator itInline = inlineParams.entrySet().iterator();
-                            while (itInline.hasNext()) {
-                                Map.Entry entryInline = (Map.Entry) itInline.next();
-                                paramLabel = (String) entryInline.getKey();
-                                paramValue = (String) entryInline.getValue();
+                            for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
+                                paramLabel = entry.getKey();
+                                paramValue = entry.getValue();
                                 //add parameter only if one with a similar name doesn't already exist in the drill down parameters
                                 if (!params.containsKey(paramLabel)) {
                                     try {
@@ -386,11 +382,9 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
                         if (multiParams != null) {
                             String[] paramValues;
-                            Iterator itMulti = multiParams.entrySet().iterator();
-                            while (itMulti.hasNext()) {
-                                Map.Entry entryMulti = (Map.Entry) itMulti.next();
-                                paramLabel = (String) entryMulti.getKey();
-                                paramValues = (String[]) entryMulti.getValue();
+                            for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
+                                paramLabel = entry.getKey();
+                                paramValues = entry.getValue();
                                 for (String param : paramValues) {
                                     try {
                                         param = URLEncoder.encode(param, "UTF-8");
@@ -465,9 +459,7 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
                     drilldownParams = drilldown.getDrilldownParams();
                     if (drilldownParams != null) {
-                        Iterator it2 = drilldownParams.iterator();
-                        while (it2.hasNext()) {
-                            ArtQueryParam param = (ArtQueryParam) it2.next();
+                        for(ArtQueryParam param : drilldownParams) {
                             //drill down on col 1 = drill on data value. drill down on col 2 = category (timestamp). drill down on col 3 = series name
                             paramLabel = param.getParamLabel();
                             paramString = "&P_" + paramLabel + "=";
@@ -497,11 +489,9 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
                     //add parameters from parent query										
                     if (inlineParams != null) {
-                        Iterator itInline = inlineParams.entrySet().iterator();
-                        while (itInline.hasNext()) {
-                            Map.Entry entryInline = (Map.Entry) itInline.next();
-                            paramLabel = (String) entryInline.getKey();
-                            paramValue = (String) entryInline.getValue();
+                        for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
+                            paramLabel = entry.getKey();
+                            paramValue = entry.getValue();
                             //add parameter only if one with a similar name doesn't already exist in the drill down parameters
                             if (!params.containsKey(paramLabel)) {
                                 try {
@@ -517,11 +507,9 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
                     if (multiParams != null) {
                         String[] paramValues;
-                        Iterator itMulti = multiParams.entrySet().iterator();
-                        while (itMulti.hasNext()) {
-                            Map.Entry entryMulti = (Map.Entry) itMulti.next();
-                            paramLabel = (String) entryMulti.getKey();
-                            paramValues = (String[]) entryMulti.getValue();
+                        for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
+                            paramLabel = entry.getKey();
+                            paramValues = entry.getValue();
                             for (String param : paramValues) {
                                 try {
                                     param = URLEncoder.encode(param, "UTF-8");
