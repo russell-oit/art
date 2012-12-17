@@ -94,11 +94,9 @@ ArtQuery aq=new ArtQuery();
 					int fieldPosition;
                     String pType;
 					
-					Map queries=aq.getQueryParams(queryId);
-					Iterator it = queries.entrySet().iterator();
-					while (it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
-						param=(ArtQueryParam)entry.getValue();
+					Map<Integer, ArtQueryParam> queries=aq.getQueryParams(queryId);
+					for (Map.Entry<Integer, ArtQueryParam> entry : queries.entrySet()) {
+						param=entry.getValue();
 						fieldPosition=param.getFieldPosition();
 						pType=param.getParamType();
 						

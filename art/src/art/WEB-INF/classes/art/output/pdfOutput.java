@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -156,10 +155,8 @@ public class pdfOutput implements ArtOutputInterface {
 
 				String[] params = new String[displayParams.size()];
 				int index = 0;
-				Iterator it = displayParams.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry) it.next();
-					ArtQueryParam param = (ArtQueryParam) entry.getValue();
+				for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
+					ArtQueryParam param = entry.getValue();
 					String paramName = param.getName();
 					Object pValue = param.getParamValue();
 					String outputString="";

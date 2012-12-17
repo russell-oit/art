@@ -8,7 +8,6 @@ import art.servlets.XmlDataProvider;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 
@@ -113,10 +112,8 @@ public class xmlOutput implements ArtOutputInterface {
         if (displayParams != null && displayParams.size()>0) {
             out.println("<queryparams>");
             // decode the parameters handling multi one
-            Iterator it = displayParams.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                ArtQueryParam param=(ArtQueryParam)entry.getValue();
+            for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
+                ArtQueryParam param=entry.getValue();
                 String paramName=param.getName();
                 Object pValue = param.getParamValue();
 				String outputString;

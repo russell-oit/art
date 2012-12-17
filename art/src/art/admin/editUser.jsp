@@ -11,7 +11,7 @@ UserEntity ue=new UserEntity();
 
 if (action.equals("DELETE")){
 	//check if lookup rules exist that reference this user
-	Map rules=ue.getLinkedLookupRules(username);
+	Map<Integer, Rule> rules=ue.getLinkedLookupRules(username);
 	if(rules.size()>0){
 		out.println("<pre>Error: There are lookup rules that reference the user you want to delete.");
 		out.println("       Remove the following lookup rule references");
@@ -19,10 +19,8 @@ if (action.equals("DELETE")){
 		out.println();
 		out.println("</pre>");
 
-		Iterator it=rules.entrySet().iterator();
-		while(it.hasNext()){
-			Map.Entry entry = (Map.Entry)it.next();
-			Rule rule=(Rule)entry.getValue();
+		for (Map.Entry<Integer, Rule> entry : rules.entrySet()) {
+			Rule rule=entry.getValue();
 			out.println("The user <b>" + rule.getUsername() + "</b> references user <i>" + username + "</i> for the rule <b>" + rule.getRuleName() + "</b>");
 		}
 		%>
@@ -44,7 +42,6 @@ if (action.equals("MODIFY")){
 }
 
 UserGroup ug=new UserGroup();
-Iterator it;
 int accessLevel=ue.getAccessLevel();
 username=ue.getUsername();
 %>
@@ -119,12 +116,10 @@ username=ue.getUsername();
 					String selected;
 
 					QueryGroup qg=new QueryGroup();
-					Map queryGroups=qg.getAllQueryGroupNames();
-					it = queryGroups.entrySet().iterator();
+					Map<String, Integer> queryGroups=qg.getAllQueryGroupNames();
 
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
-						queryGroupId=(Integer)entry.getValue();
+					for (Map.Entry<String, Integer> entry : queryGroups.entrySet()) {
+						queryGroupId=entry.getValue();
 						if(queryGroupId==defaultQueryGroup){
 							selected="selected";
 						} else {
@@ -160,10 +155,8 @@ username=ue.getUsername();
             <td class="data">
                 <select name="USER_GROUPS" size="5" multiple>
                     <%
-					Map userGroups=ug.getAllUserGroupNames();
-					it = userGroups.entrySet().iterator();
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> userGroups=ug.getAllUserGroupNames();
+					for (Map.Entry<String, Integer> entry : userGroups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%
@@ -185,10 +178,8 @@ username=ue.getUsername();
 		<tr>
             <td colspan="2" class="data2">
 				<%
-				Map map=ug.getUserGroupMemberships(username);
-				it = map.entrySet().iterator();
-				while(it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
+				Map<Integer, String> map=ug.getUserGroupMemberships(username);
+				for (Map.Entry<Integer, String> entry : map.entrySet()) {
 					%>
 					<%=entry.getValue()%> <br>
 					<%

@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
@@ -125,20 +124,16 @@ public class xlsOutput implements ArtOutputInterface {
         if (displayParams != null && displayParams.size()>0) {
             // rows with parameter names
             newLine();
-            Iterator it = displayParams.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                ArtQueryParam param=(ArtQueryParam)entry.getValue();
+            for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
+                ArtQueryParam param=entry.getValue();
                 String paramName=param.getName();
                 addHeaderCell(paramName);
             }
 			
             // rows with parameter values
             newLine();
-            it = displayParams.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                ArtQueryParam param=(ArtQueryParam)entry.getValue();                
+            for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
+                ArtQueryParam param=entry.getValue();                
                 Object pValue = param.getParamValue();
 				String outputString;
 

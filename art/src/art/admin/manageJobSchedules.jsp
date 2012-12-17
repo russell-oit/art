@@ -35,10 +35,7 @@
                     <%					
 					JobSchedule js=new JobSchedule();
 					List<String> schedules=js.getAllScheduleNames();
-					Iterator it=schedules.iterator();
-					String name;         
-					while(it.hasNext()) {
-						name=(String)it.next();	 
+					for(String name : schedules) {
 						%>
 						<option value="<%=name%>" ><%=name%></option>
 						<%

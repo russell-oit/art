@@ -44,14 +44,12 @@ dq.create(queryId,queryPosition);
                 <select name="DRILLDOWN_QUERY_ID" size="1">
                     <%
                     ArtQuery aq=new ArtQuery();
-                    Map drilldowns=aq.getAllDrilldownQueries();
-                    Iterator it = drilldowns.entrySet().iterator();
+                    Map<String, Integer> drilldowns=aq.getAllDrilldownQueries();
                     Integer candidateId; //query id of candidate drill down query
                     String candidateName; //query name of candidate drill down query
-                    while(it.hasNext()) {
-                         Map.Entry entry = (Map.Entry)it.next();
-                         candidateId=(Integer)entry.getValue();
-                         candidateName=(String)entry.getKey();
+                    for (Map.Entry<String, Integer> entry : drilldowns.entrySet()) {
+                         candidateId=entry.getValue();
+                         candidateName=entry.getKey();
                     %>
                     <option value="<%=candidateId%>" <%=(drilldownQueryId == candidateId)?"SELECTED":"" %> >
                         <%=candidateName %> - <%=candidateId%>
@@ -94,9 +92,8 @@ dq.create(queryId,queryPosition);
                     <option value="ALL" <%="ALL".equals(value)?"selected":""%> > All </option>
 					<option value="default" <%="default".equals(value)?"selected":""%> > Default </option>
                     <%
-                       Iterator itVm = ArtDBCP.getUserViewModes().iterator();
-                       while(itVm.hasNext()) {
-                          String viewMode = (String) itVm.next();
+                       List<String> viewModes = ArtDBCP.getUserViewModes();
+                       for(String viewMode : viewModes){
 						%>
 						<option value="<%=viewMode%>" <%=viewMode.equals(value)?"selected":""%> > <%=messages.getString(viewMode)%> </option>
 						<% } %>

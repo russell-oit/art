@@ -62,19 +62,17 @@ if(userGroup!=null){
                 <select name="RULE_TYPE_VALUE" size="10">
                     <%					
 					Rule ar=new Rule();
-					Map values=null;
+					Map<Integer, Rule> values=null;
 					if(username!=null){
 						values=ar.getRuleValues(username,ruleName);
 					} else if(userGroup!=null){
 						values=ar.getRuleValues(groupId,ruleName);
 					}
-					Iterator it = values.entrySet().iterator();
 					String ruleType;
 					String ruleValue;
 					
-					while (it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
-						Rule rule=(Rule)entry.getValue();
+					for (Map.Entry<Integer, Rule> entry : values.entrySet()) {
+						Rule rule=entry.getValue();
                         ruleType=rule.getRuleType();
 						ruleValue=rule.getRuleValue();
 						%>

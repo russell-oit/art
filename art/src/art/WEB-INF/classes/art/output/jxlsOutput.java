@@ -9,7 +9,6 @@ import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import net.sf.jxls.report.ReportManager;
 import net.sf.jxls.transformer.XLSTransformer;
@@ -146,10 +145,8 @@ public class jxlsOutput {
 					boolean useDynamicDatasource = false;
 
 					if (htmlParams != null) {
-						Iterator it = htmlParams.entrySet().iterator();
-						while (it.hasNext()) {
-							Map.Entry entry = (Map.Entry) it.next();
-							ArtQueryParam param = (ArtQueryParam) entry.getValue();
+						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+							ArtQueryParam param = entry.getValue();
 							String paramDataType = param.getParamDataType();
 
 							if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {

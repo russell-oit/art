@@ -4,7 +4,6 @@
 
 <%
 UserEntity ue=new UserEntity();
-Iterator it;
 %>
 
     <table align="center">
@@ -14,15 +13,13 @@ Iterator it;
 	<tr>            
             <td colspan="2" class="data2">                
 				<%				
-				Map map;
+				Map<Integer, String> map;
 				map=ue.getQueryGroupAssignment();
 				if(map.size()>0){
 					%>
 					<b>Query Groups</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%
@@ -39,9 +36,7 @@ Iterator it;
 					%>
 					<b>Queries</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%

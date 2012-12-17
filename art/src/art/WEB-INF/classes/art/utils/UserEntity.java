@@ -788,7 +788,7 @@ public class UserEntity implements Serializable {
 	 * @param groupId
 	 * @return the queries the user can see in the given group
 	 */
-	public Map getAvailableQueries(int groupId) {
+	public Map<String, Integer> getAvailableQueries(int groupId) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
@@ -1026,8 +1026,8 @@ public class UserEntity implements Serializable {
 	 *
 	 * @return the job archives the user has access to
 	 */
-	public Map<Integer, ArtJob> getJobArchives() {
-		Map<Integer, ArtJob> jobs = new TreeMap<Integer, ArtJob>();
+	public Map<String, ArtJob> getJobArchives() {
+		Map<String, ArtJob> jobs = new LinkedHashMap<String, ArtJob>();
 
 		Connection conn = null;
 
@@ -1038,24 +1038,31 @@ public class UserEntity implements Serializable {
 			ResultSet rs;
 
 			//get job archives that user has access to
-			sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME "
+			sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE "
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ"
 					+ " WHERE AJA.JOB_ID=AJ.JOB_ID "
-					+ " AND AJA.USERNAME=?" //user owns job or individualized output
+					+ " AND AJA.USERNAME=?"
+					+ " ORDER BY AJA.JOB_ID, AJA.END_DATE" //user owns job or individualized output
 					+ " UNION"
-					+ " SELECT AJ.JOB_ID, AJ.JOB_NAME"
+					+ " SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE"
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_JOBS AUJ"
 					+ " WHERE AJA.JOB_ID=AJ.JOB_ID AND AJ.JOB_ID=AUJ.JOB_ID"
-					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y' AND AUJ.USERNAME=?" //job shared with user
+					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y' AND AUJ.USERNAME=?"
+					+ " ORDER BY AJA.JOB_ID, AJA.END_DATE" //job shared with user
 					+ " UNION"
-					+ " SELECT AJ.JOB_ID, AJ.JOB_NAME"
+					+ " SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE"
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_GROUP_JOBS AUGJ, ART_USER_GROUP_ASSIGNMENT AUGA"
 					+ " WHERE AJA.JOB_ID=AJ.JOB_ID AND AJ.JOB_ID=AUGJ.JOB_ID"
 					+ " AND AUGJ.USER_GROUP_ID=AUGA.USER_GROUP_ID AND AUGA.USERNAME=?"
-					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y'"; //job shared with user group
+					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y'"
+					+ " ORDER BY AJA.JOB_ID, AJA.END_DATE"; //job shared with user group
 
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
+			ps.setString(2, username);
+			ps.setString(3, username);
+			ps.setString(4, username);
+			ps.setString(5, username);
 
 			rs = ps.executeQuery();
 
@@ -1063,10 +1070,10 @@ public class UserEntity implements Serializable {
 				ArtJob aj = new ArtJob();
 				aj.setJobIdOnly(rs.getInt("JOB_ID"));
 				aj.setJobName(rs.getString("JOB_NAME"));
+				aj.setFileName(rs.getString("ARCHIVE_FILE_NAME"));
+				aj.setLastEndDate(rs.getTimestamp("END_DATE"));
 
-				aj.buildArchives(username);
-
-				jobs.put(new Integer(rs.getInt("JOB_ID")), aj);
+				jobs.put(rs.getString("ARCHIVE_ID"), aj);
 			}
 			ps.close();
 			rs.close();
@@ -1377,7 +1384,7 @@ public class UserEntity implements Serializable {
 	 *
 	 * @return all shared jobs
 	 */
-	public Map getAllSharedJobs() {
+	public Map<String, ArtJob> getAllSharedJobs() {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, ArtJob> jobs = new TreeMap<String, ArtJob>(stringCollator);
@@ -1517,7 +1524,7 @@ public class UserEntity implements Serializable {
 	 * @return an indicator of which junior and mid admins have access to which
 	 * query groups
 	 */
-	public Map getJuniorAdminGroupAssignment() {
+	public Map<Integer, String> getJuniorAdminGroupAssignment() {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -1568,7 +1575,7 @@ public class UserEntity implements Serializable {
 	 * @return an indicator of which junior and mid admins have access to which
 	 * datasources
 	 */
-	public Map getJuniorAdminDatasourceAssignment() {
+	public Map<Integer, String> getJuniorAdminDatasourceAssignment() {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -1618,7 +1625,7 @@ public class UserEntity implements Serializable {
 	 * @param uName
 	 * @return lookup rules that reference a given user
 	 */
-	public Map getLinkedLookupRules(String uName) {
+	public Map<Integer, Rule> getLinkedLookupRules(String uName) {
 		TreeMap<Integer, Rule> map = new TreeMap<Integer, Rule>();
 
 		Connection conn = null;
@@ -1674,7 +1681,7 @@ public class UserEntity implements Serializable {
 	 * @param uname
 	 * @return all queries
 	 */
-	public Map getAdminQueries(int level, String uname) {
+	public Map<Integer, ArtQuery> getAdminQueries(int level, String uname) {
 		TreeMap<Integer, ArtQuery> map = new TreeMap<Integer, ArtQuery>();
 
 		Connection conn = null;
@@ -1901,7 +1908,7 @@ public class UserEntity implements Serializable {
 	 * @return an indicator of which users and user groups have access to which
 	 * query groups
 	 */
-	public Map getQueryGroupAssignment() {
+	public Map<Integer, String> getQueryGroupAssignment() {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -1969,7 +1976,7 @@ public class UserEntity implements Serializable {
 	 * @return an indicator of which users and user groups have access to which
 	 * queries
 	 */
-	public Map getQueryAssignment() {
+	public Map<Integer, String> getQueryAssignment() {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;

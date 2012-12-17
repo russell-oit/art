@@ -364,7 +364,7 @@ public class Datasource {
      * 
      * @return id and name for all datasources
      */
-    public Map getAllDatasourceNames() {
+    public Map<String, Integer> getAllDatasourceNames() {
         Collator stringCollator = Collator.getInstance();
         stringCollator.setStrength(Collator.TERTIARY); //order by case
         TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
@@ -405,7 +405,7 @@ public class Datasource {
      * @param dsId
      * @return all queries that use a given datasource
      */
-    public Map getLinkedQueries(int dsId) {
+    public Map<Integer, ArtQuery> getLinkedQueries(int dsId) {
         TreeMap<Integer, ArtQuery> map = new TreeMap<Integer, ArtQuery>();
 
         Connection conn = null;

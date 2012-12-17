@@ -82,8 +82,6 @@ String action=request.getParameter("sharedUsersAction");
 String[] selectedUsers=request.getParameterValues("sharedUsers");
 String[] selectedGroups=request.getParameterValues("sharedUserGroups");
 
-Iterator it;
-
 %>
 
 <c:if test="${param.action == 'save'}">
@@ -760,13 +758,11 @@ function onClickSaveSchedule(t){
 	      <%
 //load dynamic recipient queries
    Map<Integer,String> rq=aq.getDynamicRecipientQueries();
-    it = rq.entrySet().iterator();
 	Integer recipientQueryId;
 	String recipientQueryName;
-	while(it.hasNext()) {
-		Map.Entry entry = (Map.Entry)it.next();
-		recipientQueryId= (Integer) entry.getKey();
-		recipientQueryName= (String) entry.getValue();
+	for (Map.Entry<Integer, String> entry : rq.entrySet()) {
+		recipientQueryId= entry.getKey();
+		recipientQueryName= entry.getValue();
 		%>
    <option value="<%=recipientQueryId%>" <%=job.getRecipientsQueryId()==recipientQueryId?"selected":""%>><%=recipientQueryName%></option>
    <%
@@ -817,10 +813,7 @@ function onClickSaveSchedule(t){
   //get and display saved schedules
   JobSchedule js=new JobSchedule();
   List<String> schedules=js.getAllScheduleNames();
-  it=schedules.iterator();
-   String name;
-	while(it.hasNext()) {
-	 name=(String)it.next();
+	for(String name : schedules) {
 	%>
 	<option value="<%=name%>" ><%=name%></option>
 	<% }
@@ -922,10 +915,7 @@ function onClickSaveSchedule(t){
 	Arrays.sort(selectedUsers);
 	}
    List<String> usernames=ue.getAllUsernames();
-   it=usernames.iterator();
-   String username;
-	while(it.hasNext()) {
-	 username=(String)it.next();
+	for(String username : usernames) {
 	 if(selectedUsers==null){
 	%>
 	<option value="<%=username%>" ><%=username%></option>
@@ -950,11 +940,9 @@ function onClickSaveSchedule(t){
 	}
 
 	UserGroup ug=new UserGroup();
-   Map groups=ug.getAllUserGroupNames();
-    it = groups.entrySet().iterator();
+   Map<String, Integer> groups=ug.getAllUserGroupNames();
 	String groupId;
-	while(it.hasNext()) {
-		Map.Entry entry = (Map.Entry)it.next();
+	for (Map.Entry<String, Integer> entry : groups.entrySet()) {
 		groupId=String.valueOf(entry.getValue());
 		if(selectedGroups==null){
    %>
@@ -987,9 +975,7 @@ function onClickSaveSchedule(t){
 					%>
 					<b>Users</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%
@@ -1006,9 +992,7 @@ function onClickSaveSchedule(t){
 					%>
 					<b>User Groups</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%

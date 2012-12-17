@@ -793,7 +793,7 @@ public class Rule {
 	 * @param rName
 	 * @return all queries linked/associated with a rule
 	 */
-	public Map getLinkedQueries(String rName) {
+	public Map<Integer, ArtQuery> getLinkedQueries(String rName) {
 		TreeMap<Integer, ArtQuery> map = new TreeMap<Integer, ArtQuery>();
 
 		Connection conn = null;
@@ -846,7 +846,7 @@ public class Rule {
 	 *
 	 * @return an indicator of which users have values defined for which rules
 	 */
-	public Map getUserRuleAssignment() {
+	public Map<Integer, String> getUserRuleAssignment() {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -892,7 +892,7 @@ public class Rule {
 	 *
 	 * @return an indicator of which users have values defined for which rules
 	 */
-	public Map getUserGroupRuleAssignment() {
+	public Map<Integer, String> getUserGroupRuleAssignment() {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -1026,7 +1026,7 @@ public class Rule {
      * @param rName
      * @return rule values for a given user and rule
      */
-    public Map getRuleValues(String user, String rName) {
+    public Map<Integer, Rule> getRuleValues(String user, String rName) {
         TreeMap<Integer, Rule> map = new TreeMap<Integer, Rule>();
 
         Connection conn = null;
@@ -1082,7 +1082,7 @@ public class Rule {
      * @param rName
      * @return rule values for a given user and rule
      */
-    public Map getRuleValues(int gId, String rName) {
+    public Map<Integer, Rule> getRuleValues(int gId, String rName) {
         TreeMap<Integer, Rule> map = new TreeMap<Integer, Rule>();
 
         Connection conn = null;

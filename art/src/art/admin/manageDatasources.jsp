@@ -34,10 +34,8 @@
                 <select name="DATASOURCE_ID" size="10">
                     <%					
 					Datasource ds=new Datasource();
-					Map datasources=ds.getAllDatasourceNames();
-					Iterator it = datasources.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> datasources=ds.getAllDatasourceNames();
+					for (Map.Entry<String, Integer> entry : datasources.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%

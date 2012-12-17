@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -149,10 +148,8 @@ public class slkZipOutput implements ArtOutputInterface {
 		// Output parameter values list
 		if (displayParams != null && displayParams.size() > 0) {
 			// rows with params names
-			Iterator it = displayParams.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				ArtQueryParam param = (ArtQueryParam) entry.getValue();
+			for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
+				ArtQueryParam param = entry.getValue();
 				String paramName = param.getName();
 				addHeaderCell(paramName);
 			}
@@ -160,10 +157,8 @@ public class slkZipOutput implements ArtOutputInterface {
 			row_count++;
 
 			// rows with params values
-						it = displayParams.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				ArtQueryParam param = (ArtQueryParam) entry.getValue();
+			for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
+				ArtQueryParam param = entry.getValue();
 				Object pValue = param.getParamValue();
 				String outputString;
 

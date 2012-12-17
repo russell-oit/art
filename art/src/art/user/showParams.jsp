@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP,art.params.*" %>
+<%@ page import="java.util.ResourceBundle, java.util.List, art.servlets.ArtDBCP,art.params.*" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
@@ -59,7 +59,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                 </tr>
 
                 <%
-                java.util.Iterator it = aq.getParamList().iterator();
+                List<ParamInterface> params = aq.getParamList();
                 StringBuffer validateJS = new StringBuffer(128);
                 String paramClass;
                 String paramName;
@@ -68,9 +68,8 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                 String paramId;
 				String paramChainedValueId;
 				
-                while(it.hasNext()) {
+                for(ParamInterface param : params) {
                    hasParams=true;
-                   ParamInterface param = (ParamInterface) it.next();
 				   param.setMessages(messages); //enable localisation "All" string for lovs
                    paramHtmlName=param.getHtmlName();
                    paramClass=param.getParamClass();
@@ -92,11 +91,11 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
 						out.println(param.getValueBox(request.getParameter(param.getHtmlName())));
 						
 						if (param.isChained()) {
-                              String params = "";
+                              String ajaxParams = "";
                               if (paramHtmlName.startsWith("M_")) { // handle ALL_ITEMS in select
-                                 params = "action=lov,queryId="+paramClass+",isMulti=yes,filter={"+paramChainedValueId+"}";
+                                 ajaxParams = "action=lov,queryId="+paramClass+",isMulti=yes,filter={"+paramChainedValueId+"}";
                               } else {
-                                 params = "action=lov,queryId="+paramClass+",filter={"+paramChainedValueId+"}";
+                                 ajaxParams = "action=lov,queryId="+paramClass+",filter={"+paramChainedValueId+"}";
                               }
                               String dataProviderUrl = request.getContextPath()+"/XmlDataProvider";
                         %>
@@ -104,7 +103,7 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
 							baseUrl="<%=dataProviderUrl%>"
 							source="<%=paramChainedId%>"
 							target="<%=paramId%>"
-							parameters="<%=params%>"
+							parameters="<%=ajaxParams%>"
 							preFunction="artAddWork"
 							postFunction="artRemoveWork"
 							executeOnLoad="true"
@@ -172,9 +171,8 @@ boolean showResultsInline=true; //can be modified in case show inline behaviour 
                         %>    <span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
                         <SELECT name="viewMode" id="viewMode" size="1">
                             <%
-                            java.util.Iterator itVm = ArtDBCP.getUserViewModes().iterator();
-                            while(itVm.hasNext()) {
-                               String viewMode = (String) itVm.next();
+                            List<String> viewModes = ArtDBCP.getUserViewModes();
+                            for(String viewMode : viewModes){
                             %>
                             <OPTION VALUE="<%=viewMode%>"> <%=messages.getString(viewMode)%> </OPTION>
                             <% } %>

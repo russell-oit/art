@@ -34,10 +34,8 @@
                 <select name="GROUP_ID" size="10">
                     <%
 					QueryGroup qg=new QueryGroup();
-					Map groups=qg.getAllQueryGroupNames();
-					Iterator it = groups.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> groups=qg.getAllQueryGroupNames();
+					for (Map.Entry<String, Integer> entry : groups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%

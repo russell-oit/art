@@ -35,10 +35,7 @@
                     <%
 					UserEntity ue=new UserEntity();
 					List<String> usernames=ue.getAllUsernames();
-					Iterator it=usernames.iterator();
-					String name;         
-					while(it.hasNext()) {
-						name=(String)it.next();	 
+					for(String name : usernames) {
 						%>
 						<option value="<%=name%>" ><%=name%></option>
 						<%

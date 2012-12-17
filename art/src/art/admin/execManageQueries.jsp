@@ -12,9 +12,8 @@ String[] queryIds = request.getParameterValues("QUERY_ID");
 List<String> ids=Arrays.asList(queryIds);
 
 if (action.equals("DELETE")){
-    Iterator<String> it=ids.iterator();
-    while(it.hasNext()){
-        id=Integer.parseInt(it.next());
+    for(String value : ids) {
+        id=Integer.parseInt(value);
         aq.setQueryId(id);
         aq.delete();
     }	

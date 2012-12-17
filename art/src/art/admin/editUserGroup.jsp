@@ -24,7 +24,6 @@ if (action.equals("MODIFY")){
 	ug.load(groupId);
 }
 
-Iterator it;
 %>
 
 
@@ -67,12 +66,9 @@ Iterator it;
 					String selected;
 
 					QueryGroup qg=new QueryGroup();
-					Map groups=qg.getAllQueryGroupNames();
-					it = groups.entrySet().iterator();
-
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
-						queryGroupId=(Integer)entry.getValue();
+					Map<String, Integer> groups=qg.getAllQueryGroupNames();
+					for (Map.Entry<String, Integer> entry : groups.entrySet()) {
+						queryGroupId=entry.getValue();
 						if(queryGroupId==defaultQueryGroup){
 							selected="selected";
 						} else {
@@ -99,11 +95,7 @@ Iterator it;
                     <%
 					UserEntity ue=new UserEntity();
 					List<String> usernames=ue.getAllUsernames();
-					it = usernames.iterator();
-					String username;
-
-					while(it.hasNext()) {
-						username=(String)it.next();
+					for(String username : usernames) {
 						%>
 						<option value="<%=username%>"><%=username%></option>
 						<%
@@ -124,10 +116,8 @@ Iterator it;
 		<tr>
             <td colspan="2" class="data2">
 				<%
-				Map map=ug.getUserGroupMembers();
-				it = map.entrySet().iterator();
-				while(it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
+				Map<Integer, String> map=ug.getUserGroupMembers();
+				for (Map.Entry<String, String> entry : map.entrySet()) {
 					%>
 					<%=entry.getValue()%> <br>
 					<%

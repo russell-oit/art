@@ -533,10 +533,8 @@ public class PreparedQuery {
 			if (htmlParams != null) {
 				//htmlparams passed from queryexecute or artjob has paramvalues set
 
-				Iterator it = htmlParams.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry) it.next();
-					ArtQueryParam param = (ArtQueryParam) entry.getValue();
+				for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+					ArtQueryParam param = entry.getValue();
 					String paramDataType = param.getParamDataType();
 
 					if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {
@@ -1681,8 +1679,6 @@ public class PreparedQuery {
 			return;
 		}
 
-		Iterator it;
-
 		// Enable looking up of param label (column name for non-labelled params) from the html name
 		if (htmlParams == null) {
 			ArtQuery aq = new ArtQuery();
@@ -1695,13 +1691,11 @@ public class PreparedQuery {
 		String querySql;
 
 		querySql = sb.toString();
-		it = htmlParams.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String htmlName = (String) entry.getKey();
+		for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+			String htmlName = entry.getKey();
 			if (htmlName.startsWith("M_")) {
 				//this is a multi parameter
-				ArtQueryParam param = (ArtQueryParam) entry.getValue();
+				ArtQueryParam param = entry.getValue();
 				paramLabel = param.getParamLabel();
 
 				int foundPosition = querySql.toLowerCase().indexOf("#" + paramLabel.toLowerCase() + "#"); //use all lowercase to make find case insensitive
@@ -1717,41 +1711,35 @@ public class PreparedQuery {
 			//process labelled multi parameters
 
 			//replace multi parameters where a subset of values was selected
-			it = multiParams.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String paramId = (String) entry.getKey();
+			for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
+				String paramId = entry.getKey();
 				String htmlName = "M_" + paramId; //may be M_1 etc - pre 2.2, or M_label
-				String[] paramValues = (String[]) entry.getValue();
+				String[] paramValues = entry.getValue();
 
 				List<String> paramValuesList = new ArrayList<String>(); //list of parameter values as is. used by jasper reports and mdx queries
 				List<String> escapedValuesList = new ArrayList<String>(); //list of parameter values, possible escaped using single quotes. used by art queries and jxls queries
 
-				String currentValue;
 				String escapedValue;
-				int parameterNumber;
 				String paramDataType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
 
 				ArtQueryParam param = htmlParams.get(htmlName);
 				paramDataType = param.getParamDataType();
 
 				//build string of values to go into IN clause of sql
-				for (parameterNumber = 0; parameterNumber < paramValues.length; parameterNumber++) {
-					currentValue = paramValues[parameterNumber];
-
+				for (String value : paramValues) {
 					//don't quote numbers. some databases won't do implicit conversion where column is numeric
 					//confirm that they are numbers to avoid sql injection                        
-					if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
+					if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(value)) {
 						//don't quote numbers
-						escapedValuesList.add(currentValue);
+						escapedValuesList.add(value);
 					} else {
 						//escape and quote non-numbers
-						escapedValue = escapeSql(currentValue);
+						escapedValue = escapeSql(value);
 						escapedValue = "'" + escapedValue + "'";
 						escapedValuesList.add(escapedValue);
 					}
 
-					paramValuesList.add(currentValue);
+					paramValuesList.add(value);
 				}
 				//build comma separated list of values to use in the sql
 				String finalEscapedValues = StringUtils.join(escapedValuesList, ",");
@@ -1778,12 +1766,10 @@ public class PreparedQuery {
 			}
 
 			//replace any multi parameters that haven't been replaced yet. these are the ones where ALL_ITEMS was selected or all values are to be used
-			it = htmlParams.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String htmlName = (String) entry.getKey();
+			for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+				String htmlName = entry.getKey();
 				if (htmlName.startsWith("M_")) {
-					ArtQueryParam param = (ArtQueryParam) entry.getValue();
+					ArtQueryParam param = entry.getValue();
 					paramLabel = param.getParamLabel();
 					String paramDataType = param.getParamDataType();
 
@@ -1797,20 +1783,16 @@ public class PreparedQuery {
 							List<String> paramValuesList = new ArrayList<String>(); //list of parameter values as is. used by jasper reports and mdx queries
 							List<String> escapedValuesList = new ArrayList<String>(); //list of parameter values, possible escaped using single quotes. used by art queries and jxls queries
 
-							String currentValue;
 							String escapedValue;
-							int i;
 							//add all except last item
-							for (i = 0; i < finalValuesList.size(); i++) {
-								currentValue = finalValuesList.get(i);
-
+							for (String value : finalValuesList) {
 								//don't quote numbers. some databases won't do implicit conversion where column is numeric
 								//confirm that they are numbers to avoid sql injection                        
-								if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
-									escapedValuesList.add(currentValue);
+								if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(value)) {
+									escapedValuesList.add(value);
 								} else {
 									//escape and quote non-numbers
-									escapedValue = escapeSql(currentValue);
+									escapedValue = escapeSql(value);
 									escapedValue = "'" + escapedValue + "'";
 									escapedValuesList.add(escapedValue);
 								}
@@ -1846,12 +1828,10 @@ public class PreparedQuery {
 		} else {
 			//process non-labelled multi parameters
 			//note that multi parameters with All selected (ALL_ITEMS) never get passed. (they don't exist in the multiParams map)
-			it = multiParams.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				String paramId = (String) entry.getKey();
+			for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
+				String paramId = entry.getKey();
 				String htmlName = "M_" + paramId;
-				String[] paramValues = (String[]) entry.getValue();
+				String[] paramValues = entry.getValue();
 
 				//get param label. for non-labelled params, this is the column name
 				ArtQueryParam param = htmlParams.get(htmlName);
@@ -1863,28 +1843,24 @@ public class PreparedQuery {
 
 				logger.debug("Number of parameters for {}/{} is {}", new Object[]{paramId, paramLabel, paramValues.length});
 
-				String currentValue;
 				String escapedValue;
-				int parameterNumber;
 
 				List<String> paramValuesList = new ArrayList<String>(); //list of parameter values as is. used by jasper reports and mdx queries
 				List<String> escapedValuesList = new ArrayList<String>(); //list of parameter values, possible escaped using single quotes. used by art queries and jxls queries
 
-				for (parameterNumber = 0; parameterNumber < paramValues.length; parameterNumber++) {
-					currentValue = paramValues[parameterNumber];
-
+				for (String value : paramValues) {
 					//don't quote numbers. some databases won't do implicit conversion where column is numeric
 					//confirm that they are numbers to avoid sql injection                        
-					if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
-						escapedValuesList.add(currentValue);
+					if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(value)) {
+						escapedValuesList.add(value);
 					} else {
 						//escape and quote non-numbers
-						escapedValue = escapeSql(currentValue);
+						escapedValue = escapeSql(value);
 						escapedValue = "'" + escapedValue + "'";
 						escapedValuesList.add(escapedValue);
 					}
 
-					paramValuesList.add(currentValue);
+					paramValuesList.add(value);
 				}
 				//build comma separated list of values to use in the sql
 				String finalEscapedValues = StringUtils.join(escapedValuesList, ",");
@@ -2035,24 +2011,20 @@ public class PreparedQuery {
 
 								List<String> escapedValuesList = new ArrayList<String>(); //list of parameter values, possible escaped using single quotes. 
 
-								String currentValue;
 								String escapedValue;
-								int parameterNumber;
 								String paramDataType; //don't quote integer/number parameters i.e. where int_col in ('1','2') may not work on some databases e.g. hsqldb 2.x
 
 								paramDataType = param.getParamDataType();
 
 								//build string of values to go into IN clause of sql
-								for (parameterNumber = 0; parameterNumber < filterValues.length; parameterNumber++) {
-									currentValue = filterValues[parameterNumber];
-
+								for (String value : filterValues) {
 									//don't quote numbers. some databases won't do implicit conversion where column is numeric
 									//confirm that they are numbers to avoid sql injection                        
-									if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(currentValue)) {
-										escapedValuesList.add(currentValue);
+									if (StringUtils.equals(paramDataType, "NUMBER") && NumberUtils.isNumber(value)) {
+										escapedValuesList.add(value);
 									} else {
 										//escape and quote non-numbers
-										escapedValue = escapeSql(currentValue);
+										escapedValue = escapeSql(value);
 										escapedValue = "'" + escapedValue + "'";
 										escapedValuesList.add(escapedValue);
 									}
@@ -2170,7 +2142,6 @@ public class PreparedQuery {
 
 		if (treeInline != null && !treeInline.isEmpty()) {
 
-			Iterator paramNames = treeInline.values().iterator(); //contains parameters which were actually found and replaced in the sql source in the order they were found
 			int i = 0; //parameter index/order of appearance
 			String paramName, paramValue;
 
@@ -2181,8 +2152,8 @@ public class PreparedQuery {
 				htmlParams = aq.getHtmlParams(queryId);
 			}
 
-			while (paramNames.hasNext()) {
-				paramName = (String) paramNames.next();
+			for (Map.Entry<Integer, String> entry : treeInline.entrySet()) {
+				paramName = entry.getValue(); //param label
 				paramValue = inlineParams.get(paramName);
 				ArtQueryParam aqp = htmlParams.get("P_" + paramName);
 				String paramDataType = "VARCHAR";
@@ -2242,11 +2213,11 @@ public class PreparedQuery {
 				}
 
 			}
-			
-			if(finalSQL.indexOf("?")>-1){
+
+			if (finalSQL.indexOf("?") > -1) {
 				//likely that replacement of ? doesn't reflect generated query e.g. if multi param value had ? in it
 				//leave preparedstatement as it was to avoid having misleading final sql
-				finalSQL=sb.toString();
+				finalSQL = sb.toString();
 			}
 
 		}

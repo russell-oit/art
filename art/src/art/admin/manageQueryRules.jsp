@@ -63,7 +63,6 @@ int queryId = Integer.parseInt(request.getParameter("QUERY_ID"));
 
 ArtQuery aq=new ArtQuery();
 Rule ar;
-Iterator it;
 
 String ruleName;
 String fieldName;
@@ -88,11 +87,9 @@ String description;
         <tr><td colspan="2" class="data">
                 <select name="QUERY_RULES" id="queryRules" size="5" multiple>
                     <%                                  
-					 Map queryRules=aq.getQueryRules(queryId);
-					it = queryRules.entrySet().iterator();					                                             
-                      while (it.hasNext() ) {
-						Map.Entry entry = (Map.Entry)it.next();
-						ar=(Rule)entry.getValue();
+					 Map<String, Rule> queryRules=aq.getQueryRules(queryId);
+                      for (Map.Entry<String, Rule> entry : queryRules.entrySet()) {
+						ar=entry.getValue();
                          ruleName=ar.getRuleName();
 						 fieldName=ar.getFieldName();
 						 description=ar.getDescription();
@@ -120,11 +117,9 @@ String description;
         <tr><td colspan="2" class="data">
                 <select name="RULE_NAME" size="5" >
                     <%
-                    Map allRules=aq.getAvailableRules(queryId);
-					it = allRules.entrySet().iterator();	
-                    while (it.hasNext()) {
-                       Map.Entry entry = (Map.Entry)it.next();
-						ar=(Rule)entry.getValue();
+                    Map<String, Rule> allRules=aq.getAvailableRules(queryId);
+                    for (Map.Entry<String, Rule> entry : allRules.entrySet()) {
+						ar=entry.getValue();
                          ruleName=ar.getRuleName();						 
 						 description=ar.getDescription();
 						%>

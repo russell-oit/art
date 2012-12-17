@@ -371,7 +371,7 @@ public class UserGroup {
      * 
      * @return id and name for all user groups
      */
-    public Map getAllUserGroupNames() {
+    public Map<String, Integer> getAllUserGroupNames() {
         Collator stringCollator = Collator.getInstance();
         stringCollator.setStrength(Collator.TERTIARY); //order by case
         TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
@@ -412,7 +412,7 @@ public class UserGroup {
      * 
      * @return an indicator of which users belong to which user groups
      */
-    public Map getUserGroupAssignment() {
+    public Map<Integer, String> getUserGroupAssignment() {
         TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
         Connection conn = null;
@@ -461,7 +461,7 @@ public class UserGroup {
      * @param user
      * @return an indicator of which user groups a given user belongs to
      */
-    public Map getUserGroupMemberships(String user) {
+    public Map<Integer, String> getUserGroupMemberships(String user) {
         TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
         Connection conn = null;
@@ -511,7 +511,7 @@ public class UserGroup {
      * 
      * @return an indicator of which users belong to this user groups
      */
-    public Map getUserGroupMembers() {
+    public Map<Integer, String> getUserGroupMembers() {
         TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
         Connection conn = null;

@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.sql.*,art.servlets.ArtDBCP" %>
+<%@ page import="art.utils.*,java.sql.*,java.util.Map,art.servlets.ArtDBCP" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 
@@ -14,17 +14,15 @@ Datasource ds=new Datasource();
 
 if (action.equals("DELETE")){
 	//check if queries exist that use this datasource
-	java.util.Map queries=ds.getLinkedQueries(datasourceId);
+	Map<Integer, ArtQuery> queries=ds.getLinkedQueries(datasourceId);
 	if(queries.size()>0){
 		out.println("<pre>Error: There are queries targeting the datasource you want to delete.");
 		out.println("       Delete the following queries or change their datasources");
 		out.println("       in order to be able to delete this datasource: ");
 		out.println();
 								
-		java.util.Iterator it=queries.entrySet().iterator();		
-		while(it.hasNext()){
-			java.util.Map.Entry entry = (java.util.Map.Entry)it.next();
-			ArtQuery aq=(ArtQuery)entry.getValue();			
+		for (Map.Entry<Integer, ArtQuery> entry : queries.entrySet()) {
+			ArtQuery aq=entry.getValue();			
 			out.println("Query ID: " + aq.getQueryId() + " , Name: " + aq.getName() + " , Group ID: " + aq.getGroupId());
 		}
 		out.println("</pre>");

@@ -49,12 +49,10 @@ function setAction() {
 
        <select id="groupId" name="groupId" size="5">
         <%
-    Iterator it2 = groups.entrySet().iterator();
 	Integer groupId;
 	int defaultGroup=ue.getDefaultQueryGroup();	
-	while(it2.hasNext()) {
-		Map.Entry entry = (Map.Entry)it2.next();
-		groupId=(Integer)entry.getValue();
+	for (Map.Entry<String, Integer> entry : groups.entrySet()) {
+		groupId=entry.getValue();
    %>
    <option value="<%=groupId%>" <%=(groupId==defaultGroup)?"selected":""%> ><%=entry.getKey()%></option>
 	<%

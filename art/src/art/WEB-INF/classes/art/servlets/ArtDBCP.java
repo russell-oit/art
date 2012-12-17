@@ -321,9 +321,8 @@ public class ArtDBCP extends HttpServlet {
 				//output registerd fonts
 				StringBuilder sb = new StringBuilder();
 				String newline = System.getProperty("line.separator");
-				Set fonts = FontFactory.getRegisteredFonts();
-				for (Iterator it = fonts.iterator(); it.hasNext();) {
-					String f = (String) it.next();
+				Set<String> fonts = FontFactory.getRegisteredFonts();
+				for (String f : fonts) {
 					sb.append(newline);
 					sb.append(f);
 				}
@@ -597,7 +596,8 @@ public class ArtDBCP extends HttpServlet {
 	}
 
 	/**
-	 * Determine if art.properties file is available and settings have been loaded.
+	 * Determine if art.properties file is available and settings have been
+	 * loaded.
 	 *
 	 * @return <code>true</code> if file is available and settings have been
 	 * loaded correctly. <code>false</code> otherwise.

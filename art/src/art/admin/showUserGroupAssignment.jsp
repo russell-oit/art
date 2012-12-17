@@ -4,7 +4,6 @@
 
 <%
 UserGroup ug=new UserGroup();
-Iterator it;
 %>
 
    <table align="center">
@@ -14,10 +13,8 @@ Iterator it;
          <tr>            
             <td colspan="2" class="data2">                
 				<%				
-				Map map=ug.getUserGroupAssignment();
-				it = map.entrySet().iterator();					
-				while(it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
+				Map<Integer, String> map=ug.getUserGroupAssignment();
+				for (Map.Entry<Integer, String> entry : map.entrySet()) {
 					%>
 					<%=entry.getValue()%> <br>
 					<%

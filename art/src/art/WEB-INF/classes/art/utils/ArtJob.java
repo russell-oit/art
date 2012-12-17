@@ -2231,15 +2231,13 @@ public class ArtJob implements Job, Serializable {
 
 			//save inline parameters
 			if (inlineParams != null) {
-				Iterator itInline = inlineParams.entrySet().iterator();
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
 						+ " VALUES (?,?,?,?)";
 				ps = conn.prepareStatement(sql);
 				boolean batchEmpty = true; //to ensure addBatch is only called if the batch is not empty. hsqldb throws an exception
-				while (itInline.hasNext()) {
-					Map.Entry entry = (Map.Entry) itInline.next();
-					name = (String) entry.getKey();
-					value = (String) entry.getValue();
+				for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
+					name = entry.getKey();
+					value = entry.getValue();
 					ps.setInt(1, jobId);
 					ps.setString(2, "I");
 					ps.setString(3, name);
@@ -2256,16 +2254,14 @@ public class ArtJob implements Job, Serializable {
 
 			//save multi parameters
 			if (multiParams != null) {
-				Iterator itMulti = multiParams.entrySet().iterator();
 				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
 						+ " VALUES (?,?,?,?)";
 				ps = conn.prepareStatement(sql);
 				String values[];
 				boolean batchEmpty = true; //to ensure addBatch is only called if the batch is not empty. hsqldb throws an exception
-				while (itMulti.hasNext()) {
-					Map.Entry entry = (Map.Entry) itMulti.next();
-					name = (String) entry.getKey();
-					values = (String[]) entry.getValue();
+				for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
+					name = entry.getKey();
+					values = entry.getValue();
 					for (int j = 0; j < values.length; j++) {
 						ps.setInt(1, jobId);
 						ps.setString(2, "M");
@@ -2706,16 +2702,14 @@ public class ArtJob implements Job, Serializable {
 			if (showParameters) {
 				displayParams = new TreeMap<Integer, ArtQueryParam>();
 
-				Iterator it;
 				String htmlName;
 				String value;
 				String label;
-				it = inlineParams.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry) it.next();
-					label = (String) entry.getKey();
+				for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
+					label = entry.getKey();
+					value = entry.getValue();
+					
 					htmlName = "P_" + label;
-					value = (String) entry.getValue();
 
 					ArtQueryParam param = htmlParams.get(htmlName);
 					if (param != null) {
@@ -2755,11 +2749,11 @@ public class ArtJob implements Job, Serializable {
 				}
 
 				String[] values;
-				it = multiParams.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry) it.next();
-					htmlName = "M_" + (String) entry.getKey();
-					values = (String[]) entry.getValue();
+				for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
+					label=entry.getKey();
+					values = entry.getValue();
+					
+					htmlName = "M_" + label;
 
 					ArtQueryParam param = htmlParams.get(htmlName);
 					if (param != null) {

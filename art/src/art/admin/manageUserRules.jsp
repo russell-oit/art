@@ -50,11 +50,6 @@
 </script>
 
 
-<%
-Iterator it;
-String name;
-%>
-
 <form name="manageUserRules" method="post" action="manageUserRules2.jsp">
     <table align="center">
         <tr>
@@ -71,11 +66,9 @@ String name;
                     <%		
 					UserEntity ue=new UserEntity();
 					List<String> usernames=ue.getAllUsernames();
-					it=usernames.iterator();					
-					while(it.hasNext()) {
-						name=(String)it.next();	 
+					for(String username : usernames) {
 						%>
-						<option value="<%=name%>" ><%=name%></option>
+						<option value="<%=username%>" ><%=username%></option>
 						<%
 					} 
 					%>
@@ -89,10 +82,8 @@ String name;
                 <select name="USER_GROUP" id="userGroup" size="5">
                     <%
 					UserGroup ug=new UserGroup();
-					Map userGroups=ug.getAllUserGroupNames();
-					it = userGroups.entrySet().iterator();
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> userGroups=ug.getAllUserGroupNames();
+					for (Map.Entry<String, Integer> entry : userGroups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%
@@ -110,11 +101,9 @@ String name;
                     <%					
 					Rule rule=new Rule();
 					List<String> rules=rule.getAllRuleNames();
-					it=rules.iterator();					         
-					while(it.hasNext()) {
-						name=(String)it.next();	 
+					for(String ruleName : rules) {
 						%>
-						<option value="<%=name%>" ><%=name%></option>
+						<option value="<%=ruleName%>" ><%=ruleName%></option>
 						<%
 					} 
 					%>
@@ -135,14 +124,12 @@ String name;
 		<tr>            
             <td colspan="2" class="data2">                
 				<%				
-				Map map=rule.getUserRuleAssignment();
+				Map<Integer, String> map=rule.getUserRuleAssignment();
 				if(map.size()>0){
 					%>
 					<b>Users</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%
@@ -159,9 +146,7 @@ String name;
 					%>
 					<b>User Groups</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%

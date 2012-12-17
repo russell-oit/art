@@ -20,7 +20,6 @@
 
 <%
 UserEntity ue=new UserEntity();
-Iterator it;
 %>
 
 <form name="manageSharedJobs" method="post" action="execManageSharedJobs.jsp">
@@ -37,13 +36,11 @@ Iterator it;
             <td class="data">
                 <select name="JOBS" size="5" multiple>
                     <%																									
-					Map jobs=ue.getAllSharedJobs();
-					it = jobs.entrySet().iterator();
+					Map<String, ArtJob> jobs=ue.getAllSharedJobs();
 					int jobId;
 					
-					while (it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
-						ArtJob aj=(ArtJob)entry.getValue();
+					for (Map.Entry<String, ArtJob> entry : jobs.entrySet()) {
+						ArtJob aj=entry.getValue();
                         jobId=aj.getJobId();
 						%>
 						<option value="<%=jobId%>">
@@ -62,10 +59,7 @@ Iterator it;
                 <select name="USERS" size="5" multiple>
                     <%										
 					List<String> usernames=ue.getAllUsernames();
-					it=usernames.iterator();
-					String name;         
-					while(it.hasNext()) {
-						name=(String)it.next();	 
+					for(String name : usernames) {
 						%>
 						<option value="<%=name%>" ><%=name%></option>
 						<%
@@ -81,10 +75,8 @@ Iterator it;
                 <select name="USER_GROUPS" size="5" multiple>
                     <%
 					UserGroup ug=new UserGroup();
-					Map groups=ug.getAllUserGroupNames();
-					it = groups.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> groups=ug.getAllUserGroupNames();
+					for (Map.Entry<String, Integer> entry : groups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%
@@ -114,9 +106,7 @@ Iterator it;
 				<%
 				ArtJob aj=new ArtJob();
 				Map<Integer,String> map=aj.getSharedJobAssignment();
-				it = map.entrySet().iterator();					
-				while(it.hasNext()) {
-					Map.Entry entry = (Map.Entry)it.next();
+				for (Map.Entry<Integer, String> entry : map.entrySet()) {
 					%>
 					<%=entry.getValue()%> <br>
 					<%

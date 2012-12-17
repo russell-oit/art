@@ -14,17 +14,15 @@ QueryGroup group=new QueryGroup();
 
 if (action.equals("DELETE")){
 	//check if queries exist in this group
-	Map queries=group.getLinkedQueries(groupId);
+	Map<Integer, ArtQuery> queries=group.getLinkedQueries(groupId);
 	if(queries.size()>0){
 		out.println("<pre>Error: There are queries in the group you want to delete.");
 		out.println("       Delete the following queries or change their group");
 		out.println("       in order to be able to delete this group: ");
 		out.println();
 
-		Iterator it=queries.entrySet().iterator();
-		while(it.hasNext()){
-			Map.Entry entry = (Map.Entry)it.next();
-			ArtQuery aq=(ArtQuery)entry.getValue();
+		for (Map.Entry<Integer, ArtQuery> entry : queries.entrySet()) {
+			ArtQuery aq=entry.getValue();
 			out.println("Query ID: " + aq.getQueryId() + " , Name: " + aq.getName() + " , Group ID: " + aq.getGroupId());
 		}
 		out.println("</pre>");

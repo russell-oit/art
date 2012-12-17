@@ -34,10 +34,8 @@
                 <select name="GROUP_ID" size="10">
                     <%
 					UserGroup ug=new UserGroup();
-					Map groups=ug.getAllUserGroupNames();
-					Iterator it = groups.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> groups=ug.getAllUserGroupNames();
+					for (Map.Entry<String, Integer> entry : groups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%

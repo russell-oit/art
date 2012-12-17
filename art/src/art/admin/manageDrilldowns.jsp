@@ -77,10 +77,8 @@
                     int drilldownQueryId;
 					
 					Map<Integer,DrilldownQuery> queries=aq.getDrilldownQueries(queryId,false);
-					Iterator it = queries.entrySet().iterator();	
-					while (it.hasNext()) {						
-						Map.Entry entry = (Map.Entry)it.next();
-						dq=(DrilldownQuery)entry.getValue();
+					for (Map.Entry<Integer, DrilldownQuery> entry : queries.entrySet()) {					
+						dq=entry.getValue();
 						drilldownQueryId=dq.getDrilldownQueryId();
 						queryPosition=dq.getQueryPosition();						
 						

@@ -39,54 +39,33 @@ String resultMessage;
   
 	<p>
  <!--   -->
- <table align="center" width="60%">
+ <table align="center" width="90%">
   <tr>
-  <td class="attr" width="20%"><%=messages.getString("jobId")%></td>
-  <td class="attr"><%=messages.getString("jobName")%></td>
+  <td class="attr" width="5%"><%=messages.getString("jobId")%></td>
+  <td class="attr" width="30%"><%=messages.getString("jobName")%></td>
+  <td class="attr"><%=messages.getString("runDate")%></td>
+<td class="attr" width="50%"><%=messages.getString("result")%></td>
   </tr>
   
   <%
   //get job archives user has access to
-	Map<Integer,ArtJob> jobs=ue.getJobArchives();
+	Map<String,ArtJob> jobs=ue.getJobArchives();
 	
-    for (Map.Entry<Integer, ArtJob> entry : jobs.entrySet()) {
+    for (Map.Entry<String, ArtJob> entry : jobs.entrySet()) {
 		ArtJob job=entry.getValue();
   
 %>
   <tr>
    <td class="jobdetails">
     <b><%=job.getJobId()%></b>
-    <br> <a href="javascript:showHide(document.getElementById('tr_<%=job.getJobId()%>'));">+/-</a>
    </td>
-   <td class="jobdetails"><b><%=job.getJobName()%></b></td>  
-  </tr> 
-  
-  <tr id="tr_<%=job.getJobId()%>" class="collapse">
-	<td></td>
-	<td colspan="1">
-			  <table border="0" width="100%">
-				  <tr>
-					  <td class="data" colspan="2"><%=messages.getString("archives")%></td>
-				  </tr>
-				  <tr>
-					  <td class="attr"  width="20%"><%=messages.getString("runDate")%></td>
-					  <td class="attr"><%=messages.getString("result")%></td>
-				  </tr>
-				  
-				  <%
-				  //get job archive details
-	Map<String,java.util.Date> archives=job.getArchives();
-	
-    for (Map.Entry<String,java.util.Date> entry2 : archives.entrySet()) {
-		String fileName=entry2.getKey();
-		java.util.Date endDate=entry2.getValue();
-		%>
-		<tr>
-			<td class="jobdetails">
-				<code><%=formatTimestamp(endDate,locale)%></code>
-			</td>
-			<td class="jobdetails">
+   <td class="jobdetails"><b><%=job.getJobName()%></b></td>
+   <td class="jobdetails">
+	   <code><%=formatTimestamp(job.getLastEndDate(),locale)%></code>
+   </td>
+   			<td class="jobdetails">
 <%
+String fileName=job.getFileName();
 if (fileName==null){
 		out.println(messages.getString("noFile"));
 	} else if (fileName.startsWith("-")) { 
@@ -108,12 +87,8 @@ out.println(resultMessage);
    %>           
 
    </td> 
-		</tr>
-		<% } %>
-		
-			  </table>
-	</td>
-  </tr>
+  </tr> 
+  
 
 <%
     }

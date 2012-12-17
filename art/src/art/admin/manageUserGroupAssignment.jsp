@@ -34,7 +34,6 @@ $jQuery(document).ready(function() {
 <%
 UserEntity ue=new UserEntity();
 UserGroup ug=new UserGroup();
-Iterator it;
 %>
 
 <form id="artForm" name="manageUserGroupAssignment" method="post" action="execManageUserGroupAssignment.jsp">
@@ -52,10 +51,7 @@ Iterator it;
                 <select name="USERS" size="10" multiple>
                     <%
 					List<String> usernames=ue.getAllUsernames();
-					it=usernames.iterator();
-					String name;
-					while(it.hasNext()) {
-						name=(String)it.next();
+					for(String name : usernames) {
 						%>
 						<option value="<%=name%>" ><%=name%></option>
 						<%
@@ -70,10 +66,8 @@ Iterator it;
             <td class="data">
                 <select name="USER_GROUPS" size="10" multiple>
                     <%
-					Map groups=ug.getAllUserGroupNames();
-					it = groups.entrySet().iterator();
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> groups=ug.getAllUserGroupNames();
+					for (Map.Entry<String, Integer> entry : groups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%

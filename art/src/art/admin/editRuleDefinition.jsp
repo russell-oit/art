@@ -10,17 +10,15 @@ Rule rule=new Rule();
 
 if (action.equals("DELETE")){
 	//check if queries exist that are linked to this rule
-	Map queries=rule.getLinkedQueries(ruleName);
+	Map<Integer, ArtQuery> queries=rule.getLinkedQueries(ruleName);
 	if(queries.size()>0){
 		out.println("<pre>Error: There are queries that use the rule you want to delete");
 		out.println("       Delete the following queries or change their rules");
 		out.println("       in order to be able to delete this rule: ");
 		out.println();
 								
-		Iterator it=queries.entrySet().iterator();		
-		while(it.hasNext()){
-			Map.Entry entry = (Map.Entry)it.next();
-			ArtQuery aq=(ArtQuery)entry.getValue();			
+		for (Map.Entry<Integer, ArtQuery> entry : queries.entrySet()) {
+			ArtQuery aq=entry.getValue();			
 			out.println("Query ID: " + aq.getQueryId() + " , Name: " + aq.getName() + " , Group ID: " + aq.getGroupId());
 		}
 		out.println("</pre>");

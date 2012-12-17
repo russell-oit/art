@@ -81,10 +81,9 @@ public class QueryExecute extends HttpServlet {
 		viewModesHash = new HashMap<String, java.lang.Class>(allViewModes.size());
 		ClassLoader cl = this.getClass().getClassLoader();
 		String vm = "";
-		Iterator<String> itVm = allViewModes.iterator();
 		try {
-			while (itVm.hasNext()) {
-				vm = itVm.next();
+			for(String viewMode : allViewModes) {
+				vm = viewMode;
 				viewModesHash.put(vm, cl.loadClass("art.output." + vm + "Output"));
 			}
 		} catch (Exception e) {

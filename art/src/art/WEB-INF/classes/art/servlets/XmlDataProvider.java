@@ -26,7 +26,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javax.servlet.ServletException;
@@ -184,12 +183,10 @@ public class XmlDataProvider extends BaseAjaxServlet {
 
         if (groupId != -1) {
             UserEntity ue = (UserEntity) request.getSession().getAttribute("ue");
-            Map map = ue.getAvailableQueries(groupId);
+            Map<String, Integer> map = ue.getAvailableQueries(groupId);
 
-            Iterator it = map.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                builder.addItem(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+            for (Map.Entry<String, Integer> entry : map.entrySet()) {
+                builder.addItem(entry.getKey(), String.valueOf(entry.getValue()));
             }
         }
 

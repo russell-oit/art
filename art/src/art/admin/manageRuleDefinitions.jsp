@@ -35,10 +35,7 @@
                     <%					
 					Rule rule=new Rule();
 					List<String> rules=rule.getAllRuleNames();
-					Iterator it=rules.iterator();
-					String name;         
-					while(it.hasNext()) {
-						name=(String)it.next();	 
+					for(String name : rules) {
 						%>
 						<option value="<%=name%>" ><%=name%></option>
 						<%

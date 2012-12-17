@@ -37,8 +37,6 @@ String helpText;
 int accessLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
 String username=(String) session.getAttribute("AdminUsername");
 
-Iterator it;
-
 %>
 
 <script language="javascript" type="text/javascript" src="<%= request.getContextPath() %>/js/tiny_mce/tiny_mce.js"></script>
@@ -351,12 +349,10 @@ tinyMCE.init({
 					int gId;
 					String groupName;
 					QueryGroup qg;
-					Map groups=aq.getAdminQueryGroups(accessLevel,username);
-					it = groups.entrySet().iterator();
-					while (it.hasNext()) {
+					Map<String, QueryGroup> groups=aq.getAdminQueryGroups(accessLevel,username);
+					for (Map.Entry<String, QueryGroup> entry : groups.entrySet()) {
 						counterGroups++;
-						Map.Entry entry = (Map.Entry)it.next();
-						qg=(QueryGroup)entry.getValue();
+						qg=entry.getValue();
 						gId=qg.getGroupId();
 						groupName=qg.getName();
 
@@ -480,14 +476,12 @@ tinyMCE.init({
 					int counterDatasources=0;
 					int dbId;
 					String dbName;
-					Map dbs=aq.getAdminDatasources(accessLevel,username);
-					it = dbs.entrySet().iterator();
-					while (it.hasNext()) {
+					Map<String, Integer> dbs=aq.getAdminDatasources(accessLevel,username);
+					for (Map.Entry<String, Integer> entry : dbs.entrySet()) {
 						counterDatasources++;
-						Map.Entry entry = (Map.Entry)it.next();
-						Integer integerId=(Integer)entry.getValue();
+						Integer integerId=entry.getValue();
 						dbId=integerId.intValue();
-						dbName=(String)entry.getKey();
+						dbName=entry.getKey();
 
 						%>
 						<option value="<%=dbId%>" <%=(dbId == currentIntValue?"selected":"")%> >

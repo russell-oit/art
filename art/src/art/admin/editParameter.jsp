@@ -171,13 +171,11 @@ String help;
 					int id;
 					String name;
 
-					Map lovs=aq.getLovQueries();
-					Iterator it = lovs.entrySet().iterator();
-					while(it.hasNext()){
-						Map.Entry entry = (Map.Entry)it.next();
-						Integer integerId=(Integer)entry.getKey();
+					Map<Integer, String> lovs=aq.getLovQueries();
+					for (Map.Entry<Integer, String> entry : lovs.entrySet()) {
+						Integer integerId=entry.getKey();
 						id=integerId.intValue();
-						name=(String)entry.getValue();
+						name=entry.getValue();
 						%>
 						<option value="<%=id%>" <%=(qp.getLovQueryId() == id )?"selected":"" %> >
 							<%=id%> - <%=name%>

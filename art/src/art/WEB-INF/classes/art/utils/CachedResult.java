@@ -83,7 +83,7 @@ public class CachedResult  {
 	int cacheMode; // 1 = append 2 = drop/insert
 	int rowsCount =0;
 	int BATCH_EXECUTE_SIZE = 500; // states after how many inserts the batch is executed
-	ArrayList<String> columnsNameList;
+	List<String> columnsNameList;
 	
     /**
      * 
@@ -153,9 +153,8 @@ public class CachedResult  {
      */
 	public String getCachedTableColumnsName() { 
 		StringBuilder sb = new StringBuilder();
-		java.util.Iterator columnsIter = columnsNameList.iterator();
-		while ( columnsIter.hasNext() ){
-			sb.append(" "+columnsIter.next());
+		for(String column : columnsNameList) {
+			sb.append(" " + column);
 		}
 		return sb.toString();
 	}

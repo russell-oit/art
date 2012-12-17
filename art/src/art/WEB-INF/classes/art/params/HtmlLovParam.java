@@ -9,7 +9,6 @@ When     Who  What
 package art.params;
 
 import art.utils.PreparedQuery;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;
 import org.apache.commons.lang.StringUtils;
@@ -186,12 +185,10 @@ public class HtmlLovParam implements ParamInterface {
             }
 
             Map<String,String> lov = pq.executeLovQuery(useRules); //override lov use rules setting with setting defined in the parameter definition
-            Iterator it=lov.entrySet().iterator();
-            while (it.hasNext()) {
+            for (Map.Entry<String, String> entry : lov.entrySet()) {
                 // build html option list
-                Map.Entry entry=(Map.Entry) it.next();                
-                value = (String) entry.getKey();
-                viewColumnValue = (String) entry.getValue();
+                value = entry.getKey();
+                viewColumnValue = entry.getValue();
                 
 				if(StringUtils.equals(initialValue, viewColumnValue) || StringUtils.equals(initialValue, value) ) {                
                     selected = "selected";

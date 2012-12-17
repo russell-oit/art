@@ -1140,7 +1140,7 @@ public class ArtQuery {
 	 *
 	 * @return name and id for all drill down queries
 	 */
-	public Map getAllDrilldownQueries() {
+	public Map<String, Integer> getAllDrilldownQueries() {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
@@ -1367,7 +1367,7 @@ public class ArtQuery {
 	 * @param qId
 	 * @return rules for a given query
 	 */
-	public Map getQueryRules(int qId) {
+	public Map<String, Rule> getQueryRules(int qId) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, Rule> map = new TreeMap<String, Rule>(stringCollator);
@@ -1474,7 +1474,7 @@ public class ArtQuery {
 	 * @param qId
 	 * @return rules that have not already been added to a query
 	 */
-	public Map getAvailableRules(int qId) {
+	public Map<String, Rule> getAvailableRules(int qId) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, Rule> map = new TreeMap<String, Rule>(stringCollator);
@@ -1529,7 +1529,7 @@ public class ArtQuery {
 	 *
 	 * @return lov queries
 	 */
-	public Map getLovQueries() {
+	public Map<Integer, String> getLovQueries() {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -1568,7 +1568,7 @@ public class ArtQuery {
 	 * @param uname
 	 * @return query groups that junior and senior admins can see
 	 */
-	public Map getAdminQueryGroups(int level, String uname) {
+	public Map<String, QueryGroup> getAdminQueryGroups(int level, String uname) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, QueryGroup> map = new TreeMap<String, QueryGroup>(stringCollator);
@@ -1633,7 +1633,7 @@ public class ArtQuery {
 	 * @param uname
 	 * @return query groups that junior and senior admins can see
 	 */
-	public Map getAdminQueryGroupsList(int level, String uname) {
+	public Map<String, Integer> getAdminQueryGroupsList(int level, String uname) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
@@ -1691,7 +1691,7 @@ public class ArtQuery {
 	 * @param uname
 	 * @return datasources that junior and senior admins can see
 	 */
-	public Map getAdminDatasources(int level, String uname) {
+	public Map<String, Integer> getAdminDatasources(int level, String uname) {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
@@ -1748,7 +1748,7 @@ public class ArtQuery {
 	 * @param qId query id for the relevant query
 	 * @return all parameters for a query, ordered by field position
 	 */
-	public Map getQueryParams(int qId) {
+	public Map<Integer, ArtQueryParam> getQueryParams(int qId) {
 		TreeMap<Integer, ArtQueryParam> map = new TreeMap<Integer, ArtQueryParam>();
 
 		Connection conn = null;

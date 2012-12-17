@@ -20,7 +20,6 @@
 
 <%
 UserEntity ue=new UserEntity();
-Iterator it;
 %>
 
 <form name="manageAdminPrivileges" method="post" action="execManageAdminPrivileges.jsp">
@@ -38,10 +37,7 @@ Iterator it;
                 <select name="ADMINS" size="5" multiple>
                     <%										
 					List<String> usernames=ue.getJuniorAdminUsernames();
-					it=usernames.iterator();
-					String name;         
-					while(it.hasNext()) {
-						name=(String)it.next();	 
+					for(String name : usernames) {
 						%>
 						<option value="<%=name%>" ><%=name%></option>
 						<%
@@ -57,10 +53,8 @@ Iterator it;
                 <select name="QUERY_GROUPS" size="5" multiple>
                     <%
 					QueryGroup qg=new QueryGroup();
-					Map groups=qg.getAllQueryGroupNames();
-					it = groups.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> groups=qg.getAllQueryGroupNames();
+					for (Map.Entry<String, Integer> entry : groups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%
@@ -76,10 +70,8 @@ Iterator it;
                 <select name="DATASOURCES" size="5" multiple>
                     <%					
 					Datasource ds=new Datasource();
-					Map datasources=ds.getAllDatasourceNames();
-					it = datasources.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> datasources=ds.getAllDatasourceNames();
+					for (Map.Entry<String, Integer> entry : datasources.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%
@@ -107,15 +99,13 @@ Iterator it;
 		<tr>            
             <td colspan="2" class="data2">                
 				<%				
-				Map map;
+				Map<Integer, String> map;
 				map=ue.getJuniorAdminGroupAssignment();
 				if(map.size()>0){
 					%>
 					<b>Query Groups</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%
@@ -132,9 +122,7 @@ Iterator it;
 					%>
 					<b>Datasources</b><br>
 					<%
-					it = map.entrySet().iterator();					
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					for (Map.Entry<Integer, String> entry : map.entrySet()) {
 						%>
 						<%=entry.getValue()%> <br>
 						<%

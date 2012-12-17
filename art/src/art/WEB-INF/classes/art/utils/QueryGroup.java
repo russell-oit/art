@@ -306,7 +306,7 @@ public class QueryGroup {
      * 
      * @return id and name for all query groups
      */
-    public Map getAllQueryGroupNames() {
+    public Map<String, Integer> getAllQueryGroupNames() {
         Collator stringCollator = Collator.getInstance();
         stringCollator.setStrength(Collator.TERTIARY); //order by case
         TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);

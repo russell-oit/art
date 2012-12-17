@@ -34,7 +34,6 @@ $jQuery(document).ready(function() {
 
 <%
 UserEntity ue=new UserEntity();
-Iterator it;
 int accessLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
 String username=(String) session.getAttribute("AdminUsername");
 %>
@@ -54,10 +53,7 @@ String username=(String) session.getAttribute("AdminUsername");
                 <select name="USERS" size="5" multiple>
                     <%
 					List<String> usernames=ue.getAllUsernames();
-					it=usernames.iterator();
-					String name;
-					while(it.hasNext()) {
-						name=(String)it.next();
+					for(String name : usernames) {
 						%>
 						<option value="<%=name%>" ><%=name%></option>
 						<%
@@ -73,10 +69,8 @@ String username=(String) session.getAttribute("AdminUsername");
                 <select name="USER_GROUPS" size="5" multiple>
                     <%
 					UserGroup ug=new UserGroup();
-					Map userGroups=ug.getAllUserGroupNames();
-					it = userGroups.entrySet().iterator();
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> userGroups=ug.getAllUserGroupNames();
+					for (Map.Entry<String, Integer> entry : userGroups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%
@@ -94,10 +88,8 @@ String username=(String) session.getAttribute("AdminUsername");
                 <select name="QUERY_GROUPS" size="5" multiple>
                     <%
 					ArtQuery aq=new ArtQuery();
-					Map queryGroups=aq.getAdminQueryGroupsList(accessLevel,username);
-					it = queryGroups.entrySet().iterator();
-					while(it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
+					Map<String, Integer> queryGroups=aq.getAdminQueryGroupsList(accessLevel,username);
+					for (Map.Entry<String, Integer> entry : queryGroups.entrySet()) {
 						%>
 						<option value="<%=entry.getValue()%>" ><%=entry.getKey()%></option>
 						<%
@@ -112,13 +104,11 @@ String username=(String) session.getAttribute("AdminUsername");
             <td class="data">
                 <select name="QUERIES" size="10" multiple>
                     <%
-					Map queries=ue.getAdminQueries(accessLevel,username);
-					it = queries.entrySet().iterator();
+					Map<Integer, ArtQuery> queries=ue.getAdminQueries(accessLevel,username);
 					int queryId;
 
-					while (it.hasNext()) {
-						Map.Entry entry = (Map.Entry)it.next();
-						ArtQuery query=(ArtQuery)entry.getValue();
+					for (Map.Entry<Integer, ArtQuery> entry : queries.entrySet()) {
+						ArtQuery query=entry.getValue();
                         queryId=query.getQueryId();
 						%>
 						<option value="<%=queryId%>">

@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import net.sf.jasperreports.engine.*;
@@ -169,7 +168,7 @@ public class jasperOutput {
 				logger.warn("Template file not found: {}.jrxml", templatesPath + baseFileName);
 
 				fullFileName = "-Template file not found";
-				
+
 				//display error message instead of link when running query interactively
 				interactiveLink = "Template file not found. Please contact the ART administrator.";
 			} else {
@@ -276,10 +275,8 @@ public class jasperOutput {
 					boolean useDynamicDatasource = false;
 
 					if (htmlParams != null) {
-						Iterator it = htmlParams.entrySet().iterator();
-						while (it.hasNext()) {
-							Map.Entry entry = (Map.Entry) it.next();
-							ArtQueryParam param = (ArtQueryParam) entry.getValue();
+						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+							ArtQueryParam param = entry.getValue();
 							String paramDataType = param.getParamDataType();
 
 							if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {

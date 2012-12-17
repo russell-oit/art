@@ -114,10 +114,8 @@ public class ArtOutHandler {
 		String drilldownTitle;
 
 		if (drilldownCount > 0) {
-			Iterator it = drilldownQueries.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				DrilldownQuery drilldown = (DrilldownQuery) entry.getValue();
+			for (Map.Entry<Integer, DrilldownQuery> entry : drilldownQueries.entrySet()) {
+				DrilldownQuery drilldown = entry.getValue();
 				drilldownTitle = drilldown.getDrilldownTitle();
 				if (drilldownTitle == null || drilldownTitle.trim().length() == 0) {
 					drilldownTitle = drilldown.getDrilldownQueryName();
@@ -193,10 +191,8 @@ public class ArtOutHandler {
 
 			//display columns for drill down queries			
 			if (drilldownCount > 0) {
-				Iterator it = drilldownQueries.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry) it.next();
-					DrilldownQuery drilldown = (DrilldownQuery) entry.getValue();
+				for (Map.Entry<Integer, DrilldownQuery> entry : drilldownQueries.entrySet()) {
+					DrilldownQuery drilldown = entry.getValue();
 					drilldownText = drilldown.getDrilldownText();
 					if (drilldownText == null || drilldownText.trim().length() == 0) {
 						drilldownText = "Drill Down";
@@ -214,9 +210,7 @@ public class ArtOutHandler {
 					String paramValue;
 					drilldownParams = drilldown.getDrilldownParams();
 					if (drilldownParams != null) {
-						Iterator it2 = drilldownParams.iterator();
-						while (it2.hasNext()) {
-							ArtQueryParam param = (ArtQueryParam) it2.next();
+						for (ArtQueryParam param : drilldownParams) {
 							paramLabel = param.getParamLabel();
 							paramValue = rs.getString(param.getDrilldownColumn());
 							try {
@@ -232,11 +226,9 @@ public class ArtOutHandler {
 
 					//add parameters from parent query										
 					if (inlineParams != null) {
-						Iterator itInline = inlineParams.entrySet().iterator();
-						while (itInline.hasNext()) {
-							Map.Entry entryInline = (Map.Entry) itInline.next();
-							paramLabel = (String) entryInline.getKey();
-							paramValue = (String) entryInline.getValue();
+						for (Map.Entry<String, String> entryInline : inlineParams.entrySet()) {
+							paramLabel = entryInline.getKey();
+							paramValue = entryInline.getValue();
 							//add parameter only if one with a similar name doesn't already exist in the drill down parameters
 							if (!params.containsKey(paramLabel)) {
 								try {
@@ -252,11 +244,9 @@ public class ArtOutHandler {
 
 					if (multiParams != null) {
 						String[] paramValues;
-						Iterator itMulti = multiParams.entrySet().iterator();
-						while (itMulti.hasNext()) {
-							Map.Entry entryMulti = (Map.Entry) itMulti.next();
-							paramLabel = (String) entryMulti.getKey();
-							paramValues = (String[]) entryMulti.getValue();
+						for (Map.Entry<String, String[]> entryMulti : multiParams.entrySet()) {
+							paramLabel = entryMulti.getKey();
+							paramValues = entryMulti.getValue();
 							for (String param : paramValues) {
 								try {
 									param = URLEncoder.encode(param, "UTF-8");
@@ -544,10 +534,8 @@ public class ArtOutHandler {
 			out.println("<table border=\"0\" width=\"90%\"><tr><td>");
 			out.println("<div id=\"param_div\" width=\"90%\" align=\"center\" class=\"qeparams\">");
 
-			Iterator it = displayParams.entrySet().iterator();
-			while (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				ArtQueryParam param = (ArtQueryParam) entry.getValue();
+			for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
+				ArtQueryParam param = entry.getValue();
 				String paramName = param.getName();
 				Object pValue = param.getParamValue();
 				String outputString;
@@ -603,8 +591,9 @@ public class ArtOutHandler {
 
 	/**
 	 * Display final sql generated for a query
+	 *
 	 * @param out
-	 * @param finalSQL 
+	 * @param finalSQL
 	 */
 	public static void displayFinalSQL(PrintWriter out, String finalSQL) {
 		if (out != null) {
