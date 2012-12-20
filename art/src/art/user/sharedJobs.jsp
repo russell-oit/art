@@ -155,14 +155,9 @@ boolean splitJob=false; //for split jobs, get last start date and file name from
 	} else if (fileName.startsWith("-")) { 
         out.println(fileName.substring(1));
 	}  else { 
-		resultMessage="";
-		if (fileName.indexOf("\n") > -1) {
-			// publish jobs can have file link and message separated by newline(\n)
-			String result=fileName;
-			fileName = StringUtils.substringBefore(fileName, "\n"); //get file name
-			fileName = StringUtils.replace(fileName, "\r", ""); //on windows pre-2.5, filenames had \\r\\n
-			resultMessage = StringUtils.substringAfter(result, "\n"); //message
-		}	
+		List<String> details=ArtDBCP.getFileDetailsFromResult(fileName);
+		fileName=details.get(0);
+		resultMessage=details.get(1);
 	   %>
         <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=fileName%>" target="_blank"><%=fileName%> </a>		
      <%
@@ -238,22 +233,6 @@ out.println(resultMessage);
    %>
     </table>
 </p>
-
- 
-  <%
-  int jobFilesRetentionPeriod=ArtDBCP.getPublishedFilesRetentionPeriod();
-	if (jobFilesRetentionPeriod>0){
-	%>
-	<p>	
-  <table align="center"><tr><td class="attr">
-	<sup>*</sup>
-	<%
-	out.println(messages.getString("publishWarning") + jobFilesRetentionPeriod + "&nbsp;");
-	%>
-	</td></tr></table>
-	</p> 
-	<%} %>
-  
 
 <%
   } catch(Exception e) {

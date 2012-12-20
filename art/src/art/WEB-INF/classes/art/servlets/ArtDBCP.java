@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +92,7 @@ public class ArtDBCP extends HttpServlet {
 	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
 	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
+	public static String jobsPath;
 
 	/**
 	 * {@inheritDoc}
@@ -228,6 +230,9 @@ public class ArtDBCP extends HttpServlet {
 		//set export path
 		exportPath = appPath + sep + "export" + sep;
 
+		//set jobs path
+		jobsPath = exportPath + "jobs" + sep;
+
 		//set art.properties file path
 		artPropertiesFilePath = appPath + sep + "WEB-INF" + sep + "art.properties";
 
@@ -321,8 +326,8 @@ public class ArtDBCP extends HttpServlet {
 				//output registerd fonts
 				StringBuilder sb = new StringBuilder();
 				String newline = System.getProperty("line.separator");
-				Set<String> fonts = FontFactory.getRegisteredFonts();
-				for (String f : fonts) {
+				Set fonts = FontFactory.getRegisteredFonts();
+				for (Object f : fonts) {
 					sb.append(newline);
 					sb.append(f);
 				}
@@ -444,6 +449,15 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static String getExportPath() {
 		return exportPath;
+	}
+
+	/**
+	 * Get full path to the jobs directory.
+	 *
+	 * @return full path to the export directory
+	 */
+	public static String getJobsPath() {
+		return jobsPath;
 	}
 
 	/**
@@ -848,15 +862,15 @@ public class ArtDBCP extends HttpServlet {
 	 * @return job files retention period in days
 	 */
 	public static int getPublishedFilesRetentionPeriod() {
-		int retentionPeriod;
-		String retentionPeriodString = "";
+		int retentionPeriod=0;
+		String retentionPeriodString;
 
 		try {
 			retentionPeriodString = getArtSetting("published_files_retention_period");
-			retentionPeriod = Integer.parseInt(retentionPeriodString);
+			if (NumberUtils.isNumber(retentionPeriodString)) {
+				retentionPeriod = Integer.parseInt(retentionPeriodString);
+			}
 		} catch (NumberFormatException e) {
-			logger.warn("Invalid number for published files retention period: {}", retentionPeriodString, e);
-			retentionPeriod = 1;
 		}
 
 		return retentionPeriod;
@@ -1182,11 +1196,37 @@ public class ArtDBCP extends HttpServlet {
 		return msg;
 	}
 
+	/**
+	 * Generate a random number within a given range
+	 *
+	 * @param minimum
+	 * @param maximum
+	 * @return
+	 */
 	public static int getRandomNumber(int minimum, int maximum) {
 		Random rn = new Random();
 		int range = maximum - minimum + 1;
 		int randomNum = rn.nextInt(range) + minimum;
 
 		return randomNum;
+	}
+
+	public static List<String> getFileDetailsFromResult(String result) {
+		List<String> details = new ArrayList<String>();
+
+		if (StringUtils.indexOf(result, "\n") > -1) {
+			// publish jobs can have file link and message separated by newline(\n)
+			String fileName = StringUtils.substringBefore(result, "\n"); //get file name
+			fileName = StringUtils.replace(fileName, "\r", ""); //on windows pre-2.5, filenames had \\r\\n
+			String resultMessage = StringUtils.substringAfter(result, "\n"); //message
+
+			details.add(fileName);
+			details.add(resultMessage);
+		} else {
+			details.add(result);
+			details.add("");
+		}
+
+		return details;
 	}
 }

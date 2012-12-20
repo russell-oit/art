@@ -237,14 +237,9 @@ String resultMessage;
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		resultMessage="";
-		if (lastFileName.indexOf("\n") > -1) {
-			// publish jobs can have file link and message separated by newline (\n)
-			String result=lastFileName;
-			lastFileName = StringUtils.substringBefore(lastFileName, "\n"); //get file name
-			lastFileName = StringUtils.replace(lastFileName, "\r", ""); //on windows pre-2.5, filenames had \\r\\n
-			resultMessage = StringUtils.substringAfter(result, "\n"); //message
-		}	
+		List<String> details=ArtDBCP.getFileDetailsFromResult(lastFileName);
+		lastFileName=details.get(0);
+		resultMessage=details.get(1);
 	   %>
         <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>		
      <%
@@ -331,20 +326,6 @@ out.println(resultMessage);
 
 </p>
 
-  <%
-  int jobFilesRetentionPeriod=ArtDBCP.getPublishedFilesRetentionPeriod();  
-	if (jobFilesRetentionPeriod>0){
-	%>
-	<p>	
-  <table align="center"><tr><td class="attr">
-	<sup>*</sup>
-	<%
-	out.println(messages.getString("publishWarning") + jobFilesRetentionPeriod + "&nbsp;");
-	%>
-	</td></tr></table>
-	</p> 
-	<%} %>
- 
 <br /> 
 
  
@@ -426,14 +407,9 @@ if(accessLevel>=80){
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		resultMessage="";
-		if (lastFileName.indexOf("\\n") > -1) {
-			// publish jobs can have file link and message separated by newline
-			String result=lastFileName;
-			lastFileName = StringUtils.substringBefore(lastFileName, "\\n"); //get file name
-			lastFileName = StringUtils.replace(lastFileName, "\\r", ""); //on windows pre-2.5, filenames had \\r\\n
-			resultMessage = StringUtils.substringAfter(result, "\\n"); //message
-		}	
+		List<String> details=ArtDBCP.getFileDetailsFromResult(lastFileName);
+		lastFileName=details.get(0);
+		resultMessage=details.get(1);
 	   %>
         <a type="application/octet-stream" href="<%= request.getContextPath() %>/export/jobs/<%=lastFileName%>" target="_blank"><%=lastFileName%> </a>		
      <%

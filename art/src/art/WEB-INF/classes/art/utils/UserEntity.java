@@ -28,6 +28,7 @@ import java.io.Serializable;
 
 import java.sql.*;
 import java.text.Collator;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1027,7 +1028,7 @@ public class UserEntity implements Serializable {
 	 * @return the job archives the user has access to
 	 */
 	public Map<String, ArtJob> getJobArchives() {
-		Map<String, ArtJob> jobs = new LinkedHashMap<String, ArtJob>();
+		Map<String, ArtJob> jobs = new TreeMap<String, ArtJob>();
 
 		Connection conn = null;
 
@@ -1041,21 +1042,18 @@ public class UserEntity implements Serializable {
 			sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE "
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ"
 					+ " WHERE AJA.JOB_ID=AJ.JOB_ID "
-					+ " AND AJA.USERNAME=?"
-					+ " ORDER BY AJA.JOB_ID, AJA.END_DATE" //user owns job or individualized output
+					+ " AND AJA.USERNAME=?" //user owns job or individualized output
 					+ " UNION"
 					+ " SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE"
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_JOBS AUJ"
 					+ " WHERE AJA.JOB_ID=AJ.JOB_ID AND AJ.JOB_ID=AUJ.JOB_ID"
-					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y' AND AUJ.USERNAME=?"
-					+ " ORDER BY AJA.JOB_ID, AJA.END_DATE" //job shared with user
+					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y' AND AUJ.USERNAME=?" //job shared with user
 					+ " UNION"
 					+ " SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE"
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ, ART_USER_GROUP_JOBS AUGJ, ART_USER_GROUP_ASSIGNMENT AUGA"
 					+ " WHERE AJA.JOB_ID=AJ.JOB_ID AND AJ.JOB_ID=AUGJ.JOB_ID"
 					+ " AND AUGJ.USER_GROUP_ID=AUGA.USER_GROUP_ID AND AUGA.USERNAME=?"
-					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y'"
-					+ " ORDER BY AJA.JOB_ID, AJA.END_DATE"; //job shared with user group
+					+ " AND AJA.USERNAME<>? AND AJA.JOB_SHARED='Y'"; //job shared with user group
 
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
@@ -1068,12 +1066,20 @@ public class UserEntity implements Serializable {
 
 			while (rs.next()) {
 				ArtJob aj = new ArtJob();
-				aj.setJobIdOnly(rs.getInt("JOB_ID"));
+				int jobId=rs.getInt("JOB_ID");
+				
+				aj.setJobIdOnly(jobId);
 				aj.setJobName(rs.getString("JOB_NAME"));
 				aj.setFileName(rs.getString("ARCHIVE_FILE_NAME"));
-				aj.setLastEndDate(rs.getTimestamp("END_DATE"));
+				
+				java.util.Date endDate=rs.getTimestamp("END_DATE");
+				aj.setLastEndDate(endDate);
+				
+				SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss.SSS");
+				
+				String key=String.valueOf(jobId) + df.format(endDate);
 
-				jobs.put(rs.getString("ARCHIVE_ID"), aj);
+				jobs.put(key, aj);
 			}
 			ps.close();
 			rs.close();

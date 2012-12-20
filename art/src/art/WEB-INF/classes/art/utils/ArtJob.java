@@ -150,9 +150,8 @@ public class ArtJob implements Job, Serializable {
 	private String bcc;
 	Map<String, ArtQueryParam> htmlParams;
 	private int recipientsQueryId; //to support dynamic recipients
-	final String RESULT_SEPARATOR="\n"; //newline character to use to separate result filename and result message where a message exists
+	final String RESULT_SEPARATOR = "\n"; //newline character to use to separate result filename and result message where a message exists
 	private int runsToArchive; //number of job runs to archive
-	private Map<String,java.util.Date> archives; //hold job archive details: filename and finish date
 
 	/**
 	 * Instantiate a new "empty" Job (to insert/save) A new Job is created. Use
@@ -161,20 +160,6 @@ public class ArtJob implements Job, Serializable {
 	 */
 	public ArtJob() {
 		exportPath = ArtDBCP.getExportPath();
-	}
-
-	/**
-	 * @return the archives
-	 */
-	public Map<String,java.util.Date> getArchives() {
-		return archives;
-	}
-
-	/**
-	 * @param archives the archives to set
-	 */
-	public void setArchives(Map<String,java.util.Date> archives) {
-		this.archives = archives;
 	}
 
 	/**
@@ -646,7 +631,11 @@ public class ArtJob implements Job, Serializable {
 	}
 	//
 
-	//generate jobAuditKey to be used to identify a job run in the audit table
+	/**
+	 * generate uuid that can be used as a primary key
+	 *
+	 * @return
+	 */
 	private String generateKey() {
 		return UUID.randomUUID().toString();
 	}
@@ -1216,7 +1205,7 @@ public class ArtJob implements Job, Serializable {
 					ResultSet rs = ps.executeQuery();
 					while (rs.next()) {
 						userCount += 1;
-						runJob(conn, false, rs.getString("USERNAME"), rs.getString("EMAIL"));
+						runJob(conn, splitJob, rs.getString("USERNAME"), rs.getString("EMAIL"));
 						//ensure that the job owner's output version is saved in the jobs table
 						if (username.equals(rs.getString("USERNAME"))) {
 							ownerFileName = fileName;
@@ -1231,7 +1220,7 @@ public class ArtJob implements Job, Serializable {
 						if (dynamicRecipients != null) {
 							emails = emails + ";" + dynamicRecipients;
 						}
-						runJob(conn, true, username, emails);
+						runJob(conn, splitJob, username, emails);
 					}
 				} else {
 					//generate one single output to be used by all users
@@ -1239,7 +1228,7 @@ public class ArtJob implements Job, Serializable {
 					if (dynamicRecipients != null) {
 						emails = emails + ";" + dynamicRecipients;
 					}
-					runJob(conn, true, username, emails);
+					runJob(conn, splitJob, username, emails);
 				}
 			} else {
 				//job isn't shared. generate one file for the job owner
@@ -1247,7 +1236,7 @@ public class ArtJob implements Job, Serializable {
 				if (dynamicRecipients != null) {
 					emails = emails + ";" + dynamicRecipients;
 				}
-				runJob(conn, true, username, emails);
+				runJob(conn, splitJob, username, emails);
 			}
 
 			//ensure jobs table always has job owner's file, or a note if no output was produced for the job owner
@@ -1262,19 +1251,19 @@ public class ArtJob implements Job, Serializable {
 		}
 	}
 
-	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail) {
-		runJob(conn, singleOutput, user, userEmail, null, false);
+	private void runJob(Connection conn, boolean splitJob, String user, String userEmail) {
+		runJob(conn, splitJob, user, userEmail, null, false);
 	}
 
-	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail, Map<String, Map<String, String>> recipientDetails) {
-		runJob(conn, singleOutput, user, userEmail, recipientDetails, false);
+	private void runJob(Connection conn, boolean splitJob, String user, String userEmail, Map<String, Map<String, String>> recipientDetails) {
+		runJob(conn, splitJob, user, userEmail, recipientDetails, false);
 	}
 
 	//run job
-	private void runJob(Connection conn, boolean singleOutput, String user, String userEmail,
+	private void runJob(Connection conn, boolean splitJob, String user, String userEmail,
 			Map<String, Map<String, String>> recipientDetails, boolean recipientFilterPresent) {
 		//set job start date. relevant for split jobs
-		jobStartDate = new java.sql.Timestamp(new java.util.Date().getTime());
+		jobStartDate = new Timestamp(new java.util.Date().getTime());
 
 		PreparedQuery pq = null;
 
@@ -1286,8 +1275,8 @@ public class ArtJob implements Job, Serializable {
 		try {
 			pq = prepareQuery(user);
 
-			//for split jobs, don't check security for shared users. they have been allowed access to the output
-			if (!singleOutput) {
+			//for split jobs, don't check security. shared users have been allowed access to the output
+			if (splitJob) {
 				pq.setAdminSession(true);
 			}
 
@@ -1765,17 +1754,16 @@ public class ArtJob implements Job, Serializable {
 				// or just to run update statements.
 			}
 
-			// set audit timestamp
-			afterExecution(conn, singleOutput, user);
-
 			logger.debug("Job Id {} ...finished", jobId);
 		} catch (Exception e) {
 			logger.error("Error. Job id={}, User={}", new Object[]{jobId, user, e});
-			afterExecutionOnException(conn, e, singleOutput, user); // set audit timestamp and log error message
+			fileName = "-<b>Error:</b> " + e;
 		} finally {
 			if (pq != null) {
 				pq.close();
 			}
+			// set audit timestamp and update archives
+			afterExecution(conn, splitJob, user);
 		}
 	}
 
@@ -1814,7 +1802,6 @@ public class ArtJob implements Job, Serializable {
 			List<File> l = new ArrayList<File>();
 			l.add(new File(fileName));
 			m.setAttachments(l);
-			m.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
 		} else if (jobType == 5 || jobType == 7) {
 			// inline html within email
 			// read the file and include it in the HTML message
@@ -1825,17 +1812,12 @@ public class ArtJob implements Job, Serializable {
 			String htmlTable = new String(fileBytes, "UTF-8");
 			//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
 			htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
-			m.setMessage("<html>" + msg + "<hr>" + htmlTable + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+			msg = msg + "<hr>" + htmlTable;
 			fis.close();
-		} else { // publish
-			int retentionPeriod = ArtDBCP.getPublishedFilesRetentionPeriod();
-
-			if (retentionPeriod == 0) {
-				m.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message. Report has been published. (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
-			} else {
-				m.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message. Report has been published and will be available for the following number of days: " + retentionPeriod + " (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
-			}
 		}
+
+		String autoMessage = "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small>";
+		m.setMessage("<html>" + msg + autoMessage + "</html>");
 	}
 
 	/**
@@ -1891,8 +1873,8 @@ public class ArtJob implements Job, Serializable {
 	}
 
 	/**
-	 * Remove records in art_user_jobs table for users who have been denied access
-	 * because their user group has been denied access
+	 * Remove records in art_user_jobs table for users who have been denied
+	 * access because their user group has been denied access
 	 *
 	 * @param conn
 	 * @param jId
@@ -1996,37 +1978,17 @@ public class ArtJob implements Job, Serializable {
 	//set final end time and file name of job table
 	private void afterCompletion(Connection conn) {
 		try {
-			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
+			Timestamp now = new Timestamp(new java.util.Date().getTime());
 
-			String sqlString;
+			String sql;
 			PreparedStatement psUpdate;
-			String finalFileName;
 
-			String sep = java.io.File.separator;
-			// if afterExecutionOnException was executed fileName contains the exception text and starts with -
-			if (fileName.startsWith("-")) {
-				finalFileName = fileName;
-			} else {
-				//file name may have extra text after it, for publish job reminder email status
-				if (fileName.indexOf(RESULT_SEPARATOR) > -1) {
-					// filename has full path to file. save only filename
-					finalFileName = StringUtils.substringBefore(fileName, RESULT_SEPARATOR); //get full file path
-					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // get only filename
-					finalFileName = finalFileName + RESULT_SEPARATOR + StringUtils.substringAfter(fileName, RESULT_SEPARATOR); //filename + message
-				} else {
-					finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
-				}
-			}
-			// make sure we do not exceed the table col limit
-			if (finalFileName.length() > 4000) {
-				finalFileName = finalFileName.substring(0, 4000);
-			}
-
-			sqlString = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ? WHERE JOB_ID = ?";
-			psUpdate = conn.prepareStatement(sqlString);
+			//update job details
+			sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ? WHERE JOB_ID = ?";
+			psUpdate = conn.prepareStatement(sql);
 
 			psUpdate.setTimestamp(1, now);
-			psUpdate.setString(2, finalFileName);
+			psUpdate.setString(2, fileName);
 			psUpdate.setInt(3, jobId);
 			psUpdate.executeUpdate();
 
@@ -2037,16 +1999,14 @@ public class ArtJob implements Job, Serializable {
 	}
 
 	/**
-	 * Set timestamps in ART_JOBS table after job execution If Audit Flag is
-	 * set, a new row is added to ART_JOBS_AUDIT table
+	 * Update ART_USER_JOBS table. If Audit Flag is set, a new row is added to
+	 * ART_JOBS_AUDIT table
 	 */
-	private void afterExecution(Connection conn, boolean singleOutput, String user) {
+	private void afterExecution(Connection conn, boolean splitJob, String user) {
 		try {
-			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
+			Timestamp now = new Timestamp(new java.util.Date().getTime());
 
-			//Update LAST_END_DATE and LAST_FILE_NAME in ART_JOBS table
-			//for shared users, update the art_user_jobs table
-			String sqlString;
+			String sql;
 			PreparedStatement psShared;
 			PreparedStatement psAudit;
 			String finalFileName;
@@ -2058,11 +2018,12 @@ public class ArtJob implements Job, Serializable {
 			} else {
 				//file name may have extra text after it, for publish job reminder email status
 				if (fileName.indexOf(RESULT_SEPARATOR) > -1) {
-					// filename has full path to file. save only filename
+					//filename has full path to file and a status message
 					finalFileName = StringUtils.substringBefore(fileName, RESULT_SEPARATOR); //get full file path
 					finalFileName = finalFileName.substring(finalFileName.lastIndexOf(sep) + 1); // get only filename
 					finalFileName = finalFileName + RESULT_SEPARATOR + StringUtils.substringAfter(fileName, RESULT_SEPARATOR); //filename + message
 				} else {
+					// filename has full path to file. save only filename
 					finalFileName = fileName.substring(fileName.lastIndexOf(sep) + 1); // only filename
 				}
 			}
@@ -2071,13 +2032,55 @@ public class ArtJob implements Job, Serializable {
 				finalFileName = finalFileName.substring(0, 4000);
 			}
 
-			//no need to update jobs table for single output. aftercomplete will do the final update to the jobs table
-			if (!singleOutput) {
-				sqlString = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?, LAST_START_DATE = ?, LAST_END_DATE = ? "
-						+ " WHERE JOB_ID = ? AND USERNAME = ?";
-				psShared = conn.prepareStatement(sqlString);
+			//update filename field
+			fileName = finalFileName;
 
-				psShared.setString(1, finalFileName);
+			if (jobType == 3 || jobType == 8) {
+				//for publish jobs, delete previous file and update job archives as necessary
+				sql = "SELECT LAST_FILE_NAME, LAST_START_DATE, LAST_END_DATE"
+						+ " FROM ART_JOBS"
+						+ " WHERE JOB_ID = ?";
+				PreparedStatement ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+				ResultSet rs = ps.executeQuery();
+
+				String archiveFileName;
+				Timestamp archiveStartDate;
+				Timestamp archiveEndDate;
+
+				if (rs.next()) {
+					archiveFileName = rs.getString("LAST_FILE_NAME");
+					archiveStartDate = rs.getTimestamp("LAST_START_DATE");
+					archiveEndDate = rs.getTimestamp("LAST_END_DATE");
+
+					if (runsToArchive > 0) {
+						//update archives
+						updateArchives(splitJob, user, archiveFileName, archiveStartDate, archiveEndDate);
+					} else {
+						//if not archiving, delete previous file
+						if (archiveFileName != null && !archiveFileName.startsWith("-")) {
+							List<String> details = ArtDBCP.getFileDetailsFromResult(archiveFileName);
+							archiveFileName = details.get(0);
+							String filePath = ArtDBCP.getJobsPath() + archiveFileName;
+							File previousFile = new File(filePath);
+							if (previousFile.exists()) {
+								previousFile.delete();
+							}
+						}
+					}
+				}
+				ps.close();
+				rs.close();
+			}
+
+			//update job details
+			//no need to update jobs table if non-split job. aftercompletion will do the final update to the jobs table
+			if (splitJob) {
+				sql = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?, LAST_START_DATE = ?, LAST_END_DATE = ? "
+						+ " WHERE JOB_ID = ? AND USERNAME = ?";
+				psShared = conn.prepareStatement(sql);
+
+				psShared.setString(1, fileName);
 				psShared.setTimestamp(2, jobStartDate);
 				psShared.setTimestamp(3, now);
 				psShared.setInt(4, jobId);
@@ -2088,63 +2091,11 @@ public class ArtJob implements Job, Serializable {
 
 			//update audit table if required
 			if (StringUtils.equals(enableAudit, "Y")) {
-				sqlString = "UPDATE ART_JOBS_AUDIT SET JOB_ACTION = 'E', END_DATE = ? WHERE JOB_AUDIT_KEY = ? AND JOB_ID = ?";
-				psAudit = conn.prepareStatement(sqlString);
+				sql = "UPDATE ART_JOBS_AUDIT SET JOB_ACTION = 'E', END_DATE = ? WHERE JOB_AUDIT_KEY = ? AND JOB_ID = ?";
+				psAudit = conn.prepareStatement(sql);
 				psAudit.setTimestamp(1, now);
 				psAudit.setString(2, jobAuditKey);
 				psAudit.setInt(3, jobId);
-				psAudit.executeUpdate();
-				psAudit.close();
-			}
-		} catch (Exception e) {
-			logger.error("Error. Job id {}", jobId, e);
-		}
-	}
-
-	/**
-	 * Sets exception in ART_JOBS table after job execution If Audit Flag is
-	 * set, a new row is added to ART_JOBS_AUDIT table
-	 */
-	private void afterExecutionOnException(Connection conn, Exception ex, boolean singleOutput, String user) {
-		try {
-			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
-
-			// Update LAST_END_DATE and LAST_FILE_NAME in ART_JOBS table
-			//for shared users, update the art_user_jobs table
-			String sqlString;
-			PreparedStatement psShared;
-			PreparedStatement psAudit;
-			String exception;
-
-			exception = "-<b>Error:</b> " + ex;
-			//update filename variable for possible later use because of shared jobs
-			if (exception.length() > 4000) {
-				fileName = exception.substring(0, 4000);
-			} else {
-				fileName = exception;
-			}
-
-			//no need to update jobs table for single output. aftercomplete will do the final update to the jobs table
-			if (!singleOutput) {
-				sqlString = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?, LAST_START_DATE = ?, LAST_END_DATE = ? "
-						+ " WHERE JOB_ID = ? AND USERNAME = ?";
-				psShared = conn.prepareStatement(sqlString);
-
-				psShared.setString(1, exception);
-				psShared.setTimestamp(2, jobStartDate);
-				psShared.setTimestamp(3, now);
-				psShared.setInt(4, jobId);
-				psShared.setString(5, user);
-				psShared.executeUpdate();
-				psShared.close();
-			}
-
-			//update audit table if required
-			if (StringUtils.equals(enableAudit, "Y")) {
-				sqlString = "UPDATE ART_JOBS_AUDIT SET JOB_ACTION = 'X' WHERE JOB_AUDIT_KEY = ? AND JOB_ID = ?";
-				psAudit = conn.prepareStatement(sqlString);
-				psAudit.setString(1, jobAuditKey);
-				psAudit.setInt(2, jobId);
 				psAudit.executeUpdate();
 				psAudit.close();
 			}
@@ -2161,8 +2112,7 @@ public class ArtJob implements Job, Serializable {
 		Connection conn = null;
 
 		try {
-			//if (DEBUG) System.err.println(sNAME + ": ArtJob save() " + jobId);
-			logger.debug("ArtJob save() {}", jobId);
+			logger.debug("Saving job id {}", jobId);
 
 			conn = ArtDBCP.getConnection();
 
@@ -2221,146 +2171,121 @@ public class ArtJob implements Job, Serializable {
 			ps.setString(24, cc);
 			ps.setString(25, bcc);
 			ps.setInt(26, recipientsQueryId);
-			ps.setInt(27,runsToArchive);
+			ps.setInt(27, runsToArchive);
 
 			ps.executeUpdate();
 			ps.close();
 
 			//save job parameters
-			String name, value;
+			sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
+					+ " VALUES (?,?,?,?)";
+			ps = conn.prepareStatement(sql);
+			boolean batchEmpty = true; //to ensure addBatch is only called if the batch is not empty. hsqldb throws an exception
 
 			//save inline parameters
 			if (inlineParams != null) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
-				boolean batchEmpty = true; //to ensure addBatch is only called if the batch is not empty. hsqldb throws an exception
 				for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
-					name = entry.getKey();
-					value = entry.getValue();
+					String name = entry.getKey();
+					String value = entry.getValue();
+
 					ps.setInt(1, jobId);
 					ps.setString(2, "I");
 					ps.setString(3, name);
 					ps.setString(4, value);
+
 					ps.addBatch();
 					batchEmpty = false;
 				}
-
-				if (!batchEmpty) {
-					ps.executeBatch();
-				}
-				ps.close();
 			}
 
 			//save multi parameters
 			if (multiParams != null) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
-				String values[];
-				boolean batchEmpty = true; //to ensure addBatch is only called if the batch is not empty. hsqldb throws an exception
 				for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
-					name = entry.getKey();
-					values = entry.getValue();
+					String name = entry.getKey();
+					String values[] = entry.getValue();
+
 					for (int j = 0; j < values.length; j++) {
 						ps.setInt(1, jobId);
 						ps.setString(2, "M");
 						ps.setString(3, name);
 						ps.setString(4, values[j]);
+
 						ps.addBatch();
 						batchEmpty = false;
 					}
 				}
-
-				if (!batchEmpty) {
-					ps.executeBatch();
-				}
-				ps.close();
 			}
 
 			//enable show parameters in job output
 			if (showParameters) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 				ps.setString(2, "O");
 				ps.setString(3, "_showParams");
 				ps.setString(4, "true");
 
-				ps.executeUpdate();
-				ps.close();
+				ps.addBatch();
+				batchEmpty = false;
 			}
 
 			//enable show graph data in pdf output
 			if (showGraphData) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 				ps.setString(2, "O");
 				ps.setString(3, "_showGraphData");
 				ps.setString(4, "true");
 
-				ps.executeUpdate();
-				ps.close();
+				ps.addBatch();
+				batchEmpty = false;
 			}
 
 			//enable custom graph settings
 			if (showGraphDataPoints) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 				ps.setString(2, "O");
 				ps.setString(3, "_showGraphDataPoints");
 				ps.setString(4, "true");
 
-				ps.executeUpdate();
-				ps.close();
+				ps.addBatch();
+				batchEmpty = false;
 			}
 			if (showGraphLegend) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 				ps.setString(2, "O");
 				ps.setString(3, "_showGraphLegend");
 				ps.setString(4, "true");
 
-				ps.executeUpdate();
-				ps.close();
+				ps.addBatch();
+				batchEmpty = false;
 			}
 			if (showGraphLabels) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 				ps.setString(2, "O");
 				ps.setString(3, "_showGraphLabels");
 				ps.setString(4, "true");
 
-				ps.executeUpdate();
-				ps.close();
+				ps.addBatch();
+				batchEmpty = false;
 			}
 			if (StringUtils.isNotBlank(jobGraphOptions)) {
-				sql = "INSERT INTO ART_JOBS_PARAMETERS (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE) "
-						+ " VALUES (?,?,?,?)";
-				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 				ps.setString(2, "O");
 				ps.setString(3, "_graphOptions");
 				ps.setString(4, jobGraphOptions);
 
-				ps.executeUpdate();
-				ps.close();
+				ps.addBatch();
+				batchEmpty = false;
 			}
+
+			if (!batchEmpty) {
+				ps.executeBatch();
+			}
+			ps.close();
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
 		} finally {
 			try {
 				if (conn != null) {
-					conn.close(); // art repository
+					conn.close();
 				}
 			} catch (Exception e) {
 				logger.error("Error. Job id {}", jobId, e);
@@ -2534,7 +2459,7 @@ public class ArtJob implements Job, Serializable {
 				cc = rs.getString("MAIL_CC");
 				bcc = rs.getString("MAIL_BCC");
 				recipientsQueryId = rs.getInt("RECIPIENTS_QUERY_ID");
-				runsToArchive=rs.getInt("RUNS_TO_ARCHIVE");
+				runsToArchive = rs.getInt("RUNS_TO_ARCHIVE");
 
 				//update from address in case the user's email address has changed
 				UserEntity ue = new UserEntity(username);
@@ -2708,7 +2633,7 @@ public class ArtJob implements Job, Serializable {
 				for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
 					label = entry.getKey();
 					value = entry.getValue();
-					
+
 					htmlName = "P_" + label;
 
 					ArtQueryParam param = htmlParams.get(htmlName);
@@ -2750,9 +2675,9 @@ public class ArtJob implements Job, Serializable {
 
 				String[] values;
 				for (Map.Entry<String, String[]> entry : multiParams.entrySet()) {
-					label=entry.getKey();
+					label = entry.getKey();
 					values = entry.getValue();
-					
+
 					htmlName = "M_" + label;
 
 					ArtQueryParam param = htmlParams.get(htmlName);
@@ -2790,9 +2715,10 @@ public class ArtJob implements Job, Serializable {
 		}
 
 	}
-	
+
 	/**
-	 * Build string to be used to display parameters in the myjobs.jsp and sharedjobs.jsp pages
+	 * Build string to be used to display parameters in the myjobs.jsp and
+	 * sharedjobs.jsp pages
 	 */
 	public void buildParametersDisplayString() {
 
@@ -3046,7 +2972,6 @@ public class ArtJob implements Job, Serializable {
 						//create trigger that defines the schedule for the job						
 						CronTrigger trigger = newTrigger().withIdentity(triggerName, triggerGroup).withSchedule(cronSchedule(cronString)).build();
 
-
 						//delete any existing jobs or triggers with the same id before adding them to the scheduler
 						scheduler.deleteJob(jobKey(jobName, jobGroup)); //delete job records
 						scheduler.unscheduleJob(triggerKey(triggerName, triggerGroup)); //delete any trigger records
@@ -3055,18 +2980,25 @@ public class ArtJob implements Job, Serializable {
 						scheduler.scheduleJob(quartzJob, trigger);
 
 						//update jobs table to indicate that the job has been migrated						
-						psUpdate.setTimestamp(1, new java.sql.Timestamp(nextRunDate.getTime()));
-						psUpdate.setString(2, minute);
-						psUpdate.setString(3, hour);
-						psUpdate.setString(4, day);
-						psUpdate.setString(5, weekday);
-						psUpdate.setString(6, month);
-						psUpdate.setInt(7, jobId);
+						psUpdate.setTimestamp(
+								1, new java.sql.Timestamp(nextRunDate.getTime()));
+						psUpdate.setString(
+								2, minute);
+						psUpdate.setString(
+								3, hour);
+						psUpdate.setString(
+								4, day);
+						psUpdate.setString(
+								5, weekday);
+						psUpdate.setString(
+								6, month);
+						psUpdate.setInt(
+								7, jobId);
 
 						psUpdate.addBatch();
-
 						//run executebatch periodically to prevent out of memory errors
-						if (migratedRecordCount % batchSize == 0) {
+						if (migratedRecordCount % batchSize
+								== 0) {
 							ps.executeBatch();
 							ps.clearBatch(); //not sure if this is necessary
 						}
@@ -3462,7 +3394,7 @@ public class ArtJob implements Job, Serializable {
 	 *
 	 * @return an indicator of which users this job has been shared with
 	 */
-	public Map<Integer,String> getSharedUsers() {
+	public Map<Integer, String> getSharedUsers() {
 		Map<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -3511,7 +3443,7 @@ public class ArtJob implements Job, Serializable {
 	 *
 	 * @return an indicator of which user groups this job has been shared with
 	 */
-	public Map<Integer,String> getSharedUserGroups() {
+	public Map<Integer, String> getSharedUserGroups() {
 		Map<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
@@ -3555,13 +3487,122 @@ public class ArtJob implements Job, Serializable {
 
 		return map;
 	}
-	
+
 	/**
-	 * Populate the archives property with job archive records
-	 * @param user 
+	 * Update job archives table
 	 */
-	public void buildArchives(String user){
-		archives=null;
-		archives=new LinkedHashMap<String,java.util.Date>(); //use linkedhashmap so that items to be retrieved in insert order
+	private void updateArchives(boolean splitJob, String user, String archiveFileName,
+			Timestamp lastStartDate, Timestamp lastEndDate) {
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+
+			boolean jobShared = false;
+			if (StringUtils.equals(allowSharing, "Y")) {
+				jobShared = true;
+			}
+
+			String jobSharedFlag;
+			if (splitJob) {
+				jobSharedFlag = "S";
+			} else if (jobShared) {
+				jobSharedFlag = "Y";
+			} else {
+				jobSharedFlag = "N";
+			}
+
+			String archiveId = generateKey();
+
+			//add record to archive
+			sql = "INSERT INTO ART_JOB_ARCHIVES"
+					+ " (ARCHIVE_ID,JOB_ID,USERNAME,ARCHIVE_FILE_NAME,"
+					+ " START_DATE,END_DATE,JOB_SHARED)"
+					+ " VALUES(?,?,?,?,?,?,?)";
+
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, archiveId);
+			ps.setInt(2, jobId);
+			ps.setString(3, user);
+			ps.setString(4, archiveFileName);
+			ps.setTimestamp(5, lastStartDate);
+			ps.setTimestamp(6, lastEndDate);
+			ps.setString(7, jobSharedFlag);
+
+			ps.executeUpdate();
+			ps.close();
+
+			//delete previous run's records
+			List<String> oldRecords = new ArrayList<String>();
+			if (!jobShared) {
+				sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
+						+ " FROM ART_JOB_ARCHIVES "
+						+ " WHERE JOB_ID=?"
+						+ " ORDER BY START_DATE DESC";
+
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+
+				rs = ps.executeQuery();
+				int count = 0;
+				while (rs.next()) {
+					count++;
+					if (count > runsToArchive) {
+						//delete archive file and database record
+						String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
+						String oldArchive = rs.getString("ARCHIVE_ID");
+
+						//remember database record for deletion
+						oldRecords.add("'" + oldArchive + "'");
+
+						//delete file
+						String filePath = ArtDBCP.getJobsPath() + oldFileName;
+						File previousFile = new File(filePath);
+						if (previousFile.exists()) {
+							previousFile.delete();
+						}
+
+					}
+				}
+				rs.close();
+				ps.close();
+			}
+
+			//delete old archive records
+			String oldRecordsString = StringUtils.join(oldRecords, ",");
+			sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
+			ps = conn.prepareStatement(sql);
+			ps.executeUpdate();
+
+//				} else if (splitJob) {
+//					sql = "SELECT ARCHIVE_FILE_NAME "
+//							+ " FROM ART_JOB_ARCHIVES "
+//							+ " WHERE JOB_ID=? AND USERNAME=?";
+//
+//					ps = conn.prepareStatement(sql);
+//					ps.setInt(1, jobId);
+//				}
+//				rs = ps.executeQuery();
+//				while (rs.next()) {
+//					count++;
+//				}
+//				rs.close();
+//				ps.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
 	}
 }
