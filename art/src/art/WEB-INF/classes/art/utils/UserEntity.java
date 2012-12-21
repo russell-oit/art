@@ -28,6 +28,7 @@ import java.io.Serializable;
 
 import java.sql.*;
 import java.text.Collator;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import org.slf4j.Logger;
@@ -1066,18 +1067,21 @@ public class UserEntity implements Serializable {
 
 			while (rs.next()) {
 				ArtJob aj = new ArtJob();
-				int jobId=rs.getInt("JOB_ID");
-				
+				int jobId = rs.getInt("JOB_ID");
+
 				aj.setJobIdOnly(jobId);
 				aj.setJobName(rs.getString("JOB_NAME"));
 				aj.setFileName(rs.getString("ARCHIVE_FILE_NAME"));
-				
-				java.util.Date endDate=rs.getTimestamp("END_DATE");
+
+				java.util.Date endDate = rs.getTimestamp("END_DATE");
 				aj.setLastEndDate(endDate);
-				
-				SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss.SSS");
-				
-				String key=String.valueOf(jobId) + df.format(endDate);
+
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss.SSS");
+				DecimalFormat nf = new DecimalFormat("0");
+				nf.setMinimumIntegerDigits(10); //ensure all numbers are pre-padded with zeros so that sorting works correctly
+				nf.setMaximumFractionDigits(20);
+
+				String key = nf.format(jobId) + df.format(endDate);
 
 				jobs.put(key, aj);
 			}

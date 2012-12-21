@@ -3,6 +3,7 @@ ART 2.5
 * Support for case sensitive operators for dynamic queries
 * Allow use of decimals when specifying y axis range
 * Renamed "Objects" to "Queries" and "Object Groups" to "Query Groups"
+* Support for archiving publish job results
 
 ART 2.4.1
 * Support for bubble charts

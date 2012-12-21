@@ -3539,7 +3539,43 @@ public class ArtJob implements Job, Serializable {
 
 			//delete previous run's records
 			List<String> oldRecords = new ArrayList<String>();
-			if (!jobShared) {
+			if (jobSharedFlag.equals("S")) {
+				sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
+						+ " FROM ART_JOB_ARCHIVES "
+						+ " WHERE JOB_ID=? AND USERNAME=?"
+						+ " ORDER BY START_DATE DESC";
+
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, jobId);
+				ps.setString(2, user);
+
+				rs = ps.executeQuery();
+				int count = 0;
+				while (rs.next()) {
+					count++;
+					if (count > runsToArchive) {
+						//delete archive file and database record
+						String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
+						String oldArchive = rs.getString("ARCHIVE_ID");
+
+						//remember database record for deletion
+						oldRecords.add("'" + oldArchive + "'");
+
+						//delete file
+						if (oldFileName != null && !oldFileName.startsWith("-")) {
+							List<String> details = ArtDBCP.getFileDetailsFromResult(oldFileName);
+							oldFileName = details.get(0);
+							String filePath = ArtDBCP.getJobsPath() + oldFileName;
+							File previousFile = new File(filePath);
+							if (previousFile.exists()) {
+								previousFile.delete();
+							}
+						}
+					}
+				}
+				rs.close();
+				ps.close();
+			} else {
 				sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
 						+ " FROM ART_JOB_ARCHIVES "
 						+ " WHERE JOB_ID=?"
@@ -3561,12 +3597,15 @@ public class ArtJob implements Job, Serializable {
 						oldRecords.add("'" + oldArchive + "'");
 
 						//delete file
-						String filePath = ArtDBCP.getJobsPath() + oldFileName;
-						File previousFile = new File(filePath);
-						if (previousFile.exists()) {
-							previousFile.delete();
+						if (oldFileName != null && !oldFileName.startsWith("-")) {
+							List<String> details = ArtDBCP.getFileDetailsFromResult(oldFileName);
+							oldFileName = details.get(0);
+							String filePath = ArtDBCP.getJobsPath() + oldFileName;
+							File previousFile = new File(filePath);
+							if (previousFile.exists()) {
+								previousFile.delete();
+							}
 						}
-
 					}
 				}
 				rs.close();
@@ -3574,25 +3613,12 @@ public class ArtJob implements Job, Serializable {
 			}
 
 			//delete old archive records
-			String oldRecordsString = StringUtils.join(oldRecords, ",");
-			sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
-			ps = conn.prepareStatement(sql);
-			ps.executeUpdate();
-
-//				} else if (splitJob) {
-//					sql = "SELECT ARCHIVE_FILE_NAME "
-//							+ " FROM ART_JOB_ARCHIVES "
-//							+ " WHERE JOB_ID=? AND USERNAME=?";
-//
-//					ps = conn.prepareStatement(sql);
-//					ps.setInt(1, jobId);
-//				}
-//				rs = ps.executeQuery();
-//				while (rs.next()) {
-//					count++;
-//				}
-//				rs.close();
-//				ps.close();
+			if (oldRecords.size() > 0) {
+				String oldRecordsString = StringUtils.join(oldRecords, ",");
+				sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
+				ps = conn.prepareStatement(sql);
+				ps.executeUpdate();
+			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {

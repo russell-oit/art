@@ -308,7 +308,10 @@ CREATE TABLE ART_USER_GROUP_RULES
 -- 4 = just execute (i.e. no output generated), 5 = email with query output inline
 -- 6 = conditional email attachment, 7 = conditional inline email, 8 = conditional publish
 -- 9 = append to cached table, 10 = delete and insert into cached table
--- MIGRATED_TO_QUARTZ is present to allow seamless migration of jobs when upgrading from ART versions before 1.11 (i.e. before quartz was used as the scheduling engine)
+-- LAST_FILE_NAME: Contains result of last job execution. Either a status message (if contents start with -),
+-- or a file name and status message separated by newline character (\n) (for publish jobs)
+-- MIGRATED_TO_QUARTZ is present to allow seamless migration of jobs when
+-- upgrading from ART versions before 1.11 (i.e. before quartz was used as the scheduling engine)
 
 CREATE TABLE ART_JOBS
 (
@@ -508,14 +511,15 @@ CREATE TABLE ART_DRILLDOWN_QUERIES
 
 
 -- ART_JOB_ARCHIVES
--- Stored details of job archives (file names of past runs for publish and conditional publish jobs)
+-- Stored details of past runs for publish jobs
+
+-- JOB_SHARED: N = job not shared, Y = job shared, S = split job
 
 CREATE TABLE ART_JOB_ARCHIVES
 (
 	ARCHIVE_ID VARCHAR(100) NOT NULL PRIMARY KEY,
 	JOB_ID INTEGER NOT NULL,
-	USERNAME VARCHAR(30) NOT NULL,
-	USER_GROUP_ID INTEGER,
+	USERNAME VARCHAR(30) NOT NULL,	
 	ARCHIVE_FILE_NAME VARCHAR(4000),
 	START_DATE TIMESTAMP NULL,
 	END_DATE TIMESTAMP NULL,
