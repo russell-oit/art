@@ -1,6 +1,7 @@
-<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="org.apache.commons.lang.math.NumberUtils"%>
+<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP, java.util.*, java.io.File" %>
 <%@ page import="org.apache.commons.fileupload.*, org.apache.commons.fileupload.servlet.ServletFileUpload" %>
-<%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory, org.apache.commons.io.FilenameUtils, java.util.*, java.io.File" %>
+<%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory, org.apache.commons.io.FilenameUtils" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%  request.setCharacterEncoding("UTF-8");%>
 
@@ -49,6 +50,7 @@
 	String templateFileName = ""; //allows typing of filename instead of re-uploading an existing template
     
     String showParameters="";
+	int displayResultset=0;
 
 
 	if (ServletFileUpload.isMultipartContent(request)) {
@@ -127,6 +129,10 @@
 					xmlaPassword = fieldValue;
 				} else if (fieldName.equals("showParameters")) {
 					showParameters = fieldValue;
+				} else if (fieldName.equals("displayResultset")) {
+					if(NumberUtils.isNumber(fieldValue)){
+						displayResultset=Integer.parseInt(fieldValue);
+					}
 				}
 			} else {
 				//file upload field
@@ -225,6 +231,7 @@
 			aq.setXmlaCatalog(xmlaCatalog);
 			aq.setXmlaUsername(xmlaUsername);
             aq.setShowParameters(showParameters);
+			aq.setDisplayResultset(displayResultset);
 
 			//encrypt xmla password
 			if (!xmlaPassword.equals("")) {

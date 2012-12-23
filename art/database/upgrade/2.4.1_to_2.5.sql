@@ -6,6 +6,7 @@
 --          . rename "object" to "query"
 --          . rename art_shared_jobs table to art_user_jobs
 --          . support job archives
+--          . support for running DDL/DML statements before query's select statement
 --
 -- ------------------------------------------------
 
@@ -59,6 +60,9 @@ CREATE TABLE ART_JOB_ARCHIVES
 	END_DATE TIMESTAMP NULL,
 	JOB_SHARED VARCHAR(1)
 );
+
+-- support for running DDL/DML statements before query's select statement
+ALTER TABLE ART_QUERIES ADD DISPLAY_RESULTSET INTEGER;
 
 
 

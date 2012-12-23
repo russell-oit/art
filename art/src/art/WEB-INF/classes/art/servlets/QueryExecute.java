@@ -548,7 +548,6 @@ public class QueryExecute extends HttpServlet {
 			//run query            
 			if (currentNumberOfRunningQueries <= ArtDBCP.getMaxRunningQueries()) {
 				int probe = 0; // used for debugging
-				boolean isQuery; // it will contain the result of the PreparedQuery.execute() to state if query is a Select query or an update
 				int numberOfRows = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
 
 				ResultSet rs = null;
@@ -681,7 +680,7 @@ public class QueryExecute extends HttpServlet {
 					 *****RUN IT**** ************** *************
 					 */
 
-					isQuery = pq.execute(resultSetType);
+					pq.execute(resultSetType);
 
 					probe = 75;
 
@@ -808,11 +807,6 @@ public class QueryExecute extends HttpServlet {
 							numberOfRows = getNumberOfRows(rs);
 						}
 					} else {
-						int rowsUpdated = 0;
-						if (!isQuery) { // if the execute() method returned false this *might* be a procedure or an update query
-							rowsUpdated = pq.getUpdateCount(); // get the number of updated rows - this might be null/-1 in case of procedure
-						}
-
 						//get query results
 						rs = pq.getResultSet();
 
@@ -916,6 +910,7 @@ public class QueryExecute extends HttpServlet {
 
 						} else {
 							//this is an update query
+							int rowsUpdated = pq.getUpdateCount(); // will be -1 if query has multiple statements
 							request.setAttribute("rowsUpdated", "" + rowsUpdated);
 							ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
 						}

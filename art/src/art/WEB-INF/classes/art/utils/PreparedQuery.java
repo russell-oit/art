@@ -76,6 +76,7 @@ public class PreparedQuery {
 	private String recipientColumn;
 	private String recipientId;
 	private String recipientIdType = "VARCHAR";
+	int displayResultset;
 
 	/**
 	 *
@@ -469,14 +470,18 @@ public class PreparedQuery {
 			conn = ArtDBCP.getConnection();
 
 			// Get some properties of the query
-			Statement st = conn.createStatement();
-			ResultSet rs = st.executeQuery("SELECT DATABASE_ID, QUERY_GROUP_ID, ACTIVE_STATUS, QUERY_TYPE, USES_RULES "
-					+ " FROM ART_QUERIES  "
-					+ " WHERE QUERY_ID = " + queryId);
+			String sql = "SELECT DATABASE_ID, QUERY_GROUP_ID, ACTIVE_STATUS, QUERY_TYPE"
+					+ " , USES_RULES, DISPLAY_RESULTSET "
+					+ " FROM ART_QUERIES"
+					+ " WHERE QUERY_ID=?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1, queryId);
+			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
 				queryDatabaseId = rs.getInt("DATABASE_ID");
 				queryStatus = rs.getString("ACTIVE_STATUS");
 				queryType = rs.getInt("QUERY_TYPE");
+				displayResultset = rs.getInt("DISPLAY_RESULTSET");
 
 				int groupId = rs.getInt("QUERY_GROUP_ID");
 				if (groupId == 0 || queryType == 119 || queryType == 120) {
@@ -497,7 +502,7 @@ public class PreparedQuery {
 				}
 			}
 			rs.close();
-			st.close();
+			ps.close();
 
 			//get the raw sql source and determine if the user has access to the query. exception will be thrown if user can't excecute query
 			verifyQueryAccess();
@@ -584,35 +589,41 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Get the result set of this query
+	 * Get the result set to use for this query. query sql may have several
+	 * statements
 	 *
 	 * @return the result set of this query
 	 * @throws SQLException
 	 */
 	public ResultSet getResultSet() throws SQLException {
-		return psQuery.getResultSet();
-	}
-
-	/**
-	 * Get the last result set of this query if this is a series of statement,
-	 * the latter rs is returned Anyway, for some drivers a
-	 * java.sql.SQLException: Unsupported feature might be thrown
-	 *
-	 * @return last result set of this query
-	 * @throws SQLException
-	 */
-	public ResultSet getLastResultSet() throws SQLException {
 		ResultSet rs = psQuery.getResultSet();
 
-		// Loop through the list of resultsets untill there are no more
-		while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT) != false || psQuery.getUpdateCount() != -1) {
-			if (rs != null) {
-				rs.close();
+		if (displayResultset == 1) {
+			//use the select statement. will use first select statement. having several selects isn't useful
+			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT)) {
+				if (rs != null) {
+					rs.close();
+				}
+				rs = psQuery.getResultSet();
 			}
-			rs = psQuery.getResultSet();
-		}
+		} else if (displayResultset > 1) {
+			//return specific resultset
+			int count = 1;
+			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT) != false || psQuery.getUpdateCount() != -1) {
+				count++;
 
-		return rs; // return the last one
+				if (rs != null) {
+					rs.close();
+				}
+				rs = psQuery.getResultSet();
+				
+				if(count==displayResultset){
+					break;
+				}
+			}
+		}
+		
+		return rs;
 	}
 
 	/**

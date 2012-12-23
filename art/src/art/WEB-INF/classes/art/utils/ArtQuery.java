@@ -60,11 +60,26 @@ public class ArtQuery {
 	List<ParamInterface> paramList; //parameter list used in showParams pages
 	String username;
 	String groupName;
+	private int displayResultset;
 
 	/**
 	 *
 	 */
 	public ArtQuery() {
+	}
+
+	/**
+	 * @return the displayResultset
+	 */
+	public int getDisplayResultset() {
+		return displayResultset;
+	}
+
+	/**
+	 * @param displayResultset the displayResultset to set
+	 */
+	public void setDisplayResultset(int displayResultset) {
+		this.displayResultset = displayResultset;
 	}
 
 	/**
@@ -564,7 +579,7 @@ public class ArtQuery {
 			String SQL = "SELECT QUERY_GROUP_ID, QUERY_ID, NAME, SHORT_DESCRIPTION "
 					+ " , DESCRIPTION, CONTACT_PERSON, USES_RULES, DATABASE_ID, QUERY_TYPE, ACTIVE_STATUS "
 					+ " ,UPDATE_DATE, TEMPLATE, XMLA_URL, XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD "
-					+ ", X_AXIS_LABEL, Y_AXIS_LABEL, GRAPH_OPTIONS, SHOW_PARAMETERS "
+					+ ", X_AXIS_LABEL, Y_AXIS_LABEL, GRAPH_OPTIONS, SHOW_PARAMETERS, DISPLAY_RESULTSET "
 					+ " FROM ART_QUERIES "
 					+ " WHERE QUERY_ID = ? ";
 			PreparedStatement ps = conn.prepareStatement(SQL);
@@ -600,6 +615,7 @@ public class ArtQuery {
 				} else {
 					setGraphDisplayOptions(graphOptions, false);
 				}
+				displayResultset=rs.getInt("DISPLAY_RESULTSET");
 
 				//get query source
 				SQL = "SELECT SOURCE_INFO FROM ART_ALL_SOURCES "
@@ -827,7 +843,8 @@ public class ArtQuery {
 			String SQL = "UPDATE ART_QUERIES SET QUERY_GROUP_ID=?, NAME=?, SHORT_DESCRIPTION=? "
 					+ " ,DESCRIPTION=?, CONTACT_PERSON=?, USES_RULES=?, DATABASE_ID=?, QUERY_TYPE=?, UPDATE_DATE=? "
 					+ " ,ACTIVE_STATUS=?, TEMPLATE = ?, XMLA_URL = ?, XMLA_DATASOURCE = ?, XMLA_CATALOG = ? "
-					+ " ,X_AXIS_LABEL=?, Y_AXIS_LABEL=?, GRAPH_OPTIONS=?, XMLA_USERNAME=?, XMLA_PASSWORD=?, SHOW_PARAMETERS=? "
+					+ " ,X_AXIS_LABEL=?, Y_AXIS_LABEL=?, GRAPH_OPTIONS=?, XMLA_USERNAME=?, XMLA_PASSWORD=?,"
+					+ " SHOW_PARAMETERS=?, DISPLAY_RESULTSET=? "
 					+ " WHERE QUERY_ID = ? ";
 			PreparedStatement ps = conn.prepareStatement(SQL);
 
@@ -851,7 +868,9 @@ public class ArtQuery {
 			ps.setString(18, xmlaUsername);
 			ps.setString(19, xmlaPassword);
 			ps.setString(20, showParameters);
-			ps.setInt(21, queryId);
+			ps.setInt(21,displayResultset);
+			ps.setInt(22, queryId);
+			
 			if (ps.executeUpdate() == 1) {
 				ps.close();
 				success = true;

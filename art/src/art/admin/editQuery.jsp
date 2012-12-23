@@ -98,6 +98,7 @@ tinyMCE.init({
 			document.getElementById("div_graph_options2").className="collapse";
             
             document.getElementById("showParameters").className="collapse";
+			document.getElementById("displayResultset").className="collapse";
 
 		} else if (i==112) {
 			//olap - mondrian
@@ -133,6 +134,7 @@ tinyMCE.init({
 			document.getElementById("div_graph_options2").className="collapse";
             
             document.getElementById("showParameters").className="collapse";
+			document.getElementById("displayResultset").className="collapse";
 
 		} else if (i==113 || i==114) {
 			//olap - mondrian via xmla or ssas via xmla
@@ -178,6 +180,7 @@ tinyMCE.init({
 			document.getElementById("div_graph_options2").className="collapse";
             
             document.getElementById("showParameters").className="collapse";
+			document.getElementById("displayResultset").className="collapse";
 
 		} else if (i==115 || i==116 || i==117 || i==118) {
 			//jasper report or jxls template
@@ -192,8 +195,10 @@ tinyMCE.init({
 			if(i==115 || i==117){
 				//template queries can't use rules
 				document.getElementById("usesRules").className="collapse";
+				document.getElementById("displayResultset").className="collapse";
 			} else {
 				document.getElementById("usesRules").className="expand";
+				document.getElementById("displayResultset").className="expand";
 			}
 			document.getElementById("dbId").className="expand";
 
@@ -244,6 +249,8 @@ tinyMCE.init({
 			document.getElementById("div_xmla_username2").className="collapse";
 			document.getElementById("div_xmla_password1").className="collapse";
 			document.getElementById("div_xmla_password2").className="collapse";
+			
+			document.getElementById("displayResultset").className="expand";
 
 			if(i<0){
 				if(i!=-2 && i!=-10){
@@ -281,6 +288,7 @@ tinyMCE.init({
                 document.getElementById("usesRules").className="collapse";
                 document.getElementById("dbId").className="collapse";
                 document.getElementById("showParameters").className="collapse";
+				document.getElementById("displayResultset").className="collapse";
             }
 			
 			if(i==121){
@@ -532,6 +540,21 @@ tinyMCE.init({
                 <option value="A" <%=("A".equals(currentStringValue)?"selected":"")%>>Always</option>
             </select> </td></tr>
     </tr>
+	
+	<tr><td class="data"> Display Resultset </td>
+            <td class="data">
+				<input type="text" name="displayResultset" id="displayResultset" size="3" maxlength="2" value="<%=aq.getDisplayResultset()%>">
+				<%
+				helpText="The resultset to display if the sql source contains multiple sql statements e.g. "
+						+ "some DDL/DML statements before the main select."
+						+ "\\nLeave as 0 if the sql source doesn\\'t have multiple statements."
+						+ "\\nSet to 2 to use the second statement, 3 to use the third, etc."
+						+ "\\nSet to 1 to use the select statement, regardless of how many other statements exist."
+						+ "\\nYour RDBMS may not support multiple statements in a query or may require some configuration for it to work.";
+				%>
+				<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
+			</td>
+        </tr>
 
 	<tr><td class="data">
 			<div id="div_xaxis1">
@@ -597,7 +620,8 @@ tinyMCE.init({
 				<input type="text" name="template_filename" size="30" maxlength="100" value="<%=aq.getTemplate()%>"> <br>
 				<input type="file" name="template" id="template" size="40">
 				<%
-				helpText="Select the path of the mondrian schema xml file or jasper reports file or jXLS template file to use. Alternatively, type the file name in the textbox above to reuse an already uploaded file.";
+				helpText="Select the path of the mondrian schema xml file or jasper reports file or jXLS template file to use. "
+						+"Alternatively, type the file name in the textbox above to reuse an already uploaded file.";
 				%>
 				<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 			</div>
