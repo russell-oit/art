@@ -23,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 public class HtmlDateInput implements ParamInterface {
 
     String paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue;
-    boolean datetime;
     String paramClass; //can be DATE or DATETIME
     String calendarFormat; //dhtmlgoodies calendar format
     String inputSize; //size of html input element where date is displayed
@@ -52,7 +51,6 @@ public class HtmlDateInput implements ParamInterface {
 
         String defaultDateFormat; //date format for use with simpledateformat object
         if (StringUtils.equals(paramClass,"DATETIME")) {
-            datetime = true;
             calendarFormat = "yyyy-mm-dd hh:ii";
             inputSize = "19";
             displayTime = "true";
@@ -60,7 +58,6 @@ public class HtmlDateInput implements ParamInterface {
 
             defaultDateFormat = "yyyy-MM-dd HH:mm:ss";
         } else {
-            datetime = false;
             calendarFormat = "yyyy-mm-dd";
             inputSize = "11";
             displayTime = "false";

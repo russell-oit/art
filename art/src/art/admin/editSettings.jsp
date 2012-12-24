@@ -272,6 +272,9 @@ if(!propsFile.exists()){
 		} else if(dbType == "hsqldb-server"){
 			driverElement.value="org.hsqldb.jdbcDriver";
 			urlElement.value="jdbc:hsqldb:hsql://<server_name>:9001/<database_alias>";
+		} else if(dbType == "sqlserver-jtds"){
+			driverElement.value="net.sourceforge.jtds.jdbc.Driver";
+			urlElement.value="jdbc:jtds:sqlserver://<server_name>/<database_name>";
 		}
 	}
 </script>
@@ -304,7 +307,8 @@ if(!propsFile.exists()){
 			   <option value="oracle">Oracle</option>
 			   <option value="mysql">MySQL</option>
 			   <option value="postgresql">PostgreSQL</option>
-			   <option value="sqlserver-ms">SQL Server (Microsoft driver)</option>			   
+			   <option value="sqlserver-ms">SQL Server (Microsoft driver)</option>	
+				<option value="sqlserver-jtds">SQL Server (jTDS driver)</option>			   
 			   <option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
 			   <option value="hsqldb-server">HSQLDB (Server mode)</option>
 			   <option value="other">Other</option>

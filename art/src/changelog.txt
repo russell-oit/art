@@ -4,6 +4,7 @@ ART 2.5
 * Allow use of decimals when specifying y axis range
 * Renamed "Objects" to "Queries" and "Object Groups" to "Query Groups"
 * Support for archiving publish job results
+* Removed published files retention period setting
 * Allow scheduling of heat maps
 * Support for running DDL/DML statements before query's select statement
 
