@@ -442,22 +442,23 @@ public class DrilldownQuery  {
 			conn = ArtDBCP.getConnection();
 			
 			String sql;
-			Statement st;
+			PreparedStatement ps;
 			ResultSet rs;
 			
 			sql = "SELECT FIELD_POSITION " +			
 			" FROM ART_QUERY_FIELDS " +
-			" WHERE QUERY_ID = " + drilldownQueryId + " AND DRILLDOWN_COLUMN > 0 AND PARAM_TYPE = 'I'";
+			" WHERE QUERY_ID = ? AND DRILLDOWN_COLUMN > 0 AND PARAM_TYPE = 'I'";
 			
-			st=conn.createStatement();
-			rs=st.executeQuery(sql);
+			ps=conn.prepareStatement(sql);
+			ps.setInt(1,drilldownQueryId);
+			rs=ps.executeQuery();
 			while(rs.next()){
 				ArtQueryParam param=new ArtQueryParam();
 				param.create(conn,drilldownQueryId,rs.getInt("FIELD_POSITION"));
 				drilldownParams.add(param);
 			}
-			st.close();
 			rs.close();
+			ps.close();
 		
 		} catch (Exception e) {
 			logger.error("Error",e);

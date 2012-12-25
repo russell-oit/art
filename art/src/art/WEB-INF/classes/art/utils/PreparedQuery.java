@@ -827,14 +827,8 @@ public class PreparedQuery {
 	 * Get the SQL
 	 */
 	private boolean getQuery() throws SQLException {
-		Statement st;
 		ResultSet rs;
-
 		int last_stmt_retrieved_rows = 0;
-
-		// Statement to retrieve the query SQL source
-		st = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-
 		String stmt;
 		PreparedStatement ps;
 
@@ -848,15 +842,18 @@ public class PreparedQuery {
 
 			stmt = "SELECT AAS.SOURCE_INFO "
 					+ "  FROM ART_ALL_SOURCES AAS "
-					+ " WHERE AAS.OBJECT_ID = " + queryId + " "
+					+ " WHERE AAS.OBJECT_ID = ?"
 					+ " ORDER BY LINE_NUMBER";
 
-			rs = st.executeQuery(stmt);
+			ps=conn.prepareStatement(stmt);
+			ps.setInt(1,queryId);
+			rs = ps.executeQuery();
 			while (rs.next()) {
 				sb.append(rs.getString(1));
 				last_stmt_retrieved_rows++;
 			}
 			rs.close();
+			ps.close();
 		} else {
 			//User can execute query directly granted to him or his user group
 
@@ -876,8 +873,8 @@ public class PreparedQuery {
 				sb.append(rs.getString(1));
 				last_stmt_retrieved_rows++;
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 			if (last_stmt_retrieved_rows == 0) {
 				//user doesn't have direct access to query. check if he belongs to a user group which has direct access to the query
@@ -898,8 +895,8 @@ public class PreparedQuery {
 					sb.append(rs.getString(1));
 					last_stmt_retrieved_rows++;
 				}
-				ps.close();
 				rs.close();
+				ps.close();
 			}
 
 			//User can also execute all queries in a query group he has been assigned to
@@ -923,6 +920,7 @@ public class PreparedQuery {
 						last_stmt_retrieved_rows++;
 					}
 					rs.close();
+					ps.close();
 				}
 
 				if (last_stmt_retrieved_rows == 0) {
@@ -944,8 +942,8 @@ public class PreparedQuery {
 						sb.append(rs.getString(1));
 						last_stmt_retrieved_rows++;
 					}
-					ps.close();
 					rs.close();
+					ps.close();
 				}
 			}
 
@@ -957,20 +955,21 @@ public class PreparedQuery {
 
 			stmt = "SELECT AAS.SOURCE_INFO "
 					+ "  FROM ART_ALL_SOURCES AAS, ART_USER_QUERIES AUQ "
-					+ " WHERE AAS.OBJECT_ID = " + queryId + " "
+					+ " WHERE AAS.OBJECT_ID = ?"
 					+ " AND AUQ.USERNAME= 'public_user' "
 					+ " AND AAS.OBJECT_ID = AUQ.QUERY_ID "
 					+ " ORDER BY LINE_NUMBER";
 
-			rs = st.executeQuery(stmt);
+			ps=conn.prepareStatement(stmt);
+			ps.setInt(1, queryId);
+			rs = ps.executeQuery();
 			while (rs.next()) {
 				sb.append(rs.getString(1));
 				last_stmt_retrieved_rows++;
 			}
 			rs.close();
+			ps.close();
 		}
-
-		st.close();
 
 		if (last_stmt_retrieved_rows == 0) {
 			// this means we were not able to get the SQL, either because the query has not been granted to the user or it is not public
@@ -990,6 +989,8 @@ public class PreparedQuery {
 	private boolean applyRules(StringBuilder sb) throws SQLException {
 
 		logger.debug("applyRules");
+		
+		boolean successfullyApplied = true;
 
 		if (!useRules) {
 			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
@@ -1002,14 +1003,7 @@ public class PreparedQuery {
 			return true; //don't process any further
 		}
 
-		String ruleName;
-		String columnName;
-		String columnDataType;
-		Statement st; // Should I create a statement for each (nested) resultset???
-		ResultSet rs;
 		int insertPosLast = 0;
-
-		boolean successfullyApplied = true; // use variable to return method value instead of having multiple return statements
 
 		// Determine if we have a GROUP BY or an ORDER BY
 		int grb = sb.toString().lastIndexOf("GROUP BY");
@@ -1029,11 +1023,19 @@ public class PreparedQuery {
 		if (labelPosition != -1) {
 			usingLabelledRules = true;
 		}
+		
+		String ruleName;
+		String columnName;
+		String columnDataType;
+		ResultSet rs;
 
-		// Get statement
-		st = conn.createStatement();
 		// Get rules for the current query
-		rs = st.executeQuery("SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE FROM ART_QUERY_RULES WHERE QUERY_ID=" + queryId);
+		String sql="SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
+				+ " FROM ART_QUERY_RULES"
+				+ "WHERE QUERY_ID=?";
+		PreparedStatement ps=conn.prepareStatement(sql);
+		ps.setInt(1,queryId);
+		rs = ps.executeQuery();
 
 		// for each rule build and add the AND column IN (list) string to the query
 		// Note: if we don't have rules for this query, the sb is left untouched
@@ -1117,7 +1119,7 @@ public class PreparedQuery {
 		}
 
 		rs.close();
-		st.close();
+		ps.close();
 
 		//replace all occurrences of labelled rule with rule values
 		if (usingLabelledRules) {

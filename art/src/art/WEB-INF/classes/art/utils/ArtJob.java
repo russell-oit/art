@@ -2529,12 +2529,16 @@ public class ArtJob implements Job, Serializable {
 			htmlParams = aq.getHtmlParams(qId);
 
 			conn = ArtDBCP.getConnection();
+			
+			String sql = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE"
+					+ " FROM ART_JOBS_PARAMETERS "
+					+ " WHERE JOB_ID = ?"
+					+ " ORDER BY PARAM_TYPE, PARAM_NAME";
 
-			Statement st = conn.createStatement();
-			String SQL = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE FROM ART_JOBS_PARAMETERS "
-					+ " WHERE JOB_ID = " + jobId + " ORDER BY PARAM_TYPE, PARAM_NAME";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1,jobId);
 
-			ResultSet rs = st.executeQuery(SQL);
+			ResultSet rs = ps.executeQuery();
 
 			StringArray sa = new StringArray();
 			String name;
@@ -2621,7 +2625,7 @@ public class ArtJob implements Job, Serializable {
 				}
 			}
 			rs.close();
-			st.close();
+			ps.close();
 
 			//enable show parameters in job output            
 			if (showParameters) {
@@ -2727,12 +2731,16 @@ public class ArtJob implements Job, Serializable {
 		try {
 			//get the parameters from the database
 			conn = ArtDBCP.getConnection();
+			
+			String sql = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE"
+					+ " FROM ART_JOBS_PARAMETERS "
+					+ " WHERE JOB_ID = ?"
+					+ " ORDER BY PARAM_TYPE, PARAM_NAME";
 
-			Statement st = conn.createStatement();
-			String SQL = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE FROM ART_JOBS_PARAMETERS "
-					+ " WHERE JOB_ID = " + jobId + " ORDER BY PARAM_TYPE, PARAM_NAME";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1,jobId);
 
-			ResultSet rs = st.executeQuery(SQL);
+			ResultSet rs = ps.executeQuery();
 
 			int paramCount = 0;
 
@@ -2750,7 +2758,7 @@ public class ArtJob implements Job, Serializable {
 				sb.append("<br>");
 			}
 			rs.close();
-			st.close();
+			ps.close();
 
 			if (paramCount == 0) {
 				parametersDisplayString = "";
@@ -2816,10 +2824,13 @@ public class ArtJob implements Job, Serializable {
 		st.close();
 
 		//Allocating First
-		Statement stUpdate = conn.createStatement();
-		stUpdate.executeUpdate("INSERT INTO ART_JOBS (JOB_ID, QUERY_ID, USERNAME, OUTPUT_FORMAT, JOB_TYPE, ACTIVE_STATUS, ENABLE_AUDIT, MIGRATED_TO_QUARTZ) "
-				+ " VALUES (" + newJobId + ",0,'allocating','html',1, 'Y','N','X') ");
-		stUpdate.close();
+		String sql="INSERT INTO ART_JOBS (JOB_ID, QUERY_ID, USERNAME, OUTPUT_FORMAT"
+				+ " , JOB_TYPE, ACTIVE_STATUS, ENABLE_AUDIT, MIGRATED_TO_QUARTZ) "
+				+ " VALUES (?,0,'allocating','html',1, 'Y','N','X') ";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1,newJobId);
+		ps.executeUpdate();
+		ps.close();
 
 		return newJobId;
 	}

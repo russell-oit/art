@@ -44,8 +44,8 @@ public class ArtJxlsReportManager implements ReportManager {
             sql = sql.replaceAll("&apos;", "'");
             ResultSet rs = stmt.executeQuery(sql);
             RowSetDynaClass rsdc = new RowSetDynaClass(rs, false, true); //use lowercase properties = false, use column labels =true
-            stmt.close();
             rs.close();
+			stmt.close();
             rows = rsdc.getRows();
         }
 

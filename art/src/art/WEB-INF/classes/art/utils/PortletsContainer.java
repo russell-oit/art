@@ -115,31 +115,31 @@ public class PortletsContainer {
 
     /**
      * 
-     * @param portletId
+     * @param dashboardId query id of the dashboard
      * @return query ids of all art objects in the dashboard
      * @throws ArtException
      */
-    public static int[] getPortletsObjectsId(int portletId) throws ArtException {
-		int[] objectsIdArray;
+    public static List<Integer> getQueryIds(int dashboardId) throws ArtException {
+		List<Integer> queryIds=new ArrayList<Integer>();
+		
 		Connection conn =null;
 		try {
 			String portletXml = null;
 			conn = ArtDBCP.getConnection();  
 			ArtQuery aq = new ArtQuery();
-			if (aq.create(conn,portletId)) {   
+			if (aq.create(conn,dashboardId)) {   
 				portletXml = aq.getText();
 			} else {
-				throw new ArtException("Not able to load source code for portlet id: " + portletId );
+				throw new ArtException("Not able to load source for dashboard id: " + dashboardId );
 			}
-			// get list of objects id used by this portlet
-			List<String> objectsV = XmlParser.getXmlElementValues(portletXml, "OBJECTID");
-			objectsIdArray = new int[objectsV.size()];
-			for(int i=0; i<objectsV.size();i++) {
-				objectsIdArray[i] = Integer.parseInt(objectsV.get(i));
+			// get list of query ids used by this dashboard
+			List<String> queryIdStrings = XmlParser.getXmlElementValues(portletXml, "OBJECTID");
+			for(String id : queryIdStrings) {
+				queryIds.add(Integer.valueOf(id));
 			}
 		} catch(Exception e) {
             logger.error("Error",e);
-			throw new ArtException("Exception while getting objects array for portlet id: " + portletId +" Exception: " + e);
+			throw new ArtException("Exception while getting query array for dashboard id: " + dashboardId +" Exception: " + e);
 		} finally {
 			try {
 				if(conn!=null){
@@ -147,10 +147,11 @@ public class PortletsContainer {
 				}
 			} catch (SQLException e) {
                 logger.error("Error",e);
-				throw new ArtException("Not able to close connection properly for portlet id: " + portletId);
+				throw new ArtException("Not able to close connection properly for dashboard id: " + dashboardId);
 			}
 		}
-		return objectsIdArray;
+		
+		return queryIds;
 	}
 
 

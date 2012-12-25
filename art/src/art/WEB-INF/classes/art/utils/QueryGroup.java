@@ -316,10 +316,10 @@ public class QueryGroup {
         try {
             conn = ArtDBCP.getConnection();
             Statement st = conn.createStatement();
-            String SqlQuery = "SELECT QUERY_GROUP_ID, NAME "
+            String sql = "SELECT QUERY_GROUP_ID, NAME "
                     + "FROM ART_QUERY_GROUPS";
 
-            ResultSet rs = st.executeQuery(SqlQuery);
+            ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_GROUP_ID")));
             }

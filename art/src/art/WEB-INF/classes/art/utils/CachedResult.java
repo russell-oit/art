@@ -188,7 +188,7 @@ public class CachedResult  {
 			if (cacheMode==2) { // delete/insert:let's delete the content
                 logger.debug("CACHED Table: {} deleting...",tableName);
 								
-				String sql="DELETE FROM "+ tableName; // truncate table is faster but might not work on all databases! Currentlyisnot supported by hsqldb1.8
+				String sql="DELETE FROM "+ tableName; // truncate table is faster but might not work on all databases! Currently is not supported by hsqldb1.8
 				Statement st = conn.createStatement();
 				st.executeUpdate(sql); 
 				st.close();

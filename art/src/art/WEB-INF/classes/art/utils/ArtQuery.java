@@ -802,7 +802,7 @@ public class ArtQuery {
 			if (rs.next()) {
 				newQueryId = 1 + rs.getInt(1);
 
-				String SQL = "INSERT INTO ART_QUERIES ( "
+				String sql = "INSERT INTO ART_QUERIES ( "
 						+ "   QUERY_GROUP_ID, QUERY_ID, NAME "
 						+ " , SHORT_DESCRIPTION, DESCRIPTION, USES_RULES "
 						+ " , DATABASE_ID, QUERY_TYPE "
@@ -810,7 +810,7 @@ public class ArtQuery {
 						+ "  0,?,? "
 						+ " ,'-','-','N' "
 						+ " , -1,0)";
-				PreparedStatement ps = conn.prepareStatement(SQL);
+				PreparedStatement ps = conn.prepareStatement(sql);
 				ps.setInt(1, newQueryId);
 				ps.setString(2, ":allocating:" + newQueryId);
 
@@ -963,14 +963,17 @@ public class ArtQuery {
 		String roles = "";
 
 		try {
-			Statement st;
+			PreparedStatement ps;
 			ResultSet rs;
 			String sql;
 
 			//get rules for the current query
-			sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE FROM ART_QUERY_RULES WHERE QUERY_ID=" + queryId;
-			st = conn.createStatement();
-			rs = st.executeQuery(sql);
+			sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
+					+ " FROM ART_QUERY_RULES"
+					+ " WHERE QUERY_ID=?";
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, queryId);
+			rs = ps.executeQuery();
 
 			//build roles string from rule values
 			if (rs.next()) {
@@ -993,7 +996,7 @@ public class ArtQuery {
 			}
 
 			rs.close();
-			st.close();
+			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
@@ -1116,17 +1119,18 @@ public class ArtQuery {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			Statement st;
+			PreparedStatement ps;
 			ResultSet rs;
 			int position;
 
 			//drill down queries should have at least one inline parameter where drill down column > 0
 			sql = "SELECT ADQ.QUERY_ID, ADQ.DRILLDOWN_QUERY_ID, ADQ.DRILLDOWN_QUERY_POSITION "
 					+ "  FROM ART_DRILLDOWN_QUERIES ADQ "
-					+ " WHERE ADQ.QUERY_ID = " + qId;
+					+ " WHERE ADQ.QUERY_ID = ?";
 
-			st = conn.createStatement();
-			rs = st.executeQuery(sql);
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, qId);
+			rs = ps.executeQuery();
 			while (rs.next()) {
 				position = rs.getInt("DRILLDOWN_QUERY_POSITION");
 				DrilldownQuery drilldown = new DrilldownQuery();
@@ -1136,8 +1140,8 @@ public class ArtQuery {
 				}
 				map.put(new Integer(position), drilldown);
 			}
-			st.close();
 			rs.close();
+			ps.close();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -1171,13 +1175,13 @@ public class ArtQuery {
 			Statement st = conn.createStatement();
 
 			//candidate drill down query is a query with at least one inline parameter where drill down column > 0
-			String SqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME "
+			String sql = "SELECT AQ.QUERY_ID, AQ.NAME "
 					+ " FROM ART_QUERIES AQ "
 					+ " WHERE EXISTS "
 					+ " (SELECT * FROM ART_QUERY_FIELDS AQF WHERE AQ.QUERY_ID = AQF.QUERY_ID "
 					+ " AND AQF.PARAM_TYPE = 'I' AND AQF.DRILLDOWN_COLUMN > 0)";
 
-			ResultSet rs = st.executeQuery(SqlQuery);
+			ResultSet rs = st.executeQuery(sql);
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_ID")));
 			}
@@ -1244,10 +1248,10 @@ public class ArtQuery {
 
 		try {
 			//Get parameter definitions
-			Statement st = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			PreparedStatement ps;
 			ResultSet rs;
 
-			String SqlQuery = "SELECT FIELD_POSITION, NAME, PARAM_DATA_TYPE, SHORT_DESCRIPTION, DESCRIPTION "
+			String sql = "SELECT FIELD_POSITION, NAME, PARAM_DATA_TYPE, SHORT_DESCRIPTION, DESCRIPTION "
 					+ ", DEFAULT_VALUE, PARAM_TYPE, PARAM_LABEL, USE_LOV, LOV_QUERY_ID "
 					+ ", APPLY_RULES_TO_LOV, CHAINED_PARAM_POSITION, QUERY_ID, CHAINED_VALUE_POSITION "
 					+ " FROM ART_QUERY_FIELDS ";
@@ -1256,18 +1260,14 @@ public class ArtQuery {
 			// to get all the (distinct) parameters of its objects
 
 			if (queryType != 110) {
-				SqlQuery = SqlQuery
-						+ " WHERE QUERY_ID = " + queryId
+				sql = sql
+						+ " WHERE QUERY_ID = ?" 
 						+ " ORDER BY FIELD_POSITION ";
+				ps=conn.prepareStatement(sql);
+				ps.setInt(1,queryId);
 			} else {
 				// Lookup all inline query parameters for the queries used by this dashboard
-				int[] queryIds = PortletsContainer.getPortletsObjectsId(queryId);
-				StringBuilder queryIdsSb = new StringBuilder();
-				int i = 0;
-				for (i = 0; i < queryIds.length - 1; i++) {
-					queryIdsSb.append("" + queryIds[i] + ", ");
-				}
-				queryIdsSb.append("" + queryIds[i]);
+				List<Integer> queryIds = PortletsContainer.getQueryIds(queryId);
 
 				// Get all distinct InlineLabels that will appear as parameters
 				// (parameters  need to have matching labels to show up one)
@@ -1275,10 +1275,11 @@ public class ArtQuery {
 				String sqlOrs = "SELECT MAX(QUERY_ID), PARAM_LABEL"
 						+ " FROM ART_QUERY_FIELDS "
 						+ " WHERE PARAM_TYPE = 'I' "
-						+ " AND QUERY_ID in (" + queryIdsSb.toString() + ") "
+						+ " AND QUERY_ID in (" + StringUtils.join(queryIds, ",") + ") "
 						+ " GROUP BY PARAM_LABEL ";
 
-				rs = st.executeQuery(sqlOrs);
+				ps=conn.prepareStatement(sqlOrs);
+				rs = ps.executeQuery();
 
 				StringBuilder orChainSb = new StringBuilder();
 				while (rs.next()) {
@@ -1289,14 +1290,17 @@ public class ArtQuery {
 					orChainSb.append("' )");
 				}
 				rs.close();
+				ps.close();
 
-				SqlQuery = SqlQuery
+				sql = sql
 						+ " WHERE 1 = 0 "
 						+ orChainSb.toString()
-						+ "  ORDER BY FIELD_POSITION ";
+						+ " ORDER BY FIELD_POSITION ";
+				
+				ps=conn.prepareStatement(sql);
 			}
 
-			rs = st.executeQuery(SqlQuery);
+			rs = ps.executeQuery();
 
 			while (rs.next()) { // for each parameter of this query... 
 
@@ -1374,7 +1378,7 @@ public class ArtQuery {
 				}
 			}
 			rs.close();
-			st.close();
+			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}

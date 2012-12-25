@@ -86,15 +86,15 @@ while (names.hasMoreElements()) {
     }
 
 	Class.forName(driver).newInstance();
-    Connection c;
+    Connection conn;
 	if(useDefaultDatabase && !ArtDBCP.isArtSettingsLoaded()){
-		c = DriverManager.getConnection(url, username, "ART");
+		conn = DriverManager.getConnection(url, username, "ART");
 	} else {
-		c = DriverManager.getConnection(url, username, password);        
+		conn = DriverManager.getConnection(url, username, password);        
 	}
 
-    c.setAutoCommit(false);
-    session.setAttribute("SessionConn",c);
+    conn.setAutoCommit(false);
+    session.setAttribute("SessionConn",conn);
 
     /* Connection to art repository is successfull.
 
@@ -107,7 +107,7 @@ while (names.hasMoreElements()) {
 		System.out.println("ART - execEditSettings.jsp: Updating ART demo...");
 		String defaultDB_url = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
 		String sampleDB_url  = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
-		Statement st = c.createStatement();
+		Statement st = conn.createStatement();
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+defaultDB_url+"' , PASSWORD='"+artRepositoryEncryptedPassword+"' WHERE DATABASE_ID=2");
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+sampleDB_url+"' WHERE DATABASE_ID=1");
 		
@@ -116,7 +116,7 @@ while (names.hasMoreElements()) {
 			st.executeUpdate("ALTER USER ART SET PASSWORD \""+request.getParameter("art_password")+"\"");
 		}
 		st.close();
-		c.commit();
+		conn.commit();
     }
 
 

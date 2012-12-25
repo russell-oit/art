@@ -366,15 +366,23 @@ public class ArtDBCP extends HttpServlet {
 
 		//Initialize the datasources array
 		try {
+			String sql;
 			Connection conn = artdb.getConnection();
 			Statement st = conn.createStatement();
-			ResultSet rs = st.executeQuery("SELECT max(DATABASE_ID) FROM ART_DATABASES");
+			
+			sql="SELECT max(DATABASE_ID) FROM ART_DATABASES";
+			ResultSet rs = st.executeQuery(sql);
 
 			if (rs.next()) {
 				if (rs.getInt(1) > 0) { // datasources exist
 					dataSources = new LinkedHashMap<Integer, DataSource>();
 					rs.close();
-					rs = st.executeQuery("SELECT DATABASE_ID, NAME, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL FROM ART_DATABASES WHERE DATABASE_ID > 0 ORDER BY NAME");// ordered by NAME to have them inserted in order in the LinkedHashMap dataSources (note: first item is always the ArtRepository)
+					
+					sql="SELECT DATABASE_ID, NAME, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL"
+							+ " FROM ART_DATABASES"
+							+ " WHERE DATABASE_ID > 0"
+							+ " ORDER BY NAME"; // ordered by NAME to have them inserted in order in the LinkedHashMap dataSources (note: first item is always the ArtRepository)
+					rs = st.executeQuery(sql);
 					int i;
 
 					/**

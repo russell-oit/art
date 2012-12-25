@@ -105,6 +105,8 @@ artRemoveWork();
 }
 </script>
 
+
+
 <%
   String dataProviderUrl = request.getContextPath()+"/XmlDataProvider";
  %>
