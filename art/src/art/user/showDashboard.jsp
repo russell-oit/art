@@ -1,7 +1,7 @@
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP;" %>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
-<jsp:useBean id="pc" scope="request" class="art.utils.PortletsContainer" />
+<jsp:useBean id="dashboard" scope="request" class="art.utils.Dashboard" />
 
 <%
 //support display of results in the showparams page using jquery ajax
@@ -28,7 +28,7 @@ if(queryIdString!=null){
 	queryId=Integer.parseInt(objectId);
 }
   
-   pc.setObjectId(queryId);
+   dashboard.load(queryId);
    ArtDBCP.log(ue.getUsername(), "query", request.getRemoteAddr(), queryId, 0, 0, "dashboard");
    
    String contextPath=request.getContextPath();
@@ -40,24 +40,25 @@ String imgRefresh=contextPath + "/images/refresh.png";
 
  <script language="JavaScript" src="../js/overlib.js"></script>
 
-<b><%=pc.getPortletsContainerTitle()%></b> <br>
-    &nbsp;&nbsp;&nbsp;<%=pc.getPortletsContainerDescr()%>
+<b><%=dashboard.getTitle()%></b> <br>
+    &nbsp;&nbsp;&nbsp;<%=dashboard.getDescription()%>
 <div align="left">
 <table class="plain">
  <tr>
 <%
-    for(int i=0; i<pc.getColumnsCount(); i++) {
+    for(int i=0; i<dashboard.getColumnsCount(); i++) {
      %> <td> <%
-       for(int j=0; j<pc.getPortletsCount(i); j++) {
+       for(int j=0; j<dashboard.getPortletsCount(i); j++) {
 
 	  String source = "portlet_"+i+"_"+j+"_"+queryId;
 	  String divid  = "div_"+i+"_"+j+"_"+queryId;
-	  String cssclass  = "portlet"+pc.getPortletClass(i);
-          String refresh = pc.getPortletRefresh(i,j);
-	  String baseUrl = pc.getPortletLink(i,j, request); 
-	  String title = pc.getPortletTitle(i,j);
-	  // add icon on portlet title
-	  if (!pc.getPortletOnLoad(i,j)) {
+	  String cssclass  = "portlet"+dashboard.getColumnSize(i);
+          String refresh = dashboard.getPortletRefresh(i,j);
+	  String baseUrl = dashboard.getPortletLink(i,j, request); 
+	  String title = dashboard.getPortletTitle(i,j);
+	  boolean onload = dashboard.getPortletOnLoad(i,j);
+	  // add icons to portlet title
+	  if (!onload) {
 	    title = title + "  <img src='" + contextPath + "/images/onLoadFalse.gif' title='"+sdMessages.getString("portletOnLoadFalse")+"'/>";
 	  }
 	  if (refresh!=null) {
@@ -81,7 +82,7 @@ String imgRefresh=contextPath + "/images/refresh.png";
              imageMaximize="<%=imgMaximize%>"
              imageMinimize="<%=imgMinimize%>"
              imageRefresh="<%=imgRefresh%>"             
-             executeOnLoad= "<%=pc.getPortletOnLoad(i,j)%>"
+             executeOnLoad= "<%=onload%>"
 			 preFunction="artAddWork"	
               />
           <%  } else {
@@ -95,7 +96,7 @@ String imgRefresh=contextPath + "/images/refresh.png";
              imageMinimize="<%=imgMinimize%>"
              imageRefresh="<%=imgRefresh%>"             
              refreshPeriod="<%=refresh%>"
-             executeOnLoad="<%=pc.getPortletOnLoad(i,j)%>"
+             executeOnLoad="<%=onload%>"
 			 preFunction="artAddWork"				 
               />
           <%  }  %>

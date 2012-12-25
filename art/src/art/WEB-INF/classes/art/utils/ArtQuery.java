@@ -1267,7 +1267,7 @@ public class ArtQuery {
 				ps.setInt(1,queryId);
 			} else {
 				// Lookup all inline query parameters for the queries used by this dashboard
-				List<Integer> queryIds = PortletsContainer.getQueryIds(queryId);
+				List<Integer> queryIds = Dashboard.getQueryIds(queryId);
 
 				// Get all distinct InlineLabels that will appear as parameters
 				// (parameters  need to have matching labels to show up one)

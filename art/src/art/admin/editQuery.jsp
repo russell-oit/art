@@ -861,7 +861,7 @@ tinyMCE.init({
 	are displayed once.<br>
 	Use the following xml-like syntax to build your dashboard:
                             <b> tags are case sensitive (all in uppercase) </b><br>
-                            <textarea readonly cols="80" rows="10"><PORTLETSCONTAINER>
+                            <textarea readonly cols="80" rows="10"><DASHBOARD>
 <COLUMN>
 <!-- column size: auto|small|medium|large -->
 <SIZE>medium</SIZE>
@@ -873,7 +873,7 @@ tinyMCE.init({
  <ONLOAD>true</ONLOAD>
  <!-- (optional, default is never) refresh content every 30 seconds-->
  <REFRESH>30</REFRESH>
- <OBJECTID>2</OBJECTID>
+ <QUERYID>2</QUERYID>
 </PORTLET>
 <!-- create a new portlet within this column
      to embed an external html fragment -->
@@ -881,12 +881,13 @@ tinyMCE.init({
 <TITLE>Portlet title</TITLE>
  <URL>Url</URL>
 </PORTLET>
+
 <!-- .. you can add as many portlets as you want -->
 </COLUMN>
 <COLUMN>
 <!-- you can add as many columns as you want -->
 </COLUMN>
-</PORTLETSCONTAINER></textarea>
+</DASHBOARD></textarea>
 
                         </li>
                         <li><b>Text</b><br>
