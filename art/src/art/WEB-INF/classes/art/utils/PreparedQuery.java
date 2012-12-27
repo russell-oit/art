@@ -1350,8 +1350,8 @@ public class PreparedQuery {
 					if (param.usesDirectSubstitution()) {
 						String querySql = sb.toString();
 
-						//some precaution
-						if (paramValue != null) { //can be null if htmlparams was null and was created here
+						if (paramValue != null) { 
+							//some precaution
 							paramValue = paramValue.replace("'", "''").replace("--", "").replace(";", "");
 						}
 

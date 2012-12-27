@@ -57,16 +57,25 @@ public class ArtQuery {
 	String graphBgColor = "#FFFFFF";
 	String showParameters = "N"; //allow show parameters to be selected by default
 	//properties not used in query creation
-	List<ParamInterface> paramList; //parameter list used in showParams pages
+	List<ParamInterface> paramList; //parameter list used in showParams page
 	String username;
 	String groupName;
 	private int displayResultset;
+	private boolean hasParams=false; //if this query has parameters defined
 
 	/**
 	 *
 	 */
 	public ArtQuery() {
 	}
+
+	/**
+	 * @return the hasParams
+	 */
+	public boolean isHasParams() {
+		return hasParams;
+	}
+	
 
 	/**
 	 * @return the displayResultset
@@ -1242,7 +1251,10 @@ public class ArtQuery {
 		}
 	}
 
-	//build list of parameters to be used in showParams pages
+	/**
+	 * build list of parameters to be used in showParams page
+	 * @param conn 
+	 */
 	private void buildParamList(Connection conn) {
 		paramList = new ArrayList<ParamInterface>();
 
@@ -2164,8 +2176,9 @@ public class ArtQuery {
 			PreparedStatement ps;
 			ResultSet rs;
 
-			sql = "SELECT FIELD_POSITION, NAME, PARAM_LABEL, PARAM_TYPE "
-					+ " FROM ART_QUERY_FIELDS WHERE QUERY_ID =?";
+			sql = "SELECT FIELD_POSITION, NAME, PARAM_LABEL, PARAM_TYPE, DEFAULT_VALUE "
+					+ " FROM ART_QUERY_FIELDS"
+					+ " WHERE QUERY_ID =?";
 
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, qId);
@@ -2175,16 +2188,21 @@ public class ArtQuery {
 			String label;
 			int position;
 			String paramType;
+			int count=0;
 			while (rs.next()) {
+				count++;
+				
 				position = rs.getInt("FIELD_POSITION");
 				label = rs.getString("PARAM_LABEL");
 				paramType = rs.getString("PARAM_TYPE");
+				String paramValue = rs.getString("DEFAULT_VALUE");
 
 				if (StringUtils.equals(paramType, "I")) {
 					//inline param                    
 					htmlName = "P_" + label;
 					ArtQueryParam param = new ArtQueryParam();
 					param.create(conn, qId, position);
+					param.setParamValue(paramValue); //set default value for inline params
 					params.put(htmlName, param);
 				} else if (StringUtils.equals(paramType, "M")) {
 					//multi param. can be either labelled (M_label) or non-labelled (M_1)
@@ -2199,9 +2217,15 @@ public class ArtQuery {
 					params.put(htmlName, param);
 				}
 			}
-
-			ps.close();
 			rs.close();
+			ps.close();
+			
+			if(count>0){
+				hasParams=true;
+			} else {
+				hasParams=false;
+			}
+			
 
 		} catch (Exception e) {
 			logger.error("Error", e);

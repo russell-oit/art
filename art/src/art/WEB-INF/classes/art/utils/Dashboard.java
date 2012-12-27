@@ -59,7 +59,7 @@ public class Dashboard {
 	 */
 	public void load(int dashboardId) throws ArtException {
 
-		/* Load portlets info */
+		/* Load dashboard info */
 		Connection conn = null;
 		try {
 			String dashboardXml = null;
@@ -129,7 +129,7 @@ public class Dashboard {
 			List<String> queryIdStrings = XmlParser.getXmlElementValues(portletXml, "OBJECTID");
 			//allow use of QUERYID tag
 			queryIdStrings.addAll(XmlParser.getXmlElementValues(portletXml, "QUERYID"));
-			
+
 			for (String id : queryIdStrings) {
 				queryIds.add(Integer.valueOf(id));
 			}
@@ -161,31 +161,37 @@ public class Dashboard {
 	 * @throws ArtException
 	 */
 	public String getPortletLink(int col, int row, HttpServletRequest request) throws ArtException {
+
+		String link;
+
 		// Get the portlet xml info
 		String portletXml = (String) portlets[col].get(row);
-		String link = XmlParser.getXmlElementValue(portletXml, "OBJECTID");
+		link = XmlParser.getXmlElementValue(portletXml, "OBJECTID");
 		//allow use of QUERYID tag
-		if(link==null){
+		if (link == null) {
 			link = XmlParser.getXmlElementValue(portletXml, "QUERYID");
 		}
-		
+
 		if (link == null) {
-			return XmlParser.getXmlElementValue(portletXml, "URL");
+			//no query defined. use url tag
+			link = XmlParser.getXmlElementValue(portletXml, "URL");
 		} else {
 			// context path as suffix + build url + switch off html header&footer and add parameters
-			StringBuilder linkSb = new StringBuilder();
+			StringBuilder paramsSb = new StringBuilder(254);
 			boolean getDefaultParameters = true;
-			java.util.Enumeration names = request.getParameterNames();
+			Enumeration names = request.getParameterNames();
 			while (names.hasMoreElements()) {
 				String name = (String) names.nextElement();
 				if (name.startsWith("P_")) {
-					linkSb.append("&" + name + "=" + request.getParameter(name));
-					getDefaultParameters = false; // the URL has parameters, thus we'll not get the defaults
+					paramsSb.append("&" + name + "=" + request.getParameter(name));
+					getDefaultParameters = false; // the URL has parameters, thus we'll not use the defaults
 				}
 			}
 			link = QueryUrl.getExecuteUrl(Integer.parseInt(link), false, getDefaultParameters) + "&_isFragment=Y";
-			return request.getContextPath() + link + linkSb.toString();
+			link = request.getContextPath() + link + paramsSb.toString();
 		}
+
+		return link;
 	}
 
 	/**
@@ -200,11 +206,11 @@ public class Dashboard {
 		String portletXml = (String) portlets[col].get(row);
 		String value = XmlParser.getXmlElementValue(portletXml, "REFRESH");
 
-		int defaultRefresh = 5;
+		int minimumRefresh = 5;
 		if (value != null) {
 			if (NumberUtils.isNumber(value)) {
-				if (Integer.parseInt(value) < defaultRefresh) {
-					value = String.valueOf(defaultRefresh);
+				if (Integer.parseInt(value) < minimumRefresh) {
+					value = String.valueOf(minimumRefresh);
 				}
 			} else {
 				value = null; //invalid number specified. default to no refresh

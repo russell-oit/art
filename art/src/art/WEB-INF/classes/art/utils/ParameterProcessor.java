@@ -79,7 +79,7 @@ public class ParameterProcessor {
 		Enumeration names = request.getParameterNames();
 		String htmlName; //html element htmlName
 		String label; //parameter label        
-		Map<Integer, ArtQueryParam> displayParams = null; //display parameters. contains param position and list with display name and value                
+		Map<Integer, ArtQueryParam> displayParams = new TreeMap<Integer, ArtQueryParam>(); //display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
 
 
 		boolean showParams;
@@ -97,15 +97,12 @@ public class ParameterProcessor {
 			}
 		}
 
-		if (showParams) {
-			displayParams = new TreeMap<Integer, ArtQueryParam>(); //use treemap so that params can be displayed in field position order
-		}
-
 		if (htmlParams == null) {
 			//get list of all valid parameters. used with display params and counters sql injection from direct url execution            
 			htmlParams = aq.getHtmlParams(queryId);
 		}
 
+		//set parameter values from url
 		while (names.hasMoreElements()) {
 			// Get the htmlName of the parameter
 			htmlName = (String) names.nextElement();
@@ -121,38 +118,8 @@ public class ParameterProcessor {
 
 					inlineParams.put(label, paramValue);
 					param.setParamValue(paramValue);
-
-					if (showParams) {
-						//populate display params map
-
-						//for lov parameters, show both parameter value and friendly value
-						if (param.usesLov()) {
-							//get all possible lov values.							
-							try {
-								PreparedQuery pq = new PreparedQuery();
-								pq.setQueryId(param.getLovQueryId());
-								//for chained parameters, handle #filter# parameter
-								int filterPosition = param.getFilterPosition();
-								if (filterPosition > 0) {
-									//parameter chained on another parameter. get filter parameter html name
-									String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
-									//get filter value. use request because inline and multi param maps haven't been populated with all parameter values yet
-									String filter = request.getParameter(valueParamHtmlName);
-									Map<String, String> filterParam = new HashMap<String, String>();
-									filterParam.put("filter", filter);
-									pq.setInlineParams(filterParam);
-								}
-								Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
-								param.setLovValues(lov);
-							} catch (Exception e) {
-								logger.error("Error", e);
-							}
-						}
-
-						displayParams.put(param.getFieldPosition(), param);
-					}
 				}
-			} else if (htmlName.startsWith("M_")) { // it is a multiple param
+			} else if (htmlName.startsWith("M_")) { // it is a multi param
 				label = htmlName.substring(2);
 
 				String[] paramValues = request.getParameterValues(htmlName); // get values string array for the parameter
@@ -172,41 +139,57 @@ public class ParameterProcessor {
 						}
 						multiParams.put(label, paramValues);
 						param.setParamValue(paramValues);
-
-						if (showParams) {
-							//populate display params map                                                                                       
-
-							//for lov parameters, show both parameter value and friendly value
-							if (param.usesLov()) {
-								//get all possible lov values.								
-								try {
-									PreparedQuery pq = new PreparedQuery();
-									pq.setQueryId(param.getLovQueryId());
-									//for chained parameters, handle #filter# parameter
-									int filterPosition = param.getFilterPosition();
-									if (filterPosition > 0) {
-										//parameter chained on another parameter. get filter value
-										String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
-										String filter = request.getParameter(valueParamHtmlName);
-										Map<String, String> filterParam = new HashMap<String, String>();
-										filterParam.put("filter", filter);
-										pq.setInlineParams(filterParam);
-									}
-									Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
-									param.setLovValues(lov);
-								} catch (Exception e) {
-									logger.error("Error", e);
-								}
-							}
-
-							displayParams.put(param.getFieldPosition(), param);
-						}
 					}
 				}
 			}
 
 		}
 
+		if (showParams) {
+			//prepare display params
+			prepareDisplayParams(queryId, inlineParams, htmlParams, displayParams);
+		}
+
 		return displayParams;
+	}
+
+	/**
+	 * Prepare display parameters
+	 *
+	 * @param queryId
+	 * @param inlineParams
+	 * @param htmlParams
+	 * @param displayParams
+	 */
+	private static void prepareDisplayParams(int queryId, Map<String, String> inlineParams,
+			Map<String, ArtQueryParam> htmlParams, Map<Integer, ArtQueryParam> displayParams) {
+
+		for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+			ArtQueryParam param = entry.getValue();
+			//for lov parameters, show both parameter value and friendly value
+			if (param.usesLov()) {
+				//get all possible lov values.							
+				try {
+					PreparedQuery pq = new PreparedQuery();
+					pq.setQueryId(param.getLovQueryId());
+					//for chained parameters, handle #filter# parameter
+					int filterPosition = param.getFilterPosition();
+					if (filterPosition > 0) {
+						//parameter chained on another parameter. get filter value
+						String valueParamLabel = param.getLabel(queryId, filterPosition);
+						String filter = inlineParams.get(valueParamLabel);
+						Map<String, String> filterParam = new HashMap<String, String>();
+						filterParam.put("filter", filter);
+						pq.setInlineParams(filterParam);
+					}
+					Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
+					param.setLovValues(lov);
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
+			}
+
+			displayParams.put(param.getFieldPosition(), param);
+		}
 	}
 }

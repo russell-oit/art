@@ -43,8 +43,8 @@ public class XmlParser {
 	 */
 	public static String getXmlElementValue(String xml, String element) throws ArtException {
 
-		String value=null; //return null if start element not found
-		
+		String value = null; //return null if start element not found
+
 		String startElement = "<" + element + ">";
 		String endElement = "</" + element + ">";
 
@@ -61,10 +61,10 @@ public class XmlParser {
 			}
 
 			// Extract value
-			value=xml.substring((start + startElement.length()), end);
+			value = xml.substring((start + startElement.length()), end);
 		}
 
-		return value; 
+		return value;
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class XmlParser {
 
 		String xmlString = xml;
 		List<String> values = new ArrayList<String>();
-		
+
 		String startElement = "<" + element + ">";
 		String endElement = "</" + element + ">";
 
@@ -118,8 +118,8 @@ public class XmlParser {
 	 */
 	public static XmlInfo getXmlElementInfo(String xml, String element, int offset) throws ArtException {
 
-		XmlInfo info=null;
-		
+		XmlInfo info = null;
+
 		String startElement = "<" + element + ">";
 
 		// Start Pos
@@ -134,7 +134,7 @@ public class XmlParser {
 				throw new ArtException("End element not found: &lt;/" + element + "&gt;");
 			}
 
-			info=new XmlInfo(xml.substring(start + startElement.length()), start, end);
+			info = new XmlInfo(xml.substring(start + startElement.length()), start, end);
 		}
 
 		return info;

@@ -62,8 +62,8 @@ public class QueryUrl {
 	/**
 	 * Returns the URL to directly execute the query.
 	 *
-	 * getDefaulParams determines if the URL should contain the default parameters
-	 * or not
+	 * getDefaulParams determines if the URL should contain the default
+	 * parameters or not
 	 *
 	 * @param queryId
 	 * @param encodeUrl
@@ -72,30 +72,11 @@ public class QueryUrl {
 	 * @throws ArtException
 	 */
 	public static String getExecuteUrl(int queryId, boolean encodeUrl, boolean getDefaultParams) throws ArtException {
-		Connection conn = null;
-		
 		String url = "/user/ExecuteQuery?queryId=" + queryId;
 
-		try {
-			conn = ArtDBCP.getConnection();
-			
-			if (getDefaultParams) {
-				//add parameters to url
-				url = url + lookupParams(queryId, conn, encodeUrl);
-			}
-
-		} catch (Exception e) {
-			logger.error("Error", e);
-			throw new ArtException("Error while initializing query url. Query id: " + queryId + " Exception: " + e);
-		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				logger.error("Error", e);
-				throw new ArtException("Not able to close connection properly for object url. Query id: " + queryId);
-			}
+		if (getDefaultParams) {
+			//add parameters to url
+			url = url + lookupParams(queryId, encodeUrl);
 		}
 
 		return url;
@@ -105,37 +86,51 @@ public class QueryUrl {
 	 * Build the portion of the URL with default parameter values If encodeUrl
 	 * is true, the parameters values are encoded (used when printing the link)
 	 */
-	private static String lookupParams(int objectId, Connection conn, boolean encodeUrl) throws SQLException {
+	private static String lookupParams(int queryId, boolean encodeUrl) {
 		StringBuilder sb = new StringBuilder(254);
 
-		String sqlQuery = "SELECT PARAM_LABEL, DEFAULT_VALUE, PARAM_TYPE, "
-				+ " CHAINED_PARAM_POSITION, PARAM_DATA_TYPE "
-				+ " FROM ART_QUERY_FIELDS "
-				+ " WHERE QUERY_ID = ? ORDER BY FIELD_POSITION";
+		Connection conn = ArtDBCP.getConnection();
 
-		PreparedStatement ps = conn.prepareStatement(sqlQuery);
-		ps.setInt(1, objectId);
-		ResultSet rs = ps.executeQuery();
-		
-		String paramType, paramName, paramValue;
-		while (rs.next()) {
-			paramName = rs.getString("PARAM_LABEL");
-			paramValue = rs.getString("DEFAULT_VALUE");
-			if (encodeUrl && paramValue != null) {
-				try {
-					paramValue = URLEncoder.encode(paramValue, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					logger.warn("UTF-8 encoding not supported", e);
+		try {
+
+			String sqlQuery = "SELECT PARAM_LABEL, DEFAULT_VALUE, PARAM_TYPE "
+					+ " FROM ART_QUERY_FIELDS "
+					+ " WHERE QUERY_ID = ? ORDER BY FIELD_POSITION";
+
+			PreparedStatement ps = conn.prepareStatement(sqlQuery);
+			ps.setInt(1, queryId);
+			ResultSet rs = ps.executeQuery();
+
+			String paramType, paramName, paramValue;
+			while (rs.next()) {
+				paramName = rs.getString("PARAM_LABEL");
+				paramValue = rs.getString("DEFAULT_VALUE");
+				if (encodeUrl && paramValue != null) {
+					try {
+						paramValue = URLEncoder.encode(paramValue, "UTF-8");
+					} catch (UnsupportedEncodingException e) {
+						logger.warn("UTF-8 encoding not supported", e);
+					}
+				}
+
+				paramType = rs.getString("PARAM_TYPE");
+				if (StringUtils.equals(paramType, "I")) { // inline
+					sb.append("&P_" + paramName + "=" + paramValue);
 				}
 			}
-
-			paramType = rs.getString("PARAM_TYPE");
-			if (StringUtils.equals(paramType, "I")) { // inline
-				sb.append("&P_" + paramName + "=" + paramValue);
+			rs.close();
+			ps.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
 			}
 		}
-		rs.close();
-		ps.close();
 
 		return sb.toString();
 	}

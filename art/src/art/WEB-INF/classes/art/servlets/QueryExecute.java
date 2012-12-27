@@ -629,6 +629,17 @@ public class QueryExecute extends HttpServlet {
 
 					ArtQuery aq = new ArtQuery();
 					Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
+					
+					//set default parameter values. so that they don't have to be specified on the url
+					if(aq.isHasParams()){
+						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+							ArtQueryParam param = entry.getValue();
+							if(StringUtils.equals(param.getParamType(), "I")){
+								inlineParams.put(param.getParamLabel(), (String)param.getParamValue());
+							}
+								
+						}
+					}
 
 					/*
 					 * ParameterProcessor has a static function to parse the
@@ -638,7 +649,7 @@ public class QueryExecute extends HttpServlet {
 					
 					//set showparams flag. flag not only determined by presense of _showParams. may also be true if query set to always show params
 					boolean showParams=false;
-					if(displayParams!=null){
+					if(!displayParams.isEmpty()){
 						showParams=true;
 					}
 

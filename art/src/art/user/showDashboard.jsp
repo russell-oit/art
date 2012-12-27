@@ -1,5 +1,6 @@
-<%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP;" %>
+<%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
+
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <jsp:useBean id="dashboard" scope="request" class="art.utils.Dashboard" />
 

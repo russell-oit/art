@@ -778,8 +778,9 @@ public class ArtQueryParam implements Serializable {
 			PreparedStatement ps;
 			ResultSet rs;
 
-			sql = "SELECT NAME, PARAM_LABEL, PARAM_TYPE FROM ART_QUERY_FIELDS "
-					+ " WHERE QUERY_ID = ? AND FIELD_POSITION=?";
+			sql = "SELECT PARAM_LABEL, PARAM_TYPE"
+					+ " FROM ART_QUERY_FIELDS "
+					+ " WHERE QUERY_ID=? AND FIELD_POSITION=?";
 
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, qId);
@@ -799,9 +800,8 @@ public class ArtQueryParam implements Serializable {
 					htmlName = "M_" + label;
 				}
 			}
-			ps.close();
 			rs.close();
-
+			ps.close();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -817,6 +817,56 @@ public class ArtQueryParam implements Serializable {
 		}
 
 		return htmlName;
+	}
+	
+	/**
+	 * Get a parameter's label
+	 *
+	 * @param qId
+	 * @param fieldPos
+	 * @return a parameter's label
+	 */
+	public String getLabel(int qId, int fieldPos) {
+		String label = "";
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+
+			sql = "SELECT PARAM_LABEL"
+					+ " FROM ART_QUERY_FIELDS "
+					+ " WHERE QUERY_ID=? AND FIELD_POSITION=?";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, qId);
+			ps.setInt(2, fieldPos);
+
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				label = rs.getString("PARAM_LABEL");
+			}
+			rs.close();
+			ps.close();
+
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+
+		}
+
+		return label;
 	}
 	
 	
