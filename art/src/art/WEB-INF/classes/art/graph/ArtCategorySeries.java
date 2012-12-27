@@ -19,6 +19,7 @@ import de.laures.cewolf.links.CategoryItemLinkGenerator;
 import de.laures.cewolf.tooltips.CategoryToolTipGenerator;
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -490,7 +491,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 					} else {
 						// new series .
 						seriesId = series;
-						seriesList.put(tmpSeriesName, new Integer(seriesId)); // map series name to array id
+						seriesList.put(tmpSeriesName, Integer.valueOf(seriesId)); // map series name to array id
 						series++;
 					}
 					key = category + String.valueOf(seriesId);
@@ -662,7 +663,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 			//save chart as png file									            
 			try {
 				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
-			} catch (Exception e) {
+			} catch (IOException e) {
 				logger.error("Error", e);
 			}
 		}

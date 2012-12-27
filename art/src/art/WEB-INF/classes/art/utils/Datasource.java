@@ -1,10 +1,9 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-
 import java.sql.*;
+import java.text.Collator;
 import java.util.*;
-import java.text.Collator; //for ordering of strings
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

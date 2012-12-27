@@ -20,7 +20,6 @@ public class htmlGridOutput implements ArtOutputInterface {
 	int numberOfLines;
 	int maxRows;
 	NumberFormat nfPlain;
-	boolean oddline = true;
 	Map<Integer, ArtQueryParam> displayParams;
 
 	/**
@@ -141,11 +140,6 @@ public class htmlGridOutput implements ArtOutputInterface {
 	@Override
 	public boolean newLine() {
 		numberOfLines++;
-		if (numberOfLines % 2 == 0) {
-			oddline = true;
-		} else {
-			oddline = false;
-		}
 
 		if (numberOfLines == 1) { // first row
 			out.println(" <tr class=\"rows\" onclick=\"javascript:selectRow(this)\" ondblclick=\"javascript:selectRow2(this)\" onmouseover=\"javascript:highLight(this,'hiliterows')\" onmouseout=\"javascript:highLight(this,'rows')\">");

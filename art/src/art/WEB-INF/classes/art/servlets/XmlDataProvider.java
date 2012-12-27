@@ -336,22 +336,22 @@ public class XmlDataProvider extends BaseAjaxServlet {
             }
 
             builder.append("<fieldset>");
-            builder.append("<legend>" + messages.getString("itemDescription") + "</legend>");
-            builder.append(messages.getString("objectId") + " <b>" + rs.getInt("QUERY_ID") + "</b> <br>");
-            builder.append(messages.getString("objectName") + " <b>" + rs.getString("NAME") + "</b> ");
+            builder.append("<legend>").append(messages.getString("itemDescription")).append("</legend>");
+            builder.append(messages.getString("objectId")).append(" <b>").append(rs.getInt("QUERY_ID")).append("</b> <br>");
+            builder.append(messages.getString("objectName")).append(" <b>").append(rs.getString("NAME")).append("</b> ");
             String shortDescription=rs.getString("SHORT_DESCRIPTION");
 			shortDescription=StringUtils.trim(shortDescription);
             if(StringUtils.length(shortDescription)>0){
-                builder.append(":: <b>" + shortDescription + "</b>");
+                builder.append(":: <b>").append(shortDescription).append("</b>");
             }
             builder.append("<br>");
-            builder.append(messages.getString("itemDescription") + "<br>&nbsp;&nbsp; <b>" + rs.getString("DESCRIPTION") + "</b><br>");
-            builder.append(messages.getString("objectType") + " <b>" + type + "</b><br>");
-            builder.append(messages.getString("updateDate") + " <b>" + rs.getString("UPDATE_DATE") + "</b><br>");
+            builder.append(messages.getString("itemDescription")).append("<br>&nbsp;&nbsp; <b>").append(rs.getString("DESCRIPTION")).append("</b><br>");
+            builder.append(messages.getString("objectType")).append(" <b>").append(type).append("</b><br>");
+            builder.append(messages.getString("updateDate")).append(" <b>").append(rs.getString("UPDATE_DATE")).append("</b><br>");
 
             // dashboards, text querys, mondrian via xmla and ssas via xmla don't have a datasource
             if (typeId != 111 && typeId != 110 && typeId != 113 && typeId != 114) {                 
-                builder.append(messages.getString("targetDatasource") + " <b>" + rs.getString("DATABASE_NAME") + "</b><br>");
+                builder.append(messages.getString("targetDatasource")).append(" <b>").append(rs.getString("DATABASE_NAME")).append("</b><br>");
             }
 
 			//remove show params checkbox. let parameters always be shown
@@ -361,7 +361,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
             }
 			*/
 
-            builder.append("<input type=\"hidden\" name=\"typeId\" value=\"" + typeId + "\">");
+            builder.append("<input type=\"hidden\" name=\"typeId\" value=\"").append(typeId).append("\">");
             builder.append("</fieldset>");
         }
         ps.close();

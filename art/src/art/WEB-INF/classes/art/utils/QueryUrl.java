@@ -115,7 +115,7 @@ public class QueryUrl {
 
 				paramType = rs.getString("PARAM_TYPE");
 				if (StringUtils.equals(paramType, "I")) { // inline
-					sb.append("&P_" + paramName + "=" + paramValue);
+					sb.append("&P_").append(paramName).append("=").append(paramValue);
 				}
 			}
 			rs.close();

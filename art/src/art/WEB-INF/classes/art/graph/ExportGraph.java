@@ -512,6 +512,8 @@ public class ExportGraph {
 							//stacked horizontal bar graph 3d
 							chart = ChartFactory.createStackedBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
 							break;
+						default:
+							chart=null;
 					}
 
 					if (chart != null) {

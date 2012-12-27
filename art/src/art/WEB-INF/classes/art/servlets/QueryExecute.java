@@ -631,7 +631,7 @@ public class QueryExecute extends HttpServlet {
 					Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
 					
 					//set default parameter values. so that they don't have to be specified on the url
-					if(aq.isHasParams()){
+					if(!htmlParams.isEmpty()){
 						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
 							ArtQueryParam param = entry.getValue();
 							if(StringUtils.equals(param.getParamType(), "I")){

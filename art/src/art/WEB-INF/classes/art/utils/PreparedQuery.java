@@ -1095,7 +1095,7 @@ public class PreparedQuery {
 						if (count == 1) {
 							labelledValues.append(condition);
 						} else {
-							labelledValues.append(" AND " + condition);
+							labelledValues.append(" AND ").append(condition);
 						}
 					} else {
 						//append rule values for non-labelled rules
@@ -1111,7 +1111,7 @@ public class PreparedQuery {
 
 							sb.insert(sb.length() - insertPosLast, " AND " + condition);
 						} else { //No group by or order by. We can just append
-							sb.append(" AND " + condition);
+							sb.append(" AND ").append(condition);
 						}
 					}
 				}
@@ -1209,10 +1209,10 @@ public class PreparedQuery {
 				} else { // Normal EXACT type
 					if (StringUtils.equals(columnDataType, "NUMBER") && NumberUtils.isNumber(ruleValue)) {
 						//don't quote numbers
-						tmpSb.append("," + ruleValue);
+						tmpSb.append(",").append(ruleValue);
 					} else {
 						//escape and quote non-numbers
-						tmpSb.append(",'" + escapeSql(ruleValue) + "'");
+						tmpSb.append(",'").append(escapeSql(ruleValue)).append("'");
 					}
 				}
 			} else {
@@ -1285,7 +1285,7 @@ public class PreparedQuery {
 				if (count == 1) {
 					valuesSb.append(condition);
 				} else {
-					valuesSb.append(" OR " + condition);
+					valuesSb.append(" OR ").append(condition);
 				}
 			}
 		}
@@ -1852,7 +1852,7 @@ public class PreparedQuery {
 				String paramDataType = param.getParamDataType();
 
 				StringBuilder SqlAndParamIn = new StringBuilder(128);
-				SqlAndParamIn.append(" AND " + paramLabel + " IN (");
+				SqlAndParamIn.append(" AND ").append(paramLabel).append(" IN (");
 
 				logger.debug("Number of parameters for {}/{} is {}", new Object[]{paramId, paramLabel, paramValues.length});
 

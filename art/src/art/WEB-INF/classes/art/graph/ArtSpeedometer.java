@@ -8,6 +8,7 @@ import de.laures.cewolf.DatasetProducer;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -229,7 +230,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 					List<String> rangeDetails = StringUtils.split(rangeSpec, ":", true);
 					if (rangeDetails.size() == 3) {
 						rangeCount++;
-						key = new Integer(rangeCount);
+						key = Integer.valueOf(rangeCount);
 						String valuePart = rangeDetails.get(0);
 						double rangeValue;
 						if (valuePart.contains("%")) {
@@ -239,7 +240,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 							rangeValue=Double.parseDouble(valuePart);
 						}
 
-						rangeValues.put(key, new Double(rangeValue));
+						rangeValues.put(key, Double.valueOf(rangeValue));
 						rangeColors.put(key, rangeDetails.get(1));
 						rangeDescriptions.put(key, rangeDetails.get(2));
 					}
@@ -320,7 +321,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 			//save chart as png file									            
 			try {
 				ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);
-			} catch (Exception e) {
+			} catch (IOException e) {
 				logger.error("Error", e);
 			}
 		}

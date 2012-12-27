@@ -19,6 +19,7 @@ import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -440,7 +441,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                     seriesId = (hm.get(tmpSeriesName)).intValue();
                 } else { // new series 
                     seriesId = series;
-                    hm.put(tmpSeriesName, new Integer(seriesId)); // map series name to array id
+                    hm.put(tmpSeriesName, Integer.valueOf(seriesId)); // map series name to array id
                     ts[seriesId] = new TimeSeries(tmpSeriesName); // initialize new timeseries
                     //insert value
                     series++;
@@ -685,7 +686,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
             //save chart as png file									            
             try {
                 ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
-            } catch (Exception e) {
+            } catch (IOException e) {
                logger.error("Error",e);
             }
         }

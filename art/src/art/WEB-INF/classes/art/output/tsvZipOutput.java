@@ -168,7 +168,7 @@ public class tsvZipOutput implements ArtOutputInterface {
 
 	@Override
 	public void addHeaderCell(String s) {
-		exportFileStrBuf.append(s + "\t");
+		exportFileStrBuf.append(s).append("\t");
 	}
 
 	@Override
@@ -182,29 +182,29 @@ public class tsvZipOutput implements ArtOutputInterface {
 	@Override
 	public void addCellString(String s) {
 		if (s != null) {
-			exportFileStrBuf.append(s.replace('\t', ' ').replace('\n', ' ').replace('\r', ' ') + "\t");
+			exportFileStrBuf.append(s.replace('\t', ' ').replace('\n', ' ').replace('\r', ' ')).append("\t");
 		} else {
-			exportFileStrBuf.append(s + "\t");
+			exportFileStrBuf.append(s).append("\t");
 		}
 	}
 
 	@Override
 	public void addCellDouble(Double d) {
-		String formattedValue = null;
+		String formattedValue = "";
 		if (d != null) {
 			formattedValue = nfPlain.format(d.doubleValue());
 		}
-		exportFileStrBuf.append("" + formattedValue + "\t");
+		exportFileStrBuf.append(formattedValue).append("\t");
 	}
 
 	@Override
 	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		exportFileStrBuf.append("" + i + "\t");
+		exportFileStrBuf.append(i).append("\t");
 	}
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		exportFileStrBuf.append("" + ArtDBCP.getDateDisplayString(d) + "\t");
+		exportFileStrBuf.append(ArtDBCP.getDateDisplayString(d)).append("\t");
 	}
 
 	@Override

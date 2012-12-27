@@ -21,7 +21,6 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-
 import java.sql.*;
 import java.util.*;
 import org.slf4j.Logger;

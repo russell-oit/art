@@ -173,9 +173,8 @@ public class HtmlLovParam implements ParamInterface {
 			String viewColumnValue;
 
 			StringBuilder sb = new StringBuilder(1024);
-			sb.append("\n<select "
-					+ " id=\"" + paramHtmlId + "\""
-					+ " name=\"" + paramHtmlName + "\" " + (isMulti ? "size=\"5\" multiple" : "") + ">");
+			sb.append("\n<select " + " id=\"").append(paramHtmlId).append("\"" + " name=\"");
+			sb.append(paramHtmlName).append("\" ").append(isMulti ? "size=\"5\" multiple" : "").append(">");
 			if (isMulti) {
 				if (StringUtils.equals(initialValue, "ALL_ITEMS") || StringUtils.equals(initialValue, "All")) {
 					selected = "selected";
@@ -186,7 +185,7 @@ public class HtmlLovParam implements ParamInterface {
 				if (messages != null) {
 					allString = messages.getString("allItems");
 				}
-				sb.append("<option value=\"ALL_ITEMS\" " + selected + ">" + allString + "</option>");
+				sb.append("<option value=\"ALL_ITEMS\" ").append(selected).append(">").append(allString).append("</option>");
 			}
 
 			Map<String, String> lov = pq.executeLovQuery(useRules); //override lov use rules setting with setting defined in the parameter definition
@@ -211,7 +210,7 @@ public class HtmlLovParam implements ParamInterface {
 
 			sb.append("\n</select>\n");
 			values = sb.toString();
-			
+
 		} catch (Exception e) {
 			values = "Error: " + e;
 			logger.error("Error", e);

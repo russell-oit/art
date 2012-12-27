@@ -223,10 +223,10 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 			}
 			
 			//set values
-			xValues.add(new Double(x));
-			yValues.add(new Double(y));
-			zValues.add(new Double(z));
-			actualZValues.add(new Double(actualZ));
+			xValues.add(Double.valueOf(x));
+			yValues.add(Double.valueOf(y));
+			zValues.add(Double.valueOf(z));
+			actualZValues.add(Double.valueOf(actualZ));
 
 			//set heat map options
 			if (queryType == -12) {

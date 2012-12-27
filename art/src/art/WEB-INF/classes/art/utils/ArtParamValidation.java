@@ -19,8 +19,8 @@
 
 package art.utils;
 
-import javax.servlet.http.*;
 import java.util.*;
+import javax.servlet.http.*;
 
 
 /**
@@ -48,7 +48,7 @@ public class ArtParamValidation {
 		// Check input parameters
 		Enumeration parametersNames = request.getParameterNames();
 		boolean isThereAnInvalidChar = false;
-		int ifIamNegativeIsGood = 0;
+		int ifIamNegativeIsGood;
 		char[] forbiddenChars = { '"', '\'', '<', '>' };
 		
 		while (parametersNames.hasMoreElements()) {

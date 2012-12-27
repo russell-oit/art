@@ -158,14 +158,14 @@ public class ArtOutHandler {
 						o.addCellString(rs.getString(i + 1));
 						break;
 					case 1:
-						doubleField = new Double(rs.getDouble(i + 1));
+						doubleField = Double.valueOf(rs.getDouble(i + 1));
 						if (rs.wasNull()) {
 							doubleField = null;
 						}
 						o.addCellDouble(doubleField);
 						break;
 					case 2:
-						longField = new Long(rs.getLong(i + 1));
+						longField = Long.valueOf(rs.getLong(i + 1));
 						if (rs.wasNull()) {
 							longField = null;
 						}
@@ -477,9 +477,9 @@ public class ArtOutHandler {
 		if (columnType == 0) {
 			values.put(key, rs.getString(index));
 		} else if (columnType == 1) {
-			values.put(key, new Double(rs.getDouble(index)));
+			values.put(key, Double.valueOf(rs.getDouble(index)));
 		} else if (columnType == 2) {
-			values.put(key, new Long(rs.getLong(index)));
+			values.put(key, Long.valueOf(rs.getLong(index)));
 		} else if (columnType == 3) {
 			values.put(key, rs.getTimestamp(index));
 		} else if (columnType == 4) {

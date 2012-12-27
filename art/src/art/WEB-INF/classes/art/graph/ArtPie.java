@@ -18,6 +18,7 @@ import de.laures.cewolf.DatasetProducer;
 import de.laures.cewolf.links.PieSectionLinkGenerator;
 import de.laures.cewolf.tooltips.PieToolTipGenerator;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -456,7 +457,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 			//save chart as png file									            
 			try {
 				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
-			} catch (Exception e) {
+			} catch (IOException e) {
 				logger.error("Error", e);
 			}
 		}

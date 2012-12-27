@@ -24,7 +24,6 @@ public class htmlPlainOutput implements ArtOutputInterface {
     int numberOfLines;      
     int maxRows;    
     NumberFormat nfPlain;
-    boolean oddline = true;
     Map<Integer, ArtQueryParam> displayParams;
 	private boolean displayInline=false; //whether display is inline in the showparams page. to avoid duplicate display of parameters
     /**
@@ -165,11 +164,6 @@ public class htmlPlainOutput implements ArtOutputInterface {
     @Override
     public boolean newLine() {
         numberOfLines++;
-        if (numberOfLines % 2 == 0) {
-            oddline = true;
-        } else {
-            oddline = false;
-        }
 
         if (numberOfLines == 1) { // first row
             out.println(" <tr>");

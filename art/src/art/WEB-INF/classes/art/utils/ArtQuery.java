@@ -61,7 +61,6 @@ public class ArtQuery {
 	String username;
 	String groupName;
 	private int displayResultset;
-	private boolean hasParams=false; //if this query has parameters defined
 
 	/**
 	 *
@@ -69,13 +68,6 @@ public class ArtQuery {
 	public ArtQuery() {
 	}
 
-	/**
-	 * @return the hasParams
-	 */
-	public boolean isHasParams() {
-		return hasParams;
-	}
-	
 
 	/**
 	 * @return the displayResultset
@@ -685,8 +677,8 @@ public class ArtQuery {
 				//query granted to a group. user doesn't have exclusive access
 				assignedToGroup = true;
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 			if (!assignedToGroup) {
 				sql = "SELECT USERNAME FROM ART_USER_QUERIES "
@@ -1269,7 +1261,7 @@ public class ArtQuery {
 					+ " FROM ART_QUERY_FIELDS ";
 
 			// Build WHERE part based on the query type since for dashboards we need
-			// to get all the (distinct) parameters of its query's
+			// to get all the (distinct) parameters of its queries
 
 			if (queryType != 110) {
 				sql = sql
@@ -1281,8 +1273,7 @@ public class ArtQuery {
 				// Lookup all parameters for the queries used by this dashboard
 				List<Integer> queryIds = Dashboard.getQueryIds(queryId);
 
-				// Get all distinct InlineLabels that will appear as parameters
-				// (parameters  need to have matching labels to show up one)
+				// Get all distinct labels that will appear as parameters
 				// (in case of chained params, be careful since only the "latest" query defined drives both values
 				String sqlOrs = "SELECT MAX(QUERY_ID), PARAM_LABEL"
 						+ " FROM ART_QUERY_FIELDS "
@@ -1576,7 +1567,7 @@ public class ArtQuery {
 
 			ResultSet rs = st.executeQuery(SqlQuery);
 			while (rs.next()) {
-				map.put(new Integer(rs.getInt("QUERY_ID")), rs.getString("NAME"));
+				map.put(Integer.valueOf(rs.getInt("QUERY_ID")), rs.getString("NAME"));
 			}
 			st.close();
 			rs.close();
@@ -1698,7 +1689,7 @@ public class ArtQuery {
 
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_GROUP_ID")));
+				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_GROUP_ID")));
 			}
 			rs.close();
 			ps.close();
@@ -2187,10 +2178,7 @@ public class ArtQuery {
 			String label;
 			int position;
 			String paramType;
-			int count=0;
 			while (rs.next()) {
-				count++;
-				
 				position = rs.getInt("FIELD_POSITION");
 				label = rs.getString("PARAM_LABEL");
 				paramType = rs.getString("PARAM_TYPE");
@@ -2218,13 +2206,6 @@ public class ArtQuery {
 			}
 			rs.close();
 			ps.close();
-			
-			if(count>0){
-				hasParams=true;
-			} else {
-				hasParams=false;
-			}
-			
 
 		} catch (Exception e) {
 			logger.error("Error", e);

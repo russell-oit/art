@@ -192,21 +192,21 @@ public class tsvGzOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDouble(Double d) {
-		String formattedValue = null;
+		String formattedValue = "";
 		if (d != null) {
 			formattedValue = nfPlain.format(d.doubleValue());
 		}
-		exportFileStrBuf.append("" + formattedValue + "\t");
+		exportFileStrBuf.append(formattedValue).append("\t");
 	}
 
 	@Override
 	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		exportFileStrBuf.append("" + i + "\t");
+		exportFileStrBuf.append(i).append("\t");
 	}
 
 	@Override
 	public void addCellDate(Date d) {
-		exportFileStrBuf.append("" + ArtDBCP.getDateDisplayString(d) + "\t");
+		exportFileStrBuf.append(ArtDBCP.getDateDisplayString(d)).append("\t");
 	}
 
 	@Override

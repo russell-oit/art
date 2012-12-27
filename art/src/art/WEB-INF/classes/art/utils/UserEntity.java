@@ -25,7 +25,6 @@ package art.utils;
 
 import art.servlets.ArtDBCP;
 import java.io.Serializable;
-
 import java.sql.*;
 import java.text.Collator;
 import java.text.DecimalFormat;

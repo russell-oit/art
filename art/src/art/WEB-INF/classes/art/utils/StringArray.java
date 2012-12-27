@@ -56,9 +56,7 @@ public class StringArray {
 	private void reallocate() {
 		capacity = capacity * 2;
 		String[] tmp = new String[capacity];
-		for(int j=0; j< sa.length; j++) {
-			tmp[j] = sa[j];
-		}
+		System.arraycopy(sa, 0, tmp, 0, sa.length);
 		sa = tmp;
 	}
 
@@ -67,7 +65,9 @@ public class StringArray {
      * @param s
      */
     public void add(String s){
-		if ( size >= sa.length ) reallocate();
+		if ( size >= sa.length ) {
+			reallocate();
+		}
 		sa[size] = s;
 		size++;
 	}
@@ -101,9 +101,7 @@ public class StringArray {
 		/* logic to provide an array just as 
 		long as it should be: */
 		String[] tmp = new String[size];
-		for(int j=0; j< size; j++) {
-			tmp[j] = sa[j];
-		}
+		System.arraycopy(sa, 0, tmp, 0, size);
 		return tmp;
 	}
 }

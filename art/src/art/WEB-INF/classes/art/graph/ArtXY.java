@@ -20,6 +20,7 @@ import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -500,7 +501,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
             //save chart as png file									            
             try {
                 ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 logger.error("Error",e);
             }
         }
