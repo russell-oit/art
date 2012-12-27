@@ -183,8 +183,13 @@ public class Dashboard {
 			while (names.hasMoreElements()) {
 				String name = (String) names.nextElement();
 				if (name.startsWith("P_")) {
-					paramsSb.append("&" + name + "=" + request.getParameter(name));
+					paramsSb.append("&").append(name).append("=").append(request.getParameter(name));
 					getDefaultParameters = false; // the URL has parameters, thus we'll not use the defaults
+				} else if (name.startsWith("M_")) {
+					String[] paramValues=request.getParameterValues(name);
+					for(String value:paramValues){
+						paramsSb.append("&").append(name).append("=").append(value);
+					}
 				}
 			}
 			link = QueryUrl.getExecuteUrl(Integer.parseInt(link), false, getDefaultParameters) + "&_isFragment=Y";

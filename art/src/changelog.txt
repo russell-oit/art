@@ -1,12 +1,14 @@
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified
+* Support for running DDL/DML statements before query's select statement
+* Renamed "Objects" to "Queries" and "Object Groups" to "Query Groups"
 * Support for case sensitive operators for dynamic queries
 * Allow use of decimals when specifying y axis range
-* Renamed "Objects" to "Queries" and "Object Groups" to "Query Groups"
 * Support for archiving publish job results
 * Removed published files retention period setting
 * Allow scheduling of heat maps
-* Support for running DDL/DML statements before query's select statement
+* Allow use of default parameter values without specifying parameters in the url
+* Allow dashboards to use multi parameters
 
 ART 2.4.1
 * Support for bubble charts

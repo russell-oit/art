@@ -1268,8 +1268,8 @@ public class ArtQuery {
 					+ ", APPLY_RULES_TO_LOV, CHAINED_PARAM_POSITION, QUERY_ID, CHAINED_VALUE_POSITION "
 					+ " FROM ART_QUERY_FIELDS ";
 
-			// Build WHERE part based on the object Type since for portlets id we need
-			// to get all the (distinct) parameters of its objects
+			// Build WHERE part based on the query type since for dashboards we need
+			// to get all the (distinct) parameters of its query's
 
 			if (queryType != 110) {
 				sql = sql
@@ -1278,7 +1278,7 @@ public class ArtQuery {
 				ps=conn.prepareStatement(sql);
 				ps.setInt(1,queryId);
 			} else {
-				// Lookup all inline query parameters for the queries used by this dashboard
+				// Lookup all parameters for the queries used by this dashboard
 				List<Integer> queryIds = Dashboard.getQueryIds(queryId);
 
 				// Get all distinct InlineLabels that will appear as parameters
@@ -1286,8 +1286,7 @@ public class ArtQuery {
 				// (in case of chained params, be careful since only the "latest" query defined drives both values
 				String sqlOrs = "SELECT MAX(QUERY_ID), PARAM_LABEL"
 						+ " FROM ART_QUERY_FIELDS "
-						+ " WHERE PARAM_TYPE = 'I' "
-						+ " AND QUERY_ID in (" + StringUtils.join(queryIds, ",") + ") "
+						+ " WHERE QUERY_ID in (" + StringUtils.join(queryIds, ",") + ") "
 						+ " GROUP BY PARAM_LABEL ";
 
 				ps=conn.prepareStatement(sqlOrs);
