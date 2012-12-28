@@ -744,7 +744,7 @@ public class UserEntity implements Serializable {
 
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_GROUP_ID")));
+				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_GROUP_ID")));
 			}
 			ps.close();
 			rs.close();
@@ -817,7 +817,7 @@ public class UserEntity implements Serializable {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_ID")));
+				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_ID")));
 			}
 			ps.close();
 			rs.close();
@@ -954,7 +954,7 @@ public class UserEntity implements Serializable {
 
 				aj.buildParametersDisplayString();
 
-				jobs.put(new Integer(rs.getInt("JOB_ID")), aj);
+				jobs.put(Integer.valueOf(rs.getInt("JOB_ID")), aj);
 			}
 			ps.close();
 			rs.close();
@@ -1157,7 +1157,7 @@ public class UserEntity implements Serializable {
 
 				aj.buildParametersDisplayString();
 
-				jobs.put(new Integer(rs.getInt("JOB_ID")), aj);
+				jobs.put(Integer.valueOf(rs.getInt("JOB_ID")), aj);
 			}
 			ps.close();
 			rs.close();

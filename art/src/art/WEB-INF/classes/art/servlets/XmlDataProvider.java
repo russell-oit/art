@@ -50,7 +50,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
     
     final static Logger logger = LoggerFactory.getLogger(XmlDataProvider.class);
     
-    String username, sqlQuery;
+    String username;
     ResourceBundle messages;
 
     /**
@@ -99,7 +99,9 @@ public class XmlDataProvider extends BaseAjaxServlet {
                 logger.error("Error",e);
             } finally {
                 try {
-                    conn.close();
+					if(conn!=null){
+						conn.close();
+					}
                 } catch (Exception e) {
                     logger.error("Error",e);
                 }
@@ -214,14 +216,15 @@ public class XmlDataProvider extends BaseAjaxServlet {
         int groupId = Integer.parseInt(request.getParameter("groupId"));
         if (groupId != -1) {
 
+			String sql;
             if (accessLevel > 30) {
-                sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
+                sql = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
                         + " FROM ART_QUERIES AQ "
                         + "WHERE  AQ.QUERY_GROUP_ID = ? "
                         + "ORDER BY AQ.NAME";
             } else {
                 // get only queries with Group and datasource matching the "junior" admin priviledges
-                sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
+                sql = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
                         + " FROM ART_QUERIES AQ, "
                         + "      ART_ADMIN_PRIVILEGES APG, "
                         + "      ART_ADMIN_PRIVILEGES APD "
@@ -235,7 +238,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
                         + " ORDER BY AQ.NAME";
             }
 
-            PreparedStatement ps = conn.prepareStatement(sqlQuery);
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, groupId);
 
             if (accessLevel <= 30) {
@@ -268,21 +271,21 @@ public class XmlDataProvider extends BaseAjaxServlet {
     public String getHtmlQueryDescr(HttpServletRequest request, HttpServletResponse response, Connection conn)
             throws IOException, SQLException {
 
-        StringBuilder builder = new StringBuilder();
-
+		StringBuilder builder = new StringBuilder(200);
+		
         response.setContentType("text/html;charset=utf-8");
 
         int queryId = Integer.parseInt(request.getParameter("queryId"));
 
         //use left outer join as dashboards, text queries etc don't have a datasource
-        sqlQuery = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
+        String sql = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
                 + " aq.DESCRIPTION, aq.QUERY_TYPE, aq.UPDATE_DATE, "
                 + " ad.NAME AS DATABASE_NAME "
                 + " FROM ART_QUERIES aq left outer join ART_DATABASES ad"
                 + " on aq.DATABASE_ID=ad.DATABASE_ID "
                 + " WHERE aq.QUERY_ID = ?";
                 
-        PreparedStatement ps = conn.prepareStatement(sqlQuery);
+        PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, queryId);
 
         ResultSet rs = ps.executeQuery();
@@ -390,11 +393,11 @@ public class XmlDataProvider extends BaseAjaxServlet {
         String scheduleName = request.getParameter("scheduleName");
         if (scheduleName != null) {
 
-            sqlQuery = "SELECT AJS.JOB_MINUTE, AJS.JOB_HOUR, AJS.JOB_DAY, AJS.JOB_WEEKDAY, AJS.JOB_MONTH "
+            String sql = "SELECT AJS.JOB_MINUTE, AJS.JOB_HOUR, AJS.JOB_DAY, AJS.JOB_WEEKDAY, AJS.JOB_MONTH "
                     + " FROM ART_JOB_SCHEDULES AJS "
                     + " WHERE AJS.SCHEDULE_NAME = ?";
 
-            PreparedStatement ps = conn.prepareStatement(sqlQuery);
+            PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, scheduleName);
 
             ResultSet rs = ps.executeQuery();

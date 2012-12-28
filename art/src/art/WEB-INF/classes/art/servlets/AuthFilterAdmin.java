@@ -95,7 +95,7 @@ public final class AuthFilterAdmin implements Filter {
 					String username = hrequest.getParameter("username");
 					String password = hrequest.getParameter("password");
 					String sessionUser = (String) session.getAttribute("username");
-					if (username != null || (username==null && sessionUser!=null)) {
+					if (username != null || sessionUser!=null) {
 						//we have come from a login page. authenticate
 						boolean isArtRepositoryUser = false;
 						try {
@@ -155,7 +155,7 @@ public final class AuthFilterAdmin implements Filter {
 			} else {
 				// settings are not defined - this is the 1st logon (see execLogin.jsp)
 				session.setAttribute("AdminSession", "Y");
-				session.setAttribute("AdminLevel", new Integer(100));
+				session.setAttribute("AdminLevel", Integer.valueOf(100));
 				session.setAttribute("AdminUsername", "art");
 				chain.doFilter(request, response);
 			}

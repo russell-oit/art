@@ -387,7 +387,7 @@ public class UserGroup {
 
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
-                map.put(rs.getString("NAME"), new Integer(rs.getInt("USER_GROUP_ID")));
+                map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("USER_GROUP_ID")));
             }
             rs.close();
             st.close();

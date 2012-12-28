@@ -47,7 +47,7 @@ public class QuartzProperties {
      * 
      * @return populated properties object or <code>null</code> if properties not loaded
      */
-    public Properties GetProperties() {
+    public Properties getProperties() {
         Properties props = null;
 
         try {

@@ -293,7 +293,7 @@ public class slkOutput implements ArtOutputInterface {
 	@Override
 	public void endLines() {
 		addCellString("Total rows retrieved:");
-		addCellLong(new Long(counter));
+		addCellLong(Long.valueOf(counter));
 		exportFileStrBuf.append("E");
 
 		try {

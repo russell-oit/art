@@ -247,13 +247,14 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 			}
 
 			//set drill down hyperlinks
+			StringBuilder sb=new StringBuilder(200);
 			if (drilldown != null) {
 				drilldownQueryId = drilldown.getDrilldownQueryId();
 				outputFormat = drilldown.getOutputFormat();
 				if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-					drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
+					sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 				} else {
-					drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
+					sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
 				}
 
 				drilldownParams = drilldown.getDrilldownParams();
@@ -279,7 +280,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 						} else if (param.getDrilldownColumn() == 4) {
 							paramString = paramString + actualZ;
 						}
-						drilldownUrl = drilldownUrl + paramString;
+						sb.append(paramString);
 						params.put(paramLabel, paramLabel);
 					}
 				}
@@ -297,7 +298,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 								logger.warn("UTF-8 encoding not supported", e);
 							}
 							paramString = "&P_" + paramLabel + "=" + paramValue;
-							drilldownUrl = drilldownUrl + paramString;
+							sb.append(paramString);
 						}
 					}
 				}
@@ -314,11 +315,12 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 								logger.warn("UTF-8 encoding not supported", e);
 							}
 							paramString = "&M_" + paramLabel + "=" + param;
-							drilldownUrl = drilldownUrl + paramString;
+							sb.append(paramString);
 						}
 					}
 				}
 
+				drilldownUrl=sb.toString();
 				//use y data value and x data value and z data value to identify url in hashmap. to ensure correct link will be returned in generatelink. 
 				key = String.valueOf(y) + String.valueOf(x) + String.valueOf(actualZ);
 				drilldownLinks.put(key, drilldownUrl);

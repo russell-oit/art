@@ -191,6 +191,8 @@ public class ArtOutHandler {
 
 			//display columns for drill down queries			
 			if (drilldownCount > 0) {
+				StringBuilder sb=new StringBuilder(200);
+				
 				for (Map.Entry<Integer, DrilldownQuery> entry : drilldownQueries.entrySet()) {
 					DrilldownQuery drilldown = entry.getValue();
 					drilldownText = drilldown.getDrilldownText();
@@ -201,9 +203,9 @@ public class ArtOutHandler {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-						drilldownUrl = baseUrl + "/user/showParams.jsp?queryId=" + drilldownQueryId;
+						sb.append(baseUrl).append("/user/showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
-						drilldownUrl = baseUrl + "/user/ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
+						sb.append(baseUrl).append("/user/ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
 					}
 
 					String paramLabel;
@@ -219,7 +221,7 @@ public class ArtOutHandler {
 								logger.warn("UTF-8 encoding not supported", e);
 							}
 							paramString = "&P_" + paramLabel + "=" + paramValue;
-							drilldownUrl = drilldownUrl + paramString;
+							sb.append(paramString);
 							params.put(paramLabel, paramValue);
 						}
 					}
@@ -237,7 +239,7 @@ public class ArtOutHandler {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
 								paramString = "&P_" + paramLabel + "=" + paramValue;
-								drilldownUrl = drilldownUrl + paramString;
+								sb.append(paramString);
 							}
 						}
 					}
@@ -254,11 +256,12 @@ public class ArtOutHandler {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
 								paramString = "&M_" + paramLabel + "=" + param;
-								drilldownUrl = drilldownUrl + paramString;
+								sb.append(paramString);
 							}
 						}
 					}
 
+					drilldownUrl=sb.toString();
 					openInNewWindow = drilldown.getOpenInNewWindow();
 					if (StringUtils.equals(openInNewWindow, "Y") || openInNewWindow == null) {
 						//open drill down in new window

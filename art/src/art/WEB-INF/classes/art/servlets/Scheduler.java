@@ -87,7 +87,7 @@ public class Scheduler extends HttpServlet {
 			if (propsFileLoaded) {
 				//get quartz properties object to use to instantiate a scheduler
 				QuartzProperties qp = new QuartzProperties();
-				Properties props = qp.GetProperties();
+				Properties props = qp.getProperties();
 
 				if (props == null) {
 					logger.warn("Quartz properties not set. Job scheduling will not be possible");
@@ -370,10 +370,6 @@ class Timer extends Thread {
 				sleep(interval);
 			}
 		} catch (InterruptedException e) {
-			// on interrupt, delete old files before exiting
-			if (scheduler.loadProperties()) {
-				scheduler.clean();
-			}
 		}
 	}
 }

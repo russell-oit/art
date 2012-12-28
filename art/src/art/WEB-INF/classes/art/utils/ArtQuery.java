@@ -1184,7 +1184,7 @@ public class ArtQuery {
 
 			ResultSet rs = st.executeQuery(sql);
 			while (rs.next()) {
-				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_ID")));
+				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_ID")));
 			}
 			rs.close();
 			st.close();
@@ -1283,7 +1283,7 @@ public class ArtQuery {
 				ps=conn.prepareStatement(sqlOrs);
 				rs = ps.executeQuery();
 
-				StringBuilder orChainSb = new StringBuilder();
+				StringBuilder orChainSb = new StringBuilder(200);
 				while (rs.next()) {
 					orChainSb.append("OR ( QUERY_ID = ");
 					orChainSb.append(rs.getInt(1));
@@ -1747,7 +1747,7 @@ public class ArtQuery {
 
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				map.put(rs.getString("NAME"), new Integer(rs.getInt("DATABASE_ID")));
+				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("DATABASE_ID")));
 			}
 			rs.close();
 			ps.close();
@@ -2297,9 +2297,7 @@ public class ArtQuery {
 			ps = conn.prepareStatement(sql);
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				Integer qId = new Integer(rs.getInt("QUERY_ID"));
-				String name = rs.getString("NAME");
-				map.put(qId, name);
+				map.put(Integer.valueOf(rs.getInt("QUERY_ID")), rs.getString("NAME"));
 			}
 			rs.close();
 			ps.close();

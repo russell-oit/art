@@ -1378,13 +1378,13 @@ public class PreparedQuery {
 				// increased maximum to avoid loop from 30 to 200 by Giacomo Ferrari on 2005-09-23
 				// while (startPos != -1 && i++<30) {
 				while (startPos != -1 && startPos < sb.toString().length()) {
-					checker = treeInline.get(new Integer(startPos));
+					checker = treeInline.get(Integer.valueOf(startPos));
 
 					if (checker != null) {
 						logger.warn("Another parameter already stored at position {}. Cannot store {}!", startPos, paramLabel);
 					}
 
-					treeInline.put(new Integer(startPos), paramLabel); // stores the param name and its position. The order of position will ensure correct substitution in prepareInlineParameters()
+					treeInline.put(Integer.valueOf(startPos), paramLabel); // stores the param name and its position. The order of position will ensure correct substitution in prepareInlineParameters()
 
 					logger.debug("Storing parameter {} found at position {}", paramLabel, startPos);
 

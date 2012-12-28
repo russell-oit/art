@@ -92,7 +92,7 @@ public class ArtDBCP extends HttpServlet {
 	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
 	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
-	public static String jobsPath;
+	private static String jobsPath;
 
 	/**
 	 * {@inheritDoc}
@@ -324,7 +324,7 @@ public class ArtDBCP extends HttpServlet {
 				}
 
 				//output registerd fonts
-				StringBuilder sb = new StringBuilder();
+				StringBuilder sb = new StringBuilder(100);
 				String newline = System.getProperty("line.separator");
 				Set fonts = FontFactory.getRegisteredFonts();
 				for (Object f : fonts) {
@@ -389,7 +389,7 @@ public class ArtDBCP extends HttpServlet {
 					 * ******************************************
 					 * ART database is the 0 one
 					 */
-					dataSources.put(new Integer(0), artdb);
+					dataSources.put(Integer.valueOf(0), artdb);
 
 					/**
 					 * *****************************************
@@ -560,7 +560,9 @@ public class ArtDBCP extends HttpServlet {
 			logger.error("Error", e);
 		} finally {
 			try {
-				logConn.close();
+				if(logConn!=null){
+					logConn.close();
+				}
 			} catch (Exception e) {
 				logger.error("Error", e);
 			}
@@ -610,7 +612,9 @@ public class ArtDBCP extends HttpServlet {
 			logger.error("Error", e);
 		} finally {
 			try {
-				logConn.close();
+				if(logConn!=null){
+					logConn.close();
+				}
 			} catch (Exception e) {
 				logger.error("Error", e);
 			}
@@ -641,7 +645,7 @@ public class ArtDBCP extends HttpServlet {
 		try {
 			if (artSettingsLoaded) {
 				//artprops has been defined
-				DataSource ds = dataSources.get(new Integer(i));
+				DataSource ds = dataSources.get(Integer.valueOf(i));
 				conn = ds.getConnection(); // i=0 => ART Repository
 			}
 		} catch (Exception e) {
@@ -871,7 +875,7 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static int getPublishedFilesRetentionPeriod() {
 		int retentionPeriod=0;
-		String retentionPeriodString;
+		String retentionPeriodString="";
 
 		try {
 			retentionPeriodString = getArtSetting("published_files_retention_period");
@@ -879,6 +883,7 @@ public class ArtDBCP extends HttpServlet {
 				retentionPeriod = Integer.parseInt(retentionPeriodString);
 			}
 		} catch (NumberFormatException e) {
+			logger.warn("Invalid published filed retention period: {}",retentionPeriodString,e);
 		}
 
 		return retentionPeriod;
@@ -1196,7 +1201,7 @@ public class ArtDBCP extends HttpServlet {
 			// Set admin session
 			if (accessLevel >= 10) {
 				session.setAttribute("AdminSession", "Y");
-				session.setAttribute("AdminLevel", new Integer(accessLevel));
+				session.setAttribute("AdminLevel", Integer.valueOf(accessLevel));
 				session.setAttribute("AdminUsername", username);
 			}
 		}

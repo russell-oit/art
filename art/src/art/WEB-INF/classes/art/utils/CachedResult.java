@@ -148,7 +148,7 @@ public class CachedResult {
 	 * @return the cached table columns names in a string separated by a blank
 	 */
 	public String getCachedTableColumnsName() {
-		StringBuilder sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder(50);
 		for (String column : columnsNameList) {
 			sb.append(" ").append(column);
 		}
@@ -217,7 +217,7 @@ public class CachedResult {
 	 * Create the cache table in the target database
 	 */
 	private void createTable() throws SQLException {
-		StringBuilder createStatementSB = new StringBuilder();
+		StringBuilder createStatementSB = new StringBuilder(100);
 		createStatementSB.append("CREATE TABLE ").append(tableName).append(" ( ");
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int numberOfColumns = rsmd.getColumnCount();
@@ -285,7 +285,7 @@ public class CachedResult {
 		// Build the insert prepared statement
 
 		columnsNameList = new ArrayList<String>();
-		StringBuilder insertPreparedStatementSB = new StringBuilder();
+		StringBuilder insertPreparedStatementSB = new StringBuilder(100);
 		StringBuilder preparedStatementQuestionMarksSB = new StringBuilder();
 		insertPreparedStatementSB.append("INSERT INTO ").append(tableName).append(" ( ");
 		preparedStatementQuestionMarksSB.append("( ");

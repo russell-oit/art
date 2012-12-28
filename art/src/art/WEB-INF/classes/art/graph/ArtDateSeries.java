@@ -330,13 +330,14 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                     ts[series].add(new Day(date), value);
 
                     //set drill down hyperlinks
+					StringBuilder sb=new StringBuilder(200);
                     if (drilldown != null) {
                         drilldownQueryId = drilldown.getDrilldownQueryId();
                         outputFormat = drilldown.getOutputFormat();
                         if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-                            drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
+							sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
                         } else {
-                            drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
+							sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
                         }
 
                         drilldownParams = drilldown.getDrilldownParams();
@@ -364,7 +365,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                                     }
                                     paramString = paramString + paramValue;
                                 }
-                                drilldownUrl = drilldownUrl + paramString;
+								sb.append(paramString);
                                 params.put(paramLabel, paramLabel);
                             }
                         }
@@ -382,7 +383,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                                         logger.warn("UTF-8 encoding not supported", e);
                                     }
                                     paramString = "&P_" + paramLabel + "=" + paramValue;
-                                    drilldownUrl = drilldownUrl + paramString;
+									sb.append(paramString);
                                 }
                             }
                         }
@@ -399,11 +400,12 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                                         logger.warn("UTF-8 encoding not supported", e);
                                     }
                                     paramString = "&M_" + paramLabel + "=" + param;
-                                    drilldownUrl = drilldownUrl + paramString;
+									sb.append(paramString);
                                 }
                             }
                         }
 
+						drilldownUrl=sb.toString();
                         //use series, data and timestamp to identify url in hashmap. to ensure correct link will be returned in generatelink. item index available in generatelink method can't be deteremined beforehand	
                         key = String.valueOf(series) + String.valueOf(value) + date.getTime();
                         drilldownLinks.put(key, drilldownUrl);

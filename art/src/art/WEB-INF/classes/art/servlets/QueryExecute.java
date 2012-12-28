@@ -302,8 +302,8 @@ public class QueryExecute extends HttpServlet {
 		boolean showGraphData = aq.isShowGraphData();
 
 		if (yMin < yMax) {
-			request.setAttribute("_from", new Double(yMin));
-			request.setAttribute("_to", new Double(yMax));
+			request.setAttribute("_from", Double.valueOf(yMin));
+			request.setAttribute("_to", Double.valueOf(yMax));
 		}
 
 		if (!showLegend) {
@@ -880,10 +880,10 @@ public class QueryExecute extends HttpServlet {
 									request.setAttribute("baseFileName", filename);
 
 									//allow direct url not to need _query_id
-									request.setAttribute("queryType", new Integer(queryType));
+									request.setAttribute("queryType", Integer.valueOf(queryType));
 
 									//allow use of both QUERY_ID and queryId in direct url
-									request.setAttribute("queryId", new Integer(queryId));
+									request.setAttribute("queryId", Integer.valueOf(queryId));
 
 									//pass graph object
 									request.setAttribute("artGraph", ag);

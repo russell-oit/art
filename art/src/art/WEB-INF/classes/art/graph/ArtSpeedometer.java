@@ -250,7 +250,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 				double rangeMin;
 				double rangeMax;
 				for (int i = 1; i <= rangeCount; i++) {
-					key = new Integer(i);
+					key = Integer.valueOf(i);
 					if (i == 1) {
 						rangeMin = minValue;
 						rangeMax = rangeValues.get(key);

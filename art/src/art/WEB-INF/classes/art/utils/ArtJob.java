@@ -1048,7 +1048,9 @@ public class ArtJob implements Job, Serializable {
 			logger.error("Error", e);
 		} finally {
 			try {
-				conn.close(); // art repository
+				if(conn!=null){
+					conn.close();
+				}
 			} catch (Exception e) {
 				logger.error("Error", e);
 			}
@@ -1242,7 +1244,7 @@ public class ArtJob implements Job, Serializable {
 			//ensure jobs table always has job owner's file, or a note if no output was produced for the job owner
 			if (ownerFileName != null) {
 				fileName = ownerFileName;
-			} else if (splitJob && userCount > 0 && ownerFileName == null) {
+			} else if (splitJob && userCount > 0) {
 				//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
 				fileName = "-Job Shared";
 			}
@@ -2127,7 +2129,7 @@ public class ArtJob implements Job, Serializable {
 					+ " , MAIL_TOS = ? ,  MAIL_FROM = ? ,  MESSAGE = ? ,  ENABLE_AUDIT = ? ,  ACTIVE_STATUS = ? , SUBJECT = ? "
 					+ " , NEXT_RUN_DATE=?, START_DATE=?, END_DATE=?, MIGRATED_TO_QUARTZ=?, ALLOW_SHARING=?, ALLOW_SPLITTING=? "
 					+ " , CACHED_TABLE_NAME =?, JOB_NAME=?, MAIL_CC=?, MAIL_BCC=?, RECIPIENTS_QUERY_ID=?, RUNS_TO_ARCHIVE=? "
-					+ " WHERE JOB_ID = " + jobId;
+					+ " WHERE JOB_ID = ?";
 
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, queryId);
@@ -2172,6 +2174,7 @@ public class ArtJob implements Job, Serializable {
 			ps.setString(25, bcc);
 			ps.setInt(26, recipientsQueryId);
 			ps.setInt(27, runsToArchive);
+			ps.setInt(28,jobId);
 
 			ps.executeUpdate();
 			ps.close();
@@ -2397,7 +2400,7 @@ public class ArtJob implements Job, Serializable {
 
 			logger.debug("Loading job. Job Id={}, User={}", jId, usr);
 
-			String SQL = "SELECT aj.QUERY_ID, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE, aj.MAIL_TOS, aj.MAIL_FROM, aj.MESSAGE "
+			String sql = "SELECT aj.QUERY_ID, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE, aj.MAIL_TOS, aj.MAIL_FROM, aj.MESSAGE "
 					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH, aj.ENABLE_AUDIT , aj.ACTIVE_STATUS AS JOB_ACTIVE_STATUS , aj.SUBJECT "
 					+ " , aq.NAME AS QUERY_NAME, aq.QUERY_TYPE, aq.SHORT_DESCRIPTION, aq.X_AXIS_LABEL, aq.Y_AXIS_LABEL, aq.GRAPH_OPTIONS, aq.USES_RULES "
 					+ " , aj.ALLOW_SHARING, aj.ALLOW_SPLITTING, aj.MAIL_CC, aj.MAIL_BCC, aj.RECIPIENTS_QUERY_ID "
@@ -2407,7 +2410,7 @@ public class ArtJob implements Job, Serializable {
 					+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.USERNAME=au.USERNAME AND aj.JOB_ID = ? "
 					+ (usr != null ? "  AND aj.USERNAME = ? " : "");
 
-			PreparedStatement ps = conn.prepareStatement(SQL);
+			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, jId);
 
 			if (usr != null) {
@@ -2744,7 +2747,7 @@ public class ArtJob implements Job, Serializable {
 
 			int paramCount = 0;
 
-			StringBuilder sb = new StringBuilder(1024);
+			StringBuilder sb = new StringBuilder(200);
 			sb.append("<br><i>Parameters:</i><br>");
 
 			while (rs.next()) {
@@ -3335,9 +3338,10 @@ public class ArtJob implements Job, Serializable {
 
 	//get emails for shared job users
 	private String getSharedJobEmails() {
-		String emails = "";
+		String emails;
 
 		Connection conn = null;
+		StringBuilder sb=new StringBuilder(100);
 
 		try {
 			conn = ArtDBCP.getConnection();
@@ -3360,7 +3364,7 @@ public class ArtJob implements Job, Serializable {
 			while (rs.next()) {
 				tmp = rs.getString("EMAIL");
 				if (StringUtils.length(tmp) > 4) {
-					emails = emails + tmp + ";";
+					sb.append(tmp).append(";");
 				}
 			}
 			rs.close();
@@ -3378,7 +3382,7 @@ public class ArtJob implements Job, Serializable {
 			while (rs.next()) {
 				tmp = rs.getString("EMAIL");
 				if (StringUtils.length(tmp) > 4) {
-					emails = emails + tmp + ";";
+					sb.append(tmp).append(";");
 				}
 			}
 			rs.close();
@@ -3395,7 +3399,7 @@ public class ArtJob implements Job, Serializable {
 			}
 		}
 
-		emails = emails + tos;
+		emails = sb.toString() + tos;
 
 		return emails;
 	}

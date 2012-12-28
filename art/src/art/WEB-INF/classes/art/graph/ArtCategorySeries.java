@@ -312,13 +312,14 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 					dataset.addValue(value, seriesNames[series], category);
 
 					//set drill down hyperlinks
+					StringBuilder sb=new StringBuilder(200);
 					if (drilldown != null) {
 						drilldownQueryId = drilldown.getDrilldownQueryId();
 						outputFormat = drilldown.getOutputFormat();
 						if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-							drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
+							sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 						} else {
-							drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
+							sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
 						}
 
 						drilldownParams = drilldown.getDrilldownParams();
@@ -345,7 +346,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									}
 									paramString = paramString + paramValue;
 								}
-								drilldownUrl = drilldownUrl + paramString;
+								sb.append(paramString);
 								params.put(paramLabel, paramLabel);
 							}
 						}
@@ -363,7 +364,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 										logger.warn("UTF-8 encoding not supported", e);
 									}
 									paramString = "&P_" + paramLabel + "=" + paramValue;
-									drilldownUrl = drilldownUrl + paramString;
+									sb.append(paramString);
 								}
 							}
 						}
@@ -380,11 +381,12 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 										logger.warn("UTF-8 encoding not supported", e);
 									}
 									paramString = "&M_" + paramLabel + "=" + param;
-									drilldownUrl = drilldownUrl + paramString;
+									sb.append(paramString);
 								}
 							}
 						}
 
+						drilldownUrl=sb.toString();
 						//unique item to identify data in hashmap will be combination of category and series
 						key = category + String.valueOf(series);
 						drilldownLinks.put(key, drilldownUrl);

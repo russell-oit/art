@@ -95,7 +95,7 @@ public class rss20Output implements ArtOutputInterface {
     /**
      * rfc822 (2822) standard date
      */
-    public static SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+    public static final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
 
     /**
      * 

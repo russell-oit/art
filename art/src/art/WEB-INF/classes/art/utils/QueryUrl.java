@@ -87,8 +87,8 @@ public class QueryUrl {
 	 * is true, the parameters values are encoded (used when printing the link)
 	 */
 	private static String lookupParams(int queryId, boolean encodeUrl) {
-		StringBuilder sb = new StringBuilder(254);
-
+		StringBuilder sb = new StringBuilder(128);
+		
 		Connection conn = ArtDBCP.getConnection();
 
 		try {

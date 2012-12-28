@@ -55,7 +55,7 @@ public class ValidateNTLogin {
 			return true;
 		} catch (SmbAuthException sae) {
 			// AUTHENTICATION FAILURE
-			logger.error("Error", sae);
+			logger.error("Authentication Failure", sae);
 			return false;
 		} catch (SmbException se) {
 			// NETWORK PROBLEMS?

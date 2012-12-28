@@ -163,7 +163,7 @@ while (names.hasMoreElements()) {
 
 		//create new scheduler instance
 		QuartzProperties qp=new QuartzProperties();
-		Properties props=qp.GetProperties();
+		Properties props=qp.getProperties();
 
 		if(props!=null){
 			//start quartz scheduler

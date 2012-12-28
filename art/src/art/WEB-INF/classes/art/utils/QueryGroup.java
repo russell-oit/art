@@ -321,7 +321,7 @@ public class QueryGroup {
 
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
-                map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_GROUP_ID")));
+                map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_GROUP_ID")));
             }
             rs.close();
             st.close();
