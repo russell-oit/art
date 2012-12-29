@@ -548,7 +548,9 @@ tinyMCE.init({
 				helpText="The resultset to display if the sql source contains multiple sql statements e.g. "
 						+ "some DDL/DML statements before the main select."
 						+ "\\nLeave as 0 if the sql source doesn\\'t have multiple statements."
-						+ "\\nSet to 1 to use the select statement, regardless of how many other statements exist."
+						+ "\\nSet to 1 to use the first statement, 2 to use the second, etc."
+						+ "\\nSet to -1 to use the select statement, regardless of how many statements exist."
+						+ "\\nSet to -2 to use the last statement, regardless of how many statements exist."
 						+ "\\nYour RDBMS may not support multiple statements in a query or may require some configuration for it to work.";
 				%>
 				<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">

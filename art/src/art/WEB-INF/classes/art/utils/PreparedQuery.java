@@ -77,6 +77,7 @@ public class PreparedQuery {
 	private String recipientId;
 	private String recipientIdType = "VARCHAR";
 	int displayResultset;
+	int updateCount; //update count of display resultset
 
 	/**
 	 *
@@ -597,32 +598,44 @@ public class PreparedQuery {
 	 */
 	public ResultSet getResultSet() throws SQLException {
 		ResultSet rs = psQuery.getResultSet();
+		updateCount = psQuery.getUpdateCount();
 
-		if (displayResultset == 1) {
+		if (displayResultset == -1) {
 			//use the select statement. will use first select statement. having several selects isn't useful
-			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT)) {
+			if (rs == null) {
+				//first statement was not a select statement. iterate through other resultsets until we get a select statement
+				while (psQuery.getMoreResults() != false || psQuery.getUpdateCount() != -1) {
+					rs = psQuery.getResultSet();
+					updateCount = psQuery.getUpdateCount();
+					if (rs != null) {
+						//we have found a select statement (resultset object)
+						break;
+					}
+				}
+			}
+		} else if (displayResultset == -2) {
+			//use last statement. driver must be jdbc 3.0 compliant (and above)
+			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT) != false || psQuery.getUpdateCount() != -1) {
 				if (rs != null) {
 					rs.close();
 				}
 				rs = psQuery.getResultSet();
+				updateCount = psQuery.getUpdateCount();
 			}
 		} else if (displayResultset > 1) {
-			//return specific resultset
+			//use specific statment. statement 2, 3, etc. statement 1 already retrieved by initial getresultset call
 			int count = 1;
-			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT) != false || psQuery.getUpdateCount() != -1) {
+			while (psQuery.getMoreResults() != false || psQuery.getUpdateCount() != -1) {
 				count++;
-
-				if (rs != null) {
-					rs.close();
-				}
 				rs = psQuery.getResultSet();
-				
-				if(count==displayResultset){
+				updateCount = psQuery.getUpdateCount();
+
+				if (count == displayResultset) {
 					break;
 				}
 			}
 		}
-		
+
 		return rs;
 	}
 
@@ -633,7 +646,7 @@ public class PreparedQuery {
 	 * @throws SQLException
 	 */
 	public int getUpdateCount() throws SQLException {
-		return psQuery.getUpdateCount();
+		return updateCount;
 	}
 
 	/**
@@ -845,8 +858,8 @@ public class PreparedQuery {
 					+ " WHERE AAS.OBJECT_ID = ?"
 					+ " ORDER BY LINE_NUMBER";
 
-			ps=conn.prepareStatement(stmt);
-			ps.setInt(1,queryId);
+			ps = conn.prepareStatement(stmt);
+			ps.setInt(1, queryId);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				sb.append(rs.getString(1));
@@ -960,7 +973,7 @@ public class PreparedQuery {
 					+ " AND AAS.OBJECT_ID = AUQ.QUERY_ID "
 					+ " ORDER BY LINE_NUMBER";
 
-			ps=conn.prepareStatement(stmt);
+			ps = conn.prepareStatement(stmt);
 			ps.setInt(1, queryId);
 			rs = ps.executeQuery();
 			while (rs.next()) {
@@ -989,7 +1002,7 @@ public class PreparedQuery {
 	private boolean applyRules(StringBuilder sb) throws SQLException {
 
 		logger.debug("applyRules");
-		
+
 		boolean successfullyApplied = true;
 
 		if (!useRules) {
@@ -1023,18 +1036,18 @@ public class PreparedQuery {
 		if (labelPosition != -1) {
 			usingLabelledRules = true;
 		}
-		
+
 		String ruleName;
 		String columnName;
 		String columnDataType;
 		ResultSet rs;
 
 		// Get rules for the current query
-		String sql="SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
+		String sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
 				+ " FROM ART_QUERY_RULES"
 				+ "WHERE QUERY_ID=?";
-		PreparedStatement ps=conn.prepareStatement(sql);
-		ps.setInt(1,queryId);
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, queryId);
 		rs = ps.executeQuery();
 
 		// for each rule build and add the AND column IN (list) string to the query
@@ -1350,7 +1363,7 @@ public class PreparedQuery {
 					if (param.usesDirectSubstitution()) {
 						String querySql = sb.toString();
 
-						if (paramValue != null) { 
+						if (paramValue != null) {
 							//some precaution
 							paramValue = paramValue.replace("'", "''").replace("--", "").replace(";", "");
 						}

@@ -821,7 +821,8 @@ public class QueryExecute extends HttpServlet {
 						//get query results
 						rs = pq.getResultSet();
 
-						if (rs != null) { // it is a "select" query or a procedure ending with a select statement
+						if (rs != null) {
+							// it is a "select" query or a procedure ending with a select statement
 							probe = 93;
 							rsmd = rs.getMetaData();
 

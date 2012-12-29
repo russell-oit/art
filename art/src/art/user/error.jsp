@@ -2,6 +2,8 @@
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
 <%
+java.util.ResourceBundle eMessages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+
  String msg       = (String) request.getAttribute("errorMessage");
  String headerOff = (String) request.getAttribute("headerOff");
  
@@ -21,11 +23,11 @@ if(request.getParameter("_isInline")!=null){
 
 <table align="center">
     <tr>
-        <td colspan="2" class="data" align="center"> <span style="color:red"><b> <%=messages.getString("error")%> </b></span>
+        <td colspan="2" class="data" align="center"> <span style="color:red"><b> <%=eMessages.getString("error")%> </b></span>
         </td>
     </tr>
     <tr>
-        <td class="attr"> <%=messages.getString("message")%>
+        <td class="attr"> <%=eMessages.getString("message")%>
         </td>
         <td class="data"> <%=msg%>
         </td>
