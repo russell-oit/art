@@ -1,4 +1,8 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<% request.setCharacterEncoding("UTF-8"); %>
+
 <%@ include file ="headerAdminPlain.jsp" %>
+
 <%
  String mod = request.getParameter("MOD");
  String act = request.getParameter("ACT");

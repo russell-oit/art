@@ -1,5 +1,8 @@
 <%@ page import="art.utils.*,art.servlets.*" %>
 
+<%@ page contentType="text/html; charset=UTF-8" %>
+<% request.setCharacterEncoding("UTF-8"); %>
+
 
 <%
 String action = request.getParameter("ACTION");

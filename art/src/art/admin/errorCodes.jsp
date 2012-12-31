@@ -1,5 +1,8 @@
 <%@ page import="art.servlets.ArtDBCP" %>
 
+<%@ page contentType="text/html; charset=UTF-8" %>
+<% request.setCharacterEncoding("UTF-8"); %>
+
 <%@ include file ="headerAdminPlain.jsp" %>
 
 <table align="center" width="90%">
