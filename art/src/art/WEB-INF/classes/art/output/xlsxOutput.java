@@ -325,12 +325,22 @@ public class xlsxOutput implements ArtOutputInterface {
 			//Substitute the template with the generated data
 			FileOutputStream out = new FileOutputStream(fullFileName);
 			File templateFile = new File(templateFileName);
-			substitute(templateFile, xmlFile, sheetRef.substring(1), out);
-			out.close();
+			try {
+				substitute(templateFile, xmlFile, sheetRef.substring(1), out);
+			} finally {
+				out.close();
+			}
 
-			//delete template and xml file			
-			xmlFile.delete();
-			templateFile.delete();
+			//delete template and xml file	
+			boolean deleted;
+			deleted = xmlFile.delete();
+			if (!deleted) {
+				logger.warn("xmlFile not deleted: {}", xmlFileName);
+			}
+			deleted = templateFile.delete();
+			if (!deleted) {
+				logger.warn("templateFile not deleted: {}", templateFileName);
+			}
 
 			//htmlout not used for scheduled jobs
 			if (htmlout != null) {
@@ -367,24 +377,33 @@ public class xlsxOutput implements ArtOutputInterface {
 
 		ZipOutputStream zos = new ZipOutputStream(out);
 
-		@SuppressWarnings("unchecked")
-		Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zip.entries();
-		while (en.hasMoreElements()) {
-			ZipEntry ze = en.nextElement();
-			if (!ze.getName().equals(entry)) {
-				zos.putNextEntry(new ZipEntry(ze.getName()));
-				InputStream is = zip.getInputStream(ze);
+		try {
+			@SuppressWarnings("unchecked")
+			Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zip.entries();
+			while (en.hasMoreElements()) {
+				ZipEntry ze = en.nextElement();
+				if (!ze.getName().equals(entry)) {
+					zos.putNextEntry(new ZipEntry(ze.getName()));
+					InputStream is = zip.getInputStream(ze);
+					try {
+						copyStream(is, zos);
+					} finally {
+						is.close();
+					}
+				}
+			}
+			zos.putNextEntry(new ZipEntry(entry));
+			InputStream is = new FileInputStream(tmpfile);
+			try {
 				copyStream(is, zos);
+			} finally {
 				is.close();
 			}
-		}
-		zos.putNextEntry(new ZipEntry(entry));
-		InputStream is = new FileInputStream(tmpfile);
-		copyStream(is, zos);
-		is.close();
 
-		zos.close();
-		zip.close();
+		} finally {
+			zos.close();
+			zip.close();
+		}
 	}
 
 	private void copyStream(InputStream in, OutputStream out) throws IOException {
@@ -410,7 +429,7 @@ public class xlsxOutput implements ArtOutputInterface {
 
 		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
 		baseName = ArtDBCP.cleanFileName(baseName);
-		
+
 		filename = baseName + ".xlsx";
 		fullFileName = exportPath + filename;
 		templateFileName = exportPath + "template-" + filename;
@@ -459,12 +478,18 @@ public class xlsxOutput implements ArtOutputInterface {
 
 			//save the template			
 			FileOutputStream fout = new FileOutputStream(templateFileName);
-			wb.write(fout);
-			fout.close();
+			try {
+				wb.write(fout);
+			} finally {
+				fout.close();
+			}
 
 			//create xml file
 			xmlFile = new File(xmlFileName);
-			xmlFile.createNewFile();
+			boolean created = xmlFile.createNewFile();
+			if (!created) {
+				logger.warn("Couldn't create xmlFile. File already exists: {}", xmlFileName);
+			}
 			fw = new FileWriter(xmlFile);
 			sw = new SpreadsheetWriter(fw);
 		} catch (Exception e) {

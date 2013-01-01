@@ -344,7 +344,7 @@ public class ArtDBCP extends HttpServlet {
 		try {
 			Class.forName(art_jdbc_driver).newInstance();
 		} catch (Exception e) {
-			logger.error("Error wihle registering driver for ART repository: {}", art_jdbc_driver, e);
+			logger.error("Error while registering driver for ART repository: {}", art_jdbc_driver, e);
 		}
 
 		//initialize art repository datasource
@@ -352,7 +352,7 @@ public class ArtDBCP extends HttpServlet {
 		if (art_pooltimeout != null) {
 			artPoolTimeout = Integer.parseInt(art_pooltimeout);
 		}
-		DataSource artdb = new DataSource(artPoolTimeout * 60);
+		DataSource artdb = new DataSource(artPoolTimeout * 60L);
 		artdb.setName("ART_Repository"); // custom name
 		artdb.setUrl(art_jdbc_url);
 		artdb.setUsername(art_username);
@@ -365,20 +365,24 @@ public class ArtDBCP extends HttpServlet {
 		}
 
 		//Initialize the datasources array
+		Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+
 		try {
 			String sql;
-			Connection conn = artdb.getConnection();
-			Statement st = conn.createStatement();
-			
-			sql="SELECT max(DATABASE_ID) FROM ART_DATABASES";
-			ResultSet rs = st.executeQuery(sql);
+			conn = artdb.getConnection();
+			st = conn.createStatement();
+
+			sql = "SELECT max(DATABASE_ID) FROM ART_DATABASES";
+			rs = st.executeQuery(sql);
 
 			if (rs.next()) {
 				if (rs.getInt(1) > 0) { // datasources exist
 					dataSources = new LinkedHashMap<Integer, DataSource>();
 					rs.close();
-					
-					sql="SELECT DATABASE_ID, NAME, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL"
+
+					sql = "SELECT DATABASE_ID, NAME, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL"
 							+ " FROM ART_DATABASES"
 							+ " WHERE DATABASE_ID > 0"
 							+ " ORDER BY NAME"; // ordered by NAME to have them inserted in order in the LinkedHashMap dataSources (note: first item is always the ArtRepository)
@@ -419,7 +423,7 @@ public class ArtDBCP extends HttpServlet {
 						ds.setLogToStandardOutput(true);
 						ds.setMaxConnections(poolMaxConnections);
 
-						dataSources.put(new Integer(i), ds);
+						dataSources.put(Integer.valueOf(i), ds);
 					}
 					rs.close();
 
@@ -438,15 +442,37 @@ public class ArtDBCP extends HttpServlet {
 							}
 						}
 					}
-					st.close();
-					conn.close();
+					rs.close();
 				} else { // only art repository has been defined...
 					dataSources = new LinkedHashMap<Integer, DataSource>();
-					dataSources.put(new Integer(0), artdb);
+					dataSources.put(Integer.valueOf(0), artdb);
 				}
 			}
+			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+			try {
+				if (st != null) {
+					st.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 		}
 	}
 
@@ -532,36 +558,44 @@ public class ArtDBCP extends HttpServlet {
 	 * @param message log message
 	 */
 	public static void log(String user, String type, String ip, String message) {
-		java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
-		Connection logConn = null;
+
+		Connection conn = null;
+		PreparedStatement ps = null;
 
 		if (StringUtils.length(message) > 4000) {
 			message = message.substring(0, 4000);
 		}
 
 		try {
-			logConn = getConnection();
-			String SQLUpdate = "INSERT INTO ART_LOGS"
+			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
+
+			conn = getConnection();
+			String sql = "INSERT INTO ART_LOGS"
 					+ " (UPDATE_TIME, USERNAME, LOG_TYPE, IP, MESSAGE) "
-					+ " values (?,?,?,?,?) ";
+					+ " VALUES (?,?,?,?,?) ";
 
-			PreparedStatement psUpdate = logConn.prepareStatement(SQLUpdate);
-			psUpdate.setTimestamp(1, now);
-			psUpdate.setString(2, user);
-			psUpdate.setString(3, type);
-			psUpdate.setString(4, ip);
-			psUpdate.setString(5, message);
+			ps = conn.prepareStatement(sql);
+			ps.setTimestamp(1, now);
+			ps.setString(2, user);
+			ps.setString(3, type);
+			ps.setString(4, ip);
+			ps.setString(5, message);
 
-			psUpdate.executeUpdate();
-
-			psUpdate.close();
+			ps.executeUpdate();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
 			try {
-				if(logConn!=null){
-					logConn.close();
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+			try {
+				if (conn != null) {
+					conn.close();
 				}
 			} catch (Exception e) {
 				logger.error("Error", e);
@@ -581,39 +615,46 @@ public class ArtDBCP extends HttpServlet {
 	 * @param message log message
 	 */
 	public static void log(String user, String type, String ip, int queryId, long totalTime, long fetchTime, String message) {
-		java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
-		Connection logConn = null;
+
+		Connection conn = null;
+		PreparedStatement ps = null;
 
 		if (StringUtils.length(message) > 4000) {
 			message = message.substring(0, 4000);
 		}
 
 		try {
-			logConn = getConnection();
-			String SQLUpdate = "INSERT INTO ART_LOGS"
+			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
+			conn = getConnection();
+			String sql = "INSERT INTO ART_LOGS"
 					+ " (UPDATE_TIME, USERNAME, LOG_TYPE, IP, QUERY_ID, TOTAL_TIME, FETCH_TIME, MESSAGE) "
-					+ " values (?,?,?,?,?,?,?,?) ";
+					+ " VALUES (?,?,?,?,?,?,?,?) ";
 
-			PreparedStatement psUpdate = logConn.prepareStatement(SQLUpdate);
-			psUpdate.setTimestamp(1, now);
-			psUpdate.setString(2, user);
-			psUpdate.setString(3, type);
-			psUpdate.setString(4, ip);
-			psUpdate.setInt(5, queryId);
-			psUpdate.setInt(6, (int) totalTime);
-			psUpdate.setInt(7, (int) fetchTime);
-			psUpdate.setString(8, message);
+			ps = conn.prepareStatement(sql);
+			ps.setTimestamp(1, now);
+			ps.setString(2, user);
+			ps.setString(3, type);
+			ps.setString(4, ip);
+			ps.setInt(5, queryId);
+			ps.setInt(6, (int) totalTime);
+			ps.setInt(7, (int) fetchTime);
+			ps.setString(8, message);
 
-			psUpdate.executeUpdate();
-
-			psUpdate.close();
+			ps.executeUpdate();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
 			try {
-				if(logConn!=null){
-					logConn.close();
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+			try {
+				if (conn != null) {
+					conn.close();
 				}
 			} catch (Exception e) {
 				logger.error("Error", e);
@@ -751,7 +792,7 @@ public class ArtDBCP extends HttpServlet {
 	 * @return DataSource object
 	 */
 	public static DataSource getDataSource(int i) {
-		return dataSources.get(new Integer(i));
+		return dataSources.get(Integer.valueOf(i));
 	}
 
 	/**
@@ -874,8 +915,8 @@ public class ArtDBCP extends HttpServlet {
 	 * @return job files retention period in days
 	 */
 	public static int getPublishedFilesRetentionPeriod() {
-		int retentionPeriod=0;
-		String retentionPeriodString="";
+		int retentionPeriod = 0;
+		String retentionPeriodString = "";
 
 		try {
 			retentionPeriodString = getArtSetting("published_files_retention_period");
@@ -883,7 +924,7 @@ public class ArtDBCP extends HttpServlet {
 				retentionPeriod = Integer.parseInt(retentionPeriodString);
 			}
 		} catch (NumberFormatException e) {
-			logger.warn("Invalid published filed retention period: {}",retentionPeriodString,e);
+			logger.warn("Invalid published filed retention period: {}", retentionPeriodString, e);
 		}
 
 		return retentionPeriod;
@@ -1080,6 +1121,7 @@ public class ArtDBCP extends HttpServlet {
 				 * Let's verify if username and password are valid
 				 */
 				Connection conn = null;
+				PreparedStatement ps = null;
 				try {
 					//default to using bcrypt instead of md5 for password hashing
 					//password = digestString(password, "MD5");
@@ -1091,7 +1133,7 @@ public class ArtDBCP extends HttpServlet {
 						// ART Repository Down !!!
 						msg = messages.getString("invalidConnection");
 					} else {
-						PreparedStatement ps = conn.prepareStatement(SqlQuery);
+						ps = conn.prepareStatement(SqlQuery);
 						ps.setString(1, username);
 						ResultSet rs = ps.executeQuery();
 						if (rs.next()) {
@@ -1114,9 +1156,15 @@ public class ArtDBCP extends HttpServlet {
 							msg = messages.getString("invalidAccount");
 						}
 						rs.close();
-						ps.close();
 					}
 				} finally {
+					try {
+						if (ps != null) {
+							ps.close();
+						}
+					} catch (Exception e) {
+						logger.error("Error", e);
+					}
 					try {
 						if (conn != null) {
 							conn.close();
@@ -1136,6 +1184,7 @@ public class ArtDBCP extends HttpServlet {
 			 * let's get other info and authenticate it
 			 */
 			Connection conn = null;
+			PreparedStatement ps = null;
 			try {
 				username = (String) session.getAttribute("username");
 				String SqlQuery = ("SELECT ACCESS_LEVEL FROM ART_USERS "
@@ -1145,7 +1194,7 @@ public class ArtDBCP extends HttpServlet {
 					// ART Repository Down !!!
 					msg = messages.getString("invalidConnection");
 				} else {
-					PreparedStatement ps = conn.prepareStatement(SqlQuery);
+					ps = conn.prepareStatement(SqlQuery);
 					ps.setString(1, username);
 					ResultSet rs = ps.executeQuery();
 					if (rs.next()) {
@@ -1161,9 +1210,15 @@ public class ArtDBCP extends HttpServlet {
 						msg = messages.getString("invalidUser");
 					}
 					rs.close();
-					ps.close();
 				}
 			} finally {
+				try {
+					if (ps != null) {
+						ps.close();
+					}
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
 				try {
 					if (conn != null) {
 						conn.close();

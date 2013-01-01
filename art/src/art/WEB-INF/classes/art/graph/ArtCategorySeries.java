@@ -412,13 +412,14 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 				dataset.addValue(value, tmpSeriesName, category);
 
 				//set drill down hyperlinks
+				StringBuilder sb=new StringBuilder(200);
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
-						drilldownUrl = "showParams.jsp?queryId=" + drilldownQueryId;
+						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
-						drilldownUrl = "ExecuteQuery?queryId=" + drilldownQueryId + "&viewMode=" + outputFormat;
+						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
 					}
 
 					drilldownParams = drilldown.getDrilldownParams();
@@ -446,7 +447,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								}
 								paramString = paramString + paramValue;
 							}
-							drilldownUrl = drilldownUrl + paramString;
+							sb.append(paramString);
 							params.put(paramLabel, paramLabel);
 						}
 					}
@@ -464,7 +465,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									logger.warn("UTF-8 encoding not supported", e);
 								}
 								paramString = "&P_" + paramLabel + "=" + paramValue;
-								drilldownUrl = drilldownUrl + paramString;
+								sb.append(paramString);
 							}
 						}
 					}
@@ -481,7 +482,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									logger.warn("UTF-8 encoding not supported", e);
 								}
 								paramString = "&M_" + paramLabel + "=" + param;
-								drilldownUrl = drilldownUrl + paramString;
+								sb.append(paramString);
 							}
 						}
 					}
@@ -496,6 +497,8 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 						seriesList.put(tmpSeriesName, Integer.valueOf(seriesId)); // map series name to array id
 						series++;
 					}
+					
+					drilldownUrl=sb.toString();
 					key = category + String.valueOf(seriesId);
 					drilldownLinks.put(key, drilldownUrl);
 				}

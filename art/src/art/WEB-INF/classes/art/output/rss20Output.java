@@ -95,14 +95,14 @@ public class rss20Output implements ArtOutputInterface {
     /**
      * rfc822 (2822) standard date
      */
-    public static final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+    public final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
 
     /**
      * 
      * @param date
      * @return rfc822 representation of date
      */
-    public static String getDateAsRFC822String(Date date) {
+    public String getDateAsRFC822String(Date date) {
         return Rfc822DateFormat.format(date);
     }
 

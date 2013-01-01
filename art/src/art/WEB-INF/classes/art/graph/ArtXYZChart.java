@@ -70,11 +70,10 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	int queryType;
 	Map<String, String> heatmapOptions = new HashMap<String, String>(); //options used by cewolf heatmap postprocessor
 
-	
 	public ArtXYZChart() {
 	}
-	
-	public Map<String, String> getHeatmapOptions(){
+
+	public Map<String, String> getHeatmapOptions() {
 		return heatmapOptions;
 	}
 
@@ -162,7 +161,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	public void prepareDataset(ResultSet rs, Map<Integer, DrilldownQuery> drilldownQueries, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
 
 		if (useHyperLinks) {
-			hyperLinks = new ArrayList<String>(100);
+			hyperLinks = new ArrayList<String>(10);
 		}
 
 		//add support for drill down queries
@@ -221,7 +220,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 					hyperLinks.add(rs.getString(5)); //if use LINKs, must have 5 columns - actualZ column, then link column
 				}
 			}
-			
+
 			//set values
 			xValues.add(Double.valueOf(x));
 			yValues.add(Double.valueOf(y));
@@ -232,22 +231,22 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 			if (queryType == -12) {
 				if (rowCount == 1) {
 					for (int i = 4; i <= columnCount; i++) {
-						String optionSpec=rs.getString(i);
+						String optionSpec = rs.getString(i);
 						List<String> optionDetails = StringUtils.split(optionSpec, "=", true);
-						if(optionDetails.size()==2){
+						if (optionDetails.size() == 2) {
 							heatmapOptions.put(optionDetails.get(0), optionDetails.get(1));
 						}
 					}
-					
+
 					//allow specifying only the upper colour, for 2 colour schemes. set lower colour to white
-					if(heatmapOptions.containsKey("upperColor") && !heatmapOptions.containsKey("lowerColor")){
-						heatmapOptions.put("lowerColor","#FFFFFF");
+					if (heatmapOptions.containsKey("upperColor") && !heatmapOptions.containsKey("lowerColor")) {
+						heatmapOptions.put("lowerColor", "#FFFFFF");
 					}
 				}
 			}
 
 			//set drill down hyperlinks
-			StringBuilder sb=new StringBuilder(200);
+			StringBuilder sb = new StringBuilder(200);
 			if (drilldown != null) {
 				drilldownQueryId = drilldown.getDrilldownQueryId();
 				outputFormat = drilldown.getOutputFormat();
@@ -259,7 +258,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 
 				drilldownParams = drilldown.getDrilldownParams();
 				if (drilldownParams != null) {
-					for(ArtQueryParam param : drilldownParams) {
+					for (ArtQueryParam param : drilldownParams) {
 						//drill down on col 1 = data value (y value). drill down on col 2 = category (x value)
 						//drill down on col 3 = series name. (only one series is possible)
 						//drill down on col 4 = actual bubble value (actual z value)
@@ -320,16 +319,16 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 					}
 				}
 
-				drilldownUrl=sb.toString();
+				drilldownUrl = sb.toString();
 				//use y data value and x data value and z data value to identify url in hashmap. to ensure correct link will be returned in generatelink. 
 				key = String.valueOf(y) + String.valueOf(x) + String.valueOf(actualZ);
 				drilldownLinks.put(key, drilldownUrl);
 			}
 		}
 
-		double[] xArray = ArrayUtils.toPrimitive(xValues.toArray(new Double[0]));
-		double[] yArray = ArrayUtils.toPrimitive(yValues.toArray(new Double[0]));
-		double[] zArray = ArrayUtils.toPrimitive(zValues.toArray(new Double[0]));
+		double[] xArray = ArrayUtils.toPrimitive(xValues.toArray(new Double[xValues.size()]));
+		double[] yArray = ArrayUtils.toPrimitive(yValues.toArray(new Double[yValues.size()]));
+		double[] zArray = ArrayUtils.toPrimitive(zValues.toArray(new Double[zValues.size()]));
 		double[][] data = new double[][]{xArray, yArray, zArray};
 		dataset.addSeries(seriesName, data);
 

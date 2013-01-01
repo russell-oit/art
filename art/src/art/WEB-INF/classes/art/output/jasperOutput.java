@@ -213,8 +213,11 @@ public class jasperOutput {
 				File settingsFile = new File(settingsFilePath);
 				if (settingsFile.exists()) {
 					FileInputStream o = new FileInputStream(settingsFilePath);
-					props.load(o);
-					o.close();
+					try {
+						props.load(o);
+					} finally {
+						o.close();
+					}
 				}
 
 				//finalize properties object. use values from the properties file if they exist and set defaults for those that don't exist

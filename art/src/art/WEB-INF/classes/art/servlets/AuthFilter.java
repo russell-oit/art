@@ -69,7 +69,7 @@ public final class AuthFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
 
-		if (request instanceof HttpServletRequest) {
+		if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
 			HttpServletRequest hrequest = (HttpServletRequest) request;
 			HttpServletResponse hresponse = (HttpServletResponse) response;
 			HttpSession session = hrequest.getSession();

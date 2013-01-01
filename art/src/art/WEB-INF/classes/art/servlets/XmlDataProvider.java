@@ -40,410 +40,455 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class to return xml or html fragments to be used in ajaxtags components.
- * 
+ *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
 public class XmlDataProvider extends BaseAjaxServlet {
-    
-    private static final long serialVersionUID = 1L;
-    
-    final static Logger logger = LoggerFactory.getLogger(XmlDataProvider.class);
-    
-    String username;
-    ResourceBundle messages;
 
-    /**
-     * Main method from which the other methods that return ajax data are called.
-     * 
-     * @param request http request object
-     * @param response http response object
-     * @return ajax xml response or html response depending on the ajax tag used
-     * @throws ServletException
-     * @throws IOException
-     */
-    @Override
-    public String getXmlContent(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+	private static final long serialVersionUID = 1L;
+	final static Logger logger = LoggerFactory.getLogger(XmlDataProvider.class);
 
-        String result = ""; //return ajax xml response or html response depending on the ajax tag used
+	/**
+	 * Main method from which the other methods that return ajax data are
+	 * called.
+	 *
+	 * @param request http request object
+	 * @param response http response object
+	 * @return ajax xml response or html response depending on the ajax tag used
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	@Override
+	public String getXmlContent(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 
-        // make sure data is not cached
-        response.setHeader("Cache-control", "no-cache");
-        request.setCharacterEncoding("UTF-8");
+		String result = ""; //return ajax xml response or html response depending on the ajax tag used
 
-        String action = request.getParameter("action").toLowerCase();
-        messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+		// make sure data is not cached
+		response.setHeader("Cache-control", "no-cache");
+		request.setCharacterEncoding("UTF-8");
 
-        username = (String) request.getSession().getAttribute("username");
-        if (username == null) {
-            username = "public_user";
-        }
+		String action = request.getParameter("action").toLowerCase();
 
-        if (action.equals("lov")) {
-            result = getXmlLov(request, response);
-        } else {
-            Connection conn = null;
-            try {
-                conn = ArtDBCP.getConnection();
-                if (action.equals("queries")) {
-                    result = getXmlQueries(request, response, conn);
-                } else if (action.equals("queriesadmin")) {
-                    result = getXmlAdminQueries(request, response, conn);
-                } else if (action.equals("querydescr")) {
-                    result = getHtmlQueryDescr(request, response, conn);
-                } else if (action.equals("schedule")) {
-                    result = getXmlSchedule(request, response, conn);
-                }
-            } catch (Exception e) {
-                logger.error("Error",e);
-            } finally {
-                try {
-					if(conn!=null){
-						conn.close();
-					}
-                } catch (Exception e) {
-                    logger.error("Error",e);
-                }
-            }
-        }
+		String username = (String) request.getSession().getAttribute("username");
+		if (username == null) {
+			username = "public_user";
+		}
 
-        return result;
-    }
+		if (action.equals("lov")) {
+			result = getXmlLov(request, response, username);
+		} else if (action.equals("queries")) {
+			result = getXmlQueries(request, response);
+		} else if (action.equals("queriesadmin")) {
+			result = getXmlAdminQueries(request, response, username);
+		} else if (action.equals("querydescr")) {
+			result = getHtmlQueryDescr(request, response);
+		} else if (action.equals("schedule")) {
+			result = getXmlSchedule(request, response);
+		}
 
-    /** 
-     * Get ajax response for populating select box for chained parameters.
-     * 
-     * @param request http request object
-     * @param response http response object
-     * @return ajax response for populating select box for chained parameters
-     * @throws IOException  
-     */
-    public String getXmlLov(HttpServletRequest request, HttpServletResponse response)
-            throws IOException {
+		return result;
+	}
 
-        AjaxXmlBuilder builder = new AjaxXmlBuilder();
+	/**
+	 * Get ajax response for populating select box for chained parameters.
+	 *
+	 * @param request http request object
+	 * @param response http response object
+	 * @return ajax response for populating select box for chained parameters
+	 * @throws IOException
+	 */
+	private String getXmlLov(HttpServletRequest request, HttpServletResponse response, String username) {
 
-        try {
-            response.setContentType("text/xml;charset=utf-8");
+		AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
-            int queryId = Integer.parseInt(request.getParameter("queryId"));
+		try {
+			response.setContentType("text/xml;charset=utf-8");
 
-            PreparedQuery pq = new PreparedQuery();
-            pq.setUsername(username);
-            pq.setQueryId(queryId);
-            
-            // Get parameters
-            String filter = request.getParameter("filter");			
-            String isMulti = request.getParameter("isMulti");
+			int queryId = Integer.parseInt(request.getParameter("queryId"));
 
-            Map<String, String> inlineParams = new HashMap<String, String>();
-            inlineParams.put("filter", filter);
-            pq.setInlineParams(inlineParams);
+			PreparedQuery pq = new PreparedQuery();
+			pq.setUsername(username);
+			pq.setQueryId(queryId);
 
-            ResultSet rs = pq.executeQuery(false); //don't apply rules
+			// Get parameters
+			String filter = request.getParameter("filter");
+			String isMulti = request.getParameter("isMulti");
 
-            int viewColumn = rs.getMetaData().getColumnCount();
-            if (isMulti != null) {
-                builder.addItem(messages.getString("allItems"), "ALL_ITEMS");
-            }
+			Map<String, String> inlineParams = new HashMap<String, String>();
+			inlineParams.put("filter", filter);
+			pq.setInlineParams(inlineParams);
 
-            while (rs.next()) {
-                // build html option list
-                builder.addItem(parseXml(rs.getString(viewColumn)), parseXml(rs.getString(1)));
-            }
-            rs.close();
-            pq.close();
+			ResultSet rs = pq.executeQuery(false); //don't apply rules
 
-        } catch (Exception e) {
-            logger.error("Error",e);
-        }
+			int viewColumn = rs.getMetaData().getColumnCount();
+			if (isMulti != null) {
+				ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+				builder.addItem(messages.getString("allItems"), "ALL_ITEMS");
+			}
 
-        return builder.toString();
+			while (rs.next()) {
+				// build html option list
+				builder.addItem(parseXml(rs.getString(viewColumn)), parseXml(rs.getString(1)));
+			}
+			rs.close();
+			pq.close();
 
-    }
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
 
-    /** 
-     * Get the list of queries a user can view.
-     * 
-     * @param request http request object
-     * @param response http response object
-     * @param conn connection to art repository
-     * @return ajax response for the list of queries a user can view
-     * @throws IOException  
-     */
-    public String getXmlQueries(HttpServletRequest request, HttpServletResponse response, Connection conn)
-            throws IOException {
+		return builder.toString();
 
-        AjaxXmlBuilder builder = new AjaxXmlBuilder();
+	}
 
-        int groupId = -1;
-        String group = request.getParameter("groupId");
-        if (StringUtils.length(group) > 0) {
-            groupId = Integer.parseInt(group);
-        }
+	/**
+	 * Get the list of queries a user can view.
+	 *
+	 * @param request http request object
+	 * @param response http response object
+	 * @param conn connection to art repository
+	 * @return ajax response for the list of queries a user can view
+	 * @throws IOException
+	 */
+	private String getXmlQueries(HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
 
-        if (groupId != -1) {
-            UserEntity ue = (UserEntity) request.getSession().getAttribute("ue");
-            Map<String, Integer> map = ue.getAvailableQueries(groupId);
+		AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
-            for (Map.Entry<String, Integer> entry : map.entrySet()) {
-                builder.addItem(entry.getKey(), String.valueOf(entry.getValue()));
-            }
-        }
+		response.setContentType("text/xml;charset=utf-8");
 
-        return builder.toString();
-    }
+		int groupId = -1;
+		String group = request.getParameter("groupId");
+		if (StringUtils.length(group) > 0) {
+			groupId = Integer.parseInt(group);
+		}
 
-    /** 
-     * Get the list of queries an admin can view.
-     * 
-     * @param request http request object
-     * @param response http response object
-     * @param conn connection to art repository
-     * @return ajax response for the list of queries an admin can view
-     * @throws IOException
-     * @throws SQLException  
-     */
-    public String getXmlAdminQueries(HttpServletRequest request, HttpServletResponse response, Connection conn)
-            throws IOException, SQLException {
+		if (groupId != -1) {
+			UserEntity ue = (UserEntity) request.getSession().getAttribute("ue");
+			Map<String, Integer> map = ue.getAvailableQueries(groupId);
 
-        AjaxXmlBuilder builder = new AjaxXmlBuilder();
+			for (Map.Entry<String, Integer> entry : map.entrySet()) {
+				builder.addItem(entry.getKey(), String.valueOf(entry.getValue()));
+			}
+		}
 
-        response.setContentType("text/xml;charset=utf-8");
-        int accessLevel = ((Integer) request.getSession().getAttribute("AdminLevel")).intValue();
+		return builder.toString();
+	}
 
-        int groupId = Integer.parseInt(request.getParameter("groupId"));
-        if (groupId != -1) {
+	/**
+	 * Get the list of queries an admin can view.
+	 *
+	 * @param request http request object
+	 * @param response http response object
+	 * @param conn connection to art repository
+	 * @return ajax response for the list of queries an admin can view
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	private String getXmlAdminQueries(HttpServletRequest request, HttpServletResponse response, String username) {
+
+		AjaxXmlBuilder builder = new AjaxXmlBuilder();
+
+		response.setContentType("text/xml;charset=utf-8");
+
+		int accessLevel = ((Integer) request.getSession().getAttribute("AdminLevel")).intValue();
+
+		int groupId = Integer.parseInt(request.getParameter("groupId"));
+		if (groupId != -1) {
 
 			String sql;
-            if (accessLevel > 30) {
-                sql = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
-                        + " FROM ART_QUERIES AQ "
-                        + "WHERE  AQ.QUERY_GROUP_ID = ? "
-                        + "ORDER BY AQ.NAME";
-            } else {
-                // get only queries with Group and datasource matching the "junior" admin priviledges
-                sql = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
-                        + " FROM ART_QUERIES AQ, "
-                        + "      ART_ADMIN_PRIVILEGES APG, "
-                        + "      ART_ADMIN_PRIVILEGES APD "
-                        + " WHERE AQ.QUERY_GROUP_ID = ?"
-                        + "  AND AQ.QUERY_GROUP_ID = APG.VALUE_ID "
-                        + "  AND APG.PRIVILEGE = 'GRP' "
-                        + "  AND APG.USERNAME = ? "
-                        + "  AND AQ.DATABASE_ID = APD.VALUE_ID "
-                        + "  AND APD.PRIVILEGE = 'DB' "
-                        + "  AND APD.USERNAME = ? "
-                        + " ORDER BY AQ.NAME";
-            }
+			if (accessLevel <= 30) {
+				// get only queries with Group and datasource matching the "junior" admin priviledges
+				sql = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
+						+ " FROM ART_QUERIES AQ, "
+						+ " ART_ADMIN_PRIVILEGES APG, ART_ADMIN_PRIVILEGES APD "
+						+ " WHERE AQ.QUERY_GROUP_ID = APG.VALUE_ID "
+						+ " AND AQ.QUERY_GROUP_ID = ?"
+						+ " AND APG.PRIVILEGE = 'GRP' "
+						+ " AND APG.USERNAME = ? "
+						+ " AND AQ.DATABASE_ID = APD.VALUE_ID "
+						+ " AND APD.PRIVILEGE = 'DB' "
+						+ " AND APD.USERNAME = ? "
+						+ " ORDER BY AQ.NAME";
+			} else {
+				sql = "SELECT AQ.QUERY_ID, AQ.NAME, AQ.ACTIVE_STATUS"
+						+ " FROM ART_QUERIES AQ "
+						+ " WHERE AQ.QUERY_GROUP_ID = ? "
+						+ " ORDER BY AQ.NAME";
+			}
 
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setInt(1, groupId);
+			Connection conn = null;
+			PreparedStatement ps = null;
+			try {
+				conn = ArtDBCP.getConnection();
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, groupId);
 
-            if (accessLevel <= 30) {
-                ps.setString(2, username);
-                ps.setString(3, username);
-            }
+				if (accessLevel <= 30) {
+					ps.setString(2, username);
+					ps.setString(3, username);
+				}
 
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                // build html option list
-                builder.addItem(parseXml(rs.getString(2)) + " (Id:" + rs.getInt(1) + " Status:" + rs.getString(3) + ")", String.valueOf(rs.getInt(1)));
-            }
-            ps.close();
-            rs.close();
-        }
+				ResultSet rs = ps.executeQuery();
+				while (rs.next()) {
+					// build html option list
+					builder.addItem(parseXml(rs.getString(2)) + " (Id:" + rs.getInt(1) + " Status:" + rs.getString(3) + ")", String.valueOf(rs.getInt(1)));
+				}
+				rs.close();
+			} catch (Exception e) {
+				logger.error("Error", e);
+			} finally {
+				try {
+					if (ps != null) {
+						ps.close();
+					}
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
+				try {
+					if (conn != null) {
+						conn.close();
+					}
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
+			}
+		}
 
-        return builder.toString();
-    }
+		return builder.toString();
+	}
 
-    /** 
-     * Get a html fragment with object summary information.
-     * 
-     * @param request http request object
-     * @param response http response object
-     * @param conn connection to art repository
-     * @return a html fragment with object summary information
-     * @throws IOException
-     * @throws SQLException  
-     */
-    public String getHtmlQueryDescr(HttpServletRequest request, HttpServletResponse response, Connection conn)
-            throws IOException, SQLException {
+	/**
+	 * Get a html fragment with object summary information.
+	 *
+	 * @param request http request object
+	 * @param response http response object
+	 * @param conn connection to art repository
+	 * @return a html fragment with object summary information
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	private String getHtmlQueryDescr(HttpServletRequest request, HttpServletResponse response) {
 
 		StringBuilder builder = new StringBuilder(200);
-		
-        response.setContentType("text/html;charset=utf-8");
 
-        int queryId = Integer.parseInt(request.getParameter("queryId"));
+		response.setContentType("text/html;charset=utf-8");
 
-        //use left outer join as dashboards, text queries etc don't have a datasource
-        String sql = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
-                + " aq.DESCRIPTION, aq.QUERY_TYPE, aq.UPDATE_DATE, "
-                + " ad.NAME AS DATABASE_NAME "
-                + " FROM ART_QUERIES aq left outer join ART_DATABASES ad"
-                + " on aq.DATABASE_ID=ad.DATABASE_ID "
-                + " WHERE aq.QUERY_ID = ?";
-                
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ps.setInt(1, queryId);
+		int queryId = Integer.parseInt(request.getParameter("queryId"));
 
-        ResultSet rs = ps.executeQuery();
+		Connection conn = null;
+		PreparedStatement ps = null;
 
-        while (rs.next()) {
-            String type;
-            int typeId = rs.getInt("QUERY_TYPE");
-            switch (typeId) {
-                case 0:
-                    type = messages.getString("tabularQuery");
-                    break;
-                case 100:
-                    type = messages.getString("updateQuery");
-                    break;
-                case 101:
-                    type = messages.getString("crosstabQuery");
-                    break;
-                case 102:
-                    type = messages.getString("crosstabwebQuery");
-                    break;
-                case 103:
-                    type = messages.getString("tabularwebQuery");
-                    break;
-                case 110:
-                    type = messages.getString("dashboardQuery");
-                    break;
-                case 111:
-                    type = messages.getString("textQuery");
-                    break;
-                case 112:
-                case 113:
-                case 114:
-                    type = messages.getString("pivotTableQuery");
-                    break;
-                case 115:
-                case 116:
-                    type = messages.getString("jasperReportQuery");
-                    break;
-                case 117:
-                case 118:
-                    type = messages.getString("jxlsQuery");
-                    break;
-                default:
-                    if (typeId > 0 && typeId < 99) {
-                        type = messages.getString("reportwebQuery");
-                    } else if (typeId < 0) {
-                        type = messages.getString("graphQuery");
-                    } else {
-                        type = "Unknown...";
-                    }
-            }
+		try {
+			ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
-            builder.append("<fieldset>");
-            builder.append("<legend>").append(messages.getString("itemDescription")).append("</legend>");
-            builder.append(messages.getString("objectId")).append(" <b>").append(rs.getInt("QUERY_ID")).append("</b> <br>");
-            builder.append(messages.getString("objectName")).append(" <b>").append(rs.getString("NAME")).append("</b> ");
-            String shortDescription=rs.getString("SHORT_DESCRIPTION");
-			shortDescription=StringUtils.trim(shortDescription);
-            if(StringUtils.length(shortDescription)>0){
-                builder.append(":: <b>").append(shortDescription).append("</b>");
-            }
-            builder.append("<br>");
-            builder.append(messages.getString("itemDescription")).append("<br>&nbsp;&nbsp; <b>").append(rs.getString("DESCRIPTION")).append("</b><br>");
-            builder.append(messages.getString("objectType")).append(" <b>").append(type).append("</b><br>");
-            builder.append(messages.getString("updateDate")).append(" <b>").append(rs.getString("UPDATE_DATE")).append("</b><br>");
+			//use left outer join as dashboards, text queries etc don't have a datasource
+			String sql = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
+					+ " aq.DESCRIPTION, aq.QUERY_TYPE, aq.UPDATE_DATE, "
+					+ " ad.NAME AS DATABASE_NAME "
+					+ " FROM ART_QUERIES aq left outer join ART_DATABASES ad"
+					+ " on aq.DATABASE_ID=ad.DATABASE_ID "
+					+ " WHERE aq.QUERY_ID = ?";
 
-            // dashboards, text querys, mondrian via xmla and ssas via xmla don't have a datasource
-            if (typeId != 111 && typeId != 110 && typeId != 113 && typeId != 114) {                 
-                builder.append(messages.getString("targetDatasource")).append(" <b>").append(rs.getString("DATABASE_NAME")).append("</b><br>");
-            }
+			conn = ArtDBCP.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, queryId);
 
-			//remove show params checkbox. let parameters always be shown
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				String type;
+				int typeId = rs.getInt("QUERY_TYPE");
+				switch (typeId) {
+					case 0:
+						type = messages.getString("tabularQuery");
+						break;
+					case 100:
+						type = messages.getString("updateQuery");
+						break;
+					case 101:
+						type = messages.getString("crosstabQuery");
+						break;
+					case 102:
+						type = messages.getString("crosstabwebQuery");
+						break;
+					case 103:
+						type = messages.getString("tabularwebQuery");
+						break;
+					case 110:
+						type = messages.getString("dashboardQuery");
+						break;
+					case 111:
+						type = messages.getString("textQuery");
+						break;
+					case 112:
+					case 113:
+					case 114:
+						type = messages.getString("pivotTableQuery");
+						break;
+					case 115:
+					case 116:
+						type = messages.getString("jasperReportQuery");
+						break;
+					case 117:
+					case 118:
+						type = messages.getString("jxlsQuery");
+						break;
+					default:
+						if (typeId > 0 && typeId < 99) {
+							type = messages.getString("reportwebQuery");
+						} else if (typeId < 0) {
+							type = messages.getString("graphQuery");
+						} else {
+							type = "Unknown...";
+						}
+				}
+
+				builder.append("<fieldset>");
+				builder.append("<legend>").append(messages.getString("itemDescription")).append("</legend>");
+				builder.append(messages.getString("objectId")).append(" <b>").append(rs.getInt("QUERY_ID")).append("</b> <br>");
+				builder.append(messages.getString("objectName")).append(" <b>").append(rs.getString("NAME")).append("</b> ");
+				String shortDescription = rs.getString("SHORT_DESCRIPTION");
+				shortDescription = StringUtils.trim(shortDescription);
+				if (StringUtils.length(shortDescription) > 0) {
+					builder.append(":: <b>").append(shortDescription).append("</b>");
+				}
+				builder.append("<br>");
+				builder.append(messages.getString("itemDescription")).append("<br>&nbsp;&nbsp; <b>").append(rs.getString("DESCRIPTION")).append("</b><br>");
+				builder.append(messages.getString("objectType")).append(" <b>").append(type).append("</b><br>");
+				builder.append(messages.getString("updateDate")).append(" <b>").append(rs.getString("UPDATE_DATE")).append("</b><br>");
+
+				// dashboards, text querys, mondrian via xmla and ssas via xmla don't have a datasource
+				if (typeId != 111 && typeId != 110 && typeId != 113 && typeId != 114) {
+					builder.append(messages.getString("targetDatasource")).append(" <b>").append(rs.getString("DATABASE_NAME")).append("</b><br>");
+				}
+
+				//remove show params checkbox. let parameters always be shown
 			/*
-            if (typeId == 110) { // add show params checkbox for dashboards
-                builder.append("<input type=\"checkbox\" id=\"editPortletsParameters\" name=\"editPortletsParameters\" value=\"true\" checked>" + messages.getString("editPortletsParameters"));
-            }
-			*/
+				 if (typeId == 110) { // add show params checkbox for dashboards
+				 builder.append("<input type=\"checkbox\" id=\"editPortletsParameters\" name=\"editPortletsParameters\" value=\"true\" checked>" + messages.getString("editPortletsParameters"));
+				 }
+				 */
 
-            builder.append("<input type=\"hidden\" name=\"typeId\" value=\"").append(typeId).append("\">");
-            builder.append("</fieldset>");
-        }
-        ps.close();
-        rs.close();
+				builder.append("<input type=\"hidden\" name=\"typeId\" value=\"").append(typeId).append("\">");
+				builder.append("</fieldset>");
+			}
+			rs.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
 
-        return builder.toString();
-    }
+		return builder.toString();
+	}
 
-    /**
-     * Get details for a saved job schedule. To use in the editJob.jsp page.
-     * 
-     * @param request http request object
-     * @param response http response object
-     * @param conn connection to art repository
-     * @return details for a saved job schedule
-     * @throws IOException
-     * @throws SQLException
-     */
-    public String getXmlSchedule(HttpServletRequest request, HttpServletResponse response, Connection conn)
-            throws IOException, SQLException {
+	/**
+	 * Get details for a saved job schedule. To use in the editJob.jsp page.
+	 *
+	 * @param request http request object
+	 * @param response http response object
+	 * @param conn connection to art repository
+	 * @return details for a saved job schedule
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	private String getXmlSchedule(HttpServletRequest request, HttpServletResponse response) {
 
-        AjaxXmlBuilder builder = new AjaxXmlBuilder();
+		AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
-        response.setContentType("text/xml;charset=utf-8");
+		response.setContentType("text/xml;charset=utf-8");
 
-        String scheduleName = request.getParameter("scheduleName");
-        if (scheduleName != null) {
+		String scheduleName = request.getParameter("scheduleName");
+		if (scheduleName != null) {
 
-            String sql = "SELECT AJS.JOB_MINUTE, AJS.JOB_HOUR, AJS.JOB_DAY, AJS.JOB_WEEKDAY, AJS.JOB_MONTH "
-                    + " FROM ART_JOB_SCHEDULES AJS "
-                    + " WHERE AJS.SCHEDULE_NAME = ?";
+			Connection conn = null;
+			PreparedStatement ps = null;
+			try {
+				String sql = "SELECT AJS.JOB_MINUTE, AJS.JOB_HOUR, AJS.JOB_DAY, AJS.JOB_WEEKDAY, AJS.JOB_MONTH "
+						+ " FROM ART_JOB_SCHEDULES AJS "
+						+ " WHERE AJS.SCHEDULE_NAME = ?";
 
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, scheduleName);
+				conn = ArtDBCP.getConnection();
+				ps = conn.prepareStatement(sql);
+				ps.setString(1, scheduleName);
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                String minute;
-                String hour;
-                String day;
-                String month;
-                String weekday;
+				ResultSet rs = ps.executeQuery();
+				if (rs.next()) {
+					String minute;
+					String hour;
+					String day;
+					String month;
+					String weekday;
 
-                minute = rs.getString("JOB_MINUTE");
-                builder.addItem("minute", minute);
+					minute = rs.getString("JOB_MINUTE");
+					builder.addItem("minute", minute);
 
-                hour = rs.getString("JOB_HOUR");
-                builder.addItem("hour", hour);
+					hour = rs.getString("JOB_HOUR");
+					builder.addItem("hour", hour);
 
-                day = rs.getString("JOB_DAY");
-                builder.addItem("day", day);
+					day = rs.getString("JOB_DAY");
+					builder.addItem("day", day);
 
-                month = rs.getString("JOB_MONTH");
-                builder.addItem("month", month);
+					month = rs.getString("JOB_MONTH");
+					builder.addItem("month", month);
 
-                weekday = rs.getString("JOB_WEEKDAY");
-                builder.addItem("weekday", weekday);
-            }
-            ps.close();
-            rs.close();
-        }
+					weekday = rs.getString("JOB_WEEKDAY");
+					builder.addItem("weekday", weekday);
+				}
+				rs.close();
+			} catch (Exception e) {
+				logger.error("Error", e);
+			} finally {
+				try {
+					if (ps != null) {
+						ps.close();
+					}
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
+				try {
+					if (conn != null) {
+						conn.close();
+					}
+				} catch (Exception e) {
+					logger.error("Error", e);
+				}
+			}
+		}
 
-        return builder.toString();
-    }
+		return builder.toString();
+	}
 
-    //replace characters that have a special meaning in xml e.g. &, <, >
-    /**
-     * Replace characters that have a special meaning in xml e.g. &, &lt;, &gt;
-     * 
-     * @param s string to parse
-     * @return string with special xml characters removed
-     */
-    public static String parseXml(String s) {
-        String parsedString = null;
+	//replace characters that have a special meaning in xml e.g. &, <, >
+	/**
+	 * Replace characters that have a special meaning in xml e.g. &, &lt;, &gt;
+	 *
+	 * @param s string to parse
+	 * @return string with special xml characters removed
+	 */
+	public static String parseXml(String s) {
+		String parsedString = null;
 
-        if (s != null) {
-            parsedString = StringEscapeUtils.escapeXml(s);
-        }
+		if (s != null) {
+			parsedString = StringEscapeUtils.escapeXml(s);
+		}
 
-        return parsedString;
-    }
+		return parsedString;
+	}
 }

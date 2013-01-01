@@ -62,7 +62,6 @@ public class QueryExecute extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(QueryExecute.class);
-	String baseExportPath;
 	private int currentNumberOfRunningQueries = 0;
 	HashMap<String, java.lang.Class> viewModesHash;
 
@@ -395,7 +394,7 @@ public class QueryExecute extends HttpServlet {
 		ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
 		ServletContext ctx = getServletConfig().getServletContext();
-		baseExportPath = ArtDBCP.getExportPath();
+		String baseExportPath = ArtDBCP.getExportPath();
 		HttpSession session = request.getSession();
 		String username = (String) session.getAttribute("username");
 
