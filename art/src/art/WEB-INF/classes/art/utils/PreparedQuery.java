@@ -1233,8 +1233,8 @@ public class PreparedQuery {
 				break;
 			}
 		}
-		ps.close();
 		rs.close();
+		ps.close();
 
 		if (!isAllItemsForThisRule) {
 			// return the <list> for the current rule and user
@@ -1254,56 +1254,66 @@ public class PreparedQuery {
 	private String getGroupRuleValues(String ruleName, String columnName, String columnDataType) throws SQLException {
 
 		//get user's user groups
-		PreparedStatement ps;
+		PreparedStatement ps = null;
 		ResultSet rs;
 		String sql;
-
-		sql = "SELECT USER_GROUP_ID "
-				+ " FROM ART_USER_GROUP_ASSIGNMENT "
-				+ " WHERE USERNAME=? ";
-
-		ps = conn.prepareStatement(sql);
-		ps.setString(1, username);
-
-		rs = ps.executeQuery();
-
-		int count = 0;
 		StringBuilder valuesSb = new StringBuilder(512);
 
-		while (rs.next()) {
-			//for each group, get the group's rule values
-			String userGroupId = rs.getString("USER_GROUP_ID");
-			StringBuilder tmpSb = getRuleValues(conn, userGroupId, ruleName, 1, columnDataType);
+		try {
 
-			String condition;
-			if (tmpSb == null) {
-				//rule value defined for this group as ALL_ITEMS
-				condition = " 1=1 ";
-			} else {
-				if (tmpSb.length() == 0) {
-					//no values defined for this rule for this group
-					condition = "";
+			sql = "SELECT USER_GROUP_ID "
+					+ " FROM ART_USER_GROUP_ASSIGNMENT "
+					+ " WHERE USERNAME=? ";
+
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, username);
+
+			rs = ps.executeQuery();
+
+			int count = 0;
+
+			while (rs.next()) {
+				//for each group, get the group's rule values
+				String userGroupId = rs.getString("USER_GROUP_ID");
+				StringBuilder tmpSb = getRuleValues(conn, userGroupId, ruleName, 1, columnDataType);
+
+				String condition;
+				if (tmpSb == null) {
+					//rule value defined for this group as ALL_ITEMS
+					condition = " 1=1 ";
 				} else {
-					//some values defined for this rule for this group
-					String groupValues = tmpSb.toString().substring(1); //first character returned from getRuleValues is ,
-					condition = columnName + " in(" + groupValues + ") ";
+					if (tmpSb.length() == 0) {
+						//no values defined for this rule for this group
+						condition = "";
+					} else {
+						//some values defined for this rule for this group
+						String groupValues = tmpSb.toString().substring(1); //first character returned from getRuleValues is ,
+						condition = columnName + " in(" + groupValues + ") ";
+					}
+				}
+
+				//build group values string
+				if (StringUtils.length(condition) > 0) {
+					//some rule value defined for this group
+					count++;
+
+					if (count == 1) {
+						valuesSb.append(condition);
+					} else {
+						valuesSb.append(" OR ").append(condition);
+					}
 				}
 			}
-
-			//build group values string
-			if (StringUtils.length(condition) > 0) {
-				//some rule value defined for this group
-				count++;
-
-				if (count == 1) {
-					valuesSb.append(condition);
-				} else {
-					valuesSb.append(" OR ").append(condition);
+			rs.close();
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
 				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
 			}
 		}
-		ps.close();
-		rs.close();
 
 		return valuesSb.toString();
 	}
@@ -1363,10 +1373,12 @@ public class PreparedQuery {
 					if (param.usesDirectSubstitution()) {
 						String querySql = sb.toString();
 
-						if (paramValue != null) {
-							//some precaution
-							paramValue = paramValue.replace("'", "''").replace("--", "").replace(";", "");
+						if (paramValue == null) {
+							paramValue = "";
 						}
+
+						//some precaution
+						paramValue = paramValue.replace("'", "''").replace("--", "").replace(";", "");
 
 						String searchString = Pattern.quote("#" + paramLabel + "#"); //quote in case it contains special regex characters
 						String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
@@ -2078,17 +2090,17 @@ public class PreparedQuery {
 			}
 		} finally {
 			//close recordsets and lov query database connection
-			if (psLovQuery != null) {
-				psLovQuery.close();
-			}
 			if (rsLovQuery != null) {
 				rsLovQuery.close();
 			}
-			if (psLovValues != null) {
-				psLovValues.close();
+			if (psLovQuery != null) {
+				psLovQuery.close();
 			}
 			if (rsLovValues != null) {
 				rsLovValues.close();
+			}
+			if (psLovValues != null) {
+				psLovValues.close();
 			}
 			if (connLov != null) {
 				connLov.close();

@@ -1048,7 +1048,7 @@ public class ArtJob implements Job, Serializable {
 			logger.error("Error", e);
 		} finally {
 			try {
-				if(conn!=null){
+				if (conn != null) {
 					conn.close();
 				}
 			} catch (Exception e) {
@@ -1674,7 +1674,10 @@ public class ArtJob implements Job, Serializable {
 
 							//set filename to status of last recipient email sent
 							File f = new File(fileName);
-							f.delete();
+							boolean deleted = f.delete();
+							if (!deleted) {
+								logger.warn("Email attachment file not deleted: {}", fileName);
+							}
 							if (mailSent) {
 								fileName = "-File has been emailed";
 							} else {
@@ -1808,14 +1811,20 @@ public class ArtJob implements Job, Serializable {
 			// inline html within email
 			// read the file and include it in the HTML message
 			FileInputStream fis = new FileInputStream(fileName);
-			byte fileBytes[] = new byte[fis.available()];
-			fis.read(fileBytes);
-			// convert the file to a string and get only the html table
-			String htmlTable = new String(fileBytes, "UTF-8");
-			//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
-			htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
-			msg = msg + "<hr>" + htmlTable;
-			fis.close();
+			try {
+				byte fileBytes[] = new byte[fis.available()];
+				int result = fis.read(fileBytes);
+				if (result == -1) {
+					logger.warn("EOF reached for inline email file: {}", fileName);
+				}
+				// convert the file to a string and get only the html table
+				String htmlTable = new String(fileBytes, "UTF-8");
+				//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
+				htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
+				msg = msg + "<hr>" + htmlTable;
+			} finally {
+				fis.close();
+			}
 		}
 
 		String autoMessage = "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small>";
@@ -1831,9 +1840,9 @@ public class ArtJob implements Job, Serializable {
 	 */
 	public void addSharedJobUsers(Connection conn, int jId) {
 		String sql;
-		PreparedStatement ps;
+		PreparedStatement ps = null;
 		ResultSet rs;
-		PreparedStatement psInsert;
+		PreparedStatement psInsert = null;
 
 		try {
 			//get users who should have access to the job through group membership but don't already have it
@@ -1864,13 +1873,25 @@ public class ArtJob implements Job, Serializable {
 					logger.error("Error. Job id {}", jobId, e);
 				}
 			}
-
-			psInsert.close();
-			ps.close();
 			rs.close();
 
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
+		} finally {
+			try {
+				if (psInsert != null) {
+					psInsert.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
 		}
 	}
 
@@ -1884,9 +1905,9 @@ public class ArtJob implements Job, Serializable {
 	 */
 	public void removeSharedJobUsers(Connection conn, int jId, int groupId) {
 		String sql;
-		PreparedStatement ps;
+		PreparedStatement ps = null;
 		ResultSet rs;
-		PreparedStatement psDelete;
+		PreparedStatement psDelete = null;
 
 		try {
 			//get users who should be denied access to the job because their group has been denied access
@@ -1916,12 +1937,25 @@ public class ArtJob implements Job, Serializable {
 					logger.error("Error. Job id {}", jId, e);
 				}
 			}
-			psDelete.close();
-			ps.close();
 			rs.close();
 
 		} catch (Exception e) {
 			logger.error("Error. Job id={}, Group id={}", new Object[]{jId, groupId, e});
+		} finally {
+			try {
+				if (psDelete != null) {
+					psDelete.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
 		}
 	}
 
@@ -1929,74 +1963,99 @@ public class ArtJob implements Job, Serializable {
 	 * Set timestamps in ART_JOBS table before job execution
 	 */
 	private void beforeExecution(Connection conn) {
+
+		PreparedStatement ps = null;
+
 		try {
 			java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
 
 			// Update LAST_START_DATE and next run date on ART_JOBS table
-			String SQLUpdate = "UPDATE ART_JOBS SET LAST_START_DATE = ?, NEXT_RUN_DATE = ? WHERE JOB_ID = ?";
-			PreparedStatement psUpdate = conn.prepareStatement(SQLUpdate);
-			psUpdate.setTimestamp(1, now);
+			String sql = "UPDATE ART_JOBS SET LAST_START_DATE = ?, NEXT_RUN_DATE = ? WHERE JOB_ID = ?";
+			ps = conn.prepareStatement(sql);
+			ps.setTimestamp(1, now);
 			if (nextRunDate != null) {
-				psUpdate.setTimestamp(2, new java.sql.Timestamp(nextRunDate.getTime()));
+				ps.setTimestamp(2, new java.sql.Timestamp(nextRunDate.getTime()));
 			} else {
-				psUpdate.setTimestamp(2, null);
+				ps.setTimestamp(2, null);
 			}
-			psUpdate.setInt(3, jobId);
-			psUpdate.executeUpdate();
-			psUpdate.close();
+			ps.setInt(3, jobId);
+			ps.executeUpdate();
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
 		}
 	}
 
 	//create job audit record
 	private void createAuditRecord(Connection conn, String user) {
+
+		PreparedStatement ps = null;
 		try {
 			if (StringUtils.equals(enableAudit, "Y")) {
 				//generate unique key for this job run
 				jobAuditKey = generateKey();
 
 				String sqlString;
-				PreparedStatement psUpdate;
 				java.sql.Timestamp now = new java.sql.Timestamp(new java.util.Date().getTime());
 
 				//insert job start audit values.
 				sqlString = "INSERT INTO ART_JOBS_AUDIT (JOB_ID, JOB_ACTION, JOB_AUDIT_KEY, START_DATE, USERNAME) VALUES (?, 'S', ?, ?, ?)";
-				psUpdate = conn.prepareStatement(sqlString);
+				ps = conn.prepareStatement(sqlString);
 
-				psUpdate.setInt(1, jobId);
-				psUpdate.setString(2, jobAuditKey);
-				psUpdate.setTimestamp(3, now);
-				psUpdate.setString(4, user);
-				psUpdate.executeUpdate();
-
-				psUpdate.close();
+				ps.setInt(1, jobId);
+				ps.setString(2, jobAuditKey);
+				ps.setTimestamp(3, now);
+				ps.setString(4, user);
+				ps.executeUpdate();
 			}
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
 		}
 	}
 
 	//set final end time and file name of job table
 	private void afterCompletion(Connection conn) {
+
+		PreparedStatement ps = null;
 		try {
 			Timestamp now = new Timestamp(new java.util.Date().getTime());
 
 			String sql;
-			PreparedStatement psUpdate;
 
 			//update job details
 			sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ? WHERE JOB_ID = ?";
-			psUpdate = conn.prepareStatement(sql);
+			ps = conn.prepareStatement(sql);
 
-			psUpdate.setTimestamp(1, now);
-			psUpdate.setString(2, fileName);
-			psUpdate.setInt(3, jobId);
-			psUpdate.executeUpdate();
+			ps.setTimestamp(1, now);
+			ps.setString(2, fileName);
+			ps.setInt(3, jobId);
+			ps.executeUpdate();
 
-			psUpdate.close();
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
 		}
 	}
 
@@ -2005,12 +2064,13 @@ public class ArtJob implements Job, Serializable {
 	 * ART_JOBS_AUDIT table
 	 */
 	private void afterExecution(Connection conn, boolean splitJob, String user) {
-		try {
-			Timestamp now = new Timestamp(new java.util.Date().getTime());
 
+		PreparedStatement psShared = null;
+		PreparedStatement psAudit = null;
+		PreparedStatement ps = null;
+
+		try {
 			String sql;
-			PreparedStatement psShared;
-			PreparedStatement psAudit;
 			String finalFileName;
 
 			String sep = java.io.File.separator;
@@ -2042,7 +2102,7 @@ public class ArtJob implements Job, Serializable {
 				sql = "SELECT LAST_FILE_NAME, LAST_START_DATE, LAST_END_DATE"
 						+ " FROM ART_JOBS"
 						+ " WHERE JOB_ID = ?";
-				PreparedStatement ps = conn.prepareStatement(sql);
+				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 				ResultSet rs = ps.executeQuery();
 
@@ -2071,9 +2131,12 @@ public class ArtJob implements Job, Serializable {
 						}
 					}
 				}
-				ps.close();
 				rs.close();
+				ps.close();
+
 			}
+
+			Timestamp now = new Timestamp(new java.util.Date().getTime());
 
 			//update job details
 			//no need to update jobs table if non-split job. aftercompletion will do the final update to the jobs table
@@ -2103,6 +2166,28 @@ public class ArtJob implements Job, Serializable {
 			}
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
+			try {
+				if (psShared != null) {
+					psShared.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
+			try {
+				if (psAudit != null) {
+					psAudit.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
 		}
 	}
 
@@ -2174,7 +2259,7 @@ public class ArtJob implements Job, Serializable {
 			ps.setString(25, bcc);
 			ps.setInt(26, recipientsQueryId);
 			ps.setInt(27, runsToArchive);
-			ps.setInt(28,jobId);
+			ps.setInt(28, jobId);
 
 			ps.executeUpdate();
 			ps.close();
@@ -2308,14 +2393,14 @@ public class ArtJob implements Job, Serializable {
 			logger.debug("Attempting to delete Job Id {}", jobId);
 
 			//delete records in quartz tables
-			String jobName = "job" + jobId;
+			String deleteJobName = "job" + jobId;
 			String jobGroup = "jobGroup";
 			String triggerName = "trigger" + jobId;
 			String triggerGroup = "triggerGroup";
 
 			org.quartz.Scheduler scheduler = ArtDBCP.getScheduler();
 			if (scheduler != null) {
-				scheduler.deleteJob(jobKey(jobName, jobGroup)); //delete job records
+				scheduler.deleteJob(jobKey(deleteJobName, jobGroup)); //delete job records
 				scheduler.unscheduleJob(triggerKey(triggerName, triggerGroup)); //delete trigger records
 			}
 
@@ -2327,7 +2412,7 @@ public class ArtJob implements Job, Serializable {
 			ps.setInt(1, jobId);
 
 			if (ps.executeUpdate() == 1) { // job exists                
-				logger.debug("Job Deleted: ", jobId);
+				logger.debug("Job Deleted: {}", jobId);
 
 				SQL = "DELETE FROM ART_JOBS_PARAMETERS WHERE JOB_ID = ? ";
 				ps = conn.prepareStatement(SQL);
@@ -2394,6 +2479,7 @@ public class ArtJob implements Job, Serializable {
 	 */
 	public void load(int jId, String usr) {
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
@@ -2410,7 +2496,7 @@ public class ArtJob implements Job, Serializable {
 					+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.USERNAME=au.USERNAME AND aj.JOB_ID = ? "
 					+ (usr != null ? "  AND aj.USERNAME = ? " : "");
 
-			PreparedStatement ps = conn.prepareStatement(sql);
+			ps = conn.prepareStatement(sql);
 			ps.setInt(1, jId);
 
 			if (usr != null) {
@@ -2471,12 +2557,20 @@ public class ArtJob implements Job, Serializable {
 					setFrom(currentEmail);
 				}
 			}
+			rs.close();
 		} catch (SQLException e) {
 			logger.error("Error. Job id {}", jobId, e);
 		} finally {
 			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
+			try {
 				if (conn != null) {
-					conn.close(); // art repository
+					conn.close();
 				}
 			} catch (Exception e) {
 				logger.error("Error. Job id {}", jobId, e);
@@ -2532,14 +2626,14 @@ public class ArtJob implements Job, Serializable {
 			htmlParams = aq.getHtmlParams(qId);
 
 			conn = ArtDBCP.getConnection();
-			
+
 			String sql = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE"
 					+ " FROM ART_JOBS_PARAMETERS "
 					+ " WHERE JOB_ID = ?"
 					+ " ORDER BY PARAM_TYPE, PARAM_NAME";
 
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1,jobId);
+			ps.setInt(1, jobId);
 
 			ResultSet rs = ps.executeQuery();
 
@@ -2730,18 +2824,19 @@ public class ArtJob implements Job, Serializable {
 	public void buildParametersDisplayString() {
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			//get the parameters from the database
 			conn = ArtDBCP.getConnection();
-			
+
 			String sql = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE"
 					+ " FROM ART_JOBS_PARAMETERS "
 					+ " WHERE JOB_ID = ?"
 					+ " ORDER BY PARAM_TYPE, PARAM_NAME";
 
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1,jobId);
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, jobId);
 
 			ResultSet rs = ps.executeQuery();
 
@@ -2761,7 +2856,6 @@ public class ArtJob implements Job, Serializable {
 				sb.append("<br>");
 			}
 			rs.close();
-			ps.close();
 
 			if (paramCount == 0) {
 				parametersDisplayString = "";
@@ -2772,6 +2866,13 @@ public class ArtJob implements Job, Serializable {
 		} catch (Exception e) {
 			logger.error("Error. Job id {}", jobId, e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -2814,26 +2915,46 @@ public class ArtJob implements Job, Serializable {
 	}
 
 	private synchronized int allocateNewId(Connection conn) throws SQLException {
-		// Get the id
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery("SELECT MAX(JOB_ID) FROM ART_JOBS");
-		int newJobId = 1;
-		if (rs.next()) {
-			newJobId = 1 + rs.getInt(1);
-		} else {
-			logger.warn("Job allocateNewJobId failed. Defaulting to 1");
-		}
-		rs.close();
-		st.close();
 
-		//Allocating First
-		String sql="INSERT INTO ART_JOBS (JOB_ID, QUERY_ID, USERNAME, OUTPUT_FORMAT"
-				+ " , JOB_TYPE, ACTIVE_STATUS, ENABLE_AUDIT, MIGRATED_TO_QUARTZ) "
-				+ " VALUES (?,0,'allocating','html',1, 'Y','N','X') ";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setInt(1,newJobId);
-		ps.executeUpdate();
-		ps.close();
+		Statement st = null;
+		PreparedStatement ps = null;
+		int newJobId = 1;
+
+		try {
+			// Get the id
+			st = conn.createStatement();
+			ResultSet rs = st.executeQuery("SELECT MAX(JOB_ID) FROM ART_JOBS");
+
+			if (rs.next()) {
+				newJobId = 1 + rs.getInt(1);
+			} else {
+				logger.warn("Job allocateNewJobId failed. Defaulting to 1");
+			}
+			rs.close();
+
+			//Allocating First
+			String sql = "INSERT INTO ART_JOBS (JOB_ID, QUERY_ID, USERNAME, OUTPUT_FORMAT"
+					+ " , JOB_TYPE, ACTIVE_STATUS, ENABLE_AUDIT, MIGRATED_TO_QUARTZ) "
+					+ " VALUES (?,0,'allocating','html',1, 'Y','N','X') ";
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, newJobId);
+			ps.executeUpdate();
+		} finally {
+			try {
+				if (st != null) {
+					st.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error. Job id {}", jobId, e);
+			}
+		}
 
 		return newJobId;
 	}
@@ -3057,12 +3178,12 @@ public class ArtJob implements Job, Serializable {
 		}
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 
 			if (action.equals("GRANT")) {
 				sql = "INSERT INTO ART_USER_JOBS (USERNAME,JOB_ID) VALUES(?, ?)";
@@ -3083,10 +3204,16 @@ public class ArtJob implements Job, Serializable {
 					logger.warn("Error. Job id={}, User={}", new Object[]{jobId, users[i], e});
 				}
 			}
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -3111,12 +3238,12 @@ public class ArtJob implements Job, Serializable {
 		}
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 
 			if (action.equals("GRANT")) {
 				sql = "INSERT INTO ART_USER_JOBS (USERNAME, JOB_ID) values (? , ? )";
@@ -3139,10 +3266,16 @@ public class ArtJob implements Job, Serializable {
 					}
 				}
 			}
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -3167,12 +3300,12 @@ public class ArtJob implements Job, Serializable {
 		}
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 
 			if (action.equals("GRANT")) {
 				sql = "INSERT INTO ART_USER_GROUP_JOBS (USER_GROUP_ID,JOB_ID) VALUES(?, ?)";
@@ -3193,10 +3326,16 @@ public class ArtJob implements Job, Serializable {
 					logger.warn("Error. Job id={}, Group id={}", new Object[]{jobId, groups[i], e});
 				}
 			}
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -3221,12 +3360,12 @@ public class ArtJob implements Job, Serializable {
 		}
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 
 			if (action.equals("GRANT")) {
 				sql = "INSERT INTO ART_USER_GROUP_JOBS (USER_GROUP_ID,JOB_ID) VALUES(?, ?)";
@@ -3255,10 +3394,16 @@ public class ArtJob implements Job, Serializable {
 					}
 				}
 			}
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -3341,7 +3486,7 @@ public class ArtJob implements Job, Serializable {
 		String emails;
 
 		Connection conn = null;
-		StringBuilder sb=new StringBuilder(100);
+		StringBuilder sb = new StringBuilder(100);
 
 		try {
 			conn = ArtDBCP.getConnection();
@@ -3413,12 +3558,12 @@ public class ArtJob implements Job, Serializable {
 		Map<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String tmp;
 			Integer count = 0;
@@ -3437,10 +3582,16 @@ public class ArtJob implements Job, Serializable {
 				map.put(count, tmp);
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -3462,12 +3613,12 @@ public class ArtJob implements Job, Serializable {
 		Map<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String tmp;
 			Integer count = 0;
@@ -3487,10 +3638,16 @@ public class ArtJob implements Job, Serializable {
 				map.put(count, tmp);
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();

@@ -39,9 +39,7 @@ import org.slf4j.LoggerFactory;
 public class ArtQueryParam implements Serializable {
 
 	private static final long serialVersionUID = 1L; //need to implement serializable to be used as a field in artgraph classes
-	
 	final static Logger logger = LoggerFactory.getLogger(ArtQueryParam.class);
-	
 	String name = "";
 	String shortDescription = "";
 	String description = "";
@@ -53,13 +51,13 @@ public class ArtQueryParam implements Serializable {
 	String applyRulesToLov = "";
 	int queryId;
 	int fieldPosition = -1;
-	int lovQueryId;	
+	int lovQueryId;
 	int chainedPosition;
 	int drilldownColumn;
 	int chainedValuePosition;
 	Object paramValue = null; //store parameter values. either String for inline parameters or String[] for multi parameters
 	private Map<String, String> lovValues = null; //store value/friendly display string for lov parameters
-	private String directSubstitution="N";
+	private String directSubstitution = "N";
 
 	/**
 	 *
@@ -80,13 +78,12 @@ public class ArtQueryParam implements Serializable {
 	public void setDirectSubstitution(String directSubstitution) {
 		this.directSubstitution = directSubstitution;
 	}
-	
+
 	/**
 	 * Utility method to determine if the parameter uses a direct substitution
 	 * values
 	 *
-	 * @return
-	 * <code>true</code> if direct_substitution column has 'Y'.
+	 * @return <code>true</code> if direct_substitution column has 'Y'.
 	 * <code>false</code> otherwise
 	 */
 	public boolean usesDirectSubstitution() {
@@ -96,7 +93,7 @@ public class ArtQueryParam implements Serializable {
 		} else {
 			useDirectSubstitution = false;
 		}
- 
+
 		return useDirectSubstitution;
 	}
 
@@ -122,9 +119,8 @@ public class ArtQueryParam implements Serializable {
 	 * Utility method to determine if the parameter uses an lov query for its
 	 * values
 	 *
-	 * @return
-	 * <code>false</code> if use_lov column has 'N'.
-	 * <code>true</code> otherwise
+	 * @return <code>false</code> if use_lov column has 'N'. <code>true</code>
+	 * otherwise
 	 */
 	public boolean usesLov() {
 		boolean usesLov;
@@ -133,7 +129,7 @@ public class ArtQueryParam implements Serializable {
 		} else {
 			usesLov = true;
 		}
- 
+
 		return usesLov;
 	}
 
@@ -162,8 +158,7 @@ public class ArtQueryParam implements Serializable {
 	 * Utility method to determine if the parameter is chained (it's value
 	 * depends on another parameter)
 	 *
-	 * @return
-	 * <code>true</code> if parameter is chained
+	 * @return <code>true</code> if parameter is chained
 	 */
 	public boolean isChained() {
 		boolean chained;
@@ -248,7 +243,6 @@ public class ArtQueryParam implements Serializable {
 		queryId = i;
 	}
 
-	
 	/**
 	 *
 	 * @param s
@@ -357,7 +351,6 @@ public class ArtQueryParam implements Serializable {
 		return queryId;
 	}
 
-	
 	/**
 	 *
 	 * @return display name
@@ -445,11 +438,12 @@ public class ArtQueryParam implements Serializable {
 	 * @param conn
 	 * @param qId
 	 * @param fId
-	 * @return
-	 * <code>true</code> if object populated successfully
+	 * @return <code>true</code> if object populated successfully
 	 */
 	public boolean create(Connection conn, int qId, int fId) {
 		boolean success = false;
+
+		PreparedStatement ps = null;
 
 		try {
 			String SQL = "SELECT QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
@@ -459,7 +453,7 @@ public class ArtQueryParam implements Serializable {
 					+ " FROM ART_QUERY_FIELDS "
 					+ " WHERE QUERY_ID = ? AND FIELD_POSITION = ?";
 
-			PreparedStatement ps = conn.prepareStatement(SQL);
+			ps = conn.prepareStatement(SQL);
 			ps.setInt(1, qId);
 			ps.setInt(2, fId);
 			ResultSet rs = ps.executeQuery();
@@ -479,10 +473,9 @@ public class ArtQueryParam implements Serializable {
 				setChainedPosition(rs.getInt("CHAINED_PARAM_POSITION"));
 				setDrilldownColumn(rs.getInt("DRILLDOWN_COLUMN"));
 				setChainedValuePosition(rs.getInt("CHAINED_VALUE_POSITION"));
-				directSubstitution=rs.getString("DIRECT_SUBSTITUTION");
+				directSubstitution = rs.getString("DIRECT_SUBSTITUTION");
 
 				rs.close();
-				ps.close();
 
 				success = true;
 			} else {
@@ -490,6 +483,14 @@ public class ArtQueryParam implements Serializable {
 			}
 		} catch (SQLException e) {
 			logger.error("Error. Query id {}", queryId, e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 		}
 
 		return success;
@@ -500,8 +501,7 @@ public class ArtQueryParam implements Serializable {
 	 *
 	 *
 	 * @param conn
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 */
 	public boolean update(Connection conn) {
 		// Delete
@@ -509,28 +509,29 @@ public class ArtQueryParam implements Serializable {
 
 		boolean success = false;
 
+		PreparedStatement ps = null;
+
 		try {
-			String SQL;
-			PreparedStatement ps;
+			String sql;
 
 			java.util.Date utilDate = new java.util.Date();
 			java.sql.Date sysdate = new java.sql.Date(utilDate.getTime());
 
-			SQL = ("DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? AND FIELD_POSITION = ? ");
-			ps = conn.prepareStatement(SQL);
+			sql = "DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? AND FIELD_POSITION = ? ";
+			ps = conn.prepareStatement(sql);
 			ps.setInt(1, queryId);
 			ps.setInt(2, fieldPosition);
 			ps.executeUpdate();
 			ps.close();
 
-			SQL = "INSERT INTO ART_QUERY_FIELDS "
+			sql = "INSERT INTO ART_QUERY_FIELDS "
 					+ " (QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
 					+ " ,PARAM_DATA_TYPE, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
 					+ " ,LOV_QUERY_ID, UPDATE_DATE, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN "
 					+ " ,CHAINED_VALUE_POSITION, DIRECT_SUBSTITUTION) "
 					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-			ps = conn.prepareStatement(SQL);
+			ps = conn.prepareStatement(sql);
 
 			ps.setInt(1, getQueryId());
 			ps.setInt(2, getFieldPosition());
@@ -548,7 +549,7 @@ public class ArtQueryParam implements Serializable {
 			ps.setInt(14, getChainedPosition());
 			ps.setInt(15, getDrilldownColumn());
 			ps.setInt(16, getChainedValuePosition());
-			ps.setString(17,directSubstitution);
+			ps.setString(17, directSubstitution);
 
 			ps.executeUpdate();
 			ps.close();
@@ -556,6 +557,14 @@ public class ArtQueryParam implements Serializable {
 			success = true;
 		} catch (SQLException e) {
 			logger.error("Error. Query id {}", queryId, e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 		}
 
 		return success;
@@ -566,29 +575,38 @@ public class ArtQueryParam implements Serializable {
 	 *
 	 *
 	 * @param conn
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 */
 	public boolean insert(Connection conn) {
 		// Get new Position
+
+		PreparedStatement ps = null;
+
 		try {
-			String SQL;
-			PreparedStatement ps;
+			String sql;
 			ResultSet rs;
 
-			SQL = ("SELECT MAX(FIELD_POSITION) FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? ");
-			ps = conn.prepareStatement(SQL);
+			sql = "SELECT MAX(FIELD_POSITION) FROM ART_QUERY_FIELDS WHERE QUERY_ID = ? ";
+			ps = conn.prepareStatement(sql);
 			ps.setInt(1, queryId);
 			rs = ps.executeQuery();
 			if (rs.next()) {
 				setFieldPosition(1 + rs.getInt(1));
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error. Query id {}", queryId, e);
 			return false;
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 		}
+
 		return update(conn);
 	}
 
@@ -597,8 +615,7 @@ public class ArtQueryParam implements Serializable {
 	 *
 	 *
 	 * @param conn
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 */
 	public boolean delete(Connection conn) {
 		boolean success = false;
@@ -614,7 +631,7 @@ public class ArtQueryParam implements Serializable {
 			ps.setInt(2, fieldPosition);
 			ps.executeUpdate();
 			ps.close();
-			
+
 			// Fix the field position for subsequent parameters
 			SQL = ("UPDATE ART_QUERY_FIELDS SET FIELD_POSITION = (FIELD_POSITION-1) WHERE FIELD_POSITION > ? AND QUERY_ID = ?");
 			ps = conn.prepareStatement(SQL);
@@ -636,8 +653,7 @@ public class ArtQueryParam implements Serializable {
 	 *
 	 *
 	 * @param conn
-	 * @return
-	 * <code>true</code> if successful
+	 * @return <code>true</code> if successful
 	 */
 	public boolean moveUp(Connection conn) {
 		// Move Up
@@ -735,8 +751,8 @@ public class ArtQueryParam implements Serializable {
 				if (rs.next()) {
 					displayName = f.format(rs.getInt("FIELD_POSITION")) + ". " + rs.getString("NAME");
 				}
-				ps.close();
 				rs.close();
+				ps.close();
 			}
 
 		} catch (Exception e) {
@@ -770,12 +786,12 @@ public class ArtQueryParam implements Serializable {
 		String htmlName = "";
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			sql = "SELECT PARAM_LABEL, PARAM_TYPE"
@@ -801,11 +817,17 @@ public class ArtQueryParam implements Serializable {
 				}
 			}
 			rs.close();
-			ps.close();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -813,12 +835,11 @@ public class ArtQueryParam implements Serializable {
 			} catch (SQLException e) {
 				logger.error("Error", e);
 			}
-
 		}
 
 		return htmlName;
 	}
-	
+
 	/**
 	 * Get a parameter's label
 	 *
@@ -830,12 +851,11 @@ public class ArtQueryParam implements Serializable {
 		String label = "";
 
 		Connection conn = null;
-
+		PreparedStatement ps = null;
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			sql = "SELECT PARAM_LABEL"
@@ -851,11 +871,16 @@ public class ArtQueryParam implements Serializable {
 				label = rs.getString("PARAM_LABEL");
 			}
 			rs.close();
-			ps.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -868,6 +893,4 @@ public class ArtQueryParam implements Serializable {
 
 		return label;
 	}
-	
-	
 }

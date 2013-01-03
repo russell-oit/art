@@ -88,8 +88,9 @@ public class QueryUrl {
 	 */
 	private static String lookupParams(int queryId, boolean encodeUrl) {
 		StringBuilder sb = new StringBuilder(128);
-		
+
 		Connection conn = ArtDBCP.getConnection();
+		PreparedStatement ps = null;
 
 		try {
 
@@ -97,7 +98,7 @@ public class QueryUrl {
 					+ " FROM ART_QUERY_FIELDS "
 					+ " WHERE QUERY_ID = ? ORDER BY FIELD_POSITION";
 
-			PreparedStatement ps = conn.prepareStatement(sqlQuery);
+			ps = conn.prepareStatement(sqlQuery);
 			ps.setInt(1, queryId);
 			ResultSet rs = ps.executeQuery();
 
@@ -123,6 +124,13 @@ public class QueryUrl {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();

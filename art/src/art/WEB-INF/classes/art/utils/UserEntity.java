@@ -360,6 +360,7 @@ public class UserEntity implements Serializable {
 		boolean success = false;
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
@@ -367,11 +368,12 @@ public class UserEntity implements Serializable {
 			java.util.Date now = new java.util.Date();
 			java.sql.Date sysdate = new java.sql.Date(now.getTime());
 
-			String sql = "INSERT INTO ART_USERS (USERNAME,PASSWORD,EMAIL,FULL_NAME,ACTIVE_STATUS "
-					+ ",ACCESS_LEVEL, UPDATE_DATE, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, HASHING_ALGORITHM) "
+			String sql = "INSERT INTO ART_USERS"
+					+ " (USERNAME,PASSWORD,EMAIL,FULL_NAME,ACTIVE_STATUS,ACCESS_LEVEL "
+					+ " ,UPDATE_DATE, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, HASHING_ALGORITHM) "
 					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-			PreparedStatement ps = conn.prepareStatement(sql);
+			ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
 			ps.setString(2, password);
 			ps.setString(3, email);
@@ -384,11 +386,17 @@ public class UserEntity implements Serializable {
 			ps.setString(10, hashingAlgorithm);
 
 			ps.executeUpdate();
-			ps.close();
 			success = true;
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -410,12 +418,12 @@ public class UserEntity implements Serializable {
 		boolean success = false;
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 
 			java.util.Date now = new java.util.Date();
 			java.sql.Date sysdate = new java.sql.Date(now.getTime());
@@ -455,11 +463,17 @@ public class UserEntity implements Serializable {
 			}
 
 			ps.executeUpdate();
-			ps.close();
 			success = true;
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -593,7 +607,7 @@ public class UserEntity implements Serializable {
 				try {
 					ps.executeUpdate();
 				} catch (SQLIntegrityConstraintViolationException e) {
-					logger.info("User {} already a member of User Group ID {}", username, userGroups[i]);
+					//logger.info("User {} already a member of User Group ID {}", username, userGroups[i]);
 				} catch (SQLException e) {
 					logger.error("Error updating user group membership. User={}, User Group ID={}", new Object[]{username, userGroups[i], e});
 				}
@@ -668,8 +682,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_GROUP_ID")));
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 			//add query groups to which the user has access through his user group membership
 			SqlQuery = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME "
@@ -687,8 +701,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_GROUP_ID")));
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
@@ -746,8 +760,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_GROUP_ID")));
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 			//add groups where user's group has rights to the query
 			SqlQuery = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME "
@@ -764,8 +778,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_GROUP_ID")));
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -819,8 +833,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_ID")));
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 			//add queries to which user has access through user group membership
 			sqlQuery = "SELECT DISTINCT AQ.QUERY_ID, AQ.NAME "
@@ -839,8 +853,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_ID")));
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 			// user can run all queries in the query groups he has access to
 			sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME "
@@ -859,8 +873,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString(2), new Integer(rs.getInt(1)));
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 			//user can run all queries in the query groups his user groups have access to
 			sqlQuery = "SELECT DISTINCT AQ.QUERY_ID, AQ.NAME "
@@ -879,9 +893,8 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_ID")));
 			}
-			ps.close();
 			rs.close();
-
+			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
@@ -956,8 +969,8 @@ public class UserEntity implements Serializable {
 
 				jobs.put(Integer.valueOf(rs.getInt("JOB_ID")), aj);
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 
 
 			//get jobs user has direct access to. both split and non-split jobs
@@ -1005,8 +1018,8 @@ public class UserEntity implements Serializable {
 
 				jobs.put(new Integer(rs.getInt("JOB_ID")), aj);
 			}
-			ps.close();
 			rs.close();
+			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
@@ -1031,11 +1044,11 @@ public class UserEntity implements Serializable {
 		Map<String, ArtJob> jobs = new TreeMap<String, ArtJob>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			//get job archives that user has access to
@@ -1084,13 +1097,17 @@ public class UserEntity implements Serializable {
 
 				jobs.put(key, aj);
 			}
-			ps.close();
 			rs.close();
-
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1112,18 +1129,20 @@ public class UserEntity implements Serializable {
 		Map<Integer, ArtJob> jobs = new TreeMap<Integer, ArtJob>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
-			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE "
+			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.USERNAME"
+					+ " ,aj.OUTPUT_FORMAT, aj.JOB_TYPE "
 					+ " , aj.MAIL_TOS, aj.MESSAGE , aj.SUBJECT "
 					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH "
 					+ " , aj.JOB_ID, aj.CACHED_TABLE_NAME "
-					+ " , aj.LAST_START_DATE ,  aj.LAST_END_DATE , aj.LAST_FILE_NAME , aq.QUERY_TYPE, aj.NEXT_RUN_DATE "
+					+ " , aj.LAST_START_DATE ,  aj.LAST_END_DATE , aj.LAST_FILE_NAME"
+					+ " , aq.QUERY_TYPE, aj.NEXT_RUN_DATE "
 					+ " FROM ART_JOBS aj , ART_QUERIES aq "
 					+ " WHERE aq.QUERY_ID = aj.QUERY_ID "
 					+ " AND aj.USERNAME = ? ";
@@ -1159,11 +1178,17 @@ public class UserEntity implements Serializable {
 
 				jobs.put(Integer.valueOf(rs.getInt("JOB_ID")), aj);
 			}
-			ps.close();
 			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1187,12 +1212,12 @@ public class UserEntity implements Serializable {
 		Map<String, ArtJob> jobs = new TreeMap<String, ArtJob>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String uname;
 			int jobId;
@@ -1241,10 +1266,16 @@ public class UserEntity implements Serializable {
 				jobs.put(uname + jobId, aj);
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1266,10 +1297,11 @@ public class UserEntity implements Serializable {
 		List<String> usernames = new ArrayList<String>();
 
 		Connection conn = null;
+		Statement st = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
-			Statement st = conn.createStatement();
+			st = conn.createStatement();
 			String SqlQuery = "SELECT USERNAME FROM ART_USERS "
 					+ //" WHERE USERNAME <> 'public_user' "+  // 20110503 - eliboni - commented out otherwise it is not possible to assign privs to public_user....
 					" ORDER BY USERNAME";
@@ -1278,11 +1310,17 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				usernames.add(rs.getString("USERNAME"));
 			}
-			st.close();
 			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (st != null) {
+					st.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1309,10 +1347,11 @@ public class UserEntity implements Serializable {
 		List<String> usernames = new ArrayList<String>();
 
 		Connection conn = null;
+		Statement st = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
-			Statement st = conn.createStatement();
+			st = conn.createStatement();
 			String SqlQuery = "SELECT USERNAME FROM ART_USERS "
 					+ " WHERE ACCESS_LEVEL BETWEEN 10 AND 30";
 
@@ -1320,11 +1359,17 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				usernames.add(rs.getString("USERNAME"));
 			}
-			st.close();
 			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (st != null) {
+					st.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1353,12 +1398,12 @@ public class UserEntity implements Serializable {
 		boolean success = false;
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 
 			sql = "UPDATE ART_USERS SET PASSWORD = ?, UPDATE_DATE = ?, HASHING_ALGORITHM=? "
 					+ " WHERE USERNAME = ?";
@@ -1371,11 +1416,17 @@ public class UserEntity implements Serializable {
 			ps.setString(4, username);
 
 			ps.executeUpdate();
-			ps.close();
 			success = true;
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1399,12 +1450,12 @@ public class UserEntity implements Serializable {
 		TreeMap<String, ArtJob> jobs = new TreeMap<String, ArtJob>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String uname;
 			int jobId;
@@ -1429,10 +1480,16 @@ public class UserEntity implements Serializable {
 				jobs.put(uname + jobId, aj);
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1537,12 +1594,12 @@ public class UserEntity implements Serializable {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String tmp;
 			Integer count = 0;
@@ -1561,10 +1618,16 @@ public class UserEntity implements Serializable {
 				map.put(count, tmp);
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1588,12 +1651,12 @@ public class UserEntity implements Serializable {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String tmp;
 			Integer count = 0;
@@ -1612,10 +1675,16 @@ public class UserEntity implements Serializable {
 				map.put(count, tmp);
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1638,12 +1707,12 @@ public class UserEntity implements Serializable {
 		TreeMap<Integer, Rule> map = new TreeMap<Integer, Rule>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			Integer count = 0;
 
@@ -1666,11 +1735,16 @@ public class UserEntity implements Serializable {
 				map.put(count, rule);
 			}
 			rs.close();
-			ps.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1694,12 +1768,12 @@ public class UserEntity implements Serializable {
 		TreeMap<Integer, ArtQuery> map = new TreeMap<Integer, ArtQuery>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			Integer count = 0;
 
@@ -1734,10 +1808,16 @@ public class UserEntity implements Serializable {
 				map.put(count, aq);
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();

@@ -68,7 +68,6 @@ public class ArtQuery {
 	public ArtQuery() {
 	}
 
-
 	/**
 	 * @return the displayResultset
 	 */
@@ -577,13 +576,13 @@ public class ArtQuery {
 		boolean success = false;
 
 		try {
-			String SQL = "SELECT QUERY_GROUP_ID, QUERY_ID, NAME, SHORT_DESCRIPTION "
+			String sql = "SELECT QUERY_GROUP_ID, QUERY_ID, NAME, SHORT_DESCRIPTION "
 					+ " , DESCRIPTION, CONTACT_PERSON, USES_RULES, DATABASE_ID, QUERY_TYPE, ACTIVE_STATUS "
 					+ " ,UPDATE_DATE, TEMPLATE, XMLA_URL, XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD "
 					+ ", X_AXIS_LABEL, Y_AXIS_LABEL, GRAPH_OPTIONS, SHOW_PARAMETERS, DISPLAY_RESULTSET "
 					+ " FROM ART_QUERIES "
 					+ " WHERE QUERY_ID = ? ";
-			PreparedStatement ps = conn.prepareStatement(SQL);
+			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, qId);
 			ResultSet rs = ps.executeQuery();
 
@@ -616,13 +615,13 @@ public class ArtQuery {
 				} else {
 					setGraphDisplayOptions(graphOptions, false);
 				}
-				displayResultset=rs.getInt("DISPLAY_RESULTSET");
+				displayResultset = rs.getInt("DISPLAY_RESULTSET");
 
 				//get query source
-				SQL = "SELECT SOURCE_INFO FROM ART_ALL_SOURCES "
+				sql = "SELECT SOURCE_INFO FROM ART_ALL_SOURCES "
 						+ " WHERE OBJECT_ID = ?"
 						+ " ORDER BY LINE_NUMBER";
-				ps2 = conn.prepareStatement(SQL);
+				ps2 = conn.prepareStatement(sql);
 				ps2.setInt(1, qId);
 				rs2 = ps2.executeQuery();
 
@@ -631,8 +630,8 @@ public class ArtQuery {
 					concatText.append(rs2.getString(1));
 				}
 				setText(concatText.toString());
-				ps2.close();
 				rs2.close();
+				ps2.close();
 
 				rs.close();
 				ps.close();
@@ -696,8 +695,8 @@ public class ArtQuery {
 						userHasAccess = true;
 					}
 				}
-				ps.close();
 				rs.close();
+				ps.close();
 			}
 
 			if (!assignedToGroup && userHasAccess && userAccessCount == 1) {
@@ -722,21 +721,21 @@ public class ArtQuery {
 
 		try {
 			// Delete Old SQL Source
-			String SQLUpdate = ("DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?");
-			PreparedStatement ps = conn.prepareStatement(SQLUpdate);
+			String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, queryId);
 			ps.executeUpdate();
 
 			// Write the query in small segments
 			// This guarantees portability across databases with different max VARCHAR sizes
 
-			SQLUpdate = "INSERT INTO ART_ALL_SOURCES "
+			sql = "INSERT INTO ART_ALL_SOURCES "
 					+ "(OBJECT_ID, LINE_NUMBER, SOURCE_INFO)"
 					+ " values (?, ?, ?)";
-			ps = conn.prepareStatement(SQLUpdate);
+			ps = conn.prepareStatement(sql);
 
-			if(text==null){
-				text="";
+			if (text == null) {
+				text = "";
 			}
 
 			int start = 0;
@@ -821,6 +820,7 @@ public class ArtQuery {
 			} else {
 				logger.warn("Query allocateNewId failed");
 			}
+			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 			newQueryId = -1;
@@ -869,16 +869,15 @@ public class ArtQuery {
 			ps.setString(18, xmlaUsername);
 			ps.setString(19, xmlaPassword);
 			ps.setString(20, showParameters);
-			ps.setInt(21,displayResultset);
+			ps.setInt(21, displayResultset);
 			ps.setInt(22, queryId);
-			
+
 			if (ps.executeUpdate() == 1) {
-				ps.close();
 				success = true;
 			} else {
-				ps.close();
 				logger.warn("Zero or more than one row updated. Query ID - {}", queryId);
 			}
+			ps.close();
 		} catch (SQLException e) {
 			logger.error("Error. Query id {}", queryId, e);
 			throw new ArtException("Not able to update query. Error: " + e);
@@ -920,7 +919,7 @@ public class ArtQuery {
 		boolean accessGranted = false;
 
 		String sql;
-		PreparedStatement ps;
+		PreparedStatement ps = null;
 
 		try {
 			sql = "INSERT INTO ART_USER_QUERIES (USERNAME, QUERY_ID, UPDATE_DATE) VALUES(?, ?, ?)";
@@ -936,15 +935,22 @@ public class ArtQuery {
 				insertCount = ps.executeUpdate();
 			} catch (SQLException e) {
 				//most likely user already has access
-				logger.warn("Error", e);
+				logger.warn("Grant access failed.", e);
 			}
-			ps.close();
 
 			if (insertCount > 0) {
 				accessGranted = true;
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 		}
 
 		return accessGranted;
@@ -963,8 +969,9 @@ public class ArtQuery {
 
 		String roles = "";
 
+		PreparedStatement ps = null;
+
 		try {
-			PreparedStatement ps;
 			ResultSet rs;
 			String sql;
 
@@ -995,11 +1002,17 @@ public class ArtQuery {
 					}
 				}
 			}
-
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
 		}
 
 		return roles;
@@ -1115,12 +1128,12 @@ public class ArtQuery {
 		TreeMap<Integer, DrilldownQuery> map = new TreeMap<Integer, DrilldownQuery>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			int position;
 
@@ -1142,11 +1155,16 @@ public class ArtQuery {
 				map.put(new Integer(position), drilldown);
 			}
 			rs.close();
-			ps.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1170,10 +1188,11 @@ public class ArtQuery {
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
 
 		Connection conn = null;
+		Statement st = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
-			Statement st = conn.createStatement();
+			st = conn.createStatement();
 
 			//candidate drill down query is a query with at least one inline parameter where drill down column > 0
 			String sql = "SELECT AQ.QUERY_ID, AQ.NAME "
@@ -1187,10 +1206,16 @@ public class ArtQuery {
 				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_ID")));
 			}
 			rs.close();
-			st.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (st != null) {
+					st.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1245,7 +1270,8 @@ public class ArtQuery {
 
 	/**
 	 * build list of parameters to be used in showParams page
-	 * @param conn 
+	 *
+	 * @param conn
 	 */
 	private void buildParamList(Connection conn) {
 		paramList = new ArrayList<ParamInterface>();
@@ -1265,10 +1291,10 @@ public class ArtQuery {
 
 			if (queryType != 110) {
 				sql = sql
-						+ " WHERE QUERY_ID = ?" 
+						+ " WHERE QUERY_ID = ?"
 						+ " ORDER BY FIELD_POSITION ";
-				ps=conn.prepareStatement(sql);
-				ps.setInt(1,queryId);
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, queryId);
 			} else {
 				// Lookup all parameters for the queries used by this dashboard
 				List<Integer> queryIds = Dashboard.getQueryIds(queryId);
@@ -1280,7 +1306,7 @@ public class ArtQuery {
 						+ " WHERE QUERY_ID in (" + StringUtils.join(queryIds, ",") + ") "
 						+ " GROUP BY PARAM_LABEL ";
 
-				ps=conn.prepareStatement(sqlOrs);
+				ps = conn.prepareStatement(sqlOrs);
 				rs = ps.executeQuery();
 
 				StringBuilder orChainSb = new StringBuilder(200);
@@ -1298,8 +1324,8 @@ public class ArtQuery {
 						+ " WHERE 1 = 0 "
 						+ orChainSb.toString()
 						+ " ORDER BY FIELD_POSITION ";
-				
-				ps=conn.prepareStatement(sql);
+
+				ps = conn.prepareStatement(sql);
 			}
 
 			rs = ps.executeQuery();
@@ -1398,12 +1424,12 @@ public class ArtQuery {
 		TreeMap<String, Rule> map = new TreeMap<String, Rule>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String ruleName;
 			String fieldName;
@@ -1426,12 +1452,17 @@ public class ArtQuery {
 				rule.setDescription(rs.getString("SHORT_DESCRIPTION"));
 				map.put(ruleName + fieldName, rule);
 			}
-			ps.close();
 			rs.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1455,12 +1486,12 @@ public class ArtQuery {
 		TreeMap<String, Rule> map = new TreeMap<String, Rule>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String ruleName;
 
@@ -1475,12 +1506,17 @@ public class ArtQuery {
 				rule.setDescription(rs.getString("SHORT_DESCRIPTION"));
 				map.put(ruleName, rule);
 			}
-			ps.close();
 			rs.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1505,12 +1541,12 @@ public class ArtQuery {
 		TreeMap<String, Rule> map = new TreeMap<String, Rule>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String ruleName;
 
@@ -1531,12 +1567,17 @@ public class ArtQuery {
 				rule.setDescription(rs.getString("SHORT_DESCRIPTION"));
 				map.put(ruleName, rule);
 			}
-			ps.close();
 			rs.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1558,10 +1599,11 @@ public class ArtQuery {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
+		Statement st = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
-			Statement st = conn.createStatement();
+			st = conn.createStatement();
 			String SqlQuery = "SELECT QUERY_ID, NAME FROM ART_QUERIES "
 					+ " WHERE QUERY_GROUP_ID=0 OR QUERY_TYPE=119 OR QUERY_TYPE=120";
 
@@ -1569,11 +1611,17 @@ public class ArtQuery {
 			while (rs.next()) {
 				map.put(Integer.valueOf(rs.getInt("QUERY_ID")), rs.getString("NAME"));
 			}
-			st.close();
 			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (st != null) {
+					st.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1599,12 +1647,12 @@ public class ArtQuery {
 		TreeMap<String, QueryGroup> map = new TreeMap<String, QueryGroup>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			String groupName;
 
@@ -1633,12 +1681,17 @@ public class ArtQuery {
 				qg.setDescription(rs.getString("DESCRIPTION"));
 				map.put(groupName, qg);
 			}
-			ps.close();
 			rs.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1664,12 +1717,12 @@ public class ArtQuery {
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			if (level > 30) {
@@ -1692,11 +1745,16 @@ public class ArtQuery {
 				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("QUERY_GROUP_ID")));
 			}
 			rs.close();
-			ps.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1722,12 +1780,12 @@ public class ArtQuery {
 		TreeMap<String, Integer> map = new TreeMap<String, Integer>(stringCollator);
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			if (level > 30) {
@@ -1750,11 +1808,16 @@ public class ArtQuery {
 				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("DATABASE_ID")));
 			}
 			rs.close();
-			ps.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -1777,12 +1840,12 @@ public class ArtQuery {
 		TreeMap<Integer, ArtQueryParam> map = new TreeMap<Integer, ArtQueryParam>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 			int fieldPosition;
 
@@ -1801,11 +1864,16 @@ public class ArtQuery {
 				map.put(fieldPosition, param);
 			}
 			rs.close();
-			ps.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -2106,8 +2174,8 @@ public class ArtQuery {
 				concatText.append(rs.getString(1));
 			}
 			text = concatText.toString();
-			ps.close();
 			rs.close();
+			ps.close();
 
 			//check if parameter label exists in query source. don't check if query has chained params
 			if (text.indexOf(label) == -1) {
@@ -2158,12 +2226,12 @@ public class ArtQuery {
 		Map<String, ArtQueryParam> params = new HashMap<String, ArtQueryParam>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			sql = "SELECT FIELD_POSITION, NAME, PARAM_LABEL, PARAM_TYPE, DEFAULT_VALUE "
@@ -2205,11 +2273,16 @@ public class ArtQuery {
 				}
 			}
 			rs.close();
-			ps.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -2233,12 +2306,12 @@ public class ArtQuery {
 		boolean alwaysShow = false;
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			sql = "SELECT SHOW_PARAMETERS "
@@ -2254,13 +2327,17 @@ public class ArtQuery {
 					alwaysShow = true;
 				}
 			}
-
-			ps.close();
 			rs.close();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
@@ -2282,12 +2359,12 @@ public class ArtQuery {
 		TreeMap<Integer, String> map = new TreeMap<Integer, String>();
 
 		Connection conn = null;
+		PreparedStatement ps = null;
 
 		try {
 			conn = ArtDBCP.getConnection();
 
 			String sql;
-			PreparedStatement ps;
 			ResultSet rs;
 
 			sql = "SELECT QUERY_ID, NAME "
@@ -2300,10 +2377,16 @@ public class ArtQuery {
 				map.put(Integer.valueOf(rs.getInt("QUERY_ID")), rs.getString("NAME"));
 			}
 			rs.close();
-			ps.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
 			try {
 				if (conn != null) {
 					conn.close();
