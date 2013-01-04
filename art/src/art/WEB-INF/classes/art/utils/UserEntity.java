@@ -30,6 +30,7 @@ import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,12 +56,30 @@ public class UserEntity implements Serializable {
 	boolean canChangePassword = true;
 	String password;
 	String hashingAlgorithm = "bcrypt";
+	private String startQuery;
 
 	/**
 	 *
 	 */
 	public UserEntity() {
 		loginDate = new java.util.Date();
+	}
+
+	/**
+	 * @return the startQuery
+	 */
+	public String getStartQuery() {
+		if (startQuery == null) {
+			startQuery = ""; //set to empty string for display in editUser.jsp
+		}
+		return startQuery;
+	}
+
+	/**
+	 * @param startQuery the startQuery to set
+	 */
+	public void setStartQuery(String startQuery) {
+		this.startQuery = startQuery;
 	}
 
 	/**
@@ -284,7 +303,7 @@ public class UserEntity implements Serializable {
 			conn = ArtDBCP.getConnection();
 
 			String SqlQuery = "SELECT EMAIL,ACCESS_LEVEL,FULL_NAME,ACTIVE_STATUS, PASSWORD "
-					+ " ,DEFAULT_QUERY_GROUP,CAN_CHANGE_PASSWORD, HASHING_ALGORITHM "
+					+ " ,DEFAULT_QUERY_GROUP,CAN_CHANGE_PASSWORD, HASHING_ALGORITHM, START_QUERY "
 					+ " FROM ART_USERS "
 					+ " WHERE USERNAME = ? ";
 
@@ -300,6 +319,7 @@ public class UserEntity implements Serializable {
 				canChangePasswordString = rs.getString("CAN_CHANGE_PASSWORD");
 				password = rs.getString("PASSWORD");
 				hashingAlgorithm = rs.getString("HASHING_ALGORITHM");
+				startQuery = rs.getString("START_QUERY");
 			}
 			rs.close();
 			ps.close();
@@ -319,6 +339,28 @@ public class UserEntity implements Serializable {
 					setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 					if (defaultQueryGroup > 0) {
 						//first default found. use this
+						break;
+					}
+				}
+				rs.close();
+				ps.close();
+			}
+
+			if (StringUtils.isBlank(startQuery)) {
+				//no start query at user level. Use start query for first user group, if exists
+				SqlQuery = "SELECT AUG.START_QUERY "
+						+ " FROM ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUPS AUG "
+						+ " WHERE AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID "
+						+ " AND AUGA.USERNAME=? "
+						+ " ORDER BY AUGA.USER_GROUP_ID";
+
+				ps = conn.prepareStatement(SqlQuery);
+				ps.setString(1, user);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					startQuery = rs.getString("START_QUERY");
+					if (StringUtils.isNotBlank(startQuery)) {
+						//first start query found. use this
 						break;
 					}
 				}
@@ -370,8 +412,9 @@ public class UserEntity implements Serializable {
 
 			String sql = "INSERT INTO ART_USERS"
 					+ " (USERNAME,PASSWORD,EMAIL,FULL_NAME,ACTIVE_STATUS,ACCESS_LEVEL "
-					+ " ,UPDATE_DATE, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, HASHING_ALGORITHM) "
-					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ " ,UPDATE_DATE, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD"
+					+ " , HASHING_ALGORITHM, START_QUERY) "
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
 
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
@@ -384,6 +427,7 @@ public class UserEntity implements Serializable {
 			ps.setInt(8, defaultQueryGroup);
 			ps.setString(9, canChangePasswordString);
 			ps.setString(10, hashingAlgorithm);
+			ps.setString(11, startQuery);
 
 			ps.executeUpdate();
 			success = true;
@@ -430,7 +474,7 @@ public class UserEntity implements Serializable {
 
 			if (password.equals("")) {
 				sql = "UPDATE ART_USERS SET EMAIL = ? , FULL_NAME = ? , ACTIVE_STATUS = ?, ACCESS_LEVEL = ? , UPDATE_DATE = ? "
-						+ ",DEFAULT_QUERY_GROUP = ?, CAN_CHANGE_PASSWORD = ? "
+						+ ",DEFAULT_QUERY_GROUP = ?, CAN_CHANGE_PASSWORD = ?, START_QUERY=? "
 						+ " WHERE USERNAME = ?";
 
 				ps = conn.prepareStatement(sql);
@@ -442,10 +486,12 @@ public class UserEntity implements Serializable {
 				ps.setDate(5, sysdate);
 				ps.setInt(6, defaultQueryGroup);
 				ps.setString(7, canChangePasswordString);
-				ps.setString(8, username);
+				ps.setString(8, startQuery);
+				ps.setString(9, username);
 			} else {
-				sql = "UPDATE ART_USERS SET PASSWORD = ?, EMAIL = ? , FULL_NAME = ? ,  ACTIVE_STATUS = ?, ACCESS_LEVEL = ? , UPDATE_DATE = ? "
-						+ ",DEFAULT_QUERY_GROUP = ?, CAN_CHANGE_PASSWORD = ?, HASHING_ALGORITHM=? "
+				sql = "UPDATE ART_USERS SET PASSWORD = ?, EMAIL = ? , FULL_NAME = ?"
+						+ " ,ACTIVE_STATUS = ?, ACCESS_LEVEL = ? , UPDATE_DATE = ? "
+						+ " ,DEFAULT_QUERY_GROUP = ?, CAN_CHANGE_PASSWORD = ?, HASHING_ALGORITHM=?, START_QUERY=? "
 						+ " WHERE USERNAME = ? ";
 
 				ps = conn.prepareStatement(sql);
@@ -459,7 +505,8 @@ public class UserEntity implements Serializable {
 				ps.setInt(7, defaultQueryGroup);
 				ps.setString(8, canChangePasswordString);
 				ps.setString(9, hashingAlgorithm);
-				ps.setString(10, username);
+				ps.setString(10, startQuery);
+				ps.setString(11, username);
 			}
 
 			ps.executeUpdate();

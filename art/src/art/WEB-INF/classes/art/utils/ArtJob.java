@@ -2394,14 +2394,12 @@ public class ArtJob implements Job, Serializable {
 
 			//delete records in quartz tables
 			String deleteJobName = "job" + jobId;
-			String jobGroup = "jobGroup";
 			String triggerName = "trigger" + jobId;
-			String triggerGroup = "triggerGroup";
 
 			org.quartz.Scheduler scheduler = ArtDBCP.getScheduler();
 			if (scheduler != null) {
-				scheduler.deleteJob(jobKey(deleteJobName, jobGroup)); //delete job records
-				scheduler.unscheduleJob(triggerKey(triggerName, triggerGroup)); //delete trigger records
+				scheduler.deleteJob(jobKey(deleteJobName, ArtDBCP.JOB_GROUP)); //delete job records
+				scheduler.unscheduleJob(triggerKey(triggerName, ArtDBCP.TRIGGER_GROUP)); //delete trigger records
 			}
 
 			//delete records from art tables
@@ -3026,9 +3024,7 @@ public class ArtJob implements Job, Serializable {
 
 			int jobId;
 			String jobName;
-			String jobGroup = "jobGroup";
 			String triggerName;
-			String triggerGroup = "triggerGroup";
 
 			int totalRecordCount = 0; //total number of jobs to be migrated
 			int migratedRecordCount = 0; //actual number of jobs migrated
@@ -3102,14 +3098,14 @@ public class ArtJob implements Job, Serializable {
 						jobName = "job" + jobId;
 						triggerName = "trigger" + jobId;
 
-						JobDetail quartzJob = newJob(ArtJob.class).withIdentity(jobName, jobGroup).usingJobData("jobid", jobId).build();
+						JobDetail quartzJob = newJob(ArtJob.class).withIdentity(jobName, ArtDBCP.JOB_GROUP).usingJobData("jobid", jobId).build();
 
 						//create trigger that defines the schedule for the job						
-						CronTrigger trigger = newTrigger().withIdentity(triggerName, triggerGroup).withSchedule(cronSchedule(cronString)).build();
+						CronTrigger trigger = newTrigger().withIdentity(triggerName, ArtDBCP.TRIGGER_GROUP).withSchedule(cronSchedule(cronString)).build();
 
 						//delete any existing jobs or triggers with the same id before adding them to the scheduler
-						scheduler.deleteJob(jobKey(jobName, jobGroup)); //delete job records
-						scheduler.unscheduleJob(triggerKey(triggerName, triggerGroup)); //delete any trigger records
+						scheduler.deleteJob(jobKey(jobName, ArtDBCP.JOB_GROUP)); //delete job records
+						scheduler.unscheduleJob(triggerKey(triggerName, ArtDBCP.TRIGGER_GROUP)); //delete any trigger records
 
 						//add job and trigger to scheduler
 						scheduler.scheduleJob(quartzJob, trigger);

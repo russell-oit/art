@@ -20,11 +20,29 @@ public class UserGroup {
 	String name = "";
 	String description = "";
 	int defaultQueryGroup = -1;
+	private String startQuery;
 
 	/**
 	 *
 	 */
 	public UserGroup() {
+	}
+
+	/**
+	 * @return the startQuery
+	 */
+	public String getStartQuery() {
+		if(startQuery==null){
+			startQuery=""; //for display in jsp page
+		}
+		return startQuery;
+	}
+
+	/**
+	 * @param startQuery the startQuery to set
+	 */
+	public void setStartQuery(String startQuery) {
+		this.startQuery = startQuery;
 	}
 
 	/**
@@ -106,7 +124,7 @@ public class UserGroup {
 		try {
 			conn = ArtDBCP.getConnection();
 
-			String sql = "SELECT USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP "
+			String sql = "SELECT USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP, START_QUERY "
 					+ " FROM ART_USER_GROUPS "
 					+ " WHERE USER_GROUP_ID = ?";
 
@@ -119,6 +137,7 @@ public class UserGroup {
 				name = rs.getString("NAME");
 				description = rs.getString("DESCRIPTION");
 				defaultQueryGroup = rs.getInt("DEFAULT_QUERY_GROUP");
+				startQuery=rs.getString("START_QUERY");
 			}
 			rs.close();
 			success = true;
@@ -217,14 +236,16 @@ public class UserGroup {
 			ps.close();
 
 			//insert new group
-			sql = "INSERT INTO ART_USER_GROUPS (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP) "
-					+ " VALUES (?,?,?,?)";
+			sql = "INSERT INTO ART_USER_GROUPS"
+					+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP, START_QUERY) "
+					+ " VALUES (?,?,?,?,?)";
 
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, groupId);
 			ps.setString(2, name);
 			ps.setString(3, description);
 			ps.setInt(4, defaultQueryGroup);
+			ps.setString(5, startQuery);
 
 			ps.executeUpdate();
 			ps.close();
@@ -259,14 +280,15 @@ public class UserGroup {
 			conn = ArtDBCP.getConnection();
 
 			String sql = "UPDATE ART_USER_GROUPS SET "
-					+ " NAME = ?, DESCRIPTION = ?, DEFAULT_QUERY_GROUP=? "
+					+ " NAME = ?, DESCRIPTION = ?, DEFAULT_QUERY_GROUP=?, START_QUERY=? "
 					+ " WHERE USER_GROUP_ID = ? ";
 
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, name);
 			ps.setString(2, description);
 			ps.setInt(3, defaultQueryGroup);
-			ps.setInt(4, groupId);
+			ps.setString(4,startQuery);
+			ps.setInt(5, groupId);
 
 			ps.executeUpdate();
 			success = true;

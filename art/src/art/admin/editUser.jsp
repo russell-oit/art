@@ -44,6 +44,8 @@ if (action.equals("MODIFY")){
 UserGroup ug=new UserGroup();
 int accessLevel=ue.getAccessLevel();
 username=ue.getUsername();
+
+String help;
 %>
 
 
@@ -136,6 +138,18 @@ username=ue.getUsername();
                 </select>
             </td>
         </tr>
+		
+		<tr><td class="data"> Start Query </td>
+			<td class="data">
+				<input type="text" name="START_QUERY" value="<%=ue.getStartQuery()%>" size="40" maxlength="500">
+				<% help="Query to be displayed on the Start Page. Enter either" +
+               "\\nquery id e.g. 1" +
+               "\\nquery id and parameters e.g 1&P_param1=value1&P_param2=value2";
+                %>
+
+                <input type="button" class="buttonup" onclick="javascript:alert('<%=help%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" />
+			</td>
+		</tr>
 
 		<tr><td class="data"> Can Change Password</td>
 			<td class="data">

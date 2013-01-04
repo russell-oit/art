@@ -25,6 +25,7 @@ ue.setEmail(request.getParameter("EMAIL").trim());
 ue.setAccessLevel(Integer.parseInt(request.getParameter("ACCESS_LEVEL")));
 ue.setCanChangePasswordString(request.getParameter("CAN_CHANGE_PASSWORD"));
 ue.setDefaultQueryGroup(Integer.parseInt(request.getParameter("DEFAULT_QUERY_GROUP")));
+ue.setStartQuery(request.getParameter("START_QUERY").trim());
 
 if (action.equals("ADD")){
 	ue.insert();

@@ -302,7 +302,7 @@ jQuery(document).ready(function($){
 			var selectedViewMode = viewMode.options[viewMode.selectedIndex].value;
 		}
 
-		var qt=<%=queryType%>;
+		var qt="<%=queryType%>";
 		var showInline=<%=showResultsInline%>;
 
 		if(showInline && selectedViewMode!="SCHEDULE" && !(qt==112 || qt==113 || qt==114)){

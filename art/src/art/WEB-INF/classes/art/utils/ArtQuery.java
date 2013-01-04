@@ -2398,4 +2398,54 @@ public class ArtQuery {
 
 		return map;
 	}
+	
+	/**
+	 * Get query type for a particular query
+	 * @param qId
+	 * @return 
+	 */
+	public int getQueryType(int qId) {
+		int qType=0;
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			ResultSet rs;
+
+			sql = "SELECT QUERY_TYPE "
+					+ " FROM ART_QUERIES "
+					+ " WHERE QUERY_ID=?";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1,qId);
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				qType=rs.getInt("QUERY_TYPE");
+			}
+			rs.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return qType;
+	}
 }

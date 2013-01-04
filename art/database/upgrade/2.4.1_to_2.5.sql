@@ -7,6 +7,7 @@
 --          . rename art_shared_jobs table to art_user_jobs
 --          . support job archives
 --          . support for running DDL/DML statements before query's select statement
+--          . support start query
 --
 -- ------------------------------------------------
 
@@ -63,6 +64,10 @@ CREATE TABLE ART_JOB_ARCHIVES
 
 -- support for running DDL/DML statements before query's select statement
 ALTER TABLE ART_QUERIES ADD DISPLAY_RESULTSET INTEGER;
+
+-- support start query
+ALTER TABLE ART_USERS ADD START_QUERY VARCHAR(500);
+ALTER TABLE ART_USER_GROUPS ADD START_QUERY VARCHAR(500);
 
 
 

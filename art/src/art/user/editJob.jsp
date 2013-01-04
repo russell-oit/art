@@ -346,26 +346,24 @@ if (request.getParameter("bcc").equals("")){
 			int jobId=job.getJobId();
 
 			String jobName="job"+jobId;
-			String jobGroup="jobGroup";
 			String triggerName="trigger"+jobId;
-			String triggerGroup="triggerGroup";
 
 			JobDetail quartzJob = newJob(ArtJob.class)
-					.withIdentity(jobKey(jobName,jobGroup))
+					.withIdentity(jobKey(jobName,ArtDBCP.JOB_GROUP))
 					.usingJobData("jobid",jobId)
 					.build();
 
 			//create trigger that defines the schedule for the job
 		CronTrigger trigger= newTrigger()
-				.withIdentity(triggerKey(triggerName,triggerGroup))
+				.withIdentity(triggerKey(triggerName,ArtDBCP.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
 				.startAt(startDate)
 				.endAt(endDate)
 				.build();
 	   
 			//delete any existing jobs or triggers with the same id before adding them to the scheduler
-			scheduler.deleteJob(jobKey(jobName,jobGroup));
-			scheduler.unscheduleJob(triggerKey(triggerName,triggerGroup));
+			scheduler.deleteJob(jobKey(jobName,ArtDBCP.JOB_GROUP));
+			scheduler.unscheduleJob(triggerKey(triggerName,ArtDBCP.TRIGGER_GROUP));
 
 			//add job and trigger to scheduler
 			scheduler.scheduleJob(quartzJob, trigger);

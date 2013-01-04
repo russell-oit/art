@@ -1,4 +1,6 @@
-<%@ page import="java.util.*, art.servlets.ArtDBCP;" %>
+<%@ page import="java.util.*,art.servlets.ArtDBCP,art.utils.ArtQuery" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang.math.NumberUtils" %>
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
@@ -8,6 +10,22 @@
 
 <%
 boolean canChangePassword=ue.isCanChangePassword();
+String startQueryId;
+int startQueryType=0;
+String startQuery=ue.getStartQuery();
+if(StringUtils.isNotBlank(startQuery)){
+	ArtQuery aq=new ArtQuery();
+	if(NumberUtils.isNumber(startQuery)){
+		startQueryId=startQuery;
+		startQueryType=aq.getQueryType(Integer.parseInt(startQueryId));
+	} else {
+		startQueryId=StringUtils.substringBefore(startQuery, "&");
+		if(NumberUtils.isNumber(startQueryId)){
+			startQueryType=aq.getQueryType(Integer.parseInt(startQueryId));
+		}
+	}
+	startQuery="ExecuteQuery?queryId=" + startQuery + "&_isInline=true";
+}
 %>
 
 <script language="javascript">
@@ -28,13 +46,13 @@ function setAction() {
 </script>
 
       <form id="queryForm" name="queryForm" method="get" action="showParams.jsp">
-
+		  
   <fieldset>
     <legend><%=messages.getString("welcomeMessage") %></legend>
    <p>
-    <table width="90%" align="center" class="art">
+    <table width="95%" align="center" class="art">
      <tr>
-      <td  align="center" class="title" width="40%">
+      <td  align="center" class="title" width="30%">
 
        <label for="groupId"><%=messages.getString("availableGroups")%></label><br>
        <% // this allows to focus public_user in one group only
@@ -88,8 +106,59 @@ function setAction() {
   </p>
   </fieldset>
 
-
       </form >
+
+	  
+<script type="text/javascript">
+	
+jQuery(document).ready(function($){
+
+var qt="<%=startQueryType%>";
+var url="<%=startQuery%>";
+if(url!="" && !(qt==112 || qt==113 || qt==114)){
+	$("#queryDescription").load(url,function(responseText, statusText, xhr){
+		//callback funtion for when jquery load has finished
+
+		//check if session expired
+		var user=document.getElementById("username");
+		if(user!=null){
+			//a login page is being displayed. session must have expired. redirect to enable user to login and start again
+			window.location="<%= request.getContextPath() %>";
+			return;
+		}
+
+		if(statusText=="success"){
+			//make htmlgrid output sortable
+			forEach(document.getElementsByTagName('table'), function(table) {
+					if (table.className.search(/\bsortable\b/) != -1) {
+						sorttable.makeSortable(table);
+					}
+			});
+			
+			//ensure tooltips are displayed for charts
+			if(qt<0 || qt==110){
+				olLoaded=1;
+				overlib('');
+			}
+		} else if(statusText=="error"){
+			alert("An error occurred: " + xhr.status + " - " + xhr.statusText);
+		}
+
+	});	
+}	
+
+//display spinner animation when any ajax activity happens
+$("#systemWorking").ajaxStart(function(){
+    $(this).show();
+ }).ajaxStop(function(){
+    $(this).hide();
+ }).ajaxError(function(){
+    $(this).hide();
+ });
+ 
+}); 
+
+</script>
 
 
 <script type="text/javascript">

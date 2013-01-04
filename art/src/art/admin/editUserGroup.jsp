@@ -24,6 +24,7 @@ if (action.equals("MODIFY")){
 	ug.load(groupId);
 }
 
+String help;
 %>
 
 
@@ -85,6 +86,18 @@ if (action.equals("MODIFY")){
                 </select>
             </td>
         </tr>
+		
+		<tr><td class="data"> Start Query </td>
+			<td class="data">
+				<input type="text" name="START_QUERY" value="<%=ug.getStartQuery()%>" size="40" maxlength="500">
+			</td>
+			<% help="Query to be displayed on the Start Page. Enter either" +
+               "\\nquery id e.g. 1" +
+               "\\nquery id and parameters e.g 1&P_param1=value1&P_param2=value2";
+                %>
+
+                <input type="button" class="buttonup" onclick="javascript:alert('<%=help%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" />
+		</tr>
 
 		<tr><td colspan="2" >&nbsp;</td></tr>
 		<tr><td class="data" colspan="2" >  Group Members </td></tr>
@@ -117,7 +130,7 @@ if (action.equals("MODIFY")){
             <td colspan="2" class="data2">
 				<%
 				Map<Integer, String> map=ug.getUserGroupMembers();
-				for (Map.Entry<String, String> entry : map.entrySet()) {
+				for (Map.Entry<Integer, String> entry : map.entrySet()) {
 					%>
 					<%=entry.getValue()%> <br>
 					<%

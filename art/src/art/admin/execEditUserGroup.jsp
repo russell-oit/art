@@ -9,24 +9,25 @@ String action=request.getParameter("ACTION");
 String usersAction=request.getParameter("USERS_ACTION");
 String[] users = request.getParameterValues("USERS");
 
-UserGroup group=new UserGroup();
+UserGroup ug=new UserGroup();
 
-group.setGroupId(Integer.parseInt(request.getParameter("GROUP_ID")));
-group.setName(request.getParameter("GROUP_NAME").trim());
-group.setDescription(request.getParameter("GROUP_DESCRIPTION").trim());
-group.setDefaultQueryGroup(Integer.parseInt(request.getParameter("DEFAULT_QUERY_GROUP")));
+ug.setGroupId(Integer.parseInt(request.getParameter("GROUP_ID")));
+ug.setName(request.getParameter("GROUP_NAME").trim());
+ug.setDescription(request.getParameter("GROUP_DESCRIPTION").trim());
+ug.setDefaultQueryGroup(Integer.parseInt(request.getParameter("DEFAULT_QUERY_GROUP")));
+ug.setStartQuery(request.getParameter("START_QUERY").trim());
 
 if (action.equals("ADD")){	
-	group.insert();
+	ug.insert();
 } else if (action.equals("MODIFY")){
-	group.update();
+	ug.update();
 }
 
 //add or remove users from the group
 if(usersAction.equals("ADD")){
-	group.addUsers(users);
+	ug.addUsers(users);
 } else if(usersAction.equals("REMOVE")){
-	group.removeUsers(users);
+	ug.removeUsers(users);
 }
 
 response.sendRedirect("manageUserGroups.jsp");

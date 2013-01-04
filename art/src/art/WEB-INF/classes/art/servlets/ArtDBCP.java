@@ -93,6 +93,8 @@ public class ArtDBCP extends HttpServlet {
 	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
 	private static String jobsPath;
+	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
+	public static final String TRIGGER_GROUP ="triggerGroup"; //group name for quartz triggers
 
 	/**
 	 * {@inheritDoc}

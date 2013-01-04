@@ -1,6 +1,7 @@
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified
 * Support for running DDL/DML statements before query's select statement
+* Support for displaying a query in the start page
 * Fix for non-ascii values not being saved properly in some admin pages (Thanks to Edson Richter)
 * Renamed "Objects" to "Queries" and "Object Groups" to "Query Groups"
 * Support for case sensitive operators for dynamic queries
