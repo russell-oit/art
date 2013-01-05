@@ -90,13 +90,13 @@ String help;
 		<tr><td class="data"> Start Query </td>
 			<td class="data">
 				<input type="text" name="START_QUERY" value="<%=ug.getStartQuery()%>" size="40" maxlength="500">
-			</td>
-			<% help="Query to be displayed on the Start Page. Enter either" +
+				<% help="Query to be displayed on the Start Page. Enter either" +
                "\\nquery id e.g. 1" +
                "\\nquery id and parameters e.g 1&P_param1=value1&P_param2=value2";
                 %>
 
                 <input type="button" class="buttonup" onclick="javascript:alert('<%=help%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" />
+			</td>
 		</tr>
 
 		<tr><td colspan="2" >&nbsp;</td></tr>

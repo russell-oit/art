@@ -3,10 +3,19 @@
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
 <% response.setHeader("Cache-control","no-cache"); %>
-<%@ include file="header.jsp" %>
 
 <%
-try {
+boolean isInline=false;
+if(request.getParameter("_isInline")!=null){
+	isInline=true;
+}
+
+if(!isInline){ 	%>	
+	<%@ include file ="header.jsp" %>
+<% }
+%>
+
+<%
 
 String username=ue.getUsername();
 int queryId=0;
@@ -18,21 +27,8 @@ if(queryIdString!=null){
 	queryId=Integer.parseInt(objectId);
 }
 
-Connection conn = ArtDBCP.getConnection();
-if ( conn == null || conn.isClosed()) {
-    %>
-       <jsp:forward page="error.jsp">
-		<jsp:param name="MOD" value="Show Text"/>
-		<jsp:param name="ACT" value="Get connection"/>
-		<jsp:param name="MSG" value="Database connection not valid. Please log in again"/>
-		<jsp:param name="NUM" value="100"/>
-       </jsp:forward>
-    <%   
- }
-
 ArtQuery aq=new ArtQuery();
-boolean queryExists=aq.create(conn,queryId);
-conn.close();
+boolean queryExists=aq.create(queryId,false);
 if(!queryExists){	
 	%>
    <jsp:forward page="error.jsp">
@@ -51,16 +47,17 @@ int queryType=aq.getQueryType();
 if(queryType==111){
 	queryText=aq.getText();
 } else {
-	//not a text query query
+	//not a text query
 	queryText="Query ID " + queryId + " is not a text query";
 }
 %>
 
+<div align="left">
 <%=queryText%>
 
 <%
 PreparedQuery pq=new PreparedQuery();
-boolean canEdit=pq.canEditTextObject(username,queryId);
+boolean canEdit=pq.canEditTextQuery(username,queryId);
 if (canEdit && request.getParameter("_mobile") == null ) { %>
 	  <hr>
   <div align="right">
@@ -70,10 +67,12 @@ if (canEdit && request.getParameter("_mobile") == null ) { %>
 	</a>  
    </span>
   </div>
+<% } %>
+
+</div>
+
+<%
+if(!isInline){ 	%>	
+	<%@ include file ="footer.jsp" %>
 <% }
-
-} catch (Exception e) { %>
- <%=messages.getString("exception")%> <%=e%>
-<%}%>
-
-<%@ include file="footer.jsp" %>
+%>

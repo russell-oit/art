@@ -17,14 +17,11 @@ if(StringUtils.isNotBlank(startQuery)){
 	ArtQuery aq=new ArtQuery();
 	if(NumberUtils.isNumber(startQuery)){
 		startQueryId=startQuery;
-		startQueryType=aq.getQueryType(Integer.parseInt(startQueryId));
 	} else {
 		startQueryId=StringUtils.substringBefore(startQuery, "&");
-		if(NumberUtils.isNumber(startQueryId)){
-			startQueryType=aq.getQueryType(Integer.parseInt(startQueryId));
-		}
 	}
 	startQuery="ExecuteQuery?queryId=" + startQuery + "&_isInline=true";
+	startQueryType=aq.getQueryType(Integer.parseInt(startQueryId));
 }
 %>
 
@@ -50,9 +47,9 @@ function setAction() {
   <fieldset>
     <legend><%=messages.getString("welcomeMessage") %></legend>
    <p>
-    <table width="95%" align="center" class="art">
+    <table width="90%" align="center" class="art">
      <tr>
-      <td  align="center" class="title" width="30%">
+      <td align="center" class="titletop" width="40%">
 
        <label for="groupId"><%=messages.getString("availableGroups")%></label><br>
        <% // this allows to focus public_user in one group only
@@ -113,20 +110,11 @@ function setAction() {
 	
 jQuery(document).ready(function($){
 
-var qt="<%=startQueryType%>";
+var qt=<%=startQueryType%>;
 var url="<%=startQuery%>";
 if(url!="" && !(qt==112 || qt==113 || qt==114)){
 	$("#queryDescription").load(url,function(responseText, statusText, xhr){
 		//callback funtion for when jquery load has finished
-
-		//check if session expired
-		var user=document.getElementById("username");
-		if(user!=null){
-			//a login page is being displayed. session must have expired. redirect to enable user to login and start again
-			window.location="<%= request.getContextPath() %>";
-			return;
-		}
-
 		if(statusText=="success"){
 			//make htmlgrid output sortable
 			forEach(document.getElementsByTagName('table'), function(table) {

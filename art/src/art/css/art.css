@@ -184,6 +184,17 @@ td.title {
  border: 1px solid #000000;
 }
 
+td.titletop {
+ vertical-align: top;
+ text-align: center;
+ /*font-weight: bold; */
+ background-image: URL('../images/bg-gray-dark.png');
+ background-repeat: repeat-x;
+ background-color:#FFFFFF;
+ color:#003366;
+ border: 1px solid #000000;
+}
+
 /* Used in Parameters page(Name, value, class...)
  */
 td.attr {

@@ -69,7 +69,7 @@ public class PreparedQuery {
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter label and value as corresponding object e.g. Double, Long. for jasper reports
 	Map<String, String> jxlsMultiParams; //hash map will contain multi parameter label and values instead of parameter id e.g. M_2 and string array of values. for jxls reports
 	int queryType; //to enable special handling of template queries where sql source is not executed
-	boolean viewingTextObject = false; //flag used to check if user has rights to edit a text query
+	boolean viewingTextQuery = false; //flag used to check if user has rights to edit a text query
 	Map<String, ArtQueryParam> htmlParams; //all the queries parameters, with the html name as the key
 	private boolean recipientFilterPresent; //dynamic recipient filter label present
 	private final String RECIPIENT_LABEL = "#recipient#"; //for dynamic recipients, label for recipient in data query
@@ -389,7 +389,7 @@ public class PreparedQuery {
 		try {
 			// Get the query SQL source from the ART Repository
 			if (!getQuery()) {
-				throw new ArtException("<p>Not able to get query. Are you sure you have been granted rights to execute this object?</p>");
+				throw new ArtException("<p>Not able to get query. Are you sure you have been granted rights to execute this query?</p>");
 			}
 
 			if (StringUtils.equals(queryStatus, "D") && !adminSession) {
@@ -768,7 +768,7 @@ public class PreparedQuery {
 	 * *******************************************************************************
 	 */
 	/**
-	 * Determine if a user has access to an object
+	 * Determine if a user has access to a query
 	 *
 	 * @param uname
 	 * @param qid
@@ -791,12 +791,12 @@ public class PreparedQuery {
 	 * @param qid
 	 * @return <code>true</code> if user can edit the text query
 	 */
-	public boolean canEditTextObject(String uname, int qid) {
+	public boolean canEditTextQuery(String uname, int qid) {
 		username = uname;
 		queryId = qid;
 		adminSession = false;
 
-		viewingTextObject = true;
+		viewingTextQuery = true;
 
 		return canExecuteQuery();
 	}
@@ -914,7 +914,7 @@ public class PreparedQuery {
 
 			//User can also execute all queries in a query group he has been assigned to
 			//text queries must be assigned direct access
-			if (!viewingTextObject) {
+			if (!viewingTextQuery) {
 				if (last_stmt_retrieved_rows == 0) {
 					//user doesn't belong to a group with direct access to the query. check if user has access to the query's group
 					stmt = "SELECT AAS.SOURCE_INFO "

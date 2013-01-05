@@ -633,15 +633,12 @@ public class ArtQuery {
 				rs2.close();
 				ps2.close();
 
-				rs.close();
-				ps.close();
-
 				success = true;
 			} else {
-				rs.close();
-				ps.close();
 				logger.warn("The query id {} does not exist", qId);
 			}
+			rs.close();
+			ps.close();
 		} catch (SQLException e) {
 			logger.error("Error. Query id={}", qId, e);
 		}
@@ -885,6 +882,36 @@ public class ArtQuery {
 
 		return success;
 
+	}
+	
+	/**
+	 * Update query header and source
+	 *
+	 * @param conn
+	 * @return <code>true</code> if query updated
+	 */
+	public boolean update() {
+		boolean updated = false;
+		
+		Connection conn=null;
+
+		try {
+			conn=ArtDBCP.getConnection();
+			
+			updated=update(conn);
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return updated;
 	}
 
 	/**
@@ -1232,22 +1259,26 @@ public class ArtQuery {
 	 * Connect to Art repository and retrieve info related to the query. Also
 	 * get the query params and build the list with all values
 	 */
-	public void create() {
-		create(queryId, true);
+	public boolean create() {
+		return create(queryId, true);
 	}
 
 	/**
 	 * Connect to Art repository and retrieve info related to the query. Also
 	 * get the query params and build the list with all values
+	 * 
+	 * @return <code>true</code> if query found and object populated
 	 */
-	public void create(int qId, boolean buildParamList) {
+	public boolean create(int qId, boolean buildParamList) {
+		boolean success = false;
+		
 		Connection conn = null;
 
 		try {
 
 			//get query details
 			conn = ArtDBCP.getConnection();
-			create(conn, qId);
+			success=create(conn, qId);
 
 			//build parameter list
 			if (buildParamList) {
@@ -1266,6 +1297,8 @@ public class ArtQuery {
 			}
 
 		}
+		
+		return success;
 	}
 
 	/**
@@ -2398,15 +2431,16 @@ public class ArtQuery {
 
 		return map;
 	}
-	
+
 	/**
 	 * Get query type for a particular query
+	 *
 	 * @param qId
-	 * @return 
+	 * @return
 	 */
 	public int getQueryType(int qId) {
-		int qType=0;
-		
+		int qType = 0;
+
 		Connection conn = null;
 		PreparedStatement ps = null;
 
@@ -2421,10 +2455,10 @@ public class ArtQuery {
 					+ " WHERE QUERY_ID=?";
 
 			ps = conn.prepareStatement(sql);
-			ps.setInt(1,qId);
+			ps.setInt(1, qId);
 			rs = ps.executeQuery();
 			if (rs.next()) {
-				qType=rs.getInt("QUERY_TYPE");
+				qType = rs.getInt("QUERY_TYPE");
 			}
 			rs.close();
 		} catch (Exception e) {

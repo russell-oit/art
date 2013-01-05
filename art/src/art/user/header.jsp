@@ -52,7 +52,7 @@
 </head>
 <body>
  <c:if test="${empty param._mobile}">  
- <% if ( !(usernameHeader.equals("public_user") && art.servlets.ArtDBCP.getArtSetting("header_with_public_user").equals("no") )  ) { %>
+ <% if ( !("public_user".equals(usernameHeader) && "no".equals(art.servlets.ArtDBCP.getArtSetting("header_with_public_user")))) { %>
    <table width="100%"  class="art" cellpadding="0" cellspacing="0">
     <tr>
      <td class="attr" align="left" width="50%">
