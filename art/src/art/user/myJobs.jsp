@@ -77,12 +77,7 @@ owner=request.getParameter("OWNER");
 	//get scheduler instance
 	org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
 
-	boolean enableJobScheduling=true;
-	ServletContext ctx = getServletConfig().getServletContext();
-
-	if(StringUtils.equals(ctx.getInitParameter("enableJobScheduling"),"false")){
-		enableJobScheduling = false;
-	}
+	boolean schedulingEnabled=ArtDBCP.isSchedulingEnabled();
   
     if ( action.equals("run") ) { 
 	
@@ -101,7 +96,7 @@ owner=request.getParameter("OWNER");
 				.build();
         				
 		if (scheduler!=null){		
-			if (enableJobScheduling){
+			if (schedulingEnabled){
 				jobRunningId = jobId;
 				scheduler.scheduleJob(tempJob, tempTrigger);
 				msg = "Job (" + jobId + ") Running";

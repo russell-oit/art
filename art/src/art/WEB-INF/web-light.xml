@@ -32,31 +32,6 @@
         <param-name>userViewModesList</param-name>
         <param-value>htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip</param-value>
     </context-param>
-    <!-- Scheduling -->
-    <context-param>
-        <description>
-           Set this to false to disable job execution
-		</description>
-        <param-name>enableJobScheduling</param-name>
-        <param-value>true</param-value>
-    </context-param>
-    <!-- Max connections -->
-    <context-param>
-        <description>
-           Set the maximum number of connections a connection pool can open
-		   to the same datasource (further requests are queued).
-		</description>
-        <param-name>poolMaxConnections</param-name>
-        <param-value>20</param-value>
-    </context-param>
-    <!-- Max running queries-->
-    <context-param>
-        <description>
-           Set the maximum number of concurrent running queries
-		</description>
-        <param-name>maxNumberOfRunningQueries</param-name>
-        <param-value>1000</param-value>
-    </context-param>
     <!-- Max rows -->
     <context-param>
         <description>

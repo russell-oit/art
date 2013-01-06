@@ -11,6 +11,7 @@ ART 2.5
 * Allow scheduling of heat maps
 * Allow use of default parameter values without specifying parameters in the url
 * Allow dashboards to use multi parameters
+* Moved some application settings from the web.xml file to the settings page
 
 ART 2.4.1
 * Support for bubble charts

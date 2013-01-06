@@ -25,7 +25,8 @@
  * workaround is to have a dummy index.html file so that the web server does not
  * display all the content Anyway, this may not work on all servlet engine
  *
- * @author Enrico Liboni @mail enrico(at)computer.org
+ * @author Enrico Liboni
+ * @mail enrico(at)computer.org
  */
 package art.servlets;
 
@@ -148,13 +149,14 @@ public class Scheduler extends HttpServlet {
 	/**
 	 * Load system settings from art.properties file.
 	 *
-	 * @return
-	 * <code>true</code> if file is found.
-	 * <code>false</code> if file is not found.
+	 * @return <code>true</code> if file is found. <code>false</code> if file is
+	 * not found.
 	 */
 	public boolean loadProperties() {
 
 		logger.debug("Loading art.properties");
+
+		boolean loaded = false;
 
 		String propsFilePath = ArtDBCP.getArtPropertiesFilePath();
 		File propsFile = new File(propsFilePath);
@@ -184,11 +186,12 @@ public class Scheduler extends HttpServlet {
 				logger.error("Error while loading driver for ART repository: {}", art_jdbc_driver, e);
 			}
 
-			return true;
+			loaded = true;
 		} else {
 			logger.warn("art.properties file not found. Admin should define ART settings on first logon");
-			return false;
 		}
+
+		return loaded;
 
 	}
 
@@ -260,9 +263,8 @@ public class Scheduler extends HttpServlet {
 	 * Delete directory, including all files and subdirectories under it.
 	 *
 	 * @param path directory to delete
-	 * @return
-	 * <code>true</code> if directory deleted.
-	 * <code>false</code> otherwise.
+	 * @return <code>true</code> if directory deleted. <code>false</code>
+	 * otherwise.
 	 */
 	private boolean deleteDirectory(File path) {
 		logger.debug("Deleting directory: {}", path);

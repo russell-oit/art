@@ -47,6 +47,10 @@
 	 //new properties to enable custom date formats in query output
 	 String date_format;
 	 String time_format;
+	 
+	 String max_running_queries; //max number of running queries
+	 String max_pool_connections;
+	 String scheduling_enabled;
 
 
 String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
@@ -173,6 +177,19 @@ if(!propsFile.exists()){
 	if(time_format==null){
 		time_format="HH:mm:ss";
 	}
+	
+	max_running_queries=ap.getProp("max_running_queries");
+	if(max_running_queries==null){
+		max_running_queries="1000";
+	}
+	max_pool_connections=ap.getProp("max_pool_connections");
+	if(max_pool_connections==null){
+		max_pool_connections="20";
+	}
+	scheduling_enabled=ap.getProp("scheduling_enabled");
+	if(scheduling_enabled==null){
+		scheduling_enabled="true";
+	}
 
   } else {        
     art_username    = "ART";
@@ -219,6 +236,10 @@ if(!propsFile.exists()){
 
 	date_format="dd-MMM-yyyy";
 	time_format="HH:mm:ss";
+	
+	max_running_queries="1000";
+	max_pool_connections="20";
+	scheduling_enabled="true";
 	
     %>
 	
@@ -586,6 +607,39 @@ if(!propsFile.exists()){
 			msg = "In query output, the format of the time portion of date fields" +
 					"\\n\\nExamples:\\nHH:mm:ss (21:59:59)\\nh:mm:ss.SSS a (9:59:59.786 PM)" +
 					"\\n\\nFormat strings are case sensitive";
+			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+	   
+	    <tr>
+        <td class="attr">Scheduling Enabled</td>
+        <td class="data">
+			<select name="scheduling_enabled">
+	     <option value="yes"   <%= (scheduling_enabled.equals("yes")?"selected":"") %>  >Yes </option>
+	     <option value="no"  <%= (scheduling_enabled.equals("no")?"selected":"") %> >No</option>
+	   </select>
+	   <%msg = "Set this to No to disable job execution"; %>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+	   
+	   <tr>
+        <td class="attr">Maximum Running Queries</td>
+        <td class="data"><input type="text" name="max_running_queries" size="4" maxlength="5" value="<%=max_running_queries%>">
+			<%
+			msg ="Set the maximum number of concurrently running queries";
+			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+	   
+	   <tr>
+        <td class="attr">Maximum Pool Connections</td>
+        <td class="data"><input type="text" name="max_pool_connections" size="4" maxlength="3" value="<%=max_pool_connections%>">
+			<%
+			msg ="Set the maximum number of connections a connection pool can open to the same datasource."
+					+ " Further requests are queued.";
 			%>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>

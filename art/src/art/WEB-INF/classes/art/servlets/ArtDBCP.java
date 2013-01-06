@@ -81,7 +81,6 @@ public class ArtDBCP extends HttpServlet {
 	private static String passwordHashingAlgorithm = "bcrypt"; //use bcrypt for password hashing
 	private static int defaultMaxRows;
 	private static ServletContext ctx;
-	private static int maxRunningQueries;
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
 	private static boolean pdfFontEmbedded = false; //determines if custom font should be embedded in the generated pdf
@@ -94,7 +93,7 @@ public class ArtDBCP extends HttpServlet {
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
 	private static String jobsPath;
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
-	public static final String TRIGGER_GROUP ="triggerGroup"; //group name for quartz triggers
+	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
 
 	/**
 	 * {@inheritDoc}
@@ -190,6 +189,24 @@ public class ArtDBCP extends HttpServlet {
 				timeFormat = DEFAULT_TIME_FORMAT;
 			}
 
+			//set max connection pool connections
+			String poolMaxConnectionsString = "";
+			try {
+				poolMaxConnectionsString = getArtSetting("max_pool_connections");
+				poolMaxConnections = Integer.parseInt(poolMaxConnectionsString);
+			} catch (NumberFormatException e) {
+				//invalid number
+				logger.warn("Invalid number for max pool connections: {}", poolMaxConnectionsString, e);
+			}
+			
+			//set scheduling enabled
+			String scheduling = ap.getProp("scheduling_enabled");
+			if (StringUtils.equals(scheduling, "no")) {
+				schedulingEnabled = false;
+			} else {
+				schedulingEnabled = true;
+			}
+
 			artSettingsLoaded = true;
 
 		} else {
@@ -208,17 +225,11 @@ public class ArtDBCP extends HttpServlet {
 		logger.debug("Initializing variables");
 
 		//Get some web.xml parameters                        
-		poolMaxConnections = Integer.parseInt(ctx.getInitParameter("poolMaxConnections"));
 		artVersion = ctx.getInitParameter("versionNumber");
 		defaultMaxRows = Integer.parseInt(ctx.getInitParameter("defaultMaxRows"));
-		maxRunningQueries = Integer.parseInt(ctx.getInitParameter("maxNumberOfRunningQueries"));
 
 		if (StringUtils.equals(ctx.getInitParameter("versionType"), "light")) {
 			artFullVersion = false;
-		}
-
-		if (StringUtils.equals(ctx.getInitParameter("enableJobScheduling"), "false")) {
-			schedulingEnabled = false;
 		}
 
 		//set application path
@@ -938,7 +949,7 @@ public class ArtDBCP extends HttpServlet {
 	 * @return mondrian cache expiry period in hours
 	 */
 	public static int getMondrianCacheExpiry() {
-		int cacheExpiry;
+		int cacheExpiry = 0;
 		String cacheExpiryString = "";
 
 		try {
@@ -947,7 +958,6 @@ public class ArtDBCP extends HttpServlet {
 		} catch (NumberFormatException e) {
 			//invalid number set for cache expiry. default to 0 (no automatic clearing of cache)
 			logger.warn("Invalid number for mondrian cache expiry: {}", cacheExpiryString, e);
-			cacheExpiry = 0;
 		}
 
 		return cacheExpiry;
@@ -1014,7 +1024,18 @@ public class ArtDBCP extends HttpServlet {
 	 * @return the maximum number of running queries
 	 */
 	public static int getMaxRunningQueries() {
-		return maxRunningQueries;
+		int maxQueries = 1000;
+		String maxQueriesString = "";
+
+		try {
+			maxQueriesString = getArtSetting("max_running_queries");
+			maxQueries = Integer.parseInt(maxQueriesString);
+		} catch (NumberFormatException e) {
+			//invalid number
+			logger.warn("Invalid number for max running queries: {}", maxQueriesString, e);
+		}
+
+		return maxQueries;
 	}
 
 	/**
