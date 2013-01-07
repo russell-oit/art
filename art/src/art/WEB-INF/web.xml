@@ -24,63 +24,6 @@
         <param-name>versionType</param-name>
         <param-value>full</param-value>
     </context-param>
-    <!-- View modes -->
-    <context-param>
-        <description>A comma separated list of available view modes (prefix only).
-	    The order will be respected in the list viewable to users. First one is the default.
-	    Note: for every new mode a proper message entry must be added in art_messages.properties file</description>
-        <param-name>userViewModesList</param-name>
-        <param-value>htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip</param-value>
-    </context-param>
-    <!-- Max rows -->
-    <context-param>
-        <description>
-        Set the default maximum number of rows to retrieve
-		(note: the view mode itself may ignore or override this)
-		</description>
-        <param-name>defaultMaxRows</param-name>
-        <param-value>10000</param-value>
-    </context-param>
-    <context-param>
-        <description>
-        Set the default maximum number of rows to retrieve
-		for this view mode (name must be "classNameMaxRows")
-		</description>
-        <param-name>xlsOutputMaxRows</param-name>
-        <param-value>20000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>xlsZipOutputMaxRows</param-name>
-        <param-value>30000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>pdfOutputMaxRows</param-name>
-        <param-value>20000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>tsvOutputMaxRows</param-name>
-        <param-value>60000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>tsvGzOutputMaxRows</param-name>
-        <param-value>120000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>tsvZipOutputMaxRows</param-name>
-        <param-value>120000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>slkOutputMaxRows</param-name>
-        <param-value>60000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>slkZipOutputMaxRows</param-name>
-        <param-value>120000</param-value>
-    </context-param>
-    <context-param>
-        <param-name>xlsxOutputMaxRows</param-name>
-        <param-value>120000</param-value>
-    </context-param>
     <!-- Filters -->
     <filter>
         <filter-name>AuthFilter</filter-name>

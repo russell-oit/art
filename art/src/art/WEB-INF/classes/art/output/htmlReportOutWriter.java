@@ -3,7 +3,7 @@ package art.output;
 import java.io.PrintWriter;
 
 /**
- * Generate "Report on column x" reports
+ * Generate "Report on column x" (grouped) reports
  * 
  * @author Enrico Liboni
  */

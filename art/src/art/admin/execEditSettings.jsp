@@ -139,7 +139,7 @@ while (names.hasMoreElements()) {
 	 ArtDBCP.loadArtSettings();
     ArtDBCP.refreshConnections();
 
-	//recreate scheduler in case repository has changed	
+	//recreate scheduler in case repository has changed	or scheduling enabled has changed
 	String oldUsername=request.getParameter("_old_art_username");
 	String oldPassword=request.getParameter("_old_art_password");
 	String oldUrl=request.getParameter("_old_art_jdbc_url");
@@ -152,8 +152,15 @@ while (names.hasMoreElements()) {
 		//first time repository is being defined. ensure scheduler is created/started
 		repositoryHasChanged=true;
 	}
+	
+	String schedulingEnabled=request.getParameter("scheduling_enabled");
+	String oldSchedulingEnabled=request.getParameter("_old_scheduling_enabled");
+	boolean schedulingEnabledHasChanged=false;
+	if(!schedulingEnabled.equals(oldSchedulingEnabled)){
+		schedulingEnabledHasChanged=true;
+	}
 
-	if(repositoryHasChanged){
+	if(repositoryHasChanged || schedulingEnabledHasChanged){
 		//get current scheduler instance
 		org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
 		if (scheduler!=null){

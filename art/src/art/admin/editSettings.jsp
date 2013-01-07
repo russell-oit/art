@@ -51,6 +51,9 @@
 	 String max_running_queries; //max number of running queries
 	 String max_pool_connections;
 	 String scheduling_enabled;
+	 String view_modes; //user view modes
+	 String default_max_rows;
+	 String specific_max_rows;
 
 
 String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
@@ -190,6 +193,18 @@ if(!propsFile.exists()){
 	if(scheduling_enabled==null){
 		scheduling_enabled="true";
 	}
+	view_modes=ap.getProp("view_modes");
+	if(StringUtils.isBlank(view_modes)){
+		view_modes="htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
+	}
+	default_max_rows=ap.getProp("default_max_rows");
+	if(StringUtils.isBlank(default_max_rows)){
+		default_max_rows="10000";
+	}
+	specific_max_rows=ap.getProp("specific_max_rows");
+	if(specific_max_rows==null){
+		specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
+	}
 
   } else {        
     art_username    = "ART";
@@ -240,6 +255,9 @@ if(!propsFile.exists()){
 	max_running_queries="1000";
 	max_pool_connections="20";
 	scheduling_enabled="true";
+	view_modes="htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
+	default_max_rows="10000";
+	specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
 	
     %>
 	
@@ -431,7 +449,7 @@ if(!propsFile.exists()){
 		   
        <tr>
         <td class="attr">SMTP Username</td>
-        <td class="data"><input type="text" name="smtp_username" size="40" maxlength="120" value="<%=smtp_username%>">
+        <td class="data"><input type="text" name="smtp_username" size="50" maxlength="120" value="<%=smtp_username%>">
 			<%
          msg = msg = "Leave empty if your SMTP server does not require authentication";
          %>
@@ -440,7 +458,7 @@ if(!propsFile.exists()){
        </tr>
        <tr>
         <td class="attr">SMTP Password</td>
-        <td class="data"><input type="password" name="smtp_password" size="40" maxlength="120" value="<%=smtp_password%>">
+        <td class="data"><input type="password" name="smtp_password" size="50" maxlength="120" value="<%=smtp_password%>">
 			<%
          msg = msg = "Leave empty if your SMTP server does not require authentication";
          %>
@@ -460,7 +478,7 @@ if(!propsFile.exists()){
 
 	   <tr>
         <td class="attr">SMTP Port</td>
-        <td class="data"><input type="text" name="smtp_port" size="4" maxlength="5" value="<%=smtp_port%>"></td>
+        <td class="data"><input type="text" name="smtp_port" size="6" maxlength="5" value="<%=smtp_port%>"></td>
        </tr>
 
        <tr>
@@ -482,7 +500,7 @@ if(!propsFile.exists()){
 	   <tr>
         <td class="attr">PDF Font Name</td>
         <td class="data">			
-			<input type="text" name="pdf_font_name" size="40" maxlength="200" value="<%=pdf_font_name%>">
+			<input type="text" name="pdf_font_name" size="50" maxlength="200" value="<%=pdf_font_name%>">
 		<%
 		msg = "Name of custom font to be used for pdf output. Leave blank to use the default font." +
 				"\\n\\nExample:\\nArial Unicode MS";
@@ -494,7 +512,7 @@ if(!propsFile.exists()){
 	   <tr>
         <td class="attr">PDF Font File</td>
         <td class="data">			
-			<input type="text" name="pdf_font_file" size="40" maxlength="200" value="<%=pdf_font_file%>">
+			<input type="text" name="pdf_font_file" size="50" maxlength="200" value="<%=pdf_font_file%>">
 		<%
 		msg = "File that contains custom font to be used for pdf output" +
 				"\\n\\nExample:\\nc:"+sepEscaped+"windows"+sepEscaped+"fonts"+sepEscaped+"arialuni.ttf";
@@ -506,7 +524,7 @@ if(!propsFile.exists()){
 	   <tr>
         <td class="attr">PDF Font Directory</td>
         <td class="data">			
-			<input type="text" name="pdf_font_directory" size="40" maxlength="200" value="<%=pdf_font_directory%>">
+			<input type="text" name="pdf_font_directory" size="50" maxlength="200" value="<%=pdf_font_directory%>">
 			<%
 			msg = "Directory that contains custom fonts to be used for pdf output" +
 					"\\n\\nExample:\\nc:"+sepEscaped+"windows"+sepEscaped+"fonts";
@@ -518,7 +536,7 @@ if(!propsFile.exists()){
 	    <tr>
         <td class="attr">PDF Font Encoding</td>
         <td class="data">
-			<input type="text" name="pdf_font_encoding" size="40" maxlength="200" value="<%=pdf_font_encoding%>">
+			<input type="text" name="pdf_font_encoding" size="50" maxlength="200" value="<%=pdf_font_encoding%>">
 			<%
 			msg = "Encoding for custom font to be used for pdf output" +
 					"\\n\\nExamples:\\nCp1252 (Western European)\\nCp1250 (Central and Eastern European)" +
@@ -542,15 +560,39 @@ if(!propsFile.exists()){
        </tr>
 	   
 	   <tr>
+			   <td colspan="2" class="data2">Max Rows</td>
+		   </tr>
+		   
+       <tr>
+        <td class="attr">Default Max Rows</td>
+        <td class="data"><input type="text" name="default_max_rows" size="6" maxlength="8" value="<%=default_max_rows%>">
+			<%
+         msg = msg = "Set the default maximum number of rows to output for a query";
+         %>
+        <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+       <tr>
+        <td class="attr">Specific Max Rows</td>
+        <td class="data"><input type="text" name="specific_max_rows" size="50" maxlength="1000" value="<%=specific_max_rows%>">
+			<%
+         msg = msg = "Set the maximum number of rows to output for specific view modes."
+				 + "\\nComma separated list of settings in the format viewmode:value";
+         %>
+        <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+	   
+	   <tr>
 			   <td colspan="2" class="data2">General</td>
 		   </tr>
        <tr>
         <td class="attr">ART CSS (skin)</td>
-        <td class="data"><input type="text" name="css_skin" size="40" maxlength="120" value="<%=css_skin%>"></td>
+        <td class="data"><input type="text" name="css_skin" size="50" maxlength="120" value="<%=css_skin%>"></td>
        </tr>
        <tr>
         <td class="attr">Page Footer Logo</td>
-        <td class="data"><input type="text" name="bottom_logo" size="40" maxlength="120" value="<%=bottom_logo%>"></td>
+        <td class="data"><input type="text" name="bottom_logo" size="50" maxlength="120" value="<%=bottom_logo%>"></td>
        </tr>
 	   
 	   <tr>
@@ -564,7 +606,7 @@ if(!propsFile.exists()){
 	   
 	   <tr>
         <td class="attr">RSS Link</td>
-        <td class="data"><input type="text" name="rss_link" size="40" maxlength="120" value="<%=rss_link%>">
+        <td class="data"><input type="text" name="rss_link" size="50" maxlength="120" value="<%=rss_link%>">
 			<%
 			msg ="If you plan to use ART to generate RSS feeds you should specify the proper RSS link URL, i.e. the URL to the website corresponding to the channel.";
 			%>
@@ -577,7 +619,7 @@ if(!propsFile.exists()){
 	   %>
 	   <tr>
         <td class="attr">Mondrian Cache Expiry (hours)</td>
-        <td class="data"><input type="text" name="mondrian_cache_expiry" size="4" maxlength="5" value="<%=mondrian_cache_expiry%>">
+        <td class="data"><input type="text" name="mondrian_cache_expiry" size="6" maxlength="5" value="<%=mondrian_cache_expiry%>">
 			<%msg = "The number of hours after which the mondrian cache will be automatically cleared. Set to 0 to disable automatic clearing."; %>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
@@ -589,7 +631,7 @@ if(!propsFile.exists()){
 	    <tr>
         <td class="attr">Date Format</td>
         <td class="data">
-			<input type="text" name="date_format" size="40" maxlength="30" value="<%=date_format%>">
+			<input type="text" name="date_format" size="50" maxlength="30" value="<%=date_format%>">
 			<%
 			msg = "In query output, the format of the date portion of date fields" +
 					"\\n\\nExamples: \\ndd-MMM-yyyy (02-Aug-2012)\\ndd/MM/yyyy (02/08/2012)" +
@@ -602,7 +644,7 @@ if(!propsFile.exists()){
 	   <tr>
         <td class="attr">Time Format</td>
         <td class="data">
-			<input type="text" name="time_format" size="40" maxlength="20" value="<%=time_format%>">
+			<input type="text" name="time_format" size="50" maxlength="20" value="<%=time_format%>">
 			<%
 			msg = "In query output, the format of the time portion of date fields" +
 					"\\n\\nExamples:\\nHH:mm:ss (21:59:59)\\nh:mm:ss.SSS a (9:59:59.786 PM)" +
@@ -615,18 +657,29 @@ if(!propsFile.exists()){
 	    <tr>
         <td class="attr">Scheduling Enabled</td>
         <td class="data">
+			<input type="hidden" name="_old_scheduling_enabled" value="<%=scheduling_enabled%>">
 			<select name="scheduling_enabled">
 	     <option value="yes"   <%= (scheduling_enabled.equals("yes")?"selected":"") %>  >Yes </option>
 	     <option value="no"  <%= (scheduling_enabled.equals("no")?"selected":"") %> >No</option>
 	   </select>
-	   <%msg = "Set this to No to disable job execution"; %>
+		</td>
+       </tr>
+	   
+	   <tr>
+        <td class="attr">View Modes</td>
+        <td class="data">
+			<input type="text" name="view_modes" size="50" maxlength="1000" value="<%=view_modes%>">
+			<%
+			msg = "Comma separated list of view modes (case sensitive) available to users when they run a query." +
+					"\\nThe order will be respected in the list shown to users. First one is the default.";
+			%>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
        </tr>
 	   
 	   <tr>
         <td class="attr">Maximum Running Queries</td>
-        <td class="data"><input type="text" name="max_running_queries" size="4" maxlength="5" value="<%=max_running_queries%>">
+        <td class="data"><input type="text" name="max_running_queries" size="6" maxlength="5" value="<%=max_running_queries%>">
 			<%
 			msg ="Set the maximum number of concurrently running queries";
 			%>
@@ -636,7 +689,7 @@ if(!propsFile.exists()){
 	   
 	   <tr>
         <td class="attr">Maximum Pool Connections</td>
-        <td class="data"><input type="text" name="max_pool_connections" size="4" maxlength="3" value="<%=max_pool_connections%>">
+        <td class="data"><input type="text" name="max_pool_connections" size="6" maxlength="3" value="<%=max_pool_connections%>">
 			<%
 			msg ="Set the maximum number of connections a connection pool can open to the same datasource."
 					+ " Further requests are queued.";
@@ -666,7 +719,7 @@ if(!propsFile.exists()){
 	 
 	</td>
         <td class="data"> Server: </td>
-	 <td class="data"> <input type="text" name="ldap_auth_server" size="40" maxlength="120" value="<%=ldap_auth_server%>">
+	 <td class="data"> <input type="text" name="ldap_auth_server" size="50" maxlength="120" value="<%=ldap_auth_server%>">
 	 </td>
 		 </tr>
 		 <tr>
@@ -682,14 +735,14 @@ if(!propsFile.exists()){
 	</tr>
 	<tr>
 	 <td class="data">Users Parent DN:</td>
-	 <td class="data"> <input type="text" name="ldap_users_parent_dn" size="40" maxlength="400" value="<%=ldap_users_parent_dn%>">
+	 <td class="data"> <input type="text" name="ldap_users_parent_dn" size="50" maxlength="400" value="<%=ldap_users_parent_dn%>">
 	 <%msg = "The parent DN of the user entries in the LDAP directory. Not required for Active Directory authentication."; %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 	 </td>
        </tr>
 	  <tr>
 	 <td class="data">Realm:</td>
-	 <td class="data"> <input type="text" name="ldap_realm" size="40" maxlength="400" value="<%=ldap_realm%>">
+	 <td class="data"> <input type="text" name="ldap_realm" size="50" maxlength="400" value="<%=ldap_realm%>">
 	 <%msg = "The LDAP realm when using a Digest-MD5 authentication method. If blank, the default realm will be used."; %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 	 </td>
@@ -700,11 +753,11 @@ if(!propsFile.exists()){
 	 
 	</td>
         <td class="data">Domain Controller:</td>
-	 <td class="data"><input type="text" name="mswin_auth_server" size="40" maxlength="120" value="<%=mswin_auth_server%>">	</td>
+	 <td class="data"><input type="text" name="mswin_auth_server" size="50" maxlength="120" value="<%=mswin_auth_server%>">	</td>
 	 </tr>
 	 <tr>
 	 <td class="data">Allowed Domains:</td>
-	 <td class="data"> <input type="text" name="mswin_domains" size="40" maxlength="400" value="<%=mswin_domains%>"> </td>
+	 <td class="data"> <input type="text" name="mswin_domains" size="50" maxlength="400" value="<%=mswin_domains%>"> </td>
        </tr>
 
 	   <tr>
@@ -712,11 +765,11 @@ if(!propsFile.exists()){
 	 
 	</td>
         <td class="data">JDBC Driver:</td>
-	  <td class="data"><input type="text" name="jdbc_auth_driver" size="40" maxlength="120" value="<%=jdbc_auth_driver%>"> </td>
+	  <td class="data"><input type="text" name="jdbc_auth_driver" size="50" maxlength="120" value="<%=jdbc_auth_driver%>"> </td>
 	 </tr>
 	 <tr>
 	 <td class="data">JDBC URL:</td>
-	  <td class="data"><input type="text" name="jdbc_auth_url" size="40" maxlength="120" value="<%=jdbc_auth_url%>"> </td>
+	  <td class="data"><input type="text" name="jdbc_auth_url" size="50" maxlength="120" value="<%=jdbc_auth_url%>"> </td>
        </tr>
 
 <tr>

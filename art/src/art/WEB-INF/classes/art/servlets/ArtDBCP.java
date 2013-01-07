@@ -190,6 +190,7 @@ public class ArtDBCP extends HttpServlet {
 			}
 
 			//set max connection pool connections
+			poolMaxConnections = 20; //set default;
 			String poolMaxConnectionsString = "";
 			try {
 				poolMaxConnectionsString = getArtSetting("max_pool_connections");
@@ -198,13 +199,36 @@ public class ArtDBCP extends HttpServlet {
 				//invalid number
 				logger.warn("Invalid number for max pool connections: {}", poolMaxConnectionsString, e);
 			}
-			
+
 			//set scheduling enabled
 			String scheduling = ap.getProp("scheduling_enabled");
 			if (StringUtils.equals(scheduling, "no")) {
 				schedulingEnabled = false;
 			} else {
 				schedulingEnabled = true;
+			}
+
+			//Get user view modes. if a view mode is not in the list, then it's hidden
+			String modes = ap.getProp("view_modes");
+			String[] viewModes = StringUtils.split(modes, ",");
+			if (userViewModes == null) {
+				userViewModes = new ArrayList<String>();
+			} else {
+				userViewModes.clear();
+			}
+			if (viewModes != null) {
+				userViewModes.addAll(Arrays.asList(viewModes));
+			}
+
+			//set default max rows
+			defaultMaxRows = 10000; //set default;
+			String defaultMaxRowsString = "";
+			try {
+				defaultMaxRowsString = ap.getProp("default_max_rows");
+				defaultMaxRows = Integer.parseInt(defaultMaxRowsString);
+			} catch (NumberFormatException e) {
+				//invalid number
+				logger.warn("Invalid number for default max rows: {}", defaultMaxRowsString, e);
 			}
 
 			artSettingsLoaded = true;
@@ -226,8 +250,6 @@ public class ArtDBCP extends HttpServlet {
 
 		//Get some web.xml parameters                        
 		artVersion = ctx.getInitParameter("versionNumber");
-		defaultMaxRows = Integer.parseInt(ctx.getInitParameter("defaultMaxRows"));
-
 		if (StringUtils.equals(ctx.getInitParameter("versionType"), "light")) {
 			artFullVersion = false;
 		}
@@ -249,27 +271,8 @@ public class ArtDBCP extends HttpServlet {
 		//set art.properties file path
 		artPropertiesFilePath = appPath + sep + "WEB-INF" + sep + "art.properties";
 
-		//Get user view modes from web.xml file. if a view mode is not in the user list, then it's hidden
-		StringTokenizer stCode = new StringTokenizer(ctx.getInitParameter("userViewModesList"), ",");
-		String token;
-		userViewModes = new ArrayList<String>();
-		try {
-			while (stCode.hasMoreTokens()) {
-				token = stCode.nextToken();
-				userViewModes.add(token);
-			}
-		} catch (Exception e) {
-			logger.error("Error while initializing user view modes", e);
-		}
-
-		//remove any duplicates in user view modes
-		Collection<String> noDup;
-		noDup = new LinkedHashSet<String>(userViewModes);
-		userViewModes.clear();
-		userViewModes.addAll(noDup);
-
 		//construct all view modes list
-		allViewModes = new ArrayList<String>(userViewModes);
+		allViewModes = new ArrayList<String>();
 
 		//add all supported view modes
 		allViewModes.add("tsvGz");
@@ -287,11 +290,6 @@ public class ArtDBCP extends HttpServlet {
 		allViewModes.add("tsv");
 		allViewModes.add("tsvZip");
 		allViewModes.add("htmlDataTable");
-
-		//remove any duplicates that may exist in all view modes
-		noDup = new LinkedHashSet<String>(allViewModes);
-		allViewModes.clear();
-		allViewModes.addAll(noDup);
 
 
 		//load settings from art.properties file
@@ -991,28 +989,29 @@ public class ArtDBCP extends HttpServlet {
 	}
 
 	/**
-	 * Get the default max rows
-	 *
-	 * @return the default max rows
-	 */
-	public static int getDefaultMaxRows() {
-		return defaultMaxRows;
-	}
-
-	/**
 	 * Get the max rows for the given view mode
 	 *
 	 * @param viewMode
 	 * @return the max rows for the given view mode
 	 */
 	public static int getMaxRows(String viewMode) {
-		int max;
-
-		String sMax = ctx.getInitParameter(viewMode + "OutputMaxRows");
-		if (sMax == null) {
-			max = defaultMaxRows;
-		} else {
-			max = Integer.parseInt(sMax);
+		int max = defaultMaxRows;
+		
+		String setting = ap.getProp("specific_max_rows");
+		String[] maxRows = StringUtils.split(setting, ",");
+		if (maxRows != null) {
+			for (String maxSetting : maxRows) {
+				if (maxSetting.indexOf(viewMode) != -1) {
+					String value = StringUtils.substringAfter(maxSetting, ":");
+					try {
+						max = Integer.parseInt(value);
+					} catch (NumberFormatException e) {
+						//invalid number
+						logger.warn("Invalid max rows value for setting: {}", maxSetting, e);
+					}
+					break;
+				}
+			}
 		}
 
 		return max;

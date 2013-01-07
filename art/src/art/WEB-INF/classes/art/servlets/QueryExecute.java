@@ -63,7 +63,7 @@ public class QueryExecute extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(QueryExecute.class);
 	private int currentNumberOfRunningQueries = 0;
-	HashMap<String, java.lang.Class> viewModesHash;
+	HashMap<String, java.lang.Class> viewModes;
 
 	/**
 	 *
@@ -77,13 +77,13 @@ public class QueryExecute extends HttpServlet {
 
 		//load all view modes
 		List<String> allViewModes = ArtDBCP.getAllViewModes();
-		viewModesHash = new HashMap<String, java.lang.Class>(allViewModes.size());
+		viewModes = new HashMap<String, java.lang.Class>(allViewModes.size());
 		ClassLoader cl = this.getClass().getClassLoader();
 		String vm = "";
 		try {
 			for(String viewMode : allViewModes) {
 				vm = viewMode;
-				viewModesHash.put(vm, cl.loadClass("art.output." + vm + "Output"));
+				viewModes.put(vm, cl.loadClass("art.output." + vm + "Output"));
 			}
 		} catch (Exception e) {
 			logger.error("Error while loading view mode: {}", vm, e);
@@ -91,7 +91,7 @@ public class QueryExecute extends HttpServlet {
 	}
 
 	/**
-	 * Generate a crosstab report.
+	 * Generate a report on column (grouped) report.
 	 *
 	 * @param out
 	 * @param rs
@@ -107,8 +107,8 @@ public class QueryExecute extends HttpServlet {
 		int counter = 0;
 		htmlReportOutWriter o = new htmlReportOutWriter(out);
 		String tmpstr;
-		StringBuffer cmpStr; // temporary string used to copare values
-		StringBuffer tmpCmpStr; // temporary string used to copare values
+		StringBuffer cmpStr; // temporary string used to compare values
+		StringBuffer tmpCmpStr; // temporary string used to compare values
 
 
 		// Report, is intended to be something like that:
@@ -140,9 +140,9 @@ public class QueryExecute extends HttpServlet {
 			o.addCellToSubHeader(tmpstr);
 		}
 
-		int defaultMaxRows = ArtDBCP.getDefaultMaxRows();
+		int maxRows = ArtDBCP.getMaxRows("htmlreport");
 
-		while (rs.next() && counter < defaultMaxRows) {
+		while (rs.next() && counter < maxRows) {
 			// Separators
 			out.println("<br><hr style=\"width:90%;height:1px\"><br>");
 
@@ -171,7 +171,7 @@ public class QueryExecute extends HttpServlet {
 			}
 
 			boolean currentMain = true;
-			while (currentMain && counter < defaultMaxRows) {  // next line
+			while (currentMain && counter < maxRows) {  // next line
 				// Get Main Data in order to compare it
 				if (rs.next()) {
 					counter++;
@@ -200,10 +200,10 @@ public class QueryExecute extends HttpServlet {
 			}
 		}
 
-		if (!(counter < defaultMaxRows)) {
+		if (!(counter < maxRows)) {
 			o.newLine();
-			o.addCellToLine("<blink>Too many rows (>" + defaultMaxRows
-					+ ")! Data not completed. Please narrow your search or use the tsv spreadsheet view mode</blink>", "qeattr", "left", col_count);
+			o.addCellToLine("<blink>Too many rows (>" + maxRows
+					+ ")! Data not completed. Please narrow your search or use the xlsx, slk or tsv view modes</blink>", "qeattr", "left", col_count);
 		}
 
 		o.endLines();
@@ -458,7 +458,7 @@ public class QueryExecute extends HttpServlet {
 					viewMode = "graph";
 				} else if (queryType > 0 && queryType < 100) {
 					//report on column
-					viewMode = "HTMLREPORT";
+					viewMode = "htmlreport";
 				} else if (queryType == 115 || queryType == 116) {
 					//jasper report
 					viewMode = "pdf";
@@ -481,9 +481,9 @@ public class QueryExecute extends HttpServlet {
 				// forward to the editJob page
 				ctx.getRequestDispatcher("/user/editJob.jsp").forward(request, response);
 				return; // a return is needed otherwise the flow would proceed!
-			} else if (StringUtils.containsIgnoreCase(viewMode, "GRAPH")) {
+			} else if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
 				showHeaderAndFooter = false; // graphs are created in memory and displayed by showGraph.jsp page
-			} else if (StringUtils.equalsIgnoreCase(viewMode, "HTMLREPORT")) {
+			} else if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
 				response.setContentType("text/html; charset=UTF-8");
 				out = response.getWriter();
 			} else if (queryType == 115 || queryType == 116 || queryType == 117 || queryType == 118) {
@@ -512,7 +512,7 @@ public class QueryExecute extends HttpServlet {
 				// => Load the appropriate ArtOutputInterface for the view mode
 
 				try {
-					java.lang.Class classx = viewModesHash.get(viewMode);
+					java.lang.Class classx = viewModes.get(viewMode);
 					o = (ArtOutputInterface) classx.newInstance();
 
 					// Set the content type according to the object
@@ -667,7 +667,7 @@ public class QueryExecute extends HttpServlet {
 					int resultSetType;
 					if (queryType == 116 || queryType == 118) {
 						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset in order to determine record count
-					} else if (StringUtils.equalsIgnoreCase(viewMode, "HTMLREPORT")) {
+					} else if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
 						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 					} else if (queryType < 0) {
 						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
@@ -826,7 +826,7 @@ public class QueryExecute extends HttpServlet {
 							rsmd = rs.getMetaData();
 
 							try {
-								if (StringUtils.equalsIgnoreCase(viewMode, "HTMLREPORT")) {
+								if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
 									/*
 									 * HTML REPORT
 									 */
@@ -838,7 +838,7 @@ public class QueryExecute extends HttpServlet {
 									}
 									numberOfRows = htmlReportOut(out, rs, rsmd, splitCol);
 									probe = 100;
-								} else if (StringUtils.containsIgnoreCase(viewMode, "GRAPH")) {
+								} else if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
 									/*
 									 * GRAPH
 									 */
@@ -958,13 +958,13 @@ public class QueryExecute extends HttpServlet {
 
 					if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
 						//graph. set output format and forward to the rendering page
-						if (StringUtils.equalsIgnoreCase(viewMode, "GRAPH")) {
+						if (StringUtils.equalsIgnoreCase(viewMode, "graph")) {
 							//only display graph on the browser
 							request.setAttribute("outputToFile", "nofile");
-						} else if (StringUtils.equalsIgnoreCase(viewMode, "PDFGRAPH")) {
+						} else if (StringUtils.equalsIgnoreCase(viewMode, "pdfgraph")) {
 							//additionally generate graph in a pdf file
 							request.setAttribute("outputToFile", "pdf");
-						} else if (StringUtils.equalsIgnoreCase(viewMode, "PNGGRAPH")) {
+						} else if (StringUtils.equalsIgnoreCase(viewMode, "pnggraph")) {
 							//additionally generate graph as a png file
 							request.setAttribute("outputToFile", "png");
 						}

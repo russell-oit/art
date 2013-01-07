@@ -237,7 +237,7 @@ public class rss20Output implements ArtOutputInterface {
         } else {
             out.println("</item><item>");
             out.println("<title>Error: too many rows</title>");
-            out.println("<description>the number of rows (" + numberOfLines + ") for this feed is above the threshold defined in ART. add parameters or increase the threshold</description>");
+            out.println("<description>the number of rows (" + numberOfLines + ") for this feed is above the threshold defined in ART. Add parameters or increase the threshold</description>");
             endLines();
 
             return false; // ART will stop to feed the object if it returns false
