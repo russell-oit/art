@@ -1,0 +1,1 @@
+These are sample ART queries that can be used to monitor and administer the application

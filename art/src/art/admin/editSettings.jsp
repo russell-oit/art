@@ -181,6 +181,7 @@ if(!propsFile.exists()){
 		time_format="HH:mm:ss";
 	}
 	
+	//other properties
 	max_running_queries=ap.getProp("max_running_queries");
 	if(max_running_queries==null){
 		max_running_queries="1000";
@@ -213,16 +214,16 @@ if(!propsFile.exists()){
     art_jdbc_driver = "org.hsqldb.jdbcDriver";
 	art_testsql     = "";
 	art_pooltimeout = "15";
-    administrator   = "<art_admin_email>";
-    smtp_server     = "<a.smtp.server>";
+    administrator   = "";
+    smtp_server     = "";
     smtp_username   = "";
     smtp_password   = "";
     ldap_auth_server   = "ldap://ldap.server.com:389";
     ldap_auth_method   = "simple";
     mswin_auth_server  ="a.domain.controller";
     mswin_domains      ="Domain1,Domain2,Domain3";
-    jdbc_auth_driver   = "<a jdbc driver>";
-    jdbc_auth_url      = "<a jdbc url>";
+    jdbc_auth_driver   = "";
+    jdbc_auth_url      = "";
     index_page_default = "login";
 
     bottom_logo	       = "/images/artminiicon.png";
@@ -666,7 +667,7 @@ if(!propsFile.exists()){
        </tr>
 	   
 	   <tr>
-        <td class="attr">View Modes</td>
+        <td class="attr">Available View Modes</td>
         <td class="data">
 			<input type="text" name="view_modes" size="50" maxlength="1000" value="<%=view_modes%>">
 			<%

@@ -22,6 +22,8 @@ if(StringUtils.isNotBlank(startQuery)){
 	}
 	startQuery="ExecuteQuery?queryId=" + startQuery + "&_isInline=true";
 	startQueryType=aq.getQueryType(Integer.parseInt(startQueryId));
+} else {
+	startQuery="";
 }
 %>
 
@@ -111,8 +113,8 @@ function setAction() {
 jQuery(document).ready(function($){
 
 var qt=<%=startQueryType%>;
-var url="<%=startQuery%>";
-if(url!="" && !(qt==112 || qt==113 || qt==114)){
+var sq="<%=startQuery%>";
+if(sq!="" && !(qt==112 || qt==113 || qt==114)){
 	$("#queryDescription").load(url,function(responseText, statusText, xhr){
 		//callback funtion for when jquery load has finished
 		if(statusText=="success"){
