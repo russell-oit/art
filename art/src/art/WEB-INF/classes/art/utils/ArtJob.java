@@ -444,7 +444,8 @@ public class ArtJob implements Job, Serializable {
 	 * @return job name
 	 */
 	public String getJobName() {
-		if (jobName == null || jobName.trim().length() == 0) {
+		//if job name is empty, use query name as job name
+		if (StringUtils.isBlank(jobName)) {
 			jobName = queryName;
 		}
 		return jobName;
@@ -2115,7 +2116,7 @@ public class ArtJob implements Job, Serializable {
 					archiveStartDate = rs.getTimestamp("LAST_START_DATE");
 					archiveEndDate = rs.getTimestamp("LAST_END_DATE");
 
-					if (runsToArchive > 0) {
+					if (runsToArchive > 0 && archiveFileName != null) {
 						//update archives
 						updateArchives(splitJob, user, archiveFileName, archiveStartDate, archiveEndDate);
 					} else {
@@ -2128,6 +2129,11 @@ public class ArtJob implements Job, Serializable {
 							if (previousFile.exists()) {
 								previousFile.delete();
 							}
+						}
+
+						//delete old archives if they exist
+						if(runsToArchive==0){
+							deleteArchives();
 						}
 					}
 				}
@@ -3786,6 +3792,74 @@ public class ArtJob implements Job, Serializable {
 				sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
 				ps = conn.prepareStatement(sql);
 				ps.executeUpdate();
+				ps.close();
+			}
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		}
+	}
+
+	/**
+	 * Delete all records from job archives table for this job id
+	 */
+	private void deleteArchives() {
+
+		Connection conn = null;
+
+		try {
+			conn = ArtDBCP.getConnection();
+
+			String sql;
+			PreparedStatement ps;
+			ResultSet rs;
+
+			List<String> oldRecords = new ArrayList<String>();
+
+			sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
+					+ " FROM ART_JOB_ARCHIVES "
+					+ " WHERE JOB_ID=?";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, jobId);
+
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				//delete archive file and database record
+				String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
+				String oldArchive = rs.getString("ARCHIVE_ID");
+
+				//remember database record for deletion
+				oldRecords.add("'" + oldArchive + "'");
+
+				//delete file
+				if (oldFileName != null && !oldFileName.startsWith("-")) {
+					List<String> details = ArtDBCP.getFileDetailsFromResult(oldFileName);
+					oldFileName = details.get(0);
+					String filePath = ArtDBCP.getJobsPath() + oldFileName;
+					File previousFile = new File(filePath);
+					if (previousFile.exists()) {
+						previousFile.delete();
+					}
+				}
+			}
+			rs.close();
+			ps.close();
+
+			//delete old archive records
+			if (oldRecords.size() > 0) {
+				String oldRecordsString = StringUtils.join(oldRecords, ",");
+				sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
+				ps = conn.prepareStatement(sql);
+				ps.executeUpdate();
+				ps.close();
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);

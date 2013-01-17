@@ -328,6 +328,11 @@ if (request.getParameter("bcc").equals("")){
 
 		job.setStartDate(startDate);
 		job.setEndDate(endDate);
+		
+		//if job name is blank, use query name as job name
+		if(StringUtils.isBlank(job.getJobName())){
+			job.setJobName(queryName);
+		}
 
 		job.save(); //for a new job, will generate a new job id
 

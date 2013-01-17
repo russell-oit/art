@@ -14,7 +14,7 @@
 <div style="float: right; text-align: right">
 	<span style="font-size:75%">
 	 version <%=art.servlets.ArtDBCP.getArtVersion()%> <img src="<%=request.getContextPath() + art.servlets.ArtDBCP.getArtSetting("bottom_logo")%>" alt="">
-	  <i><a href="mailto:<%=art.servlets.ArtDBCP.getArtSetting("administrator")%>"><%=fMessages.getString("artSupport")%></a></i>
+	  <a href="mailto:<%=art.servlets.ArtDBCP.getArtSetting("administrator")%>"><%=fMessages.getString("artSupport")%></a>
 	</span>
 </div>
 </p>

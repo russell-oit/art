@@ -1101,7 +1101,7 @@ public class UserEntity implements Serializable {
 			//get job archives that user has access to
 			sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE "
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ"
-					+ " WHERE AJA.JOB_ID=AJ.JOB_ID "
+					+ " WHERE AJA.JOB_ID=AJ.JOB_ID"
 					+ " AND AJA.USERNAME=?" //user owns job or individualized output
 					+ " UNION"
 					+ " SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE"
@@ -1139,8 +1139,13 @@ public class UserEntity implements Serializable {
 				DecimalFormat nf = new DecimalFormat("0");
 				nf.setMinimumIntegerDigits(10); //ensure all numbers are pre-padded with zeros so that sorting works correctly
 				nf.setMaximumFractionDigits(20);
+				
+				String datePart="";
+				if(endDate!=null){
+					datePart=df.format(endDate);
+				}
 
-				String key = nf.format(jobId) + df.format(endDate);
+				String key = nf.format(jobId) + datePart;
 
 				jobs.put(key, aj);
 			}
