@@ -1784,7 +1784,7 @@ public class ArtJob implements Job, Serializable {
 		m.setSubject(subject);
 		m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
 		m.setFrom(from);
-		m.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small></html>");
+		m.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message (ART, Job ID " + jobId + ")</small></html>");
 	}
 
 	/**
@@ -1828,7 +1828,7 @@ public class ArtJob implements Job, Serializable {
 			}
 		}
 
-		String autoMessage = "<hr><small>This is an automatically generated message (ART Reporting Tool, Job ID " + jobId + ")</small>";
+		String autoMessage = "<hr><small>This is an automatically generated message (ART, Job ID " + jobId + ")</small>";
 		m.setMessage("<html>" + msg + autoMessage + "</html>");
 	}
 

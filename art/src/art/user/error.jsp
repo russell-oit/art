@@ -16,7 +16,7 @@ if(request.getParameter("_isInline")!=null){
 	isInline=true;
 }
 
- if (headerOff == null &&!isInline) {
+ if (headerOff == null && !isInline) {
 %>
 <%@ include file ="header.jsp" %>
 <%}%>

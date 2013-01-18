@@ -8,7 +8,7 @@
  writeStatus(<%=messages.getString("updateExecuted")%>);
 </script>
 
-<br> <%=messages.getString("updatedRows")%>: <%=(String) request.getAttribute("rowsUpdated")%>
+<br> <%=messages.getString("updatedRows")%> <%=(String) request.getAttribute("rowsUpdated")%>
 
 <br><small><%=messages.getString("updateWarning")%></small><br>
 

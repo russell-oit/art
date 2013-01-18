@@ -31,6 +31,11 @@ boolean hasParams=false;
 
 boolean showResultsInline=true; //can be modified in case show inline behaviour is not desired
 
+//pivot tables never shown inline
+if(queryType==112 || queryType==113 || queryType==114){
+	showResultsInline=false;
+}
+
 %>
 
 <script type="text/javascript" src="<%= request.getContextPath() %>/js/date.js"></script>
@@ -305,7 +310,7 @@ jQuery(document).ready(function($){
 		var qt=<%=queryType%>;
 		var showInline=<%=showResultsInline%>;
 
-		if(showInline && selectedViewMode!="SCHEDULE" && !(qt==112 || qt==113 || qt==114)){
+		if(showInline && selectedViewMode!="SCHEDULE"){
 			//display results inline. don't display inline for scheduling or pivot tables			
 			e.preventDefault();
 

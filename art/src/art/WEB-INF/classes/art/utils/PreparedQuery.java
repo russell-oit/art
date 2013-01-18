@@ -1045,7 +1045,7 @@ public class PreparedQuery {
 		// Get rules for the current query
 		String sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
 				+ " FROM ART_QUERY_RULES"
-				+ "WHERE QUERY_ID=?";
+				+ " WHERE QUERY_ID=?";
 		PreparedStatement ps = conn.prepareStatement(sql);
 		ps.setInt(1, queryId);
 		rs = ps.executeQuery();
