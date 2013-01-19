@@ -17,7 +17,11 @@
 	<logger name="org.quartz">
 		<level value="info" />
 	</logger>
-
+	
+	<logger name="art">
+		<level value="info" />
+	</logger>
+		
 	<logger name="mondrian.sql">
 		<level value="warn" />
 	</logger>
@@ -38,9 +42,7 @@
 		<level value="warn"/>
 	</logger>
 
-	<logger name="art">
-		<level value="info" />
-	</logger>
+	
 
 	<root>
 		<level value="warn" />

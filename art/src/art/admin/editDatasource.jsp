@@ -80,6 +80,9 @@ String msg;
 		} else if(dbType == "sqlserver-jtds"){
 			driverElement.value="net.sourceforge.jtds.jdbc.Driver";
 			urlElement.value="jdbc:jtds:sqlserver://<server_name>/<database_name>";
+		} else if(dbType == "log4jdbc"){
+			driverElement.value="net.sf.log4jdbc.DriverSpy";
+			urlElement.value="jdbc:log4" + urlElement.value;
 		}
 	}
 </script>
@@ -120,6 +123,7 @@ String msg;
 					<option value="sqlserver-jtds">SQL Server (jTDS driver)</option>
 					<option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
 					<option value="hsqldb-server">HSQLDB (Server mode)</option>
+					<option value="log4jdbc">SQL Logging</option>
 					<option value="other">Other</option>
 				</select>
 				<%msg = "Sets the jdbc driver and url fields with default values for the selected database type"; %>
