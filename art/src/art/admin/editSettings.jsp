@@ -56,43 +56,37 @@
 	 String specific_max_rows;
 
 
-String propsFilePath=ArtDBCP.getArtPropertiesFilePath();
-File propsFile = new File(propsFilePath);
-if(!propsFile.exists()){
-	//art.properties doesn't exit. try art.props
-	String  sep = java.io.File.separator;
-	propsFilePath=ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
-}
-  ArtProps ap = new ArtProps();
+  ArtSettings as = new ArtSettings();
 
-  if (ap.load(propsFilePath)){ // file exists
-    art_username           = ap.getProp("art_username");
-    art_password           = ap.getProp("art_password");
+  if (as.load()){
+	  //settings defined
+    art_username = as.getSetting("art_username");
+    art_password = as.getSetting("art_password");
 	// un-obfuscate password
 	art_password = Encrypter.decrypt(art_password);
-	art_jdbc_url                = ap.getProp("art_jdbc_url");
+	art_jdbc_url                = as.getSetting("art_jdbc_url");
 	if(StringUtils.isBlank(art_jdbc_url)){
-		art_jdbc_url=ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+		art_jdbc_url=as.getSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
 	}
-    art_jdbc_driver        = ap.getProp("art_jdbc_driver");
-	art_testsql            = ap.getProp("art_testsql");
-	art_pooltimeout        = ap.getProp("art_pooltimeout");
-    administrator          = ap.getProp("administrator");
-    smtp_server            = ap.getProp("smtp_server");
-    smtp_username          = ap.getProp("smtp_username");
-    smtp_password          = ap.getProp("smtp_password");
+    art_jdbc_driver        = as.getSetting("art_jdbc_driver");
+	art_testsql            = as.getSetting("art_testsql");
+	art_pooltimeout        = as.getSetting("art_pooltimeout");
+    administrator          = as.getSetting("administrator");
+    smtp_server            = as.getSetting("smtp_server");
+    smtp_username          = as.getSetting("smtp_username");
+    smtp_password          = as.getSetting("smtp_password");
 	smtp_password = Encrypter.decrypt(smtp_password);
 
-    ldap_auth_server       = ap.getProp("ldap_auth_server");
-    ldap_auth_method       = ap.getProp("ldap_auth_method");
-    mswin_auth_server      = ap.getProp("mswin_auth_server");
-    mswin_domains          = ap.getProp("mswin_domains");
-    jdbc_auth_driver       = ap.getProp("jdbc_auth_driver");
-    jdbc_auth_url          = ap.getProp("jdbc_auth_url");
-    index_page_default     = ap.getProp("index_page_default");
+    ldap_auth_server       = as.getSetting("ldap_auth_server");
+    ldap_auth_method       = as.getSetting("ldap_auth_method");
+    mswin_auth_server      = as.getSetting("mswin_auth_server");
+    mswin_domains          = as.getSetting("mswin_domains");
+    jdbc_auth_driver       = as.getSetting("jdbc_auth_driver");
+    jdbc_auth_url          = as.getSetting("jdbc_auth_url");
+    index_page_default     = as.getSetting("index_page_default");
 
-    bottom_logo            = ap.getProp("bottom_logo");
-    css_skin               = ap.getProp("css_skin");
+    bottom_logo            = as.getSetting("bottom_logo");
+    css_skin               = as.getSetting("css_skin");
     
     //enable smooth upgrade from 2.1 to 2.2+
     if(StringUtils.equals(css_skin,"/art/css/art.css")){
@@ -102,107 +96,107 @@ if(!propsFile.exists()){
         bottom_logo="/images/artminiicon.png";
     }
     
-    header_with_public_user =  ap.getProp("header_with_public_user");
-    page_size               = ap.getProp("page_size");
+    header_with_public_user =  as.getSetting("header_with_public_user");
+    page_size               = as.getSetting("page_size");
 
-	rss_link			= ap.getProp("rss_link");
+	rss_link			= as.getSetting("rss_link");
 	//new property to make published files deletion period configurable
-	if (ap.getProp("published_files_retention_period")==null){
+	if (as.getSetting("published_files_retention_period")==null){
 		published_files_retention_period="0";
 	}
 	else {
-		published_files_retention_period=ap.getProp("published_files_retention_period");
+		published_files_retention_period=as.getSetting("published_files_retention_period");
 	}
 
 	//new properties for use of secure smtp
-	if (ap.getProp("secure_smtp")==null){
+	if (as.getSetting("secure_smtp")==null){
 		secure_smtp="no";
 	}
 	else {
-		secure_smtp=ap.getProp("secure_smtp");
+		secure_smtp=as.getSetting("secure_smtp");
 	}
-	if (ap.getProp("smtp_port")==null){
+	if (as.getSetting("smtp_port")==null){
 		smtp_port="25";
 	}
 	else {
-		smtp_port=ap.getProp("smtp_port");
+		smtp_port=as.getSetting("smtp_port");
 	}
 
 	//new properties for ldap authentication
-	if (ap.getProp("ldap_users_parent_dn")==null){
+	if (as.getSetting("ldap_users_parent_dn")==null){
 		ldap_users_parent_dn="";
 	}
 	else {
-		ldap_users_parent_dn=ap.getProp("ldap_users_parent_dn");
+		ldap_users_parent_dn=as.getSetting("ldap_users_parent_dn");
 	}
-	if (ap.getProp("ldap_realm")==null){
+	if (as.getSetting("ldap_realm")==null){
 		ldap_realm="";
 	}
 	else {
-		ldap_realm=ap.getProp("ldap_realm");
+		ldap_realm=as.getSetting("ldap_realm");
 	}
 
-	if (ap.getProp("mondrian_cache_expiry")==null){
+	if (as.getSetting("mondrian_cache_expiry")==null){
 		mondrian_cache_expiry="0";
 	}
 	else {
-		mondrian_cache_expiry=ap.getProp("mondrian_cache_expiry");
+		mondrian_cache_expiry=as.getSetting("mondrian_cache_expiry");
 	}
 	
 	//new properties for pdf unicode support
-	pdf_font_directory=ap.getProp("pdf_font_directory");
+	pdf_font_directory=as.getSetting("pdf_font_directory");
 	if(pdf_font_directory==null){
 		pdf_font_directory="";
 	}
-	pdf_font_name=ap.getProp("pdf_font_name");
+	pdf_font_name=as.getSetting("pdf_font_name");
 	if(pdf_font_name==null){
 		pdf_font_name="";
 	}
-	pdf_font_file=ap.getProp("pdf_font_file");
+	pdf_font_file=as.getSetting("pdf_font_file");
 	if(pdf_font_file==null){
 		pdf_font_file="";
 	}
-	pdf_font_encoding=ap.getProp("pdf_font_encoding");
+	pdf_font_encoding=as.getSetting("pdf_font_encoding");
 	if(pdf_font_encoding==null){
 		pdf_font_encoding="";
 	}
-	pdf_font_embedded=ap.getProp("pdf_font_embedded");
+	pdf_font_embedded=as.getSetting("pdf_font_embedded");
 	if(pdf_font_embedded==null){
 		pdf_font_embedded="no";
 	}
 	
 	//new properties for custom date formats
-	date_format=ap.getProp("date_format");
+	date_format=as.getSetting("date_format");
 	if(date_format==null){
 		date_format="dd-MMM-yyyy";
 	}
-	time_format=ap.getProp("time_format");
+	time_format=as.getSetting("time_format");
 	if(time_format==null){
 		time_format="HH:mm:ss";
 	}
 	
 	//other properties
-	max_running_queries=ap.getProp("max_running_queries");
+	max_running_queries=as.getSetting("max_running_queries");
 	if(max_running_queries==null){
 		max_running_queries="1000";
 	}
-	max_pool_connections=ap.getProp("max_pool_connections");
+	max_pool_connections=as.getSetting("max_pool_connections");
 	if(max_pool_connections==null){
 		max_pool_connections="20";
 	}
-	scheduling_enabled=ap.getProp("scheduling_enabled");
+	scheduling_enabled=as.getSetting("scheduling_enabled");
 	if(scheduling_enabled==null){
 		scheduling_enabled="true";
 	}
-	view_modes=ap.getProp("view_modes");
+	view_modes=as.getSetting("view_modes");
 	if(StringUtils.isBlank(view_modes)){
 		view_modes="htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
 	}
-	default_max_rows=ap.getProp("default_max_rows");
+	default_max_rows=as.getSetting("default_max_rows");
 	if(StringUtils.isBlank(default_max_rows)){
 		default_max_rows="10000";
 	}
-	specific_max_rows=ap.getProp("specific_max_rows");
+	specific_max_rows=as.getSetting("specific_max_rows");
 	if(specific_max_rows==null){
 		specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
 	}

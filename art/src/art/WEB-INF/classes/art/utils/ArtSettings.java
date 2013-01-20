@@ -1,9 +1,10 @@
 package art.utils;
 
+import art.servlets.ArtDBCP;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.Enumeration;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,16 +14,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Enrico Liboni
  */
-public class ArtProps {
+public class ArtSettings {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtProps.class);
+	final static Logger logger = LoggerFactory.getLogger(ArtSettings.class);
 	Properties p;
-	String artPropsDefaultName = "art.properties";
 
 	/**
 	 *
 	 */
-	public ArtProps() {
+	public ArtSettings() {
 		p = new Properties();
 	}
 
@@ -31,10 +31,8 @@ public class ArtProps {
 	 * @param key
 	 * @param value
 	 */
-	public void setProp(String key, String value) {
-		if (p != null) {
-			p.setProperty(key, value);
-		}
+	public void setSetting(String key, String value) {
+		p.setProperty(key, value);
 	}
 
 	/**
@@ -42,16 +40,8 @@ public class ArtProps {
 	 * @param key
 	 * @return property value for the given key
 	 */
-	public String getProp(String key) {
+	public String getSetting(String key) {
 		return p.getProperty(key);
-	}
-
-	/**
-	 *
-	 * @return store the properties to the default file
-	 */
-	public boolean store() {
-		return store(artPropsDefaultName);
 	}
 
 	/**
@@ -59,13 +49,13 @@ public class ArtProps {
 	 * @param fileName
 	 * @return store the properties to given file
 	 */
-	public boolean store(String fileName) {
+	public boolean save(String fileName) {
 		boolean success = false;
 
 		try {
 			FileOutputStream o = new FileOutputStream(fileName, false);
 			try {
-				p.store(o, "ART Properties File");
+				p.store(o, "ART Settings File");
 			} finally {
 				o.close();
 			}
@@ -79,11 +69,20 @@ public class ArtProps {
 	}
 
 	/**
+	 * load settings from default location
 	 *
-	 * @return <code>true</code> if properties file loaded successfully
+	 * @return
 	 */
 	public boolean load() {
-		return load(artPropsDefaultName);
+		String settingsFilePath = ArtDBCP.getSettingsFilePath();
+		File settingsFile = new File(settingsFilePath);
+		if (!settingsFile.exists()) {
+			//art.properties doesn't exit. try art.props
+			String sep = java.io.File.separator;
+			settingsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
+		}
+		
+		return load(settingsFilePath);
 	}
 
 	/**
@@ -104,37 +103,11 @@ public class ArtProps {
 
 			success = true;
 		} catch (FileNotFoundException e) {
-			logger.warn("The file {} has not been created yet", fileName);
+			logger.warn("ART settings have not been defined", e);
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
 
 		return success;
-	}
-
-	/**
-	 *
-	 * @param fileName
-	 */
-	public void printProps(String fileName) {
-		try {
-			FileInputStream o = new FileInputStream(fileName);
-			try {
-				p.load(o);
-			} finally {
-				o.close();
-			}
-			Enumeration enumer = p.propertyNames();
-			String propName, propValue;
-			while (enumer.hasMoreElements()) {
-				propName = (String) enumer.nextElement();
-				propValue = p.getProperty(propName);
-				System.out.println("Name:   " + propName);
-				System.out.println(" Value: " + propValue);
-			}
-
-		} catch (Exception e) {
-			logger.error("Error", e);
-		}
 	}
 }

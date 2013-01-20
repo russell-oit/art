@@ -73,7 +73,7 @@ public class QuartzProperties {
 			final String MAKE_THREADS_DAEMONS = "org.quartz.threadPool.makeThreadsDaemons";
 
 
-			//check if art props file exists. this will supply data source details
+			//check if art.properties file exists. this will supply data source details
 			if (ArtDBCP.isArtSettingsLoaded()) {
 				dbUrl = ArtDBCP.getArtSetting("art_jdbc_url");
 				if (StringUtils.isBlank(dbUrl)) {

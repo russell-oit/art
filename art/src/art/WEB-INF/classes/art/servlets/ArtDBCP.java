@@ -32,11 +32,10 @@
 package art.servlets;
 
 import art.dbcp.DataSource;
-import art.utils.ArtProps;
+import art.utils.ArtSettings;
 import art.utils.Encrypter;
 import art.utils.UserEntity;
 import com.lowagie.text.FontFactory;
-import java.io.File;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -68,7 +67,7 @@ public class ArtDBCP extends HttpServlet {
 	private static int poolMaxConnections;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
-	private static ArtProps ap;
+	private static ArtSettings as;
 	private static ArrayList<String> userViewModes; //view modes shown to users
 	private static boolean schedulingEnabled = true;
 	private static String templatesPath; //full path to templates directory where formatted report templates and mondiran cube definitions are stored
@@ -135,42 +134,33 @@ public class ArtDBCP extends HttpServlet {
 	 * @return <code>true</code> if file found. <code>false</code> otherwise.
 	 */
 	public static boolean loadArtSettings() {
-		logger.debug("Loading art.properties file");
+		logger.debug("Loading art settings");
 
-		String propsFilePath = getArtPropertiesFilePath();
-		File propsFile = new File(propsFilePath);
-		if (!propsFile.exists()) {
-			//art.properties doesn't exit. try art.props
-			String sep = java.io.File.separator;
-			propsFilePath = getAppPath() + sep + "WEB-INF" + sep + "art.props";
-		}
+		as = new ArtSettings();
 
-		ap = new ArtProps();
-
-		if (ap.load(propsFilePath)) { // file exists
-			logger.debug("Loaded settings from {}", propsFilePath);
-
-			art_username = ap.getProp("art_username");
-			art_password = ap.getProp("art_password");
+		if (as.load()) { 
+			// settings defined
+			art_username = as.getSetting("art_username");
+			art_password = as.getSetting("art_password");
 			// de-obfuscate the password
 			art_password = Encrypter.decrypt(art_password);
 
-			art_jdbc_url = ap.getProp("art_jdbc_url");
+			art_jdbc_url = as.getSetting("art_jdbc_url");
 			if (StringUtils.isBlank(art_jdbc_url)) {
-				art_jdbc_url = ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+				art_jdbc_url = as.getSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
 			}
-			art_jdbc_driver = ap.getProp("art_jdbc_driver");
+			art_jdbc_driver = as.getSetting("art_jdbc_driver");
 
-			art_pooltimeout = ap.getProp("art_pooltimeout");
-			art_testsql = ap.getProp("art_testsql");
+			art_pooltimeout = as.getSetting("art_pooltimeout");
+			art_testsql = as.getSetting("art_testsql");
 
-			String pdfFontName = ap.getProp("pdf_font_name");
+			String pdfFontName = as.getSetting("pdf_font_name");
 			if (StringUtils.isBlank(pdfFontName)) {
 				useCustomPdfFont = false; //font name must be defined in order to use custom font
 			} else {
 				useCustomPdfFont = true;
 			}
-			String fontEmbedded = ap.getProp("pdf_font_embedded");
+			String fontEmbedded = as.getSetting("pdf_font_embedded");
 			if (StringUtils.equals(fontEmbedded, "no")) {
 				pdfFontEmbedded = false;
 			} else {
@@ -178,13 +168,13 @@ public class ArtDBCP extends HttpServlet {
 			}
 
 			//set date format
-			dateFormat = ap.getProp("date_format");
+			dateFormat = as.getSetting("date_format");
 			if (StringUtils.isBlank(dateFormat)) {
 				dateFormat = DEFAULT_DATE_FORMAT;
 			}
 
 			//set time format
-			timeFormat = ap.getProp("time_format");
+			timeFormat = as.getSetting("time_format");
 			if (StringUtils.isBlank(timeFormat)) {
 				timeFormat = DEFAULT_TIME_FORMAT;
 			}
@@ -201,7 +191,7 @@ public class ArtDBCP extends HttpServlet {
 			}
 
 			//set scheduling enabled
-			String scheduling = ap.getProp("scheduling_enabled");
+			String scheduling = as.getSetting("scheduling_enabled");
 			if (StringUtils.equals(scheduling, "no")) {
 				schedulingEnabled = false;
 			} else {
@@ -209,7 +199,7 @@ public class ArtDBCP extends HttpServlet {
 			}
 
 			//Get user view modes. if a view mode is not in the list, then it's hidden
-			String modes = ap.getProp("view_modes");
+			String modes = as.getSetting("view_modes");
 			String[] viewModes = StringUtils.split(modes, ",");
 			if (userViewModes == null) {
 				userViewModes = new ArrayList<String>();
@@ -224,7 +214,7 @@ public class ArtDBCP extends HttpServlet {
 			defaultMaxRows = 10000; //set default;
 			String defaultMaxRowsString = "";
 			try {
-				defaultMaxRowsString = ap.getProp("default_max_rows");
+				defaultMaxRowsString = as.getSetting("default_max_rows");
 				defaultMaxRows = Integer.parseInt(defaultMaxRowsString);
 			} catch (NumberFormatException e) {
 				//invalid number
@@ -320,14 +310,14 @@ public class ArtDBCP extends HttpServlet {
 			String pdfFontName = getArtSetting("pdf_font_name");
 			if (!FontFactory.isRegistered(pdfFontName)) {
 				//font not registered. register any defined font files or directories
-				String pdfFontDirectory = ap.getProp("pdf_font_directory");
+				String pdfFontDirectory = as.getSetting("pdf_font_directory");
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					logger.info("Registering fonts from directory: {}", pdfFontDirectory);
 					int i = FontFactory.registerDirectory(pdfFontDirectory);
 					logger.info("{} fonts registered", i);
 				}
 
-				String pdfFontFile = ap.getProp("pdf_font_file");
+				String pdfFontFile = as.getSetting("pdf_font_file");
 				if (StringUtils.isNotBlank(pdfFontFile)) {
 					logger.info("Registering font file: {}", pdfFontFile);
 					FontFactory.register(pdfFontFile);
@@ -538,7 +528,7 @@ public class ArtDBCP extends HttpServlet {
 	 *
 	 * @return the full path to the art.properties file
 	 */
-	public static String getArtPropertiesFilePath() {
+	public static String getSettingsFilePath() {
 		return artPropertiesFilePath;
 	}
 
@@ -696,7 +686,7 @@ public class ArtDBCP extends HttpServlet {
 
 		try {
 			if (artSettingsLoaded) {
-				//artprops has been defined
+				//settings have been defined
 				DataSource ds = dataSources.get(Integer.valueOf(i));
 				conn = ds.getConnection(); // i=0 => ART Repository
 			}
@@ -729,7 +719,7 @@ public class ArtDBCP extends HttpServlet {
 
 		try {
 			if (artSettingsLoaded) {
-				//artprops has been defined
+				//settings have been defined
 				if (dataSources != null) {
 					for (Integer key : dataSources.keySet()) {
 						DataSource ds = dataSources.get(key);
@@ -793,7 +783,7 @@ public class ArtDBCP extends HttpServlet {
 	 * @return setting value
 	 */
 	public static String getArtSetting(String key) {
-		return ap.getProp(key);
+		return as.getSetting(key);
 	}
 
 	/**
@@ -997,7 +987,7 @@ public class ArtDBCP extends HttpServlet {
 	public static int getMaxRows(String viewMode) {
 		int max = defaultMaxRows;
 		
-		String setting = ap.getProp("specific_max_rows");
+		String setting = as.getSetting("specific_max_rows");
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {

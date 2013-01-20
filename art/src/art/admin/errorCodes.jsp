@@ -74,7 +74,7 @@
             </small>
             <br><i>Solution:</i>           
             <br><small>If you do not know previous password, delete the art.properties file
-                in the WEB-INF directory of ART web application (<i><%=ArtDBCP.getArtPropertiesFilePath()%></i>).
+                in the WEB-INF directory of ART web application (<i><%=ArtDBCP.getSettingsFilePath()%></i>).
             </small>
         </td></tr>
 

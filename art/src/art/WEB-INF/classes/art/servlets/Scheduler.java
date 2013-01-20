@@ -31,7 +31,7 @@
 package art.servlets;
 
 import art.utils.ArtJob;
-import art.utils.ArtProps;
+import art.utils.ArtSettings;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import java.io.BufferedWriter;
@@ -82,10 +82,10 @@ public class Scheduler extends HttpServlet {
 
 			base_export_path = ArtDBCP.getExportPath();
 
-			boolean propsFileLoaded;
-			propsFileLoaded = loadProperties();
+			boolean settingsLoaded;
+			settingsLoaded = loadSettings();
 
-			if (propsFileLoaded) {
+			if (settingsLoaded) {
 				//get quartz properties object to use to instantiate a scheduler
 				QuartzProperties qp = new QuartzProperties();
 				Properties props = qp.getProperties();
@@ -152,33 +152,26 @@ public class Scheduler extends HttpServlet {
 	 * @return <code>true</code> if file is found. <code>false</code> if file is
 	 * not found.
 	 */
-	public boolean loadProperties() {
+	public boolean loadSettings() {
 
 		logger.debug("Loading art.properties");
 
 		boolean loaded = false;
 
-		String propsFilePath = ArtDBCP.getArtPropertiesFilePath();
-		File propsFile = new File(propsFilePath);
-		if (!propsFile.exists()) {
-			//art.properties doesn't exit. try art.props
-			String sep = java.io.File.separator;
-			propsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
-		}
+		ArtSettings as = new ArtSettings();
 
-		ArtProps ap = new ArtProps();
-
-		if (ap.load(propsFilePath)) { // file exists            
-			art_username = ap.getProp("art_username");
-			art_password = ap.getProp("art_password");
+		if (as.load()) {
+			//settings have been defined
+			art_username = as.getSetting("art_username");
+			art_password = as.getSetting("art_password");
 			// de-obfuscate the password
 			art_password = Encrypter.decrypt(art_password);
 
-			art_jdbc_url = ap.getProp("art_jdbc_url");
+			art_jdbc_url = as.getSetting("art_jdbc_url");
 			if (StringUtils.isBlank(art_jdbc_url)) {
-				art_jdbc_url = ap.getProp("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+				art_jdbc_url = as.getSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
 			}
-			art_jdbc_driver = ap.getProp("art_jdbc_driver");
+			art_jdbc_driver = as.getSetting("art_jdbc_driver");
 
 			try {
 				Class.forName(art_jdbc_driver).newInstance();
@@ -188,7 +181,7 @@ public class Scheduler extends HttpServlet {
 
 			loaded = true;
 		} else {
-			logger.warn("art.properties file not found. Admin should define ART settings on first logon");
+			logger.warn("Admin should define ART settings on first logon");
 		}
 
 		return loaded;
@@ -365,7 +358,7 @@ class Timer extends Thread {
 		try {
 			while (true) {
 				// get settings. art.properties must exist before cleaning in order to get configured durations
-				if (scheduler.loadProperties()) { // this returns false if art settings are not defined yet
+				if (scheduler.loadSettings()) { // this returns false if art settings are not defined yet
 					// clean old files in export path
 					scheduler.clean();
 				}

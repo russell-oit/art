@@ -21,10 +21,9 @@
 
 String baseDir = ArtDBCP.getAppPath();
 String sep = java.io.File.separator;
-String propsFile = ArtDBCP.getArtPropertiesFilePath();
 String defaultArtUrl = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
 String defaultArtDriver="org.hsqldb.jdbcDriver";
-ArtProps ap = new ArtProps();
+ArtSettings as = new ArtSettings();
 
 String username=request.getParameter("art_username");
 String password=request.getParameter("art_password");
@@ -67,7 +66,7 @@ while (names.hasMoreElements()) {
 	
 	//don't save utility fields (fields starting with _)
 	if (!name.startsWith("_")){
-		ap.setProp(name, value);
+		as.setSetting(name, value);
 	}
 }
 
@@ -133,8 +132,8 @@ while (names.hasMoreElements()) {
     <%
  }
 
-
- if(ap.store(propsFile)) {
+String settingsFilePath = ArtDBCP.getSettingsFilePath();
+ if(as.save(settingsFilePath)) {
 	 //refresh settings and connections
 	 ArtDBCP.loadArtSettings();
     ArtDBCP.refreshConnections();
@@ -201,7 +200,7 @@ while (names.hasMoreElements()) {
 	return;
 
  } else {
-    String msg = "Not able to write to file: " + propsFile;
+    String msg = "Not able to write to file: " + settingsFilePath;
     %>
        <jsp:forward page="error.jsp">
 		<jsp:param name="MOD" value="Exec Update Settings"/>
