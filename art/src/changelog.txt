@@ -1,3 +1,6 @@
+ART 2.6
+* Added Portuguese translation (thanks to Edson Richter)
+
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified
 * Support for running DDL/DML statements before query's select statement
