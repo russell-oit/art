@@ -1,5 +1,6 @@
 ART 2.6
 * Added Portuguese translation (thanks to Edson Richter)
+* Fix for query name truncated to 25 characters
 
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified

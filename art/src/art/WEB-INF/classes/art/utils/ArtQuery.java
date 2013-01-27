@@ -400,9 +400,6 @@ public class ArtQuery {
 	 * @param s
 	 */
 	public void setName(String s) {
-		if (s.length() > 25) {
-			s = s.substring(0, 25);
-		}
 		name = s;
 	}
 
