@@ -115,7 +115,7 @@ jQuery(document).ready(function($){
 var qt=<%=startQueryType%>;
 var sq="<%=startQuery%>";
 if(sq!="" && !(qt==112 || qt==113 || qt==114)){
-	$("#queryDescription").load(url,function(responseText, statusText, xhr){
+	$("#queryDescription").load(sq,function(responseText, statusText, xhr){
 		//callback funtion for when jquery load has finished
 		if(statusText=="success"){
 			//make htmlgrid output sortable

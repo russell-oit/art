@@ -148,7 +148,7 @@
         </tr>
         <tr>
             <td align="right" width="50%">
-				<input type="text" size="20"  maxlength="25" value="New Name" name="NEW_QUERY_NAME" id="newName">
+				<input type="text" size="30"  maxlength="50" value="New Name" name="NEW_QUERY_NAME" id="newName">
 			</td>
             <td align="left">
 				<input type="button" onclick="copyQuery()" value="Copy">
