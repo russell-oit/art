@@ -131,7 +131,7 @@
             </td>
         </tr>
         <tr>
-            <td align="right" width="50%">
+            <td align="right" width="70%">
 				&nbsp;
 			</td>
             <td align="left">
@@ -139,7 +139,7 @@
 			</td>
         </tr>
         <tr>
-			<td align="right" width="50%">
+			<td align="right" width="70%">
 				&nbsp;
 			</td>
             <td align="left">
@@ -147,7 +147,7 @@
 			</td>
         </tr>
         <tr>
-            <td align="right" width="50%">
+            <td align="right" width="70%">
 				<input type="text" size="30"  maxlength="50" value="New Name" name="NEW_QUERY_NAME" id="newName">
 			</td>
             <td align="left">
