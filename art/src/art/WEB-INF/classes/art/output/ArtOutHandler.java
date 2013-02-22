@@ -191,7 +191,6 @@ public class ArtOutHandler {
 
 			//display columns for drill down queries			
 			if (drilldownCount > 0) {
-				StringBuilder sb=new StringBuilder(200);
 				
 				for (Map.Entry<Integer, DrilldownQuery> entry : drilldownQueries.entrySet()) {
 					DrilldownQuery drilldown = entry.getValue();
@@ -202,6 +201,9 @@ public class ArtOutHandler {
 
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
+					
+					StringBuilder sb=new StringBuilder(200);
+					
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 						sb.append(baseUrl).append("/user/showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {

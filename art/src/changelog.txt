@@ -2,6 +2,7 @@ ART 2.6
 * Added Portuguese translation (thanks to Edson Richter)
 * Fix for query name truncated to 25 characters
 * Fix for start query not displaying
+* Fix for invalid drill down queries link
 
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified
