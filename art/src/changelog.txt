@@ -1,4 +1,4 @@
-ART 2.6
+ART 2.5.1
 * Added Portuguese translation (thanks to Edson Richter)
 * Fix for query name truncated to 25 characters
 * Fix for start query not displaying
@@ -6,6 +6,7 @@ ART 2.6
 * Fix for not being able to define email jobs in Italian and Portuguese locales
 * Allow xy chart to have multiple series
 * Have show results inline as an application setting
+* Enable show/hide of parameters box
 
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified

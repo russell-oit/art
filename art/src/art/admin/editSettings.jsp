@@ -428,24 +428,8 @@
    <tr>
     <td colspan="2" align="center" class="data">
 
-    <script language="JavaScript">
-    <!-- Expand/collapse the optional external authentication div
-
-    var isCollapsed = true;
-
-    function showHideOptional() {
-       if (isCollapsed) {
-          document.getElementById("optional_div").className="expand";
-	  isCollapsed = false;
-       } else {
-          document.getElementById("optional_div").className="collapse";
-	  isCollapsed = true;
-       }
-    }
-    -->
-    </script>
-        <a href="javascript:showHideOptional();">Optional Settings </a>
-     <!-- - ---------------------------------------- - -->
+    <a href="javascript:showHide(document.getElementById('optional_div'));">Optional Settings</a>
+	
      <div id="optional_div" class="collapse">
       <table>
 		   

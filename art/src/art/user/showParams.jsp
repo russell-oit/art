@@ -47,8 +47,12 @@ if(queryType==112 || queryType==113 || queryType==114){
 <script type="text/javascript" src="<%= request.getContextPath() %>/js/dhtmlgoodies_calendar/dhtmlgoodies_calendar_js.jsp"></script>
 
 <div id="params">
+	
+	<div>
+		<a href="javascript:showHide(document.getElementById('paramsFieldset'));">+/-</a>
+	</div>
 
-    <fieldset>
+    <fieldset id="paramsFieldset">
         <legend><%=messages.getString("enterParams") %></legend>
 
         <form name="artparameters" id="paramForm" action="<%=action%>"  method="post">
@@ -59,7 +63,7 @@ if(queryType==112 || queryType==113 || queryType==114){
 			<input type="hidden" name="_isInline" id="_isInline" VALUE="true">
 			<%}%>
 			
-            <table class="art" align="center">
+            <table class="art" align="center" id="paramsTable">
                 <tr>
                     <td colspan="4" class="title" >
                          <b><%=queryName%></b> <br>
