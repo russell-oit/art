@@ -54,6 +54,7 @@
 	 String view_modes; //user view modes
 	 String default_max_rows;
 	 String specific_max_rows;
+	 String show_results_inline;
 
 
   ArtSettings as = new ArtSettings();
@@ -200,6 +201,10 @@
 	if(specific_max_rows==null){
 		specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
 	}
+	show_results_inline=as.getSetting("show_results_inline");
+	if(StringUtils.isBlank(show_results_inline)){
+		show_results_inline="yes";
+	}
 
   } else {        
     art_username    = "ART";
@@ -253,6 +258,8 @@
 	view_modes="htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
 	default_max_rows="10000";
 	specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
+	
+	show_results_inline="yes";
 	
     %>
 	
@@ -693,6 +700,20 @@
 			msg ="Set the maximum number of connections a connection pool can open to the same datasource."
 					+ " Further requests are queued.";
 			%>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+	   
+	   <tr>
+        <td class="attr">Show Results Inline</td>
+        <td class="data">
+		<select name="show_results_inline">
+	     <option value="yes" <%= ("yes".equals(show_results_inline)?"SELECTED":"") %> > Yes</option>
+	     <option value="no" <%= ("no".equals(show_results_inline)?"SELECTED":"") %> > No</option>
+	   </select>
+	   <%msg = "Set to Yes to show query results below the parameter selection box" +
+			   " or No to show query results in a new page.";
+	   %>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
        </tr>
