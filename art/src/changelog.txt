@@ -4,6 +4,7 @@ ART 2.6
 * Fix for start query not displaying
 * Fix for invalid drill down queries link
 * Fix for not being able to define email jobs in Italian and Portuguese locales
+* Allow xy chart to have multiple series
 
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified
