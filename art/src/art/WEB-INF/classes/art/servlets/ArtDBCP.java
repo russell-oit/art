@@ -93,7 +93,7 @@ public class ArtDBCP extends HttpServlet {
 	private static String jobsPath;
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
-	public static boolean showResultsInline=true;
+	public static boolean showResultsInline = true;
 
 	/**
 	 * {@inheritDoc}
@@ -139,7 +139,7 @@ public class ArtDBCP extends HttpServlet {
 
 		as = new ArtSettings();
 
-		if (as.load()) { 
+		if (as.load()) {
 			// settings defined
 			art_username = as.getSetting("art_username");
 			art_password = as.getSetting("art_password");
@@ -221,7 +221,7 @@ public class ArtDBCP extends HttpServlet {
 				//invalid number
 				logger.warn("Invalid number for default max rows: {}", defaultMaxRowsString, e);
 			}
-			
+
 			String resultsInline = as.getSetting("show_results_inline");
 			if (StringUtils.equals(resultsInline, "no")) {
 				showResultsInline = false;
@@ -557,11 +557,12 @@ public class ArtDBCP extends HttpServlet {
 	public static boolean isPdfFontEmbedded() {
 		return pdfFontEmbedded;
 	}
-	
+
 	/**
 	 * Determine if query results should be shown on parameters page
 	 *
-	 * @return <code>true</code> if query results should be shown on parameters page
+	 * @return <code>true</code> if query results should be shown on parameters
+	 * page
 	 */
 	public static boolean isShowResultsInline() {
 		return showResultsInline;
@@ -1003,7 +1004,7 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static int getMaxRows(String viewMode) {
 		int max = defaultMaxRows;
-		
+
 		String setting = as.getSetting("specific_max_rows");
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
@@ -1304,6 +1305,20 @@ public class ArtDBCP extends HttpServlet {
 		Random rn = new Random();
 		int range = maximum - minimum + 1;
 		int randomNum = rn.nextInt(range) + minimum;
+
+		return randomNum;
+	}
+
+	/**
+	 * Generate a random number within a given range
+	 *
+	 * @param minimum
+	 * @param maximum
+	 * @return
+	 */
+	public static long getRandomNumber(long minimum, long maximum) {
+		Random rn = new Random();
+		long randomNum = minimum + (long) (rn.nextDouble() * (maximum - minimum));
 
 		return randomNum;
 	}

@@ -147,18 +147,53 @@ if (request.getParameter("bcc").equals("")){
 	String actualHour; //allow hour and minute to be left blank, in which case random values are used
 	String actualMinute; //allow hour and minute to be left blank, in which case random values are used
 
-  minute=job.getMinute().replaceAll(" ", ""); // cron fields shouldn't have any spaces in them
-  actualMinute=minute;
+  actualMinute=job.getMinute().replaceAll(" ", ""); // cron fields shouldn't have any spaces in them
+  minute=actualMinute;
+  actualHour=job.getHour().replaceAll(" ", "");
+	hour=actualHour;
+	
+	//enable definition of random start time
+	if(actualHour.indexOf("|")>-1){
+		String startPart=StringUtils.substringBefore(actualHour, "|");
+		String endPart=StringUtils.substringAfter(actualHour, "|");
+		String startHour=StringUtils.substringBefore(startPart, ":");
+		String startMinute=StringUtils.substringAfter(startPart, ":");
+		String endHour=StringUtils.substringBefore(endPart, ":");
+		String endMinute=StringUtils.substringAfter(endPart, ":");
+		
+		if(StringUtils.isBlank(startMinute)){
+			startMinute="0";
+		}
+		if(StringUtils.isBlank(endMinute)){
+			endMinute="59";
+		}
+		
+		java.util.Calendar calStart = java.util.Calendar.getInstance();
+		java.util.Calendar calEnd = java.util.Calendar.getInstance();
+		java.util.Date now = new java.util.Date();
+		calStart.setTime(now);
+		calEnd.setTime(now);
+		calStart.set(java.util.Calendar.HOUR_OF_DAY, Integer.parseInt(startHour));
+		calStart.set(java.util.Calendar.MINUTE, Integer.parseInt(startMinute));
+		calEnd.set(java.util.Calendar.HOUR_OF_DAY, Integer.parseInt(endHour));
+		calEnd.set(java.util.Calendar.MINUTE, Integer.parseInt(endMinute));
+		
+		long randomDate=ArtDBCP.getRandomNumber(calStart.getTimeInMillis(), calEnd.getTimeInMillis());
+		java.util.Calendar calRandom = java.util.Calendar.getInstance();
+		calRandom.setTimeInMillis(randomDate);
+		
+		hour=String.valueOf(calRandom.get(java.util.Calendar.HOUR_OF_DAY));
+		minute=String.valueOf(calRandom.get(java.util.Calendar.MINUTE));
+	}
+	
   if (minute.length()==0){
 	//no minute defined. use random value
 	minute=String.valueOf(ArtDBCP.getRandomNumber(0, 59));
 	}
 
-	hour=job.getHour().replaceAll(" ", "");
-	actualHour=hour;
   if (hour.length()==0){
 	//no hour defined. use random value
-	hour=String.valueOf(ArtDBCP.getRandomNumber(3, 7));
+	hour=String.valueOf(ArtDBCP.getRandomNumber(3, 6));
 	}
 
 	month=job.getMonth().replaceAll(" ", "");

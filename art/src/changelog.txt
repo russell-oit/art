@@ -8,6 +8,7 @@ ART 2.5.1
 * Allow xy chart to have multiple series
 * Have show results inline as an application setting
 * Enable show/hide of parameters box
+* Allow specification of random start time for jobs 
 
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified
