@@ -29,10 +29,7 @@ if(queryType==110){
 int accessLevel=ue.getAccessLevel();
 boolean hasParams=false;
 
-boolean showResultsInline=false; 
-if(StringUtils.equals(ArtDBCP.getArtSetting("show_results_inline"), "yes")){
-	showResultsInline=true;
-}
+boolean showResultsInline=ArtDBCP.isShowResultsInline(); 
 
 //pivot tables never shown inline
 if(queryType==112 || queryType==113 || queryType==114){

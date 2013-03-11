@@ -93,6 +93,7 @@ public class ArtDBCP extends HttpServlet {
 	private static String jobsPath;
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
+	public static boolean showResultsInline=true;
 
 	/**
 	 * {@inheritDoc}
@@ -219,6 +220,13 @@ public class ArtDBCP extends HttpServlet {
 			} catch (NumberFormatException e) {
 				//invalid number
 				logger.warn("Invalid number for default max rows: {}", defaultMaxRowsString, e);
+			}
+			
+			String resultsInline = as.getSetting("show_results_inline");
+			if (StringUtils.equals(resultsInline, "no")) {
+				showResultsInline = false;
+			} else {
+				showResultsInline = true;
 			}
 
 			artSettingsLoaded = true;
@@ -548,6 +556,15 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static boolean isPdfFontEmbedded() {
 		return pdfFontEmbedded;
+	}
+	
+	/**
+	 * Determine if query results should be shown on parameters page
+	 *
+	 * @return <code>true</code> if query results should be shown on parameters page
+	 */
+	public static boolean isShowResultsInline() {
+		return showResultsInline;
 	}
 
 	/**
