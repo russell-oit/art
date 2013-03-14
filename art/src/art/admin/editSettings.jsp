@@ -55,6 +55,7 @@
 	 String default_max_rows;
 	 String specific_max_rows;
 	 String show_results_inline;
+	 String null_value_enabled;
 
 
   ArtSettings as = new ArtSettings();
@@ -205,6 +206,10 @@
 	if(StringUtils.isBlank(show_results_inline)){
 		show_results_inline="yes";
 	}
+	null_value_enabled=as.getSetting("null_value_enabled");
+	if(null_value_enabled==null){
+		null_value_enabled="yes";
+	}
 
   } else {        
     art_username    = "ART";
@@ -260,6 +265,7 @@
 	specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
 	
 	show_results_inline="yes";
+	null_value_enabled="yes";
 	
     %>
 	
@@ -698,6 +704,18 @@
 	   <%msg = "Set to Yes to show query results below the parameter selection box" +
 			   " or No to show query results in a new page.";
 	   %>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+		</td>
+       </tr>
+	   
+	   <tr>
+        <td class="attr">Display Null Value</td>
+        <td class="data">
+			<select name="null_value_enabled">
+				<option value="yes"   <%= (null_value_enabled.equals("yes")?"selected":"") %>  >Yes </option>
+				<option value="no"  <%= (null_value_enabled.equals("no")?"selected":"") %> >No</option>
+			</select>
+			<%msg = "When set to Yes, null is displayed for report fields that are null. When set to No, a blank space is displayed instead of null. This only applies for varchar fields."; %>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
        </tr>

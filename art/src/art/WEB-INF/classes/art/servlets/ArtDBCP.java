@@ -94,6 +94,7 @@ public class ArtDBCP extends HttpServlet {
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
 	public static boolean showResultsInline = true;
+	private static boolean nullValueEnabled = true;
 
 	/**
 	 * {@inheritDoc}
@@ -227,6 +228,12 @@ public class ArtDBCP extends HttpServlet {
 				showResultsInline = false;
 			} else {
 				showResultsInline = true;
+			}
+			String nullValue = as.getSetting("null_value_enabled");
+			if (StringUtils.equals(nullValue, "no")) {
+				nullValueEnabled = false;
+			} else {
+				nullValueEnabled = true;
 			}
 
 			artSettingsLoaded = true;
@@ -566,6 +573,15 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static boolean isShowResultsInline() {
 		return showResultsInline;
+	}
+	
+	/**
+	 * Determine if displaying null value is enabled.
+	 *
+	 * @return <code>true</code> if displaying null value is enabled
+	 */
+	public static boolean isNullValueEnabled() {
+		return nullValueEnabled;
 	}
 
 	/**

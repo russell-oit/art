@@ -26,6 +26,7 @@
  */
 package art.output;
 
+import art.servlets.ArtDBCP;
 import art.utils.ArtException;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
@@ -142,6 +143,11 @@ public class ArtOutHandler {
 
 		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
 		HashMap<String, String> params = new HashMap<String, String>();
+		
+		//checking to see if Display Null Value optional setting is set to "No"
+		if (!ArtDBCP.isNullValueEnabled()) { //setting set to "No"
+			o = new hideNullOutput(o);
+		}
 
 		while (rs.next()) {
 			if (!o.newLine()) {

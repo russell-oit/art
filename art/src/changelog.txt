@@ -1,6 +1,7 @@
 ART 2.5.1
 * Added Portuguese translation (thanks to Edson Richter)
 * Updated French translation (thanks to Eric Lemesre)
+* Enable display of blank space instead of "null" for null fields (thanks to ckb)
 * Fix for query name truncated to 25 characters
 * Fix for start query not displaying
 * Fix for invalid drill down queries link

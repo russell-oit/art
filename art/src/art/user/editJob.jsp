@@ -165,7 +165,7 @@ if (request.getParameter("bcc").equals("")){
 			startMinute="0";
 		}
 		if(StringUtils.isBlank(endMinute)){
-			endMinute="59";
+			endMinute="0";
 		}
 		
 		java.util.Calendar calStart = java.util.Calendar.getInstance();
