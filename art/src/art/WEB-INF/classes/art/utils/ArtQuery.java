@@ -21,8 +21,8 @@ public class ArtQuery {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtQuery.class);
 	final int MAX_RECURSIVE_LOOKUP = 20;
-	final int MAX_GRAPH_WIDTH = 1200;
-	final int MAX_GRAPH_HEIGHT = 1200;
+	final int MAX_GRAPH_WIDTH = 2048; //max width allowed by cewolf is 2048
+	final int MAX_GRAPH_HEIGHT = 1024; //max height allowed by cewolf is 1024
 	final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds query source
 	String name = "";
 	String shortDescription = "";
