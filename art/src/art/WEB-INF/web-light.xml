@@ -96,6 +96,14 @@
             <param-name>storage</param-name>
             <param-value>de.laures.cewolf.storage.TransientSessionStorage</param-value>
         </init-param>
+		<init-param>
+            <param-name>maxImageWidth</param-name>
+            <param-value>2048</param-value>
+        </init-param>
+		<init-param>
+            <param-name>maxImageHeight</param-name>
+            <param-value>1024</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
