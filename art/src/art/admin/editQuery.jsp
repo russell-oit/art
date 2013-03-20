@@ -595,18 +595,25 @@ tinyMCE.init({
 
 					<br><br>
 					Width
-					<input type="text" name="graph_width" value=<%=aq.getGraphWidth()%> size="3" maxlength="4">
+					<input type="text" name="graph_width" value=<%=aq.getGraphWidth()%> size="4" maxlength="4">
 					Height
-					<input type="text" name="graph_height" value=<%=aq.getGraphHeight()%> size="3" maxlength="4">
+					<input type="text" name="graph_height" value=<%=aq.getGraphHeight()%> size="4" maxlength="4">
 					&nbsp;&nbsp;Back Color
-					<input type="text" name="graph_bgcolor" value=<%=aq.getGraphBgColor()%> size="6" maxlength="7">
+					<input type="text" name="graph_bgcolor" value=<%=aq.getGraphBgColor()%> size="7" maxlength="7">
 
 					<br><br>
 					y-axis Min
-					<input type="text" name="graph_ymin" value=<%=aq.getGraphYMin()%> size="5" maxlength="10">
+					<input type="text" name="graph_ymin" value=<%=aq.getGraphYMin()%> size="5" maxlength="15">
 					y-axis Max
-					<input type="text" name="graph_ymax" value=<%=aq.getGraphYMax()%> size="5" maxlength="10">
+					<input type="text" name="graph_ymax" value=<%=aq.getGraphYMax()%> size="5" maxlength="15">
 					<input type="button" class="buttonup" onclick="javascript:alert('Leave y-axis min and max values as 0 to use the full data range of the result set')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
+					
+					<br><br>
+					Rotate x-axis labels at
+					<input type="text" name="graph_rotate_at" value=<%=aq.getGraphRotateAt()%> size="4" maxlength="4">
+					Remove x-axis labels at
+					<input type="text" name="graph_remove_at" value=<%=aq.getGraphRemoveAt()%> size="4" maxlength="4">
+					<input type="button" class="buttonup" onclick="javascript:alert('Rotate or remove x-axis labels when graph contains this number of series')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 				</div>
 			</td>
 		</tr>

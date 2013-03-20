@@ -299,6 +299,11 @@ public class QueryExecute extends HttpServlet {
 		boolean showLabels = aq.isShowLabels();
 		boolean showPoints = aq.isShowPoints();
 		boolean showGraphData = aq.isShowGraphData();
+		int rotateAt = aq.getGraphRotateAt();
+		int removeAt = aq.getGraphRemoveAt();
+		
+		request.setAttribute("_rotate_at", String.valueOf(rotateAt));
+		request.setAttribute("_remove_at", String.valueOf(removeAt));
 
 		if (yMin < yMax) {
 			request.setAttribute("_from", Double.valueOf(yMin));

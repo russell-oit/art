@@ -10,6 +10,7 @@ ART 2.5.1
 * Have show results inline as an application setting
 * Enable show/hide of parameters box
 * Allow specification of random start time for jobs 
+* Made graph x-axis label rotate and remove options configurable per query
 
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified

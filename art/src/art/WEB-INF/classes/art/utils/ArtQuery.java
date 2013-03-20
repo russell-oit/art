@@ -61,11 +61,41 @@ public class ArtQuery {
 	String username;
 	String groupName;
 	private int displayResultset;
+	private int graphRotateAt; //display x-axis labels vertically when graph has this number of categories
+	private int graphRemoveAt; //omit x-axis labels when graph has this number of categories
 
 	/**
 	 *
 	 */
 	public ArtQuery() {
+	}
+
+	/**
+	 * @return the graphRotateAt
+	 */
+	public int getGraphRotateAt() {
+		return graphRotateAt;
+	}
+
+	/**
+	 * @param graphRotateAt the graphRotateAt to set
+	 */
+	public void setGraphRotateAt(int graphRotateAt) {
+		this.graphRotateAt = graphRotateAt;
+	}
+
+	/**
+	 * @return the graphRemoveAt
+	 */
+	public int getGraphRemoveAt() {
+		return graphRemoveAt;
+	}
+
+	/**
+	 * @param graphRemoveAt the graphRemoveAt to set
+	 */
+	public void setGraphRemoveAt(int graphRemoveAt) {
+		this.graphRemoveAt = graphRemoveAt;
 	}
 
 	/**
@@ -1098,24 +1128,30 @@ public class ArtQuery {
 				String token;
 				while (st.hasMoreTokens()) {
 					token = st.nextToken();
-
-					if (token.toLowerCase().startsWith("noleg")) {
+					
+					if(token.startsWith("rotate_at")){
+						String tmp=StringUtils.substringAfter(token, ":");
+						graphRotateAt=Integer.parseInt(tmp);
+					} else if (token.startsWith("remove_at")){
+						String tmp=StringUtils.substringAfter(token, ":");
+						graphRemoveAt=Integer.parseInt(tmp);
+					} else if (token.startsWith("noleg")) {
 						showLegend = false;
-					} else if (token.toLowerCase().startsWith("showlegend")) {
+					} else if (token.startsWith("showlegend")) {
 						showLegend = true;
-					} else if (token.toLowerCase().startsWith("nolab")) {
+					} else if (token.startsWith("nolab")) {
 						showLabels = false;
-					} else if (token.toLowerCase().startsWith("showlabels")) {
+					} else if (token.startsWith("showlabels")) {
 						showLabels = true;
-					} else if (token.toLowerCase().startsWith("showpoints")) {
+					} else if (token.startsWith("showpoints")) {
 						showPoints = true;
-					} else if (token.toLowerCase().startsWith("showdata")) {
+					} else if (token.startsWith("showdata")) {
 						showGraphData = true;
-					} else if (token.indexOf("x") != -1) {
+					} else if (token.indexOf("x") != -1) { //must come after named options e.g. rotate_at
 						int idx = token.indexOf("x");
 						graphWidth = Integer.parseInt(token.substring(0, idx));
 						graphHeight = Integer.parseInt(token.substring(idx + 1));
-					} else if (token.indexOf(":") != -1) {
+					} else if (token.indexOf(":") != -1) { //must come after named options e.g. rotate_at
 						int idx = token.indexOf(":");
 						graphYMin = Double.parseDouble(token.substring(0, idx));
 						graphYMax = Double.parseDouble(token.substring(idx + 1));

@@ -41,6 +41,8 @@
 	String showGraphData = "";
 	String graphYMin = "";
 	String graphYMax = "";
+	String graphRotateAt = "0";
+	String graphRemoveAt = "0";
 
 	FileItem uploadItem = null;
 	long uploadSize = 0;
@@ -134,7 +136,15 @@
 					if(NumberUtils.isNumber(fieldValue)){
 						displayResultset=Integer.parseInt(fieldValue);
 					}
-				}
+				} else if (fieldName.equals("graph_rotate_at")) {
+					if(NumberUtils.isNumber(fieldValue)){
+						graphRotateAt = fieldValue;
+					}
+				} else if (fieldName.equals("graph_remove_at")) {
+					if(NumberUtils.isNumber(fieldValue)){
+						graphRemoveAt = fieldValue;
+					}
+				} 
 			} else {
 				//file upload field
 				if (fieldName.equals("template")) {
@@ -247,7 +257,9 @@
 				//build graph options string
 				String graphSize = graphWidth + "x" + graphHeight;
 				String graphRange = graphYMin + ":" + graphYMax;
-				String graphOptions = graphSize + " " + graphRange + " " + graphBgColor + " " + showLegend + " " + showLabels + " " + showDataPoints + " " + showGraphData;
+				String graphOptions = graphSize + " " + graphRange + " " + graphBgColor
+						+ " " + showLegend + " " + showLabels + " " + showDataPoints + " " + showGraphData
+						+ " rotate_at:" + graphRotateAt + " remove_at:" + graphRemoveAt;
 				aq.setGraphOptions(graphOptions);
 			}
 

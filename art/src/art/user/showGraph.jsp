@@ -47,6 +47,10 @@
    // y axis data range
   Double from = (Double) request.getAttribute("_from");
   Double to = (Double) request.getAttribute("_to");
+  
+  //x-axis label handling
+  String rotateAt = (String) request.getAttribute("_rotate_at"); //cewolf expects a string object
+  String removeAt = (String) request.getAttribute("_remove_at"); //cewolf expects a string object
     
   // legend
   boolean showLegend = true;
@@ -193,10 +197,6 @@ if(showParams){
 if (showSQL) {
 	ArtOutHandler.displayFinalSQL(htmlout, finalSQL);
 }
-
-//set values for axis label rotate and remove options. use variables to prevent error with java 1.7
-String rotateAt="5";
-String removeAt="10000";
 
 %>
 
