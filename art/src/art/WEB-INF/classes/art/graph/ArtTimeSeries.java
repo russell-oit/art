@@ -312,7 +312,7 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
             TimeSeries ts[] = new TimeSeries[series];
             for (int i = 0; i < series; i++) {
                 seriesNames[i] = rsmd.getColumnLabel(i + 2 + hop);
-                ts[i] = new TimeSeries(seriesNames[i], Millisecond.class);
+                ts[i] = new TimeSeries(seriesNames[i]);
             }
 
             while (rs.next()) {
@@ -438,7 +438,7 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
                 } else { // new series 
                     seriesId = series;
                     hm.put(tmpSeriesName, Integer.valueOf(seriesId)); // map series name to array id
-                    ts[seriesId] = new TimeSeries(tmpSeriesName, Millisecond.class); // initialize new timeseries
+                    ts[seriesId] = new TimeSeries(tmpSeriesName); // initialize new timeseries
                     //insert value
                     series++;
                 }
