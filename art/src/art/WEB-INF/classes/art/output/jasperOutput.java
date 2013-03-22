@@ -10,13 +10,12 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.design.JRDesignBand;
-import net.sf.jasperreports.engine.design.JRDesignSubreport;
-import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRXhtmlExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
@@ -25,8 +24,10 @@ import net.sf.jasperreports.engine.fill.JRAbstractLRUVirtualizer;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import net.sf.jasperreports.engine.fill.JRGzipVirtualizer;
 import net.sf.jasperreports.engine.fill.JRSwapFileVirtualizer;
+import net.sf.jasperreports.engine.util.JRElementsVisitor;
+import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSwapFile;
-import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import net.sf.jasperreports.engine.util.JRVisitorSupport;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -50,6 +51,7 @@ public class jasperOutput {
 	String exportPath;
 	String virtualizer = "swap";
 	PrintWriter htmlout;
+	private List<String> completedSubReports = new ArrayList<String>(30);
 
 	/**
 	 * Set html output object
@@ -154,11 +156,11 @@ public class jasperOutput {
 			}
 
 			String templatesPath = ArtDBCP.getTemplatesPath();
-			String jasperFileName = templatesPath + baseFileName + ".jasper";
-			String jrxmlFileName = templatesPath + baseFileName + ".jrxml";
+			String jasperFilePath = templatesPath + baseFileName + ".jasper";
+			String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
 
-			File jasperFile = new File(jasperFileName);
-			File jrxmlFile = new File(jrxmlFileName);
+			File jasperFile = new File(jasperFilePath);
+			File jrxmlFile = new File(jrxmlFilePath);
 
 			String interactiveLink;
 
@@ -172,27 +174,8 @@ public class jasperOutput {
 				//display error message instead of link when running query interactively
 				interactiveLink = "Template file not found. Please contact the ART administrator.";
 			} else {
-				if (!jasperFile.exists() || (jasperFile.lastModified() < jrxmlFile.lastModified())) {
-					//compile jrxml file to generate jasper file if it doesn't exist or recompile it if jrxml is newer than jasper file
-					jasperFileName = JasperCompileManager.compileReportToFile(jrxmlFileName);
-
-					//compile subreports. only checks for subreports in the first detail band
-					JasperDesign reportDesign;
-					reportDesign = JRXmlLoader.load(jrxmlFileName);
-					if (reportDesign.getDetailSection() != null && reportDesign.getDetailSection().getBands() != null && reportDesign.getDetailSection().getBands().length > 0) {
-						JRDesignBand detailBand = (JRDesignBand) reportDesign.getDetailSection().getBands()[0];
-						JRElement[] jrElements = detailBand.getElements();
-						for (JRElement jrElement : jrElements) {
-							if (jrElement instanceof JRDesignSubreport) {
-								JRDesignSubreport subReportDesign = (JRDesignSubreport) jrElement;
-								JRExpression jrExpression = subReportDesign.getExpression();
-								String file = jrExpression.getText();
-								file = file.substring(1, file.length() - 8) + ".jrxml"; //assumes subreport expression is something like "subreport.jasper"
-								JasperCompileManager.compileReportToFile(templatesPath + file);
-							}
-						}
-					}
-				}
+				//compile report and subreports if necessary
+				compileReport(baseFileName);
 
 				//set report parameters
 				Map<String, Object> params = new HashMap<String, Object>();
@@ -307,12 +290,12 @@ public class jasperOutput {
 						//not using dynamic datasource. use datasource defined on the query
 						connQuery = ArtDBCP.getConnection(datasourceId);
 					}
-					jasperPrint = JasperFillManager.fillReport(jasperFileName, params, connQuery);
+					jasperPrint = JasperFillManager.fillReport(jasperFilePath, params, connQuery);
 				} else {
 					//use recordset based on art query
 					JRResultSetDataSource ds;
 					ds = new JRResultSetDataSource(rs);
-					jasperPrint = JasperFillManager.fillReport(jasperFileName, params, ds);
+					jasperPrint = JasperFillManager.fillReport(jasperFilePath, params, ds);
 				}
 
 				//set virtualizer read only to optimize performance. must be set after print object has been generated
@@ -409,6 +392,50 @@ public class jasperOutput {
 			} catch (Exception e) {
 				logger.error("Error", e);
 			}
+		}
+	}
+
+	/**
+	 * Recursively compile report and subreports
+	 */
+	public void compileReport(String baseFileName) {
+
+		try {
+			String templatesPath = ArtDBCP.getTemplatesPath();
+			String jasperFilePath = templatesPath + baseFileName + ".jasper";
+			String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
+
+			File jasperFile = new File(jasperFilePath);
+			File jrxmlFile = new File(jrxmlFilePath);
+
+			//compile report if .jasper doesn't exist or is outdated
+			if (!jasperFile.exists() || (jasperFile.lastModified() < jrxmlFile.lastModified())) {
+				JasperCompileManager.compileReportToFile(jrxmlFilePath, jasperFilePath);
+			}
+			//load report object
+			JasperReport jasperReport = (JasperReport) JRLoader.loadObjectFromFile(jasperFilePath);
+
+			//Compile sub reports
+			JRElementsVisitor.visitReport(jasperReport, new JRVisitorSupport() {
+				@Override
+				public void visitSubreport(JRSubreport subreport) {
+					try {
+						String subReportName = subreport.getExpression().getText().replace(".jasper", "").replace("\"", "");
+						//Sometimes the same subreport can be used multiple times, but
+						//there is no need to compile multiple times
+						if (completedSubReports.contains(subReportName)) {
+							return;
+						}
+						completedSubReports.add(subReportName);
+						compileReport(subReportName);
+					} catch (Exception e) {
+						logger.error("Error", e);
+					}
+				}
+			});
+
+		} catch (Exception e) {
+			logger.error("Error", e);
 		}
 	}
 }

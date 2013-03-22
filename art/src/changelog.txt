@@ -12,6 +12,8 @@ ART 2.5.1
 * Enable show/hide of parameters box
 * Allow specification of random start time for jobs 
 * Made graph x-axis label rotate and remove options configurable per query
+* Automatically compile all subreports in a jasper report
+* Updated jasperreports to 5.0.1
 
 ART 2.5
 * Fix for invalid publish job link on linux when reminder email specified
