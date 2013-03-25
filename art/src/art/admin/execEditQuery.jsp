@@ -1,3 +1,4 @@
+<%@page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.apache.commons.lang.math.NumberUtils"%>
 <%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP, java.util.*, java.io.File" %>
 <%@ page import="org.apache.commons.fileupload.*, org.apache.commons.fileupload.servlet.ServletFileUpload" %>
@@ -51,6 +52,12 @@
 	int MAX_UPLOAD_SIZE = 2000000; //approximately 2MB
 	boolean fileUploaded = false;
 	String templateFileName = ""; //allows typing of filename instead of re-uploading an existing template
+	
+	FileItem subreportUploadItem = null;
+	long subreportUploadSize = 0;
+	String subreportFileName = "";
+	String subreportFilePath = "";
+	boolean subreportFileUploaded = false;
     
     String showParameters="";
 	int displayResultset=0;
@@ -152,6 +159,11 @@
 					uploadSize = uploadItem.getSize();
 					filePath = uploadItem.getName(); //may be only a file name or the full path of the file on the client machine (depending on the browser)
 					fileName = FilenameUtils.getName(filePath);
+				} else if (fieldName.equals("subreport")) {
+					subreportUploadItem = fileItem;
+					subreportUploadSize = subreportUploadItem.getSize();
+					subreportFilePath = subreportUploadItem.getName(); 
+					subreportFileName = FilenameUtils.getName(subreportFilePath);
 				}
 			}
 		}
@@ -166,7 +178,7 @@
 </jsp:forward>
 <%		}
 
-	if (uploadSize > MAX_UPLOAD_SIZE) {
+	if (uploadSize > MAX_UPLOAD_SIZE || subreportUploadSize > MAX_UPLOAD_SIZE) {
 %>
 <jsp:forward page="error.jsp">
 	<jsp:param name="MOD" value="Execute Update Query"/>
@@ -177,31 +189,30 @@
 <%		}
 	
 	//check upload file type
-	if(fileName.length()>0){
-		String extension="";
-		int index = fileName.lastIndexOf(".");
-		if (index > -1) {
-			extension = fileName.substring(index);
-			extension=extension.toLowerCase();
-		}
+	List<String> validExtensions=new ArrayList<String>();
+	validExtensions.add("xml");
+	validExtensions.add("jrxml");
+	validExtensions.add("jasper");
+	validExtensions.add("xls");
+	validExtensions.add("xlsx");
+	
+	List<String> subreportValidExtensions=new ArrayList<String>();
+	subreportValidExtensions.add("jrxml");
+	subreportValidExtensions.add("jasper");
 		
-		List<String> validExtensions=new ArrayList<String>();
-		validExtensions.add(".xml");
-		validExtensions.add(".jrxml");
-		validExtensions.add(".jasper");
-		validExtensions.add(".xls");
-		validExtensions.add(".xlsx");
+	String extension=StringUtils.substringAfterLast(fileName, ".").toLowerCase();
+	String subreportExtension=StringUtils.substringAfterLast(subreportFileName, ".").toLowerCase();
 		
-			if (!validExtensions.contains(extension)) {
-		%>
-		<jsp:forward page="error.jsp">
-			<jsp:param name="MOD" value="Execute Update Query"/>
-			<jsp:param name="ACT" value="Template type"/>
-			<jsp:param name="MSG" value="Invalid template file type. Please upload a different file."/>
-			<jsp:param name="NUM" value="0"/>
-		</jsp:forward>
-		<%		}
-	}
+	if ((fileName.length()>0 && !validExtensions.contains(extension))
+	|| (subreportFileName.length()>0 && !subreportValidExtensions.contains(subreportExtension))) {
+%>
+<jsp:forward page="error.jsp">
+	<jsp:param name="MOD" value="Execute Update Query"/>
+	<jsp:param name="ACT" value="Template type"/>
+	<jsp:param name="MSG" value="Invalid template file type"/>
+	<jsp:param name="NUM" value="0"/>
+</jsp:forward>
+<%		}
 
 	Connection conn = (Connection) session.getAttribute("SessionConn");
 	if (conn == null || conn.isClosed()) {
@@ -282,6 +293,16 @@
 				//no upload. just set file name
 				aq.setTemplate(templateFileName);
 			}
+			
+			//upload subreport file if applicable
+			File subreportDestinationFile;
+			String subreportDestinationFileName;
+			if (subreportUploadSize > 0 && subreportUploadSize < MAX_UPLOAD_SIZE) {
+				subreportDestinationFileName = ArtDBCP.getTemplatesPath() + subreportFileName;
+				subreportDestinationFile = new File(subreportDestinationFileName);
+				subreportUploadItem.write(subreportDestinationFile);
+				subreportFileUploaded = true;
+			}
 
 			//save
 			if (MODIFY) {
@@ -294,12 +315,18 @@
 
 			conn.commit();
 
-			//log file upload
+			//log template file upload
 			if (fileUploaded) {
-				//log upload
 				String username = (String) session.getAttribute("username");
 				String ip = request.getRemoteAddr();
 				String msg = "size=" + uploadSize + ", file=" + fileName + ", path=" + filePath;				
+				ArtDBCP.log(username, "upload", ip, queryId, 0, 0, msg);
+			}
+			//log subreport file upload
+			if (subreportFileUploaded) {
+				String username = (String) session.getAttribute("username");
+				String ip = request.getRemoteAddr();
+				String msg = "size=" + subreportUploadSize + ", file=" + subreportFileName + ", path=" + subreportFilePath;				
 				ArtDBCP.log(username, "upload", ip, queryId, 0, 0, msg);
 			}
 

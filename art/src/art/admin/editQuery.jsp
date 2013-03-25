@@ -628,8 +628,16 @@ tinyMCE.init({
 				<input type="text" name="template_filename" size="30" maxlength="100" value="<%=aq.getTemplate()%>"> <br>
 				<input type="file" name="template" id="template" size="40">
 				<%
-				helpText="Select the path of the mondrian schema xml file or jasper reports file or jXLS template file to use. "
+				helpText="Select the path of the mondrian schema xml file, jasper reports file or jXLS template file to use. "
 						+"Alternatively, type the file name in the textbox above to reuse an already uploaded file.";
+				%>
+				<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
+				<br><br>
+				Subreport <br>
+				<input type="file" name="subreport" id="subreport" size="40">
+				<%
+				helpText="For jasper reports, if your main report uses a subreport, "
+						+"you can use this field to upload the subreport file.";
 				%>
 				<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 			</div>
