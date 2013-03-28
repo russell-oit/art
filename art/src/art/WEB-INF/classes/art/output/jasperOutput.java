@@ -51,7 +51,7 @@ public class jasperOutput {
 	String exportPath;
 	String virtualizer = "swap";
 	PrintWriter htmlout;
-	private List<String> completedSubReports = new ArrayList<String>(30);
+	private List<String> completedSubReports = new ArrayList<String>();
 
 	/**
 	 * Set html output object
@@ -420,14 +420,15 @@ public class jasperOutput {
 				@Override
 				public void visitSubreport(JRSubreport subreport) {
 					try {
-						String subReportName = subreport.getExpression().getText().replace(".jasper", "").replace("\"", "");
+						String subreportName = subreport.getExpression().getText().replace("\"", ""); //file name is quoted
+						subreportName=StringUtils.substringBeforeLast(subreportName, ".");
 						//Sometimes the same subreport can be used multiple times, but
 						//there is no need to compile multiple times
-						if (completedSubReports.contains(subReportName)) {
+						if (completedSubReports.contains(subreportName)) {
 							return;
 						}
-						completedSubReports.add(subReportName);
-						compileReport(subReportName);
+						completedSubReports.add(subreportName);
+						compileReport(subreportName);
 					} catch (Exception e) {
 						logger.error("Error", e);
 					}

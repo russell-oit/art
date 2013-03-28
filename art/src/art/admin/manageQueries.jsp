@@ -16,7 +16,6 @@
     }
     
     function deleteQuery() {
-
         if ( document.getElementById("queryId").value > 0 ) {
             if (window.confirm("Do you really want to delete the selected queries?")) {
                 document.manageQueries.action="execManageQueries.jsp";
@@ -24,17 +23,38 @@
                 document.manageQueries.submit();
             }
         } else {
-            alert("Please select a query");
+            alert("Please select at leaset one query");
         }
- 
+    }
+	
+	function moveQuery() {
+        if ( document.getElementById("queryId").value > 0 && document.getElementById("newGroupId").value > 0 ) {
+			document.manageQueries.action="execManageQueries.jsp";
+			document.manageQueries.QUERYACTION.value="MOVE";
+			document.manageQueries.submit();
+        } else {
+            alert("Please select at leaset one query and specify the new query group");
+        }
     }
 
     function copyQuery() {
         if(countSelected(document.getElementById("queryId"))>1){
             alert("Please select a single query");
-        } else if ( document.getElementById("queryId").value > 0 && document.getElementById("newName").value != "" && document.getElementById("newName").value != "New Name") {
+        } else if ( document.getElementById("queryId").value > 0 && document.getElementById("copyName").value != "" && document.getElementById("copyName").value != "New Name") {
             document.manageQueries.action="execManageQueries.jsp";
             document.manageQueries.QUERYACTION.value="COPY";
+            document.manageQueries.submit();
+        } else {
+            alert("Please select a query and specify a new name for it");
+        }
+    }
+	
+	function renameQuery() {
+        if(countSelected(document.getElementById("queryId"))>1){
+            alert("Please select a single query");
+        } else if ( document.getElementById("queryId").value > 0 && document.getElementById("newName").value != "" && document.getElementById("newName").value != "New Name") {
+            document.manageQueries.action="execManageQueries.jsp";
+            document.manageQueries.QUERYACTION.value="RENAME";
             document.manageQueries.submit();
         } else {
             alert("Please select a query and specify a new name for it");
@@ -68,6 +88,10 @@
             document.getElementById("groupId").options[i].selected = false
             document.getElementById("groupId").selectedIndex = 0;
         }
+		for (var i=0; i<document.getElementById("newGroupId").length; i++) {
+            document.getElementById("newGroupId").options[i].selected = false
+            document.getElementById("newGroupId").selectedIndex = 0;
+        }
     }
 	
     //void the group selection when page has finished to load
@@ -76,6 +100,15 @@
     window.onload = voidGroupSelection;   
 
 </script>
+
+<%
+int accessLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
+String username=(String) session.getAttribute("AdminUsername");
+
+ArtQuery aq=new ArtQuery();
+Map<String, QueryGroup> groups=aq.getAdminQueryGroups(accessLevel,username);
+int queryGroupId;
+%>					
 
 
 <form name="manageQueries" method="post">
@@ -104,13 +137,6 @@
                 <select id="groupId" name="GROUP_ID">
                     <option value="-1">Select Group</option>
                     <%
-                    int accessLevel = ((Integer) session.getAttribute("AdminLevel")).intValue();
-					String username=(String) session.getAttribute("AdminUsername");
-																									
-					ArtQuery aq=new ArtQuery();
-					Map<String, QueryGroup> groups=aq.getAdminQueryGroups(accessLevel,username);
-					int queryGroupId; 
-					
 					for (Map.Entry<String, QueryGroup> entry : groups.entrySet()) {
 						QueryGroup qg=entry.getValue();
                         queryGroupId=qg.getGroupId();						
@@ -121,7 +147,6 @@
 						<%
 					 }                 
                     %>
-					                   
                 </select>
 
                 <br>
@@ -148,10 +173,39 @@
         </tr>
         <tr>
             <td align="right" width="70%">
-				<input type="text" size="30"  maxlength="50" value="New Name" name="NEW_QUERY_NAME" id="newName">
+				<input type="text" size="30"  maxlength="50" value="New Name" name="COPY_QUERY_NAME" id="copyName">
 			</td>
             <td align="left">
 				<input type="button" onclick="copyQuery()" value="Copy">
+			</td>
+        </tr>
+		<tr>
+            <td align="right" width="70%">
+				<input type="text" size="30"  maxlength="50" value="New Name" name="NEW_QUERY_NAME" id="newName">
+			</td>
+            <td align="left">
+				<input type="button" onclick="renameQuery()" value="Rename">
+			</td>
+        </tr>
+		<tr>
+            <td align="right" width="70%">
+				<select id="newGroupId" name="NEW_GROUP_ID">
+                    <option value="-1">New Group</option>
+                    <%
+					for (Map.Entry<String, QueryGroup> entry : groups.entrySet()) {
+						QueryGroup qg=entry.getValue();
+                        queryGroupId=qg.getGroupId();						
+						%>
+						<option value="<%=queryGroupId%>">
+							<%=qg.getName()%>
+						</option>
+						<%
+					 }                 
+                    %>
+                </select>
+			</td>
+            <td align="left">
+				<input type="button" onclick="moveQuery()" value="Move">
 			</td>
         </tr>
 

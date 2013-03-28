@@ -7,20 +7,22 @@ String action = request.getParameter("QUERYACTION");
 
 ArtQuery aq=new ArtQuery();
 
-int id;
 String[] queryIds = request.getParameterValues("QUERY_ID");
-List<String> ids=Arrays.asList(queryIds);
 
 if (action.equals("DELETE")){
-    for(String value : ids) {
-        id=Integer.parseInt(value);
-        aq.setQueryId(id);
+    for(String value : queryIds) {
+        aq.setQueryId(Integer.parseInt(value));
         aq.delete();
     }	
 } else if (action.equals("COPY")){
-    id=Integer.parseInt(ids.get(0));
-    aq.setQueryId(id);
-	aq.copy(request.getParameter("NEW_QUERY_NAME"));
+    aq.setQueryId(Integer.parseInt(queryIds[0]));
+	aq.copy(request.getParameter("COPY_QUERY_NAME"));
+} else if (action.equals("RENAME")){
+    aq.setQueryId(Integer.parseInt(queryIds[0]));
+	aq.rename(request.getParameter("NEW_QUERY_NAME"));
+} else if (action.equals("MOVE")){
+    int newGroupId=Integer.parseInt(request.getParameter("NEW_GROUP_ID"));
+	aq.move(queryIds,newGroupId);
 }
 
 response.sendRedirect("manageQueries.jsp");

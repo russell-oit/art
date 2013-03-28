@@ -192,13 +192,11 @@
 	List<String> validExtensions=new ArrayList<String>();
 	validExtensions.add("xml");
 	validExtensions.add("jrxml");
-	validExtensions.add("jasper");
 	validExtensions.add("xls");
 	validExtensions.add("xlsx");
 	
 	List<String> subreportValidExtensions=new ArrayList<String>();
 	subreportValidExtensions.add("jrxml");
-	subreportValidExtensions.add("jasper");
 		
 	String extension=StringUtils.substringAfterLast(fileName, ".").toLowerCase();
 	String subreportExtension=StringUtils.substringAfterLast(subreportFileName, ".").toLowerCase();

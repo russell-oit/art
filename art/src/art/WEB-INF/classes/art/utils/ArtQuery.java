@@ -960,6 +960,73 @@ public class ArtQuery {
 
 		return updated;
 	}
+	
+	/**
+	 * Rename
+	 *
+	 * @return <code>true</code> if rename is successful
+	 */
+	public boolean rename(String newName) {
+		boolean success = false;
+		
+		Connection conn=null;
+
+		try {
+			conn=ArtDBCP.getConnection();
+			
+			String sql = "UPDATE ART_QUERIES SET NAME=? WHERE QUERY_ID=?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1,newName);
+			ps.setInt(2, queryId);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return success;
+	}
+	
+	/**
+	 * Move queries to a given query group
+	 *
+	 * @return <code>true</code> if move is successful
+	 */
+	public boolean move(String[] queryIds, int newGroupId) {
+		boolean success = false;
+		
+		Connection conn=null;
+
+		try {
+			conn=ArtDBCP.getConnection();
+			
+			String ids=StringUtils.join(queryIds, ",");
+			
+			String sql = "UPDATE ART_QUERIES SET QUERY_GROUP_ID=? WHERE QUERY_ID IN(" + ids + ")";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setInt(1,newGroupId);
+			ps.executeUpdate();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return success;
+	}
 
 	/**
 	 * Grant query access to a given user. Returns false if an error occurs or
