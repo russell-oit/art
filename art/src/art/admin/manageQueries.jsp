@@ -156,7 +156,7 @@ int queryGroupId;
             </td>
         </tr>
         <tr>
-            <td align="right" width="70%">
+            <td align="right" width="80%">
 				&nbsp;
 			</td>
             <td align="left">
@@ -164,7 +164,7 @@ int queryGroupId;
 			</td>
         </tr>
         <tr>
-			<td align="right" width="70%">
+			<td align="right" width="80%">
 				&nbsp;
 			</td>
             <td align="left">
@@ -172,23 +172,23 @@ int queryGroupId;
 			</td>
         </tr>
         <tr>
-            <td align="right" width="70%">
-				<input type="text" size="30"  maxlength="50" value="New Name" name="COPY_QUERY_NAME" id="copyName">
+            <td align="right" width="80%">
+				<input type="text" size="40"  maxlength="50" value="New Name" name="COPY_QUERY_NAME" id="copyName">
 			</td>
             <td align="left">
 				<input type="button" onclick="copyQuery()" value="Copy">
 			</td>
         </tr>
 		<tr>
-            <td align="right" width="70%">
-				<input type="text" size="30"  maxlength="50" value="New Name" name="NEW_QUERY_NAME" id="newName">
+            <td align="right" width="80%">
+				<input type="text" size="40"  maxlength="50" value="New Name" name="NEW_QUERY_NAME" id="newName">
 			</td>
             <td align="left">
 				<input type="button" onclick="renameQuery()" value="Rename">
 			</td>
         </tr>
 		<tr>
-            <td align="right" width="70%">
+            <td align="right" width="80%">
 				<select id="newGroupId" name="NEW_GROUP_ID">
                     <option value="-1">New Group</option>
                     <%

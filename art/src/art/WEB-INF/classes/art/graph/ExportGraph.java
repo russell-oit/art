@@ -555,10 +555,9 @@ public class ExportGraph {
 				//display x-axis labels vertically if too many categories present
 				RotatedAxisLabels labelRotation=new RotatedAxisLabels();
 				
-				//set rotate_at and remove_at parameters. set to same as in showGraph.jsp
 				Map<String,String> params=new HashMap<String,String>();
-				params.put("rotate_at","5");
-				params.put("remove_at","10000");
+				params.put("rotate_at",String.valueOf(aq.getGraphRotateAt()));
+				params.put("remove_at",String.valueOf(aq.getGraphRemoveAt()));
 				labelRotation.processChart(chart, params);
 				
 				

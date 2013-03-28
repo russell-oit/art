@@ -218,21 +218,11 @@ if (showSQL) {
        <cewolf:data>
            <cewolf:producer id="graph" />
        </cewolf:data>
-	   	    	
-      <cewolf:chartpostprocessor id="graph">
-          <cewolf:param name="from" value="<%= from %>"/>
-          <cewolf:param name="to" value="<%= to %>"/>
-          <cewolf:param name="labelFormat" value="<%= labelFormat %>" />
-		  <cewolf:param name="outputToFile" value="<%= outputToFile %>" />
-          <cewolf:param name="fullFileName" value="<%= fullFileName %>" />          		  		  
-		  <cewolf:param name="showLegend" value="<%= showLegend %>" />	  		  
-		  <cewolf:param name="showPoints" value="<%=showPoints%>" />
-      </cewolf:chartpostprocessor>
-       
-       <cewolf:chartpostprocessor id="labelRotation">
-		<cewolf:param name="rotate_at" value="<%=rotateAt%>" />
-		<cewolf:param name="remove_at" value="<%=removeAt%>" />
-	</cewolf:chartpostprocessor> 
+	   
+		<cewolf:chartpostprocessor id="labelRotation">
+			<cewolf:param name="rotate_at" value="<%=rotateAt%>" />
+			<cewolf:param name="remove_at" value="<%=removeAt%>" />
+		</cewolf:chartpostprocessor> 
 	   
 	   <% if(queryType==-12){
 		   ArtXYZChart heatmap=(ArtXYZChart)graph;
@@ -255,6 +245,17 @@ if (showSQL) {
     </cewolf:chartpostprocessor>
 	   
 	   <%} %>
+	   	    	
+	   
+      <cewolf:chartpostprocessor id="graph">
+          <cewolf:param name="from" value="<%= from %>"/>
+          <cewolf:param name="to" value="<%= to %>"/>
+          <cewolf:param name="labelFormat" value="<%= labelFormat %>" />
+		  <cewolf:param name="outputToFile" value="<%= outputToFile %>" />
+          <cewolf:param name="fullFileName" value="<%= fullFileName %>" />          		  		  
+		  <cewolf:param name="showLegend" value="<%= showLegend %>" />	  		  
+		  <cewolf:param name="showPoints" value="<%=showPoints%>" />
+      </cewolf:chartpostprocessor>
 	   
    </cewolf:chart>
    
