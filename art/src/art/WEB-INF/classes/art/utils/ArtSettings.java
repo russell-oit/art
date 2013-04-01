@@ -74,15 +74,7 @@ public class ArtSettings {
 	 * @return
 	 */
 	public boolean load() {
-		String settingsFilePath = ArtDBCP.getSettingsFilePath();
-		File settingsFile = new File(settingsFilePath);
-		if (!settingsFile.exists()) {
-			//art.properties doesn't exit. try art.props
-			String sep = java.io.File.separator;
-			settingsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "art.props";
-		}
-		
-		return load(settingsFilePath);
+		return load(ArtDBCP.getSettingsFilePath());
 	}
 
 	/**

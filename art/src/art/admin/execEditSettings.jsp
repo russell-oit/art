@@ -1,6 +1,7 @@
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtDBCP" %>
 <%@ page import="org.quartz.*,org.quartz.impl.*,com.lowagie.text.FontFactory" %>
+<%@ page import="javax.naming.InitialContext,javax.naming.NamingException,javax.sql.DataSource" %>
 
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%  request.setCharacterEncoding("UTF-8"); %>
@@ -84,15 +85,28 @@ while (names.hasMoreElements()) {
 	   e.printStackTrace(System.out);
     }
 
-	Class.forName(driver).newInstance();
-    Connection conn;
-	if(useDefaultDatabase && !ArtDBCP.isArtSettingsLoaded()){
-		conn = DriverManager.getConnection(url, username, "ART");
+	Connection conn = null;
+	if(StringUtils.isNotBlank(driver)){
+		Class.forName(driver).newInstance();
+		if(useDefaultDatabase && !ArtDBCP.isArtSettingsLoaded()){
+			conn = DriverManager.getConnection(url, username, "ART");
+		} else {
+			conn = DriverManager.getConnection(url, username, password);   
+		}    
+		conn.setAutoCommit(false);
 	} else {
-		conn = DriverManager.getConnection(url, username, password);        
+		//using jndi datasource
+		try {
+			InitialContext ic = new InitialContext();
+			DataSource ds = (DataSource) ic.lookup("java:comp/env/" + url);
+			conn = ds.getConnection();
+			conn.setAutoCommit(false);
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
 	}
 
-    conn.setAutoCommit(false);
+    
     session.setAttribute("SessionConn",conn);
 
     /* Connection to art repository is successfull.
