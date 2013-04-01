@@ -2,6 +2,7 @@ ART 2.5.1
 * Added Portuguese translation (thanks to Edson Richter)
 * Added Spanish translation (thanks to Carlos Narvaez)
 * Updated French translation (thanks to Eric Lemesre)
+* Allow custom path for export files (thanks to ckb)
 * Enable display of blank space instead of "null" for null fields (thanks to ckb)
 * Fix for query name truncated to 25 characters
 * Fix for start query not displaying

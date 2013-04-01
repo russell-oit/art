@@ -39,6 +39,9 @@ import com.lowagie.text.FontFactory;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -94,7 +97,8 @@ public class ArtDBCP extends HttpServlet {
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
 	public static boolean showResultsInline = true;
-	private static boolean nullValueEnabled = true;
+	private static boolean nullValueEnabled = true; //to enable blank spaces instead of "null" for varchar fields on reports
+	private static boolean customExportDirectory = false; //to enable custom export path
 
 	/**
 	 * {@inheritDoc}
@@ -229,6 +233,7 @@ public class ArtDBCP extends HttpServlet {
 			} else {
 				showResultsInline = true;
 			}
+
 			String nullValue = as.getSetting("null_value_enabled");
 			if (StringUtils.equals(nullValue, "no")) {
 				nullValueEnabled = false;
@@ -269,6 +274,17 @@ public class ArtDBCP extends HttpServlet {
 
 		//set export path
 		exportPath = appPath + sep + "export" + sep;
+		try {
+			Context ic = new InitialContext();
+			String ex = (String) ic.lookup("java:comp/env/REPORT_EXPORT_DIRECTORY");
+			if (ex != null) {
+				//custom export path defined
+				exportPath = ex + sep;
+				customExportDirectory = true;
+			}
+		} catch (NamingException e) {
+			logger.error("Error",e);
+		}
 
 		//set jobs path
 		jobsPath = exportPath + "jobs" + sep;
@@ -574,7 +590,7 @@ public class ArtDBCP extends HttpServlet {
 	public static boolean isShowResultsInline() {
 		return showResultsInline;
 	}
-	
+
 	/**
 	 * Determine if displaying null value is enabled.
 	 *
@@ -582,6 +598,15 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static boolean isNullValueEnabled() {
 		return nullValueEnabled;
+	}
+	
+	/**
+	 * Determine if a custom export path is in use
+	 *
+	 * @return <code>true</code> if a custom export path is in use
+	 */
+	public static boolean isCustomExportDirectory() {
+		return customExportDirectory;
 	}
 
 	/**
