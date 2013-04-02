@@ -166,7 +166,7 @@ public class ArtDBCP extends HttpServlet {
 				customExportDirectory = true;
 			}
 		} catch (NamingException e) {
-			logger.warn("Custom export directory not configured", e);
+			logger.debug("Custom export directory not configured", e);
 		}
 
 		//set jobs path
@@ -199,7 +199,7 @@ public class ArtDBCP extends HttpServlet {
 		//load settings from art.properties file
 		if (!loadArtSettings()) {
 			//art.properties not available. don't continue as required configuration settings will be missing
-			logger.warn("Not able to get ART settings file (WEB-INF/art.properties). Admin should define ART settings on first logon");
+			logger.warn("ART settings not available. Admin should define ART settings on first logon.");
 			return;
 		}
 

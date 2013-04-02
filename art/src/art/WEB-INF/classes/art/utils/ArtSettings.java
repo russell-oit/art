@@ -86,16 +86,19 @@ public class ArtSettings {
 		boolean success = false;
 
 		try {
-			FileInputStream o = new FileInputStream(fileName);
-			try {
-				p.load(o);
-			} finally {
-				o.close();
-			}
+			File settingsFile = new File(fileName);
+			if (settingsFile.exists()) {
+				FileInputStream o = new FileInputStream(fileName);
+				try {
+					p.load(o);
+				} finally {
+					o.close();
+				}
 
-			success = true;
-		} catch (FileNotFoundException e) {
-			logger.warn("ART settings have not been defined", e);
+				success = true;
+			} else {
+				logger.warn("ART settings file not found: {}", fileName);
+			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
