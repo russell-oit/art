@@ -133,6 +133,83 @@ public class ArtDBCP extends HttpServlet {
 
 		logger.info("ART Stopped.");
 	}
+	
+	/**
+	 * Initialize datasources, viewModes and variables
+	 */
+	private void ArtDBCPInit() {
+
+		logger.debug("Initializing variables");
+
+		//Get some web.xml parameters                        
+		artVersion = ctx.getInitParameter("versionNumber");
+		if (StringUtils.equals(ctx.getInitParameter("versionType"), "light")) {
+			artFullVersion = false;
+		}
+
+		//set application path
+		appPath = ctx.getRealPath("");
+
+		//set templates path
+		String sep = java.io.File.separator;
+		templatesPath = appPath + sep + "WEB-INF" + sep + "templates" + sep;
+		relativeTemplatesPath = "/WEB-INF/templates/";
+
+		//set export path
+		exportPath = appPath + sep + "export" + sep;
+		try {
+			Context ic = new InitialContext();
+			String ex = (String) ic.lookup("java:comp/env/REPORT_EXPORT_DIRECTORY");
+			if (ex != null) {
+				//custom export path defined
+				exportPath = ex + sep;
+				customExportDirectory = true;
+			}
+		} catch (NamingException e) {
+			logger.warn("Custom export directory not configured", e);
+		}
+
+		//set jobs path
+		jobsPath = exportPath + "jobs" + sep;
+
+		//set art.properties file path
+		artPropertiesFilePath = appPath + sep + "WEB-INF" + sep + "art.properties";
+
+		//construct all view modes list
+		allViewModes = new ArrayList<String>();
+
+		//add all supported view modes
+		allViewModes.add("tsvGz");
+		allViewModes.add("xml");
+		allViewModes.add("rss20");
+		allViewModes.add("htmlGrid");
+		allViewModes.add("html");
+		allViewModes.add("xls");
+		allViewModes.add("xlsx");
+		allViewModes.add("pdf");
+		allViewModes.add("htmlPlain");
+		allViewModes.add("xlsZip");
+		allViewModes.add("slk");
+		allViewModes.add("slkZip");
+		allViewModes.add("tsv");
+		allViewModes.add("tsvZip");
+		allViewModes.add("htmlDataTable");
+
+
+		//load settings from art.properties file
+		if (!loadArtSettings()) {
+			//art.properties not available. don't continue as required configuration settings will be missing
+			logger.warn("Not able to get ART settings file (WEB-INF/art.properties). Admin should define ART settings on first logon");
+			return;
+		}
+
+		//initialize datasources
+		initializeDatasources();
+
+		//register pdf fonts
+		registerPdfFonts();
+
+	}
 
 	/**
 	 * Load art.properties file and initialize variables
@@ -248,83 +325,6 @@ public class ArtDBCP extends HttpServlet {
 		}
 
 		return artSettingsLoaded;
-
-	}
-
-	/**
-	 * Initialize datasources, viewModes and variables
-	 */
-	private void ArtDBCPInit() {
-
-		logger.debug("Initializing variables");
-
-		//Get some web.xml parameters                        
-		artVersion = ctx.getInitParameter("versionNumber");
-		if (StringUtils.equals(ctx.getInitParameter("versionType"), "light")) {
-			artFullVersion = false;
-		}
-
-		//set application path
-		appPath = ctx.getRealPath("");
-
-		//set templates path
-		String sep = java.io.File.separator;
-		templatesPath = appPath + sep + "WEB-INF" + sep + "templates" + sep;
-		relativeTemplatesPath = "/WEB-INF/templates/";
-
-		//set export path
-		exportPath = appPath + sep + "export" + sep;
-		try {
-			Context ic = new InitialContext();
-			String ex = (String) ic.lookup("java:comp/env/REPORT_EXPORT_DIRECTORY");
-			if (ex != null) {
-				//custom export path defined
-				exportPath = ex + sep;
-				customExportDirectory = true;
-			}
-		} catch (NamingException e) {
-			logger.warn("Custom export directory not configured", e);
-		}
-
-		//set jobs path
-		jobsPath = exportPath + "jobs" + sep;
-
-		//set art.properties file path
-		artPropertiesFilePath = appPath + sep + "WEB-INF" + sep + "art.properties";
-
-		//construct all view modes list
-		allViewModes = new ArrayList<String>();
-
-		//add all supported view modes
-		allViewModes.add("tsvGz");
-		allViewModes.add("xml");
-		allViewModes.add("rss20");
-		allViewModes.add("htmlGrid");
-		allViewModes.add("html");
-		allViewModes.add("xls");
-		allViewModes.add("xlsx");
-		allViewModes.add("pdf");
-		allViewModes.add("htmlPlain");
-		allViewModes.add("xlsZip");
-		allViewModes.add("slk");
-		allViewModes.add("slkZip");
-		allViewModes.add("tsv");
-		allViewModes.add("tsvZip");
-		allViewModes.add("htmlDataTable");
-
-
-		//load settings from art.properties file
-		if (!loadArtSettings()) {
-			//art.properties not available. don't continue as required configuration settings will be missing
-			logger.warn("Not able to get ART settings file (WEB-INF/art.properties). Admin should define ART settings on first logon");
-			return;
-		}
-
-		//initialize datasources
-		initializeDatasources();
-
-		//register pdf fonts
-		registerPdfFonts();
 
 	}
 

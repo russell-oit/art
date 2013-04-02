@@ -62,7 +62,7 @@ public class Scheduler extends HttpServlet {
 	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
 	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
 	long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
-	String base_export_path, art_username, art_password, art_jdbc_driver, art_jdbc_url;
+	String exportPath;
 	final String MONDRIAN_CACHE_CLEARED_FILE_NAME = "mondrian-cache-cleared.txt"; //file to indicate when the mondrian cache was last cleared
 	Timer t;
 
@@ -80,12 +80,9 @@ public class Scheduler extends HttpServlet {
 
 			logger.debug("ART Scheduler starting up");
 
-			base_export_path = ArtDBCP.getExportPath();
+			exportPath = ArtDBCP.getExportPath();
 
-			boolean settingsLoaded;
-			settingsLoaded = loadSettings();
-
-			if (settingsLoaded) {
+			if (ArtDBCP.isArtSettingsLoaded()) {
 				//get quartz properties object to use to instantiate a scheduler
 				QuartzProperties qp = new QuartzProperties();
 				Properties props = qp.getProperties();
@@ -147,107 +144,69 @@ public class Scheduler extends HttpServlet {
 	}
 
 	/**
-	 * Load system settings from art.properties file.
-	 *
-	 * @return <code>true</code> if file is found. <code>false</code> if file is
-	 * not found.
-	 */
-	public boolean loadSettings() {
-
-		logger.debug("Loading art.properties");
-
-		boolean loaded = false;
-
-		ArtSettings as = new ArtSettings();
-
-		if (as.load()) {
-			//settings have been defined
-			art_username = as.getSetting("art_username");
-			art_password = as.getSetting("art_password");
-			// de-obfuscate the password
-			art_password = Encrypter.decrypt(art_password);
-
-			art_jdbc_url = as.getSetting("art_jdbc_url");
-			if (StringUtils.isBlank(art_jdbc_url)) {
-				art_jdbc_url = as.getSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
-			}
-			art_jdbc_driver = as.getSetting("art_jdbc_driver");
-
-			try {
-				Class.forName(art_jdbc_driver).newInstance();
-			} catch (Exception e) {
-				logger.error("Error while loading driver for ART repository: {}", art_jdbc_driver, e);
-			}
-
-			loaded = true;
-		} else {
-			logger.warn("Admin should define ART settings on first logon");
-		}
-
-		return loaded;
-
-	}
-
-	/**
 	 * Delete old export or job files.
 	 */
 	public void clean() {
 
 		logger.debug("Running clean");
 
-		try {
-			// Delete old files in the export directory
-			File exportFiles = new File(base_export_path);
-			File[] fileNames = exportFiles.listFiles();
-			long lastModified;
-			long actualTime = new java.util.Date().getTime();
-			String fileName;
-			for (int i = 0; i < fileNames.length; i++) {
-				lastModified = fileNames[i].lastModified();
-				fileName = fileNames[i].getName();
-				// Delete the file if it is older than INTERVAL_DELETE_FILES
-				// and the name is not "index.html"
-				// This is a workaround in order to avoid a user to
-				// view all the export files though the browser...
-				if ((actualTime - lastModified) > INTERVAL_DELETE_FILES) {
-					//delete directories that may be created by jasper report html output
-					if (fileNames[i].isDirectory()) {
-						if (!fileName.equals("jobs")) {
-							deleteDirectory(fileNames[i]);
-						}
-					} else if (!fileName.equals("index.html") && !fileName.equals(MONDRIAN_CACHE_CLEARED_FILE_NAME)) {
-						fileNames[i].delete();
-					}
-				}
-			}
-
-			// Delete old files in the export/jobs directory
-			long jobFilesRetentionPeriod = (long) ArtDBCP.getPublishedFilesRetentionPeriod(); //configured file retention period in days
-			jobFilesRetentionPeriod = jobFilesRetentionPeriod * 24 * 60 * 60 * 1000; //convert period defined in days to milliseconds
-
-			if (jobFilesRetentionPeriod > 0) {
-				exportFiles = new File(base_export_path + "jobs/");
-				fileNames = exportFiles.listFiles();
+		if (ArtDBCP.isArtSettingsLoaded()) {
+			try {
+				// Delete old files in the export directory
+				File exportFiles = new File(exportPath);
+				File[] fileNames = exportFiles.listFiles();
+				long lastModified;
+				long actualTime = new java.util.Date().getTime();
+				String fileName;
 				for (int i = 0; i < fileNames.length; i++) {
 					lastModified = fileNames[i].lastModified();
-					if ((actualTime - lastModified) > jobFilesRetentionPeriod) {
+					fileName = fileNames[i].getName();
+					// Delete the file if it is older than INTERVAL_DELETE_FILES
+					// and the name is not "index.html"
+					// This is a workaround in order to avoid a user to
+					// view all the export files though the browser...
+					if ((actualTime - lastModified) > INTERVAL_DELETE_FILES) {
 						//delete directories that may be created by jasper report html output
 						if (fileNames[i].isDirectory()) {
-							deleteDirectory(fileNames[i]);
-						} else if (!fileNames[i].getName().equals("index.html")) {
+							if (!fileName.equals("jobs")) {
+								deleteDirectory(fileNames[i]);
+							}
+						} else if (!fileName.equals("index.html") && !fileName.equals(MONDRIAN_CACHE_CLEARED_FILE_NAME)) {
 							fileNames[i].delete();
 						}
 					}
 				}
-			}
 
-			//clear mondrian cache as per configuration
-			if (ArtDBCP.isArtFullVersion()) {
-				clearMondrianCache();
-			}
+				// Delete old files in the export/jobs directory
+				long jobFilesRetentionPeriod = (long) ArtDBCP.getPublishedFilesRetentionPeriod(); //configured file retention period in days
+				jobFilesRetentionPeriod = jobFilesRetentionPeriod * 24 * 60 * 60 * 1000; //convert period defined in days to milliseconds
 
-		} catch (Exception e) {
-			logger.error("Error", e);
+				if (jobFilesRetentionPeriod > 0) {
+					exportFiles = new File(exportPath + "jobs/");
+					fileNames = exportFiles.listFiles();
+					for (int i = 0; i < fileNames.length; i++) {
+						lastModified = fileNames[i].lastModified();
+						if ((actualTime - lastModified) > jobFilesRetentionPeriod) {
+							//delete directories that may be created by jasper report html output
+							if (fileNames[i].isDirectory()) {
+								deleteDirectory(fileNames[i]);
+							} else if (!fileNames[i].getName().equals("index.html")) {
+								fileNames[i].delete();
+							}
+						}
+					}
+				}
+
+				//clear mondrian cache as per configuration
+				if (ArtDBCP.isArtFullVersion()) {
+					clearMondrianCache();
+				}
+
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		} else {
+			logger.debug("ART settings not defined");
 		}
 
 	}
@@ -289,7 +248,7 @@ public class Scheduler extends HttpServlet {
 		if (mondrianCacheExpiry > 0) {
 			boolean clearCache = false;
 			long actualTime = new java.util.Date().getTime();
-			File cacheFile = new File(base_export_path + MONDRIAN_CACHE_CLEARED_FILE_NAME);
+			File cacheFile = new File(exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME);
 			if (cacheFile.exists()) {
 				//check last modified date
 				long lastModified = cacheFile.lastModified();
@@ -316,7 +275,7 @@ public class Scheduler extends HttpServlet {
 				BufferedWriter out;
 				try {
 					//create file that indicates when the cache was last cleared
-					out = new BufferedWriter(new FileWriter(base_export_path + MONDRIAN_CACHE_CLEARED_FILE_NAME));
+					out = new BufferedWriter(new FileWriter(exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME));
 					java.util.Date now = new java.util.Date();
 					out.write(now.toString());
 					out.close();
@@ -357,11 +316,9 @@ class Timer extends Thread {
 	public void run() {
 		try {
 			while (true) {
-				// get settings. art.properties must exist before cleaning in order to get configured durations
-				if (scheduler.loadSettings()) { // this returns false if art settings are not defined yet
-					// clean old files in export path
-					scheduler.clean();
-				}
+				// clean old files in export path
+				scheduler.clean();
+
 				sleep(interval);
 			}
 		} catch (InterruptedException e) {
