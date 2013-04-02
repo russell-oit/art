@@ -31,8 +31,6 @@
 package art.servlets;
 
 import art.utils.ArtJob;
-import art.utils.ArtSettings;
-import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -41,7 +39,6 @@ import java.util.Properties;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.apache.commons.lang.StringUtils;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;

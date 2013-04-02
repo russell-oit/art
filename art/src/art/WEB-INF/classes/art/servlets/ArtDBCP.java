@@ -845,7 +845,7 @@ public class ArtDBCP extends HttpServlet {
 		try {
 			InitialContext ic = new InitialContext();
 			String finalUrl = jndiUrl;
-			if (!StringUtils.startsWith(finalUrl, "java:")) {
+			if (StringUtils.startsWith(finalUrl, "jdbc/")) {
 				//use default jndi prefix
 				finalUrl = "java:comp/env/" + finalUrl;
 			}

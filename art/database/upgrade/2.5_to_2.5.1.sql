@@ -10,7 +10,7 @@
 
 
 -- update database version 
-UPDATE ART_SETTINGS SET SETTING_VALUE='2.5.1-alpha2' WHERE SETTING_NAME='database version';
+UPDATE ART_SETTINGS SET SETTING_VALUE='2.5.1' WHERE SETTING_NAME='database version';
 
 
 

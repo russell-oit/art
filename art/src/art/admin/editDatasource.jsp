@@ -143,7 +143,8 @@ String msg;
 		
 		<tr><td class="data"> JDBC URL </td>
 			<td class="data"> <input type="text" name="URL" id="URL" value="<%=ds.getUrl()%>" size="50" maxlength="2000"> </td>
-			<%msg = "For a JNDI datasource, set this to the JNDI name e.g. jdbc/MyDatasource"; %>
+			<%msg = "For a JNDI datasource, set this to the JNDI name e.g. jdbc/MyDatasource."
+					+ " You can also use the full JNDI url e.g. java:comp/env/jdbc/MyDatasource"; %>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</tr>
 		
