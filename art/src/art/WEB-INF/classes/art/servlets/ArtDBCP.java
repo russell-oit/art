@@ -283,7 +283,7 @@ public class ArtDBCP extends HttpServlet {
 				customExportDirectory = true;
 			}
 		} catch (NamingException e) {
-			logger.error("Error", e);
+			logger.warn("Custom export directory not configured", e);
 		}
 
 		//set jobs path
@@ -825,23 +825,37 @@ public class ArtDBCP extends HttpServlet {
 		logger.debug("Getting admin connection");
 		// Create a connection to the ART repository for this admin and store it in the
 		// admin session (we are not getting this from the pool since it should not be in Autocommit mode)
-		Connection connArt=null;
+		Connection connArt;
 		if (StringUtils.isNotBlank(art_jdbc_driver)) {
 			connArt = DriverManager.getConnection(art_jdbc_url, art_username, art_password);
 			connArt.setAutoCommit(false);
 		} else {
 			//using jndi datasource
-			try {
-				InitialContext ic = new InitialContext();
-				javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup("java:comp/env/" + art_jdbc_url);
-				connArt = ds.getConnection();
-				connArt.setAutoCommit(false);
-			} catch (NamingException e) {
-				e.printStackTrace();
-			}
+			connArt = getJndiConnection(art_jdbc_url);
+			connArt.setAutoCommit(false);
 		}
 
 		return connArt;
+	}
+
+	public static Connection getJndiConnection(String jndiUrl) throws SQLException {
+
+		Connection conn = null;
+
+		try {
+			InitialContext ic = new InitialContext();
+			String finalUrl = jndiUrl;
+			if (!StringUtils.startsWith(finalUrl, "java:")) {
+				//use default jndi prefix
+				finalUrl = "java:comp/env/" + finalUrl;
+			}
+			javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(finalUrl);
+			conn = ds.getConnection();
+		} catch (NamingException e) {
+			logger.error("Error", e);
+		}
+
+		return conn;
 	}
 
 	/**

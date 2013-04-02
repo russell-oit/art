@@ -83,6 +83,9 @@ String msg;
 		} else if(dbType == "log4jdbc"){
 			driverElement.value="net.sf.log4jdbc.DriverSpy";
 			urlElement.value="jdbc:log4" + urlElement.value;
+		} else if(dbType == "jndi"){
+			driverElement.value="";
+			urlElement.value="";
 		}
 	}
 </script>
@@ -124,6 +127,7 @@ String msg;
 					<option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
 					<option value="hsqldb-server">HSQLDB (Server mode)</option>
 					<option value="log4jdbc">SQL Logging</option>
+					<option value="jndi">JNDI</option>
 					<option value="other">Other</option>
 				</select>
 				<%msg = "Sets the jdbc driver and url fields with default values for the selected database type"; %>
@@ -133,10 +137,14 @@ String msg;
 		
 		<tr><td class="data"> JDBC Driver </td>
 			<td class="data"> <input type="text" name="DRIVER" id="DRIVER" value="<%=ds.getDriver()%>" size="50" maxlength="200"> </td>
+			<%msg = "For a JNDI datasource, this must be blank"; %>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</tr>
 		
 		<tr><td class="data"> JDBC URL </td>
 			<td class="data"> <input type="text" name="URL" id="URL" value="<%=ds.getUrl()%>" size="50" maxlength="2000"> </td>
+			<%msg = "For a JNDI datasource, set this to the JNDI name e.g. jdbc/MyDatasource"; %>
+			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</tr>
 		
 		<tr><td class="data"> Username </td>

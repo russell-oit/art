@@ -1,4 +1,5 @@
 <%@ page import="art.utils.*,java.sql.*,art.servlets.ArtDBCP" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 
@@ -13,17 +14,27 @@ String username=request.getParameter("USERNAME").trim();
 try{
 	out.println("<p><table align=\"center\"><tr><td class=\"data\"><b>Testing Datasource</b><br>");
 
-	// Register the database driver for the database
-	// that has just been specified (only if it is not the one already registered for the ART repository)
-	if (!driver.equals(ArtDBCP.getArtSetting("art_jdbc_driver"))) {
-		out.println("<br>Registering driver "+driver+" ...<br>");
-		Class.forName(driver).newInstance();
+	if(StringUtils.isNotBlank(driver)){
+		// Register the database driver for the database
+		// that has just been specified (only if it is not the one already registered for the ART repository)
+		if (!driver.equals(ArtDBCP.getArtSetting("art_jdbc_driver"))) {
+			out.println("<br>Registering driver "+driver+" ...<br>");
+			Class.forName(driver).newInstance();
+			out.println("...OK<br>");
+		}
+		out.println("<br>Testing connection ...<br>");
+		Connection testConn = DriverManager.getConnection(url, username, password);
+		testConn.close();
+		testConn=null;
+		out.println("...OK<br>");
+	} else {
+		//jndi datasource
+		out.println("<br>Testing connection ...<br>");
+		Connection testConn = ArtDBCP.getJndiConnection(url);
+		testConn.close();
+		testConn=null;
 		out.println("...OK<br>");
 	}
-	out.println("<br>Testing connection ...<br>");
-	Connection testConn = DriverManager.getConnection(url, username, password);
-	testConn.close();
-	out.println("...OK<br>");
 }catch(SQLException ex){
 	ex.printStackTrace();
 	out.println("<p><b>Connection Exception:</b><br> The datasource parameters you specified are not correct " +

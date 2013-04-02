@@ -58,20 +58,20 @@ public class QuartzProperties {
 			String dbPassword;
 			final String DATASOURCE_NAME = "ArtDS";
 
-			final String THREAD_POOL_CLASS = "org.quartz.threadPool.class";
+			final String INSTANCE_NAME = "org.quartz.scheduler.instanceName";
 			final String SKIP_UPDATE = "org.quartz.scheduler.skipUpdateCheck";
+			final String MAKE_SCHEDULER_DAEMON = "org.quartz.scheduler.makeSchedulerThreadDaemon";
+			final String THREAD_POOL_CLASS = "org.quartz.threadPool.class";
 			final String THREAD_COUNT = "org.quartz.threadPool.threadCount";
+			final String MAKE_THREADS_DAEMONS = "org.quartz.threadPool.makeThreadsDaemons";
 			final String DRIVER_DELEGATE = "org.quartz.jobStore.driverDelegateClass";
+			final String JOB_STORE_CLASS = "org.quartz.jobStore.class";
 			final String DRIVER = "org.quartz.dataSource." + DATASOURCE_NAME + ".driver";
 			final String URL = "org.quartz.dataSource." + DATASOURCE_NAME + ".URL";
 			final String USER = "org.quartz.dataSource." + DATASOURCE_NAME + ".user";
 			final String PASSWORD = "org.quartz.dataSource." + DATASOURCE_NAME + ".password";
 			final String VALIDATION_QUERY = "org.quartz.dataSource." + DATASOURCE_NAME + ".validationQuery";
-			final String INSTANCE_NAME = "org.quartz.scheduler.instanceName";
-			final String JOB_STORE_CLASS = "org.quartz.jobStore.class";
-			final String MAKE_SCHEDULER_DAEMON = "org.quartz.scheduler.makeSchedulerThreadDaemon";
-			final String MAKE_THREADS_DAEMONS = "org.quartz.threadPool.makeThreadsDaemons";
-
+			final String JNDI_URL = "org.quartz.dataSource." + DATASOURCE_NAME + ".jndiURL";
 
 			//check if art.properties file exists. this will supply data source details
 			if (ArtDBCP.isArtSettingsLoaded()) {
@@ -130,101 +130,117 @@ public class QuartzProperties {
 				//data source
 				props.setProperty("org.quartz.jobStore.dataSource", DATASOURCE_NAME);
 
-				if (props.getProperty(DRIVER) == null) {
-					props.setProperty(DRIVER, dbDriver);
-				}
-				if (props.getProperty(URL) == null) {
-					props.setProperty(URL, dbUrl);
-				}
-				if (props.getProperty(USER) == null) {
-					props.setProperty(USER, dbUsername);
-				}
-				if (props.getProperty(PASSWORD) == null) {
-					props.setProperty(PASSWORD, dbPassword);
-				}
+				if (StringUtils.isNotBlank(dbDriver)) {
+					//jdbc datasource
+					if (props.getProperty(DRIVER) == null) {
+						props.setProperty(DRIVER, dbDriver);
+					}
+					if (props.getProperty(URL) == null) {
+						props.setProperty(URL, dbUrl);
+					}
+					if (props.getProperty(USER) == null) {
+						props.setProperty(USER, dbUsername);
+					}
+					if (props.getProperty(PASSWORD) == null) {
+						props.setProperty(PASSWORD, dbPassword);
+					}
 
-				int dbType = -1;
-				final int ORACLE = 1;
-				final int MYSQL = 2;
-				final int HSQLDB = 3;
-				final int POSTGRESQL = 4;
-				final int SQLSERVER = 5;
-				final int CUBRID = 6;
+					int dbType = -1;
+					final int ORACLE = 1;
+					final int MYSQL = 2;
+					final int HSQLDB = 3;
+					final int POSTGRESQL = 4;
+					final int SQLSERVER = 5;
+					final int CUBRID = 6;
 
-				if (dbDriver.indexOf("oracle") != -1) {
-					dbType = ORACLE;
-				} else if (dbDriver.indexOf("mysql") != -1) {
-					dbType = MYSQL;
-				} else if (dbDriver.indexOf("hsqldb") != -1) {
-					dbType = HSQLDB;
-				} else if (dbDriver.indexOf("postgresql") != -1) {
-					dbType = POSTGRESQL;
-				} else if (dbDriver.indexOf("jtds") != -1) {
-					dbType = SQLSERVER;
-				} else if (dbDriver.indexOf("sqlserver") != -1) {
-					dbType = SQLSERVER;
-				} else if (dbDriver.indexOf("cubrid") != -1) {
-					dbType = CUBRID;
-				}
+					if (dbDriver.indexOf("oracle") != -1) {
+						dbType = ORACLE;
+					} else if (dbDriver.indexOf("mysql") != -1) {
+						dbType = MYSQL;
+					} else if (dbDriver.indexOf("hsqldb") != -1) {
+						dbType = HSQLDB;
+					} else if (dbDriver.indexOf("postgresql") != -1) {
+						dbType = POSTGRESQL;
+					} else if (dbDriver.indexOf("jtds") != -1) {
+						dbType = SQLSERVER;
+					} else if (dbDriver.indexOf("sqlserver") != -1) {
+						dbType = SQLSERVER;
+					} else if (dbDriver.indexOf("cubrid") != -1) {
+						dbType = CUBRID;
+					}
 
-				//set properties that depend on the database type
-				switch (dbType) {
-					case ORACLE:
-						if (props.getProperty(DRIVER_DELEGATE) == null) {
-							props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate");
+					//set properties that depend on the database type
+					switch (dbType) {
+						case ORACLE:
+							if (props.getProperty(DRIVER_DELEGATE) == null) {
+								props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate");
+							}
+							if (props.getProperty(VALIDATION_QUERY) == null) {
+								props.setProperty(VALIDATION_QUERY, "select 1 from dual");
+							}
+							break;
+						case MYSQL:
+							if (props.getProperty(DRIVER_DELEGATE) == null) {
+								props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+							}
+							if (props.getProperty(VALIDATION_QUERY) == null) {
+								props.setProperty(VALIDATION_QUERY, "select 1");
+							}
+							break;
+						case HSQLDB:
+							if (props.getProperty(DRIVER_DELEGATE) == null) {
+								props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
+							}
+							if (props.getProperty(VALIDATION_QUERY) == null) {
+								props.setProperty(VALIDATION_QUERY, "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS");
+							}
+							break;
+						case POSTGRESQL:
+							if (props.getProperty(DRIVER_DELEGATE) == null) {
+								props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
+							}
+							if (props.getProperty(VALIDATION_QUERY) == null) {
+								props.setProperty(VALIDATION_QUERY, "select 1");
+							}
+							break;
+						case SQLSERVER:
+							if (props.getProperty(DRIVER_DELEGATE) == null) {
+								props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.MSSQLDelegate");
+							}
+							if (props.getProperty(VALIDATION_QUERY) == null) {
+								props.setProperty(VALIDATION_QUERY, "select 1");
+							}
+							break;
+						case CUBRID:
+							if (props.getProperty(DRIVER_DELEGATE) == null) {
+								props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.CUBRIDDelegate");
+							}
+							if (props.getProperty(VALIDATION_QUERY) == null) {
+								props.setProperty(VALIDATION_QUERY, "select 1");
+							}
+							break;
+						default:
+							//use standard jdbc delegate if none is defined
+							if (props.getProperty(DRIVER_DELEGATE) == null) {
+								props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+							}
+							if (props.getProperty(VALIDATION_QUERY) == null) {
+								props.setProperty(VALIDATION_QUERY, "select 1");
+							}
+					}
+				} else {
+					//jndi datasource
+					if (props.getProperty(DRIVER_DELEGATE) == null) {
+						props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+					}
+					if (props.getProperty(JNDI_URL) == null) {
+						String finalUrl = dbUrl;
+						if (!StringUtils.startsWith(finalUrl, "java:")) {
+							//use default jndi prefix
+							finalUrl = "java:comp/env/" + finalUrl;
 						}
-						if (props.getProperty(VALIDATION_QUERY) == null) {
-							props.setProperty(VALIDATION_QUERY, "select 1 from dual");
-						}
-						break;
-					case MYSQL:
-						if (props.getProperty(DRIVER_DELEGATE) == null) {
-							props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-						}
-						if (props.getProperty(VALIDATION_QUERY) == null) {
-							props.setProperty(VALIDATION_QUERY, "select 1");
-						}
-						break;
-					case HSQLDB:
-						if (props.getProperty(DRIVER_DELEGATE) == null) {
-							props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
-						}
-						if (props.getProperty(VALIDATION_QUERY) == null) {
-							props.setProperty(VALIDATION_QUERY, "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS");
-						}
-						break;
-					case POSTGRESQL:
-						if (props.getProperty(DRIVER_DELEGATE) == null) {
-							props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
-						}
-						if (props.getProperty(VALIDATION_QUERY) == null) {
-							props.setProperty(VALIDATION_QUERY, "select 1");
-						}
-						break;
-					case SQLSERVER:
-						if (props.getProperty(DRIVER_DELEGATE) == null) {
-							props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.MSSQLDelegate");
-						}
-						if (props.getProperty(VALIDATION_QUERY) == null) {
-							props.setProperty(VALIDATION_QUERY, "select 1");
-						}
-						break;
-					case CUBRID:
-						if (props.getProperty(DRIVER_DELEGATE) == null) {
-							props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.CUBRIDDelegate");
-						}
-						if (props.getProperty(VALIDATION_QUERY) == null) {
-							props.setProperty(VALIDATION_QUERY, "select 1");
-						}
-						break;
-					default:
-						//use standard jdbc delegate if none is defined
-						if (props.getProperty(DRIVER_DELEGATE) == null) {
-							props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-						}
-						if (props.getProperty(VALIDATION_QUERY) == null) {
-							props.setProperty(VALIDATION_QUERY, "select 1");
-						}
+						props.setProperty(JNDI_URL, finalUrl);
+					}
 				}
 			}
 		} catch (Exception e) {

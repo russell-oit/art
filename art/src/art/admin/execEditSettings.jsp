@@ -79,6 +79,7 @@ while (names.hasMoreElements()) {
        Connection connOld  = (Connection) session.getAttribute("SessionConn");
        if (connOld != null){
 			connOld.close();
+			connOld=null;
 		}
     } catch (Exception e) {
        System.out.println("ART - execEditSettings.jsp: WARNING: Error closing old connection: " + e);
@@ -96,16 +97,9 @@ while (names.hasMoreElements()) {
 		conn.setAutoCommit(false);
 	} else {
 		//using jndi datasource
-		try {
-			InitialContext ic = new InitialContext();
-			DataSource ds = (DataSource) ic.lookup("java:comp/env/" + url);
-			conn = ds.getConnection();
-			conn.setAutoCommit(false);
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
+		conn = ArtDBCP.getJndiConnection(url);
+		conn.setAutoCommit(false);
 	}
-
     
     session.setAttribute("SessionConn",conn);
 
@@ -129,6 +123,7 @@ while (names.hasMoreElements()) {
 			st.executeUpdate("ALTER USER ART SET PASSWORD \""+request.getParameter("art_password")+"\"");
 		}
 		st.close();
+		st=null;
 		conn.commit();
     }
 

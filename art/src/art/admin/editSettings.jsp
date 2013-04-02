@@ -99,9 +99,9 @@
     }
     
     header_with_public_user =  as.getSetting("header_with_public_user");
-    page_size               = as.getSetting("page_size");
+    page_size = as.getSetting("page_size");
 
-	rss_link			= as.getSetting("rss_link");
+	rss_link = as.getSetting("rss_link");
 	//new property to make published files deletion period configurable
 	if (as.getSetting("published_files_retention_period")==null){
 		published_files_retention_period="0";
@@ -325,6 +325,9 @@
 		} else if(dbType == "log4jdbc"){
 			driverElement.value="net.sf.log4jdbc.DriverSpy";
 			urlElement.value="jdbc:log4" + urlElement.value;
+		} else if(dbType == "jndi"){
+			driverElement.value="";
+			urlElement.value="";
 		}
 	}
 </script>
@@ -362,6 +365,7 @@
 			   <option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
 			   <option value="hsqldb-server">HSQLDB (Server mode)</option>
 			   <option value="log4jdbc">SQL Logging</option>
+			   <option value="jndi">JNDI</option>
 			   <option value="other">Other</option>
 		   </select>
 		   <%msg = "Sets the jdbc driver and url fields with default values for the selected database type"; %>
@@ -385,8 +389,8 @@
 		String sep = java.io.File.separator;
 		String baseDirEscaped=baseDir.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments
 		String sepEscaped=sep.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments
-		msg = "JDBC URL\\n\\nNote: If you use the embedded HSQLDB database as the ART repository pay attention." +
-		         " The database files are stored by default within the ART application and will be deleted when undeployng ART. "+
+		msg = "Note: If you use the embedded HSQLDB database as the ART repository pay attention." +
+		         " The database files are stored by default within the ART application and will be deleted when undeploying ART. "+
 				 " To retain your repository, copy the\\n"+baseDirEscaped+sepEscaped+"WEB-INF"+sepEscaped+"hsqldb"+sepEscaped+"*\\n" +
 				 " files to a secure place and update the JDBC URL to point to the new path."; %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">

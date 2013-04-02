@@ -8,6 +8,7 @@ ART 2.5.1
 * Fix for start query not displaying
 * Fix for invalid drill down queries link
 * Fix for not being able to define email jobs in Italian and Portuguese locales
+* Allow use of jndi datasources
 * Allow rename and move of queries from the query management console
 * Allow xy chart to have multiple series
 * Have show results inline as an application setting
