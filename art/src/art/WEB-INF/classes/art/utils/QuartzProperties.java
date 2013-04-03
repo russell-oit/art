@@ -235,7 +235,7 @@ public class QuartzProperties {
 					}
 					if (props.getProperty(JNDI_URL) == null) {
 						String finalUrl = dbUrl;
-						if (StringUtils.startsWith(finalUrl, "jdbc/")) {
+						if (!StringUtils.startsWith(finalUrl, "java:")) {
 							//use default jndi prefix
 							finalUrl = "java:comp/env/" + finalUrl;
 						}

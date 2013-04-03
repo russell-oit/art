@@ -328,7 +328,7 @@
 		} else if(dbType == "jndi"){
 			driverElement.value="";
 			urlElement.value="";
-		}
+		} 
 	}
 </script>
 
@@ -355,7 +355,7 @@
        <td class="data">
 		   <select name="_art_database_type" id="art_database_type" size="1" onChange="javascript:onTypeSelection();">
 			   <option value="--" selected="selected">--</option>
-			   <option value="demo">Demo</option>
+			   <option value="demo">Default/Demo</option>
 			   <option value="cubrid">CUBRID</option>
 			   <option value="oracle">Oracle</option>
 			   <option value="mysql">MySQL</option>

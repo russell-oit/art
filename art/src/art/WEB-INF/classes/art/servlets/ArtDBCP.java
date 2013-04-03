@@ -133,7 +133,7 @@ public class ArtDBCP extends HttpServlet {
 
 		logger.info("ART Stopped.");
 	}
-	
+
 	/**
 	 * Initialize datasources, viewModes and variables
 	 */
@@ -845,7 +845,7 @@ public class ArtDBCP extends HttpServlet {
 		try {
 			InitialContext ic = new InitialContext();
 			String finalUrl = jndiUrl;
-			if (StringUtils.startsWith(finalUrl, "jdbc/")) {
+			if (!StringUtils.startsWith(finalUrl, "java:")) {
 				//use default jndi prefix
 				finalUrl = "java:comp/env/" + finalUrl;
 			}
@@ -1044,7 +1044,9 @@ public class ArtDBCP extends HttpServlet {
 
 		try {
 			cacheExpiryString = getArtSetting("mondrian_cache_expiry");
-			cacheExpiry = Integer.parseInt(cacheExpiryString);
+			if (NumberUtils.isNumber(cacheExpiryString)) {
+				cacheExpiry = Integer.parseInt(cacheExpiryString);
+			}
 		} catch (NumberFormatException e) {
 			//invalid number set for cache expiry. default to 0 (no automatic clearing of cache)
 			logger.warn("Invalid number for mondrian cache expiry: {}", cacheExpiryString, e);

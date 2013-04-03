@@ -611,9 +611,18 @@ tinyMCE.init({
 					<br><br>
 					Rotate x-axis labels at
 					<input type="text" name="graph_rotate_at" value=<%=aq.getGraphRotateAt()%> size="4" maxlength="4">
+					<%
+					helpText="Display x-axis labels vertically when the graph contains this number of categories."
+							+ "\\nSet to 1 to always display the labels vertically";
+					%>
+					<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 					Remove x-axis labels at
 					<input type="text" name="graph_remove_at" value=<%=aq.getGraphRemoveAt()%> size="4" maxlength="4">
-					<input type="button" class="buttonup" onclick="javascript:alert('Rotate or remove x-axis labels when graph contains this number of series')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
+					<%
+					helpText="Omit x-axis labels when the graph contains this number of categories."
+							+ "\\nSet to 1 to always omit the labels";
+					%>
+					<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 				</div>
 			</td>
 		</tr>

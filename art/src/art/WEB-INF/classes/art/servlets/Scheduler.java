@@ -122,12 +122,11 @@ public class Scheduler extends HttpServlet {
 	public void destroy() {
 
 		try {
+			//stop clean thread
 			if (t != null) {
 				t.interrupt();
-
-				logger.info("ART clean thread stopped");
 			}
-
+			
 			//shutdown quartz scheduler
 			org.quartz.Scheduler scheduler = ArtDBCP.getScheduler();
 			if (scheduler != null) {
@@ -291,10 +290,6 @@ public class Scheduler extends HttpServlet {
 	 */
 	public long getInterval() {
 		return INTERVAL;
-
-
-
-
 	}
 }
 
