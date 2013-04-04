@@ -240,7 +240,7 @@ public class QueryExecute extends HttpServlet {
 				o = new ArtXYZChart();
 				o.setQueryType(queryType);
 				break;
-			default: //3-5, 8,9
+			default: //-3,-4,-5,-8,-9,-14,-15,-16,-17
 				o = new ArtCategorySeries();
 		}
 

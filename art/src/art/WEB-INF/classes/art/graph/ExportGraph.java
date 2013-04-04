@@ -209,9 +209,9 @@ public class ExportGraph {
 		String timeFormat = "HH_mm_ss";
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
-		
-		fullFileNameWithoutExt=fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
-		fullFileNameWithoutExt=ArtDBCP.cleanFileName(fullFileNameWithoutExt);
+
+		fullFileNameWithoutExt = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
+		fullFileNameWithoutExt = ArtDBCP.cleanFileName(fullFileNameWithoutExt);
 
 		fullFileNameWithoutExt = exportPath + fullFileNameWithoutExt;
 	}
@@ -241,10 +241,9 @@ public class ExportGraph {
 			//use legacy theme to ensure you have white plot backgrounds. this was changed in jfreechart 1.0.11 to default to grey
 			//save current settings
 			currentChartTheme = ChartFactory.getChartTheme();
-			currentBarPainter = BarRenderer.getDefaultBarPainter();
 
-			BarRenderer.setDefaultBarPainter(new StandardBarPainter());
 			StandardChartTheme chartTheme = (StandardChartTheme) StandardChartTheme.createJFreeTheme(); //if using createLegacyTheme custom font isn't applied in pdf output for some reason
+			chartTheme.setBarPainter(new StandardBarPainter()); //remove white line/glossy effect on 2D bar graphs with the jfree theme
 
 			//change default colours. default "jfree" theme has plot background colour of light grey
 			chartTheme.setPlotBackgroundPaint(Color.white); //default is grey
@@ -317,7 +316,7 @@ public class ExportGraph {
 					DefaultPieDataset pieDataset = (DefaultPieDataset) pieChart.produceDataset(null);
 
 					//create chart
-					if(queryType==-2){
+					if (queryType == -2) {
 						chart = ChartFactory.createPieChart3D(title, pieDataset, showLegend, showTooltips, showUrls);
 					} else {
 						//2D pie chart
@@ -449,7 +448,7 @@ public class ExportGraph {
 
 					if (queryType == -11) {
 						//bubble chart
-						
+
 						//create chart
 						chart = ChartFactory.createBubbleChart(title, xAxisLabel, yAxisLabel, xyzDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 
@@ -461,15 +460,15 @@ public class ExportGraph {
 						}
 					} else if (queryType == -12) {
 						//heat map
-						
+
 						//create chart
-						chart=CewolfChartFactory.getChartInstance("heatmap", title, xAxisLabel, yAxisLabel, xyzDataset, showLegend);
-						
+						chart = CewolfChartFactory.getChartInstance("heatmap", title, xAxisLabel, yAxisLabel, xyzDataset, showLegend);
+
 						//process chart
-						Map<String, String> heatmapOptions=xyz.getHeatmapOptions();
-						HeatmapEnhancer heatmapPP=new HeatmapEnhancer();
+						Map<String, String> heatmapOptions = xyz.getHeatmapOptions();
+						HeatmapEnhancer heatmapPP = new HeatmapEnhancer();
 						heatmapPP.processChart(chart, heatmapOptions);
-						
+
 						//set y axis range if required
 						XYPlot heatmapPlot = (XYPlot) chart.getPlot();
 						if (from != 0 && to != 0) {
@@ -495,9 +494,17 @@ public class ExportGraph {
 							//horizontal bar graph 3d
 							chart = ChartFactory.createBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
 							break;
+						case -16:
+							//horizontal bar graph 2d
+							chart = ChartFactory.createBarChart(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
+							break;
 						case -4:
 							//vertical bar graph 3d
 							chart = ChartFactory.createBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+							break;
+						case -14:
+							//vertical bar graph 2d
+							chart = ChartFactory.createBarChart(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 							break;
 						case -5:
 							//line graph
@@ -514,12 +521,20 @@ public class ExportGraph {
 							//stacked vertical bar graph 3d
 							chart = ChartFactory.createStackedBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
 							break;
+						case -15:
+							//stacked vertical bar graph 2d
+							chart = ChartFactory.createStackedBarChart(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
+							break;
 						case -9:
 							//stacked horizontal bar graph 3d
 							chart = ChartFactory.createStackedBarChart3D(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
 							break;
+						case -17:
+							//stacked horizontal bar graph 2d
+							chart = ChartFactory.createStackedBarChart(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.HORIZONTAL, showLegend, showTooltips, showUrls);
+							break;
 						default:
-							chart=null;
+							chart = null;
 					}
 
 					if (chart != null) {
@@ -559,14 +574,14 @@ public class ExportGraph {
 				chart.setBackgroundPaint(Color.decode(bgColor));
 
 				//display x-axis labels vertically if too many categories present
-				RotatedAxisLabels labelRotation=new RotatedAxisLabels();
-				
-				Map<String,String> params=new HashMap<String,String>();
-				params.put("rotate_at",String.valueOf(aq.getGraphRotateAt()));
-				params.put("remove_at",String.valueOf(aq.getGraphRemoveAt()));
+				RotatedAxisLabels labelRotation = new RotatedAxisLabels();
+
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("rotate_at", String.valueOf(aq.getGraphRotateAt()));
+				params.put("remove_at", String.valueOf(aq.getGraphRemoveAt()));
 				labelRotation.processChart(chart, params);
-				
-				
+
+
 				if (outputFormat.equals("png")) {
 					fullFileName = fullFileNameWithoutExt + ".png";
 					ChartUtilities.saveChartAsPNG(new File(fullFileName), chart, width, height);
@@ -601,10 +616,6 @@ public class ExportGraph {
 			if (currentChartTheme != null) {
 				ChartFactory.setChartTheme(currentChartTheme);
 			}
-			if (currentBarPainter != null) {
-				BarRenderer.setDefaultBarPainter(currentBarPainter);
-			}
 		}
 	}
-
 }

@@ -2,6 +2,7 @@
 <%@ page import="org.jfree.chart.*,org.apache.commons.beanutils.*,java.awt.Font" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="art.output.ArtOutHandler,java.io.PrintWriter" %>
+<%@ page import="org.jfree.chart.renderer.category.*" %>
 
 <%@taglib uri='/WEB-INF/cewolf.tld' prefix='cewolf' %>
 
@@ -17,7 +18,8 @@
 
   String graphType[] = {"xy","pie3D","horizontalBar3D","verticalBar3D","line"
                         ,"timeseries","timeseries","stackedVerticalBar3D","stackedHorizontalBar3D"
-						,"meter","bubble","heatmap","pie"};
+						,"meter","bubble","heatmap","pie","verticalBar","stackedVerticalBar"
+						,"horizontalBar","stackedHorizontalBar"};
 						  
   //get query type from attribute so that it doesn't have to be specified in direct url 
   Integer queryTypeInteger = (Integer)request.getAttribute("queryType");
@@ -166,9 +168,11 @@
 
 out.flush(); 
 
-//reset jfreechat theme to the default theme. jasper reports sets it to the legacy theme and this affects the speedometer chart
-//also allow use of custom font to enable display of non-ascii characters
+//reset jfreechat theme to the default theme ("jfree"). jasper reports sets it to the legacy theme and this affects the speedometer chart
 StandardChartTheme chartTheme = (StandardChartTheme) StandardChartTheme.createJFreeTheme(); 
+chartTheme.setBarPainter(new StandardBarPainter()); //remove white line/glossy effect on 2D bar graphs with the jfree theme
+
+//also allow use of custom font to enable display of non-ascii characters
 if(ArtDBCP.isUseCustomPdfFont()){
 	String pdfFontName = ArtDBCP.getArtSetting("pdf_font_name");
 	Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
@@ -184,7 +188,6 @@ if(ArtDBCP.isUseCustomPdfFont()){
 	chartTheme.setRegularFont(regularFont);
 }
 ChartFactory.setChartTheme(chartTheme);
-
 				
 //display parameters
 PrintWriter htmlout=response.getWriter();

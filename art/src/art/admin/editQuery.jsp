@@ -428,14 +428,18 @@ tinyMCE.init({
                     <option value="100" <%=(currentStringValue.equals("100")?"SELECTED":"")%>>Update Statement</option>
                     <option value="101" <%=(currentStringValue.equals("101")?"SELECTED":"")%>>Crosstab </option>
                     <option value="102" <%=(currentStringValue.equals("102")?"SELECTED":"")%>>Crosstab (html only)</option>
+					<option value="0" <%=(currentStringValue.equals("0")?"SELECTED":"")%>>Tabular </option>
                     <option value="103" <%=(currentStringValue.equals("103")?"SELECTED":"")%>>Tabular (html only)</option>
-                    <option value="0" <%=(currentStringValue.equals("0")?"SELECTED":"")%>>Tabular </option>
                     <option value="-1" <%=(currentStringValue.equals("-1")?"SELECTED":"")%>>Graph: XY Chart</option>
 					<option value="-13" <%=(currentStringValue.equals("-13")?"SELECTED":"")%>>Graph: Pie 2D</option>
                     <option value="-2" <%=(currentStringValue.equals("-2")?"SELECTED":"")%>>Graph: Pie 3D</option>
+					<option value="-14" <%=(currentStringValue.equals("-14")?"SELECTED":"")%>>Graph: Vertical Bar 2D</option>
                     <option value="-4" <%=(currentStringValue.equals("-4")?"SELECTED":"")%>>Graph: Vertical Bar 3D</option>
+					<option value="-15" <%=(currentStringValue.equals("-15")?"SELECTED":"")%>>Graph: Stacked Vertical Bar 2D</option>
                     <option value="-8" <%=(currentStringValue.equals("-8")?"SELECTED":"")%>>Graph: Stacked Vertical Bar 3D</option>
+					<option value="-16" <%=(currentStringValue.equals("-16")?"SELECTED":"")%>>Graph: Horizontal Bar 2D</option>
                     <option value="-3" <%=(currentStringValue.equals("-3")?"SELECTED":"")%>>Graph: Horizontal Bar 3D</option>
+					<option value="-17" <%=(currentStringValue.equals("-17")?"SELECTED":"")%>>Graph: Stacked Horizontal Bar 2D</option>
                     <option value="-9" <%=(currentStringValue.equals("-9")?"SELECTED":"")%>>Graph: Stacked Horizontal Bar 3D</option>
                     <option value="-5" <%=(currentStringValue.equals("-5")?"SELECTED":"")%>>Graph: Line</option>
                     <option value="-6" <%=(currentStringValue.equals("-6")?"SELECTED":"")%>>Graph: Time Series</option>
