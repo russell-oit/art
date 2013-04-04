@@ -21,8 +21,8 @@ public class ArtQuery {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtQuery.class);
 	final int MAX_RECURSIVE_LOOKUP = 20;
-	final int MAX_GRAPH_WIDTH = 2048; 
-	final int MAX_GRAPH_HEIGHT = 1024; 
+	final int MAX_GRAPH_WIDTH = 2048;
+	final int MAX_GRAPH_HEIGHT = 1024;
 	final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds query source
 	String name = "";
 	String shortDescription = "";
@@ -910,7 +910,7 @@ public class ArtQuery {
 		return success;
 
 	}
-	
+
 	/**
 	 * Update query header and source
 	 *
@@ -919,13 +919,13 @@ public class ArtQuery {
 	 */
 	public boolean update() {
 		boolean updated = false;
-		
-		Connection conn=null;
+
+		Connection conn = null;
 
 		try {
-			conn=ArtDBCP.getConnection();
-			
-			updated=update(conn);
+			conn = ArtDBCP.getConnection();
+
+			updated = update(conn);
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
@@ -960,7 +960,7 @@ public class ArtQuery {
 
 		return updated;
 	}
-	
+
 	/**
 	 * Rename
 	 *
@@ -968,15 +968,15 @@ public class ArtQuery {
 	 */
 	public boolean rename(String newName) {
 		boolean success = false;
-		
-		Connection conn=null;
+
+		Connection conn = null;
 
 		try {
-			conn=ArtDBCP.getConnection();
-			
+			conn = ArtDBCP.getConnection();
+
 			String sql = "UPDATE ART_QUERIES SET NAME=? WHERE QUERY_ID=?";
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1,newName);
+			ps.setString(1, newName);
 			ps.setInt(2, queryId);
 			ps.executeUpdate();
 		} catch (Exception e) {
@@ -993,7 +993,7 @@ public class ArtQuery {
 
 		return success;
 	}
-	
+
 	/**
 	 * Move queries to a given query group
 	 *
@@ -1001,17 +1001,17 @@ public class ArtQuery {
 	 */
 	public boolean move(String[] queryIds, int newGroupId) {
 		boolean success = false;
-		
-		Connection conn=null;
+
+		Connection conn = null;
 
 		try {
-			conn=ArtDBCP.getConnection();
-			
-			String ids=StringUtils.join(queryIds, ",");
-			
+			conn = ArtDBCP.getConnection();
+
+			String ids = StringUtils.join(queryIds, ",");
+
 			String sql = "UPDATE ART_QUERIES SET QUERY_GROUP_ID=? WHERE QUERY_ID IN(" + ids + ")";
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1,newGroupId);
+			ps.setInt(1, newGroupId);
 			ps.executeUpdate();
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -1170,7 +1170,7 @@ public class ArtQuery {
 						showLegend = true;
 					}
 					//set default for showlabels. true for pie charts. false for all other graphs
-					if (queryType == -2) {
+					if (queryType == -2 || queryType == -13) {
 						showLabels = true;
 					} else {
 						showLabels = false;
@@ -1195,13 +1195,13 @@ public class ArtQuery {
 				String token;
 				while (st.hasMoreTokens()) {
 					token = st.nextToken();
-					
-					if(token.startsWith("rotate_at")){
-						String tmp=StringUtils.substringAfter(token, ":");
-						graphRotateAt=Integer.parseInt(tmp);
-					} else if (token.startsWith("remove_at")){
-						String tmp=StringUtils.substringAfter(token, ":");
-						graphRemoveAt=Integer.parseInt(tmp);
+
+					if (token.startsWith("rotate_at")) {
+						String tmp = StringUtils.substringAfter(token, ":");
+						graphRotateAt = Integer.parseInt(tmp);
+					} else if (token.startsWith("remove_at")) {
+						String tmp = StringUtils.substringAfter(token, ":");
+						graphRemoveAt = Integer.parseInt(tmp);
 					} else if (token.startsWith("noleg")) {
 						showLegend = false;
 					} else if (token.startsWith("showlegend")) {
@@ -1366,19 +1366,19 @@ public class ArtQuery {
 	/**
 	 * Connect to Art repository and retrieve info related to the query. Also
 	 * get the query params and build the list with all values
-	 * 
+	 *
 	 * @return <code>true</code> if query found and object populated
 	 */
 	public boolean create(int qId, boolean buildParamList) {
 		boolean success = false;
-		
+
 		Connection conn = null;
 
 		try {
 
 			//get query details
 			conn = ArtDBCP.getConnection();
-			success=create(conn, qId);
+			success = create(conn, qId);
 
 			//build parameter list
 			if (buildParamList) {
@@ -1397,7 +1397,7 @@ public class ArtQuery {
 			}
 
 		}
-		
+
 		return success;
 	}
 

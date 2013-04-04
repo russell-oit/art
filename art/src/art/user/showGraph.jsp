@@ -15,9 +15,9 @@
   request.setCharacterEncoding("UTF-8");
   response.setHeader("Cache-control","no-cache");
 
-  String graphType[] = {"xy","pie3d","horizontalBar3D","verticalBar3D","line"
-                        ,"timeseries","timeseries","stackedVerticalBar3d","stackedHorizontalBar3d"
-						,"meter","bubble","heatmap"};
+  String graphType[] = {"xy","pie3D","horizontalBar3D","verticalBar3D","line"
+                        ,"timeseries","timeseries","stackedVerticalBar3D","stackedHorizontalBar3D"
+						,"meter","bubble","heatmap","pie"};
 						  
   //get query type from attribute so that it doesn't have to be specified in direct url 
   Integer queryTypeInteger = (Integer)request.getAttribute("queryType");

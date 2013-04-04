@@ -81,7 +81,7 @@ public class QueryExecute extends HttpServlet {
 		ClassLoader cl = this.getClass().getClassLoader();
 		String vm = "";
 		try {
-			for(String viewMode : allViewModes) {
+			for (String viewMode : allViewModes) {
 				vm = viewMode;
 				viewModes.put(vm, cl.loadClass("art.output." + vm + "Output"));
 			}
@@ -223,6 +223,7 @@ public class QueryExecute extends HttpServlet {
 				o = new ArtXY();
 				break;
 			case -2:
+			case -13:
 				o = new ArtPie();
 				break;
 			case -6:
@@ -236,7 +237,7 @@ public class QueryExecute extends HttpServlet {
 				break;
 			case -11:
 			case -12:
-				o=new ArtXYZChart();
+				o = new ArtXYZChart();
 				o.setQueryType(queryType);
 				break;
 			default: //3-5, 8,9
@@ -301,7 +302,7 @@ public class QueryExecute extends HttpServlet {
 		boolean showGraphData = aq.isShowGraphData();
 		int rotateAt = aq.getGraphRotateAt();
 		int removeAt = aq.getGraphRemoveAt();
-		
+
 		request.setAttribute("_rotate_at", String.valueOf(rotateAt));
 		request.setAttribute("_remove_at", String.valueOf(removeAt));
 
@@ -633,15 +634,15 @@ public class QueryExecute extends HttpServlet {
 
 					ArtQuery aq = new ArtQuery();
 					Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
-					
+
 					//set default parameter values. so that they don't have to be specified on the url
-					if(!htmlParams.isEmpty()){
+					if (!htmlParams.isEmpty()) {
 						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
 							ArtQueryParam param = entry.getValue();
-							if(StringUtils.equals(param.getParamType(), "I")){
-								inlineParams.put(param.getParamLabel(), (String)param.getParamValue());
+							if (StringUtils.equals(param.getParamType(), "I")) {
+								inlineParams.put(param.getParamLabel(), (String) param.getParamValue());
 							}
-								
+
 						}
 					}
 
@@ -650,11 +651,11 @@ public class QueryExecute extends HttpServlet {
 					 * request and fill the hashmaps that store the parameters
 					 */
 					Map<Integer, ArtQueryParam> displayParams = ParameterProcessor.processParameters(request, inlineParams, multiParams, queryId, htmlParams);
-					
+
 					//set showparams flag. flag not only determined by presense of _showParams. may also be true if query set to always show params
-					boolean showParams=false;
-					if(!displayParams.isEmpty()){
-						showParams=true;
+					boolean showParams = false;
+					if (!displayParams.isEmpty()) {
+						showParams = true;
 					}
 
 					// Set the hash tables in the pq object
@@ -714,12 +715,12 @@ public class QueryExecute extends HttpServlet {
 
 					//determine if final sql should be shown. only admins can see sql
 					boolean showSQL = false;
-					int accessLevel=0;
-					UserEntity ue=(UserEntity)session.getAttribute("ue");
-					if(ue!=null){
-						accessLevel=ue.getAccessLevel();
+					int accessLevel = 0;
+					UserEntity ue = (UserEntity) session.getAttribute("ue");
+					if (ue != null) {
+						accessLevel = ue.getAccessLevel();
 					}
-					if (request.getParameter("_showSQL") != null && accessLevel>5) {
+					if (request.getParameter("_showSQL") != null && accessLevel > 5) {
 						showSQL = true;
 					}
 
@@ -743,14 +744,14 @@ public class QueryExecute extends HttpServlet {
 							if (o instanceof htmlPlainOutput) {
 								htmlPlainOutput hpo = (htmlPlainOutput) o;
 								hpo.setDisplayInline(isInline);
-								
+
 								//ensure parameters are displayed if not in inline mode
 								hpo.setDisplayParameters(displayParams);
 							}
-							
+
 							//enable localization for datatable output
-							if(o instanceof htmlDataTableOutput){
-								htmlDataTableOutput dt= (htmlDataTableOutput)o;
+							if (o instanceof htmlDataTableOutput) {
+								htmlDataTableOutput dt = (htmlDataTableOutput) o;
 								dt.setLocale(request.getLocale());
 							}
 
@@ -766,7 +767,7 @@ public class QueryExecute extends HttpServlet {
 					if (showHeaderAndFooter) {
 						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
 						String description = "";
-						shortDescription=StringUtils.trim(shortDescription);
+						shortDescription = StringUtils.trim(shortDescription);
 						if (StringUtils.length(shortDescription) > 0) {
 							description = " :: " + shortDescription;
 						}
@@ -848,7 +849,7 @@ public class QueryExecute extends HttpServlet {
 									 * GRAPH
 									 */
 									probe = 105;
-									
+
 									//do initial preparation of graph object
 									ArtGraph ag = artGraphOut(rsmd, request, graphOptions, shortDescription, queryType);
 

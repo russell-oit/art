@@ -8,6 +8,7 @@ ART 2.5.1
 * Fix for start query not displaying
 * Fix for invalid drill down queries link
 * Fix for not being able to define email jobs in Italian and Portuguese locales
+* Added some 2D charts
 * Allow use of jndi datasources
 * Allow rename and move of queries from the query management console
 * Allow xy chart to have multiple series
@@ -16,7 +17,7 @@ ART 2.5.1
 * Allow specification of random start time for jobs 
 * Made graph x-axis label rotate and remove options configurable per query
 * Automatically compile all subreports in a jasper report
-* Added field for uploading subreports used by a jasper report
+* Added separate field for uploading subreports used by a jasper report
 * Updated jasperreports to 5.0.1
 
 ART 2.5

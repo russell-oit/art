@@ -307,6 +307,7 @@ public class ExportGraph {
 			// build the chart object
 			switch (queryType) {
 				case -2:
+				case -13:
 					//pie chart				
 
 					//create dataset for the pie chart
@@ -316,12 +317,17 @@ public class ExportGraph {
 					DefaultPieDataset pieDataset = (DefaultPieDataset) pieChart.produceDataset(null);
 
 					//create chart
-					chart = ChartFactory.createPieChart3D(title, pieDataset, showLegend, showTooltips, showUrls);
+					if(queryType==-2){
+						chart = ChartFactory.createPieChart3D(title, pieDataset, showLegend, showTooltips, showUrls);
+					} else {
+						//2D pie chart
+						chart = ChartFactory.createPieChart(title, pieDataset, showLegend, showTooltips, showUrls);
+					}
 
-					//set chart section labels. to have name of category, data value and percentage e.g. laptops = 21 (54%)
-					PiePlot3D piePlot = (PiePlot3D) chart.getPlot();
+					//set chart section labels. {0} = category, {1} = data value and {2} = percentage
+					PiePlot piePlot = (PiePlot) chart.getPlot();
 					if (showLabels) {
-						piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} = {1} ({2})"));
+						piePlot.setLabelGenerator(new StandardPieSectionLabelGenerator("{1} ({2})"));
 					} else {
 						piePlot.setLabelGenerator(null);
 					}

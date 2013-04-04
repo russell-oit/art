@@ -253,7 +253,7 @@ tinyMCE.init({
 			document.getElementById("displayResultset").className="expand";
 
 			if(i<0){
-				if(i!=-2 && i!=-10){
+				if(i!=-2 && i!=-10 && i!=-13){
 					document.getElementById("div_xaxis1").className="expand";
 					document.getElementById("div_xaxis2").className="expand";
 					document.getElementById("div_yaxis1").className="expand";
@@ -431,6 +431,7 @@ tinyMCE.init({
                     <option value="103" <%=(currentStringValue.equals("103")?"SELECTED":"")%>>Tabular (html only)</option>
                     <option value="0" <%=(currentStringValue.equals("0")?"SELECTED":"")%>>Tabular </option>
                     <option value="-1" <%=(currentStringValue.equals("-1")?"SELECTED":"")%>>Graph: XY Chart</option>
+					<option value="-13" <%=(currentStringValue.equals("-13")?"SELECTED":"")%>>Graph: Pie 2D</option>
                     <option value="-2" <%=(currentStringValue.equals("-2")?"SELECTED":"")%>>Graph: Pie 3D</option>
                     <option value="-4" <%=(currentStringValue.equals("-4")?"SELECTED":"")%>>Graph: Vertical Bar 3D</option>
                     <option value="-8" <%=(currentStringValue.equals("-8")?"SELECTED":"")%>>Graph: Stacked Vertical Bar 3D</option>
@@ -613,14 +614,14 @@ tinyMCE.init({
 					<input type="text" name="graph_rotate_at" value=<%=aq.getGraphRotateAt()%> size="4" maxlength="4">
 					<%
 					helpText="Display x-axis labels vertically when the graph contains this number of categories."
-							+ "\\nSet to 1 to always display the labels vertically";
+							+ "\\nSet to 1 to always display x-axis labels vertically";
 					%>
 					<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 					Remove x-axis labels at
 					<input type="text" name="graph_remove_at" value=<%=aq.getGraphRemoveAt()%> size="4" maxlength="4">
 					<%
 					helpText="Omit x-axis labels when the graph contains this number of categories."
-							+ "\\nSet to 1 to always omit the labels";
+							+ "\\nSet to 1 to always omit x-axis labels";
 					%>
 					<input type="button" class="buttonup" onclick="javascript:alert('<%=helpText%>')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
 				</div>

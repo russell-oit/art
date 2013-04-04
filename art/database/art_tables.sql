@@ -135,9 +135,9 @@ ALTER TABLE ART_QUERY_GROUPS ADD CONSTRAINT art_query_groups_uc_name UNIQUE (NAM
 -- 117 = jxls spreadsheet with template query, 118 = jxls spreadsheet with art query
 -- 119 = dynamic lov, 120 = static lov, 121 = dynamic job recipients
 -- Query types for graphs:
--- -1 = XY, -2 = Pie , -3 = Horizontal bar, -4 = Vertical bar, -5 = Line
+-- -1 = XY, -2 = Pie 3D, -3 = Horizontal bar, -4 = Vertical bar, -5 = Line
 -- -6 = Time series, -7 = Date series, -8 = stacked vertical bar, -9 = stacked horizontal bar
--- -10 = speedometer, -11 = Bubble chart, -12 = Heat Map
+-- -10 = speedometer, -11 = Bubble chart, -12 = Heat Map, -13 = Pie 2D
 
 CREATE TABLE ART_QUERIES
 (

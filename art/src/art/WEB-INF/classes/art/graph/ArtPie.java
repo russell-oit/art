@@ -35,7 +35,7 @@ import org.apache.commons.beanutils.RowSetDynaClass;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.slf4j.Logger;
@@ -438,7 +438,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	 */
 	@Override
 	public void processChart(Object chart, Map params) {
-		PiePlot3D plot = (PiePlot3D) ((JFreeChart) chart).getPlot();
+		PiePlot plot = (PiePlot) ((JFreeChart) chart).getPlot();
 
 		// switch off labels
 		String labelFormat = (String) params.get("labelFormat");
