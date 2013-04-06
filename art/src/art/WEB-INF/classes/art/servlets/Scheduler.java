@@ -30,17 +30,12 @@
  */
 package art.servlets;
 
-import art.utils.ArtJob;
-import art.utils.QuartzProperties;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.util.Properties;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.quartz.SchedulerFactory;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,12 +54,12 @@ public class Scheduler extends HttpServlet {
 	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
 	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
 	long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
-	String exportPath;
 	final String MONDRIAN_CACHE_CLEARED_FILE_NAME = "mondrian-cache-cleared.txt"; //file to indicate when the mondrian cache was last cleared
+	String exportPath;
 	Timer t;
 
 	/**
-	 * Initialize quartz scheduler and clean files timer.
+	 * Start clean files thread
 	 *
 	 * @param config servlet config
 	 * @throws ServletException
@@ -79,33 +74,7 @@ public class Scheduler extends HttpServlet {
 
 			exportPath = ArtDBCP.getExportPath();
 
-			if (ArtDBCP.isArtSettingsLoaded()) {
-				//get quartz properties object to use to instantiate a scheduler
-				QuartzProperties qp = new QuartzProperties();
-				Properties props = qp.getProperties();
-
-				if (props == null) {
-					logger.warn("Quartz properties not set. Job scheduling will not be possible");
-				} else {
-					//start quartz scheduler
-					SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
-					org.quartz.Scheduler scheduler = schedulerFactory.getScheduler();
-
-					if (ArtDBCP.isSchedulingEnabled()) {
-						scheduler.start();
-					} else {
-						scheduler.standby();
-					}
-
-					//save scheduler, to make it accessible throughout the application
-					ArtDBCP.setScheduler(scheduler);
-
-					//migrate existing jobs to quartz, if any exist from previous art versions                
-					ArtJob aj = new ArtJob();
-					aj.migrateJobsToQuartz();
-				}
-			}
-
+			//start clean thread timer
 			t = new Timer(this);
 			t.start();
 
@@ -116,7 +85,7 @@ public class Scheduler extends HttpServlet {
 	}
 
 	/**
-	 * Stop quartz scheduler and clean files timer.
+	 * Stop clean files thread
 	 */
 	@Override
 	public void destroy() {
@@ -126,21 +95,13 @@ public class Scheduler extends HttpServlet {
 			if (t != null) {
 				t.interrupt();
 			}
-			
-			//shutdown quartz scheduler
-			org.quartz.Scheduler scheduler = ArtDBCP.getScheduler();
-			if (scheduler != null) {
-				scheduler.shutdown();
-				Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
-			}
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
 	}
 
 	/**
-	 * Delete old export or job files.
+	 * Delete old export files
 	 */
 	public void clean() {
 
@@ -193,7 +154,7 @@ public class Scheduler extends HttpServlet {
 					}
 				}
 
-				//clear mondrian cache as per configuration
+				//clear mondrian cache
 				if (ArtDBCP.isArtFullVersion()) {
 					clearMondrianCache();
 				}
@@ -244,7 +205,8 @@ public class Scheduler extends HttpServlet {
 		if (mondrianCacheExpiry > 0) {
 			boolean clearCache = false;
 			long actualTime = new java.util.Date().getTime();
-			File cacheFile = new File(exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME);
+			String cacheFilePath=exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME;
+			File cacheFile = new File(cacheFilePath);
 			if (cacheFile.exists()) {
 				//check last modified date
 				long lastModified = cacheFile.lastModified();
@@ -271,7 +233,7 @@ public class Scheduler extends HttpServlet {
 				BufferedWriter out;
 				try {
 					//create file that indicates when the cache was last cleared
-					out = new BufferedWriter(new FileWriter(exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME));
+					out = new BufferedWriter(new FileWriter(cacheFilePath));
 					java.util.Date now = new java.util.Date();
 					out.write(now.toString());
 					out.close();
@@ -293,7 +255,7 @@ public class Scheduler extends HttpServlet {
 	}
 }
 
-//thread that runs scheduler clean method to delete old export and jobs files
+//thread that runs scheduler clean method to delete old export files
 class Timer extends Thread {
 
 	art.servlets.Scheduler scheduler;

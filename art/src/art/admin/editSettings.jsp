@@ -719,7 +719,7 @@
 				<option value="yes"   <%= (null_value_enabled.equals("yes")?"selected":"") %>  >Yes </option>
 				<option value="no"  <%= (null_value_enabled.equals("no")?"selected":"") %> >No</option>
 			</select>
-			<%msg = "When set to Yes, null is displayed for report fields that are null. When set to No, a blank space is displayed instead of null. This only applies for varchar fields."; %>
+			<%msg = "When set to Yes, null is displayed for report fields that are null. When set to No, a blank space is displayed instead of null."; %>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
        </tr>
@@ -830,7 +830,7 @@ ServletContext ctx   = getServletConfig().getServletContext();
 
  <p>
   <table align="center">
-   <tr><td colspan="2" class="title"> Servlet Context Properties </td></tr>
+   <tr><td colspan="2" class="title"> Application Server Properties </td></tr>
    <tr><td class="data">ART Path</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>   
    <tr><td class="data">Server Info</td><td><code> <%=ctx.getServerInfo()%></code></td></tr>
    <tr><td class="data">Servlet API Supported</td><td><code> <%=ctx.getMajorVersion()%>.<%= ctx.getMinorVersion()%></code> </td></tr>

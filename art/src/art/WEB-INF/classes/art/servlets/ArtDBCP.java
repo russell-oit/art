@@ -32,8 +32,10 @@
 package art.servlets;
 
 import art.dbcp.DataSource;
+import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.Encrypter;
+import art.utils.QuartzProperties;
 import art.utils.UserEntity;
 import com.lowagie.text.FontFactory;
 import java.sql.*;
@@ -51,6 +53,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.quartz.SchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +86,6 @@ public class ArtDBCP extends HttpServlet {
 	private static ArrayList<String> allViewModes; //all view modes
 	private static String passwordHashingAlgorithm = "bcrypt"; //use bcrypt for password hashing
 	private static int defaultMaxRows;
-	private static ServletContext ctx;
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
 	private static boolean pdfFontEmbedded = false; //determines if custom font should be embedded in the generated pdf
@@ -113,35 +116,45 @@ public class ArtDBCP extends HttpServlet {
 
 		logger.info("ART is starting up...");
 
-		ctx = getServletConfig().getServletContext();
-
 		ArtDBCPInit();
 	}
 
 	/**
-	 * Close the connection pools
+	 * Stop quartz scheduler and close datasource connections
 	 */
 	@Override
 	public void destroy() {
 
-		if (dataSources != null) {
-			for (Integer key : dataSources.keySet()) {
-				DataSource ds = dataSources.get(key);
-				ds.close();
+		try {
+			//shutdown quartz scheduler
+			if (scheduler != null) {
+				scheduler.shutdown();
 			}
+
+			//close connections
+			if (dataSources != null) {
+				for (Integer key : dataSources.keySet()) {
+					DataSource ds = dataSources.get(key);
+					ds.close();
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error", e);
 		}
 
 		logger.info("ART Stopped.");
 	}
 
 	/**
-	 * Initialize datasources, viewModes and variables
+	 * Initialize datasources, viewModes, quartz scheduler
 	 */
 	private void ArtDBCPInit() {
 
 		logger.debug("Initializing variables");
 
-		//Get some web.xml parameters                        
+		//Get some web.xml parameters    
+		ServletContext ctx = getServletConfig().getServletContext();
+
 		artVersion = ctx.getInitParameter("versionNumber");
 		if (StringUtils.equals(ctx.getInitParameter("versionType"), "light")) {
 			artFullVersion = false;
@@ -197,18 +210,43 @@ public class ArtDBCP extends HttpServlet {
 
 
 		//load settings from art.properties file
-		if (!loadArtSettings()) {
-			//art.properties not available. don't continue as required configuration settings will be missing
+		if (loadArtSettings()) {
+			//initialize datasources
+			initializeDatasources();
+
+			//register pdf fonts
+			registerPdfFonts();
+
+			//start quartz scheduler
+			try {
+				//get quartz properties object to use to instantiate a scheduler
+				QuartzProperties qp = new QuartzProperties();
+				Properties props = qp.getProperties();
+
+				if (props == null) {
+					logger.warn("Quartz properties not set. Job scheduling will not be possible");
+				} else {
+					//start quartz scheduler
+					SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
+					scheduler = schedulerFactory.getScheduler();
+
+					if (schedulingEnabled) {
+						scheduler.start();
+					} else {
+						scheduler.standby();
+					}
+
+					//migrate existing jobs to quartz, if any exist from previous art versions                
+					ArtJob aj = new ArtJob();
+					aj.migrateJobsToQuartz();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+		} else {
+			//art.properties not available
 			logger.warn("ART settings not available. Admin should define ART settings on first logon.");
-			return;
 		}
-
-		//initialize datasources
-		initializeDatasources();
-
-		//register pdf fonts
-		registerPdfFonts();
-
 	}
 
 	/**
