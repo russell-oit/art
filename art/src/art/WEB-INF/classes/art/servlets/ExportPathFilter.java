@@ -30,10 +30,15 @@ public class ExportPathFilter implements Filter {
 
 		if (ArtDBCP.isCustomExportDirectory()) {
 			HttpServletRequest request = (HttpServletRequest) arg0;
-			File requestPath = new File(request.getRequestURI());
+			String requestUri = request.getRequestURI();
+			File requestPath = new File(requestUri);
 
 			String filename = URLDecoder.decode(requestPath.getName(), "UTF-8");
-			filename = ArtDBCP.getExportPath() + filename;
+			if (requestUri.contains("/export/jobs/")) {
+				filename = ArtDBCP.getJobsPath() + filename;
+			} else {
+				filename = ArtDBCP.getExportPath() + filename;
+			}
 			File file = new File(filename);
 
 			FileInputStream fs = new FileInputStream(file);

@@ -129,6 +129,7 @@ public class ArtDBCP extends HttpServlet {
 			//shutdown quartz scheduler
 			if (scheduler != null) {
 				scheduler.shutdown();
+				Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
 			}
 
 			//close connections
@@ -177,6 +178,8 @@ public class ArtDBCP extends HttpServlet {
 				//custom export path defined
 				exportPath = ex + sep;
 				customExportDirectory = true;
+				
+				logger.info("Using custom export path: {}",exportPath);
 			}
 		} catch (NamingException e) {
 			logger.debug("Custom export directory not configured", e);
