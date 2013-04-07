@@ -1,3 +1,7 @@
+rem clear archive directory
+rd /S /Q C:\toa\Projects\ART\Nightly\hg
+md C:\toa\Projects\ART\Nightly\hg
+
 rem create archive from hg repo
 hg archive --repository C:\toa\Projects\ART\hg -t files -- C:\toa\Projects\ART\Nightly\hg
 

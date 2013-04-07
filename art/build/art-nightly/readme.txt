@@ -9,7 +9,7 @@ T ool
  Supports tabular, crosstab/pivot, charts, scheduling,  
  alerts, Jasper Reports, Mondrian OLAP, LDAP, SSO, 
  data exportable to spreadsheet & pdf.
- 100% Java, works on Apache Tomcat and other J2EE engines
+ 100% Java, works on Apache Tomcat and other Java EE engines
  (Min. req. Servlet2.5/Jsp2.1 / Java 1.6)
  
  The name ART stands for A Reporting Tool.
@@ -57,5 +57,5 @@ T ool
     
   
       ... check for updates on http://art.sourceforge.net,
-          use the Discussion forum to ask questions and enjoy ART!
+          use the Discussion forum to ask questions, and enjoy ART!
 

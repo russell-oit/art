@@ -115,7 +115,7 @@
   }
   
   //set default values. by default labels are shown for pie charts but not for category dataset charts (line and bar)
-  if(graphId==2){
+  if(graphId==2 || graphId==13){
 	labelFormat= pieLabelFormat;
 } else {
 	labelFormat=LABELS_OFF;
@@ -127,7 +127,7 @@
 	} 
   
 	if (request.getAttribute("_showlabels") != null){
-		if(graphId==2){
+		if(graphId==2 || graphId==13){
 			labelFormat= pieLabelFormat;
 		} else {
 			labelFormat=CATEGORY_LABEL_FORMAT;
