@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.sf.jxls.report.ReportManager;
 import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -93,12 +94,8 @@ public class jxlsOutput {
 
 		try {
 			String templateFileName;
-			String extension = "xls";
-			int index;
 			int datasourceId;
 			String querySql;
-			String templatesPath;
-			String fullTemplateFileName;
 
 			//get query datasource and template file name
 			connArt = ArtDBCP.getConnection();
@@ -108,8 +105,8 @@ public class jxlsOutput {
 			datasourceId = aq.getDatabaseId();
 			querySql = aq.getText();
 
-			templatesPath = ArtDBCP.getTemplatesPath();
-			fullTemplateFileName = templatesPath + templateFileName;
+			String templatesPath = ArtDBCP.getTemplatesPath();
+			String fullTemplateFileName = templatesPath + templateFileName;
 
 			String interactiveLink;
 
@@ -194,11 +191,7 @@ public class jxlsOutput {
 				SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 				h_m_s = timeFormatter.format(today);
 
-				index = templateFileName.lastIndexOf(".");
-				if (index > -1) {
-					//extension may be xlsx
-					extension = templateFileName.substring(index);
-				}
+				String extension = "." + FilenameUtils.getExtension(templateFileName);
 
 				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + extension;
 				fileName = ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename

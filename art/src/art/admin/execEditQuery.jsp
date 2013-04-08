@@ -194,18 +194,17 @@
 	validExtensions.add("jrxml");
 	validExtensions.add("xls");
 	validExtensions.add("xlsx");
-	
-	List<String> subreportValidExtensions=new ArrayList<String>();
-	subreportValidExtensions.add("jrxml");
 		
-	String extension=StringUtils.substringAfterLast(fileName, ".").toLowerCase();
-	String subreportExtension=StringUtils.substringAfterLast(subreportFileName, ".").toLowerCase();
+	String extension=FilenameUtils.getExtension(fileName).toLowerCase();
+	String subreportExtension=FilenameUtils.getExtension(subreportFileName).toLowerCase();
+	String templateExtension=FilenameUtils.getExtension(templateFileName).toLowerCase();
 		
 	if ((fileName.length()>0 && !validExtensions.contains(extension))
-	|| (subreportFileName.length()>0 && !subreportValidExtensions.contains(subreportExtension))) {
+	|| (subreportFileName.length()>0 && !validExtensions.contains(subreportExtension))
+			|| (templateFileName.length()>0 && !validExtensions.contains(templateExtension))) {
 %>
 <jsp:forward page="error.jsp">
-	<jsp:param name="MOD" value="Execute Update Query"/>
+	<jsp:param name="MOD" value="Execute Edit Query"/>
 	<jsp:param name="ACT" value="Template type"/>
 	<jsp:param name="MSG" value="Invalid template file type"/>
 	<jsp:param name="NUM" value="0"/>

@@ -1026,7 +1026,10 @@ public class ArtDBCP extends HttpServlet {
 	 * @return modified query name to be used in file names
 	 */
 	public static String cleanFileName(String fileName) {
-		return fileName.replace('/', '_').replace('*', '_').replace('&', '_').replace('?', '_').replace('!', '_').replace('\\', '_').replace('[', '_').replace(']', '_').replace(':', '_');
+		return fileName.replace('/', '_').replace('*', '_').replace('&', '_')
+				.replace('?', '_').replace('!', '_').replace('\\', '_').replace('[', '_')
+				.replace(']', '_').replace(':', '_').replace('|','_')
+				.replace('<','_').replace('>','_').replace('"', '_');
 	}
 
 	/**

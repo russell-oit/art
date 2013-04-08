@@ -28,6 +28,7 @@ import net.sf.jasperreports.engine.util.JRElementsVisitor;
 import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.engine.util.JRSwapFile;
 import net.sf.jasperreports.engine.util.JRVisitorSupport;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -133,8 +134,6 @@ public class jasperOutput {
 
 		try {
 			String templateFileName;
-			String baseFileName;
-			int index;
 			int datasourceId;
 			String querySql;
 
@@ -146,15 +145,7 @@ public class jasperOutput {
 			datasourceId = aq.getDatabaseId();
 			querySql = aq.getText();
 
-			index = templateFileName.lastIndexOf(".");
-			if (index > -1) {
-				//file name has extension
-				baseFileName = templateFileName.substring(0, index);
-			} else {
-				//file name doesn't have extension
-				baseFileName = templateFileName;
-			}
-
+			String baseFileName = FilenameUtils.getBaseName(templateFileName);
 			String templatesPath = ArtDBCP.getTemplatesPath();
 			String jasperFilePath = templatesPath + baseFileName + ".jasper";
 			String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";

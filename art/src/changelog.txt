@@ -1,3 +1,6 @@
+ART 2.6
+
+
 ART 2.5.1
 * Added Portuguese translation (thanks to Edson Richter)
 * Added Spanish translation (thanks to Carlos Narvaez)
