@@ -197,11 +197,9 @@
 		
 	String extension=FilenameUtils.getExtension(fileName).toLowerCase();
 	String subreportExtension=FilenameUtils.getExtension(subreportFileName).toLowerCase();
-	String templateExtension=FilenameUtils.getExtension(templateFileName).toLowerCase();
 		
 	if ((fileName.length()>0 && !validExtensions.contains(extension))
-	|| (subreportFileName.length()>0 && !validExtensions.contains(subreportExtension))
-			|| (templateFileName.length()>0 && !validExtensions.contains(templateExtension))) {
+	|| (subreportFileName.length()>0 && !validExtensions.contains(subreportExtension))) {
 %>
 <jsp:forward page="error.jsp">
 	<jsp:param name="MOD" value="Execute Edit Query"/>

@@ -467,10 +467,6 @@ tinyMCE.init({
                     <option value="3" <%=(currentStringValue.equals("3")?"SELECTED":"")%>>Report on Column: 3</option>
                     <option value="4" <%=(currentStringValue.equals("4")?"SELECTED":"")%>>Report on Column: 4</option>
                     <option value="5" <%=(currentStringValue.equals("5")?"SELECTED":"")%>>Report on Column: 5</option>
-                    <option value="6" <%=(currentStringValue.equals("6")?"SELECTED":"")%>>Report on Column: 6</option>
-                    <option value="7" <%=(currentStringValue.equals("7")?"SELECTED":"")%>>Report on Column: 7</option>
-                    <option value="8" <%=(currentStringValue.equals("8")?"SELECTED":"")%>>Report on Column: 8</option>
-                    <option value="9" <%=(currentStringValue.equals("9")?"SELECTED":"")%>>Report on Column: 9</option>
 
                 </select>
 					<%
