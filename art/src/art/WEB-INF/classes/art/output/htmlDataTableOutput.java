@@ -188,7 +188,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellString(String s) {
-		out.println("  <td>" + s + "</td>");
+		out.println("  <td style=\"text-align: left\">" + s + "</td>");
 	}
 
 	@Override
@@ -216,7 +216,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td> <span style=\"display:none;\">" + ArtDBCP.getDateSortString(d) + "</span>" + ArtDBCP.getDateDisplayString(d) + "</td>");
+		out.println("  <td style=\"text-align: left\"> <span style=\"display:none;\">" + ArtDBCP.getDateSortString(d) + "</span>" + ArtDBCP.getDateDisplayString(d) + "</td>");
 	}
 
 	@Override

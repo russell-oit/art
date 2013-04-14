@@ -135,7 +135,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void addCellString(String s) {
-        out.println(" <td>" + s + "</td>");
+        out.println(" <td style=\"text-align: left\">" + s + "</td>");
     }
 
     @Override
@@ -144,7 +144,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
         if (d != null) {
             formattedValue = nfPlain.format(d.doubleValue());
         }
-        out.println(" <td>" + formattedValue + "</td>");
+        out.println(" <td align=\"right\">" + formattedValue + "</td>");
     }
 
     @Override
@@ -153,12 +153,12 @@ public class htmlPlainOutput implements ArtOutputInterface {
         if (i != null) {
             formattedValue = nfPlain.format(i.longValue());
         }
-        out.println(" <td>" + formattedValue + "</td>");
+        out.println(" <td align=\"right\">" + formattedValue + "</td>");
     }
 
     @Override
     public void addCellDate(java.util.Date d) {
-        out.println(" <td>" + ArtDBCP.getDateDisplayString(d) + "</td>");
+        out.println(" <td style=\"text-align: left\">" + ArtDBCP.getDateDisplayString(d) + "</td>");
     }
 
     @Override

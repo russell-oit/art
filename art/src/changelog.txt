@@ -1,4 +1,6 @@
 ART 2.6
+* Left align text in htmlDataTable and htmlPlain view modes
+* Added DataTable translations for Spanish and Portuguese
 
 
 ART 2.5.1
