@@ -390,15 +390,10 @@ public class ArtOutHandler {
 					throw new ArtException(messages.getString("tooManyRows"));
 				}
 				Object Dy = ya[j];
-				o.addHeaderCell(y.get(Dy).toString());
+				o.addHeaderCell(y.get(Dy).toString()); //column 1 data displayed as a header
 				for (i = 0; i < xa.length; i++) {
 					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-					if (value != null) {
-						addCell(o, value, columnType);
-					} else {
-						addCell(o, "", 0);
-
-					}
+					addCell(o, value, columnType);
 				}
 				counter++;
 			}
@@ -438,7 +433,7 @@ public class ArtOutHandler {
 					throw new ArtException(messages.getString("tooManyRows"));
 				}
 				Object Dy = ya[j];
-				o.addHeaderCell(Dy.toString()); //data for column 1 displayed as a header
+				o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
 				for (i = 0; i < xa.length; i++) {
 					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
 					addCell(o, value, columnType);
