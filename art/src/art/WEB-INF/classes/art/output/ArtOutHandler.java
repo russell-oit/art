@@ -143,7 +143,7 @@ public class ArtOutHandler {
 
 		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
 		HashMap<String, String> params = new HashMap<String, String>();
-		
+
 		//checking to see if Display Null Value optional setting is set to "No"
 		if (!ArtDBCP.isNullValueEnabled()) { //setting set to "No"
 			o = new hideNullOutput(o);
@@ -197,7 +197,7 @@ public class ArtOutHandler {
 
 			//display columns for drill down queries			
 			if (drilldownCount > 0) {
-				
+
 				for (Map.Entry<Integer, DrilldownQuery> entry : drilldownQueries.entrySet()) {
 					DrilldownQuery drilldown = entry.getValue();
 					drilldownText = drilldown.getDrilldownText();
@@ -207,9 +207,9 @@ public class ArtOutHandler {
 
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
-					
-					StringBuilder sb=new StringBuilder(200);
-					
+
+					StringBuilder sb = new StringBuilder(200);
+
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 						sb.append(baseUrl).append("/user/showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
@@ -269,7 +269,7 @@ public class ArtOutHandler {
 						}
 					}
 
-					drilldownUrl=sb.toString();
+					drilldownUrl = sb.toString();
 					openInNewWindow = drilldown.getOpenInNewWindow();
 					if (StringUtils.equals(openInNewWindow, "Y") || openInNewWindow == null) {
 						//open drill down in new window
@@ -335,6 +335,11 @@ public class ArtOutHandler {
 		int colCount = rsmd.getColumnCount();
 		if (colCount != 3 && colCount != 5) {
 			throw new ArtException(messages.getString("notACrosstab"));
+		}
+
+		//checking to see if Display Null Value optional setting is set to "No"
+		if (!ArtDBCP.isNullValueEnabled()) { //setting set to "No"
+			o = new hideNullOutput(o);
 		}
 
 		// Check the data type of the value (last column)
@@ -433,14 +438,10 @@ public class ArtOutHandler {
 					throw new ArtException(messages.getString("tooManyRows"));
 				}
 				Object Dy = ya[j];
-				o.addHeaderCell(Dy.toString());
+				o.addHeaderCell(Dy.toString()); //data for column 1 displayed as a header
 				for (i = 0; i < xa.length; i++) {
 					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-					if (value != null) {
-						addCell(o, value, columnType);
-					} else {
-						addCell(o, "", 0);
-					}
+					addCell(o, value, columnType);
 				}
 				counter++;
 			}
@@ -466,12 +467,16 @@ public class ArtOutHandler {
 		} else if (columnType == 3) {
 			o.addCellDate((java.util.Date) value);
 		} else if (columnType == 4) {
-			java.sql.Clob clob = (java.sql.Clob) value;
-			try {
-				o.addCellString(clob.getSubString(1, (int) clob.length()));
-			} catch (SQLException e) {
-				logger.error("Error", e);
-				o.addCellString("Exception getting CLOB: " + e);
+			if (value == null) {
+				o.addCellString((String) value);
+			} else {
+				java.sql.Clob clob = (java.sql.Clob) value;
+				try {
+					o.addCellString(clob.getSubString(1, (int) clob.length()));
+				} catch (SQLException e) {
+					logger.error("Error", e);
+					o.addCellString("Error getting CLOB: " + e);
+				}
 			}
 		} else {
 			o.addCellString((String) value);

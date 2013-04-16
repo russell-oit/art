@@ -208,7 +208,7 @@
 	}
 	null_value_enabled=as.getSetting("null_value_enabled");
 	if(null_value_enabled==null){
-		null_value_enabled="yes";
+		null_value_enabled="no";
 	}
 
   } else {        
@@ -265,7 +265,7 @@
 	specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
 	
 	show_results_inline="yes";
-	null_value_enabled="yes";
+	null_value_enabled="no";
 	
     %>
 	

@@ -1,12 +1,12 @@
 package art.output;
 
+import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Map;
 
-import art.utils.ArtQueryParam;
-
 public class hideNullOutput implements ArtOutputInterface {
+
 	private final ArtOutputInterface artOutputInterface;
 
 	@Override
@@ -76,23 +76,29 @@ public class hideNullOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellString(String s) {
-		artOutputInterface.addCellString(s==null?" ":s);
+		if (s == null) {
+			artOutputInterface.addCellString(" ");
+		} else {
+			artOutputInterface.addCellString(s);
+		}
 	}
 
 	@Override
 	public void addCellDouble(Double d) {
-		if (d == null){
-			artOutputInterface.addCellString(" ");
-		}else{
+		if (d == null) {
+			//artOutputInterface.addCellString(" "); //display nulls as blank space
+			artOutputInterface.addCellDouble(0.0D); //display nulls as 0
+		} else {
 			artOutputInterface.addCellDouble(d);
 		}
 	}
 
 	@Override
 	public void addCellLong(Long i) {
-		if (i == null){
-			artOutputInterface.addCellString(" ");
-		}else{
+		if (i == null) {
+			//artOutputInterface.addCellString(" "); //display nulls as blank space
+			artOutputInterface.addCellLong(0L); //display nulls as 0
+		} else {
 			artOutputInterface.addCellLong(i);
 		}
 	}
@@ -126,5 +132,4 @@ public class hideNullOutput implements ArtOutputInterface {
 		super();
 		this.artOutputInterface = artOutputInterface;
 	}
-
 }
