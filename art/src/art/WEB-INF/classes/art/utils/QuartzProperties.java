@@ -234,12 +234,7 @@ public class QuartzProperties {
 						props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
 					}
 					if (props.getProperty(JNDI_URL) == null) {
-						String finalUrl = dbUrl;
-						if (!StringUtils.startsWith(finalUrl, "java:")) {
-							//use default jndi prefix
-							finalUrl = "java:comp/env/" + finalUrl;
-						}
-						props.setProperty(JNDI_URL, finalUrl);
+						props.setProperty(JNDI_URL, ArtDBCP.getJndiDatasourceUrl(dbUrl));
 					}
 				}
 			}

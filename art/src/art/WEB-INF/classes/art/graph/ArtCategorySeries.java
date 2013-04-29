@@ -284,7 +284,6 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 		String outputFormat;
 		int drilldownQueryId;
 		List<ArtQueryParam> drilldownParams;
-		String paramString;
 
 		String category;
 		double value;
@@ -312,41 +311,41 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 					dataset.addValue(value, seriesNames[series], category);
 
 					//set drill down hyperlinks
-					StringBuilder sb=new StringBuilder(200);
+					StringBuilder sb = new StringBuilder(200);
 					if (drilldown != null) {
 						drilldownQueryId = drilldown.getDrilldownQueryId();
 						outputFormat = drilldown.getOutputFormat();
 						if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 							sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 						} else {
-							sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
+							sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
+									.append("&viewMode=").append(outputFormat);
 						}
 
 						drilldownParams = drilldown.getDrilldownParams();
 						if (drilldownParams != null) {
-							for(ArtQueryParam param : drilldownParams) {
+							for (ArtQueryParam param : drilldownParams) {
 								//drill down on col 1 = drill on data value. drill down on col 2 = category name. drill down on col 3 = series name
 
 								paramLabel = param.getParamLabel();
-								paramString = "&P_" + paramLabel + "=";
 								if (param.getDrilldownColumn() == 1) {
-									paramString = paramString + value;
+									paramValue = String.valueOf(value);
 								} else if (param.getDrilldownColumn() == 2) {
 									paramValue = category;
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
 									} catch (UnsupportedEncodingException e) {
+										logger.warn("UTF-8 encoding not supported", e);
 									}
-									paramString = paramString + paramValue;
 								} else {
 									paramValue = seriesNames[series];
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
 									} catch (UnsupportedEncodingException e) {
+										logger.warn("UTF-8 encoding not supported", e);
 									}
-									paramString = paramString + paramValue;
 								}
-								sb.append(paramString);
+								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 								params.put(paramLabel, paramLabel);
 							}
 						}
@@ -363,8 +362,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									} catch (UnsupportedEncodingException e) {
 										logger.warn("UTF-8 encoding not supported", e);
 									}
-									paramString = "&P_" + paramLabel + "=" + paramValue;
-									sb.append(paramString);
+									sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 								}
 							}
 						}
@@ -380,13 +378,12 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									} catch (UnsupportedEncodingException e) {
 										logger.warn("UTF-8 encoding not supported", e);
 									}
-									paramString = "&M_" + paramLabel + "=" + param;
-									sb.append(paramString);
+									sb.append("&M_").append(paramLabel).append("=").append(param);
 								}
 							}
 						}
 
-						drilldownUrl=sb.toString();
+						drilldownUrl = sb.toString();
 						//unique item to identify data in hashmap will be combination of category and series
 						key = category + String.valueOf(series);
 						drilldownLinks.put(key, drilldownUrl);
@@ -412,24 +409,24 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 				dataset.addValue(value, tmpSeriesName, category);
 
 				//set drill down hyperlinks
-				StringBuilder sb=new StringBuilder(200);
+				StringBuilder sb = new StringBuilder(200);
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
-						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
+						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
+								.append("&viewMode=").append(outputFormat);
 					}
 
 					drilldownParams = drilldown.getDrilldownParams();
 					if (drilldownParams != null) {
-						for(ArtQueryParam param : drilldownParams) {
+						for (ArtQueryParam param : drilldownParams) {
 							//drill down on col 1 = drill on data value. drill down on col 2 = category name. drill down on col 3 = series name							
 							paramLabel = param.getParamLabel();
-							paramString = "&P_" + paramLabel + "=";
 							if (param.getDrilldownColumn() == 1) {
-								paramString = paramString + value;
+								paramValue = String.valueOf(value);
 							} else if (param.getDrilldownColumn() == 2) {
 								paramValue = category;
 								try {
@@ -437,7 +434,6 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = paramString + paramValue;
 							} else {
 								paramValue = tmpSeriesName;
 								try {
@@ -445,9 +441,8 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = paramString + paramValue;
 							}
-							sb.append(paramString);
+							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							params.put(paramLabel, paramLabel);
 						}
 					}
@@ -464,8 +459,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&P_" + paramLabel + "=" + paramValue;
-								sb.append(paramString);
+								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							}
 						}
 					}
@@ -481,8 +475,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&M_" + paramLabel + "=" + param;
-								sb.append(paramString);
+								sb.append("&M_").append(paramLabel).append("=").append(param);
 							}
 						}
 					}
@@ -497,8 +490,8 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 						seriesList.put(tmpSeriesName, Integer.valueOf(seriesId)); // map series name to array id
 						series++;
 					}
-					
-					drilldownUrl=sb.toString();
+
+					drilldownUrl = sb.toString();
 					key = category + String.valueOf(seriesId);
 					drilldownLinks.put(key, drilldownUrl);
 				}

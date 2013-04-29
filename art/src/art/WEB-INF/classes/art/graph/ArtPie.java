@@ -77,31 +77,31 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	DefaultPieDataset dataset = new DefaultPieDataset();
 	boolean showGraphData = false;
 	RowSetDynaClass graphData = null; //store graph data in disconnected, serializable object
-	Map<Integer,ArtQueryParam> displayParameters=null; //to enable display of graph parameters in pdf output
+	Map<Integer, ArtQueryParam> displayParameters = null; //to enable display of graph parameters in pdf output
 
 	/**
 	 * Constructor
 	 */
 	public ArtPie() {
 	}
-	
+
 	@Override
 	public void setQueryType(int queryType) {
 		//not used
 	}
-	
+
 	@Override
-	public void setDisplayParameters(Map<Integer,ArtQueryParam> value){
-		displayParameters=value;
+	public void setDisplayParameters(Map<Integer, ArtQueryParam> value) {
+		displayParameters = value;
 	}
-	
+
 	@Override
-	public Map<Integer,ArtQueryParam> getDisplayParameters(){
+	public Map<Integer, ArtQueryParam> getDisplayParameters() {
 		return displayParameters;
 	}
-	
+
 	@Override
-	public RowSetDynaClass getGraphData(){
+	public RowSetDynaClass getGraphData() {
 		return graphData;
 	}
 
@@ -245,7 +245,6 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 		String outputFormat;
 		int drilldownQueryId;
 		List<ArtQueryParam> drilldownParams;
-		String paramString;
 		String category;
 
 		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
@@ -265,24 +264,24 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 				}
 
 				//set drill down hyperlinks
-				StringBuilder sb=new StringBuilder(200);
+				StringBuilder sb = new StringBuilder(200);
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
-						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
+						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
+								.append("&viewMode=").append(outputFormat);
 					}
 
 					drilldownParams = drilldown.getDrilldownParams();
 					if (drilldownParams != null) {
-						for(ArtQueryParam param : drilldownParams) {
+						for (ArtQueryParam param : drilldownParams) {
 							//drill down on col 1 = drill on data value. drill down on col 2 = category name
 							paramLabel = param.getParamLabel();
-							paramString = "&P_" + paramLabel + "=";
 							if (param.getDrilldownColumn() == 1) {
-								paramString = paramString + rs.getString(2);
+								paramValue = rs.getString(2);
 							} else {
 								paramValue = category;
 								try {
@@ -290,9 +289,8 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = paramString + paramValue;
 							}
-							sb.append(paramString);
+							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							params.put(paramLabel, paramLabel);
 						}
 					}
@@ -309,8 +307,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&P_" + paramLabel + "=" + paramValue;
-								sb.append(paramString);
+								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							}
 						}
 					}
@@ -326,13 +323,12 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&M_" + paramLabel + "=" + param;
-								sb.append(paramString);
+								sb.append("&M_").append(paramLabel).append("=").append(param);
 							}
 						}
 					}
 
-					drilldownUrl=sb.toString();
+					drilldownUrl = sb.toString();
 					drilldownLinks.put(category, drilldownUrl);
 				}
 			}
@@ -346,7 +342,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 			}
 			graphData = new RowSetDynaClass(rs, false, true);
 		} else {
-			graphData=null;
+			graphData = null;
 		}
 	}
 
@@ -373,8 +369,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	 *
 	 * @param params
 	 * @param since
-	 * @return
-	 * <code>true</code> if the data for the chart has expired
+	 * @return <code>true</code> if the data for the chart has expired
 	 */
 	@Override
 	public boolean hasExpired(Map params, java.util.Date since) {

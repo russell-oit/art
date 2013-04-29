@@ -178,8 +178,8 @@ public class ArtDBCP extends HttpServlet {
 				//custom export path defined
 				exportPath = ex + sep;
 				customExportDirectory = true;
-				
-				logger.info("Using custom export path: {}",exportPath);
+
+				logger.info("Using custom export path: {}", exportPath);
 			}
 		} catch (NamingException e) {
 			logger.debug("Custom export directory not configured", e);
@@ -885,12 +885,7 @@ public class ArtDBCP extends HttpServlet {
 
 		try {
 			InitialContext ic = new InitialContext();
-			String finalUrl = jndiUrl;
-			if (!StringUtils.startsWith(finalUrl, "java:")) {
-				//use default jndi prefix
-				finalUrl = "java:comp/env/" + finalUrl;
-			}
-			javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(finalUrl);
+			javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(getJndiDatasourceUrl(jndiUrl));
 			conn = ds.getConnection();
 		} catch (NamingException e) {
 			logger.error("Error", e);
@@ -1028,8 +1023,8 @@ public class ArtDBCP extends HttpServlet {
 	public static String cleanFileName(String fileName) {
 		return fileName.replace('/', '_').replace('*', '_').replace('&', '_')
 				.replace('?', '_').replace('!', '_').replace('\\', '_').replace('[', '_')
-				.replace(']', '_').replace(':', '_').replace('|','_')
-				.replace('<','_').replace('>','_').replace('"', '_');
+				.replace(']', '_').replace(':', '_').replace('|', '_')
+				.replace('<', '_').replace('>', '_').replace('"', '_');
 	}
 
 	/**
@@ -1470,5 +1465,15 @@ public class ArtDBCP extends HttpServlet {
 		}
 
 		return details;
+	}
+
+	public static String getJndiDatasourceUrl(String url) {
+		String finalUrl = url;
+		if (!StringUtils.startsWith(finalUrl, "java:")) {
+			//use default jndi prefix
+			finalUrl = "java:comp/env/" + finalUrl;
+		}
+		
+		return finalUrl;
 	}
 }

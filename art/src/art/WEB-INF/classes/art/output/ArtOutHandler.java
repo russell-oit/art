@@ -134,7 +134,6 @@ public class ArtOutHandler {
 		String outputFormat;
 		int drilldownQueryId;
 		List<ArtQueryParam> drilldownParams;
-		String paramString;
 		String openInNewWindow;
 
 		//allow null int or float fields to be indicated as null instead of 0
@@ -213,7 +212,8 @@ public class ArtOutHandler {
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 						sb.append(baseUrl).append("/user/showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
-						sb.append(baseUrl).append("/user/ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
+						sb.append(baseUrl).append("/user/ExecuteQuery?queryId=").append(drilldownQueryId)
+								.append("&viewMode=").append(outputFormat);
 					}
 
 					String paramLabel;
@@ -228,8 +228,7 @@ public class ArtOutHandler {
 							} catch (UnsupportedEncodingException e) {
 								logger.warn("UTF-8 encoding not supported", e);
 							}
-							paramString = "&P_" + paramLabel + "=" + paramValue;
-							sb.append(paramString);
+							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							params.put(paramLabel, paramValue);
 						}
 					}
@@ -246,8 +245,7 @@ public class ArtOutHandler {
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&P_" + paramLabel + "=" + paramValue;
-								sb.append(paramString);
+								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							}
 						}
 					}
@@ -263,8 +261,7 @@ public class ArtOutHandler {
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&M_" + paramLabel + "=" + param;
-								sb.append(paramString);
+								sb.append("&M_").append(paramLabel).append("=").append(param);
 							}
 						}
 					}
@@ -463,7 +460,7 @@ public class ArtOutHandler {
 			o.addCellDate((java.util.Date) value);
 		} else if (columnType == 4) {
 			if (value == null) {
-				o.addCellString((String) value);
+				o.addCellString(null);
 			} else {
 				java.sql.Clob clob = (java.sql.Clob) value;
 				try {

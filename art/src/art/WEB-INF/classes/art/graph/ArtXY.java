@@ -282,7 +282,6 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 		String outputFormat;
 		int drilldownQueryId;
 		List<ArtQueryParam> drilldownParams;
-		String paramString;
 		String key;
 
 		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
@@ -312,7 +311,8 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
-						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
+						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
+								.append("&viewMode=").append(outputFormat);
 					}
 
 					drilldownParams = drilldown.getDrilldownParams();
@@ -320,11 +320,10 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 						for (ArtQueryParam param : drilldownParams) {
 							//drill down on col 1 = data value (y value). drill down on col 2 = category (x value). drill down on col 3 = series name. (only one series is possible)
 							paramLabel = param.getParamLabel();
-							paramString = "&P_" + paramLabel + "=";
 							if (param.getDrilldownColumn() == 1) {
-								paramString = paramString + y;
+								paramValue = String.valueOf(y);
 							} else if (param.getDrilldownColumn() == 2) {
-								paramString = paramString + x;
+								paramValue = String.valueOf(x);
 							} else {
 								paramValue = seriesName;
 								try {
@@ -332,9 +331,8 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = paramString + paramValue;
 							}
-							sb.append(paramString);
+							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							params.put(paramLabel, paramLabel);
 						}
 					}
@@ -351,8 +349,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&P_" + paramLabel + "=" + paramValue;
-								sb.append(paramString);
+								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							}
 						}
 					}
@@ -368,8 +365,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&M_" + paramLabel + "=" + param;
-								sb.append(paramString);
+								sb.append("&M_").append(paramLabel).append("=").append(param);
 							}
 						}
 					}
@@ -425,7 +421,8 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
-						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
+						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
+								.append("&viewMode=").append(outputFormat);
 					}
 
 					drilldownParams = drilldown.getDrilldownParams();
@@ -433,11 +430,10 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 						for (ArtQueryParam param : drilldownParams) {
 							//drill down on col 1 = data value (y value). drill down on col 2 = category (x value). drill down on col 3 = series name. 
 							paramLabel = param.getParamLabel();
-							paramString = "&P_" + paramLabel + "=";
 							if (param.getDrilldownColumn() == 1) {
-								paramString = paramString + y;
+								paramValue = String.valueOf(y);
 							} else if (param.getDrilldownColumn() == 2) {
-								paramString = paramString + x;
+								paramValue = String.valueOf(x);
 							} else {
 								paramValue = tmpSeriesName;
 								try {
@@ -445,9 +441,8 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = paramString + paramValue;
 							}
-							sb.append(paramString);
+							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							params.put(paramLabel, paramLabel);
 						}
 					}
@@ -464,8 +459,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&P_" + paramLabel + "=" + paramValue;
-								sb.append(paramString);
+								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							}
 						}
 					}
@@ -481,8 +475,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								} catch (UnsupportedEncodingException e) {
 									logger.warn("UTF-8 encoding not supported", e);
 								}
-								paramString = "&M_" + paramLabel + "=" + param;
-								sb.append(paramString);
+								sb.append("&M_").append(paramLabel).append("=").append(param);
 							}
 						}
 					}
