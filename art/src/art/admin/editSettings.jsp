@@ -717,7 +717,8 @@
         <td class="data">
 			<select name="null_value_enabled">
 				<option value="yes"   <%= (null_value_enabled.equals("yes")?"selected":"") %>  >Yes </option>
-				<option value="no"  <%= (null_value_enabled.equals("no")?"selected":"") %> >No</option>
+				<option value="no"  <%= (null_value_enabled.equals("no")?"selected":"") %> >No (Numbers as blank)</option>
+				<option value="no_numbers_as_zero"  <%= (null_value_enabled.equals("no_numbers_as_zero")?"selected":"") %> >No (Numbers as zero)</option>
 			</select>
 			<%msg = "When set to Yes, null is displayed for report fields that are null. When set to No, a blank space is displayed instead of null."; %>
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">

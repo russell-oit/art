@@ -1,7 +1,7 @@
 ART 2.6
 * Left align text in htmlDataTable and htmlPlain view modes
 * Added DataTable translations for Spanish and Portuguese
-* Display 0 for numbers when display null value is set to No
+* Allow display of 0 for numbers when value is null
 
 ART 2.5.1
 * Added Portuguese translation (thanks to Edson Richter)

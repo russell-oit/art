@@ -330,7 +330,7 @@ public class UserEntity implements Serializable {
 						+ " FROM ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUPS AUG "
 						+ " WHERE AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID "
 						+ " AND AUGA.USERNAME=? "
-						+ " ORDER BY AUGA.USER_GROUP_ID";
+						+ " ORDER BY AUG.NAME";
 
 				ps = conn.prepareStatement(SqlQuery);
 				ps.setString(1, user);
@@ -352,7 +352,7 @@ public class UserEntity implements Serializable {
 						+ " FROM ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUPS AUG "
 						+ " WHERE AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID "
 						+ " AND AUGA.USERNAME=? "
-						+ " ORDER BY AUGA.USER_GROUP_ID";
+						+ " ORDER BY AUG.NAME";
 
 				ps = conn.prepareStatement(SqlQuery);
 				ps.setString(1, user);

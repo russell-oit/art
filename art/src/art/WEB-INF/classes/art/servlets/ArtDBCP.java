@@ -102,6 +102,7 @@ public class ArtDBCP extends HttpServlet {
 	public static boolean showResultsInline = true;
 	private static boolean nullValueEnabled = true; //to enable blank spaces instead of "null" for varchar fields on reports
 	private static boolean customExportDirectory = false; //to enable custom export path
+	private static boolean nullNumbersAsBlank=true; //whether null numbers are displayed as blank or a zero when nullValueEnabled is true
 
 	/**
 	 * {@inheritDoc}
@@ -353,8 +354,13 @@ public class ArtDBCP extends HttpServlet {
 			}
 
 			String nullValue = as.getSetting("null_value_enabled");
-			if (StringUtils.equals(nullValue, "no")) {
+			if (StringUtils.startsWith(nullValue, "no")) {
 				nullValueEnabled = false;
+				if (StringUtils.equals(nullValue, "no")) {
+					nullNumbersAsBlank=true;
+				} else {
+					nullNumbersAsBlank=false; //null numbers as zero
+				}
 			} else {
 				nullValueEnabled = true;
 			}
@@ -663,6 +669,15 @@ public class ArtDBCP extends HttpServlet {
 	 */
 	public static boolean isCustomExportDirectory() {
 		return customExportDirectory;
+	}
+	
+		/**
+	 * Determine if displaying null numbers as blank or as zero 
+	 * when nullValueEnabled is true
+	 * @return <code>true</code> if displaying null numbers as blank. Otherwise, display null numbers as zero
+	 */
+	public static boolean isNullNumbersAsBlank() {
+		return nullNumbersAsBlank;
 	}
 
 	/**

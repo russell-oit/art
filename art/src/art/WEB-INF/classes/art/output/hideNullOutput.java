@@ -1,5 +1,6 @@
 package art.output;
 
+import art.servlets.ArtDBCP;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -86,8 +87,11 @@ public class hideNullOutput implements ArtOutputInterface {
 	@Override
 	public void addCellDouble(Double d) {
 		if (d == null) {
-			//artOutputInterface.addCellString(" "); //display nulls as blank space
-			artOutputInterface.addCellDouble(0.0D); //display nulls as 0
+			if (ArtDBCP.isNullNumbersAsBlank()) {
+				artOutputInterface.addCellString(" "); //display nulls as blank space
+			} else {
+				artOutputInterface.addCellDouble(0.0D); //display nulls as 0
+			}
 		} else {
 			artOutputInterface.addCellDouble(d);
 		}
@@ -96,8 +100,11 @@ public class hideNullOutput implements ArtOutputInterface {
 	@Override
 	public void addCellLong(Long i) {
 		if (i == null) {
-			//artOutputInterface.addCellString(" "); //display nulls as blank space
-			artOutputInterface.addCellLong(0L); //display nulls as 0
+			if (ArtDBCP.isNullNumbersAsBlank()) {
+				artOutputInterface.addCellString(" "); //display nulls as blank space
+			} else {
+				artOutputInterface.addCellLong(0L); //display nulls as 0
+			}
 		} else {
 			artOutputInterface.addCellLong(i);
 		}
