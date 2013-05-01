@@ -205,6 +205,11 @@ public class xlsxOutput implements ArtOutputInterface {
 			errorOccurred = true; //set flag so that no more rows are processed
 		}
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		addHeaderCell(s);
+	}
 
 	@Override
 	public void endHeader() {

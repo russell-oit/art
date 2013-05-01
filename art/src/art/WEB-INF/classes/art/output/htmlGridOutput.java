@@ -95,7 +95,12 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addHeaderCell(String s) {		
-		out.println("  <th class=\"header\">" + s + "</th>");
+		out.println(" <th class=\"header\">" + s + "</th>");
+	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {		
+		out.println(" <th style=\"text-align: left\">" + s + "</th>");
 	}
 
 	@Override

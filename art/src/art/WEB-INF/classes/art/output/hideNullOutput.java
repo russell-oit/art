@@ -64,6 +64,11 @@ public class hideNullOutput implements ArtOutputInterface {
 	public void addHeaderCell(String s) {
 		artOutputInterface.addHeaderCell(s);
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		artOutputInterface.addHeaderCellLeft(s);
+	}
 
 	@Override
 	public void endHeader() {

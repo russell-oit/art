@@ -123,6 +123,11 @@ public class htmlPlainOutput implements ArtOutputInterface {
     public void addHeaderCell(String s) {
         out.println("<td><b>" + s + "</b></td>");
     }
+	
+	@Override
+    public void addHeaderCellLeft(String s) {
+        addHeaderCell(s);
+    }
 
     @Override
     public void endHeader() {

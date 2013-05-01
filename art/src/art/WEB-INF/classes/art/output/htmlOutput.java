@@ -96,6 +96,11 @@ public class htmlOutput implements ArtOutputInterface {
 	public void addHeaderCell(String s) {
 		out.println("<td class=\"qeattr\">" + s + "</td>");
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		out.println("<td class=\"qeattrLeft\">" + s + "</td>");
+	}
 
 	@Override
 	public void endHeader() {

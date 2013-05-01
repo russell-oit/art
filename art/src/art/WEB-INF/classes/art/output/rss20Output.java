@@ -190,6 +190,11 @@ public class rss20Output implements ArtOutputInterface {
         columnNames[columnIndex] = s;
         columnIndex++;
     }
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		addHeaderCell(s);
+	}
 
     @Override
     public void endHeader() {

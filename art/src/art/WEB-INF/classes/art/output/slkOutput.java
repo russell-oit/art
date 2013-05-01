@@ -211,6 +211,11 @@ public class slkOutput implements ArtOutputInterface {
 	public void addHeaderCell(String s) {
 		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + s + "\"\n");
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		addHeaderCell(s);
+	}
 
 	@Override
 	public void endHeader() {

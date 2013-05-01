@@ -240,6 +240,11 @@ public class pdfOutput implements ArtOutputInterface {
 		cell.setGrayFill(headergray);
 		table.addCell(cell);
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		addHeaderCell(s);
+	}
 
 	@Override
 	public void endHeader() {

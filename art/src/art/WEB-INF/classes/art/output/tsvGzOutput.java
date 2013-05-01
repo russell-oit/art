@@ -170,6 +170,11 @@ public class tsvGzOutput implements ArtOutputInterface {
 		exportFileStrBuf.append(s);
 		exportFileStrBuf.append("\t");
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		addHeaderCell(s);
+	}
 
 	@Override
 	public void endHeader() {

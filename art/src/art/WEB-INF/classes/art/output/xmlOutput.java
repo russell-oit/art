@@ -172,6 +172,11 @@ public class xmlOutput implements ArtOutputInterface {
     public void addHeaderCell(String s) {
         out.println("<col type=\"header\">" + XmlDataProvider.parseXml(s) + "</col>");
     }
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		addHeaderCell(s);
+	}
 
     @Override
     public void endHeader() {

@@ -140,6 +140,11 @@ public interface ArtOutputInterface {
      * @param s column header name
      */
     public void addHeaderCell(String s);
+	
+	/**     
+    Add a header cell whose text is left aligned
+     */
+	public void addHeaderCellLeft(String s);
 
     /**     
     Method invoked to state that the header finishes.

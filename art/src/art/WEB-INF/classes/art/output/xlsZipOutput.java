@@ -211,6 +211,11 @@ public class xlsZipOutput implements ArtOutputInterface {
 
 		cell.setCellStyle(headerStyle);
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		addHeaderCell(s);
+	}
 
 	@Override
 	public void endHeader() {

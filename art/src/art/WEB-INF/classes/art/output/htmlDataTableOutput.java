@@ -174,6 +174,11 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 	public void addHeaderCell(String s) {
 		out.println("  <th>" + s + "</th>");
 	}
+	
+	@Override
+	public void addHeaderCellLeft(String s) {
+		out.println("  <th style=\"text-align: left\">" + s + "</th>");
+	}
 
 	@Override
 	public void endHeader() {
