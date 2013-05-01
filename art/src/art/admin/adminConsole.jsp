@@ -162,8 +162,8 @@
 		/*
 		     *   Manage Shared Jobs
 		     */
-		if (accessLevel >=10) {
-			//junior admin and above
+		if (accessLevel >=80) {
+			//senior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageSharedJobs.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
 			Shared Jobs
@@ -175,8 +175,8 @@
 		/*
 		     *   Manage Job Schedules
 		     */
-		if (accessLevel >=10) {
-			//junior admin and above
+		if (accessLevel >=80) {
+			//senior admin and above
    %>
 		    <tr><td class="artLink" onclick="javascript:parent.location='manageJobSchedules.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
 			Schedules

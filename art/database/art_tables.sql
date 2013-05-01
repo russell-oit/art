@@ -72,7 +72,7 @@ INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) VALUES('database version',
 -- ART_USERS 
 -- Stores user info
 
--- ACCESS_LEVEL: 0= normal user, 5 = normal user who can schedule jobs
+-- ACCESS_LEVEL: 0 = normal user, 5 = normal user who can schedule jobs
 -- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin, 100 = super admin
 
 CREATE TABLE ART_USERS

@@ -83,7 +83,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 		} else if (action.equals("queriesadmin")) {
 			result = getXmlAdminQueries(request, response, username);
 		} else if (action.equals("querydescr")) {
-			result = getHtmlQueryDescr(request, response);
+			result = getHtmlQueryDescription(request, response);
 		} else if (action.equals("schedule")) {
 			result = getXmlSchedule(request, response);
 		}
@@ -270,7 +270,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	private String getHtmlQueryDescr(HttpServletRequest request, HttpServletResponse response) {
+	private String getHtmlQueryDescription(HttpServletRequest request, HttpServletResponse response) {
 
 		StringBuilder builder = new StringBuilder(200);
 

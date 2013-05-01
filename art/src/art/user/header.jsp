@@ -56,7 +56,7 @@
    <table width="100%"  class="art" cellpadding="0" cellspacing="0">
     <tr>
      <td class="attr" align="left" width="50%">
-      <% if (accessLevelHeader > 5) {%>
+      <% if (accessLevelHeader >= 10) {%>
        &nbsp;<a href="<%= request.getContextPath() %>/admin/adminConsole.jsp" ><img src="<%= request.getContextPath() %>/images/admin.png" title="Admin Console" border="0" /></a> ::
       <% } %>
 
@@ -70,7 +70,7 @@
 	  
 	  :: <a href="<%= request.getContextPath() %>/user/jobArchives.jsp"> <img src="<%= request.getContextPath() %>/images/job-archives.png" title="<%=messages.getString("jobArchives")%>" border="0" /></a>
 	  
-	  <% if (accessLevelHeader >= 10) {%>
+	  <% if (accessLevelHeader >= 30) {%>
       :: <a href="<%= request.getContextPath() %>/logs" ><img src="<%= request.getContextPath() %>/images/logs.png" title="<%=messages.getString("logsLink")%>" border="0" /></a>
       <% } %>
 

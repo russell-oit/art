@@ -118,7 +118,7 @@ public class ViewLogs extends HttpServlet {
 				toPage = "login";
 			}
 			request.getRequestDispatcher("/" + toPage + ".jsp").forward(request, response);
-		} else if (ue.getAccessLevel() >= 10) {
+		} else if (ue.getAccessLevel() >= 80) {
 			//only allow admins to view logs
 			reacquireCBA();
 			PrintWriter out = response.getWriter();

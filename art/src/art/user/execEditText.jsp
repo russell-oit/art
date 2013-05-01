@@ -33,7 +33,7 @@ if(!queryExists){
 
 PreparedQuery pq=new PreparedQuery();
 boolean canEdit=pq.canEditTextQuery(ue.getUsername(),queryId);
- if (canEdit || ue.getAccessLevel() >= 10 ) {
+ if (canEdit || ue.getAccessLevel() >= 30 ) {
 	aq.setShortDescription(description);
 	aq.setText(text);
     aq.update();
