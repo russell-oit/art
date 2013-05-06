@@ -31,7 +31,6 @@ import art.utils.ArtException;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -223,10 +222,12 @@ public class ArtOutHandler {
 						for (ArtQueryParam param : drilldownParams) {
 							paramLabel = param.getParamLabel();
 							paramValue = rs.getString(param.getDrilldownColumn());
-							try {
-								paramValue = URLEncoder.encode(paramValue, "UTF-8");
-							} catch (UnsupportedEncodingException e) {
-								logger.warn("UTF-8 encoding not supported", e);
+							if (paramValue != null) {
+								try {
+									paramValue = URLEncoder.encode(paramValue, "UTF-8");
+								} catch (Exception e) {
+									logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+								}
 							}
 							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							params.put(paramLabel, paramValue);
@@ -240,10 +241,12 @@ public class ArtOutHandler {
 							paramValue = entryInline.getValue();
 							//add parameter only if one with a similar name doesn't already exist in the drill down parameters
 							if (!params.containsKey(paramLabel)) {
-								try {
-									paramValue = URLEncoder.encode(paramValue, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									logger.warn("UTF-8 encoding not supported", e);
+								if (paramValue != null) {
+									try {
+										paramValue = URLEncoder.encode(paramValue, "UTF-8");
+									} catch (Exception e) {
+										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+									}
 								}
 								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							}
@@ -256,10 +259,12 @@ public class ArtOutHandler {
 							paramLabel = entryMulti.getKey();
 							paramValues = entryMulti.getValue();
 							for (String param : paramValues) {
-								try {
-									param = URLEncoder.encode(param, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									logger.warn("UTF-8 encoding not supported", e);
+								if (param != null) {
+									try {
+										param = URLEncoder.encode(param, "UTF-8");
+									} catch (Exception e) {
+										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
+									}
 								}
 								sb.append("&M_").append(paramLabel).append("=").append(param);
 							}

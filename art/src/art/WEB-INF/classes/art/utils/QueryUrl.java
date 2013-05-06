@@ -19,7 +19,6 @@
 package art.utils;
 
 import art.servlets.ArtDBCP;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -102,21 +101,21 @@ public class QueryUrl {
 			ps.setInt(1, queryId);
 			ResultSet rs = ps.executeQuery();
 
-			String paramType, paramName, paramValue;
+			String paramType, paramLabel, paramValue;
 			while (rs.next()) {
-				paramName = rs.getString("PARAM_LABEL");
+				paramLabel = rs.getString("PARAM_LABEL");
 				paramValue = rs.getString("DEFAULT_VALUE");
 				if (encodeUrl && paramValue != null) {
 					try {
 						paramValue = URLEncoder.encode(paramValue, "UTF-8");
-					} catch (UnsupportedEncodingException e) {
-						logger.warn("UTF-8 encoding not supported", e);
+					} catch (Exception e) {
+						logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 					}
 				}
 
 				paramType = rs.getString("PARAM_TYPE");
 				if (StringUtils.equals(paramType, "I")) { // inline
-					sb.append("&P_").append(paramName).append("=").append(paramValue);
+					sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 				}
 			}
 			rs.close();

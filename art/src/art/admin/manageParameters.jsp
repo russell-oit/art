@@ -133,7 +133,10 @@ ArtQuery aq=new ArtQuery();
         <tr>
             <td>&nbsp;</td>
         </tr>
-        <tr><td colspan="2">  <input type="button" onclick="goBackToEditQuery()" value="<< Back" name="backQuery"> </td>
+        <tr>
+			<td colspan="2">
+				<input type="button" onclick="goBackToEditQuery()" value="<< Back" name="backQuery">
+			</td>
         </tr>
     </table>
 </form>

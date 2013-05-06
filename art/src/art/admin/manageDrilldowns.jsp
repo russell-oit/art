@@ -97,15 +97,20 @@
         <%/*
            Show button : delete, modify, new
         */%>
-        <tr><td colspan="2" class="data">  <input type="button" onclick="deleteDrilldown()" value="Delete" name="ACTION">
-            </td>
+		<tr>
+			<td colspan="2" class="data">
+				<input type="button" onclick="createDrilldown()" value="New" name="ACTION">
+				&nbsp;<input type="button" onclick="updateDrilldown()" value="Modify" name="ACTION">
+				&nbsp;<input type="button" onclick="deleteDrilldown()" value="Delete" name="ACTION">
+			</td>
         </tr>
-        <tr><td colspan="2" class="data">  <input type="button" onclick="updateDrilldown()" value="Modify" name="ACTION"> </td>
+         <tr>
+            <td>&nbsp;</td>
         </tr>
         <tr>
-            <td class="data" valign="center"> <input type="button" onclick="createDrilldown()" value="New" name="ACTION"> </td>
-        </tr>
-        <tr><td colspan="2" class="data" >  <input type="button" onclick="goBackToEditQuery()" value="<< Back" name="backQuery"> </td>
+			<td colspan="2">
+				<input type="button" onclick="goBackToEditQuery()" value="<< Back" name="backQuery">
+			</td>
         </tr>
     </table>
 </form>

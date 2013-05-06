@@ -21,7 +21,6 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -326,17 +325,21 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 									paramValue = String.valueOf(value);
 								} else if (param.getDrilldownColumn() == 2) {
 									paramValue = category;
-									try {
-										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (UnsupportedEncodingException e) {
-										logger.warn("UTF-8 encoding not supported", e);
+									if (paramValue != null) {
+										try {
+											paramValue = URLEncoder.encode(paramValue, "UTF-8");
+										} catch (Exception e) {
+											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+										}
 									}
 								} else {
 									paramValue = seriesNames[series];
-									try {
-										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (UnsupportedEncodingException e) {
-										logger.warn("UTF-8 encoding not supported", e);
+									if (paramValue != null) {
+										try {
+											paramValue = URLEncoder.encode(paramValue, "UTF-8");
+										} catch (Exception e) {
+											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+										}
 									}
 								}
 								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
@@ -351,10 +354,12 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 								paramValue = entry.getValue();
 								//add parameter only if one with a similar name doesn't already exist in the drill down parameters
 								if (!params.containsKey(paramLabel)) {
-									try {
-										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (UnsupportedEncodingException e) {
-										logger.warn("UTF-8 encoding not supported", e);
+									if (paramValue != null) {
+										try {
+											paramValue = URLEncoder.encode(paramValue, "UTF-8");
+										} catch (Exception e) {
+											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+										}
 									}
 									sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 								}
@@ -367,10 +372,12 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 								paramLabel = entry.getKey();
 								paramValues = entry.getValue();
 								for (String param : paramValues) {
-									try {
-										param = URLEncoder.encode(param, "UTF-8");
-									} catch (UnsupportedEncodingException e) {
-										logger.warn("UTF-8 encoding not supported", e);
+									if (param != null) {
+										try {
+											param = URLEncoder.encode(param, "UTF-8");
+										} catch (Exception e) {
+											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
+										}
 									}
 									sb.append("&M_").append(paramLabel).append("=").append(param);
 								}
@@ -448,17 +455,21 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 								paramValue = String.valueOf(value);
 							} else if (param.getDrilldownColumn() == 2) {
 								paramValue = category;
-								try {
-									paramValue = URLEncoder.encode(paramValue, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									logger.warn("UTF-8 encoding not supported", e);
+								if (paramValue != null) {
+									try {
+										paramValue = URLEncoder.encode(paramValue, "UTF-8");
+									} catch (Exception e) {
+										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+									}
 								}
 							} else {
 								paramValue = tmpSeriesName;
-								try {
-									paramValue = URLEncoder.encode(paramValue, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									logger.warn("UTF-8 encoding not supported", e);
+								if (paramValue != null) {
+									try {
+										paramValue = URLEncoder.encode(paramValue, "UTF-8");
+									} catch (Exception e) {
+										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+									}
 								}
 							}
 							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
@@ -473,10 +484,12 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 							paramValue = entry.getValue();
 							//add parameter only if one with a similar name doesn't already exist in the drill down parameters
 							if (!params.containsKey(paramLabel)) {
-								try {
-									paramValue = URLEncoder.encode(paramValue, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									logger.warn("UTF-8 encoding not supported", e);
+								if (paramValue != null) {
+									try {
+										paramValue = URLEncoder.encode(paramValue, "UTF-8");
+									} catch (Exception e) {
+										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
+									}
 								}
 								sb.append("&P_").append(paramLabel).append("=").append(paramValue);
 							}
@@ -489,10 +502,12 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 							paramLabel = entry.getKey();
 							paramValues = entry.getValue();
 							for (String param : paramValues) {
-								try {
-									param = URLEncoder.encode(param, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									logger.warn("UTF-8 encoding not supported", e);
+								if (param != null) {
+									try {
+										param = URLEncoder.encode(param, "UTF-8");
+									} catch (Exception e) {
+										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
+									}
 								}
 								sb.append("&M_").append(paramLabel).append("=").append(param);
 							}
