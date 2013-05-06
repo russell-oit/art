@@ -18,6 +18,9 @@
  */
 package art.servlets;
 
+import art.utils.ArtQuery;
+import art.utils.ArtQueryParam;
+import art.utils.ParameterProcessor;
 import art.utils.PreparedQuery;
 import art.utils.UserEntity;
 import java.io.IOException;
@@ -113,12 +116,27 @@ public class XmlDataProvider extends BaseAjaxServlet {
 			pq.setQueryId(queryId);
 
 			// Get parameters
-			String filter = request.getParameter("filter");
+			final String filterLabel = "filter";
+			String filterValue = request.getParameter(filterLabel);
 			String isMulti = request.getParameter("isMulti");
 
+			//allow dynamic lov to use dynamic datasource
 			Map<String, String> inlineParams = new HashMap<String, String>();
-			inlineParams.put("filter", filter);
+			ArtQuery aq = new ArtQuery();
+			Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
+			if (htmlParams.isEmpty()) {
+				inlineParams.put(filterLabel, filterValue);
+			} else {
+				for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+					ArtQueryParam param = entry.getValue();
+					param.setParamValue(filterValue);
+					inlineParams.put(filterLabel, filterValue);
+					break; //can only use one parameter
+				}
+			}
+
 			pq.setInlineParams(inlineParams);
+			pq.setHtmlParams(htmlParams);
 
 			ResultSet rs = pq.executeQuery(false); //don't apply rules
 

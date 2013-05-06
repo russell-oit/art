@@ -1,7 +1,8 @@
-ART 2.6
+ART 2.5.2
 * Left align text in htmlDataTable and htmlPlain view modes
 * Added DataTable translations for Spanish and Portuguese
 * Allow display of 0 for numbers when value is null
+* Allow chained parameter lov to use dynamic datasource filter
 
 ART 2.5.1
 * Added Portuguese translation (thanks to Edson Richter)

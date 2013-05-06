@@ -58,8 +58,8 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
         <td class="data"> Edit Header and Source code</td></tr>
 
     <%
-     if (queryGroupId!=0 && (queryType<110 || (queryType>=112 && queryType<=118))) {
-     //list of values, dashboards, text ojbects do not have parameters
+     if (queryType<110 || (queryType>=112 && queryType<=119)) {
+     //static lovs, dashboards, text ojbects do not have parameters
     %>
     <tr><td class="attr" >
             <form method="post" action="manageParameters.jsp" class="data">
