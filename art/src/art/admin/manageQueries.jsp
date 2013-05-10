@@ -168,7 +168,7 @@ int queryGroupId;
 				&nbsp;
 			</td>
             <td align="left">
-				<input type="button" onclick="deleteQuery()" value="Delete"
+				<input type="button" onclick="deleteQuery()" value="Delete">
 			</td>
         </tr>
         <tr>

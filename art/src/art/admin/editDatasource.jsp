@@ -107,11 +107,15 @@ String msg;
 				inputType="text";
 			} 
 			%>
-			<td class="data"> <input type="<%=inputType%>" name="DATASOURCE_ID" value="<%=ds.getDatasourceId()%>" size="25" readonly </td>			
+			<td class="data"> 
+				<input type="<%=inputType%>" name="DATASOURCE_ID" value="<%=ds.getDatasourceId()%>" size="25" readonly>
+			</td>			
 		</tr>
 
 		<tr><td class="data"> Datasource Name </td>
-			<td class="data"> <input type="text" name="NAME" value="<%=ds.getName()%>" size="25" maxlength="25"> </td>
+			<td class="data">
+				<input type="text" name="NAME" value="<%=ds.getName()%>" size="25" maxlength="25">
+			</td>
 		</tr>
 		
 		<tr><td class="data"> Database Type</td>
@@ -136,20 +140,26 @@ String msg;
 		</tr>
 		
 		<tr><td class="data"> JDBC Driver </td>
-			<td class="data"> <input type="text" name="DRIVER" id="DRIVER" value="<%=ds.getDriver()%>" size="50" maxlength="200"> </td>
-			<%msg = "For a JNDI datasource, this must be blank"; %>
-			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			<td class="data">
+				<input type="text" name="DRIVER" id="DRIVER" value="<%=ds.getDriver()%>" size="50" maxlength="200"> 
+				<%msg = "For a JNDI datasource, this must be blank"; %>
+				<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" value="?">
+			</td>
 		</tr>
 		
 		<tr><td class="data"> JDBC URL </td>
-			<td class="data"> <input type="text" name="URL" id="URL" value="<%=ds.getUrl()%>" size="50" maxlength="2000"> </td>
-			<%msg = "For a JNDI datasource, set this to the JNDI name e.g. jdbc/MyDatasource."
-					+ " You can also use the full JNDI url e.g. java:comp/env/jdbc/MyDatasource"; %>
-			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			<td class="data">
+				<input type="text" name="URL" id="URL" value="<%=ds.getUrl()%>" size="50" maxlength="2000">
+				<%msg = "For a JNDI datasource, set this to the JNDI name e.g. jdbc/MyDatasource."
+					+ "\\nYou can also use the full JNDI url e.g. java:comp/env/jdbc/MyDatasource"; %>
+				<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
+			</td>
 		</tr>
 		
 		<tr><td class="data"> Username </td>
-			<td class="data"> <input type="text" name="USERNAME" value="<%=ds.getUsername()%>" size="25" maxlength="25"> </td>
+			<td class="data">
+				<input type="text" name="USERNAME" value="<%=ds.getUsername()%>" size="25" maxlength="25">
+			</td>
 		</tr>
 		
 		<tr>

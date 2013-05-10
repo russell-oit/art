@@ -1,9 +1,12 @@
 ART 2.5.2
 * Fix for error when drill down column has a null value
+* Updated French translation (thanks to Eric Lemesre)
+* Minor html tag corrections (thanks to Eric Lemesre)
 * Left align text in htmlDataTable and htmlPlain view modes
 * Added DataTable translations for Spanish and Portuguese
 * Allow display of 0 for numbers when value is null
 * Allow chained parameter lov to use dynamic datasource filter
+* Left align first column text in crosstab queries
 
 ART 2.5.1
 * Added Portuguese translation (thanks to Edson Richter)

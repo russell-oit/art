@@ -62,7 +62,7 @@ if (action.equals("MODIFY")){
 				inputType="text";
 			}
 			%>
-			<td class="data"> <input type="<%=inputType%>" name="GROUP_ID" value="<%=group.getGroupId()%>" size="25" readonly </td>
+			<td class="data"> <input type="<%=inputType%>" name="GROUP_ID" value="<%=group.getGroupId()%>" size="25" readonly> </td>
 
 		</tr>
 

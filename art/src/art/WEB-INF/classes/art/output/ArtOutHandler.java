@@ -378,7 +378,6 @@ public class ArtOutHandler {
 			o.setColumnsNumber(xa.length + 1);
 			o.beginHeader();
 			o.addHeaderCell(rsmd.getColumnLabel(5) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(3) + ")");
-			//o.addHeaderCellLeft(rsmd.getColumnLabel(5) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(3) + ")");
 			int i, j;
 			for (i = 0; i < xa.length; i++) {
 				o.addHeaderCell(x.get(xa[i]).toString());
@@ -393,8 +392,8 @@ public class ArtOutHandler {
 					throw new ArtException(messages.getString("tooManyRows"));
 				}
 				Object Dy = ya[j];
-				o.addHeaderCell(y.get(Dy).toString()); //column 1 data displayed as a header
-				//o.addHeaderCellLeft(y.get(Dy).toString()); //column 1 data displayed as a header
+				//o.addHeaderCell(y.get(Dy).toString()); //column 1 data displayed as a header
+				o.addHeaderCellLeft(y.get(Dy).toString()); //column 1 data displayed as a header
 				for (i = 0; i < xa.length; i++) {
 					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
 					addCell(o, value, columnType);
@@ -422,7 +421,6 @@ public class ArtOutHandler {
 			o.setColumnsNumber(xa.length + 1);
 			o.beginHeader();
 			o.addHeaderCell(rsmd.getColumnLabel(3) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(2) + ")");
-			//o.addHeaderCellLeft(rsmd.getColumnLabel(3) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(2) + ")");
 			int i, j;
 			for (i = 0; i < xa.length; i++) {
 				o.addHeaderCell(xa[i].toString());
@@ -438,8 +436,8 @@ public class ArtOutHandler {
 					throw new ArtException(messages.getString("tooManyRows"));
 				}
 				Object Dy = ya[j];
-				o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
-				//o.addHeaderCellLeft(Dy.toString()); //column 1 data displayed as a header
+				//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
+				o.addHeaderCellLeft(Dy.toString()); //column 1 data displayed as a header
 				for (i = 0; i < xa.length; i++) {
 					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
 					addCell(o, value, columnType);

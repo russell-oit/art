@@ -2233,7 +2233,8 @@ public class PreparedQuery {
 						ps.setTimestamp(i, new java.sql.Timestamp(dateValue.getTime()));
 					}
 					jasperInlineParams.put(paramName, dateValue);
-				} else if (paramDataType.equals("VARCHAR") || paramDataType.equals("TEXT")) {
+				} else { 
+					//VARCHAR, TEXT, DATASOURCE
 					if (ps != null) {
 						ps.setString(i, paramValue);
 					}
