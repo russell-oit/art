@@ -2189,6 +2189,9 @@ public class PreparedQuery {
 				ArtQuery aq = new ArtQuery();
 				htmlParams = aq.getHtmlParams(queryId);
 			}
+			
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			for (Map.Entry<Integer, String> entry : treeInline.entrySet()) {
 				paramName = entry.getValue(); //param label
@@ -2242,9 +2245,10 @@ public class PreparedQuery {
 				}
 
 				//set final sql. replace parameter placeholders ( ? ) with actual parameter values passed to database
-				if (StringUtils.contains(paramDataType, "DATE")) {
-					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				if (StringUtils.equals(paramDataType, "DATE")) {
 					finalSQL = StringUtils.replace(finalSQL, "?", "'" + df.format(dateValue) + "'", 1);
+				} else if (StringUtils.equals(paramDataType, "DATETIME")) {
+					finalSQL = StringUtils.replace(finalSQL, "?", "'" + dtf.format(dateValue) + "'", 1);
 				} else if (StringUtils.equals(paramDataType, "INTEGER") || StringUtils.equals(paramDataType, "NUMBER")) {
 					finalSQL = StringUtils.replace(finalSQL, "?", paramValue, 1);
 				} else {

@@ -555,7 +555,11 @@ public class ArtOutHandler {
 				Object pValue = param.getParamValue();
 				String outputString;
 
-				if (pValue instanceof String) {
+				if (pValue == null) {
+					//multi parameter with all selected
+					outputString = paramName + ": All <br> ";
+					out.println(outputString);
+				} else if (pValue instanceof String) {
 					String paramValue = (String) pValue;
 					outputString = paramName + ": " + paramValue + " <br> "; //default to displaying parameter value
 
