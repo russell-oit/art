@@ -1,3 +1,6 @@
+ART 2.5.3
+* Enable multi parameter to act as a master for chained parameters
+
 ART 2.5.2
 * Fix for error when drill down column has a null value
 * Updated French translation (thanks to Eric Lemesre)

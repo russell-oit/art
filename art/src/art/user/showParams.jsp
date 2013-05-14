@@ -79,7 +79,7 @@ if(queryType==112 || queryType==113 || queryType==114){
 				
                 for(ParamInterface param : params) {
                    hasParams=true;
-				   param.setMessages(messages); //enable localisation "All" string for lovs
+				   param.setMessages(messages); //enable localisation of "All" string for lovs
                    paramHtmlName=param.getHtmlName();
                    paramClass=param.getParamClass();
                    paramName=param.getName();

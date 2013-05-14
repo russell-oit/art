@@ -386,7 +386,10 @@ AjaxJspTag.Base = Class.create({
                 result.push(key + encodeURIComponent(pair));
             } else if (('select-multiple' === field.type) || ('checkbox' === field.type)) { // BUG 016027
                 if (v = value(field)) {
-                    result.push(v);
+					//Timothy Anyona 20130513
+					//result.push(v); 
+                    result.push(key + encodeURIComponent(v));
+					//
                 }
             } else if (/^(?:radio|text|textarea|password|hidden|select-one)$/i.test(field.type)) {
                 result.push(key + encodeURIComponent(field.value));

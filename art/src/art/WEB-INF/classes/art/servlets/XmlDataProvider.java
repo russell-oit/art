@@ -28,7 +28,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javax.servlet.ServletException;
@@ -109,49 +111,85 @@ public class XmlDataProvider extends BaseAjaxServlet {
 		try {
 			response.setContentType("text/xml;charset=utf-8");
 
+			// Get parameters
+			String filterLabel = "filter";
+			String[] filterValues = null; //in case master is a multi parameter
+			String filterValue = request.getParameter(filterLabel);
+			String isMultiValue = request.getParameter("isMulti");
 			int queryId = Integer.parseInt(request.getParameter("queryId"));
 
-			PreparedQuery pq = new PreparedQuery();
-			pq.setUsername(username);
-			pq.setQueryId(queryId);
+			boolean isMulti = false;
+			if (isMultiValue != null) {
+				isMulti = true;
+			}
 
-			// Get parameters
-			final String filterLabel = "filter";
-			String filterValue = request.getParameter(filterLabel);
-			String isMulti = request.getParameter("isMulti");
-
-			//allow dynamic lov to use dynamic datasource
-			Map<String, String> inlineParams = new HashMap<String, String>();
-			ArtQuery aq = new ArtQuery();
-			Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
-			if (htmlParams.isEmpty()) {
-				inlineParams.put(filterLabel, filterValue);
-			} else {
-				for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
-					ArtQueryParam param = entry.getValue();
-					param.setParamValue(filterValue);
-					inlineParams.put(filterLabel, filterValue);
-					break; //can only use one parameter
+			if (filterValue != null) { //filtervalue may be null on first display with a multi master when nothing is selected
+				//determine if chained value is a multi parameter
+				boolean isChainedValueMulti = false;
+				if (StringUtils.startsWith(filterValue, "M_")) {
+					isChainedValueMulti = true;
+					List<String> values = new ArrayList<String>();
+					String[] pairs = StringUtils.split(filterValue, "&");
+					for (String pair : pairs) {
+						values.add(StringUtils.substringAfter(pair, "="));
+					}
+					filterValues = values.toArray(new String[0]);
 				}
+
+				//execute lov to get values to display
+				Map<String, String> inlineParams = new HashMap<String, String>();
+				Map<String, String[]> multiParams = new HashMap<String, String[]>();
+				ArtQuery aq = new ArtQuery();
+				Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
+				if (htmlParams.isEmpty()) {
+					if (isChainedValueMulti) {
+						//don't add ALL_ITEMS
+						if (!StringUtils.equals(filterValues[0], "ALL_ITEMS")) {
+							multiParams.put(filterLabel, filterValues);
+						}
+					} else {
+						inlineParams.put(filterLabel, filterValue);
+					}
+				} else {
+					for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+						ArtQueryParam param = entry.getValue();
+						filterLabel = param.getParamLabel();
+						param.setParamValue(filterValue);
+						if (isChainedValueMulti) {
+							//don't add ALL_ITEMS
+							if (!StringUtils.equals(filterValues[0], "ALL_ITEMS")) {
+								multiParams.put(filterLabel, filterValues);
+							}
+						} else {
+							inlineParams.put(filterLabel, filterValue);
+						}
+						break; //can only use one parameter
+					}
+				}
+
+				PreparedQuery pq = new PreparedQuery();
+				pq.setUsername(username);
+				pq.setQueryId(queryId);
+				pq.setInlineParams(inlineParams);
+				pq.setMultiParams(multiParams);
+				pq.setHtmlParams(htmlParams);
+
+				Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
+
+				if (isMulti) {
+					//add All as the first item displayed
+					ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+					builder.addItem(messages.getString("allItems"), "ALL_ITEMS");
+				}
+
+				//add other items
+				for (Map.Entry<String, String> entry : lov.entrySet()) {
+					String value = entry.getKey();
+					String viewColumnValue = entry.getValue();
+					builder.addItem(parseXml(viewColumnValue), parseXml(value));
+				}
+				pq.close();
 			}
-
-			pq.setInlineParams(inlineParams);
-			pq.setHtmlParams(htmlParams);
-
-			ResultSet rs = pq.executeQuery(false); //don't apply rules
-
-			int viewColumn = rs.getMetaData().getColumnCount();
-			if (isMulti != null) {
-				ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
-				builder.addItem(messages.getString("allItems"), "ALL_ITEMS");
-			}
-
-			while (rs.next()) {
-				// build html option list
-				builder.addItem(parseXml(rs.getString(viewColumn)), parseXml(rs.getString(1)));
-			}
-			rs.close();
-			pq.close();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
