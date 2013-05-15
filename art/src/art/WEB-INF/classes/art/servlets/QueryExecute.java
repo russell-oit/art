@@ -775,7 +775,7 @@ public class QueryExecute extends HttpServlet {
 
 						//display parameters
 						if (showParams) {
-							ArtOutHandler.displayParameters(out, displayParams);
+							ArtOutHandler.displayParameters(out, displayParams,messages);
 						}
 
 						//display final sql

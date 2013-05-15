@@ -1335,7 +1335,7 @@ public class PreparedQuery {
 		final String blanks = "                                                       "; //any length as long as we don't have a parameter label of longer length
 
 
-		if (inlineParams == null || inlineParams.isEmpty()) {
+		if (inlineParams == null) {
 			return;
 		}
 
@@ -1439,7 +1439,7 @@ public class PreparedQuery {
 	/**
 	 * Dynamic SQL is parsed, evaluated and the sb is modified according
 	 */
-	private void applyDynamicSQL(StringBuilder sb, boolean useFilterIfText) throws ArtException {
+	private void applyDynamicSQL(StringBuilder sb, boolean usingFilter) throws ArtException {
 		String element, xmlText, exp1, exp2, op, tmp;
 		XmlInfo xinfo;
 
@@ -1514,10 +1514,32 @@ public class PreparedQuery {
 
 			//enable use of same lov for chained and non-chained parameters			
 			if (StringUtils.equals(exp1, "#filter#") && (StringUtils.equalsIgnoreCase(op, "is not null") || StringUtils.equalsIgnoreCase(op, "is not blank"))) {
-				if (useFilterIfText) {
+				if (!usingFilter) {
+					//determine if we have filter
+					if (inlineParams != null) {
+						if (inlineParams.get("filter") != null) {
+							usingFilter = true;
+						}
+					} else if (multiParams != null) {
+						if (multiParams.get("filter") != null) {
+							usingFilter = true;
+						}
+					} else if (htmlParams != null) {
+						ArtQueryParam param = htmlParams.get("P_filter");
+						if (param == null) {
+							//filter may be a multi parameter
+							param = htmlParams.get("M_filter");
+						}
+						if (param != null) {
+							usingFilter = true;
+						}
+					}
+				}
+
+				if (usingFilter) {
 					exp1Value = "#filter#"; //any string. just so that if condition is returned
-				} else if (!useFilterIfText && (inlineParams == null || inlineParams.isEmpty())) {
-					exp1Value = ""; //empty string. so that else value is returned					
+				} else {
+					exp1Value = ""; //empty sting. so that else value is returned
 				}
 			}
 
@@ -1759,7 +1781,6 @@ public class PreparedQuery {
 
 				//build and add string of values to go into IN clause of sql
 				querySql = addMultiParamValues(querySql, Arrays.asList(paramValues), param);
-
 			}
 
 			//replace any multi parameters that haven't been replaced yet. these are the ones where ALL_ITEMS was selected or all values are to be used
@@ -1773,8 +1794,7 @@ public class PreparedQuery {
 					if (StringUtils.containsIgnoreCase(querySql, "#" + paramLabel + "#")) {
 						//replace parameter with all possible values
 						List<String> finalValuesList = getAllParameterValues(paramLabel); //return all values from the parameter's lov query
-
-						if (finalValuesList != null && finalValuesList.size() > 0) {
+						if (!finalValuesList.isEmpty()) {
 							//build and add string of values to go into IN clause of sql
 							querySql = addMultiParamValues(querySql, finalValuesList, param);
 						}
@@ -1796,6 +1816,10 @@ public class PreparedQuery {
 				ArtQueryParam param = htmlParams.get(htmlName);
 				if (param != null) {
 					paramLabel = param.getParamLabel();
+					if(StringUtils.equals(paramLabel, "ignore")){
+						//allow use of multi parameter without it being included in query logic
+						continue;
+					}
 				} else {
 					//param may be null for pre-2.5.3 filter value of chained parameter
 					continue;
@@ -2003,7 +2027,7 @@ public class PreparedQuery {
 							filterLabel = valueParamHtmlName.substring(2);
 							String filterValue = inlineParams.get(filterLabel);
 
-							String searchString = Pattern.quote("#" + filterLabel + "#"); //quote in case it contains special regex characters
+							String searchString = Pattern.quote("#filter#"); //quote in case it contains special regex characters
 							String replaceString = Matcher.quoteReplacement(filterValue); //quote in case it contains special regex characters
 							lovSql = lovSql.replaceAll("(?iu)" + searchString, replaceString);
 						} else if (StringUtils.startsWith(valueParamHtmlName, "M_")) {
@@ -2017,7 +2041,7 @@ public class PreparedQuery {
 								String finalEscapedValues = buildMultiParamEscapedValues(Arrays.asList(filterValues), filterParam);
 
 								//replace #filter# with parameter values
-								String searchString = Pattern.quote("#" + filterLabel + "#"); //quote in case it contains special regex characters
+								String searchString = Pattern.quote("#filter#"); //quote in case it contains special regex characters
 								String replaceString = Matcher.quoteReplacement(finalEscapedValues); //quote in case it contains special regex characters
 								lovSql = lovSql.replaceAll("(?iu)" + searchString, replaceString);
 							}

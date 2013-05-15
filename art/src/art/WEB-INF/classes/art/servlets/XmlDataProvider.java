@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 			response.setContentType("text/xml;charset=utf-8");
 
 			// Get parameters
-			String filterLabel = "filter";
+			final String filterLabel = "filter";
 			String[] filterValues = null; //in case master is a multi parameter
 			String filterValue = request.getParameter(filterLabel);
 			String isMultiValue = request.getParameter("isMulti");
@@ -137,13 +138,17 @@ public class XmlDataProvider extends BaseAjaxServlet {
 				}
 
 				//execute lov to get values to display
+				PreparedQuery pq = new PreparedQuery();
+				pq.setUsername(username);
+				pq.setQueryId(queryId);
+
 				Map<String, String> inlineParams = new HashMap<String, String>();
 				Map<String, String[]> multiParams = new HashMap<String, String[]>();
 				ArtQuery aq = new ArtQuery();
 				Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
 				if (htmlParams.isEmpty()) {
 					if (isChainedValueMulti) {
-						//don't add ALL_ITEMS
+						//don't add ALL_ITEMS to multiParams map. Current logic works that way
 						if (!StringUtils.equals(filterValues[0], "ALL_ITEMS")) {
 							multiParams.put(filterLabel, filterValues);
 						}
@@ -151,27 +156,31 @@ public class XmlDataProvider extends BaseAjaxServlet {
 						inlineParams.put(filterLabel, filterValue);
 					}
 				} else {
-					for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
-						ArtQueryParam param = entry.getValue();
-						filterLabel = param.getParamLabel();
-						param.setParamValue(filterValue);
+					ArtQueryParam param = htmlParams.get("P_filter");
+					if(param==null){
+						//filter may be a multi parameter
+						param=htmlParams.get("M_filter");
+					}
+					if (param != null) {
 						if (isChainedValueMulti) {
-							//don't add ALL_ITEMS
+							//don't add ALL_ITEMS to multiParams map. Current logic works that way
 							if (!StringUtils.equals(filterValues[0], "ALL_ITEMS")) {
 								multiParams.put(filterLabel, filterValues);
 							}
+							param.setParamValue(filterValues);
 						} else {
 							inlineParams.put(filterLabel, filterValue);
+							param.setParamValue(filterValue);
 						}
-						break; //can only use one parameter
 					}
 				}
 
-				PreparedQuery pq = new PreparedQuery();
-				pq.setUsername(username);
-				pq.setQueryId(queryId);
-				pq.setInlineParams(inlineParams);
-				pq.setMultiParams(multiParams);
+				if (isChainedValueMulti) {
+					pq.setMultiParams(multiParams);
+				} else {
+					pq.setInlineParams(inlineParams);
+				}
+
 				pq.setHtmlParams(htmlParams);
 
 				Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules

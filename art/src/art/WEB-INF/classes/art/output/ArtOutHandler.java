@@ -535,6 +535,10 @@ public class ArtOutHandler {
 				ta[i] = 0;
 		}
 	}
+	
+	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams) {
+		displayParameters(out,displayParams,null);
+	}
 
 	/**
 	 * Display parameters for html view modes
@@ -542,7 +546,7 @@ public class ArtOutHandler {
 	 * @param out
 	 * @param displayParams
 	 */
-	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams) {
+	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams, ResourceBundle messages) {
 		// display parameters if they are available
 		if (displayParams != null && displayParams.size() > 0 && out != null) {
 			out.println("<div align=\"center\">");
@@ -557,7 +561,11 @@ public class ArtOutHandler {
 
 				if (pValue == null) {
 					//multi parameter with all selected
-					outputString = paramName + ": All <br> ";
+					String allString="All";
+					if(messages!=null){
+						allString=messages.getString("allItems");
+					}
+					outputString = paramName + ": " + allString + " <br> ";
 					out.println(outputString);
 				} else if (pValue instanceof String) {
 					String paramValue = (String) pValue;
