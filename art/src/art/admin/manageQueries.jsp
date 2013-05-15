@@ -23,17 +23,17 @@
                 document.manageQueries.submit();
             }
         } else {
-            alert("Please select at leaset one query");
+            alert("Please select at least one query");
         }
     }
 	
 	function moveQuery() {
-        if ( document.getElementById("queryId").value > 0 && document.getElementById("newGroupId").value > 0 ) {
+        if ( document.getElementById("queryId").value > 0 && document.getElementById("newGroupId").value > -1 ) {
 			document.manageQueries.action="execManageQueries.jsp";
 			document.manageQueries.QUERYACTION.value="MOVE";
 			document.manageQueries.submit();
         } else {
-            alert("Please select at leaset one query and specify the new query group");
+            alert("Please select at least one query and specify the new query group");
         }
     }
 

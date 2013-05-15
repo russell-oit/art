@@ -20,7 +20,6 @@ package art.servlets;
 
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
-import art.utils.ParameterProcessor;
 import art.utils.PreparedQuery;
 import art.utils.UserEntity;
 import java.io.IOException;
@@ -29,7 +28,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
