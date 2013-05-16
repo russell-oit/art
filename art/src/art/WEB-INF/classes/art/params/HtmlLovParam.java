@@ -74,6 +74,11 @@ public class HtmlLovParam implements ParamInterface {
 			isMulti = true;
 		}
 	}
+	
+	@Override
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 
 	@Override
 	public String getChainedValueId() {

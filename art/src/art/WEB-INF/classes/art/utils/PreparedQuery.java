@@ -1816,67 +1816,65 @@ public class PreparedQuery {
 				ArtQueryParam param = htmlParams.get(htmlName);
 				if (param != null) {
 					paramLabel = param.getParamLabel();
-					if(StringUtils.equals(paramLabel, "ignore")){
-						//allow use of multi parameter without it being included in query logic
-						continue;
+					//allow use of multi parameter without it being included in query logic
+					//where the label starts with ignore
+					if (!StringUtils.startsWith(paramLabel, "ignore")) {
+						StringBuilder SqlAndParamIn = new StringBuilder(128);
+						SqlAndParamIn.append(" AND ").append(paramLabel).append(" IN (");
+
+						logger.debug("Number of parameters for {}/{} is {}", new Object[]{paramId, paramLabel, paramValues.length});
+
+						List<String> paramValuesList = new ArrayList<String>(); //list of parameter values as is. used by jasper reports and mdx queries
+
+						paramValuesList.addAll(Arrays.asList(paramValues));
+
+						//build comma separated list of values to use in the sql
+						String finalEscapedValues = buildMultiParamEscapedValues(paramValuesList, param);
+
+						SqlAndParamIn.append(finalEscapedValues);
+						SqlAndParamIn.append(") ");
+
+						//populate jasper multi parameters hash map
+						jasperMultiParams.put(paramLabel, paramValuesList);
+
+						//populate jxls multi parameters hash table
+						jxlsMultiParams.put(paramLabel, finalEscapedValues);
+
+						/*
+						 * The line: AND PARAM IN ( 'value1', 'value2', ... , 'valueN')
+						 * is completed (and stored in SqlAndParamIn); we can add it to
+						 * the prepared statement (only if allItems is false) We had to
+						 * handle the case where a GROUP BY or a ORDER BY expression is
+						 * present (the case in which we have a HAVING without GROUP BY
+						 * is not considered).
+						 */
+						/**
+						 * NOTE: the 'GROUP BY' and 'ORDER BY' string on the
+						 * (main query of the) Prepared Statement must be in
+						 * UPPERCASE and separated with a single blank. So
+						 * nested queries should have the words 'GROUP BY' or
+						 * 'ORDER BY' in lower case.
+						 *
+						 * NOTE2: the AND before the IN could be erroneous if we
+						 * have nothing after the WHERE => workaround set a
+						 * dummy condition WHERE 1 = 1
+						 */
+						int grb = sb.toString().lastIndexOf("GROUP BY");
+						//int hvg = SqlQueryBuf.toString().lastIndexOf("HAVING");
+						int orb = sb.toString().lastIndexOf("ORDER BY");
+
+						if ((grb != -1) || (orb != -1)) {
+							// We have a GROUP BY or an ORDER BY clause
+							int pos = ((grb > orb) && (orb > 0) ? orb : (grb == -1 ? orb : grb));
+							sb.insert(pos, SqlAndParamIn.toString());
+
+							logger.debug("Multiple - IN inserted pos: {} because of GROUP BY or ORDER BY", pos);
+						} else { // We can just append
+							sb.append(SqlAndParamIn.toString());
+							logger.debug("Multiple - IN appended");
+
+						}
 					}
-				} else {
-					//param may be null for pre-2.5.3 filter value of chained parameter
-					continue;
-				}
-
-				StringBuilder SqlAndParamIn = new StringBuilder(128);
-				SqlAndParamIn.append(" AND ").append(paramLabel).append(" IN (");
-
-				logger.debug("Number of parameters for {}/{} is {}", new Object[]{paramId, paramLabel, paramValues.length});
-
-				List<String> paramValuesList = new ArrayList<String>(); //list of parameter values as is. used by jasper reports and mdx queries
-
-				paramValuesList.addAll(Arrays.asList(paramValues));
-
-				//build comma separated list of values to use in the sql
-				String finalEscapedValues = buildMultiParamEscapedValues(paramValuesList, param);
-
-				SqlAndParamIn.append(finalEscapedValues);
-				SqlAndParamIn.append(") ");
-
-				//populate jasper multi parameters hash map
-				jasperMultiParams.put(paramLabel, paramValuesList);
-
-				//populate jxls multi parameters hash table
-				jxlsMultiParams.put(paramLabel, finalEscapedValues);
-
-				/*
-				 * The line: AND PARAM IN ( 'value1', 'value2', ... , 'valueN')
-				 * is completed (and stored in SqlAndParamIn); we can add it to
-				 * the prepared statement (only if allItems is false) We had to
-				 * handle the case where a GROUP BY or a ORDER BY expression is
-				 * present (the case in which we have a HAVING without GROUP BY
-				 * is not considered).
-				 */
-				/**
-				 * NOTE: the 'GROUP BY' and 'ORDER BY' string on the (main query
-				 * of the) Prepared Statement must be in UPPERCASE and separated
-				 * with a single blank. So nested queries should have the words
-				 * 'GROUP BY' or 'ORDER BY' in lower case.
-				 *
-				 * NOTE2: the AND before the IN could be erroneous if we have
-				 * nothing after the WHERE => workaround set a dummy condition
-				 * WHERE 1 = 1
-				 */
-				int grb = sb.toString().lastIndexOf("GROUP BY");
-				//int hvg = SqlQueryBuf.toString().lastIndexOf("HAVING");
-				int orb = sb.toString().lastIndexOf("ORDER BY");
-
-				if ((grb != -1) || (orb != -1)) {
-					// We have a GROUP BY or an ORDER BY clause
-					int pos = ((grb > orb) && (orb > 0) ? orb : (grb == -1 ? orb : grb));
-					sb.insert(pos, SqlAndParamIn.toString());
-
-					logger.debug("Multiple - IN inserted pos: {} because of GROUP BY or ORDER BY", pos);
-				} else { // We can just append
-					sb.append(SqlAndParamIn.toString());
-					logger.debug("Multiple - IN appended");
 				}
 			}
 		}

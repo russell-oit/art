@@ -71,6 +71,11 @@ public class HtmlDateInput implements ParamInterface {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(defaultDateFormat);
         this.defaultValue = dateFormatter.format(defaultDate);
     }
+	
+	@Override
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 
     @Override
     public String getChainedValueId() {

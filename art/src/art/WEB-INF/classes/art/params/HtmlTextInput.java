@@ -36,6 +36,11 @@ public class HtmlTextInput implements ParamInterface {
         this.paramDescr = paramDescr;
         this.defaultValue = defaultValue;
     }
+	
+	@Override
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 
     @Override
     public String getChainedValueId() {

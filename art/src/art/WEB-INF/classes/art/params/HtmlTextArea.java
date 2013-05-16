@@ -38,6 +38,11 @@ public class HtmlTextArea implements ParamInterface {
             this.defaultValue = "";
         }
     }
+	
+	@Override
+    public String getDefaultValue() {
+        return defaultValue;
+    }
 
     @Override
     public String getChainedValueId() {

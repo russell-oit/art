@@ -84,4 +84,10 @@ public interface ParamInterface {
 	 * @param msgs 
 	 */
 	public void setMessages(java.util.ResourceBundle msgs);
+	
+	/** 
+     * Get the Html element default value
+     * @return the Html element default value
+     */
+    public String getDefaultValue();
 }

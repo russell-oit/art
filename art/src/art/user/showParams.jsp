@@ -76,6 +76,7 @@ if(queryType==112 || queryType==113 || queryType==114){
                 String paramChainedId;
                 String paramId;
 				String paramChainedValueId;
+				String defaultValue;
 				
                 for(ParamInterface param : params) {
                    hasParams=true;
@@ -86,6 +87,7 @@ if(queryType==112 || queryType==113 || queryType==114){
                    paramChainedId=param.getChainedId();
                    paramId=param.getId();
 				   paramChainedValueId=param.getChainedValueId();
+				   defaultValue=param.getDefaultValue();
 
                    if ( paramClass.equals("INTEGER") || paramClass.equals("NUMBER") || paramClass.equals("DATE") || paramClass.equals("DATETIME") ){
                       validateJS.append("ValidateValue('"+paramClass+"', '"+paramName+"', document.getElementById('"+paramId+"').value ) && ");
@@ -113,6 +115,7 @@ if(queryType==112 || queryType==113 || queryType==114){
 							source="<%=paramChainedId%>"
 							target="<%=paramId%>"
 							parameters="<%=ajaxParams%>"
+							defaultOptions="<%=defaultValue%>"
 							preFunction="artAddWork"
 							postFunction="artRemoveWork"
 							executeOnLoad="true"
