@@ -1,0 +1,124 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>net.sf.art</groupId>
+	<artifactId>art-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Parent project for ART</name>
+	<url>http://art.sourceforge.net</url>
+	<description>Parent project for ART. ART is A Reporting Tool.</description>
+
+	<modules>
+		<module>artdbcp</module>
+		<module>artmail</module>
+		<module>art</module>
+	</modules>
+
+	<scm>
+		<connection>scm:hg:http://hg.code.sf.net/p/art/code</connection>
+		<developerConnection>scm:hg:https://hg.code.sf.net/p/art/code</developerConnection>
+		<url>http://hg.code.sf.net/p/art/code</url>
+	</scm>
+
+	<issueManagement>
+		<system>SourceForge</system>
+		<url>http://sourceforge.net/p/art/tickets/</url>
+	</issueManagement>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<jdk.version>1.6</jdk.version>
+		<poi.version>3.7</poi.version>
+	</properties>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.3.2</version>
+					<configuration>
+						<source>${jdk.version}</source>
+						<target>${jdk.version}</target>
+						<debug>true</debug>
+						<debuglevel>source,lines</debuglevel>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<version>1.9</version>
+					<executions>
+						<execution>
+							<id>check-java16</id>
+							<phase>test</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+							<configuration>
+								<signature>
+									<groupId>org.codehaus.mojo.signature</groupId>
+									<artifactId>java16</artifactId>
+									<version>1.1</version>
+								</signature>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.3</version>
+					<configuration>
+						<webResources>
+							<!-- include java source files in generated art.war -->
+							<resource>
+								<directory>src/main/java</directory>
+								<targetPath>WEB-INF/classes</targetPath>
+								<includes>
+									<include>**/*.java</include>
+								</includes>
+							</resource>
+						</webResources>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- jpivot needs commons-digester 1.x -->
+			<dependency>
+				<groupId>commons-digester</groupId>
+				<artifactId>commons-digester</artifactId>
+				<version>1.7</version>
+			</dependency>
+			<!-- use dom4j that comes with jpivot -->
+			<dependency>
+				<groupId>dom4j</groupId>
+				<artifactId>dom4j</artifactId>
+				<version>1.3-jpivot</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+</project>

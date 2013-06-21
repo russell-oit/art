@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.sf.art</groupId>
+		<artifactId>art-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>artdbcp</artifactId>
+	<version>2.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>artdbcp</name>
+	<url>http://art.sourceforge.net</url>
+	<description>Library to provide connection pooling</description>
+
+	<licenses>
+		<license>
+			<name>GNU Lesser General Public License version 2.1 (LGPLv2.1)</name>
+			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+		</license>
+	</licenses>
+
+	<build>
+		<resources>
+			<!-- include java source files in generated jar -->
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.java</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+</project>

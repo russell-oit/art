@@ -1,0 +1,354 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.sf.art</groupId>
+		<artifactId>art-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>art</artifactId>
+	<packaging>war</packaging>
+	<version>2.6-SNAPSHOT</version>
+
+	<name>art webapp</name>
+	<url>http://art.sourceforge.net</url>
+	<description>Main ART application</description>
+
+	<licenses>
+		<license>
+			<name>GNU General Public License version 2 (GPLv2)</name>
+			<url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+	</build>
+
+	<repositories>
+		<!-- repository for cubrid jdbc driver -->
+		<repository>
+			<id>CUBRID</id>
+			<name>CUBRID-releases</name>
+			<url>http://maven.cubrid.org</url>
+		</repository>
+		<!-- in-project repository for artifacts that are not in a public maven 
+			repository e.g. spnego, cewolf-2.x, itext-asian-2.1.7, ajaxtags-1.5.5, jcommon-1.0.18 -->
+		<repository>
+			<id>art.local</id>
+			<name>art</name>
+			<url>file://${project.basedir}/repo</url>
+		</repository>
+		<!-- repository for mondrian and olap4j -->
+		<repository>
+			<id>pentaho</id>
+			<name>Pentaho</name>
+			<url>http://repository.pentaho.org/artifactory/repo</url>
+		</repository>
+	</repositories>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>artdbcp</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>artmail</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>jsp-api</artifactId>
+			<version>2.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- mondrian specific dependencies -->
+		<dependency>
+			<groupId>pentaho</groupId>
+			<artifactId>mondrian-pom</artifactId>
+			<version>1.0</version>
+			<type>pom</type>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- jpivot specific dependencies -->
+		<dependency>
+			<groupId>com.tonbeller</groupId>
+			<artifactId>jpivot-pom</artifactId>
+			<version>1.0</version>
+			<type>pom</type>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- art needs/uses commons-beanutils-1.8.3 -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.8.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.tonbeller</groupId>
+			<artifactId>jpivot</artifactId>
+			<version>1.8.0-art</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.log4jdbc</groupId>
+			<artifactId>log4jdbc4</artifactId>
+			<version>1.2</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.spnego</groupId>
+			<artifactId>spnego</artifactId>
+			<version>r7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.cewolf</groupId>
+			<artifactId>cewolf</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.ajaxtags</groupId>
+			<artifactId>ajaxtags</artifactId>
+			<version>1.5.5</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2.2</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>jcifs</groupId>
+			<artifactId>jcifs</artifactId>
+			<version>1.3.17</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>2.2.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.jtds</groupId>
+			<artifactId>jtds</artifactId>
+			<version>1.2.8</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.25</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>cubrid</groupId>
+			<artifactId>cubrid-jdbc</artifactId>
+			<version>9.1.0.0212</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.2-1003-jdbc4</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.0.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.6.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			<version>2.1.7</version>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-oracle</artifactId>
+			<version>2.1.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-weblogic</artifactId>
+			<version>2.1.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz-jboss</artifactId>
+			<version>2.1.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.lowagie</groupId>
+			<artifactId>itext-asian</artifactId>
+			<version>2.1.7</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>5.0.1</version>
+			<exclusions>
+				<!-- jasperreports refers to itext-2.1.7.js1 whose pom isn't available -->
+				<exclusion>
+					<groupId>com.lowagie</groupId>
+					<artifactId>itext</artifactId>
+				</exclusion>
+				<!-- exclude old jfreechart that has jfree groupid -->
+				<exclusion>
+					<groupId>jfree</groupId>
+					<artifactId>jfreechart</artifactId>
+				</exclusion>
+				<!-- exclude old jcommon that has jfree groupid -->
+				<exclusion>
+					<groupId>jfree</groupId>
+					<artifactId>jcommon</artifactId>
+				</exclusion>
+				<!-- castor used for chart themes. not currently used by art -->
+				<exclusion>
+					<groupId>org.codehaus.castor</groupId>
+					<artifactId>castor</artifactId>
+				</exclusion>
+				<!-- not currently used by art -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<!-- not currently used by art -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+				<!-- not currently used by art -->
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-annotations</artifactId>
+				</exclusion>
+				<!-- jdtcore used to compile Java expressions used in reports. likely 
+					also available in servlet container. inclusion may cause conflicts and errors -->
+				<exclusion>
+					<groupId>eclipse</groupId>
+					<artifactId>jdtcore</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
+			<exclusions>
+				<!-- stax comes with java 1.6 -->
+				<exclusion>
+					<artifactId>stax-api</artifactId>
+					<groupId>stax</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jxls</groupId>
+			<artifactId>jxls-core</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.lowagie</groupId>
+			<artifactId>itext</artifactId>
+			<version>2.1.7</version>
+			<exclusions>
+				<!-- bouncycastle jars used for encryption. not currently used by art -->
+				<exclusion>
+					<artifactId>bcprov-jdk14</artifactId>
+					<groupId>bouncycastle</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>bcmail-jdk14</artifactId>
+					<groupId>bouncycastle</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>bctsp-jdk14</artifactId>
+					<groupId>org.bouncycastle</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>pentaho</groupId>
+			<artifactId>mondrian</artifactId>
+			<!-- art using 3.2.1.13885. pom on pentaho repository doesn't have dependencies. 
+				3.2.1.14022 first mondrian version with dependencies defined in pom but has 
+				api changes -->
+			<version>3.2.1.13885</version>
+			<exclusions>
+				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.olap4j</groupId>
+			<artifactId>olap4j</artifactId>
+			<version>0.9.8</version>
+			<exclusions>
+				<!-- only required for java 1.4, using olap4j-jdk14.jar -->
+				<exclusion>
+					<artifactId>retroweaver</artifactId>
+					<groupId>retroweaver</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>retroweaver-rt</artifactId>
+					<groupId>retroweaver</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>asm-commons</artifactId>
+					<groupId>asm</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>asm</artifactId>
+					<groupId>asm</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
+
+
+</project>
