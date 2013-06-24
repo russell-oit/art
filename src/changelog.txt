@@ -1,4 +1,5 @@
 ART 2.5.3
+* Mavenised ART
 * Enable multi parameter to act as a chained parameter master
 * Allow chained parameter slave to have default values
 

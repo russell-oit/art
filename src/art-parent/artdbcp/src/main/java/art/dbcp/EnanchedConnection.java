@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 /**
  * 
@@ -432,6 +433,44 @@ public class EnanchedConnection implements Connection {
         return c.createStruct(typeName, attributes);
     }
 
+	
+    /*
+     * END JDK 1.6 only
+     */
+    
+    
+    
+    /*
+     * START JDK 1.7 only
+     */
+    
+    /*
+    @Override
+	public void abort(Executor arg0) throws SQLException {
+		c.abort(arg0);
+	}
+
+	@Override
+	public int getNetworkTimeout() throws SQLException {
+		return c.getNetworkTimeout();
+	}
+
+	@Override
+	public String getSchema() throws SQLException {
+		return c.getSchema();
+	}
+
+	@Override
+	public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException {
+		c.setNetworkTimeout(arg0, arg1);
+	}
+
+	@Override
+	public void setSchema(String arg0) throws SQLException {
+		c.setSchema(arg0);
+	}
+	*/
+    
     /*
      * END JDK 1.6 only
      */

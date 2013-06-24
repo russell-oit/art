@@ -1,1 +1,5 @@
 ^art/src/art/META-INF$
+syntax: glob
+src/art-parent/art/target/
+src/art-parent/artdbcp/target/
+src/art-parent/artmail/target/
