@@ -6,10 +6,9 @@
   in the directory where the art.war file was unzipped,
 
   type "ant" or "ant compile" to compile any changed classes
-  type "ant clean" to remove any compiled class or log files
-  type "ant full" to create the full war file
-  type "ant light" to create the light war file
-
+  type "ant clean" to remove compiled class files
+  type "ant war" to create the war file
+  
   This script compiles classes inline,
    the war file is created in this folder
   -->
@@ -50,11 +49,10 @@
 			<fileset dir="WEB-INF/templates/" excludes="readme.txt,sample-*.*"/>
 		</delete>
 	</target>
-
-
-	<!-- Create full art war file -->
-	<target name="full"  description="Create war file for full version" >
-		<copy file="${dist}/WEB-INF/web-full.xml" tofile="${dist}/WEB-INF/web.xml" overwrite="true"/>
+	
+		
+	<!-- Create art war file -->
+	<target name="war" depends="clean,compile"  description="Create war file" >		
 		<delete file="${dist}/art.war"/>
 		<zip    destfile="${dist}/art.war" basedir="${dist}"
 
@@ -65,66 +63,17 @@
 		/>
 
 	</target>
-
-
-	<!-- Create light art. war file -->
-	<target name="light"  description="Create war file for light version, excluding jasperreports and jpivot support" >
-		<copy file="${dist}/WEB-INF/web-light.xml" tofile="${dist}/WEB-INF/web.xml" overwrite="true"/>
-		<delete file="${dist}/art-light.war"/>
-		<zip  destfile="${dist}/art-light.war" basedir="${dist}"
-
-		excludes="WEB-INF/art.properties			
-		,*.war
-		,export/*-*.*
-		,export/jobs/J*
-		,jpivot/**
-		,wcf/**
-		,WEB-INF/jpivot/**
-		,WEB-INF/wcf/**
-		,WEB-INF/lib/aggregates.dtd
-		,WEB-INF/lib/avalon-framework-cvs-20020806.jar
-		,WEB-INF/lib/batik.jar
-		,WEB-INF/lib/commons-digester*.jar
-		,WEB-INF/lib/commons-math-1.0.jar
-		,WEB-INF/lib/commons-vfs-1.0.jar
-		,WEB-INF/lib/datasourcesconfig.dtd
-		,WEB-INF/lib/eigenbase-properties.jar
-		,WEB-INF/lib/eigenbase-resgen.jar
-		,WEB-INF/lib/eigenbase-xom.jar
-		,WEB-INF/lib/fop.jar
-		,WEB-INF/lib/groovy-all-1.0-jsr-03.jar
-		,WEB-INF/lib/jai_codec.jar
-		,WEB-INF/lib/jai_core.jar
-		,WEB-INF/lib/jakarta-regexp-1.2.jar
-		,WEB-INF/lib/jasperreports*.jar
-		,WEB-INF/lib/javacup.jar
-		,WEB-INF/lib/jaxen-full.jar
-		,WEB-INF/lib/jpivot.jar
-		,WEB-INF/lib/jsf-api.jar
-		,WEB-INF/lib/mondrian.dtd
-		,WEB-INF/lib/mondrian*.jar
-		,WEB-INF/lib/olap4j.jar
-		,WEB-INF/lib/saaj-api.jar
-		,WEB-INF/lib/saaj-ri.jar
-		,WEB-INF/lib/saxpath.jar
-		,WEB-INF/serializer.jar
-		,WEB-INF/lib/tbutils-wcf.jar
-		,WEB-INF/lib/wcf.jar
-		,WEB-INF/lib/jxls-core*.jar
-		,WEB-INF/lib/commons-jexl*.*
-		,WEB-INF/lib/postgresql*.*
-		,WEB-INF/lib/CUBRID*.*
-		,WEB-INF/lib/mysql*.*
-		,WEB-INF/hsqldb/server-mode/**"
-		/>
-
+	
+	<!-- Create full art war file. No longer available. Managing dependencies manually is tedious -->
+	<target name="full"  description="deprecated" >
+		<echo message="&quot;ant full&quot; is deprecated, use &quot;ant war&quot; instead"/>
+	</target>
+	
+	<!-- Create light art war file. No longer available. Managing dependencies manually is tedious -->
+	<target name="light"  description="deprecated" >
+		<echo message="&quot;ant light&quot; is deprecated, use &quot;ant war&quot; instead"/>
 	</target>
 
-	<!-- Create full art war file -->
-	<target name="war"  description="deprecated" >
-		<echo message="&quot;ant war&quot; is deprecated, use &quot;ant full&quot; or &quot;ant light&quot; instead"/>
-
-	</target>
 
 	<!-- Clean .jasper files -->
 	<target name="clean-jasperreports" description="Delete compiled jasper reports" >
@@ -139,11 +88,11 @@
 	</taskdef>
 
 	<target name="compile-jasperreports" description="Compile uncompiled jasper reports" >
-
 		<jrc
-    srcdir="WEB-INF/templates"
-    destdir="WEB-INF/templates"
-    tempdir="WEB-INF/templates">
+			srcdir="WEB-INF/templates"
+			destdir="WEB-INF/templates"
+			tempdir="WEB-INF/templates">
+			
 			<classpath refid="classpath"/>
 			<include name="**/*.jrxml"/>
 		</jrc>
