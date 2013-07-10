@@ -4,3 +4,14 @@ src/art-parent/art/target/
 src/art-parent/artdbcp/target/
 src/art-parent/artmail/target/
 src/art-parent/art/src/main/webapp/META-INF/
+src/art-parent/artmail/.settings/
+src/art-parent/artmail/.project
+src/art-parent/artmail/.classpath
+src/art-parent/artdbcp/.settings/
+src/art-parent/artdbcp/.project
+src/art-parent/artdbcp/.classpath
+src/art-parent/art/.settings/
+src/art-parent/art/.project
+src/art-parent/art/.classpath
+src/art-parent/.settings/
+src/art-parent/.project
