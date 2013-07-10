@@ -231,10 +231,10 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 			drilldownLinks = new HashMap<String, String>();
 
 			//only use the first drill down query
-			Iterator it = drilldownQueries.entrySet().iterator();
+			Iterator<Map.Entry<Integer, DrilldownQuery>> it = drilldownQueries.entrySet().iterator();
 			if (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				drilldown = (DrilldownQuery) entry.getValue();
+				Map.Entry<Integer, DrilldownQuery> entry = it.next();
+				drilldown = entry.getValue();
 
 				openDrilldownInNewWindow = drilldown.getOpenInNewWindow();
 			}
@@ -389,7 +389,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	 * @return tooltip text
 	 */
 	@Override
-	public String generateToolTip(PieDataset dataset, Comparable section, int index) {
+	public String generateToolTip(PieDataset dataset, @SuppressWarnings("rawtypes") Comparable section, int index) {
 		double dataValue;
 		DecimalFormat valueFormatter;
 		String formattedValue;

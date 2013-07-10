@@ -152,6 +152,7 @@ public class PdfGraph {
 				p.setAlignment(Element.ALIGN_CENTER);				
 				document.add(p);
 				
+				@SuppressWarnings("rawtypes")
 				java.util.List rows = graphData.getRows();
 				DynaProperty[] dynaProperties = null;
 				String columnName;

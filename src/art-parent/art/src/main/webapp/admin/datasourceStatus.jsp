@@ -16,7 +16,7 @@ if (action!=null && request.getSession().getAttribute("AdminSession")!=null) {
 	}
 	
 	//display status
-	LinkedHashMap<Integer, DataSource> dataSources=(LinkedHashMap)ArtDBCP.getDataSources();
+	Map<Integer, DataSource> dataSources=ArtDBCP.getDataSources();
 	for (Integer key : dataSources.keySet()) {			
 		DataSource ds = dataSources.get(key);			
 		if (ds != null) {

@@ -36,14 +36,11 @@ import org.slf4j.LoggerFactory;
 public final class AuthFilterAdmin implements Filter {
 
 	final static Logger logger = LoggerFactory.getLogger(AuthFilterAdmin.class);
-	private FilterConfig filterConfig = null;
-
 	/**
 	 *
 	 */
 	@Override
 	public void destroy() {
-		this.filterConfig = null;
 	}
 
 	/**
@@ -53,7 +50,6 @@ public final class AuthFilterAdmin implements Filter {
 	 */
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		this.filterConfig = filterConfig;
 	}
 
 	/**

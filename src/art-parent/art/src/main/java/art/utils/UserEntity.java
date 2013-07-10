@@ -690,7 +690,7 @@ public class UserEntity implements Serializable {
 	 *
 	 * @return all query groups the user has access to
 	 */
-	public Map getQueryGroups() {
+	public Map<String, Integer> getQueryGroups() {
 		return getQueryGroup(-1);
 	}
 

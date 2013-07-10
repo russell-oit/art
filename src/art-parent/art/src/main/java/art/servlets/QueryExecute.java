@@ -63,6 +63,7 @@ public class QueryExecute extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(QueryExecute.class);
 	private int currentNumberOfRunningQueries = 0;
+	@SuppressWarnings("rawtypes")
 	HashMap<String, java.lang.Class> viewModes;
 
 	/**
@@ -70,6 +71,7 @@ public class QueryExecute extends HttpServlet {
 	 * @param config
 	 * @throws ServletException
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 
@@ -518,6 +520,7 @@ public class QueryExecute extends HttpServlet {
 				// => Load the appropriate ArtOutputInterface for the view mode
 
 				try {
+					@SuppressWarnings("rawtypes")
 					java.lang.Class classx = viewModes.get(viewMode);
 					o = (ArtOutputInterface) classx.newInstance();
 

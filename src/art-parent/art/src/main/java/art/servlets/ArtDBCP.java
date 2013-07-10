@@ -405,6 +405,7 @@ public class ArtDBCP extends HttpServlet {
 				//output registerd fonts
 				StringBuilder sb = new StringBuilder(100);
 				String newline = System.getProperty("line.separator");
+				@SuppressWarnings("rawtypes")
 				Set fonts = FontFactory.getRegisteredFonts();
 				for (Object f : fonts) {
 					sb.append(newline);
@@ -954,7 +955,7 @@ public class ArtDBCP extends HttpServlet {
 	 *
 	 * @return all datasources
 	 */
-	public static HashMap getDataSources() {
+	public static Map<Integer, DataSource> getDataSources() {
 		return dataSources;
 	}
 

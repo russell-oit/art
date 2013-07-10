@@ -11,6 +11,7 @@ import org.apache.commons.beanutils.ResultSetDynaClass;
  * 
  * @author Timothy Anyona
  */
+@SuppressWarnings("rawtypes")
 public class ArtJxlsResultSetCollection extends AbstractCollection {	    
 	
 	ResultSet resultSet;

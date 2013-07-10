@@ -138,7 +138,7 @@ public class CachedResult {
 	 *
 	 * @return List of cached table columns names
 	 */
-	public List getCachedTableColumnList() {
+	public List<String> getCachedTableColumnList() {
 		return columnsNameList;
 	}
 

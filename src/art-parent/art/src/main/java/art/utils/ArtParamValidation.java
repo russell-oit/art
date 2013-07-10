@@ -46,6 +46,7 @@ public class ArtParamValidation {
      */
     public boolean validate(HttpServletRequest request ) { 
 		// Check input parameters
+		@SuppressWarnings("rawtypes")
 		Enumeration parametersNames = request.getParameterNames();
 		boolean isThereAnInvalidChar = false;
 		int ifIamNegativeIsGood;

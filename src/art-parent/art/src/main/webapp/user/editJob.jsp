@@ -575,10 +575,10 @@ function setCacheDatasources(s) {
 	// database ids/names in the page html code to every user enabled to schedule jobs
 	if(accessLevel>79){
 	    String output = job.getOutputFormat();
-		HashMap<Integer,art.dbcp.DataSource> dataSources = ArtDBCP.getDataSources();
+		Map<Integer,art.dbcp.DataSource> dataSources = ArtDBCP.getDataSources();
 		int i =0;
 		for (Integer key : dataSources.keySet()) {
-			art.dbcp.DataSource ds = (art.dbcp.DataSource) dataSources.get(key);
+			art.dbcp.DataSource ds = dataSources.get(key);
 			String dsName = ds.getName();
 			if (key.intValue() != 0) { // don't show ART repository
 				%>

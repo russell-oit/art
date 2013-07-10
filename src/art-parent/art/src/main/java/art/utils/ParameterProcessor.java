@@ -76,6 +76,7 @@ public class ParameterProcessor {
 	 */
 	public static Map<Integer, ArtQueryParam> processParameters(HttpServletRequest request, Map<String, String> inlineParams, Map<String, String[]> multiParams, int queryId, Map<String, ArtQueryParam> htmlParams) {
 
+		@SuppressWarnings("rawtypes")
 		Enumeration names = request.getParameterNames();
 		String htmlName; //html element htmlName
 		String label; //parameter label        

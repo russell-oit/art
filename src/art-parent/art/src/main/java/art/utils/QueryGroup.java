@@ -275,7 +275,7 @@ public class QueryGroup {
 	 * @param gId
 	 * @return all queries in a given group
 	 */
-	public Map getLinkedQueries(int gId) {
+	public Map<Integer, ArtQuery> getLinkedQueries(int gId) {
 		TreeMap<Integer, ArtQuery> map = new TreeMap<Integer, ArtQuery>();
 
 		Connection conn = null;

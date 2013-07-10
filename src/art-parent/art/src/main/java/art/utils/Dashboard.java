@@ -40,8 +40,8 @@ public class Dashboard {
 
 	final static Logger logger = LoggerFactory.getLogger(Dashboard.class);
 	int columnsCount;  // number of columns in this dashboard
-	List[] portlets; // portlets[0] contains a list of Xml strings representing the portlets in the first column, etc
-	String[] columnSize;
+	List<List<String>> portlets; // portlets[0] contains a list of Xml strings representing the portlets in the first column, etc
+	List<String> columnSize;
 	String title;
 	String description;
 
@@ -77,17 +77,16 @@ public class Dashboard {
 			List<String> columns = XmlParser.getXmlElementValues(dashboardXml, "COLUMN");
 			columnsCount = columns.size(); // number of cols
 
-			portlets = new List[columnsCount];
-			columnSize = new String[columnsCount];
+			portlets = new ArrayList<List<String>>(columnsCount);
+			columnSize = new ArrayList<String>(columnsCount);
 
-			for (int i = 0; i < columnsCount; i++) { // for each column
-				String columnXml = columns.get(i);
+			for (String columnXml : columns) {
 				String size = XmlParser.getXmlElementValue(columnXml, "SIZE");
 				if (size == null) {
 					size = "auto";
 				}
-				columnSize[i] = size;
-				portlets[i] = XmlParser.getXmlElementValues(columnXml, "PORTLET");
+				columnSize.add(size);
+				portlets.add(XmlParser.getXmlElementValues(columnXml, "PORTLET"));
 			}
 
 
@@ -165,7 +164,7 @@ public class Dashboard {
 		String link;
 
 		// Get the portlet xml info
-		String portletXml = (String) portlets[col].get(row);
+		String portletXml = portlets.get(col).get(row);
 		link = XmlParser.getXmlElementValue(portletXml, "OBJECTID");
 		//allow use of QUERYID tag
 		if (link == null) {
@@ -179,6 +178,7 @@ public class Dashboard {
 			// context path as suffix + build url + switch off html header&footer and add parameters
 			StringBuilder paramsSb = new StringBuilder(254);
 			boolean getDefaultParameters = true;
+			@SuppressWarnings("rawtypes")
 			Enumeration names = request.getParameterNames();
 			while (names.hasMoreElements()) {
 				String name = (String) names.nextElement();
@@ -208,7 +208,7 @@ public class Dashboard {
 	 */
 	public String getPortletRefresh(int col, int row) throws ArtException {
 		// Get the portlet xml info
-		String portletXml = (String) portlets[col].get(row);
+		String portletXml = portlets.get(col).get(row);
 		String value = XmlParser.getXmlElementValue(portletXml, "REFRESH");
 
 		int minimumRefresh = 5;
@@ -235,7 +235,7 @@ public class Dashboard {
 	 */
 	public boolean getPortletOnLoad(int col, int row) throws ArtException {
 		// Get the portlet xml info
-		String portletXml = (String) portlets[col].get(row);
+		String portletXml = portlets.get(col).get(row);
 		String value = XmlParser.getXmlElementValue(portletXml, "ONLOAD");
 
 		boolean executeOnLoad = true;
@@ -255,7 +255,7 @@ public class Dashboard {
 	 */
 	public String getPortletTitle(int col, int row) throws ArtException {
 		// Get the portlet xml info
-		String portletXml = (String) portlets[col].get(row);
+		String portletXml = portlets.get(col).get(row);
 		return XmlParser.getXmlElementValue(portletXml, "TITLE");
 	}
 
@@ -267,7 +267,7 @@ public class Dashboard {
 	 * @return the css class name used to render the portlet
 	 */
 	public String getColumnSize(int col) {
-		return columnSize[col].toUpperCase(); // common for all portlets of same column
+		return columnSize.get(col).toUpperCase(); // common for all portlets of same column
 	}
 
 	/* Dashboard attributes */
@@ -287,7 +287,7 @@ public class Dashboard {
 	 * @return the number of portlets in the dashboard's column
 	 */
 	public int getPortletsCount(int col) {
-		return portlets[col].size();
+		return portlets.get(col).size();
 	}
 
 	/**

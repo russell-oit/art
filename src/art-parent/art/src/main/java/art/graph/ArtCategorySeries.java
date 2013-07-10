@@ -270,10 +270,10 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 			drilldownLinks = new HashMap<String, String>();
 
 			//only use the first drill down query
-			Iterator it = drilldownQueries.entrySet().iterator();
+			Iterator<Map.Entry<Integer, DrilldownQuery>> it = drilldownQueries.entrySet().iterator();
 			if (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				drilldown = (DrilldownQuery) entry.getValue();
+				Map.Entry<Integer, DrilldownQuery> entry = it.next();
+				drilldown = entry.getValue();
 
 				openDrilldownInNewWindow = drilldown.getOpenInNewWindow();
 			}

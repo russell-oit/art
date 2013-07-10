@@ -30,6 +30,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -263,10 +264,10 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 			drilldownLinks = new HashMap<String, String>();
 
 			//only use the first drill down query
-			Iterator it = drilldownQueries.entrySet().iterator();
+			Iterator<Map.Entry<Integer, DrilldownQuery>> it = drilldownQueries.entrySet().iterator();
 			if (it.hasNext()) {
-				Map.Entry entry = (Map.Entry) it.next();
-				drilldown = (DrilldownQuery) entry.getValue();
+				Map.Entry<Integer, DrilldownQuery> entry = it.next();
+				drilldown = entry.getValue();
 
 				openDrilldownInNewWindow = drilldown.getOpenInNewWindow();
 			}

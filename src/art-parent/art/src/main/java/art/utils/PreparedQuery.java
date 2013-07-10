@@ -65,7 +65,7 @@ public class PreparedQuery {
 	String preparedStatementSQL; //final sql statement. if query has inline parameters, sql will still have ?
 	private String finalSQL = ""; //final sql statement. if query has inline parameters, sql will have query values
 	String queryStatus;
-	Map<String, List> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
+	Map<String, List<String>> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter label and value as corresponding object e.g. Double, Long. for jasper reports
 	Map<String, String> jxlsMultiParams; //hash map will contain multi parameter label and values instead of parameter id e.g. M_2 and string array of values. for jxls reports
 	int queryType; //to enable special handling of template queries where sql source is not executed
@@ -86,7 +86,7 @@ public class PreparedQuery {
 		sb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
 
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
-		jasperMultiParams = new HashMap<String, List>(); //to populate hash map with multi parameter names and values
+		jasperMultiParams = new HashMap<String, List<String>>(); //to populate hash map with multi parameter names and values
 		jxlsMultiParams = new HashMap<String, String>(); //save parameters in special hash map for jxls reports        
 	}
 
@@ -1672,7 +1672,7 @@ public class PreparedQuery {
 	 * @param querySql
 	 * @return multi parameters to be used with jasper reports
 	 */
-	public Map<String, List> getJasperMultiParams(String querySql) {
+	public Map<String, List<String>> getJasperMultiParams(String querySql) {
 
 		try {
 
@@ -2050,9 +2050,7 @@ public class PreparedQuery {
 					psLovValues = connLov.prepareStatement(lovSql);
 					rsLovValues = psLovValues.executeQuery();
 
-					int rowCount = 0;
 					while (rsLovValues.next()) {
-						rowCount++;
 						finalValuesList.add(rsLovValues.getString(1));
 					}
 				}

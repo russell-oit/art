@@ -2644,15 +2644,12 @@ public class ArtJob implements Job, Serializable {
 			StringArray sa = new StringArray();
 			String name;
 
-			int paramCount = 0;
 			String paramType;
 			String paramName;
 			String paramValue;
 
 			//put the parameters in maps
 			while (rs.next()) {
-				paramCount++;
-
 				paramType = rs.getString("PARAM_TYPE");
 				paramName = rs.getString("PARAM_NAME");
 				paramValue = rs.getString("PARAM_VALUE");

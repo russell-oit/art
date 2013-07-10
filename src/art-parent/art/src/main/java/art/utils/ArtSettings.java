@@ -3,7 +3,6 @@ package art.utils;
 import art.servlets.ArtDBCP;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Properties;
 import org.slf4j.Logger;

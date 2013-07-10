@@ -235,8 +235,6 @@ public class ExportGraph {
 		double to; //y axis range maximum
 
 		ChartTheme currentChartTheme = null;
-		BarPainter currentBarPainter = null;
-
 		try {
 			//use legacy theme to ensure you have white plot backgrounds. this was changed in jfreechart 1.0.11 to default to grey
 			//save current settings

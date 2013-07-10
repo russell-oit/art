@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public final class AuthFilter implements Filter {
 
 	final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
-	private FilterConfig filterConfig = null;
 	private boolean isArtRepositoryUser;
 
 	/**
@@ -43,7 +42,6 @@ public final class AuthFilter implements Filter {
 	 */
 	@Override
 	public void destroy() {
-		this.filterConfig = null;
 	}
 
 	/**
@@ -53,7 +51,6 @@ public final class AuthFilter implements Filter {
 	 */
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		this.filterConfig = filterConfig;
 	}
 
 	/**

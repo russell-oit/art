@@ -33,6 +33,7 @@ public class ArtJxlsReportManager implements ReportManager {
 	 * @return rows that have been returned by the query
 	 * @throws SQLException
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public List exec(String sql) throws SQLException {
 		List rows = null;
@@ -63,6 +64,7 @@ public class ArtJxlsReportManager implements ReportManager {
 	 * @return rows that have been returned by the query
 	 * @throws SQLException
 	 */
+	@SuppressWarnings("rawtypes")
 	public List exec(Connection c, String sql) throws SQLException {
 		conn = c;
 		return exec(sql);
@@ -76,6 +78,7 @@ public class ArtJxlsReportManager implements ReportManager {
 	 * @return rows that have been returned by the query
 	 * @throws SQLException
 	 */
+	@SuppressWarnings("rawtypes")
 	public List exec(int datasourceId, String sql) throws SQLException {
 		List rows = null;
 
@@ -115,6 +118,7 @@ public class ArtJxlsReportManager implements ReportManager {
 	 * @return rows that have been returned by the query
 	 * @throws SQLException
 	 */
+	@SuppressWarnings("rawtypes")
 	public List exec(String datasourceName, String sql) throws SQLException {
 		List rows = null;
 
