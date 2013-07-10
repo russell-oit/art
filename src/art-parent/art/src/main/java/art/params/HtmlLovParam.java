@@ -12,6 +12,7 @@ package art.params;
 import art.utils.PreparedQuery;
 import java.util.Map;
 import java.util.ResourceBundle;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -205,11 +206,11 @@ public class HtmlLovParam implements ParamInterface {
 					selected = "";
 				}
 				sb.append("<option value=\"");
-				sb.append(value);
+				sb.append(StringEscapeUtils.escapeHtml(value));
 				sb.append("\" ");
 				sb.append(selected);
 				sb.append(">");
-				sb.append(viewColumnValue);
+				sb.append(StringEscapeUtils.escapeHtml(viewColumnValue));
 				sb.append("</option>");
 			}
 
