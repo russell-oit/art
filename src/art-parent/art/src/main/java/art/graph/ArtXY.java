@@ -22,13 +22,13 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.*;
-
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -257,12 +257,12 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 	public void prepareDataset(ResultSet rs, Map<Integer, DrilldownQuery> drilldownQueries, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
 
 		if (useHyperLinks) {
-			hyperLinks = new ArrayList<String>(100);
+			hyperLinks = new ArrayList<String>(10);
 		}
 
 		//add support for drill down queries
 		DrilldownQuery drilldown = null;
-		if (drilldownQueries != null && drilldownQueries.size() > 0) {
+		if (drilldownQueries != null && !drilldownQueries.isEmpty()) {
 			hasDrilldown = true;
 			drilldownLinks = new HashMap<String, String>();
 
@@ -308,7 +308,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
-					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+					if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
 						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -329,7 +329,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -349,7 +349,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -367,7 +367,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								if (param != null) {
 									try {
 										param = URLEncoder.encode(param, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 									}
 								}
@@ -424,7 +424,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
-					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+					if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
 						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -445,7 +445,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -465,7 +465,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -483,7 +483,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 								if (param != null) {
 									try {
 										param = URLEncoder.encode(param, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 									}
 								}
@@ -563,9 +563,9 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 		double xValue;
 		String key;
 
-		if (useHyperLinks) {
+		if (hyperLinks != null) {
 			link = hyperLinks.get(item);
-		} else if (hasDrilldown) {
+		} else if (drilldownLinks != null) {
 			tmpDataset = (XYDataset) data;
 			yValue = tmpDataset.getYValue(series, item);
 			xValue = tmpDataset.getXValue(series, item);

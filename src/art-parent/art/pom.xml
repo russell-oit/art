@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -12,7 +12,7 @@
 	<packaging>war</packaging>
 	<version>2.5.3-SNAPSHOT</version>
 
-	<name>art webapp</name>
+	<name>art</name>
 	<url>http://art.sourceforge.net</url>
 	<description>Main ART application</description>
 
@@ -35,7 +35,7 @@
 			<url>http://maven.cubrid.org</url>
 		</repository>
 		<!-- in-project repository for artifacts that are not in a public maven 
-			repository e.g. spnego, cewolf-2.x, itext-asian-2.1.7, ajaxtags-1.5.5, jcommon-1.0.18 -->
+		repository e.g. spnego, cewolf-2.x, itext-asian-2.1.7, ajaxtags-1.5.5, jcommon-1.0.18 -->
 		<repository>
 			<id>art.local</id>
 			<name>art</name>
@@ -263,7 +263,7 @@
 					<artifactId>jackson-annotations</artifactId>
 				</exclusion>
 				<!-- jdtcore used to compile Java expressions used in reports. likely 
-					also available in servlet container. inclusion may cause conflicts and errors -->
+				also available in servlet container. inclusion may cause conflicts and errors -->
 				<exclusion>
 					<groupId>eclipse</groupId>
 					<artifactId>jdtcore</artifactId>
@@ -316,8 +316,8 @@
 			<groupId>pentaho</groupId>
 			<artifactId>mondrian</artifactId>
 			<!-- art using 3.2.1.13885. pom on pentaho repository doesn't have dependencies. 
-				3.2.1.14022 first mondrian version with dependencies defined in pom but has 
-				api changes -->
+			3.2.1.14022 first mondrian version with dependencies defined in pom but has 
+			api changes -->
 			<version>3.2.1.13885</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->
@@ -350,6 +350,11 @@
 					<groupId>asm</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.owasp.encoder</groupId>
+			<artifactId>encoder</artifactId>
+			<version>1.1</version>
 		</dependency>
 	</dependencies>
 

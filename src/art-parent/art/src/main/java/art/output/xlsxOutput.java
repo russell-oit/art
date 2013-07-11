@@ -128,7 +128,7 @@ public class xlsxOutput implements ArtOutputInterface {
 			addCellString(queryName + " - " + y_m_d.replace('_', '-') + " " + h_m_s.replace('_', ':'));
 
 			// Output parameter values list
-			if (displayParams != null && displayParams.size() > 0) {
+			if (displayParams != null && !displayParams.isEmpty()) {
 				// rows with parameter names
 				newLine();
 				for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {

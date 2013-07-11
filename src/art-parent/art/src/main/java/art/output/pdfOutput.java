@@ -48,7 +48,7 @@ public class pdfOutput implements ArtOutputInterface {
 	int counter;
 	float evengray = 1.0f;
 	float oddgray = 0.75f;
-	float headergray = 0.5f;
+	float headergray = 0.9f;
 	FontSelector fsBody; //fonts to use for document body
 	FontSelector fsHeading; //fonts to use for document title and column headings
 	String exportPath;
@@ -149,7 +149,7 @@ public class pdfOutput implements ArtOutputInterface {
 		// Output parameter values list	
 
 		try {
-			if (displayParams != null && displayParams.size() > 0) {
+			if (displayParams != null && !displayParams.isEmpty()) {
 
 				doc.add(new Paragraph(fs.process("Parameters\n")));
 

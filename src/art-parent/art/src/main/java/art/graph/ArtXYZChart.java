@@ -9,7 +9,9 @@ import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -37,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class to render bubble charts and heat map charts (both use XYZDataset)
- * 
+ *
  * @author Timothy Anyona
  */
 public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcessor, Serializable, XYToolTipGenerator, XYItemLinkGenerator {
@@ -164,7 +166,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 
 		// add support for drill down queries
 		DrilldownQuery drilldown = null;
-		if (drilldownQueries != null && drilldownQueries.size() > 0) {
+		if (drilldownQueries != null && !drilldownQueries.isEmpty()) {
 			hasDrilldown = true;
 			drilldownLinks = new HashMap<String, String>();
 
@@ -249,7 +251,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 			if (drilldown != null) {
 				drilldownQueryId = drilldown.getDrilldownQueryId();
 				outputFormat = drilldown.getOutputFormat();
-				if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+				if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 					sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 				} else {
 					sb.append("ExecuteQuery?queryId=").append(drilldownQueryId).append("&viewMode=").append(outputFormat);
@@ -271,8 +273,8 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 							if (paramValue != null) {
 								try {
 									paramValue = URLEncoder.encode(paramValue, "UTF-8");
-								} catch (Exception e) {
-									logger.warn("Error while encoding. Parameter={}, Value={}", new Object[] { paramLabel, paramValue, e });
+								} catch (UnsupportedEncodingException e) {
+									logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 								}
 							}
 						} else {
@@ -293,8 +295,8 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 							if (paramValue != null) {
 								try {
 									paramValue = URLEncoder.encode(paramValue, "UTF-8");
-								} catch (Exception e) {
-									logger.warn("Error while encoding. Parameter={}, Value={}", new Object[] { paramLabel, paramValue, e });
+								} catch (UnsupportedEncodingException e) {
+									logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 								}
 							}
 							sb.append("&P_").append(paramLabel).append("=").append(paramValue);
@@ -311,8 +313,8 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 							if (param != null) {
 								try {
 									param = URLEncoder.encode(param, "UTF-8");
-								} catch (Exception e) {
-									logger.warn("Error while encoding. Parameter={}, Value={}", new Object[] { paramLabel, param, e });
+								} catch (UnsupportedEncodingException e) {
+									logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 								}
 							}
 							sb.append("&M_").append(paramLabel).append("=").append(param);
@@ -330,7 +332,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 		double[] xArray = ArrayUtils.toPrimitive(xValues.toArray(new Double[xValues.size()]));
 		double[] yArray = ArrayUtils.toPrimitive(yValues.toArray(new Double[yValues.size()]));
 		double[] zArray = ArrayUtils.toPrimitive(zValues.toArray(new Double[zValues.size()]));
-		double[][] data = new double[][] { xArray, yArray, zArray };
+		double[][] data = new double[][]{xArray, yArray, zArray};
 		dataset.addSeries(seriesName, data);
 
 		// store data for potential use in pdf output
@@ -407,37 +409,6 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	}
 
 	@Override
-	public void processChart(Object chart, Map params) {
-		XYPlot plot = (XYPlot) ((JFreeChart) chart).getPlot();
-
-		// set y axis range if required
-		if (params.get("from") != null && params.get("to") != null) {
-			Double from = (Double) params.get("from");
-			Double to = (Double) params.get("to");
-			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
-			rangeAxis.setRange(from, to);
-		}
-
-		// set grid lines to light grey so that they are visible with a default plot background colour of white
-		plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
-		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
-
-		// Output to file if required
-		String outputToFile = (String) params.get("outputToFile");
-		String fileName = (String) params.get("fullFileName");
-		if (outputToFile.equals("pdf")) {
-			PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
-		} else if (outputToFile.equals("png")) {
-			// save chart as png file
-			try {
-				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-		}
-	}
-
-	@Override
 	public String generateToolTip(XYDataset xyd, int series, int index) {
 		// display formatted values
 
@@ -484,9 +455,9 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	public String generateLink(Object data, int series, int item) {
 		String link = "";
 
-		if (useHyperLinks) {
+		if (hyperLinks != null) {
 			link = hyperLinks.get(item);
-		} else if (hasDrilldown) {
+		} else if (drilldownLinks != null) {
 			double y;
 			double x;
 			double z;
@@ -509,5 +480,36 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 		}
 
 		return link;
+	}
+
+	@Override
+	public void processChart(Object chart, Map params) {
+		XYPlot plot = (XYPlot) ((JFreeChart) chart).getPlot();
+
+		// set y axis range if required
+		if (params.get("from") != null && params.get("to") != null) {
+			Double from = (Double) params.get("from");
+			Double to = (Double) params.get("to");
+			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+			rangeAxis.setRange(from, to);
+		}
+
+		// set grid lines to light grey so that they are visible with a default plot background colour of white
+		plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+
+		// Output to file if required
+		String outputToFile = (String) params.get("outputToFile");
+		String fileName = (String) params.get("fullFileName");
+		if (outputToFile.equals("pdf")) {
+			PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
+		} else if (outputToFile.equals("png")) {
+			// save chart as png file
+			try {
+				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
+			} catch (IOException e) {
+				logger.error("Error", e);
+			}
+		}
 	}
 }

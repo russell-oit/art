@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -30,7 +31,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -240,7 +240,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 		 as many series to plot, otherwise the series name is expected to be 
 		 in the 2nd (+hop) column (the latter allows dynamic series) 
 		 */
-		boolean areSeriesOnColumn = false;
+		boolean areSeriesOnColumn;
 		ResultSetMetaData rsmd = rs.getMetaData();
 
 		switch (rsmd.getColumnType(2 + hop)) {
@@ -255,11 +255,13 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 			case Types.BIGINT:
 				areSeriesOnColumn = true;
 				break;
+			default:
+				areSeriesOnColumn = false;
 		}
 
 		//add support for drill down queries
 		DrilldownQuery drilldown = null;
-		if (drilldownQueries != null && drilldownQueries.size() > 0) {
+		if (drilldownQueries != null && !drilldownQueries.isEmpty()) {
 			hasDrilldown = true;
 			drilldownLinks = new HashMap<String, String>();
 
@@ -310,7 +312,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 					if (drilldown != null) {
 						drilldownQueryId = drilldown.getDrilldownQueryId();
 						outputFormat = drilldown.getOutputFormat();
-						if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+						if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 							sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 						} else {
 							sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -329,7 +331,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 									if (paramValue != null) {
 										try {
 											paramValue = URLEncoder.encode(paramValue, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 										}
 									}
@@ -338,7 +340,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 									if (paramValue != null) {
 										try {
 											paramValue = URLEncoder.encode(paramValue, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 										}
 									}
@@ -358,7 +360,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 									if (paramValue != null) {
 										try {
 											paramValue = URLEncoder.encode(paramValue, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 										}
 									}
@@ -376,7 +378,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 									if (param != null) {
 										try {
 											param = URLEncoder.encode(param, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 										}
 									}
@@ -391,7 +393,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 						drilldownLinks.put(key, drilldownUrl);
 					}
 				}
-				if (useHyperLinks) {
+				if (hyperLinks != null) {
 					hyperLinks.add(rs.getString("LINK"));
 				}
 			}
@@ -431,7 +433,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 
 				// insert value
 				ts[seriesId].add(new Day(date), value);
-				if (useHyperLinks) {
+				if (hyperLinks != null) {
 					hyperLinks.add(rs.getString("LINK"));
 				}
 
@@ -440,7 +442,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
-					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+					if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
 						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -459,7 +461,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -468,7 +470,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -488,7 +490,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -506,7 +508,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 								if (param != null) {
 									try {
 										param = URLEncoder.encode(param, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 									}
 								}
@@ -585,9 +587,9 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 		double yValue;
 		String key;
 
-		if (useHyperLinks) {
+		if (hyperLinks != null) {
 			link = hyperLinks.get(item);
-		} else if (hasDrilldown) {
+		} else if (drilldownLinks != null) {
 			tmpDataset = (XYDataset) data;
 			yValue = tmpDataset.getYValue(series, item);
 			timestamp = (long) tmpDataset.getXValue(series, item);

@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -247,7 +248,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 		 as many series to plot, otherwise the series name is expected to be 
 		 in the 2nd (+hop) column (the latter allows dynamic series) 
 		 */
-		boolean areSeriesOnColumn = false;
+		boolean areSeriesOnColumn;
 		ResultSetMetaData rsmd = rs.getMetaData();
 		switch (rsmd.getColumnType(2 + hop)) {
 			case Types.NUMERIC:
@@ -261,11 +262,13 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 			case Types.BIGINT:
 				areSeriesOnColumn = true;
 				break;
+			default:
+				areSeriesOnColumn = false;
 		}
 
 		//cater for drill down queries
 		DrilldownQuery drilldown = null;
-		if (drilldownQueries != null && drilldownQueries.size() > 0) {
+		if (drilldownQueries != null && !drilldownQueries.isEmpty()) {
 			hasDrilldown = true;
 			drilldownLinks = new HashMap<String, String>();
 
@@ -314,7 +317,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 					if (drilldown != null) {
 						drilldownQueryId = drilldown.getDrilldownQueryId();
 						outputFormat = drilldown.getOutputFormat();
-						if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+						if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 							sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 						} else {
 							sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -334,7 +337,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									if (paramValue != null) {
 										try {
 											paramValue = URLEncoder.encode(paramValue, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 										}
 									}
@@ -343,7 +346,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									if (paramValue != null) {
 										try {
 											paramValue = URLEncoder.encode(paramValue, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 										}
 									}
@@ -363,7 +366,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									if (paramValue != null) {
 										try {
 											paramValue = URLEncoder.encode(paramValue, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 										}
 									}
@@ -381,7 +384,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 									if (param != null) {
 										try {
 											param = URLEncoder.encode(param, "UTF-8");
-										} catch (Exception e) {
+										} catch (UnsupportedEncodingException e) {
 											logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 										}
 									}
@@ -397,7 +400,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 					}
 				}
 
-				if (useHyperLinks) {
+				if (hyperLinks != null) {
 					hyperLinks.put(category, rs.getString("LINK"));
 				}
 			}
@@ -420,7 +423,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
-					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+					if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
 						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -439,7 +442,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -448,7 +451,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -468,7 +471,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -486,7 +489,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 								if (param != null) {
 									try {
 										param = URLEncoder.encode(param, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 									}
 								}
@@ -511,7 +514,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 					drilldownLinks.put(key, drilldownUrl);
 				}
 
-				if (useHyperLinks) {
+				if (hyperLinks != null) {
 					hyperLinks.put(category, rs.getString("LINK"));
 				}
 			}
@@ -572,9 +575,9 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 		String link = "";
 		String key;
 
-		if (useHyperLinks) {
+		if (hyperLinks != null) {
 			link = hyperLinks.get(category.toString());
-		} else if (hasDrilldown) {
+		} else if (drilldownLinks != null) {
 			key = category.toString() + String.valueOf(series);
 			link = drilldownLinks.get(key);
 		}

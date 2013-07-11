@@ -140,10 +140,12 @@ public class slkOutput implements ArtOutputInterface {
 		row_count = 1;
 		column_count = 1;
 
-		exportFileStrBuf.append("C;Y" + row_count++ + ";X1;K\"" + queryName + " executed on: " + y_m_d.replace('_', '-') + " " + h_m_s.replace('_', ':') + "\"\n"); // first row Y1
+		exportFileStrBuf.append("C;Y").append(row_count++).append(";X1;K\"")
+				.append(queryName).append(" executed on: ").append(y_m_d.replace('_', '-'))
+				.append(" ").append(h_m_s.replace('_', ':')).append("\"\n"); // first row Y1
 
 		// Output parameter values list
-		if (displayParams != null && displayParams.size() > 0) {
+		if (displayParams != null && !displayParams.isEmpty()) {
 			// rows with params names
 			for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
 				ArtQueryParam param = entry.getValue();

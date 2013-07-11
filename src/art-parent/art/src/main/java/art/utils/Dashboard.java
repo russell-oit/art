@@ -267,7 +267,7 @@ public class Dashboard {
 	 * @return the css class name used to render the portlet
 	 */
 	public String getColumnSize(int col) {
-		return columnSize.get(col).toUpperCase(); // common for all portlets of same column
+		return columnSize.get(col).toUpperCase(Locale.ENGLISH); // common for all portlets of same column
 	}
 
 	/* Dashboard attributes */

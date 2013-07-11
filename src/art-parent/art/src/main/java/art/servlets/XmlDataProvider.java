@@ -73,22 +73,22 @@ public class XmlDataProvider extends BaseAjaxServlet {
 		response.setHeader("Cache-control", "no-cache");
 		request.setCharacterEncoding("UTF-8");
 
-		String action = request.getParameter("action").toLowerCase();
+		String action = request.getParameter("action");
 
 		String username = (String) request.getSession().getAttribute("username");
 		if (username == null) {
 			username = "public_user";
 		}
 
-		if (action.equals("lov")) {
+		if (StringUtils.equalsIgnoreCase(action,"lov")) {
 			result = getXmlLov(request, response, username);
-		} else if (action.equals("queries")) {
+		} else if (StringUtils.equalsIgnoreCase(action,"queries")) {
 			result = getXmlQueries(request, response);
-		} else if (action.equals("queriesadmin")) {
+		} else if (StringUtils.equalsIgnoreCase(action,"queriesadmin")) {
 			result = getXmlAdminQueries(request, response, username);
-		} else if (action.equals("querydescr")) {
+		} else if (StringUtils.equalsIgnoreCase(action,"querydescr")) {
 			result = getHtmlQueryDescription(request, response);
-		} else if (action.equals("schedule")) {
+		} else if (StringUtils.equalsIgnoreCase(action,"schedule")) {
 			result = getXmlSchedule(request, response);
 		}
 
@@ -132,7 +132,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 					for (String pair : pairs) {
 						values.add(StringUtils.substringAfter(pair, "="));
 					}
-					filterValues = values.toArray(new String[0]);
+					filterValues = values.toArray(new String[values.size()]);
 				}
 
 				//execute lov to get values to display

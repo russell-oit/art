@@ -399,7 +399,7 @@ public class Datasource {
 
 			ResultSet rs = st.executeQuery(sql);
 			while (rs.next()) {
-				map.put(rs.getString("NAME"), new Integer(rs.getInt("DATABASE_ID")));
+				map.put(rs.getString("NAME"), Integer.valueOf(rs.getInt("DATABASE_ID")));
 			}
 			rs.close();
 

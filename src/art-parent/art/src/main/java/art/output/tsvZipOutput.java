@@ -110,7 +110,7 @@ public class tsvZipOutput implements ArtOutputInterface {
 		//initialize objects required for output
 		initializeOutput();
 
-				if (displayParams != null && displayParams.size() > 0) {
+		if (displayParams != null && !displayParams.isEmpty()) {
 			exportFileStrBuf.append("Params:\t");
 			// decode the parameters handling multi one
 			for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
@@ -134,8 +134,8 @@ public class tsvZipOutput implements ArtOutputInterface {
 								outputString = paramName + "=" + paramDisplayString + " (" + paramValue + ") \t ";
 							}
 						}
-					}					
-					exportFileStrBuf.append(outputString);					
+					}
+					exportFileStrBuf.append(outputString);
 				} else if (pValue instanceof String[]) { // multi
 					String[] paramValues = (String[]) pValue;
 					outputString = paramName + "=" + StringUtils.join(paramValues, ", ") + " \t "; //default to showing parameter values only
@@ -158,8 +158,8 @@ public class tsvZipOutput implements ArtOutputInterface {
 							}
 							outputString = paramName + "=" + StringUtils.join(paramDisplayStrings, ", ") + " \t ";
 						}
-					}					
-					exportFileStrBuf.append(outputString);					
+					}
+					exportFileStrBuf.append(outputString);
 				}
 			}
 			exportFileStrBuf.append("\n");
@@ -170,7 +170,7 @@ public class tsvZipOutput implements ArtOutputInterface {
 	public void addHeaderCell(String s) {
 		exportFileStrBuf.append(s).append("\t");
 	}
-	
+
 	@Override
 	public void addHeaderCellLeft(String s) {
 		addHeaderCell(s);

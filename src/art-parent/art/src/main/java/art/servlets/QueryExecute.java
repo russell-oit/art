@@ -262,7 +262,7 @@ public class QueryExecute extends HttpServlet {
 		//  on Y range from -10 to 100  with a white backround, without legend and labels
 		String params = request.getParameter("_GRAPH_SIZE");
 		boolean customParam = false;
-		if (params != null && !params.trim().equals("") && !params.toUpperCase().equals("DEFAULT")) {
+		if (StringUtils.isNotBlank(params) && !params.equalsIgnoreCase("DEFAULT")) {
 			customParam = true;
 		}
 

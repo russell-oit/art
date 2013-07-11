@@ -47,7 +47,6 @@ import javax.mail.internet.MimeMultipart;
 public class Mailer {
 
 	String[] tos; //recipient email addresses
-	boolean isToSet = false; // false = not set, true = (or multiple or  single)
 	boolean areThereAttachments = false;
 	String subject = "";
 	String message = "";
@@ -163,21 +162,10 @@ public class Mailer {
 	}
 
 	/**
-	 * Set To mail address<br>
-	 *
-	 * note: your smtp server may deny to send mails to an unknown address
-	 *
-	 * @param s
+	 * Set To email address
+	 * @param s 
 	 */
 	public void setTo(String s) {
-		if (isToSet == false) {
-			tos = new String[1];
-			tos[0] = s;
-			isToSet = true;
-		}
-	}
-
-	public void setToForce(String s) {
 		tos=null;
 		tos = new String[1];
 		tos[0] = s;
@@ -186,18 +174,10 @@ public class Mailer {
 	/**
 	 * Set the "to" list of email address.<br>
 	 *
-	 * t is a String[] of e-mail addresses
 	 *
-	 * @param t
+	 * @param t a String[] of e-mail addresses
 	 */
-	public void setTos(String[] t) {
-		if (isToSet == false) {
-			tos = t;
-			isToSet = true;
-		}
-	}
-	
-	public void setTosForce(String[] t){
+	public void setTos(String[] t){
 		tos=null;
 		tos = t;
 	}

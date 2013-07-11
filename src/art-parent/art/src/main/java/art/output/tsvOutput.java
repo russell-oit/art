@@ -107,7 +107,7 @@ public class tsvOutput implements ArtOutputInterface {
 		//initialize objects required for output
 		initializeOutput();
 
-		if (displayParams != null && displayParams.size() > 0) {
+		if (displayParams != null && !displayParams.isEmpty()) {
 			exportFileStrBuf.append("Params:\t");
 			// decode the parameters handling multi one
 			for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {

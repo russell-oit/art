@@ -33,9 +33,11 @@ package art.servlets;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +131,10 @@ public class Scheduler extends HttpServlet {
 								deleteDirectory(fileNames[i]);
 							}
 						} else if (!fileName.equals("index.html") && !fileName.equals(MONDRIAN_CACHE_CLEARED_FILE_NAME)) {
-							fileNames[i].delete();
+							boolean deleted = fileNames[i].delete();
+							if (!deleted) {
+								logger.warn("File not deleted: {}", fileNames[i]);
+							}
 						}
 					}
 				}
@@ -184,7 +189,10 @@ public class Scheduler extends HttpServlet {
 				if (files[i].isDirectory()) {
 					deleteDirectory(files[i]);
 				} else {
-					files[i].delete();
+					boolean deleted = files[i].delete();
+					if (!deleted) {
+						logger.warn("File not deleted: {}", files[i]);
+					}
 				}
 			}
 		}
@@ -205,14 +213,17 @@ public class Scheduler extends HttpServlet {
 		if (mondrianCacheExpiry > 0) {
 			boolean clearCache = false;
 			long actualTime = new java.util.Date().getTime();
-			String cacheFilePath=exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME;
+			String cacheFilePath = exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME;
 			File cacheFile = new File(cacheFilePath);
 			if (cacheFile.exists()) {
 				//check last modified date
 				long lastModified = cacheFile.lastModified();
 				if ((actualTime - lastModified) > mondrianCacheExpiry) {
 					clearCache = true;
-					cacheFile.delete();
+					boolean deleted = cacheFile.delete();
+					if (!deleted) {
+						logger.warn("File not deleted: {}", cacheFile);
+					}
 				}
 			} else {
 				clearCache = true;
@@ -230,15 +241,24 @@ public class Scheduler extends HttpServlet {
 					cacheControl.flushSchemaCache();
 				}
 
-				BufferedWriter out;
+				BufferedWriter out = null;
 				try {
 					//create file that indicates when the cache was last cleared
 					out = new BufferedWriter(new FileWriter(cacheFilePath));
 					java.util.Date now = new java.util.Date();
 					out.write(now.toString());
-					out.close();
 				} catch (Exception e) {
 					logger.error("Error", e);
+				} finally {
+					//Close the BufferedWriter
+					try {
+						if (out != null) {
+							out.flush();
+							out.close();
+						}
+					} catch (IOException e) {
+						logger.error("Error while closing writer", e);
+					}
 				}
 			}
 

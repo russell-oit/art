@@ -208,7 +208,7 @@ public class ArtOutHandler {
 
 					StringBuilder sb = new StringBuilder(200);
 
-					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+					if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 						sb.append(baseUrl).append("/user/showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
 						sb.append(baseUrl).append("/user/ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -548,7 +548,7 @@ public class ArtOutHandler {
 	 */
 	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams, ResourceBundle messages) {
 		// display parameters if they are available
-		if (displayParams != null && displayParams.size() > 0 && out != null) {
+		if (displayParams != null && !displayParams.isEmpty() && out != null) {
 			out.println("<div align=\"center\">");
 			out.println("<table border=\"0\" width=\"90%\"><tr><td>");
 			out.println("<div id=\"param_div\" width=\"90%\" align=\"center\" class=\"qeparams\">");

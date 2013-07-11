@@ -1083,7 +1083,7 @@ public class ArtJob implements Job, Serializable {
 				}
 				rs.close();
 
-				if (emailsList.size() > 0) {
+				if (!emailsList.isEmpty()) {
 					String emails = StringUtils.join(emailsList, ";");
 					runNormalJob(conn, emails);
 				}
@@ -1096,7 +1096,7 @@ public class ArtJob implements Job, Serializable {
 
 					//store column names in lowercase to ensure special columns are found by list.contains()
 					//some RDBMSs make all column names uppercase					
-					columnList.add(columnName.toLowerCase());
+					columnList.add(columnName.toLowerCase(Locale.ENGLISH));
 				}
 
 				if (columnList.contains(ArtDBCP.RECIPIENT_COLUMN) && columnList.contains(ArtDBCP.RECIPIENT_ID)) {
@@ -1410,7 +1410,7 @@ public class ArtJob implements Job, Serializable {
 
 									prepareAlertJob(m, customMessage);
 
-									m.setToForce(email);
+									m.setTo(email);
 
 									//send email for this recipient
 									mailSent = m.send();
@@ -1662,7 +1662,7 @@ public class ArtJob implements Job, Serializable {
 
 								prepareEmailJob(m, customMessage);
 
-								m.setToForce(email);
+								m.setTo(email);
 
 								//send email for this recipient
 								mailSent = m.send();
@@ -2132,7 +2132,7 @@ public class ArtJob implements Job, Serializable {
 						}
 
 						//delete old archives if they exist
-						if(runsToArchive==0){
+						if (runsToArchive == 0) {
 							deleteArchives();
 						}
 					}
@@ -3784,7 +3784,7 @@ public class ArtJob implements Job, Serializable {
 			}
 
 			//delete old archive records
-			if (oldRecords.size() > 0) {
+			if (!oldRecords.isEmpty()) {
 				String oldRecordsString = StringUtils.join(oldRecords, ",");
 				sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
 				ps = conn.prepareStatement(sql);
@@ -3843,7 +3843,10 @@ public class ArtJob implements Job, Serializable {
 					String filePath = ArtDBCP.getJobsPath() + oldFileName;
 					File previousFile = new File(filePath);
 					if (previousFile.exists()) {
-						previousFile.delete();
+						boolean deleted = previousFile.delete();
+						if (!deleted) {
+							logger.warn("File not deleted: {}", previousFile);
+						}
 					}
 				}
 			}
@@ -3851,7 +3854,7 @@ public class ArtJob implements Job, Serializable {
 			ps.close();
 
 			//delete old archive records
-			if (oldRecords.size() > 0) {
+			if (!oldRecords.isEmpty()) {
 				String oldRecordsString = StringUtils.join(oldRecords, ",");
 				sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
 				ps = conn.prepareStatement(sql);

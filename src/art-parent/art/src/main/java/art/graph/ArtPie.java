@@ -20,6 +20,7 @@ import de.laures.cewolf.tooltips.PieToolTipGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -226,7 +227,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 
 		//add support for drill down queries
 		DrilldownQuery drilldown = null;
-		if (drilldownQueries != null && drilldownQueries.size() > 0) {
+		if (drilldownQueries != null && !drilldownQueries.isEmpty()) {
 			hasDrilldown = true;
 			drilldownLinks = new HashMap<String, String>();
 
@@ -267,7 +268,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 				if (drilldown != null) {
 					drilldownQueryId = drilldown.getDrilldownQueryId();
 					outputFormat = drilldown.getOutputFormat();
-					if (outputFormat == null || outputFormat.toUpperCase().equals("ALL")) {
+					if (outputFormat == null || outputFormat.equalsIgnoreCase("ALL")) {
 						sb.append("showParams.jsp?queryId=").append(drilldownQueryId);
 					} else {
 						sb.append("ExecuteQuery?queryId=").append(drilldownQueryId)
@@ -286,7 +287,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -306,7 +307,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 								if (paramValue != null) {
 									try {
 										paramValue = URLEncoder.encode(paramValue, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, paramValue, e});
 									}
 								}
@@ -324,7 +325,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 								if (param != null) {
 									try {
 										param = URLEncoder.encode(param, "UTF-8");
-									} catch (Exception e) {
+									} catch (UnsupportedEncodingException e) {
 										logger.warn("Error while encoding. Parameter={}, Value={}", new Object[]{paramLabel, param, e});
 									}
 								}
@@ -421,9 +422,9 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	public String generateLink(Object data, Object category) {
 		String link = "";
 
-		if (useHyperLinks) {
+		if (hyperLinks != null) {
 			link = hyperLinks.get(category.toString());
-		} else if (hasDrilldown) {
+		} else if (drilldownLinks != null) {
 			link = drilldownLinks.get(category.toString());
 		}
 
