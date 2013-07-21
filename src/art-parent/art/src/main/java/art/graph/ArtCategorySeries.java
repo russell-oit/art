@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -623,13 +624,13 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 	 * @param params
 	 */
 	@Override
-	public void processChart(Object chart, Map params) {
-		CategoryPlot plot = (CategoryPlot) ((JFreeChart) chart).getPlot();
+	public void processChart (JFreeChart chart, Map<String,String> params) {
+		CategoryPlot plot = (CategoryPlot) chart.getPlot();
 
 		//set y axis range if required
-		if (params.get("from") != null && params.get("to") != null) {
-			Double from = (Double) params.get("from");
-			Double to = (Double) params.get("to");
+		if (StringUtils.isNotBlank(params.get("from")) && StringUtils.isNotBlank(params.get("to"))) {
+			Double from = Double.valueOf(params.get("from"));
+			Double to = Double.valueOf(params.get("to"));
 			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 			rangeAxis.setRange(from, to);
 		}
@@ -638,8 +639,8 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 		plot.getDomainAxis().setMaximumCategoryLabelLines(5);
 
 		// turn on or off data labels. by default labels are not displayed
-		String labelFormat = (String) params.get("labelFormat");
-		if (!labelFormat.equals("off")) {
+		String labelFormat = params.get("labelFormat");
+		if (!StringUtils.equals(labelFormat,"off")) {
 			//display labels with data values
 
 			DecimalFormat valueFormatter;
@@ -659,26 +660,15 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 		plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
 		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 
-		//allow highlighting of data points
-		boolean showPoints = (Boolean) params.get("showPoints");
-		if (showPoints) {
-			CategoryItemRenderer r = plot.getRenderer();
-			if (r instanceof LineAndShapeRenderer) {
-				//show data points for line graphs, not for bar graphs
-				LineAndShapeRenderer renderer = (LineAndShapeRenderer) r;
-				renderer.setBaseShapesVisible(true);
-			}
-		}
-
 		// Output to file if required     	  
-		String outputToFile = (String) params.get("outputToFile");
-		String fileName = (String) params.get("fullFileName");
-		if (outputToFile.equals("pdf")) {
+		String outputToFile = params.get("outputToFile");
+		String fileName = params.get("fullFileName");
+		if (StringUtils.equals(outputToFile,"pdf")) {
 			PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
-		} else if (outputToFile.equals("png")) {
+		} else if (StringUtils.equals(outputToFile,"png")) {
 			//save chart as png file									            
 			try {
-				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
+				ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);
 			} catch (IOException e) {
 				logger.error("Error", e);
 			}

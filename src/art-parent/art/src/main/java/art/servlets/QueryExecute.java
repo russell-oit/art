@@ -309,8 +309,8 @@ public class QueryExecute extends HttpServlet {
 		request.setAttribute("_remove_at", String.valueOf(removeAt));
 
 		if (yMin < yMax) {
-			request.setAttribute("_from", Double.valueOf(yMin));
-			request.setAttribute("_to", Double.valueOf(yMax));
+			request.setAttribute("_from", String.valueOf(yMin)); //cewolf expects strings
+			request.setAttribute("_to", String.valueOf(yMax));
 		}
 
 		if (!showLegend) {

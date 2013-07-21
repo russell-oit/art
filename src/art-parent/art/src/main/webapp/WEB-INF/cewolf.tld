@@ -1254,7 +1254,7 @@
     </attribute>
     <attribute>
 	  <description>
-		Value of the param. Must be serializable. 	
+		Value of the param. 
 	  </description>
       <name>value</name>
       <required>true</required>

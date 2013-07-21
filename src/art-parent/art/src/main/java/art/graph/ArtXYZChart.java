@@ -483,13 +483,13 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	}
 
 	@Override
-	public void processChart(Object chart, Map params) {
-		XYPlot plot = (XYPlot) ((JFreeChart) chart).getPlot();
+	public void processChart (JFreeChart chart, Map<String,String> params) {
+		XYPlot plot = (XYPlot) chart.getPlot();
 
 		// set y axis range if required
-		if (params.get("from") != null && params.get("to") != null) {
-			Double from = (Double) params.get("from");
-			Double to = (Double) params.get("to");
+		if (StringUtils.isNotBlank(params.get("from")) && StringUtils.isNotBlank(params.get("to"))) {
+			Double from = Double.valueOf(params.get("from"));
+			Double to = Double.valueOf(params.get("to"));
 			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 			rangeAxis.setRange(from, to);
 		}
@@ -499,14 +499,14 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 
 		// Output to file if required
-		String outputToFile = (String) params.get("outputToFile");
-		String fileName = (String) params.get("fullFileName");
-		if (outputToFile.equals("pdf")) {
+		String outputToFile = params.get("outputToFile");
+		String fileName = params.get("fullFileName");
+		if (StringUtils.equals(outputToFile,"pdf")) {
 			PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
-		} else if (outputToFile.equals("png")) {
+		} else if (StringUtils.equals(outputToFile,"png")) {
 			// save chart as png file
 			try {
-				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
+				ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);
 			} catch (IOException e) {
 				logger.error("Error", e);
 			}

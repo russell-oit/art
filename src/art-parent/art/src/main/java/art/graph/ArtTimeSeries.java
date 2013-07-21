@@ -29,6 +29,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
@@ -640,13 +641,13 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 	 * @param params
 	 */
 	@Override
-	public void processChart(Object chart, Map params) {
-		XYPlot plot = (XYPlot) ((JFreeChart) chart).getPlot();
+	public void processChart (JFreeChart chart, Map<String,String> params) {
+		XYPlot plot = (XYPlot) chart.getPlot();
 
 		//set y axis range if required
-		if (params.get("from") != null && params.get("to") != null) {
-			Double from = (Double) params.get("from");
-			Double to = (Double) params.get("to");
+		if (StringUtils.isNotBlank(params.get("from")) && StringUtils.isNotBlank(params.get("to"))) {
+			Double from = Double.valueOf(params.get("from"));
+			Double to = Double.valueOf(params.get("to"));
 			NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 			rangeAxis.setRange(from, to);
 		}
@@ -655,22 +656,15 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 		plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
 		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 
-		//allow highlighting of data points
-		boolean showPoints = (Boolean) params.get("showPoints");
-		if (showPoints) {
-			XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) plot.getRenderer();
-			renderer.setBaseShapesVisible(true);
-		}
-
 		// Output to file if required     	  
-		String outputToFile = (String) params.get("outputToFile");
-		String fileName = (String) params.get("fullFileName");
-		if (outputToFile.equals("pdf")) {
+		String outputToFile = params.get("outputToFile");
+		String fileName = params.get("fullFileName");
+		if (StringUtils.equals(outputToFile,"pdf")) {
 			PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
-		} else if (outputToFile.equals("png")) {
+		} else if (StringUtils.equals(outputToFile,"png")) {
 			//save chart as png file									            
 			try {
-				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
+				ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);
 			} catch (IOException e) {
 				logger.error("Error", e);
 			}

@@ -4,6 +4,7 @@ import art.servlets.ArtDBCP;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import de.laures.cewolf.cpp.HeatmapEnhancer;
+import de.laures.cewolf.cpp.LineRendererProcessor;
 import de.laures.cewolf.cpp.RotatedAxisLabels;
 import de.laures.cewolf.taglib.CewolfChartFactory;
 import java.awt.Color;
@@ -17,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.*;
 import org.jfree.chart.axis.*;
 import org.jfree.chart.labels.*;
@@ -345,12 +347,6 @@ public class ExportGraph {
 
 					XYPlot xyPlot = (XYPlot) chart.getPlot();
 
-					//show data points if required
-					if (showDataPoints) {
-						XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) xyPlot.getRenderer();
-						renderer.setBaseShapesVisible(true);
-					}
-
 					//set y axis range if required
 					if (from != 0 && to != 0) {
 						NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
@@ -378,12 +374,6 @@ public class ExportGraph {
 						rangeAxis.setRange(from, to);
 					}
 
-					//show data points if required
-					if (showDataPoints) {
-						XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) timePlot.getRenderer();
-						renderer.setBaseShapesVisible(true);
-					}
-
 					break;
 				case -7:
 					//date series
@@ -403,12 +393,6 @@ public class ExportGraph {
 					if (from != 0 && to != 0) {
 						NumberAxis rangeAxis = (NumberAxis) datePlot.getRangeAxis();
 						rangeAxis.setRange(from, to);
-					}
-
-					//show data points if required
-					if (showDataPoints) {
-						XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) datePlot.getRenderer();
-						renderer.setBaseShapesVisible(true);
 					}
 
 					break;
@@ -507,13 +491,6 @@ public class ExportGraph {
 						case -5:
 							//line graph
 							chart = ChartFactory.createLineChart(title, xAxisLabel, yAxisLabel, chartDataset, PlotOrientation.VERTICAL, showLegend, showTooltips, showUrls);
-
-							//show data points if required
-							if (showDataPoints) {
-								CategoryPlot linePlot = (CategoryPlot) chart.getPlot();
-								LineAndShapeRenderer renderer = (LineAndShapeRenderer) linePlot.getRenderer();
-								renderer.setBaseShapesVisible(true);
-							}
 							break;
 						case -8:
 							//stacked vertical bar graph 3d
@@ -573,17 +550,23 @@ public class ExportGraph {
 
 				//display x-axis labels vertically if too many categories present
 				RotatedAxisLabels labelRotation = new RotatedAxisLabels();
+				Map<String, String> rotationOptions = new HashMap<String, String>();
+				rotationOptions.put("rotate_at", String.valueOf(aq.getGraphRotateAt()));
+				rotationOptions.put("remove_at", String.valueOf(aq.getGraphRemoveAt()));
+				labelRotation.processChart(chart, rotationOptions);
 
-				Map<String, String> params = new HashMap<String, String>();
-				params.put("rotate_at", String.valueOf(aq.getGraphRotateAt()));
-				params.put("remove_at", String.valueOf(aq.getGraphRemoveAt()));
-				labelRotation.processChart(chart, params);
+				//higlight data points
+				if (showDataPoints) {
+					LineRendererProcessor lineRenderer = new LineRendererProcessor();
+					Map<String, String> lineOptions = new HashMap<String, String>();
+					lineOptions.put("shapes", "true");
+					lineRenderer.processChart(chart, lineOptions);
+				}
 
-
-				if (outputFormat.equals("png")) {
+				if (StringUtils.equals(outputFormat, "png")) {
 					fullFileName = fullFileNameWithoutExt + ".png";
 					ChartUtilities.saveChartAsPNG(new File(fullFileName), chart, width, height);
-				} else if (outputFormat.equals("pdf")) {
+				} else if (StringUtils.equals(outputFormat, "pdf")) {
 					fullFileName = fullFileNameWithoutExt + ".pdf";
 
 					//include graph data if applicable

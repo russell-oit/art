@@ -47,8 +47,8 @@
   boolean hasDrilldown=graph.getHasDrilldown();
 		  
    // y axis data range
-  Double from = (Double) request.getAttribute("_from");
-  Double to = (Double) request.getAttribute("_to");
+  String from = (String) request.getAttribute("_from");
+  String to = (String) request.getAttribute("_to");
   
   //x-axis label handling
   String rotateAt = (String) request.getAttribute("_rotate_at"); //cewolf expects a string object
@@ -99,7 +99,7 @@
 	}
 	
 // Labels
-	String showLabels="false";
+	boolean showLabels=false;
   String labelFormat;
   final String LABELS_OFF="off";
   final String CATEGORY_LABEL_FORMAT="{2}";
@@ -132,7 +132,7 @@
 		} else {
 			labelFormat=CATEGORY_LABEL_FORMAT;
 		}
-		showLabels="true";
+		showLabels=true;
 	}
 	
 	//make target configurable, mainly for drill down queries
@@ -228,6 +228,10 @@ if (showSQL) {
 			<cewolf:param name="remove_at" value="<%=removeAt%>" />
 		</cewolf:chartpostprocessor> 
 	   
+	   <cewolf:chartpostprocessor id="lineRenderer">
+			<cewolf:param name="shapes" value="<%= String.valueOf(showPoints)%>" />
+		</cewolf:chartpostprocessor> 
+	   
 	   <% if(queryType==-12){
 		   ArtXYZChart heatmap=(ArtXYZChart)graph;
 		   Map<String,String> options=heatmap.getHeatmapOptions();
@@ -235,7 +239,7 @@ if (showSQL) {
 	   <cewolf:chartpostprocessor id="heatmapPP">
         <cewolf:param name="xLabel" value="<%=graph.getXAxisLabel()%>"/>
         <cewolf:param name="yLabel" value="<%=graph.getYAxisLabel()%>"/>
-		<cewolf:param name="showItemLabels" value="<%=showLabels%>"/>
+		<cewolf:param name="showItemLabels" value="<%= String.valueOf(showLabels)%>"/>
 		%>
 		<%
 		for(Map.Entry<String,String> entry: options.entrySet()){
@@ -257,8 +261,7 @@ if (showSQL) {
           <cewolf:param name="labelFormat" value="<%= labelFormat %>" />
 		  <cewolf:param name="outputToFile" value="<%= outputToFile %>" />
           <cewolf:param name="fullFileName" value="<%= fullFileName %>" />          		  		  
-		  <cewolf:param name="showLegend" value="<%= showLegend %>" />	  		  
-		  <cewolf:param name="showPoints" value="<%=showPoints%>" />
+		  <cewolf:param name="showLegend" value="<%= String.valueOf(showLegend) %>" />	  		  
       </cewolf:chartpostprocessor>
 	   
    </cewolf:chart>

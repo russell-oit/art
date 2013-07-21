@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
@@ -438,28 +439,28 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	 * @param params
 	 */
 	@Override
-	public void processChart(Object chart, Map params) {
-		PiePlot plot = (PiePlot) ((JFreeChart) chart).getPlot();
+	public void processChart (JFreeChart chart, Map<String,String> params) {
+		PiePlot plot = (PiePlot) chart.getPlot();
 
 		// switch off labels
-		String labelFormat = (String) params.get("labelFormat");
-		if (labelFormat.equals("off")) {
+		String labelFormat = params.get("labelFormat");
+		if (StringUtils.equals(labelFormat,"off")) {
 			plot.setLabelGenerator(null);
 		} else {
 			plot.setLabelGenerator(new StandardPieSectionLabelGenerator(labelFormat));
 		}
 
 		// Output to file if required     	  
-		String outputToFile = (String) params.get("outputToFile");
-		String fileName = (String) params.get("fullFileName");
-		if (outputToFile.equals("pdf")) {
+		String outputToFile = params.get("outputToFile");
+		String fileName = params.get("fullFileName");
+		if (StringUtils.equals(outputToFile,"pdf")) {
 			//allow show graph data below graph and show graph parameters above graph
 			//PdfGraph.createPdf(chart, fileName, title);
 			PdfGraph.createPdf(chart, fileName, title, graphData, displayParameters);
-		} else if (outputToFile.equals("png")) {
+		} else if (StringUtils.equals(outputToFile,"png")) {
 			//save chart as png file									            
 			try {
-				ChartUtilities.saveChartAsPNG(new File(fileName), (JFreeChart) chart, width, height);
+				ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);
 			} catch (IOException e) {
 				logger.error("Error", e);
 			}

@@ -332,7 +332,7 @@ public class Mailer {
 
 			for (int i = 0; i < attachments.size(); i++) {
 				MimeBodyPart file_part = new MimeBodyPart();
-				File file = (File) attachments.get(i);
+				File file = attachments.get(i);
 				FileDataSource fds = new FileDataSource(file);
 				DataHandler dh = new DataHandler(fds);
 				file_part.setFileName(file.getName());

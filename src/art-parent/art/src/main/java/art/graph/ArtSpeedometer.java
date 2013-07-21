@@ -305,23 +305,22 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 	 * @param params
 	 */
 	@Override
-	public void processChart(Object ch, Map params) {
-		JFreeChart chart = (JFreeChart) ch;
+	public void processChart (JFreeChart chart, Map<String,String> params) {
 		MeterPlot plot = (MeterPlot) chart.getPlot();
 
 		finalizePlot(plot);
 
-		boolean showLegend = (Boolean) params.get("showLegend");
+		boolean showLegend = Boolean.valueOf(params.get("showLegend"));
 		if (!showLegend) {
 			chart.removeLegend();
 		}
 
 		// Output to file if required
-		String outputToFile = (String) params.get("outputToFile");
-		String fileName = (String) params.get("fullFileName");
-		if (outputToFile.equals("pdf")) {
+		String outputToFile = params.get("outputToFile");
+		String fileName = params.get("fullFileName");
+		if (StringUtils.equals(outputToFile,"pdf")) {
 			PdfGraph.createPdf(chart, fileName, title, null, displayParameters);
-		} else if (outputToFile.equals("png")) {
+		} else if (StringUtils.equals(outputToFile,"png")) {
 			// save chart as png file
 			try {
 				ChartUtilities.saveChartAsPNG(new File(fileName), chart, width, height);

@@ -1,8 +1,9 @@
 ART 2.5.3
+* Fix for incorrect handling of " within lov parameter values
 * Mavenised ART
 * Enable multi parameter to act as a chained parameter master
 * Allow chained parameter slave to have default values
-* Fix for incorrect handling of " within lov parameter values
+* Updated cewolf to 1.2.4
 
 ART 2.5.2
 * Fix for error when drill down column has a null value

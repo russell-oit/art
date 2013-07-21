@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -8,7 +8,7 @@
 	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Parent project for ART</name>
+	<name>art-parent</name>
 	<url>http://art.sourceforge.net</url>
 	<description>Parent project for ART. ART is A Reporting Tool.</description>
 
@@ -48,6 +48,9 @@
 						<target>${jdk.version}</target>
 						<debug>true</debug>
 						<debuglevel>source,lines</debuglevel>
+						<compilerArgument>-Xlint:all</compilerArgument>
+						<showWarnings>true</showWarnings>
+						<showDeprecation>true</showDeprecation>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -98,7 +101,7 @@
 			</plugin>
 
 			<!-- animal-sniffer mainly critical at release time to ensure only java 1.6 apis are 
-				used in the code -->
+			used in the code -->
 			<!-- <plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>animal-sniffer-maven-plugin</artifactId>
