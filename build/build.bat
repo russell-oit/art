@@ -1,36 +1,33 @@
 rem clear archive directory
-rd /S /Q C:\toa\Projects\ART\Nightly\hg
-md C:\toa\Projects\ART\Nightly\hg
+rd /S /Q hg
+md hg
 
 rem clear package directory
-rd /S /Q C:\toa\Projects\ART\Nightly\art-nightly
-md C:\toa\Projects\ART\Nightly\art-nightly
+rd /S /Q art-nightly
+md art-nightly
 
 rem create archive from hg repo
-hg archive --repository C:\toa\Projects\ART\hg -t files -- C:\toa\Projects\ART\Nightly\hg
+hg archive --repository ..\hg -t files -- hg
 
 rem copy maven source files (before generation of target files)
-md C:\toa\Projects\ART\Nightly\art-nightly\maven\art-parent
-xcopy /Y /E C:\toa\Projects\ART\Nightly\hg\src\art-parent C:\toa\Projects\ART\Nightly\art-nightly\maven\art-parent
+md art-nightly\src\art-parent
+xcopy /Y /E hg\src\art-parent art-nightly\src\art-parent
 
 rem copy changelog
-copy /Y C:\toa\Projects\ART\Nightly\hg\src\changelog.txt C:\toa\Projects\ART\Nightly\art-nightly
+copy /Y hg\src\changelog.txt art-nightly
 
 rem copy readme
-copy /Y C:\toa\Projects\ART\Nightly\hg\build\readme.txt C:\toa\Projects\ART\Nightly\art-nightly
+copy /Y hg\build\readme.txt art-nightly
 
 rem copy docs
-md C:\toa\Projects\ART\Nightly\art-nightly\docs
-copy /Y C:\toa\Projects\ART\Manuals\automated\*.pdf C:\toa\Projects\ART\Nightly\art-nightly\docs
+md art-nightly\docs
+copy /Y ..\Manuals\automated\*.pdf art-nightly\docs
 
 rem copy database scripts
-md C:\toa\Projects\ART\Nightly\art-nightly\database
-xcopy /Y /E C:\toa\Projects\ART\Nightly\hg\database C:\toa\Projects\ART\Nightly\art-nightly\database
+md art-nightly\database
+xcopy /Y /E hg\database art-nightly\database
 
 rem compile, build and copy war
-cd C:\toa\Projects\ART\Nightly\hg\src\art-parent
-call mvn -o clean package
-copy C:\toa\Projects\ART\Nightly\hg\src\art-parent\art\target\art.war C:\toa\Projects\ART\Nightly\art-nightly
+call mvn -o -f hg\src\art-parent\pom.xml clean package
+copy hg\src\art-parent\art\target\art.war art-nightly
 
-
-cd C:\toa\Projects\ART\Nightly

@@ -1,13 +1,18 @@
 set the correct paths in the following files
 
-html2ps
+convert-manual.bat
+====================
+perl html2ps\html2ps -t -C hb -U -D -b file:///c:/toa/projects/art/manuals/automated/images/ -f html2ps\config.txt -o AdminManual.ps manual.htm
+
+
+htmp2ps\html2ps
 ==========
 eval 'exec C:\Perl\bin\perl.exe -S $0 "$@"'
 $globrc='C:\toa\Projects\ART\Manuals\automated\html2ps\html2psrc';
 $ug='C:\toa\Projects\ART\Manuals\automated\html2ps\html2ps.html';
 
 
-html2psrc
+html2ps\html2psrc
 ==========
 path: "C:\Program Files (x86)\ImageMagick-6.7.4-Q16;C:\Program Files\gs\gs9.04\bin";
 file: "C:\toa\Projects\ART\Manuals\automated\html2ps\hyphen.tex";
