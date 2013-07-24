@@ -42,5 +42,53 @@
 				</includes>
 			</resource>
 		</resources>
+
+		<pluginManagement>
+			<plugins>
+				<!-- not currently using the codehause license plugin. retain sample 
+					configuration for potential future use -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>1.5</version>
+					<configuration>
+						<licenseName>artmail</licenseName>
+						<licenseResolver>${project.baseUri}/src/license</licenseResolver>
+						<organizationName>Enrico Liboni</organizationName>
+						<inceptionYear>2001</inceptionYear>
+						<roots>
+							<root>src/main/java</root>
+						</roots>
+						<includes>
+							<include>**/*.java</include>
+						</includes>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>com.mycila.maven-license-plugin</groupId>
+					<artifactId>maven-license-plugin</artifactId>
+					<version>1.10.b1</version>
+					<configuration>
+						<header>src/license/artmail/header.txt</header>
+						<includes>
+							<include>src/main/java/**/*.java</include>
+						</includes>
+						<encoding>UTF-8</encoding>
+						<strictCheck>true</strictCheck>
+						<dryRun>false</dryRun>
+						<failIfMissing>true</failIfMissing>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<!-- uncomment and use maven-license-plugin as required e.g. mvn license:check, 
+				license:format, license:remove -->
+
+			<!-- <plugin> <groupId>com.mycila.maven-license-plugin</groupId> <artifactId>maven-license-plugin</artifactId> 
+				</plugin> -->
+		</plugins>
 	</build>
 </project>

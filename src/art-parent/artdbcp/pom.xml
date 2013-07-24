@@ -33,5 +33,33 @@
 				</includes>
 			</resource>
 		</resources>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.mycila.maven-license-plugin</groupId>
+					<artifactId>maven-license-plugin</artifactId>
+					<version>1.10.b1</version>
+					<configuration>
+						<header>src/license/artdbcp/header.txt</header>
+						<includes>
+							<include>src/main/java/**/*.java</include>
+						</includes>
+						<encoding>UTF-8</encoding>
+						<strictCheck>true</strictCheck>
+						<dryRun>false</dryRun>
+						<failIfMissing>true</failIfMissing>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<!-- uncomment and use maven-license-plugin as required e.g. mvn license:check, 
+				license:format, license:remove -->
+
+			<!-- <plugin> <groupId>com.mycila.maven-license-plugin</groupId> <artifactId>maven-license-plugin</artifactId> 
+				</plugin> -->
+		</plugins>
 	</build>
 </project>

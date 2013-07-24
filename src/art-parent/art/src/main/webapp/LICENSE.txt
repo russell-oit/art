@@ -1,8 +1,7 @@
-ART is free software; anyone can redistribute, modify and use
-it at no charges under the terms of the GPL license.
+ART is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 2 of the License.
 
-art includes other free software componets:
-artdb, artmail, tinymce: distributed under the LGPL license
-cewolf (cewolf.sf.net) , jfreechart (www.jfree.org): distributed under the LGPL license
-poi,log4j (jakarta.apache.org), ajaxtags: Apache license
+ART includes other free software components.
+A listing can be found at https://sourceforge.net/p/art/wiki/Libraries/
 

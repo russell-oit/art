@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -25,6 +25,37 @@
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.mycila.maven-license-plugin</groupId>
+					<artifactId>maven-license-plugin</artifactId>
+					<version>1.10.b1</version>
+					<configuration>
+						<header>src/license/art/header.txt</header>
+						<includes>
+							<include>src/main/java/**/*.java</include>
+						</includes>
+						<excludes>
+							<exclude>src/main/java/**/BCrypt.java</exclude>
+						</excludes>
+						<encoding>UTF-8</encoding>
+						<strictCheck>true</strictCheck>
+						<dryRun>false</dryRun>
+						<failIfMissing>true</failIfMissing>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<!-- uncomment and use maven-license-plugin as required e.g. mvn license:check, 
+				license:format, license:remove -->
+
+			<!-- <plugin> <groupId>com.mycila.maven-license-plugin</groupId> <artifactId>maven-license-plugin</artifactId> 
+				</plugin> -->
+		</plugins>
 	</build>
 
 	<repositories>
@@ -35,7 +66,8 @@
 			<url>http://maven.cubrid.org</url>
 		</repository>
 		<!-- in-project repository for artifacts that are not in a public maven 
-		repository e.g. spnego, cewolf-1.2.x, itext-asian-2.1.7, ajaxtags-1.5.5, jcommon-1.0.18 -->
+			repository e.g. spnego, cewolf-1.2.x, itext-asian-2.1.7, ajaxtags-1.5.5, 
+			jcommon-1.0.18 -->
 		<repository>
 			<id>art.local</id>
 			<name>art</name>
@@ -48,7 +80,7 @@
 			<url>http://repository.pentaho.org/artifactory/repo</url>
 		</repository>
 	</repositories>
-	
+
 	<properties>
 		<poi.version>3.7</poi.version>
 	</properties>
@@ -263,7 +295,7 @@
 					<artifactId>jackson-annotations</artifactId>
 				</exclusion>
 				<!-- jdtcore used to compile Java expressions used in reports. likely 
-				also available in servlet container. inclusion may cause conflicts and errors -->
+					also available in servlet container. inclusion may cause conflicts and errors -->
 				<exclusion>
 					<groupId>eclipse</groupId>
 					<artifactId>jdtcore</artifactId>
@@ -316,8 +348,8 @@
 			<groupId>pentaho</groupId>
 			<artifactId>mondrian</artifactId>
 			<!-- art using 3.2.1.13885. pom on pentaho repository doesn't have dependencies. 
-			3.2.1.14022 first mondrian version with dependencies defined in pom but has 
-			api changes -->
+				3.2.1.14022 first mondrian version with dependencies defined in pom but has 
+				api changes -->
 			<version>3.2.1.13885</version>
 			<exclusions>
 				<!-- art is using log4j-over-slf4j so don't include log4j.jar -->

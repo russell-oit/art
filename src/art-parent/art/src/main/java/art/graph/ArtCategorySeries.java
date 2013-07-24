@@ -1,13 +1,19 @@
-/*
- * Copyright (C)   Enrico Liboni  - enrico@computer.org
+/**
+ * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the LGPL License as published by
- *   the Free Software Foundation;
+ * This file is part of ART.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. *  
+ * ART is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
 package art.graph;
 
@@ -44,7 +50,6 @@ import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
-import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.ui.TextAnchor;
