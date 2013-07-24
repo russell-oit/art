@@ -1,6 +1,6 @@
 ART 2.5.3
 * Fix for incorrect handling of " within lov parameter values
-* Mavenised ART
+* Mavenised the source code
 * Enable multi parameter to act as a chained parameter master
 * Allow chained parameter slave to have default values
 * Updated cewolf to 1.2.4

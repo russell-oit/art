@@ -20,6 +20,7 @@ package art.graph;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
 import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.DatasetProducer;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -292,7 +293,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 	 * @return dataset to be used for rendering the chart
 	 */
 	@Override
-	public Object produceDataset(Map params) {
+	public Object produceDataset(Map<String,Object> params) throws DatasetProduceException {
 		return dataset;
 	}
 

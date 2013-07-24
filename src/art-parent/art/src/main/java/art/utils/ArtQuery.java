@@ -1630,10 +1630,10 @@ public class ArtQuery {
 	 *
 	 * @return all rules in the database
 	 */
-	public Map getAllRules() {
+	public Map<String, Rule> getAllRules() {
 		Collator stringCollator = Collator.getInstance();
 		stringCollator.setStrength(Collator.TERTIARY); //order by case
-		TreeMap<String, Rule> map = new TreeMap<String, Rule>(stringCollator);
+		Map<String, Rule> map = new TreeMap<String, Rule>(stringCollator);
 
 		Connection conn = null;
 		PreparedStatement ps = null;

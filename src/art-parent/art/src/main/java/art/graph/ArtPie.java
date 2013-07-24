@@ -20,6 +20,7 @@ package art.graph;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
 import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.DatasetProducer;
 import de.laures.cewolf.links.PieSectionLinkGenerator;
 import de.laures.cewolf.tooltips.PieToolTipGenerator;
@@ -365,7 +366,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	 * @return dataset to be used for rendering the chart
 	 */
 	@Override
-	public Object produceDataset(Map params) {
+	public Object produceDataset(Map<String,Object> params) throws DatasetProduceException {
 		return dataset;
 	}
 

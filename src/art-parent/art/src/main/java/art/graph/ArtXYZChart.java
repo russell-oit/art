@@ -411,7 +411,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 	}
 
 	@Override
-	public Object produceDataset(Map map) throws DatasetProduceException {
+	public Object produceDataset(Map<String,Object> map) throws DatasetProduceException {
 		return dataset;
 	}
 

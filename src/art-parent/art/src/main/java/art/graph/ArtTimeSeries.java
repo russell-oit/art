@@ -20,6 +20,7 @@ package art.graph;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
 import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.DatasetProducer;
 import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;
@@ -549,7 +550,7 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 	 * @return dataset to be used for rendering the chart
 	 */
 	@Override
-	public Object produceDataset(Map params) {
+	public Object produceDataset(Map<String,Object> params) throws DatasetProduceException {
 		return dataset;
 	}
 

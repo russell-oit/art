@@ -530,7 +530,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 	 * @throws DatasetProduceException
 	 */
 	@Override
-	public Object produceDataset(Map params) throws DatasetProduceException {
+	public Object produceDataset(Map<String,Object> params) throws DatasetProduceException {
 		return dataset;
 	}
 
