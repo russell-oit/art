@@ -312,6 +312,7 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 	 * @param since
 	 * @return <code>true</code> if the data for the chart has expired
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean hasExpired(Map params, java.util.Date since) {
 		return true;

@@ -1,0 +1,28 @@
+<!-- artmail build.xml
+  -->
+
+<project name="ART" default="compile" basedir=".">
+	<description>
+        artmail ant script
+	</description>
+
+	<property name="dist" location="."/> 
+	<property name="jars.dir" value="lib"/>
+
+	<path id="classpath">
+		<fileset dir="${jars.dir}" includes="*.jar"/>		
+	</path>
+
+
+	<!-- Compile all -->
+	<target name="compile"  description="Compile source code inline" >  	
+		<javac  source="1.6" target="1.6" classpathref="classpath" srcdir="${dist}/" includeAntRuntime="no" debug="true" debuglevel="lines,source" />	
+	</target>
+
+	<!-- Create jar file -->
+	<target name="jar"  description="Create jar file" >
+		<delete file="${dist}/artmail.jar"/>
+		<jar    destfile="${dist}/artmail.jar" basedir="${dist}/src"/>
+	</target>
+
+</project>

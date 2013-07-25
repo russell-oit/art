@@ -32,16 +32,25 @@
 					<include>**/*.java</include>
 				</includes>
 			</resource>
+			<!-- include license file and build.xml file in generated jar -->
+			<resource>
+				<directory>${basedir}</directory>
+				<includes>
+					<include>LICENSE.txt</include>
+					<include>build.xml</include>
+				</includes>
+			</resource>
 		</resources>
 
 		<pluginManagement>
 			<plugins>
+				<!-- plugin to update/add license headers to source files -->
 				<plugin>
 					<groupId>com.mycila.maven-license-plugin</groupId>
 					<artifactId>maven-license-plugin</artifactId>
 					<version>1.10.b1</version>
 					<configuration>
-						<header>src/license/artdbcp/header.txt</header>
+						<header>src/license/header.txt</header>
 						<includes>
 							<include>src/main/java/**/*.java</include>
 						</includes>

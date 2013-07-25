@@ -415,6 +415,7 @@ public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcesso
 		return dataset;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean hasExpired(Map map, Date date) {
 		return true;
