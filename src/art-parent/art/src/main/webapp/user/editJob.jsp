@@ -32,7 +32,7 @@ if(owner==null){ %>
 window.onload=function(){
 onClickSaveSchedule(document.getElementById("saveSchedule"));
 onChangeAllowSharing(document.getElementById("allowSharing"));
-}
+};
 </script>
 
 <%
@@ -472,8 +472,8 @@ if (request.getParameter("bcc").equals("")){
  %>
 </c:if>
 
-<script language="javascript" type="text/javascript" src="<%= request.getContextPath() %>/js/tiny_mce/tiny_mce.js"></script>
-<script language="javascript" type="text/javascript">
+<script type="text/javascript" src="<%= request.getContextPath() %>/js/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript">
 tinyMCE.init({
 	   mode : "exact",
 	   elements : "mceedit",
@@ -484,7 +484,7 @@ tinyMCE.init({
 	   theme_advanced_toolbar_location : "top" });
 </script>
 
-<script language="Javascript">
+<script type="text/javascript">
 <!-- Begin
 function onChangeJobType(jobType,queryType) {
    // initiate output types
@@ -836,7 +836,7 @@ function onClickSaveSchedule(t){
 	 </table>
  </div>
 
- <script language="javascript">
+ <script type="text/javascript">
 	onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);
  </script>
 

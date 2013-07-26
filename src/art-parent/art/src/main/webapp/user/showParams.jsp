@@ -243,9 +243,9 @@ if(queryType==112 || queryType==113 || queryType==114){
                             <input type="button" class="buttonup" value="..." onclick='javascript:alert(" <%=messages.getString("graphHelp1")%> <%=messages.getString("graphHelp2")%> <%=messages.getString("graphHelp3")%> <%=messages.getString("graphHelp4")%> ");' onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
                         </small>
 
-                        <span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
+                        <span style="font-size:95%"><i><%= messages.getString("viewMode") %></i></span>
                         <SELECT name="viewMode" id="viewMode" size="1">
-                            <OPTION VALUE="GRAPH"><%=messages.getString("htmlPlain")%></OPTION>
+                            <OPTION VALUE="GRAPH"><%= messages.getString("htmlPlain") %></OPTION>
                             <OPTION VALUE="PDFGRAPH"><%=messages.getString("pdf")%></OPTION>
                             <OPTION VALUE="PNGGRAPH"><%=messages.getString("png")%></OPTION>
                             <% if (accessLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
@@ -311,7 +311,7 @@ jQuery(document).ready(function($){
 		var selectedViewMode="";
 
 		if(viewMode!=null){
-			var selectedViewMode = viewMode.options[viewMode.selectedIndex].value;
+			selectedViewMode = viewMode.options[viewMode.selectedIndex].value;
 		}
 
 		var qt=<%=queryType%>;
@@ -363,18 +363,18 @@ jQuery(document).ready(function($){
 			
 		}
 
-});  
+	});  
 
-//display spinner animation when any ajax activity happens
-$("#systemWorking").ajaxStart(function(){
-    $(this).show();
- }).ajaxStop(function(){
-    $(this).hide();
- }).ajaxError(function(){
-    $(this).hide();
- });
- 
-}); 
+	//display spinner animation when any ajax activity happens
+	$("#systemWorking").ajaxStart(function(){
+	    $(this).show();
+	 }).ajaxStop(function(){
+	    $(this).hide();
+	 }).ajaxError(function(){
+	    $(this).hide();
+	 });
+	 
+	}); 
 
 
 

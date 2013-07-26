@@ -1,7 +1,7 @@
 <%@ page import="art.utils.*,java.util.*" %>
 <%@ include file ="headerAdmin.jsp" %>
 
-<script language="javascript">
+<script type="text/javascript">
     <!--
 	
 	function countSelected(list){

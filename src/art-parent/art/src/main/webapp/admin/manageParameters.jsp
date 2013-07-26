@@ -2,7 +2,7 @@
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
-<script language="javascript">
+<script type="text/javascript">
     <!--
 
     function moveUp() {

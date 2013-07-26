@@ -39,7 +39,7 @@ String imgMaximize=contextPath + "/images/maximize.png";
 String imgRefresh=contextPath + "/images/refresh.png";
  %>
 
- <script language="JavaScript" src="../js/overlib.js"></script>
+ <script type="text/javascript" src="../js/overlib.js"></script>
 
 <b><%=dashboard.getTitle()%></b> <br>
     &nbsp;&nbsp;&nbsp;<%=dashboard.getDescription()%>

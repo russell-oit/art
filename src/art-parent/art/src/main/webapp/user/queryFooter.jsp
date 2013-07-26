@@ -21,7 +21,7 @@ if(request.getParameter("_isInline")!=null){
  </tr>
 </table>
 
-<script language="javascript">
+<script type="text/javascript">
  writeStatus("&nbsp;");
 </script>	  
 

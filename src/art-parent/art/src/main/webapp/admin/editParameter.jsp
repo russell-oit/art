@@ -30,7 +30,7 @@ String help;
 
 %>
 
-<script language="javascript" type="text/javascript">
+<script type="text/javascript">
 	<!-- Begin
 	function onTypeSelection() {
 		var paramType = document.getElementById("paramType").value;
@@ -267,7 +267,7 @@ String help;
     </table>
 </form>
 			
-<script language="javascript" type="text/javascript">
+<script type="text/javascript">
     onTypeSelection();
 </script>
 

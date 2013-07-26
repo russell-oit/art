@@ -84,9 +84,9 @@ if(queryType==111){
   }
 %>  
 
-<script language="javascript" type="text/javascript" src="<%= request.getContextPath() %>/js/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" src="<%= request.getContextPath() %>/js/tiny_mce/tiny_mce.js"></script>
 
-<script language="javascript" type="text/javascript">
+<script type="text/javascript">
     tinyMCE.init({
         mode : "exact",
         elements : "mceedit",

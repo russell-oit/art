@@ -27,7 +27,7 @@ return;
         <link rel="stylesheet" href="css/art.css">
         <title>ART - Login</title>
 
-        <script language="JavaScript">
+        <script type="text/javascript">
             <!-- Begin
             function Start(page) {
                 OpenWin = this.open(page, "CtrlWindow", "toolbar=yes,menubar=no,location=no,statusbar=no,scrollbars=yes,resizable=yes,width=800,height=600");

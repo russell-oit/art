@@ -4,7 +4,7 @@
 <%	
  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
 %>
-<script language="javascript">
+<script type="text/javascript">
  writeStatus(<%=messages.getString("updateExecuted")%>);
 </script>
 

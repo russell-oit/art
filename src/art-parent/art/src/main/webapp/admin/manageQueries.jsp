@@ -2,7 +2,7 @@
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <%@ include file ="headerAdmin.jsp" %>
 
-<script language="javascript">
+<script type="text/javascript">
     
     function countSelected(list){
         var count=0;
@@ -85,11 +85,11 @@
 
     function voidGroupSelection() {
         for (var i=0; i<document.getElementById("groupId").length; i++) {
-            document.getElementById("groupId").options[i].selected = false
+            document.getElementById("groupId").options[i].selected = false;
             document.getElementById("groupId").selectedIndex = 0;
         }
 		for (var i=0; i<document.getElementById("newGroupId").length; i++) {
-            document.getElementById("newGroupId").options[i].selected = false
+            document.getElementById("newGroupId").options[i].selected = false;
             document.getElementById("newGroupId").selectedIndex = 0;
         }
     }

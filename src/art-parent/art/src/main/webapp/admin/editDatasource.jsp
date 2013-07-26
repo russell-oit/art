@@ -48,7 +48,7 @@ if (action.equals("MODIFY")){
 String msg;
 %>
 
-<script language="javascript" type="text/javascript">	
+<script type="text/javascript">	
 	function onTypeSelection() {		
 		var dbType=document.getElementById("database_type").value;
 		var driverElement=document.getElementById("DRIVER");

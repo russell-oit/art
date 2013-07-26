@@ -1,9 +1,9 @@
-<!-- ART DBCP build.xml
+<!-- artdbcp build.xml
   -->
 
 <project name="ART" default="compile" basedir=".">
 	<description>
-        ART DBCP ant script
+        artdbcp ant script
 	</description>
 
 	<property name="dist" location="."/> 

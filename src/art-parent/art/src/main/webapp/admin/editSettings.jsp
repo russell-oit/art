@@ -287,7 +287,7 @@
 
 %>
 
-<script language="javascript" type="text/javascript">	
+<script type="text/javascript">	
 	function onTypeSelection() {		
 		var dbType=document.getElementById("art_database_type").value;
 		var driverElement=document.getElementById("art_jdbc_driver");

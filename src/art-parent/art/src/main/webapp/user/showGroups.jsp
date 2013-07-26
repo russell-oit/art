@@ -27,7 +27,7 @@ if(StringUtils.isNotBlank(startQuery)){
 }
 %>
 
-<script language="javascript">
+<script type="text/javascript">
 <!--
 
 function setAction() {

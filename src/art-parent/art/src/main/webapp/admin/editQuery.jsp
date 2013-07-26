@@ -39,8 +39,8 @@ String username=(String) session.getAttribute("AdminUsername");
 
 %>
 
-<script language="javascript" type="text/javascript" src="<%= request.getContextPath() %>/js/tiny_mce/tiny_mce.js"></script>
-<script language="javascript" type="text/javascript">
+<script type="text/javascript" src="<%= request.getContextPath() %>/js/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript">
 tinyMCE.init({
 	   mode : "exact",
 	   elements : "textSource",
@@ -51,7 +51,7 @@ tinyMCE.init({
 	   theme_advanced_toolbar_location : "top" });
 </script>
 
-<script language="Javascript">
+<script type="text/javascript">
 	<!-- Begin
 	function onTypeSelection() {
 		i = document.getElementById("typeId").value;
@@ -275,26 +275,27 @@ tinyMCE.init({
 				document.getElementById("div_graph_options1").className="collapse";
 				document.getElementById("div_graph_options2").className="collapse";
 			}
-            
-            if(i==0 || i==101 || i==102 || i==103 || i<0 || (i>=1 && i<=99)){
-                document.getElementById("showParameters").className="expand";                
-            } else {
-                //show parameters option not valid for other query types
-                document.getElementById("showParameters").className="collapse";
-            }
-            
-            if(i==120){
-                //static lov
-                document.getElementById("usesRules").className="collapse";
-                document.getElementById("dbId").className="collapse";
-                document.getElementById("showParameters").className="collapse";
+		
+            //show parameters only for tabular queries, group queries, graphs, crosstabs
+			if(i<100 || i==101 || i==102 || i==103){
+				document.getElementById("showParameters").className="expand";                
+			} else {
+				//show parameters option not valid for other query types
+				document.getElementById("showParameters").className="collapse";
+			}
+
+			if(i==120){
+				//static lov
+				document.getElementById("usesRules").className="collapse";
+				document.getElementById("dbId").className="collapse";
+				document.getElementById("showParameters").className="collapse";
 				document.getElementById("displayResultset").className="collapse";
-            }
-			
+			}
+
 			if(i==121){
-                //dynamic job recepients query
-                document.getElementById("usesRules").className="collapse";
-            }
+				//dynamic job recepients query
+				document.getElementById("usesRules").className="collapse";
+			}
 		}
 
 		//use different textarea for text querys
@@ -380,7 +381,9 @@ tinyMCE.init({
             </td>
         </tr>
         <tr><td class="data"> Name </td>
-            <td class="data"> <input type="text" name="NAME" size="50" maxlength="50" value="<%=aq.getName()%>"> </td>
+            <td class="data">
+            	<input type="text" name="NAME" size="50" maxlength="50" value="<%=aq.getName()%>">
+            </td>
         </tr>
 
         <tr><td class="data"> Status </td>
@@ -394,10 +397,9 @@ tinyMCE.init({
                     <option value="H" <%=("H".equals(currentStringValue)?"selected":"")%>>Hidden</option>
                 </select>
                 <input type="button" class="buttonup" onclick="javascript:alert('If a query is disabled, it will not run, either interactively or as a scheduled job.')" value="?" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);">
-            </td></tr>
-        </tr>
-
-
+            </td>
+        </tr>        
+        
         <tr><td class="data"> Short Description <br><small>(also: Title on Graphs/Dashboards)</small> </td>
             <td class="data"> <input type="text" name="SHORT_DESCRIPTION" size="50" maxlength="254" value="<%=aq.getShortDescription()%>"> </td>
         </tr>
@@ -527,7 +529,8 @@ tinyMCE.init({
             <select name="USES_RULES" id="usesRules" size="1">
                 <option value="N" <%=("N".equals(currentStringValue)?"selected":"")%>>No</option>
                 <option value="Y" <%=("Y".equals(currentStringValue)?"selected":"")%>>Yes</option>
-            </select> </td></tr>
+            </select>
+            </td>
     </tr>
         
     <tr><td class="data"> Show Parameters In Output</td>
@@ -539,7 +542,8 @@ tinyMCE.init({
                 <option value="N" <%=("N".equals(currentStringValue)?"selected":"")%>>No</option>
                 <option value="Y" <%=("Y".equals(currentStringValue)?"selected":"")%>>Yes</option>
                 <option value="A" <%=("A".equals(currentStringValue)?"selected":"")%>>Always</option>
-            </select> </td></tr>
+            </select>
+         </td>
     </tr>
 	
 	<tr><td class="data"> Display Resultset </td>
@@ -872,7 +876,7 @@ tinyMCE.init({
     <table align="center" class="art">
 
         <tr>
-            <td type="attr">
+            <td class="attr">
 
                     <b>Notes:</b> <br>
                     <ul>
@@ -931,7 +935,7 @@ tinyMCE.init({
     </table>
 </div>
 
-<script language="Javascript">
+<script type="text/javascript">
     onTypeSelection();
 </script>
 

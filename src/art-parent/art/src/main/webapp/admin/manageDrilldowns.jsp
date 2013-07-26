@@ -1,7 +1,7 @@
 <%@ page import="java.util.*,art.utils.*;" %>
 <%@ include file ="headerAdmin.jsp" %>
 
-<script language="javascript">
+<script type="text/javascript">
     <!--
 
     function moveUp() {
