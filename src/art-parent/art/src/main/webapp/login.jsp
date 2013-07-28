@@ -17,12 +17,14 @@
         <table class="art login">
             <tr class="centerMiddle">
                 <td class="loginTitle" colSpan="2" align="left">
-					<img src="${pageContext.request.contextPath}/images/art-64px.jpg" alt="ART" height="70">
+					<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
+						 alt="ART" height="70">
 				</td>
             </tr>
             <tr class="centerMiddle">
                 <td colSpan="2">
-					<img src="${pageContext.request.contextPath}/images/users-64px.jpg" alt="" border="0" width="64" height="64" style="vertical-align: middle">
+					<img src="${pageContext.request.contextPath}/images/users-64px.jpg"
+						 alt="" border="0" width="64" height="64" style="vertical-align: middle">
                     &nbsp;
 					<span style="font-size:180%"><b>ART</b>
 						<c:if test="${(pageScope._mobile == true)}">
@@ -34,7 +36,7 @@
 
 			<form name="login" method="post" action="<%= pageContext.getAttribute("nextPage")%>">
 
-                <c:if test="${( !empty requestScope.message) && (pageScope._login != true)}">
+                <c:if test="${(!empty requestScope.message) && (pageScope._login != true)}">
                     <tr>
                         <td colspan="2" align="center">
                             <span style="color:red">
@@ -62,7 +64,8 @@
                 </tr>
                 <tr>
                     <td class="centerMiddle" colspan="2">
-						<input type="submit" class="buttonup" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" 
+						<input type="submit" class="buttonup"
+							   onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" 
                                style="width:100px;" value="<%=messages.getString("login")%>">
 					</td>
                 </tr>
