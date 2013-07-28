@@ -205,7 +205,7 @@ if (showSQL) {
 %>
 
 <p>
-<table class="plain" align="center" border="0" width="60%">
+<table class="plain" align="center" border="0" style="width:60%">
  <tr>
   <td align="center"> 
    
@@ -284,7 +284,7 @@ if (showSQL) {
   <% if (outputToFile.equals("pdf") || outputToFile.equals("png")) {  %>
    <p>
     <div align="center">
-     <table border="0" width="90%">
+     <table border="0" style="width:90%">
       <tr>
        <td colspan="2" class="data" align="center" >
         <a type="application/octet-stream" href="../export/<%=fileName%>" target="_blank"><%=fileName%></a>
@@ -299,7 +299,7 @@ if (showSQL) {
 <p>
 <br>
 <div align="center">
-<table border="0" width="90%">
+<table border="0" style="width:90%">
   
   <%	
 	if(graph.isShowGraphData()){

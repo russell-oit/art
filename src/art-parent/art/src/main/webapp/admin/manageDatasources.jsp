@@ -61,7 +61,7 @@
     </table> 
 		
 	<p>
-		<table align="center" width="90%">	
+		<table align="center" style="width:90%">	
 			<tr>
 				<td colspan="3" class="attr">
 				Refresh and View Database Connections

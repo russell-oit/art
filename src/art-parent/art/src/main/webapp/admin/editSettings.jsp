@@ -333,7 +333,7 @@
 </script>
 
 <form action="execEditSettings.jsp" method="post">
- <table align="center" width="60%">
+ <table align="center" style="width:60%">
   <tr><td class="title" colspan="2" >Settings </td></tr>
   <tr><td class="Data" colspan="2" > Specify <i>ART Repository</i> connection parameters and other settings </td></tr>
 

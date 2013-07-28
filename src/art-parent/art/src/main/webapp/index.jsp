@@ -40,7 +40,7 @@ return;
 
         <div>
             <br>
-            <table align="center" width="400px"  class="art">
+            <table align="center" style="width:400px"  class="art">
                 <tr>
                     <td class="supertitle" align="center">
                         <br> <img height="70" src="<%= request.getContextPath() %>/images/art-64px.jpg" alt="ART">

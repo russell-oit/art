@@ -35,14 +35,14 @@
 
 %>
 
-<table width="100%">
+<table style="width:100%">
  <tr>
   <td align="left"class="attr">
    <a href="<%=request.getContextPath()%>"><%=messages.getString("login")%></a>
   </td>
  </tr>
 </table>
-<hr style="width:100%;height:1px">
+<hr style="width:100%; height:1px">
 <p>
 <table align="center">
  <tr>

@@ -5,7 +5,7 @@
 
 <%@ include file ="headerAdminPlain.jsp" %>
 
-<table align="center" width="90%">
+<table align="center" style="width:90%">
 
     <tr><td class="title">ART Error codes
         </td></tr>

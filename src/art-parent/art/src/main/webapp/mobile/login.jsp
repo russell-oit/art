@@ -14,7 +14,7 @@
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/art.css">
     </head>
     <body onload="javascript:document.getElementById('username').focus();">
-        <table cellSpacing="1" cellPadding="5" width="300" height="300" border="0" class="art" valign="middle" align="center">
+        <table cellSpacing="1" cellPadding="5" style="width:300px; height:300px" border="0" class="art" valign="middle" align="center">
             <tr vAlign="center" align="middle">
                 <td class="title" colspan="2" align="left"><img height="70" src="<%= request.getContextPath() %>/images/art-64px.jpg"></td>
             </tr>

@@ -9,7 +9,7 @@ if(request.getParameter("_isInline")!=null){
 %>
 
 
-<table width="90%" border="0" cellspacing="0" cellpadding="0">
+<table style="width:90%" border="0" cellspacing="0" cellpadding="0">
  <tr> 
   <td style="text-align: left">
    <div class="small">

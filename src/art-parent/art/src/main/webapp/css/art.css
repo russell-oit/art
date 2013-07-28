@@ -13,12 +13,11 @@ td.jobdetails {
 	padding: 5px;
 }
 
-table.notes td,table.notes th {
+table.notes table.notes td,table.notes th {
 	font-size: 8pt;
 }
 
-table.notes {
-	font-size: 8pt;
+table.scheduleNotes {
 	border-collapse: separate;
 	border-spacing: 8px;
 }
@@ -566,4 +565,62 @@ td.data2 {
 	font-size: 10pt;
 	font-weight: bold;
 	border: 1px solid #000000;
+}
+
+table.login {
+	/* cellspacing=1 */
+	border-collapse: separate;
+	border-spacing: 1px;
+	/* cellspacing=1 */
+	width: 300px;
+	height: 300px;
+	border: 1px solid #000000;
+	border-collapse: collapse;
+	vertical-align: middle;
+	/* align=center */
+	margin: 0 auto;
+	/* align=center */
+}
+
+table.login td,table.login th {
+	/* cellpadding=5 */
+	padding: 5px;
+	/* cellpadding=5 */
+}
+
+td.loginTitle {
+	vertical-align: middle;
+	text-align: center;
+	background-image: URL('../images/bg-gray-dark.png');
+	background-repeat: repeat-x;
+	background-color: #FFFFFF;
+	color: #003366;
+	border: 1px solid #000000;
+}
+
+.centerMiddle {
+	vertical-align: middle;
+	text-align: center;
+}
+
+.centerRight {
+	vertical-align: middle;
+	text-align: right;
+}
+
+.centerLeft {
+	vertical-align: middle;
+	text-align: left;
+}
+
+.loginLabel {
+	vertical-align: middle;
+	text-align: right;
+	width: 30%;
+}
+
+.loginField {
+	vertical-align: middle;
+	text-align: left;
+	width: 70%;
 }

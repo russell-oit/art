@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * ArtDBCP.class
@@ -101,7 +100,7 @@ public class ArtDBCP extends HttpServlet {
 	public static boolean showResultsInline = true;
 	private static boolean nullValueEnabled = true; //to enable blank spaces instead of "null" for varchar fields on reports
 	private static boolean customExportDirectory = false; //to enable custom export path
-	private static boolean nullNumbersAsBlank=true; //whether null numbers are displayed as blank or a zero when nullValueEnabled is true
+	private static boolean nullNumbersAsBlank = true; //whether null numbers are displayed as blank or a zero when nullValueEnabled is true
 
 	/**
 	 * {@inheritDoc}
@@ -356,9 +355,9 @@ public class ArtDBCP extends HttpServlet {
 			if (StringUtils.startsWith(nullValue, "no")) {
 				nullValueEnabled = false;
 				if (StringUtils.equals(nullValue, "no")) {
-					nullNumbersAsBlank=true;
+					nullNumbersAsBlank = true;
 				} else {
-					nullNumbersAsBlank=false; //null numbers as zero
+					nullNumbersAsBlank = false; //null numbers as zero
 				}
 			} else {
 				nullValueEnabled = true;
@@ -670,11 +669,13 @@ public class ArtDBCP extends HttpServlet {
 	public static boolean isCustomExportDirectory() {
 		return customExportDirectory;
 	}
-	
-		/**
-	 * Determine if displaying null numbers as blank or as zero 
-	 * when nullValueEnabled is true
-	 * @return <code>true</code> if displaying null numbers as blank. Otherwise, display null numbers as zero
+
+	/**
+	 * Determine if displaying null numbers as blank or as zero when
+	 * nullValueEnabled is true
+	 *
+	 * @return <code>true</code> if displaying null numbers as blank. Otherwise,
+	 * display null numbers as zero
 	 */
 	public static boolean isNullNumbersAsBlank() {
 		return nullNumbersAsBlank;
@@ -1488,7 +1489,18 @@ public class ArtDBCP extends HttpServlet {
 			//use default jndi prefix
 			finalUrl = "java:comp/env/" + finalUrl;
 		}
-		
+
 		return finalUrl;
+	}
+
+	public static List<String> getWindowsDomains() {
+		List<String> domainsList = new ArrayList<String>();
+
+		String[] domains = StringUtils.split(getArtSetting("mswin_domains"), ",");
+		if (domains != null) {
+			domainsList.addAll(Arrays.asList(domains));
+		}
+
+		return domainsList;
 	}
 }

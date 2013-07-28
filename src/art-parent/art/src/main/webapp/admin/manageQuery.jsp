@@ -114,7 +114,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
     </table>
 </div>
 <p>
-<table align="center"  width="80%">
+<table align="center"  style="width:80%">
     <tr><td class="attr" align="center"><b><%=aq.getName()%></b> (ID: <b><%=queryId%></b>) <br>&nbsp;</td></tr>
     <tr><td class="data" align="center">
             <textarea cols="70" rows="10" wrap="off" style="background-color: #D3D3D3" readonly><%=aq.getText().trim()%>
@@ -145,7 +145,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
 
 
 <p>
-<table align="center"  width="80%">
+<table align="center" style="width:80%">
 
     <tr><td type="attr">
             <%

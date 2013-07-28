@@ -15,7 +15,7 @@
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/ajaxtags-art.css" />
     </head>
     <body>
-        <table  class="art" width="100%">
+        <table  class="art" style="width:100%">
             <tr>
                 <td class="attr" align="left" width="50%">
                     <%=messages.getString("textEditor")%>
