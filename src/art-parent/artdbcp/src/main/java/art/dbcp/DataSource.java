@@ -98,7 +98,7 @@ public class DataSource implements TimerListener {
 	private String testSQL;
 	private boolean enableTest = false;
 	LocalTimer t;
-	private List<EnanchedConnection> connectionPool = new ArrayList<EnanchedConnection>(maxConnections); // this vector stores active connections
+	private List<EnhancedConnection> connectionPool = new ArrayList<EnhancedConnection>(maxConnections); // this vector stores active connections
 	private long thisObjectTicket; // for debug
 	private String driver = ""; //added to support olap
 	private boolean logToStandardOutput = false; //to support logging to standard output
@@ -398,7 +398,7 @@ public class DataSource implements TimerListener {
 	public void close() { // close all active connection and stops timer
 		if (!jndi) {
 			int i;
-			EnanchedConnection e;
+			EnhancedConnection e;
 			try {
 				for (i = (connectionPool.size() - 1); i >= 0; i--) {
 					e = connectionPool.get(i);
@@ -425,7 +425,7 @@ public class DataSource implements TimerListener {
 			// Close all connections
 			writeLog("DataSource: " + name + " - refreshConnection() - removing from pool connections");
 			for (int i = 0; i < connectionPool.size(); i++) {
-				EnanchedConnection s = connectionPool.get(i);
+				EnhancedConnection s = connectionPool.get(i);
 				try {
 					s.realClose();
 				} catch (Exception e) {
@@ -533,7 +533,7 @@ public class DataSource implements TimerListener {
 
 	private boolean isThereAFreeConnection() {
 		int i;
-		EnanchedConnection s;
+		EnhancedConnection s;
 		for (i = 0; i < connectionPool.size(); i++) {
 			s = connectionPool.get(i);
 			if (!s.getInUse()) {
@@ -543,9 +543,9 @@ public class DataSource implements TimerListener {
 		return false;
 	}
 
-	private EnanchedConnection getFreeConnection() {
+	private EnhancedConnection getFreeConnection() {
 		int i;
-		EnanchedConnection s;
+		EnhancedConnection s;
 		for (i = 0; i < connectionPool.size(); i++) {
 			s = connectionPool.get(i);
 			if (!s.getInUse()) {
@@ -556,11 +556,11 @@ public class DataSource implements TimerListener {
 		return null;
 	}
 
-	private EnanchedConnection getOlderConnection() {
+	private EnhancedConnection getOlderConnection() {
 		int i;
 		long last = -1;
 		int index = -1;
-		EnanchedConnection s;
+		EnhancedConnection s;
 		for (i = 0; i < connectionPool.size(); i++) {
 			s = connectionPool.get(i);
 			if (s.getLastUsedTime() > last) {
@@ -573,8 +573,8 @@ public class DataSource implements TimerListener {
 		return s;
 	}
 
-	private EnanchedConnection getNewDatabaseConnection() throws SQLException {
-		EnanchedConnection c = new EnanchedConnection(url, username, password);
+	private EnhancedConnection getNewDatabaseConnection() throws SQLException {
+		EnhancedConnection c = new EnhancedConnection(url, username, password);
 		connectionPool.add(c);
 		if (connectionPool.size() > maxReachedPoolSize) {
 			maxReachedPoolSize = connectionPool.size();
@@ -627,7 +627,7 @@ public class DataSource implements TimerListener {
 			}
 			int i;
 			long currentTime = new java.util.Date().getTime();
-			EnanchedConnection e;
+			EnhancedConnection e;
 			boolean b;
 			try {
 				for (i = (connectionPool.size() - 1); i >= 0; i--) {
@@ -681,7 +681,7 @@ public class DataSource implements TimerListener {
 	 *
 	 * @return
 	 */
-	public List<EnanchedConnection> getConnectionPool() {
+	public List<EnhancedConnection> getConnectionPool() {
 		return connectionPool;
 	}
 }

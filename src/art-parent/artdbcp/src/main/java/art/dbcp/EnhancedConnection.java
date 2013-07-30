@@ -36,7 +36,7 @@ import java.util.Properties;
  * 
  * @author Enrico Liboni
  */
-public class EnanchedConnection implements Connection {
+public class EnhancedConnection implements Connection {
 
     private boolean inUse = false;
     private int inUseCount = 0;    
@@ -45,7 +45,7 @@ public class EnanchedConnection implements Connection {
     private final boolean DEBUG = false;
     private List<Statement> openStatements;
 
-    EnanchedConnection(String url, String username, String password) throws SQLException {
+    EnhancedConnection(String url, String username, String password) throws SQLException {
         Properties dbprops = new Properties();
         dbprops.put("user", username);
         dbprops.put("password", password);

@@ -1,4 +1,5 @@
-<%@ page import="art.utils.*,java.util.*,art.servlets.ArtDBCP,art.dbcp.*,java.text.SimpleDateFormat" %>
+<%@ page import="art.utils.*,java.util.*,art.servlets.ArtDBCP,art.dbcp.*" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 
@@ -30,7 +31,7 @@ if (action!=null && request.getSession().getAttribute("AdminSession")!=null) {
 			StringBuilder sb = new StringBuilder(512);
 			SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			for(int i=0; i<connectionPool.size() ; i++) {
-				EnanchedConnection ec = (EnanchedConnection) connectionPool.get(i) ;								
+				EnhancedConnection ec = (EnhancedConnection) connectionPool.get(i) ;								
 				Date lastUsedTime = new Date(ec.getLastUsedTime());				
 				sb.append(ec.getInUse() + " (" + dateFormatter.format(lastUsedTime) + ") , ");				
 			}

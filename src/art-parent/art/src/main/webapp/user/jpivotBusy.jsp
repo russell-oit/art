@@ -32,7 +32,7 @@
 <body>
  <c:if test="${empty param._mobile}">  
  <% if ( !(ue.getUsername().equals("public_user") && ArtDBCP.getArtSetting("header_with_public_user").equals("no") )  ) { %>
-   <table style="width:100%"  class="art" cellpadding="0" cellspacing="0">
+   <table style="width:100%"  class="art zeroPadding" >
     <tr>
      <td class="attr" align="left" width="50%">
       <% if (ue.getAccessLevel() >= 10) {%>

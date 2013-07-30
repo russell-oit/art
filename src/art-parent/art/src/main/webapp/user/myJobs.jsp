@@ -257,7 +257,7 @@ out.println(resultMessage);
   <tr id="tr_<%=jobId%>" class="collapse">
 	<td></td>
 	<td colspan="6">
-            <table border="0" style="width: 100%">
+            <table style="width: 100%">
 			<tr>
 			<td class="jobdetails"><i><%=messages.getString("queryName")%></i></td>
               <td class="jobdetails" colspan="3"><%=queryName%></td>
@@ -426,7 +426,7 @@ out.println(resultMessage);
   <tr id="tr2_<%=jobId%>" class="collapse">
         <td></td>
 	<td colspan="7">
-            <table border="0" style="width: 100%">
+            <table style="width: 100%">
 				<tr>
 			<td class="jobdetails"><i><%=messages.getString("queryName")%></i></td>
               <td class="jobdetails" colspan="3"><%=queryName%></td>

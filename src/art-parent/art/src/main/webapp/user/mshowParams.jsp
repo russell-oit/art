@@ -153,11 +153,8 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="data">
-                        <div align="center" valign="middle">
+                    <td colspan="3" class="data" style="text-align: center; vertical-align: middle ">
                             <input type="submit" onClick="javascript:return(<%= validateJS.toString()%> returnTrue() )" class="buttonup"  style="width:100px;" value="<%=messages.getString("executeQueryButton")%>">
-                        </div>
-
                     </td>
                 </tr>
             </table>

@@ -211,6 +211,19 @@ int queryGroupId;
 
     </table>
 </form>
+				
+				<p>
+    <table class="centerTable">
+        <tr><td>
+                <form name="backToAdminConsole" method="post" action="<%= request.getContextPath() %>/admin/adminConsole.jsp">
+                    <input type="submit"  value=" << " name="backQuery"><small>&nbsp;Back to Admin Console</small>
+                </form>
+            </td>
+		</tr>
+    </table>
+					</p>
+
+<%@ include file ="/user/footer.jsp" %>
 
 
 <%
@@ -229,16 +242,4 @@ baseUrl="<%=dataProviderUrl%>"
     />
 
 
-<div align="center" valign="center">
-    <table>
-        <tr><td>
-                <form name="backToAdminConsole" method="post" action="<%= request.getContextPath() %>/admin/adminConsole.jsp">
-                    <input type="submit"  value=" << " name="backQuery"><small>&nbsp;Back to Admin Console</small>
-                </form>
-            </td>
-		</tr>
-    </table>
-</div>
 
-
-<%@ include file ="/user/footer.jsp" %>

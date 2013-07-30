@@ -286,10 +286,8 @@ if(queryType==112 || queryType==113 || queryType==114){
                         %>
 
                     </td>
-                    <td colspan="2" class="attr">
-                        <div align="center" valign="middle">
+                    <td colspan="2" class="attr" style="text-align: center; vertical-align: middle ">
                             <input type="submit" name="execute" id="execute" onClick="javascript:return(<%= validateJS.toString()%> returnTrue() )" class="buttonup"  style="width:100px;" value="<%=messages.getString("executeQueryButton")%>">
-                        </div>
                     </td>
                 </tr>
             </table>

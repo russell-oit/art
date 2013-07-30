@@ -29,7 +29,7 @@
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/ajaxtags-art.css" />
     </head>
     <body>
-        <table style="width:100%" class="art" cellpadding="0" cellspacing="0">
+        <table style="width:100%" class="art zeroPadding">
             <tr>
                 <td class="attr" align="left" width="50%">
                     &nbsp;<a href="<%= request.getContextPath() %>/admin/adminConsole.jsp" ><img src="<%= request.getContextPath() %>/images/admin.png" title="Admin Console" border="0" /></a>

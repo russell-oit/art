@@ -52,7 +52,7 @@
 <body>
  <c:if test="${empty param._mobile}">  
  <% if ( !("public_user".equals(usernameHeader) && "no".equals(art.servlets.ArtDBCP.getArtSetting("header_with_public_user")))) { %>
- <table class="art centerTable" style="width: 100%" cellpadding="0" cellspacing="0">
+ <table class="art centerTable zeroPadding" style="width: 100%" >
     <tr>
      <td class="attr" align="left" width="50%">
       <% if (accessLevelHeader >= 10) {%>
