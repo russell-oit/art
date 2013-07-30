@@ -270,7 +270,7 @@
     %>
 	
     <p>
-    <table align="center"><tr><td class="title"> Welcome! </td></tr>
+    <table class="centerTableAuto"><tr><td class="title"> Welcome! </td></tr>
            <tr><td class="data"><span style="color:green">
 	     This is the first time you are logging in.
 		 You need to specify the settings below before being able to use ART.</span><br>
@@ -333,7 +333,7 @@
 </script>
 
 <form action="execEditSettings.jsp" method="post">
- <table align="center" style="width:60%">
+ <table class="centerTable" style="width:60%">
   <tr><td class="title" colspan="2" >Settings </td></tr>
   <tr><td class="Data" colspan="2" > Specify <i>ART Repository</i> connection parameters and other settings </td></tr>
 
@@ -830,7 +830,7 @@ ServletContext ctx   = getServletConfig().getServletContext();
 %>
 
  <p>
-  <table align="center">
+  <table class="centerTableAuto">
    <tr><td colspan="2" class="title"> Application Server Properties </td></tr>
    <tr><td class="data">ART Path</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>   
    <tr><td class="data">Server Info</td><td><code> <%=ctx.getServerInfo()%></code></td></tr>

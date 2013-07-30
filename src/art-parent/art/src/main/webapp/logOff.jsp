@@ -2,7 +2,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page pageEncoding="UTF-8" %>
 <%   response.setHeader("Cache-control","no-cache"); %>
-
+<!DOCTYPE html>
 <html>
 <head>
  <meta http-equiv="expires" content="0">
@@ -37,14 +37,14 @@
 
 <table style="width:100%">
  <tr>
-  <td align="left"class="attr">
+  <td align="left" class="attr">
    <a href="<%=request.getContextPath()%>"><%=messages.getString("login")%></a>
   </td>
  </tr>
 </table>
 <hr style="width:100%; height:1px">
 <p>
-<table align="center">
+<table class="centerTableAuto">
  <tr>
   <td class="attr" align="center">
               <%=messages.getString("sessionClosed")%>

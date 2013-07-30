@@ -49,7 +49,7 @@ if (action.equals("MODIFY")){
 <form name="editQueryGroup" method="post" action="execEditQueryGroup.jsp">
 	<input type="hidden" name="ACTION" value="<%=action%>">
 
-	<table align="center">
+	<table class="centerTableAuto">
 		<tr>
 			<td class="title" colspan="2">Define Query Group</td>
 		</tr>
@@ -67,7 +67,7 @@ if (action.equals("MODIFY")){
 		</tr>
 
 		<tr><td class="data"> Name </td>
-			<td class="data"> <input type="text" name="GROUP_NAME" value="<%=group.getName()%>" size="25" maxlength="25"> </td>
+			<td class="data"> <input type="text" name="GROUP_NAME" value="<%=group.getName()%>" size="40" maxlength="25"> </td>
 		</tr>
 
 		<tr><td class="data"> Description </td>

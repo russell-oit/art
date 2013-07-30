@@ -23,7 +23,7 @@ UserEntity ue=new UserEntity();
 %>
 
 <form name="manageAdminPrivileges" method="post" action="execManageAdminPrivileges.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Privileges for Mid/Junior Admins </td>
         </tr>

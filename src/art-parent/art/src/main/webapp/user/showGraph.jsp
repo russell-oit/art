@@ -205,7 +205,7 @@ if (showSQL) {
 %>
 
 <p>
-<table class="plain" align="center" border="0" style="width:60%">
+<table class="plain centerTable" border="0" style="width: 60%">
  <tr>
   <td align="center"> 
    

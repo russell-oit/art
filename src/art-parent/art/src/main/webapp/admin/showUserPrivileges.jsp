@@ -6,7 +6,7 @@
 UserEntity ue=new UserEntity();
 %>
 
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2">Current User/User Group Privileges</td>
         </tr>

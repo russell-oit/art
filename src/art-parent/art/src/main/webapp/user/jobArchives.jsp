@@ -29,7 +29,7 @@ String resultMessage;
 	
 %>
 
- <table align="center" width="50%">
+ <table class="centerTable" style="width: 50%">
 
   <tr><td class="title"><%=messages.getString("jobArchives")%></td></tr>  
 
@@ -39,7 +39,7 @@ String resultMessage;
   
 	<p>
  <!--   -->
- <table align="center" width="90%">
+ <table class="centerTable" style="width: 50%">
   <tr>
   <td class="attr" width="5%"><%=messages.getString("jobId")%></td>
   <td class="attr" width="30%"><%=messages.getString("jobName")%></td>

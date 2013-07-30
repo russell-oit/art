@@ -52,7 +52,6 @@ tinyMCE.init({
 </script>
 
 <script type="text/javascript">
-	<!-- Begin
 	function onTypeSelection() {
 		i = document.getElementById("typeId").value;
 		if (i == 110 || i == 111) {
@@ -318,7 +317,6 @@ tinyMCE.init({
 			document.getElementById("textSourceDiv").className="collapse";
 		}
 	}
-	// End -->
 </script>
 
 <form method="post" name="updQuery" action="execEditQuery.jsp" enctype="multipart/form-data">
@@ -330,7 +328,7 @@ tinyMCE.init({
     <%
      }
     %>
-    <table align="center">
+    <table class="centerTableAuto">
 		<tr><td class="title" colspan="2" >Define Query</td></tr>
         <tr><td class="title" colspan="2" > Header</td></tr>
         <tr><td class="data"> ID </td>
@@ -770,9 +768,9 @@ tinyMCE.init({
 </form>
 
 <div id="querydiv">
-    <table align="center" class="art">
+    <table class="art centerTableAuto">
 
-        <tr><td type="attr">
+        <tr><td class="attr">
 
                 <b>Notes:</b> <br>
                 <ul>                    
@@ -873,7 +871,7 @@ tinyMCE.init({
 </div>
 
 <div id="portletdiv">
-    <table align="center" class="art">
+    <table class="art centerTableAuto">
 
         <tr>
             <td class="attr">

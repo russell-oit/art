@@ -3,7 +3,7 @@
 <%@ include file ="headerAdmin.jsp" %>
 
 
-       <table align="center">
+       <table class="centerTableAuto">
        <tr><td class="title" colspan="2" align="center">
             <br>Admin Console<br><img src="../images/settings-64px.jpg"> </td></tr>
 

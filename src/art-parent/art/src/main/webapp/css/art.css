@@ -2,11 +2,11 @@
 /* When      What
  * 20070814  removed global rules on table/td to avoid to
              interfere with overlib tooltips (by desand)
- */
+*/
 
 /*
  * General Definitions
- */
+*/
 td.jobdetails {
 	border: 1px solid #000000;
 	font-size: 10pt;
@@ -83,7 +83,7 @@ body {
 	font-style: normal;
 	color: #000000;
 	background-color: #FFFFFF;
-	font-size: 10pt;
+	font-size: 10pt; 
 }
 
 a {
@@ -126,10 +126,10 @@ div.queryDescr {
 
 /*
  * Admin Part, Group Select, Query Select, Query Parameter
- */
+*/
 
 /* input text fields
- */
+*/
 select,input {
 	border-color: #08699C;
 	background-color: #FFFFFF;
@@ -162,7 +162,7 @@ button:disabled {
 }
 
 /* Big title (on logon screen)
- */
+*/
 td.supertitle {
 	background-image: URL('../images/bg-blue.png');
 	background-repeat: repeat-x;
@@ -173,7 +173,7 @@ td.supertitle {
 }
 
 /* Title (top on pages)
- */
+*/
 td.title {
 	vertical-align: middle;
 	text-align: center;
@@ -183,6 +183,7 @@ td.title {
 	background-color: #FFFFFF;
 	color: #003366;
 	border: 1px solid #000000;
+	font-size: 120%;
 }
 
 td.titletop {
@@ -197,7 +198,7 @@ td.titletop {
 }
 
 /* Used in Parameters page(Name, value, class...)
- */
+*/
 td.attr {
 	background-color: #CCCCCC;
 	vertical-align: middle;
@@ -210,7 +211,7 @@ td.attr {
 }
 
 /* Used in login page
- */
+*/
 td.link {
 	vertical-align: middle;
 	text-align: center;
@@ -222,7 +223,7 @@ td.link {
 }
 
 /* "Group:", "Query:"
- */
+*/
 td.info {
 	background-color: #CCCCCC;
 	vertical-align: middle;
@@ -233,7 +234,7 @@ td.info {
 }
 
 /* Used to store input boxes (button and graph WxH)
- */
+*/
 td.action {
 	vertical-align: middle;
 	background-image: URL('../images/bg-gray.png');
@@ -246,14 +247,14 @@ td.action {
 }
 
 /* option select
- */
+*/
 td.choice {
 	background-color: #E0E0E0;
 	vertical-align: text-top;
 }
 
 /* Parameters names etc
- */
+*/
 td.data {
 	font-size: 10pt;
 	background-image: URL('../images/bg-gray.png');
@@ -267,7 +268,7 @@ td.data {
 }
 
 .expand {
-	
+
 }
 
 .collapse {
@@ -304,7 +305,7 @@ input.buttondn {
 
 /*
  * Query Execute (html fancy and html report)
- */
+*/
 table.qe {
 	border-collapse: collapse;
 }
@@ -423,7 +424,7 @@ div.qeparams {
 
 /*
  * Query Execute (html grid)
- */
+*/
 table.sortable {
 	background-color: transparent;
 	border-top: 1px solid black;
@@ -527,7 +528,7 @@ td.data2 {
 
 /*
  * Sticky spinning icon
- */
+*/
 #systemWorking {
 	display: block;
 	top: 0px;
@@ -546,7 +547,7 @@ td.data2 {
 }
 
 /* Used to highlight a component (adminConsole.jsp)
- */
+*/
 .artLink {
 	background-color: #CCCCCC;
 	vertical-align: middle;
@@ -623,4 +624,13 @@ td.loginTitle {
 	vertical-align: middle;
 	text-align: left;
 	width: 70%;
+}
+
+table.centerTable {
+	margin: 0 auto;
+}
+
+table.centerTableAuto {
+	margin: 0 auto;
+	width: auto;
 }

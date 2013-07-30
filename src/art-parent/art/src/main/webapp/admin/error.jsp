@@ -1,7 +1,6 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<% request.setCharacterEncoding("UTF-8"); %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
 
-<%@ include file ="headerAdminPlain.jsp" %>
+<%@ include file="headerAdmin.jsp" %>
 
 <%
  String mod = request.getParameter("MOD");
@@ -10,7 +9,7 @@
  String num = request.getParameter("NUM");
 %>
 
-<table align="center">
+<table class="centerTableAuto">
     <tr>
         <td colspan="2" class="data" align="center"> <span style="color:red"> <b>Error! </b></span>
         </td>
@@ -41,10 +40,10 @@
     </tr>
 </table>
 <p>
-<table align="center">
+<table class="centerTableAuto">
     <tr><td>
             <%
-             if ( num.equals("100") ) {
+             if (StringUtils.equals(num,"100") ) {
               session.invalidate();
             %>
             <a href="<%= request.getContextPath() %>"><small>&nbsp;Login Page&nbsp;</small></a>

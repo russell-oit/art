@@ -41,7 +41,7 @@
 
         <div>
             <br>
-            <table align="center" style="width:400px"  class="art">
+            <table class="centerTable" style="width:400px"  class="art">
                 <tr>
                     <td class="supertitle" align="center">
                         <br>
@@ -68,7 +68,7 @@
                 </tr>
                 <tr>
                     <td class="link">
-						<a href="http://art.sourceforge.net">Web site</a
+						<a href="http://art.sourceforge.net">Web site</a>
 					</td>
                 </tr>
                 <tr>

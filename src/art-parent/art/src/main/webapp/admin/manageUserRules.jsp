@@ -51,7 +51,7 @@
 
 
 <form name="manageUserRules" method="post" action="manageUserRules2.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Rule Values </td>
         </tr>

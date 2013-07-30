@@ -28,8 +28,6 @@ if(StringUtils.isNotBlank(startQuery)){
 %>
 
 <script type="text/javascript">
-<!--
-
 function setAction() {
 	val = document.queryForm.typeId.value ;
 	if (val == 111){
@@ -39,9 +37,6 @@ function setAction() {
 	}
 	return true;
 }
-
--->
-
 </script>
 
       <form id="queryForm" name="queryForm" method="get" action="showParams.jsp">
@@ -49,7 +44,7 @@ function setAction() {
   <fieldset>
     <legend><%=messages.getString("welcomeMessage") %></legend>
    <p>
-    <table width="90%" align="center" class="art">
+    <table class="art centerTable" style="width: 90%">
      <tr>
       <td align="center" class="titletop" width="40%">
 

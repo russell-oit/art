@@ -21,7 +21,7 @@
 
 
 <form name="manageRuleDefinitions" method="post" action="editRuleDefinition.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Rule Definitions </td>
         </tr>

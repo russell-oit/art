@@ -23,7 +23,7 @@ UserEntity ue=new UserEntity();
 %>
 
 <form name="manageSharedJobs" method="post" action="execManageSharedJobs.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Shared Jobs </td>
         </tr>

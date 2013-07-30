@@ -21,7 +21,7 @@
 
 
 <form name="manageDatasources" method="post" action="editDatasource.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Datasources </td>
         </tr>
@@ -61,7 +61,7 @@
     </table> 
 		
 	<p>
-		<table align="center" style="width:90%">	
+		<table class="centerTable" style="width:90%">	
 			<tr>
 				<td colspan="3" class="attr">
 				Refresh and View Database Connections

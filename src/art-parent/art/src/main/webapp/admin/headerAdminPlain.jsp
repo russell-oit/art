@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
  <meta http-equiv="expires" content="0">

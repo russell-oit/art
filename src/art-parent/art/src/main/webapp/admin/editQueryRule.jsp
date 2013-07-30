@@ -26,7 +26,7 @@ ar.loadQueryRuleColumn(queryId, ruleName);
     <input type="hidden" name="QUERY_ID" value="<%= queryId%>">
     <input type="hidden" name="RULEACTION" value="<%= action%>">
 	
-    <table align="center">
+    <table class="centerTableAuto">
         
         <tr><td class="title" colspan="2" ><i>Define Rule Column</i></td></tr>
 

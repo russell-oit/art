@@ -1,11 +1,14 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page pageEncoding="UTF-8" %>
-<%@ page import=" art.servlets.ArtDBCP;" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
+
+<%@ page import=" art.servlets.ArtDBCP;" %>
 <%
   /* Invalidate the current session to allow a new login */
   session.invalidate();
   java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
 %>
+<!DOCTYPE html>
 <html>
     <head>
         <title>ART - Login</title>
@@ -14,43 +17,59 @@
         <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/art.css">
     </head>
     <body onload="javascript:document.getElementById('username').focus();">
-        <table cellSpacing="1" cellPadding="5" style="width:300px; height:300px" border="0" class="art" valign="middle" align="center">
-            <tr vAlign="center" align="middle">
-                <td class="title" colspan="2" align="left"><img height="70" src="<%= request.getContextPath() %>/images/art-64px.jpg"></td>
+        <table class="art login">
+             <tr class="centerMiddle">
+                <td class="loginTitle" colSpan="2" align="left">
+					<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
+						 alt="ART" height="70">
+				</td>
             </tr>
-            <tr vAlign="center" align="middle">
-                <td colSpan="2"> <img height="64" src="<%= request.getContextPath() %>/images/users-64px.jpg" width="64" align="absMiddle" border="0"> &nbsp;
-                    <span style="font-size:180%"><b>ART</b><i>mobile</i></span>
-                </td>
-            </tr>
+            <tr class="centerMiddle">
+                <td colSpan="2">
+					<img src="${pageContext.request.contextPath}/images/users-64px.jpg"
+						 alt="" border="0" width="64" height="64"
+						 style="vertical-align: middle;">
+                    &nbsp;
+					<span style="font-size:180%"><b>ART</b>
+						<c:if test="${(pageScope._mobile == true)}">
+							<i>mobile</i>
+						</c:if>
+					</span>
+				</td>
+			</tr>
             <form name="login" method="post" action="<%= request.getContextPath() %>/user/mshowGroups.jsp">
                 <input type="hidden" name="_mobile" value="true">
-                <% String msg = (String) request.getAttribute("message");
-                   if (msg != null) {
-                %>
+                <c:if test="${(!empty requestScope.message)}">
+                    <tr>
+                        <td colspan="2" align="center">
+                            <span style="color:red">
+                                ${requestScope.message}
+                            </span>
+                        </td>
+                    </tr>
+                </c:if>
                 <tr>
-                    <td colspan="2" align="center">
-                        <span style="color:red">
-                            <%=msg%>
-                        </span>
-                    </td>
-                </tr>
-                <% } %>
-                <tr>
-                    <td vAlign="center" align="right" width="50%"><%=messages.getString("username")%></td>
-                    <td vAlign="center" align="left" width="50%">
-                        <input id="username" maxLength="15" size="16" name="username">
-                    </td>
-                </tr>
-                <tr>
-                    <td vAlign="center" align="right" width="50%"><%=messages.getString("password")%></td>
-                    <td vAlign="center" align="left" width="50%">
-                        <input id="password" type="password" maxLength="40" size="16" name="password">
+                    <td class="loginLabel">
+						<label for="username"><%=messages.getString("username")%></label>
+					</td>
+                    <td class="loginField">
+                        <input name="username" id="username" maxLength="30" size="25">
                     </td>
                 </tr>
                 <tr>
-                    <td vAlign="center" align="middle" colspan="2">
-                        <input type="submit" class="buttonup" style="width:100px;" value="<%=messages.getString("login")%>"> </td>
+                    <td class="loginLabel">
+						<label for="password"><%=messages.getString("password")%></label>
+					</td>
+                    <td class="loginField">
+                        <input name="password" id="password" type="password" maxLength="40" size="25">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="centerMiddle" colspan="2">
+						<input type="submit" class="buttonup"
+							   onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);" 
+                               style="width:100px;" value="<%=messages.getString("login")%>">
+					</td>
                 </tr>
             </form>
         </table>

@@ -2,8 +2,6 @@
 <%@ include file ="headerAdmin.jsp" %>
 
 <script type="text/javascript">
-    <!--
-	
 	function countSelected(list){
         var count=0;
         for(var i=0; i<list.options.length; i++ ){
@@ -54,8 +52,6 @@
         document.viewRule.action="manageQuery.jsp";
         document.viewRule.submit();
     }
-
-    //-->
 </script>
 
 <%
@@ -73,7 +69,7 @@ String description;
     <input type="hidden" name="QUERY_ID" value="<%= request.getParameter("QUERY_ID")%>">
     <input type="hidden" name="RULEACTION" >
 	
-    <table align="center">        
+    <table class="centerTableAuto">        
         <tr><td class="title" colspan="2" > Edit Rule </td></tr>
 		
         <%/*

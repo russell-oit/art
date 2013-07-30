@@ -65,7 +65,7 @@ if (action.equals("DELETE")){
 	<input type="hidden" name="OLD_RULE_TYPE" value="<%=ruleType%>">
 	<input type="hidden" name="OLD_RULE_VALUE" value="<%=ruleValue%>">
 
-	<table align="center">
+	<table class="centerTableAuto">
 		<tr>
 			<td class="title" colspan="2">Define Rule Value</td>
 		</tr>

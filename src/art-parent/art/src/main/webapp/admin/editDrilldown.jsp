@@ -37,7 +37,7 @@ dq.create(queryId,queryPosition);
     }
     %>
 
-    <table align="center">
+    <table class="centerTableAuto">
         <tr><td class="title" colspan="2" > Select Drill Down Query </td></tr>
         <tr><td class="data"> Drill Down Query </td>
             <td class="data">

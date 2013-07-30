@@ -20,9 +20,9 @@ msg=messages.getString("jpivotError");
       }
 %>
 
- <table align=center>
+ <table class="centerTableAuto">
   <tr>
-    <td colspan=2 class=data align=center> <b><span style="color:red"> <%=messages.getString("error")%> </span></b> 
+    <td colspan="2" class="data" align="center"> <b><span style="color:red"> <%=messages.getString("error")%> </span></b> 
     </td>
   </tr>
   <tr>

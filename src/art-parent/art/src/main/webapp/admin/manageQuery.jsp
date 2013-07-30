@@ -43,8 +43,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
 
 %>
 
-<p>
-<table align="center">
+<table class="centerTable">
     <tr><td class="title" colspan="2" > Query Editor </td></tr>
 
     <tr><td class="attr" >
@@ -102,7 +101,6 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
 
 
 </table>
-</p>
 
 <div align="center" valign="center">
     <table>
@@ -114,7 +112,7 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
     </table>
 </div>
 <p>
-<table align="center"  style="width:80%">
+<table class="centerTable"  style="width:80%">
     <tr><td class="attr" align="center"><b><%=aq.getName()%></b> (ID: <b><%=queryId%></b>) <br>&nbsp;</td></tr>
     <tr><td class="data" align="center">
             <textarea cols="70" rows="10" wrap="off" style="background-color: #D3D3D3" readonly><%=aq.getText().trim()%>
@@ -145,9 +143,9 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
 
 
 <p>
-<table align="center" style="width:80%">
+<table class="centerTable" style="width:80%">
 
-    <tr><td type="attr">
+    <tr><td class="attr">
             <%
              if(queryGroupId!= 0 && queryType!=119 && queryType!=120 && (queryType<110 || (queryType>=112 && queryType<=118))) {
 				 //list of values, dashboards, text ojbects do not have parameters

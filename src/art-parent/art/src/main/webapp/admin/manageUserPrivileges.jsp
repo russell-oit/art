@@ -39,7 +39,7 @@ String username=(String) session.getAttribute("AdminUsername");
 %>
 
 <form id="artForm" name="manageUserPrivileges" method="post" action="execManageUserPrivileges.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage User/User Group Privileges </td>
         </tr>

@@ -3,8 +3,6 @@
 <%@ include file ="headerAdmin.jsp" %>
 
 <script type="text/javascript">
-    <!--
-
     function moveUp() {
 		if (document.viewParam.FIELD_POSITION.selectedIndex>=0) {
 			document.viewParam.action="execEditParameter.jsp";
@@ -48,8 +46,6 @@
         document.viewParam.action="manageQuery.jsp";
         document.viewParam.submit();
     }
-
-    //-->
 </script>
 
 <%
@@ -75,7 +71,7 @@ ArtQuery aq=new ArtQuery();
 <form name="viewParam" method="post">
     <input type="hidden" name="QUERY_ID" value="<%= request.getParameter("QUERY_ID")%>">
     <input type="hidden" name="PARAMACTION" >
-    <table align="center">
+    <table class="centerTableAuto">
         <%/*
            Print title
         */%>

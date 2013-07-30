@@ -293,7 +293,7 @@ dataSource="<%=xmlaDatasource%>" catalog="<%=xmlaCatalog%>" >
 %>
 
 
-<table class="pivot" align="center" width="50%">
+<table class="pivot centerTable" style="width: 50%">
 	<tr> <td class="title">
 			<b> <br /> <%=title%> </b> <br /> <br />
 		</td> </tr>

@@ -21,7 +21,7 @@
 
 
 <form name="manageUserGroups" method="post" action="editUserGroup.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage User Groups </td>
         </tr>

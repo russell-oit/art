@@ -94,7 +94,7 @@ String msg;
 <form name="editDatasource" method="post" action="execEditDatasource.jsp">    	
 	<input type="hidden" name="ACTION" value="<%=action%>">
 	
-	<table align="center">		
+	<table class="centerTableAuto">		
 		<tr>
 			<td class="title" colspan="2">Define Datasource</td>
 		</tr>

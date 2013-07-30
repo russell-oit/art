@@ -12,6 +12,7 @@
 
 
 <% if (request.getParameter("_isFragment")==null) { %>
+<!DOCTYPE html>
 <html>
 <head>
   <title>ART</title>
@@ -84,9 +85,9 @@
 <!-- end header -->
 
 
- <table align=center>
+ <table class="centerTableAuto">
   <tr>
-    <td colspan=2 class=data align=center> <b><span style="color:red"><%=messages.getString("jpivotQueryWait")%></span></b>
+    <td colspan="2" class="data" align="center"> <b><span style="color:red"><%=messages.getString("jpivotQueryWait")%></span></b>
 	<img src="<%= request.getContextPath() %>/images/spinner.gif">
     </td>
   </tr>

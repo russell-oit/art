@@ -51,7 +51,7 @@
 			<input type="hidden" name="queryId" value="<%=queryId%>">
             <input type="hidden" name="_mobile" value="true">
 
-            <table class="art" align="Center" >
+            <table class="art centerTableAuto" >
                 <tr>
                     <td colspan="3" class="title" >
 

@@ -111,10 +111,10 @@ int queryGroupId;
 %>					
 
 
-<form name="manageQueries" method="post">
+<form name="manageQueries" method="post" >
     <input type="hidden" name="QUERYACTION">
 	
-    <table align="center" class="art">       
+    <table class="centerTableAuto art">       
         <tr>
 			<td class="title" colspan="2">
 				<br>Query Management Console <br> <img src="<%=request.getContextPath()%>/images/queries-64px.jpg">

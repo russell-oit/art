@@ -18,7 +18,7 @@ if(!isInline){ 	%>
 
 <div align="center">
 
-<table width="90%" border="0" cellspacing="0" cellpadding="0">
+<table style="width: 90%" border="0" cellspacing="0" cellpadding="0">
  <tr>
   <td style="text-align: left">
    <div class="small" id="infoDiv" style="border-right: 0px">

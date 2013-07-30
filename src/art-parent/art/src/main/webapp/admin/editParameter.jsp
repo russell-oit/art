@@ -31,7 +31,6 @@ String help;
 %>
 
 <script type="text/javascript">
-	<!-- Begin
 	function onTypeSelection() {
 		var paramType = document.getElementById("paramType").value;
 		
@@ -96,8 +95,6 @@ String help;
 			}
 		}
 	}
-	
-	//-->
 </script>
 	
 
@@ -106,7 +103,7 @@ String help;
     <input type="hidden" name="PARAMACTION" value="<%= request.getParameter("PARAMACTION")%>">
 	<input type="hidden" name="FIELD_POSITION" value="<%= fieldPosition%>">
    
-    <table align="center">
+    <table class="centerTableAuto">
         <tr><td class="title" colspan="2" > Define Parameter </td></tr>
        		
 		<tr><td class="data"> Parameter Type </td><td class="data">

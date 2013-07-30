@@ -485,7 +485,6 @@ tinyMCE.init({
 </script>
 
 <script type="text/javascript">
-<!-- Begin
 function onChangeJobType(jobType,queryType) {
    // initiate output types
    var s = document.getElementById("outputTypeId");
@@ -640,8 +639,6 @@ function onClickSaveSchedule(t){
 		document.getElementById("scheduleName").readOnly=true;
 	}
 }
-
-// End -->
 </script>
 
  <!-- id: ${job.jobId} user: ${job.username}  -->
@@ -655,7 +652,7 @@ function onClickSaveSchedule(t){
     <input type="hidden" name="OWNER" value="<%=owner%>">
    <%}%>
 
- <table align="center" width="60%">
+ <table class="centerTable" style="width: 60%">
 
   <tr><td class="title" colspan="4" >
 		  <%=messages.getString("defineJob")%>
@@ -770,7 +767,7 @@ function onClickSaveSchedule(t){
 	</tr>
  </table>
 	<div id="emailDiv" class="collapse">
-	 <table align="center" width="60%">
+	 <table class="centerTable" style="width: 60%">
 	   <tr><td class="action" colspan="4" ><i><%=messages.getString("jobEmailMessage")%></i></td></tr>
 	   <tr>
 		   <td class="data"> <%=messages.getString("mailFrom")%> </td>
@@ -840,7 +837,7 @@ function onClickSaveSchedule(t){
 	onChangeJobType(document.getElementById('jobTypeId'),<%=queryType%>);
  </script>
 
- <table align="center" width="60%">
+ <table class="centerTable" style="width: 60%">
 
   <tr><td class="action" colspan="4" ><i><%=messages.getString("schedule")%></i><br/><code><%= java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM,java.text.DateFormat.MEDIUM,request.getLocale()).format(new java.util.Date())%></code></td></tr>
   <tr>
@@ -940,7 +937,7 @@ function onClickSaveSchedule(t){
    </table>
 
    	<div id="sharedUsersDiv" class="collapse">
-	 <table align="center" width="60%">
+		<table class="centerTable" style="width: 60%">
    <tr>
    <td class="data">
    <%=messages.getString("selectUsersToShareJobWith")%>
@@ -1042,7 +1039,7 @@ function onClickSaveSchedule(t){
    </table>
 	  </div>
 
-	  <table align="center" width="60%">
+	  <table class="centerTable" style="width: 60%">
 	  <tr>
 	  <td colspan="4" class="data" style="color:red"> <%=msg%></td>
 	  </tr>

@@ -31,7 +31,7 @@ String help;
 <form name="editUserGroup" method="post" action="execEditUserGroup.jsp">
 	<input type="hidden" name="ACTION" value="<%=action%>">
 
-	<table align="center">
+	<table class="centerTableAuto">
 		<tr>
 			<td class="title" colspan="2">Define User Group</td>
 		</tr>

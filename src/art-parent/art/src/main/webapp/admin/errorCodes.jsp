@@ -1,11 +1,8 @@
 <%@ page import="art.servlets.ArtDBCP" %>
 
-<%@ page contentType="text/html; charset=UTF-8" %>
-<% request.setCharacterEncoding("UTF-8"); %>
+<%@ include file ="headerAdmin.jsp" %>
 
-<%@ include file ="headerAdminPlain.jsp" %>
-
-<table align="center" style="width:90%">
+<table class="centerTable" style="width:90%">
 
     <tr><td class="title">ART Error codes
         </td></tr>

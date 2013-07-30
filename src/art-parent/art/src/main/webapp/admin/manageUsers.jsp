@@ -21,7 +21,7 @@
 
 
 <form name="manageUsers" method="post" action="editUser.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Users </td>
         </tr>

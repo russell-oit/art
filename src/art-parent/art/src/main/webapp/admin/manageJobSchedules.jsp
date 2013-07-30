@@ -21,7 +21,7 @@
 
 
 <form name="manageJobSchedules" method="post" action="editJobSchedule.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2">Manage Job Schedules</td>
         </tr>

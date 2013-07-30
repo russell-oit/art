@@ -6,7 +6,7 @@
 UserGroup ug=new UserGroup();
 %>
 
-   <table align="center">
+   <table class="centerTableAuto">
         <tr>
 	   <td class="title" colspan="2"> Current User Group Assignments </td>
         </tr>

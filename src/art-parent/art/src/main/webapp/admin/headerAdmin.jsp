@@ -10,6 +10,7 @@
  }
 %>
 
+<!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="expires" content="0">
@@ -63,5 +64,5 @@
             </tr>
         </table>
 
-        <hr style="width:100%;height:2px">
+				<br>
 

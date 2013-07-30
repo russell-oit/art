@@ -140,7 +140,7 @@ String lastFileName;
 String resultMessage;
 %>
 
- <table align="center" width="50%">
+ <table class="centerTable" style="width: 50%">
 
   <tr><td class="title"><%=messages.getString("myJobs")%></td></tr>  
 
@@ -152,7 +152,7 @@ String resultMessage;
 <%
     if (msg != null) {
        %>
-         <table align="center">
+         <table class="centerTableAuto">
           <tr>
 	   <td class="attr"><img src="<%= request.getContextPath() %>/images/warning.png" > 
 	   <%=msg%>
@@ -164,7 +164,7 @@ String resultMessage;
     }
 	%>
 	<p>
-	<table align="center" width="95%">
+	<table class="centerTable" style="width: 95%">
   <tr>
   <td class="attr"><%=messages.getString("jobId")%></td>
   <td class="attr" width="15%"><%=messages.getString("jobName")%></td>
@@ -257,7 +257,7 @@ out.println(resultMessage);
   <tr id="tr_<%=jobId%>" class="collapse">
 	<td></td>
 	<td colspan="6">
-            <table border="0" width="100%">
+            <table border="0" style="width: 100%">
 			<tr>
 			<td class="jobdetails"><i><%=messages.getString("queryName")%></i></td>
               <td class="jobdetails" colspan="3"><%=queryName%></td>
@@ -291,7 +291,7 @@ out.println(resultMessage);
 			<%=job.getParametersDisplayString()%>
 			
 			<br>	      
-		    <table width="60%" align="center"> 
+		    <table class="centerTable" style="width: 60%"> 
 		      <tr>
 		       <td class="action"><small><%=messages.getString("month")%>  </small></td>  
 		       <td class="action"><small><%=messages.getString("day")%>    </small></td>  
@@ -328,7 +328,7 @@ out.println(resultMessage);
 //allow admin to manage all jobs
 if(accessLevel>=80){
 %>
-    <table align="center" width="95%">
+    <table class="centerTable" style="width: 95%">
   <tr>
   <td align="center">   
   
@@ -426,7 +426,7 @@ out.println(resultMessage);
   <tr id="tr2_<%=jobId%>" class="collapse">
         <td></td>
 	<td colspan="7">
-            <table border="0" width="100%">
+            <table border="0" style="width: 100%">
 				<tr>
 			<td class="jobdetails"><i><%=messages.getString("queryName")%></i></td>
               <td class="jobdetails" colspan="3"><%=queryName%></td>
@@ -459,7 +459,7 @@ out.println(resultMessage);
 			<%=job.getParametersDisplayString()%>
 			
 			<br>	      
-		    <table width="60%" align="center"> 
+		    <table class="centerTable" style="width: 60%"> 
 		      <tr>
 		       <td class="action"><small><%=messages.getString("month")%>  </small></td>  
 		       <td class="action"><small><%=messages.getString("day")%>    </small></td>  

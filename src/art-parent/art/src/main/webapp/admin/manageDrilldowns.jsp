@@ -56,7 +56,7 @@
 <form name="viewDrilldown" method="post">
     <input type="hidden" name="QUERY_ID" value="<%= request.getParameter("QUERY_ID")%>">
     <input type="hidden" name="DRILLDOWN_ACTION" >
-    <table align="center">
+    <table class="centerTableAuto">
 
         <tr><td class="title" colspan="2" > Edit Drill Down Queries </td></tr>
         <%/*

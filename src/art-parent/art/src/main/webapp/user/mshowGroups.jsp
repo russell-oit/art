@@ -6,7 +6,7 @@
 
   <fieldset>
     <legend><%=messages.getString("welcomeMessage") %></legend>
-    <table width="90%" align="center" class="art">
+    <table style="width: 90%" class="centerTable art">
      <tr>
       <td  align="center" class="title" width="40%">
 

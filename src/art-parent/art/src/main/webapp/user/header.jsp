@@ -13,8 +13,7 @@
 
 
 <% if (request.getParameter("_isFragment")==null) { %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
   <title>ART</title>
@@ -53,7 +52,7 @@
 <body>
  <c:if test="${empty param._mobile}">  
  <% if ( !("public_user".equals(usernameHeader) && "no".equals(art.servlets.ArtDBCP.getArtSetting("header_with_public_user")))) { %>
-   <table width="100%"  class="art" cellpadding="0" cellspacing="0">
+ <table class="art centerTable" style="width: 100%" cellpadding="0" cellspacing="0">
     <tr>
      <td class="attr" align="left" width="50%">
       <% if (accessLevelHeader >= 10) {%>

@@ -43,7 +43,7 @@ if(userGroup!=null){
 	<%}%>
 	<input type="hidden" name="RULE_NAME" value="<%=ruleName%>">
 	
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Rule Values </td>
         </tr>

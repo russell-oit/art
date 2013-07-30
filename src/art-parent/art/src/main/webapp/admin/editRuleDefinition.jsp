@@ -45,7 +45,7 @@ if (action.equals("MODIFY")){
 <form name="editRuleDefinition" method="post" action="execEditRuleDefinition.jsp">    	
 	<input type="hidden" name="ACTION" value="<%=action%>">
 	
-	<table align="center">		
+	<table class="centerTableAuto">		
 		<tr>
 			<td class="title" colspan="2">Define Rule</td>
 		</tr>

@@ -21,7 +21,7 @@
 
 
 <form name="manageQueryGroups" method="post" action="editQueryGroup.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage Query Groups </td>
         </tr>

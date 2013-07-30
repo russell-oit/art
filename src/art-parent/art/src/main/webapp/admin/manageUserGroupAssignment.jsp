@@ -37,7 +37,7 @@ UserGroup ug=new UserGroup();
 %>
 
 <form id="artForm" name="manageUserGroupAssignment" method="post" action="execManageUserGroupAssignment.jsp">
-    <table align="center">
+    <table class="centerTableAuto">
         <tr>
 			<td class="title" colspan="2"> Manage User Group Assignment </td>
         </tr>

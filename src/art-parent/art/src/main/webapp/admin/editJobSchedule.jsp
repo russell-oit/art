@@ -27,7 +27,7 @@ String help;
 <form name="editJobSchedule" method="post" action="execEditJobSchedule.jsp">    	
 	<input type="hidden" name="ACTION" value="<%=action%>">
 	
-	<table align="center">		
+	<table class="centerTableAuto">		
 		<tr>
 			<td class="title" colspan="2">Define Schedule</td>
 		</tr>

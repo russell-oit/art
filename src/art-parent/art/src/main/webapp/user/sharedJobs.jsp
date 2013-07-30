@@ -57,7 +57,7 @@ boolean splitJob=false; //for split jobs, get last start date and file name from
 	
 %>
 
- <table align="center" width="50%">
+ <table class="centerTable" style="width: 50%">
 
   <tr><td class="title"><%=messages.getString("sharedJobs")%></td></tr>  
 
@@ -67,7 +67,7 @@ boolean splitJob=false; //for split jobs, get last start date and file name from
   
 	<p>
  <!--   -->
- <table align="center" width="90%">
+ <table class="centerTable" style="width: 90%">
   <tr>
   <td class="attr"><%=messages.getString("jobId")%></td>
   <td class="attr" width="15%"><%=messages.getString("jobName")%></td>
@@ -172,7 +172,7 @@ out.println(resultMessage);
   <tr id="tr_<%=job.getJobId()%>" class="collapse">
 	<td></td>
 	<td colspan="5">
-            <table border="0" width="100%">
+            <table border="0" style="width: 100%">
 			<tr>
 			<td class="jobdetails"><i><%=messages.getString("queryName")%></i></td>
               <td class="jobdetails" colspan="3"><%=job.getQueryName()%></td>
@@ -205,7 +205,7 @@ out.println(resultMessage);
 			<%=job.getParametersDisplayString()%>
 			
 			<br>	      
-		    <table width="60%" align="center"> 
+		    <table class="centerTable" style="width: 60%"> 
 		      <tr>		         		       
 			   <td class="action"><small><%=messages.getString("month")%>  </small></td>  
 		       <td class="action"><small><%=messages.getString("day")%>    </small></td>  

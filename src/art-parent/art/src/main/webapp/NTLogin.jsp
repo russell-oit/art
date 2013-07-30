@@ -26,7 +26,8 @@
             <tr class="centerMiddle">
                 <td colSpan="2">
 					<img src="${pageContext.request.contextPath}/images/users-64px.jpg"
-						 alt="" border="0" width="64" height="64" style="vertical-align: middle">
+						 alt="" border="0" width="64" height="64"
+						 style="vertical-align: middle;">
                     &nbsp;
 					<span style="font-size:180%"><b>ART</b>
 						<c:if test="${(pageScope._mobile == true)}">
@@ -54,7 +55,7 @@
 					</td>
                     <td class="loginField">
                         <select name="ntdomain" id="ntdomain">
-                            <c:forTokens var="domain" delims="," items='<%= ArtDBCP.getArtSetting("mswin_domains") %>'>
+                            <c:forTokens var="domain" items='<%= ArtDBCP.getArtSetting("mswin_domains") %>' delims=",">
 								<option value="${domain}">${domain}</option>
 							</c:forTokens>
                         </select>
