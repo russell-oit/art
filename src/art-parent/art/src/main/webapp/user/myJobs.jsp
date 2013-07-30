@@ -321,7 +321,7 @@ out.println(resultMessage);
 
 </p>
 
-<br /> 
+<br> 
 
  
 <%   
@@ -485,7 +485,7 @@ out.println(resultMessage);
     }
    %>
     </table>
-	
+</div>
 	</td>
 	</tr>
 	</table>

@@ -24,14 +24,13 @@ if (action!=null && request.getSession().getAttribute("AdminSession")!=null) {
 			out.println("<hr>");
 			out.println("Name: <b>"+ ds.getName()+"</b> , ID: <b>"+key+"</b>");
 			
-			List connectionPool=ds.getConnectionPool();
+			List<EnhancedConnection> connectionPool=ds.getConnectionPool();
 			out.println("<pre>");			
 			out.println(" Connection Pool Size  = " + connectionPool.size());
 			
 			StringBuilder sb = new StringBuilder(512);
 			SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			for(int i=0; i<connectionPool.size() ; i++) {
-				EnhancedConnection ec = (EnhancedConnection) connectionPool.get(i) ;								
+			for(EnhancedConnection ec : connectionPool) {
 				Date lastUsedTime = new Date(ec.getLastUsedTime());				
 				sb.append(ec.getInUse() + " (" + dateFormatter.format(lastUsedTime) + ") , ");				
 			}

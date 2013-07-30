@@ -1,10 +1,12 @@
-<%@ page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,art.utils.*,java.text.SimpleDateFormat" %>
+<%@ page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,art.utils.*" %>
+<%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="org.jfree.chart.*,org.apache.commons.beanutils.*,java.awt.Font" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="art.output.ArtOutHandler,java.io.PrintWriter" %>
 <%@ page import="org.jfree.chart.renderer.category.*" %>
 
 <%@taglib uri='/WEB-INF/cewolf.tld' prefix='cewolf' %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <jsp:useBean id="lineRenderer" class="de.laures.cewolf.cpp.LineRendererProcessor" />
@@ -304,44 +306,35 @@ if (showSQL) {
   <%	
 	if(graph.isShowGraphData()){
 		RowSetDynaClass graphData=graph.getGraphData();
-		if(graphData!=null){
-			List rows=graphData.getRows();
-			DynaProperty[] dynaProperties = null;
-			String columnName;
-			String columnValue;
-			
-			for(int i=0;i<rows.size();i++){
-				DynaBean row=(DynaBean)rows.get(i);
-				if (i==0) {
-					%>
-					<tr>
-					<%
-					dynaProperties = row.getDynaClass().getDynaProperties();
-					for (int j=0;j<dynaProperties.length;j++) {
-						columnName=dynaProperties[j].getName();
-						%>
-						<td class="graphheader"><%=columnName%></td>
-					<%
-					}
-					%>
-					</tr>
-					<%
-				}
+		request.setAttribute("graphData", graphData);
+		%>
+		<c:forEach var="row" items="${graphData.rows}" varStatus="status">
+			<c:if test="${status.first}">
+				<%
+				DynaBean tempRow = (DynaBean) pageContext.getAttribute("row");
+				DynaProperty[] graphDataColumns = tempRow.getDynaClass().getDynaProperties();
+				pageContext.setAttribute("graphDataColumns", graphDataColumns);
 				%>
 				<tr>
-				<%
-				for (int k=0;k<dynaProperties.length;k++) {
-					columnName=dynaProperties[k].getName();
-					columnValue=String.valueOf(row.get(columnName));
-					%>
-					<td class="graphdata"><%=columnValue%></td>
-				<%
-				}
-				%>
+					<c:forEach var="col" items="${graphDataColumns}">
+						<td class="graphheader">${col.name}</td>
+					</c:forEach>
 				</tr>
-				<%
-			}
-		}
+			</c:if>
+				
+			<tr>
+				<c:forEach var="col" items="${graphDataColumns}">
+					<%
+					DynaProperty c = (DynaProperty) pageContext.getAttribute("col");
+					String columnName = c.getName();
+					DynaBean tempRow2 = (DynaBean) pageContext.getAttribute("row");
+					%>
+					<td class="graphdata"><%= String.valueOf(tempRow2.get(columnName)) %></td>
+				</c:forEach>
+			</tr>
+		</c:forEach>
+		
+	<%
 	}
 	%>
 	

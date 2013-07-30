@@ -270,14 +270,21 @@
     %>
 	
     <p>
-    <table class="centerTableAuto"><tr><td class="title"> Welcome! </td></tr>
-           <tr><td class="data"><span style="color:green">
+    <table class="centerTableAuto">
+		<tr>
+			<td class="title"> Welcome! </td>
+		</tr>
+           <tr>
+			   <td class="data"><span style="color:green">
 	     This is the first time you are logging in.
 		 You need to specify the settings below before being able to use ART.</span><br>
 		 <span style="color:red"><small>
-		 To use the embedded ART Repository and Demo, leave the default below for ART Database Username/url/JDBC Driver but
-		 set a new ART Database Password of your choice (default is "ART"). Once ART settings are defined, make sure to update
-		 the password for the two art users in the repository ("admin" and "auser", default passwords match the usernames).
+		 To use the embedded ART Repository and Demo, leave the default below for
+		 ART Database Username/url/JDBC Driver but
+		 set a new ART Database Password of your choice (default is "ART"). 
+		 Once ART settings are defined, make sure to update
+		 the password for the two art users in the repository
+		 ("admin" and "auser", default passwords match the usernames).
 		 Finally log off and log in using one of the two users.</small>
 	   </span></td></tr>
     </table>
@@ -335,7 +342,7 @@
 <form action="execEditSettings.jsp" method="post">
  <table class="centerTable" style="width:60%">
   <tr><td class="title" colspan="2" >Settings </td></tr>
-  <tr><td class="Data" colspan="2" > Specify <i>ART Repository</i> connection parameters and other settings </td></tr>
+  <tr><td class="data" colspan="2" > Specify <i>ART Repository</i> connection parameters and other settings </td></tr>
 
    <tr><td class="attr"> ART Database Username</td>
        <td class="data">
@@ -416,7 +423,7 @@
        <td class="data">
          <input type="text" name="art_testsql" size="30" maxlength="60" value="<%=art_testsql%>">
 		 <%
-         msg = msg = "Specify a short and fast SQL query to execute every Timeout(mins) to validate an active connection. If the validation fails the connection is removed from the pool. Leave blank to disable this test.\\n\\nExample:\\n Select 1 from dual - Oracle\\n Select 1 - MySQL, SQL Server, PostgreSQL, CUBRID\\n Select 1 from information_schema.system_users - HSQLDB";
+         msg = "Specify a short and fast SQL query to execute every Timeout(mins) to validate an active connection. If the validation fails the connection is removed from the pool. Leave blank to disable this test.\\n\\nExample:\\n Select 1 from dual - Oracle\\n Select 1 - MySQL, SQL Server, PostgreSQL, CUBRID\\n Select 1 from information_schema.system_users - HSQLDB";
          %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
        </td>
@@ -451,7 +458,7 @@
         <td class="attr">SMTP Username</td>
         <td class="data"><input type="text" name="smtp_username" size="50" maxlength="120" value="<%=smtp_username%>">
 			<%
-         msg = msg = "Leave empty if your SMTP server does not require authentication";
+         msg = "Leave empty if your SMTP server does not require authentication";
          %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
@@ -460,7 +467,7 @@
         <td class="attr">SMTP Password</td>
         <td class="data"><input type="password" name="smtp_password" size="50" maxlength="120" value="<%=smtp_password%>">
 			<%
-         msg = msg = "Leave empty if your SMTP server does not require authentication";
+         msg = "Leave empty if your SMTP server does not require authentication";
          %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
@@ -567,7 +574,7 @@
         <td class="attr">Default Max Rows</td>
         <td class="data"><input type="text" name="default_max_rows" size="6" maxlength="8" value="<%=default_max_rows%>">
 			<%
-         msg = msg = "Set the default maximum number of rows to output for a query";
+         msg = "Set the default maximum number of rows to output for a query";
          %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
@@ -576,7 +583,7 @@
         <td class="attr">Specific Max Rows</td>
         <td class="data"><input type="text" name="specific_max_rows" size="50" maxlength="1000" value="<%=specific_max_rows%>">
 			<%
-         msg = msg = "Set the maximum number of rows to output for specific view modes."
+         msg = "Set the maximum number of rows to output for specific view modes."
 				 + "\\nComma separated list of settings in the format viewmode:value";
          %>
         <input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
@@ -840,6 +847,6 @@ ServletContext ctx   = getServletConfig().getServletContext();
    <tr><td class="data">OS</td><td><code><%=System.getProperty("os.arch")%> / <%=System.getProperty("os.name")%> / <%=System.getProperty("os.version")%></code> </td></tr>
   </table>
  </p>
-</pre>
+
 <%@ include file ="/user/footer.jsp" %>
 
