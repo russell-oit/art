@@ -20,9 +20,10 @@
  * Description: Delete export and job files older than XX minutes
  *
  *
- * TODO:	Find a better way to avoid user to read all available export files. The
+ * Note:	Find a better way to avoid user to read all available export files. The
  * workaround is to have a dummy index.html file so that the web server does not
- * display all the content Anyway, this may not work on all servlet engine
+ * display all the content Anyway, this may not work on all servlet engines. 
+ * Use ExportPathFilter?
  *
  * @author Enrico Liboni
  * @mail enrico(at)computer.org

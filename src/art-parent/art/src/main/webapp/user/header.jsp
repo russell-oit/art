@@ -90,7 +90,7 @@
     <img src="<%= request.getContextPath() %>/images/spinner.gif" alt="Executing..." />
   </div>
 
- <hr style="width:100%;height:1px">
+  <br>
  
  </c:if>
  <c:if test="${!empty param._mobile}">  

@@ -269,7 +269,6 @@
 	
     %>
 	
-    <p>
     <table class="centerTableAuto">
 		<tr>
 			<td class="title"> Welcome! </td>
@@ -288,7 +287,6 @@
 		 Finally log off and log in using one of the two users.</small>
 	   </span></td></tr>
     </table>
-    </p>
     <%
   }
 

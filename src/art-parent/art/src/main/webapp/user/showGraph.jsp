@@ -309,9 +309,9 @@ if (showSQL) {
 		request.setAttribute("graphData", graphData);
 		%>
 		<c:forEach var="row" items="${graphData.rows}" varStatus="status">
+			<% DynaBean tempRow = (DynaBean) pageContext.getAttribute("row"); %>
 			<c:if test="${status.first}">
 				<%
-				DynaBean tempRow = (DynaBean) pageContext.getAttribute("row");
 				DynaProperty[] graphDataColumns = tempRow.getDynaClass().getDynaProperties();
 				pageContext.setAttribute("graphDataColumns", graphDataColumns);
 				%>
@@ -327,9 +327,8 @@ if (showSQL) {
 					<%
 					DynaProperty c = (DynaProperty) pageContext.getAttribute("col");
 					String columnName = c.getName();
-					DynaBean tempRow2 = (DynaBean) pageContext.getAttribute("row");
 					%>
-					<td class="graphdata"><%= String.valueOf(tempRow2.get(columnName)) %></td>
+					<td class="graphdata"><%= String.valueOf(tempRow.get(columnName)) %></td>
 				</c:forEach>
 			</tr>
 		</c:forEach>

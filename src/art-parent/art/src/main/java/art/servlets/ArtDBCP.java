@@ -446,6 +446,7 @@ public class ArtDBCP extends HttpServlet {
 		if (!jndiDatasource) {
 			try {
 				Class.forName(art_jdbc_driver).newInstance();
+				logger.info("ART repository JDBC Driver Registered: {}", art_jdbc_driver);
 			} catch (Exception e) {
 				logger.error("Error while registering driver for ART repository: {}", art_jdbc_driver, e);
 			}

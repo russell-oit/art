@@ -42,7 +42,7 @@
   </td>
  </tr>
 </table>
-<hr style="width:100%; height:1px">
+
 <p>
 <table class="centerTableAuto">
  <tr>

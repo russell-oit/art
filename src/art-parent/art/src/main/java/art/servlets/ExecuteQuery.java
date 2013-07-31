@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * ExecuteQuery.java
@@ -406,7 +405,12 @@ public class ExecuteQuery extends HttpServlet {
 		String username = (String) session.getAttribute("username");
 
 		//generate output
-		if (username != null) { // the session is valid if the username is not null
+		if (username == null) {
+			//invalid session
+			request.setAttribute("errorMessage", messages.getString("invalidSession"));
+			ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
+		} else {
+			// the session is valid if the username is not null
 
 			/*
 			 * isFlushEnabled states if this servlet can produce html output.
@@ -685,7 +689,7 @@ public class ExecuteQuery extends HttpServlet {
 
 					// JavaScript code to write status
 					if (showHeaderAndFooter) {
-						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryExecuting") + "\");</script>");
+						out.println("<script type=\"text/javascript\">writeStatus(\"" + messages.getString("queryExecuting") + "\");</script>");
 						out.flush();
 					}
 
@@ -767,17 +771,17 @@ public class ExecuteQuery extends HttpServlet {
 
 					// display status information, parameters and final sql
 					if (showHeaderAndFooter) {
-						out.println("<script language=\"JAVASCRIPT\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
+						out.println("<script type=\"text/javascript\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
 						String description = "";
 						shortDescription = StringUtils.trim(shortDescription);
 						if (StringUtils.length(shortDescription) > 0) {
 							description = " :: " + shortDescription;
 						}
-						out.println("<script language=\"JAVASCRIPT\">writeInfo(\"<b>" + queryName + "</b>" + description + " :: " + startTimeString + "\");</script>");
+						out.println("<script type=\"text/javascript\">writeInfo(\"<b>" + queryName + "</b>" + description + " :: " + startTimeString + "\");</script>");
 
 						//display parameters
 						if (showParams) {
-							ArtOutHandler.displayParameters(out, displayParams,messages);
+							ArtOutHandler.displayParameters(out, displayParams, messages);
 						}
 
 						//display final sql
@@ -1017,10 +1021,6 @@ public class ExecuteQuery extends HttpServlet {
 				ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
 			} // END maxNumberOfRunningQueries IF
 
-		} else {
-			//invalid session
-			request.setAttribute("errorMessage", messages.getString("invalidSession"));
-			ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
 		}
 
 	} // end doPost
