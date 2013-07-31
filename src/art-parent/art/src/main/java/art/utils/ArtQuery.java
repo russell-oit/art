@@ -1504,7 +1504,7 @@ public class ArtQuery {
 				String paramType = rs.getString("PARAM_TYPE");
 				paramHtmlId = "P_" + rs.getString("QUERY_ID") + "_" + paramPosition;
 				if (StringUtils.equals(paramType, "I")) { // inline
-					paramHtmlName = "P_" + rs.getString("PARAM_LABEL"); // use P_ to maintain compatibility with params passed via URL to QueryExecute                    
+					paramHtmlName = "P_" + rs.getString("PARAM_LABEL"); // use P_ to maintain compatibility with params passed via URL to ExecuteQuery                    
 				} else if (StringUtils.equals(paramType, "M")) { // multi                    
 					paramHtmlName = "M_" + rs.getString("PARAM_LABEL"); //logic in parameterprocessor and preparedquery will prevent sql injection                    
 				}

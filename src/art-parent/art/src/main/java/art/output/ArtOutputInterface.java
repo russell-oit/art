@@ -30,7 +30,7 @@ The resultset is used to feed the objects  who
 render the output (presentation layer).
 These objects need to implement this interface.<br>
 
-Briefly, the methods below are the ones used by the QueryExecute
+Briefly, the methods below are the ones used by the ExecuteQuery
 servlet (or the scheduler) to pass the data to the object who is in charge to "display" the
 output (in html, xml , xls,  etc).
 
@@ -51,7 +51,7 @@ on the web.xml file if you want to limit the maximum number of rows.
 </li>
 </ol>
 <br>
-Technically, the QueryExecute servlet (or the scheduler job) receives the <i>output type</i> 
+Technically, the ExecuteQuery servlet (or the scheduler job) receives the <i>output type</i> 
 name (<i>xyz</i>) and tries to instatiate a class named <code>xyzOutput</code>, that is assumed 
 to implement the   <i>ArtOutputInterface</i>.<br>
 <br>
@@ -152,7 +152,7 @@ public interface ArtOutputInterface {
 
     /**     
     This method is invoked to set a column header name (from the result set meta data).
-    <br>QueryExecute will call this method as many time as the number of columns in the result set.
+    <br>ExecuteQuery will call this method as many time as the number of columns in the result set.
      * 
      * @param s column header name
      */
@@ -210,7 +210,7 @@ public interface ArtOutputInterface {
      * Method invoked to close the current line and open a new one.
     <br>This method should return true if the new line is allocatable, false if it is not possible to proceed 
     (for example MaxRows reached or an exception raises).
-     * If false is returned, the QueryExecute servlet will stop to feed the object, it will call endLines() and close the result set.
+     * If false is returned, the ExecuteQuery servlet will stop to feed the object, it will call endLines() and close the result set.
      * 
      * @return <code>true</code> if can proceed to next record
      */
@@ -237,10 +237,10 @@ public interface ArtOutputInterface {
 
     /**     
     States if the standard html header and footer have to be printed to the output.
-    <br>	If this method returns true, the QueryExecute servlet will print
+    <br>	If this method returns true, the ExecuteQuery servlet will print
     the standard html header (with query name and status box) and footer (total
     time elapsed).
-    <br>	If it returns false, QueryExecute will not add anything around what it is printed
+    <br>	If it returns false, ExecuteQuery will not add anything around what it is printed
     by this object. 
     <br>
     For example, this should return false  if you are implementing a class that outputs non-html (like

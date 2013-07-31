@@ -5,7 +5,7 @@
     <description>
 	This is an application to perform
 	a wild and wonderful task, based on servlets and jsp.
-	It was written by eliboni@sourceforge.net
+	It was written by eliboni@users.sourceforge.net
 	who should be contacted for more information.
 	Web site http://art.sourceforge.net
 	</description>
@@ -33,10 +33,10 @@
         <filter-name>AuthFilterAdmin</filter-name>
         <filter-class>art.servlets.AuthFilterAdmin</filter-class>
     </filter>
-	<filter>
-		<filter-name>exportPathFilter</filter-name>
-		<filter-class>art.servlets.ExportPathFilter</filter-class>
-	</filter>
+    <filter>
+        <filter-name>exportPathFilter</filter-name>
+        <filter-class>art.servlets.ExportPathFilter</filter-class>
+    </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/user/*</url-pattern>
@@ -45,44 +45,48 @@
         <filter-name>AuthFilterAdmin</filter-name>
         <url-pattern>/admin/*</url-pattern>
     </filter-mapping>
-	<filter-mapping>
-		<filter-name>exportPathFilter</filter-name>
-		<url-pattern>/export/*</url-pattern>
-	</filter-mapping>
+    <filter-mapping>
+        <filter-name>exportPathFilter</filter-name>
+        <url-pattern>/export/*</url-pattern>
+    </filter-mapping>
     <!-- Servlet definitions -->
     <servlet>
-        <description>
-           Initialize ART settings and database connection pools
-		</description>
         <servlet-name>ArtDBCP</servlet-name>
         <servlet-class>art.servlets.ArtDBCP</servlet-class>
+		<description>
+           Initialize ART settings and database connection pools
+		</description>
         <!-- Load this servlet at server startup time -->
         <load-on-startup>2</load-on-startup>
     </servlet>
     <servlet>
-        <description>
-           Get various info for ajax components
-		</description>
         <servlet-name>XmlDataProvider</servlet-name>
         <servlet-class>art.servlets.XmlDataProvider</servlet-class>
+		<description>
+           Get various info for ajax components
+		</description>
         <!-- Load this servlet at server startup time. load after ArtDBCP -->
         <load-on-startup>3</load-on-startup>
     </servlet>
     <servlet>
-        <description>
-           Clean export files 	   
-		</description>
         <servlet-name>Scheduler</servlet-name>
         <servlet-class>art.servlets.Scheduler</servlet-class>
+		<description>
+           Clean export files 	   
+		</description>
         <!-- Load this servlet at server startup time. load after ArtDBCP -->
         <load-on-startup>4</load-on-startup>
     </servlet>
     <servlet>
-        <description>
+        <servlet-name>ExecuteQuery</servlet-name>
+        <servlet-class>art.servlets.ExecuteQuery</servlet-class>
+		<description>
            Execute the query and show the results
 		</description>
-        <servlet-name>QueryExecute</servlet-name>
-        <servlet-class>art.servlets.QueryExecute</servlet-class>
+    </servlet>
+	<servlet>
+        <servlet-name>ViewLogs</servlet-name>
+        <servlet-class>art.servlets.ViewLogs</servlet-class>
     </servlet>
     <!-- CeWolf -->
     <servlet>
@@ -100,36 +104,19 @@
             <param-name>storage</param-name>
             <param-value>de.laures.cewolf.storage.TransientSessionStorage</param-value>
         </init-param>
-		<init-param>
+        <init-param>
             <param-name>maxImageWidth</param-name>
             <param-value>2048</param-value>
         </init-param>
-		<init-param>
+        <init-param>
             <param-name>maxImageHeight</param-name>
             <param-value>1024</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-    <servlet>
-        <servlet-name>ViewLogs</servlet-name>
-        <servlet-class>art.servlets.ViewLogs</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>CewolfServlet</servlet-name>
-        <url-pattern>/portlets/cewolf/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CewolfServlet</servlet-name>
-        <url-pattern>/user/cewolf/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CewolfServlet</servlet-name>
-        <url-pattern>/cewolf/*</url-pattern>
-    </servlet-mapping>
     <!-- End CeWolf -->
     <!-- 
       * Define servlet mappings
-      
 		  that are used by the servlet container to
 		  translate a particular request URI (context-relative) to a
 		  particular servlet.  
@@ -138,31 +125,21 @@
 		  servlet, if you wish to.
      -->
     <servlet-mapping>
-        <servlet-name>ArtDBCP</servlet-name>
-        <url-pattern>/ArtDBCP</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>XmlDataProvider</servlet-name>
         <url-pattern>/XmlDataProvider</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>QueryExecute</servlet-name>
-        <url-pattern>/QueryExecute</url-pattern>
+        <servlet-name>ExecuteQuery</servlet-name>
         <url-pattern>/ExecuteQuery</url-pattern>
-        <url-pattern>/user/QueryExecute</url-pattern>
-        <url-pattern>/user/ExecuteQuery</url-pattern>
-        <url-pattern>/servlet/QueryExecute</url-pattern>
     </servlet-mapping>
-	<servlet-mapping>
+    <servlet-mapping>
         <servlet-name>ViewLogs</servlet-name>
         <url-pattern>/logs</url-pattern>
-        <url-pattern>/ViewLogs</url-pattern>
     </servlet-mapping>
     <!-- Define the default session timeout for your application,
-          in minutes.  From a servlet or JSP page, you can modify
+          in minutes. From a servlet or JSP page, you can modify
           the timeout for a particular session dynamically by using
           HttpSession.getMaxInactiveInterval(). -->
-   
     <session-config>
         <session-timeout>120</session-timeout>
         <!-- 120 minutes -->
@@ -181,7 +158,7 @@
             <param-value>/user/jpivotError.jsp</param-value>
         </init-param>
         <init-param>
-            <description>This page is displayed if a the user clicks
+            <description>This page is displayed if a user clicks
 			on a query before the previous query has finished
 			</description>
             <param-name>busyJSP</param-name>

@@ -18,7 +18,7 @@
 /**
  * ParameterProcessor.java
  *
- * Caller:	QueryExecute, editJob.jsp Purpose:	parse the request parameter and
+ * Caller:	ExecuteQuery, editJob.jsp Purpose:	parse the request parameter and
  * feed the hash tables Note:	Parameters that begin with _ are ignored as well
  * as the ones in the first IF below
  */

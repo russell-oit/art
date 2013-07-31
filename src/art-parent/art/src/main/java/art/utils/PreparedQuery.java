@@ -537,7 +537,7 @@ public class PreparedQuery {
 			boolean useDynamicDatasource = false;
 
 			if (htmlParams != null) {
-				//htmlparams passed from queryexecute or artjob has paramvalues set
+				//htmlparams passed from ExecuteQuery or artjob has paramvalues set
 
 				for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
 					ArtQueryParam param = entry.getValue();

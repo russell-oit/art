@@ -16,7 +16,7 @@
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * QueryExecute.java
+ * ExecuteQuery.java
  *
  * Purpose: 1. Execute the query (on the right database...) 2. build the html
  * page to show the data or create the spreadsheet or exportable file and show
@@ -57,10 +57,10 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class QueryExecute extends HttpServlet {
+public class ExecuteQuery extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(QueryExecute.class);
+	final static Logger logger = LoggerFactory.getLogger(ExecuteQuery.class);
 	private int currentNumberOfRunningQueries = 0;
 	@SuppressWarnings("rawtypes")
 	HashMap<String, java.lang.Class> viewModes;
@@ -1041,7 +1041,7 @@ public class QueryExecute extends HttpServlet {
 
 		/*
 		 * A note about security: A malicious user cannot execute arbitrary
-		 * queries because QueryExecute checks that the query is viewable by the
+		 * queries because ExecuteQuery checks that the query is viewable by the
 		 * authenticated or public user before the SQL code is executed (in
 		 * PreparedQuery)
 		 */

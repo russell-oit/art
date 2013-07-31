@@ -18,7 +18,7 @@
 /**
  * ArtOutHandler.java
  *
- * Caller:	QueryExecute and ArtJob Purpose:	Scroll the resultset and feed
+ * Caller:	ExecuteQuery and ArtJob Purpose:	Scroll the resultset and feed
  * properly the ArtOutputInterface
  *
  *
