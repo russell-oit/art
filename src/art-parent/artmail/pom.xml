@@ -36,14 +36,14 @@
 		<resources>
 			<!-- include java source files in generated jar -->
 			<resource>
-				<directory>src/main/java</directory>
+				<directory>${basedir}/src/main/java</directory>
 				<includes>
 					<include>**/*.java</include>
 				</includes>
 			</resource>
 			<!-- include license file and build.xml file in generated jar -->
 			<resource>
-				<directory>${basedir}</directory>
+				<directory>${basedir}/src/main/resources</directory>
 				<includes>
 					<include>LICENSE.txt</include>
 					<include>build.xml</include>
@@ -59,7 +59,8 @@
 					<artifactId>maven-license-plugin</artifactId>
 					<version>1.10.b1</version>
 					<configuration>
-						<header>src/license/header.txt</header>
+						<basedir>${basedir}</basedir>
+						<header>${basedir}/src/license/header.txt</header>
 						<includes>
 							<include>src/main/java/**/*.java</include>
 						</includes>

@@ -28,7 +28,9 @@
     }
 	
 	function moveQuery() {
-        if ( document.getElementById("queryId").value > 0 && document.getElementById("newGroupId").value > -1 ) {
+        if ( document.getElementById("queryId").value > 0
+			&& document.getElementById("newGroupId").value > -1 ) {
+			
 			document.manageQueries.action="execManageQueries.jsp";
 			document.manageQueries.QUERYACTION.value="MOVE";
 			document.manageQueries.submit();
@@ -40,19 +42,24 @@
     function copyQuery() {
         if(countSelected(document.getElementById("queryId"))>1){
             alert("Please select a single query");
-        } else if ( document.getElementById("queryId").value > 0 && document.getElementById("copyName").value != "" && document.getElementById("copyName").value != "New Name") {
+        } else if ( document.getElementById("queryId").value > 0
+			&& document.getElementById("copyName").value != "") {
+			
             document.manageQueries.action="execManageQueries.jsp";
             document.manageQueries.QUERYACTION.value="COPY";
             document.manageQueries.submit();
         } else {
             alert("Please select a query and specify a new name for it");
+			document.getElementById('copyName').focus();
         }
     }
 	
 	function renameQuery() {
         if(countSelected(document.getElementById("queryId"))>1){
             alert("Please select a single query");
-        } else if ( document.getElementById("queryId").value > 0 && document.getElementById("newName").value != "" && document.getElementById("newName").value != "New Name") {
+        } else if ( document.getElementById("queryId").value > 0
+			&& document.getElementById("newName").value != "") {
+			
             document.manageQueries.action="execManageQueries.jsp";
             document.manageQueries.QUERYACTION.value="RENAME";
             document.manageQueries.submit();
@@ -72,6 +79,18 @@
             alert("Please select a single query");
         } else if ( document.getElementById("queryId").value > 0 ) {
             document.manageQueries.action="<%= request.getContextPath() %>/admin/manageQuery.jsp";
+            document.manageQueries.submit();
+        } else {
+            alert("Please select a query");
+        }
+    }
+	
+	function updateQuerySource() {
+        if(countSelected(document.getElementById("queryId"))>1){
+            alert("Please select a single query");
+        } else if ( document.getElementById("queryId").value > 0 ) {
+            document.manageQueries.action="<%= request.getContextPath() %>/admin/editQuery.jsp";
+			document.manageQueries.QUERYACTION.value="MODIFY";
             document.manageQueries.submit();
         } else {
             alert("Please select a query");
@@ -122,20 +141,21 @@ int queryGroupId;
 		</tr>
 
         <tr>
-            <td class="attr" colspan="2" align="center">
+            <td class="attr"  align="center" colspan="2">
                 <input type="button" onclick="newQuery()" value="Create New Query">
             </td>
         </tr>
        
         <tr>
-            <td  class="attr" colspan="2" >
+            <td  class="attr" colspan="2">
                 Select query to modify/delete/copy
             </td>
         </tr>
         <tr>
-            <td style="vertical-align: middle;" align="center" colspan="2">
-                <select id="groupId" name="GROUP_ID">
-                    <option value="-1">Select Group</option>
+            <td colspan="2">
+				Query Groups <br>
+                <select id="groupId" name="GROUP_ID" size="5">
+					<option value="-1">--</option>
                     <%
 					for (Map.Entry<String, QueryGroup> entry : groups.entrySet()) {
 						QueryGroup qg=entry.getValue();
@@ -148,49 +168,49 @@ int queryGroupId;
 					 }                 
                     %>
                 </select>
-
-                <br>
-                <select id="queryId" name="QUERY_ID" size="10" multiple="multiple" >
+			</td>
+		</tr>
+		<tr><td colspan="2">
+                Queries <br>
+                <select id="queryId" name="QUERY_ID" size="10" multiple>
                     <option value="">...</option>
                 </select>
             </td>
         </tr>
-        <tr>
-            <td align="right" width="80%">
-				&nbsp;
-			</td>
-            <td align="left">
+		<tr>
+		<td colspan="2" style="padding-bottom: 5px">
 				<input type="button" onclick="updateQuery()" value="Modify">
-			</td>
-        </tr>
-        <tr>
-			<td align="right" width="80%">
 				&nbsp;
-			</td>
-            <td align="left">
+				<input type="button" onclick="updateQuerySource()" value="Modify Source">
+				&nbsp;
 				<input type="button" onclick="deleteQuery()" value="Delete">
 			</td>
-        </tr>
-        <tr>
-            <td align="right" width="80%">
-				<input type="text" size="40"  maxlength="50" value="New Name" name="COPY_QUERY_NAME" id="copyName">
-			</td>
-            <td align="left">
+		</tr>
+<tr>
+			<td>
 				<input type="button" onclick="copyQuery()" value="Copy">
 			</td>
-        </tr>
-		<tr>
-            <td align="right" width="80%">
-				<input type="text" size="40"  maxlength="50" value="New Name" name="NEW_QUERY_NAME" id="newName">
+			<td>
+				<input type="text" size="40"  maxlength="50" value=""
+					   name="COPY_QUERY_NAME" id="copyName" placeholder="new name">
 			</td>
-            <td align="left">
+			</tr>
+			<tr>
+			<td>
 				<input type="button" onclick="renameQuery()" value="Rename">
 			</td>
-        </tr>
-		<tr>
-            <td align="right" width="80%">
+			<td>
+				<input type="text" size="40"  maxlength="50" value=""
+					   name="NEW_QUERY_NAME" id="newName" placeholder="new name">
+			</td>
+			</tr>
+			<tr>
+			<td>
+				<input type="button" onclick="moveQuery()" value="Move">
+			</td>
+			<td>
 				<select id="newGroupId" name="NEW_GROUP_ID">
-                    <option value="-1">New Group</option>
+                    <option value="-1">Select Group</option>
                     <%
 					for (Map.Entry<String, QueryGroup> entry : groups.entrySet()) {
 						QueryGroup qg=entry.getValue();
@@ -204,11 +224,8 @@ int queryGroupId;
                     %>
                 </select>
 			</td>
-            <td align="left">
-				<input type="button" onclick="moveQuery()" value="Move">
-			</td>
-        </tr>
-
+        
+</tr>
     </table>
 </form>
 				
@@ -235,10 +252,11 @@ baseUrl="<%=dataProviderUrl%>"
     source="groupId"
     target="queryId"
     parameters="action=queriesadmin,groupId={groupId}"
-    emptyOptionName="Empty"
+    emptyOptionName="..."
     emptyOptionValue=""
     preFunction="artAddWork"
     postFunction="artRemoveWork"
+	executeOnLoad="true"
     />
 
 

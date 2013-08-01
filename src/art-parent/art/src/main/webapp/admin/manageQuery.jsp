@@ -49,7 +49,6 @@ if(StringUtils.equals(aq.getUsesRules(),"Y")){
     <tr><td class="attr" >
             <form method="post" action="editQuery.jsp" class="data">
                 <input type="hidden" name="QUERY_ID" value="<%=queryId%>">
-                <input type="hidden" name="GROUP_ID" value="<%=requestGroupId%>">
                 <input type="hidden" name="QUERYACTION" value="MODIFY">
                 <input type="submit" value="Header and Source">
             </form>

@@ -51,38 +51,42 @@
 	</filter-mapping>
 	<!-- Servlet definitions -->
 	<servlet>
-		<servlet-name>ArtDBCP</servlet-name>
-		<servlet-class>art.servlets.ArtDBCP</servlet-class>
+		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Initialize ART settings and database connection pools
 		</description>
+		<servlet-name>ArtDBCP</servlet-name>
+		<servlet-class>art.servlets.ArtDBCP</servlet-class>
 		<!-- Load this servlet at server startup time -->
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 	<servlet>
-		<servlet-name>XmlDataProvider</servlet-name>
-		<servlet-class>art.servlets.XmlDataProvider</servlet-class>
+		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Get various info for ajax components
 		</description>
+		<servlet-name>XmlDataProvider</servlet-name>
+		<servlet-class>art.servlets.XmlDataProvider</servlet-class>
 		<!-- Load this servlet at server startup time. load after ArtDBCP -->
 		<load-on-startup>3</load-on-startup>
 	</servlet>
 	<servlet>
-		<servlet-name>Scheduler</servlet-name>
-		<servlet-class>art.servlets.Scheduler</servlet-class>
+		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Clean export files 	   
 		</description>
+		<servlet-name>Scheduler</servlet-name>
+		<servlet-class>art.servlets.Scheduler</servlet-class>
 		<!-- Load this servlet at server startup time. load after ArtDBCP -->
 		<load-on-startup>4</load-on-startup>
 	</servlet>
 	<servlet>
-		<servlet-name>ExecuteQuery</servlet-name>
-		<servlet-class>art.servlets.ExecuteQuery</servlet-class>
+		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Execute the query and show the results
 		</description>
+		<servlet-name>ExecuteQuery</servlet-name>
+		<servlet-class>art.servlets.ExecuteQuery</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>ViewLogs</servlet-name>

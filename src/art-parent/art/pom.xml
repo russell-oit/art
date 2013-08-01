@@ -36,7 +36,7 @@
 						<webResources>
 							<!-- include java source files in generated art.war -->
 							<resource>
-								<directory>src/main/java</directory>
+								<directory>${basedir}/src/main/java</directory>
 								<targetPath>WEB-INF/classes</targetPath>
 								<includes>
 									<include>**/*.java</include>
