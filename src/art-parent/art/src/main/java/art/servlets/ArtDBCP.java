@@ -156,9 +156,6 @@ public class ArtDBCP extends HttpServlet {
 		ServletContext ctx = getServletConfig().getServletContext();
 
 		artVersion = ctx.getInitParameter("versionNumber");
-		if (StringUtils.equals(ctx.getInitParameter("versionType"), "light")) {
-			artFullVersion = false;
-		}
 
 		//set application path
 		appPath = ctx.getRealPath("");

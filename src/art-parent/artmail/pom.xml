@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -34,19 +34,15 @@
 
 	<build>
 		<resources>
+			<!-- include files in default resources location -->
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
 			<!-- include java source files in generated jar -->
 			<resource>
 				<directory>${basedir}/src/main/java</directory>
 				<includes>
 					<include>**/*.java</include>
-				</includes>
-			</resource>
-			<!-- include license file and build.xml file in generated jar -->
-			<resource>
-				<directory>${basedir}/src/main/resources</directory>
-				<includes>
-					<include>LICENSE.txt</include>
-					<include>build.xml</include>
 				</includes>
 			</resource>
 		</resources>
@@ -75,10 +71,10 @@
 
 		<plugins>
 			<!-- uncomment and use maven-license-plugin as required e.g. mvn license:check, 
-				license:format, license:remove -->
+			license:format, license:remove -->
 
 			<!-- <plugin> <groupId>com.mycila.maven-license-plugin</groupId> <artifactId>maven-license-plugin</artifactId> 
-				</plugin> -->
+			</plugin> -->
 		</plugins>
 	</build>
 </project>

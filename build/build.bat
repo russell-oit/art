@@ -19,8 +19,12 @@ copy /Y build-hg\src\changelog.txt art-nightly
 rem copy readme
 copy /Y build-hg\build\readme.txt art-nightly
 
-rem copy license
-copy /Y build-hg\build\LICENSE.txt art-nightly
+rem copy ART license
+copy /Y build-hg\src\art-parent\art\LICENSE.txt art-nightly
+
+rem copy Apache license for third-party libraries
+md art-nightly\third-party
+copy /Y build-hg\build\third-party\*.* art-nightly\third-party
 
 rem copy database scripts
 md art-nightly\database

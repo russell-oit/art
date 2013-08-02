@@ -15,15 +15,6 @@
 		<param-name>versionNumber</param-name>
 		<param-value>2.5.3-alpha1</param-value>
 	</context-param>
-	<context-param>
-		<description>
-			Either full or light
-			Light version has some jars and features omitted 
-			to keep the package size small
-		</description>
-		<param-name>versionType</param-name>
-		<param-value>full</param-value>
-	</context-param>
 	<!-- Filters -->
 	<filter>
 		<filter-name>AuthFilter</filter-name>
@@ -61,27 +52,24 @@
 		<load-on-startup>2</load-on-startup>
 	</servlet>
 	<servlet>
-		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Get various info for ajax components
 		</description>
 		<servlet-name>XmlDataProvider</servlet-name>
 		<servlet-class>art.servlets.XmlDataProvider</servlet-class>
-		<!-- Load this servlet at server startup time. load after ArtDBCP -->
+		<!-- load after ArtDBCP -->
 		<load-on-startup>3</load-on-startup>
 	</servlet>
 	<servlet>
-		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Clean export files 	   
 		</description>
 		<servlet-name>Scheduler</servlet-name>
 		<servlet-class>art.servlets.Scheduler</servlet-class>
-		<!-- Load this servlet at server startup time. load after ArtDBCP -->
+		<!-- load after ArtDBCP -->
 		<load-on-startup>4</load-on-startup>
 	</servlet>
 	<servlet>
-		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Execute the query and show the results
 		</description>

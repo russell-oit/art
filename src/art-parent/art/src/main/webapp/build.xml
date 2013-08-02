@@ -64,17 +64,6 @@
 
 	</target>
 	
-	<!-- Create full art war file. No longer available. Managing dependencies manually is tedious -->
-	<target name="full"  description="deprecated" >
-		<echo message="&quot;ant full&quot; is deprecated, use &quot;ant war&quot; instead"/>
-	</target>
-	
-	<!-- Create light art war file. No longer available. Managing dependencies manually is tedious -->
-	<target name="light"  description="deprecated" >
-		<echo message="&quot;ant light&quot; is deprecated, use &quot;ant war&quot; instead"/>
-	</target>
-
-
 	<!-- Clean .jasper files -->
 	<target name="clean-jasperreports" description="Delete compiled jasper reports" >
 		<delete>
