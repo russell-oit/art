@@ -159,19 +159,24 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 
 		//set table options. see http://www.datatables.net/ref
 		String props = "{aaSorting: []"
-				//+ ", \"sPaginationType\":\"full_numbers\""
+				+ ", \"sPaginationType\":\"full_numbers\""
 				//+ ", \"bPaginate\": false"
 				//+ ", \"sScrollY\": \"200px\""
 				//+ ", \"bScrollCollapse\": true"
 				//+ ", \"bProcessing\": true"
+				+ ", \"bJQueryUI\": true"
 				+ languageSetting
 				+ ", \"iDisplayLength\": 50" //default item in show entries e.g. -1
 				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
 				+ "}";
 
 		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/datatables.css\" /> ");
-		out.println("<script type=\"text/javascript\" language=\"javascript\" src=\"../js/jquery.js\"></script>");
-		out.println("<script type=\"text/javascript\" language=\"javascript\" src=\"../js/jquery.dataTables.min.js\"></script>");
+		out.println("<script type=\"text/javascript\" src=\"../js/jquery-1.6.2.min.js\"></script>");
+		out.println("<script type=\"text/javascript\" src=\"../js/jquery.dataTables.min.js\"></script>");
+		//enable use of jquery ui theme. needs theme css, jquery.js, jquery-ui.js
+		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/smoothness/jquery-ui-1.10.3.custom.css\" /> ");
+		out.println("<script type=\"text/javascript\" src=\"../js/jquery-ui-10.3.custom.min.js\"></script>");
+		//
 		out.println("<script type=\"text/javascript\" charset=\"utf-8\">");
 		out.println("	var $jQuery = jQuery.noConflict();");
 		out.println("	$jQuery(document).ready(function() {");

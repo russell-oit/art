@@ -21,7 +21,7 @@
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/scriptaculous/scriptaculous.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/ajaxtags.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>
-        <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery.js"></script>
+        <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery-1.6.2.min.js"></script>
         <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery.form.js"></script>
 	<script> var $jQuery = jQuery.noConflict();</script>
 
