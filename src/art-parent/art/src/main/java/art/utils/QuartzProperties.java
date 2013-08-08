@@ -105,7 +105,7 @@ public class QuartzProperties {
 				if (quartzPropsFilePath == null) {
 					//use default path
 					String sep = java.io.File.separator;
-					quartzPropsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "art-quartz.properties";
+					quartzPropsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "quartz.properties";
 				}
 				File quartzFile = new File(quartzPropsFilePath);
 				if (quartzFile.exists()) {

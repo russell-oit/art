@@ -1,18 +1,21 @@
 -- Create the ART Repository
 
 -- IMPORTANT:
--- after running this script, ALSO RUN the tables_xxx.sql script for your database (found in the quartz directory)
+-- after running this script, ALSO RUN the tables_xxx.sql script for your database
+-- (found in the quartz directory)
 
 -- NOTES:
 -- for sql server, replace "timestamp" data type with "datetime"
 -- for sql server 2000/2005 also replace "date" data type with "datetime"
 
 -- UPGRADING:
--- if you are upgrading, don't use this script. run the scripts available in the upgrade directory
--- run the scripts one at a time to upgrade to newer versions. e.g. from 2.0 to 2.1, then 2.1 to 2.2 etc.
+-- if you are upgrading, don't use this script. run the scripts available in the
+-- upgrade directory run the scripts one at a time to upgrade to newer versions.
+-- e.g. from 2.0 to 2.1, then 2.1 to 2.2 etc.
 
--- if you want to create a new repository in place of an existing one, uncomment the DROP statements
--- you can use a text editor to replace "-- DROP" with "DROP" to accomplish this
+-- if you want to create a new repository in place of an existing one,
+-- uncomment the DROP statements. you can use a text editor to
+-- replace "-- DROP" with "DROP" to accomplish this
 
 -- ------------------------------------------------
 
@@ -66,14 +69,16 @@ CREATE TABLE ART_SETTINGS
 	PRIMARY KEY (SETTING_NAME)
 );
 -- insert database version
-INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) VALUES('database version','2.5.3-alpha1');
+INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) 
+VALUES('database version','2.5.3-alpha1');
 
 
 -- ART_USERS 
 -- Stores user info
 
 -- ACCESS_LEVEL: 0 = normal user, 5 = normal user who can schedule jobs
--- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin, 100 = super admin
+-- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin
+-- 100 = super admin
 
 CREATE TABLE ART_USERS
 (
@@ -129,16 +134,24 @@ ALTER TABLE ART_QUERY_GROUPS ADD CONSTRAINT art_query_groups_uc_name UNIQUE (NAM
 
 -- Query types:
 -- 0 = normal query, 1-99 = report on column, 100 = update, 101 = crosstab
--- 102 = crosstab html only, 103 = normal query html only, 110 = dashboard, 111 = text object
--- 112 = mondrian cube, 113 = mondrian cube via xmla, 114 = sql server analysis services cube via xmla
+-- 102 = crosstab html only, 103 = normal query html only, 110 = dashboard
+-- 111 = text object, 112 = mondrian cube, 113 = mondrian cube via xmla
+-- 114 = sql server analysis services cube via xmla
 -- 115 = jasper report with template query, 116 = jasper report with art query
 -- 117 = jxls spreadsheet with template query, 118 = jxls spreadsheet with art query
 -- 119 = dynamic lov, 120 = static lov, 121 = dynamic job recipients
+
 -- Query types for graphs:
 -- -1 = XY, -2 = Pie 3D, -3 = Horizontal bar 3D, -4 = Vertical bar 3D, -5 = Line
--- -6 = Time series, -7 = Date series, -8 = Stacked vertical bar 3D, -9 = Stacked horizontal bar 3D
--- -10 = Speedometer, -11 = Bubble chart, -12 = Heat Map, -13 = Pie 2D, -14 = Vertical bar 2D
--- -15 = Stacked vertical bar 2D, -16 = Horizontal bar 2D, -17 = Stacked horizontal bar 2D
+-- -6 = Time series, -7 = Date series, -8 = Stacked vertical bar 3D
+-- -9 = Stacked horizontal bar 3D, -10 = Speedometer, -11 = Bubble chart
+-- -12 = Heat Map, -13 = Pie 2D, -14 = Vertical bar 2D
+-- -15 = Stacked vertical bar 2D, -16 = Horizontal bar 2D
+-- -17 = Stacked horizontal bar 2D
+
+-- NOTES:
+-- X_AXIS_LABEL has a length of 2000 because of migration from 1.x versions.
+-- Data input is limited at 50.
 
 CREATE TABLE ART_QUERIES
 (
@@ -153,7 +166,7 @@ CREATE TABLE ART_QUERIES
 	CONTACT_PERSON        VARCHAR(20),  
 	ACTIVE_STATUS    VARCHAR(1),
 	SHOW_PARAMETERS VARCHAR(1),
-	X_AXIS_LABEL VARCHAR(50),
+	X_AXIS_LABEL VARCHAR(2000),
 	Y_AXIS_LABEL VARCHAR(50),
 	GRAPH_OPTIONS VARCHAR(200),
 	TEMPLATE VARCHAR(100),
@@ -171,7 +184,8 @@ ALTER TABLE ART_QUERIES ADD CONSTRAINT art_queries_uc_name UNIQUE (NAME);
 
 -- ART_ADMIN_PRIVILEGES
 -- stores privileges for Junior and Mid Admin (Admin Level <=30)
--- this table is used to limit data extraction for these admins when viewing available groups and databases
+-- this table is used to limit data extraction for these admins when
+-- viewing available groups and databases
 
 -- PRIVILEGE can be either DB (database) or GRP (Group)
 -- VALUE_ID is the DATABASE_ID or the QUERY_GROUP_ID
@@ -213,12 +227,15 @@ CREATE TABLE ART_USER_QUERY_GROUPS
 
 -- FIELD_POSITION is the order the parameter is displayed to users
 -- FIELD_CLASS stores the data type of the parameter
--- PARAM_TYPE: M for MULTI param, I for INLINE param (N for obsolete bind parameters)
--- PARAM_LABEL stores the column name for non-labelled MULTI params or the parameter label for INLINE params or labelled multi params
+-- PARAM_TYPE: M for MULTI param, I for INLINE param 
+-- PARAM_LABEL stores the column name for non-labelled MULTI params
+-- or the parameter label for INLINE params or labelled multi params
 -- USE_LOV is set to Y if the param values are provided by an LOV query
--- CHAINED_PARAM_POSITION is the position of the chained param (in osolete Bind params this is the index of the ? in the prepared statement)
--- CHAINED_VALUE_POSITION - allow chained parameter value to come from a different parameter from the previous one in the chained parameter sequence
--- DRILLDOWN_COLUMN - if used in a drill down report, referes to the column in the parent report on which the parameter will be applied 
+-- CHAINED_PARAM_POSITION is the position of the chained param 
+-- CHAINED_VALUE_POSITION - allow chained parameter value to come from
+-- a different parameter from the previous one in the chained parameter sequence
+-- DRILLDOWN_COLUMN - if used in a drill down report, refers to the column in
+-- the parent report on which the parameter will be applied 
 
 CREATE TABLE ART_QUERY_FIELDS
 (	
@@ -309,12 +326,15 @@ CREATE TABLE ART_USER_GROUP_RULES
 -- OUTPUT: html, pdf, xls etc (viewMode code)
 -- JOB_TYPE: 1 = alert, 2 = email with query output as attachment, 3 = publish
 -- 4 = just execute (i.e. no output generated), 5 = email with query output inline
--- 6 = conditional email attachment, 7 = conditional inline email, 8 = conditional publish
--- 9 = append to cached table, 10 = delete and insert into cached table
--- LAST_FILE_NAME: Contains result of last job execution. Either a status message (if contents start with -),
--- or a file name and status message separated by newline character (\n) (for publish jobs)
+-- 6 = conditional email attachment, 7 = conditional inline email
+-- 8 = conditional publish, 9 = append to cached table
+-- 10 = delete and insert into cached table
+-- LAST_FILE_NAME: Contains result of last job execution. Either a status message
+-- (if contents start with -), or a file name and status message separated by 
+-- newline character (\n) (for publish jobs)
 -- MIGRATED_TO_QUARTZ is present to allow seamless migration of jobs when
--- upgrading from ART versions before 1.11 (i.e. before quartz was used as the scheduling engine)
+-- upgrading from ART versions before 1.11
+-- (before quartz was used as the scheduling engine)
 
 CREATE TABLE ART_JOBS
 (
@@ -355,7 +375,7 @@ CREATE TABLE ART_JOBS
 -- ART_JOBS_PARAMETERS
 -- store jobs parameters
 
--- PARAM_TYPE: M = multi, I = inline (B for obsolete bind parameters)
+-- PARAM_TYPE: M = multi, I = inline 
 -- PARAM_NAME: the html element name of the parameter
 
 CREATE TABLE ART_JOBS_PARAMETERS
@@ -389,9 +409,11 @@ CREATE TABLE ART_JOBS_AUDIT
 -- Stores log information e.g. logins and query execution
 
 -- LOG_TYPE: login = successful login, loginerr = unsuccessful login attempt
--- query = interactive query execution, upload = template file uploaded when creating query that uses a template file
+-- query = interactive query execution, upload = template file uploaded when
+-- creating query that uses a template file
 -- TOTAL_TIME: total execution time in secs, including fetch time and display time
--- FETCH_TIME: time elapsed from when the query is submitted to when the database returns 1st row
+-- FETCH_TIME: time elapsed from when the query is submitted to when the
+-- database returns 1st row
 
 CREATE TABLE ART_LOGS
 (
@@ -409,9 +431,11 @@ CREATE TABLE ART_LOGS
 -- ART_USER_JOBS
 -- Stores users who have been given access to a job's output
 
--- USER_GROUP_ID: used to indicate if job was shared via user group. To enable deletion of split job records where
+-- USER_GROUP_ID: used to indicate if job was shared via user group. To enable
+-- deletion of split job records where
 -- access was granted via user group, when a user is removed from a group.
--- LAST_FILE_NAME: contains file name for individualized output (split job), or NULL if file name to use comes from ART_JOBS table
+-- LAST_FILE_NAME: contains file name for individualized output (split job),
+-- or NULL if file name to use comes from ART_JOBS table
 
 CREATE TABLE ART_USER_JOBS
 (
@@ -466,7 +490,8 @@ CREATE TABLE ART_USER_GROUP_ASSIGNMENT
 
 
 -- ART_USER_GROUP_QUERIES
--- Stores which queries certain user groups can access (users who are members of the group can access the queries)
+-- Stores which queries certain user groups can access (users who are members of 
+-- the group can access the queries)
 
 CREATE TABLE ART_USER_GROUP_QUERIES
 (
@@ -477,7 +502,8 @@ CREATE TABLE ART_USER_GROUP_QUERIES
 
 
 -- ART_USER_GROUP_GROUPS
--- Stores which query groups certain user groups can access (users who are members of the group can access the query groups)
+-- Stores which query groups certain user groups can access (users who are members
+-- of the group can access the query groups)
 
 CREATE TABLE ART_USER_GROUP_GROUPS
 (
@@ -488,7 +514,8 @@ CREATE TABLE ART_USER_GROUP_GROUPS
 
 
 -- ART_USER_GROUP_JOBS
--- Stores which jobs have been shared with certain user groups (users who are members of the group can access the job output)
+-- Stores which jobs have been shared with certain user groups (users who are
+-- members of the group can access the job output)
 
 CREATE TABLE ART_USER_GROUP_JOBS
 (
