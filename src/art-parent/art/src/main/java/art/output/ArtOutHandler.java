@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * ArtOutHandler.java
@@ -86,11 +85,11 @@ public class ArtOutHandler {
 	public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd, Map<Integer, DrilldownQuery> drilldownQueries, String baseUrl, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException, ArtException {
 
 
-		int col_count = rsmd.getColumnCount();
+		int columnCount = rsmd.getColumnCount();
 		int i;
 		int counter = 0;
 
-		int columnTypes[] = new int[col_count]; // 0 = string ; 1 = numeric/double ; 2 = int ; 3 = date 
+		int columnTypes[] = new int[columnCount]; // 0 = string ; 1 = numeric/double ; 2 = int ; 3 = date 
 		String tmpstr;
 
 		//include columns for drill down queries
@@ -100,10 +99,10 @@ public class ArtOutHandler {
 		}
 
 		//include columns for drill down queries		
-		o.setColumnsNumber(col_count + drilldownCount);
+		o.setColumnsNumber(columnCount + drilldownCount);
 
 		o.beginHeader();
-		for (i = 0; i < (col_count); i++) {
+		for (i = 0; i < columnCount; i++) {
 			tmpstr = rsmd.getColumnLabel(i + 1);
 			setTypesArray(rsmd.getColumnType(i + 1), columnTypes, i);
 			o.addHeaderCell(tmpstr);
@@ -112,7 +111,7 @@ public class ArtOutHandler {
 		//include columns for drill down queries
 		String drilldownTitle;
 
-		if (drilldownCount > 0) {
+		if (drilldownQueries != null) {
 			for (Map.Entry<Integer, DrilldownQuery> entry : drilldownQueries.entrySet()) {
 				DrilldownQuery drilldown = entry.getValue();
 				drilldownTitle = drilldown.getDrilldownTitle();
@@ -134,10 +133,6 @@ public class ArtOutHandler {
 		List<ArtQueryParam> drilldownParams;
 		String openInNewWindow;
 
-		//allow null int or float fields to be indicated as null instead of 0
-		Long longField;
-		Double doubleField;
-
 		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
 		HashMap<String, String> params = new HashMap<String, String>();
 
@@ -154,47 +149,64 @@ public class ArtOutHandler {
 					throw new ArtException(messages.getString("tooManyRows"));
 				}
 			}
-			for (i = 0; i < (col_count); i++) {
 
+			//save column values for use in drill down columns.
+			//for the jdbc-odbc bridge, you can only read
+			// column values ONCE and in the ORDER they appear in the select
+			List<String> columnValues = new ArrayList<String>();
+			for (i = 0; i < columnCount; i++) {
 				switch (columnTypes[i]) {
 					case 0:
-						o.addCellString(rs.getString(i + 1));
+						String stringValue = rs.getString(i + 1);
+						columnValues.add(stringValue);
+						o.addCellString(stringValue);
 						break;
 					case 1:
-						doubleField = Double.valueOf(rs.getDouble(i + 1));
+						//allow null int or float fields to be indicated as null instead of 0
+						Double doubleValue = Double.valueOf(rs.getDouble(i + 1));
+						columnValues.add(String.valueOf(doubleValue));
 						if (rs.wasNull()) {
-							doubleField = null;
+							doubleValue = null;
 						}
-						o.addCellDouble(doubleField);
+						o.addCellDouble(doubleValue);
 						break;
 					case 2:
-						longField = Long.valueOf(rs.getLong(i + 1));
+						//allow null int or float fields to be indicated as null instead of 0
+						Long longValue = Long.valueOf(rs.getLong(i + 1));
+						columnValues.add(String.valueOf(longValue));
 						if (rs.wasNull()) {
-							longField = null;
+							longValue = null;
 						}
-						o.addCellLong(longField);
+						o.addCellLong(longValue);
 						break;
 					case 3:
-						o.addCellDate(rs.getTimestamp(i + 1)); // try always to get a timestamp, the jdbc driver should properly convert to a date...
+						java.util.Date dateValue = rs.getTimestamp(i + 1);
+						columnValues.add(String.valueOf(dateValue));
+						o.addCellDate(dateValue); // try always to get a timestamp, the jdbc driver should properly convert to a date...
 						break;
 					case 4:
 						// convert CLOB to string
 						java.sql.Clob clob = rs.getClob(i + 1);
+						String clobValue;
 						try {
-							o.addCellString(clob.getSubString(1, (int) clob.length()));
+							clobValue=clob.getSubString(1, (int) clob.length());
+							o.addCellString(clobValue);
 						} catch (SQLException e) {
 							logger.error("Error", e);
-							o.addCellString("Exception getting CLOB: " + e);
+							clobValue="Exception getting CLOB: " + e;
+							o.addCellString(clobValue);
 						}
+						columnValues.add(clobValue);
 						break;
 					default:
-						o.addCellString(rs.getString(i + 1));
+						String defaultValue=rs.getString(i + 1);
+						columnValues.add(defaultValue);
+						o.addCellString(defaultValue);
 				}
 			}
 
 			//display columns for drill down queries			
-			if (drilldownCount > 0) {
-
+			if (drilldownQueries != null) {
 				for (Map.Entry<Integer, DrilldownQuery> entry : drilldownQueries.entrySet()) {
 					DrilldownQuery drilldown = entry.getValue();
 					drilldownText = drilldown.getDrilldownText();
@@ -220,7 +232,7 @@ public class ArtOutHandler {
 					if (drilldownParams != null) {
 						for (ArtQueryParam param : drilldownParams) {
 							paramLabel = param.getParamLabel();
-							paramValue = rs.getString(param.getDrilldownColumn());
+							paramValue = columnValues.get(param.getDrilldownColumn()-1);
 							if (paramValue != null) {
 								try {
 									paramValue = URLEncoder.encode(paramValue, "UTF-8");
@@ -534,9 +546,9 @@ public class ArtOutHandler {
 				ta[i] = 0;
 		}
 	}
-	
+
 	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams) {
-		displayParameters(out,displayParams,null);
+		displayParameters(out, displayParams, null);
 	}
 
 	/**
@@ -560,9 +572,9 @@ public class ArtOutHandler {
 
 				if (pValue == null) {
 					//multi parameter with all selected
-					String allString="All";
-					if(messages!=null){
-						allString=messages.getString("allItems");
+					String allString = "All";
+					if (messages != null) {
+						allString = messages.getString("allItems");
 					}
 					outputString = paramName + ": " + allString + " <br> ";
 					out.println(outputString);

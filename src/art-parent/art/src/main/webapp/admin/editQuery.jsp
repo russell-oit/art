@@ -25,6 +25,9 @@ if ( conn == null || conn.isClosed()) {
 <%
 }
 
+//refresh connection in case new queries have been created/deleted
+conn.commit();
+
 
 ArtQuery aq = new ArtQuery();
 

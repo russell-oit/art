@@ -152,7 +152,7 @@ int queryGroupId;
             </td>
         </tr>
         <tr>
-            <td colspan="2">
+            <td colspan="2" style="padding-top: 10px; padding-bottom: 10px">
 				Query Groups <br>
                 <select id="groupId" name="GROUP_ID" size="5">
 					<option value="-1">--</option>
@@ -170,15 +170,15 @@ int queryGroupId;
                 </select>
 			</td>
 		</tr>
-		<tr><td colspan="2">
-                Queries <br>
+		<tr><td colspan="2" style="padding-top: 10px; padding-bottom: 10px">
+				 Queries <br>
                 <select id="queryId" name="QUERY_ID" size="10" multiple>
                     <option value="">...</option>
                 </select>
             </td>
         </tr>
 		<tr>
-		<td colspan="2" style="padding-bottom: 5px">
+		<td colspan="2" style="padding-top: 10px; padding-bottom: 10px">
 				<input type="button" onclick="updateQuery()" value="Modify">
 				&nbsp;
 				<input type="button" onclick="updateQuerySource()" value="Modify Source">
