@@ -36,6 +36,7 @@ import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import art.utils.UserEntity;
 import com.lowagie.text.FontFactory;
+import java.io.File;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1500,5 +1501,25 @@ public class ArtDBCP extends HttpServlet {
 		}
 
 		return domainsList;
+	}
+
+	/**
+	 * Get language file to use for datatables, depending on the locale
+	 * 
+	 * @param request
+	 * @return 
+	 */
+	public static String getDataTablesLanguageUrl(HttpServletRequest request) {
+		String url = "";
+
+		String languageFileName = "dataTables." + request.getLocale() + ".txt";
+		String sep = File.separator;
+		String languageFilePath = ArtDBCP.getAppPath() + sep + "js" + sep + languageFileName;
+		File languageFile = new File(languageFilePath);
+		if (languageFile.exists()) {
+			url = request.getContextPath() + "/js/" + languageFileName;
+		}
+
+		return url;
 	}
 }

@@ -17,6 +17,7 @@
 package art.schedule;
 
 import art.servlets.ArtDBCP;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,7 +68,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			close(rs, ps, conn);
+			ArtUtils.close(rs, ps, conn);
 		}
 
 		return scheduleExists;
@@ -99,7 +100,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			close(ps, conn);
+			ArtUtils.close(ps, conn);
 		}
 	}
 
@@ -129,7 +130,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			close(ps, conn);
+			ArtUtils.close(ps, conn);
 		}
 	}
 
@@ -158,7 +159,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			close(rs, ps, conn);
+			ArtUtils.close(rs, ps, conn);
 		}
 
 		//sort names
@@ -190,7 +191,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			close(ps, conn);
+			ArtUtils.close(ps, conn);
 		}
 	}
 
@@ -228,7 +229,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			close(rs, ps, conn);
+			ArtUtils.close(rs, ps, conn);
 		}
 
 		return schedule;
@@ -268,77 +269,11 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			close(rs, ps, conn);
+			ArtUtils.close(rs, ps, conn);
 		}
 
 		return schedules;
 	}
 
-	/**
-	 * Close resultset
-	 *
-	 * @param rs
-	 */
-	private void closeResultSet(ResultSet rs) {
-		if (rs != null) {
-			try {
-				rs.close();
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
-			}
-		}
-	}
-
-	/**
-	 * Close statement
-	 *
-	 * @param st
-	 */
-	private void closeStatement(Statement st) {
-		if (st != null) {
-			try {
-				st.close();
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
-			}
-		}
-	}
-
-	/**
-	 * Close connection
-	 *
-	 * @param conn
-	 */
-	private void closeConnection(Connection conn) {
-		if (conn != null) {
-			try {
-				conn.close();
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
-			}
-		}
-	}
-
-	/**
-	 * Close resultset, statement and connection
-	 *
-	 * @param rs
-	 * @param st
-	 * @param conn
-	 */
-	private void close(ResultSet rs, Statement st, Connection conn) {
-		closeResultSet(rs);
-		closeStatement(st);
-		closeConnection(conn);
-	}
-
-	/**
-	 * Close statement and connection
-	 *
-	 * @param st
-	 * @param conn
-	 */
-	private void close(Statement st, Connection conn) {
-		close(null, st, conn);
-	}
+	
 }
