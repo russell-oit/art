@@ -60,7 +60,7 @@
 
   ArtSettings as = new ArtSettings();
 
-  if (as.load()){
+  if (as.load(ArtConfig.getSettingsFilePath())){
 	  //settings defined
     art_username = as.getSetting("art_username");
     art_password = as.getSetting("art_password");

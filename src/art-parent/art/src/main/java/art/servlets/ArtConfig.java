@@ -17,14 +17,10 @@
 package art.servlets;
 
 import art.dbcp.DataSource;
-import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.utils.Encrypter;
-import art.utils.QuartzProperties;
-import art.utils.UserEntity;
 import com.lowagie.text.FontFactory;
-import java.io.File;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -35,12 +31,8 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.quartz.SchedulerFactory;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,33 +189,6 @@ public class ArtConfig extends HttpServlet {
 
 			//register pdf fonts
 			registerPdfFonts();
-
-			//start quartz scheduler
-			try {
-				//get quartz properties object to use to instantiate a scheduler
-				QuartzProperties qp = new QuartzProperties();
-				Properties props = qp.getProperties();
-
-				if (props == null) {
-					logger.warn("Quartz properties not set. Job scheduling will not be possible");
-				} else {
-					//start quartz scheduler
-					SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
-					scheduler = schedulerFactory.getScheduler();
-
-					if (schedulingEnabled) {
-						scheduler.start();
-					} else {
-						scheduler.standby();
-					}
-
-					//migrate existing jobs to quartz, if any exist from previous art versions                
-					ArtJob aj = new ArtJob();
-					aj.migrateJobsToQuartz();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
 		} else {
 			//art.properties not available
 			logger.warn("ART settings not available. Admin should define ART settings on first logon.");
@@ -240,7 +205,7 @@ public class ArtConfig extends HttpServlet {
 
 		as = new ArtSettings();
 
-		if (as.load()) {
+		if (as.load(artPropertiesFilePath)) {
 			// settings defined
 			art_username = as.getSetting("art_username");
 			art_password = as.getSetting("art_password");
@@ -741,6 +706,13 @@ public class ArtConfig extends HttpServlet {
 		return connArt;
 	}
 
+	/**
+	 * Get connection located by the given jndi url
+	 * 
+	 * @param jndiUrl
+	 * @return
+	 * @throws SQLException 
+	 */
 	public static Connection getJndiConnection(String jndiUrl) throws SQLException {
 		Connection conn = null;
 

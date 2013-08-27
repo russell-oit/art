@@ -48,15 +48,15 @@ import org.slf4j.LoggerFactory;
 public class QuartzProperties {
 
 	final static Logger logger = LoggerFactory.getLogger(QuartzProperties.class);
-	String quartzPropsFilePath;
+	String quartzPropertiesFilePath;
 
 	/**
 	 * Set path to quartz properties file
 	 *
 	 * @param value path to quartz properties file
 	 */
-	public void setQuartzPropsFilePath(String value) {
-		quartzPropsFilePath = value;
+	public void setQuartzPropertiesFilePath(String value) {
+		quartzPropertiesFilePath = value;
 	}
 
 	/**
@@ -102,14 +102,14 @@ public class QuartzProperties {
 
 				//load properties from quartz properties file if it exists
 				props = new Properties();
-				if (quartzPropsFilePath == null) {
+				if (quartzPropertiesFilePath == null) {
 					//use default path
 					String sep = java.io.File.separator;
-					quartzPropsFilePath = ArtConfig.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "quartz.properties";
+					quartzPropertiesFilePath = ArtConfig.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "quartz.properties";
 				}
-				File quartzFile = new File(quartzPropsFilePath);
+				File quartzFile = new File(quartzPropertiesFilePath);
 				if (quartzFile.exists()) {
-					FileInputStream o = new FileInputStream(quartzPropsFilePath);
+					FileInputStream o = new FileInputStream(quartzPropertiesFilePath);
 					try {
 						props.load(o);
 					} finally {

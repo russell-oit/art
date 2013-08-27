@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  *
@@ -22,21 +21,27 @@
  *
  * Note:	Find a better way to avoid user to read all available export files. The
  * workaround is to have a dummy index.html file so that the web server does not
- * display all the content Anyway, this may not work on all servlet engines. 
- * Use ExportPathFilter?
+ * display all the content Anyway, this may not work on all servlet engines. Use
+ * ExportPathFilter?
  *
  * @author Enrico Liboni
  * @mail enrico(at)computer.org
  */
 package art.servlets;
 
+import static art.servlets.ArtConfig.logger;
+import art.utils.ArtJob;
+import art.utils.QuartzProperties;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Properties;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import org.quartz.SchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,11 +80,41 @@ public class Scheduler extends HttpServlet {
 
 			exportPath = ArtConfig.getExportPath();
 
+			//start quartz scheduler
+			try {
+				//get quartz properties object to use to instantiate a scheduler
+				QuartzProperties qp = new QuartzProperties();
+				Properties props = qp.getProperties();
+
+				if (props == null) {
+					logger.warn("Quartz properties not set. Job scheduling will not be possible");
+				} else {
+					//start quartz scheduler
+					SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
+					org.quartz.Scheduler scheduler = schedulerFactory.getScheduler();
+
+					if (ArtConfig.isSchedulingEnabled()) {
+						scheduler.start();
+					} else {
+						scheduler.standby();
+					}
+
+					ArtConfig.setScheduler(scheduler);
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+
+			//migrate existing jobs to quartz, if any exist from previous art versions
+			//quartz scheduler needs to be available
+			ArtJob aj = new ArtJob();
+			aj.migrateJobsToQuartz();
+
 			//start clean thread timer
 			t = new Timer(this);
 			t.start();
 
-			logger.debug("ART clean thread running");
+			logger.debug("ART scheduler running");
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}

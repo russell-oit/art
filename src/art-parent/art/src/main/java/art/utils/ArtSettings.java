@@ -17,7 +17,6 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -82,15 +81,6 @@ public class ArtSettings {
 		}
 
 		return success;
-	}
-
-	/**
-	 * load settings from default location
-	 *
-	 * @return
-	 */
-	public boolean load() {
-		return load(ArtConfig.getSettingsFilePath());
 	}
 
 	/**
