@@ -56,7 +56,7 @@ public class MondrianXmla extends DynamicDatasourceXmlaServlet {
     protected DataSourcesConfig.DataSources makeDataSources(ServletConfig config) {
         String datasourcesFile; //path to datasources.xml file
 
-        datasourcesFile = ArtDBCP.getTemplatesPath() + "datasources.xml";
+        datasourcesFile = ArtConfig.getTemplatesPath() + "datasources.xml";
         File file = new File(datasourcesFile);
 
         try {

@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.util.*,java.text.*,art.servlets.ArtDBCP" %>
+<%@ page import="art.utils.*,java.util.*,java.text.*,art.servlets.ArtConfig" %>
 <%@ page import="org.quartz.*,org.apache.commons.lang.StringUtils" %>
 <%@ page import="static org.quartz.JobBuilder.*" %>
 <%@ page import="static org.quartz.CronScheduleBuilder.*" %>
@@ -178,7 +178,7 @@ if (request.getParameter("bcc").equals("")){
 		calEnd.set(java.util.Calendar.HOUR_OF_DAY, Integer.parseInt(endHour));
 		calEnd.set(java.util.Calendar.MINUTE, Integer.parseInt(endMinute));
 		
-		long randomDate=ArtDBCP.getRandomNumber(calStart.getTimeInMillis(), calEnd.getTimeInMillis());
+		long randomDate=ArtConfig.getRandomNumber(calStart.getTimeInMillis(), calEnd.getTimeInMillis());
 		java.util.Calendar calRandom = java.util.Calendar.getInstance();
 		calRandom.setTimeInMillis(randomDate);
 		
@@ -188,12 +188,12 @@ if (request.getParameter("bcc").equals("")){
 	
   if (minute.length()==0){
 	//no minute defined. use random value
-	minute=String.valueOf(ArtDBCP.getRandomNumber(0, 59));
+	minute=String.valueOf(ArtConfig.getRandomNumber(0, 59));
 	}
 
   if (hour.length()==0){
 	//no hour defined. use random value
-	hour=String.valueOf(ArtDBCP.getRandomNumber(3, 6));
+	hour=String.valueOf(ArtConfig.getRandomNumber(3, 6));
 	}
 
 	month=job.getMonth().replaceAll(" ", "");
@@ -380,7 +380,7 @@ if (request.getParameter("bcc").equals("")){
 		//create quartz job
 		
 		//get scheduler instance
-		org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
+		org.quartz.Scheduler scheduler=ArtConfig.getScheduler();
 
 		if (scheduler!=null){
 			int jobId=job.getJobId();
@@ -389,21 +389,21 @@ if (request.getParameter("bcc").equals("")){
 			String triggerName="trigger"+jobId;
 
 			JobDetail quartzJob = newJob(ArtJob.class)
-					.withIdentity(jobKey(jobName,ArtDBCP.JOB_GROUP))
+					.withIdentity(jobKey(jobName,ArtConfig.JOB_GROUP))
 					.usingJobData("jobid",jobId)
 					.build();
 
 			//create trigger that defines the schedule for the job
 		CronTrigger trigger= newTrigger()
-				.withIdentity(triggerKey(triggerName,ArtDBCP.TRIGGER_GROUP))
+				.withIdentity(triggerKey(triggerName,ArtConfig.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
 				.startAt(startDate)
 				.endAt(endDate)
 				.build();
 	   
 			//delete any existing jobs or triggers with the same id before adding them to the scheduler
-			scheduler.deleteJob(jobKey(jobName,ArtDBCP.JOB_GROUP));
-			scheduler.unscheduleJob(triggerKey(triggerName,ArtDBCP.TRIGGER_GROUP));
+			scheduler.deleteJob(jobKey(jobName,ArtConfig.JOB_GROUP));
+			scheduler.unscheduleJob(triggerKey(triggerName,ArtConfig.TRIGGER_GROUP));
 
 			//add job and trigger to scheduler
 			scheduler.scheduleJob(quartzJob, trigger);
@@ -574,7 +574,7 @@ function setCacheDatasources(s) {
 	// database ids/names in the page html code to every user enabled to schedule jobs
 	if(accessLevel>79){
 	    String output = job.getOutputFormat();
-		Map<Integer,art.dbcp.DataSource> dataSources = ArtDBCP.getDataSources();
+		Map<Integer,art.dbcp.DataSource> dataSources = ArtConfig.getDataSources();
 		int i =0;
 		for (Integer key : dataSources.keySet()) {
 			art.dbcp.DataSource ds = dataSources.get(key);

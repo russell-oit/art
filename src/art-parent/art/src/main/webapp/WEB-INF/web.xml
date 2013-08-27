@@ -46,8 +46,8 @@
         <description>
 			Initialize ART settings and database connection pools
 		</description>
-        <servlet-name>ArtDBCP</servlet-name>
-        <servlet-class>art.servlets.ArtDBCP</servlet-class>
+        <servlet-name>ArtConfig</servlet-name>
+        <servlet-class>art.servlets.ArtConfig</servlet-class>
         <!-- Load this servlet at server startup time -->
         <load-on-startup>2</load-on-startup>
     </servlet>
@@ -57,7 +57,7 @@
 		</description>
         <servlet-name>XmlDataProvider</servlet-name>
         <servlet-class>art.servlets.XmlDataProvider</servlet-class>
-        <!-- load after ArtDBCP -->
+        <!-- load after ArtConfig -->
         <load-on-startup>3</load-on-startup>
     </servlet>
     <servlet>
@@ -66,7 +66,7 @@
 		</description>
         <servlet-name>Scheduler</servlet-name>
         <servlet-class>art.servlets.Scheduler</servlet-class>
-        <!-- load after ArtDBCP -->
+        <!-- load after ArtConfig -->
         <load-on-startup>4</load-on-startup>
     </servlet>
     <servlet>

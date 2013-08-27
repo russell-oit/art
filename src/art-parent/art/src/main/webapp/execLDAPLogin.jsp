@@ -1,4 +1,4 @@
-<%@ page import="java.io.*, javax.naming.*, art.servlets.ArtDBCP, java.util.*" %>
+<%@ page import="java.io.*, javax.naming.*, art.servlets.ArtConfig, java.util.*" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 
 <% request.setCharacterEncoding("UTF-8");%>
@@ -11,8 +11,8 @@
 	 */
 	ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
-	String ldapServer = ArtDBCP.getArtSetting("ldap_auth_server");
-	String ldapAuthType = ArtDBCP.getArtSetting("ldap_auth_method");
+	String ldapServer = ArtConfig.getArtSetting("ldap_auth_server");
+	String ldapAuthType = ArtConfig.getArtSetting("ldap_auth_method");
 
 	String username = request.getParameter("ldapusername");
 // NOTE: username should be the uid e.g. for distinguished name like
@@ -24,8 +24,8 @@
 	String nextPage = request.getParameter("nextPage");
 	session.setAttribute("nextPage", nextPage);
 
-	String ldapUsersParentDn = ArtDBCP.getArtSetting("ldap_users_parent_dn");
-	String ldapRealm = ArtDBCP.getArtSetting("ldap_realm");
+	String ldapUsersParentDn = ArtConfig.getArtSetting("ldap_users_parent_dn");
+	String ldapRealm = ArtConfig.getArtSetting("ldap_realm");
 	String bindAuthType = "simple"; //actual authentication method string used for ldap bind
 	String bindUsername; //actual username used for LDAP bind
 

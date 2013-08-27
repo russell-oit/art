@@ -24,7 +24,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
@@ -317,7 +317,7 @@ public class pdfOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		cell = new PdfPCell(new Paragraph(fsBody.process(ArtDBCP.getDateDisplayString(d))));
+		cell = new PdfPCell(new Paragraph(fsBody.process(ArtConfig.getDateDisplayString(d))));
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
 		cell.setGrayFill((oddline ? evengray : oddgray));
@@ -335,7 +335,7 @@ public class pdfOutput implements ArtOutputInterface {
 		}
 
 		// split table in smaller pieces in order to save memory:
-		// fragment size should come from ArtDBCP servlet, from  web.xml or properties		
+		// fragment size should come from ArtConfig servlet, from  web.xml or properties		
 		if (counter % 500 == 500 - 1) {
 			try {
 				document.add(table);
@@ -401,10 +401,10 @@ public class pdfOutput implements ArtOutputInterface {
 		//first font added to selector wins
 
 		//use custom font if defined			
-		if (ArtDBCP.isUseCustomPdfFont()) {
-			String fontName = ArtDBCP.getArtSetting("pdf_font_name");
-			String encoding = ArtDBCP.getArtSetting("pdf_font_encoding");
-			boolean embedded = ArtDBCP.isPdfFontEmbedded();
+		if (ArtConfig.isUseCustomPdfFont()) {
+			String fontName = ArtConfig.getArtSetting("pdf_font_name");
+			String encoding = ArtConfig.getArtSetting("pdf_font_encoding");
+			boolean embedded = ArtConfig.isPdfFontEmbedded();
 
 			Font bodyFont = FontFactory.getFont(fontName, encoding, embedded);
 			bodyFont.setSize(8);
@@ -436,8 +436,8 @@ public class pdfOutput implements ArtOutputInterface {
 		dateFormatter.applyPattern(timeFormat);
 		h_m_s = dateFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".pdf";
-		filename = ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString() + ".pdf";
+		filename = ArtConfig.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename;
 	}
 
@@ -449,7 +449,7 @@ public class pdfOutput implements ArtOutputInterface {
 
 		try {
 			Rectangle pageSize;
-			switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
+			switch (Integer.parseInt(ArtConfig.getArtSetting("page_size"))) {
 				case 1:
 					pageSize = PageSize.A4;
 					break;

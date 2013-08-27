@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP;" %>
+<%@ page import="java.util.ResourceBundle, art.servlets.ArtConfig;" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page pageEncoding="UTF-8" %>
 <%   response.setHeader("Cache-control","no-cache"); %>

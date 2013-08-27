@@ -1,6 +1,6 @@
 <%@page import="org.apache.commons.lang.StringUtils"%>
 <%@ page import="org.apache.commons.lang.math.NumberUtils"%>
-<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP, java.util.*, java.io.File" %>
+<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtConfig, java.util.*, java.io.File" %>
 <%@ page import="org.apache.commons.fileupload.*, org.apache.commons.fileupload.servlet.ServletFileUpload" %>
 <%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory, org.apache.commons.io.FilenameUtils" %>
 
@@ -279,7 +279,7 @@
 			File destinationFile;
 			String destinationFileName;
 			if (uploadSize > 0 && uploadSize < MAX_UPLOAD_SIZE) {
-				destinationFileName = ArtDBCP.getTemplatesPath() + fileName;
+				destinationFileName = ArtConfig.getTemplatesPath() + fileName;
 				destinationFile = new File(destinationFileName);
 				uploadItem.write(destinationFile);
 				aq.setTemplate(fileName);
@@ -293,7 +293,7 @@
 			File subreportDestinationFile;
 			String subreportDestinationFileName;
 			if (subreportUploadSize > 0 && subreportUploadSize < MAX_UPLOAD_SIZE) {
-				subreportDestinationFileName = ArtDBCP.getTemplatesPath() + subreportFileName;
+				subreportDestinationFileName = ArtConfig.getTemplatesPath() + subreportFileName;
 				subreportDestinationFile = new File(subreportDestinationFileName);
 				subreportUploadItem.write(subreportDestinationFile);
 				subreportFileUploaded = true;
@@ -315,14 +315,14 @@
 				String username = (String) session.getAttribute("username");
 				String ip = request.getRemoteAddr();
 				String msg = "size=" + uploadSize + ", file=" + fileName + ", path=" + filePath;				
-				ArtDBCP.log(username, "upload", ip, queryId, 0, 0, msg);
+				ArtConfig.log(username, "upload", ip, queryId, 0, 0, msg);
 			}
 			//log subreport file upload
 			if (subreportFileUploaded) {
 				String username = (String) session.getAttribute("username");
 				String ip = request.getRemoteAddr();
 				String msg = "size=" + subreportUploadSize + ", file=" + subreportFileName + ", path=" + subreportFilePath;				
-				ArtDBCP.log(username, "upload", ip, queryId, 0, 0, msg);
+				ArtConfig.log(username, "upload", ip, queryId, 0, 0, msg);
 			}
 
 %>

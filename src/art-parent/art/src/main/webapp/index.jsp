@@ -1,4 +1,4 @@
-<%@ page import="art.servlets.ArtDBCP" %>
+<%@ page import="art.servlets.ArtConfig" %>
 <%@ page import="java.util.ResourceBundle" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 
@@ -8,12 +8,12 @@
 <%
 	ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
-	if (!ArtDBCP.isArtSettingsLoaded()) {
+	if (!ArtConfig.isArtSettingsLoaded()) {
 		// settings not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
 		response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/admin/adminConsole.jsp"));
 		return;
 	} else {
-		String toPage = ArtDBCP.getArtSetting("index_page_default");
+		String toPage = ArtConfig.getArtSetting("index_page_default");
 		if (!StringUtils.equals(toPage,"default")) {
 			toPage = toPage + ".jsp";
 %>

@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import java.sql.*;
 import java.util.*;
 import org.slf4j.Logger;
@@ -196,7 +196,7 @@ public class DrilldownQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			success = create(conn, qId, position);
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -457,7 +457,7 @@ public class DrilldownQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;

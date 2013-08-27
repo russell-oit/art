@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -322,7 +322,7 @@ public class Rule {
 		ruleName = rName;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "SELECT FIELD_NAME, FIELD_DATA_TYPE "
 					+ " FROM ART_QUERY_RULES "
@@ -373,7 +373,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "INSERT INTO ART_RULES (RULE_NAME, SHORT_DESCRIPTION) "
 					+ " VALUES (?,?)";
@@ -418,7 +418,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "DELETE FROM ART_RULES "
 					+ " WHERE RULE_NAME = ?";
@@ -462,7 +462,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "SELECT RULE_NAME, SHORT_DESCRIPTION "
 					+ " FROM ART_RULES "
@@ -512,7 +512,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "UPDATE ART_RULES SET SHORT_DESCRIPTION = ? "
 					+ " WHERE RULE_NAME = ? ";
@@ -558,7 +558,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "INSERT INTO ART_USER_RULES"
 					+ " (RULE_NAME, USERNAME, RULE_TYPE, RULE_VALUE) "
@@ -606,7 +606,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "INSERT INTO ART_USER_GROUP_RULES"
 					+ " (RULE_NAME, USER_GROUP_ID, RULE_TYPE, RULE_VALUE) "
@@ -656,7 +656,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "UPDATE ART_USER_RULES SET RULE_TYPE = ? , RULE_VALUE = ?  "
 					+ " WHERE RULE_NAME = ? AND USERNAME = ? AND RULE_TYPE = ? AND RULE_VALUE = ?";
@@ -707,7 +707,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "UPDATE ART_USER_GROUP_RULES SET RULE_TYPE = ? , RULE_VALUE = ?  "
 					+ " WHERE RULE_NAME = ? AND USER_GROUP_ID = ? AND RULE_TYPE = ? AND RULE_VALUE = ?";
@@ -760,7 +760,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "DELETE FROM ART_USER_RULES "
 					+ " WHERE RULE_NAME = ?  "
@@ -815,7 +815,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "DELETE FROM ART_USER_GROUP_RULES "
 					+ " WHERE RULE_NAME = ?  "
@@ -866,7 +866,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "SELECT RULE_NAME FROM ART_RULES";
 
@@ -917,7 +917,7 @@ public class Rule {
 
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -976,7 +976,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1028,7 +1028,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1083,7 +1083,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "DELETE FROM ART_USER_RULES "
 					+ " WHERE RULE_NAME = ? AND USERNAME = ? ";
@@ -1131,7 +1131,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql = "DELETE FROM ART_USER_GROUP_RULES "
 					+ " WHERE RULE_NAME = ? AND USER_GROUP_ID = ? ";
@@ -1179,7 +1179,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1241,7 +1241,7 @@ public class Rule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;

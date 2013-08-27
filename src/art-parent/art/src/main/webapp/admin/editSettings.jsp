@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*,java.io.File,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="java.sql.*,java.io.File,art.utils.*,art.servlets.ArtConfig" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
@@ -390,7 +390,7 @@
 		   <input type="hidden" name="_old_art_jdbc_url" value="<%=art_jdbc_url%>">
          <input type="text" name="art_jdbc_url" id="art_jdbc_url" size="60" maxlength="2000" value="<%=art_jdbc_url%>">
         <%
-		String baseDir = ArtDBCP.getAppPath();
+		String baseDir = ArtConfig.getAppPath();
 		String sep = java.io.File.separator;
 		String baseDirEscaped=baseDir.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments
 		String sepEscaped=sep.replaceAll("\\\\","\\\\\\\\"); //escape backslash for correct display in windows environments
@@ -620,7 +620,7 @@
        </tr>
 
 	   <%
-	   if(ArtDBCP.isArtFullVersion()){
+	   if(ArtConfig.isArtFullVersion()){
 	   %>
 	   <tr>
         <td class="attr">Mondrian Cache Expiry (hours)</td>

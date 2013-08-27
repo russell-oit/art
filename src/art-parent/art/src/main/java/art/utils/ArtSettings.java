@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -90,7 +90,7 @@ public class ArtSettings {
 	 * @return
 	 */
 	public boolean load() {
-		return load(ArtDBCP.getSettingsFilePath());
+		return load(ArtConfig.getSettingsFilePath());
 	}
 
 	/**

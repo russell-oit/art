@@ -16,7 +16,7 @@
  */
 package art.schedule;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -53,7 +53,7 @@ public class ScheduleDao {
 		ResultSet rs = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			String sql = "SELECT AJS.JOB_MINUTE "
 					+ " FROM ART_JOB_SCHEDULES AJS "
 					+ " WHERE AJS.SCHEDULE_NAME = ?";
@@ -83,7 +83,7 @@ public class ScheduleDao {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			String sql = "INSERT INTO ART_JOB_SCHEDULES"
 					+ "(SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY)"
 					+ " VALUES (?, ?, ?, ?, ?, ?)";
@@ -113,7 +113,7 @@ public class ScheduleDao {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			String sql = "UPDATE ART_JOB_SCHEDULES SET JOB_MINUTE = ? , JOB_HOUR = ?"
 					+ " , JOB_DAY = ? , JOB_MONTH = ? , JOB_WEEKDAY = ? "
 					+ " WHERE SCHEDULE_NAME = ? ";
@@ -147,7 +147,7 @@ public class ScheduleDao {
 		ResultSet rs = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			String sql = "SELECT SCHEDULE_NAME "
 					+ " FROM ART_JOB_SCHEDULES";
 
@@ -180,7 +180,7 @@ public class ScheduleDao {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			String sql = "DELETE FROM ART_JOB_SCHEDULES "
 					+ " WHERE SCHEDULE_NAME = ?";
 
@@ -208,7 +208,7 @@ public class ScheduleDao {
 		ResultSet rs = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			String sql = "SELECT SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
 					+ " JOB_MONTH, JOB_WEEKDAY "
 					+ " FROM ART_JOB_SCHEDULES "
@@ -248,7 +248,7 @@ public class ScheduleDao {
 		ResultSet rs = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			String sql = "SELECT SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
 					+ " JOB_MONTH, JOB_WEEKDAY "
 					+ " FROM ART_JOB_SCHEDULES ";

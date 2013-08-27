@@ -11,14 +11,14 @@ String[] userGroups = request.getParameterValues("USER_GROUPS");
 
 String password = request.getParameter("PASSWORD");
 if(!password.trim().equals("")){
-	password=Encrypter.HashPassword(password,ArtDBCP.getPasswordHashingAlgorithm());
+	password=Encrypter.HashPassword(password,ArtConfig.getPasswordHashingAlgorithm());
 }
 
 UserEntity ue=new UserEntity();
 
 ue.setUsername(request.getParameter("USERNAME").toLowerCase().trim());
 ue.setPassword(password);
-ue.setHashingAlgorithm(ArtDBCP.getPasswordHashingAlgorithm());
+ue.setHashingAlgorithm(ArtConfig.getPasswordHashingAlgorithm());
 ue.setActiveStatus(request.getParameter("STATUS"));
 ue.setFullName(request.getParameter("FULL_NAME").trim());
 ue.setEmail(request.getParameter("EMAIL").trim());

@@ -284,7 +284,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 			Connection conn = null;
 			PreparedStatement ps = null;
 			try {
-				conn = ArtDBCP.getConnection();
+				conn = ArtConfig.getConnection();
 				ps = conn.prepareStatement(sql);
 				ps.setInt(1, groupId);
 
@@ -354,7 +354,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 					+ " on aq.DATABASE_ID=ad.DATABASE_ID "
 					+ " WHERE aq.QUERY_ID = ?";
 
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, queryId);
 
@@ -486,7 +486,7 @@ public class XmlDataProvider extends BaseAjaxServlet {
 						+ " FROM ART_JOB_SCHEDULES AJS "
 						+ " WHERE AJS.SCHEDULE_NAME = ?";
 
-				conn = ArtDBCP.getConnection();
+				conn = ArtConfig.getConnection();
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, scheduleName);
 

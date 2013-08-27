@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, java.util.List, art.servlets.ArtDBCP,art.params.*" %>
+<%@ page import="java.util.ResourceBundle, java.util.List, art.servlets.ArtConfig,art.params.*" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
@@ -29,7 +29,7 @@ if(queryType==110){
 int accessLevel=ue.getAccessLevel();
 boolean hasParams=false;
 
-boolean showResultsInline=ArtDBCP.isShowResultsInline(); 
+boolean showResultsInline=ArtConfig.isShowResultsInline(); 
 
 //pivot tables never shown inline
 if(queryType==112 || queryType==113 || queryType==114){
@@ -183,13 +183,13 @@ if(queryType==112 || queryType==113 || queryType==114){
                         %>    <span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
                         <SELECT name="viewMode" id="viewMode" size="1">
                             <%
-                            List<String> viewModes = ArtDBCP.getUserViewModes();
+                            List<String> viewModes = ArtConfig.getUserViewModes();
                             for(String viewMode : viewModes){
                             %>
                             <OPTION VALUE="<%=viewMode%>"> <%=messages.getString(viewMode)%> </OPTION>
                             <% } %>
 
-                            <% if (accessLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && ArtConfig.isSchedulingEnabled()) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <% } %>
 
@@ -208,7 +208,7 @@ if(queryType==112 || queryType==113 || queryType==114){
                             <OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
                             <OPTION VALUE="xlsx"><%=messages.getString("xlsx")%></OPTION>
                             <OPTION VALUE="html"><%=messages.getString("htmlJasper")%></OPTION>
-                            <% if (accessLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && ArtConfig.isSchedulingEnabled()) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <% } %>
 
@@ -222,7 +222,7 @@ if(queryType==112 || queryType==113 || queryType==114){
 					<span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
 					<SELECT name="viewMode" id="viewMode" size="1">			     		
 					<OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
-					 <% if (ue.getAccessLevel() >=5 && ArtDBCP.isSchedulingEnabled()) { %>
+					 <% if (ue.getAccessLevel() >=5 && ArtConfig.isSchedulingEnabled()) { %>
 					<OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
 					 <% } %>
 						 </SELECT>
@@ -248,7 +248,7 @@ if(queryType==112 || queryType==113 || queryType==114){
                             <OPTION VALUE="GRAPH"><%= messages.getString("htmlPlain") %></OPTION>
                             <OPTION VALUE="PDFGRAPH"><%=messages.getString("pdf")%></OPTION>
                             <OPTION VALUE="PNGGRAPH"><%=messages.getString("png")%></OPTION>
-                            <% if (accessLevel>=5 && ArtDBCP.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && ArtConfig.isSchedulingEnabled()) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <%}%>
                         </SELECT>

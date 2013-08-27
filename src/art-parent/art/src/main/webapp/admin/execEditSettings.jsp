@@ -1,5 +1,5 @@
 <%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtConfig" %>
 <%@ page import="org.quartz.*,org.quartz.impl.*,com.lowagie.text.FontFactory" %>
 <%@ page import="javax.naming.InitialContext,javax.naming.NamingException,javax.sql.DataSource" %>
 
@@ -20,7 +20,7 @@
     <%
   }
 
-String baseDir = ArtDBCP.getAppPath();
+String baseDir = ArtConfig.getAppPath();
 String sep = java.io.File.separator;
 String defaultArtUrl = "jdbc:hsqldb:file:"+baseDir+sep+"WEB-INF"+sep+"hsqldb"+sep+"ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
 String defaultArtDriver="org.hsqldb.jdbcDriver";
@@ -89,7 +89,7 @@ while (names.hasMoreElements()) {
 	Connection conn = null;
 	if(StringUtils.isNotBlank(driver)){
 		Class.forName(driver).newInstance();
-		if(useDefaultDatabase && !ArtDBCP.isArtSettingsLoaded()){
+		if(useDefaultDatabase && !ArtConfig.isArtSettingsLoaded()){
 			conn = DriverManager.getConnection(url, username, "ART");
 		} else {
 			conn = DriverManager.getConnection(url, username, password);   
@@ -97,7 +97,7 @@ while (names.hasMoreElements()) {
 		conn.setAutoCommit(false);
 	} else {
 		//using jndi datasource
-		conn = ArtDBCP.getJndiConnection(url);
+		conn = ArtConfig.getJndiConnection(url);
 		conn.setAutoCommit(false);
 	}
     
@@ -118,7 +118,7 @@ while (names.hasMoreElements()) {
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+defaultDB_url+"' , PASSWORD='"+artRepositoryEncryptedPassword+"' WHERE DATABASE_ID=2");
 		st.executeUpdate("UPDATE ART_DATABASES SET URL='"+sampleDB_url+"' WHERE DATABASE_ID=1");
 		
-		if(!ArtDBCP.isArtSettingsLoaded()){
+		if(!ArtConfig.isArtSettingsLoaded()){
 			//allow changing of password on initial setup
 			st.executeUpdate("ALTER USER ART SET PASSWORD \""+request.getParameter("art_password")+"\"");
 		}
@@ -141,11 +141,11 @@ while (names.hasMoreElements()) {
     <%
  }
 
-String settingsFilePath = ArtDBCP.getSettingsFilePath();
+String settingsFilePath = ArtConfig.getSettingsFilePath();
  if(as.save(settingsFilePath)) {
 	 //refresh settings and connections
-	 ArtDBCP.loadArtSettings();
-    ArtDBCP.refreshConnections();
+	 ArtConfig.loadArtSettings();
+    ArtConfig.refreshConnections();
 
 	//recreate scheduler in case repository has changed	or scheduling enabled has changed
 	String oldUsername=request.getParameter("_old_art_username");
@@ -156,7 +156,7 @@ String settingsFilePath = ArtDBCP.getSettingsFilePath();
 	if(username.equals(oldUsername) && password.equals(oldPassword) && url.equals(oldUrl) && driver.equals(oldDriver)){
 		repositoryHasChanged=false;
 	}
-	if(!ArtDBCP.isArtSettingsLoaded()){
+	if(!ArtConfig.isArtSettingsLoaded()){
 		//first time repository is being defined. ensure scheduler is created/started
 		repositoryHasChanged=true;
 	}
@@ -170,7 +170,7 @@ String settingsFilePath = ArtDBCP.getSettingsFilePath();
 
 	if(repositoryHasChanged || schedulingEnabledHasChanged){
 		//get current scheduler instance
-		org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
+		org.quartz.Scheduler scheduler=ArtConfig.getScheduler();
 		if (scheduler!=null){
 			scheduler.shutdown();
 			scheduler=null;
@@ -185,7 +185,7 @@ String settingsFilePath = ArtDBCP.getSettingsFilePath();
 			SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
 			scheduler = schedulerFactory.getScheduler();
 
-			if (ArtDBCP.isSchedulingEnabled()){
+			if (ArtConfig.isSchedulingEnabled()){
 				scheduler.start();
 			}
 			else {
@@ -193,7 +193,7 @@ String settingsFilePath = ArtDBCP.getSettingsFilePath();
 			}
 
 			//save scheduler, to make it accessible throughout the application
-			ArtDBCP.setScheduler(scheduler);
+			ArtConfig.setScheduler(scheduler);
 
 			//migrate jobs to quartz, if any exist that require migrating
 			ArtJob aj=new ArtJob();
@@ -202,7 +202,7 @@ String settingsFilePath = ArtDBCP.getSettingsFilePath();
 	}
 	
 	//register pdf font if not already registered
-	ArtDBCP.registerPdfFonts();
+	ArtConfig.registerPdfFonts();
 				
 	//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
 	response.sendRedirect("adminConsole.jsp");

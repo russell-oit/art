@@ -20,7 +20,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.servlets.XmlDataProvider;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
@@ -221,7 +221,7 @@ public class xmlOutput implements ArtOutputInterface {
 
     @Override
     public void addCellDate(Date d) {
-        out.println("<col type=\"date\">" + ArtDBCP.getDateDisplayString(d) + "</col>");
+        out.println("<col type=\"date\">" + ArtConfig.getDateDisplayString(d) + "</col>");
     }
 
     @Override

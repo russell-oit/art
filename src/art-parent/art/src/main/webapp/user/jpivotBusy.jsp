@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP;" %>
+<%@ page import="java.util.ResourceBundle, art.servlets.ArtConfig;" %>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
 <!-- start header. similar to default user header but has auto refresh to check if query has finished and display results -->
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="<%= request.getContextPath() %>/js/ajaxtags-1.1.5.js"></script>
   </c:if>
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>
-  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + ArtDBCP.getArtSetting("css_skin")%>" />      
+  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + ArtConfig.getArtSetting("css_skin")%>" />      
   <link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/ajaxtags-art.css" />
   <c:if test="${empty param._mobile}">  
     <link rel="stylesheet" href="<%= request.getContextPath() %>/js/dhtmlgoodies_calendar/dhtmlgoodies_calendar.css" media="screen">
@@ -31,7 +31,7 @@
 </head>
 <body>
  <c:if test="${empty param._mobile}">  
- <% if ( !(ue.getUsername().equals("public_user") && ArtDBCP.getArtSetting("header_with_public_user").equals("no") )  ) { %>
+ <% if ( !(ue.getUsername().equals("public_user") && ArtConfig.getArtSetting("header_with_public_user").equals("no") )  ) { %>
    <table style="width:100%"  class="art zeroPadding" >
     <tr>
      <td class="attr" align="left" width="50%">

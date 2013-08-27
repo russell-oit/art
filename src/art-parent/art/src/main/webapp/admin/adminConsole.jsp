@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.io.*,java.util.*,art.servlets.ArtDBCP" %>
+<%@ page import="art.utils.*,java.io.*,java.util.*,art.servlets.ArtConfig" %>
 
 <%@ include file ="headerAdmin.jsp" %>
 
@@ -22,7 +22,7 @@
    <%
 	  }
 
-	  if (!ArtDBCP.isArtSettingsLoaded()) {
+	  if (!ArtConfig.isArtSettingsLoaded()) {
    %>
 	      <tr><td class="artLink" colspan="2"><small>You need to define <i>ART Settings</i> - database connection
 	                   parameters and other settings - before being able to use ART.</small></td></tr>

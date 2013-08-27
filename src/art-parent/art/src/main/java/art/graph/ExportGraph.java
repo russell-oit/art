@@ -17,7 +17,7 @@
  */
 package art.graph;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import de.laures.cewolf.cpp.HeatmapEnhancer;
@@ -228,8 +228,8 @@ public class ExportGraph {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		fullFileNameWithoutExt = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
-		fullFileNameWithoutExt = ArtDBCP.cleanFileName(fullFileNameWithoutExt);
+		fullFileNameWithoutExt = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
+		fullFileNameWithoutExt = ArtConfig.cleanFileName(fullFileNameWithoutExt);
 
 		fullFileNameWithoutExt = exportPath + fullFileNameWithoutExt;
 	}
@@ -268,8 +268,8 @@ public class ExportGraph {
 
 			//enable use of custom font in pdf output
 			String fontName = "SansSerif"; //for use in speedometer chart creation
-			if (ArtDBCP.isUseCustomPdfFont()) {
-				fontName = ArtDBCP.getArtSetting("pdf_font_name");
+			if (ArtConfig.isUseCustomPdfFont()) {
+				fontName = ArtConfig.getArtSetting("pdf_font_name");
 				Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
 				Font oldLargeFont = chartTheme.getLargeFont();
 				Font oldRegularFont = chartTheme.getRegularFont();

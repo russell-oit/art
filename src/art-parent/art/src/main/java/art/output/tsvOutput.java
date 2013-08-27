@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -226,7 +226,7 @@ public class tsvOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(Date d) {
-		exportFileStrBuf.append(ArtDBCP.getDateDisplayString(d)).append("\t");
+		exportFileStrBuf.append(ArtConfig.getDateDisplayString(d)).append("\t");
 	}
 
 	@Override
@@ -309,8 +309,8 @@ public class tsvOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + ".tsv";
-		filename = ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString() + ".tsv";
+		filename = ArtConfig.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename;
 	}
 

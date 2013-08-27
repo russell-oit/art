@@ -1,4 +1,4 @@
-<%@ page import="java.util.*,java.text.*,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="java.util.*,java.text.*,art.utils.*,art.servlets.ArtConfig" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -71,7 +71,7 @@ if (fileName==null){
 	} else if (fileName.startsWith("-")) { 
         out.println(fileName.substring(1));
 	}  else { 
-		List<String> details=ArtDBCP.getFileDetailsFromResult(fileName);
+		List<String> details=ArtConfig.getFileDetailsFromResult(fileName);
 		fileName=details.get(0);
 		resultMessage=details.get(1);
 	   %>

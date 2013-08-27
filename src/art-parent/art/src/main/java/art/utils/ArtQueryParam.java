@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -712,7 +712,7 @@ public class ArtQueryParam implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -788,7 +788,7 @@ public class ArtQueryParam implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -852,7 +852,7 @@ public class ArtQueryParam implements Serializable {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			String sql;
 			ResultSet rs;

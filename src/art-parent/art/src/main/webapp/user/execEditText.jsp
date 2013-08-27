@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="java.util.ResourceBundle,java.sql.Connection,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="java.util.ResourceBundle,java.sql.Connection,art.utils.*,art.servlets.ArtConfig" %>
 <%  request.setCharacterEncoding("UTF-8");  %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />

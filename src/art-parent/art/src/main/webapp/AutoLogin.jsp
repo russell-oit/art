@@ -1,4 +1,4 @@
-<%@ page import="art.servlets.ArtDBCP" %>
+<%@ page import="art.servlets.ArtConfig" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 
 <%@ page contentType="text/html; charset=UTF-8" %>

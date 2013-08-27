@@ -69,14 +69,14 @@ public final class AuthFilterAdmin implements Filter {
 			HttpServletResponse hresponse = (HttpServletResponse) response;
 			HttpSession session = hrequest.getSession();
 
-			if (ArtDBCP.isArtSettingsLoaded()) {
+			if (ArtConfig.isArtSettingsLoaded()) {
 				// settings are defined
 				if (session.getAttribute("AdminSession") != null) {
 					// if the admin connection is not in the session 
 					// get the connection and store it in the admin session 
 					if (session.getAttribute("SessionConn") == null) {
 						try {
-							session.setAttribute("SessionConn", ArtDBCP.getAdminConnection());
+							session.setAttribute("SessionConn", ArtConfig.getAdminConnection());
 						} catch (Exception e) {
 							logger.error("Error while getting the connection to the ART repository", e);
 							PrintWriter out = response.getWriter();
@@ -93,11 +93,11 @@ public final class AuthFilterAdmin implements Filter {
 						//we have come from a login page. authenticate
 						boolean isArtRepositoryUser = false;
 						try {
-							String msg = ArtDBCP.authenticateSession(hrequest);
+							String msg = ArtConfig.authenticateSession(hrequest);
 							if (msg == null) {
 								//no error messages. authentication succeeded
-								if (StringUtils.equals(username, ArtDBCP.getArtRepositoryUsername())
-										&& StringUtils.equals(password, ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+								if (StringUtils.equals(username, ArtConfig.getArtRepositoryUsername())
+										&& StringUtils.equals(password, ArtConfig.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 									// using repository username and password
 									isArtRepositoryUser = true;
 								}
@@ -167,7 +167,7 @@ public final class AuthFilterAdmin implements Filter {
 	 */
 	private void forwardToLoginPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
 		hrequest.setAttribute("message", msg);
-		String toPage = ArtDBCP.getArtSetting("index_page_default");
+		String toPage = ArtConfig.getArtSetting("index_page_default");
 		if (toPage == null || toPage.equals("default")) {
 			toPage = "login";
 		}

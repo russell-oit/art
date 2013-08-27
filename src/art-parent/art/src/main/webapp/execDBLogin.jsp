@@ -1,4 +1,4 @@
-<%@ page import="java.io.*, java.sql.*, art.servlets.ArtDBCP" %>
+<%@ page import="java.io.*, java.sql.*, art.servlets.ArtConfig" %>
 <%@ page import="java.util.ResourceBundle" %>
 
 <% request.setCharacterEncoding("UTF-8");%>
@@ -13,7 +13,7 @@
 	 */
 	ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
-	String url = ArtDBCP.getArtSetting("jdbc_auth_url");
+	String url = ArtConfig.getArtSetting("jdbc_auth_url");
 	String username = request.getParameter("dbusername");
 
 	String nextPage = request.getParameter("nextPage");
@@ -53,7 +53,7 @@
 		// Load the JDBC Driver (it might be different from the other driver already
 		// loaded for the Art repository or Target datasources
 		try {
-			Class.forName(ArtDBCP.getArtSetting("jdbc_auth_driver")).newInstance();
+			Class.forName(ArtConfig.getArtSetting("jdbc_auth_driver")).newInstance();
 		} catch (Exception ex) {
 			ex.printStackTrace(System.out);
 		}

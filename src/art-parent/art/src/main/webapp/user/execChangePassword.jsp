@@ -41,8 +41,8 @@ boolean canChangePassword=ue.isCanChangePassword();
 	   <%
   } else { // change it
      // hash and update password     
-    newPassword1 = Encrypter.HashPassword(newPassword1, ArtDBCP.getPasswordHashingAlgorithm());     
-	boolean success=ue.updatePassword(newPassword1,ArtDBCP.getPasswordHashingAlgorithm());
+    newPassword1 = Encrypter.HashPassword(newPassword1, ArtConfig.getPasswordHashingAlgorithm());     
+	boolean success=ue.updatePassword(newPassword1,ArtConfig.getPasswordHashingAlgorithm());
 	if (success) {	   
 	   %>
 	        <td class="attr"> <%=messages.getString("passwordChangeSuccess")%> </td>

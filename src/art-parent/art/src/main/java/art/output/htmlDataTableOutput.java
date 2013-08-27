@@ -20,7 +20,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import java.io.File;
 import java.io.PrintWriter;
@@ -150,7 +150,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		if (StringUtils.isNotBlank(language)) {
 			String languageFileName = "dataTables." + language + ".txt";
 			String sep = java.io.File.separator;
-			String languageFilePath = ArtDBCP.getAppPath() + sep + "js" + sep + languageFileName;
+			String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
 			File languageFile = new File(languageFilePath);
 			if (languageFile.exists()) {
 				languageSetting = ", \"oLanguage\": {\"sUrl\": \"../js/" + languageFileName + "\"}";
@@ -243,7 +243,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td style=\"text-align: left\"> <span style=\"display:none;\">" + ArtDBCP.getDateSortString(d) + "</span>" + ArtDBCP.getDateDisplayString(d) + "</td>");
+		out.println("  <td style=\"text-align: left\"> <span style=\"display:none;\">" + ArtConfig.getDateSortString(d) + "</span>" + ArtConfig.getDateDisplayString(d) + "</td>");
 	}
 
 	@Override

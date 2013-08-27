@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.sql.*,art.servlets.ArtDBCP" %>
+<%@ page import="art.utils.*,java.sql.*,art.servlets.ArtConfig" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
@@ -17,7 +17,7 @@ try{
 	if(StringUtils.isNotBlank(driver)){
 		// Register the database driver for the database
 		// that has just been specified (only if it is not the one already registered for the ART repository)
-		if (!driver.equals(ArtDBCP.getArtSetting("art_jdbc_driver"))) {
+		if (!driver.equals(ArtConfig.getArtSetting("art_jdbc_driver"))) {
 			out.println("<br>Registering driver "+driver+" ...<br>");
 			Class.forName(driver).newInstance();
 			out.println("...OK<br>");
@@ -30,7 +30,7 @@ try{
 	} else {
 		//jndi datasource
 		out.println("<br>Testing connection ...<br>");
-		Connection testConn = ArtDBCP.getJndiConnection(url);
+		Connection testConn = ArtConfig.getJndiConnection(url);
 		testConn.close();
 		testConn=null;
 		out.println("...OK<br>");
@@ -83,7 +83,7 @@ if (action.equals("ADD")){
 }
 
 //Refresh the Art connection pools so that the new connection is ready to use (no manual refresh needed)
-ArtDBCP.refreshConnections();
+ArtConfig.refreshConnections();
 
 %>
 

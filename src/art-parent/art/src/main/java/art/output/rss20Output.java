@@ -25,7 +25,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.servlets.XmlDataProvider;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
@@ -136,7 +136,7 @@ public class rss20Output implements ArtOutputInterface {
 
         out.println("<channel>");
         out.println("<title>" + queryName + "</title>");
-        out.println("<link>" + ArtDBCP.getArtSetting("rss_link") + "</link>");
+        out.println("<link>" + ArtConfig.getArtSetting("rss_link") + "</link>");
         out.println("<description>" + queryName + " ART Feed</description>");
         out.println("<pubDate>" + getDateAsRFC822String(new java.util.Date()) + "</pubDate> ");
         out.println("<generator>http://art.sourceforge.net</generator> ");

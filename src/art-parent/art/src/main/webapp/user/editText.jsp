@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP,art.utils.*,java.sql.Connection" %>
+<%@ page import="java.util.ResourceBundle, art.servlets.ArtConfig,art.utils.*,java.sql.Connection" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <%	
@@ -46,7 +46,7 @@ if(queryIdString!=null){
 	queryId=Integer.parseInt(objectId);
 }
 
-Connection conn = ArtDBCP.getConnection();
+Connection conn = ArtConfig.getConnection();
 if ( conn == null || conn.isClosed()) {
     %>
        <jsp:forward page="error.jsp">

@@ -76,7 +76,7 @@ public class ExecuteQuery extends HttpServlet {
 		super.init(config);
 
 		//load all view modes
-		List<String> allViewModes = ArtDBCP.getAllViewModes();
+		List<String> allViewModes = ArtConfig.getAllViewModes();
 		viewModes = new HashMap<String, java.lang.Class>(allViewModes.size());
 		ClassLoader cl = this.getClass().getClassLoader();
 		String vm = "";
@@ -140,7 +140,7 @@ public class ExecuteQuery extends HttpServlet {
 			o.addCellToSubHeader(tmpstr);
 		}
 
-		int maxRows = ArtDBCP.getMaxRows("htmlreport");
+		int maxRows = ArtConfig.getMaxRows("htmlreport");
 
 		while (rs.next() && counter < maxRows) {
 			// Separators
@@ -400,7 +400,7 @@ public class ExecuteQuery extends HttpServlet {
 		ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 
 		ServletContext ctx = getServletConfig().getServletContext();
-		String baseExportPath = ArtDBCP.getExportPath();
+		String baseExportPath = ArtConfig.getExportPath();
 		HttpSession session = request.getSession();
 		String username = (String) session.getAttribute("username");
 
@@ -441,7 +441,7 @@ public class ExecuteQuery extends HttpServlet {
 			}
 
 			try {
-				Connection conn = ArtDBCP.getConnection();
+				Connection conn = ArtConfig.getConnection();
 				ArtQuery aq = new ArtQuery();
 				aq.create(conn, queryId);
 
@@ -557,7 +557,7 @@ public class ExecuteQuery extends HttpServlet {
 
 
 			//run query            
-			if (currentNumberOfRunningQueries <= ArtDBCP.getMaxRunningQueries()) {
+			if (currentNumberOfRunningQueries <= ArtConfig.getMaxRunningQueries()) {
 				int probe = 0; // used for debugging
 				int numberOfRows = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
 
@@ -735,7 +735,7 @@ public class ExecuteQuery extends HttpServlet {
 						try {
 							probe = 77;
 
-							o.setMaxRows(ArtDBCP.getMaxRows(viewMode));
+							o.setMaxRows(ArtConfig.getMaxRows(viewMode));
 							o.setWriter(out);
 							o.setQueryName(queryName);
 							o.setFileUserName(username);
@@ -887,8 +887,8 @@ public class ExecuteQuery extends HttpServlet {
 									//set base file name
 									java.util.Date today = new java.util.Date();
 									SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-									String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtDBCP.getRandomString();
-									filename = ArtDBCP.cleanFileName(filename);
+									String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtConfig.getRandomString();
+									filename = ArtConfig.cleanFileName(filename);
 									request.setAttribute("baseFileName", filename);
 
 									//allow direct url not to need _query_id
@@ -965,7 +965,7 @@ public class ExecuteQuery extends HttpServlet {
 						ctx.getRequestDispatcher("/user/queryFooter.jsp").include(request, response);
 					}
 
-					ArtDBCP.log(username, "query", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
+					ArtConfig.log(username, "query", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
 					probe = 200;
 
 					if (StringUtils.containsIgnoreCase(viewMode, "graph")) {

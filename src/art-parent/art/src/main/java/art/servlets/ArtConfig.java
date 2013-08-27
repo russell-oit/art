@@ -15,7 +15,7 @@
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * ArtDBCP.class
+ * ArtConfig.class
  *
  *
  * Purpose:	loaded at startup, it initializes an array of database connections
@@ -63,10 +63,10 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class ArtDBCP extends HttpServlet {
+public class ArtConfig extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ArtDBCP.class);
+	final static Logger logger = LoggerFactory.getLogger(ArtConfig.class);
 	// Global variables
 	private static String art_username, art_password, art_jdbc_driver, art_jdbc_url,
 			exportPath, art_testsql, art_pooltimeout;
@@ -116,7 +116,7 @@ public class ArtDBCP extends HttpServlet {
 
 		logger.info("ART is starting up...");
 
-		ArtDBCPInit();
+		ArtConfigInit();
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class ArtDBCP extends HttpServlet {
 	/**
 	 * Initialize datasources, viewModes, quartz scheduler
 	 */
-	private void ArtDBCPInit() {
+	private void ArtConfigInit() {
 
 		logger.debug("Initializing variables");
 
@@ -1280,12 +1280,12 @@ public class ArtDBCP extends HttpServlet {
 		if (username != null && password != null) {  // INTERNAL AUTHENTICATION ( a username and password is available)
 
 			// check if the credentials match the ART Reposority username/password
-			if (StringUtils.equals(username, ArtDBCP.getArtRepositoryUsername())
-					&& StringUtils.equals(password, ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+			if (StringUtils.equals(username, ArtConfig.getArtRepositoryUsername())
+					&& StringUtils.equals(password, ArtConfig.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 				// using repository username and password. Give user super admin privileges
 				// no need to authenticate it
 				accessLevel = 100;
-				ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + accessLevel);
+				ArtConfig.log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + accessLevel);
 			} else { // begin normal internal authentication
 				/*
 				 * Let's verify if username and password are valid
@@ -1298,7 +1298,7 @@ public class ArtDBCP extends HttpServlet {
 
 					String SqlQuery = "SELECT ACCESS_LEVEL, PASSWORD, HASHING_ALGORITHM FROM ART_USERS "
 							+ "WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
-					conn = ArtDBCP.getConnection();
+					conn = ArtConfig.getConnection();
 					if (conn == null) {
 						// ART Repository Down !!!
 						msg = messages.getString("invalidConnection");
@@ -1313,16 +1313,16 @@ public class ArtDBCP extends HttpServlet {
 
 								accessLevel = rs.getInt("ACCESS_LEVEL");
 								session.setAttribute("username", username); // store username in the session
-								ArtDBCP.log(username, "login", request.getRemoteAddr(), "internal, level: " + accessLevel);
+								ArtConfig.log(username, "login", request.getRemoteAddr(), "internal, level: " + accessLevel);
 							} else {
 								//wrong password
-								ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
+								ArtConfig.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
 								msg = messages.getString("invalidAccount");
 							}
 
 						} else {
 							//user doesn't exist
-							ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
+							ArtConfig.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
 							msg = messages.getString("invalidAccount");
 						}
 						rs.close();
@@ -1359,7 +1359,7 @@ public class ArtDBCP extends HttpServlet {
 				username = (String) session.getAttribute("username");
 				String SqlQuery = ("SELECT ACCESS_LEVEL FROM ART_USERS "
 						+ " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL) ");
-				conn = ArtDBCP.getConnection();
+				conn = ArtConfig.getConnection();
 				if (conn == null) {
 					// ART Repository Down !!!
 					msg = messages.getString("invalidConnection");
@@ -1373,10 +1373,10 @@ public class ArtDBCP extends HttpServlet {
 						accessLevel = rs.getInt("ACCESS_LEVEL");
 						internalAuthentication = false;
 
-						ArtDBCP.log(username, "login", request.getRemoteAddr(), "external, level: " + accessLevel);
+						ArtConfig.log(username, "login", request.getRemoteAddr(), "external, level: " + accessLevel);
 					} else {
 						//external user not created in ART
-						ArtDBCP.log(username, "loginerr", request.getRemoteAddr(), "external, failed");
+						ArtConfig.log(username, "loginerr", request.getRemoteAddr(), "external, failed");
 						msg = messages.getString("invalidUser");
 					}
 					rs.close();
@@ -1514,7 +1514,7 @@ public class ArtDBCP extends HttpServlet {
 
 		String languageFileName = "dataTables." + request.getLocale() + ".txt";
 		String sep = File.separator;
-		String languageFilePath = ArtDBCP.getAppPath() + sep + "js" + sep + languageFileName;
+		String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
 		File languageFile = new File(languageFilePath);
 		if (languageFile.exists()) {
 			url = request.getContextPath() + "/js/" + languageFileName;

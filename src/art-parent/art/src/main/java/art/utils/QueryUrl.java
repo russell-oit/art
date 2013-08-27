@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -87,7 +87,7 @@ public class QueryUrl {
 	private static String lookupParams(int queryId, boolean encodeUrl) {
 		StringBuilder sb = new StringBuilder(128);
 
-		Connection conn = ArtDBCP.getConnection();
+		Connection conn = ArtConfig.getConnection();
 		PreparedStatement ps = null;
 
 		try {

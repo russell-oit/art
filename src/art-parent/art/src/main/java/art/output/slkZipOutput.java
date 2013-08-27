@@ -21,7 +21,7 @@
 // considered as the number 123
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -280,7 +280,7 @@ public class slkZipOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(Date d) {
-		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + ArtDBCP.getDateDisplayString(d) + "\"\n");
+		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + ArtConfig.getDateDisplayString(d) + "\"\n");
 	}
 
 	@Override
@@ -369,8 +369,8 @@ public class slkZipOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
-		filename = ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
+		filename = ArtConfig.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename + ".zip";
 	}
 

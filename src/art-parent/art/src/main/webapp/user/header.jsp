@@ -43,7 +43,7 @@
 </c:if> 
   
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>  
-  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + art.servlets.ArtDBCP.getArtSetting("css_skin")%>" />      
+  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + art.servlets.ArtConfig.getArtSetting("css_skin")%>" />      
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/ajaxtags-art.css" /> 
   
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/overlib.js"></script>
@@ -51,7 +51,7 @@
 </head>
 <body>
  <c:if test="${empty param._mobile}">  
- <% if ( !("public_user".equals(usernameHeader) && "no".equals(art.servlets.ArtDBCP.getArtSetting("header_with_public_user")))) { %>
+ <% if ( !("public_user".equals(usernameHeader) && "no".equals(art.servlets.ArtConfig.getArtSetting("header_with_public_user")))) { %>
  <table class="art centerTable zeroPadding" style="width: 100%" >
     <tr>
      <td class="attr" align="left" width="50%">

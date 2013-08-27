@@ -22,7 +22,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -180,7 +180,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 
     @Override
     public void addCellDate(java.util.Date d) {
-        out.println(" <td style=\"text-align: left\">" + ArtDBCP.getDateDisplayString(d) + "</td>");
+        out.println(" <td style=\"text-align: left\">" + ArtConfig.getDateDisplayString(d) + "</td>");
     }
 
     @Override

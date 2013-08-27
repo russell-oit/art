@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.*;
 import java.io.File;
 import java.io.PrintWriter;
@@ -115,14 +115,14 @@ public class jxlsOutput {
 			String querySql;
 
 			//get query datasource and template file name
-			connArt = ArtDBCP.getConnection();
+			connArt = ArtConfig.getConnection();
 			ArtQuery aq = new ArtQuery();
 			aq.create(connArt, queryId);
 			templateFileName = aq.getTemplate();
 			datasourceId = aq.getDatabaseId();
 			querySql = aq.getText();
 
-			String templatesPath = ArtDBCP.getTemplatesPath();
+			String templatesPath = ArtConfig.getTemplatesPath();
 			String fullTemplateFileName = templatesPath + templateFileName;
 
 			String interactiveLink;
@@ -172,10 +172,10 @@ public class jxlsOutput {
 										useDynamicDatasource = true;
 										if (NumberUtils.isNumber(paramValue)) {
 											//use datasource id
-											connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
+											connQuery = ArtConfig.getConnection(Integer.parseInt(paramValue));
 										} else {
 											//use datasource name
-											connQuery = ArtDBCP.getConnection(paramValue);
+											connQuery = ArtConfig.getConnection(paramValue);
 										}
 									}
 								}
@@ -186,7 +186,7 @@ public class jxlsOutput {
 
 					if (!useDynamicDatasource) {
 						//not using dynamic datasource. use datasource defined on the query
-						connQuery = ArtDBCP.getConnection(datasourceId);
+						connQuery = ArtConfig.getConnection(datasourceId);
 					}
 					ReportManager reportManager = new ArtJxlsReportManager(connQuery);
 					beans.put("rm", reportManager);
@@ -210,8 +210,8 @@ public class jxlsOutput {
 
 				String extension = "." + FilenameUtils.getExtension(templateFileName);
 
-				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString() + extension;
-				fileName = ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename
+				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString() + extension;
+				fileName = ArtConfig.cleanFileName(fileName); //replace characters that would make an invalid filename
 				fullOutputFileName = exportPath + fileName;
 
 				//generate output

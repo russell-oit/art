@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -264,7 +264,7 @@ public class xlsZipOutput implements ArtOutputInterface {
 	public void addCellDate(Date d) {
 		cell = row.createCell(cellNumber++);
 		if (d != null) {
-			cell.setCellValue(ArtDBCP.getDateDisplayString(d));
+			cell.setCellValue(ArtConfig.getDateDisplayString(d));
 			cell.setCellStyle(dateStyle);
 		}
 	}
@@ -331,8 +331,8 @@ public class xlsZipOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
-		filename = ArtDBCP.cleanFileName(filename); //replace characters that would make an invalid filename
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
+		filename = ArtConfig.cleanFileName(filename); //replace characters that would make an invalid filename
 
 		fullFileName = exportPath + filename + ".zip";
 	}

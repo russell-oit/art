@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.util.*,art.servlets.ArtDBCP" %>
+<%@ page import="art.utils.*,java.util.*,art.servlets.ArtConfig" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 <%
@@ -92,7 +92,7 @@ dq.create(queryId,queryPosition);
                     <option value="ALL" <%="ALL".equals(value)?"selected":""%> > All </option>
 					<option value="default" <%="default".equals(value)?"selected":""%> > Default </option>
                     <%
-                       List<String> viewModes = ArtDBCP.getUserViewModes();
+                       List<String> viewModes = ArtConfig.getUserViewModes();
                        for(String viewMode : viewModes){
 						%>
 						<option value="<%=viewMode%>" <%=viewMode.equals(value)?"selected":""%> > <%=messages.getString(viewMode)%> </option>

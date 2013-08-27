@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP;" %>
+<%@ page import="java.util.ResourceBundle, art.servlets.ArtConfig;" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <%   response.setHeader("Cache-control","no-cache"); %>

@@ -130,7 +130,7 @@ public class ViewLogs extends HttpServlet {
 			ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 			String msg = messages.getString("sessionExpired");
 			request.setAttribute("message", msg);
-			String toPage = ArtDBCP.getArtSetting("index_page_default");
+			String toPage = ArtConfig.getArtSetting("index_page_default");
 			if (toPage == null || toPage.equals("default")) {
 				toPage = "login";
 			}

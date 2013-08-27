@@ -1,4 +1,4 @@
-<%@ page import="java.io.*, art.utils.ValidateNTLogin, art.servlets.ArtDBCP" %>
+<%@ page import="java.io.*, art.utils.ValidateNTLogin, art.servlets.ArtConfig" %>
 <%@ page import="java.util.ResourceBundle" %>
 
 <% request.setCharacterEncoding("UTF-8");%>
@@ -62,7 +62,7 @@
 
 	public void jspInit() {
 
-		String domainCtrlAddr = ArtDBCP.getArtSetting("mswin_auth_server");
+		String domainCtrlAddr = ArtConfig.getArtSetting("mswin_auth_server");
 		try {
 			vnl = new ValidateNTLogin();
 			vnl.setDomainController(domainCtrlAddr);

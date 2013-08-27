@@ -1,4 +1,4 @@
-<%@ page import="java.util.*,art.servlets.ArtDBCP,art.graph.*,art.utils.*" %>
+<%@ page import="java.util.*,art.servlets.ArtConfig,art.graph.*,art.utils.*" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="org.jfree.chart.*,org.apache.commons.beanutils.*,java.awt.Font" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
@@ -94,10 +94,10 @@
 	
 	if (outputToFile.equals("pdf")){
         fileName=baseFileName + ".pdf";
-		fullFileName= ArtDBCP.getExportPath() + fileName;
+		fullFileName= ArtConfig.getExportPath() + fileName;
 	} else if (outputToFile.equals("png")){
         fileName=baseFileName + ".png";
-		fullFileName= ArtDBCP.getExportPath() + fileName;
+		fullFileName= ArtConfig.getExportPath() + fileName;
 	}
 	
 // Labels
@@ -175,8 +175,8 @@ StandardChartTheme chartTheme = (StandardChartTheme) StandardChartTheme.createJF
 chartTheme.setBarPainter(new StandardBarPainter()); //remove white line/glossy effect on 2D bar graphs with the jfree theme
 
 //also allow use of custom font to enable display of non-ascii characters
-if(ArtDBCP.isUseCustomPdfFont()){
-	String pdfFontName = ArtDBCP.getArtSetting("pdf_font_name");
+if(ArtConfig.isUseCustomPdfFont()){
+	String pdfFontName = ArtConfig.getArtSetting("pdf_font_name");
 	Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
 	Font oldLargeFont = chartTheme.getLargeFont();
 	Font oldRegularFont = chartTheme.getRegularFont();

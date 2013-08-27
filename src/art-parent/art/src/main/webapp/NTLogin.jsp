@@ -1,4 +1,4 @@
-<%@ page import="art.servlets.ArtDBCP" %>
+<%@ page import="art.servlets.ArtConfig" %>
 
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page pageEncoding="UTF-8" %>
@@ -55,7 +55,7 @@
 					</td>
                     <td class="loginField">
                         <select name="ntdomain" id="ntdomain">
-                            <c:forTokens var="domain" items='<%= ArtDBCP.getArtSetting("mswin_domains") %>' delims=",">
+                            <c:forTokens var="domain" items='<%= ArtConfig.getArtSetting("mswin_domains") %>' delims=",">
 								<option value="${domain}">${domain}</option>
 							</c:forTokens>
                         </select>

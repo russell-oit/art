@@ -22,7 +22,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -290,7 +290,7 @@ public class xlsxOutput implements ArtOutputInterface {
 				//output blank string
 				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
 			} else {
-				sw.createCell(cellNumber++, ArtDBCP.getDateDisplayString(d), styles.get("date").getIndex());
+				sw.createCell(cellNumber++, ArtConfig.getDateDisplayString(d), styles.get("date").getIndex());
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -449,8 +449,8 @@ public class xlsxOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat("HH_mm_ss");
 		h_m_s = timeFormatter.format(today);
 
-		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
-		baseName = ArtDBCP.cleanFileName(baseName);
+		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
+		baseName = ArtConfig.cleanFileName(baseName);
 
 		filename = baseName + ".xlsx";
 		fullFileName = exportPath + filename;

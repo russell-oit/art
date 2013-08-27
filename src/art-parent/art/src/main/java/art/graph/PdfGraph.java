@@ -18,7 +18,7 @@
 package art.graph;
 
 import art.output.pdfOutput;
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
@@ -66,7 +66,7 @@ public class PdfGraph {
 
 		Rectangle pageSize;
 
-		switch (Integer.parseInt(ArtDBCP.getArtSetting("page_size"))) {
+		switch (Integer.parseInt(ArtConfig.getArtSetting("page_size"))) {
 			case 1:
 				pageSize = PageSize.A4;
 				break;
@@ -112,14 +112,14 @@ public class PdfGraph {
 			DefaultFontMapper mapper = new DefaultFontMapper();
 
 			//enable use of custom font so as to display non-ascii characters			
-			if (ArtDBCP.isUseCustomPdfFont()) {
+			if (ArtConfig.isUseCustomPdfFont()) {
 				//enable custom chart font to be used in pdf output
 				BaseFontParameters fp;
-				String pdfFontName = ArtDBCP.getArtSetting("pdf_font_name");
-				String pdfFontDirectory = ArtDBCP.getArtSetting("pdf_font_directory");
-				String pdfFontFile = ArtDBCP.getArtSetting("pdf_font_file");
-				String pdfFontEncoding = ArtDBCP.getArtSetting("pdf_font_encoding");
-				boolean pdfFontEmbedded = ArtDBCP.isPdfFontEmbedded();
+				String pdfFontName = ArtConfig.getArtSetting("pdf_font_name");
+				String pdfFontDirectory = ArtConfig.getArtSetting("pdf_font_directory");
+				String pdfFontFile = ArtConfig.getArtSetting("pdf_font_file");
+				String pdfFontEncoding = ArtConfig.getArtSetting("pdf_font_encoding");
+				boolean pdfFontEmbedded = ArtConfig.isPdfFontEmbedded();
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					mapper.insertDirectory(pdfFontDirectory);
 					fp = mapper.getBaseFontParameters(pdfFontName);

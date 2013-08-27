@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,art.servlets.ArtDBCP,java.util.*" %>
+<%@ page import="art.utils.*,art.servlets.ArtConfig,java.util.*" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 

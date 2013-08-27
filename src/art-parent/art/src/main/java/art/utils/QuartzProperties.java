@@ -25,7 +25,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -91,21 +91,21 @@ public class QuartzProperties {
 			final String JNDI_URL = "org.quartz.dataSource." + DATASOURCE_NAME + ".jndiURL";
 
 			//check if art.properties file exists. this will supply data source details
-			if (ArtDBCP.isArtSettingsLoaded()) {
-				dbUrl = ArtDBCP.getArtSetting("art_jdbc_url");
+			if (ArtConfig.isArtSettingsLoaded()) {
+				dbUrl = ArtConfig.getArtSetting("art_jdbc_url");
 				if (StringUtils.isBlank(dbUrl)) {
-					dbUrl = ArtDBCP.getArtSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+					dbUrl = ArtConfig.getArtSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
 				}
-				dbDriver = ArtDBCP.getArtSetting("art_jdbc_driver");
-				dbUsername = ArtDBCP.getArtRepositoryUsername();
-				dbPassword = ArtDBCP.getArtRepositoryPassword(); //has already been decrypted
+				dbDriver = ArtConfig.getArtSetting("art_jdbc_driver");
+				dbUsername = ArtConfig.getArtRepositoryUsername();
+				dbPassword = ArtConfig.getArtRepositoryPassword(); //has already been decrypted
 
 				//load properties from quartz properties file if it exists
 				props = new Properties();
 				if (quartzPropsFilePath == null) {
 					//use default path
 					String sep = java.io.File.separator;
-					quartzPropsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "quartz.properties";
+					quartzPropsFilePath = ArtConfig.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "quartz.properties";
 				}
 				File quartzFile = new File(quartzPropsFilePath);
 				if (quartzFile.exists()) {
@@ -251,7 +251,7 @@ public class QuartzProperties {
 						props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
 					}
 					if (props.getProperty(JNDI_URL) == null) {
-						props.setProperty(JNDI_URL, ArtDBCP.getJndiDatasourceUrl(dbUrl));
+						props.setProperty(JNDI_URL, ArtConfig.getJndiDatasourceUrl(dbUrl));
 					}
 				}
 			}

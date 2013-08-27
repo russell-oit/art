@@ -1,4 +1,4 @@
-<%@ page import="java.util.*,java.sql.*,art.utils.*,art.servlets.ArtDBCP,java.io.*,java.net.*" %>
+<%@ page import="java.util.*,java.sql.*,art.utils.*,art.servlets.ArtConfig,java.io.*,java.net.*" %>
 <%@ page import="com.tonbeller.jpivot.olap.query.MdxOlapModel,
 	com.tonbeller.wcf.form.FormComponent,
 	com.tonbeller.jpivot.table.TableComponent,
@@ -47,7 +47,7 @@
 		//first time we are displaying the pivot table.
 		//parameter ?null=null&... used to display the page when settings are changed from the olap navigator toolbar button
 
-		Connection conn = ArtDBCP.getConnection();
+		Connection conn = ArtConfig.getConnection();
 		if (conn == null || conn.isClosed()) {
 			%>
 			<jsp:forward page="error.jsp">
@@ -97,7 +97,7 @@
 	//check if template file exists
 	int queryType = aq.getQueryType();
 	String template = aq.getTemplate();
-	File templateFile = new File(ArtDBCP.getTemplatesPath() + template);
+	File templateFile = new File(ArtConfig.getTemplatesPath() + template);
 	if (queryType == 112 && !templateFile.exists()) {
 		conn.close();
 		%>
@@ -107,13 +107,13 @@
 		<%
 	}
 
-	schemaFile = ArtDBCP.getRelativeTemplatesPath() + template;
+	schemaFile = ArtConfig.getRelativeTemplatesPath() + template;
 
 	//put title in session. may be lost if olap navigator option on jpivot toolbar is used
 	title = aq.getName();
 	session.setAttribute("pivotTitle" + queryId, title);
 
-	art.dbcp.DataSource ds = ArtDBCP.getDataSource(aq.getDatabaseId());
+	art.dbcp.DataSource ds = ArtConfig.getDataSource(aq.getDatabaseId());
 
 	databaseUrl = ds.getUrl().trim();
 	databaseUser = ds.getUsername().trim();

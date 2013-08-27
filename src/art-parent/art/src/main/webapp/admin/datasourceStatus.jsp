@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.util.*,art.servlets.ArtDBCP,art.dbcp.*" %>
+<%@ page import="art.utils.*,java.util.*,art.servlets.ArtConfig,art.dbcp.*" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ include file ="headerAdmin.jsp" %>
 
@@ -10,14 +10,14 @@ if (action!=null && request.getSession().getAttribute("AdminSession")!=null) {
 	out.println("<b>ART Datasource Status</b><br>");
 	if (action.equals("REFRESH")){
 		out.println("Action: <b>Refresh</b>");
-		ArtDBCP.refreshConnections() ;
+		ArtConfig.refreshConnections() ;
 	} else if (action.equals("FORCEREFRESH") ){
 		out.println("Action: <b>Force Refresh</b>");
-		ArtDBCP.forceRefreshConnections();
+		ArtConfig.forceRefreshConnections();
 	}
 	
 	//display status
-	Map<Integer, DataSource> dataSources=ArtDBCP.getDataSources();
+	Map<Integer, DataSource> dataSources=ArtConfig.getDataSources();
 	for (Integer key : dataSources.keySet()) {			
 		DataSource ds = dataSources.get(key);			
 		if (ds != null) {

@@ -72,7 +72,7 @@ public final class AuthFilter implements Filter {
 
 			if (session.getAttribute("ue") == null) {
 				//Let's authenticate it
-				if (!ArtDBCP.isArtSettingsLoaded()) {
+				if (!ArtConfig.isArtSettingsLoaded()) {
 					// properties not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)
 					hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
 					return; //not needed but retained in case code changes later giving execution path after redirect
@@ -80,13 +80,13 @@ public final class AuthFilter implements Filter {
 					isArtRepositoryUser = false;
 					try {
 						//String msg = AuthenticateSession(hrequest);
-						String msg = ArtDBCP.authenticateSession(hrequest);
+						String msg = ArtConfig.authenticateSession(hrequest);
 						if (msg == null) {
 							//no error messages. authentication succeeded
 							String username = hrequest.getParameter("username");
 							String password = hrequest.getParameter("password");
-							if (StringUtils.equals(username,ArtDBCP.getArtRepositoryUsername())
-									&& StringUtils.equals(password,ArtDBCP.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+							if (StringUtils.equals(username,ArtConfig.getArtRepositoryUsername())
+									&& StringUtils.equals(password,ArtConfig.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 								// using repository username and password. 
 								isArtRepositoryUser = true;
 							}
@@ -132,7 +132,7 @@ public final class AuthFilter implements Filter {
 	 */
 	private void forwardToLoginPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
 		hrequest.setAttribute("message", msg);
-		String toPage = ArtDBCP.getArtSetting("index_page_default");
+		String toPage = ArtConfig.getArtSetting("index_page_default");
 		if (toPage == null || toPage.equals("default")) {
 			toPage = "login";
 		}

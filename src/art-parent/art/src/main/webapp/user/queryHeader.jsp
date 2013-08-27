@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP,art.params.*;" %>
+<%@ page import="java.util.ResourceBundle, art.servlets.ArtConfig,art.params.*;" %>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
 <%

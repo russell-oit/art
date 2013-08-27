@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtDBCP,java.util.ResourceBundle,java.util.Calendar,java.text.SimpleDateFormat" %>
+<%@ page import="java.sql.*,art.utils.*,art.servlets.ArtConfig,java.util.ResourceBundle,java.util.Calendar,java.text.SimpleDateFormat" %>
 <%@ page import="org.quartz.*,org.apache.commons.lang.StringUtils" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -27,7 +27,7 @@
 	}
 
 
-	Connection conn = ArtDBCP.getConnection();
+	Connection conn = ArtConfig.getConnection();
 	if (conn == null || conn.isClosed()) {
 %>
 <jsp:forward page="error.jsp">

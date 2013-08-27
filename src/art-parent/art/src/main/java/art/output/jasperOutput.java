@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.utils.PreparedQuery;
@@ -155,7 +155,7 @@ public class jasperOutput {
 			String querySql;
 
 			//get query datasource and template file name
-			connArt = ArtDBCP.getConnection();
+			connArt = ArtConfig.getConnection();
 			ArtQuery aq = new ArtQuery();
 			aq.create(connArt, queryId);
 			templateFileName = aq.getTemplate();
@@ -163,7 +163,7 @@ public class jasperOutput {
 			querySql = aq.getText();
 
 			String baseFileName = FilenameUtils.getBaseName(templateFileName);
-			String templatesPath = ArtDBCP.getTemplatesPath();
+			String templatesPath = ArtConfig.getTemplatesPath();
 			String jasperFilePath = templatesPath + baseFileName + ".jasper";
 			String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
 
@@ -200,7 +200,7 @@ public class jasperOutput {
 				//set virtualizer properties, if virtualizer is to be used
 				Properties props = new Properties();
 				String sep = File.separator;
-				String settingsFilePath = ArtDBCP.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "jasper.properties";
+				String settingsFilePath = ArtConfig.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "jasper.properties";
 				File settingsFile = new File(settingsFilePath);
 				if (settingsFile.exists()) {
 					FileInputStream o = new FileInputStream(settingsFilePath);
@@ -282,10 +282,10 @@ public class jasperOutput {
 										useDynamicDatasource = true;
 										if (NumberUtils.isNumber(paramValue)) {
 											//use datasource id
-											connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
+											connQuery = ArtConfig.getConnection(Integer.parseInt(paramValue));
 										} else {
 											//use datasource name
-											connQuery = ArtDBCP.getConnection(paramValue);
+											connQuery = ArtConfig.getConnection(paramValue);
 										}
 									}
 								}
@@ -296,7 +296,7 @@ public class jasperOutput {
 
 					if (!useDynamicDatasource) {
 						//not using dynamic datasource. use datasource defined on the query
-						connQuery = ArtDBCP.getConnection(datasourceId);
+						connQuery = ArtConfig.getConnection(datasourceId);
 					}
 					jasperPrint = JasperFillManager.fillReport(jasperFilePath, params, connQuery);
 				} else {
@@ -322,8 +322,8 @@ public class jasperOutput {
 				SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 				h_m_s = timeFormatter.format(today);
 
-				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtDBCP.getRandomString();
-				fileName = ArtDBCP.cleanFileName(fileName); //replace characters that would make an invalid filename
+				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
+				fileName = ArtConfig.cleanFileName(fileName); //replace characters that would make an invalid filename
 				String fullFileNameWithoutExt = exportPath + fileName;
 
 				//export report
@@ -409,7 +409,7 @@ public class jasperOutput {
 	public void compileReport(String baseFileName) {
 
 		try {
-			String templatesPath = ArtDBCP.getTemplatesPath();
+			String templatesPath = ArtConfig.getTemplatesPath();
 			String jasperFilePath = templatesPath + baseFileName + ".jasper";
 			String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
 

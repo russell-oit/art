@@ -1,4 +1,4 @@
-<%@ page import="java.util.*,art.servlets.ArtDBCP,art.utils.ArtQuery" %>
+<%@ page import="java.util.*,art.servlets.ArtConfig,art.utils.ArtQuery" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 <%@ page import="org.apache.commons.lang.math.NumberUtils" %>
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>

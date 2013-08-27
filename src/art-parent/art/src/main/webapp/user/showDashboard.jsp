@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtDBCP;" %>
+<%@ page import="java.util.ResourceBundle, art.servlets.ArtConfig;" %>
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -30,7 +30,7 @@ if(queryIdString!=null){
 }
   
    dashboard.load(queryId);
-   ArtDBCP.log(ue.getUsername(), "query", request.getRemoteAddr(), queryId, 0, 0, "dashboard");
+   ArtConfig.log(ue.getUsername(), "query", request.getRemoteAddr(), queryId, 0, 0, "dashboard");
    
    String contextPath=request.getContextPath();
    

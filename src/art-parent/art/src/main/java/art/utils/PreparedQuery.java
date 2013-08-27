@@ -24,7 +24,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -467,7 +467,7 @@ public class PreparedQuery {
 		preparedStatementSQL = null;
 
 		try {
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 
 			// Get some properties of the query
 			String sql = "SELECT DATABASE_ID, QUERY_GROUP_ID, ACTIVE_STATUS, QUERY_TYPE"
@@ -553,10 +553,10 @@ public class PreparedQuery {
 								useDynamicDatasource = true;
 								if (NumberUtils.isNumber(paramValue)) {
 									//use datasource id
-									connQuery = ArtDBCP.getConnection(Integer.parseInt(paramValue));
+									connQuery = ArtConfig.getConnection(Integer.parseInt(paramValue));
 								} else {
 									//use datasource name
-									connQuery = ArtDBCP.getConnection(paramValue);
+									connQuery = ArtConfig.getConnection(paramValue);
 								}
 							}
 						}
@@ -567,7 +567,7 @@ public class PreparedQuery {
 
 			if (!useDynamicDatasource) {
 				//not using dynamic datasource. use datasource defined on the query
-				connQuery = ArtDBCP.getConnection(queryDatabaseId);
+				connQuery = ArtConfig.getConnection(queryDatabaseId);
 			}
 
 			if (connQuery == null) {
@@ -811,7 +811,7 @@ public class PreparedQuery {
 
 		try {
 			if (conn == null) {
-				conn = ArtDBCP.getConnection();
+				conn = ArtConfig.getConnection();
 				newConnection = true;
 			}
 
@@ -1675,7 +1675,7 @@ public class PreparedQuery {
 
 		try {
 
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			StringBuilder builder = new StringBuilder(1024 * 2);
 			builder.append(querySql);
 
@@ -1707,7 +1707,7 @@ public class PreparedQuery {
 
 		try {
 
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			StringBuilder builder = new StringBuilder(1024 * 2);
 			builder.append(querySql);
 
@@ -2045,7 +2045,7 @@ public class PreparedQuery {
 						}
 					}
 
-					connLov = ArtDBCP.getConnection(databaseId);
+					connLov = ArtConfig.getConnection(databaseId);
 					psLovValues = connLov.prepareStatement(lovSql);
 					rsLovValues = psLovValues.executeQuery();
 
@@ -2311,7 +2311,7 @@ public class PreparedQuery {
 
 		try {
 
-			conn = ArtDBCP.getConnection();
+			conn = ArtConfig.getConnection();
 			StringBuilder builder = new StringBuilder(1024 * 2);
 			builder.append(querySql);
 

@@ -1,5 +1,5 @@
 <%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="java.util.*,art.utils.*,art.servlets.ArtDBCP,org.quartz.*,java.text.*" %>
+<%@ page import="java.util.*,art.utils.*,art.servlets.ArtConfig,org.quartz.*,java.text.*" %>
 <%@ page import="static org.quartz.JobBuilder.*" %>
 <%@ page import="static org.quartz.TriggerBuilder.*" %>
 <%@ page import="static org.quartz.JobKey.jobKey" %>
@@ -75,9 +75,9 @@ owner=request.getParameter("OWNER");
 	int jobId = Integer.parseInt(request.getParameter("jobId"));			
 	
 	//get scheduler instance
-	org.quartz.Scheduler scheduler=ArtDBCP.getScheduler();
+	org.quartz.Scheduler scheduler=ArtConfig.getScheduler();
 
-	boolean schedulingEnabled=ArtDBCP.isSchedulingEnabled();
+	boolean schedulingEnabled=ArtConfig.isSchedulingEnabled();
   
     if ( action.equals("run") ) { 
 	
@@ -232,7 +232,7 @@ String resultMessage;
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		List<String> details=ArtDBCP.getFileDetailsFromResult(lastFileName);
+		List<String> details=ArtConfig.getFileDetailsFromResult(lastFileName);
 		lastFileName=details.get(0);
 		resultMessage=details.get(1);
 	   %>
@@ -402,7 +402,7 @@ if(accessLevel>=80){
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		List<String> details=ArtDBCP.getFileDetailsFromResult(lastFileName);
+		List<String> details=ArtConfig.getFileDetailsFromResult(lastFileName);
 		lastFileName=details.get(0);
 		resultMessage=details.get(1);
 	   %>

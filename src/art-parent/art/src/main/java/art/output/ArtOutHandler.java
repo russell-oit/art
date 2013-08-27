@@ -24,7 +24,7 @@
  */
 package art.output;
 
-import art.servlets.ArtDBCP;
+import art.servlets.ArtConfig;
 import art.utils.ArtException;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
@@ -137,7 +137,7 @@ public class ArtOutHandler {
 		HashMap<String, String> params = new HashMap<String, String>();
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (!ArtDBCP.isNullValueEnabled()) { //setting set to "No"
+		if (!ArtConfig.isNullValueEnabled()) { //setting set to "No"
 			o = new hideNullOutput(o);
 		}
 
@@ -351,7 +351,7 @@ public class ArtOutHandler {
 		}
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (!ArtDBCP.isNullValueEnabled()) { //setting set to "No"
+		if (!ArtConfig.isNullValueEnabled()) { //setting set to "No"
 			o = new hideNullOutput(o);
 		}
 

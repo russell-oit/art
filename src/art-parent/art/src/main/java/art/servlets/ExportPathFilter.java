@@ -45,16 +45,16 @@ public class ExportPathFilter implements Filter {
 	public void doFilter(ServletRequest arg0, ServletResponse arg1,
 			FilterChain arg2) throws IOException, ServletException {
 
-		if (ArtDBCP.isCustomExportDirectory()) {
+		if (ArtConfig.isCustomExportDirectory()) {
 			HttpServletRequest request = (HttpServletRequest) arg0;
 			String requestUri = request.getRequestURI();
 			File requestPath = new File(requestUri);
 
 			String filename = URLDecoder.decode(requestPath.getName(), "UTF-8");
 			if (requestUri.contains("/export/jobs/")) {
-				filename = ArtDBCP.getJobsPath() + filename;
+				filename = ArtConfig.getJobsPath() + filename;
 			} else {
-				filename = ArtDBCP.getExportPath() + filename;
+				filename = ArtConfig.getExportPath() + filename;
 			}
 			File file = new File(filename);
 

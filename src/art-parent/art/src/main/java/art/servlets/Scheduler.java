@@ -73,7 +73,7 @@ public class Scheduler extends HttpServlet {
 
 			logger.debug("ART Scheduler starting up");
 
-			exportPath = ArtDBCP.getExportPath();
+			exportPath = ArtConfig.getExportPath();
 
 			//start clean thread timer
 			t = new Timer(this);
@@ -108,7 +108,7 @@ public class Scheduler extends HttpServlet {
 
 		logger.debug("Running clean");
 
-		if (ArtDBCP.isArtSettingsLoaded()) {
+		if (ArtConfig.isArtSettingsLoaded()) {
 			try {
 				// Delete old files in the export directory
 				File exportFiles = new File(exportPath);
@@ -139,7 +139,7 @@ public class Scheduler extends HttpServlet {
 				}
 
 				// Delete old files in the export/jobs directory
-				long jobFilesRetentionPeriod = (long) ArtDBCP.getPublishedFilesRetentionPeriod(); //configured file retention period in days
+				long jobFilesRetentionPeriod = (long) ArtConfig.getPublishedFilesRetentionPeriod(); //configured file retention period in days
 				jobFilesRetentionPeriod = jobFilesRetentionPeriod * 24 * 60 * 60 * 1000; //convert period defined in days to milliseconds
 
 				if (jobFilesRetentionPeriod > 0) {
@@ -159,7 +159,7 @@ public class Scheduler extends HttpServlet {
 				}
 
 				//clear mondrian cache
-				if (ArtDBCP.isArtFullVersion()) {
+				if (ArtConfig.isArtFullVersion()) {
 					clearMondrianCache();
 				}
 
@@ -206,7 +206,7 @@ public class Scheduler extends HttpServlet {
 
 		long mondrianCacheExpiry; //cache expiry duration in milliseconds
 
-		mondrianCacheExpiry = (long) ArtDBCP.getMondrianCacheExpiry();
+		mondrianCacheExpiry = (long) ArtConfig.getMondrianCacheExpiry();
 		mondrianCacheExpiry = mondrianCacheExpiry * 60 * 60 * 1000; //convert period defined in hours to milliseconds
 
 		if (mondrianCacheExpiry > 0) {

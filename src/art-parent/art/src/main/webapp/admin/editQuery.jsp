@@ -1,4 +1,4 @@
-<%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtDBCP" %>
+<%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtConfig" %>
 <%@ include file="headerAdmin.jsp" %>
 
 
@@ -452,7 +452,7 @@ tinyMCE.init({
 					<option value="-12" <%=(currentStringValue.equals("-12")?"SELECTED":"")%>>Graph: Heat Map</option>
 
 					<%
-					if(ArtDBCP.isArtFullVersion()){
+					if(ArtConfig.isArtFullVersion()){
 					%>
                     <option value="112" <%=(currentStringValue.equals("112")?"SELECTED":"")%>>Pivot Table: Mondrian</option>
                     <option value="113" <%=(currentStringValue.equals("113")?"SELECTED":"")%>>Pivot Table: Mondrian XMLA</option>

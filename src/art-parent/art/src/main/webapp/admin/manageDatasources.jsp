@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.util.*,art.servlets.ArtDBCP" %>
+<%@ page import="art.utils.*,java.util.*,art.servlets.ArtConfig" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 
@@ -80,7 +80,7 @@
 				
 				<td class="data">
 					<%
-					if(ArtDBCP.isArtFullVersion()){
+					if(ArtConfig.isArtFullVersion()){
 					%>
 						<a href="clearMondrianCache.jsp">Clear Mondrian Cache</a>		
 						<br>Clear the mondrian cache of any pivot table data

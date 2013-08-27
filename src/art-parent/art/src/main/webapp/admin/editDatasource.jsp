@@ -1,4 +1,4 @@
-<%@ page import="art.utils.*,java.sql.*,java.util.Map,art.servlets.ArtDBCP" %>
+<%@ page import="art.utils.*,java.sql.*,java.util.Map,art.servlets.ArtConfig" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 
@@ -33,7 +33,7 @@ if (action.equals("DELETE")){
 	} else {
 		//no linked queries. delete datasource
 		ds.delete(datasourceId);
-		ArtDBCP.refreshConnections();
+		ArtConfig.refreshConnections();
 		response.sendRedirect("manageDatasources.jsp");
 		return;
 	}
