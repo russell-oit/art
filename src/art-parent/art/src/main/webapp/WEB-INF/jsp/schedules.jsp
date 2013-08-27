@@ -1,6 +1,6 @@
 <%@include file="/WEB-INF/jspf/adminHeader.jspf" %>
 
-<%@page import="art.servlets.ArtConfig" %>
+<%@page import="art.utils.ArtHelper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <script type="text/javascript" charset=\"utf-8\">
@@ -13,7 +13,7 @@
 			"aLengthMenu": [[10, 25, -1], [10, 25, "All"]],
 			"iDisplayLength": 10,
 			"oLanguage": {
-				"sUrl": "<%= ArtConfig.getDataTablesLanguageUrl(request) %>"
+				"sUrl": "<%= ArtHelper.getDataTablesLanguageUrl(request) %>"
 			}
 		});
 	});

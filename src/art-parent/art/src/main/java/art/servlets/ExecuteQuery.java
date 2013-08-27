@@ -965,7 +965,7 @@ public class ExecuteQuery extends HttpServlet {
 						ctx.getRequestDispatcher("/user/queryFooter.jsp").include(request, response);
 					}
 
-					ArtConfig.log(username, "query", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
+					ArtHelper.log(username, "query", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
 					probe = 200;
 
 					if (StringUtils.containsIgnoreCase(viewMode, "graph")) {

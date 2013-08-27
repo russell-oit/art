@@ -15,23 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
- * Generate a RSS 2.0 output
- * the query column names MUST follow the RSS 2.0 naming convention for <item>
- * i.e. at least one of "title" or "description" must exists.
- * for other valid columns names (i.e. item sub-tags) refer to the RSS 2.0 specs.
- * (pubDate and guid should be there)
- * select col1 "title", col2 "description" [, col3 "pubDate", col4 "guid", ...] from ... 
- */
 package art.output;
 
 import art.servlets.ArtConfig;
-import art.servlets.AjaxTagsDataProvider;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -155,7 +147,7 @@ public class rss20Output implements ArtOutputInterface {
                 out.println("<art:param>");
                 if (pValue instanceof String) {
 					String paramValue = (String) pValue;
-					outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(paramValue) + "</art:value> "; //default to displaying parameter value
+					outputString = "<art:name>" + StringEscapeUtils.escapeXml(paramName) + "</art:name><art:value>" + StringEscapeUtils.escapeXml(paramValue) + "</art:value> "; //default to displaying parameter value
 
 					if (param.usesLov()) {
 						//for lov parameters, show both parameter value and display string if any
@@ -165,14 +157,14 @@ public class rss20Output implements ArtOutputInterface {
 							String paramDisplayString = lov.get(paramValue);
 							if (!StringUtils.equals(paramValue, paramDisplayString)) {
 								//parameter value and display string differ. show both
-								outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(paramDisplayString) + " (" + AjaxTagsDataProvider.parseXml(paramValue) + ")</art:value> ";
+								outputString = "<art:name>" + StringEscapeUtils.escapeXml(paramName) + "</art:name><art:value>" + StringEscapeUtils.escapeXml(paramDisplayString) + " (" + StringEscapeUtils.escapeXml(paramValue) + ")</art:value> ";
 							}
 						}
 					}
 					out.println(outputString);                    
                 } else if (pValue instanceof String[]) { // multi
                     String[] paramValues = (String[]) pValue;
-					outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(StringUtils.join(paramValues, ", ")) + "</art:value> "; //default to showing parameter values only
+					outputString = "<art:name>" + StringEscapeUtils.escapeXml(paramName) + "</art:name><art:value>" + StringEscapeUtils.escapeXml(StringUtils.join(paramValues, ", ")) + "</art:value> "; //default to showing parameter values only
 
 					if (param.usesLov()) {
 						//for lov parameters, show both parameter value and display string if any
@@ -190,7 +182,7 @@ public class rss20Output implements ArtOutputInterface {
 									paramDisplayStrings[i] = value;
 								}
 							}
-							outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(StringUtils.join(paramDisplayStrings, ", ")) + "</art:value> ";
+							outputString = "<art:name>" + StringEscapeUtils.escapeXml(paramName) + "</art:name><art:value>" + StringEscapeUtils.escapeXml(StringUtils.join(paramDisplayStrings, ", ")) + "</art:value> ";
 						}
 					}
 					out.println(outputString);                    
@@ -225,7 +217,7 @@ public class rss20Output implements ArtOutputInterface {
 
     @Override
     public void addCellString(String s) {
-        out.println("<" + columnNames[columnIndex] + ">" + art.servlets.AjaxTagsDataProvider.parseXml(s) + "</" + columnNames[columnIndex] + ">");
+        out.println("<" + columnNames[columnIndex] + ">" + StringEscapeUtils.escapeXml(s) + "</" + columnNames[columnIndex] + ">");
         columnIndex++;
     }
 

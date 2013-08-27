@@ -17,6 +17,7 @@
  */
 package art.servlets;
 
+import art.utils.ArtHelper;
 import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -80,7 +81,7 @@ public final class AuthFilter implements Filter {
 					isArtRepositoryUser = false;
 					try {
 						//String msg = AuthenticateSession(hrequest);
-						String msg = ArtConfig.authenticateSession(hrequest);
+						String msg = ArtHelper.authenticateSession(hrequest);
 						if (msg == null) {
 							//no error messages. authentication succeeded
 							String username = hrequest.getParameter("username");

@@ -17,6 +17,7 @@
  */
 package art.servlets;
 
+import art.utils.ArtHelper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import javax.servlet.*;
@@ -93,7 +94,7 @@ public final class AuthFilterAdmin implements Filter {
 						//we have come from a login page. authenticate
 						boolean isArtRepositoryUser = false;
 						try {
-							String msg = ArtConfig.authenticateSession(hrequest);
+							String msg = ArtHelper.authenticateSession(hrequest);
 							if (msg == null) {
 								//no error messages. authentication succeeded
 								if (StringUtils.equals(username, ArtConfig.getArtRepositoryUsername())

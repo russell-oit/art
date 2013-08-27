@@ -1,4 +1,4 @@
-<%@ page import="java.util.ResourceBundle, art.servlets.ArtConfig,art.utils.*,java.sql.Connection" %>
+<%@ page import="java.util.ResourceBundle, art.utils.*,java.sql.Connection" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
@@ -40,7 +40,7 @@ if(!queryExists){
    <%
 }
 
-ArtConfig.log(username, "query", request.getRemoteAddr(), queryId, 0, 0, "text");
+ArtHelper.log(username, "query", request.getRemoteAddr(), queryId, 0, 0, "text");
 
 String queryText;
 int queryType=aq.getQueryType();

@@ -3,29 +3,28 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.servlets;
 
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import art.utils.PreparedQuery;
 import art.utils.UserEntity;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,29 +64,27 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 	@Override
 	public String getXmlContent(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
-		String result = ""; //return ajax xml response or html response depending on the ajax tag used
+		String result = "";
 
 		// make sure data is not cached
 		response.setHeader("Cache-control", "no-cache");
 		request.setCharacterEncoding("UTF-8");
 
 		String action = request.getParameter("action");
-
 		String username = (String) request.getSession().getAttribute("username");
 		if (username == null) {
 			username = "public_user";
 		}
 
-		if (StringUtils.equalsIgnoreCase(action,"lov")) {
+		if (StringUtils.equalsIgnoreCase(action, "lov")) {
 			result = getXmlLov(request, response, username);
-		} else if (StringUtils.equalsIgnoreCase(action,"queries")) {
+		} else if (StringUtils.equalsIgnoreCase(action, "queries")) {
 			result = getXmlQueries(request, response);
-		} else if (StringUtils.equalsIgnoreCase(action,"queriesadmin")) {
+		} else if (StringUtils.equalsIgnoreCase(action, "queriesadmin")) {
 			result = getXmlAdminQueries(request, response, username);
-		} else if (StringUtils.equalsIgnoreCase(action,"querydescr")) {
+		} else if (StringUtils.equalsIgnoreCase(action, "querydescr")) {
 			result = getHtmlQueryDescription(request, response);
-		} else if (StringUtils.equalsIgnoreCase(action,"schedule")) {
+		} else if (StringUtils.equalsIgnoreCase(action, "schedule")) {
 			result = getXmlSchedule(request, response);
 		}
 
@@ -103,7 +100,6 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 	 * @throws IOException
 	 */
 	private String getXmlLov(HttpServletRequest request, HttpServletResponse response, String username) {
-
 		AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
 		try {
@@ -154,9 +150,9 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 					}
 				} else {
 					ArtQueryParam param = htmlParams.get("P_filter");
-					if(param==null){
+					if (param == null) {
 						//filter may be a multi parameter
-						param=htmlParams.get("M_filter");
+						param = htmlParams.get("M_filter");
 					}
 					if (param != null) {
 						if (isChainedValueMulti) {
@@ -192,7 +188,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 				for (Map.Entry<String, String> entry : lov.entrySet()) {
 					String value = entry.getKey();
 					String viewColumnValue = entry.getValue();
-					builder.addItem(parseXml(viewColumnValue), parseXml(value));
+					builder.addItem(StringEscapeUtils.escapeXml(viewColumnValue), StringEscapeUtils.escapeXml(value));
 				}
 				pq.close();
 			}
@@ -216,7 +212,6 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 	 */
 	private String getXmlQueries(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
-
 		AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
 		response.setContentType("text/xml;charset=utf-8");
@@ -250,16 +245,12 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 	 * @throws SQLException
 	 */
 	private String getXmlAdminQueries(HttpServletRequest request, HttpServletResponse response, String username) {
-
 		AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
 		response.setContentType("text/xml;charset=utf-8");
-
 		int accessLevel = ((Integer) request.getSession().getAttribute("AdminLevel")).intValue();
-
 		int groupId = Integer.parseInt(request.getParameter("groupId"));
 		if (groupId != -1) {
-
 			String sql;
 			if (accessLevel <= 30) {
 				// get only queries with Group and datasource matching the "junior" admin priviledges
@@ -283,6 +274,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 
 			Connection conn = null;
 			PreparedStatement ps = null;
+			ResultSet rs=null;
 			try {
 				conn = ArtConfig.getConnection();
 				ps = conn.prepareStatement(sql);
@@ -293,29 +285,15 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 					ps.setString(3, username);
 				}
 
-				ResultSet rs = ps.executeQuery();
+				rs = ps.executeQuery();
 				while (rs.next()) {
 					// build html option list
-					builder.addItem(parseXml(rs.getString(2)) + " (Id:" + rs.getInt(1) + " Status:" + rs.getString(3) + ")", String.valueOf(rs.getInt(1)));
+					builder.addItem(StringEscapeUtils.escapeXml(rs.getString(2)) + " (Id:" + rs.getInt(1) + " Status:" + rs.getString(3) + ")", String.valueOf(rs.getInt(1)));
 				}
-				rs.close();
 			} catch (Exception e) {
 				logger.error("Error", e);
 			} finally {
-				try {
-					if (ps != null) {
-						ps.close();
-					}
-				} catch (Exception e) {
-					logger.error("Error", e);
-				}
-				try {
-					if (conn != null) {
-						conn.close();
-					}
-				} catch (Exception e) {
-					logger.error("Error", e);
-				}
+				ArtUtils.close(rs, ps, conn);
 			}
 		}
 
@@ -333,19 +311,17 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 	 * @throws SQLException
 	 */
 	private String getHtmlQueryDescription(HttpServletRequest request, HttpServletResponse response) {
-
 		StringBuilder builder = new StringBuilder(200);
 
 		response.setContentType("text/html;charset=utf-8");
-
 		int queryId = Integer.parseInt(request.getParameter("queryId"));
 
 		Connection conn = null;
 		PreparedStatement ps = null;
+		ResultSet rs = null;
 
 		try {
-			ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
-
+			conn = ArtConfig.getConnection();
 			//use left outer join as dashboards, text queries etc don't have a datasource
 			String sql = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
 					+ " aq.DESCRIPTION, aq.QUERY_TYPE, aq.UPDATE_DATE, "
@@ -354,12 +330,11 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 					+ " on aq.DATABASE_ID=ad.DATABASE_ID "
 					+ " WHERE aq.QUERY_ID = ?";
 
-			conn = ArtConfig.getConnection();
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, queryId);
 
-			ResultSet rs = ps.executeQuery();
-
+			rs = ps.executeQuery();
+			ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
 			while (rs.next()) {
 				String type;
 				int typeId = rs.getInt("QUERY_TYPE");
@@ -427,34 +402,13 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 					builder.append(messages.getString("targetDatasource")).append(" <b>").append(rs.getString("DATABASE_NAME")).append("</b><br>");
 				}
 
-				//remove show params checkbox. let parameters always be shown
-			/*
-				 if (typeId == 110) { // add show params checkbox for dashboards
-				 builder.append("<input type=\"checkbox\" id=\"editPortletsParameters\" name=\"editPortletsParameters\" value=\"true\" checked>" + messages.getString("editPortletsParameters"));
-				 }
-				 */
-
 				builder.append("<input type=\"hidden\" name=\"typeId\" value=\"").append(typeId).append("\">");
 				builder.append("</fieldset>");
 			}
-			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
+			ArtUtils.close(rs, ps, conn);
 		}
 
 		return builder.toString();
@@ -471,86 +425,38 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 	 * @throws SQLException
 	 */
 	private String getXmlSchedule(HttpServletRequest request, HttpServletResponse response) {
-
 		AjaxXmlBuilder builder = new AjaxXmlBuilder();
 
 		response.setContentType("text/xml;charset=utf-8");
-
 		String scheduleName = request.getParameter("scheduleName");
 		if (scheduleName != null) {
-
 			Connection conn = null;
 			PreparedStatement ps = null;
+			ResultSet rs = null;
 			try {
+				conn = ArtConfig.getConnection();
 				String sql = "SELECT AJS.JOB_MINUTE, AJS.JOB_HOUR, AJS.JOB_DAY, AJS.JOB_WEEKDAY, AJS.JOB_MONTH "
 						+ " FROM ART_JOB_SCHEDULES AJS "
 						+ " WHERE AJS.SCHEDULE_NAME = ?";
 
-				conn = ArtConfig.getConnection();
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, scheduleName);
 
-				ResultSet rs = ps.executeQuery();
+				rs = ps.executeQuery();
 				if (rs.next()) {
-					String minute;
-					String hour;
-					String day;
-					String month;
-					String weekday;
-
-					minute = rs.getString("JOB_MINUTE");
-					builder.addItem("minute", minute);
-
-					hour = rs.getString("JOB_HOUR");
-					builder.addItem("hour", hour);
-
-					day = rs.getString("JOB_DAY");
-					builder.addItem("day", day);
-
-					month = rs.getString("JOB_MONTH");
-					builder.addItem("month", month);
-
-					weekday = rs.getString("JOB_WEEKDAY");
-					builder.addItem("weekday", weekday);
+					builder.addItem("minute", rs.getString("JOB_MINUTE"));
+					builder.addItem("hour", rs.getString("JOB_HOUR"));
+					builder.addItem("day", rs.getString("JOB_DAY"));
+					builder.addItem("month", rs.getString("JOB_MONTH"));
+					builder.addItem("weekday", rs.getString("JOB_WEEKDAY"));
 				}
-				rs.close();
 			} catch (Exception e) {
 				logger.error("Error", e);
 			} finally {
-				try {
-					if (ps != null) {
-						ps.close();
-					}
-				} catch (Exception e) {
-					logger.error("Error", e);
-				}
-				try {
-					if (conn != null) {
-						conn.close();
-					}
-				} catch (Exception e) {
-					logger.error("Error", e);
-				}
+				ArtUtils.close(rs, ps, conn);
 			}
 		}
 
 		return builder.toString();
-	}
-
-	//replace characters that have a special meaning in xml e.g. &, <, >
-	/**
-	 * Replace characters that have a special meaning in xml e.g. &, &lt;, &gt;
-	 *
-	 * @param s string to parse
-	 * @return string with special xml characters removed
-	 */
-	public static String parseXml(String s) {
-		String parsedString = null;
-
-		if (s != null) {
-			parsedString = StringEscapeUtils.escapeXml(s);
-		}
-
-		return parsedString;
 	}
 }

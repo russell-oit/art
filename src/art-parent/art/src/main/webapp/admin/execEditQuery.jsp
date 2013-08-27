@@ -315,14 +315,14 @@
 				String username = (String) session.getAttribute("username");
 				String ip = request.getRemoteAddr();
 				String msg = "size=" + uploadSize + ", file=" + fileName + ", path=" + filePath;				
-				ArtConfig.log(username, "upload", ip, queryId, 0, 0, msg);
+				ArtHelper.log(username, "upload", ip, queryId, 0, 0, msg);
 			}
 			//log subreport file upload
 			if (subreportFileUploaded) {
 				String username = (String) session.getAttribute("username");
 				String ip = request.getRemoteAddr();
 				String msg = "size=" + subreportUploadSize + ", file=" + subreportFileName + ", path=" + subreportFilePath;				
-				ArtConfig.log(username, "upload", ip, queryId, 0, 0, msg);
+				ArtHelper.log(username, "upload", ip, queryId, 0, 0, msg);
 			}
 
 %>

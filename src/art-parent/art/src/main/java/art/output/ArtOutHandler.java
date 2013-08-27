@@ -14,14 +14,6 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * ArtOutHandler.java
- *
- * Caller:	ExecuteQuery and ArtJob Purpose:	Scroll the resultset and feed
- * properly the ArtOutputInterface
- *
- *
- */
 package art.output;
 
 import art.servlets.ArtConfig;
