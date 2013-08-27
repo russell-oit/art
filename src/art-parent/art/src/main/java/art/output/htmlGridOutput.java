@@ -22,6 +22,7 @@ package art.output;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Map;
@@ -156,7 +157,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + ArtConfig.getDateSortString(d) + "\" >" + ArtConfig.getDateDisplayString(d) + "</td>");
+		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + ArtUtils.getDateSortString(d) + "\" >" + ArtConfig.getDateDisplayString(d) + "</td>");
 	}
 
 	@Override

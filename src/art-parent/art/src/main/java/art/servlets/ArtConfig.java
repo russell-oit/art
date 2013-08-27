@@ -14,24 +14,12 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * ArtConfig.class
- *
- *
- * Purpose:	loaded at startup, it initializes an array of database connections
- * (pooled - art dbcp datasources) This array is stored in the context with name
- * "ArtDataSources" and used by all other ART classes
- *
- *
- * @version 1.1
- * @author Enrico Liboni
- * @mail enrico(at)computer.org Last changes: Logging
- */
 package art.servlets;
 
 import art.dbcp.DataSource;
 import art.utils.ArtJob;
 import art.utils.ArtSettings;
+import art.utils.ArtUtils;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import art.utils.UserEntity;
@@ -58,7 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class that initializes datasource connections and holds global variables.
+ * Class that initializes datasource connections and application settings.
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -67,7 +55,6 @@ public class ArtConfig extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(ArtConfig.class);
-	// Global variables
 	private static String art_username, art_password, art_jdbc_driver, art_jdbc_url,
 			exportPath, art_testsql, art_pooltimeout;
 	private static int poolMaxConnections;
@@ -92,16 +79,50 @@ public class ArtConfig extends HttpServlet {
 	private static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 	private static String dateFormat = DEFAULT_DATE_FORMAT; //for date fields, format of date portion
 	private static String timeFormat = DEFAULT_TIME_FORMAT; //for date fields, format of time portion
-	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
-	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
-	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
 	private static String jobsPath;
-	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
-	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
 	public static boolean showResultsInline = true;
 	private static boolean nullValueEnabled = true; //to enable blank spaces instead of "null" for varchar fields on reports
 	private static boolean customExportDirectory = false; //to enable custom export path
 	private static boolean nullNumbersAsBlank = true; //whether null numbers are displayed as blank or a zero when nullValueEnabled is true
+
+	/**
+	 * Get string to be displayed in query output for a date field
+	 *
+	 * @param dt
+	 * @return
+	 */
+	public static String getDateDisplayString(java.util.Date dt) {
+		String dateString;
+		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS");
+		SimpleDateFormat df = new SimpleDateFormat(ArtConfig.dateFormat);
+		SimpleDateFormat dtf = new SimpleDateFormat(ArtConfig.dateFormat + " " + ArtConfig.timeFormat);
+		if (dt == null) {
+			dateString = "";
+		} else if (zf.format(dt).equals("00:00:00.000")) {
+			dateString = df.format(dt);
+		} else {
+			dateString = dtf.format(dt);
+		}
+		return dateString;
+	}
+
+	/**
+	 * Get language file to use for datatables, depending on the locale
+	 *
+	 * @param request
+	 * @return
+	 */
+	public static String getDataTablesLanguageUrl(HttpServletRequest request) {
+		String url = "";
+		String languageFileName = "dataTables." + request.getLocale().toString() + ".txt";
+		String sep = File.separator;
+		String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
+		File languageFile = new File(languageFilePath);
+		if (languageFile.exists()) {
+			url = request.getContextPath() + "/js/" + languageFileName;
+		}
+		return url;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -147,7 +168,7 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Initialize datasources, viewModes, quartz scheduler
+	 * Initialize datasources, viewModes, quartz scheduler, application settings
 	 */
 	private void ArtConfigInit() {
 
@@ -482,7 +503,7 @@ public class ArtConfig extends HttpServlet {
 
 					/**
 					 * *****************************************
-					 * Create other datasources 1-...
+					 * Create other datasources 1-n
 					 */
 					while (rs.next()) {
 						String driver = rs.getString("DRIVER");
@@ -544,27 +565,7 @@ public class ArtConfig extends HttpServlet {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-			try {
-				if (st != null) {
-					st.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
+			ArtUtils.close(rs, st, conn);
 		}
 	}
 
@@ -895,12 +896,11 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	public static Connection getJndiConnection(String jndiUrl) throws SQLException {
-
 		Connection conn = null;
 
 		try {
 			InitialContext ic = new InitialContext();
-			javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(getJndiDatasourceUrl(jndiUrl));
+			javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(ArtUtils.getJndiDatasourceUrl(jndiUrl));
 			conn = ds.getConnection();
 		} catch (NamingException e) {
 			logger.error("Error", e);
@@ -1026,20 +1026,6 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static boolean isSchedulingEnabled() {
 		return schedulingEnabled;
-	}
-
-	/**
-	 * Utility method to remove characters from query name that may result in an
-	 * invalid output file name.
-	 *
-	 * @param fileName query name
-	 * @return modified query name to be used in file names
-	 */
-	public static String cleanFileName(String fileName) {
-		return fileName.replace('/', '_').replace('*', '_').replace('&', '_')
-				.replace('?', '_').replace('!', '_').replace('\\', '_').replace('[', '_')
-				.replace(']', '_').replace(':', '_').replace('|', '_')
-				.replace('<', '_').replace('>', '_').replace('"', '_');
 	}
 
 	/**
@@ -1183,61 +1169,6 @@ public class ArtConfig extends HttpServlet {
 		}
 
 		return maxQueries;
-	}
-
-	/**
-	 * Get random string to be appended to output filenames
-	 *
-	 * @return random string to be appended to output filenames
-	 */
-	public static String getRandomString() {
-		return "-" + RandomStringUtils.randomAlphanumeric(10);
-	}
-
-	/**
-	 * Get string to be displayed in query output for a date field
-	 *
-	 * @param dt
-	 * @return
-	 */
-	public static String getDateDisplayString(java.util.Date dt) {
-		String dateString;
-
-		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS"); //use to check if time component is 0
-		SimpleDateFormat df = new SimpleDateFormat(dateFormat);
-		SimpleDateFormat dtf = new SimpleDateFormat(dateFormat + " " + timeFormat);
-
-		if (dt == null) {
-			dateString = "";
-		} else if (zf.format(dt).equals("00:00:00.000")) {
-			//time component is 0. don't display time component
-			dateString = df.format(dt);
-		} else {
-			//display both date and time
-			dateString = dtf.format(dt);
-		}
-
-		return dateString;
-	}
-
-	/**
-	 * Get a string to be used for correctly sorting dates irrespective of the
-	 * date format used to display dates
-	 *
-	 * @param dt
-	 * @return
-	 */
-	public static String getDateSortString(java.util.Date dt) {
-		String sortKey;
-
-		if (dt == null) {
-			sortKey = "null";
-		} else {
-			SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss:SSS");
-			sortKey = sf.format(dt);
-		}
-
-		return sortKey;
 	}
 
 	/**
@@ -1434,64 +1365,6 @@ public class ArtConfig extends HttpServlet {
 		return msg;
 	}
 
-	/**
-	 * Generate a random number within a given range
-	 *
-	 * @param minimum
-	 * @param maximum
-	 * @return
-	 */
-	public static int getRandomNumber(int minimum, int maximum) {
-		Random rn = new Random();
-		int range = maximum - minimum + 1;
-		int randomNum = rn.nextInt(range) + minimum;
-
-		return randomNum;
-	}
-
-	/**
-	 * Generate a random number within a given range
-	 *
-	 * @param minimum
-	 * @param maximum
-	 * @return
-	 */
-	public static long getRandomNumber(long minimum, long maximum) {
-		Random rn = new Random();
-		long randomNum = minimum + (long) (rn.nextDouble() * (maximum - minimum));
-
-		return randomNum;
-	}
-
-	public static List<String> getFileDetailsFromResult(String result) {
-		List<String> details = new ArrayList<String>();
-
-		if (StringUtils.indexOf(result, "\n") > -1) {
-			// publish jobs can have file link and message separated by newline(\n)
-			String fileName = StringUtils.substringBefore(result, "\n"); //get file name
-			fileName = StringUtils.replace(fileName, "\r", ""); //on windows pre-2.5, filenames had \\r\\n
-			String resultMessage = StringUtils.substringAfter(result, "\n"); //message
-
-			details.add(fileName);
-			details.add(resultMessage);
-		} else {
-			details.add(result);
-			details.add("");
-		}
-
-		return details;
-	}
-
-	public static String getJndiDatasourceUrl(String url) {
-		String finalUrl = url;
-		if (!StringUtils.startsWith(finalUrl, "java:")) {
-			//use default jndi prefix
-			finalUrl = "java:comp/env/" + finalUrl;
-		}
-
-		return finalUrl;
-	}
-
 	public static List<String> getWindowsDomains() {
 		List<String> domainsList = new ArrayList<String>();
 
@@ -1501,25 +1374,5 @@ public class ArtConfig extends HttpServlet {
 		}
 
 		return domainsList;
-	}
-
-	/**
-	 * Get language file to use for datatables, depending on the locale
-	 * 
-	 * @param request
-	 * @return 
-	 */
-	public static String getDataTablesLanguageUrl(HttpServletRequest request) {
-		String url = "";
-
-		String languageFileName = "dataTables." + request.getLocale() + ".txt";
-		String sep = File.separator;
-		String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
-		File languageFile = new File(languageFilePath);
-		if (languageFile.exists()) {
-			url = request.getContextPath() + "/js/" + languageFileName;
-		}
-
-		return url;
 	}
 }

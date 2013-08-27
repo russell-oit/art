@@ -20,6 +20,7 @@ package art.output;
 import art.servlets.ArtConfig;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import art.utils.PreparedQuery;
 import java.io.File;
 import java.io.FileInputStream;
@@ -322,8 +323,8 @@ public class jasperOutput {
 				SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 				h_m_s = timeFormatter.format(today);
 
-				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
-				fileName = ArtConfig.cleanFileName(fileName); //replace characters that would make an invalid filename
+				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString();
+				fileName = ArtUtils.cleanFileName(fileName); //replace characters that would make an invalid filename
 				String fullFileNameWithoutExt = exportPath + fileName;
 
 				//export report

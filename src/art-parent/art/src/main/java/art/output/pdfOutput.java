@@ -26,6 +26,7 @@ package art.output;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import java.io.FileOutputStream;
@@ -436,8 +437,8 @@ public class pdfOutput implements ArtOutputInterface {
 		dateFormatter.applyPattern(timeFormat);
 		h_m_s = dateFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString() + ".pdf";
-		filename = ArtConfig.cleanFileName(filename); //replace characters that would make an invalid filename
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString() + ".pdf";
+		filename = ArtUtils.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename;
 	}
 

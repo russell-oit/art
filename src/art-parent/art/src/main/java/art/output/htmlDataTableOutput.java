@@ -22,6 +22,7 @@ package art.output;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
@@ -243,7 +244,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td style=\"text-align: left\"> <span style=\"display:none;\">" + ArtConfig.getDateSortString(d) + "</span>" + ArtConfig.getDateDisplayString(d) + "</td>");
+		out.println("  <td style=\"text-align: left\"> <span style=\"display:none;\">" + ArtUtils.getDateSortString(d) + "</span>" + ArtConfig.getDateDisplayString(d) + "</td>");
 	}
 
 	@Override

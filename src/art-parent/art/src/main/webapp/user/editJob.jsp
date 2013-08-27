@@ -178,7 +178,7 @@ if (request.getParameter("bcc").equals("")){
 		calEnd.set(java.util.Calendar.HOUR_OF_DAY, Integer.parseInt(endHour));
 		calEnd.set(java.util.Calendar.MINUTE, Integer.parseInt(endMinute));
 		
-		long randomDate=ArtConfig.getRandomNumber(calStart.getTimeInMillis(), calEnd.getTimeInMillis());
+		long randomDate=ArtUtils.getRandomNumber(calStart.getTimeInMillis(), calEnd.getTimeInMillis());
 		java.util.Calendar calRandom = java.util.Calendar.getInstance();
 		calRandom.setTimeInMillis(randomDate);
 		
@@ -188,12 +188,12 @@ if (request.getParameter("bcc").equals("")){
 	
   if (minute.length()==0){
 	//no minute defined. use random value
-	minute=String.valueOf(ArtConfig.getRandomNumber(0, 59));
+	minute=String.valueOf(ArtUtils.getRandomNumber(0, 59));
 	}
 
   if (hour.length()==0){
 	//no hour defined. use random value
-	hour=String.valueOf(ArtConfig.getRandomNumber(3, 6));
+	hour=String.valueOf(ArtUtils.getRandomNumber(3, 6));
 	}
 
 	month=job.getMonth().replaceAll(" ", "");
@@ -389,21 +389,21 @@ if (request.getParameter("bcc").equals("")){
 			String triggerName="trigger"+jobId;
 
 			JobDetail quartzJob = newJob(ArtJob.class)
-					.withIdentity(jobKey(jobName,ArtConfig.JOB_GROUP))
+					.withIdentity(jobKey(jobName,ArtUtils.JOB_GROUP))
 					.usingJobData("jobid",jobId)
 					.build();
 
 			//create trigger that defines the schedule for the job
 		CronTrigger trigger= newTrigger()
-				.withIdentity(triggerKey(triggerName,ArtConfig.TRIGGER_GROUP))
+				.withIdentity(triggerKey(triggerName,ArtUtils.TRIGGER_GROUP))
 				.withSchedule(cronSchedule(cronString))
 				.startAt(startDate)
 				.endAt(endDate)
 				.build();
 	   
 			//delete any existing jobs or triggers with the same id before adding them to the scheduler
-			scheduler.deleteJob(jobKey(jobName,ArtConfig.JOB_GROUP));
-			scheduler.unscheduleJob(triggerKey(triggerName,ArtConfig.TRIGGER_GROUP));
+			scheduler.deleteJob(jobKey(jobName,ArtUtils.JOB_GROUP));
+			scheduler.unscheduleJob(triggerKey(triggerName,ArtUtils.TRIGGER_GROUP));
 
 			//add job and trigger to scheduler
 			scheduler.scheduleJob(quartzJob, trigger);

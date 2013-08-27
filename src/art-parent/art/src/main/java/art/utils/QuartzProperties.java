@@ -251,7 +251,7 @@ public class QuartzProperties {
 						props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
 					}
 					if (props.getProperty(JNDI_URL) == null) {
-						props.setProperty(JNDI_URL, ArtConfig.getJndiDatasourceUrl(dbUrl));
+						props.setProperty(JNDI_URL, ArtUtils.getJndiDatasourceUrl(dbUrl));
 					}
 				}
 			}

@@ -1,4 +1,4 @@
-<%@ page import="java.util.*,java.text.*,art.utils.*,art.servlets.ArtConfig" %>
+<%@ page import="java.util.*,java.text.*,art.utils.*" %>
 <%@ page import="org.apache.commons.lang.StringUtils" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
@@ -155,7 +155,7 @@ boolean splitJob=false; //for split jobs, get last start date and file name from
 	} else if (fileName.startsWith("-")) { 
         out.println(fileName.substring(1));
 	}  else { 
-		List<String> details=ArtConfig.getFileDetailsFromResult(fileName);
+		List<String> details=ArtUtils.getFileDetailsFromResult(fileName);
 		fileName=details.get(0);
 		resultMessage=details.get(1);
 	   %>

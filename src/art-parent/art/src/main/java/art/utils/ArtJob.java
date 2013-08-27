@@ -1097,7 +1097,7 @@ public class ArtJob implements Job, Serializable {
 					columnList.add(columnName.toLowerCase(Locale.ENGLISH));
 				}
 
-				if (columnList.contains(ArtConfig.RECIPIENT_COLUMN) && columnList.contains(ArtConfig.RECIPIENT_ID)) {
+				if (columnList.contains(ArtUtils.RECIPIENT_COLUMN) && columnList.contains(ArtUtils.RECIPIENT_ID)) {
 					//separate emails, different email message, different report data
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses
@@ -1287,9 +1287,9 @@ public class ArtJob implements Job, Serializable {
 				for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 					//map should only have one value if filter present
 					Map<String, String> recipientColumns = entry.getValue();
-					pq.setRecipientColumn(recipientColumns.get(ArtConfig.RECIPIENT_COLUMN));
-					pq.setRecipientId(recipientColumns.get(ArtConfig.RECIPIENT_ID));
-					pq.setRecipientIdType(recipientColumns.get(ArtConfig.RECIPIENT_ID_TYPE));
+					pq.setRecipientColumn(recipientColumns.get(ArtUtils.RECIPIENT_COLUMN));
+					pq.setRecipientId(recipientColumns.get(ArtUtils.RECIPIENT_ID));
+					pq.setRecipientIdType(recipientColumns.get(ArtUtils.RECIPIENT_ID_TYPE));
 				}
 			}
 
@@ -1573,14 +1573,14 @@ public class ArtJob implements Job, Serializable {
 								SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
 								String datePart = dateFormatter.format(new java.util.Date());
 
-								fileName = jobFileUsername + "-" + queryName + "-" + datePart + ArtConfig.getRandomString() + ".html";
-								fileName = ArtConfig.cleanFileName(fileName);
+								fileName = jobFileUsername + "-" + queryName + "-" + datePart + ArtUtils.getRandomString() + ".html";
+								fileName = ArtUtils.cleanFileName(fileName);
 								fileName = jobsPath + fileName;
 
 							} else {
 								//xml or rss
 								fileName = jobFileUsername + ".html";
-								fileName = ArtConfig.cleanFileName(fileName);
+								fileName = ArtUtils.cleanFileName(fileName);
 								fileName = jobsPath + fileName;
 							}
 							fos = new FileOutputStream(fileName);
@@ -2120,7 +2120,7 @@ public class ArtJob implements Job, Serializable {
 					} else {
 						//if not archiving, delete previous file
 						if (archiveFileName != null && !archiveFileName.startsWith("-")) {
-							List<String> details = ArtConfig.getFileDetailsFromResult(archiveFileName);
+							List<String> details = ArtUtils.getFileDetailsFromResult(archiveFileName);
 							archiveFileName = details.get(0);
 							String filePath = ArtConfig.getJobsPath() + archiveFileName;
 							File previousFile = new File(filePath);
@@ -2402,8 +2402,8 @@ public class ArtJob implements Job, Serializable {
 
 			org.quartz.Scheduler scheduler = ArtConfig.getScheduler();
 			if (scheduler != null) {
-				scheduler.deleteJob(jobKey(deleteJobName, ArtConfig.JOB_GROUP)); //delete job records
-				scheduler.unscheduleJob(triggerKey(triggerName, ArtConfig.TRIGGER_GROUP)); //delete trigger records
+				scheduler.deleteJob(jobKey(deleteJobName, ArtUtils.JOB_GROUP)); //delete job records
+				scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP)); //delete trigger records
 			}
 
 			//delete records from art tables
@@ -3099,14 +3099,14 @@ public class ArtJob implements Job, Serializable {
 						jobName = "job" + jobId;
 						triggerName = "trigger" + jobId;
 
-						JobDetail quartzJob = newJob(ArtJob.class).withIdentity(jobName, ArtConfig.JOB_GROUP).usingJobData("jobid", jobId).build();
+						JobDetail quartzJob = newJob(ArtJob.class).withIdentity(jobName, ArtUtils.JOB_GROUP).usingJobData("jobid", jobId).build();
 
 						//create trigger that defines the schedule for the job						
-						CronTrigger trigger = newTrigger().withIdentity(triggerName, ArtConfig.TRIGGER_GROUP).withSchedule(cronSchedule(cronString)).build();
+						CronTrigger trigger = newTrigger().withIdentity(triggerName, ArtUtils.TRIGGER_GROUP).withSchedule(cronSchedule(cronString)).build();
 
 						//delete any existing jobs or triggers with the same id before adding them to the scheduler
-						scheduler.deleteJob(jobKey(jobName, ArtConfig.JOB_GROUP)); //delete job records
-						scheduler.unscheduleJob(triggerKey(triggerName, ArtConfig.TRIGGER_GROUP)); //delete any trigger records
+						scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP)); //delete job records
+						scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP)); //delete any trigger records
 
 						//add job and trigger to scheduler
 						scheduler.scheduleJob(quartzJob, trigger);
@@ -3732,7 +3732,7 @@ public class ArtJob implements Job, Serializable {
 
 						//delete file
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
-							List<String> details = ArtConfig.getFileDetailsFromResult(oldFileName);
+							List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 							oldFileName = details.get(0);
 							String filePath = ArtConfig.getJobsPath() + oldFileName;
 							File previousFile = new File(filePath);
@@ -3767,7 +3767,7 @@ public class ArtJob implements Job, Serializable {
 
 						//delete file
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
-							List<String> details = ArtConfig.getFileDetailsFromResult(oldFileName);
+							List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 							oldFileName = details.get(0);
 							String filePath = ArtConfig.getJobsPath() + oldFileName;
 							File previousFile = new File(filePath);
@@ -3836,7 +3836,7 @@ public class ArtJob implements Job, Serializable {
 
 				//delete file
 				if (oldFileName != null && !oldFileName.startsWith("-")) {
-					List<String> details = ArtConfig.getFileDetailsFromResult(oldFileName);
+					List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 					oldFileName = details.get(0);
 					String filePath = ArtConfig.getJobsPath() + oldFileName;
 					File previousFile = new File(filePath);

@@ -1,5 +1,6 @@
-<%@ page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="java.util.*,art.utils.*,art.servlets.ArtConfig,org.quartz.*,java.text.*" %>
+<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="java.util.*,art.utils.*,art.servlets.ArtConfig" %>
+<%@ page import="org.quartz.*,java.text.*" %>
 <%@ page import="static org.quartz.JobBuilder.*" %>
 <%@ page import="static org.quartz.TriggerBuilder.*" %>
 <%@ page import="static org.quartz.JobKey.jobKey" %>
@@ -232,7 +233,7 @@ String resultMessage;
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		List<String> details=ArtConfig.getFileDetailsFromResult(lastFileName);
+		List<String> details=ArtUtils.getFileDetailsFromResult(lastFileName);
 		lastFileName=details.get(0);
 		resultMessage=details.get(1);
 	   %>
@@ -402,7 +403,7 @@ if(accessLevel>=80){
       } else if (lastFileName.startsWith("-")) {
         out.println(lastFileName.substring(1));
      } else { 
-		List<String> details=ArtConfig.getFileDetailsFromResult(lastFileName);
+		List<String> details=ArtUtils.getFileDetailsFromResult(lastFileName);
 		lastFileName=details.get(0);
 		resultMessage=details.get(1);
 	   %>

@@ -24,6 +24,7 @@ package art.output;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -449,8 +450,8 @@ public class xlsxOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat("HH_mm_ss");
 		h_m_s = timeFormatter.format(today);
 
-		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
-		baseName = ArtConfig.cleanFileName(baseName);
+		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString();
+		baseName = ArtUtils.cleanFileName(baseName);
 
 		filename = baseName + ".xlsx";
 		fullFileName = exportPath + filename;

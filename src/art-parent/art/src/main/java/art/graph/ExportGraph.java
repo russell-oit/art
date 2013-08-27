@@ -20,6 +20,7 @@ package art.graph;
 import art.servlets.ArtConfig;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import de.laures.cewolf.cpp.HeatmapEnhancer;
 import de.laures.cewolf.cpp.LineRendererProcessor;
 import de.laures.cewolf.cpp.RotatedAxisLabels;
@@ -228,8 +229,8 @@ public class ExportGraph {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		fullFileNameWithoutExt = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtConfig.getRandomString();
-		fullFileNameWithoutExt = ArtConfig.cleanFileName(fullFileNameWithoutExt);
+		fullFileNameWithoutExt = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString();
+		fullFileNameWithoutExt = ArtUtils.cleanFileName(fullFileNameWithoutExt);
 
 		fullFileNameWithoutExt = exportPath + fullFileNameWithoutExt;
 	}
