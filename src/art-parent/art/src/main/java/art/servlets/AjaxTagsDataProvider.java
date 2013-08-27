@@ -47,10 +47,10 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class XmlDataProvider extends BaseAjaxServlet {
+public class AjaxTagsDataProvider extends BaseAjaxServlet {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(XmlDataProvider.class);
+	final static Logger logger = LoggerFactory.getLogger(AjaxTagsDataProvider.class);
 
 	/**
 	 * Main method from which the other methods that return ajax data are

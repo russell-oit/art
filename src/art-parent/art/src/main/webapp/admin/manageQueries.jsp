@@ -244,7 +244,7 @@ int queryGroupId;
 
 
 <%
- String dataProviderUrl = request.getContextPath()+"/XmlDataProvider";
+ String dataProviderUrl = request.getContextPath()+"/AjaxTagsDataProvider";
 %>
 
 <ajax:select

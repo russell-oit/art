@@ -1055,7 +1055,7 @@ function onClickSaveSchedule(t){
 
 
 <%
-  String dataProviderUrl = request.getContextPath()+"/XmlDataProvider";
+  String dataProviderUrl = request.getContextPath()+"/AjaxTagsDataProvider";
  %>
 <ajax:updateField
   baseUrl="<%=dataProviderUrl%>"

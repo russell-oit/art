@@ -55,8 +55,8 @@
         <description>
 			Get various info for ajax components
 		</description>
-        <servlet-name>XmlDataProvider</servlet-name>
-        <servlet-class>art.servlets.XmlDataProvider</servlet-class>
+        <servlet-name>AjaxTagsDataProvider</servlet-name>
+        <servlet-class>art.servlets.AjaxTagsDataProvider</servlet-class>
         <!-- load after ArtConfig -->
         <load-on-startup>3</load-on-startup>
     </servlet>
@@ -125,8 +125,8 @@
 	  servlet, if you wish to.
  -->
     <servlet-mapping>
-        <servlet-name>XmlDataProvider</servlet-name>
-        <url-pattern>/XmlDataProvider</url-pattern>
+        <servlet-name>AjaxTagsDataProvider</servlet-name>
+        <url-pattern>/AjaxTagsDataProvider</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ExecuteQuery</servlet-name>

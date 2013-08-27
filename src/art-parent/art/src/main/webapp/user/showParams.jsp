@@ -108,7 +108,7 @@ if(queryType==112 || queryType==113 || queryType==114){
                               } else {
                                  ajaxParams = "action=lov,queryId="+paramClass+",filter={"+paramChainedValueId+"}";
                               }
-                              String dataProviderUrl = request.getContextPath()+"/XmlDataProvider";
+                              String dataProviderUrl = request.getContextPath()+"/AjaxTagsDataProvider";
                         %>
                         <ajax:select
 							baseUrl="<%=dataProviderUrl%>"

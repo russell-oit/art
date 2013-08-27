@@ -26,7 +26,7 @@
 package art.output;
 
 import art.servlets.ArtConfig;
-import art.servlets.XmlDataProvider;
+import art.servlets.AjaxTagsDataProvider;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -155,7 +155,7 @@ public class rss20Output implements ArtOutputInterface {
                 out.println("<art:param>");
                 if (pValue instanceof String) {
 					String paramValue = (String) pValue;
-					outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(paramValue) + "</art:value> "; //default to displaying parameter value
+					outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(paramValue) + "</art:value> "; //default to displaying parameter value
 
 					if (param.usesLov()) {
 						//for lov parameters, show both parameter value and display string if any
@@ -165,14 +165,14 @@ public class rss20Output implements ArtOutputInterface {
 							String paramDisplayString = lov.get(paramValue);
 							if (!StringUtils.equals(paramValue, paramDisplayString)) {
 								//parameter value and display string differ. show both
-								outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(paramDisplayString) + " (" + XmlDataProvider.parseXml(paramValue) + ")</art:value> ";
+								outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(paramDisplayString) + " (" + AjaxTagsDataProvider.parseXml(paramValue) + ")</art:value> ";
 							}
 						}
 					}
 					out.println(outputString);                    
                 } else if (pValue instanceof String[]) { // multi
                     String[] paramValues = (String[]) pValue;
-					outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(StringUtils.join(paramValues, ", ")) + "</art:value> "; //default to showing parameter values only
+					outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(StringUtils.join(paramValues, ", ")) + "</art:value> "; //default to showing parameter values only
 
 					if (param.usesLov()) {
 						//for lov parameters, show both parameter value and display string if any
@@ -190,7 +190,7 @@ public class rss20Output implements ArtOutputInterface {
 									paramDisplayStrings[i] = value;
 								}
 							}
-							outputString = "<art:name>" + XmlDataProvider.parseXml(paramName) + "</art:name><art:value>" + XmlDataProvider.parseXml(StringUtils.join(paramDisplayStrings, ", ")) + "</art:value> ";
+							outputString = "<art:name>" + AjaxTagsDataProvider.parseXml(paramName) + "</art:name><art:value>" + AjaxTagsDataProvider.parseXml(StringUtils.join(paramDisplayStrings, ", ")) + "</art:value> ";
 						}
 					}
 					out.println(outputString);                    
@@ -225,7 +225,7 @@ public class rss20Output implements ArtOutputInterface {
 
     @Override
     public void addCellString(String s) {
-        out.println("<" + columnNames[columnIndex] + ">" + art.servlets.XmlDataProvider.parseXml(s) + "</" + columnNames[columnIndex] + ">");
+        out.println("<" + columnNames[columnIndex] + ">" + art.servlets.AjaxTagsDataProvider.parseXml(s) + "</" + columnNames[columnIndex] + ">");
         columnIndex++;
     }
 

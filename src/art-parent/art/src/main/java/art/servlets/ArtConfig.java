@@ -37,7 +37,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.quartz.SchedulerFactory;
@@ -84,45 +83,6 @@ public class ArtConfig extends HttpServlet {
 	private static boolean nullValueEnabled = true; //to enable blank spaces instead of "null" for varchar fields on reports
 	private static boolean customExportDirectory = false; //to enable custom export path
 	private static boolean nullNumbersAsBlank = true; //whether null numbers are displayed as blank or a zero when nullValueEnabled is true
-
-	/**
-	 * Get string to be displayed in query output for a date field
-	 *
-	 * @param dt
-	 * @return
-	 */
-	public static String getDateDisplayString(java.util.Date dt) {
-		String dateString;
-		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS");
-		SimpleDateFormat df = new SimpleDateFormat(ArtConfig.dateFormat);
-		SimpleDateFormat dtf = new SimpleDateFormat(ArtConfig.dateFormat + " " + ArtConfig.timeFormat);
-		if (dt == null) {
-			dateString = "";
-		} else if (zf.format(dt).equals("00:00:00.000")) {
-			dateString = df.format(dt);
-		} else {
-			dateString = dtf.format(dt);
-		}
-		return dateString;
-	}
-
-	/**
-	 * Get language file to use for datatables, depending on the locale
-	 *
-	 * @param request
-	 * @return
-	 */
-	public static String getDataTablesLanguageUrl(HttpServletRequest request) {
-		String url = "";
-		String languageFileName = "dataTables." + request.getLocale().toString() + ".txt";
-		String sep = File.separator;
-		String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
-		File languageFile = new File(languageFilePath);
-		if (languageFile.exists()) {
-			url = request.getContextPath() + "/js/" + languageFileName;
-		}
-		return url;
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -437,7 +397,6 @@ public class ArtConfig extends HttpServlet {
 	 * Initialize art repository datasource, and other defined datasources
 	 */
 	private static void initializeDatasources() {
-
 		boolean jndiDatasource = false;
 
 		//initialize art repository datasource
@@ -714,24 +673,10 @@ public class ArtConfig extends HttpServlet {
 			ps.setString(5, message);
 
 			ps.executeUpdate();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
+			ArtUtils.close(ps, conn);
 		}
 	}
 
@@ -773,24 +718,10 @@ public class ArtConfig extends HttpServlet {
 			ps.setString(8, message);
 
 			ps.executeUpdate();
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
+			ArtUtils.close(ps, conn);
 		}
 	}
 
@@ -1223,6 +1154,7 @@ public class ArtConfig extends HttpServlet {
 				 */
 				Connection conn = null;
 				PreparedStatement ps = null;
+				ResultSet rs = null;
 				try {
 					//default to using bcrypt instead of md5 for password hashing
 					//password = digestString(password, "MD5");
@@ -1236,7 +1168,7 @@ public class ArtConfig extends HttpServlet {
 					} else {
 						ps = conn.prepareStatement(SqlQuery);
 						ps.setString(1, username);
-						ResultSet rs = ps.executeQuery();
+						rs = ps.executeQuery();
 						if (rs.next()) {
 							//user exists. verify password
 							if (Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"))) {
@@ -1256,23 +1188,9 @@ public class ArtConfig extends HttpServlet {
 							ArtConfig.log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
 							msg = messages.getString("invalidAccount");
 						}
-						rs.close();
 					}
 				} finally {
-					try {
-						if (ps != null) {
-							ps.close();
-						}
-					} catch (Exception e) {
-						logger.error("Error", e);
-					}
-					try {
-						if (conn != null) {
-							conn.close();
-						}
-					} catch (Exception e) {
-						logger.error("Error", e);
-					}
+					ArtUtils.close(rs, ps, conn);
 				}
 			} // end internal authentication
 			/*
@@ -1286,6 +1204,7 @@ public class ArtConfig extends HttpServlet {
 			 */
 			Connection conn = null;
 			PreparedStatement ps = null;
+			ResultSet rs = null;
 			try {
 				username = (String) session.getAttribute("username");
 				String SqlQuery = ("SELECT ACCESS_LEVEL FROM ART_USERS "
@@ -1297,7 +1216,7 @@ public class ArtConfig extends HttpServlet {
 				} else {
 					ps = conn.prepareStatement(SqlQuery);
 					ps.setString(1, username);
-					ResultSet rs = ps.executeQuery();
+					rs = ps.executeQuery();
 					if (rs.next()) {
 						// ----------------------------------------------------AUTHENTICATED!
 
@@ -1310,23 +1229,9 @@ public class ArtConfig extends HttpServlet {
 						ArtConfig.log(username, "loginerr", request.getRemoteAddr(), "external, failed");
 						msg = messages.getString("invalidUser");
 					}
-					rs.close();
 				}
 			} finally {
-				try {
-					if (ps != null) {
-						ps.close();
-					}
-				} catch (Exception e) {
-					logger.error("Error", e);
-				}
-				try {
-					if (conn != null) {
-						conn.close();
-					}
-				} catch (Exception e) {
-					logger.error("Error", e);
-				}
+				ArtUtils.close(rs, ps, conn);
 			}
 		} else {
 			// if the request is for a public_user session
@@ -1374,5 +1279,44 @@ public class ArtConfig extends HttpServlet {
 		}
 
 		return domainsList;
+	}
+
+	/**
+	 * Get string to be displayed in query output for a date field
+	 *
+	 * @param dt
+	 * @return
+	 */
+	public static String getDateDisplayString(java.util.Date dt) {
+		String dateString;
+		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS");
+		SimpleDateFormat df = new SimpleDateFormat(ArtConfig.dateFormat);
+		SimpleDateFormat dtf = new SimpleDateFormat(ArtConfig.dateFormat + " " + ArtConfig.timeFormat);
+		if (dt == null) {
+			dateString = "";
+		} else if (zf.format(dt).equals("00:00:00.000")) {
+			dateString = df.format(dt);
+		} else {
+			dateString = dtf.format(dt);
+		}
+		return dateString;
+	}
+
+	/**
+	 * Get language file to use for datatables, depending on the locale
+	 *
+	 * @param request
+	 * @return
+	 */
+	public static String getDataTablesLanguageUrl(HttpServletRequest request) {
+		String url = "";
+		String languageFileName = "dataTables." + request.getLocale().toString() + ".txt";
+		String sep = File.separator;
+		String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
+		File languageFile = new File(languageFilePath);
+		if (languageFile.exists()) {
+			url = request.getContextPath() + "/js/" + languageFileName;
+		}
+		return url;
 	}
 }
