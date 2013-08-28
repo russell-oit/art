@@ -86,7 +86,7 @@ public class ArtHelper {
 						}
 					}
 				} finally {
-					ArtUtils.close(rs, ps, conn);
+					DbUtils.close(rs, ps, conn);
 				}
 			}
 		} else if (session.getAttribute("username") != null) {
@@ -113,7 +113,7 @@ public class ArtHelper {
 					}
 				}
 			} finally {
-				ArtUtils.close(rs, ps, conn);
+				DbUtils.close(rs, ps, conn);
 			}
 		} else {
 			if (request.getParameter("_public_user") != null) {
@@ -197,7 +197,7 @@ public class ArtHelper {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(ps, conn);
+			DbUtils.close(ps, conn);
 		}
 	}
 
@@ -234,7 +234,7 @@ public class ArtHelper {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(ps, conn);
+			DbUtils.close(ps, conn);
 		}
 	}
 }

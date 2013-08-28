@@ -14,16 +14,6 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * ExecuteQuery.java
- *
- * Purpose: 1. Execute the query (on the right database...) 2. build the html
- * page to show the data or create the spreadsheet or exportable file and show
- * the link to retrieve it or forward to the page to create the graph 3. Write
- * log file with statistics
- *
- *
- */
 package art.servlets;
 
 import art.graph.*;
@@ -52,6 +42,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class to start off the query execution process and display the results.
+ * 
+ * Purpose: 1. Execute the query (on the right database...) 2. build the html
+ * page to show the data or create the spreadsheet or exportable file and show
+ * the link to retrieve it or forward to the page to create the graph 3. Write
+ * log file with statistics
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -90,276 +85,7 @@ public class ExecuteQuery extends HttpServlet {
 		}
 	}
 
-	/**
-	 * Generate a report on column (grouped) report.
-	 *
-	 * @param out
-	 * @param rs
-	 * @param rsmd
-	 * @param splitCol
-	 * @return number of rows output
-	 * @throws SQLException
-	 */
-	private int htmlReportOut(PrintWriter out, ResultSet rs, ResultSetMetaData rsmd, int splitCol)
-			throws SQLException {
-		int col_count = rsmd.getColumnCount();
-		int i;
-		int counter = 0;
-		htmlReportOutWriter o = new htmlReportOutWriter(out);
-		String tmpstr;
-		StringBuffer cmpStr; // temporary string used to compare values
-		StringBuffer tmpCmpStr; // temporary string used to compare values
-
-
-		// Report, is intended to be something like that:
-		/*
-		 * ------------------------------------- | Attr1 | Attr2 | Attr3 | //
-		 * Main header ------------------------------------- | Value1 | Value2 |
-		 * Value3 | // Main Data -------------------------------------
-		 *
-		 * -----------------------------... | SubAttr1 | Subattr2 |... // Sub
-		 * Header -----------------------------... | SubValue1.1 | SubValue1.2
-		 * |... // Sub Data -----------------------------... | SubValue2.1 |
-		 * SubValue2.2 |... -----------------------------...
-		 * ................................ ................................
-		 * ................................
-		 *
-		 * etc...
-		 */
-
-		// Build main header HTML
-		for (i = 0; i < (splitCol); i++) {
-			tmpstr = rsmd.getColumnLabel(i + 1);
-			o.addCellToMainHeader(tmpstr);
-		}
-		// Now the header is completed
-
-		// Build the Sub Header
-		for (; i < col_count; i++) {
-			tmpstr = rsmd.getColumnLabel(i + 1);
-			o.addCellToSubHeader(tmpstr);
-		}
-
-		int maxRows = ArtConfig.getMaxRows("htmlreport");
-
-		while (rs.next() && counter < maxRows) {
-			// Separators
-			out.println("<br><hr style=\"width:90%;height:1px\"><br>");
-
-			// Output Main Header and Main Data
-			o.header(90);
-			o.printMainHeader();
-			o.beginLines();
-			cmpStr = new StringBuffer();
-
-			// Output Main Data (only one row, obviously)
-			for (i = 0; i < splitCol; i++) {
-				o.addCellToLine(rs.getString(i + 1));
-				cmpStr.append(rs.getString(i + 1));
-			}
-			o.endLines();
-			o.footer();
-
-			// Output Sub Header and Sub Data
-			o.header(80);
-			o.printSubHeader();
-			o.beginLines();
-
-			// Output Sub Data (first line)
-			for (; i < col_count; i++) {
-				o.addCellToLine(rs.getString(i + 1));
-			}
-
-			boolean currentMain = true;
-			while (currentMain && counter < maxRows) {  // next line
-				// Get Main Data in order to compare it
-				if (rs.next()) {
-					counter++;
-					tmpCmpStr = new StringBuffer();
-
-					for (i = 0; i < splitCol; i++) {
-						tmpCmpStr.append(rs.getString(i + 1));
-					}
-
-					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
-						o.newLine();
-						// Add data lines
-						for (; i < col_count; i++) {
-							o.addCellToLine(rs.getString(i + 1));
-						}
-					} else {
-						o.endLines();
-						o.footer();
-						currentMain = false;
-						rs.previous();
-					}
-				} else {
-					currentMain = false;
-					// The outer and inner while will exit
-				}
-			}
-		}
-
-		if (!(counter < maxRows)) {
-			o.newLine();
-			o.addCellToLine("<blink>Too many rows (>" + maxRows
-					+ ")! Data not completed. Please narrow your search or use the xlsx, slk or tsv view modes</blink>", "qeattr", "left", col_count);
-		}
-
-		o.endLines();
-		o.footer();
-
-		return counter + 1; // number of rows
-	}
-
-	//prepare graph object for it's display using the showGraph.jsp page
-	private ArtGraph artGraphOut(ResultSetMetaData rsmd, HttpServletRequest request,
-			String graphOptions, String shortDescr, int queryType) throws SQLException {
-
-		ArtGraph o;
-
-		switch (queryType) {
-			case -1:
-				o = new ArtXY();
-				break;
-			case -2:
-			case -13:
-				o = new ArtPie();
-				break;
-			case -6:
-				o = new ArtTimeSeries();
-				break;
-			case -7:
-				o = new ArtDateSeries();
-				break; //  this line was missing... added thanks to anonymous post in sf
-			case -10:
-				o = new ArtSpeedometer();
-				break;
-			case -11:
-			case -12:
-				o = new ArtXYZChart();
-				o.setQueryType(queryType);
-				break;
-			default: //-3,-4,-5,-8,-9,-14,-15,-16,-17
-				o = new ArtCategorySeries();
-		}
-
-		String link = rsmd.getColumnLabel(2);
-		if (link.equals("LINK")) {
-			o.setUseHyperLinks(true);
-		} else {
-			o.setUseHyperLinks(false);
-		}
-
-		int width;
-		int height;
-		String bgColor;
-
-		// @200x100 -10:100 #FFFFFF nolegend nolabels
-		// = make a chart 200px width 100px height focused
-		//  on Y range from -10 to 100  with a white backround, without legend and labels
-		String params = request.getParameter("_GRAPH_SIZE");
-		boolean customParam = false;
-		if (StringUtils.isNotBlank(params) && !params.equalsIgnoreCase("DEFAULT")) {
-			customParam = true;
-		}
-
-		String tmp;
-		String options = "";
-		boolean usingShortDescription = true; //to accomodate graph options in short description string for art pre-2.0
-
-		int indexOf = shortDescr.lastIndexOf("@");
-		if (indexOf > -1) {
-			options = shortDescr;
-			shortDescr = shortDescr.substring(0, indexOf);
-		}
-
-		if (graphOptions != null) {
-			options = graphOptions;
-			usingShortDescription = false;
-		}
-
-		if (customParam) {
-			tmp = params;
-			usingShortDescription = false;
-		} else {
-			tmp = options;
-		}
-
-		//process graph options string
-		ArtQuery aq = new ArtQuery();
-		aq.setQueryType(queryType);
-		aq.setGraphDisplayOptions(tmp, usingShortDescription);
-
-		double yMin = aq.getGraphYMin();
-		double yMax = aq.getGraphYMax();
-		width = aq.getGraphWidth();
-		height = aq.getGraphHeight();
-		bgColor = aq.getGraphBgColor();
-		boolean showLegend = aq.isShowLegend();
-		boolean showLabels = aq.isShowLabels();
-		boolean showPoints = aq.isShowPoints();
-		boolean showGraphData = aq.isShowGraphData();
-		int rotateAt = aq.getGraphRotateAt();
-		int removeAt = aq.getGraphRemoveAt();
-
-		request.setAttribute("_rotate_at", String.valueOf(rotateAt));
-		request.setAttribute("_remove_at", String.valueOf(removeAt));
-
-		if (yMin < yMax) {
-			request.setAttribute("_from", String.valueOf(yMin)); //cewolf expects strings
-			request.setAttribute("_to", String.valueOf(yMax));
-		}
-
-		if (!showLegend) {
-			request.setAttribute("_nolegend", "true");
-		}
-
-		if (showLabels) {
-			request.setAttribute("_showlabels", "true");
-		} else {
-			request.setAttribute("_nolabels", "true");
-		}
-
-		if (showPoints) {
-			request.setAttribute("_showpoints", "true");
-		}
-
-		//override show legend, labels, data points with values selected using checkboxes.
-		//only override if from showparams.jsp. if displayed from direct url or dashboard, no chance to change settings using check boxes
-		if (request.getParameter("_GRAPH_SIZE") != null) {
-			if (request.getParameter("_showLegend") == null) {
-				request.setAttribute("_nolegend", "true");
-			} else {
-				request.removeAttribute("_nolegend");
-			}
-			if (request.getParameter("_showLabels") == null) {
-				request.removeAttribute("_showlabels");
-			} else {
-				request.setAttribute("_showlabels", "true");
-			}
-			if (request.getParameter("_showDataPoints") == null) {
-				request.removeAttribute("_showpoints");
-			} else {
-				request.setAttribute("_showpoints", "true");
-			}
-			if (request.getParameter("_showGraphData") == null) {
-				showGraphData = false;
-			} else {
-				showGraphData = true;
-			}
-		}
-
-		o.setTitle(shortDescr);
-		o.setWidth(width);
-		o.setHeight(height);
-		o.setSeriesName(rsmd.getColumnLabel(2));
-		o.setBgColor(bgColor);
-		o.setShowGraphData(showGraphData);
-
-		return o;
-	}
-
+	
 	/**
 	 * Start the query execution process and display the output.
 	 *
@@ -1073,6 +799,277 @@ public class ExecuteQuery extends HttpServlet {
 		// use .......... instead
 		doPost(request, response);
 	}
+	
+	/**
+	 * Generate a report on column (grouped) report.
+	 *
+	 * @param out
+	 * @param rs
+	 * @param rsmd
+	 * @param splitCol
+	 * @return number of rows output
+	 * @throws SQLException
+	 */
+	private int htmlReportOut(PrintWriter out, ResultSet rs, ResultSetMetaData rsmd, int splitCol)
+			throws SQLException {
+		int col_count = rsmd.getColumnCount();
+		int i;
+		int counter = 0;
+		htmlReportOutWriter o = new htmlReportOutWriter(out);
+		String tmpstr;
+		StringBuffer cmpStr; // temporary string used to compare values
+		StringBuffer tmpCmpStr; // temporary string used to compare values
+
+
+		// Report, is intended to be something like that:
+		/*
+		 * ------------------------------------- | Attr1 | Attr2 | Attr3 | //
+		 * Main header ------------------------------------- | Value1 | Value2 |
+		 * Value3 | // Main Data -------------------------------------
+		 *
+		 * -----------------------------... | SubAttr1 | Subattr2 |... // Sub
+		 * Header -----------------------------... | SubValue1.1 | SubValue1.2
+		 * |... // Sub Data -----------------------------... | SubValue2.1 |
+		 * SubValue2.2 |... -----------------------------...
+		 * ................................ ................................
+		 * ................................
+		 *
+		 * etc...
+		 */
+
+		// Build main header HTML
+		for (i = 0; i < (splitCol); i++) {
+			tmpstr = rsmd.getColumnLabel(i + 1);
+			o.addCellToMainHeader(tmpstr);
+		}
+		// Now the header is completed
+
+		// Build the Sub Header
+		for (; i < col_count; i++) {
+			tmpstr = rsmd.getColumnLabel(i + 1);
+			o.addCellToSubHeader(tmpstr);
+		}
+
+		int maxRows = ArtConfig.getMaxRows("htmlreport");
+
+		while (rs.next() && counter < maxRows) {
+			// Separators
+			out.println("<br><hr style=\"width:90%;height:1px\"><br>");
+
+			// Output Main Header and Main Data
+			o.header(90);
+			o.printMainHeader();
+			o.beginLines();
+			cmpStr = new StringBuffer();
+
+			// Output Main Data (only one row, obviously)
+			for (i = 0; i < splitCol; i++) {
+				o.addCellToLine(rs.getString(i + 1));
+				cmpStr.append(rs.getString(i + 1));
+			}
+			o.endLines();
+			o.footer();
+
+			// Output Sub Header and Sub Data
+			o.header(80);
+			o.printSubHeader();
+			o.beginLines();
+
+			// Output Sub Data (first line)
+			for (; i < col_count; i++) {
+				o.addCellToLine(rs.getString(i + 1));
+			}
+
+			boolean currentMain = true;
+			while (currentMain && counter < maxRows) {  // next line
+				// Get Main Data in order to compare it
+				if (rs.next()) {
+					counter++;
+					tmpCmpStr = new StringBuffer();
+
+					for (i = 0; i < splitCol; i++) {
+						tmpCmpStr.append(rs.getString(i + 1));
+					}
+
+					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
+						o.newLine();
+						// Add data lines
+						for (; i < col_count; i++) {
+							o.addCellToLine(rs.getString(i + 1));
+						}
+					} else {
+						o.endLines();
+						o.footer();
+						currentMain = false;
+						rs.previous();
+					}
+				} else {
+					currentMain = false;
+					// The outer and inner while will exit
+				}
+			}
+		}
+
+		if (!(counter < maxRows)) {
+			o.newLine();
+			o.addCellToLine("<blink>Too many rows (>" + maxRows
+					+ ")! Data not completed. Please narrow your search or use the xlsx, slk or tsv view modes</blink>", "qeattr", "left", col_count);
+		}
+
+		o.endLines();
+		o.footer();
+
+		return counter + 1; // number of rows
+	}
+
+	//prepare graph object for it's display using the showGraph.jsp page
+	private ArtGraph artGraphOut(ResultSetMetaData rsmd, HttpServletRequest request,
+			String graphOptions, String shortDescr, int queryType) throws SQLException {
+
+		ArtGraph o;
+
+		switch (queryType) {
+			case -1:
+				o = new ArtXY();
+				break;
+			case -2:
+			case -13:
+				o = new ArtPie();
+				break;
+			case -6:
+				o = new ArtTimeSeries();
+				break;
+			case -7:
+				o = new ArtDateSeries();
+				break; //  this line was missing... added thanks to anonymous post in sf
+			case -10:
+				o = new ArtSpeedometer();
+				break;
+			case -11:
+			case -12:
+				o = new ArtXYZChart();
+				o.setQueryType(queryType);
+				break;
+			default: //-3,-4,-5,-8,-9,-14,-15,-16,-17
+				o = new ArtCategorySeries();
+		}
+
+		String link = rsmd.getColumnLabel(2);
+		if (link.equals("LINK")) {
+			o.setUseHyperLinks(true);
+		} else {
+			o.setUseHyperLinks(false);
+		}
+
+		int width;
+		int height;
+		String bgColor;
+
+		// @200x100 -10:100 #FFFFFF nolegend nolabels
+		// = make a chart 200px width 100px height focused
+		//  on Y range from -10 to 100  with a white backround, without legend and labels
+		String params = request.getParameter("_GRAPH_SIZE");
+		boolean customParam = false;
+		if (StringUtils.isNotBlank(params) && !params.equalsIgnoreCase("DEFAULT")) {
+			customParam = true;
+		}
+
+		String tmp;
+		String options = "";
+		boolean usingShortDescription = true; //to accomodate graph options in short description string for art pre-2.0
+
+		int indexOf = shortDescr.lastIndexOf("@");
+		if (indexOf > -1) {
+			options = shortDescr;
+			shortDescr = shortDescr.substring(0, indexOf);
+		}
+
+		if (graphOptions != null) {
+			options = graphOptions;
+			usingShortDescription = false;
+		}
+
+		if (customParam) {
+			tmp = params;
+			usingShortDescription = false;
+		} else {
+			tmp = options;
+		}
+
+		//process graph options string
+		ArtQuery aq = new ArtQuery();
+		aq.setQueryType(queryType);
+		aq.setGraphDisplayOptions(tmp, usingShortDescription);
+
+		double yMin = aq.getGraphYMin();
+		double yMax = aq.getGraphYMax();
+		width = aq.getGraphWidth();
+		height = aq.getGraphHeight();
+		bgColor = aq.getGraphBgColor();
+		boolean showLegend = aq.isShowLegend();
+		boolean showLabels = aq.isShowLabels();
+		boolean showPoints = aq.isShowPoints();
+		boolean showGraphData = aq.isShowGraphData();
+		int rotateAt = aq.getGraphRotateAt();
+		int removeAt = aq.getGraphRemoveAt();
+
+		request.setAttribute("_rotate_at", String.valueOf(rotateAt));
+		request.setAttribute("_remove_at", String.valueOf(removeAt));
+
+		if (yMin < yMax) {
+			request.setAttribute("_from", String.valueOf(yMin)); //cewolf expects strings
+			request.setAttribute("_to", String.valueOf(yMax));
+		}
+
+		if (!showLegend) {
+			request.setAttribute("_nolegend", "true");
+		}
+
+		if (showLabels) {
+			request.setAttribute("_showlabels", "true");
+		} else {
+			request.setAttribute("_nolabels", "true");
+		}
+
+		if (showPoints) {
+			request.setAttribute("_showpoints", "true");
+		}
+
+		//override show legend, labels, data points with values selected using checkboxes.
+		//only override if from showparams.jsp. if displayed from direct url or dashboard, no chance to change settings using check boxes
+		if (request.getParameter("_GRAPH_SIZE") != null) {
+			if (request.getParameter("_showLegend") == null) {
+				request.setAttribute("_nolegend", "true");
+			} else {
+				request.removeAttribute("_nolegend");
+			}
+			if (request.getParameter("_showLabels") == null) {
+				request.removeAttribute("_showlabels");
+			} else {
+				request.setAttribute("_showlabels", "true");
+			}
+			if (request.getParameter("_showDataPoints") == null) {
+				request.removeAttribute("_showpoints");
+			} else {
+				request.setAttribute("_showpoints", "true");
+			}
+			if (request.getParameter("_showGraphData") == null) {
+				showGraphData = false;
+			} else {
+				showGraphData = true;
+			}
+		}
+
+		o.setTitle(shortDescr);
+		o.setWidth(width);
+		o.setHeight(height);
+		o.setSeriesName(rsmd.getColumnLabel(2));
+		o.setBgColor(bgColor);
+		o.setShowGraphData(showGraphData);
+
+		return o;
+	}
+
 
 	//get number of rows in a resultset.
 	private int getNumberOfRows(ResultSet rs) {

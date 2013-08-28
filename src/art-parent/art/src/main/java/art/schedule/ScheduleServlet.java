@@ -11,12 +11,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Timothy Anyona
  */
 public class ScheduleServlet extends HttpServlet {
+	final static Logger logger = LoggerFactory.getLogger(ScheduleServlet.class);
 
 	/**
 	 * Processes requests for both HTTP
@@ -37,13 +42,13 @@ public class ScheduleServlet extends HttpServlet {
 			out.println("<!DOCTYPE html>");
 			out.println("<html>");
 			out.println("<head>");
-			out.println("<title>Servlet ScheduleServlet</title>");			
+			out.println("<title>Servlet ScheduleServlet</title>");
 			out.println("</head>");
 			out.println("<body>");
 			out.println("<h1>Servlet ScheduleServlet at " + request.getContextPath() + "</h1>");
 			out.println("</body>");
 			out.println("</html>");
-		} finally {			
+		} finally {
 			out.close();
 		}
 	}
@@ -60,13 +65,36 @@ public class ScheduleServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
+		request.setCharacterEncoding("UTF-8");
+
 		String userPath = request.getServletPath();
-		
-		ScheduleDao scheduleDao=new ScheduleDao();
-		List<Schedule> schedules=scheduleDao.getAllSchedules();
-		request.setAttribute("schedules", schedules);
-		
-		request.getRequestDispatcher("/WEB-INF/jsp/schedules.jsp").forward(request, response);
+
+		String action = request.getParameter("action");
+		String id=request.getParameter("id");
+
+		ScheduleDao scheduleDao = new ScheduleDao();
+
+		if (StringUtils.equalsIgnoreCase(action, "list")) {
+			request.setAttribute("schedules", scheduleDao.getAllSchedules());
+
+			request.getRequestDispatcher("/WEB-INF/jsp/schedules.jsp").forward(request, response);
+		} else if (StringUtils.equalsIgnoreCase(action, "delete")) {
+			scheduleDao.deleteSchedule(id);
+//			int scheduleId=NumberUtils.toInt(id);
+//			if(scheduleId>0){
+//				scheduleDao.deleteSchedule(id);
+//			} else {
+//				logger.warn("Invalid schedule to delete: id={}",id);
+//			}
+			
+			response.sendRedirect(request.getContextPath() + "/admin/schedules?action=list");
+		} else if (StringUtils.equalsIgnoreCase(action, "edit")) {
+			Schedule schedule=scheduleDao.getSchedule(id);
+			request.setAttribute("schedule", schedule);
+			request.getRequestDispatcher("/WEB-INF/jsp/editSchedule.jsp").forward(request, response);
+			
+		}
 	}
 
 	/**

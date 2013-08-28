@@ -18,11 +18,10 @@ package art.schedule;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtUtils;
+import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,7 +67,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(rs, ps, conn);
+			DbUtils.close(rs, ps, conn);
 		}
 
 		return scheduleExists;
@@ -100,7 +99,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(ps, conn);
+			DbUtils.close(ps, conn);
 		}
 	}
 
@@ -130,7 +129,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(ps, conn);
+			DbUtils.close(ps, conn);
 		}
 	}
 
@@ -159,7 +158,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(rs, ps, conn);
+			DbUtils.close(rs, ps, conn);
 		}
 
 		//sort names
@@ -191,7 +190,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(ps, conn);
+			DbUtils.close(ps, conn);
 		}
 	}
 
@@ -229,7 +228,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(rs, ps, conn);
+			DbUtils.close(rs, ps, conn);
 		}
 
 		return schedule;
@@ -269,7 +268,7 @@ public class ScheduleDao {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(rs, ps, conn);
+			DbUtils.close(rs, ps, conn);
 		}
 
 		return schedules;

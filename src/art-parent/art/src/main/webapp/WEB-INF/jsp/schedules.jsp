@@ -19,8 +19,8 @@
 	});
 </script>
 
-<div id="container">
-	<div id="demo_jui">
+<div id="container" style="margin: 30px auto; padding: 0; width: 800px;">
+	<div id="demo_jui" style="margin: 30px auto 0 auto;">
 		<button id="btnAddNewRow" value="Ok">New</button> 
 		<button id="btnDeleteRow" value="cancel">Delete selected</button>
 		<table id="schedulesTable" class="display">

@@ -19,6 +19,7 @@ package art.servlets;
 import art.dbcp.DataSource;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
+import art.utils.DbUtils;
 import art.utils.Encrypter;
 import com.lowagie.text.FontFactory;
 import java.sql.*;
@@ -489,7 +490,7 @@ public class ArtConfig extends HttpServlet {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtUtils.close(rs, st, conn);
+			DbUtils.close(rs, st, conn);
 		}
 	}
 
