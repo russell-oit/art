@@ -476,6 +476,6 @@ public class EnhancedConnection implements Connection {
 	*/
     
     /*
-     * END JDK 1.6 only
+     * END JDK 1.7 only
      */
 }

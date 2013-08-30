@@ -18,3 +18,4 @@ src/art-parent/.project
 src/art-parent/artmail/nb-configuration.xml
 src/art-parent/artdbcp/nb-configuration.xml
 src/art-parent/art/nb-configuration.xml
+src/art-parent/nb-configuration.xml

@@ -10,7 +10,7 @@
 
 	<artifactId>art</artifactId>
 	<packaging>war</packaging>
-	<version>2.5.3-SNAPSHOT</version>
+	<version>3.0-SNAPSHOT</version>
 
 	<name>art</name>
 	<url>http://art.sourceforge.net</url>
@@ -137,6 +137,16 @@
 			<groupId>taglibs</groupId>
 			<artifactId>standard</artifactId>
 			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>3.2.4.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.2.2</version>
 		</dependency>
 		<!-- mondrian specific dependencies -->
 		<dependency>

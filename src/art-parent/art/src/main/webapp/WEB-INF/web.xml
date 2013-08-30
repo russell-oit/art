@@ -13,7 +13,7 @@
     <context-param>
         <description>ART Version Number</description>
         <param-name>versionNumber</param-name>
-        <param-value>2.5.3-alpha1</param-value>
+        <param-value>3.0-alpha1</param-value>
     </context-param>
     <!-- Filters -->
     <filter>
@@ -28,6 +28,14 @@
         <filter-name>exportPathFilter</filter-name>
         <filter-class>art.servlets.ExportPathFilter</filter-class>
     </filter>
+    <filter>
+        <filter-name>encodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
     <filter-mapping>
         <filter-name>AuthFilter</filter-name>
         <url-pattern>/user/*</url-pattern>
@@ -40,47 +48,11 @@
         <filter-name>exportPathFilter</filter-name>
         <url-pattern>/export/*</url-pattern>
     </filter-mapping>
+	<filter-mapping>
+        <filter-name>encodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <!-- Servlet definitions -->
-    <servlet>
-        <!-- description, if it exists, must come before servlet-name -->
-        <description>
-			Initialize ART settings and database connection pools
-		</description>
-        <servlet-name>ArtConfig</servlet-name>
-        <servlet-class>art.servlets.ArtConfig</servlet-class>
-        <!-- Load this servlet at server startup time -->
-        <load-on-startup>2</load-on-startup>
-    </servlet>
-    <servlet>
-        <description>
-			Get various info for ajax components
-		</description>
-        <servlet-name>AjaxTagsDataProvider</servlet-name>
-        <servlet-class>art.servlets.AjaxTagsDataProvider</servlet-class>
-        <!-- load after ArtConfig -->
-        <load-on-startup>3</load-on-startup>
-    </servlet>
-    <servlet>
-        <description>
-			Clean export files 	   
-		</description>
-        <servlet-name>Scheduler</servlet-name>
-        <servlet-class>art.servlets.Scheduler</servlet-class>
-        <!-- load after ArtConfig -->
-        <load-on-startup>4</load-on-startup>
-    </servlet>
-    <servlet>
-        <description>
-			Execute the query and show the results
-		</description>
-        <servlet-name>ExecuteQuery</servlet-name>
-        <servlet-class>art.servlets.ExecuteQuery</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ViewLogs</servlet-name>
-        <servlet-class>art.servlets.ViewLogs</servlet-class>
-    </servlet>
-    <!-- CeWolf -->
     <servlet>
         <servlet-name>CewolfServlet</servlet-name>
         <servlet-class>de.laures.cewolf.CewolfRenderer</servlet-class>
@@ -107,23 +79,62 @@
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet>
-        <servlet-name>ScheduleServlet</servlet-name>
-        <servlet-class>art.schedule.ScheduleServlet</servlet-class>
+        <servlet-name>dispatcher</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>2</load-on-startup>
     </servlet>
+    <servlet>
+        <!-- description, if it exists, must come before servlet-name -->
+        <description>
+			Initialize ART settings and database connection pools
+		</description>
+        <servlet-name>ArtConfig</servlet-name>
+        <servlet-class>art.servlets.ArtConfig</servlet-class>
+        <!-- Load this servlet at server startup time -->
+        <load-on-startup>3</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>
+			Get data for AjaxTags components
+		</description>
+        <servlet-name>AjaxTagsDataProvider</servlet-name>
+        <servlet-class>art.servlets.AjaxTagsDataProvider</servlet-class>
+        <!-- load after ArtConfig -->
+        <load-on-startup>4</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>
+			Periodically perform some actions e.g. clean export files 	   
+		</description>
+        <servlet-name>Scheduler</servlet-name>
+        <servlet-class>art.servlets.Scheduler</servlet-class>
+        <!-- load after ArtConfig -->
+        <load-on-startup>5</load-on-startup>
+    </servlet>
+    <servlet>
+        <description>
+			Execute the query and show the results
+		</description>
+        <servlet-name>ExecuteQuery</servlet-name>
+        <servlet-class>art.servlets.ExecuteQuery</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ViewLogs</servlet-name>
+        <servlet-class>art.servlets.ViewLogs</servlet-class>
+    </servlet>
+    <!-- 
+	 * Define servlet mappings
+		 that are used by the servlet container to
+		 translate a particular request URI (context-relative) to a
+		 particular servlet.  
+		 You may define any number of servlet mappings, including zero.
+		 It is also legal to define more than one mapping for the same
+		 servlet, if you wish to.
+	-->
     <servlet-mapping>
         <servlet-name>CewolfServlet</servlet-name>
         <url-pattern>/cewolf/*</url-pattern>
     </servlet-mapping>
-    <!-- End CeWolf -->
-    <!-- 
-  * Define servlet mappings
-	  that are used by the servlet container to
-	  translate a particular request URI (context-relative) to a
-	  particular servlet.  
-	  You may define any number of servlet mappings, including zero.
-	  It is also legal to define more than one mapping for the same
-	  servlet, if you wish to.
- -->
     <servlet-mapping>
         <servlet-name>AjaxTagsDataProvider</servlet-name>
         <url-pattern>/AjaxTagsDataProvider</url-pattern>
@@ -137,17 +148,13 @@
         <servlet-name>ViewLogs</servlet-name>
         <url-pattern>/logs</url-pattern>
     </servlet-mapping>
-    <!-- Define the default session timeout for your application,
- in minutes. From a servlet or JSP page, you can modify
- the timeout for a particular session dynamically by using
- HttpSession.getMaxInactiveInterval(). -->
     <servlet-mapping>
-        <servlet-name>ScheduleServlet</servlet-name>
-        <url-pattern>/admin/schedules</url-pattern>
+        <servlet-name>dispatcher</servlet-name>
+        <url-pattern>/admin/*</url-pattern>
     </servlet-mapping>
     <session-config>
-        <session-timeout>120</session-timeout>
         <!-- 120 minutes -->
+        <session-timeout>120</session-timeout>
     </session-config>
     <!-- JPivot -->
     <context-param>

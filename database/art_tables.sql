@@ -70,7 +70,7 @@ CREATE TABLE ART_SETTINGS
 );
 -- insert database version
 INSERT INTO ART_SETTINGS (SETTING_NAME,SETTING_VALUE) VALUES 
-('database version','2.5.3-alpha1');
+('database version','3.0-alpha1');
 
 
 -- ART_USERS 
