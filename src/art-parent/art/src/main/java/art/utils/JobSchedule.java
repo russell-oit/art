@@ -306,8 +306,8 @@ public class JobSchedule {
 		try {
 			conn = ArtConfig.getConnection();
 
-			String sql = "SELECT AJS.SCHEDULE_NAME "
-					+ " FROM ART_JOB_SCHEDULES AJS";
+			String sql = "SELECT SCHEDULE_NAME "
+					+ " FROM ART_JOB_SCHEDULES";
 
 			ps = conn.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
@@ -401,7 +401,8 @@ public class JobSchedule {
 		try {
 			conn = ArtConfig.getConnection();
 
-			String sql = "SELECT SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY "
+			String sql = "SELECT SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
+					+ " JOB_MONTH, JOB_WEEKDAY "
 					+ " FROM ART_JOB_SCHEDULES "
 					+ " WHERE SCHEDULE_NAME = ?";
 			ps = conn.prepareStatement(sql);

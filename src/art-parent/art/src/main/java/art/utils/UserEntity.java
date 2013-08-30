@@ -301,8 +301,9 @@ public class UserEntity implements Serializable {
 		try {
 			conn = ArtConfig.getConnection();
 
-			String SqlQuery = "SELECT EMAIL,ACCESS_LEVEL,FULL_NAME,ACTIVE_STATUS, PASSWORD "
-					+ " ,DEFAULT_QUERY_GROUP,CAN_CHANGE_PASSWORD, HASHING_ALGORITHM, START_QUERY "
+			String SqlQuery = "SELECT EMAIL,ACCESS_LEVEL,FULL_NAME,ACTIVE_STATUS,"
+					+ " PASSWORD,DEFAULT_QUERY_GROUP,CAN_CHANGE_PASSWORD, "
+					+ " HASHING_ALGORITHM, START_QUERY "
 					+ " FROM ART_USERS "
 					+ " WHERE USERNAME = ? ";
 
@@ -310,13 +311,13 @@ public class UserEntity implements Serializable {
 			ps.setString(1, user);
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
-				setAccessLevel(rs.getInt("ACCESS_LEVEL"));
 				setEmail(rs.getString("EMAIL"));
+				setAccessLevel(rs.getInt("ACCESS_LEVEL"));
 				setFullName(rs.getString("FULL_NAME"));
 				setActiveStatus(rs.getString("ACTIVE_STATUS"));
+				password = rs.getString("PASSWORD");
 				setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 				canChangePasswordString = rs.getString("CAN_CHANGE_PASSWORD");
-				password = rs.getString("PASSWORD");
 				hashingAlgorithm = rs.getString("HASHING_ALGORITHM");
 				startQuery = rs.getString("START_QUERY");
 			}
@@ -714,7 +715,7 @@ public class UserEntity implements Serializable {
 			PreparedStatement ps;
 			ResultSet rs;
 
-			String SqlQuery = "SELECT aqg.QUERY_GROUP_ID , aqg.NAME "
+			String SqlQuery = "SELECT aqg.NAME, aqg.QUERY_GROUP_ID "
 					+ " FROM ART_USER_QUERY_GROUPS auqg , ART_QUERY_GROUPS aqg "
 					+ " WHERE auqg.USERNAME = ? "
 					+ " AND auqg.QUERY_GROUP_ID = aqg.QUERY_GROUP_ID "
@@ -732,7 +733,7 @@ public class UserEntity implements Serializable {
 			ps.close();
 
 			//add query groups to which the user has access through his user group membership
-			SqlQuery = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME "
+			SqlQuery = "SELECT DISTINCT AQG.NAME,AQG.QUERY_GROUP_ID "
 					+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERY_GROUPS AQG "
 					+ " WHERE AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
 					+ (groupId == -1 ? "" : ("AND AQG.QUERY_GROUP_ID =" + groupId))
@@ -793,7 +794,7 @@ public class UserEntity implements Serializable {
 			PreparedStatement ps;
 			ResultSet rs;
 
-			String SqlQuery = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME, AQ.QUERY_TYPE "
+			String SqlQuery = "SELECT DISTINCT AQG.NAME, AQG.QUERY_GROUP_ID "
 					+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
 					+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
 					+ " AND AUQ.USERNAME=? AND AQG.QUERY_GROUP_ID<>0"
@@ -810,7 +811,7 @@ public class UserEntity implements Serializable {
 			ps.close();
 
 			//add groups where user's group has rights to the query
-			SqlQuery = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME "
+			SqlQuery = "SELECT DISTINCT AQG.NAME, AQG.QUERY_GROUP_ID "
 					+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
 					+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
 					+ " AND AQG.QUERY_GROUP_ID<>0 AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
@@ -863,7 +864,7 @@ public class UserEntity implements Serializable {
 			ResultSet rs;
 
 			// User can run queries directly granted to him. don't show static lov, dynamic lov or dynamic job recipient queries
-			sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME "
+			sqlQuery = "SELECT AQ.NAME, AQ.QUERY_ID "
 					+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ "
 					+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID "
 					+ " AND AUQ.USERNAME=? AND AQ.QUERY_GROUP_ID=? "
@@ -883,7 +884,7 @@ public class UserEntity implements Serializable {
 			ps.close();
 
 			//add queries to which user has access through user group membership
-			sqlQuery = "SELECT DISTINCT AQ.QUERY_ID, AQ.NAME "
+			sqlQuery = "SELECT DISTINCT AQ.NAME, AQ.QUERY_ID "
 					+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ "
 					+ " WHERE AUGQ.QUERY_ID = AQ.QUERY_ID "
 					+ " AND AQ.ACTIVE_STATUS = 'A' AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
@@ -903,7 +904,7 @@ public class UserEntity implements Serializable {
 			ps.close();
 
 			// user can run all queries in the query groups he has access to
-			sqlQuery = "SELECT AQ.QUERY_ID, AQ.NAME "
+			sqlQuery = "SELECT AQ.NAME, AQ.QUERY_ID "
 					+ " FROM ART_USER_QUERY_GROUPS AUQG, ART_QUERIES AQ "
 					+ " WHERE AUQG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
 					+ " AND AUQG.USERNAME=? AND AQ.QUERY_GROUP_ID = ? "
@@ -917,13 +918,13 @@ public class UserEntity implements Serializable {
 			rs = ps.executeQuery();
 
 			while (rs.next()) {
-				map.put(rs.getString(2), new Integer(rs.getInt(1)));
+				map.put(rs.getString("NAME"), new Integer(rs.getInt("QUERY_ID")));
 			}
 			rs.close();
 			ps.close();
 
 			//user can run all queries in the query groups his user groups have access to
-			sqlQuery = "SELECT DISTINCT AQ.QUERY_ID, AQ.NAME "
+			sqlQuery = "SELECT DISTINCT AQ.NAME, AQ.QUERY_ID "
 					+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERIES AQ "
 					+ " WHERE AUGG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
 					+ " AND AQ.ACTIVE_STATUS = 'A' AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
@@ -973,10 +974,12 @@ public class UserEntity implements Serializable {
 			ResultSet rs;
 
 			//get shared jobs user has access to via group membership. non-spit jobs. no entries for them in the art_user_jobs table
-			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE, aj.SUBJECT, aq.USES_RULES, aj.ALLOW_SPLITTING "
-					+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE, aj.CACHED_TABLE_NAME "
-					+ " ,aj.LAST_END_DATE, aj.OUTPUT_FORMAT, aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE "
-					+ " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH "
+			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
+					+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
+					+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"
+					+ " aj.CACHED_TABLE_NAME,aj.LAST_END_DATE, aj.OUTPUT_FORMAT, "
+					+ " aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE,aj.JOB_MINUTE,  "
+					+ " aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH "
 					+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_GROUP_JOBS AUGJ "
 					+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID = AUGJ.JOB_ID "
 					+ " AND aj.USERNAME <> ? AND EXISTS "
@@ -992,7 +995,8 @@ public class UserEntity implements Serializable {
 				ArtJob aj = new ArtJob();
 				aj.setQueryName(rs.getString("QUERY_NAME"));
 				aj.setJobName(rs.getString("JOB_NAME"));
-				aj.setJobIdOnly(rs.getInt("JOB_ID"));
+				int jobId=rs.getInt("JOB_ID");
+				aj.setJobIdOnly(jobId);
 				aj.setJobType(rs.getInt("JOB_TYPE"));
 				aj.setQueryRulesFlag(rs.getString("USES_RULES"));
 				aj.setAllowSplitting(rs.getString("ALLOW_SPLITTING"));
@@ -1013,18 +1017,21 @@ public class UserEntity implements Serializable {
 
 				aj.buildParametersDisplayString();
 
-				jobs.put(Integer.valueOf(rs.getInt("JOB_ID")), aj);
+				jobs.put(Integer.valueOf(jobId), aj);
 			}
 			rs.close();
 			ps.close();
 
 
 			//get jobs user has direct access to. both split and non-split jobs
-			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE, aj.SUBJECT, aq.USES_RULES, aj.ALLOW_SPLITTING "
-					+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE, aj.CACHED_TABLE_NAME "
-					+ " ,auj.LAST_FILE_NAME AS SHARED_FILE_NAME, auj.LAST_START_DATE AS SHARED_START_DATE "
-					+ " ,aj.LAST_END_DATE, aj.OUTPUT_FORMAT, aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE "
-					+ " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH, auj.LAST_END_DATE AS SHARED_END_DATE "
+			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
+					+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
+					+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"
+					+ " aj.CACHED_TABLE_NAME,auj.LAST_FILE_NAME AS SHARED_FILE_NAME, "
+					+ " auj.LAST_START_DATE AS SHARED_START_DATE,aj.LAST_END_DATE, "
+					+ " aj.OUTPUT_FORMAT, aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE "
+					+ " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
+					+ " aj.JOB_MONTH, auj.LAST_END_DATE AS SHARED_END_DATE "
 					+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_JOBS auj "
 					+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID=auj.JOB_ID "
 					+ " AND auj.USERNAME = ? AND aj.USERNAME <> ?";
@@ -1039,7 +1046,8 @@ public class UserEntity implements Serializable {
 				aj.setQueryName(rs.getString("QUERY_NAME"));
 				aj.setJobName(rs.getString("JOB_NAME"));
 				aj.setJobIdOnly(rs.getInt("JOB_ID"));
-				aj.setJobType(rs.getInt("JOB_TYPE"));
+				int jobId=rs.getInt("JOB_TYPE");
+				aj.setJobType(jobId);
 				aj.setQueryRulesFlag(rs.getString("USES_RULES"));
 				aj.setAllowSplitting(rs.getString("ALLOW_SPLITTING"));
 				aj.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
@@ -1062,7 +1070,7 @@ public class UserEntity implements Serializable {
 
 				aj.buildParametersDisplayString();
 
-				jobs.put(new Integer(rs.getInt("JOB_ID")), aj);
+				jobs.put(new Integer(jobId), aj);
 			}
 			rs.close();
 			ps.close();
@@ -1098,7 +1106,8 @@ public class UserEntity implements Serializable {
 			ResultSet rs;
 
 			//get job archives that user has access to
-			sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID, AJA.ARCHIVE_FILE_NAME, AJA.END_DATE "
+			sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME, AJA.ARCHIVE_ID,"
+					+ " AJA.ARCHIVE_FILE_NAME, AJA.END_DATE "
 					+ " FROM ART_JOB_ARCHIVES AJA, ART_JOBS AJ"
 					+ " WHERE AJA.JOB_ID=AJ.JOB_ID"
 					+ " AND AJA.USERNAME=?" //user owns job or individualized output
@@ -1126,7 +1135,6 @@ public class UserEntity implements Serializable {
 			while (rs.next()) {
 				ArtJob aj = new ArtJob();
 				int jobId = rs.getInt("JOB_ID");
-
 				aj.setJobIdOnly(jobId);
 				aj.setJobName(rs.getString("JOB_NAME"));
 				aj.setFileName(rs.getString("ARCHIVE_FILE_NAME"));
@@ -1190,7 +1198,8 @@ public class UserEntity implements Serializable {
 			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.USERNAME"
 					+ " ,aj.OUTPUT_FORMAT, aj.JOB_TYPE "
 					+ " , aj.MAIL_TOS, aj.MESSAGE , aj.SUBJECT "
-					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH "
+					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
+					+ " aj.JOB_MONTH "
 					+ " , aj.JOB_ID, aj.CACHED_TABLE_NAME "
 					+ " , aj.LAST_START_DATE ,  aj.LAST_END_DATE , aj.LAST_FILE_NAME"
 					+ " , aq.QUERY_TYPE, aj.NEXT_RUN_DATE "
@@ -1207,27 +1216,27 @@ public class UserEntity implements Serializable {
 				aj.setQueryName(rs.getString("QUERY_NAME"));
 				aj.setJobName(rs.getString("JOB_NAME"));
 				aj.setUsername(rs.getString("USERNAME"));
-				aj.setJobIdOnly(rs.getInt("JOB_ID"));
-				aj.setJobType(rs.getInt("JOB_TYPE"));
-				aj.setQueryType(rs.getInt("QUERY_TYPE"));
-				aj.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
-				aj.setFileName(rs.getString("LAST_FILE_NAME"));
-				aj.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
-				aj.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
-				aj.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
 				aj.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
+				aj.setJobType(rs.getInt("JOB_TYPE"));
 				aj.setTos(rs.getString("MAIL_TOS"));
-				aj.setSubject(rs.getString("SUBJECT"));
 				aj.setMessage(rs.getString("MESSAGE"));
+				aj.setSubject(rs.getString("SUBJECT"));
 				aj.setMinute(rs.getString("JOB_MINUTE"));
 				aj.setHour(rs.getString("JOB_HOUR"));
 				aj.setDay(rs.getString("JOB_DAY"));
 				aj.setWeekday(rs.getString("JOB_WEEKDAY"));
 				aj.setMonth(rs.getString("JOB_MONTH"));
-
+				int jobId=rs.getInt("JOB_ID");
+				aj.setJobIdOnly(jobId);
+				aj.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
+				aj.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
+				aj.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
+				aj.setFileName(rs.getString("LAST_FILE_NAME"));
+				aj.setQueryType(rs.getInt("QUERY_TYPE"));
+				aj.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
 				aj.buildParametersDisplayString();
 
-				jobs.put(Integer.valueOf(rs.getInt("JOB_ID")), aj);
+				jobs.put(Integer.valueOf(jobId), aj);
 			}
 			rs.close();
 		} catch (Exception e) {
@@ -1270,14 +1279,15 @@ public class UserEntity implements Serializable {
 
 			String sql;
 			ResultSet rs;
-			String uname;
-			int jobId;
 
-			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE "
+			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.USERNAME,"
+					+ " aj.OUTPUT_FORMAT, aj.JOB_TYPE "
 					+ " , aj.MAIL_TOS, aj.MESSAGE , aj.SUBJECT "
-					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH "
+					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
+					+ " aj.JOB_MONTH "
 					+ " , aj.JOB_ID, aj.CACHED_TABLE_NAME "
-					+ " , aj.LAST_START_DATE ,  aj.LAST_END_DATE , aj.LAST_FILE_NAME , aq.QUERY_TYPE, aj.NEXT_RUN_DATE "
+					+ " , aj.LAST_START_DATE ,  aj.LAST_END_DATE , aj.LAST_FILE_NAME ,"
+					+ " aq.QUERY_TYPE, aj.NEXT_RUN_DATE "
 					+ " FROM ART_JOBS aj , ART_QUERIES aq "
 					+ " WHERE aq.QUERY_ID = aj.QUERY_ID "
 					+ " AND aj.USERNAME <> ? ";
@@ -1290,29 +1300,29 @@ public class UserEntity implements Serializable {
 				ArtJob aj = new ArtJob();
 				aj.setQueryName(rs.getString("QUERY_NAME"));
 				aj.setJobName(rs.getString("JOB_NAME"));
-				aj.setUsername(rs.getString("USERNAME"));
-				aj.setJobIdOnly(rs.getInt("JOB_ID"));
-				aj.setJobType(rs.getInt("JOB_TYPE"));
-				aj.setQueryType(rs.getInt("QUERY_TYPE"));
-				aj.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
-				aj.setFileName(rs.getString("LAST_FILE_NAME"));
-				aj.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
-				aj.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
-				aj.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
+				String uname=rs.getString("USERNAME");
+				aj.setUsername(uname);
 				aj.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
+				aj.setJobType(rs.getInt("JOB_TYPE"));
 				aj.setTos(rs.getString("MAIL_TOS"));
-				aj.setSubject(rs.getString("SUBJECT"));
 				aj.setMessage(rs.getString("MESSAGE"));
+				aj.setSubject(rs.getString("SUBJECT"));
 				aj.setMinute(rs.getString("JOB_MINUTE"));
 				aj.setHour(rs.getString("JOB_HOUR"));
 				aj.setDay(rs.getString("JOB_DAY"));
 				aj.setWeekday(rs.getString("JOB_WEEKDAY"));
 				aj.setMonth(rs.getString("JOB_MONTH"));
-
+				int jobId=rs.getInt("JOB_ID");
+				aj.setJobIdOnly(jobId);
+				aj.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
+				aj.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
+				aj.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
+				aj.setFileName(rs.getString("LAST_FILE_NAME"));
+				aj.setQueryType(rs.getInt("QUERY_TYPE"));
+				aj.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
 				aj.buildParametersDisplayString();
 
-				uname = rs.getString("USERNAME");
-				jobId = rs.getInt("JOB_ID");
+				aj.buildParametersDisplayString();
 
 				jobs.put(uname + jobId, aj);
 			}
@@ -1508,8 +1518,6 @@ public class UserEntity implements Serializable {
 
 			String sql;
 			ResultSet rs;
-			String uname;
-			int jobId;
 
 			sql = "SELECT AJ.JOB_ID, AJ.JOB_NAME, AJ.USERNAME"
 					+ " FROM ART_JOBS AJ, ART_QUERIES AQ"
@@ -1521,13 +1529,12 @@ public class UserEntity implements Serializable {
 
 			while (rs.next()) {
 				ArtJob aj = new ArtJob();
+				int jobId = rs.getInt("JOB_ID");
+				aj.setJobIdOnly(jobId);
 				aj.setJobName(rs.getString("JOB_NAME"));
-				aj.setUsername(rs.getString("USERNAME"));
-				aj.setJobIdOnly(rs.getInt("JOB_ID"));
-
-				uname = rs.getString("USERNAME");
-				jobId = rs.getInt("JOB_ID");
-
+				String uname = rs.getString("USERNAME");
+				aj.setUsername(uname);
+				
 				jobs.put(uname + jobId, aj);
 			}
 			rs.close();

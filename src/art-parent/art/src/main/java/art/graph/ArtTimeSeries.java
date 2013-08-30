@@ -301,8 +301,8 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 			}
 
 			while (rs.next()) {
-				category = rs.getString(1);
 				Timestamp cts = rs.getTimestamp(1);
+				category=cts.toString();
 
 				for (series = 0; series < seriesNames.length; series++) {
 					value = rs.getDouble(hop + 2 + series);
@@ -417,9 +417,10 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 			HashMap<String, Integer> hm = new HashMap<String, Integer>(); // stores series name and id
 
 			while (rs.next()) {
+				Timestamp cts = rs.getTimestamp(1);
+				category=cts.toString();
 				tmpSeriesName = rs.getString(2 + hop); // series name is in the 2nd column
 				value = rs.getDouble(hop + 3);
-				category = rs.getString(1);
 
 				// has this series already appeared?
 				if (hm.containsKey(tmpSeriesName)) { // item already available					
@@ -433,7 +434,6 @@ public class ArtTimeSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 				}
 
 				// insert value
-				Timestamp cts = rs.getTimestamp(1);
 				ts[seriesId].add(new Millisecond(new java.util.Date(cts.getTime())), value);
 				if (useHyperLinks) {
 					hyperLinks.add(rs.getString("LINK"));

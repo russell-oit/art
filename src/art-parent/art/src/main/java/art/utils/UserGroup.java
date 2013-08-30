@@ -141,7 +141,8 @@ public class UserGroup {
 		try {
 			conn = ArtConfig.getConnection();
 
-			String sql = "SELECT USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP, START_QUERY "
+			String sql = "SELECT USER_GROUP_ID, NAME, DESCRIPTION,"
+					+ " DEFAULT_QUERY_GROUP, START_QUERY "
 					+ " FROM ART_USER_GROUPS "
 					+ " WHERE USER_GROUP_ID = ?";
 
@@ -459,7 +460,7 @@ public class UserGroup {
 			conn = ArtConfig.getConnection();
 
 			st = conn.createStatement();
-			String sql = "SELECT USER_GROUP_ID, NAME "
+			String sql = "SELECT NAME, USER_GROUP_ID "
 					+ "FROM ART_USER_GROUPS";
 
 			ResultSet rs = st.executeQuery(sql);

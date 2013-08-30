@@ -190,7 +190,8 @@ public class Datasource {
 		try {
 			conn = ArtConfig.getConnection();
 
-			String sql = "SELECT DATABASE_ID, NAME, DRIVER, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL "
+			String sql = "SELECT DATABASE_ID, NAME, DRIVER, URL, USERNAME, PASSWORD,"
+					+ " POOL_TIMEOUT, TEST_SQL "
 					+ " FROM ART_DATABASES "
 					+ " WHERE DATABASE_ID = ?";
 
@@ -412,7 +413,7 @@ public class Datasource {
 			conn = ArtConfig.getConnection();
 
 			st = conn.createStatement();
-			String sql = "SELECT DATABASE_ID, NAME FROM ART_DATABASES";
+			String sql = "SELECT NAME, DATABASE_ID FROM ART_DATABASES";
 
 			ResultSet rs = st.executeQuery(sql);
 			while (rs.next()) {
@@ -461,7 +462,8 @@ public class Datasource {
 			ResultSet rs;
 			int queryId;
 
-			sql = "SELECT QUERY_GROUP_ID, QUERY_ID, NAME FROM ART_QUERIES "
+			sql = "SELECT QUERY_ID, QUERY_GROUP_ID, NAME"
+					+ " FROM ART_QUERIES "
 					+ " WHERE DATABASE_ID = ? ";
 
 			ps = conn.prepareStatement(sql);

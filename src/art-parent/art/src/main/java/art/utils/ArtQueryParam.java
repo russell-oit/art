@@ -445,10 +445,12 @@ public class ArtQueryParam implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			String SQL = "SELECT QUERY_ID, FIELD_POSITION, NAME, SHORT_DESCRIPTION, DESCRIPTION "
-					+ " ,PARAM_DATA_TYPE, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, PARAM_LABEL, APPLY_RULES_TO_LOV "
-					+ " ,LOV_QUERY_ID, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN, CHAINED_VALUE_POSITION "
-					+ " ,DIRECT_SUBSTITUTION "
+			String SQL = "SELECT QUERY_ID, FIELD_POSITION, NAME,"
+					+ " SHORT_DESCRIPTION, DESCRIPTION "
+					+ " ,PARAM_DATA_TYPE, DEFAULT_VALUE, USE_LOV, PARAM_TYPE,"
+					+ " PARAM_LABEL, APPLY_RULES_TO_LOV "
+					+ " ,LOV_QUERY_ID, CHAINED_PARAM_POSITION, DRILLDOWN_COLUMN,"
+					+ " CHAINED_VALUE_POSITION, DIRECT_SUBSTITUTION "
 					+ " FROM ART_QUERY_FIELDS "
 					+ " WHERE QUERY_ID = ? AND FIELD_POSITION = ?";
 
@@ -724,7 +726,8 @@ public class ArtQueryParam implements Serializable {
 			if (htmlName.substring(0, 2).equals("P_") || !NumberUtils.isNumber(label)) {
 				//inline parameter or multi parameter that uses a label
 
-				sql = "SELECT FIELD_POSITION, NAME FROM ART_QUERY_FIELDS "
+				sql = "SELECT FIELD_POSITION, NAME"
+						+ " FROM ART_QUERY_FIELDS "
 						+ " WHERE QUERY_ID = ? AND PARAM_LABEL=?";
 
 				ps = conn.prepareStatement(sql);
@@ -733,13 +736,15 @@ public class ArtQueryParam implements Serializable {
 
 				rs = ps.executeQuery();
 				if (rs.next()) {
-					displayName = f.format(rs.getInt("FIELD_POSITION")) + ". " + rs.getString("NAME");
+					displayName = f.format(rs.getInt("FIELD_POSITION")) + ". "
+							+ rs.getString("NAME");
 				}
 				ps.close();
 				rs.close();
 			} else {
 				//multi parameter that uses the field position
-				sql = "SELECT FIELD_POSITION, NAME FROM ART_QUERY_FIELDS "
+				sql = "SELECT FIELD_POSITION, NAME"
+						+ " FROM ART_QUERY_FIELDS "
 						+ " WHERE QUERY_ID = ? AND FIELD_POSITION=?";
 
 				ps = conn.prepareStatement(sql);
@@ -748,7 +753,8 @@ public class ArtQueryParam implements Serializable {
 
 				rs = ps.executeQuery();
 				if (rs.next()) {
-					displayName = f.format(rs.getInt("FIELD_POSITION")) + ". " + rs.getString("NAME");
+					displayName = f.format(rs.getInt("FIELD_POSITION")) + ". "
+							+ rs.getString("NAME");
 				}
 				rs.close();
 				ps.close();

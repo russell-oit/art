@@ -290,7 +290,7 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 		String category;
 		double value;
 		String key;
-		java.sql.Date date;
+		java.util.Date date;
 
 		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -307,8 +307,8 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 			}
 
 			while (rs.next()) {
-				category = rs.getString(1);
 				date = rs.getDate(1);
+				category=date.toString();
 
 				for (series = 0; series < seriesNames.length; series++) {
 					value = rs.getDouble(hop + 2 + series);
@@ -422,10 +422,10 @@ public class ArtDateSeries implements ArtGraph, DatasetProducer, XYItemLinkGener
 			HashMap<String, Integer> hm = new HashMap<String, Integer>(); // stores series name and id
 
 			while (rs.next()) {
+				date = rs.getDate(1);
+				category=date.toString();
 				tmpSeriesName = rs.getString(2 + hop); // series name is in the 2nd column
 				value = rs.getDouble(hop + 3);
-				category = rs.getString(1);
-				date = rs.getDate(1);
 
 				//has this series already appeared?
 				if (hm.containsKey(tmpSeriesName)) { // item already available

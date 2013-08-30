@@ -404,9 +404,9 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 			HashMap<String, Integer> hm = new HashMap<String, Integer>(); // stores series name and id
 
 			while (rs.next()) {
-				tmpSeriesName = rs.getString(3); // series name is in the 3rd column
 				x = rs.getDouble(1);
 				y = rs.getDouble(2);
+				tmpSeriesName = rs.getString(3); // series name is in the 3rd column
 
 				//has this series already appeared?
 				if (hm.containsKey(tmpSeriesName)) { // item already available

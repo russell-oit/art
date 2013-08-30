@@ -275,7 +275,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 
 			Connection conn = null;
 			PreparedStatement ps = null;
-			ResultSet rs=null;
+			ResultSet rs = null;
 			try {
 				conn = ArtConfig.getConnection();
 				ps = conn.prepareStatement(sql);
@@ -289,7 +289,8 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 				rs = ps.executeQuery();
 				while (rs.next()) {
 					// build html option list
-					builder.addItem(StringEscapeUtils.escapeXml(rs.getString(2)) + " (Id:" + rs.getInt(1) + " Status:" + rs.getString(3) + ")", String.valueOf(rs.getInt(1)));
+					int queryId = rs.getInt(1);
+					builder.addItem(StringEscapeUtils.escapeXml(rs.getString(2)) + " (Id:" + queryId + " Status:" + rs.getString(3) + ")", String.valueOf(queryId));
 				}
 			} catch (Exception e) {
 				logger.error("Error", e);
@@ -324,8 +325,8 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 		try {
 			conn = ArtConfig.getConnection();
 			//use left outer join as dashboards, text queries etc don't have a datasource
-			String sql = " SELECT aq.QUERY_ID , aq.NAME, aq.SHORT_DESCRIPTION, "
-					+ " aq.DESCRIPTION, aq.QUERY_TYPE, aq.UPDATE_DATE, "
+			String sql = " SELECT aq.QUERY_TYPE, aq.QUERY_ID, aq.NAME, "
+					+ " aq.SHORT_DESCRIPTION, aq.DESCRIPTION, aq.UPDATE_DATE, "
 					+ " ad.NAME AS DATABASE_NAME "
 					+ " FROM ART_QUERIES aq left outer join ART_DATABASES ad"
 					+ " on aq.DATABASE_ID=ad.DATABASE_ID "
@@ -385,25 +386,34 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 				}
 
 				builder.append("<fieldset>");
-				builder.append("<legend>").append(messages.getString("itemDescription")).append("</legend>");
-				builder.append(messages.getString("objectId")).append(" <b>").append(rs.getInt("QUERY_ID")).append("</b> <br>");
-				builder.append(messages.getString("objectName")).append(" <b>").append(rs.getString("NAME")).append("</b> ");
+				builder.append("<legend>").append(messages.getString("itemDescription"))
+						.append("</legend>");
+				builder.append(messages.getString("objectId")).append(" <b>")
+						.append(rs.getInt("QUERY_ID")).append("</b> <br>");
+				builder.append(messages.getString("objectName")).append(" <b>")
+						.append(rs.getString("NAME")).append("</b> ");
 				String shortDescription = rs.getString("SHORT_DESCRIPTION");
 				shortDescription = StringUtils.trim(shortDescription);
 				if (StringUtils.length(shortDescription) > 0) {
 					builder.append(":: <b>").append(shortDescription).append("</b>");
 				}
 				builder.append("<br>");
-				builder.append(messages.getString("itemDescription")).append("<br>&nbsp;&nbsp; <b>").append(rs.getString("DESCRIPTION")).append("</b><br>");
-				builder.append(messages.getString("objectType")).append(" <b>").append(type).append("</b><br>");
-				builder.append(messages.getString("updateDate")).append(" <b>").append(rs.getString("UPDATE_DATE")).append("</b><br>");
+				builder.append(messages.getString("itemDescription"))
+						.append("<br>&nbsp;&nbsp; <b>")
+						.append(rs.getString("DESCRIPTION")).append("</b><br>");
+				builder.append(messages.getString("objectType")).append(" <b>")
+						.append(type).append("</b><br>");
+				builder.append(messages.getString("updateDate")).append(" <b>")
+						.append(rs.getString("UPDATE_DATE")).append("</b><br>");
 
 				// dashboards, text querys, mondrian via xmla and ssas via xmla don't have a datasource
 				if (typeId != 111 && typeId != 110 && typeId != 113 && typeId != 114) {
-					builder.append(messages.getString("targetDatasource")).append(" <b>").append(rs.getString("DATABASE_NAME")).append("</b><br>");
+					builder.append(messages.getString("targetDatasource")).append(" <b>")
+							.append(rs.getString("DATABASE_NAME")).append("</b><br>");
 				}
 
-				builder.append("<input type=\"hidden\" name=\"typeId\" value=\"").append(typeId).append("\">");
+				builder.append("<input type=\"hidden\" name=\"typeId\" value=\"")
+						.append(typeId).append("\">");
 				builder.append("</fieldset>");
 			}
 		} catch (Exception e) {
@@ -436,9 +446,10 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			ResultSet rs = null;
 			try {
 				conn = ArtConfig.getConnection();
-				String sql = "SELECT AJS.JOB_MINUTE, AJS.JOB_HOUR, AJS.JOB_DAY, AJS.JOB_WEEKDAY, AJS.JOB_MONTH "
-						+ " FROM ART_JOB_SCHEDULES AJS "
-						+ " WHERE AJS.SCHEDULE_NAME = ?";
+				String sql = "SELECT JOB_MINUTE, JOB_HOUR, JOB_DAY,"
+						+ " JOB_MONTH, JOB_WEEKDAY "
+						+ " FROM ART_JOB_SCHEDULES "
+						+ " WHERE SCHEDULE_NAME = ?";
 
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, scheduleName);

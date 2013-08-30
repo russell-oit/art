@@ -313,7 +313,6 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 
 			while (rs.next()) {
 				//Category data set: addValue(value,series,category)
-
 				category = rs.getString(1);
 				for (series = 0; series < seriesNames.length; series++) {
 					value = rs.getDouble(series + hop + 2);
@@ -419,9 +418,9 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 			HashMap<String, Integer> seriesList = new HashMap<String, Integer>(); // stores series name and id
 
 			while (rs.next()) {
+				category = rs.getString(1);
 				tmpSeriesName = rs.getString(2 + hop); // series name is in the 2nd column value
 				// insert value	
-				category = rs.getString(1);
 				value = rs.getDouble(hop + 3);
 				dataset.addValue(value, tmpSeriesName, category);
 

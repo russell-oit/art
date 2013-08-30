@@ -923,7 +923,7 @@ public class Rule {
 			ResultSet rs;
 			int qId;
 
-			sql = "SELECT AQ.QUERY_GROUP_ID, AQ.QUERY_ID, AQ.NAME"
+			sql = "SELECT AQ.QUERY_ID, AQ.QUERY_GROUP_ID, AQ.NAME"
 					+ " FROM ART_QUERY_RULES AQR, ART_QUERIES AQ"
 					+ " WHERE AQ.QUERY_ID = AQR.QUERY_ID "
 					+ " AND AQR.RULE_NAME = ?  ";

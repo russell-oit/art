@@ -414,10 +414,13 @@ public class ArtConfig extends HttpServlet {
 					dataSources = new LinkedHashMap<Integer, DataSource>();
 					rs.close();
 
-					sql = "SELECT DATABASE_ID, NAME, DRIVER, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL"
+					// ordered by NAME to have them inserted in order in the
+					//LinkedHashMap dataSources (note: first item is always the ArtRepository)
+					sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
+							+ " PASSWORD, TEST_SQL, DATABASE_ID"
 							+ " FROM ART_DATABASES"
 							+ " WHERE DATABASE_ID > 0"
-							+ " ORDER BY NAME"; // ordered by NAME to have them inserted in order in the LinkedHashMap dataSources (note: first item is always the ArtRepository)
+							+ " ORDER BY NAME"; 
 					rs = st.executeQuery(sql);
 
 					/**

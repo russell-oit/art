@@ -232,7 +232,6 @@ public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProce
 
 		if (rs.next()) {
 			dataset.setValue(rs.getDouble(1));
-
 			minValue = rs.getDouble(2);
 			maxValue = rs.getDouble(3);
 			unitsDescription = rs.getString(4);

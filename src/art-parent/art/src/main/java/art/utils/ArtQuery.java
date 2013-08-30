@@ -620,10 +620,12 @@ public class ArtQuery {
 		boolean success = false;
 
 		try {
-			String sql = "SELECT QUERY_GROUP_ID, QUERY_ID, NAME, SHORT_DESCRIPTION "
-					+ " , DESCRIPTION, CONTACT_PERSON, USES_RULES, DATABASE_ID, QUERY_TYPE, ACTIVE_STATUS "
-					+ " ,UPDATE_DATE, TEMPLATE, XMLA_URL, XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD "
-					+ ", X_AXIS_LABEL, Y_AXIS_LABEL, GRAPH_OPTIONS, SHOW_PARAMETERS, DISPLAY_RESULTSET "
+			String sql = "SELECT QUERY_GROUP_ID, QUERY_ID, NAME, SHORT_DESCRIPTION,"
+					+ " DESCRIPTION, CONTACT_PERSON, USES_RULES, DATABASE_ID,"
+					+ " QUERY_TYPE, ACTIVE_STATUS, UPDATE_DATE, TEMPLATE, XMLA_URL,"
+					+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD, "
+					+ " X_AXIS_LABEL, Y_AXIS_LABEL, GRAPH_OPTIONS, SHOW_PARAMETERS,"
+					+ " DISPLAY_RESULTSET "
 					+ " FROM ART_QUERIES "
 					+ " WHERE QUERY_ID = ? ";
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -633,14 +635,14 @@ public class ArtQuery {
 			PreparedStatement ps2;
 			ResultSet rs2;
 			if (rs.next()) {
+				setGroupId(rs.getInt("QUERY_GROUP_ID"));
+				setQueryId(rs.getInt("QUERY_ID"));
 				setName(rs.getString("NAME"));
 				setShortDescription(rs.getString("SHORT_DESCRIPTION"));
 				setDescription(rs.getString("DESCRIPTION"));
 				setContactPerson(rs.getString("CONTACT_PERSON"));
 				setUsesRules(rs.getString("USES_RULES"));
 				setDatabaseId(rs.getInt("DATABASE_ID"));
-				setGroupId(rs.getInt("QUERY_GROUP_ID"));
-				setQueryId(rs.getInt("QUERY_ID"));
 				setQueryType(rs.getInt("QUERY_TYPE"));
 				setStatus(rs.getString("ACTIVE_STATUS"));
 				setUpdateDate(rs.getDate("UPDATE_DATE"));
@@ -652,17 +654,18 @@ public class ArtQuery {
 				setXmlaPassword(rs.getString("XMLA_PASSWORD"));
 				setXaxisLabel(rs.getString("X_AXIS_LABEL"));
 				setYaxisLabel(rs.getString("Y_AXIS_LABEL"));
-				setShowParameters(rs.getString("SHOW_PARAMETERS"));
 				graphOptions = rs.getString("GRAPH_OPTIONS");
 				if (graphOptions == null) {
 					setGraphDisplayOptions(shortDescription, true);
 				} else {
 					setGraphDisplayOptions(graphOptions, false);
 				}
+				setShowParameters(rs.getString("SHOW_PARAMETERS"));
 				displayResultset = rs.getInt("DISPLAY_RESULTSET");
 
 				//get query source
-				sql = "SELECT SOURCE_INFO FROM ART_ALL_SOURCES "
+				sql = "SELECT SOURCE_INFO"
+						+ " FROM ART_ALL_SOURCES "
 						+ " WHERE OBJECT_ID = ?"
 						+ " ORDER BY LINE_NUMBER";
 				ps2 = conn.prepareStatement(sql);
@@ -708,7 +711,8 @@ public class ArtQuery {
 		boolean assignedToGroup = false;
 
 		try {
-			sql = "SELECT USER_GROUP_ID FROM ART_USER_GROUP_QUERIES "
+			sql = "SELECT USER_GROUP_ID"
+					+ " FROM ART_USER_GROUP_QUERIES "
 					+ " WHERE QUERY_ID = ?";
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, queryId);
@@ -721,7 +725,8 @@ public class ArtQuery {
 			ps.close();
 
 			if (!assignedToGroup) {
-				sql = "SELECT USERNAME FROM ART_USER_QUERIES "
+				sql = "SELECT USERNAME"
+						+ " FROM ART_USER_QUERIES "
 						+ " WHERE QUERY_ID = ?";
 				ps = conn.prepareStatement(sql);
 				ps.setInt(1, queryId);
@@ -1114,7 +1119,7 @@ public class ArtQuery {
 			String sql;
 
 			//get rules for the current query
-			sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
+			sql = "SELECT RULE_NAME, FIELD_DATA_TYPE"
 					+ " FROM ART_QUERY_RULES"
 					+ " WHERE QUERY_ID=?";
 			ps = conn.prepareStatement(sql);
@@ -1136,7 +1141,8 @@ public class ArtQuery {
 					String s = tmpSb.toString();
 					if (StringUtils.length(s) > 1) {
 						//user has some rule values
-						roles = s.substring(1); //actual values start from second character. first character is a comma (,)
+						//actual values start from second character. first character is a comma (,)
+						roles = s.substring(1); 
 					}
 				}
 			}
@@ -1282,9 +1288,9 @@ public class ArtQuery {
 			int position;
 
 			//drill down queries should have at least one inline parameter where drill down column > 0
-			sql = "SELECT ADQ.QUERY_ID, ADQ.DRILLDOWN_QUERY_ID, ADQ.DRILLDOWN_QUERY_POSITION "
-					+ "  FROM ART_DRILLDOWN_QUERIES ADQ "
-					+ " WHERE ADQ.QUERY_ID = ?";
+			sql = "SELECT DRILLDOWN_QUERY_POSITION "
+					+ " FROM ART_DRILLDOWN_QUERIES"
+					+ " WHERE QUERY_ID = ?";
 
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, qId);
@@ -1339,7 +1345,7 @@ public class ArtQuery {
 			st = conn.createStatement();
 
 			//candidate drill down query is a query with at least one inline parameter where drill down column > 0
-			String sql = "SELECT AQ.QUERY_ID, AQ.NAME "
+			String sql = "SELECT AQ.NAME, AQ.QUERY_ID "
 					+ " FROM ART_QUERIES AQ "
 					+ " WHERE EXISTS "
 					+ " (SELECT * FROM ART_QUERY_FIELDS AQF WHERE AQ.QUERY_ID = AQF.QUERY_ID "
@@ -1431,9 +1437,10 @@ public class ArtQuery {
 			PreparedStatement ps;
 			ResultSet rs;
 
-			String sql = "SELECT FIELD_POSITION, NAME, PARAM_DATA_TYPE, SHORT_DESCRIPTION, DESCRIPTION "
-					+ ", DEFAULT_VALUE, PARAM_TYPE, PARAM_LABEL, USE_LOV, LOV_QUERY_ID "
-					+ ", APPLY_RULES_TO_LOV, CHAINED_PARAM_POSITION, QUERY_ID, CHAINED_VALUE_POSITION "
+			String sql = "SELECT FIELD_POSITION, NAME, PARAM_DATA_TYPE, SHORT_DESCRIPTION,"
+					+ " DESCRIPTION, DEFAULT_VALUE, USE_LOV, PARAM_TYPE, QUERY_ID "
+					+ " PARAM_LABEL, CHAINED_PARAM_POSITION, "
+					+ " CHAINED_VALUE_POSITION, LOV_QUERY_ID, APPLY_RULES_TO_LOV "
 					+ " FROM ART_QUERY_FIELDS ";
 
 			// Build WHERE part based on the query type since for dashboards we need
@@ -1450,7 +1457,8 @@ public class ArtQuery {
 				List<Integer> queryIds = Dashboard.getQueryIds(queryId);
 
 				// Get all distinct labels that will appear as parameters
-				// (in case of chained params, be careful since only the "latest" query defined drives both values
+				// (in case of chained params, be careful since only the "latest"
+				//query defined drives both values
 				String sqlOrs = "SELECT MAX(QUERY_ID), PARAM_LABEL"
 						+ " FROM ART_QUERY_FIELDS "
 						+ " WHERE QUERY_ID in (" + StringUtils.join(queryIds, ",") + ") "
@@ -1481,18 +1489,16 @@ public class ArtQuery {
 			rs = ps.executeQuery();
 
 			while (rs.next()) { // for each parameter of this query... 
-
 				// build the parameter object
+				String paramPosition = rs.getString("FIELD_POSITION");
 				String paramName = rs.getString("NAME");
+				String paramDataType = rs.getString("PARAM_DATA_TYPE").toUpperCase();
 				String paramShortDescr = rs.getString("SHORT_DESCRIPTION");
 				String paramDescr = rs.getString("DESCRIPTION");
-				String paramPosition = rs.getString("FIELD_POSITION");
-				String paramDataType = rs.getString("PARAM_DATA_TYPE").toUpperCase();
 				String defaultValue = rs.getString("DEFAULT_VALUE");
 
 				boolean isLovParameter = !rs.getString("USE_LOV").equals("N");
 				boolean isOldBind = false;
-
 
 				// Build param id for html input/select box
 				// syntax is [param_type]_[param position]
@@ -1502,11 +1508,15 @@ public class ArtQuery {
 				String paramHtmlName = "";
 
 				String paramType = rs.getString("PARAM_TYPE");
-				paramHtmlId = "P_" + rs.getString("QUERY_ID") + "_" + paramPosition;
+				String queryIdString=rs.getString("QUERY_ID");
+				paramHtmlId = "P_" + queryIdString + "_" + paramPosition;
+				String paramLabel=rs.getString("PARAM_LABEL");
 				if (StringUtils.equals(paramType, "I")) { // inline
-					paramHtmlName = "P_" + rs.getString("PARAM_LABEL"); // use P_ to maintain compatibility with params passed via URL to ExecuteQuery                    
-				} else if (StringUtils.equals(paramType, "M")) { // multi                    
-					paramHtmlName = "M_" + rs.getString("PARAM_LABEL"); //logic in parameterprocessor and preparedquery will prevent sql injection                    
+					// use P_ to maintain compatibility with params passed via URL to ExecuteQuery 
+					paramHtmlName = "P_" + paramLabel; 
+				} else if (StringUtils.equals(paramType, "M")) { // multi    
+					//logic in parameterprocessor and preparedquery will prevent sql injection  
+					paramHtmlName = "M_" + paramLabel; 
 				}
 
 				if (!isLovParameter) {
@@ -1533,13 +1543,13 @@ public class ArtQuery {
 					String chainedParamId = null;
 					String chainedValueId = null;
 					if (chainedId > 0 && !isOldBind) {
-						chainedParamId = "P_" + rs.getString("QUERY_ID") + "_" + rs.getInt("CHAINED_PARAM_POSITION");
+						chainedParamId = "P_" + queryIdString+ "_" + chainedId;
 
 						//allow filter value to come from any chained parameter, not necessarily the previous in the sequence
 						int valueId = rs.getInt("CHAINED_VALUE_POSITION");
 						if (chainedId > 0 && valueId > 0) {
 							//chained parameter. gets it's value from the chained value parameter, not chained sequence parameter
-							chainedValueId = "P_" + rs.getString("QUERY_ID") + "_" + valueId;
+							chainedValueId = "P_" + queryIdString + "_" + valueId;
 						} else {
 							//chained parameter gets it's value from the chained parameter sequence
 							chainedValueId = chainedParamId;
@@ -1813,7 +1823,7 @@ public class ArtQuery {
 				ps = conn.prepareStatement(sql);
 			} else {
 				// get only query groups matching the "junior" admin priviledges
-				sql = "SELECT AG.QUERY_GROUP_ID, AG.NAME, AG.DESCRIPTION"
+				sql = "SELECT AG.NAME, AG.QUERY_GROUP_ID, AG.DESCRIPTION"
 						+ " FROM ART_QUERY_GROUPS AG, ART_ADMIN_PRIVILEGES APG "
 						+ " WHERE AG.QUERY_GROUP_ID = APG.VALUE_ID "
 						+ " AND APG.PRIVILEGE = 'GRP' "
@@ -1881,7 +1891,7 @@ public class ArtQuery {
 				ps = conn.prepareStatement(sql);
 			} else {
 				// get only query groups matching the "junior" admin priviledges
-				sql = "SELECT AG.QUERY_GROUP_ID, AG.NAME  "
+				sql = "SELECT AG.NAME, AG.QUERY_GROUP_ID "
 						+ " FROM ART_QUERY_GROUPS AG, ART_ADMIN_PRIVILEGES AP "
 						+ " WHERE AG.QUERY_GROUP_ID = AP.VALUE_ID "
 						+ " AND AP.PRIVILEGE = 'GRP' "
@@ -1944,7 +1954,7 @@ public class ArtQuery {
 				ps = conn.prepareStatement(sql);
 			} else {
 				// get only datasources matching the "junior" admin priviledges
-				sql = "SELECT AD.DATABASE_ID, AD.NAME  "
+				sql = "SELECT AD.NAME, AD.DATABASE_ID "
 						+ " FROM ART_DATABASES AD, ART_ADMIN_PRIVILEGES AP "
 						+ " WHERE AD.DATABASE_ID = AP.VALUE_ID "
 						+ " AND AP.PRIVILEGE = 'DB' "
@@ -2130,10 +2140,11 @@ public class ArtQuery {
 			//create new query
 			int newQueryId = allocateNewId(conn);
 			if (newQueryId != -1) {
-				sql = "SELECT QUERY_GROUP_ID, SHORT_DESCRIPTION, DESCRIPTION, USES_RULES "
-						+ " ,DATABASE_ID, QUERY_TYPE, ACTIVE_STATUS "
-						+ " ,CONTACT_PERSON, TEMPLATE, XMLA_URL, XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD "
-						+ " ,X_AXIS_LABEL, Y_AXIS_LABEL, GRAPH_OPTIONS "
+				sql = "SELECT QUERY_GROUP_ID, SHORT_DESCRIPTION, DESCRIPTION, USES_RULES, "
+						+ " DATABASE_ID, QUERY_TYPE, ACTIVE_STATUS, "
+						+ " CONTACT_PERSON, TEMPLATE, XMLA_URL, XMLA_DATASOURCE,"
+						+ " X_AXIS_LABEL, Y_AXIS_LABEL, GRAPH_OPTIONS, "
+						+ " XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD "
 						+ " FROM ART_QUERIES "
 						+ " WHERE QUERY_ID = ? ";
 				ps = conn.prepareStatement(sql);
@@ -2143,9 +2154,12 @@ public class ArtQuery {
 
 				//copy query definition
 				if (rs.next()) {
-					sqlUpdate = "UPDATE ART_QUERIES SET QUERY_GROUP_ID= ?, NAME = ?, SHORT_DESCRIPTION = ? , DESCRIPTION = ? , USES_RULES = ? "
-							+ ", DATABASE_ID = ? , QUERY_TYPE = ?, ACTIVE_STATUS = ?, CONTACT_PERSON = ?, TEMPLATE = ? "
-							+ ", XMLA_URL = ?, XMLA_DATASOURCE = ?, XMLA_CATALOG = ?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?, GRAPH_OPTIONS=? "
+					sqlUpdate = "UPDATE ART_QUERIES SET QUERY_GROUP_ID= ?, NAME = ?,"
+							+ " SHORT_DESCRIPTION = ? , DESCRIPTION = ? , USES_RULES = ? "
+							+ ", DATABASE_ID = ? , QUERY_TYPE = ?, ACTIVE_STATUS = ?,"
+							+ " CONTACT_PERSON = ?, TEMPLATE = ? "
+							+ ", XMLA_URL = ?, XMLA_DATASOURCE = ?, XMLA_CATALOG = ?,"
+							+ " X_AXIS_LABEL=?, Y_AXIS_LABEL=?, GRAPH_OPTIONS=? "
 							+ ", XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=? "
 							+ " WHERE QUERY_ID = ? ";
 					psUpdate = conn.prepareStatement(sqlUpdate);
@@ -2384,7 +2398,7 @@ public class ArtQuery {
 			String sql;
 			ResultSet rs;
 
-			sql = "SELECT FIELD_POSITION, NAME, PARAM_LABEL, PARAM_TYPE, DEFAULT_VALUE "
+			sql = "SELECT FIELD_POSITION, PARAM_LABEL, PARAM_TYPE, DEFAULT_VALUE "
 					+ " FROM ART_QUERY_FIELDS"
 					+ " WHERE QUERY_ID =?";
 

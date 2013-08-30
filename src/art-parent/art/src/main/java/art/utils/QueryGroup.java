@@ -305,7 +305,8 @@ public class QueryGroup {
 			ResultSet rs;
 			int queryId;
 
-			sql = "SELECT QUERY_GROUP_ID, QUERY_ID, NAME FROM ART_QUERIES "
+			sql = "SELECT QUERY_ID, QUERY_GROUP_ID, NAME"
+					+ " FROM ART_QUERIES "
 					+ " WHERE QUERY_GROUP_ID = ?  ";
 
 			ps = conn.prepareStatement(sql);
@@ -360,7 +361,7 @@ public class QueryGroup {
 		try {
 			conn = ArtConfig.getConnection();
 			st = conn.createStatement();
-			String sql = "SELECT QUERY_GROUP_ID, NAME "
+			String sql = "SELECT NAME, QUERY_GROUP_ID "
 					+ "FROM ART_QUERY_GROUPS";
 
 			ResultSet rs = st.executeQuery(sql);

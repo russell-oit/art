@@ -254,6 +254,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 		int drilldownQueryId;
 		List<ArtQueryParam> drilldownParams;
 		String category;
+		double value;
 
 		//store parameter names so that parent parameters with the same name as in the drilldown query are omitted
 		HashMap<String, String> params = new HashMap<String, String>();
@@ -266,7 +267,8 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 				// Pie data set: setValue(category, value)
 
 				category = rs.getString(1);
-				dataset.setValue(category, rs.getDouble(2));
+				value=rs.getDouble(2);
+				dataset.setValue(category, value);
 				if (useHyperLinks) {
 					hyperLinks.put(category, rs.getString(3));
 				}
@@ -289,7 +291,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 							//drill down on col 1 = drill on data value. drill down on col 2 = category name
 							paramLabel = param.getParamLabel();
 							if (param.getDrilldownColumn() == 1) {
-								paramValue = rs.getString(2);
+								paramValue = String.valueOf(value);
 							} else {
 								paramValue = category;
 								if (paramValue != null) {

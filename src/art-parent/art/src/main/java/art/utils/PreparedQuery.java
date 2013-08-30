@@ -735,7 +735,8 @@ public class PreparedQuery {
 			int columnCount = rs.getMetaData().getColumnCount();
 			while (rs.next()) {
 				if (columnCount == 1) {
-					lov.put(rs.getString(1), rs.getString(1));
+					String dataValue=rs.getString(1);
+					lov.put(dataValue, dataValue);
 				} else if (columnCount == 2) {
 					lov.put(rs.getString(1), rs.getString(2));
 				}

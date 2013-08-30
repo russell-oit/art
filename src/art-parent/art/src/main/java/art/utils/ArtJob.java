@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /* 2007-02-02  john   added editable subject
  2007-05-14  enrico added new type = 5 (mail with html output inside the email)
@@ -1195,10 +1194,10 @@ public class ArtJob implements Job, Serializable {
 					addSharedJobUsers(conn, jobId);
 
 					//get users to generate output for
-					String usersSQL = "SELECT auj.USERNAME, AU.EMAIL "
-							+ " FROM ART_USER_JOBS auj, ART_USERS AU "
-							+ " WHERE auj.USERNAME = AU.USERNAME "
-							+ " AND auj.JOB_ID = ? AND AU.ACTIVE_STATUS='A'";
+					String usersSQL = "SELECT auj.USERNAME, au.EMAIL "
+							+ " FROM ART_USER_JOBS auj, ART_USERS au "
+							+ " WHERE auj.USERNAME = au.USERNAME "
+							+ " AND auj.JOB_ID = ? AND au.ACTIVE_STATUS='A'";
 
 					PreparedStatement ps = conn.prepareStatement(usersSQL);
 					ps.setInt(1, jobId);
@@ -1206,9 +1205,10 @@ public class ArtJob implements Job, Serializable {
 					ResultSet rs = ps.executeQuery();
 					while (rs.next()) {
 						userCount += 1;
-						runJob(conn, splitJob, rs.getString("USERNAME"), rs.getString("EMAIL"));
+						String user = rs.getString("USERNAME");
+						runJob(conn, splitJob, user, rs.getString("EMAIL"));
 						//ensure that the job owner's output version is saved in the jobs table
-						if (username.equals(rs.getString("USERNAME"))) {
+						if (username.equals(user)) {
 							ownerFileName = fileName;
 						}
 					}
@@ -2488,14 +2488,21 @@ public class ArtJob implements Job, Serializable {
 
 			logger.debug("Loading job. Job Id={}, User={}", jId, usr);
 
-			String sql = "SELECT aj.QUERY_ID, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE, aj.MAIL_TOS, aj.MAIL_FROM, aj.MESSAGE "
-					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH, aj.ENABLE_AUDIT , aj.ACTIVE_STATUS AS JOB_ACTIVE_STATUS , aj.SUBJECT "
-					+ " , aq.NAME AS QUERY_NAME, aq.QUERY_TYPE, aq.SHORT_DESCRIPTION, aq.X_AXIS_LABEL, aq.Y_AXIS_LABEL, aq.GRAPH_OPTIONS, aq.USES_RULES "
-					+ " , aj.ALLOW_SHARING, aj.ALLOW_SPLITTING, aj.MAIL_CC, aj.MAIL_BCC, aj.RECIPIENTS_QUERY_ID "
-					+ " , aj.NEXT_RUN_DATE, aj.START_DATE, aj.END_DATE, aj.MIGRATED_TO_QUARTZ, aq.ACTIVE_STATUS AS QUERY_ACTIVE_STATUS, aj.LAST_FILE_NAME "
-					+ " , aj.CACHED_TABLE_NAME, aj.JOB_NAME, au.ACTIVE_STATUS AS OWNER_ACTIVE_STATUS, aj.RUNS_TO_ARCHIVE "
+			String sql = "SELECT aj.QUERY_ID, aj.USERNAME, aj.OUTPUT_FORMAT, aj.JOB_TYPE,"
+					+ " aj.MAIL_TOS, aj.MAIL_FROM, aj.MESSAGE, "
+					+ " aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
+					+ " aj.JOB_MONTH, aj.ENABLE_AUDIT , aj.ACTIVE_STATUS AS JOB_ACTIVE_STATUS,"
+					+ " aj.SUBJECT, aq.NAME AS QUERY_NAME, aq.QUERY_TYPE, "
+					+ " aq.SHORT_DESCRIPTION, aq.X_AXIS_LABEL, aq.Y_AXIS_LABEL,"
+					+ " aq.GRAPH_OPTIONS, aq.USES_RULES, "
+					+ " aj.ALLOW_SHARING, aj.ALLOW_SPLITTING, aj.MAIL_CC, aj.MAIL_BCC,"
+					+ " aj.RECIPIENTS_QUERY_ID, aj.NEXT_RUN_DATE, aj.START_DATE, aj.END_DATE, "
+					+ " aj.MIGRATED_TO_QUARTZ, aq.ACTIVE_STATUS AS QUERY_ACTIVE_STATUS,"
+					+ " aj.LAST_FILE_NAME, aj.CACHED_TABLE_NAME, aj.JOB_NAME, "
+					+ " au.ACTIVE_STATUS AS OWNER_ACTIVE_STATUS, aj.RUNS_TO_ARCHIVE "
 					+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USERS au"
-					+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.USERNAME=au.USERNAME AND aj.JOB_ID = ? "
+					+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.USERNAME=au.USERNAME"
+					+ " AND aj.JOB_ID = ? "
 					+ (usr != null ? "  AND aj.USERNAME = ? " : "");
 
 			ps = conn.prepareStatement(sql);
@@ -2534,22 +2541,21 @@ public class ArtJob implements Job, Serializable {
 				yAxisLabel = rs.getString("Y_AXIS_LABEL");
 				queryGraphOptions = rs.getString("GRAPH_OPTIONS");
 
+				setQueryRulesFlag(rs.getString("USES_RULES"));
+				setAllowSharing(rs.getString("ALLOW_SHARING"));
+				setAllowSplitting(rs.getString("ALLOW_SPLITTING"));
+				cc = rs.getString("MAIL_CC");
+				bcc = rs.getString("MAIL_BCC");
+				recipientsQueryId = rs.getInt("RECIPIENTS_QUERY_ID");
 				setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
 				setStartDate(rs.getDate("START_DATE"));
 				setEndDate(rs.getDate("END_DATE"));
 				setMigratedToQuartz(rs.getString("MIGRATED_TO_QUARTZ"));
 				setQueryStatus(rs.getString("QUERY_ACTIVE_STATUS"));
 				setLastFileName(rs.getString("LAST_FILE_NAME"));
-				setQueryRulesFlag(rs.getString("USES_RULES"));
-				setAllowSharing(rs.getString("ALLOW_SHARING"));
-				setAllowSplitting(rs.getString("ALLOW_SPLITTING"));
 				setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
 				setJobName(rs.getString("JOB_NAME"));
-
 				jobOwnerStatus = rs.getString("OWNER_ACTIVE_STATUS");
-				cc = rs.getString("MAIL_CC");
-				bcc = rs.getString("MAIL_BCC");
-				recipientsQueryId = rs.getInt("RECIPIENTS_QUERY_ID");
 				runsToArchive = rs.getInt("RUNS_TO_ARCHIVE");
 
 				//update from address in case the user's email address has changed
@@ -2829,7 +2835,7 @@ public class ArtJob implements Job, Serializable {
 			//get the parameters from the database
 			conn = ArtConfig.getConnection();
 
-			String sql = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE"
+			String sql = "SELECT PARAM_NAME, PARAM_VALUE"
 					+ " FROM ART_JOBS_PARAMETERS "
 					+ " WHERE JOB_ID = ?"
 					+ " ORDER BY PARAM_TYPE, PARAM_NAME";
@@ -3003,13 +3009,17 @@ public class ArtJob implements Job, Serializable {
 			PreparedStatement psUpdate;
 
 			//prepare statement for updating migration status			
-			updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y', NEXT_RUN_DATE=? "
-					+ ", JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
+			updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y',"
+					+ " NEXT_RUN_DATE=?, JOB_MINUTE=?, JOB_HOUR=?, "
+					+ " JOB_DAY=?, JOB_WEEKDAY=?, JOB_MONTH=? "
 					+ " WHERE JOB_ID=?";
 			psUpdate = conn.prepareStatement(updateJobSqlString);
 
 			//determine the jobs to migrate
-			oldJobsSqlString = "SELECT JOB_ID, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_WEEKDAY, JOB_MONTH FROM ART_JOBS WHERE MIGRATED_TO_QUARTZ='N'";
+			oldJobsSqlString = "SELECT JOB_MINUTE, JOB_HOUR, JOB_MONTH, JOB_DAY,"
+					+ " JOB_WEEKDAY, JOB_ID "
+					+ " FROM ART_JOBS"
+					+ " WHERE MIGRATED_TO_QUARTZ='N'";
 
 			PreparedStatement ps = conn.prepareStatement(oldJobsSqlString);
 			ResultSet rs = ps.executeQuery();
@@ -3112,20 +3122,13 @@ public class ArtJob implements Job, Serializable {
 						scheduler.scheduleJob(quartzJob, trigger);
 
 						//update jobs table to indicate that the job has been migrated						
-						psUpdate.setTimestamp(
-								1, new java.sql.Timestamp(nextRunDate.getTime()));
-						psUpdate.setString(
-								2, minute);
-						psUpdate.setString(
-								3, hour);
-						psUpdate.setString(
-								4, day);
-						psUpdate.setString(
-								5, weekday);
-						psUpdate.setString(
-								6, month);
-						psUpdate.setInt(
-								7, jobId);
+						psUpdate.setTimestamp(1, new java.sql.Timestamp(nextRunDate.getTime()));
+						psUpdate.setString(2, minute);
+						psUpdate.setString(3, hour);
+						psUpdate.setString(4, day);
+						psUpdate.setString(5, weekday);
+						psUpdate.setString(6, month);
+						psUpdate.setInt(7, jobId);
 
 						psUpdate.addBatch();
 						//run executebatch periodically to prevent out of memory errors
@@ -3441,7 +3444,8 @@ public class ArtJob implements Job, Serializable {
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				count++;
-				tmp = rs.getString("USERNAME") + " - " + "Job " + rs.getInt("JOB_ID") + " (" + rs.getString("JOB_NAME") + ")";
+				tmp = rs.getString("USERNAME") + " - " + "Job " + rs.getInt("JOB_ID")
+						+ " (" + rs.getString("JOB_NAME") + ")";
 				map.put(count, tmp);
 			}
 			rs.close();
@@ -3458,7 +3462,8 @@ public class ArtJob implements Job, Serializable {
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				count++;
-				tmp = "[" + rs.getString("NAME") + "] - " + "Job " + rs.getInt("JOB_ID") + " (" + rs.getString("JOB_NAME") + ")";
+				tmp = "[" + rs.getString("NAME") + "] - " + "Job " + rs.getInt("JOB_ID")
+						+ " (" + rs.getString("JOB_NAME") + ")";
 				map.put(count, tmp);
 			}
 			rs.close();
@@ -3513,9 +3518,9 @@ public class ArtJob implements Job, Serializable {
 			ps.close();
 
 			//get emails from shared users
-			sql = " SELECT DISTINCT AU.EMAIL "
-					+ " FROM ART_USER_JOBS auj, ART_USERS AU "
-					+ " WHERE auj.USERNAME=AU.USERNAME "
+			sql = " SELECT DISTINCT au.EMAIL "
+					+ " FROM ART_USER_JOBS auj, ART_USERS au "
+					+ " WHERE auj.USERNAME=au.USERNAME "
 					+ " AND auj.JOB_ID=?";
 
 			ps = conn.prepareStatement(sql);
@@ -3724,11 +3729,11 @@ public class ArtJob implements Job, Serializable {
 					count++;
 					if (count > runsToArchive) {
 						//delete archive file and database record
+						String oldArchiveId = rs.getString("ARCHIVE_ID");
 						String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
-						String oldArchive = rs.getString("ARCHIVE_ID");
 
 						//remember database record for deletion
-						oldRecords.add("'" + oldArchive + "'");
+						oldRecords.add("'" + oldArchiveId + "'");
 
 						//delete file
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
@@ -3759,11 +3764,11 @@ public class ArtJob implements Job, Serializable {
 					count++;
 					if (count > runsToArchive) {
 						//delete archive file and database record
+						String oldArchiveId = rs.getString("ARCHIVE_ID");
 						String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
-						String oldArchive = rs.getString("ARCHIVE_ID");
 
 						//remember database record for deletion
-						oldRecords.add("'" + oldArchive + "'");
+						oldRecords.add("'" + oldArchiveId + "'");
 
 						//delete file
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
@@ -3828,11 +3833,11 @@ public class ArtJob implements Job, Serializable {
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				//delete archive file and database record
+				String oldArchiveId = rs.getString("ARCHIVE_ID");
 				String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
-				String oldArchive = rs.getString("ARCHIVE_ID");
 
 				//remember database record for deletion
-				oldRecords.add("'" + oldArchive + "'");
+				oldRecords.add("'" + oldArchiveId + "'");
 
 				//delete file
 				if (oldFileName != null && !oldFileName.startsWith("-")) {
