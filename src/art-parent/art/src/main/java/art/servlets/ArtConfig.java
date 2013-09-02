@@ -483,13 +483,11 @@ public class ArtConfig extends HttpServlet {
 							}
 						}
 					}
-					rs.close();
 				} else { // only art repository has been defined...
 					dataSources = new LinkedHashMap<Integer, DataSource>();
 					dataSources.put(Integer.valueOf(0), artdb);
 				}
 			}
-			rs.close();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {

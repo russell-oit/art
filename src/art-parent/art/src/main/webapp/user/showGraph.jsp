@@ -5,7 +5,7 @@
 <%@ page import="art.output.ArtOutHandler,java.io.PrintWriter" %>
 <%@ page import="org.jfree.chart.renderer.category.*" %>
 
-<%@taglib uri='/WEB-INF/cewolf.tld' prefix='cewolf' %>
+<%@taglib uri='/WEB-INF/cewolf/cewolf.tld' prefix='cewolf' %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />

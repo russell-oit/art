@@ -63,9 +63,9 @@ public class ArtHelper {
 				PreparedStatement ps = null;
 				ResultSet rs = null;
 				try {
-					String SqlQuery = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL,"
+					String SqlQuery = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL"
 							+ " FROM ART_USERS " 
-							+ "WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
+							+ " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
 					conn = ArtConfig.getConnection();
 					if (conn == null) {
 						msg = messages.getString("invalidConnection");

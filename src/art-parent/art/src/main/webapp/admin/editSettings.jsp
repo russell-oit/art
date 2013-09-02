@@ -333,7 +333,13 @@
 		} else if(dbType == "jndi"){
 			driverElement.value="";
 			urlElement.value="";
-		} 
+		} else if(dbType == "db2"){
+			driverElement.value="com.ibm.db2.jcc.DB2Driver";
+			urlElement.value="jdbc:db2://<server_name>/<database_name>";
+		} else if(dbType == "odbc"){
+			driverElement.value="sun.jdbc.odbc.JdbcOdbcDriver";
+			urlElement.value="jdbc:odbc:<dsn_name>";
+		}
 	}
 </script>
 
@@ -362,16 +368,18 @@
 			   <option value="--" selected="selected">--</option>
 			   <option value="demo">Default/Demo</option>
 			   <option value="cubrid">CUBRID</option>
-			   <option value="oracle">Oracle</option>
-			   <option value="mysql">MySQL</option>
-			   <option value="postgresql">PostgreSQL</option>
-			   <option value="sqlserver-ms">SQL Server (Microsoft driver)</option>	
-				<option value="sqlserver-jtds">SQL Server (jTDS driver)</option>			   
-			   <option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
-			   <option value="hsqldb-server">HSQLDB (Server mode)</option>
-			   <option value="log4jdbc">SQL Logging</option>
-			   <option value="jndi">JNDI</option>
-			   <option value="other">Other</option>
+				<option value="oracle">Oracle</option>
+				<option value="mysql">MySQL</option>
+				<option value="postgresql">PostgreSQL</option>
+				<option value="sqlserver-ms">SQL Server (Microsoft driver)</option>
+				<option value="sqlserver-jtds">SQL Server (jTDS driver)</option>
+				<option value="hsqldb-standalone">HSQLDB (Standalone mode)</option>
+				<option value="hsqldb-server">HSQLDB (Server mode)</option>
+				<option value="db2">DB2</option>
+				<option value="odbc">Generic ODBC</option>
+				<option value="jndi">JNDI</option>
+				<option value="log4jdbc">SQL Logging</option>					
+				<option value="other">Other</option>
 		   </select>
 		   <%msg = "Sets the jdbc driver and url fields with default values for the selected database type"; %>
 		<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
@@ -837,7 +845,7 @@ ServletContext ctx   = getServletConfig().getServletContext();
  <p>
   <table class="centerTableAuto">
    <tr><td colspan="2" class="title"> Application Server Properties </td></tr>
-   <tr><td class="data">ART Path</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>   
+   <tr><td class="data">ART Home</td><td><code> <%= ctx.getRealPath("")%></code></td></tr>   
    <tr><td class="data">Server Info</td><td><code> <%=ctx.getServerInfo()%></code></td></tr>
    <tr><td class="data">Servlet API Supported</td><td><code> <%=ctx.getMajorVersion()%>.<%= ctx.getMinorVersion()%></code> </td></tr>
    <tr><td class="data">Java Vendor</td><td><code> <%=System.getProperty("java.vendor")%></code> </td></tr>
