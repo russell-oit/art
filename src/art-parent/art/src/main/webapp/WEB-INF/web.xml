@@ -36,28 +36,27 @@
 		<filter-name>AuthFilter</filter-name>
 		<filter-class>art.servlets.AuthFilter</filter-class>
 	</filter>
-	<filter>
-		<filter-name>AuthFilterAdmin</filter-name>
-		<filter-class>art.servlets.AuthFilterAdmin</filter-class>
-	</filter>
-	<filter>
-		<filter-name>exportPathFilter</filter-name>
-		<filter-class>art.servlets.ExportPathFilter</filter-class>
-	</filter>
-	
 	<filter-mapping>
 		<filter-name>AuthFilter</filter-name>
 		<url-pattern>/user/*</url-pattern>
 	</filter-mapping>
+	<filter>
+		<filter-name>AuthFilterAdmin</filter-name>
+		<filter-class>art.servlets.AuthFilterAdmin</filter-class>
+	</filter>
 	<filter-mapping>
 		<filter-name>AuthFilterAdmin</filter-name>
 		<url-pattern>/admin/*</url-pattern>
 	</filter-mapping>
+	<filter>
+		<filter-name>exportPathFilter</filter-name>
+		<filter-class>art.servlets.ExportPathFilter</filter-class>
+	</filter>
 	<filter-mapping>
 		<filter-name>exportPathFilter</filter-name>
 		<url-pattern>/export/*</url-pattern>
 	</filter-mapping>
-	<!-- Servlet definitions -->
+	<!-- Servlets -->
 	<servlet>
 		<servlet-name>CewolfServlet</servlet-name>
 		<servlet-class>de.laures.cewolf.CewolfRenderer</servlet-class>
@@ -83,13 +82,19 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-	<!--
+	<servlet-mapping>
+		<servlet-name>CewolfServlet</servlet-name>
+		<url-pattern>/cewolf/*</url-pattern>
+	</servlet-mapping>
 	<servlet>
 		<servlet-name>dispatcher</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<load-on-startup>2</load-on-startup>
 	</servlet>
-	-->
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>/admin/*</url-pattern>
+	</servlet-mapping>
 	<servlet>
 		<!-- description, if it exists, must come before servlet-name -->
 		<description>
@@ -129,11 +134,7 @@
 		<servlet-name>ViewLogs</servlet-name>
 		<servlet-class>art.servlets.ViewLogs</servlet-class>
 	</servlet>
-	<!-- Servlet mappings -->
-	<servlet-mapping>
-		<servlet-name>CewolfServlet</servlet-name>
-		<url-pattern>/cewolf/*</url-pattern>
-	</servlet-mapping>
+	
 	<servlet-mapping>
 		<servlet-name>AjaxTagsDataProvider</servlet-name>
 		<url-pattern>/AjaxTagsDataProvider</url-pattern>
@@ -147,12 +148,17 @@
 		<servlet-name>ViewLogs</servlet-name>
 		<url-pattern>/logs</url-pattern>
 	</servlet-mapping>
-	<!--
-	<servlet-mapping>
-		<servlet-name>dispatcher</servlet-name>
-		<url-pattern>/admin/*</url-pattern>
-	</servlet-mapping>
-	-->
+	
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/dispatcher-servlet.xml</param-value>
+	</context-param>
+	<listener>
+		<listener-class>
+			org.springframework.web.context.ContextLoaderListener
+		</listener-class>
+	</listener>
+	
 	<session-config>
 		<!-- 120 minutes -->
 		<session-timeout>120</session-timeout>
