@@ -178,7 +178,7 @@
 		if (accessLevel >=80) {
 			//senior admin and above
    %>
-		    <tr><td class="artLink" onclick="javascript:parent.location='<%= request.getContextPath() %>/admin/schedules'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
+		    <tr><td class="artLink" onclick="javascript:parent.location='manageJobSchedules.jsp'" onmouseover="javascript:setClass(this,'artLinkHighlight')" onmouseout="javascript:setClass(this,'artLink')">
 			Schedules
 			</td>
 		    <td class="data">Define schedules that can be used when creating jobs</td></tr>
