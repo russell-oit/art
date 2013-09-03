@@ -11,7 +11,7 @@
 	 * Validate username/password towards a database
 	 *
 	 */
-	ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+	ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 
 	String url = ArtConfig.getArtSetting("jdbc_auth_url");
 	String username = request.getParameter("dbusername");

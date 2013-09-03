@@ -195,7 +195,7 @@ ChartFactory.setChartTheme(chartTheme);
 PrintWriter htmlout=response.getWriter();
 
 if(showParams){
-	ResourceBundle msgs = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+	ResourceBundle msgs = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 	ArtOutHandler.displayParameters(htmlout, graph.getDisplayParameters(), msgs);
 }
 

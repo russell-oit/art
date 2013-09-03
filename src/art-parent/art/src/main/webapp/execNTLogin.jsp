@@ -9,7 +9,7 @@
 	 * WINDOWS DOMAIN CONTROLLER Authentication
 	 *
 	 */
-	ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+	ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 
 	String domain = request.getParameter("ntdomain");
 	String username = request.getParameter("ntusername");

@@ -6,7 +6,7 @@
 <%
   /* Invalidate the current session to allow a new login */
   session.invalidate();
-  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+  java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.ArtMessages",request.getLocale());
 %>
 <!DOCTYPE html>
 <html>

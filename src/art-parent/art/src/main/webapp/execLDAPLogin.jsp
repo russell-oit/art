@@ -9,7 +9,7 @@
 	 * LDAP Authentication
 	 *
 	 */
-	ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+	ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 
 	String ldapServer = ArtConfig.getArtSetting("ldap_auth_server");
 	String ldapAuthType = ArtConfig.getArtSetting("ldap_auth_method");

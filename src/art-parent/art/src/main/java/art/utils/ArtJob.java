@@ -1594,7 +1594,7 @@ public class ArtJob implements Job, Serializable {
 						o.setExportPath(jobsPath);
 						o.setDisplayParameters(displayParams);
 
-						ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages");
+						ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages");
 						if (queryType == 101 || queryType == 102) {
 							ArtOutHandler.flushXOutput(messages, o, rs, rsmd);
 						} else {

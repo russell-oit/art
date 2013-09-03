@@ -5,7 +5,7 @@
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
 <%
-java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.ArtMessages",request.getLocale());
 
 int queryId=0;
 String queryIdString=request.getParameter("queryId");

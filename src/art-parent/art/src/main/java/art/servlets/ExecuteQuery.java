@@ -123,7 +123,7 @@ public class ExecuteQuery extends HttpServlet {
 		}
 
 		PrintWriter out = null; // this will be initialized according to the content type of the view mode
-		ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 
 		ServletContext ctx = getServletConfig().getServletContext();
 		String baseExportPath = ArtConfig.getExportPath();

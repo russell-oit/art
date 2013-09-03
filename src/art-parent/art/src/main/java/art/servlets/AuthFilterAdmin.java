@@ -142,7 +142,7 @@ public final class AuthFilterAdmin implements Filter {
 						}
 						session.setAttribute("nextPage", nextPage);
 
-						java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages", hrequest.getLocale());
+						java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.ArtMessages", hrequest.getLocale());
 						forwardToLoginPage(hresponse, hrequest, messages.getString("sessionExpired"));
 					}
 				}

@@ -1,6 +1,6 @@
 
 <%	
-java.util.ResourceBundle qfMessages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+java.util.ResourceBundle qfMessages = java.util.ResourceBundle.getBundle("i18n.ArtMessages",request.getLocale());
  
 boolean isInline=false;
 if(request.getParameter("_isInline")!=null){

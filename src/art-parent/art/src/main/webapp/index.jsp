@@ -6,7 +6,7 @@
 <%@ page pageEncoding="UTF-8" %>
 
 <%
-	ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+	ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 
 	if (!ArtConfig.isArtSettingsLoaded()) {
 		// settings not defined: 1st Logon -> go to adminConsole.jsp (passing through the AuthFilterAdmin)

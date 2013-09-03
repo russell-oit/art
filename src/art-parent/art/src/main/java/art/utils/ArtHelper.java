@@ -49,7 +49,7 @@ public class ArtHelper {
 	public static String authenticateSession(HttpServletRequest request) throws Exception {
 		String msg = null;
 		HttpSession session = request.getSession();
-		ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 		int accessLevel = -1;
 		boolean internalAuthentication = true;
 		String username = request.getParameter("username");

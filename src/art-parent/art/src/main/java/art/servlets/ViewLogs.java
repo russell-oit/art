@@ -127,7 +127,7 @@ public class ViewLogs extends HttpServlet {
 		UserEntity ue = (UserEntity) session.getAttribute("ue");
 		if (ue == null) {
 			//invalid session
-			ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+			ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 			String msg = messages.getString("sessionExpired");
 			request.setAttribute("message", msg);
 			String toPage = ArtConfig.getArtSetting("index_page_default");

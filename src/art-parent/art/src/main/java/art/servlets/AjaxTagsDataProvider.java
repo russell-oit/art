@@ -181,7 +181,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 
 				if (isMulti) {
 					//add All as the first item displayed
-					ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+					ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 					builder.addItem(messages.getString("allItems"), "ALL_ITEMS");
 				}
 
@@ -336,7 +336,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			ps.setInt(1, queryId);
 
 			rs = ps.executeQuery();
-			ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages", request.getLocale());
+			ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 			while (rs.next()) {
 				String type;
 				int typeId = rs.getInt("QUERY_TYPE");

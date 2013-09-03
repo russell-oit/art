@@ -1,7 +1,7 @@
 <% if (request.getParameter("_isFragment")==null) { %>
 
 <%	
- java.util.ResourceBundle fMessages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+ java.util.ResourceBundle fMessages = java.util.ResourceBundle.getBundle("i18n.ArtMessages",request.getLocale());
 %>
 
 <p>

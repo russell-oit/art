@@ -14,7 +14,7 @@
 	<!-- Application Message Bundle -->
 	<bean id="messageSource" 
 		  class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
-		  p:basenames="classpath:art/i18n/ArtMessages"
+		  p:basenames="classpath:i18n/ArtMessages"
 		  p:defaultEncoding="UTF-8"
 		  p:fallbackToSystemLocale="false"/>
 		

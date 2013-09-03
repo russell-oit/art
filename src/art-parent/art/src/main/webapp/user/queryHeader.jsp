@@ -3,7 +3,7 @@
 
 <%
 //support display of results in the showparams page using jquery ajax
-java.util.ResourceBundle qhMessages = java.util.ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+java.util.ResourceBundle qhMessages = java.util.ResourceBundle.getBundle("i18n.ArtMessages",request.getLocale());
 
 boolean isInline=false;
 if(request.getParameter("_isInline")!=null){

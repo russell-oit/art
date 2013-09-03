@@ -2,7 +2,7 @@
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 
 <%
-ResourceBundle eMessages = ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+ResourceBundle eMessages = ResourceBundle.getBundle("i18n.ArtMessages",request.getLocale());
 
  String msg       = (String) request.getAttribute("errorMessage");
  String headerOff = (String) request.getAttribute("headerOff");

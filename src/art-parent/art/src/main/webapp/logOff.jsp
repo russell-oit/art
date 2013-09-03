@@ -14,7 +14,7 @@
 <body>
 <%
 
- ResourceBundle messages = ResourceBundle.getBundle("art.i18n.ArtMessages",request.getLocale());
+ ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages",request.getLocale());
 	    
  /* If this page is called by an Admin session, let's
     close the dedicated connection used by the admin who is logging off 
