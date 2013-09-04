@@ -9,7 +9,9 @@ String password = request.getParameter("PASSWORD");
 String driver=request.getParameter("DRIVER").trim();
 String url=request.getParameter("URL").trim();
 String username=request.getParameter("USERNAME").trim();
+String status=request.getParameter("STATUS");
 
+if(StringUtils.equalsIgnoreCase(status, "A")){
 //test database connection
 try{
 	out.println("<p><table align=\"center\"><tr><td class=\"data\"><b>Testing Datasource</b><br>");
@@ -58,6 +60,7 @@ try{
 } finally {
 	out.println("</td></tr></table></p>");
 }
+}
 
 //encrypt password
 if (!password.equals(""))  {
@@ -75,6 +78,7 @@ ds.setUsername(username);
 ds.setPassword(password);
 ds.setPoolTimeout(Integer.parseInt(request.getParameter("POOL_TIMEOUT")));
 ds.setTestSql(request.getParameter("TEST_SQL"));
+ds.setActiveStatus(status);
 
 if (action.equals("ADD")){
 	ds.insert();

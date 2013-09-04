@@ -40,11 +40,26 @@ public class Datasource {
 	String password = "";
 	int poolTimeout = 20;
 	String testSql = "";
+	private String activeStatus="A";
 
 	/**
 	 *
 	 */
 	public Datasource() {
+	}
+
+	/**
+	 * @return the activeStatus
+	 */
+	public String getActiveStatus() {
+		return activeStatus;
+	}
+
+	/**
+	 * @param activeStatus the activeStatus to set
+	 */
+	public void setActiveStatus(String activeStatus) {
+		this.activeStatus = activeStatus;
 	}
 
 	/**
@@ -191,7 +206,7 @@ public class Datasource {
 			conn = ArtConfig.getConnection();
 
 			String sql = "SELECT DATABASE_ID, NAME, DRIVER, URL, USERNAME, PASSWORD,"
-					+ " POOL_TIMEOUT, TEST_SQL "
+					+ " POOL_TIMEOUT, TEST_SQL, ACTIVE_STATUS "
 					+ " FROM ART_DATABASES "
 					+ " WHERE DATABASE_ID = ?";
 
@@ -208,6 +223,7 @@ public class Datasource {
 				password = rs.getString("PASSWORD");
 				poolTimeout = rs.getInt("POOL_TIMEOUT");
 				testSql = rs.getString("TEST_SQL");
+				activeStatus=rs.getString("ACTIVE_STATUS");
 			}
 			rs.close();
 			success = true;
@@ -261,8 +277,10 @@ public class Datasource {
 			ps.close();
 
 			//insert new datasource
-			sql = "INSERT INTO ART_DATABASES (DATABASE_ID, NAME, DRIVER, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL, UPDATE_DATE) "
-					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			sql = "INSERT INTO ART_DATABASES (DATABASE_ID, NAME, DRIVER, URL,"
+					+ " USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL,"
+					+ " UPDATE_DATE, ACTIVE_STATUS) "
+					+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, datasourceId);
@@ -274,6 +292,7 @@ public class Datasource {
 			ps.setInt(7, poolTimeout);
 			ps.setString(8, testSql);
 			ps.setDate(9, sysdate);
+			ps.setString(10, activeStatus);
 
 			ps.executeUpdate();
 			ps.close();
@@ -358,7 +377,8 @@ public class Datasource {
 			java.sql.Date sysdate = new java.sql.Date(now.getTime());
 
 			sql = "UPDATE ART_DATABASES SET NAME = ?, DRIVER = ?, URL = ?"
-					+ " ,USERNAME = ?, PASSWORD = ?, POOL_TIMEOUT=?, TEST_SQL=?, UPDATE_DATE=?"
+					+ " ,USERNAME = ?, PASSWORD = ?, POOL_TIMEOUT=?, TEST_SQL=?,"
+					+ " UPDATE_DATE=?, ACTIVE_STATUS=?"
 					+ " WHERE DATABASE_ID = ? ";
 			ps = conn.prepareStatement(sql);
 
@@ -370,7 +390,8 @@ public class Datasource {
 			ps.setInt(6, poolTimeout);
 			ps.setString(7, testSql);
 			ps.setDate(8, sysdate);
-			ps.setInt(9, datasourceId);
+			ps.setString(9, activeStatus);
+			ps.setInt(10, datasourceId);
 
 			ps.executeUpdate();
 			success = true;

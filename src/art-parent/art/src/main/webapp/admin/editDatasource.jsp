@@ -124,6 +124,18 @@ String msg;
 			</td>
 		</tr>
 		
+		<tr><td class="data"> Status</td>
+			<td class="data">
+				<select name="STATUS">
+					<%
+					String status=ds.getActiveStatus();
+					%>
+					<option value="A" <%=("A".equals(status)?"selected":"")%>>Active</option>
+					<option value="D" <%=("D".equals(status)?"selected":"")%>>Disabled</option>
+				</select>
+			</td>
+		</tr>
+		
 		<tr><td class="data"> Database Type</td>
 			<td class="data">
 				<select name="database_type" id="database_type" size="1" onChange="javascript:onTypeSelection();">

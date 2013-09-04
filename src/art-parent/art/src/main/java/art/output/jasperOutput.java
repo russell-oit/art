@@ -201,7 +201,7 @@ public class jasperOutput {
 				//set virtualizer properties, if virtualizer is to be used
 				Properties props = new Properties();
 				String sep = File.separator;
-				String settingsFilePath = ArtConfig.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "jasper.properties";
+				String settingsFilePath = ArtConfig.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "jasperreports.properties";
 				File settingsFile = new File(settingsFilePath);
 				if (settingsFile.exists()) {
 					FileInputStream o = new FileInputStream(settingsFilePath);

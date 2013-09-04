@@ -106,13 +106,8 @@ public class ArtConfig extends HttpServlet {
 				Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
 			}
 
-			//close connections
-			if (dataSources != null) {
-				for (Integer key : dataSources.keySet()) {
-					DataSource ds = dataSources.get(key);
-					ds.close();
-				}
-			}
+			//close connections in the artdbcp connection pool
+			clearConnections();
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
@@ -386,112 +381,96 @@ public class ArtConfig extends HttpServlet {
 			artdb.setTestSQL(art_testsql);
 		}
 
-		//Register jdbc driver for art repository
-		if (!jndiDatasource) {
-			try {
-				Class.forName(art_jdbc_driver).newInstance();
-				logger.info("ART repository JDBC Driver Registered: {}", art_jdbc_driver);
-			} catch (Exception e) {
-				logger.error("Error while registering driver for ART repository: {}", art_jdbc_driver, e);
-			}
-		}
+		//populate dataSources map
+		dataSources = null;
+		dataSources = new LinkedHashMap<Integer, DataSource>();
 
-		//Initialize the datasources array
+		//add art repository database to the dataSources map ("id" = 0). 
+		//it's not explicitly defined from the admin console
+		dataSources.put(Integer.valueOf(0), artdb);
+
+		//add explicitly defined datasources
 		Connection conn = null;
-		Statement st = null;
+		PreparedStatement ps = null;
 		ResultSet rs = null;
 
 		try {
-			String sql;
 			conn = artdb.getConnection();
-			st = conn.createStatement();
 
-			sql = "SELECT max(DATABASE_ID) FROM ART_DATABASES";
-			rs = st.executeQuery(sql);
+			// ordered by NAME to have datasources inserted in order in the
+			//LinkedHashMap dataSources (note: first item is always the ArtRepository)
+			String sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
+					+ " PASSWORD, TEST_SQL, DATABASE_ID"
+					+ " FROM ART_DATABASES"
+					+ " WHERE ACTIVE_STATUS='A'"
+					+ " ORDER BY NAME";
+			ps = conn.prepareStatement(sql);
 
-			if (rs.next()) {
-				if (rs.getInt(1) > 0) { // datasources exist
-					dataSources = new LinkedHashMap<Integer, DataSource>();
-					rs.close();
-
-					// ordered by NAME to have them inserted in order in the
-					//LinkedHashMap dataSources (note: first item is always the ArtRepository)
-					sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
-							+ " PASSWORD, TEST_SQL, DATABASE_ID"
-							+ " FROM ART_DATABASES"
-							+ " WHERE DATABASE_ID > 0"
-							+ " ORDER BY NAME"; 
-					rs = st.executeQuery(sql);
-
-					/**
-					 * ******************************************
-					 * ART database is the 0 one
-					 */
-					dataSources.put(Integer.valueOf(0), artdb);
-
-					/**
-					 * *****************************************
-					 * Create other datasources 1-n
-					 */
-					while (rs.next()) {
-						String driver = rs.getString("DRIVER");
-						if (StringUtils.isBlank(driver)) {
-							jndiDatasource = true;
-						} else {
-							jndiDatasource = false;
-						}
-
-						int thisPoolTimeoutSecs = 20 * 60; // set the default value to 20 mins
-						String timeout = rs.getString("POOL_TIMEOUT");
-						if (StringUtils.isNotBlank(timeout)) {
-							thisPoolTimeoutSecs = Integer.parseInt(timeout) * 60;
-						}
-
-						DataSource ds = new DataSource(thisPoolTimeoutSecs, jndiDatasource);
-						ds.setName(rs.getString("NAME"));
-						ds.setUrl(rs.getString("URL"));
-						ds.setUsername(rs.getString("USERNAME"));
-						String pwd = rs.getString("PASSWORD");
-						// decrypt password if stored encrypted
-						if (pwd.startsWith("o:")) {
-							pwd = Encrypter.decrypt(pwd.substring(2));
-						}
-						String testSQL = rs.getString("TEST_SQL");
-						if (StringUtils.length(testSQL) > 3) {
-							ds.setTestSQL(testSQL);
-						}
-						ds.setPassword(pwd);
-						ds.setLogToStandardOutput(true);
-						ds.setMaxConnections(poolMaxConnections);
-
-						dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
-					}
-					rs.close();
-
-					// Get jdbc classes to load
-					rs = st.executeQuery("SELECT DISTINCT DRIVER FROM ART_DATABASES");
-					while (rs.next()) {
-						String dbDriver = rs.getString("DRIVER");
-						if (StringUtils.isNotBlank(dbDriver) && !StringUtils.equals(dbDriver, art_jdbc_driver)) {
-							// Register a database driver only if different from the ART one
-							// (since ART db one has been already registered)
-							try {
-								Class.forName(dbDriver).newInstance();
-								logger.info("Datasource JDBC Driver Registered: {}", dbDriver);
-							} catch (Exception e) {
-								logger.error("Error while registering Datasource Driver: {}", dbDriver, e);
-							}
-						}
-					}
-				} else { // only art repository has been defined...
-					dataSources = new LinkedHashMap<Integer, DataSource>();
-					dataSources.put(Integer.valueOf(0), artdb);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				String driver = rs.getString("DRIVER");
+				if (StringUtils.isBlank(driver)) {
+					jndiDatasource = true;
+				} else {
+					jndiDatasource = false;
 				}
+
+				int thisPoolTimeoutSecs = 20 * 60; // set the default value to 20 mins
+				String timeout = rs.getString("POOL_TIMEOUT");
+				if (StringUtils.isNotBlank(timeout)) {
+					thisPoolTimeoutSecs = Integer.parseInt(timeout) * 60;
+				}
+
+				DataSource ds = new DataSource(thisPoolTimeoutSecs, jndiDatasource);
+				ds.setName(rs.getString("NAME"));
+				ds.setUrl(rs.getString("URL"));
+				ds.setUsername(rs.getString("USERNAME"));
+				String pwd = rs.getString("PASSWORD");
+				// decrypt password if stored encrypted
+				if (pwd.startsWith("o:")) {
+					pwd = Encrypter.decrypt(pwd.substring(2));
+				}
+				String testSQL = rs.getString("TEST_SQL");
+				if (StringUtils.length(testSQL) > 3) {
+					ds.setTestSQL(testSQL);
+				}
+				ds.setPassword(pwd);
+				ds.setLogToStandardOutput(true);
+				ds.setMaxConnections(poolMaxConnections);
+				ds.setDriver(driver);
+
+				dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			DbUtils.close(rs, st, conn);
+			DbUtils.close(rs, ps, conn);
+		}
+
+		//register jdbc drivers for datasources in the map
+		//only register a driver once. several datasources may use the same driver
+		//use a set (doesn't add duplicate items)
+		Set<String> drivers = new HashSet<String>();
+
+		//get distinct drivers
+		if (dataSources != null) {
+			for (DataSource ds : dataSources.values()) {
+				if (ds != null) {
+					drivers.add(ds.getDriver());
+				}
+			}
+		}
+
+		//register drivers
+		for (String driver : drivers) {
+			if (StringUtils.isNotBlank(driver)) {
+				try {
+					Class.forName(driver).newInstance();
+					logger.info("JDBC Driver Registered: {}", driver);
+				} catch (Exception e) {
+					logger.error("Error while registering JDBC Driver: {}", driver, e);
+				}
+			}
 		}
 	}
 
@@ -710,10 +689,10 @@ public class ArtConfig extends HttpServlet {
 
 	/**
 	 * Get connection located by the given jndi url
-	 * 
+	 *
 	 * @param jndiUrl
 	 * @return
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public static Connection getJndiConnection(String jndiUrl) throws SQLException {
 		Connection conn = null;
@@ -779,12 +758,9 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Refresh all connections in the pool, attempting to properly close the
-	 * connections before recreating them.
-	 *
+	 * Properly close connections in the dataSources connection pool
 	 */
-	public static void refreshConnections() {
-		//properly close connections
+	private static void clearConnections() {
 		if (dataSources != null) {
 			for (Integer key : dataSources.keySet()) {
 				DataSource ds = dataSources.get(key);
@@ -792,7 +768,19 @@ public class ArtConfig extends HttpServlet {
 					ds.close();
 				}
 			}
+			dataSources.clear();
+			dataSources = null;
 		}
+	}
+
+	/**
+	 * Refresh all connections in the pool, attempting to properly close the
+	 * connections before recreating them.
+	 *
+	 */
+	public static void refreshConnections() {
+		//properly close connections
+		clearConnections();
 
 		//reset datasources array
 		initializeDatasources();
