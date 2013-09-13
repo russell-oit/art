@@ -153,10 +153,10 @@ public class ArtHelper {
 		String url = "";
 		String languageFileName = "dataTables." + request.getLocale().toString() + ".txt";
 		String sep = File.separator;
-		String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
+		String languageFilePath = ArtConfig.getAppPath() + sep + "dataTables" + sep + languageFileName;
 		File languageFile = new File(languageFilePath);
 		if (languageFile.exists()) {
-			url = request.getContextPath() + "/js/" + languageFileName;
+			url = request.getContextPath() + "/dataTables/" + languageFileName;
 		}
 		return url;
 	}
