@@ -608,8 +608,7 @@ public class ArtConfig extends HttpServlet {
 		Connection conn = null;
 
 		try {
-			if (artSettingsLoaded) {
-				//settings have been defined
+			if (dataSources!=null) {
 				DataSource ds = dataSources.get(Integer.valueOf(i));
 				conn = ds.getConnection(); // i=0 => ART Repository
 			}
@@ -641,17 +640,13 @@ public class ArtConfig extends HttpServlet {
 		Connection conn = null;
 
 		try {
-			if (artSettingsLoaded) {
-				//settings have been defined
-				if (dataSources != null) {
-					for (Integer key : dataSources.keySet()) {
-						DataSource ds = dataSources.get(key);
-						if (ds != null) {
-							if (StringUtils.equalsIgnoreCase(name, ds.getName())) {
-								//this is the required datasource. get connection and exit loop
-								conn = ds.getConnection();
-								break;
-							}
+			if (dataSources != null) {
+				for (DataSource ds : dataSources.values()) {
+					if (ds != null) {
+						if (StringUtils.equalsIgnoreCase(name, ds.getName())) {
+							//this is the required datasource. get connection and exit loop
+							conn = ds.getConnection();
+							break;
 						}
 					}
 				}
