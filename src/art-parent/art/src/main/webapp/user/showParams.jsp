@@ -245,9 +245,9 @@ if(queryType==112 || queryType==113 || queryType==114){
 
                         <span style="font-size:95%"><i><%= messages.getString("viewMode") %></i></span>
                         <SELECT name="viewMode" id="viewMode" size="1">
-                            <OPTION VALUE="GRAPH"><%= messages.getString("htmlPlain") %></OPTION>
-                            <OPTION VALUE="PDFGRAPH"><%=messages.getString("pdf")%></OPTION>
-                            <OPTION VALUE="PNGGRAPH"><%=messages.getString("png")%></OPTION>
+                            <OPTION VALUE="graph"><%= messages.getString("htmlPlain") %></OPTION>
+                            <OPTION VALUE="pdfgraph"><%=messages.getString("pdf")%></OPTION>
+                            <OPTION VALUE="pnggraph"><%=messages.getString("png")%></OPTION>
                             <% if (accessLevel>=5 && ArtConfig.isSchedulingEnabled()) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <%}%>

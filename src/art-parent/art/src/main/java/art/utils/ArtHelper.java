@@ -65,7 +65,7 @@ public class ArtHelper {
 				try {
 					String SqlQuery = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL"
 							+ " FROM ART_USERS " 
-							+ " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
+							+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
 					conn = ArtConfig.getConnection();
 					if (conn == null) {
 						msg = messages.getString("invalidConnection");
@@ -99,7 +99,7 @@ public class ArtHelper {
 				username = (String) session.getAttribute("username");
 				String SqlQuery = "SELECT ACCESS_LEVEL "
 						+ " FROM ART_USERS " 
-						+ " WHERE USERNAME = ? AND (ACTIVE_STATUS = 'A' OR ACTIVE_STATUS IS NULL)";
+						+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
 				conn = ArtConfig.getConnection();
 				if (conn == null) {
 					msg = messages.getString("invalidConnection");

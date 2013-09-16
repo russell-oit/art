@@ -194,7 +194,7 @@ public class ExecuteQuery extends HttpServlet {
 					//graph
 					viewMode = "graph";
 				} else if (queryType > 0 && queryType < 100) {
-					//report on column
+					//group
 					viewMode = "htmlreport";
 				} else if (queryType == 115 || queryType == 116) {
 					//jasper report
@@ -227,7 +227,6 @@ public class ExecuteQuery extends HttpServlet {
 				//jasper report or jxls spreadsheet
 				response.setContentType("text/html; charset=UTF-8");
 				out = response.getWriter();
-				showHeaderAndFooter = true;
 			} else if (queryType == 100) {
 				//update query
 				response.setContentType("text/html; charset=UTF-8");
@@ -801,7 +800,7 @@ public class ExecuteQuery extends HttpServlet {
 	}
 	
 	/**
-	 * Generate a report on column (grouped) report.
+	 * Generate a group report
 	 *
 	 * @param out
 	 * @param rs

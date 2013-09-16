@@ -190,7 +190,7 @@ public class ArtConfig extends HttpServlet {
 			logger.warn("ART settings not available. Admin should define ART settings on first logon.");
 		}
 	}
-
+	
 	/**
 	 * Load art.properties file and initialize variables
 	 *
@@ -203,6 +203,7 @@ public class ArtConfig extends HttpServlet {
 
 		if (as.load(artPropertiesFilePath)) {
 			// settings defined
+			
 			art_username = as.getSetting("art_username");
 			art_password = as.getSetting("art_password");
 			// de-obfuscate the password

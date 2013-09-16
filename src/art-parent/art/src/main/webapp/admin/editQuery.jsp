@@ -433,23 +433,23 @@ tinyMCE.init({
                     <option value="102" <%=(currentStringValue.equals("102")?"SELECTED":"")%>>Crosstab (html only)</option>
 					<option value="0" <%=(currentStringValue.equals("0")?"SELECTED":"")%>>Tabular </option>
                     <option value="103" <%=(currentStringValue.equals("103")?"SELECTED":"")%>>Tabular (html only)</option>
-                    <option value="-1" <%=(currentStringValue.equals("-1")?"SELECTED":"")%>>Graph: XY Chart</option>
-					<option value="-13" <%=(currentStringValue.equals("-13")?"SELECTED":"")%>>Graph: Pie 2D</option>
-                    <option value="-2" <%=(currentStringValue.equals("-2")?"SELECTED":"")%>>Graph: Pie 3D</option>
-					<option value="-14" <%=(currentStringValue.equals("-14")?"SELECTED":"")%>>Graph: Vertical Bar 2D</option>
-                    <option value="-4" <%=(currentStringValue.equals("-4")?"SELECTED":"")%>>Graph: Vertical Bar 3D</option>
-					<option value="-15" <%=(currentStringValue.equals("-15")?"SELECTED":"")%>>Graph: Stacked Vertical Bar 2D</option>
-                    <option value="-8" <%=(currentStringValue.equals("-8")?"SELECTED":"")%>>Graph: Stacked Vertical Bar 3D</option>
-					<option value="-16" <%=(currentStringValue.equals("-16")?"SELECTED":"")%>>Graph: Horizontal Bar 2D</option>
-                    <option value="-3" <%=(currentStringValue.equals("-3")?"SELECTED":"")%>>Graph: Horizontal Bar 3D</option>
-					<option value="-17" <%=(currentStringValue.equals("-17")?"SELECTED":"")%>>Graph: Stacked Horizontal Bar 2D</option>
-                    <option value="-9" <%=(currentStringValue.equals("-9")?"SELECTED":"")%>>Graph: Stacked Horizontal Bar 3D</option>
-                    <option value="-5" <%=(currentStringValue.equals("-5")?"SELECTED":"")%>>Graph: Line</option>
-                    <option value="-6" <%=(currentStringValue.equals("-6")?"SELECTED":"")%>>Graph: Time Series</option>
-                    <option value="-7" <%=(currentStringValue.equals("-7")?"SELECTED":"")%>>Graph: Date Series</option>
-                    <option value="-10" <%=(currentStringValue.equals("-10")?"SELECTED":"")%>>Graph: Speedometer</option>
-					<option value="-11" <%=(currentStringValue.equals("-11")?"SELECTED":"")%>>Graph: Bubble Chart</option>
-					<option value="-12" <%=(currentStringValue.equals("-12")?"SELECTED":"")%>>Graph: Heat Map</option>
+                    <option value="-1" <%=(currentStringValue.equals("-1")?"SELECTED":"")%>>Chart: XY Chart</option>
+					<option value="-13" <%=(currentStringValue.equals("-13")?"SELECTED":"")%>>Chart: Pie 2D</option>
+                    <option value="-2" <%=(currentStringValue.equals("-2")?"SELECTED":"")%>>Chart: Pie 3D</option>
+					<option value="-14" <%=(currentStringValue.equals("-14")?"SELECTED":"")%>>Chart: Vertical Bar 2D</option>
+                    <option value="-4" <%=(currentStringValue.equals("-4")?"SELECTED":"")%>>Chart: Vertical Bar 3D</option>
+					<option value="-15" <%=(currentStringValue.equals("-15")?"SELECTED":"")%>>Chart: Stacked Vertical Bar 2D</option>
+                    <option value="-8" <%=(currentStringValue.equals("-8")?"SELECTED":"")%>>Chart: Stacked Vertical Bar 3D</option>
+					<option value="-16" <%=(currentStringValue.equals("-16")?"SELECTED":"")%>>Chart: Horizontal Bar 2D</option>
+                    <option value="-3" <%=(currentStringValue.equals("-3")?"SELECTED":"")%>>Chart: Horizontal Bar 3D</option>
+					<option value="-17" <%=(currentStringValue.equals("-17")?"SELECTED":"")%>>Chart: Stacked Horizontal Bar 2D</option>
+                    <option value="-9" <%=(currentStringValue.equals("-9")?"SELECTED":"")%>>Chart: Stacked Horizontal Bar 3D</option>
+                    <option value="-5" <%=(currentStringValue.equals("-5")?"SELECTED":"")%>>Chart: Line</option>
+                    <option value="-6" <%=(currentStringValue.equals("-6")?"SELECTED":"")%>>Chart: Time Series</option>
+                    <option value="-7" <%=(currentStringValue.equals("-7")?"SELECTED":"")%>>Chart: Date Series</option>
+                    <option value="-10" <%=(currentStringValue.equals("-10")?"SELECTED":"")%>>Chart: Speedometer</option>
+					<option value="-11" <%=(currentStringValue.equals("-11")?"SELECTED":"")%>>Chart: Bubble Chart</option>
+					<option value="-12" <%=(currentStringValue.equals("-12")?"SELECTED":"")%>>Chart: Heat Map</option>
 
 					<%
 					if(ArtConfig.isArtFullVersion()){
@@ -465,11 +465,11 @@ tinyMCE.init({
 					}
 					%>
 
-                    <option value="1" <%=(currentStringValue.equals("1")?"SELECTED":"")%>>Report on Column: 1</option>
-                    <option value="2" <%=(currentStringValue.equals("2")?"SELECTED":"")%>>Report on Column: 2</option>
-                    <option value="3" <%=(currentStringValue.equals("3")?"SELECTED":"")%>>Report on Column: 3</option>
-                    <option value="4" <%=(currentStringValue.equals("4")?"SELECTED":"")%>>Report on Column: 4</option>
-                    <option value="5" <%=(currentStringValue.equals("5")?"SELECTED":"")%>>Report on Column: 5</option>
+                    <option value="1" <%=(currentStringValue.equals("1")?"SELECTED":"")%>>Group: 1 column</option>
+                    <option value="2" <%=(currentStringValue.equals("2")?"SELECTED":"")%>>Group: 2 columns</option>
+                    <option value="3" <%=(currentStringValue.equals("3")?"SELECTED":"")%>>Group: 3 columns</option>
+                    <option value="4" <%=(currentStringValue.equals("4")?"SELECTED":"")%>>Group: 4 columns</option>
+                    <option value="5" <%=(currentStringValue.equals("5")?"SELECTED":"")%>>Group: 5 columns</option>
 
                 </select>
 					<%
@@ -821,19 +821,19 @@ tinyMCE.init({
                         <br>The AltSort columns are optional.
                     </li>
                     <li>
-                        <i>Report on Column</i>: Split the retrieved rows
+                        <i>Group</i>: Split the retrieved rows
 	in order to group values. If the value is set to <i>n</i>, the query
 	must be ordered by the the first <i>n-1</i> columns.
                     </li>
                     <li>
 
-                        <i>Graph</i>: Chart the result set. See below for the query layout.<br>
+                        <i>Chart</i>: Chart the result set. See below for the query layout.<br>
 
                         <br><b>XY</b>: <br><i> SELECT Value1, Value2 "Series Name" FROM ...</i> (data type: number, number )
                         
 						<br><br><b>Pie</b>: <br><i> SELECT Category, Value FROM ...</i> (data type: string, number )
                         
-						<br><br><b>Bars/Line</b>:
+						<br><br><b>Bars/Stacked Bars/Line</b>:
                         <br>Static Series
                         <br><i> SELECT Item, Value1 "Series1 Name" [, Value2, ...]  FROM ...</i> (data type: string, number, [, number, ...] )
                         <br>Dynamic Series
@@ -882,12 +882,12 @@ tinyMCE.init({
                     <b>Notes:</b> <br>
                     <ul>
                         <li><b>Dashboard</b><br>
-                            Any ART query, graph or text query can be considered a portlet, i.e.
+                            Any ART query can be considered a portlet, i.e.
 	a small embeddable frame within a web page.
-	A Dashboard is an object that allows you to group portlets in a
+	A Dashboard is a query that allows you to group portlets in a
 	single page.<br>
                             You can create small portal-like web pages to display queries,
-	graphs, text fragments (see below) or static pages.<br>
+	charts, text fragments (see below) or static pages.<br>
 	Before executing a dashboard, you can specify
 	the parameters for all the queries. Parameters with identical labels
 	are displayed once.<br>
@@ -898,7 +898,7 @@ tinyMCE.init({
 <!-- column size: auto|small|medium|large -->
 <SIZE>medium</SIZE>
 <!-- create a new portlet within this column
-     to embed an ART query (tabular, graph, text) -->
+     to embed an ART query (tabular, chart, text) -->
 <PORTLET>
 <TITLE>Portlet title</TITLE>
  <!-- (optional, default is true) load content when page appears -->

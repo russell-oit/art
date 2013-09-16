@@ -20,7 +20,7 @@ package art.output;
 import java.io.PrintWriter;
 
 /**
- * Generate "Report on column x" (grouped) reports
+ * Generate "Group: n columns" (grouped) reports
  * 
  * @author Enrico Liboni
  */

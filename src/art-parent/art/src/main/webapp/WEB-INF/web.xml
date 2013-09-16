@@ -60,10 +60,12 @@
 	<servlet>
 		<servlet-name>CewolfServlet</servlet-name>
 		<servlet-class>de.laures.cewolf.CewolfRenderer</servlet-class>
+		<!-- sets overlib.js location relative to webapp -->
 		<init-param>
 			<param-name>overliburl</param-name>
 			<param-value>/js/overlib.js</param-value>
 		</init-param>
+		<!-- turn on or off debugging logging -->
 		<init-param>
 			<param-name>debug</param-name>
 			<param-value>false</param-value>
@@ -145,7 +147,7 @@
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>ViewLogs</servlet-name>
-		<url-pattern>/logs</url-pattern>
+		<url-pattern>/admin/logs</url-pattern>
 	</servlet-mapping>
 	
 	<session-config>
