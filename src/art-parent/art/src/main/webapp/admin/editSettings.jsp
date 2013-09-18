@@ -25,7 +25,6 @@
           jdbc_auth_driver ,jdbc_auth_url ,index_page_default, bottom_logo, css_skin,header_with_public_user,
 	  page_size, rss_link;
 
-	 String published_files_retention_period; //new variable to make published files deletion period configurable
 
 	 //new properties for use of secure smtp
 	 String secure_smtp;
@@ -102,13 +101,6 @@
     page_size = as.getSetting("page_size");
 
 	rss_link = as.getSetting("rss_link");
-	//new property to make published files deletion period configurable
-	if (as.getSetting("published_files_retention_period")==null){
-		published_files_retention_period="0";
-	}
-	else {
-		published_files_retention_period=as.getSetting("published_files_retention_period");
-	}
 
 	//new properties for use of secure smtp
 	if (as.getSetting("secure_smtp")==null){
@@ -236,7 +228,6 @@
     header_with_public_user = "no";
     page_size               = "2"; // 1 A4, 2 A4 Landscape, 3 Letter, 4 Letter Landscape
 	rss_link			= "http://art.sourceforge.net";
-	published_files_retention_period="0";
 
 	//new properties for use of secure smtp
 	secure_smtp="no";

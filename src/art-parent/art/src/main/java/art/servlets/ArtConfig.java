@@ -857,27 +857,6 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get job files retention period in days
-	 *
-	 * @return job files retention period in days
-	 */
-	public static int getPublishedFilesRetentionPeriod() {
-		int retentionPeriod = 0;
-		String retentionPeriodString = "";
-
-		try {
-			retentionPeriodString = getArtSetting("published_files_retention_period");
-			if (NumberUtils.isNumber(retentionPeriodString)) {
-				retentionPeriod = Integer.parseInt(retentionPeriodString);
-			}
-		} catch (NumberFormatException e) {
-			logger.warn("Invalid published filed retention period: {}", retentionPeriodString, e);
-		}
-
-		return retentionPeriod;
-	}
-
-	/**
 	 * Get mondrian cache expiry period in hours
 	 *
 	 * @return mondrian cache expiry period in hours

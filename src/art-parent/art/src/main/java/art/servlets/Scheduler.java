@@ -173,26 +173,6 @@ public class Scheduler extends HttpServlet {
 					}
 				}
 
-				// Delete old files in the export/jobs directory
-				long jobFilesRetentionPeriod = (long) ArtConfig.getPublishedFilesRetentionPeriod(); //configured file retention period in days
-				jobFilesRetentionPeriod = jobFilesRetentionPeriod * 24 * 60 * 60 * 1000; //convert period defined in days to milliseconds
-
-				if (jobFilesRetentionPeriod > 0) {
-					exportFiles = new File(exportPath + "jobs/");
-					fileNames = exportFiles.listFiles();
-					for (int i = 0; i < fileNames.length; i++) {
-						lastModified = fileNames[i].lastModified();
-						if ((actualTime - lastModified) > jobFilesRetentionPeriod) {
-							//delete directories that may be created by jasper report html output
-							if (fileNames[i].isDirectory()) {
-								deleteDirectory(fileNames[i]);
-							} else if (!fileNames[i].getName().equals("index.html")) {
-								fileNames[i].delete();
-							}
-						}
-					}
-				}
-
 				//clear mondrian cache
 				if (ArtConfig.isArtFullVersion()) {
 					clearMondrianCache();

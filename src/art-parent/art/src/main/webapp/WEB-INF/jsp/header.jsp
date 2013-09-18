@@ -62,6 +62,25 @@ Header that appears at the top of all pages, except the login and logs pages
 					</a>
 				</li>
 			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<i class="icon-user"></i> ${user.username} <b class="caret"></b>
+					</a>
+					<ul class="dropdown-menu">
+						<li>
+							<a href="${pageContext.request.contextPath}/changePassword.do">
+								<fmt:message key="changePassword"/>
+							</a>
+						</li>
+						<li>
+							<a href="${pageContext.request.contextPath}/changeLanguage.do">
+								<fmt:message key="changeLanguage"/>
+							</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
 		</div><!--/.nav-collapse -->
 	</div>
 </div>
