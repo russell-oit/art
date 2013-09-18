@@ -79,14 +79,8 @@
 				</td>
 				
 				<td class="data">
-					<%
-					if(ArtConfig.isArtFullVersion()){
-					%>
-						<a href="clearMondrianCache.jsp">Clear Mondrian Cache</a>		
-						<br>Clear the mondrian cache of any pivot table data
-						<%
-					}
-					%>
+					<a href="clearMondrianCache.jsp">Clear Mondrian Cache</a>		
+					<br>Clear the mondrian cache of any pivot table data
 				</td>
 			</tr>
 		</table>

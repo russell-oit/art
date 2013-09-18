@@ -618,9 +618,6 @@
 		</td>
        </tr>
 
-	   <%
-	   if(ArtConfig.isArtFullVersion()){
-	   %>
 	   <tr>
         <td class="attr">Mondrian Cache Expiry (hours)</td>
         <td class="data"><input type="text" name="mondrian_cache_expiry" size="6" maxlength="5" value="<%=mondrian_cache_expiry%>">
@@ -628,9 +625,6 @@
 			<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
 		</td>
        </tr>
-	   <%
-	   }
-	   %>
 	   
 	    <tr>
         <td class="attr">Date Format</td>

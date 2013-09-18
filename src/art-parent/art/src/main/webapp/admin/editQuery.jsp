@@ -451,9 +451,6 @@ tinyMCE.init({
 					<option value="-11" <%=(currentStringValue.equals("-11")?"SELECTED":"")%>>Chart: Bubble Chart</option>
 					<option value="-12" <%=(currentStringValue.equals("-12")?"SELECTED":"")%>>Chart: Heat Map</option>
 
-					<%
-					if(ArtConfig.isArtFullVersion()){
-					%>
                     <option value="112" <%=(currentStringValue.equals("112")?"SELECTED":"")%>>Pivot Table: Mondrian</option>
                     <option value="113" <%=(currentStringValue.equals("113")?"SELECTED":"")%>>Pivot Table: Mondrian XMLA</option>
                     <option value="114" <%=(currentStringValue.equals("114")?"SELECTED":"")%>>Pivot Table: Microsoft XMLA</option>
@@ -461,9 +458,6 @@ tinyMCE.init({
                     <option value="116" <%=(currentStringValue.equals("116")?"SELECTED":"")%>>Jasper Report: ART Query</option>
 					<option VALUE="117" <%=(currentStringValue.equals("117")?"SELECTED":"")%>>jXLS Spreadsheet: Template Query</option>
 					<option VALUE="118" <%=(currentStringValue.equals("118")?"SELECTED":"")%>>jXLS Spreadsheet: ART Query</option>
-					<%
-					}
-					%>
 
                     <option value="1" <%=(currentStringValue.equals("1")?"SELECTED":"")%>>Group: 1 column</option>
                     <option value="2" <%=(currentStringValue.equals("2")?"SELECTED":"")%>>Group: 2 columns</option>

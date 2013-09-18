@@ -59,7 +59,6 @@ public class ArtConfig extends HttpServlet {
 	private static String relativeTemplatesPath; //relative path to templates directory. used by showAnalysis.jsp
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static String artVersion; //art version string
-	private static boolean artFullVersion = true;
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static ArrayList<String> allViewModes; //all view modes
 	private static String passwordHashingAlgorithm = "bcrypt"; //use bcrypt for password hashing
@@ -126,6 +125,9 @@ public class ArtConfig extends HttpServlet {
 		ServletContext ctx = getServletConfig().getServletContext();
 
 		artVersion = ctx.getInitParameter("versionNumber");
+		
+		//save version in application scope for access from jsp pages
+		ctx.setAttribute("artVersion", artVersion);
 
 		//set application path
 		appPath = ctx.getRealPath("");
@@ -830,30 +832,6 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static boolean isSchedulingEnabled() {
 		return schedulingEnabled;
-	}
-
-	/**
-	 * Determine if this is the full or light version.
-	 *
-	 * @return <code>true</code> if this is the full version
-	 */
-	public static boolean isArtFullVersion() {
-		return artFullVersion;
-	}
-
-	/**
-	 * Get the art version string. Displayed in art user pages.
-	 *
-	 * @return the art version string
-	 */
-	public static String getArtVersion() {
-		String version = artVersion;
-
-		if (!artFullVersion) {
-			version = artVersion + " - light";
-		}
-
-		return version;
 	}
 
 	/**

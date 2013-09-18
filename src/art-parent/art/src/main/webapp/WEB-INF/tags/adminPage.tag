@@ -16,6 +16,7 @@ Template for admin pages
 <t:genericPage title="${title}">
 	<jsp:attribute name="pageJavascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
 	</jsp:attribute>
 
 	<jsp:attribute name="pageHeader">

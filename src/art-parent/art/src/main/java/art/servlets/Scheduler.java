@@ -174,9 +174,7 @@ public class Scheduler extends HttpServlet {
 				}
 
 				//clear mondrian cache
-				if (ArtConfig.isArtFullVersion()) {
-					clearMondrianCache();
-				}
+				clearMondrianCache();
 
 			} catch (Exception e) {
 				logger.error("Error", e);

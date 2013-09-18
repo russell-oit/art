@@ -36,7 +36,7 @@ Has elements common to all pages
 		
 		<jsp:invoke fragment="pageHeader"/>
 
-		<div class="container">
+		<div id="pageContent" class="container">
 			<jsp:doBody/>
 		</div>
 
@@ -44,6 +44,5 @@ Has elements common to all pages
 
 		<!-- javascript placed at the end of the document so that pages load faster -->
 		<jsp:invoke fragment="pageJavascript"/>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
 	</body>
 </html>
