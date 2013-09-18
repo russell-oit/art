@@ -14,15 +14,15 @@ Template for admin pages
 
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="${title}">
-	<jsp:attribute name="headContent">
-		<jsp:include page="/WEB-INF/jsp/adminHeadContent.jsp"/>
+	<jsp:attribute name="pageJavascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 	</jsp:attribute>
 
 	<jsp:attribute name="pageHeader">
 		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 	</jsp:attribute>
-	
-	 <jsp:body>
+
+	<jsp:body>
         <jsp:doBody/>
     </jsp:body>
 </t:genericPage>

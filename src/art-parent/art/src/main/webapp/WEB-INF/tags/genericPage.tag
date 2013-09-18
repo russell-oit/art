@@ -13,21 +13,37 @@ Has elements common to all pages
 <%@attribute name="title"%>
 <%@attribute name="headContent" fragment="true" %>
 <%@attribute name="pageHeader" fragment="true" %>
+<%@attribute name="pageJavascript" fragment="true" %>
+<%@attribute name="pageCss" fragment="true" %>
+<%@attribute name="metaContent" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<jsp:invoke fragment="metaContent"/>
+
 		<title>${title}</title>
-		<link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="<%= request.getContextPath() %>/css/font-awesome.min.css">
+
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
+
+		<jsp:invoke fragment="pageCss"/>
 		<jsp:invoke fragment="headContent"/>
 	</head>
 	<body>
+		
 		<jsp:invoke fragment="pageHeader"/>
-		<div id="container">
+
+		<div class="container">
 			<jsp:doBody/>
 		</div>
+
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+
+		<!-- javascript placed at the end of the document so that pages load faster -->
+		<jsp:invoke fragment="pageJavascript"/>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
 	</body>
 </html>

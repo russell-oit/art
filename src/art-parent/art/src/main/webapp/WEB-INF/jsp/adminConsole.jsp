@@ -9,4 +9,5 @@
 
 <t:adminPage title="ART - Admin Console">
 	HELLO
+ <a href="#" class="btn btn-info">Contact Us</a> 
 </t:adminPage>
