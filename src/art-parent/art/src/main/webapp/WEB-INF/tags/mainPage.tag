@@ -1,13 +1,13 @@
 <%-- 
-    Document   : genericPage
-    Created on : 19-Sep-2013, 16:52:05
+    Document   : mainPage
+    Created on : 17-Sep-2013, 10:08:05
     Author     : Timothy Anyona
 
-Template for a basic page
-Only includes bootstrap css
+Template for any main application page.
+Includes bootstrap css, page header (navbar), page footer
 --%>
 
-<%@tag description="Generic Page Template" pageEncoding="UTF-8"%>
+<%@tag description="Main Page Template" pageEncoding="UTF-8"%>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title"%>
@@ -15,8 +15,6 @@ Only includes bootstrap css
 <%@attribute name="pageJavascript" fragment="true" %>
 <%@attribute name="pageCss" fragment="true" %>
 <%@attribute name="metaContent" fragment="true" %>
-<%@attribute name="pageHeader" fragment="true" %>
-<%@attribute name="pageFooter" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <!DOCTYPE html>
@@ -34,15 +32,15 @@ Only includes bootstrap css
 		<jsp:invoke fragment="pageCss"/>
 		<jsp:invoke fragment="headContent"/>
 	</head>
-	<body>
+	<body style="padding-top: 60px">
 		
-		<jsp:invoke fragment="pageHeader"/>
+		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
 		<div id="pageContent" class="container">
 			<jsp:doBody/>
 		</div>
-		
-		<jsp:invoke fragment="pageFooter"/>
+
+		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 
 		<!-- javascript placed at the end of the document so that pages load faster -->
 		<jsp:invoke fragment="pageJavascript"/>

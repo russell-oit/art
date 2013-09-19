@@ -10,4 +10,5 @@
 <t:adminPage title="ART - Admin Console">
 	HELLO
  <a href="#" class="btn btn-info">Contact Us</a> 
+ <jsp:include page="/WEB-INF/jsp/login.jsp"/>
 </t:adminPage>

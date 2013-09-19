@@ -13,7 +13,7 @@
 
 <div style="float: right; text-align: right">
 	<span style="font-size:75%">
-	 version <%=art.servlets.ArtConfig.getArtVersion()%> <img src="<%=request.getContextPath() + art.servlets.ArtConfig.getArtSetting("bottom_logo")%>" alt="">
+	 version ${applicationScope.artVersion} <img src="<%=request.getContextPath() + art.servlets.ArtConfig.getArtSetting("bottom_logo")%>" alt="">
 	  <a href="mailto:<%=art.servlets.ArtConfig.getArtSetting("administrator")%>"><%=fMessages.getString("artSupport")%></a>
 	</span>
 </div>

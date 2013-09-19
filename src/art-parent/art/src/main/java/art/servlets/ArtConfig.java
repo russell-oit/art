@@ -476,6 +476,21 @@ public class ArtConfig extends HttpServlet {
 			}
 		}
 	}
+	
+	/**
+	 * Get bottom logo image path
+	 *
+	 * @return bottom logo image path
+	 */
+	public static String getBottomLogoPath() {
+		String bottomLogoPath=as.getSetting("bottom_logo");
+		
+		if(StringUtils.isBlank(bottomLogoPath)){
+			bottomLogoPath="/images/artminiicon.png";
+		}
+		
+		return bottomLogoPath;
+	}
 
 	/**
 	 * Get full path to the export directory.

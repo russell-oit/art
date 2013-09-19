@@ -16,7 +16,7 @@ Footer that appears on all pages
 				<a href="http://art.sourceforge.net">ART</a> &nbsp; A Reporting Tool
 			</span>
 			<span class="text-muted credit pull-right">
-				version ${applicationScope.artVersion} <img src="<%=request.getContextPath() + art.servlets.ArtConfig.getArtSetting("bottom_logo")%>" alt="">
+				version ${applicationScope.artVersion} <img src="<%=request.getContextPath() + art.servlets.ArtConfig.getBottomLogoPath()%>" alt="">
 				<a href="mailto:<%=art.servlets.ArtConfig.getArtSetting("administrator")%>"><fmt:message key="artSupport"/></a>
 			</span>
 		</div>
