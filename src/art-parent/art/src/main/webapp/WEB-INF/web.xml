@@ -17,6 +17,12 @@
 	</context-param>
 	<!-- Filters -->
 	<filter>
+		<!-- ensure all parameter values are retrieved using utf-8 encoding
+		This filter simply calls request.setCharacterEncoding()
+		Must be the first filter. This applies to POST requests.
+		(request.setCharacterEncoding() only has effect when the request is a POST 
+		request and the request body is not processed yet.)
+		 -->
 		<filter-name>CharacterEncodingFilter</filter-name>
 		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
 		<init-param>

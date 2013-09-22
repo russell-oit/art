@@ -3,25 +3,23 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * Encrypt / Decrypt a string given a fixed key
  *
- * Note: this does provide an obfuscation-like protection
- *       for strings, but using this class and the same key
- *       it is possible to decrypt string (i.e. it is not
- *       as sure as private/public keys)
+ * Note: this does provide an obfuscation-like protection for strings, but using
+ * this class and the same key it is possible to decrypt string (i.e. it is not
+ * as sure as private/public keys)
  */
 package art.utils;
 
@@ -41,181 +39,222 @@ import org.slf4j.LoggerFactory;
 /**
  * Encrypt / Decrypt a string given a fixed key.
  *
- * Note: this does provide an obfuscation-like protection
- *       for strings, but using this class and the same key
- *       it is possible to decrypt string (i.e. it is not
- *       as sure as private/public keys)
- * 
+ * Note: this does provide an obfuscation-like protection for strings, but using
+ * this class and the same key it is possible to decrypt string (i.e. it is not
+ * as sure as private/public keys)
+ *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
 public class Encrypter {
 
-    final static Logger logger = LoggerFactory.getLogger(Encrypter.class);
-    private static String staticKey = "d-jhbgy&5153tygo8176!"; // this is used as an additional static key
-    private static String defaultPassword = "1tra"; //to allow use and single point of replacing the default password
+	final static Logger logger = LoggerFactory.getLogger(Encrypter.class);
+	private static String staticKey = "d-jhbgy&5153tygo8176!"; // this is used as an additional static key
+	private static String defaultPassword = "1tra"; //to allow use and single point of replacing the default password
 
-    /**
-     * Encrypt overload that uses default password
-     * 
-     * @param cleartext
-     * @return cipher text
-     */
-    public static String encrypt(String cleartext) {
-        return encrypt(cleartext, defaultPassword);
-    }
+	/**
+	 * Encrypt overload that uses default password
+	 *
+	 * @param cleartext
+	 * @return cipher text
+	 */
+	public static String encrypt(String cleartext) {
+		return encrypt(cleartext, defaultPassword);
+	}
 
-    /** Encrypt the 'creartext' string using the given key
-     * 
-     * @param cleartext 
-     * @param key
-     * @return cipher text
-     */
-    public static String encrypt(String cleartext, String key) {
-        try {
-            Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-            pbeCipher.init(Cipher.ENCRYPT_MODE, getKey(key), getParamSpec());
-            // Encode the string into bytes using utf-8
-            byte[] utf8 = cleartext.getBytes("UTF8");
-            // Encrypt
-            byte[] enc = pbeCipher.doFinal(utf8);
-            // Encode bytes to base64 to get a string
-            return Base64.encodeBase64String(enc);
-        } catch (Exception e) {
-            logger.error("Error", e);
-        }
-        return null;
-    }
+	/**
+	 * Encrypt the 'creartext' string using the given key
+	 *
+	 * @param cleartext
+	 * @param key
+	 * @return cipher text
+	 */
+	public static String encrypt(String cleartext, String key) {
+		try {
+			Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
+			pbeCipher.init(Cipher.ENCRYPT_MODE, getKey(key), getParamSpec());
+			// Encode the string into bytes using utf-8
+			byte[] utf8 = cleartext.getBytes("UTF8");
+			// Encrypt
+			byte[] enc = pbeCipher.doFinal(utf8);
+			// Encode bytes to base64 to get a string
+			return Base64.encodeBase64String(enc);
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+		return null;
+	}
 
-    /**
-     * Decrypt overload that uses default password
-     * 
-     * @param cryptedtext
-     * @return clear text
-     */
-    public static String decrypt(String cryptedtext) {
-        return decrypt(cryptedtext, defaultPassword);
-    }
+	/**
+	 * Decrypt overload that uses default password
+	 *
+	 * @param cryptedtext
+	 * @return clear text
+	 */
+	public static String decrypt(String cryptedtext) {
+		return decrypt(cryptedtext, defaultPassword);
+	}
 
-    /** D-ecrypt the 'cryptedtext' string using the given key
-     * 
-     * @param cryptedtext 
-     * @param key 
-     * @return clear text
-     */
-    public static String decrypt(String cryptedtext, String key) {
-        try {
-            Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
-            pbeCipher.init(Cipher.DECRYPT_MODE, getKey(key), getParamSpec());
-            // Decode base64 to get bytes
-            byte[] dec = Base64.decodeBase64(cryptedtext);
-            // Decrypt
-            byte[] utf8 = pbeCipher.doFinal(dec);
-            // Decode using utf-8
-            return new String(utf8, "UTF8");
-        } catch (Exception e) {
-            logger.error("Error", e);
-        }
-        return null;
-    }
+	/**
+	 * D-ecrypt the 'cryptedtext' string using the given key
+	 *
+	 * @param cryptedtext
+	 * @param key
+	 * @return clear text
+	 */
+	public static String decrypt(String cryptedtext, String key) {
+		try {
+			Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
+			pbeCipher.init(Cipher.DECRYPT_MODE, getKey(key), getParamSpec());
+			// Decode base64 to get bytes
+			byte[] dec = Base64.decodeBase64(cryptedtext);
+			// Decrypt
+			byte[] utf8 = pbeCipher.doFinal(dec);
+			// Decode using utf-8
+			return new String(utf8, "UTF8");
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+		return null;
+	}
 
-    private static PBEParameterSpec getParamSpec() {
-        // Salt
-        byte[] salt = {
-            (byte) 0xc8, (byte) 0x73, (byte) 0x21, (byte) 0x99,
-            (byte) 0x73, (byte) 0xc7, (byte) 0xee, (byte) 0x8c
-        };
-        // Iteration count
-        int count = 23;
-        // Create PBE parameter set
-        PBEParameterSpec pbeParamSpec = new PBEParameterSpec(salt, count);
-        return pbeParamSpec;
-    }
+	private static PBEParameterSpec getParamSpec() {
+		// Salt
+		byte[] salt = {
+			(byte) 0xc8, (byte) 0x73, (byte) 0x21, (byte) 0x99,
+			(byte) 0x73, (byte) 0xc7, (byte) 0xee, (byte) 0x8c
+		};
+		// Iteration count
+		int count = 23;
+		// Create PBE parameter set
+		PBEParameterSpec pbeParamSpec = new PBEParameterSpec(salt, count);
+		return pbeParamSpec;
+	}
 
-    private static SecretKey getKey(String pwd) {
-        try {
-            pwd = staticKey + pwd;
-            PBEKeySpec pbeKeySpec;
-            SecretKeyFactory keyFac;
-            pbeKeySpec = new PBEKeySpec(pwd.toCharArray());
-            keyFac = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
-            SecretKey pbeKey = keyFac.generateSecret(pbeKeySpec);
-            return pbeKey;
-        } catch (Exception e) {
-            logger.error("Error", e);
-        }
-        return null;
-    }
+	private static SecretKey getKey(String pwd) {
+		try {
+			pwd = staticKey + pwd;
+			PBEKeySpec pbeKeySpec;
+			SecretKeyFactory keyFac;
+			pbeKeySpec = new PBEKeySpec(pwd.toCharArray());
+			keyFac = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+			SecretKey pbeKey = keyFac.generateSecret(pbeKeySpec);
+			return pbeKey;
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+		return null;
+	}
 
-    /**      
-     * Hash a password using the algorithm specified and return the hashed password.
-    
-     * @param clearText clear text password
-     * @param algorithm algorithm to use
-     * @return hashed password
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException  
-     */
-    public static String HashPassword(String clearText, String algorithm)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	/**
+	 * Hash a password using the bcrypt algorithm and return the hashed
+	 * password.
+	 *
+	 * @param clearText
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String HashPasswordBcrypt(String clearText) {
+		return HashPasswordBcrypt(clearText, 6);
+	}
 
-        String hashedPassword;
+	/**
+	 * Hash a password using the bcrypt algorithm and return the hashed
+	 * password.
+	 *
+	 * @param clearText
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String HashPasswordBcrypt(String clearText, int rounds) {
+		//NOTE: bcrypt only uses the first 72 bytes so long texts with the first 72 bytes the same will give the same hash
+		//rounds must be 4-31. increase gensalt factor to have slower password generation
+		if (rounds < 4 || rounds > 31) {
+			rounds = 6; //default
+		}
+		return BCrypt.hashpw(clearText, BCrypt.gensalt(rounds));
+	}
 
-        // Algorithm MD5 will generate a 128bit (16 byte) digested byte[]
-        // otherwise, SHA-1 algorithm  will produce a 160bit (20 byte) digested byte[]
+	/**
+	 * Verify a password against it's bcrypt hashed equivalent
+	 *
+	 * @param clearText clear text password
+	 * @param hashedPassword hashed password
+	 * @return <code>true</code> if password matches hash
+	 */
+	public static boolean VerifyPasswordBcrypt(String clearText, String hashedPassword) {
+		return BCrypt.checkpw(clearText, hashedPassword);
+	}
 
-        if (algorithm == null || clearText == null || algorithm.equals("none")) {
-            hashedPassword = clearText;
-        } else if (algorithm.equals("bcrypt")) {
-            //NOTE: bcrypt only uses the first 72 bytes so long texts with the first 72 bytes the same will give the same hash
-            hashedPassword = BCrypt.hashpw(clearText, BCrypt.gensalt(6)); //4-31. increase gensalt factor to have slower password generation
-        } else {
-            //either md5,sha-1,sha-256,sha-512
-            MessageDigest mdg = MessageDigest.getInstance(algorithm);
+	/**
+	 * Hash a password using the a jdk provided algorithm specified and return
+	 * the hashed password.
+	 *
+	 * @param clearText clear text password
+	 * @param algorithm algorithm to use
+	 * @return hashed password
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String HashPassword(String clearText, String algorithm)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
-            // To avoid the use of the (implicit) platform-specific encoding
-            // that can undermine portability of an existent ART instance
-            // we enforce the "UTF-8" encoding
+		String hashedPassword;
 
-            byte[] hashedMsg = mdg.digest(clearText.getBytes("UTF-8"));
-            // The String is now digested
+		// Algorithm MD5 will generate a 128bit (16 byte) digested byte[]
+		// otherwise, SHA-1 algorithm  will produce a 160bit (20 byte) digested byte[]
 
-            int v;
-            StringBuilder d = new StringBuilder(22);
-            for (int i = 0; i < hashedMsg.length; i++) {
-                v = hashedMsg[i] & 0xFF;
-                if (v < 16) {
-                    d.append("0");
-                }
-                d.append(Integer.toString(v, 16));
-            }
+		if (algorithm == null || clearText == null || algorithm.equals("none")) {
+			hashedPassword = clearText;
+		} else {
+			//either md5,sha-1,sha-256,sha-512
+			MessageDigest mdg = MessageDigest.getInstance(algorithm);
 
-            hashedPassword = d.toString();
-        }
+			// To avoid the use of the (implicit) platform-specific encoding
+			// that can undermine portability of an existent ART instance
+			// we enforce the "UTF-8" encoding
 
-        return hashedPassword;
-    }
+			byte[] hashedMsg = mdg.digest(clearText.getBytes("UTF-8"));
+			// The String is now digested
 
-    /**
-     * Verify a password against it's hashed equivalent
-     * 
-     * @param clearText clear text password
-     * @param hashedPassword hashed password
-     * @param algorithm hashing algorithm
-     * @return <code>true</code> if password matches hash
-     * @throws NoSuchAlgorithmException
-     * @throws UnsupportedEncodingException  
-     */
-    public static boolean VerifyPassword(String clearText, String hashedPassword, String algorithm)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+			int v;
+			StringBuilder d = new StringBuilder(22);
+			for (int i = 0; i < hashedMsg.length; i++) {
+				v = hashedMsg[i] & 0xFF;
+				if (v < 16) {
+					d.append("0");
+				}
+				d.append(Integer.toString(v, 16));
+			}
 
-        boolean verified = false;
+			hashedPassword = d.toString();
+		}
 
-        if (StringUtils.equals(algorithm,"bcrypt")) {
-            verified = BCrypt.checkpw(clearText, hashedPassword);
-        } else if (StringUtils.equals(hashedPassword,HashPassword(clearText, algorithm))) {
-            verified = true;
-        }
+		return hashedPassword;
+	}
+
+	/**
+	 * Verify a password against it's hashed equivalent
+	 *
+	 * @param clearText clear text password
+	 * @param hashedPassword hashed password
+	 * @param algorithm hashing algorithm
+	 * @return <code>true</code> if password matches hash
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 */
+	public static boolean VerifyPassword(String clearText, String hashedPassword, String algorithm)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+		boolean verified = false;
+
+		if (StringUtils.equals(algorithm, "bcrypt")) {
+			verified = BCrypt.checkpw(clearText, hashedPassword);
+		} else if (StringUtils.equals(hashedPassword, HashPassword(clearText, algorithm))) {
+			verified = true;
+		}
 
 		return verified;
 	}

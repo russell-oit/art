@@ -1452,10 +1452,9 @@ public class UserEntity implements Serializable {
 	 * Update this user's password
 	 *
 	 * @param newPassword
-	 * @param algorithm
 	 * @return <code>true</code> if successful
 	 */
-	public boolean updatePassword(String newPassword, String algorithm) {
+	public boolean updatePassword(String newPassword) {
 		boolean success = false;
 
 		Connection conn = null;
@@ -1466,15 +1465,14 @@ public class UserEntity implements Serializable {
 
 			String sql;
 
-			sql = "UPDATE ART_USERS SET PASSWORD = ?, UPDATE_DATE = ?, HASHING_ALGORITHM=? "
+			sql = "UPDATE ART_USERS SET PASSWORD = ?, UPDATE_DATE = ?, HASHING_ALGORITHM='bcrypt' "
 					+ " WHERE USERNAME = ?";
 
 			ps = conn.prepareStatement(sql);
 
 			ps.setString(1, newPassword);
 			ps.setDate(2, new java.sql.Date(System.currentTimeMillis()));
-			ps.setString(3, algorithm);
-			ps.setString(4, username);
+			ps.setString(3, username);
 
 			ps.executeUpdate();
 			success = true;

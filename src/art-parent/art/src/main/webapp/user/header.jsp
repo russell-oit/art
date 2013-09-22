@@ -76,7 +76,7 @@
       :: <a href="<%= request.getContextPath() %>/logOff.jsp"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOff")%>" border="0" /></a>
       <img src="<%= request.getContextPath() %>/images/vertical_16px.gif" />
 	  
-	  <a href="<%= request.getContextPath() %>/admin/adminConsole.do">Admin Console 2</a>
+	  <a href="<%= request.getContextPath() %>/admin/admin.do">Admin Console 2</a>
      </td>
      <td class="attr" align="right" width="50%">
 

@@ -4,7 +4,7 @@
     Author     : Timothy Anyona
 
 Template for a basic page
-Only includes bootstrap css
+Includes bootstrap css
 --%>
 
 <%@tag description="Generic Page Template" pageEncoding="UTF-8"%>
@@ -27,11 +27,12 @@ Only includes bootstrap css
 		<title>${title}</title>
 		
 		<jsp:invoke fragment="metaContent"/>
+		
+		<jsp:invoke fragment="pageCss"/>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
 
-		<jsp:invoke fragment="pageCss"/>
 		<jsp:invoke fragment="headContent"/>
 	</head>
 	<body>

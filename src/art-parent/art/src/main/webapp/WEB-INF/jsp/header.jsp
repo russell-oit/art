@@ -31,13 +31,13 @@ Header that appears at the top of all pages, except the login and logs pages
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li class="active">
-						<a href="${pageContext.request.contextPath}/user/showGroups.do">
+						<a href="${pageContext.request.contextPath}/user/home.do">
 							<i class="icon-home"></i> <fmt:message key="home"/>
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/admin/adminConsole.do">
-							<i class="icon-wrench"></i> <fmt:message key="administration"/>
+						<a href="${pageContext.request.contextPath}/admin/admin.do">
+							<i class="icon-wrench"></i> <fmt:message key="admin"/>
 						</a>
 					</li>
 					<li>
@@ -66,7 +66,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/logOff.jsp">
+						<a href="${pageContext.request.contextPath}/logOff.do">
 							<i class="icon-signout"></i> <fmt:message key="logOff"/>
 						</a>
 					</li>
@@ -74,7 +74,7 @@ Header that appears at the top of all pages, except the login and logs pages
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-							<i class="icon-user"></i> ${user.username} <b class="caret"></b>
+							<i class="icon-user"></i> ${sessionUser.username} <b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
 							<li>

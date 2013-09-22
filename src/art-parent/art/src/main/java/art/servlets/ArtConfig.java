@@ -32,6 +32,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -50,31 +51,26 @@ public class ArtConfig extends HttpServlet {
 	private static String art_username, art_password, art_jdbc_driver, art_jdbc_url,
 			exportPath, art_testsql, art_pooltimeout;
 	private static int poolMaxConnections;
+	private static final int DEFAULT_POOL_MAX_CONNECTIONS=20;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
 	private static ArtSettings as;
 	private static ArrayList<String> userViewModes; //view modes shown to users
-	private static boolean schedulingEnabled = true;
 	private static String templatesPath; //full path to templates directory where formatted report templates and mondiran cube definitions are stored
 	private static String relativeTemplatesPath; //relative path to templates directory. used by showAnalysis.jsp
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
-	private static String artVersion; //art version string
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static ArrayList<String> allViewModes; //all view modes
-	private static String passwordHashingAlgorithm = "bcrypt"; //use bcrypt for password hashing
 	private static int defaultMaxRows;
+	private static final int DEFAULT_MAX_ROWS=1000; //default in case of incorrect setting
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
-	private static boolean pdfFontEmbedded = false; //determines if custom font should be embedded in the generated pdf
 	private static final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
 	private static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 	private static String dateFormat = DEFAULT_DATE_FORMAT; //for date fields, format of date portion
 	private static String timeFormat = DEFAULT_TIME_FORMAT; //for date fields, format of time portion
 	private static String jobsPath;
-	public static boolean showResultsInline = true;
-	private static boolean nullValueEnabled = true; //to enable blank spaces instead of "null" for varchar fields on reports
 	private static boolean customExportDirectory = false; //to enable custom export path
-	private static boolean nullNumbersAsBlank = true; //whether null numbers are displayed as blank or a zero when nullValueEnabled is true
 
 	/**
 	 * {@inheritDoc}
@@ -121,11 +117,10 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("Initializing variables");
 
-		//Get some web.xml parameters    
+		//Get art version   
 		ServletContext ctx = getServletConfig().getServletContext();
+		String artVersion = ctx.getInitParameter("versionNumber");
 
-		artVersion = ctx.getInitParameter("versionNumber");
-		
 		//save version in application scope for access from jsp pages
 		ctx.setAttribute("artVersion", artVersion);
 
@@ -139,6 +134,8 @@ public class ArtConfig extends HttpServlet {
 
 		//set export path
 		exportPath = appPath + sep + "export" + sep;
+		
+		//set custom export directory
 		try {
 			Context ic = new InitialContext();
 			String ex = (String) ic.lookup("java:comp/env/REPORT_EXPORT_DIRECTORY");
@@ -192,7 +189,7 @@ public class ArtConfig extends HttpServlet {
 			logger.warn("ART settings not available. Admin should define ART settings on first logon.");
 		}
 	}
-	
+
 	/**
 	 * Load art.properties file and initialize variables
 	 *
@@ -205,7 +202,7 @@ public class ArtConfig extends HttpServlet {
 
 		if (as.load(artPropertiesFilePath)) {
 			// settings defined
-			
+
 			art_username = as.getSetting("art_username");
 			art_password = as.getSetting("art_password");
 			// de-obfuscate the password
@@ -217,6 +214,16 @@ public class ArtConfig extends HttpServlet {
 			}
 			art_jdbc_driver = as.getSetting("art_jdbc_driver");
 
+			//register authentication jdbc driver
+			if (StringUtils.isNotBlank(art_jdbc_driver)) {
+				try {
+					Class.forName(art_jdbc_driver).newInstance();
+					logger.info("Authentication JDBC Driver Registered: {}", art_jdbc_driver);
+				} catch (Exception e) {
+					logger.error("Error while registering Authentication JDBC Driver: {}", art_jdbc_driver, e);
+				}
+			}
+
 			art_pooltimeout = as.getSetting("art_pooltimeout");
 			art_testsql = as.getSetting("art_testsql");
 
@@ -225,12 +232,6 @@ public class ArtConfig extends HttpServlet {
 				useCustomPdfFont = false; //font name must be defined in order to use custom font
 			} else {
 				useCustomPdfFont = true;
-			}
-			String fontEmbedded = as.getSetting("pdf_font_embedded");
-			if (StringUtils.equals(fontEmbedded, "no")) {
-				pdfFontEmbedded = false;
-			} else {
-				pdfFontEmbedded = true;
 			}
 
 			//set date format
@@ -246,25 +247,9 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//set max connection pool connections
-			poolMaxConnections = 20; //set default;
-			String poolMaxConnectionsString = "";
-			try {
-				poolMaxConnectionsString = getArtSetting("max_pool_connections");
-				poolMaxConnections = Integer.parseInt(poolMaxConnectionsString);
-			} catch (NumberFormatException e) {
-				//invalid number
-				logger.warn("Invalid number for max pool connections: {}", poolMaxConnectionsString, e);
-			}
+			poolMaxConnections = NumberUtils.toInt(as.getSetting("max_pool_connections"), DEFAULT_POOL_MAX_CONNECTIONS);
 
-			//set scheduling enabled
-			String scheduling = as.getSetting("scheduling_enabled");
-			if (StringUtils.equals(scheduling, "no")) {
-				schedulingEnabled = false;
-			} else {
-				schedulingEnabled = true;
-			}
-
-			//Get user view modes. if a view mode is not in the list, then it's hidden
+			//set user view modes. if a view mode is not in the list, then it's hidden
 			String modes = as.getSetting("view_modes");
 			String[] viewModes = StringUtils.split(modes, ",");
 			if (userViewModes == null) {
@@ -277,34 +262,7 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//set default max rows
-			defaultMaxRows = 10000; //set default;
-			String defaultMaxRowsString = "";
-			try {
-				defaultMaxRowsString = as.getSetting("default_max_rows");
-				defaultMaxRows = Integer.parseInt(defaultMaxRowsString);
-			} catch (NumberFormatException e) {
-				//invalid number
-				logger.warn("Invalid number for default max rows: {}", defaultMaxRowsString, e);
-			}
-
-			String resultsInline = as.getSetting("show_results_inline");
-			if (StringUtils.equals(resultsInline, "no")) {
-				showResultsInline = false;
-			} else {
-				showResultsInline = true;
-			}
-
-			String nullValue = as.getSetting("null_value_enabled");
-			if (StringUtils.startsWith(nullValue, "no")) {
-				nullValueEnabled = false;
-				if (StringUtils.equals(nullValue, "no")) {
-					nullNumbersAsBlank = true;
-				} else {
-					nullNumbersAsBlank = false; //null numbers as zero
-				}
-			} else {
-				nullValueEnabled = true;
-			}
+			defaultMaxRows=NumberUtils.toInt(as.getSetting("default_max_rows"), DEFAULT_MAX_ROWS);
 
 			artSettingsLoaded = true;
 
@@ -469,26 +427,40 @@ public class ArtConfig extends HttpServlet {
 			if (StringUtils.isNotBlank(driver)) {
 				try {
 					Class.forName(driver).newInstance();
-					logger.info("JDBC Driver Registered: {}", driver);
+					logger.info("Datasource JDBC Driver Registered: {}", driver);
 				} catch (Exception e) {
-					logger.error("Error while registering JDBC Driver: {}", driver, e);
+					logger.error("Error while registering Datasource JDBC Driver: {}", driver, e);
 				}
 			}
 		}
 	}
-	
+
+	/**
+	 * Get default authentication method configured for the application
+	 *
+	 * @return default authentication method configured for the application
+	 */
+	public static String getAuthenticationMethod() {
+		String authenticationMethod = as.getSetting("index_page_default");
+		if (StringUtils.isBlank(authenticationMethod)) {
+			authenticationMethod = "login";
+		}
+
+		return authenticationMethod;
+	}
+
 	/**
 	 * Get bottom logo image path
 	 *
 	 * @return bottom logo image path
 	 */
 	public static String getBottomLogoPath() {
-		String bottomLogoPath=as.getSetting("bottom_logo");
-		
-		if(StringUtils.isBlank(bottomLogoPath)){
-			bottomLogoPath="/images/artminiicon.png";
+		String bottomLogoPath = as.getSetting("bottom_logo");
+
+		if (StringUtils.isBlank(bottomLogoPath)) {
+			bottomLogoPath = "/images/artminiicon.png";
 		}
-		
+
 		return bottomLogoPath;
 	}
 
@@ -562,7 +534,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return <code>true</code> if the custom pdf font should be embedded
 	 */
 	public static boolean isPdfFontEmbedded() {
-		return pdfFontEmbedded;
+		return BooleanUtils.toBoolean(as.getSetting("pdf_font_embedded"));
 	}
 
 	/**
@@ -572,7 +544,7 @@ public class ArtConfig extends HttpServlet {
 	 * page
 	 */
 	public static boolean isShowResultsInline() {
-		return showResultsInline;
+		return BooleanUtils.toBoolean(as.getSetting("show_results_inline"));
 	}
 
 	/**
@@ -581,7 +553,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return <code>true</code> if displaying null value is enabled
 	 */
 	public static boolean isNullValueEnabled() {
-		return nullValueEnabled;
+		return BooleanUtils.toBoolean(as.getSetting("null_value_enabled"));
 	}
 
 	/**
@@ -595,12 +567,21 @@ public class ArtConfig extends HttpServlet {
 
 	/**
 	 * Determine if displaying null numbers as blank or as zero when
-	 * nullValueEnabled is true
+	 * display null value is no
 	 *
 	 * @return <code>true</code> if displaying null numbers as blank. Otherwise,
 	 * display null numbers as zero
 	 */
 	public static boolean isNullNumbersAsBlank() {
+		boolean nullNumbersAsBlank = false;
+
+		String nullValue = as.getSetting("null_value_enabled");
+
+		//setting can be "yes", "no_numbers_as_blank" or "no_numbers_as_zero"
+		if (StringUtils.equalsIgnoreCase(nullValue, "no_numbers_as_blank")) {
+			nullNumbersAsBlank = true;
+		}
+
 		return nullNumbersAsBlank;
 	}
 
@@ -626,7 +607,7 @@ public class ArtConfig extends HttpServlet {
 		Connection conn = null;
 
 		try {
-			if (dataSources!=null) {
+			if (dataSources != null) {
 				DataSource ds = dataSources.get(Integer.valueOf(i));
 				conn = ds.getConnection(); // i=0 => ART Repository
 			}
@@ -846,7 +827,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return <code>true</code> if job scheduling is enabled
 	 */
 	public static boolean isSchedulingEnabled() {
-		return schedulingEnabled;
+		return BooleanUtils.toBoolean(as.getSetting("scheduling_enabled"));
 	}
 
 	/**
@@ -869,15 +850,6 @@ public class ArtConfig extends HttpServlet {
 		}
 
 		return cacheExpiry;
-	}
-
-	/**
-	 * Get the hash algorithm setting
-	 *
-	 * @return hash algorithm setting
-	 */
-	public static String getPasswordHashingAlgorithm() {
-		return passwordHashingAlgorithm;
 	}
 
 	/**
@@ -967,8 +939,8 @@ public class ArtConfig extends HttpServlet {
 	public static String getDateDisplayString(java.util.Date dt) {
 		String dateString;
 		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS");
-		SimpleDateFormat df = new SimpleDateFormat(ArtConfig.dateFormat);
-		SimpleDateFormat dtf = new SimpleDateFormat(ArtConfig.dateFormat + " " + ArtConfig.timeFormat);
+		SimpleDateFormat df = new SimpleDateFormat(dateFormat);
+		SimpleDateFormat dtf = new SimpleDateFormat(dateFormat + " " + timeFormat);
 		if (dt == null) {
 			dateString = "";
 		} else if (zf.format(dt).equals("00:00:00.000")) {

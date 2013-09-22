@@ -200,7 +200,7 @@
 	}
 	null_value_enabled=as.getSetting("null_value_enabled");
 	if(null_value_enabled==null){
-		null_value_enabled="no";
+		null_value_enabled="no_numbers_as_blank";
 	}
 
   } else {        
@@ -214,9 +214,9 @@
     smtp_server     = "";
     smtp_username   = "";
     smtp_password   = "";
-    ldap_auth_server   = "ldap://ldap.server.com:389";
+    ldap_auth_server   = "";
     ldap_auth_method   = "simple";
-    mswin_auth_server  ="a.domain.controller";
+    mswin_auth_server  ="";
     mswin_domains      ="Domain1,Domain2,Domain3";
     jdbc_auth_driver   = "";
     jdbc_auth_url      = "";
@@ -256,7 +256,7 @@
 	specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
 	
 	show_results_inline="yes";
-	null_value_enabled="no";
+	null_value_enabled="no_numbers_as_blank";
 	
     %>
 	
@@ -715,7 +715,7 @@
         <td class="data">
 			<select name="null_value_enabled">
 				<option value="yes"   <%= (null_value_enabled.equals("yes")?"selected":"") %>  >Yes </option>
-				<option value="no"  <%= (null_value_enabled.equals("no")?"selected":"") %> >No (Numbers as blank)</option>
+				<option value="no_numbers_as_blank"  <%= (null_value_enabled.equals("no_numbers_as_blank")?"selected":"") %> >No (Numbers as blank)</option>
 				<option value="no_numbers_as_zero"  <%= (null_value_enabled.equals("no_numbers_as_zero")?"selected":"") %> >No (Numbers as zero)</option>
 			</select>
 			<%msg = "When set to Yes, null is displayed for report fields that are null. When set to No, a blank space is displayed instead of null."; %>
