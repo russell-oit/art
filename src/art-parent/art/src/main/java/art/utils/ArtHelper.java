@@ -131,7 +131,6 @@ public class ArtHelper {
 		if (msg == null) {
 			UserEntity ue = new UserEntity(username);
 			ue.setAccessLevel(accessLevel);
-			ue.setInternalAuth(internalAuthentication);
 			session.setAttribute("ue", ue);
 			session.setAttribute("username", username);
 			if (accessLevel >= 10) {

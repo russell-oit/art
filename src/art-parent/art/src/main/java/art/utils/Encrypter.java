@@ -251,7 +251,7 @@ public class Encrypter {
 		boolean verified = false;
 
 		if (StringUtils.equals(algorithm, "bcrypt")) {
-			verified = BCrypt.checkpw(clearText, hashedPassword);
+			verified = VerifyPasswordBcrypt(clearText, hashedPassword);
 		} else if (StringUtils.equals(hashedPassword, HashPassword(clearText, algorithm))) {
 			verified = true;
 		}

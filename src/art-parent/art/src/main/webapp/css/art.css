@@ -642,3 +642,12 @@ table.zeroPadding {
 table.zeroPadding th, table.zeroPadding td {
 	padding: 0;
 }
+
+.centered {
+	margin: 0 auto;
+}
+
+.centeredAuto {
+	margin: 0 auto;
+	width: auto;
+}

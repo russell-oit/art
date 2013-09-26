@@ -72,14 +72,14 @@ public class ValidateNTLogin {
 			return true;
 		} catch (SmbAuthException sae) {
 			// AUTHENTICATION FAILURE
-			logger.error("Authentication Failure", sae);
+			logger.error("Windows Domain Authentication Failure: Username={}", user, sae);
 			return false;
 		} catch (SmbException se) {
 			// NETWORK PROBLEMS?
-			logger.error("Error", se);
+			logger.error("Windows Domain SMB Error: Username={}", user, se);
 			return false;
 		} catch (Exception e) {
-			logger.error("Error", e);
+			logger.error("Windows Domain Error: Username={}",user, e);
 			return false;
 		}
 	}
@@ -94,7 +94,7 @@ public class ValidateNTLogin {
 			domainController = UniAddress.getByName(domainCtrl);
 			return true;
 		} catch (Exception e) {
-			logger.error("Error", e);
+			logger.error("Error Setting Domain Controller={}", domainCtrl, e);
 			return false;
 		}
 

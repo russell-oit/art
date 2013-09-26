@@ -56,7 +56,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/admin/logs">
+						<a href="${pageContext.request.contextPath}/admin/logs" target="_blank">
 							<i class="icon-reorder"></i> <fmt:message key="logs"/>
 						</a>
 					</li>
@@ -66,8 +66,8 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/logOff.do">
-							<i class="icon-signout"></i> <fmt:message key="logOff"/>
+						<a href="${pageContext.request.contextPath}/logOut.do">
+							<i class="icon-signout"></i> <fmt:message key="logOut"/>
 						</a>
 					</li>
 				</ul>

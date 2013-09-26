@@ -12,5 +12,6 @@
           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
 ">
 
+	<!-- retain file even if empty. otherwise, setup web.xml with location of dispatcher servlet -->
 	
 </beans>

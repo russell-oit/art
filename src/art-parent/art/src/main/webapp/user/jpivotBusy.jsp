@@ -53,7 +53,7 @@
       :: <a href="<%= request.getContextPath() %>/logs" ><img src="<%= request.getContextPath() %>/images/logs.png" title="<%=messages.getString("logsLink")%>" border="0" /></a>
       <% } %>
 
-      :: <a href="<%= request.getContextPath() %>/logOff.jsp"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOffLink")%>" border="0"></a>
+      :: <a href="<%= request.getContextPath() %>/logOut.do"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOut")%>" border="0"></a>
       <img src="<%= request.getContextPath() %>/images/vertical_16px.gif">
      </td>
      <td class="attr" align="right" width="50%">

@@ -45,7 +45,6 @@ public class UserEntity implements Serializable {
 	final static Logger logger = LoggerFactory.getLogger(UserEntity.class);
 	String username = "";
 	String email = "";
-	boolean internalAuth;
 	int accessLevel;
 	java.util.Date loginDate;
 	String fullName = "";
@@ -246,22 +245,6 @@ public class UserEntity implements Serializable {
 	 */
 	public String getEmail() {
 		return email;
-	}
-
-	/**
-	 *
-	 * @param b
-	 */
-	public void setInternalAuth(boolean b) {
-		internalAuth = b;
-	}
-
-	/**
-	 *
-	 * @return <code>true</code> if internal authentication used
-	 */
-	public boolean isInternalAuth() {
-		return internalAuth;
 	}
 
 	/**

@@ -133,11 +133,7 @@ public final class AuthFilter implements Filter {
 	 */
 	private void forwardToLoginPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
 		hrequest.setAttribute("message", msg);
-		String toPage = ArtConfig.getArtSetting("index_page_default");
-		if (toPage == null || toPage.equals("default")) {
-			toPage = "login";
-		}
-		hrequest.getRequestDispatcher("/" + toPage + ".jsp").forward(hrequest, hresponse);
+		hrequest.getRequestDispatcher("/login.do").forward(hrequest, hresponse);
 	}
 
 }

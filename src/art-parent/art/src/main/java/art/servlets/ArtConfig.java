@@ -17,6 +17,7 @@
 package art.servlets;
 
 import art.dbcp.DataSource;
+import art.enums.LoginMethod;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.utils.DbUtils;
@@ -263,6 +264,21 @@ public class ArtConfig extends HttpServlet {
 
 			//set default max rows
 			defaultMaxRows=NumberUtils.toInt(as.getSetting("default_max_rows"), DEFAULT_MAX_ROWS);
+			
+			//cater for change of authentication method identifiers, from 2.5.2 - 3.0
+			String loginMethod=as.getSetting("index_page_default");
+			if(StringUtils.equalsIgnoreCase(loginMethod, "ldaplogin")){
+				loginMethod=LoginMethod.Ldap.getValue();
+			} else if(StringUtils.equalsIgnoreCase(loginMethod, "ntlogin")){
+				loginMethod=LoginMethod.WindowsDomain.getValue();
+			} else if(StringUtils.equalsIgnoreCase(loginMethod, "dblogin")){
+				loginMethod=LoginMethod.Database.getValue();
+			} else if(StringUtils.equalsIgnoreCase(loginMethod, "autologin")){
+				loginMethod=LoginMethod.Auto.getValue();
+			} else {
+				loginMethod=LoginMethod.Internal.getValue();
+			}
+			as.setSetting("index_page_default", loginMethod);
 
 			artSettingsLoaded = true;
 

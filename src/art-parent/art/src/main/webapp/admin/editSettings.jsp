@@ -800,12 +800,11 @@
 <tr>
         <td colspan="3" class="attr">Login Page:
 	   <select name="index_page_default">
-	     <option value="login"     <%= (index_page_default.equals("login")?"SELECTED":"") %>    >Internal Login</option>
-	     <option value="LDAPLogin" <%= (index_page_default.equals("LDAPLogin")?"SELECTED":"") %>>LDAP Login</option>
-	     <option value="NTLogin"   <%= (index_page_default.equals("NTLogin")?"SELECTED":"") %>  >Windows Login</option>
-	     <option value="DBLogin"   <%= (index_page_default.equals("DBLogin")?"SELECTED":"") %>  >Database Login</option>
-	     <option value="AutoLogin" <%= (index_page_default.equals("AutoLogin")?"SELECTED":"") %>>Single Sign On</option>
-		 <option value="default"   <%= (index_page_default.equals("default")?"SELECTED":"") %>  >Default </option>
+	     <option value="internal"     <%= (index_page_default.equals("internal")?"SELECTED":"") %>    >Internal Login</option>
+	     <option value="ldap" <%= (index_page_default.equals("ldap")?"SELECTED":"") %>>LDAP Login</option>
+	     <option value="windowsDomain"   <%= (index_page_default.equals("windowsDomain")?"SELECTED":"") %>  >Windows Login</option>
+	     <option value="database"   <%= (index_page_default.equals("database")?"SELECTED":"") %>  >Database Login</option>
+	     <option value="auto" <%= (index_page_default.equals("auto")?"SELECTED":"") %>>Single Sign On</option>
 	   </select>
 	</td>
 </tr>

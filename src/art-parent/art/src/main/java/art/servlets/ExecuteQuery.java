@@ -786,7 +786,6 @@ public class ExecuteQuery extends HttpServlet {
 			ue.setUsername("public_user");
 
 			ue.setAccessLevel(0);
-			ue.setInternalAuth(true);
 
 			session.setAttribute("ue", ue);
 			session.setAttribute("username", "public_user");

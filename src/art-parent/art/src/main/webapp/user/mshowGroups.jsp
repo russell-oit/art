@@ -37,7 +37,7 @@
      </tr>
     </table>
   </fieldset>
-<a href="<%= request.getContextPath() %>/logOff.jsp?_mobile=true"> <%=messages.getString("logOffLink")%></a>
+<a href="<%= request.getContextPath() %>/logOut.do?_mobile=true"> <%=messages.getString("logOut")%></a>
 
 <%@ include file ="footer.jsp" %>
 
