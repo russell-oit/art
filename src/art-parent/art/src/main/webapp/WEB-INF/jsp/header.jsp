@@ -6,8 +6,9 @@
 Header that appears at the top of all pages, except the login and logs pages
 --%>
 
-<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
@@ -38,27 +39,27 @@ Header that appears at the top of all pages, except the login and logs pages
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li class="active">
-						<a href="${pageContext.request.contextPath}/user/home.do">
+						<a href="${pageContext.request.contextPath}/app/home.do">
 							<i class="icon-home"></i> <spring:message code="header.link.home"/>
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/admin/admin.do">
-							<i class="icon-wrench"></i> <spring:message code="headre.link.admin"/>
+						<a href="${pageContext.request.contextPath}/app/admin.do">
+							<i class="icon-wrench"></i> <spring:message code="header.link.admin"/>
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/user/myJobs.do">
+						<a href="${pageContext.request.contextPath}/app/myJobs.do">
 							<i class="icon-time"></i> <spring:message code="header.link.myJobs"/>
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/user/sharedJobs.do">
+						<a href="${pageContext.request.contextPath}/app/sharedJobs.do">
 							<i class="icon-th-large"></i> <spring:message code="header.link.sharedJobs"/>
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/user/jobArchives.do">
+						<a href="${pageContext.request.contextPath}/app/jobArchives.do">
 							<i class="icon-archive"></i> <spring:message code="header.link.jobArchives"/>
 						</a>
 					</li>

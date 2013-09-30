@@ -8,8 +8,8 @@ Login page
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
@@ -29,7 +29,6 @@ Login page
 
 	<jsp:attribute name="pageJavascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('#username').focus();
@@ -38,7 +37,6 @@ Login page
 	</jsp:attribute>
 
 	<jsp:body>
-
 		<div class="well col-lg-6 col-lg-offset-3">
 			<form class="form-horizontal" method="POST" action="">
 				<fieldset>
@@ -104,8 +102,5 @@ Login page
 				</fieldset>
 			</form>
 		</div>
-	</div>
-
-
-</jsp:body>
+	</jsp:body>
 </t:genericPage>

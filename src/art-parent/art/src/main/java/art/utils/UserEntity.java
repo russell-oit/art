@@ -956,7 +956,8 @@ public class UserEntity implements Serializable {
 			PreparedStatement ps;
 			ResultSet rs;
 
-			//get shared jobs user has access to via group membership. non-spit jobs. no entries for them in the art_user_jobs table
+			//get shared jobs user has access to via group membership. 
+			//non-split jobs. no entries for them in the art_user_jobs table
 			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
 					+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
 					+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"

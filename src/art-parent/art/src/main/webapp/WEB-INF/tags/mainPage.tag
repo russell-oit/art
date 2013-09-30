@@ -5,12 +5,13 @@
 
 Template for any main application page.
 Includes bootstrap css, page header (navbar), page footer
+bootstrap js, jquery js
 --%>
 
 <%@tag description="Main Page Template" pageEncoding="UTF-8"%>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
-<%@attribute name="title"%>
+<%@attribute name="title" required="true"%>
 <%@attribute name="headContent" fragment="true" %>
 <%@attribute name="pageJavascript" fragment="true" %>
 <%@attribute name="pageCss" fragment="true" %>
@@ -45,6 +46,8 @@ Includes bootstrap css, page header (navbar), page footer
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 
 		<!-- javascript placed at the end of the document so that pages load faster -->
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
 		<jsp:invoke fragment="pageJavascript"/>
 	</body>
 </html>

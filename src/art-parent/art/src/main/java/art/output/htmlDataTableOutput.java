@@ -165,13 +165,13 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 				//+ ", \"sScrollY\": \"200px\""
 				//+ ", \"bScrollCollapse\": true"
 				//+ ", \"bProcessing\": true"
-				+ ", \"bJQueryUI\": true"
+				//+ ", \"bJQueryUI\": true"
 				+ languageSetting
 				+ ", \"iDisplayLength\": 50" //default item in show entries e.g. -1
 				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
 				+ "}";
 
-		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/dataTables_demo_table\" /> ");
+		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/dataTables_demo_table.css\" /> ");
 		out.println("<script type=\"text/javascript\" src=\"../js/jquery-1.6.2.min.js\"></script>");
 		out.println("<script type=\"text/javascript\" src=\"../js/jquery.dataTables.min.js\"></script>");
 		//enable use of jquery ui theme. needs theme css, jquery.js, jquery-ui.js

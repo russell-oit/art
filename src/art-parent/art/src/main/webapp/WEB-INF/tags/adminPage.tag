@@ -10,14 +10,10 @@ Template for admin pages
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
-<%@attribute name="title"%>
+<%@attribute name="title" required="true"%>
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
-	<jsp:attribute name="pageJavascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
-	</jsp:attribute>
 
 	<jsp:body>
         <jsp:doBody/>

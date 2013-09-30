@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class AdminController {
 	
-	@RequestMapping(value="/admin/admin", method=RequestMethod.GET)
+	@RequestMapping(value="/app/admin", method=RequestMethod.GET)
 	public String showAdmin(){
 		return "admin";
 	}

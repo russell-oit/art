@@ -18,7 +18,7 @@ Footer that appears on all pages
 </c:set>
 
 <div id="pageFooter">
-	<div class="navbar navbar-fixed-bottom well" style="padding: 10px; bottom: -20px;">
+	<div class="navbar navbar-fixed-bottom well" style="bottom: -20px;">
 		<div class="container"> 
 			<span class="text-muted credit">
 				<a href="http://art.sourceforge.net">ART</a>

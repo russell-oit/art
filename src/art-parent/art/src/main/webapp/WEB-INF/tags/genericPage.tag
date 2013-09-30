@@ -10,7 +10,7 @@ Includes bootstrap css
 <%@tag description="Generic Page Template" pageEncoding="UTF-8"%>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
-<%@attribute name="title"%>
+<%@attribute name="title" required="true"%>
 <%@attribute name="headContent" fragment="true" %>
 <%@attribute name="pageJavascript" fragment="true" %>
 <%@attribute name="pageCss" fragment="true" %>

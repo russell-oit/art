@@ -99,4 +99,14 @@ public class DbUtils {
 		close(null, st, conn);
 	}
 	
+	/**
+	 * Close resultset and statement
+	 * 
+	 * @param rs
+	 * @param st 
+	 */
+	public static void close(ResultSet rs, Statement st) {
+		close(rs, st, null);
+	}
+	
 }

@@ -98,11 +98,13 @@ public class AuthorizationFilter implements Filter {
 				}
 			}
 
-			if (canAccessPage) {
-				chain.doFilter(srequest, sresponse);
-			} else {
-				response.sendRedirect(response.encodeRedirectURL(contextPath + "/user/showGroups.jsp"));
-			}
+			chain.doFilter(srequest, sresponse);
+			
+//			if (canAccessPage) {
+//				chain.doFilter(srequest, sresponse);
+//			} else {
+//				response.sendRedirect(response.encodeRedirectURL(contextPath + "/user/showGroups.jsp"));
+//			}
 		}
 	}
 }
