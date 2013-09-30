@@ -29,7 +29,6 @@
  */
 package art.servlets;
 
-import static art.servlets.ArtConfig.logger;
 import art.utils.ArtJob;
 import art.utils.QuartzProperties;
 import java.io.BufferedWriter;

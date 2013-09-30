@@ -5,13 +5,13 @@ package art.enums;
  *
  * @author Timothy Anyona
  */
-public enum LoginMethod {
+public enum AuthenticationMethod {
 
 	Internal("internal"), Auto("auto"), WindowsDomain("windowsDomain"),
-	Ldap("ldap"), Database("database");
+	Ldap("ldap"), Database("database"), ArtRepository("artRepository");
 	private String value;
 
-	private LoginMethod(String value) {
+	private AuthenticationMethod(String value) {
 		this.value = value;
 	}
 
@@ -19,8 +19,8 @@ public enum LoginMethod {
 		return value;
 	}
 
-	public static LoginMethod getEnum(String method) {
-		for (LoginMethod v : values()) {
+	public static AuthenticationMethod getEnum(String method) {
+		for (AuthenticationMethod v : values()) {
 			if (v.value.equalsIgnoreCase(method)) {
 				return v;
 			}

@@ -31,7 +31,7 @@ if(!canChangePassword){
                 <td class="data"><input type="password" name="newPassword2" size="25" maxlength="40"></td>
             </tr>
             <tr>
-                <td colspan="2" class="data"  align="center"> <input type="submit" value="<%=messages.getString("changePassword")%>"> </td>
+                <td colspan="2" class="data"  align="center"> <input type="submit" value="<%=messages.getString("header.link.changePassword")%>"> </td>
             </tr>
         </table>
     </form>

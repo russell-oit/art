@@ -17,7 +17,6 @@
 package art.schedule;
 
 import art.servlets.ArtConfig;
-import art.utils.ArtUtils;
 import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

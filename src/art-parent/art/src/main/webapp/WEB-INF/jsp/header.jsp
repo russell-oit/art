@@ -6,7 +6,14 @@
 Header that appears at the top of all pages, except the login and logs pages
 --%>
 
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
+<spring:htmlEscape defaultHtmlEscape="true"/>
+
+<c:set var="INTERNAL_AUTHENTICATION">
+	<%= art.enums.AuthenticationMethod.Internal.getValue() %>
+</c:set>
 
 <%-- need buffer with fixed navbar so that main body content isn't hidden under it
 <div id="fix-for-navbar-fixed-top-spacing" style="height: 60px;">&nbsp;</div>
@@ -32,42 +39,42 @@ Header that appears at the top of all pages, except the login and logs pages
 				<ul class="nav navbar-nav">
 					<li class="active">
 						<a href="${pageContext.request.contextPath}/user/home.do">
-							<i class="icon-home"></i> <fmt:message key="home"/>
+							<i class="icon-home"></i> <spring:message code="header.link.home"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/admin/admin.do">
-							<i class="icon-wrench"></i> <fmt:message key="admin"/>
+							<i class="icon-wrench"></i> <spring:message code="headre.link.admin"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/user/myJobs.do">
-							<i class="icon-time"></i> <fmt:message key="myJobs"/>
+							<i class="icon-time"></i> <spring:message code="header.link.myJobs"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/user/sharedJobs.do">
-							<i class="icon-th-large"></i> <fmt:message key="sharedJobs"/>
+							<i class="icon-th-large"></i> <spring:message code="header.link.sharedJobs"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/user/jobArchives.do">
-							<i class="icon-archive"></i> <fmt:message key="jobArchives"/>
+							<i class="icon-archive"></i> <spring:message code="header.link.jobArchives"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/admin/logs" target="_blank">
-							<i class="icon-reorder"></i> <fmt:message key="logs"/>
+							<i class="icon-reorder"></i> <spring:message code="header.link.logs"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/help.jsp" target="_blank">
-							<i class="icon-info"></i> <fmt:message key="help"/>
+							<i class="icon-info"></i> <spring:message code="header.link.help"/>
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/logOut.do">
-							<i class="icon-signout"></i> <fmt:message key="logOut"/>
+						<a href="${pageContext.request.contextPath}/logout.do">
+							<i class="icon-signout"></i> <spring:message code="header.link.logout"/>
 						</a>
 					</li>
 				</ul>
@@ -77,14 +84,16 @@ Header that appears at the top of all pages, except the login and logs pages
 							<i class="icon-user"></i> ${sessionUser.username} <b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
-							<li>
-								<a href="${pageContext.request.contextPath}/changePassword.do">
-									<fmt:message key="changePassword"/>
-								</a>
-							</li>
+							<c:if test="${authenticationMethod eq INTERNAL_AUTHENTICATION}">
+								<li>
+									<a href="${pageContext.request.contextPath}/changePassword.do">
+										<spring:message code="header.link.changePassword"/>
+									</a>
+								</li>
+							</c:if>
 							<li>
 								<a href="${pageContext.request.contextPath}/changeLanguage.do">
-									<fmt:message key="changeLanguage"/>
+									<spring:message code="header.link.changeLanguage"/>
 								</a>
 							</li>
 						</ul>

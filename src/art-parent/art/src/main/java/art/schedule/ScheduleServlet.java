@@ -6,13 +6,11 @@ package art.schedule;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +19,10 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class ScheduleServlet extends HttpServlet {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(ScheduleServlet.class);
 
 	/**
@@ -67,8 +69,6 @@ public class ScheduleServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		request.setCharacterEncoding("UTF-8");
-
-		String userPath = request.getServletPath();
 
 		String action = request.getParameter("action");
 		String id=request.getParameter("id");

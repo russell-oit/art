@@ -51,7 +51,6 @@ public class ArtHelper {
 		HttpSession session = request.getSession();
 		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 		int accessLevel = -1;
-		boolean internalAuthentication = true;
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		if (username != null && password != null) {
@@ -109,7 +108,6 @@ public class ArtHelper {
 					rs = ps.executeQuery();
 					if (rs.next()) {
 						accessLevel = rs.getInt("ACCESS_LEVEL");
-						internalAuthentication = false;
 						log(username, "login", request.getRemoteAddr(), "external, level: " + accessLevel);
 					} else {
 						log(username, "loginerr", request.getRemoteAddr(), "external, failed");
@@ -123,7 +121,6 @@ public class ArtHelper {
 			if (request.getParameter("_public_user") != null) {
 				username = "public_user";
 				accessLevel = 0;
-				internalAuthentication = true;
 			} else {
 				msg = messages.getString("sessionExpired");
 			}

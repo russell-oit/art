@@ -1,4 +1,6 @@
+<%--
 <%@include file="/WEB-INF/jspf/adminHeader.jspf" %>
+--%>
 
 <%@page import="art.utils.ArtHelper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
@@ -54,4 +56,6 @@
 
 <jsp:include page="/user/scheduleHelp.html"/>
 
+<%--
 <%@include file="/WEB-INF/jspf/footer.jspf" %>
+--%>

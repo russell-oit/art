@@ -14,7 +14,7 @@
 <div style="float: right; text-align: right">
 	<span style="font-size:75%">
 	 version ${applicationScope.artVersion} <img src="<%=request.getContextPath() + art.servlets.ArtConfig.getArtSetting("bottom_logo")%>" alt="">
-	  <a href="mailto:<%=art.servlets.ArtConfig.getArtSetting("administrator")%>"><%=fMessages.getString("artSupport")%></a>
+	  <a href="mailto:<%=art.servlets.ArtConfig.getArtSetting("administrator")%>"><%=fMessages.getString("footer.link.artAdministrator")%></a>
 	</span>
 </div>
 </p>

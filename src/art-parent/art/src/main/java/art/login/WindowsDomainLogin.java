@@ -1,7 +1,6 @@
 package art.login;
 
 import art.servlets.ArtConfig;
-import static art.utils.ArtHelper.log;
 import art.utils.ValidateNTLogin;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

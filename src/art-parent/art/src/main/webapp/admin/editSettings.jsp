@@ -19,10 +19,10 @@
   //NOTE: the html element names correspond to art setting values
   //if they are changed, code that uses those settings needs to be changed
 
-  String  administrator , smtp_server, smtp_username, smtp_password,
+  String  administrator_email , smtp_server, smtp_username, smtp_password,
           art_username, art_password, art_jdbc_url, art_jdbc_driver, art_testsql, art_pooltimeout, msg;
   String  ldap_auth_server, ldap_auth_method  ,mswin_auth_server, mswin_domains,
-          jdbc_auth_driver ,jdbc_auth_url ,index_page_default, bottom_logo, css_skin,header_with_public_user,
+          jdbc_auth_driver ,jdbc_auth_url ,authentication_method, bottom_logo, css_skin,header_with_public_user,
 	  page_size, rss_link;
 
 
@@ -72,7 +72,7 @@
     art_jdbc_driver        = as.getSetting("art_jdbc_driver");
 	art_testsql            = as.getSetting("art_testsql");
 	art_pooltimeout        = as.getSetting("art_pooltimeout");
-    administrator          = as.getSetting("administrator");
+    administrator_email          = as.getSetting("administrator_email");
     smtp_server            = as.getSetting("smtp_server");
     smtp_username          = as.getSetting("smtp_username");
     smtp_password          = as.getSetting("smtp_password");
@@ -84,7 +84,7 @@
     mswin_domains          = as.getSetting("mswin_domains");
     jdbc_auth_driver       = as.getSetting("jdbc_auth_driver");
     jdbc_auth_url          = as.getSetting("jdbc_auth_url");
-    index_page_default     = as.getSetting("index_page_default");
+    authentication_method     = as.getSetting("authentication_method");
 
     bottom_logo            = as.getSetting("bottom_logo");
     css_skin               = as.getSetting("css_skin");
@@ -210,7 +210,7 @@
     art_jdbc_driver = "org.hsqldb.jdbcDriver";
 	art_testsql     = "";
 	art_pooltimeout = "15";
-    administrator   = "";
+    administrator_email   = "";
     smtp_server     = "";
     smtp_username   = "";
     smtp_password   = "";
@@ -220,7 +220,7 @@
     mswin_domains      ="Domain1,Domain2,Domain3";
     jdbc_auth_driver   = "";
     jdbc_auth_url      = "";
-    index_page_default = "login";
+    authentication_method = "internal";
 
     bottom_logo	       = "/images/artminiicon.png";
     css_skin	       = "/css/art.css";
@@ -428,8 +428,8 @@
     
    <tr><td class="attr"> ART Administrator Email</td>
        <td class="data">
-         <input type="text" name="administrator" size="60" maxlength="120" value="<%=administrator%>">
-		 <%msg = "Appears in the ART Support link in the footer of ART pages"; %>
+         <input type="text" name="administrator_email" size="60" maxlength="120" value="<%=administrator_email%>">
+		 <%msg = "Appears in the ART Administrator link in the footer of ART pages"; %>
 		<input type="button" class="buttonup" onClick="alert('<%=msg%>')" onMouseOver="javascript:btndn(this);" onMouseOut="javascript:btnup(this);"  value="?">
        </td>
    </tr>
@@ -590,14 +590,6 @@
 	   <tr>
 			   <td colspan="2" class="data2">General</td>
 		   </tr>
-       <tr>
-        <td class="attr">ART CSS (skin)</td>
-        <td class="data"><input type="text" name="css_skin" size="50" maxlength="120" value="<%=css_skin%>"></td>
-       </tr>
-       <tr>
-        <td class="attr">Page Footer Logo</td>
-        <td class="data"><input type="text" name="bottom_logo" size="50" maxlength="120" value="<%=bottom_logo%>"></td>
-       </tr>
 	   
 	   <tr>
         <td colspan="2" class="attr">Show standard header and footer in public_user sessions
@@ -774,7 +766,7 @@
        </tr>
 
 	<tr>
-        <td class="attr" rowspan="2">Windows
+        <td class="attr" rowspan="2">Windows Domain
 	 
 	</td>
         <td class="data">Domain Controller:</td>
@@ -798,13 +790,13 @@
        </tr>
 
 <tr>
-        <td colspan="3" class="attr">Login Page:
-	   <select name="index_page_default">
-	     <option value="internal"     <%= (index_page_default.equals("internal")?"SELECTED":"") %>    >Internal Login</option>
-	     <option value="ldap" <%= (index_page_default.equals("ldap")?"SELECTED":"") %>>LDAP Login</option>
-	     <option value="windowsDomain"   <%= (index_page_default.equals("windowsDomain")?"SELECTED":"") %>  >Windows Login</option>
-	     <option value="database"   <%= (index_page_default.equals("database")?"SELECTED":"") %>  >Database Login</option>
-	     <option value="auto" <%= (index_page_default.equals("auto")?"SELECTED":"") %>>Single Sign On</option>
+        <td colspan="3" class="attr">Authentication Method:
+	   <select name="authentication_method">
+	     <option value="internal"     <%= (authentication_method.equals("internal")?"SELECTED":"") %>    >Internal Login</option>
+	     <option value="ldap" <%= (authentication_method.equals("ldap")?"SELECTED":"") %>>LDAP Login</option>
+	     <option value="windowsDomain"   <%= (authentication_method.equals("windowsDomain")?"SELECTED":"") %>  >Windows Login</option>
+	     <option value="database"   <%= (authentication_method.equals("database")?"SELECTED":"") %>  >Database Login</option>
+	     <option value="auto" <%= (authentication_method.equals("auto")?"SELECTED":"") %>>Single Sign On</option>
 	   </select>
 	</td>
 </tr>

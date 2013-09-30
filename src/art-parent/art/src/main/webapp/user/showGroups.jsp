@@ -191,7 +191,7 @@ preFunction="artAddWork"
  <% if (!ue.getUsername().equals("public_user") && canChangePassword) { %>
    <!-- Change password for internal user -->
    <p><div align="center">
-   <a href="<%= request.getContextPath() %>/user/changePassword.jsp"><small><%=messages.getString("changePassword")%></small></a>
+   <a href="<%= request.getContextPath() %>/user/changePassword.jsp"><small><%=messages.getString("header.link.changePassword")%></small></a>
 
    </div></p>
  <%}%>

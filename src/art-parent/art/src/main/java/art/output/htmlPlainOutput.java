@@ -24,7 +24,6 @@ package art.output;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
-import art.utils.ArtUtils;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Map;

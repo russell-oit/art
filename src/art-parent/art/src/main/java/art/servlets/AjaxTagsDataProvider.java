@@ -18,7 +18,6 @@ package art.servlets;
 
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
-import art.utils.ArtUtils;
 import art.utils.DbUtils;
 import art.utils.PreparedQuery;
 import art.utils.UserEntity;

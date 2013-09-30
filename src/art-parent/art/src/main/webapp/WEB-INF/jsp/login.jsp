@@ -13,6 +13,10 @@ Login page
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
+<c:set var="WINDOWS_DOMAIN_AUTHENTICATION">
+	<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>
+</c:set>
+
 <t:genericPage title="ART - Login">
 	<jsp:attribute name="metaContent">
 		<meta http-equiv="pragma" content="no-cache">
@@ -36,29 +40,35 @@ Login page
 	<jsp:body>
 
 		<div class="well col-lg-6 col-lg-offset-3">
-
-			<form class="form-horizontal" method="POST" action="" accept-charset="UTF-8">
+			<form class="form-horizontal" method="POST" action="">
 				<fieldset>
 					<legend class="text-center">ART</legend>
 					<div class="form-group">
-						<div class="col-lg-12">
-							<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
-								 alt="ART" class="img-responsive" style="margin: 0 auto">
+						<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
+							 alt="" class="img-responsive centered">
+					</div>
+
+					<c:if test="${not empty message}">
+						<div class="alert alert-danger">
+							<spring:message code="${message}"/>
 						</div>
-					</div>
-					<div style="color:red">
-						${requestScope.message}
-					</div>
-					<c:if test="${not empty standardMessage}">
-						<div id="message" style="color:red"><spring:message code="${standardMessage}"/></div>
 					</c:if>
 					<c:if test="${not empty autoLoginMessage}">
-						<div id="autologinMessage" style="color:red"><spring:message code="${autoLoginMessage}" arguments="${username}"/></div>
+						<div class="alert alert-danger">
+							<spring:message code="${autoLoginMessage}" arguments="${autoLoginUser}"/>
+						</div>
+					</c:if>
+					<c:if test="${not empty messageDetails}">
+						<div class="alert alert-danger">
+							${messageDetails}
+						</div>
 					</c:if>
 
-					<c:if test="${loginMode eq 'windowsDomain'}">
+					<c:if test="${authenticationMethod eq WINDOWS_DOMAIN_AUTHENTICATION}">
 						<div class="form-group">
-							<label class="control-label col-lg-2" for="windowsDomain">Domain</label>
+							<label class="control-label col-lg-2" for="windowsDomain">
+								<spring:message code="login.label.domain"/>
+							</label>
 							<div class="col-lg-10">
 								<select name="windowsDomain" id="windowsDomain" class="form-control">
 									<c:forTokens var="domain" items='${domains}' delims=",">
@@ -69,20 +79,26 @@ Login page
 						</div>
 					</c:if>
 					<div class="form-group">
-						<label class="control-label col-lg-2" for="username">Username</label>
+						<label class="control-label col-lg-2" for="username">
+							<spring:message code="login.label.username"/>
+						</label>
 						<div class="col-lg-10">
 							<input type="text" name="username" id="username" class="form-control input-xlarge">
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-lg-2" for="password">Password</label>
+						<label class="control-label col-lg-2" for="password">
+							<spring:message code="login.label.password"/>
+						</label>
 						<div class="col-lg-10">
 							<input type="password" name="password" id="password" class="form-control input-xlarge">
 						</div>
 					</div>
 					<div class="form-group">
 						<div class="col-lg-10 col-lg-offset-2">
-							<button type="submit" class="btn btn-default">Login</button>
+							<button type="submit" class="btn btn-default">
+								<spring:message code="login.button.login"/>
+							</button>
 						</div>
 					</div>
 				</fieldset>

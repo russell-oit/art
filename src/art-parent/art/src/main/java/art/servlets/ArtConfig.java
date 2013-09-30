@@ -17,7 +17,7 @@
 package art.servlets;
 
 import art.dbcp.DataSource;
-import art.enums.LoginMethod;
+import art.enums.AuthenticationMethod;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.utils.DbUtils;
@@ -52,7 +52,7 @@ public class ArtConfig extends HttpServlet {
 	private static String art_username, art_password, art_jdbc_driver, art_jdbc_url,
 			exportPath, art_testsql, art_pooltimeout;
 	private static int poolMaxConnections;
-	private static final int DEFAULT_POOL_MAX_CONNECTIONS=20;
+	private static final int DEFAULT_POOL_MAX_CONNECTIONS = 20;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
 	private static ArtSettings as;
@@ -63,7 +63,7 @@ public class ArtConfig extends HttpServlet {
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static ArrayList<String> allViewModes; //all view modes
 	private static int defaultMaxRows;
-	private static final int DEFAULT_MAX_ROWS=1000; //default in case of incorrect setting
+	private static final int DEFAULT_MAX_ROWS = 1000; //default in case of incorrect setting
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
 	private static final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
@@ -135,7 +135,7 @@ public class ArtConfig extends HttpServlet {
 
 		//set export path
 		exportPath = appPath + sep + "export" + sep;
-		
+
 		//set custom export directory
 		try {
 			Context ic = new InitialContext();
@@ -263,22 +263,32 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//set default max rows
-			defaultMaxRows=NumberUtils.toInt(as.getSetting("default_max_rows"), DEFAULT_MAX_ROWS);
-			
+			defaultMaxRows = NumberUtils.toInt(as.getSetting("default_max_rows"), DEFAULT_MAX_ROWS);
+
 			//cater for change of authentication method identifiers, from 2.5.2 - 3.0
-			String loginMethod=as.getSetting("index_page_default");
-			if(StringUtils.equalsIgnoreCase(loginMethod, "ldaplogin")){
-				loginMethod=LoginMethod.Ldap.getValue();
-			} else if(StringUtils.equalsIgnoreCase(loginMethod, "ntlogin")){
-				loginMethod=LoginMethod.WindowsDomain.getValue();
-			} else if(StringUtils.equalsIgnoreCase(loginMethod, "dblogin")){
-				loginMethod=LoginMethod.Database.getValue();
-			} else if(StringUtils.equalsIgnoreCase(loginMethod, "autologin")){
-				loginMethod=LoginMethod.Auto.getValue();
-			} else {
-				loginMethod=LoginMethod.Internal.getValue();
+			String loginMethod = as.getSetting("index_page_default"); //old setting name
+			if (StringUtils.isNotBlank(loginMethod)) {
+				loginMethod = as.getSetting("index_page_default");
+				
+				if (StringUtils.equalsIgnoreCase(loginMethod, "ldaplogin")) {
+					loginMethod = AuthenticationMethod.Ldap.getValue();
+				} else if (StringUtils.equalsIgnoreCase(loginMethod, "ntlogin")) {
+					loginMethod = AuthenticationMethod.WindowsDomain.getValue();
+				} else if (StringUtils.equalsIgnoreCase(loginMethod, "dblogin")) {
+					loginMethod = AuthenticationMethod.Database.getValue();
+				} else if (StringUtils.equalsIgnoreCase(loginMethod, "autologin")) {
+					loginMethod = AuthenticationMethod.Auto.getValue();
+				} else {
+					loginMethod = AuthenticationMethod.Internal.getValue();
+				}
+				as.setSetting("authentication_method", loginMethod);
 			}
-			as.setSetting("index_page_default", loginMethod);
+
+			//change of admin email setting name
+			String adminEmail = as.getSetting("administrator"); //old name
+			if (StringUtils.isNotBlank(adminEmail)) {
+				as.setSetting("administrator_email", adminEmail);
+			}
 
 			artSettingsLoaded = true;
 
@@ -582,8 +592,8 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Determine if displaying null numbers as blank or as zero when
-	 * display null value is no
+	 * Determine if displaying null numbers as blank or as zero when display
+	 * null value is no
 	 *
 	 * @return <code>true</code> if displaying null numbers as blank. Otherwise,
 	 * display null numbers as zero

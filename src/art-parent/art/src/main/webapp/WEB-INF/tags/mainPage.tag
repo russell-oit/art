@@ -30,6 +30,7 @@ Includes bootstrap css, page header (navbar), page footer
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
 
 		<jsp:invoke fragment="headContent"/>
 	</head>

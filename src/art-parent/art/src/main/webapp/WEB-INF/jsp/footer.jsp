@@ -6,21 +6,29 @@
 Footer that appears on all pages
 --%>
 
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@ taglib  uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
+
+<c:set var="administratorEmail">
+	<%= art.servlets.ArtConfig.getArtSetting("administrator_email") %>
+</c:set>
 
 <div id="pageFooter">
 	<div class="navbar navbar-fixed-bottom well" style="padding: 10px; bottom: -20px;">
 		<div class="container"> 
 			<span class="text-muted credit">
-				<a href="http://art.sourceforge.net">ART</a> &nbsp; A Reporting Tool
+				<a href="http://art.sourceforge.net">ART</a>
+				&nbsp; A Reporting Tool 
+				&nbsp; <spring:message code="footer.text.artVersion"/> ${artVersion}
 			</span>
 			<span class="text-muted credit pull-right">
-				<spring:message code="footer.content.artVersion"/> ${artVersion} <img src="<%=request.getContextPath() + art.servlets.ArtConfig.getBottomLogoPath()%>" alt="">
-				<a href="mailto:<%=art.servlets.ArtConfig.getArtSetting("administrator")%>"><spring:message code="artSupport"/></a>
+				<a href="mailto:${administratorEmail}">
+					<spring:message code="footer.link.artAdministrator"/>
+				</a>
 			</span>
 		</div>
 	</div>

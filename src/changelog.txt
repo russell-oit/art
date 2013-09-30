@@ -5,7 +5,7 @@ ART 3.0
  - twitter bootstrap, font awesome
 * Enable multi parameter to act as a chained parameter master
 * Allow chained parameter slave to have default values
-* Modified some user interface elements for ease of use
+* Improved support for sun jdbc-odbc bridge driver
 * Allow datasources to be disabled
 * Renamed "Report on Column" query types to "Group"
 * Renamed "Graph" query types to "Chart"
