@@ -8,19 +8,22 @@ Login page
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
-<%@taglib uri="http://www.springframework.org/tags" prefix="spring"%>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib  uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<c:set var="WINDOWS_DOMAIN_AUTHENTICATION">
-	<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>
-</c:set>
+<c:set var="WINDOWS_DOMAIN_AUTHENTICATION"
+value="<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 
-<t:genericPage title="ART - Login">
+<spring:message code="page.title.login" var="pageTitle" scope="page"/>
+
+<t:genericPage title="ART - ${pageTitle}">
 	<jsp:attribute name="metaContent">
 		<meta http-equiv="pragma" content="no-cache">
-        <meta http-equiv="cache-control" content="no-cache, must-revalidate">
+		<meta http-equiv="cache-control" content="no-cache, must-revalidate">
 	</jsp:attribute>
 
 	<jsp:attribute name="pageFooter">

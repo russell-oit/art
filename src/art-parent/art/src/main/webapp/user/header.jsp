@@ -22,7 +22,7 @@
  <script type="text/javascript" src="<%= request.getContextPath() %>/js/prototype.js"></script>
  <script type="text/javascript" src="<%= request.getContextPath() %>/js/scriptaculous/scriptaculous.js"></script>
  
-  <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery-1.6.2.min.js"></script>
+  <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery-1.10.2.min.js"></script>
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery.form.js"></script>
  
  <script type="text/javascript">
@@ -43,7 +43,7 @@
 </c:if> 
   
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/art.js"></script>  
-  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() + art.servlets.ArtConfig.getArtSetting("css_skin")%>" />      
+  <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/art.css" />      
   <link rel="stylesheet" type="text/css" href="<%=request.getContextPath() %>/css/ajaxtags-art.css" /> 
   
   <script type="text/javascript" src="<%= request.getContextPath() %>/js/overlib.js"></script>
@@ -73,7 +73,7 @@
       :: <a href="<%= request.getContextPath() %>/admin/logs" ><img src="<%= request.getContextPath() %>/images/logs.png" title="<%=messages.getString("logs")%>" border="0" /></a>
       <% } %>
 
-      :: <a href="<%= request.getContextPath() %>/logOut.do"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOut")%>" border="0" /></a>
+      :: <a href="<%= request.getContextPath() %>/logout.do"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOut")%>" border="0" /></a>
       <img src="<%= request.getContextPath() %>/images/vertical_16px.gif" />
 	  
 	  <a href="<%= request.getContextPath() %>/app/admin.do">Admin Console 2</a>

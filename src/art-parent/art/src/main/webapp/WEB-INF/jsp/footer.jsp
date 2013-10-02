@@ -6,16 +6,12 @@
 Footer that appears on all pages
 --%>
 
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-<%@ taglib  uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<c:set var="administratorEmail">
-	<%= art.servlets.ArtConfig.getArtSetting("administrator_email") %>
-</c:set>
+<c:set var="administratorEmail" 
+	   value="<%= art.servlets.ArtConfig.getArtSetting("administrator_email")%>"/>
 
 <div id="pageFooter">
 	<div class="navbar navbar-fixed-bottom well" style="bottom: -20px;">

@@ -1,6 +1,6 @@
 package art.servlets;
 
-import art.utils.UserEntity;
+import art.user.User;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -54,15 +54,18 @@ public class AuthorizationFilter implements Filter {
 			HttpServletResponse response = (HttpServletResponse) sresponse;
 			HttpSession session = request.getSession();
 
-			UserEntity user = (UserEntity) session.getAttribute("ue");
+			User user = (User) session.getAttribute("sessionUser");
 			if (user == null) {
 				//user not authenticated or session expired
 				if (srequest.getParameter("_public_user") != null) {
 					//allow public user access
 					String username = "public_user";
-					user = new UserEntity(username);
+
+					user = new User();
+					user.setUsername(username);
 					user.setAccessLevel(0);
-					session.setAttribute("ue", user);
+
+					session.setAttribute("sessionUser", user);
 					session.setAttribute("username", username);
 				} else {
 					//redirect to login page. 
@@ -81,30 +84,45 @@ public class AuthorizationFilter implements Filter {
 			}
 
 			//if we are here, user is authenticated
-			//ensure they have access to the specific page. if not redirect to home page
-			//request.getPathInfo() doesn't work in filters
-			//TODO or show accessdenied page?
-
-			boolean canAccessPage = false;
-			int accessLevel = user.getAccessLevel();
-			String contextPath = request.getContextPath();
-			String requestUri = request.getRequestURI();
-			String path = contextPath + "/app/";
-
-			//TODO use permissions instead of access level
-			if (StringUtils.startsWith(requestUri, path + "admin.do")) {
-				if (accessLevel >= 10) {
-					canAccessPage = true;
-				}
+			//ensure they have access to the specific page. if not show access denied page
+			if (canAccessPage(request,user)) {
+				chain.doFilter(srequest, sresponse);
+			} else {
+				//show access denied page. 
+				//use forward instead of redirect so that the intended url remains in the browser
+				request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
 			}
-
-			chain.doFilter(srequest, sresponse);
-			
-//			if (canAccessPage) {
-//				chain.doFilter(srequest, sresponse);
-//			} else {
-//				response.sendRedirect(response.encodeRedirectURL(contextPath + "/user/showGroups.jsp"));
-//			}
 		}
+	}
+
+	private boolean canAccessPage(HttpServletRequest request, User user) {
+		boolean authorized = false;
+		
+		int accessLevel = user.getAccessLevel();
+		String contextPath = request.getContextPath();
+		String requestUri = request.getRequestURI();
+		String path = contextPath + "/app/";
+
+		//TODO use permissions instead of access level
+		if (StringUtils.startsWith(requestUri, path + "admin.do")) {
+			//only admins can access
+			if (accessLevel >= 10) {
+				authorized = true;
+			}
+		} else if (StringUtils.startsWith(requestUri, path + "home.do")) {
+			//everyone can access
+			//NOTE: "everyone" excludes the special codes when accessing as
+			//the initial setup user (-1) and the art repository user (-2)
+			if (accessLevel >= 0) {
+				authorized = true;
+			}
+		} else if (StringUtils.startsWith(requestUri, path + "sharedJobs.do")) {
+			//everyone
+			if (accessLevel >= 0) {
+				authorized = true;
+			}
+		}
+		
+		return authorized;
 	}
 }

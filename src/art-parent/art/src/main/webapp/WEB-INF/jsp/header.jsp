@@ -12,9 +12,9 @@ Header that appears at the top of all pages, except the login and logs pages
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<c:set var="INTERNAL_AUTHENTICATION">
-	<%= art.enums.AuthenticationMethod.Internal.getValue() %>
-</c:set>
+<c:set var="INTERNAL_AUTHENTICATION"
+	value="<%= art.enums.AuthenticationMethod.Internal.getValue() %>"/>
+
 
 <%-- need buffer with fixed navbar so that main body content isn't hidden under it
 <div id="fix-for-navbar-fixed-top-spacing" style="height: 60px;">&nbsp;</div>
@@ -55,7 +55,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/app/sharedJobs.do">
-							<i class="icon-th-large"></i> <spring:message code="header.link.sharedJobs"/>
+							<i class="icon-exchange"></i> <spring:message code="header.link.sharedJobs"/>
 						</a>
 					</li>
 					<li>

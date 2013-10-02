@@ -2,6 +2,7 @@ package art.login;
 
 import art.enums.AuthenticationMethod;
 import art.servlets.ArtConfig;
+import art.user.User;
 import art.utils.UserEntity;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -27,7 +28,7 @@ public class LoginController {
 			Model model) {
 
 		HttpSession session = request.getSession();
-		
+
 		if (!ArtConfig.isArtSettingsLoaded()) {
 			UserEntity ue = new UserEntity();
 			ue.setAccessLevel(100); //TODO change
@@ -52,17 +53,7 @@ public class LoginController {
 			message = (String) request.getAttribute("message");
 			if (StringUtils.length(username) > 0 && message == null) {
 				//user authenticated 
-
-				//TODO encode url. String nextPage = response.encodeRedirectURL((String) session.getAttribute("nextPage"));
-				String nextPage = (String) session.getAttribute("nextPage");
-				//remove nextpage attribute to prevent endless redirection to login page for /admin pages
-				session.removeAttribute("nextPage");
-
-				// redirect and art will verify if the user is setup as an art user
-				if (nextPage == null) {
-					nextPage = "user/showGroups.jsp";
-				}
-				return "redirect:" + nextPage;
+				return "redirect:" + getNextPage(session);
 			} else {
 				//auto login failed. give message and change default to internal login
 				model.addAttribute("autoLoginUser", username);
@@ -106,37 +97,52 @@ public class LoginController {
 		}
 
 		//auto login handled by GET
-		
+
 		//TODO test all authentication methods
 		//TODO log login attempt success or failure, to logger and to database
 
 		if (!authenticated) {
 			//if external authentication failed, try and use internal login
 			authenticated = InternalLogin.authenticate(username, password);
-			loginMethod=AuthenticationMethod.Internal;
+			loginMethod = AuthenticationMethod.Internal;
 		}
 
 		if (authenticated) {
-			String nextPage = (String) session.getAttribute("nextPage");
-			session.removeAttribute("nextPage"); //TODO. remove? not needed. filter won't check this
-			
-			if(loginMethod==AuthenticationMethod.Internal){
+			if (loginMethod == AuthenticationMethod.Internal) {
 				//if internal login, allow user to change password
 				session.setAttribute("internalAuthentication", "true");
 			}
 
 			UserEntity ue = new UserEntity(username);
 			ue.setAccessLevel(80); //TODO change. get value from login classes?
-
 			session.setAttribute("ue", ue);
+
+			User user = new User();
+			user.setUsername(username);
+			user.setAccessLevel(80);
+			session.setAttribute("sessionUser", user);
+
 			session.setAttribute("username", username);
-			if (nextPage == null) {
-				nextPage = "user/showGroups.jsp";
-			}
-			return "redirect:" + nextPage;
+
+			return "redirect:" + getNextPage(session);
 		} else {
 			model.addAttribute("message", "login.message.invalidAccount");
 			return "login";
 		}
+	}
+
+	private String getNextPage(HttpSession session) {
+		//TODO encode url. String nextPage = response.encodeRedirectURL((String) session.getAttribute("nextPage"));
+		String nextPage = (String) session.getAttribute("nextPage");
+		//remove nextpage attribute. 
+		//it should only be set by the authorization filter, when the session expires
+		session.removeAttribute("nextPage");
+
+		// redirect and art will verify if the user is setup as an art user
+		if (nextPage == null) {
+			nextPage = "/app/home.do";
+		}
+
+		return nextPage;
 	}
 }

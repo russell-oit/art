@@ -46,7 +46,7 @@
 					<% }
 					}%>
 
-                    :: <a href="<%= request.getContextPath() %>/logOut.do"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOut")%>" border="0" /></a>
+                    :: <a href="<%= request.getContextPath() %>/logout.do"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOut")%>" border="0" /></a>
                     <img src="<%= request.getContextPath() %>/images/vertical_16px.gif">
 					
 					<a href="<%= request.getContextPath() %>/app/admin.do">Admin Console 2</a>

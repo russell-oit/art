@@ -15,7 +15,7 @@ public class SharedJob extends Job {
 	@Override
 	public Date getLastEndDate() {
 		Date lastEndDate;
-		if (isASplitJob()) {
+		if (isSplitJob()) {
 			//split job. get value from the art_user_jobs table
 			lastEndDate = this.getSharedLastEndDate();
 		} else {
@@ -29,7 +29,7 @@ public class SharedJob extends Job {
 	@Override
 	public String getLastFileName() {
 		String lastFileName;
-		if (isASplitJob()) {
+		if (isSplitJob()) {
 			//split job. get value from the art_user_jobs table
 			lastFileName = this.getSharedLastFileName();
 		} else {
@@ -40,8 +40,23 @@ public class SharedJob extends Job {
 		return lastFileName;
 	}
 	
-	private boolean isASplitJob(){
+	@Override
+	public String getLastRunDetails() {
+		String lastRunDetails;
+		if (isSplitJob()) {
+			//split job. get value from the art_user_jobs table
+			lastRunDetails = this.getSharedLastRunDetails();
+		} else {
+			//non-split job. get value from jobs table
+			lastRunDetails = this.getLastRunDetails();
+		}
+
+		return lastRunDetails;
+	}
+	
+	private boolean isSplitJob(){
 		boolean splitJob=false;
+		
 		if (StringUtils.equalsIgnoreCase(this.getUsesRules(), "Y")
 				&& StringUtils.equalsIgnoreCase(this.getAllowSplitting(), "Y")) {
 			splitJob=true;

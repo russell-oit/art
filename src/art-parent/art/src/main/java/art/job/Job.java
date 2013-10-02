@@ -19,7 +19,6 @@ public class Job implements Serializable {
 	private String lastRunDetails;
 	private Date nextRunDate;
 	private String lastFileName;
-	private String lastRunResult;
 	private String usesRules;
 	private String allowSplitting;
 	private String queryName;
@@ -152,24 +151,6 @@ public class Job implements Serializable {
 	 */
 	public void setUsesRules(String usesRules) {
 		this.usesRules = usesRules;
-	}
-
-	/**
-	 * Get the value of lastRunResult
-	 *
-	 * @return the value of lastRunResult
-	 */
-	public String getLastRunResult() {
-		return lastRunResult;
-	}
-
-	/**
-	 * Set the value of lastRunResult
-	 *
-	 * @param lastRunResult new value of lastRunResult
-	 */
-	public void setLastRunResult(String lastRunResult) {
-		this.lastRunResult = lastRunResult;
 	}
 
 	/**

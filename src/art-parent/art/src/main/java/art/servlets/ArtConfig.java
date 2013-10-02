@@ -49,10 +49,9 @@ public class ArtConfig extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(ArtConfig.class);
-	private static String art_username, art_password, art_jdbc_driver, art_jdbc_url,
-			exportPath, art_testsql, art_pooltimeout;
+	private static String art_password, art_jdbc_driver, art_jdbc_url;
+	private static String exportPath;
 	private static int poolMaxConnections;
-	private static final int DEFAULT_POOL_MAX_CONNECTIONS = 20;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
 	private static ArtSettings as;
@@ -63,7 +62,6 @@ public class ArtConfig extends HttpServlet {
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static ArrayList<String> allViewModes; //all view modes
 	private static int defaultMaxRows;
-	private static final int DEFAULT_MAX_ROWS = 1000; //default in case of incorrect setting
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
 	private static final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
@@ -204,14 +202,14 @@ public class ArtConfig extends HttpServlet {
 		if (as.load(artPropertiesFilePath)) {
 			// settings defined
 
-			art_username = as.getSetting("art_username");
 			art_password = as.getSetting("art_password");
 			// de-obfuscate the password
 			art_password = Encrypter.decrypt(art_password);
 
 			art_jdbc_url = as.getSetting("art_jdbc_url");
-			if (StringUtils.isBlank(art_jdbc_url)) {
+			if (art_jdbc_url == null) {
 				art_jdbc_url = as.getSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
+				as.setSetting("art_jdbc_url", art_jdbc_url);
 			}
 			art_jdbc_driver = as.getSetting("art_jdbc_driver");
 
@@ -224,9 +222,6 @@ public class ArtConfig extends HttpServlet {
 					logger.error("Error while registering Authentication JDBC Driver: {}", art_jdbc_driver, e);
 				}
 			}
-
-			art_pooltimeout = as.getSetting("art_pooltimeout");
-			art_testsql = as.getSetting("art_testsql");
 
 			String pdfFontName = as.getSetting("pdf_font_name");
 			if (StringUtils.isBlank(pdfFontName)) {
@@ -248,6 +243,7 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//set max connection pool connections
+			final int DEFAULT_POOL_MAX_CONNECTIONS = 20;
 			poolMaxConnections = NumberUtils.toInt(as.getSetting("max_pool_connections"), DEFAULT_POOL_MAX_CONNECTIONS);
 
 			//set user view modes. if a view mode is not in the list, then it's hidden
@@ -263,13 +259,14 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//set default max rows
+			final int DEFAULT_MAX_ROWS = 1000; //default in case of incorrect setting
 			defaultMaxRows = NumberUtils.toInt(as.getSetting("default_max_rows"), DEFAULT_MAX_ROWS);
 
 			//cater for change of authentication method identifiers, from 2.5.2 - 3.0
-			String loginMethod = as.getSetting("index_page_default"); //old setting name
-			if (StringUtils.isNotBlank(loginMethod)) {
+			String loginMethod = as.getSetting("authentication_method");
+			if (loginMethod == null) {
 				loginMethod = as.getSetting("index_page_default");
-				
+
 				if (StringUtils.equalsIgnoreCase(loginMethod, "ldaplogin")) {
 					loginMethod = AuthenticationMethod.Ldap.getValue();
 				} else if (StringUtils.equalsIgnoreCase(loginMethod, "ntlogin")) {
@@ -285,8 +282,10 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//change of admin email setting name
-			String adminEmail = as.getSetting("administrator"); //old name
-			if (StringUtils.isNotBlank(adminEmail)) {
+			String adminEmail = as.getSetting("administrator_email");
+			if (adminEmail == null) {
+				//use old setting
+				adminEmail = as.getSetting("administrator");
 				as.setSetting("administrator_email", adminEmail);
 			}
 
@@ -352,18 +351,19 @@ public class ArtConfig extends HttpServlet {
 			jndiDatasource = true;
 		}
 
-		int artPoolTimeout = 15;
-		if (StringUtils.isNotBlank(art_pooltimeout)) {
-			artPoolTimeout = Integer.parseInt(art_pooltimeout);
-		}
+		final int DEFAULT_POOL_TIMEOUT = 15;
+		int artPoolTimeout = NumberUtils.toInt(as.getSetting("art_pooltimeout"), DEFAULT_POOL_TIMEOUT);
+
 		DataSource artdb = new DataSource(artPoolTimeout * 60L, jndiDatasource);
 		artdb.setName("ART_Repository");  //custom name
 		artdb.setUrl(art_jdbc_url); //for jndi datasources, the url contains the jndi name/resource reference
-		artdb.setUsername(art_username);
+		artdb.setUsername(as.getSetting("art_username"));
 		artdb.setPassword(art_password);
 		artdb.setLogToStandardOutput(true);
 		artdb.setMaxConnections(poolMaxConnections);
 		artdb.setDriver(art_jdbc_driver);
+
+		String art_testsql = as.getSetting("art_testsql");
 		if (StringUtils.length(art_testsql) > 3) {
 			artdb.setTestSQL(art_testsql);
 		}
@@ -696,7 +696,7 @@ public class ArtConfig extends HttpServlet {
 		// admin session (we are not getting this from the pool since it should not be in Autocommit mode)
 		Connection connArt;
 		if (StringUtils.isNotBlank(art_jdbc_driver)) {
-			connArt = DriverManager.getConnection(art_jdbc_url, art_username, art_password);
+			connArt = DriverManager.getConnection(art_jdbc_url, as.getSetting("art_username"), art_password);
 			connArt.setAutoCommit(false);
 		} else {
 			//using jndi datasource
@@ -735,7 +735,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return the username used to connect to the ART repository
 	 */
 	public static String getArtRepositoryUsername() {
-		return art_username;
+		return as.getSetting("art_username");
 
 	}
 
