@@ -49,13 +49,8 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/app/myJobs.do">
-							<i class="icon-time"></i> <spring:message code="header.link.myJobs"/>
-						</a>
-					</li>
-					<li>
-						<a href="${pageContext.request.contextPath}/app/sharedJobs.do">
-							<i class="icon-exchange"></i> <spring:message code="header.link.sharedJobs"/>
+						<a href="${pageContext.request.contextPath}/app/jobs.do">
+							<i class="icon-time"></i> <spring:message code="header.link.jobs"/>
 						</a>
 					</li>
 					<li>

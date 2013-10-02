@@ -590,6 +590,15 @@
 	   <tr>
 			   <td colspan="2" class="data2">General</td>
 		   </tr>
+		   
+		   <tr>
+        <td class="attr">ART CSS (skin)</td>
+        <td class="data"><input type="text" name="css_skin" size="50" maxlength="120" value="<%=css_skin%>"></td>
+       </tr>
+       <tr>
+        <td class="attr">Page Footer Logo</td>
+        <td class="data"><input type="text" name="bottom_logo" size="50" maxlength="120" value="<%=bottom_logo%>"></td>
+       </tr>
 	   
 	   <tr>
         <td colspan="2" class="attr">Show standard header and footer in public_user sessions

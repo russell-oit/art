@@ -68,17 +68,18 @@ public class AuthorizationFilter implements Filter {
 					session.setAttribute("sessionUser", user);
 					session.setAttribute("username", username);
 				} else {
-					//redirect to login page. 
+					//forward to login page. 
+					//use forward instead of redirect so that an indication of the
+					//page that was being accessed remains in the browser
 					//give session expired message, although it may just be unauthorized access attempt
 
 					//remember the page the user tried to access in order to forward after the authentication
-					String nextPage = request.getRequestURI();
-					if (request.getQueryString() != null) {
-						nextPage = nextPage + "?" + request.getQueryString();
-					}
+					//use relative path (without context path).
+					//that's what redirect in login controller needs
+					String nextPage=StringUtils.substringAfter(request.getRequestURI(),request.getContextPath());
 					session.setAttribute("nextPage", nextPage);
 					request.setAttribute("message", "login.message.sessionExpired");
-					response.sendRedirect("/login.do");
+					request.getRequestDispatcher("/login.do").forward(request, response);
 					return;
 				}
 			}
@@ -116,7 +117,7 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= 0) {
 				authorized = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "sharedJobs.do")) {
+		} else if (StringUtils.startsWith(requestUri, path + "jobs.do")) {
 			//everyone
 			if (accessLevel >= 0) {
 				authorized = true;

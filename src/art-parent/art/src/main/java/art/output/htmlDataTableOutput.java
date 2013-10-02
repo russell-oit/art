@@ -165,7 +165,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 				//+ ", \"sScrollY\": \"200px\""
 				//+ ", \"bScrollCollapse\": true"
 				//+ ", \"bProcessing\": true"
-				//+ ", \"bJQueryUI\": true"
+//				+ ", \"bJQueryUI\": true"
 				+ languageSetting
 				+ ", \"iDisplayLength\": 50" //default item in show entries e.g. -1
 				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
@@ -175,8 +175,8 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		out.println("<script type=\"text/javascript\" src=\"../js/jquery-1.6.2.min.js\"></script>");
 		out.println("<script type=\"text/javascript\" src=\"../js/jquery.dataTables.min.js\"></script>");
 		//enable use of jquery ui theme. needs theme css, jquery.js, jquery-ui.js
-		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/smoothness/jquery-ui-1.10.3.custom.css\" /> ");
-		out.println("<script type=\"text/javascript\" src=\"../js/jquery-ui-10.3.custom.min.js\"></script>");
+//		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/smoothness/jquery-ui-1.10.3.custom.css\" /> ");
+//		out.println("<script type=\"text/javascript\" src=\"../js/jquery-ui-10.3.custom.min.js\"></script>");
 		//
 		out.println("<script type=\"text/javascript\" charset=\"utf-8\">");
 		out.println("	var $jQuery = jQuery.noConflict();");

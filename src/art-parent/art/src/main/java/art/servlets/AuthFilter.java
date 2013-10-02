@@ -132,7 +132,7 @@ public final class AuthFilter implements Filter {
 	 * @throws IOException
 	 */
 	private void forwardToLoginPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
-		hrequest.setAttribute("message", msg);
+		hrequest.setAttribute("messageDetails", msg);
 		hrequest.getRequestDispatcher("/login.do").forward(hrequest, hresponse);
 	}
 

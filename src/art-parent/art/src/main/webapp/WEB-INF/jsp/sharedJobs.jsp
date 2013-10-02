@@ -42,7 +42,7 @@ Display shared jobs
 		<div class="col-lg-10 col-lg-offset-1">
 			<div class="row">
 				<span class="pull-left">
-					<fmt:formatDate value="${now}" type="both" dateStyle="medium" timeStyle="medium"/>
+					<fmt:formatDate value="${now}" pattern="dd-MMM-yyyy HH:mm:ss"/>
 				</span>
 				<span class="pull-right">
 					<a class="btn btn-default" href="">
@@ -67,8 +67,7 @@ Display shared jobs
 								<td>${job.jobId}</td>
 								<td>${job.jobName}</td>
 								<td>
-									<fmt:formatDate value="${job.lastEndDate}" type="both" 
-													dateStyle="medium" timeStyle="medium"/>
+									<fmt:formatDate value="${job.lastEndDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
 								</td>
 								<td>
 									<a type="application/octet-stream" 
@@ -80,8 +79,7 @@ Display shared jobs
 									${job.lastRunDetails}
 								</td>
 								<td>
-									<fmt:formatDate value="${job.nextRunDate}" type="both" 
-													dateStyle="medium" timeStyle="medium"/>
+									<fmt:formatDate value="${job.nextRunDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
 								</td>
 							</tr>
 						</c:forEach>

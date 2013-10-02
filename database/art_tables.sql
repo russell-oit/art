@@ -486,8 +486,8 @@ CREATE TABLE ART_LOGS
 -- Stores users who have been given access to a job's output
 
 -- USER_GROUP_ID: used to indicate if job was shared via user group. To enable
--- deletion of split job records where
--- access was granted via user group, when a user is removed from a group.
+-- deletion of split job records where access was granted via user group,
+-- when a user is removed from a group.
 -- LAST_FILE_NAME: contains file name for individualized output (split job),
 -- or NULL if file name to use comes from ART_JOBS table
 
