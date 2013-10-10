@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /*
  * Grid html output mode
@@ -24,7 +23,9 @@ import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -39,6 +40,7 @@ public class htmlGridOutput implements ArtOutputInterface {
 	int maxRows;
 	NumberFormat nfPlain;
 	Map<Integer, ArtQueryParam> displayParams;
+	DecimalFormat nfSort;
 
 	/**
 	 * Constructor
@@ -49,6 +51,14 @@ public class htmlGridOutput implements ArtOutputInterface {
 		nfPlain.setMinimumFractionDigits(0);
 		nfPlain.setGroupingUsed(true);
 		nfPlain.setMaximumFractionDigits(99);
+
+		//specifically use english locale for sorting e.g.
+		//in case default locale uses . as thousands separator
+		nfSort = (DecimalFormat) NumberFormat.getNumberInstance(Locale.ENGLISH);
+		nfSort.applyPattern("#.#");
+		//ensure all numbers are pre-padded with zeros so that sorting works correctly
+		nfSort.setMinimumIntegerDigits(20);
+		nfSort.setMaximumFractionDigits(99);
 	}
 
 	@Override
@@ -101,10 +111,10 @@ public class htmlGridOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public void beginHeader() {		
-				
+	public void beginHeader() {
+
 		//display parameters
-        ArtOutHandler.displayParameters(out, displayParams);
+		ArtOutHandler.displayParameters(out, displayParams);
 
 		//start results table
 		out.println("<div style=\"border: 3px solid white\"><table class=\"sortable\" name=\"maintable\" id=\"maintable\" cellpadding=\"2\" cellspacing=\"0\" width=\"80%\">");
@@ -112,12 +122,12 @@ public class htmlGridOutput implements ArtOutputInterface {
 	}
 
 	@Override
-	public void addHeaderCell(String s) {		
+	public void addHeaderCell(String s) {
 		out.println(" <th class=\"header\">" + s + "</th>");
 	}
-	
+
 	@Override
-	public void addHeaderCellLeft(String s) {		
+	public void addHeaderCellLeft(String s) {
 		out.println(" <th style=\"text-align: left\">" + s + "</th>");
 	}
 
@@ -140,19 +150,23 @@ public class htmlGridOutput implements ArtOutputInterface {
 	@Override
 	public void addCellDouble(Double d) {
 		String formattedValue = null;
+		String sortValue = null;
 		if (d != null) {
 			formattedValue = nfPlain.format(d.doubleValue());
+			sortValue = nfSort.format(d.doubleValue());
 		}
-		out.println("  <td align=\"right\">" + formattedValue + "</td>");
+		out.println("  <td align=\"right\" sorttable_customkey=\"" + sortValue + "\" >" + formattedValue + "</td>");
 	}
 
 	@Override
-	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
+	public void addCellLong(Long i) {  // used for INTEGER, TINYINT, SMALLINT, BIGINT
 		String formattedValue = null;
+		String sortValue = null;
 		if (i != null) {
 			formattedValue = nfPlain.format(i.longValue());
+			sortValue = nfSort.format(i.longValue());
 		}
-		out.println("  <td align=\"right\">" + formattedValue + "</td>");
+		out.println("  <td align=\"right\" sorttable_customkey=\"" + sortValue + "\" >" + formattedValue + "</td>");
 	}
 
 	@Override

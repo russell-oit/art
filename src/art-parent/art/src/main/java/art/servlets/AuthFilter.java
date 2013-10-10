@@ -101,10 +101,11 @@ public final class AuthFilter implements Filter {
 						} else {
 							//authentication failed. display error message
 							//remember the page the user tried to access in order to forward after the authentication
-							String nextPage = hrequest.getRequestURI();
-							if (hrequest.getQueryString() != null) {
-								nextPage = nextPage + "?" + hrequest.getQueryString();
-							}
+//							String nextPage = hrequest.getRequestURI();
+//							if (hrequest.getQueryString() != null) {
+//								nextPage = nextPage + "?" + hrequest.getQueryString();
+//							}
+							String nextPage=StringUtils.substringAfter(hrequest.getRequestURI(),hrequest.getContextPath());
 							session.setAttribute("nextPage", nextPage);
 
 							//display appropriate login page

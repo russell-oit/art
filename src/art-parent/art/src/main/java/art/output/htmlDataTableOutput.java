@@ -62,8 +62,12 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		nfPlain.setMaximumFractionDigits(99);
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
 		
-		nfSort=new DecimalFormat("#.#");
-		nfSort.setMinimumIntegerDigits(20); //ensure all numbers are pre-padded with zeros so that sorting works correctly
+		//specifically use english locale for sorting e.g.
+		//in case default locale uses . as thousands separator
+		nfSort=(DecimalFormat)NumberFormat.getNumberInstance(Locale.ENGLISH);
+		nfSort.applyPattern("#.#");
+		//ensure all numbers are pre-padded with zeros so that sorting works correctly
+		nfSort.setMinimumIntegerDigits(20); 
 		nfSort.setMaximumFractionDigits(99);
 		
 	}

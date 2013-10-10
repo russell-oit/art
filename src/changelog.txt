@@ -1,5 +1,6 @@
 ART 3.0
 * Fix for incorrect handling of " within lov parameter values
+* Fix for incorrect sorting of numeric values with grid view mode in italian locale
 * Reorganised the code for easier maintenance and enhanced user experience
  - now using maven, spring mvc, jquery ui, datatables,
  - twitter bootstrap, font awesome

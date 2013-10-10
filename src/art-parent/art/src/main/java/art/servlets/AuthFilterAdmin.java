@@ -120,10 +120,11 @@ public final class AuthFilterAdmin implements Filter {
 							} else {
 								//authentication failed. display error message
 								//remember the page the user tried to access in order to forward after the authentication
-								String nextPage = hrequest.getRequestURI();
-								if (hrequest.getQueryString() != null) {
-									nextPage = nextPage + "?" + hrequest.getQueryString();
-								}
+//								String nextPage = hrequest.getRequestURI();
+//								if (hrequest.getQueryString() != null) {
+//									nextPage = nextPage + "?" + hrequest.getQueryString();
+//								}
+								String nextPage=StringUtils.substringAfter(hrequest.getRequestURI(),hrequest.getContextPath());
 								session.setAttribute("nextPage", nextPage);
 
 								//display appropriate login page
@@ -136,10 +137,11 @@ public final class AuthFilterAdmin implements Filter {
 					} else {
 						//we have not come from a login page. display appropriate login page
 						//remember the page the user tried to access in order to forward after the authentication
-						String nextPage = hrequest.getRequestURI();
-						if (hrequest.getQueryString() != null) {
-							nextPage = nextPage + "?" + hrequest.getQueryString();
-						}
+//						String nextPage = hrequest.getRequestURI();
+//						if (hrequest.getQueryString() != null) {
+//							nextPage = nextPage + "?" + hrequest.getQueryString();
+//						}
+						String nextPage=StringUtils.substringAfter(hrequest.getRequestURI(),hrequest.getContextPath());
 						session.setAttribute("nextPage", nextPage);
 
 						java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.ArtMessages", hrequest.getLocale());
@@ -167,7 +169,7 @@ public final class AuthFilterAdmin implements Filter {
 	 * @throws IOException
 	 */
 	private void forwardToLoginPage(HttpServletResponse hresponse, HttpServletRequest hrequest, String msg) throws ServletException, IOException {
-		hrequest.setAttribute("message", msg);
+		hrequest.setAttribute("messageDetails", msg);
 		hrequest.getRequestDispatcher("/login.do").forward(hrequest, hresponse);
 	}
 }

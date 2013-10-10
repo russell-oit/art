@@ -57,37 +57,32 @@
 	 String null_value_enabled;
 
 
-  ArtSettings as = new ArtSettings();
-
-  if (as.load(ArtConfig.getSettingsFilePath())){
+  if (ArtConfig.loadArtSettings()){
 	  //settings defined
-    art_username = as.getSetting("art_username");
-    art_password = as.getSetting("art_password");
+    art_username = ArtConfig.getArtSetting("art_username");
+    art_password = ArtConfig.getArtSetting("art_password");
 	// un-obfuscate password
 	art_password = Encrypter.decrypt(art_password);
-	art_jdbc_url                = as.getSetting("art_jdbc_url");
-	if(StringUtils.isBlank(art_jdbc_url)){
-		art_jdbc_url=as.getSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
-	}
-    art_jdbc_driver        = as.getSetting("art_jdbc_driver");
-	art_testsql            = as.getSetting("art_testsql");
-	art_pooltimeout        = as.getSetting("art_pooltimeout");
-    administrator_email          = as.getSetting("administrator_email");
-    smtp_server            = as.getSetting("smtp_server");
-    smtp_username          = as.getSetting("smtp_username");
-    smtp_password          = as.getSetting("smtp_password");
+	art_jdbc_url                = ArtConfig.getArtSetting("art_jdbc_url");
+    art_jdbc_driver        = ArtConfig.getArtSetting("art_jdbc_driver");
+	art_testsql            = ArtConfig.getArtSetting("art_testsql");
+	art_pooltimeout        = ArtConfig.getArtSetting("art_pooltimeout");
+    administrator_email          = ArtConfig.getArtSetting("administrator_email");
+    smtp_server            = ArtConfig.getArtSetting("smtp_server");
+    smtp_username          = ArtConfig.getArtSetting("smtp_username");
+    smtp_password          = ArtConfig.getArtSetting("smtp_password");
 	smtp_password = Encrypter.decrypt(smtp_password);
 
-    ldap_auth_server       = as.getSetting("ldap_auth_server");
-    ldap_auth_method       = as.getSetting("ldap_auth_method");
-    mswin_auth_server      = as.getSetting("mswin_auth_server");
-    mswin_domains          = as.getSetting("mswin_domains");
-    jdbc_auth_driver       = as.getSetting("jdbc_auth_driver");
-    jdbc_auth_url          = as.getSetting("jdbc_auth_url");
-    authentication_method     = as.getSetting("authentication_method");
+    ldap_auth_server       = ArtConfig.getArtSetting("ldap_auth_server");
+    ldap_auth_method       = ArtConfig.getArtSetting("ldap_auth_method");
+    mswin_auth_server      = ArtConfig.getArtSetting("mswin_auth_server");
+    mswin_domains          = ArtConfig.getArtSetting("mswin_domains");
+    jdbc_auth_driver       = ArtConfig.getArtSetting("jdbc_auth_driver");
+    jdbc_auth_url          = ArtConfig.getArtSetting("jdbc_auth_url");
+    authentication_method     = ArtConfig.getArtSetting("authentication_method");
 
-    bottom_logo            = as.getSetting("bottom_logo");
-    css_skin               = as.getSetting("css_skin");
+    bottom_logo            = ArtConfig.getArtSetting("bottom_logo");
+    css_skin               = ArtConfig.getArtSetting("css_skin");
     
     //enable smooth upgrade from 2.1 to 2.2+
     if(StringUtils.equals(css_skin,"/art/css/art.css")){
@@ -97,108 +92,108 @@
         bottom_logo="/images/artminiicon.png";
     }
     
-    header_with_public_user =  as.getSetting("header_with_public_user");
-    page_size = as.getSetting("page_size");
+    header_with_public_user =  ArtConfig.getArtSetting("header_with_public_user");
+    page_size = ArtConfig.getArtSetting("page_size");
 
-	rss_link = as.getSetting("rss_link");
+	rss_link = ArtConfig.getArtSetting("rss_link");
 
 	//new properties for use of secure smtp
-	if (as.getSetting("secure_smtp")==null){
+	if (ArtConfig.getArtSetting("secure_smtp")==null){
 		secure_smtp="no";
 	}
 	else {
-		secure_smtp=as.getSetting("secure_smtp");
+		secure_smtp=ArtConfig.getArtSetting("secure_smtp");
 	}
-	if (as.getSetting("smtp_port")==null){
+	if (ArtConfig.getArtSetting("smtp_port")==null){
 		smtp_port="25";
 	}
 	else {
-		smtp_port=as.getSetting("smtp_port");
+		smtp_port=ArtConfig.getArtSetting("smtp_port");
 	}
 
 	//new properties for ldap authentication
-	if (as.getSetting("ldap_users_parent_dn")==null){
+	if (ArtConfig.getArtSetting("ldap_users_parent_dn")==null){
 		ldap_users_parent_dn="";
 	}
 	else {
-		ldap_users_parent_dn=as.getSetting("ldap_users_parent_dn");
+		ldap_users_parent_dn=ArtConfig.getArtSetting("ldap_users_parent_dn");
 	}
-	if (as.getSetting("ldap_realm")==null){
+	if (ArtConfig.getArtSetting("ldap_realm")==null){
 		ldap_realm="";
 	}
 	else {
-		ldap_realm=as.getSetting("ldap_realm");
+		ldap_realm=ArtConfig.getArtSetting("ldap_realm");
 	}
 
-	if (as.getSetting("mondrian_cache_expiry")==null){
+	if (ArtConfig.getArtSetting("mondrian_cache_expiry")==null){
 		mondrian_cache_expiry="0";
 	}
 	else {
-		mondrian_cache_expiry=as.getSetting("mondrian_cache_expiry");
+		mondrian_cache_expiry=ArtConfig.getArtSetting("mondrian_cache_expiry");
 	}
 	
 	//new properties for pdf unicode support
-	pdf_font_directory=as.getSetting("pdf_font_directory");
+	pdf_font_directory=ArtConfig.getArtSetting("pdf_font_directory");
 	if(pdf_font_directory==null){
 		pdf_font_directory="";
 	}
-	pdf_font_name=as.getSetting("pdf_font_name");
+	pdf_font_name=ArtConfig.getArtSetting("pdf_font_name");
 	if(pdf_font_name==null){
 		pdf_font_name="";
 	}
-	pdf_font_file=as.getSetting("pdf_font_file");
+	pdf_font_file=ArtConfig.getArtSetting("pdf_font_file");
 	if(pdf_font_file==null){
 		pdf_font_file="";
 	}
-	pdf_font_encoding=as.getSetting("pdf_font_encoding");
+	pdf_font_encoding=ArtConfig.getArtSetting("pdf_font_encoding");
 	if(pdf_font_encoding==null){
 		pdf_font_encoding="";
 	}
-	pdf_font_embedded=as.getSetting("pdf_font_embedded");
+	pdf_font_embedded=ArtConfig.getArtSetting("pdf_font_embedded");
 	if(pdf_font_embedded==null){
 		pdf_font_embedded="no";
 	}
 	
 	//new properties for custom date formats
-	date_format=as.getSetting("date_format");
+	date_format=ArtConfig.getArtSetting("date_format");
 	if(date_format==null){
 		date_format="dd-MMM-yyyy";
 	}
-	time_format=as.getSetting("time_format");
+	time_format=ArtConfig.getArtSetting("time_format");
 	if(time_format==null){
 		time_format="HH:mm:ss";
 	}
 	
 	//other properties
-	max_running_queries=as.getSetting("max_running_queries");
+	max_running_queries=ArtConfig.getArtSetting("max_running_queries");
 	if(max_running_queries==null){
 		max_running_queries="1000";
 	}
-	max_pool_connections=as.getSetting("max_pool_connections");
+	max_pool_connections=ArtConfig.getArtSetting("max_pool_connections");
 	if(max_pool_connections==null){
 		max_pool_connections="20";
 	}
-	scheduling_enabled=as.getSetting("scheduling_enabled");
+	scheduling_enabled=ArtConfig.getArtSetting("scheduling_enabled");
 	if(scheduling_enabled==null){
 		scheduling_enabled="true";
 	}
-	view_modes=as.getSetting("view_modes");
+	view_modes=ArtConfig.getArtSetting("view_modes");
 	if(StringUtils.isBlank(view_modes)){
 		view_modes="htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
 	}
-	default_max_rows=as.getSetting("default_max_rows");
+	default_max_rows=ArtConfig.getArtSetting("default_max_rows");
 	if(StringUtils.isBlank(default_max_rows)){
 		default_max_rows="10000";
 	}
-	specific_max_rows=as.getSetting("specific_max_rows");
+	specific_max_rows=ArtConfig.getArtSetting("specific_max_rows");
 	if(specific_max_rows==null){
 		specific_max_rows="xlsx:100000,slk:60000,slkZip:100000,tsv:60000,tsvZip:100000,tsvGz:100000";
 	}
-	show_results_inline=as.getSetting("show_results_inline");
+	show_results_inline=ArtConfig.getArtSetting("show_results_inline");
 	if(StringUtils.isBlank(show_results_inline)){
 		show_results_inline="yes";
 	}
-	null_value_enabled=as.getSetting("null_value_enabled");
+	null_value_enabled=ArtConfig.getArtSetting("null_value_enabled");
 	if(null_value_enabled==null){
 		null_value_enabled="no_numbers_as_blank";
 	}
@@ -801,11 +796,11 @@
 <tr>
         <td colspan="3" class="attr">Authentication Method:
 	   <select name="authentication_method">
-	     <option value="internal"     <%= (authentication_method.equals("internal")?"SELECTED":"") %>    >Internal Login</option>
-	     <option value="ldap" <%= (authentication_method.equals("ldap")?"SELECTED":"") %>>LDAP Login</option>
-	     <option value="windowsDomain"   <%= (authentication_method.equals("windowsDomain")?"SELECTED":"") %>  >Windows Login</option>
-	     <option value="database"   <%= (authentication_method.equals("database")?"SELECTED":"") %>  >Database Login</option>
-	     <option value="auto" <%= (authentication_method.equals("auto")?"SELECTED":"") %>>Single Sign On</option>
+	     <option value="internal"     <%= (authentication_method.equals("internal")?"SELECTED":"") %> >Internal</option>
+	     <option value="ldap" <%= (authentication_method.equals("ldap")?"SELECTED":"") %>>LDAP</option>
+	     <option value="windowsDomain"   <%= (authentication_method.equals("windowsDomain")?"SELECTED":"") %>  >Windows Domain</option>
+	     <option value="database"   <%= (authentication_method.equals("database")?"SELECTED":"") %>  >Database</option>
+	     <option value="auto" <%= (authentication_method.equals("auto")?"SELECTED":"") %>>Auto</option>
 	   </select>
 	</td>
 </tr>
