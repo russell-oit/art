@@ -48,6 +48,7 @@ bootstrap js, jquery js
 		<!-- javascript placed at the end of the document so that pages load faster -->
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/twitter-bootstrap-hover-dropdown.min.js"></script>
 		<jsp:invoke fragment="pageJavascript"/>
 	</body>
 </html>

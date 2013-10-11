@@ -76,7 +76,7 @@ Header that appears at the top of all pages, except the login and logs pages
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
 							<i class="icon-user"></i> ${sessionUser.username} <b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
