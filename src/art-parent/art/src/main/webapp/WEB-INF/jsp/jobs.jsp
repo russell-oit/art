@@ -43,7 +43,7 @@ Display job results for the jobs a user has access to
 
 	<jsp:body>
 		<div class="row">
-			<div class="col-md-12 text-right">
+			<div class="col-md-12 text-center">
 				<fmt:formatDate value="${now}" pattern="dd-MMM-yyyy HH:mm:ss"/>
 				&nbsp;
 				<a class="btn btn-default" href="">
@@ -52,54 +52,56 @@ Display job results for the jobs a user has access to
 			</div>
 		</div>
 		<div class="row">
-			<table id="jobsTable" class="display">
-				<thead>
-					<tr>
-						<th><spring:message code="jobs.text.jobName"/></th>
-						<th><spring:message code="jobs.text.lastEndDate"/></th>
-						<th><spring:message code="jobs.text.result"/></th>
-						<th><spring:message code="jobs.text.nextRunDate"/></th>
-						<th><spring:message code="jobs.text.action"/></th>
-					</tr>
-				</thead>
-				<tbody>
-					<c:forEach var="job" items="${jobs}">
+			<div class="col-md-12">
+				<table id="jobsTable" class=" display table table-bordered">
+					<thead>
 						<tr>
-							<td>${job.jobName}</td>
-							<td>
-								<fmt:formatDate value="${job.lastEndDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
-							</td>
-							<td>
-								<a type="application/octet-stream" 
-								   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}" 
-								   target="_blank">
-									${job.lastFileName}
-								</a>
-								<br>
-								${job.lastRunDetails}
-							</td>
-							<td>
-								<fmt:formatDate value="${job.nextRunDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
-							</td>
-							<td>
-								<c:if test="${sessionUser.username eq job.username}">
-									<div class="btn-group">
-										<a class="btn btn-small" href="#">
-											<i class="icon-trash"></i> <spring:message code="jobs.button.delete"/>
-										</a>
-										<a class="btn btn-small" href="#">
-											<i class="icon-edit"></i> <spring:message code="jobs.button.edit"/>
-										</a>
-										<a class="btn btn-small" href="#">
-											<i class="icon-bolt"></i> <spring:message code="jobs.button.run"/>
-										</a>
-									</div>
-								</c:if>
-							</td>
+							<th><spring:message code="jobs.text.jobName"/></th>
+							<th><spring:message code="jobs.text.lastEndDate"/></th>
+							<th><spring:message code="jobs.text.result"/></th>
+							<th><spring:message code="jobs.text.nextRunDate"/></th>
+							<th><spring:message code="jobs.text.action"/></th>
 						</tr>
-					</c:forEach>
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						<c:forEach var="job" items="${jobs}">
+							<tr>
+								<td>${job.jobName}</td>
+								<td>
+									<fmt:formatDate value="${job.lastEndDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
+								</td>
+								<td>
+									<a type="application/octet-stream" 
+									   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}" 
+									   target="_blank">
+										${job.lastFileName}
+									</a>
+									<br>
+									${job.lastRunDetails}
+								</td>
+								<td>
+									<fmt:formatDate value="${job.nextRunDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
+								</td>
+								<td  style="width: 220px">
+									<c:if test="${sessionUser.username eq job.username}">
+										<div class="btn-group">
+											<a class="btn btn-small" href="#">
+												<i class="icon-edit"></i> <spring:message code="jobs.button.edit"/>
+											</a>
+											<a class="btn btn-small" href="#">
+												<i class="icon-trash"></i> <spring:message code="jobs.button.delete"/>
+											</a>
+											<a class="btn btn-small" href="#">
+												<i class="icon-bolt"></i> <spring:message code="jobs.button.run"/>
+											</a>
+										</div>
+									</c:if>
+								</td>
+							</tr>
+						</c:forEach>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</jsp:body>
 </t:mainPage>

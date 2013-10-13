@@ -17,9 +17,9 @@ public class CommonController {
 		return "accessDenied";
 	}
 	
-	@RequestMapping(value="/app/home", method=RequestMethod.GET)
-	public String showHome(){
-		return "home";
+	@RequestMapping(value="/app/reports", method=RequestMethod.GET)
+	public String showReports(){
+		return "reports";
 	}
 	
 }

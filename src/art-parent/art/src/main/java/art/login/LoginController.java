@@ -140,7 +140,7 @@ public class LoginController {
 
 		// redirect and art will verify if the user is setup as an art user
 		if (nextPage == null) {
-			nextPage = "/app/home.do";
+			nextPage = "/app/reports.do";
 		}
 
 		return nextPage;

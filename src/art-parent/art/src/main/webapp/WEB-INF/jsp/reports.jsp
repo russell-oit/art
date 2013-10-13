@@ -1,9 +1,9 @@
 <%-- 
-    Document   : home
+    Document   : reports
     Created on : 01-Oct-2013, 09:53:44
     Author     : Timothy Anyona
 
-Home page
+Reports page. Also main/home page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -12,8 +12,8 @@ Home page
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<spring:message code="page.title.home" var="pageTitle" scope="page"/>
+<spring:message code="page.title.reports" var="pageTitle" scope="page"/>
 
 <t:mainPage title="ART - ${pageTitle}">
-	Home
+	Reports
 </t:mainPage>

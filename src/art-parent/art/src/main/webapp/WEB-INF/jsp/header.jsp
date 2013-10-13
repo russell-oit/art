@@ -39,8 +39,8 @@ Header that appears at the top of all pages, except the login and logs pages
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
 					<li class="active">
-						<a href="${pageContext.request.contextPath}/app/home.do">
-							<i class="icon-home"></i> <spring:message code="header.link.home"/>
+						<a href="${pageContext.request.contextPath}/app/reports.do">
+							<i class="icon-bar-chart"></i> <spring:message code="header.link.reports"/>
 						</a>
 					</li>
 					<li>
