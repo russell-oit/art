@@ -15,14 +15,7 @@ Header that appears at the top of all pages, except the login and logs pages
 <c:set var="INTERNAL_AUTHENTICATION"
 	value="<%= art.enums.AuthenticationMethod.Internal.getValue() %>"/>
 
-
-<%-- need buffer with fixed navbar so that main body content isn't hidden under it
-<div id="fix-for-navbar-fixed-top-spacing" style="height: 60px;">&nbsp;</div>
---%>
-<%-- or add padding-top to the main html body tag --%>
-
-<div id="pageHeader">
-
+<div id="header">
 	<!-- Fixed navbar -->
 	<div class="navbar navbar-default navbar-fixed-top">
 		<div class="container">

@@ -20,22 +20,29 @@ Display job results for the jobs a user has access to
 
 <t:mainPage title="ART - ${pageTitle}">
 	<jsp:attribute name="headContent">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dataTables_demo_table.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="pageJavascript">
-		<script>
-			var $jQuery = jQuery.noConflict();
-		</script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			var $jQuery = jQuery.noConflict();
-			$jQuery(document).ready(function() {
-				$jQuery('#jobsTable').dataTable({
-					"sPaginationType": "full_numbers",
+			$(document).ready(function() {
+				$('.datatable').dataTable({
+					"sPaginationType": "bs_full",
 					"aaSorting": [],
-					"aLengthMenu": [[10, 25, -1], [10, 25, "All"]],
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
 					"iDisplayLength": -1
+				});
+				$('.datatable').each(function() {
+					var datatable = $(this);
+					// SEARCH - Add the placeholder for Search and Turn this into in-line form control
+					var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input');
+					search_input.attr('placeholder', 'Search');
+					search_input.addClass('form-control input-sm');
+					// LENGTH - Inline-Form control
+					var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
+					length_sel.addClass('form-control input-sm');
 				});
 			});
 		</script>
@@ -53,7 +60,7 @@ Display job results for the jobs a user has access to
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				<table id="jobsTable" class=" display table table-bordered">
+				<table id="jobsTable" class="datatable table table-bordered table-striped">
 					<thead>
 						<tr>
 							<th><spring:message code="jobs.text.jobName"/></th>
@@ -68,6 +75,9 @@ Display job results for the jobs a user has access to
 							<tr>
 								<td>${job.jobName}</td>
 								<td>
+									<span style="display: none">
+										<fmt:formatDate value="${job.lastEndDate}" pattern="yyyy-MM-dd-HH:mm:ss.SSS"/>
+									</span>
 									<fmt:formatDate value="${job.lastEndDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
 								</td>
 								<td>
@@ -80,6 +90,9 @@ Display job results for the jobs a user has access to
 									${job.lastRunDetails}
 								</td>
 								<td>
+									<span style="display: none">
+										<fmt:formatDate value="${job.nextRunDate}" pattern="yyyy-MM-dd-HH:mm:ss.SSS"/>
+									</span>
 									<fmt:formatDate value="${job.nextRunDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
 								</td>
 								<td  style="width: 220px">

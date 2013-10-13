@@ -8,12 +8,55 @@
 
 
 /* override bootstrap container width so as to make use of the whole screen */
-/*.container{
+.container{
 	max-width:100%;
-	padding: 0 10px;
-}*/
+	/*padding: 0 10px;*/
+}
 
 .centered{
 	margin: 0 auto;
 }
+
+/* add padding to navbar so that main body content isn't hidden under it */
+#header{
+	padding-bottom: 60px;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+
+html,
+body {
+	height: 100%;
+	/* The html and body elements cannot have any padding or margin. */
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	/* Negative indent footer by it's height */
+	margin: 0 auto -50px;
+}
+
+/* Set the fixed height of the footer here */
+#push,
+#footer {
+	height: 50px;
+}
+#footer {
+	background-color: #eee;
+}
+
+/* Lastly, apply responsive CSS fixes as necessary */
+/*@media (max-width: 767px) {
+	#footer {
+		margin-left: -20px;
+		margin-right: -20px;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+}*/
+
 

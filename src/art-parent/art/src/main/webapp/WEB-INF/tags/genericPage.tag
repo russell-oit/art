@@ -25,25 +25,28 @@ Includes bootstrap css
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
 		<title>${title}</title>
-		
+
 		<jsp:invoke fragment="metaContent"/>
-		
+
 		<jsp:invoke fragment="pageCss"/>
 
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap-3.0.0.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-3.2.1.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
 
 		<jsp:invoke fragment="headContent"/>
 	</head>
 	<body>
-		
+
 		<jsp:invoke fragment="pageHeader"/>
 
-		<div id="pageContent" class="container">
-			<jsp:doBody/>
+		<div id="wrap">
+			<div id="pageContent" class="container">
+				<jsp:doBody/>
+			</div>
+			<div id="push"></div>
 		</div>
-		
+
 		<jsp:invoke fragment="pageFooter"/>
 
 		<!-- javascript placed at the end of the document so that pages load faster -->

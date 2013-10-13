@@ -110,7 +110,7 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= 10) {
 				authorized = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "home.do")) {
+		} else if (StringUtils.startsWith(requestUri, path + "reports.do")) {
 			//everyone can access
 			//NOTE: "everyone" excludes the special codes when accessing as
 			//the initial setup user (-1) and the art repository user (-2)
