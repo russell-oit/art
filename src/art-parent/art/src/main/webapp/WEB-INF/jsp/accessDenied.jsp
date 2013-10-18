@@ -17,8 +17,10 @@ Show access denied message when a user tries to access a page he is not authoriz
 
 <t:mainPage title="ART - ${pageTitle}">
 	<jsp:body>
-		<div class="col-lg-6 col-lg-offset-3 alert alert-danger text-center">
-			<spring:message code="page.message.accessDenied"/>
+		<div class="row">
+			<div class="col-lg-6 col-lg-offset-3 alert alert-danger text-center">
+				<spring:message code="page.message.accessDenied"/>
+			</div>
 		</div>
 	</jsp:body>
 </t:mainPage>

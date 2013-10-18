@@ -66,13 +66,12 @@ public class LoginController {
 			model.addAttribute("domains", ArtConfig.getArtSetting("mswin_domains"));
 		}
 
-		//TODO use loginmethod enum in session instead of value? No?
 		session.setAttribute("authenticationMethod", loginMethod.getValue());
 		
 		//set available application languages
 		//use a treemap so that languages are displayed in alphabetical order (of language codes)
+		//don't include default, english
 		Map<String,String> languages=new TreeMap<String,String>();
-		languages.put("en", "English");
 		languages.put("es", "español (Spanish)");
 		languages.put("fr", "français (French)");
 		languages.put("hu", "magyar (Hungarian)");

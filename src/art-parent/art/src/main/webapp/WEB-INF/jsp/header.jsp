@@ -31,14 +31,9 @@ Header that appears at the top of all pages, except the login and logs pages
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
-					<li class="active">
+					<li>
 						<a href="${pageContext.request.contextPath}/app/reports.do">
 							<i class="icon-bar-chart"></i> <spring:message code="header.link.reports"/>
-						</a>
-					</li>
-					<li>
-						<a href="${pageContext.request.contextPath}/app/admin.do">
-							<i class="icon-wrench"></i> <spring:message code="header.link.admin"/>
 						</a>
 					</li>
 					<li>
@@ -47,8 +42,8 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/app/jobArchives.do">
-							<i class="icon-archive"></i> <spring:message code="header.link.jobArchives"/>
+						<a href="${pageContext.request.contextPath}/app/admin.do">
+							<i class="icon-wrench"></i> <spring:message code="header.link.admin"/>
 						</a>
 					</li>
 					<li>
@@ -80,11 +75,6 @@ Header that appears at the top of all pages, except the login and logs pages
 									</a>
 								</li>
 							</c:if>
-							<li>
-								<a href="${pageContext.request.contextPath}/changeLanguage.do">
-									<spring:message code="header.link.changeLanguage"/>
-								</a>
-							</li>
 						</ul>
 					</li>
 				</ul>

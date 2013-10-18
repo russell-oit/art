@@ -103,6 +103,7 @@ value="<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 						</label>
 						<div class="col-lg-10">
 							<select name="lang" id="lang" class="form-control">
+								<option value="en">English</option>
 								<c:forEach var="language" items="${languages}">
 									<option value="${language.key}" ${locale == language.key ? "selected" : ""}>${language.value}</option>
 								</c:forEach>

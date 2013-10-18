@@ -38,9 +38,8 @@ bootstrap js, jquery js
 	<body>
 
 		<div id="wrap">
-		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
+			<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
-		
 			<div id="pageContent" class="container">
 				<jsp:doBody/>
 			</div>

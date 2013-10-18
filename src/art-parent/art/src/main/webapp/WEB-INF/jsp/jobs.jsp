@@ -44,6 +44,10 @@ Display job results for the jobs a user has access to
 					var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
 					length_sel.addClass('form-control input-sm');
 				});
+
+				$(function() {
+					$('a[href*="jobs.do"]').parent().addClass('active');
+				});
 			});
 		</script>
 	</jsp:attribute>

@@ -15,5 +15,18 @@ Reports page. Also main/home page
 <spring:message code="page.title.reports" var="pageTitle" scope="page"/>
 
 <t:mainPage title="ART - ${pageTitle}">
-	Reports
+	<jsp:attribute name="pageJavascript">
+		<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+				$(function() {
+					$('a[href*="reports.do"]').parent().addClass('active');
+				});
+			});
+		</script>
+	</jsp:attribute>
+
+	<jsp:body>
+		Reports
+	</jsp:body>
+
 </t:mainPage>
