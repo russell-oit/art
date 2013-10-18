@@ -18,6 +18,8 @@ Login page
 <c:set var="WINDOWS_DOMAIN_AUTHENTICATION"
 value="<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 
+<c:set var="locale" value="${pageContext.response.locale}" />
+
 <spring:message code="page.title.login" var="pageTitle" scope="page"/>
 
 <t:genericPage title="ART - ${pageTitle}">
@@ -84,7 +86,7 @@ value="<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 							<spring:message code="login.label.username"/>
 						</label>
 						<div class="col-lg-10">
-							<input type="text" name="username" id="username" class="form-control input-xlarge">
+							<input type="text" name="username" id="username" class="form-control">
 						</div>
 					</div>
 					<div class="form-group">
@@ -92,7 +94,19 @@ value="<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 							<spring:message code="login.label.password"/>
 						</label>
 						<div class="col-lg-10">
-							<input type="password" name="password" id="password" class="form-control input-xlarge">
+							<input type="password" name="password" id="password" class="form-control">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-lg-2" for="lang">
+							<spring:message code="login.label.language"/>
+						</label>
+						<div class="col-lg-10">
+							<select name="lang" id="lang" class="form-control">
+								<c:forEach var="language" items="${languages}">
+									<option value="${language.key}" ${locale == language.key ? "selected" : ""}>${language.value}</option>
+								</c:forEach>
+							</select>
 						</div>
 					</div>
 					<div class="form-group">

@@ -4,6 +4,8 @@ import art.enums.AuthenticationMethod;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.UserEntity;
+import java.util.Map;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +30,7 @@ public class LoginController {
 			Model model) {
 
 		HttpSession session = request.getSession();
-
+		
 		if (!ArtConfig.isArtSettingsLoaded()) {
 			UserEntity ue = new UserEntity();
 			ue.setAccessLevel(100); //TODO change
@@ -64,8 +66,23 @@ public class LoginController {
 			model.addAttribute("domains", ArtConfig.getArtSetting("mswin_domains"));
 		}
 
-		//TODO use loginmethod enum in session instead of value
+		//TODO use loginmethod enum in session instead of value? No?
 		session.setAttribute("authenticationMethod", loginMethod.getValue());
+		
+		//set available application languages
+		//use a treemap so that languages are displayed in alphabetical order (of language codes)
+		Map<String,String> languages=new TreeMap<String,String>();
+		languages.put("en", "English");
+		languages.put("es", "español (Spanish)");
+		languages.put("fr", "français (French)");
+		languages.put("hu", "magyar (Hungarian)");
+		languages.put("it", "italiano (Italian)");
+		languages.put("pt_BR", "português brasileiro (Brazilian Portuguese)");
+		languages.put("sw", "Kiswahili (Swahili)");
+		languages.put("zh_CN","简体中文 (Simplified Chinese)");
+		languages.put("zh_TW","繁體中文 (Traditional Chinese)");
+		
+		model.addAttribute("languages", languages);
 
 		return "login";
 	}
