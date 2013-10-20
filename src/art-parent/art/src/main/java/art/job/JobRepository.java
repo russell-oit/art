@@ -1,27 +1,25 @@
 package art.job;
 
 import art.servlets.ArtConfig;
-import art.utils.ArtJob;
 import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
 /**
  * Class to provide data access methods for jobs
  *
  * @author Timothy Anyona
  */
-public class JobDao {
+@Repository
+public class JobRepository {
 
-	final static Logger logger = LoggerFactory.getLogger(JobDao.class);
+	final static Logger logger = LoggerFactory.getLogger(JobRepository.class);
 
 	/**
 	 * Get all the jobs a user has access to. Both the jobs the user owns and
@@ -30,12 +28,12 @@ public class JobDao {
 	 * @param username
 	 * @return all the jobs a user has access to
 	 */
-	public static List<Job> getAllJobs(String username) {
-		List<Job> jobs=new ArrayList<Job>();
-		
+	public List<Job> getAllJobs(String username) {
+		List<Job> jobs = new ArrayList<Job>();
+
 		jobs.addAll(getOwnedJobs(username));
 		jobs.addAll(getSharedJobs(username));
-		
+
 		return jobs;
 	}
 
@@ -45,12 +43,12 @@ public class JobDao {
 	 * @param username
 	 * @return
 	 */
-	public static List<Job> getOwnedJobs(String username) {
+	public List<Job> getOwnedJobs(String username) {
 		List<Job> jobs = new ArrayList<Job>();
 
 		Connection conn = null;
 		PreparedStatement ps = null;
-		ResultSet rs=null;
+		ResultSet rs = null;
 
 		try {
 			conn = ArtConfig.getConnection();
@@ -70,8 +68,8 @@ public class JobDao {
 
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
-			rs = ps.executeQuery();
 
+			rs = ps.executeQuery();
 			while (rs.next()) {
 				Job job = new Job();
 				job.setQueryName(rs.getString("QUERY_NAME"));
@@ -110,7 +108,7 @@ public class JobDao {
 	 *
 	 * @return the shared jobs a user has access to
 	 */
-	public static List<SharedJob> getSharedJobs(String username) {
+	public List<SharedJob> getSharedJobs(String username) {
 		List<SharedJob> jobs = new ArrayList<SharedJob>();
 
 		Connection conn = null;
@@ -139,8 +137,8 @@ public class JobDao {
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, username);
 				ps.setString(2, username);
-				rs = ps.executeQuery();
 
+				rs = ps.executeQuery();
 				while (rs.next()) {
 					SharedJob job = new SharedJob();
 					job.setQueryName(rs.getString("QUERY_NAME"));
@@ -188,8 +186,8 @@ public class JobDao {
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, username);
 				ps.setString(2, username);
-				rs = ps.executeQuery();
 
+				rs = ps.executeQuery();
 				while (rs.next()) {
 					SharedJob job = new SharedJob();
 					job.setQueryName(rs.getString("QUERY_NAME"));

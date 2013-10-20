@@ -18,11 +18,11 @@ Footer that appears on all pages
 		<span class="navbar-text text-muted">
 			<a href="http://art.sourceforge.net">ART</a>
 			&nbsp; A Reporting Tool 
-			&nbsp; <spring:message code="footer.text.artVersion"/> ${artVersion}
+			&nbsp; version ${artVersion}
 		</span>
 		<span class="navbar-text pull-right">
 			<a href="mailto:${administratorEmail}">
-				<spring:message code="footer.link.artAdministrator"/>
+				<spring:message code="footer.link.artSupport"/>
 			</a>
 		</span>
 	</div>

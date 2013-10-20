@@ -32,7 +32,7 @@ Display job results for the jobs a user has access to
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
-					"iDisplayLength": -1
+					"iDisplayLength": 5
 				});
 				$('.datatable').each(function() {
 					var datatable = $(this);
@@ -48,77 +48,68 @@ Display job results for the jobs a user has access to
 				$(function() {
 					$('a[href*="jobs.do"]').parent().addClass('active');
 				});
+
+				$(function() {
+					$("a[data-toggle='tooltip']").tooltip({container: 'body'});
+				});
 			});
 		</script>
 	</jsp:attribute>
 
 	<jsp:body>
-		<div class="row">
-			<div class="col-md-12 text-center">
-				<fmt:formatDate value="${now}" pattern="dd-MMM-yyyy HH:mm:ss"/>
-				&nbsp;
-				<a class="btn btn-default" href="">
-					<i class="icon-refresh"></i> <spring:message code="jobs.button.refresh"/>
-				</a>
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">
-				<table id="jobsTable" class="datatable table table-bordered table-striped">
-					<thead>
+		<div>
+			<table id="jobsTable" class="datatable table table-bordered table-striped table-condensed">
+				<thead>
+					<tr>
+						<th><spring:message code="jobs.text.jobName"/></th>
+						<th><spring:message code="jobs.text.lastEndDate"/></th>
+						<th><spring:message code="jobs.text.result"/></th>
+						<th><spring:message code="jobs.text.nextRunDate"/></th>
+						<th><spring:message code="jobs.text.action"/></th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:forEach var="job" items="${jobs}">
 						<tr>
-							<th><spring:message code="jobs.text.jobName"/></th>
-							<th><spring:message code="jobs.text.lastEndDate"/></th>
-							<th><spring:message code="jobs.text.result"/></th>
-							<th><spring:message code="jobs.text.nextRunDate"/></th>
-							<th><spring:message code="jobs.text.action"/></th>
-						</tr>
-					</thead>
-					<tbody>
-						<c:forEach var="job" items="${jobs}">
-							<tr>
-								<td>${job.jobName}</td>
-								<td>
-									<span style="display: none">
-										<fmt:formatDate value="${job.lastEndDate}" pattern="yyyy-MM-dd-HH:mm:ss.SSS"/>
-									</span>
-									<fmt:formatDate value="${job.lastEndDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
-								</td>
-								<td>
-									<a type="application/octet-stream" 
-									   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}" 
-									   target="_blank">
-										${job.lastFileName}
+							<td>${job.jobName}</td>
+							<td>
+								<span style="display: none">
+									<fmt:formatDate value="${job.lastEndDate}" pattern="yyyy-MM-dd-HH:mm:ss.SSS"/>
+								</span>
+								<fmt:formatDate value="${job.lastEndDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
+							</td>
+							<td>
+								<a type="application/octet-stream" 
+								   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}" 
+								   target="_blank">
+									${job.lastFileName}
+								</a>
+								<br>
+								${job.lastRunDetails}
+							</td>
+							<td>
+								<span style="display: none">
+									<fmt:formatDate value="${job.nextRunDate}" pattern="yyyy-MM-dd-HH:mm:ss.SSS"/>
+								</span>
+								<fmt:formatDate value="${job.nextRunDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
+							</td>
+							<td>
+								<c:if test="${sessionUser.username eq job.username}">
+									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.button.edit"/>">
+										<i class="icon-edit"></i>
 									</a>
-									<br>
-									${job.lastRunDetails}
-								</td>
-								<td>
-									<span style="display: none">
-										<fmt:formatDate value="${job.nextRunDate}" pattern="yyyy-MM-dd-HH:mm:ss.SSS"/>
-									</span>
-									<fmt:formatDate value="${job.nextRunDate}" pattern="dd-MMM-yyyy HH:mm:ss"/>
-								</td>
-								<td  style="width: 220px">
-									<c:if test="${sessionUser.username eq job.username}">
-										<div class="btn-group">
-											<a class="btn btn-small" href="#">
-												<i class="icon-edit"></i> <spring:message code="jobs.button.edit"/>
-											</a>
-											<a class="btn btn-small" href="#">
-												<i class="icon-trash"></i> <spring:message code="jobs.button.delete"/>
-											</a>
-											<a class="btn btn-small" href="#">
-												<i class="icon-bolt"></i> <spring:message code="jobs.button.run"/>
-											</a>
-										</div>
-									</c:if>
-								</td>
-							</tr>
-						</c:forEach>
-					</tbody>
-				</table>
-			</div>
+									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.button.delete"/>">
+										<i class="icon-trash"></i>
+									</a>
+									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.button.run"/>">
+										<i class="icon-bolt"></i>
+									</a>
+								</c:if>
+							</td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
 		</div>
 	</jsp:body>
 </t:mainPage>

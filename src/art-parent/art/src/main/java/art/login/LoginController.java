@@ -39,10 +39,12 @@ public class LoginController {
 			session.setAttribute("username", "");
 			return "redirect:/admin/editSettings.jsp";
 		}
+		
+		String authenticationMethodSetting=ArtConfig.getAuthenticationMethod();
 
 		if (authenticationMethod == null) {
 			//authentication method not specified in url. use application setting
-			authenticationMethod = ArtConfig.getAuthenticationMethod();
+			authenticationMethod = authenticationMethodSetting;
 		}
 
 		AuthenticationMethod loginMethod = AuthenticationMethod.getEnum(authenticationMethod);
@@ -51,6 +53,7 @@ public class LoginController {
 		String username;
 		String message;
 		if (loginMethod == AuthenticationMethod.Auto) {
+			//TODO also ensure app setting is auto? to avoid unintended, unauthorised access if machine not locked?
 			username = request.getRemoteUser();
 			message = (String) request.getAttribute("message");
 			if (StringUtils.length(username) > 0 && message == null) {
@@ -72,14 +75,14 @@ public class LoginController {
 		//use a treemap so that languages are displayed in alphabetical order (of language codes)
 		//don't include default, english
 		Map<String,String> languages=new TreeMap<String,String>();
-		languages.put("es", "español (Spanish)");
-		languages.put("fr", "français (French)");
-		languages.put("hu", "magyar (Hungarian)");
-		languages.put("it", "italiano (Italian)");
-		languages.put("pt_BR", "português brasileiro (Brazilian Portuguese)");
-		languages.put("sw", "Kiswahili (Swahili)");
-		languages.put("zh_CN","简体中文 (Simplified Chinese)");
-		languages.put("zh_TW","繁體中文 (Traditional Chinese)");
+		languages.put("es", "español"); //spanish
+		languages.put("fr", "français"); //french
+		languages.put("hu", "magyar"); //hungarian
+		languages.put("it", "italiano"); //italian
+		languages.put("pt_BR", "português brasileiro"); //brazilian portuguese
+		languages.put("sw", "Kiswahili"); //swahili
+		languages.put("zh_CN","简体中文"); //simplified chinese
+		languages.put("zh_TW","繁體中文"); //traditional chinese
 		
 		model.addAttribute("languages", languages);
 
@@ -99,6 +102,7 @@ public class LoginController {
 		//only available with windows domain authentication
 
 		boolean authenticated = false;
+		boolean loginOk=false;
 
 		HttpSession session = request.getSession();
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
@@ -124,10 +128,7 @@ public class LoginController {
 		}
 
 		if (authenticated) {
-			if (loginMethod == AuthenticationMethod.Internal) {
-				//if internal login, allow user to change password
-				session.setAttribute("internalAuthentication", "true");
-			}
+			session.setAttribute("authenticationMethod", loginMethod.getValue());
 
 			UserEntity ue = new UserEntity(username);
 			ue.setAccessLevel(80); //TODO change. get value from login classes?
