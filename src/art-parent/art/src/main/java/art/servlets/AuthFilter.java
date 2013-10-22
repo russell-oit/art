@@ -86,8 +86,8 @@ public final class AuthFilter implements Filter {
 							//no error messages. authentication succeeded
 							String username = hrequest.getParameter("username");
 							String password = hrequest.getParameter("password");
-							if (StringUtils.equals(username,ArtConfig.getArtRepositoryUsername())
-									&& StringUtils.equals(password,ArtConfig.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+							if (StringUtils.equals(username,ArtConfig.getRepositoryUsername())
+									&& StringUtils.equals(password,ArtConfig.getRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 								// using repository username and password. 
 								isArtRepositoryUser = true;
 							}

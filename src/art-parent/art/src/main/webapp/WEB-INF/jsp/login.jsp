@@ -16,9 +16,9 @@ Login page
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
 <c:set var="WINDOWS_DOMAIN_AUTHENTICATION"
-value="<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>"/>
+value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 
-<c:set var="locale" value="${pageContext.response.locale}" />
+<c:set var="localeCode" value="${pageContext.response.locale}" />
 
 <spring:message code="page.title.login" var="pageTitle" scope="page"/>
 
@@ -105,7 +105,7 @@ value="<%= art.enums.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 							<select name="lang" id="lang" class="form-control">
 								<option value="en">English</option>
 								<c:forEach var="language" items="${languages}">
-									<option value="${language.key}" ${locale == language.key ? "selected" : ""}>${language.value}</option>
+									<option value="${language.key}" ${localeCode == language.key ? "selected" : ""}>${language.value}</option>
 								</c:forEach>
 							</select>
 						</div>

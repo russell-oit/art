@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Service class for jobs
+ * Class to provide methods related to jobs
  *
  * @author Timothy
  */

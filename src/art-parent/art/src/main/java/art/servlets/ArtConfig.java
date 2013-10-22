@@ -17,7 +17,7 @@
 package art.servlets;
 
 import art.dbcp.DataSource;
-import art.enums.AuthenticationMethod;
+import art.login.AuthenticationMethod;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.utils.DbUtils;
@@ -734,7 +734,7 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @return the username used to connect to the ART repository
 	 */
-	public static String getArtRepositoryUsername() {
+	public static String getRepositoryUsername() {
 		return as.getSetting("art_username");
 
 	}
@@ -744,7 +744,7 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @return the password used to connect to the ART repository
 	 */
-	public static String getArtRepositoryPassword() {
+	public static String getRepositoryPassword() {
 		return art_password;
 	}
 

@@ -13,7 +13,7 @@ Header that appears at the top of all pages, except the login and logs pages
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
 <c:set var="INTERNAL_AUTHENTICATION"
-	value="<%= art.enums.AuthenticationMethod.Internal.getValue() %>"/>
+	value="<%= art.login.AuthenticationMethod.Internal.getValue() %>"/>
 
 <div id="header">
 	<!-- Fixed navbar -->
@@ -43,7 +43,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/app/admin.do">
-							<i class="icon-wrench"></i> <spring:message code="header.link.admin"/>
+							<i class="icon-wrench"></i> <spring:message code="header.link.administration"/>
 						</a>
 					</li>
 					<li>
@@ -52,8 +52,8 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/help.jsp" target="_blank">
-							<i class="icon-info"></i> <spring:message code="header.link.help"/>
+						<a href="${pageContext.request.contextPath}/docs" target="_blank">
+							<i class="icon-info"></i> <spring:message code="header.link.documentation"/>
 						</a>
 					</li>
 					<li>

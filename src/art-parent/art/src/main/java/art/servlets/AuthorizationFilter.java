@@ -1,6 +1,9 @@
 package art.servlets;
 
+import art.login.AuthenticationMethod;
 import art.user.User;
+import art.user.UserService;
+import art.utils.ArtUtils;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -52,41 +55,74 @@ public class AuthorizationFilter implements Filter {
 		if (srequest instanceof HttpServletRequest && sresponse instanceof HttpServletResponse) {
 			HttpServletRequest request = (HttpServletRequest) srequest;
 			HttpServletResponse response = (HttpServletResponse) sresponse;
+
 			HttpSession session = request.getSession();
+
+			String message = null;
 
 			User user = (User) session.getAttribute("sessionUser");
 			if (user == null) {
-				//user not authenticated or session expired
-				if (srequest.getParameter("_public_user") != null) {
-					//allow public user access
-					String username = "public_user";
+				//custom authentication, public user session or session expired
 
-					user = new User();
-					user.setUsername(username);
-					user.setAccessLevel(0);
+				AuthenticationMethod loginMethod = null;
 
-					session.setAttribute("sessionUser", user);
-					session.setAttribute("username", username);
+				//test custom authentication
+				String username = (String) session.getAttribute("username");
+
+				if (username == null) {
+					//not using custom authentication. test public user session
+					if (request.getParameter("_public_user") != null) {
+						username = ArtUtils.PUBLIC_USER; //hardcoded anonymous/guest user.
+						loginMethod = AuthenticationMethod.Public;
+					}
 				} else {
-					//forward to login page. 
-					//use forward instead of redirect so that an indication of the
-					//page that was being accessed remains in the browser
-					//give session expired message, although it may just be unauthorized access attempt
-
-					//remember the page the user tried to access in order to forward after the authentication
-					//use relative path (without context path).
-					//that's what redirect in login controller needs
-					String nextPage=StringUtils.substringAfter(request.getRequestURI(),request.getContextPath());
-					session.setAttribute("nextPage", nextPage);
-					request.setAttribute("message", "login.message.sessionExpired");
-					request.getRequestDispatcher("/login.do").forward(request, response);
-					return;
+					loginMethod = AuthenticationMethod.Custom;
 				}
+
+				if (username != null) {
+					//either custom authentication or public user session
+					//ensure user exists
+					UserService userService = new UserService();
+					user = userService.getUser(username);
+					if (user == null) {
+						message = "login.message.invalidAccount";
+						//TODO log failure
+					} else {
+						//valid access
+						//ensure public user always has 0 access level
+						if (loginMethod == AuthenticationMethod.Public) {
+							user.setAccessLevel(0);
+						}
+						session.setAttribute("sessionUser", user);
+						session.setAttribute("authenticationMethod", loginMethod.getValue());
+						//TODO log success
+					}
+				} else {
+					//session expired or just unauthorized access attempt
+					message = "login.message.sessionExpired";
+				}
+			}
+
+			if (user == null) {
+				//no valid user available
+
+				//forward to login page. 
+				//use forward instead of redirect so that an indication of the
+				//page that was being accessed remains in the browser
+
+				//remember the page the user tried to access in order to forward after the authentication
+				//use relative path (without context path).
+				//that's what redirect in login controller needs
+				String nextPage = StringUtils.substringAfter(request.getRequestURI(), request.getContextPath());
+				session.setAttribute("nextPage", nextPage);
+				request.setAttribute("message", message);
+				request.getRequestDispatcher("/login.do").forward(request, response);
+				return;
 			}
 
 			//if we are here, user is authenticated
 			//ensure they have access to the specific page. if not show access denied page
-			if (canAccessPage(request,user)) {
+			if (canAccessPage(request, user)) {
 				chain.doFilter(srequest, sresponse);
 			} else {
 				//show access denied page. 
@@ -98,7 +134,7 @@ public class AuthorizationFilter implements Filter {
 
 	private boolean canAccessPage(HttpServletRequest request, User user) {
 		boolean authorized = false;
-		
+
 		int accessLevel = user.getAccessLevel();
 		String contextPath = request.getContextPath();
 		String requestUri = request.getRequestURI();
@@ -123,7 +159,7 @@ public class AuthorizationFilter implements Filter {
 				authorized = true;
 			}
 		}
-		
+
 		return authorized;
 	}
 }

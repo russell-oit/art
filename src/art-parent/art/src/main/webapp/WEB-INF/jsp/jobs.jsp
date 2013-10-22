@@ -19,7 +19,7 @@ Display job results for the jobs a user has access to
 <c:set var="now" value="<%=new java.util.Date()%>" />
 
 <t:mainPage title="ART - ${pageTitle}">
-	<jsp:attribute name="headContent">
+	<jsp:attribute name="pageCss">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
 	</jsp:attribute>
 

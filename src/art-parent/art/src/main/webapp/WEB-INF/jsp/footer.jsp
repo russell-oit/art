@@ -22,7 +22,7 @@ Footer that appears on all pages
 		</span>
 		<span class="navbar-text pull-right">
 			<a href="mailto:${administratorEmail}">
-				<spring:message code="footer.link.artSupport"/>
+				<spring:message code="footer.link.contactSupport"/>
 			</a>
 		</span>
 	</div>

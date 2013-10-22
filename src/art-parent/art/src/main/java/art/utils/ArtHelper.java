@@ -54,7 +54,7 @@ public class ArtHelper {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		if (username != null && password != null) {
-			if (StringUtils.equals(username, ArtConfig.getArtRepositoryUsername()) && StringUtils.equals(password, ArtConfig.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+			if (StringUtils.equals(username, ArtConfig.getRepositoryUsername()) && StringUtils.equals(password, ArtConfig.getRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 				accessLevel = 100;
 				log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + accessLevel);
 			} else {

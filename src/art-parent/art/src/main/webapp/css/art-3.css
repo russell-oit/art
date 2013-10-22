@@ -10,7 +10,6 @@
 /* override bootstrap container width so as to make use of the whole screen */
 .container{
 	max-width:100%;
-	/*padding: 0 10px;*/
 }
 
 .centered{

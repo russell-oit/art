@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to authenticate user via ldap
+ * Class to authenticate user using ldap
  *
  * @author Timothy Anyona
  */
@@ -19,8 +19,8 @@ public class LdapLogin {
 
 	final static Logger logger = LoggerFactory.getLogger(LdapLogin.class);
 
-	public static boolean authenticate(String username, String password) {
-		boolean authenticated = false;
+	public static LoginResult authenticate(String username, String password) {
+		LoginResult result = new LoginResult();
 
 		// NOTE: username should be the uid e.g. for distinguished name like
 		// uid=jdoe,ou=users,ou=system, username should be jdoe
@@ -35,6 +35,9 @@ public class LdapLogin {
 
 		if (StringUtils.isBlank(ldapServer)) {
 			logger.info("LDAP authentication server not set. Username={}", username);
+			
+			result.setMessage("login.message.ldapAuthenticationNotConfigured");
+			result.setMessageDetails("ldap authentication not configured");
 		} else {
 
 			if (StringUtils.equalsIgnoreCase(ldapAuthType, "simple")) {
@@ -65,16 +68,24 @@ public class LdapLogin {
 
 			try {
 				DirContext authContext = new InitialDirContext(authEnv);
-				// If we are here, Autentication Successful!
-				authenticated = true;
+				//if we are here, authentication is successful
+				result.setAuthenticated(true);
 				authContext.close();
-			} catch (AuthenticationException authEx) {
-				logger.error("Authentication Error. Username={}", username, authEx);
+			} catch (AuthenticationException ae) {
+				logger.error("Error. Username={}", username, ae);
+				
+				result.setMessage("login.message.invalidAccount");
+				result.setMessage(ae.getMessage());
+				result.setError(ae.toString());
 			} catch (Exception e) {
 				logger.error("Error. Username={}", username, e);
+				
+				result.setMessage("login.message.errorOccurred");
+				result.setMessage(e.getMessage());
+				result.setError(e.toString());
 			}
 		}
 
-		return authenticated;
+		return result;
 	}
 }

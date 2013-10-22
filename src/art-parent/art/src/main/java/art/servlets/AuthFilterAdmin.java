@@ -97,8 +97,8 @@ public final class AuthFilterAdmin implements Filter {
 							String msg = ArtHelper.authenticateSession(hrequest);
 							if (msg == null) {
 								//no error messages. authentication succeeded
-								if (StringUtils.equals(username, ArtConfig.getArtRepositoryUsername())
-										&& StringUtils.equals(password, ArtConfig.getArtRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+								if (StringUtils.equals(username, ArtConfig.getRepositoryUsername())
+										&& StringUtils.equals(password, ArtConfig.getRepositoryPassword()) && StringUtils.isNotBlank(username)) {
 									// using repository username and password
 									isArtRepositoryUser = true;
 								}

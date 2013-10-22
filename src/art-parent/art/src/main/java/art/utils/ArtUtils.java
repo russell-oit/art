@@ -39,6 +39,7 @@ public class ArtUtils {
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
+	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<String>();

@@ -1,4 +1,4 @@
-package art.enums;
+package art.login;
 
 /**
  * Enum for login or authentication methods
@@ -7,8 +7,11 @@ package art.enums;
  */
 public enum AuthenticationMethod {
 
+	//values used by the login page
 	Internal("internal"), Auto("auto"), WindowsDomain("windowsDomain"),
-	Ldap("ldap"), Database("database"), ArtRepository("artRepository");
+	Ldap("ldap"), Database("database"),
+	//values used internally by ART
+	Repository("repository"), Custom("custom"), Public("public");
 	private String value;
 
 	private AuthenticationMethod(String value) {

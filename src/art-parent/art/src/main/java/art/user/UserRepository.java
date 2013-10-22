@@ -20,6 +20,12 @@ public class UserRepository {
 
 	final static Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
+	/**
+	 * Get a user object for the given username
+	 * 
+	 * @param username
+	 * @return populated user object if username exists, otherwise null
+	 */
 	public User getUser(String username) {
 		User user = null;
 
