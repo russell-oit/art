@@ -1,8 +1,10 @@
 package art.login;
 
 import art.servlets.ArtConfig;
+import java.net.UnknownHostException;
 import jcifs.UniAddress;
 import jcifs.smb.NtlmPasswordAuthentication;
+import jcifs.smb.SmbException;
 import jcifs.smb.SmbSession;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -10,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class to authenticate user using windows domain
- * 
+ *
  * @author Timothy Anyona
  */
 public class WindowsDomainLogin {
@@ -21,28 +23,34 @@ public class WindowsDomainLogin {
 		LoginResult result = new LoginResult();
 
 		String domainController = ArtConfig.getArtSetting("mswin_auth_server");
-		
+
 		if (StringUtils.isBlank(domainController)) {
-			logger.info("Windows Domain authentication server not set. Username={}", username);
+			logger.info("Windows Domain authentication server not set. username={}", username);
 
 			result.setMessage("login.message.windowsDomainAuthenticationNotConfigured");
-			result.setMessageDetails("windows domain authentication not configured");
+			result.setDetails("windows domain authentication not configured");
 		} else {
-			NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(domain, username, password);
 			try {
+				NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(domain, username, password);
 				UniAddress dc = UniAddress.getByName(domainController);
-				//if we are here, domain controller is valid
+				//if we are here, domain controller is ok
 				SmbSession.logon(dc, auth);
 				//if we are here, authentication is successful
 				result.setAuthenticated(true);
-			} catch (Exception e) {
-				logger.error("Error. Username={}", username, e);
+			} catch (UnknownHostException ex) {
+				//problem with domain controller
+				logger.error("Error. username={}", username, ex);
+
+				result.setMessage("login.message.errorOccurred");
+				result.setMessage(ex.getMessage());
+				result.setError(ex.toString());
+			} catch (SmbException ex) {
+				logger.error("Error. username={}", username, ex);
 
 				result.setMessage("login.message.invalidAccount");
-				result.setMessage(e.getMessage());
-				result.setError(e.toString());
+				result.setMessage(ex.getMessage());
+				result.setError(ex.toString());
 			}
-
 		}
 
 		return result;

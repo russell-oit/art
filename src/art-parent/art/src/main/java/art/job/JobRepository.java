@@ -5,6 +5,7 @@ import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -94,8 +95,8 @@ public class JobRepository {
 
 				jobs.add(job);
 			}
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
@@ -219,8 +220,8 @@ public class JobRepository {
 			} finally {
 				DbUtils.close(rs, ps);
 			}
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
 		} finally {
 			DbUtils.closeConnection(conn);
 		}

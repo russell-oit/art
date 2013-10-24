@@ -1,6 +1,7 @@
 package art.user;
 
 import java.io.Serializable;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Class to represent a user. Data stored in the ART_USERS table
@@ -199,5 +200,20 @@ public class User implements Serializable {
 	 */
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	/**
+	 * Determine if the user is active (active status = 'Y')
+	 *
+	 * @return true if user is active, false otherwise
+	 */
+	public boolean isActive() {
+		boolean active = false;
+
+		if (StringUtils.equalsIgnoreCase(activeStatus, "A")) {
+			active = true;
+		}
+
+		return active;
 	}
 }

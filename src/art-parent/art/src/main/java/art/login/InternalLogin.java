@@ -1,11 +1,13 @@
 package art.login;
 
 import art.servlets.ArtConfig;
+import art.utils.ArtUtils;
 import art.utils.DbUtils;
 import art.utils.Encrypter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,29 +41,35 @@ public class InternalLogin {
 			rs = ps.executeQuery();
 			if (rs.next()) {
 				if (StringUtils.equalsIgnoreCase(rs.getString("ACTIVE_STATUS"), "A")) {
-					if (Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"))) {
+					boolean passwordVerified = false;
+					try {
+						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"));
+					} catch (Exception ex) {
+						logger.error("Error. username={}", username, ex);
+					}
+					if (passwordVerified) {
 						result.setAuthenticated(true);
 					} else {
 						//invalid password
 						result.setMessage("login.message.invalidPassword");
-						result.setMessageDetails("invalid password");
+						result.setDetails("invalid password");
 					}
 				} else {
 					//user disabled
 					result.setMessage("login.message.userDisabled");
-					result.setMessageDetails("user disabled");
+					result.setDetails("user disabled");
 				}
 			} else {
-				//invalid username
-				result.setMessage("login.message.invalidUsername");
-				result.setMessageDetails("invalid username");
+				//user doesn't exist
+				result.setMessage("login.message.invalidUser");
+				result.setDetails("invalid user");
 			}
-		} catch (Exception e) {
-			logger.error("Error. Username={}", username, e);
-			
+		} catch (SQLException ex) {
+			logger.error("Error. username={}", username, ex);
+
 			result.setMessage("login.message.errorOccurred");
-			result.setMessageDetails(e.getMessage());
-			result.setError(e.toString());
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}

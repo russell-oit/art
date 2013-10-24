@@ -3,12 +3,15 @@ package art.login;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.user.UserService;
+import art.utils.ArtUtils;
 import art.utils.UserEntity;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,9 +27,10 @@ import org.springframework.web.bind.support.SessionStatus;
  * @author Timothy Anyona
  */
 @Controller
-@SessionAttributes({"languages", "domains"})
+@SessionAttributes({"languages", "domains", "selectedDomain"})
 public class LoginController {
 
+	final static Logger logger = LoggerFactory.getLogger(LoginController.class);
 	@Autowired
 	private UserService userService;
 
@@ -73,7 +77,10 @@ public class LoginController {
 				loginMethod = AuthenticationMethod.Internal;
 			}
 		} else if (loginMethod == AuthenticationMethod.WindowsDomain) {
-			model.addAttribute("domains", ArtConfig.getArtSetting("mswin_domains"));
+			String domains = ArtConfig.getArtSetting("mswin_domains");
+			if (domains != null) {
+				model.addAttribute("domains", domains);
+			}
 		}
 
 		//store auth method in normal session attribute rather than spring session attribute
@@ -83,12 +90,13 @@ public class LoginController {
 		//set available application languages
 		//use a treemap so that languages are displayed in alphabetical order (of language codes)
 		//don't include default (english)
+		//see http://people.w3.org/rishida/names/languages.html for language names
 		Map<String, String> languages = new TreeMap<String, String>();
-		languages.put("es", "español"); //spanish
-		languages.put("fr", "français"); //french
-		languages.put("hu", "magyar"); //hungarian
-		languages.put("it", "italiano"); //italian
-		languages.put("pt_BR", "português brasileiro"); //brazilian portuguese
+		languages.put("es", "Español"); //spanish
+		languages.put("fr", "Français"); //french
+		languages.put("hu", "Magyar"); //hungarian
+		languages.put("it", "Italiano"); //italian
+		languages.put("pt_BR", "Português (Brasil)"); //brazilian portuguese
 		languages.put("sw", "Kiswahili"); //swahili
 		languages.put("zh_CN", "简体中文"); //simplified chinese
 		languages.put("zh_TW", "繁體中文"); //traditional chinese
@@ -109,6 +117,11 @@ public class LoginController {
 
 		//windowsDomain request parameter may not be in the request parameters. 
 		//only available with windows domain authentication
+		if (windowsDomain != null) {
+			//ModelMap.addAttribute() does not permit the attribute value to be null,
+			//and will throw an IllegalArgumentException if it is
+			model.addAttribute("selectedDomain", windowsDomain);
+		}
 
 		HttpSession session = request.getSession();
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
@@ -138,7 +151,7 @@ public class LoginController {
 			if (!result.isAuthenticated()) {
 				//external authentication failed
 				//log external authentication failure
-				loginHelper.logLoginAttempt(loginMethod, result, username, ip);
+				loginHelper.log(loginMethod, result, username, ip);
 
 				//try internal authentication
 				loginMethod = AuthenticationMethod.Internal;
@@ -155,72 +168,67 @@ public class LoginController {
 			user = userService.getUser(username);
 			if (user == null) {
 				//user doesn't exist. update result status
+				result = new LoginResult();
 				result.setAuthenticated(false);
-				result.setMessage("login.message.invalidUsername");
-				result.setMessageDetails("invalid username");
+				result.setMessage("login.message.invalidUser");
+				result.setDetails(ArtUtils.LOGIN_OK_INVALID_USER);
+			} else if (!user.isActive()) {
+				//user is disabled
+				result = new LoginResult();
+				result.setAuthenticated(false);
+				result.setMessage("login.message.userDisabled");
+				result.setDetails(ArtUtils.LOGIN_OK_USER_DISABLED);
 			}
 		}
 
 		//log final login status
-		loginHelper.logLoginAttempt(loginMethod, result, username, ip);
+		loginHelper.log(loginMethod, result, username, ip);
 
-		if (user == null) {
-			//authentication failed or user doesn't exist
+		if (!result.isAuthenticated()) {
+			//authentication failed or user doesn't exist or user is disabled
 			//allow login if credentials match the repository user
+
 			loginMethod = AuthenticationMethod.Repository;
 			if (isValidRepositoryUser(username, password)) {
 				user = new User();
 				user.setAccessLevel(100); //repository user has super admin access
 
+				result = new LoginResult();
+				result.setAuthenticated(true);
+
 				//log access using repository user
-				loginHelper.logLoginAttempt(true, username, ip, loginMethod.getValue());
+				loginHelper.logSuccess(loginMethod, username, ip);
 			}
 		}
 
 		//finally, authentication process finished. display appropriate page
-		if (user == null) {
+		if (!result.isAuthenticated()) {
 			//login failure. always display invalid account message rather than actual result details
 			//better for security if less details are displayed
 			model.addAttribute("message", "login.message.invalidAccount");
-			//set available application languages
-			//use a treemap so that languages are displayed in alphabetical order (of language codes)
-			//don't include default, english
-			Map<String, String> languages = new TreeMap<String, String>();
-			languages.put("es", "español"); //spanish
-			languages.put("fr", "français"); //french
-			languages.put("hu", "magyar"); //hungarian
-			languages.put("it", "italiano"); //italian
-			languages.put("pt_BR", "português brasileiro"); //brazilian portuguese
-			languages.put("sw", "Kiswahili"); //swahili
-			languages.put("zh_CN", "简体中文"); //simplified chinese
-			languages.put("zh_TW", "繁體中文"); //traditional chinese
-
-			model.addAttribute("languages", languages);
-
-			//add constant used by login page
-			model.addAttribute("WINDOWS_DOMAIN_AUTHENTICATION", AuthenticationMethod.WindowsDomain.getValue());
-			//add constant used by all pages that include the navbar (used in header.jsp)
-			session.setAttribute("INTERNAL_AUTHENTICATION", AuthenticationMethod.Internal.getValue());
 
 			return "login";
 		} else {
 			//access granted 
 
 			//TODO remove once refactoring is complete
-			UserEntity ue = new UserEntity(user.getUsername());
-			ue.setAccessLevel(user.getAccessLevel());
-			session.setAttribute("ue", ue);
-			if (user.getAccessLevel() >= 10) {
-				session.setAttribute("AdminSession", "Y");
-				session.setAttribute("AdminLevel", user.getAccessLevel());
-				session.setAttribute("AdminUsername", user.getUsername());
+			if (user != null) {
+				UserEntity ue = new UserEntity(user.getUsername());
+				ue.setAccessLevel(user.getAccessLevel());
+				session.setAttribute("ue", ue);
+				session.setAttribute("username", user.getUsername());
+				if (user.getAccessLevel() >= 10) {
+					session.setAttribute("AdminSession", "Y");
+					session.setAttribute("AdminLevel", user.getAccessLevel());
+					session.setAttribute("AdminUsername", user.getUsername());
+				}
 			}
 			//
 
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("authenticationMethod", loginMethod.getValue());
 
-			//clear spring sessionattributes
+			//clear spring session attributes
 			sessionStatus.setComplete();
 
 			return "redirect:" + getNextPage(session);

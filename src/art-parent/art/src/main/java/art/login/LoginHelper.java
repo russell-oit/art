@@ -21,15 +21,10 @@ public class LoginHelper {
 	 * @param username
 	 * @param ip ip address from which login was done or attempted
 	 */
-	public void logLoginAttempt(AuthenticationMethod loginMethod, LoginResult result,
+	public void log(AuthenticationMethod loginMethod, LoginResult result,
 			String username, String ip) {
 
-		String message = loginMethod.getValue();
-		if (!result.isAuthenticated()) {
-			//add failure message
-			message += ", " + result.getMessageDetails();
-		}
-		logLoginAttempt(result.isAuthenticated(), username, ip, message);
+		log(loginMethod, result.isAuthenticated(), username, ip, result.getDetails());
 	}
 
 	/**
@@ -38,16 +33,37 @@ public class LoginHelper {
 	 * @param success
 	 * @param username
 	 * @param ip
-	 * @param message
+	 * @param failureMessage
 	 */
-	public void logLoginAttempt(boolean success, String username, String ip, String message) {
+	private void log(AuthenticationMethod loginMethod, boolean success,
+			String username, String ip, String failureMessage) {
+
 		String loginStatus;
+		String logMessage;
 		if (success) {
 			loginStatus = "login";
+			logMessage = loginMethod.getValue();
 		} else {
 			loginStatus = "loginerr";
+			logMessage = loginMethod.getValue() + ", " + failureMessage;
 		}
 
-		ArtHelper.log(username, loginStatus, ip, message);
+		ArtHelper.log(username, loginStatus, ip, logMessage);
+		
+		//also log to file
+		logger.info("{}. username={}, message={}", new Object[]{loginStatus, username, logMessage});
+	}
+
+	public void logSuccess(AuthenticationMethod loginMethod,
+			String username, String ip) {
+
+		log(loginMethod, true, username, ip, "");
+	}
+
+	public void logFailure(AuthenticationMethod loginMethod,
+			String username, String ip, String message) {
+
+		log(loginMethod, false, username, ip, message);
+
 	}
 }

@@ -8,26 +8,26 @@ package art.login;
 public class LoginResult {
 
 	private boolean authenticated;
-	private String message; //i18n message. only used for display in the ui
+	private String message; //i18n message. only for use in the login page
 	private String error; //full exception details
-	private String messageDetails; //exception message or custom message
+	private String details; //exception message or custom message. for display or logging
 
 	/**
 	 * Get the exception message or custom message
 	 *
 	 * @return the exception message or custom message
 	 */
-	public String getMessageDetails() {
-		return messageDetails;
+	public String getDetails() {
+		return details;
 	}
 
 	/**
 	 * Set the exception message or custom message
 	 *
-	 * @param messageDetails the exception message or custom message
+	 * @param details the exception message or custom message
 	 */
-	public void setMessageDetails(String messageDetails) {
-		this.messageDetails = messageDetails;
+	public void setDetails(String details) {
+		this.details = details;
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class LoginResult {
 	}
 
 	/**
-	 * Get the i18n message. only used for display in the ui
+	 * Get the i18n message. only for use in the login page
 	 *
 	 * @return the i18n message
 	 */
@@ -58,7 +58,7 @@ public class LoginResult {
 	}
 
 	/**
-	 * Set the i18n message. only used for display in the ui
+	 * Set the i18n message. only for use in the login page
 	 *
 	 * @param message the i18n message
 	 */

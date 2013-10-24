@@ -75,7 +75,7 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 							<div class="col-lg-10">
 								<select name="windowsDomain" id="windowsDomain" class="form-control">
 									<c:forTokens var="domain" items='${domains}' delims=",">
-										<option value="${domain}">${domain}</option>
+										<option value="${domain}" ${domain == selectedDomain ? "selected" : ""}>${domain}</option>
 									</c:forTokens>
 								</select>
 							</div>

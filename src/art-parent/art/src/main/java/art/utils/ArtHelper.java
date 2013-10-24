@@ -21,6 +21,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -194,8 +195,8 @@ public class ArtHelper {
 			ps.setString(8, message);
 
 			ps.executeUpdate();
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(ps, conn);
 		}
@@ -231,8 +232,8 @@ public class ArtHelper {
 			ps.setString(5, message);
 
 			ps.executeUpdate();
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(ps, conn);
 		}

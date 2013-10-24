@@ -25,10 +25,10 @@ public class DbLogin {
 		String url = ArtConfig.getArtSetting("jdbc_auth_url");
 		
 		if (StringUtils.isBlank(url)) {
-			logger.info("Database authentication url not set. Username={}", username);
+			logger.info("Database authentication url not set. username={}", username);
 			
 			result.setMessage("login.message.databaseAuthenticationNotConfigured");
-			result.setMessageDetails("database authentication not configured");
+			result.setDetails("database authentication not configured");
 		} else {
 			try {
 				Connection conn = DriverManager.getConnection(url, username, password);
@@ -36,10 +36,10 @@ public class DbLogin {
 				result.setAuthenticated(true);
 				DbUtils.closeConnection(conn);
 			} catch (SQLException ex) {
-				logger.error("Error. Username={}", username, ex);
+				logger.error("Error. username={}", username, ex);
 				
 				result.setMessage("login.message.invalidAccount");
-				result.setMessage(ex.getMessage());
+				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			}
 		}

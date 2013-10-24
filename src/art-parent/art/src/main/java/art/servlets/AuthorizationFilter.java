@@ -1,6 +1,7 @@
 package art.servlets;
 
 import art.login.AuthenticationMethod;
+import art.login.LoginHelper;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
@@ -15,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Filter to ensure user has access to the requested page
@@ -22,6 +25,8 @@ import org.apache.commons.lang.StringUtils;
  * @author Timothy Anyona
  */
 public class AuthorizationFilter implements Filter {
+
+	final static Logger logger = LoggerFactory.getLogger(AuthorizationFilter.class);
 
 	/**
 	 *
@@ -64,15 +69,16 @@ public class AuthorizationFilter implements Filter {
 			if (user == null) {
 				//custom authentication, public user session or session expired
 
-				AuthenticationMethod loginMethod = null;
+				AuthenticationMethod loginMethod = AuthenticationMethod.Unknown;
 
 				//test custom authentication
 				String username = (String) session.getAttribute("username");
 
 				if (username == null) {
 					//not using custom authentication. test public user session
-					if (request.getParameter("_public_user") != null) {
-						username = ArtUtils.PUBLIC_USER; //hardcoded anonymous/guest user.
+					if (request.getParameter("public_user") != null
+							|| request.getParameter("_public_user") != null) {
+						username = ArtUtils.PUBLIC_USER; 
 						loginMethod = AuthenticationMethod.Public;
 					}
 				} else {
@@ -82,11 +88,23 @@ public class AuthorizationFilter implements Filter {
 				if (username != null) {
 					//either custom authentication or public user session
 					//ensure user exists
+					LoginHelper loginHelper = new LoginHelper();
+					String ip = request.getRemoteAddr();
+
 					UserService userService = new UserService();
 					user = userService.getUser(username);
 					if (user == null) {
+						//user doesn't exist
+						//always display invalidAccount message in login page. log actual cause
 						message = "login.message.invalidAccount";
-						//TODO log failure
+						//log failure
+						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.LOGIN_OK_INVALID_USER);
+					} else if (!user.isActive()) {
+						//user disabled
+						//always display invalidAccount message in login page. log actual cause
+						message = "login.message.invalidAccount";
+						//log failure
+						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.LOGIN_OK_USER_DISABLED);
 					} else {
 						//valid access
 						//ensure public user always has 0 access level
@@ -95,7 +113,8 @@ public class AuthorizationFilter implements Filter {
 						}
 						session.setAttribute("sessionUser", user);
 						session.setAttribute("authenticationMethod", loginMethod.getValue());
-						//TODO log success
+						//log success
+						loginHelper.logSuccess(loginMethod, username, ip);
 					}
 				} else {
 					//session expired or just unauthorized access attempt

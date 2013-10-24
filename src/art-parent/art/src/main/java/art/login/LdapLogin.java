@@ -2,8 +2,8 @@ package art.login;
 
 import art.servlets.ArtConfig;
 import java.util.Hashtable;
-import javax.naming.AuthenticationException;
 import javax.naming.Context;
+import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import org.apache.commons.lang.StringUtils;
@@ -34,10 +34,10 @@ public class LdapLogin {
 		String bindUsername; //actual username used for LDAP bind
 
 		if (StringUtils.isBlank(ldapServer)) {
-			logger.info("LDAP authentication server not set. Username={}", username);
-			
+			logger.info("LDAP authentication server not set. username={}", username);
+
 			result.setMessage("login.message.ldapAuthenticationNotConfigured");
-			result.setMessageDetails("ldap authentication not configured");
+			result.setDetails("ldap authentication not configured");
 		} else {
 
 			if (StringUtils.equalsIgnoreCase(ldapAuthType, "simple")) {
@@ -66,23 +66,23 @@ public class LdapLogin {
 			//for tracing
 			//authEnv.put("com.sun.jndi.ldap.trace.ber", System.err);
 
+			DirContext authContext;
 			try {
-				DirContext authContext = new InitialDirContext(authEnv);
+				authContext = new InitialDirContext(authEnv);
 				//if we are here, authentication is successful
 				result.setAuthenticated(true);
-				authContext.close();
-			} catch (AuthenticationException ae) {
-				logger.error("Error. Username={}", username, ae);
-				
+
+				try {
+					authContext.close(); //close can also throw exception
+				} catch (NamingException ex) {
+					logger.error("Error. username={}", username, ex);
+				}
+			} catch (NamingException ex) {
+				logger.error("Error. username={}", username, ex);
+
 				result.setMessage("login.message.invalidAccount");
-				result.setMessage(ae.getMessage());
-				result.setError(ae.toString());
-			} catch (Exception e) {
-				logger.error("Error. Username={}", username, e);
-				
-				result.setMessage("login.message.errorOccurred");
-				result.setMessage(e.getMessage());
-				result.setError(e.toString());
+				result.setMessage(ex.getMessage());
+				result.setError(ex.toString());
 			}
 		}
 

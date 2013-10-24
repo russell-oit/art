@@ -11,7 +11,7 @@ public enum AuthenticationMethod {
 	Internal("internal"), Auto("auto"), WindowsDomain("windowsDomain"),
 	Ldap("ldap"), Database("database"),
 	//values used internally by ART
-	Repository("repository"), Custom("custom"), Public("public");
+	Repository("repository"), Custom("custom"), Public("public"), Unknown("unknown");
 	private String value;
 
 	private AuthenticationMethod(String value) {
