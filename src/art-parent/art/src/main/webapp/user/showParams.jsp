@@ -1,5 +1,5 @@
 <%@ page import="java.util.ResourceBundle, java.util.List, art.servlets.ArtConfig,art.params.*" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />

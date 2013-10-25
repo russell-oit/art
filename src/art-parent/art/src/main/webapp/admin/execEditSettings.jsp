@@ -1,4 +1,4 @@
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="java.sql.*,java.util.*,art.utils.*,art.servlets.ArtConfig" %>
 <%@ page import="org.quartz.*,org.quartz.impl.*,com.lowagie.text.FontFactory" %>
 <%@ page import="javax.naming.InitialContext,javax.naming.NamingException,javax.sql.DataSource" %>

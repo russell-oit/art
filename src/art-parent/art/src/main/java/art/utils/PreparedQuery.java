@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * PreparedQuery.java
@@ -31,9 +30,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -735,7 +734,7 @@ public class PreparedQuery {
 			int columnCount = rs.getMetaData().getColumnCount();
 			while (rs.next()) {
 				if (columnCount == 1) {
-					String dataValue=rs.getString(1);
+					String dataValue = rs.getString(1);
 					lov.put(dataValue, dataValue);
 				} else if (columnCount == 2) {
 					lov.put(rs.getString(1), rs.getString(2));
@@ -1321,7 +1320,11 @@ public class PreparedQuery {
 
 	// escape the ' char in a parameter value (used in multi params)
 	private String escapeSql(String s) {
-		return StringEscapeUtils.escapeSql(s);
+		String escaped = null;
+		if (s != null) {
+			escaped = StringUtils.replace(s, "'", "''");
+		}
+		return escaped;
 	}
 
 	/**

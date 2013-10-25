@@ -1,5 +1,5 @@
 <%@ page import="java.sql.*,art.utils.*,art.servlets.ArtConfig,java.util.ResourceBundle,java.util.Calendar,java.text.SimpleDateFormat" %>
-<%@ page import="org.quartz.*,org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.quartz.*,org.apache.commons.lang3.StringUtils" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <%@ include file ="header.jsp" %>

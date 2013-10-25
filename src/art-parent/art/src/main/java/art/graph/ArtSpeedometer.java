@@ -33,7 +33,7 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.beanutils.RowSetDynaClass;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.MeterInterval;

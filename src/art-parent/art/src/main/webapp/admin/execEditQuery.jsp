@@ -1,5 +1,5 @@
-<%@page import="org.apache.commons.lang.StringUtils"%>
-<%@ page import="org.apache.commons.lang.math.NumberUtils"%>
+<%@page import="org.apache.commons.lang3.StringUtils"%>
+<%@ page import="org.apache.commons.lang3.math.NumberUtils"%>
 <%@ page import="java.sql.*,art.utils.*,art.servlets.ArtConfig, java.util.*, java.io.File" %>
 <%@ page import="org.apache.commons.fileupload.*, org.apache.commons.fileupload.servlet.ServletFileUpload" %>
 <%@ page import="org.apache.commons.fileupload.disk.DiskFileItemFactory, org.apache.commons.io.FilenameUtils" %>

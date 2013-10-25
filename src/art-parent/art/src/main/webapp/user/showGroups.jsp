@@ -1,6 +1,6 @@
 <%@ page import="java.util.*,art.servlets.ArtConfig,art.utils.ArtQuery" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
-<%@ page import="org.apache.commons.lang.math.NumberUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.math.NumberUtils" %>
 <%@ taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 

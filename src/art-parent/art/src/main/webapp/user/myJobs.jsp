@@ -1,4 +1,4 @@
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="java.util.*,art.utils.*,art.servlets.ArtConfig" %>
 <%@ page import="org.quartz.*,java.text.*" %>
 <%@ page import="static org.quartz.JobBuilder.*" %>

@@ -1,5 +1,5 @@
 <%@ page import="art.utils.*,java.sql.*,art.servlets.ArtConfig" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 

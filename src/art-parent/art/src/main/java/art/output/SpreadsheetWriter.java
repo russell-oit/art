@@ -32,7 +32,7 @@ import java.io.*;
 import java.util.*;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.commons.lang.StringEscapeUtils; //to escape xml characters
+import org.apache.commons.lang3.StringEscapeUtils; //to escape xml characters
 
 
 /**

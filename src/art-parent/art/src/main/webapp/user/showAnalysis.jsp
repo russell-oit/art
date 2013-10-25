@@ -5,7 +5,7 @@
 	com.tonbeller.jpivot.olap.model.*,
 	com.tonbeller.jpivot.tags.OlapModelProxy"
 		 %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 
 <jsp:useBean id="ue" scope="session" class="art.utils.UserEntity" />
 <% response.setHeader("Cache-control", "no-cache");%>

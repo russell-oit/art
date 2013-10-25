@@ -1,7 +1,7 @@
 <%@ page import="java.util.*,art.servlets.ArtConfig,art.graph.*,art.utils.*" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="org.jfree.chart.*,org.apache.commons.beanutils.*,java.awt.Font" %>
-<%@ page import="org.apache.commons.lang.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="art.output.ArtOutHandler,java.io.PrintWriter" %>
 <%@ page import="org.jfree.chart.renderer.category.*" %>
 

@@ -22,7 +22,7 @@
 package art.utils;
 
 import java.util.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Very simple and minimal implementation of a XML Parser (parse just ELEMENTS

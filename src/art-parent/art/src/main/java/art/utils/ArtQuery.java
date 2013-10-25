@@ -26,7 +26,7 @@ import art.servlets.ArtConfig;
 import java.sql.*;
 import java.text.Collator;
 import java.util.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

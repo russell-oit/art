@@ -29,7 +29,7 @@ package art.params;
 import art.utils.PreparedQuery;
 import java.util.Map;
 import java.util.ResourceBundle;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -22,8 +22,8 @@ import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Map;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Generate xml output
