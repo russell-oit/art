@@ -4,8 +4,8 @@
 --          . update database version
 --          . reset x_axis_label for non-graph queries
 --          . allow datasources to be disabled
---          . update users active status where it is null
 --          . add reference table for query types
+--          . change active_status fields from varchar to integer
 --
 -- ------------------------------------------------
 
@@ -19,11 +19,8 @@ UPDATE ART_SETTINGS SET SETTING_VALUE='3.0-alpha1' WHERE SETTING_NAME='database 
 UPDATE ART_QUERIES SET X_AXIS_LABEL='' WHERE QUERY_TYPE>=0;
 
 -- allow datasources to be disabled
-ALTER TABLE ART_DATABASES ADD ACTIVE_STATUS VARCHAR(1);
-UPDATE ART_DATABASES SET ACTIVE_STATUS='A';
-
--- update users active status where it is null
-UPDATE ART_USERS SET ACTIVE_STATUS='A' WHERE ACTIVE_STATUS IS NULL;
+ALTER TABLE ART_DATABASES ADD ACTIVE INTEGER;
+UPDATE ART_DATABASES SET ACTIVE=1;
 
 -- add reference table for query types
 CREATE TABLE ART_QUERY_TYPES
@@ -71,6 +68,10 @@ INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-14,'Chart: Vertic
 INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-15,'Chart: Stacked Vertical Bar 2D');
 INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-16,'Chart: Horizontal Bar 2D');
 INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-17,'Chart: Stacked Horizontal Bar 2D');
+
+-- change active_status fields from varchar to integer
+ALTER TABLE ART_USERS ADD ACTIVE INTEGER;
+UPDATE ART_USERS SET ACTIVE=1 WHERE ACTIVE_STATUS='A' OR ACTIVE_STATUS IS NULL;
 
 
 

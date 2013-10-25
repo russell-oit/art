@@ -1,7 +1,7 @@
 package art.job;
 
 import java.util.Date;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Class to represent a shared job. Overrides a few properties

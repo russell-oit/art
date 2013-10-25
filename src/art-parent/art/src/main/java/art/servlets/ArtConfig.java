@@ -389,7 +389,7 @@ public class ArtConfig extends HttpServlet {
 			String sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
 					+ " PASSWORD, TEST_SQL, DATABASE_ID"
 					+ " FROM ART_DATABASES"
-					+ " WHERE ACTIVE_STATUS='A'"
+					+ " WHERE ACTIVE=1"
 					+ " ORDER BY NAME";
 			ps = conn.prepareStatement(sql);
 

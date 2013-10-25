@@ -154,7 +154,7 @@ int queryGroupId;
         <tr>
             <td colspan="2" style="padding-top: 10px; padding-bottom: 10px">
 				Query Groups <br>
-                <select id="groupId" name="GROUP_ID" size="5">
+                <select id="groupId" name="groupId" size="5">
 					<option value="-1">--</option>
                     <%
 					for (Map.Entry<String, QueryGroup> entry : groups.entrySet()) {
@@ -172,7 +172,7 @@ int queryGroupId;
 		</tr>
 		<tr><td colspan="2" style="padding-top: 10px; padding-bottom: 10px">
 				 Queries <br>
-                <select id="queryId" name="QUERY_ID" size="10" multiple>
+                <select id="queryId" name="queryId" size="10" multiple>
                     <option value="">...</option>
                 </select>
             </td>

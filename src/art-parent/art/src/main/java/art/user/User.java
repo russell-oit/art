@@ -1,7 +1,6 @@
 package art.user;
 
 import java.io.Serializable;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Class to represent a user. Data stored in the ART_USERS table
@@ -14,13 +13,31 @@ public class User implements Serializable {
 	private String username;
 	private int accessLevel;
 	private String email;
-	private String activeStatus;
 	private String fullName;
 	private String password;
 	private int defaultQueryGroup;
 	private String canChangePassword;
 	private String hashingAlgorithm;
 	private String startQuery;
+	private boolean active;
+
+	/**
+	 * Get the value of active
+	 *
+	 * @return the value of active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * Set the value of active
+	 *
+	 * @param active new value of active
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 
 	/**
 	 * Get the value of startQuery
@@ -131,24 +148,6 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Get the value of activeStatus
-	 *
-	 * @return the value of activeStatus
-	 */
-	public String getActiveStatus() {
-		return activeStatus;
-	}
-
-	/**
-	 * Set the value of activeStatus
-	 *
-	 * @param activeStatus new value of activeStatus
-	 */
-	public void setActiveStatus(String activeStatus) {
-		this.activeStatus = activeStatus;
-	}
-
-	/**
 	 * Get the value of email
 	 *
 	 * @return the value of email
@@ -200,20 +199,5 @@ public class User implements Serializable {
 	 */
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	/**
-	 * Determine if the user is active (active status = 'Y')
-	 *
-	 * @return true if user is active, false otherwise
-	 */
-	public boolean isActive() {
-		boolean active = false;
-
-		if (StringUtils.equalsIgnoreCase(activeStatus, "A")) {
-			active = true;
-		}
-
-		return active;
 	}
 }

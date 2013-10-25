@@ -61,9 +61,14 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 							<spring:message code="${autoLoginMessage}" arguments="${autoLoginUser}"/>
 						</div>
 					</c:if>
-					<c:if test="${not empty messageDetails}">
+					<c:if test="${not empty details}">
 						<div class="alert alert-danger">
-							${messageDetails}
+							${details}
+						</div>
+					</c:if>
+					<c:if test="${not empty error}">
+						<div class="alert alert-danger">
+							${error}
 						</div>
 					</c:if>
 

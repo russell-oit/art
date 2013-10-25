@@ -5,7 +5,7 @@ import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +24,11 @@ public class DbLogin {
 
 		String url = ArtConfig.getArtSetting("jdbc_auth_url");
 		
+		//TODO remove references to commons lang 2.x (org.apache.commons.lang). use commons lang 3.x (org.apache.commons.lang3)
+
 		if (StringUtils.isBlank(url)) {
 			logger.info("Database authentication url not set. username={}", username);
-			
+
 			result.setMessage("login.message.databaseAuthenticationNotConfigured");
 			result.setDetails("database authentication not configured");
 		} else {
@@ -37,7 +39,7 @@ public class DbLogin {
 				DbUtils.closeConnection(conn);
 			} catch (SQLException ex) {
 				logger.error("Error. username={}", username, ex);
-				
+
 				result.setMessage("login.message.invalidAccount");
 				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());

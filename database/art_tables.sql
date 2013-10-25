@@ -80,6 +80,7 @@ INSERT INTO ART_SETTINGS (SETTING_ID, SETTING_NAME, SETTING_VALUE) VALUES
 -- ACCESS_LEVEL: 0 = normal user, 5 = normal user who can schedule jobs
 -- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin
 -- 100 = super admin
+-- ACTIVE: boolean value. 0=false, 1=true
 
 CREATE TABLE ART_USERS
 (
@@ -92,13 +93,15 @@ CREATE TABLE ART_USERS
 	DEFAULT_QUERY_GROUP INTEGER,
 	START_QUERY VARCHAR(500),
 	CAN_CHANGE_PASSWORD VARCHAR(1), 
-	ACTIVE_STATUS    VARCHAR(1), 
+	ACTIVE    INTEGER, 
 	UPDATE_DATE    DATE  
 );
 
 
 -- ART_DATABASES
 -- Stores Target Database definitions
+
+-- ACTIVE: boolean value. 0=false, 1=true
 
 CREATE TABLE ART_DATABASES
 (
@@ -110,7 +113,7 @@ CREATE TABLE ART_DATABASES
 	PASSWORD          VARCHAR(40) NOT NULL,
 	POOL_TIMEOUT      INTEGER,  
 	TEST_SQL          VARCHAR(60),
-	ACTIVE_STATUS VARCHAR(1),
+	ACTIVE    INTEGER,
 	UPDATE_DATE       DATE	
 );
 -- create unique constraints

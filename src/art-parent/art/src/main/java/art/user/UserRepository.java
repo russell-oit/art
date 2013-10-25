@@ -5,7 +5,8 @@ import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -37,8 +38,8 @@ public class UserRepository {
 			conn = ArtConfig.getConnection();
 			String sql;
 
-			sql = "SELECT EMAIL,ACCESS_LEVEL,FULL_NAME,ACTIVE_STATUS,"
-					+ " PASSWORD,DEFAULT_QUERY_GROUP,CAN_CHANGE_PASSWORD, "
+			sql = "SELECT EMAIL, ACCESS_LEVEL, FULL_NAME, ACTIVE, "
+					+ " PASSWORD, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, "
 					+ " HASHING_ALGORITHM, START_QUERY "
 					+ " FROM ART_USERS "
 					+ " WHERE USERNAME = ? ";
@@ -54,7 +55,7 @@ public class UserRepository {
 				user.setEmail(rs.getString("EMAIL"));
 				user.setAccessLevel(rs.getInt("ACCESS_LEVEL"));
 				user.setFullName(rs.getString("FULL_NAME"));
-				user.setActiveStatus(rs.getString("ACTIVE_STATUS"));
+				user.setActive(BooleanUtils.toBoolean(rs.getInt("ACTIVE")));
 				user.setPassword(rs.getString("PASSWORD"));
 				user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 				user.setCanChangePassword(rs.getString("CAN_CHANGE_PASSWORD"));
