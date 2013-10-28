@@ -27,7 +27,7 @@ import org.springframework.web.bind.support.SessionStatus;
  * @author Timothy Anyona
  */
 @Controller
-@SessionAttributes({"languages", "domains", "selectedDomain"})
+@SessionAttributes({"languages", "domains", "selectedDomain", "selectedUser"})
 public class LoginController {
 
 	final static Logger logger = LoggerFactory.getLogger(LoginController.class);
@@ -121,6 +121,12 @@ public class LoginController {
 			//ModelMap.addAttribute() does not permit the attribute value to be null,
 			//and will throw an IllegalArgumentException if it is
 			model.addAttribute("selectedDomain", windowsDomain);
+		}
+		model.addAttribute("selectedUser", username);
+		
+		if(StringUtils.isBlank(username)){
+			//likely just attempt to change the language. don't attempt to authenticate
+			return "login";
 		}
 
 		HttpSession session = request.getSession();

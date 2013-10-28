@@ -70,7 +70,7 @@
 	  :: <a href="<%= request.getContextPath() %>/user/jobArchives.jsp"> <img src="<%= request.getContextPath() %>/images/job-archives.png" title="<%=messages.getString("jobArchives")%>" border="0" /></a>
 	  
 	  <% if (accessLevelHeader >= 30) {%>
-      :: <a href="<%= request.getContextPath() %>/admin/logs" ><img src="<%= request.getContextPath() %>/images/logs.png" title="<%=messages.getString("logs")%>" border="0" /></a>
+      :: <a href="<%= request.getContextPath() %>/app/logs" ><img src="<%= request.getContextPath() %>/images/logs.png" title="<%=messages.getString("logs")%>" border="0" /></a>
       <% } %>
 
       :: <a href="<%= request.getContextPath() %>/logout.do"> <img src="<%= request.getContextPath() %>/images/exit.png" title="<%=messages.getString("logOut")%>" border="0" /></a>

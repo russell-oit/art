@@ -62,6 +62,12 @@ public class AuthorizationFilter implements Filter {
 			HttpServletResponse response = (HttpServletResponse) sresponse;
 
 			HttpSession session = request.getSession();
+			
+			if (!ArtConfig.isArtSettingsLoaded()) {
+				//go to login page which has the appropriate action to be taken
+				request.getRequestDispatcher("/login.do").forward(request, response);
+				return;
+			}
 
 			String message = null;
 
@@ -175,6 +181,11 @@ public class AuthorizationFilter implements Filter {
 		} else if (StringUtils.startsWith(requestUri, path + "jobs.do")) {
 			//everyone
 			if (accessLevel >= 0) {
+				authorized = true;
+			}
+		} else if (StringUtils.startsWith(requestUri, path + "logs")) {
+			//standard admins
+			if (accessLevel >= 40) {
 				authorized = true;
 			}
 		}

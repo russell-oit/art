@@ -25,7 +25,7 @@ public class WindowsDomainLogin {
 		String domainController = ArtConfig.getArtSetting("mswin_auth_server");
 
 		if (StringUtils.isBlank(domainController)) {
-			logger.info("Windows Domain authentication server not set. username={}", username);
+			logger.info("Windows Domain authentication not configured. username={}", username);
 
 			result.setMessage("login.message.windowsDomainAuthenticationNotConfigured");
 			result.setDetails("windows domain authentication not configured");
@@ -33,22 +33,25 @@ public class WindowsDomainLogin {
 			try {
 				NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(domain, username, password);
 				UniAddress dc = UniAddress.getByName(domainController);
-				//if we are here, domain controller is ok
+				//if we are here, domainController is an ip or a valid machine name
+				//domainController can also be any machine that is a member of the domain,
+				//doesn't have to be the domain controller
 				SmbSession.logon(dc, auth);
 				//if we are here, authentication is successful
 				result.setAuthenticated(true);
 			} catch (UnknownHostException ex) {
-				//problem with domain controller
+				//invalid domain controller machine name
 				logger.error("Error. username={}", username, ex);
 
 				result.setMessage("login.message.errorOccurred");
-				result.setMessage(ex.getMessage());
+				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			} catch (SmbException ex) {
+				//failed to connect to dc or logon failure
 				logger.error("Error. username={}", username, ex);
 
 				result.setMessage("login.message.invalidAccount");
-				result.setMessage(ex.getMessage());
+				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			}
 		}

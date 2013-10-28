@@ -467,9 +467,9 @@ public class ArtConfig extends HttpServlet {
 	 * @return default authentication method configured for the application
 	 */
 	public static String getAuthenticationMethod() {
-		String authenticationMethod = as.getSetting("index_page_default");
+		String authenticationMethod = as.getSetting("authentication_method");
 		if (StringUtils.isBlank(authenticationMethod)) {
-			authenticationMethod = "login";
+			authenticationMethod = AuthenticationMethod.Internal.getValue();
 		}
 
 		return authenticationMethod;

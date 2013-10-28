@@ -91,7 +91,7 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 							<spring:message code="login.label.username"/>
 						</label>
 						<div class="col-lg-10">
-							<input type="text" name="username" id="username" class="form-control">
+							<input type="text" name="username" id="username" class="form-control" value="${selectedUser}">
 						</div>
 					</div>
 					<div class="form-group">

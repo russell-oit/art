@@ -160,7 +160,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ViewLogs</servlet-name>
-        <url-pattern>/admin/logs</url-pattern>
+        <url-pattern>/app/logs</url-pattern>
     </servlet-mapping>
     <session-config>
         <!-- 120 minutes -->

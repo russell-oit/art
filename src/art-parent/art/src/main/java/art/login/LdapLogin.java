@@ -34,7 +34,7 @@ public class LdapLogin {
 		String bindUsername; //actual username used for LDAP bind
 
 		if (StringUtils.isBlank(ldapServer)) {
-			logger.info("LDAP authentication server not set. username={}", username);
+			logger.info("LDAP authentication not configured. username={}", username);
 
 			result.setMessage("login.message.ldapAuthenticationNotConfigured");
 			result.setDetails("ldap authentication not configured");
@@ -81,7 +81,7 @@ public class LdapLogin {
 				logger.error("Error. username={}", username, ex);
 
 				result.setMessage("login.message.invalidAccount");
-				result.setMessage(ex.getMessage());
+				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			}
 		}

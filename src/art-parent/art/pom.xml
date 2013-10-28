@@ -156,6 +156,7 @@
 			<type>pom</type>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- mondrian specific dependencies -->
 		<!-- jpivot specific dependencies -->
 		<dependency>
 			<groupId>com.tonbeller</groupId>
@@ -164,6 +165,7 @@
 			<type>pom</type>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- jpivot specific dependencies -->
 		<!-- art needs/uses commons-beanutils-1.8.3 -->
 		<dependency>
 			<groupId>commons-beanutils</groupId>

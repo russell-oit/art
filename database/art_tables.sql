@@ -1,19 +1,19 @@
--- Create the ART Repository
+-- Create the ART database
 
 -- IMPORTANT:
 -- after running this script, ALSO RUN the tables_xxx.sql script for your database
 -- (found in the quartz directory)
 
 -- NOTES:
--- for sql server, replace "timestamp" data type with "datetime"
--- for sql server 2000/2005 also replace "date" data type with "datetime"
+-- for sql server, replace TIMESTAMP data type with DATETIME
+-- for sql server 2000/2005 also replace DATE data type with DATETIME
 
 -- UPGRADING:
 -- if you are upgrading, don't use this script. run the scripts available in the
 -- upgrade directory run the scripts one at a time to upgrade to newer versions.
 -- e.g. from 2.0 to 2.1, then 2.1 to 2.2 etc.
 
--- if you want to create a new repository in place of an existing one,
+-- if you want to create a new database in place of an existing one,
 -- uncomment the DROP statements. you can use a text editor to
 -- replace "-- DROP" with "DROP" to accomplish this
 
@@ -615,9 +615,7 @@ CREATE TABLE ART_JOB_ARCHIVES
 );
 
 
---
 -- Default Data
---
  
 -- test query group
 INSERT INTO ART_QUERY_GROUPS (QUERY_GROUP_ID,NAME,DESCRIPTION) VALUES

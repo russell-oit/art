@@ -47,7 +47,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/admin/logs" target="_blank">
+						<a href="${pageContext.request.contextPath}/app/logs" target="_blank">
 							<i class="icon-reorder"></i> <spring:message code="header.link.logs"/>
 						</a>
 					</li>

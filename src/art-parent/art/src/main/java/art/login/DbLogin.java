@@ -27,7 +27,7 @@ public class DbLogin {
 		//TODO remove references to commons lang 2.x (org.apache.commons.lang). use commons lang 3.x (org.apache.commons.lang3)
 
 		if (StringUtils.isBlank(url)) {
-			logger.info("Database authentication url not set. username={}", username);
+			logger.info("Database authentication not configured. username={}", username);
 
 			result.setMessage("login.message.databaseAuthenticationNotConfigured");
 			result.setDetails("database authentication not configured");
