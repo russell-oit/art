@@ -40,7 +40,7 @@ public class DbLogin {
 			} catch (SQLException ex) {
 				logger.error("Error. username={}", username, ex);
 
-				result.setMessage("login.message.invalidAccount");
+				result.setMessage("login.message.invalidCredentials");
 				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			}

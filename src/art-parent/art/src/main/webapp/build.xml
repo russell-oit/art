@@ -32,7 +32,7 @@
 	<target name="compile"  description="Compile source code inline" >
 		<javac classpathref="classpath"  source="1.6" target="1.6"
 		srcdir="${dist}/WEB-INF/classes" includeAntRuntime="no"
-		debug="true" debuglevel="lines,source">
+		debug="true" debuglevel="source,lines,vars" encoding="UTF-8">
 			<!-- <compilerarg value="-Xlint"/> -->
 		</javac>
 	</target>

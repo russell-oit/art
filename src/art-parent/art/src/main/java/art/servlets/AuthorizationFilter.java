@@ -65,7 +65,7 @@ public class AuthorizationFilter implements Filter {
 			
 			if (!ArtConfig.isArtSettingsLoaded()) {
 				//go to login page which has the appropriate action to be taken
-				request.getRequestDispatcher("/login.do").forward(request, response);
+				response.sendRedirect(request.getContextPath() + "/login.do");
 				return;
 			}
 
@@ -102,15 +102,15 @@ public class AuthorizationFilter implements Filter {
 					if (user == null) {
 						//user doesn't exist
 						//always display invalidAccount message in login page. log actual cause
-						message = "login.message.invalidAccount";
+						message = "login.message.invalidCredentials";
 						//log failure
-						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.LOGIN_OK_INVALID_USER);
+						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_INVALID);
 					} else if (!user.isActive()) {
 						//user disabled
 						//always display invalidAccount message in login page. log actual cause
-						message = "login.message.invalidAccount";
+						message = "login.message.invalidCredentials";
 						//log failure
-						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.LOGIN_OK_USER_DISABLED);
+						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_DISABLED);
 					} else {
 						//valid access
 						//ensure public user always has 0 access level

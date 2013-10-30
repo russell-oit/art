@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class InternalLogin {
 		try {
 			conn = ArtConfig.getConnection();
 
-			String sql = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL, ACTIVE_STATUS "
+			String sql = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL, ACTIVE "
 					+ " FROM ART_USERS "
 					+ " WHERE USERNAME = ?";
 
@@ -39,7 +40,7 @@ public class InternalLogin {
 
 			rs = ps.executeQuery();
 			if (rs.next()) {
-				if (StringUtils.equalsIgnoreCase(rs.getString("ACTIVE_STATUS"), "A")) {
+				if (BooleanUtils.toBoolean(rs.getInt("ACTIVE"))) {
 					boolean passwordVerified = false;
 					try {
 						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"));

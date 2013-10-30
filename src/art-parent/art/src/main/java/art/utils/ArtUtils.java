@@ -40,8 +40,8 @@ public class ArtUtils {
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
 	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user
-	public static final String LOGIN_OK_INVALID_USER ="authentication ok but invalid user"; //log message on login failure
-	public static final String LOGIN_OK_USER_DISABLED="authentication ok but user disabled"; //log message on login failure
+	public static final String ART_USER_INVALID ="user not created in ART"; //log message on login failure
+	public static final String ART_USER_DISABLED="user disabled in ART"; //log message on login failure
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<String>();

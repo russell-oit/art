@@ -36,8 +36,9 @@ public class LoginController {
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
-			@RequestParam(required = false) String authenticationMethod,
-			Model model) {
+			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
+			Model model,
+			SessionStatus sessionStatus) {
 
 		HttpSession session = request.getSession();
 
@@ -60,22 +61,55 @@ public class LoginController {
 		AuthenticationMethod loginMethod = AuthenticationMethod.getEnum(authenticationMethod);
 
 		//if auto login, no login page is displayed as user is authenticated by application server
-		String username;
-		String message;
 		if (loginMethod == AuthenticationMethod.Auto) {
-			//TODO also ensure app setting is auto? to avoid unintended, unauthorised access if machine not locked?
+			//TODO also ensure app setting is auto? to avoid unintended, 
+			//unauthorised access if machine not locked?
 			//or add separate auto login allowed setting?
-			username = request.getRemoteUser();
-			message = (String) request.getAttribute("message");
-			if (StringUtils.length(username) > 0 && message == null) {
-				//user authenticated 
-				return "redirect:" + getNextPage(session);
+
+			String ip = request.getRemoteAddr();
+			LoginHelper loginHelper = new LoginHelper();
+			
+			LoginResult result;
+
+			//check if user is authenticated
+			String username = request.getRemoteUser();
+
+			if (StringUtils.isNotBlank(username)) {
+				//user authenticated. ensure they are a valid ART user
+				User user = userService.getUser(username);
+				if (user == null) {
+					//user doesn't exist
+					result = new LoginResult();
+					result.setAuthenticated(false);
+					result.setMessage("login.message.artUserInvalid");
+					result.setDetails(ArtUtils.ART_USER_INVALID);
+				} else if (!user.isActive()) {
+					//user is disabled
+					result = new LoginResult();
+					result.setAuthenticated(false);
+					result.setMessage("login.message.artUserDisabled");
+					result.setDetails(ArtUtils.ART_USER_DISABLED);
+				} else {
+					//valid user
+					//log access
+					loginHelper.logSuccess(loginMethod, username, ip);
+
+					//go to next page
+					return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
+				}
 			} else {
-				//auto login failed. give message and change default to internal login
-				model.addAttribute("autoLoginUser", username);
-				model.addAttribute("autoLoginMessage", "login.message.invalidAutoLoginUser");
-				loginMethod = AuthenticationMethod.Internal;
+				//user not authenticated. should never get here as browser won't have authenticated?
+				result = new LoginResult();
 			}
+
+			//if we are here auto login failed or invalid user or disabed user
+			//log failure
+			loginHelper.logFailure(loginMethod, username, ip, result.getDetails());
+
+			//give message and change default to internal login
+			model.addAttribute("autoLoginUser", username);
+			model.addAttribute("autoLoginMessage", "login.message.invalidAutoLoginUser");
+			loginMethod = AuthenticationMethod.Internal;
 		} else if (loginMethod == AuthenticationMethod.WindowsDomain) {
 			String domains = ArtConfig.getArtSetting("mswin_domains");
 			if (domains != null) {
@@ -109,9 +143,9 @@ public class LoginController {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String processLogin(
 			HttpServletRequest request,
-			@RequestParam(required = false) String windowsDomain,
-			@RequestParam String username,
-			@RequestParam String password,
+			@RequestParam(value="windowsDomain",required = false) String windowsDomain,
+			@RequestParam("username") String username,
+			@RequestParam("password") String password,
 			Model model,
 			SessionStatus sessionStatus) {
 
@@ -123,9 +157,10 @@ public class LoginController {
 			model.addAttribute("selectedDomain", windowsDomain);
 		}
 		model.addAttribute("selectedUser", username);
-		
-		if(StringUtils.isBlank(username)){
-			//likely just attempt to change the language. don't attempt to authenticate
+
+		if (StringUtils.isBlank(username)) {
+			//likely just attempt to change the language
+			//don't attempt to authenticate. just redisplay login page
 			return "login";
 		}
 
@@ -138,11 +173,23 @@ public class LoginController {
 
 		LoginResult result;
 
-		if (loginMethod == AuthenticationMethod.Internal) {
-			result = InternalLogin.authenticate(username, password);
+		User user = userService.getUser(username);
+		if (user == null) {
+			//user doesn't exist
+			result = new LoginResult();
+			result.setAuthenticated(false);
+			result.setMessage("login.message.artUserInvalid");
+			result.setDetails(ArtUtils.ART_USER_INVALID);
+		} else if (!user.isActive()) {
+			//user is disabled
+			result = new LoginResult();
+			result.setAuthenticated(false);
+			result.setMessage("login.message.artUserDisabled");
+			result.setDetails(ArtUtils.ART_USER_DISABLED);
 		} else {
-			//for external methods, try external and then internal authentication
-			if (loginMethod == AuthenticationMethod.Database) {
+			if (loginMethod == AuthenticationMethod.Internal) {
+				result = InternalLogin.authenticate(username, password);
+			} else if (loginMethod == AuthenticationMethod.Database) {
 				result = DbLogin.authenticate(username, password);
 			} else if (loginMethod == AuthenticationMethod.Ldap) {
 				result = LdapLogin.authenticate(username, password);
@@ -153,49 +200,28 @@ public class LoginController {
 				//create default object
 				result = new LoginResult();
 			}
-
-			if (!result.isAuthenticated()) {
-				//external authentication failed
-				//log external authentication failure
-				loginHelper.log(loginMethod, result, username, ip);
-
-				//try internal authentication
-				loginMethod = AuthenticationMethod.Internal;
-				result = InternalLogin.authenticate(username, password);
-			}
-
 		}
 
-		//TODO test all authentication methods
-
-		User user = null;
-		if (result.isAuthenticated()) {
-			//authentication successful. ensure user exists
-			user = userService.getUser(username);
-			if (user == null) {
-				//user doesn't exist. update result status
-				result = new LoginResult();
-				result.setAuthenticated(false);
-				result.setMessage("login.message.invalidUser");
-				result.setDetails(ArtUtils.LOGIN_OK_INVALID_USER);
-			} else if (!user.isActive()) {
-				//user is disabled
-				result = new LoginResult();
-				result.setAuthenticated(false);
-				result.setMessage("login.message.userDisabled");
-				result.setDetails(ArtUtils.LOGIN_OK_USER_DISABLED);
-			}
-		}
-
-		//log final login status
+		//log result
 		loginHelper.log(loginMethod, result, username, ip);
+
+		if (!result.isAuthenticated() && user != null && loginMethod != AuthenticationMethod.Internal) {
+			//external authentication failed. try internal authentication
+			result = InternalLogin.authenticate(username, password);
+			if (result.isAuthenticated()) {
+				//log access using internal authentication
+				loginMethod = AuthenticationMethod.Internal;
+				loginHelper.logSuccess(loginMethod, username, ip);
+			}
+		}
+
+//TODO test ldap authentication
 
 		if (!result.isAuthenticated()) {
 			//authentication failed or user doesn't exist or user is disabled
 			//allow login if credentials match the repository user
-
-			loginMethod = AuthenticationMethod.Repository;
 			if (isValidRepositoryUser(username, password)) {
+				loginMethod = AuthenticationMethod.Repository;
 				user = new User();
 				user.setAccessLevel(100); //repository user has super admin access
 
@@ -208,40 +234,43 @@ public class LoginController {
 		}
 
 		//finally, authentication process finished. display appropriate page
-		if (!result.isAuthenticated()) {
-			//login failure. always display invalid account message rather than actual result details
-			//better for security if less details are displayed
-			model.addAttribute("message", "login.message.invalidAccount");
-
-			return "login";
-		} else {
+		if (result.isAuthenticated() && user != null) {
 			//access granted 
 
-			//TODO remove once refactoring is complete
-			if (user != null) {
-				UserEntity ue = new UserEntity(user.getUsername());
-				ue.setAccessLevel(user.getAccessLevel());
-				session.setAttribute("ue", ue);
-				session.setAttribute("username", user.getUsername());
-				if (user.getAccessLevel() >= 10) {
-					session.setAttribute("AdminSession", "Y");
-					session.setAttribute("AdminLevel", user.getAccessLevel());
-					session.setAttribute("AdminUsername", user.getUsername());
-				}
-			}
-			//
+			return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
+		} else {
+			//login failure. always display invalid account message rather than actual result details
+			//better for security if less details are displayed
+			model.addAttribute("message", "login.message.invalidCredentials");
 
-			session.setAttribute("sessionUser", user);
-			session.setAttribute("authenticationMethod", loginMethod.getValue());
+			return "login";
 
-			//clear spring session attributes
-			sessionStatus.setComplete();
-
-			return "redirect:" + getNextPage(session);
 		}
 	}
 
-	private String getNextPage(HttpSession session) {
+	private String getLoginSuccessNextPage(HttpSession session, User user,
+			AuthenticationMethod loginMethod, SessionStatus sessionStatus) {
+		//prepare session
+		
+		//TODO remove once refactoring is complete
+		UserEntity ue = new UserEntity(user.getUsername());
+		ue.setAccessLevel(user.getAccessLevel());
+		session.setAttribute("ue", ue);
+		session.setAttribute("username", user.getUsername());
+		if (user.getAccessLevel() >= 10) {
+			session.setAttribute("AdminSession", "Y");
+			session.setAttribute("AdminLevel", user.getAccessLevel());
+			session.setAttribute("AdminUsername", user.getUsername());
+		}
+		//
+
+		session.setAttribute("sessionUser", user);
+		session.setAttribute("authenticationMethod", loginMethod.getValue());
+
+		//clear spring session attributes
+		sessionStatus.setComplete();
+
+		//get next page
 		//TODO encode url. String nextPage = response.encodeRedirectURL((String) session.getAttribute("nextPage"));
 		String nextPage = (String) session.getAttribute("nextPage");
 		//remove nextpage attribute. 
@@ -252,7 +281,7 @@ public class LoginController {
 			nextPage = "/app/reports.do";
 		}
 
-		return nextPage;
+		return "redirect:" + nextPage;
 	}
 
 	private boolean isValidRepositoryUser(String username, String password) {

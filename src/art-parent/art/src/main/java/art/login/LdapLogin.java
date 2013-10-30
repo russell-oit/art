@@ -80,7 +80,7 @@ public class LdapLogin {
 			} catch (NamingException ex) {
 				logger.error("Error. username={}", username, ex);
 
-				result.setMessage("login.message.invalidAccount");
+				result.setMessage("login.message.invalidCredentials");
 				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			}
