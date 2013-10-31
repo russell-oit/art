@@ -3,7 +3,7 @@
     Created on : 30-Oct-2013, 09:10:16
     Author     : Timothy Anyona
 
-Display logout message. Only used with auto authentication
+Display logout page. Only used with auto login
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

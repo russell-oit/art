@@ -30,7 +30,7 @@ bootstrap js, jquery js
 		<jsp:invoke fragment="headContent"/>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap-3.0.0.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-3.2.1.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.1.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
 		
 		<jsp:invoke fragment="pageCss"/>

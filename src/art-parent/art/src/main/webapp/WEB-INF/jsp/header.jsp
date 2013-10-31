@@ -33,39 +33,39 @@ Header that appears at the top of all pages, except the login and logs pages
 				<ul class="nav navbar-nav">
 					<li>
 						<a href="${pageContext.request.contextPath}/app/reports.do">
-							<i class="icon-bar-chart"></i> <spring:message code="header.link.reports"/>
+							<i class="fa fa-bar-chart-o"></i> <spring:message code="header.link.reports"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/app/jobs.do">
-							<i class="icon-time"></i> <spring:message code="header.link.jobs"/>
+							<i class="fa fa-clock-o"></i> <spring:message code="header.link.jobs"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/app/admin.do">
-							<i class="icon-wrench"></i> <spring:message code="header.link.administration"/>
+							<i class="fa fa-wrench"></i> <spring:message code="header.link.administration"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/app/logs" target="_blank">
-							<i class="icon-reorder"></i> <spring:message code="header.link.logs"/>
+							<i class="fa fa-reorder"></i> <spring:message code="header.link.logs"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/docs" target="_blank">
-							<i class="icon-info"></i> <spring:message code="header.link.documentation"/>
+							<i class="fa fa-info"></i> <spring:message code="header.link.documentation"/>
 						</a>
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/logout.do">
-							<i class="icon-signout"></i> <spring:message code="header.link.logout"/>
+							<i class="fa fa-sign-out"></i> <spring:message code="header.link.logout"/>
 						</a>
 					</li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
-							<i class="icon-user"></i> ${sessionUser.username} <b class="caret"></b>
+							<i class="fa fa-user"></i> ${sessionUser.username} <b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
 							<c:if test="${authenticationMethod eq INTERNAL_AUTHENTICATION}">

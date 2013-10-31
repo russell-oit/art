@@ -7,8 +7,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,7 @@ public class InternalLogin {
 
 			rs = ps.executeQuery();
 			if (rs.next()) {
-				if (BooleanUtils.toBoolean(rs.getInt("ACTIVE"))) {
+				if (rs.getBoolean("ACTIVE") == true) {
 					boolean passwordVerified = false;
 					try {
 						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"));

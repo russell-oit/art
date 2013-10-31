@@ -80,14 +80,10 @@ public class LoginController {
 				if (user == null) {
 					//user doesn't exist
 					result = new LoginResult();
-					result.setAuthenticated(false);
-					result.setMessage("login.message.artUserInvalid");
 					result.setDetails(ArtUtils.ART_USER_INVALID);
 				} else if (!user.isActive()) {
 					//user is disabled
 					result = new LoginResult();
-					result.setAuthenticated(false);
-					result.setMessage("login.message.artUserDisabled");
 					result.setDetails(ArtUtils.ART_USER_DISABLED);
 				} else {
 					//valid user
@@ -100,6 +96,7 @@ public class LoginController {
 			} else {
 				//user not authenticated. should never get here as browser won't have authenticated?
 				result = new LoginResult();
+				result.setDetails("invalid user");
 			}
 
 			//if we are here auto login failed or invalid user or disabed user
@@ -148,6 +145,9 @@ public class LoginController {
 			@RequestParam("password") String password,
 			Model model,
 			SessionStatus sessionStatus) {
+		
+		//explicitly name requestparams to avoid error if code compiled without debug option
+		//see http://www.java-allandsundry.com/2012/10/method-parameter-names-and-spring.html
 
 		//windowsDomain request parameter may not be in the request parameters. 
 		//only available with windows domain authentication

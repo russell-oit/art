@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.utils;
 
@@ -41,7 +40,7 @@ public class Datasource {
 	String password = "";
 	int poolTimeout = 20;
 	String testSql = "";
-		private boolean active;
+	private boolean active;
 
 	/**
 	 * Get the value of active
@@ -60,7 +59,6 @@ public class Datasource {
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-
 
 	/**
 	 *
@@ -229,7 +227,7 @@ public class Datasource {
 				password = rs.getString("PASSWORD");
 				poolTimeout = rs.getInt("POOL_TIMEOUT");
 				testSql = rs.getString("TEST_SQL");
-				active=BooleanUtils.toBoolean(rs.getInt("ACTIVE"));
+				active = rs.getBoolean("ACTIVE");
 			}
 			rs.close();
 			success = true;
@@ -397,7 +395,7 @@ public class Datasource {
 			ps.setString(7, testSql);
 			ps.setDate(8, sysdate);
 			ps.setInt(9, BooleanUtils.toInteger(active));
-			
+
 			ps.setInt(10, datasourceId);
 
 			ps.executeUpdate();

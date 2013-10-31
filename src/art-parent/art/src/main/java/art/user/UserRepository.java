@@ -5,7 +5,6 @@ import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +54,7 @@ public class UserRepository {
 				user.setEmail(rs.getString("EMAIL"));
 				user.setAccessLevel(rs.getInt("ACCESS_LEVEL"));
 				user.setFullName(rs.getString("FULL_NAME"));
-				user.setActive(BooleanUtils.toBoolean(rs.getInt("ACTIVE")));
+				user.setActive(rs.getBoolean("ACTIVE"));
 				user.setPassword(rs.getString("PASSWORD"));
 				user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 				user.setCanChangePassword(rs.getString("CAN_CHANGE_PASSWORD"));
