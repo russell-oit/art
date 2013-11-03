@@ -10,6 +10,7 @@ ART 3.0
 * Allow datasources to be disabled
 * Renamed "Report on Column" query types to "Group"
 * Renamed "Graph" query types to "Chart"
+* Modified LDAP authentication configuration. Settings need to be re-entered.
 * Updated cewolf to 1.2.4
 
 ART 2.5.2

@@ -185,7 +185,17 @@ public class Encrypter {
 	 * @return <code>true</code> if password matches hash
 	 */
 	public static boolean VerifyPasswordBcrypt(String clearText, String hashedPassword) {
-		return BCrypt.checkpw(clearText, hashedPassword);
+		boolean verified;
+		
+		//hashedPassword must not be blank otherwise error will be thrown
+		if (StringUtils.isBlank(hashedPassword)) {
+			verified = false;
+		} else {
+			//hashedPassword must be a valid bcrypt hash otherwise error will be thrown
+			verified = BCrypt.checkpw(clearText, hashedPassword);
+		}
+
+		return verified;
 	}
 
 	/**

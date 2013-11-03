@@ -148,6 +148,11 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>2.2.2</version>
 		</dependency>
+		<dependency>
+			<groupId>com.unboundid</groupId>
+			<artifactId>unboundid-ldapsdk</artifactId>
+			<version>2.3.4</version>
+		</dependency>
 		<!-- mondrian specific dependencies -->
 		<dependency>
 			<groupId>pentaho</groupId>
