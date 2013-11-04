@@ -9,52 +9,37 @@ bootstrap js, jquery js
 --%>
 
 <%@tag description="Main Page Template" pageEncoding="UTF-8"%>
+<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
-<%@attribute name="title" required="true"%>
-<%@attribute name="headContent" fragment="true" %>
-<%@attribute name="pageJavascript" fragment="true" %>
+<%@attribute name="title" %>
+<%@attribute name="artTitle" %>
 <%@attribute name="pageCss" fragment="true" %>
-<%@attribute name="metaContent" fragment="true" %>
+<%@attribute name="pageJavascript" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-
-		<title>${title}</title>
-
-		<jsp:invoke fragment="metaContent"/>
-
-		<jsp:invoke fragment="headContent"/>
-
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap-3.0.0.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.1.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
-		
+<t:genericPage title="${empty artTitle? 'ART - '.concat(title) : artTitle}">
+	<jsp:attribute name="pageCss">
 		<jsp:invoke fragment="pageCss"/>
-	</head>
-	<body>
+	</jsp:attribute>
 
-		<div id="wrap">
-			<jsp:include page="/WEB-INF/jsp/header.jsp"/>
-
-			<div id="pageContent">
-				<div  class="container">
-					<jsp:doBody/>
-				</div>
-			</div>
-			<div id="push"></div>
-		</div>
-
-		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
-
-		<!-- javascript placed at the end of the document so that pages load faster -->
+	<jsp:attribute name="pageJavascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/twitter-bootstrap-hover-dropdown.min.js"></script>
 
 		<jsp:invoke fragment="pageJavascript"/>
-	</body>
-</html>
+	</jsp:attribute>
+
+	<jsp:attribute name="pageHeader">
+		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
+	</jsp:attribute>
+
+	<jsp:attribute name="pageFooter">
+		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+	</jsp:attribute>
+
+	<jsp:body>
+        <jsp:doBody/>
+    </jsp:body>
+</t:genericPage>

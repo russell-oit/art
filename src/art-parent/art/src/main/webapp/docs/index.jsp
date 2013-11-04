@@ -9,7 +9,7 @@ Page to provide access to application documentation
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
-<t:genericPage title="ART - Docs">
+<t:genericPage title="ART - Documentation">
 	<jsp:body>
 		<h2>ART Documentation</h2>
 		<ul>

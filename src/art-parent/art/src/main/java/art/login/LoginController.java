@@ -4,9 +4,8 @@ import art.servlets.ArtConfig;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
+import art.utils.LanguageUtils;
 import art.utils.UserEntity;
-import java.util.Map;
-import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -118,21 +117,7 @@ public class LoginController {
 		//it will be used even after login
 		session.setAttribute("authenticationMethod", loginMethod.getValue());
 
-		//set available application languages
-		//use a treemap so that languages are displayed in alphabetical order (of language codes)
-		//don't include default (english)
-		//see http://people.w3.org/rishida/names/languages.html for language names
-		Map<String, String> languages = new TreeMap<String, String>();
-		languages.put("es", "Español"); //spanish
-		languages.put("fr", "Français"); //french
-		languages.put("hu", "Magyar"); //hungarian
-		languages.put("it", "Italiano"); //italian
-		languages.put("pt_BR", "Português (Brasil)"); //brazilian portuguese
-		languages.put("sw", "Kiswahili"); //swahili
-		languages.put("zh_CN", "简体中文"); //simplified chinese
-		languages.put("zh_TW", "繁體中文"); //traditional chinese
-
-		model.addAttribute("languages", languages);
+		model.addAttribute("languages", LanguageUtils.getLanguages());
 
 		return "login";
 	}

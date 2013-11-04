@@ -15,12 +15,13 @@ Display logout page. Only used with auto login
 
 <spring:message code="page.title.logout" var="pageTitle" scope="page"/>
 
-<t:genericPage title="ART - ${pageTitle}">
-	<jsp:attribute name="pageFooter">
-		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
-	</jsp:attribute>
-
+<t:headerlessPage title="${pageTitle}">
 	<jsp:body>
+		<div class="row">
+			<div class="col-lg-6 col-lg-offset-3 alert alert-info text-center">
+				<spring:message code="logout.message.sessionEnded"/>
+			</div>
+		</div>
 		<div class="row">
 			<div class="col-lg-6 col-lg-offset-3 text-center">
 				<a class="btn btn-default" href="${pageContext.request.contextPath}/login.do">
@@ -29,4 +30,4 @@ Display logout page. Only used with auto login
 			</div>
 		</div>
 	</jsp:body>
-</t:genericPage>
+</t:headerlessPage>
