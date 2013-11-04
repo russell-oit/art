@@ -13,12 +13,11 @@ bootstrap js, jquery js
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" %>
-<%@attribute name="artTitle" %>
 <%@attribute name="pageCss" fragment="true" %>
 <%@attribute name="pageJavascript" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
-<t:genericPage title="${empty artTitle? 'ART - '.concat(title) : artTitle}">
+<t:genericPage title="ART - ${title}">
 	<jsp:attribute name="pageCss">
 		<jsp:invoke fragment="pageCss"/>
 	</jsp:attribute>
