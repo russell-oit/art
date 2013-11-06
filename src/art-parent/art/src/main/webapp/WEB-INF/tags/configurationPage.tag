@@ -15,18 +15,50 @@ Includes the elements in a main page
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
+	<jsp:attribute name="pageCss">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
+	</jsp:attribute>
+		
 	<jsp:attribute name="pageJavascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
+				$('.datatable').dataTable({
+					"sPaginationType": "bs_full",
+					"aaSorting": [],
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
+					"iDisplayLength": 10,
+					"oLanguage": {
+						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
+					}
+				});
+				$('.datatable').each(function() {
+					var datatable = $(this);
+					// SEARCH - Add the placeholder for Search and Turn this into in-line form control
+					var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input');
+					search_input.attr('placeholder', 'Search');
+					search_input.addClass('form-control input-sm');
+					// LENGTH - Inline-Form control
+					var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
+					length_sel.addClass('form-control input-sm');
+				});
+
 				$(function() {
-					$('a[href*="admin.do"]').parent().addClass('active');
+					$('a[id="configure"]').parent().addClass('active');
+				});
+
+				$(function() {
+					$("a[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 			});
 		</script>
 	</jsp:attribute>
 
 	<jsp:body>
-		${title} <br>
+		<div class="text-center">
+			${title}
+		</div>
         <jsp:doBody/>
     </jsp:body>
 </t:mainPage>

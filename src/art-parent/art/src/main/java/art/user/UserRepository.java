@@ -5,6 +5,9 @@ import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +40,7 @@ public class UserRepository {
 			conn = ArtConfig.getConnection();
 			String sql;
 
-			sql = "SELECT EMAIL, ACCESS_LEVEL, FULL_NAME, ACTIVE, "
+			sql = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, ACTIVE, "
 					+ " PASSWORD, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, "
 					+ " HASHING_ALGORITHM, START_QUERY "
 					+ " FROM ART_USERS "
@@ -50,7 +53,7 @@ public class UserRepository {
 			if (rs.next()) {
 				user = new User();
 
-				user.setUsername(username);
+				user.setUsername(rs.getString("USERNAME"));
 				user.setEmail(rs.getString("EMAIL"));
 				user.setAccessLevel(rs.getInt("ACCESS_LEVEL"));
 				user.setFullName(rs.getString("FULL_NAME"));
@@ -64,8 +67,8 @@ public class UserRepository {
 				//set user properties whose values may come from user groups
 				populateGroupValues(conn, user);
 			}
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
@@ -108,10 +111,59 @@ public class UserRepository {
 			
 			user.setDefaultQueryGroup(defaultQueryGroup);
 			user.setStartQuery(startQuery);
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(rs, ps);
 		}
+	}
+	
+	/**
+	 * Get all users
+	 * 
+	 * @return all users
+	 */
+	public List<User> getAllUsers() {
+		List<User> users = new ArrayList<User>();
+
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			conn = ArtConfig.getConnection();
+			String sql;
+
+			sql = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, ACTIVE, "
+					+ " PASSWORD, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, "
+					+ " HASHING_ALGORITHM, START_QUERY "
+					+ " FROM ART_USERS ";
+
+			ps = conn.prepareStatement(sql);
+
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				User user = new User();
+
+				user.setUsername(rs.getString("USERNAME"));
+				user.setEmail(rs.getString("EMAIL"));
+				user.setAccessLevel(rs.getInt("ACCESS_LEVEL"));
+				user.setFullName(rs.getString("FULL_NAME"));
+				user.setActive(rs.getBoolean("ACTIVE"));
+				user.setPassword(rs.getString("PASSWORD"));
+				user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+				user.setCanChangePassword(rs.getString("CAN_CHANGE_PASSWORD"));
+				user.setHashingAlgorithm(rs.getString("HASHING_ALGORITHM"));
+				user.setStartQuery(rs.getString("START_QUERY"));
+
+				users.add(user);
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		} finally {
+			DbUtils.close(rs, ps, conn);
+		}
+
+		return users;
 	}
 }

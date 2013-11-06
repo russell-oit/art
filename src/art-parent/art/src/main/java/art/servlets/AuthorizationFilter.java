@@ -166,12 +166,7 @@ public class AuthorizationFilter implements Filter {
 		String path = contextPath + "/app/";
 
 		//TODO use permissions instead of access level
-		if (StringUtils.startsWith(requestUri, path + "admin.do")) {
-			//only admins can access
-			if (accessLevel >= 10) {
-				authorized = true;
-			}
-		} else if (StringUtils.startsWith(requestUri, path + "reports.do")) {
+		if (StringUtils.startsWith(requestUri, path + "reports.do")) {
 			//everyone can access
 			//NOTE: "everyone" excludes the special codes when accessing as
 			//the initial setup user (-1) and the art repository user (-2)
@@ -184,7 +179,12 @@ public class AuthorizationFilter implements Filter {
 				authorized = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "logs")) {
-			//standard admins
+			//standard admins and above
+			if (accessLevel >= 40) {
+				authorized = true;
+			}
+		} else if (StringUtils.startsWith(requestUri, path + "users.do")) {
+			//standard admins and above
 			if (accessLevel >= 40) {
 				authorized = true;
 			}

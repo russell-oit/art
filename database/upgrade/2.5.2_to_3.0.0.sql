@@ -5,15 +5,20 @@
 --          . reset x_axis_label for non-graph queries
 --          . allow datasources to be disabled
 --          . add reference table for query types
+--          . add reference table for job types
 --          . change active_status fields from varchar to integer
 --
 -- ------------------------------------------------
 
 
 -- update database version
-ALTER TABLE ART_SETTINGS ADD SETTING_ID INTEGER;
-UPDATE ART_SETTINGS SET SETTING_ID=1; 
-UPDATE ART_SETTINGS SET SETTING_VALUE='3.0-alpha1' WHERE SETTING_NAME='database version';
+DROP TABLE ART_SETTINGS;
+CREATE TABLE ART_DATABASE_VERSION
+(
+	DATABASE_VERSION VARCHAR(50)
+);
+-- insert database version
+INSERT INTO ART_DATABASE_VERSION VALUES('3.0-alpha1');
 
 -- reset x_axis_label for non-graph queries
 UPDATE ART_QUERIES SET X_AXIS_LABEL='' WHERE QUERY_TYPE>=0;
@@ -68,6 +73,24 @@ INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-14,'Chart: Vertic
 INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-15,'Chart: Stacked Vertical Bar 2D');
 INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-16,'Chart: Horizontal Bar 2D');
 INSERT INTO ART_QUERY_TYPES (QUERY_TYPE, DESCRIPTION) VALUES (-17,'Chart: Stacked Horizontal Bar 2D');
+
+-- add reference table for job types
+CREATE TABLE ART_JOB_TYPES
+(
+	JOB_TYPE INTEGER NOT NULL PRIMARY KEY,
+	DESCRIPTION VARCHAR(100)
+);
+-- insert job types
+INSERT INTO ART_JOB_TYPES VALUES(1,'Alert');
+INSERT INTO ART_JOB_TYPES VALUES(2,'Email Output (Attachment)');
+INSERT INTO ART_JOB_TYPES VALUES(3,'Publish');
+INSERT INTO ART_JOB_TYPES VALUES(4,'Just Run It');
+INSERT INTO ART_JOB_TYPES VALUES(5,'Email Output (Inline)');
+INSERT INTO ART_JOB_TYPES VALUES(6,'Conditional Email Output (Attachment)');
+INSERT INTO ART_JOB_TYPES VALUES(7,'Conditional Email Output (Inline)');
+INSERT INTO ART_JOB_TYPES VALUES(8,'Conditional Publish');
+INSERT INTO ART_JOB_TYPES VALUES(9,'Cache ResultSet (Append)');
+INSERT INTO ART_JOB_TYPES VALUES(10,'Cache ResultSet (Delete & Insert)');
 
 -- change active_status fields from varchar to integer
 ALTER TABLE ART_USERS ADD ACTIVE INTEGER;

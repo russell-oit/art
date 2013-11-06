@@ -42,7 +42,7 @@ value="<%= art.login.AuthenticationMethod.Internal.getValue()%>"/>
 						</a>
 					</li>
 					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+						<a id="configure" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
 							<i class="fa fa-wrench"></i> <spring:message code="header.link.configure"/> <b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
@@ -72,7 +72,7 @@ value="<%= art.login.AuthenticationMethod.Internal.getValue()%>"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureUsers.do">
+								<a href="${pageContext.request.contextPath}/app/users.do">
 									<spring:message code="header.link.configureUsers"/>
 								</a>
 							</li>

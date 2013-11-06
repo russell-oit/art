@@ -1,0 +1,23 @@
+{
+    "sEmptyTable":     "Hakuna data",
+    "sInfo":           "Inaonyesha _START_ hadi _END_ ya matokeo _TOTAL_",
+    "sInfoEmpty":      "Inaonyesha 0 hadi 0 ya matokeo 0",
+    "sInfoFiltered":   "(chujo kutoka matokeo _MAX_)",
+    "sInfoPostFix":    "",
+    "sInfoThousands":  ",",
+    "sLengthMenu":     "Onyesha matokeo _MENU_",
+    "sLoadingRecords": "Inapakia...",
+    "sProcessing":     "Inachakata...",
+    "sSearch":         "Tafuta:",
+    "sZeroRecords":    "Hakuna vifano",
+    "oPaginate": {
+        "sFirst":    "Mwanzo",
+        "sLast":     "Mwisho",
+        "sNext":     "Ifuatayo",
+        "sPrevious": "Iliyopita"
+    },
+    "oAria": {
+        "sSortAscending": ": amilisha kupanga safuwima ikipanda",
+        "sSortDescending": ": amilisha kupanga safuwima ikishuka"
+    }
+}

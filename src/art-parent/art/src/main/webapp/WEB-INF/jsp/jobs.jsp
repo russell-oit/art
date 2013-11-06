@@ -16,8 +16,6 @@ Display job results for the jobs a user has access to
 
 <spring:message code="page.title.jobs" var="pageTitle" scope="page"/>
 
-<c:set var="now" value="<%=new java.util.Date()%>" />
-
 <t:mainPage title="${pageTitle}">
 	<jsp:attribute name="pageCss">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
@@ -32,7 +30,10 @@ Display job results for the jobs a user has access to
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
-					"iDisplayLength": 5
+					"iDisplayLength": 10,
+					"oLanguage": {
+						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
+					}
 				});
 				$('.datatable').each(function() {
 					var datatable = $(this);
@@ -58,7 +59,7 @@ Display job results for the jobs a user has access to
 
 	<jsp:body>
 		<div>
-			<table id="jobsTable" class="datatable table table-bordered table-striped table-condensed">
+			<table class="datatable table table-bordered table-striped table-condensed">
 				<thead>
 					<tr>
 						<th><spring:message code="jobs.text.jobName"/></th>
