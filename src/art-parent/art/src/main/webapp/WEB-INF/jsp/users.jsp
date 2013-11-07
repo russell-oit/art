@@ -17,9 +17,19 @@ Display user configuration page
 <spring:message code="page.title.configureUsers" var="pageTitle" scope="page"/>
 
 <t:configurationPage title="${pageTitle}">
+	<jsp:attribute name="javascript">
+		<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+				$(function() {
+					$('a[href*="users.do"]').parent().addClass('active');
+				});
+			});
+		</script>
+	</jsp:attribute>
+		
 	<jsp:body>
 		<div>
-			<table class="datatable table table-bordered table-striped">
+			<table class="datatable table table-bordered table-striped table-condensed">
 				<thead>
 					<tr>
 						<th><spring:message code="users.text.username"/></th>

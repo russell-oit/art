@@ -12,11 +12,11 @@ Includes bootstrap css
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" required="true"%>
 <%@attribute name="headContent" fragment="true" %>
-<%@attribute name="pageJavascript" fragment="true" %>
-<%@attribute name="pageCss" fragment="true" %>
+<%@attribute name="javascript" fragment="true" %>
+<%@attribute name="css" fragment="true" %>
 <%@attribute name="metaContent" fragment="true" %>
-<%@attribute name="pageHeader" fragment="true" %>
-<%@attribute name="pageFooter" fragment="true" %>
+<%@attribute name="header" fragment="true" %>
+<%@attribute name="footer" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <!DOCTYPE html>
@@ -34,12 +34,12 @@ Includes bootstrap css
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.1.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
 
-		<jsp:invoke fragment="pageCss"/>
+		<jsp:invoke fragment="css"/>
 	</head>
 	<body>
 
 		<div id="wrap">
-			<jsp:invoke fragment="pageHeader"/>
+			<jsp:invoke fragment="header"/>
 
 			<div id="pageContent">
 				<div  class="container">
@@ -49,9 +49,9 @@ Includes bootstrap css
 			<div id="push"></div>
 		</div>
 
-		<jsp:invoke fragment="pageFooter"/>
+		<jsp:invoke fragment="footer"/>
 
 		<!-- javascript placed at the end of the document so that pages load faster -->
-		<jsp:invoke fragment="pageJavascript"/>
+		<jsp:invoke fragment="javascript"/>
 	</body>
 </html>

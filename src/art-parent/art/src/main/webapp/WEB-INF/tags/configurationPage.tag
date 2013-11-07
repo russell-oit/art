@@ -4,7 +4,7 @@
     Author     : Timothy Anyona
 
 Template for configuration pages
-Includes the elements in a main page
+Includes the elements in a main page, plus datatables css and javascript
 --%>
 
 <%@tag description="Configuration Page Template" pageEncoding="UTF-8"%>
@@ -12,14 +12,18 @@ Includes the elements in a main page
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" required="true"%>
+<%@attribute name="css" fragment="true" %>
+<%@attribute name="javascript" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
-	<jsp:attribute name="pageCss">
+	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
+		
+		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 		
-	<jsp:attribute name="pageJavascript">
+	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
 		<script type="text/javascript" charset="utf-8">
@@ -49,10 +53,13 @@ Includes the elements in a main page
 				});
 
 				$(function() {
+					//required only if action icons are buttons
 					$("a[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 			});
 		</script>
+		
+		<jsp:invoke fragment="javascript"/>
 	</jsp:attribute>
 
 	<jsp:body>

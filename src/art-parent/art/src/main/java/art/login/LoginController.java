@@ -4,8 +4,10 @@ import art.servlets.ArtConfig;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
+import art.utils.DbUtils;
 import art.utils.LanguageUtils;
 import art.utils.UserEntity;
+import java.sql.Connection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -48,6 +50,15 @@ public class LoginController {
 			session.setAttribute("ue", ue);
 			return "redirect:/admin/editSettings.jsp";
 			//
+		}
+		
+		//ensure art database connection is available
+		Connection conn=ArtConfig.getConnection();
+		if(conn==null){
+			model.addAttribute("message", "page.error.invalidArtDatabaseConnection");
+			return "headerlessError";
+		} else {
+			DbUtils.closeConnection(conn);
 		}
 
 		String authenticationMethodSetting = ArtConfig.getAuthenticationMethod();

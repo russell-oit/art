@@ -28,11 +28,11 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 		<meta http-equiv="cache-control" content="no-cache, must-revalidate">
 	</jsp:attribute>
 
-	<jsp:attribute name="pageFooter">
+	<jsp:attribute name="footer">
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</jsp:attribute>
 
-	<jsp:attribute name="pageJavascript">
+	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
@@ -69,6 +69,13 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 					<c:if test="${not empty error}">
 						<div class="alert alert-danger">
 							${error}
+						</div>
+					</c:if>
+					<c:if test="${not empty result}">
+						<div class="alert alert-danger">
+							<p><spring:message code="${result.message}"/></p>
+							<p>${result.details}</p>
+							<p>${result.error}</p>
 						</div>
 					</c:if>
 

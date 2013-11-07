@@ -17,11 +17,11 @@ Display job results for the jobs a user has access to
 <spring:message code="page.title.jobs" var="pageTitle" scope="page"/>
 
 <t:mainPage title="${pageTitle}">
-	<jsp:attribute name="pageCss">
+	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
 	</jsp:attribute>
 
-	<jsp:attribute name="pageJavascript">
+	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
 		<script type="text/javascript" charset="utf-8">
@@ -103,7 +103,7 @@ Display job results for the jobs a user has access to
 										<i class="fa fa-trash-o"></i>
 									</a>
 									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.button.run"/>">
-										<i class="fa fa-play"></i>
+										<i class="fa fa-bolt"></i>
 									</a>
 								</c:if>
 							</td>

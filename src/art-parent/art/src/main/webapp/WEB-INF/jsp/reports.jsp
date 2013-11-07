@@ -14,8 +14,8 @@ Reports page. Also main/home page
 
 <spring:message code="page.title.reports" var="pageTitle" scope="page"/>
 
-<t:mainPage title="ART - ${pageTitle}">
-	<jsp:attribute name="pageJavascript">
+<t:mainPage title="${pageTitle}">
+	<jsp:attribute name="javascript">
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$(function() {

@@ -13,28 +13,28 @@ bootstrap js, jquery js
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" %>
-<%@attribute name="pageCss" fragment="true" %>
-<%@attribute name="pageJavascript" fragment="true" %>
+<%@attribute name="css" fragment="true" %>
+<%@attribute name="javascript" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
-	<jsp:attribute name="pageCss">
-		<jsp:invoke fragment="pageCss"/>
+	<jsp:attribute name="css">
+		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 
-	<jsp:attribute name="pageJavascript">
+	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/twitter-bootstrap-hover-dropdown.min.js"></script>
 
-		<jsp:invoke fragment="pageJavascript"/>
+		<jsp:invoke fragment="javascript"/>
 	</jsp:attribute>
 
-	<jsp:attribute name="pageHeader">
+	<jsp:attribute name="header">
 		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 	</jsp:attribute>
 
-	<jsp:attribute name="pageFooter">
+	<jsp:attribute name="footer">
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</jsp:attribute>
 

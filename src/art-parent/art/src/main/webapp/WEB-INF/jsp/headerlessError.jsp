@@ -1,9 +1,9 @@
 <%-- 
-    Document   : accessDenied
-    Created on : 01-Oct-2013, 09:30:56
+    Document   : headerlessError
+    Created on : 07-Nov-2013, 09:41:59
     Author     : Timothy Anyona
 
-Show access denied message when a user tries to access a page he is not authorized to
+Display an error without the main header
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -13,14 +13,14 @@ Show access denied message when a user tries to access a page he is not authoriz
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<spring:message code="page.title.accessDenied" var="pageTitle" scope="page"/>
+<spring:message code="page.title.error" var="pageTitle" scope="page"/>
 
-<t:mainPage title="${pageTitle}">
+<t:headerlessPage title="${pageTitle}">
 	<jsp:body>
 		<div class="row">
 			<div class="col-lg-6 col-lg-offset-3 alert alert-danger text-center">
-				<spring:message code="page.message.accessDenied"/>
+				<spring:message code="${message}"/>
 			</div>
 		</div>
 	</jsp:body>
-</t:mainPage>
+</t:headerlessPage>
