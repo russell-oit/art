@@ -16,7 +16,9 @@ Display user configuration page
 
 <spring:message code="page.title.configureUsers" var="pageTitle" scope="page"/>
 
-<t:configurationPage title="${pageTitle}">
+<spring:message code="datatables.text.all" var="datatablesAllText" scope="page"/>
+
+<t:configurationPage title="${pageTitle}" datatablesAllText="${datatablesAllText}">
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
@@ -26,7 +28,7 @@ Display user configuration page
 			});
 		</script>
 	</jsp:attribute>
-		
+
 	<jsp:body>
 		<div>
 			<table class="datatable table table-bordered table-striped table-condensed">
@@ -35,6 +37,7 @@ Display user configuration page
 						<th><spring:message code="users.text.username"/></th>
 						<th><spring:message code="users.text.fullName"/></th>
 						<th><spring:message code="users.text.active"/></th>
+						<th><spring:message code="users.text.action"/></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -43,6 +46,14 @@ Display user configuration page
 							<td>${user.username}</td>
 							<td>${user.fullName}</td>
 							<td>${user.active}</td>
+							<td>
+								<a href="#" data-toggle="tooltip" title="<spring:message code="users.action.edit"/>">
+									<i class="fa fa-pencil-square-o"></i>
+								</a>
+								<a href="#" data-toggle="tooltip" title="<spring:message code="users.action.delete"/>">
+									<i class="fa fa-trash-o"></i>
+								</a>
+							</td>
 						</tr>
 					</c:forEach>
 				</tbody>

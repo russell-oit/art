@@ -11,9 +11,10 @@ Includes the elements in a main page, plus datatables css and javascript
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
-<%@attribute name="title" required="true"%>
+<%@attribute name="title" required="true" %>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
+<%@attribute name="datatablesAllText" required="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
@@ -31,8 +32,8 @@ Includes the elements in a main page, plus datatables css and javascript
 				$('.datatable').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
-					"iDisplayLength": 10,
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${datatablesAllText}"]],
+					"iDisplayLength": -1,
 					"oLanguage": {
 						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
 					}

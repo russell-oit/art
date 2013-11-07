@@ -96,13 +96,13 @@ Display job results for the jobs a user has access to
 							</td>
 							<td>
 								<c:if test="${sessionUser.username eq job.username}">
-									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.button.edit"/>">
+									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.action.edit"/>">
 										<i class="fa fa-pencil-square-o"></i>
 									</a>
-									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.button.delete"/>">
+									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.action.delete"/>">
 										<i class="fa fa-trash-o"></i>
 									</a>
-									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.button.run"/>">
+									<a href="#" data-toggle="tooltip" title="<spring:message code="jobs.action.run"/>">
 										<i class="fa fa-bolt"></i>
 									</a>
 								</c:if>
