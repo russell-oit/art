@@ -47,7 +47,7 @@ value="<%= art.login.AuthenticationMethod.Internal.getValue()%>"/>
 						</a>
 						<ul class="dropdown-menu">
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureArtDatabase.do">
+								<a href="${pageContext.request.contextPath}/app/artDatabase.do">
 									<spring:message code="header.link.configureArtDatabase"/>
 								</a>
 							</li>

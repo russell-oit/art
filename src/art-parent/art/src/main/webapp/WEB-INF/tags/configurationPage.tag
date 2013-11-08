@@ -14,7 +14,7 @@ Includes the elements in a main page, plus datatables css and javascript
 <%@attribute name="title" required="true" %>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
-<%@attribute name="datatablesAllText" required="true" %>
+<%@attribute name="dataTablesAllRowsText" required="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
@@ -32,7 +32,7 @@ Includes the elements in a main page, plus datatables css and javascript
 				$('.datatable').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${datatablesAllText}"]],
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": -1,
 					"oLanguage": {
 						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
@@ -64,7 +64,7 @@ Includes the elements in a main page, plus datatables css and javascript
 	</jsp:attribute>
 
 	<jsp:body>
-		<div class="text-center">
+		<div style="text-align: center">
 			${title}
 		</div>
         <jsp:doBody/>

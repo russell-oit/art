@@ -12,6 +12,7 @@ Login page
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib  uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
@@ -98,7 +99,7 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 							<spring:message code="login.label.username"/>
 						</label>
 						<div class="col-lg-10">
-							<input type="text" name="username" id="username" class="form-control" value="${selectedUser}">
+							<input type="text" name="username" id="username" class="form-control" value="${selectedUsername}">
 						</div>
 					</div>
 					<div class="form-group">

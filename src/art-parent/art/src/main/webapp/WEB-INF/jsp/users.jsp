@@ -6,19 +6,16 @@
 Display user configuration page
 --%>
 
->
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib  uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
 <spring:message code="page.title.configureUsers" var="pageTitle" scope="page"/>
 
-<spring:message code="datatables.text.all" var="datatablesAllText" scope="page"/>
+<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText" scope="page"/>
 
-<t:configurationPage title="${pageTitle}" datatablesAllText="${datatablesAllText}">
+<t:configurationPage title="${pageTitle}" dataTablesAllRowsText="${dataTablesAllRowsText}">
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {

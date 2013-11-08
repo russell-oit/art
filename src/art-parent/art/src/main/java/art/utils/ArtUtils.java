@@ -18,8 +18,11 @@ package art.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,8 +43,8 @@ public class ArtUtils {
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
 	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user
-	public static final String ART_USER_INVALID ="user not created in ART"; //log message on login failure
-	public static final String ART_USER_DISABLED="user disabled in ART"; //log message on login failure
+	public static final String ART_USER_INVALID = "user not created in ART"; //log message on login failure
+	public static final String ART_USER_DISABLED = "user disabled in ART"; //log message on login failure
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<String>();
@@ -129,5 +132,34 @@ public class ArtUtils {
 			finalUrl = "java:comp/env/" + finalUrl;
 		}
 		return finalUrl;
+	}
+
+	/**
+	 * Get database types to be displayed when defining a database connection
+	 *
+	 * @return map with database types. key=database type identifier,
+	 * value=database name
+	 */
+	public static Map<String, String> getDatabaseTypes() {
+		//use linkedhashmap so that items are displayed in the order listed here
+		Map<String, String> databaseTypes = new LinkedHashMap<String, String>();
+
+		databaseTypes.put("--", "--");
+		databaseTypes.put("demo", "Demo");
+		databaseTypes.put("cubrid", "CUBRID");
+		databaseTypes.put("oracle", "Oracle");
+		databaseTypes.put("mysql", "MySQL");
+		databaseTypes.put("postgresql", "PostgreSQL");
+		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver)");
+		databaseTypes.put("sqlserver-jtds", "SQL Server (jTDS driver)");
+		databaseTypes.put("hsqldb-standalone", "HSQLDB (Standalone mode)");
+		databaseTypes.put("hsqldb-server", "HSQLDB (Server mode)");
+		databaseTypes.put("db2", "DB2");
+		databaseTypes.put("odbc", "Generic ODBC");
+		databaseTypes.put("jndi", "JNDI");
+		databaseTypes.put("log4jdbc", "SQL Logging");
+		databaseTypes.put("other", "Other");
+
+		return databaseTypes;
 	}
 }
