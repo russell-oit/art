@@ -6,12 +6,13 @@
 Footer that appears on all pages
 --%>
 
-<%@ taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
 <c:set var="administratorEmail" 
-	   value="<%= art.servlets.ArtConfig.getArtSetting("administrator_email")%>"/>
+value='<%= art.servlets.ArtConfig.getArtSetting("administrator_email")%>'/>
 
 <div id="footer">
 	<div class="container"> 
@@ -20,10 +21,12 @@ Footer that appears on all pages
 			&nbsp; A Reporting Tool 
 			&nbsp; version ${artVersion}
 		</span>
-		<span class="navbar-text pull-right">
-			<a href="mailto:${administratorEmail}">
-				<spring:message code="footer.link.contactSupport"/>
-			</a>
-		</span>
+		<c:if test="${not empty administratorEmail}">
+			<span class="navbar-text pull-right">
+				<a href="mailto:${administratorEmail}?subject=ART">
+					<spring:message code="footer.link.contactSupport"/>
+				</a>
+			</span>
+		</c:if>
 	</div>
 </div>

@@ -70,6 +70,8 @@ public class ArtConfig extends HttpServlet {
 	private static String timeFormat = DEFAULT_TIME_FORMAT; //for date fields, format of time portion
 	private static String jobsPath;
 	private static boolean customExportDirectory = false; //to enable custom export path
+	private static boolean artDatabaseConfigured = false;
+	private static String webinfPath;
 
 	/**
 	 * {@inheritDoc}
@@ -126,8 +128,12 @@ public class ArtConfig extends HttpServlet {
 		//set application path
 		appPath = ctx.getRealPath("");
 
-		//set templates path
 		String sep = java.io.File.separator;
+
+		//set web-inf path
+		webinfPath = appPath + sep + "WEB-INF" + sep;
+
+		//set templates path
 		templatesPath = appPath + sep + "WEB-INF" + sep + "templates" + sep;
 		relativeTemplatesPath = "/WEB-INF/templates/";
 
@@ -137,10 +143,10 @@ public class ArtConfig extends HttpServlet {
 		//set custom export directory
 		try {
 			Context ic = new InitialContext();
-			String ex = (String) ic.lookup("java:comp/env/REPORT_EXPORT_DIRECTORY");
-			if (ex != null) {
+			String customExportPath = (String) ic.lookup("java:comp/env/REPORT_EXPORT_DIRECTORY");
+			if (customExportPath != null) {
 				//custom export path defined
-				exportPath = ex + sep;
+				exportPath = customExportPath + sep;
 				customExportDirectory = true;
 
 				logger.info("Using custom export path: {}", exportPath);
@@ -489,6 +495,33 @@ public class ArtConfig extends HttpServlet {
 
 		return bottomLogoPath;
 	}
+	
+	/**
+	 * Determine if art database has been configured
+	 *
+	 * @return 
+	 */
+	public static boolean isArtDatabaseConfigured() {
+		return artDatabaseConfigured;
+	}
+	
+	/**
+	 * Set if art database has been configured
+	 *
+	 * @return 
+	 */
+	public static boolean setArtDatabaseConfigured(boolean configured) {
+		return artDatabaseConfigured=configured;
+	}
+	
+	/**
+	 * Get full path to the web-inf directory.
+	 *
+	 * @return full path to the web-inf directory
+	 */
+	public static String getWebinfPath() {
+		return webinfPath;
+	}
 
 	/**
 	 * Get full path to the export directory.
@@ -502,7 +535,7 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Get full path to the jobs directory.
 	 *
-	 * @return full path to the export directory
+	 * @return full path to the jobs directory
 	 */
 	public static String getJobsPath() {
 		return jobsPath;

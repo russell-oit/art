@@ -22,7 +22,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +44,7 @@ public class ArtUtils {
 	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user
 	public static final String ART_USER_INVALID = "user not created in ART"; //log message on login failure
 	public static final String ART_USER_DISABLED = "user disabled in ART"; //log message on login failure
+	public static final int DEFAULT_CONNECTION_POOL_TIMEOUT=20;
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<String>();
@@ -144,7 +144,6 @@ public class ArtUtils {
 		//use linkedhashmap so that items are displayed in the order listed here
 		Map<String, String> databaseTypes = new LinkedHashMap<String, String>();
 
-		databaseTypes.put("--", "--");
 		databaseTypes.put("demo", "Demo");
 		databaseTypes.put("cubrid", "CUBRID");
 		databaseTypes.put("oracle", "Oracle");
@@ -162,4 +161,5 @@ public class ArtUtils {
 
 		return databaseTypes;
 	}
+	
 }

@@ -1,5 +1,7 @@
 package art.artdatabase;
 
+import art.utils.ArtUtils;
+
 /**
  * Class to act as a form backing bean for art database configuration
  * 
@@ -11,25 +13,25 @@ public class ArtDatabaseForm {
 	private String url;
 	private String username;
 	private String password;
-	private int connectionPoolTimeout;
-	private String connectionPoolTestSql;
+	private int connectionPoolTimeout=ArtUtils.DEFAULT_CONNECTION_POOL_TIMEOUT;
+	private String connectionTestSql;
 
 	/**
-	 * Get the value of connectionPoolTestSql
+	 * Get the value of connectionTestSql
 	 *
-	 * @return the value of connectionPoolTestSql
+	 * @return the value of connectionTestSql
 	 */
-	public String getConnectionPoolTestSql() {
-		return connectionPoolTestSql;
+	public String getConnectionTestSql() {
+		return connectionTestSql;
 	}
 
 	/**
-	 * Set the value of connectionPoolTestSql
+	 * Set the value of connectionTestSql
 	 *
-	 * @param connectionPoolTestSql new value of connectionPoolTestSql
+	 * @param connectionTestSql new value of connectionTestSql
 	 */
-	public void setConnectionPoolTestSql(String connectionPoolTestSql) {
-		this.connectionPoolTestSql = connectionPoolTestSql;
+	public void setConnectionTestSql(String connectionTestSql) {
+		this.connectionTestSql = connectionTestSql;
 	}
 
 	/**

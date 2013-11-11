@@ -62,7 +62,7 @@ public class AuthorizationFilter implements Filter {
 			HttpServletResponse response = (HttpServletResponse) sresponse;
 
 			HttpSession session = request.getSession();
-			
+
 			if (!ArtConfig.isArtSettingsLoaded()) {
 				//go to login page which has the appropriate action to be taken
 				response.sendRedirect(request.getContextPath() + "/login.do");
@@ -84,7 +84,7 @@ public class AuthorizationFilter implements Filter {
 					//not using custom authentication. test public user session
 					if (request.getParameter("public_user") != null
 							|| request.getParameter("_public_user") != null) {
-						username = ArtUtils.PUBLIC_USER; 
+						username = ArtUtils.PUBLIC_USER;
 						loginMethod = AuthenticationMethod.Public;
 					}
 				} else {
@@ -184,8 +184,13 @@ public class AuthorizationFilter implements Filter {
 				authorized = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "users.do")) {
-			//standard admins and above
-			if (accessLevel >= 40) {
+			//standard admins and above, and repository user
+			if (accessLevel >= 40 || accessLevel == -2) {
+				authorized = true;
+			}
+		} else if (StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
+			//super admins only, and repository user
+			if (accessLevel >= 100 || accessLevel == -2) {
 				authorized = true;
 			}
 		}

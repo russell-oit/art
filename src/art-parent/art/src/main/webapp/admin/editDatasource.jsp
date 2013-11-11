@@ -127,11 +127,8 @@ String msg;
 		<tr><td class="data"> Status</td>
 			<td class="data">
 				<select name="STATUS">
-					<%
-					String status=ds.getActiveStatus();
-					%>
-					<option value="A" <%=("A".equals(status)?"selected":"")%>>Active</option>
-					<option value="D" <%=("D".equals(status)?"selected":"")%>>Disabled</option>
+					<option value="1" <%=(ds.isActive()?"selected":"")%>>Active</option>
+					<option value="0" <%=(!ds.isActive()?"selected":"")%>>Disabled</option>
 				</select>
 			</td>
 		</tr>

@@ -44,17 +44,22 @@ public class LoginController {
 		HttpSession session = request.getSession();
 
 		if (!ArtConfig.isArtSettingsLoaded()) {
-			//TODO change once refactoring is complete
+			User user = new User();
+			user.setAccessLevel(-2); //repository user 
+			session.setAttribute("sessionUser", user);
+			session.setAttribute("initialSetup", "true");
+			
+			//TODO remove once refactoring is complete
 			UserEntity ue = new UserEntity();
 			ue.setAccessLevel(100);
 			session.setAttribute("ue", ue);
 			return "redirect:/admin/editSettings.jsp";
 			//
 		}
-		
+
 		//ensure art database connection is available
-		Connection conn=ArtConfig.getConnection();
-		if(conn==null){
+		Connection conn = ArtConfig.getConnection();
+		if (conn == null) {
 			model.addAttribute("message", "page.message.artDatabaseConnectionNotAvailable");
 			return "headerlessError";
 		} else {
@@ -78,7 +83,7 @@ public class LoginController {
 
 			String ip = request.getRemoteAddr();
 			LoginHelper loginHelper = new LoginHelper();
-			
+
 			LoginResult result;
 
 			//check if user is authenticated
@@ -136,12 +141,12 @@ public class LoginController {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String processLogin(
 			HttpServletRequest request,
-			@RequestParam(value="windowsDomain",required = false) String windowsDomain,
+			@RequestParam(value = "windowsDomain", required = false) String windowsDomain,
 			@RequestParam("username") String username,
 			@RequestParam("password") String password,
 			Model model,
 			SessionStatus sessionStatus) {
-		
+
 		//explicitly name requestparams to avoid error if code compiled without debug option
 		//see http://www.java-allandsundry.com/2012/10/method-parameter-names-and-spring.html
 
@@ -219,7 +224,7 @@ public class LoginController {
 			if (isValidRepositoryUser(username, password)) {
 				loginMethod = AuthenticationMethod.Repository;
 				user = new User();
-				user.setAccessLevel(100); //repository user has super admin access
+				user.setAccessLevel(-2); //repository user 
 
 				result = new LoginResult();
 				result.setAuthenticated(true);
@@ -247,7 +252,7 @@ public class LoginController {
 	private String getLoginSuccessNextPage(HttpSession session, User user,
 			AuthenticationMethod loginMethod, SessionStatus sessionStatus) {
 		//prepare session
-		
+
 		//TODO remove once refactoring is complete
 		UserEntity ue = new UserEntity(user.getUsername());
 		ue.setAccessLevel(user.getAccessLevel());
