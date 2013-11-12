@@ -43,18 +43,13 @@ public class LoginController {
 
 		HttpSession session = request.getSession();
 
-		if (!ArtConfig.isArtSettingsLoaded()) {
+		if (!ArtConfig.isArtDatabaseConfigured()) {
 			User user = new User();
 			user.setAccessLevel(-2); //repository user 
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
 			
-			//TODO remove once refactoring is complete
-			UserEntity ue = new UserEntity();
-			ue.setAccessLevel(100);
-			session.setAttribute("ue", ue);
-			return "redirect:/admin/editSettings.jsp";
-			//
+			return "redirect:/app/artDatabase.do";
 		}
 
 		//ensure art database connection is available

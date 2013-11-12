@@ -1,7 +1,5 @@
 package art.artdatabase;
 
-import art.utils.ArtUtils;
-
 /**
  * Class to act as a form backing bean for art database configuration
  * 
@@ -13,7 +11,7 @@ public class ArtDatabaseForm {
 	private String url;
 	private String username;
 	private String password;
-	private int connectionPoolTimeout=ArtUtils.DEFAULT_CONNECTION_POOL_TIMEOUT;
+	private int connectionPoolTimeout=20;
 	private String connectionTestSql;
 
 	/**

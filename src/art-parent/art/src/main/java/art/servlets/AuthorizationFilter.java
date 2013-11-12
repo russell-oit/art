@@ -63,12 +63,6 @@ public class AuthorizationFilter implements Filter {
 
 			HttpSession session = request.getSession();
 
-			if (!ArtConfig.isArtSettingsLoaded()) {
-				//go to login page which has the appropriate action to be taken
-				response.sendRedirect(request.getContextPath() + "/login.do");
-				return;
-			}
-
 			String message = null;
 
 			User user = (User) session.getAttribute("sessionUser");
@@ -194,6 +188,8 @@ public class AuthorizationFilter implements Filter {
 				authorized = true;
 			}
 		}
+		
+		
 
 		return authorized;
 	}

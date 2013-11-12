@@ -34,21 +34,23 @@ Display art database configuration page
 
 		<div class="row">
 			<div class="col-lg-6 col-lg-offset-3">
-				<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabase">
+				<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabaseForm">
 					<fieldset>
 						<legend class="text-center">
 							<spring:message code="artDatabase.text.configureArtDatabase"/>
 						</legend>
 
-						<c:if test="${not empty successMessage}">
-							<div class="alert alert-success">
-								<spring:message code="${successMessage}"/>
+						<c:if test="${not empty success}">
+							<div class="alert alert-success alert-dismissable">
+								<a class="close" data-dismiss="alert" href="#">x</a>
+								<spring:message code="artDatabase.message.configurationSaved"/>
 							</div>
 						</c:if>
-						<c:if test="${not empty errorMessage}">
-							<div class="alert alert-danger">
+						<c:if test="${not empty error}">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 								<p><spring:message code="page.message.errorOccurred"/></p>
-								<p>${errorMessage}</p>
+								<p>${error}</p>
 							</div>
 						</c:if>
 
@@ -59,8 +61,8 @@ Display art database configuration page
 							<div class="col-lg-8">
 								<select name="databaseType" id="databaseType" class="form-control"
 										onchange="setDatasourceDriverAndUrl(this.value, document.getElementById('driver'), document.getElementById('url'));">
+									<option value=""><spring:message code="artDatabase.text.selectDatabaseType"/></option>
 									<c:forEach var="dbType" items="${databaseTypes}">
-										<option value=""><spring:message code="artDatabase.text.selectDatabaseType"/></option>
 										<option value="${dbType.key}">${dbType.value}</option>
 									</c:forEach>
 								</select>
