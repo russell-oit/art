@@ -510,7 +510,7 @@ function onChangeJobType(jobType,queryType) {
 		s.options[i++] = new Option("<%=messages.getString("xls")%>","xls");
 		<c:if test="${job.outputFormat == 'xls'}">s.selectedIndex = i-1;</c:if>
 	} else {
-		if (jobType.value == 5  ) { // only html is allowed inline emails
+		if (jobType.value == 5 || jobType.value == 7 ) { // only html is allowed for inline emails
 			s.options[i] = new Option("<%=messages.getString("htmlPlain")%>","htmlPlain");
 			<c:if test="${job.outputFormat == 'htmlPlain'}">s.selectedIndex = i;</c:if>
 		}

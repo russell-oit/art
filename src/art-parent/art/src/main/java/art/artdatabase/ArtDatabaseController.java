@@ -42,12 +42,15 @@ public class ArtDatabaseController {
 		ArtDatabaseForm artDatabaseForm = new ArtDatabaseForm();
 
 		Properties p = ArtConfig.loadArtDatabaseProperties();
-		if (p != null) {
+		if (p == null) {
+			artDatabaseForm.setUrl("demo");
+		} else {
 			artDatabaseForm.setDriver(p.getProperty("driver"));
 			artDatabaseForm.setUrl(p.getProperty("url"));
 			artDatabaseForm.setUsername(p.getProperty("username"));
 			artDatabaseForm.setConnectionPoolTimeout(NumberUtils.toInt(p.getProperty("connectionPoolTimeout")));
 			artDatabaseForm.setConnectionTestSql(p.getProperty("connectionTestSql"));
+			artDatabaseForm.setMaxPoolConnections(NumberUtils.toInt(p.getProperty("maxPoolConnections")));
 		}
 
 		model.addAttribute("artDatabaseForm", artDatabaseForm);
@@ -123,12 +126,9 @@ public class ArtDatabaseController {
 			artDbProperties.setProperty("url", url);
 			artDbProperties.setProperty("username", username);
 			artDbProperties.setProperty("password", Encrypter.encrypt(password));
-			int timeout = artDatabaseForm.getConnectionPoolTimeout();
-			if (timeout == 0) {
-				timeout = ArtUtils.DEFAULT_CONNECTION_POOL_TIMEOUT;
-			}
-			artDbProperties.setProperty("connectionPoolTimeout", String.valueOf(timeout));
+			artDbProperties.setProperty("connectionPoolTimeout", String.valueOf(artDatabaseForm.getConnectionPoolTimeout()));
 			artDbProperties.setProperty("connectionTestSql", artDatabaseForm.getConnectionTestSql());
+			artDbProperties.setProperty("maxPoolConnections", String.valueOf(artDatabaseForm.getMaxPoolConnections()));
 
 			FileOutputStream o = new FileOutputStream(ArtConfig.getArtDatabaseFilePath(), false);
 			try {

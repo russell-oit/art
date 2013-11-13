@@ -11,8 +11,27 @@ public class ArtDatabaseForm {
 	private String url;
 	private String username;
 	private String password;
-	private int connectionPoolTimeout=20;
+	private int connectionPoolTimeout;
 	private String connectionTestSql;
+	private int maxPoolConnections;
+
+	/**
+	 * Get the value of maxPoolConnections
+	 *
+	 * @return the value of maxPoolConnections
+	 */
+	public int getMaxPoolConnections() {
+		return maxPoolConnections;
+	}
+
+	/**
+	 * Set the value of maxPoolConnections
+	 *
+	 * @param maxPoolConnections new value of maxPoolConnections
+	 */
+	public void setMaxPoolConnections(int maxPoolConnections) {
+		this.maxPoolConnections = maxPoolConnections;
+	}
 
 	/**
 	 * Get the value of connectionTestSql

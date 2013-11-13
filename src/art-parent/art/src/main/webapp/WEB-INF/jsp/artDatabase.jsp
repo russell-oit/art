@@ -60,7 +60,11 @@ Display art database configuration page
 							</label>
 							<div class="col-lg-8">
 								<select name="databaseType" id="databaseType" class="form-control"
-										onchange="setDatasourceDriverAndUrl(this.value, document.getElementById('driver'), document.getElementById('url'));">
+										onchange="setDatasourceDriverAndUrl(this.value,
+						document.getElementById('driver'),
+						document.getElementById('url'),
+						document.getElementById('connectionTestSql'));">
+									
 									<option value=""><spring:message code="artDatabase.text.selectDatabaseType"/></option>
 									<c:forEach var="dbType" items="${databaseTypes}">
 										<option value="${dbType.key}">${dbType.value}</option>
@@ -102,6 +106,15 @@ Display art database configuration page
 							</div>
 						</div>
 						<div class="form-group">
+							<label class="control-label col-lg-4" for="connectionTestSql">
+								<spring:message code="artDatabase.label.connectionTestSql"/>
+							</label>
+							<div class="col-lg-8">
+								<form:input path="connectionTestSql" name="connectionTestSql"
+											id="connectionTestSql" class="form-control" />
+							</div>
+						</div>
+						<div class="form-group">
 							<label class="control-label col-lg-4" for="connectionPoolTimeout">
 								<spring:message code="artDatabase.label.connectionPoolTimeout"/>
 							</label>
@@ -110,13 +123,13 @@ Display art database configuration page
 											id="connectionPoolTimeout" class="form-control" />
 							</div>
 						</div>
-						<div class="form-group">
-							<label class="control-label col-lg-4" for="connectionTestSql">
-								<spring:message code="artDatabase.label.connectionTestSql"/>
+							<div class="form-group">
+							<label class="control-label col-lg-4" for="maxPoolConnections">
+								<spring:message code="artDatabase.label.maxPoolConnections"/>
 							</label>
 							<div class="col-lg-8">
-								<form:input path="connectionTestSql" name="connectionTestSql"
-											id="connectionTestSql" class="form-control" />
+								<form:input path="maxPoolConnections" name="maxPoolConnections"
+											id="maxPoolConnections" class="form-control" />
 							</div>
 						</div>
 						<div class="form-group">

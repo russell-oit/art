@@ -1,6 +1,7 @@
 ART 3.0
 * Fix for incorrect handling of " within lov parameter values
 * Fix for incorrect sorting of numeric values with grid view mode in italian locale
+* Fix for error when using Conditional Email Output (Inline) jobs
 * Reorganised the code for easier maintenance and enhanced user experience
  - now using maven, spring mvc, jquery ui, datatables,
  - twitter bootstrap, font awesome
@@ -11,7 +12,7 @@ ART 3.0
 * Renamed "Report on Column" query types to "Group"
 * Renamed "Graph" query types to "Chart"
 * Renamed "Query" concept to "Report"
-* Modified LDAP authentication configuration. Settings need to be re-entered.
+* Modified application settings configuration. Settings need to be manually re-entered.
 * Updated cewolf to 1.2.4
 
 ART 2.5.2
