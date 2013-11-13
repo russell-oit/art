@@ -29,18 +29,13 @@
  */
 package art.servlets;
 
-import art.utils.ArtJob;
-import art.utils.QuartzProperties;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Properties;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.quartz.SchedulerFactory;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +55,6 @@ public class Scheduler extends HttpServlet {
 	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
 	long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
 	final String MONDRIAN_CACHE_CLEARED_FILE_NAME = "mondrian-cache-cleared.txt"; //file to indicate when the mondrian cache was last cleared
-	String exportPath;
 	Timer t;
 
 	/**
@@ -76,38 +70,6 @@ public class Scheduler extends HttpServlet {
 			super.init(config);
 
 			logger.debug("ART Scheduler starting up");
-
-			exportPath = ArtConfig.getExportPath();
-
-			//start quartz scheduler
-			try {
-				//get quartz properties object to use to instantiate a scheduler
-				QuartzProperties qp = new QuartzProperties();
-				Properties props = qp.getProperties();
-
-				if (props == null) {
-					logger.warn("Quartz properties not set. Job scheduling will not be possible");
-				} else {
-					//start quartz scheduler
-					SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
-					org.quartz.Scheduler scheduler = schedulerFactory.getScheduler();
-
-					if (ArtConfig.isSchedulingEnabled()) {
-						scheduler.start();
-					} else {
-						scheduler.standby();
-					}
-
-					ArtConfig.setScheduler(scheduler);
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-
-			//migrate existing jobs to quartz, if any exist from previous art versions
-			//quartz scheduler needs to be available
-			ArtJob aj = new ArtJob();
-			aj.migrateJobsToQuartz();
 
 			//start clean thread timer
 			t = new Timer(this);
@@ -145,7 +107,7 @@ public class Scheduler extends HttpServlet {
 		if (ArtConfig.isArtSettingsLoaded()) {
 			try {
 				// Delete old files in the export directory
-				File exportFiles = new File(exportPath);
+				File exportFiles = new File(ArtConfig.getExportPath());
 				File[] fileNames = exportFiles.listFiles();
 				long lastModified;
 				long actualTime = new java.util.Date().getTime();
@@ -224,7 +186,7 @@ public class Scheduler extends HttpServlet {
 		if (mondrianCacheExpiry > 0) {
 			boolean clearCache = false;
 			long actualTime = new java.util.Date().getTime();
-			String cacheFilePath = exportPath + MONDRIAN_CACHE_CLEARED_FILE_NAME;
+			String cacheFilePath = ArtConfig.getExportPath() + MONDRIAN_CACHE_CLEARED_FILE_NAME;
 			File cacheFile = new File(cacheFilePath);
 			if (cacheFile.exists()) {
 				//check last modified date

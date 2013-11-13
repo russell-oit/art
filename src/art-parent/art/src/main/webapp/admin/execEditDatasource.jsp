@@ -1,5 +1,6 @@
 <%@ page import="art.utils.*,java.sql.*,art.servlets.ArtConfig" %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.BooleanUtils" %>
 <%@ include file ="headerAdmin.jsp" %>
 
 
@@ -9,9 +10,9 @@ String password = request.getParameter("PASSWORD");
 String driver=request.getParameter("DRIVER").trim();
 String url=request.getParameter("URL").trim();
 String username=request.getParameter("USERNAME").trim();
-String status=request.getParameter("STATUS");
+boolean active=BooleanUtils.toBoolean(request.getParameter("STATUS"));
 
-if(StringUtils.equalsIgnoreCase(status, "A")){
+if(active){
 //test database connection
 try{
 	out.println("<p><table align=\"center\"><tr><td class=\"data\"><b>Testing Datasource</b><br>");
@@ -78,7 +79,7 @@ ds.setUsername(username);
 ds.setPassword(password);
 ds.setPoolTimeout(Integer.parseInt(request.getParameter("POOL_TIMEOUT")));
 ds.setTestSql(request.getParameter("TEST_SQL"));
-ds.setActiveStatus(status);
+ds.setActive(active);
 
 if (action.equals("ADD")){
 	ds.insert();

@@ -60,11 +60,11 @@ Display art database configuration page
 							</label>
 							<div class="col-lg-8">
 								<select name="databaseType" id="databaseType" class="form-control"
-										onchange="setDatasourceDriverAndUrl(this.value,
+										onchange="setDatasourceFields(this.value,
 						document.getElementById('driver'),
 						document.getElementById('url'),
 						document.getElementById('connectionTestSql'));">
-									
+
 									<option value=""><spring:message code="artDatabase.text.selectDatabaseType"/></option>
 									<c:forEach var="dbType" items="${databaseTypes}">
 										<option value="${dbType.key}">${dbType.value}</option>
@@ -119,11 +119,13 @@ Display art database configuration page
 								<spring:message code="artDatabase.label.connectionPoolTimeout"/>
 							</label>
 							<div class="col-lg-8">
-								<form:input path="connectionPoolTimeout" name="connectionPoolTimeout"
-											id="connectionPoolTimeout" class="form-control" />
+								<div class="form-group">
+									<form:input path="connectionPoolTimeout" name="connectionPoolTimeout"
+												id="connectionPoolTimeout" class="form-control" />
+								</div>
 							</div>
 						</div>
-							<div class="form-group">
+						<div class="form-group">
 							<label class="control-label col-lg-4" for="maxPoolConnections">
 								<spring:message code="artDatabase.label.maxPoolConnections"/>
 							</label>

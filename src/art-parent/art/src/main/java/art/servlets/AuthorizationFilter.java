@@ -152,12 +152,11 @@ public class AuthorizationFilter implements Filter {
 	}
 
 	private boolean canAccessPage(HttpServletRequest request, User user) {
-		boolean authorized = false;
+		boolean authorised = false;
 
 		int accessLevel = user.getAccessLevel();
-		String contextPath = request.getContextPath();
 		String requestUri = request.getRequestURI();
-		String path = contextPath + "/app/";
+		String path = request.getContextPath() + "/app/";
 
 		//TODO use permissions instead of access level
 		if (StringUtils.startsWith(requestUri, path + "reports.do")) {
@@ -165,32 +164,38 @@ public class AuthorizationFilter implements Filter {
 			//NOTE: "everyone" excludes the special codes when accessing as
 			//the initial setup user (-1) and the art repository user (-2)
 			if (accessLevel >= 0) {
-				authorized = true;
+				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "jobs.do")) {
 			//everyone
 			if (accessLevel >= 0) {
-				authorized = true;
+				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "logs")) {
 			//standard admins and above
 			if (accessLevel >= 40) {
-				authorized = true;
+				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "users.do")) {
 			//standard admins and above, and repository user
 			if (accessLevel >= 40 || accessLevel == -2) {
-				authorized = true;
+				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
 			//super admins only, and repository user
 			if (accessLevel >= 100 || accessLevel == -2) {
-				authorized = true;
+				authorised = true;
 			}
 		}
 		
 		
+		if(!ArtConfig.isArtDatabaseConfigured()){
+			//if art database not configured, only allow access to artDatabase.do
+			if (!StringUtils.startsWith(requestUri, path + "artDatabase.do")){
+				authorised=false;
+			}
+		}
 
-		return authorized;
+		return authorised;
 	}
 }

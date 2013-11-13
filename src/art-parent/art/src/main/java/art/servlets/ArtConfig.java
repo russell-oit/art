@@ -18,10 +18,13 @@ package art.servlets;
 
 import art.dbcp.DataSource;
 import art.login.AuthenticationMethod;
+import static art.servlets.Scheduler.logger;
+import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.utils.DbUtils;
 import art.utils.Encrypter;
+import art.utils.QuartzProperties;
 import com.lowagie.text.FontFactory;
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,6 +41,8 @@ import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.quartz.SchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -484,6 +489,9 @@ public class ArtConfig extends HttpServlet {
 					}
 				}
 			}
+			
+			//create quartz scheduler
+			createQuartzScheduler();
 		}
 	}
 
@@ -1069,5 +1077,40 @@ public class ArtConfig extends HttpServlet {
 		}
 
 		return p;
+	}
+
+	private static void createQuartzScheduler() {
+		try {
+			//shutdown existing scheduler instance
+			if (scheduler != null) {
+				scheduler.shutdown();
+				scheduler = null;
+			}
+
+			//create new scheduler instance
+			QuartzProperties qp = new QuartzProperties();
+			Properties props = qp.getProperties();
+
+			if (props == null) {
+				logger.warn("Quartz properties not set. Job scheduling will not be possible");
+			} else {
+				//start quartz scheduler
+				SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
+				scheduler = schedulerFactory.getScheduler();
+
+				if (ArtConfig.isSchedulingEnabled()) {
+					scheduler.start();
+				} else {
+					scheduler.standby();
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
+
+		//migrate existing jobs to quartz, if any exist from previous art versions
+		//quartz scheduler needs to be available
+		ArtJob aj = new ArtJob();
+		aj.migrateJobsToQuartz();
 	}
 }
