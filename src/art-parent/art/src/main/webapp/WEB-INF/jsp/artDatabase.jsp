@@ -23,6 +23,10 @@ Display art database configuration page
 				$(function() {
 					$('a[href*="artDatabase.do"]').parent().addClass('active');
 				});
+
+				$(function() {
+					$("[data-toggle='tooltip']").tooltip({container: 'body'});
+				});
 			});
 		</script>
 	</jsp:attribute>
@@ -59,17 +63,22 @@ Display art database configuration page
 								<spring:message code="artDatabase.label.databaseType"/>
 							</label>
 							<div class="col-lg-8">
-								<select name="databaseType" id="databaseType" class="form-control"
-										onchange="setDatasourceFields(this.value,
+								<div class='input-group'>
+									<select name="databaseType" id="databaseType" class="form-control"
+											onchange="setDatasourceFields(this.value,
 						document.getElementById('driver'),
 						document.getElementById('url'),
 						document.getElementById('connectionTestSql'));">
 
-									<option value=""><spring:message code="artDatabase.text.selectDatabaseType"/></option>
-									<c:forEach var="dbType" items="${databaseTypes}">
-										<option value="${dbType.key}">${dbType.value}</option>
-									</c:forEach>
-								</select>
+										<option value=""><spring:message code="artDatabase.text.selectDatabaseType"/></option>
+										<c:forEach var="dbType" items="${databaseTypes}">
+											<option value="${dbType.key}">${dbType.value}</option>
+										</c:forEach>
+									</select>
+									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
+										<button class="btn btn-default" type="button"><i class="fa fa-info"></i></button>
+									</span>
+								</div>
 							</div>
 						</div>
 						<div class="form-group">
@@ -110,8 +119,13 @@ Display art database configuration page
 								<spring:message code="artDatabase.label.connectionTestSql"/>
 							</label>
 							<div class="col-lg-8">
-								<form:input path="connectionTestSql" name="connectionTestSql"
-											id="connectionTestSql" class="form-control" />
+								<div class="input-group">
+									<form:input path="connectionTestSql" name="connectionTestSql"
+												id="connectionTestSql" class="form-control" />
+									<span class="input-group-btn">
+										<button class="btn btn-default" type="button"><i class="fa fa-info"></i></button>
+									</span>
+								</div>
 							</div>
 						</div>
 						<div class="form-group">
@@ -119,9 +133,13 @@ Display art database configuration page
 								<spring:message code="artDatabase.label.connectionPoolTimeout"/>
 							</label>
 							<div class="col-lg-8">
-								<div class="form-group">
+								<div class="input-group">
 									<form:input path="connectionPoolTimeout" name="connectionPoolTimeout"
 												id="connectionPoolTimeout" class="form-control" />
+									<spring:message code="artDatabase.help.connectionPoolTimeout" var="help" />
+									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
+										<button class="btn btn-default" type="button"><i class="fa fa-info"></i></button>
+									</span>
 								</div>
 							</div>
 						</div>
@@ -130,8 +148,13 @@ Display art database configuration page
 								<spring:message code="artDatabase.label.maxPoolConnections"/>
 							</label>
 							<div class="col-lg-8">
-								<form:input path="maxPoolConnections" name="maxPoolConnections"
-											id="maxPoolConnections" class="form-control" />
+								<div class="input-group">
+									<form:input path="maxPoolConnections" name="maxPoolConnections"
+												id="maxPoolConnections" class="form-control" />
+									<span class="input-group-addon" data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</span>
+								</div>
 							</div>
 						</div>
 						<div class="form-group">

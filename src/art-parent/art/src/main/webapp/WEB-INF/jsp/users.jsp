@@ -9,8 +9,6 @@ Display user configuration page
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<spring:htmlEscape defaultHtmlEscape="true"/>
-
 <spring:message code="page.title.configureUsers" var="pageTitle" scope="page"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText" scope="page"/>
@@ -38,21 +36,25 @@ Display user configuration page
 					</tr>
 				</thead>
 				<tbody>
-					<c:forEach var="user" items="${users}">
-						<tr>
-							<td>${user.username}</td>
-							<td>${user.fullName}</td>
-							<td>${user.active}</td>
-							<td>
-								<a href="#" data-toggle="tooltip" title="<spring:message code="users.action.edit"/>">
+				<c:forEach var="user" items="${users}">
+					<tr>
+						<td>${user.username}</td>
+						<td>${user.fullName}</td>
+						<td>${user.active}</td>
+						<td>
+							<div class="btn-group">
+								<a class="btn btn-default" href="#">
 									<i class="fa fa-pencil-square-o"></i>
+									<spring:message code="users.action.edit"/>
 								</a>
-								<a href="#" data-toggle="tooltip" title="<spring:message code="users.action.delete"/>">
+								<a class="btn btn-default" href="#">
 									<i class="fa fa-trash-o"></i>
+									<spring:message code="users.action.delete"/>
 								</a>
-							</td>
-						</tr>
-					</c:forEach>
+							</div>
+						</td>
+					</tr>
+				</c:forEach>
 				</tbody>
 			</table>
 		</div>
