@@ -11,8 +11,6 @@ Display art database configuration page
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<spring:htmlEscape defaultHtmlEscape="true"/>
-
 <spring:message code="page.title.configureArtDatabase" var="pageTitle" scope="page"/>
 
 <t:mainPage title="${pageTitle}">
@@ -75,8 +73,13 @@ Display art database configuration page
 											<option value="${dbType.key}">${dbType.value}</option>
 										</c:forEach>
 									</select>
+									<spring:message code="artDatabase.help.databaseType"
+													var="help" javaScriptEscape="true" />
 									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
-										<button class="btn btn-default" type="button"><i class="fa fa-info"></i></button>
+										<button class="btn btn-default" type="button"
+												onclick="alert('${help}');">
+											<i class="fa fa-info"></i>
+										</button>
 									</span>
 								</div>
 							</div>
@@ -122,8 +125,16 @@ Display art database configuration page
 								<div class="input-group">
 									<form:input path="connectionTestSql" name="connectionTestSql"
 												id="connectionTestSql" class="form-control" />
-									<span class="input-group-btn">
-										<button class="btn btn-default" type="button"><i class="fa fa-info"></i></button>
+									<spring:message code="artDatabase.help.connectionTestSql"
+													var="help" javaScriptEscape="true" />
+									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
+										<c:set var="helpDetails"
+											   value="\n\nExamples:\n Select 1 from dual - Oracle\n Select 1 - MySQL, SQL Server, PostgreSQL, CUBRID\n Select 1 from information_schema.system_users - HSQLDB"
+											   />
+										<button class="btn btn-default" type="button"
+												onclick="alert('${help}${helpDetails}');">
+											<i class="fa fa-info"></i>
+										</button>
 									</span>
 								</div>
 							</div>
@@ -136,9 +147,13 @@ Display art database configuration page
 								<div class="input-group">
 									<form:input path="connectionPoolTimeout" name="connectionPoolTimeout"
 												id="connectionPoolTimeout" class="form-control" />
-									<spring:message code="artDatabase.help.connectionPoolTimeout" var="help" />
+									<spring:message code="artDatabase.help.connectionPoolTimeout"
+													var="help" javaScriptEscape="true" />
 									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
-										<button class="btn btn-default" type="button"><i class="fa fa-info"></i></button>
+										<button class="btn btn-default" type="button"
+												onclick="alert('${help}');">
+											<i class="fa fa-info"></i>
+										</button>
 									</span>
 								</div>
 							</div>
@@ -151,10 +166,16 @@ Display art database configuration page
 								<div class="input-group">
 									<form:input path="maxPoolConnections" name="maxPoolConnections"
 												id="maxPoolConnections" class="form-control" />
-									<span class="input-group-addon" data-toggle="tooltip" title="${help}">
-										<i class="fa fa-info"></i>
+									<spring:message code="artDatabase.help.maxPoolConnections"
+													var="help" javaScriptEscape="true" />
+									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
+										<button class="btn btn-default" type="button"
+												onclick="alert('${help}');">
+											<i class="fa fa-info"></i>
+										</button>
 									</span>
 								</div>
+								<font color="red"><form:errors path="maxPoolConnections" /></font>
 							</div>
 						</div>
 						<div class="form-group">

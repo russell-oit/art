@@ -141,7 +141,19 @@ public class AuthorizationFilter implements Filter {
 
 			//if we are here, user is authenticated
 			//ensure they have access to the specific page. if not show access denied page
-			if (canAccessPage(request, user)) {
+			int accessLevel = user.getAccessLevel();
+			String requestUri = request.getRequestURI();
+			String path = request.getContextPath() + "/app/";
+
+			if (canAccessPage(requestUri, path, accessLevel)) {
+				if (!ArtConfig.isArtDatabaseConfigured()) {
+					//if art database not configured, only allow access to artDatabase.do
+					if (!StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
+						request.setAttribute("message", "page.message.artDatabaseNotConfigured");
+						request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
+						return;
+					}
+				}
 				chain.doFilter(srequest, sresponse);
 			} else {
 				//show access denied page. 
@@ -151,12 +163,8 @@ public class AuthorizationFilter implements Filter {
 		}
 	}
 
-	private boolean canAccessPage(HttpServletRequest request, User user) {
+	private boolean canAccessPage(String requestUri, String path, int accessLevel) {
 		boolean authorised = false;
-
-		int accessLevel = user.getAccessLevel();
-		String requestUri = request.getRequestURI();
-		String path = request.getContextPath() + "/app/";
 
 		//TODO use permissions instead of access level
 		if (StringUtils.startsWith(requestUri, path + "reports.do")) {
@@ -185,14 +193,6 @@ public class AuthorizationFilter implements Filter {
 			//super admins only, and repository user
 			if (accessLevel >= 100 || accessLevel == -2) {
 				authorised = true;
-			}
-		}
-		
-		
-		if(!ArtConfig.isArtDatabaseConfigured()){
-			//if art database not configured, only allow access to artDatabase.do
-			if (!StringUtils.startsWith(requestUri, path + "artDatabase.do")){
-				authorised=false;
 			}
 		}
 

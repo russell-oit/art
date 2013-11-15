@@ -11,15 +11,18 @@ import java.sql.PreparedStatement;
 import java.util.Map;
 import java.util.Properties;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Spring controller for the art database configuration process
@@ -32,7 +35,7 @@ public class ArtDatabaseController {
 	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
 
 	@ModelAttribute("databaseTypes")
-	public Map<String, String> databaseTypes() {
+	public Map<String, String> getDatabaseTypes() {
 		return ArtUtils.getDatabaseTypes();
 	}
 
@@ -60,8 +63,13 @@ public class ArtDatabaseController {
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.POST)
 	public String processArtDatabaseConfiguration(
-			@ModelAttribute("artDatabaseForm") ArtDatabaseForm artDatabaseForm,
-			Model model) {
+			@ModelAttribute("artDatabaseForm") @Valid ArtDatabaseForm artDatabaseForm,
+			BindingResult result,
+			Model model, RedirectAttributes redirectAttributes) {
+		
+		if(result.hasErrors()){
+			return "artDatabase";
+		}
 
 		//verify database settings
 		Connection conn = null;
@@ -136,10 +144,13 @@ public class ArtDatabaseController {
 			} finally {
 				o.close();
 			}
-			
+
 			ArtConfig.refreshConnections();
-			
-			model.addAttribute("success", "true");
+
+			//use redirect after successful submission so that a browser page refresh e.g. F5
+			//doesn't resubmit the page (PRG pattern)
+			redirectAttributes.addFlashAttribute("success", "true");
+			return "redirect:/app/artDatabase.do";
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

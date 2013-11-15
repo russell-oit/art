@@ -1,5 +1,8 @@
 package art.artdatabase;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 /**
  * Class to act as a form backing bean for art database configuration
  * 
