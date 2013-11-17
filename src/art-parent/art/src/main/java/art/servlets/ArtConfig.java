@@ -174,8 +174,8 @@ public class ArtConfig extends HttpServlet {
 		//set art.properties file path
 		artPropertiesFilePath = webinfPath + "art.properties";
 
-		//set art-database.properties file path
-		artDatabaseFilePath = webinfPath + "art-database.properties";
+		//set art-database file path
+		artDatabaseFilePath = webinfPath + "art-database.json";
 
 		//construct all view modes list
 		allViewModes = new ArrayList<String>();
@@ -531,9 +531,9 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the art-database.properties file
+	 * Get full path to the art-database file
 	 *
-	 * @return full path to the art-database.properties file
+	 * @return full path to the art-database file
 	 */
 	public static String getArtDatabaseFilePath() {
 		return artDatabaseFilePath;

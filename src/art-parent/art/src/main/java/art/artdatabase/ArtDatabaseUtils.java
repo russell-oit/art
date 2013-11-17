@@ -1,14 +1,10 @@
 package art.artdatabase;
 
-import art.servlets.ArtConfig;
 import art.utils.Encrypter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Properties;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,17 +16,10 @@ import org.slf4j.LoggerFactory;
 public class ArtDatabaseUtils {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseUtils.class);
-	final static String DRIVER_PROPERTY = "driver";
-	final static String URL_PROPERTY = "url";
-	final static String USERNAME_PROPERTY = "username";
-	final static String PASSWORD_PROPERTY = "password";
-	final static String CONNECTION_TEST_SQL_PROPERTY = "connectionTestSql";
-	final static String CONNECTION_POOL_TIMEOUT_PROPERTY = "connectionPoolTimeout";
-	final static String MAX_POOL_CONNECTIONS_PROPERTY = "maxPoolConnections";
 	public final static int DEFAULT_CONNECTION_POOL_TIMEOUT = 20; //used also in ArtConfig
 
 	/**
-	 * Load art database configuration from properties file
+	 * Load art database configuration from file
 	 *
 	 * @return object with art database properties or null if file not found or
 	 * error occurred
@@ -39,41 +28,25 @@ public class ArtDatabaseUtils {
 		ArtDatabaseForm artDatabaseForm = null;
 
 		try {
-			File settingsFile = new File(artDatabaseFilePath);
-			if (settingsFile.exists()) {
-				FileInputStream o = new FileInputStream(artDatabaseFilePath);
-				Properties p = new Properties();
-				try {
-					p.load(o);
+			File artDatabaseFile = new File(artDatabaseFilePath);
+			if (artDatabaseFile.exists()) {
+				ObjectMapper mapper = new ObjectMapper();
+				artDatabaseForm = mapper.readValue(artDatabaseFile, ArtDatabaseForm.class);
 
-					artDatabaseForm = new ArtDatabaseForm();
+				artDatabaseForm.setPassword(Encrypter.decrypt(artDatabaseForm.getPassword()));
 
-					artDatabaseForm.setDriver(p.getProperty(DRIVER_PROPERTY));
-					artDatabaseForm.setUrl(p.getProperty(URL_PROPERTY));
-					artDatabaseForm.setUsername(p.getProperty(USERNAME_PROPERTY));
-
-					String artDbPassword = p.getProperty(PASSWORD_PROPERTY);
-					artDbPassword = Encrypter.decrypt(artDbPassword);
-					artDatabaseForm.setPassword(artDbPassword);
-
-					artDatabaseForm.setConnectionTestSql(p.getProperty(CONNECTION_TEST_SQL_PROPERTY));
-
-					int artDbPoolTimeout = NumberUtils.toInt(p.getProperty(CONNECTION_POOL_TIMEOUT_PROPERTY));
-					if (artDbPoolTimeout <= 0) {
-						artDbPoolTimeout = DEFAULT_CONNECTION_POOL_TIMEOUT;
-					}
-					artDatabaseForm.setConnectionPoolTimeout(artDbPoolTimeout);
-
-					final int MAX_POOL_CONNECTIONS = 20;
-					int maxPoolConnections = NumberUtils.toInt(p.getProperty(MAX_POOL_CONNECTIONS_PROPERTY));
-					if (maxPoolConnections <= 0) {
-						maxPoolConnections = MAX_POOL_CONNECTIONS;
-					}
-					artDatabaseForm.setMaxPoolConnections(maxPoolConnections);
-				} finally {
-					o.close();
+				if (artDatabaseForm.getConnectionPoolTimeout() <= 0) {
+					artDatabaseForm.setConnectionPoolTimeout(DEFAULT_CONNECTION_POOL_TIMEOUT);
 				}
+
+				final int DEFAULT_MAX_POOL_CONNECTIONS = 20;
+				if (artDatabaseForm.getMaxPoolConnections() <= 0) {
+					artDatabaseForm.setMaxPoolConnections(DEFAULT_MAX_POOL_CONNECTIONS);
+				}
+			} else {
+				logger.info("ART Database configuration file not found");
 			}
+
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
@@ -82,7 +55,7 @@ public class ArtDatabaseUtils {
 	}
 
 	/**
-	 * Save art database configuration to properties file
+	 * Save art database configuration to file
 	 *
 	 * @param artDatabaseForm
 	 * @param artDatabaseFilePath
@@ -90,20 +63,11 @@ public class ArtDatabaseUtils {
 	public static void SaveConfiguration(ArtDatabaseForm artDatabaseForm, String artDatabaseFilePath)
 			throws FileNotFoundException, IOException {
 
-		Properties p = new Properties();
-		p.setProperty(DRIVER_PROPERTY, artDatabaseForm.getDriver());
-		p.setProperty(URL_PROPERTY, artDatabaseForm.getUrl());
-		p.setProperty(USERNAME_PROPERTY, artDatabaseForm.getUsername());
-		p.setProperty(PASSWORD_PROPERTY, Encrypter.encrypt(artDatabaseForm.getPassword()));
-		p.setProperty(CONNECTION_TEST_SQL_PROPERTY, artDatabaseForm.getConnectionTestSql());
-		p.setProperty(CONNECTION_POOL_TIMEOUT_PROPERTY, String.valueOf(artDatabaseForm.getConnectionPoolTimeout()));
-		p.setProperty(MAX_POOL_CONNECTIONS_PROPERTY, String.valueOf(artDatabaseForm.getMaxPoolConnections()));
+		//obfuscate password field
+		artDatabaseForm.setPassword(Encrypter.encrypt(artDatabaseForm.getPassword()));
 
-		FileOutputStream o = new FileOutputStream(artDatabaseFilePath, false);
-		try {
-			p.store(o, "ART Database Properties");
-		} finally {
-			o.close();
-		}
+		File artDatabaseFile = new File(artDatabaseFilePath);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabaseForm);
 	}
 }

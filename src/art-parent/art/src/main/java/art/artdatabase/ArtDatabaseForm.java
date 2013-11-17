@@ -1,18 +1,21 @@
 package art.artdatabase;
 
+import java.io.Serializable;
+
 /**
  * Class to act as a form backing bean for art database configuration
- * 
+ *
  * @author Timothy Anyona
  */
-public class ArtDatabaseForm {
-	
+public class ArtDatabaseForm implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private String driver;
 	private String url;
 	private String username;
 	private String password;
-	private int connectionPoolTimeout;
 	private String connectionTestSql;
+	private int connectionPoolTimeout;
 	private int maxPoolConnections; //setting used by art database and all datasources
 
 	/**
@@ -140,6 +143,4 @@ public class ArtDatabaseForm {
 	public void setDriver(String driver) {
 		this.driver = driver;
 	}
-
-	
 }
