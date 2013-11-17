@@ -1,8 +1,5 @@
 package art.artdatabase;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-
 /**
  * Class to act as a form backing bean for art database configuration
  * 
@@ -16,7 +13,7 @@ public class ArtDatabaseForm {
 	private String password;
 	private int connectionPoolTimeout;
 	private String connectionTestSql;
-	private int maxPoolConnections;
+	private int maxPoolConnections; //setting used by art database and all datasources
 
 	/**
 	 * Get the value of maxPoolConnections

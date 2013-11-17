@@ -27,6 +27,7 @@ Display user configuration page
 	<jsp:body>
 		<div>
 			<table class="datatable table table-bordered table-striped table-condensed">
+				<caption>test caption</caption>
 				<thead>
 					<tr>
 						<th><spring:message code="users.text.username"/></th>

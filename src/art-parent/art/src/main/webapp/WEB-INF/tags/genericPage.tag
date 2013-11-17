@@ -4,7 +4,7 @@
     Author     : Timothy Anyona
 
 Template for a basic page
-Includes bootstrap css
+Includes bootstrap css, font awesome css, art css
 --%>
 
 <%@tag description="Generic Page Template" pageEncoding="UTF-8"%>

@@ -45,7 +45,7 @@ public class LoginController {
 
 		if (!ArtConfig.isArtDatabaseConfigured()) {
 			User user = new User();
-			user.setAccessLevel(-2); //repository user 
+			user.setAccessLevel(-1); //repository user 
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
 			
@@ -219,7 +219,7 @@ public class LoginController {
 			if (isValidRepositoryUser(username, password)) {
 				loginMethod = AuthenticationMethod.Repository;
 				user = new User();
-				user.setAccessLevel(-2); //repository user 
+				user.setAccessLevel(-1); //repository user 
 
 				result = new LoginResult();
 				result.setAuthenticated(true);

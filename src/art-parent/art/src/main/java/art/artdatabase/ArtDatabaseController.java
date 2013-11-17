@@ -42,19 +42,13 @@ public class ArtDatabaseController {
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
 	public String showArtDatabaseConfiguration(HttpSession session, Model model) {
 
-		ArtDatabaseForm artDatabaseForm = new ArtDatabaseForm();
+		ArtDatabaseForm artDatabaseForm = ArtDatabaseUtils.loadConfiguration(ArtConfig.getArtDatabaseFilePath());
 
-		Properties p = ArtConfig.loadArtDatabaseProperties();
-		if (p == null) {
+		if (artDatabaseForm == null) {
+			//art database not configured
+			artDatabaseForm=new ArtDatabaseForm();
 			artDatabaseForm.setUrl("demo");
-		} else {
-			artDatabaseForm.setDriver(p.getProperty("driver"));
-			artDatabaseForm.setUrl(p.getProperty("url"));
-			artDatabaseForm.setUsername(p.getProperty("username"));
-			artDatabaseForm.setConnectionPoolTimeout(NumberUtils.toInt(p.getProperty("connectionPoolTimeout")));
-			artDatabaseForm.setConnectionTestSql(p.getProperty("connectionTestSql"));
-			artDatabaseForm.setMaxPoolConnections(NumberUtils.toInt(p.getProperty("maxPoolConnections")));
-		}
+		} 
 
 		model.addAttribute("artDatabaseForm", artDatabaseForm);
 
@@ -129,21 +123,7 @@ public class ArtDatabaseController {
 			}
 
 			//save settings
-			Properties artDbProperties = new Properties();
-			artDbProperties.setProperty("driver", driver);
-			artDbProperties.setProperty("url", url);
-			artDbProperties.setProperty("username", username);
-			artDbProperties.setProperty("password", Encrypter.encrypt(password));
-			artDbProperties.setProperty("connectionPoolTimeout", String.valueOf(artDatabaseForm.getConnectionPoolTimeout()));
-			artDbProperties.setProperty("connectionTestSql", artDatabaseForm.getConnectionTestSql());
-			artDbProperties.setProperty("maxPoolConnections", String.valueOf(artDatabaseForm.getMaxPoolConnections()));
-
-			FileOutputStream o = new FileOutputStream(ArtConfig.getArtDatabaseFilePath(), false);
-			try {
-				artDbProperties.store(o, "ART Database Properties");
-			} finally {
-				o.close();
-			}
+			ArtDatabaseUtils.SaveConfiguration(artDatabaseForm, ArtConfig.getArtDatabaseFilePath());
 
 			ArtConfig.refreshConnections();
 

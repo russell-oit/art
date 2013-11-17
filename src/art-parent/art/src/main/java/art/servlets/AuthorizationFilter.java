@@ -170,7 +170,7 @@ public class AuthorizationFilter implements Filter {
 		if (StringUtils.startsWith(requestUri, path + "reports.do")) {
 			//everyone can access
 			//NOTE: "everyone" excludes the special codes when accessing as
-			//the initial setup user (-1) and the art repository user (-2)
+			//the art repository user (-1)
 			if (accessLevel >= 0) {
 				authorised = true;
 			}
@@ -186,12 +186,12 @@ public class AuthorizationFilter implements Filter {
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "users.do")) {
 			//standard admins and above, and repository user
-			if (accessLevel >= 40 || accessLevel == -2) {
+			if (accessLevel >= 40 || accessLevel == -1) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
 			//super admins only, and repository user
-			if (accessLevel >= 100 || accessLevel == -2) {
+			if (accessLevel >= 100 || accessLevel == -1) {
 				authorised = true;
 			}
 		}

@@ -16,6 +16,8 @@
  */
 package art.servlets;
 
+import art.artdatabase.ArtDatabaseForm;
+import art.artdatabase.ArtDatabaseUtils;
 import art.dbcp.DataSource;
 import art.login.AuthenticationMethod;
 import static art.servlets.Scheduler.logger;
@@ -79,6 +81,7 @@ public class ArtConfig extends HttpServlet {
 	private static String webinfPath;
 	private static String artDatabaseFilePath; //full path to art-database.properties file
 	private static String hsqldbPath;
+	private static boolean artDatabaseConfigured;
 
 	/**
 	 * {@inheritDoc}
@@ -194,11 +197,11 @@ public class ArtConfig extends HttpServlet {
 		allViewModes.add("tsvZip");
 		allViewModes.add("htmlDataTable");
 
+		//initialize datasources
+		initializeDatasources();
+
 		//load settings from art.properties file
 		if (loadArtSettings()) {
-			//initialize datasources
-			initializeDatasources();
-
 			//register pdf fonts
 			registerPdfFonts();
 		} else {
@@ -360,26 +363,20 @@ public class ArtConfig extends HttpServlet {
 	private static void initializeDatasources() {
 
 		//load art database settings
-		Properties p = loadArtDatabaseProperties();
-		if (p != null) {
-			//initialize art repository datasource
-			final int DEFAULT_CONNECTION_POOL_TIMEOUT = 20;
-			final int MAX_POOL_CONNECTIONS = 20;
+		ArtDatabaseForm artDatabaseForm = ArtDatabaseUtils.loadConfiguration(artDatabaseFilePath);
+		if (artDatabaseForm == null) {
+			artDatabaseConfigured = false;
+		} else {
+			artDatabaseConfigured = true;
 
-			artDbDriver = p.getProperty("driver");
-			artDbUrl = p.getProperty("url");
-			String username = p.getProperty("username");
-			artDbPassword = p.getProperty("password");
-			artDbPassword = Encrypter.decrypt(artDbPassword);
-			int artDbPoolTimeout = NumberUtils.toInt(p.getProperty("connectionPoolTimeout"));
-			if (artDbPoolTimeout <= 0) {
-				artDbPoolTimeout = DEFAULT_CONNECTION_POOL_TIMEOUT;
-			}
-			String artDbTestSql = p.getProperty("connectionTestSql");
-			int maxPoolConnections = NumberUtils.toInt(p.getProperty("maxPoolConnections"));
-			if (maxPoolConnections <= 0) {
-				maxPoolConnections = MAX_POOL_CONNECTIONS;
-			}
+			//initialize art repository datasource
+			artDbDriver = artDatabaseForm.getDriver();
+			artDbUrl = artDatabaseForm.getUrl();
+			String username = artDatabaseForm.getUsername();
+			artDbPassword = artDatabaseForm.getPassword();
+			String artDbTestSql = artDatabaseForm.getConnectionTestSql();
+			int artDbPoolTimeout = artDatabaseForm.getConnectionPoolTimeout();
+			int maxPoolConnections = artDatabaseForm.getMaxPoolConnections();
 
 			boolean jndiDatasource = false;
 
@@ -436,7 +433,7 @@ public class ArtConfig extends HttpServlet {
 
 					int timeout = NumberUtils.toInt(rs.getString("POOL_TIMEOUT"));
 					if (timeout <= 0) {
-						timeout = DEFAULT_CONNECTION_POOL_TIMEOUT;
+						timeout = ArtDatabaseUtils.DEFAULT_CONNECTION_POOL_TIMEOUT;
 					}
 
 					DataSource ds = new DataSource(timeout, jndiDatasource);
@@ -489,7 +486,7 @@ public class ArtConfig extends HttpServlet {
 					}
 				}
 			}
-			
+
 			//create quartz scheduler
 			createQuartzScheduler();
 		}
@@ -530,14 +527,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return
 	 */
 	public static boolean isArtDatabaseConfigured() {
-		boolean configured = false;
-
-		File settingsFile = new File(artDatabaseFilePath);
-		if (settingsFile.exists()) {
-			configured = true;
-		}
-
-		return configured;
+		return artDatabaseConfigured;
 	}
 
 	/**

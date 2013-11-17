@@ -6,14 +6,23 @@
         ART custom css
 */
 
+.centered{
+	margin: 0 auto;
+}
+
+/* for use with spring <form:error tag. by default creates a span with error class */
+span.error{
+	color: red;
+}
+
+/* override bootstrap tooltip max width */
+div[class="tooltip-inner"] {
+    max-width: 350px;
+}
 
 /* override bootstrap container width so as to make use of the whole screen */
 .container{
 	max-width:100%;
-}
-
-.centered{
-	margin: 0 auto;
 }
 
 /* add padding to navbar so that main body content isn't hidden under it */

@@ -96,7 +96,11 @@ function selectRow2(obj) {
 	}
 }
 
-function setDatasourceFields(dbType, driverElement, urlElement, testSqlElement) {
+function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlElementId) {
+	var driverElement = document.getElementById(driverElementId);
+	var urlElement = document.getElementById(urlElementId);
+	var testSqlElement = document.getElementById(testSqlElementId);
+
 	if (dbType === "oracle") {
 		driverElement.value = "oracle.jdbc.OracleDriver";
 		urlElement.value = "jdbc:oracle:thin:@<server_name>:1521:<sid>";
@@ -153,6 +157,7 @@ function setDatasourceFields(dbType, driverElement, urlElement, testSqlElement) 
 		driverElement.value = "";
 		urlElement.value = "demo";
 		testSqlElement.value = "";
+		
 		var usernameElement = document.getElementById("username");
 		if (usernameElement !== null) {
 			usernameElement.value = "";

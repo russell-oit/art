@@ -63,21 +63,19 @@ Display art database configuration page
 							<div class="col-lg-8">
 								<div class='input-group'>
 									<select name="databaseType" id="databaseType" class="form-control"
-											onchange="setDatasourceFields(this.value,
-						document.getElementById('driver'),
-						document.getElementById('url'),
-						document.getElementById('connectionTestSql'));">
-
-										<option value=""><spring:message code="artDatabase.text.selectDatabaseType"/></option>
+											onchange="setDatasourceFields(this.value, 'driver', 'url', 'connectionTestSql');">
+										<option value="">
+											<spring:message code="artDatabase.text.selectDatabaseType"/>
+										</option>
 										<c:forEach var="dbType" items="${databaseTypes}">
 											<option value="${dbType.key}">${dbType.value}</option>
 										</c:forEach>
 									</select>
 									<spring:message code="artDatabase.help.databaseType"
 													var="help" javaScriptEscape="true" />
-									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
+									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
-												onclick="alert('${help}');">
+												data-toggle="tooltip" title="${help}">
 											<i class="fa fa-info"></i>
 										</button>
 									</span>
@@ -126,13 +124,10 @@ Display art database configuration page
 									<form:input path="connectionTestSql" name="connectionTestSql"
 												id="connectionTestSql" class="form-control" />
 									<spring:message code="artDatabase.help.connectionTestSql"
-													var="help" javaScriptEscape="true" />
-									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
-										<c:set var="helpDetails"
-											   value="\n\nExamples:\n Select 1 from dual - Oracle\n Select 1 - MySQL, SQL Server, PostgreSQL, CUBRID\n Select 1 from information_schema.system_users - HSQLDB"
-											   />
+													var="help" />
+									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
-												onclick="alert('${help}${helpDetails}');">
+												data-toggle="tooltip" title="${help}">
 											<i class="fa fa-info"></i>
 										</button>
 									</span>
@@ -148,14 +143,16 @@ Display art database configuration page
 									<form:input path="connectionPoolTimeout" name="connectionPoolTimeout"
 												id="connectionPoolTimeout" class="form-control" />
 									<spring:message code="artDatabase.help.connectionPoolTimeout"
-													var="help" javaScriptEscape="true" />
-									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
+													var="help" htmlEscape="false" />
+									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
-												onclick="alert('${help}');">
+												data-toggle="tooltip" data-html="true" title="${help}">
 											<i class="fa fa-info"></i>
 										</button>
 									</span>
+									</span>
 								</div>
+								<form:errors path="connectionPoolTimeout" cssClass="error" />
 							</div>
 						</div>
 						<div class="form-group">
@@ -167,15 +164,15 @@ Display art database configuration page
 									<form:input path="maxPoolConnections" name="maxPoolConnections"
 												id="maxPoolConnections" class="form-control" />
 									<spring:message code="artDatabase.help.maxPoolConnections"
-													var="help" javaScriptEscape="true" />
-									<span class="input-group-btn" data-toggle="tooltip" title="${help}">
+													var="help" />
+									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
-												onclick="alert('${help}');">
+												data-toggle="tooltip" title="${help}">
 											<i class="fa fa-info"></i>
 										</button>
 									</span>
 								</div>
-								<font color="red"><form:errors path="maxPoolConnections" /></font>
+								<form:errors path="maxPoolConnections" cssClass="error" />
 							</div>
 						</div>
 						<div class="form-group">
