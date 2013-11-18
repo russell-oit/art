@@ -17,19 +17,19 @@
 package art.servlets;
 
 import art.artdatabase.ArtDatabaseForm;
-import art.artdatabase.ArtDatabaseUtils;
 import art.dbcp.DataSource;
 import art.login.AuthenticationMethod;
-import static art.servlets.Scheduler.logger;
 import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.utils.DbUtils;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -72,16 +72,15 @@ public class ArtConfig extends HttpServlet {
 	private static int defaultMaxRows;
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
-	private static final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
-	private static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
-	private static String dateFormat = DEFAULT_DATE_FORMAT; //for date fields, format of date portion
-	private static String timeFormat = DEFAULT_TIME_FORMAT; //for date fields, format of time portion
+	private static String dateFormat; //for date fields, format of date portion
+	private static String timeFormat; //for date fields, format of time portion
 	private static String jobsPath;
 	private static boolean customExportDirectory = false; //to enable custom export path
 	private static String webinfPath;
-	private static String artDatabaseFilePath; //full path to art-database.properties file
+	private static String artDatabaseFilePath; //full path to art-database file
 	private static String hsqldbPath;
-	private static boolean artDatabaseConfigured;
+	private final static int DEFAULT_CONNECTION_POOL_TIMEOUT = 20;
+	private static ArtDatabaseForm artDatabaseConfiguration;
 
 	/**
 	 * {@inheritDoc}
@@ -252,12 +251,14 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//set date format
+			final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
 			dateFormat = as.getSetting("date_format");
 			if (StringUtils.isBlank(dateFormat)) {
 				dateFormat = DEFAULT_DATE_FORMAT;
 			}
 
 			//set time format
+			final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 			timeFormat = as.getSetting("time_format");
 			if (StringUtils.isBlank(timeFormat)) {
 				timeFormat = DEFAULT_TIME_FORMAT;
@@ -363,20 +364,17 @@ public class ArtConfig extends HttpServlet {
 	private static void initializeDatasources() {
 
 		//load art database settings
-		ArtDatabaseForm artDatabaseForm = ArtDatabaseUtils.loadConfiguration(artDatabaseFilePath);
-		if (artDatabaseForm == null) {
-			artDatabaseConfigured = false;
-		} else {
-			artDatabaseConfigured = true;
-
+		artDatabaseConfiguration = null;
+		artDatabaseConfiguration = loadArtDatabaseConfiguration();
+		if (artDatabaseConfiguration != null) {
 			//initialize art repository datasource
-			artDbDriver = artDatabaseForm.getDriver();
-			artDbUrl = artDatabaseForm.getUrl();
-			String username = artDatabaseForm.getUsername();
-			artDbPassword = artDatabaseForm.getPassword();
-			String artDbTestSql = artDatabaseForm.getConnectionTestSql();
-			int artDbPoolTimeout = artDatabaseForm.getConnectionPoolTimeout();
-			int maxPoolConnections = artDatabaseForm.getMaxPoolConnections();
+			artDbDriver = artDatabaseConfiguration.getDriver();
+			artDbUrl = artDatabaseConfiguration.getUrl();
+			String username = artDatabaseConfiguration.getUsername();
+			artDbPassword = artDatabaseConfiguration.getPassword();
+			String artDbTestSql = artDatabaseConfiguration.getConnectionTestSql();
+			int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
+			int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
 
 			boolean jndiDatasource = false;
 
@@ -433,7 +431,7 @@ public class ArtConfig extends HttpServlet {
 
 					int timeout = NumberUtils.toInt(rs.getString("POOL_TIMEOUT"));
 					if (timeout <= 0) {
-						timeout = ArtDatabaseUtils.DEFAULT_CONNECTION_POOL_TIMEOUT;
+						timeout = DEFAULT_CONNECTION_POOL_TIMEOUT;
 					}
 
 					DataSource ds = new DataSource(timeout, jndiDatasource);
@@ -527,7 +525,13 @@ public class ArtConfig extends HttpServlet {
 	 * @return
 	 */
 	public static boolean isArtDatabaseConfigured() {
-		return artDatabaseConfigured;
+		boolean configured = false;
+
+		if (artDatabaseConfiguration != null) {
+			configured = true;
+		}
+
+		return configured;
 	}
 
 	/**
@@ -1041,32 +1045,66 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Load art database properties from art-database.properties file
+	 * Get art database configuration settings
 	 *
-	 * @return properties object with art database properties or null if file
-	 * not found or error occurred
+	 * @return object with art database settings or null if art database not
+	 * configured
 	 */
-	public static Properties loadArtDatabaseProperties() {
-		Properties p = null;
+	public static ArtDatabaseForm getArtDatabaseConfiguration() {
+		return artDatabaseConfiguration;
+	}
+
+	/**
+	 * Load art database configuration from art-database file
+	 *
+	 * @return object with art database settings or null if file not found or
+	 * error occurred
+	 */
+	private static ArtDatabaseForm loadArtDatabaseConfiguration() {
+		ArtDatabaseForm artDatabaseForm = null;
 
 		try {
-			File settingsFile = new File(artDatabaseFilePath);
-			if (settingsFile.exists()) {
-				FileInputStream o = new FileInputStream(artDatabaseFilePath);
-				p = new Properties();
-				try {
-					p.load(o);
-				} finally {
-					o.close();
+			File artDatabaseFile = new File(artDatabaseFilePath);
+			if (artDatabaseFile.exists()) {
+				ObjectMapper mapper = new ObjectMapper();
+				artDatabaseForm = mapper.readValue(artDatabaseFile, ArtDatabaseForm.class);
+
+				artDatabaseForm.setPassword(Encrypter.decrypt(artDatabaseForm.getPassword()));
+
+				if (artDatabaseForm.getConnectionPoolTimeout() <= 0) {
+					artDatabaseForm.setConnectionPoolTimeout(DEFAULT_CONNECTION_POOL_TIMEOUT);
 				}
+
+				final int DEFAULT_MAX_POOL_CONNECTIONS = 20;
+				if (artDatabaseForm.getMaxPoolConnections() <= 0) {
+					artDatabaseForm.setMaxPoolConnections(DEFAULT_MAX_POOL_CONNECTIONS);
+				}
+			} else {
+				logger.info("ART Database configuration file not found");
 			}
+
 		} catch (Exception ex) {
 			logger.error("Error", ex);
-
-			p = null;
 		}
 
-		return p;
+		return artDatabaseForm;
+	}
+
+	/**
+	 * Save art database configuration to file
+	 *
+	 * @param artDatabaseForm
+	 * @param artDatabaseFilePath
+	 */
+	public static void SaveArtDatabaseConfiguration(ArtDatabaseForm artDatabaseForm)
+			throws FileNotFoundException, IOException {
+
+		//obfuscate password field
+		artDatabaseForm.setPassword(Encrypter.encrypt(artDatabaseForm.getPassword()));
+
+		File artDatabaseFile = new File(artDatabaseFilePath);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabaseForm);
 	}
 
 	private static void createQuartzScheduler() {

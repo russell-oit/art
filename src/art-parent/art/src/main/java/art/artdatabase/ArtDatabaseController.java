@@ -38,7 +38,7 @@ public class ArtDatabaseController {
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
 	public String showArtDatabaseConfiguration(HttpSession session, Model model) {
 
-		ArtDatabaseForm artDatabaseForm = ArtDatabaseUtils.loadConfiguration(ArtConfig.getArtDatabaseFilePath());
+		ArtDatabaseForm artDatabaseForm = ArtConfig.getArtDatabaseConfiguration();
 
 		if (artDatabaseForm == null) {
 			//art database not configured
@@ -119,7 +119,7 @@ public class ArtDatabaseController {
 			}
 
 			//save settings
-			ArtDatabaseUtils.SaveConfiguration(artDatabaseForm, ArtConfig.getArtDatabaseFilePath());
+			ArtConfig.SaveArtDatabaseConfiguration(artDatabaseForm);
 
 			ArtConfig.refreshConnections();
 
