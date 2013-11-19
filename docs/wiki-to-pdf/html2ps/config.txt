@@ -17,10 +17,9 @@
     hyphenate: 1;
 	
   }
-  titlepage {           /* The title page content: document title, author and
-                           creation date */
-    content: "<DIV align=center><H1><BIG>$T</BIG></H1>
-              <H2>$[version]</H2>$[created]";
+  titlepage {           /* The title page content: meta tags: title, version */
+    content: "<DIV align=center><H1><BIG>$[pdfTitle]</BIG></H1>
+              <H2>$[version]</H2>";
   }  
   seq-number: 1;          /* Automatic numbering of headings */
   extrapage: 0;

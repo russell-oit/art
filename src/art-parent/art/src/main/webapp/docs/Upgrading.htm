@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
  <head> 
- <meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
-  <meta name="pdfTitle" content="Upgrading ART" />
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" /> 
+  <meta name="pdfTitle" content="Upgrading ART" /> 
   <title>ART - Upgrading</title> 
  </head> 
  <body class="wiki-Tips" id="forge"> 
@@ -12,7 +12,7 @@
    <ul> 
     <li>Download the latest ART version</li> 
     <li>Extract the zip package to a temporary location</li> 
-    <li>Review the <strong>changelog.txt</strong> file to have an idea of what has changed</li> 
+    <li>Review the <strong>changelog.txt</strong> file to see what has changed</li> 
     <li>Backup the ART directory contained on the application server </li> 
     <li>Backup the ART repository (database)</li> 
     <li>Connect to the ART repository and run any database upgrade scripts included in the download package to bring the ART database up to date</li> 
@@ -22,10 +22,10 @@
       <li>Delete the art directory and art.war file in the <strong>TOMCAT_HOME\webapps</strong> directory</li> 
       <li>Delete ART's Tomcat cache by deleting the art directory in the <strong>TOMCAT_HOME\work\Catalina\localhost</strong> directory</li> 
       <li>Copy the new art.war file to the webapps directory</li> 
-      <li>Start Tomcat</li> 
+      <li>Start Tomcat </li> 
      </ul> </li> 
-    <li>Copy the file <strong>art\WEB-INF\art.properties</strong> from the backup ART directory to the new version's WEB-INF directory. </li> 
     <li>Copy the contents of the backup <strong>art\WEB-INF\templates</strong> directory to the new version's templates directory</li> 
+    <li>If you were using the default HSQLDB database for your repository, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="alink" href="/p/art/wiki/Tips/">[wiki:Tips]</a> documentation to see how you can upgrade an HSQLDB database.</li> 
     <li> <p>If you are using JasperReports templates and the new ART version has included an updated jasperreports engine, delete all the <strong>.jasper</strong> files contained in the templates directory so that they will be recompiled with the new engine. Alternatively, if you have Apache Ant set up, run the following commands</p> 
      <div class="codehilite"> 
       <pre><span class="n">cd</span> <span class="n">art</span>
@@ -34,12 +34,13 @@
 </pre> 
      </div> </li> 
     <li> <p>Copy the contents of the backup <strong>art\export</strong> directory to the new version's export directory</p> </li> 
+    <li>If you had put any <strong>jdbc drivers</strong> in the art\WEB-INF\lib directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
+    <li>Copy the file <strong>art\WEB-INF\art.properties</strong> from the backup ART directory to the new version's WEB-INF directory</li> 
     <li>Restart Tomcat</li> 
     <li>Log in to ART as an administrator. From the <strong>Admin Console</strong>, go to the <strong>Settings</strong> page and click on the <strong>Submit</strong> button to update application settings.</li> 
     <li>Clear your browser's cache e.g. for Firefox, use the Clear Recent History menu.</li> 
    </ul> 
    <p>The upgrade is complete. All users, queries, scheduled jobs etc should continue to work as before.</p>
-  </div> 
-  
+  </div>  
  </body>
 </html>

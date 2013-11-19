@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+ <head> 
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" /> 
+  <meta name="pdfTitle" content="ART Libraries" /> 
+  <title>ART - Libraries</title> 
+ </head> 
+ <body class="wiki-Libraries" id="forge"> 
+  <div class="markdown_content">
+   <h1 id="art-libraries">ART Libraries</h1> 
+   <p>ART uses a number of free and open source libraries and resources in order to provide various functionality. Use of these libraries makes it possible to provide features that would otherwise not have been available in the application, saves time and generally makes it easier to build the application. Many thanks to all those who've worked on them.</p> 
+   <p>Below is a listing of some of them.</p> 
+   <table border="1" cellpadding="5" cellspacing="0"> 
+    <thead> 
+     <tr> 
+      <th>Library</th> 
+      <th>License</th> 
+      <th>Comment</th> 
+     </tr> 
+    </thead> 
+    <tbody> 
+     <tr> 
+      <td><a class="" href="http://tango.freedesktop.org/" rel="nofollow">Tango Desktop Project</a></td> 
+      <td>Public Domain</td> 
+      <td>Many icons used in the application have come from this icon set</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://logback.qos.ch/" rel="nofollow">Logback</a></td> 
+      <td>EPL v1.0 and LGPL 2.1</td> 
+      <td>Provides the concrete logging library. More currently maintained than log4j used previously. Enables modification of logging level without need to restart the application. Switching to debug mode can now be done without much thought. Also provided code to enable viewing of logs from the application interface. No longer need access to application server machine to view logs.</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.slf4j.org/" rel="nofollow">SLF4J</a></td> 
+      <td>MIT</td> 
+      <td>Logging facade allowing for change of the concrete logging library without changing application code. Allowed for an easy change from using log4j to logback (ART 2.3.1 to 2.4). No code changes were needed and there was minimal change from the log4j.xml file to the logback.xml file.</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://jsoup.org" rel="nofollow">jsoup</a></td> 
+      <td>MIT</td> 
+      <td>Enable automatic generation of pdf manuals from wiki contents</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://user.it.uu.se/~jan/html2ps.html" rel="nofollow">html2ps</a></td> 
+      <td>GPL</td> 
+      <td>Enable automatic generation of pdf manuals from wiki contents</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.kryogenix.org/code/browser/sorttable/" rel="nofollow">sorttable.js</a></td> 
+      <td>X11</td> 
+      <td>Enable sorting of data in htmlGrid view mode</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.JavascriptToolbox.com/lib/date/" rel="nofollow">date.js</a></td> 
+      <td>MIT and GPL</td> 
+      <td>Used to verify validity of dates entered for date parameters</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://ajaxtags.sourceforge.net/">AjaxTags</a></td> 
+      <td>Apache</td> 
+      <td>Used to display dashboards, to provide information about queries in the start page and to retrieve saved schedule information in the define job page</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="https://sourceforge.net/projects/cewolf/">Cewolf</a></td> 
+      <td>LGPL</td> 
+      <td>Used to display charts on the browser</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.jfree.org/jfreechart/" rel="nofollow">JFreeChart</a></td> 
+      <td>LGPL</td> 
+      <td>Used to output charts as pdf and png files</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://mondrian.pentaho.com/" rel="nofollow">Mondrian</a></td> 
+      <td>EPL</td> 
+      <td>Used to provide OLAP functionality</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://jpivot.sourceforge.net/">JPivot</a></td> 
+      <td>CPL</td> 
+      <td>Used to provide the interface for interacting with OLAP cubes</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="https://commons.apache.org/" rel="nofollow">Apache Commons</a>, including <br /> fileupload, lang</td> 
+      <td>Apache</td> 
+      <td>Used for a number of utility functions</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://hsqldb.org/" rel="nofollow">HSQLDB</a></td> 
+      <td><a class="" href="http://hsqldb.org/web/hsqlLicense.html" rel="nofollow">custom</a>, based on BSD</td> 
+      <td>Used to provide a default database with sample queries, that doesn't require any configuration/setup to use</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://itextpdf.com/" rel="nofollow">iText</a></td> 
+      <td>MPL or LGPL <br /><br /> Using iText 2.1.7 which was the last version under this license. Later iText versions are licensed under the AGPL</td> 
+      <td>Used to provide pdf output</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.jaspersoft.com/jasperreports" rel="nofollow">JasperReports</a></td> 
+      <td>LGPL</td> 
+      <td>Used to provide support for formatted reports</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://jcifs.samba.org/" rel="nofollow">JCIFS</a></td> 
+      <td>LGPL</td> 
+      <td>Used to provide windows authentication</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="https://poi.apache.org/" rel="nofollow">Apache POI</a></td> 
+      <td>Apache</td> 
+      <td>Used to provide xls and xlsx output</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://quartz-scheduler.org/" rel="nofollow">Quartz</a></td> 
+      <td>Apache</td> 
+      <td>Used to provide scheduling for jobs</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://spnego.sourceforge.net/">SPNEGO</a></td> 
+      <td>LGPL</td> 
+      <td>Used to provide integrated windows authentication or Single Sign On</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://datatables.net/" rel="nofollow">DataTables</a></td> 
+      <td>GPL or BSD</td> 
+      <td>Used to provide the htmlDataTable view mode. Enables paginated results, sorting and searching of results</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://jquery.com/" rel="nofollow">jQuery</a></td> 
+      <td>MIT</td> 
+      <td>Used to display query results in the select parameters page</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.malsup.com/jquery/form/" rel="nofollow">jQuery Form Plugin</a></td> 
+      <td>MIT and GPL</td> 
+      <td>Enable use of AJAX in form submission</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.tinymce.com/" rel="nofollow">TinyMCE</a></td> 
+      <td>LGPL</td> 
+      <td>Used to provide a HTML WYSISYG editor for defining job email message text, and contents of text object queries</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.dhtmlgoodies.com/index.html?page=calendarScripts" rel="nofollow">DHTMLgoodies JS Calendar</a></td> 
+      <td>LGPL</td> 
+      <td>Used to provide a date picker for date parameters in the select parameters page</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://www.mindrot.org/projects/jBCrypt/" rel="nofollow">jBCrypt</a></td> 
+      <td>ISC/BSD</td> 
+      <td>Used to hash user passwords</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="http://code.google.com/p/log4jdbc/" rel="nofollow">log4jdbc</a></td> 
+      <td>Apache</td> 
+      <td>Used to support logging of sql statements</td> 
+     </tr> 
+     <tr> 
+      <td><a class="" href="https://owasp.org/index.php/OWASP_Java_Encoder_Project" rel="nofollow">OWASP Java Encoder</a></td> 
+      <td>New BSD</td> 
+      <td>Escaping/encoding of strings that build html output, to prevent cross-site scripting</td> 
+     </tr> 
+    </tbody> 
+   </table>
+  </div> 
+  
+ </body>
+</html>
