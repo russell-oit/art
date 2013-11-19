@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+ <head> 
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" /> 
+  <meta name="pdfTitle" content="Installing ART" /> 
+  <title>ART - Installing</title> 
+ </head> 
+ <body class="wiki-Tips" id="forge"> 
+  <div class="markdown_content">
+   <h1 id="requirements">Requirements</h1> 
+   <ul> 
+    <li>Java EE application server e.g. Apache Tomcat</li> 
+    <li>Java 1.6 and above</li> 
+   </ul> 
+   <h1 id="download-art">Download ART</h1> 
+   <ul> 
+    <li>Download the latest ART package from <a href="http://sourceforge.net/projects/art/files/">http://sourceforge.net/projects/art/files/</a></li> 
+    <li>Unzip the package to a temporary location. The resulting directory path will be referred to as PACKAGE_PATH.</li> 
+   </ul> 
+   <h1 id="deploy-the-web-application">Deploy the web application</h1> 
+   <p>Deploy the ART web application to the application server. If you don't already have a java application server set up, you can download and use Apache Tomcat.</p> 
+   <h2 id="installing-tomcat">Installing Tomcat</h2> 
+   <p>You can get Tomcat from <a href="http://tomcat.apache.org/" rel="nofollow">http://tomcat.apache.org/</a></p> 
+   <h3 id="linux-installation">Linux Installation</h3> 
+   <ul> 
+    <li>Download the latest binary distribution</li> 
+    <li> <p>Unpack the archive somewhere e.g.</p> 
+     <div class="codehilite"> 
+      <pre><span class="n">tar</span> <span class="n">xvzf</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mf">7.0.23</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span>
+<span class="n">sudo</span> <span class="n">mv</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mf">7.0.23</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">tomcat</span>
+</pre> 
+     </div> </li> 
+   </ul> 
+   <p>The /usr/local/tomcat directory will be referred to as TOMCAT_HOME.</p> 
+   <ul> 
+    <li>Go to TOMCAT_HOME/bin and run ./startup.sh to start Tomcat.</li> 
+    <li>To stop Tomcat, go to TOMCAT_HOME/bin and run ./shutdown.sh</li> 
+   </ul> 
+   <h3 id="windows-installation">Windows Installation</h3> 
+   <ul> 
+    <li>Download and install the Windows Service Installer package</li> 
+    <li>Change the default install location from C:\Program Files, e.g. install to C:\tomcat.</li> 
+    <li>To start Tomcat, start the service e.g. type &quot;net start tomcat7&quot; in a command prompt window. You may need to open the command prompt window using the &quot;Run as administrator&quot; option.</li> 
+    <li>To stop Tomcat, stop the service e.g. type &quot;net stop tomcat7&quot; in a command prompt window</li> 
+   </ul> 
+   <p>Once Tomcat is installed and started, open a browser and navigate to localhost:8080. You should see the Tomcat welcome page. This indicates that the Tomcat installation was successful.</p> 
+   <h2 id="deployment-on-tomcat">Deployment on Tomcat</h2> 
+   <p>You can deploy web applications to Tomcat via a browser using the Tomcat Manager utility available from localhost:8080, or by copying the .war file to the TOMCAT_HOME\webapps directory.</p> 
+   <ul> 
+    <li>Ensure Tomcat is running</li> 
+    <li>Copy the file <strong>PACKAGE_PATH\art.war</strong> to TOMCAT_HOME\webapps. This will cause the web application to be deployed and a new directory TOMCAT_HOME\webapps\art to be created. This directory will be referred to as ART_HOME.</li> 
+   </ul> 
+   <h1 id="launch-art">Launch ART</h1> 
+   <ul> 
+    <li>Using a browser, navigate to localhost:8080/art</li> 
+    <li>Click on the <strong>Settings</strong> button</li> 
+    <li>ART needs a database to store details about queries, users etc (the ART repository). The application comes with an already configured sample database. Click on the <strong>Submit</strong> button to use this default database</li> 
+    <li>Click on the <strong>Log Off</strong> link. You need to log off at this point so that you can log in as an actual user.</li> 
+    <li>Log in using the username/password admin/admin</li> 
+   </ul> 
+   <p>Installation is complete. </p> 
+   <h1 id="using-the-default-database">Using the default database</h1> 
+   <p>ART comes with a sample database embedded within the application. This allows you to explore the application's functionality without having to set up your own database and queries first. The database is a HSQLDB database that is run in standalone mode. The files for the database are contained in the <strong>ART_HOME\WEB-INF\hsqldb</strong> directory of the deployed application. To use this database as the ART repository,</p> 
+   <ul> 
+    <li>From the <strong>Admin Console</strong>, click on the <strong>Settings</strong> button</li> 
+    <li>Set the ART database username/password to ART/ART (both username and password are case sensitive)</li> 
+    <li>Set the jdbc driver field to &quot;default&quot;</li> 
+    <li>Set the jdbc url field to &quot;default&quot;</li> 
+    <li>Make any other application settings as you like and click on the <strong>Submit</strong> button</li> 
+   </ul> 
+   <p><strong>Note:</strong></p> 
+   <ul> 
+    <li>If you decide to use the default database in a live/production environment, be careful. If you undeploy the application, accidentally or otherwise (e.g. when doing an application upgrade), you will lose the database as the database files will be deleted along with all other application files when the application is undeployed/redeployed.</li> 
+   </ul> 
+   <h2 id="default-users">Default users</h2> 
+   <p>The default database has 2 users configured - <strong>admin</strong> and <strong>auser</strong>. To login, use one of the following username/password combinations</p> 
+   <ul> 
+    <li>admin/admin (a super admin user)</li> 
+    <li>auser/auser (a normal user who can schedule jobs)</li> 
+   </ul> 
+   <h2 id="default-datasources">Default datasources</h2> 
+   <p>The default database has 2 datasources configured - <strong>ArtRepository</strong> and <strong>SampleDB</strong>.</p> 
+   <ul> 
+    <li><strong>ArtRepository</strong> allows you to query ART repository tables e.g. ART_USERS, ART_QUERIES etc. The username/password for this datasource is ART/ART</li> 
+    <li><strong>SampleDB</strong> allows you to query a sample target database. It has tables like ORDERS, ITEMS, REGIONS, CITIES. Most of the sample queries use this datasource. The username/password for this datasource is SAMPLE/SAMPLE.</li> 
+   </ul> 
+   <h2 id="default-queries">Default queries</h2> 
+   <p>The default database comes with a number of queries. These sample queries help to illustrate some of the query types and features of the application e.g. charts, dashboards etc</p> 
+   <h1 id="using-your-own-rdbms">Using your own RDBMS</h1> 
+   <p>You can use a different RDBMS for the ART repository, instead of the sample one that comes with the application. The following steps are required to use a different database.</p> 
+   <ul> 
+    <li>Deploy the JDBC driver for your database to the application server. e.g. For Apache Tomcat, you can copy the driver to TOMCAT_HOME\lib or TOMCAT_HOME\webapps\art\WEB-INF\lib. ART comes with JDBC drivers for CUBRID, PostgreSQL, MySQL and HSQLDB.</li> 
+    <li>Create a database in your RDBMS to be used for the ART repository</li> 
+    <li>Run the SQL statements in the file <strong>PACKAGE_PATH\database\art_tables.sql</strong> to create the ART repository schema. Read the comments at the beginning of the file before running it to see if any modifications are needed for your RDBMS</li> 
+    <li>Run the SQL file for your RDBMS located in the <strong>PACKAGE_PATH\database\quartz</strong> directory</li> 
+    <li>Configure your database details in the Settings page</li> 
+    <li>Create a super admin user to administer the application</li> 
+   </ul> 
+   <p>A variety of databases can be used including Oracle, MySQL, PostgreSQL, HSQLDB, SQL Server, CUBRID.</p> 
+   <h2 id="create-the-database">Create the database</h2> 
+   <h3 id="using-mysql-on-windows">Using MySQL on Windows</h3> 
+   <ul> 
+    <li>Ensure the path to mysql.exe is included in the PATH environment variable</li> 
+    <li> <p>Open a command prompt window <br /> </p> 
+     <div class="codehilite"> 
+      <pre><span class="nl">c:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">mysql</span> <span class="o">-</span><span class="n">h</span> <span class="n">localhost</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">-</span><span class="n">p</span>
+</pre> 
+     </div> </li> 
+    <li> <p>Enter the password</p> 
+     <div class="codehilite"> 
+      <pre><span class="n">mysql</span><span class="o">&gt;</span> <span class="n">create</span> <span class="n">database</span> <span class="n">art</span><span class="p">;</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="n">grant</span> <span class="n">all</span> <span class="n">on</span> <span class="n">art</span><span class="p">.</span><span class="o">*</span> <span class="n">to</span> <span class="n">artuser</span><span class="err">@</span><span class="n">localhost</span> <span class="n">identified</span> <span class="n">by</span> <span class="s">&quot;artpassword&quot;</span><span class="p">;</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="n">use</span> <span class="n">art</span><span class="p">;</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="err">\</span><span class="p">.</span> <span class="s">&quot;PACKAGE_PATH\database</span><span class="se">\a</span><span class="s">rt_tables.sql&quot;</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="err">\</span><span class="p">.</span> <span class="s">&quot;PACKAGE_PATH\database\quartz</span><span class="se">\t</span><span class="s">ables_mysql.sql&quot;</span>
+<span class="n">mysql</span><span class="o">&gt;</span> <span class="n">quit</span><span class="p">;</span>
+</pre> 
+     </div> </li> 
+   </ul> 
+   <p>The database name, user and password can be set to anything you wish.</p> 
+   <h3 id="using-postgresql-on-windows">Using PostgreSQL on Windows</h3> 
+   <ul> 
+    <li>Ensure the path to the PostgreSQL bin folder is included in the PATH environment variable</li> 
+    <li> <p>Open a command prompt window</p> 
+     <div class="codehilite"> 
+      <pre><span class="nl">c:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">psql</span> <span class="o">-</span><span class="n">U</span> <span class="n">postgres</span>
+</pre> 
+     </div> </li> 
+    <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not &quot;postgres&quot;, use the appropriate name in place of postgres in the -U switch of the command.</p> 
+     <div class="codehilite"> 
+      <pre><span class="n">postgres</span><span class="o">=</span><span class="err">#</span> <span class="n">create</span> <span class="n">user</span> <span class="n">artuser</span> <span class="n">password</span> <span class="err">'</span><span class="n">artpassword</span><span class="err">'</span><span class="p">;</span>
+<span class="n">postgres</span><span class="o">=</span><span class="err">#</span> <span class="n">create</span> <span class="n">database</span> <span class="n">art</span> <span class="n">owner</span> <span class="n">artuser</span><span class="p">;</span>
+<span class="n">postgres</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">c</span> <span class="n">art</span>
+
+<span class="n">art</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">i</span> <span class="err">'</span><span class="n">c</span><span class="o">:/</span><span class="n">somepath</span><span class="o">/</span><span class="n">database</span><span class="o">/</span><span class="n">art_tables</span><span class="p">.</span><span class="n">sql</span><span class="err">'</span>
+<span class="n">art</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">i</span> <span class="err">'</span><span class="n">c</span><span class="o">:/</span><span class="n">somepath</span><span class="o">/</span><span class="n">database</span><span class="o">/</span><span class="n">quartz</span><span class="o">/</span><span class="n">tables_postgres</span><span class="p">.</span><span class="n">sql</span><span class="err">'</span>
+<span class="n">art</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">q</span>
+</pre> 
+     </div> </li> 
+   </ul> 
+   <p>For the path to the sql scripts, use forward slashes instead of back slashes, and enclose the path in single quotes in case it contains spaces.</p> 
+   <h3 id="using-cubrid-on-windows">Using CUBRID on Windows</h3> 
+   <p>CUBRID is a comprehensive open source relational database management system highly optimized for Web Applications.<br /> Using the CUBRID Manager application,</p> 
+   <ul> 
+    <li>Connect to your host</li> 
+    <li>Right click on <strong>Databases</strong> and select <strong>Create Database...</strong>. Provide the required details for database creation.</li> 
+    <li>Right click on the created database and select <strong>Login Database</strong>. Login with the username <strong>public</strong> and blank password. This will ensure that tables will be created with owner as &quot;public&quot;, making access to them more straight forward.</li> 
+    <li>Right click on the database and select <strong>Run SQL File</strong>. Select the PACKAGE_PATH\database\art_tables.sql file and click on OK. Do the same for the PACKAGE_PATH\database\quartz\tables_cubrid.sql file.</li> 
+   </ul> 
+   <h2 id="configure-art">Configure ART</h2> 
+   <ul> 
+    <li>Once the database is created, navigate to localhost:8080/art using your browser</li> 
+    <li>Ensure that the JDBC driver for your database is available to the application. The following drivers are included with the application (in the ART_HOME\WEB-INF\lib directory). CUBRID, PostgreSQL, MySQL, HSQLDB, SQL Server (jTDS)</li> 
+    <li>Click on the <strong>Settings</strong> button, enter the appropriate details for your database and other application details and click on the <strong>Submit</strong> button</li> 
+    <li>From the <strong>Admin Console</strong>, click on the <strong>Users</strong> button and then create a super admin user to be used for administering the application</li> 
+    <li>Log off</li> 
+    <li>Log in as the newly created super admin user</li> 
+    <li>Create and publish queries as required</li> 
+   </ul> 
+   <h1 id="patches">Patches</h1> 
+   <p>ART patches replace specific files in an ART installation in order to resolve specific issues.<br /> If patches are available for your ART version, take the following steps.</p> 
+   <ul> 
+    <li>Download the latest patch for your version</li> 
+    <li>Stop the application server</li> 
+    <li>Backup the ART installation</li> 
+    <li>Extract the patch zip package to a temporary location</li> 
+    <li>Copy the art directory contained in the patch over the existing ART installation directory, overwriting existing files.</li> 
+    <li>New files in the patch with update relevant files, leaving all other files as they are were</li> 
+    <li>Start the application server</li> 
+   </ul> 
+   <p>Only the latest patch for a particular version needs to be applied as the latest patch contains all the fixes in the previous patches.</p>
+  </div>  
+ </body>
+</html>
