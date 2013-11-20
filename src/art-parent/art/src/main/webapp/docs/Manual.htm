@@ -2,11 +2,25 @@
 <html>
  <head> 
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" /> 
+  <meta name="pdfTitle" content="ART Manual" /> 
   <meta name="version" content="3.0-alpha1" /> 
-  <meta name="pdfTitle" content="ART Administration Manual" /> 
   <title>ART - Manual</title> 
+  <style type="text/css">
+			table
+			{
+				border-collapse: collapse; /* 'cellspacing=0' equivalent */
+			}
+
+			table td, table th
+			{
+				padding: 5px; /* 'cellpadding' equivalent */
+			}
+		</style> 
  </head> 
  <body class="wiki-Tips" id="forge"> 
+  <div> 
+   <p><strong>ART Manual</strong></p> 
+  </div> 
   <div class="markdown_content">
    <div class="toc"> 
     <ol> 
@@ -221,7 +235,7 @@
      <!--NewPage--> 
      <h1 id="settings">Settings</h1> 
      <p>Certain settings are used to configure how ART works. From the <strong>Admin Console</strong>, use the <strong>Settings</strong> option to manage ART settings.</p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Setting</th> 
@@ -410,7 +424,7 @@
      <h2 id="creating-a-new-datasource">Creating a new datasource</h2> 
      <p>From the Manage Datasources page, choose the ADD option and then specify the settings for the datasource. ART can execute queries against any datasource for which a JDBC driver is available. <br /> </p> 
      <p><img alt="add datasource" src="add-datasource.png" /></p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Attribute</th> 
@@ -650,7 +664,7 @@
      <h2 id="creating-a-query">Creating a query</h2> 
      <p>From the <strong>Admin Console</strong>, click on <strong>Queries</strong> then click on <strong>Create New Query</strong> to create a query. From here you can specify the query name, description, datasource, the SQL statement for the query etc.</p> 
      <p><img alt="New-query" src="New-query.png" /></p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Attribute</th> 
@@ -907,7 +921,7 @@
        </div> </li> 
       <li> <p>For <strong>heat map</strong> charts, the following options are available. Option names and values are case sensitive. Options are defined in the result set with a column value whose syntax is <code>&lt;option&gt;=&lt;value&gt;</code> i.e. the option name and value separated by <code>=</code></p> </li> 
      </ul> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Option</th> 
@@ -1015,7 +1029,7 @@
       <li><strong>Jasper Report: Template Query</strong><br /> To generate formatted reports e.g. statements given to customers, you can use Jasper Reports. To create a jasper report, use the <a class="" href="http://jasperforge.org/projects/ireport" rel="nofollow">iReport</a> report designer.</li> 
      </ul> 
      <p>Displays a jasper report based on the selected jrxml template. The query within the jasper report template will be used to generate the results. The query will be run against the selected datasource. You can define parameters that will be passed to the jasper report. Just insert the parameter labels into the SQL source section, with each parameter on a new line. Jasper report parameters are defined with a specific type. The following mapping of ART and jasperreport parameter types should be used</p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>ART parameter type</th> 
@@ -1240,7 +1254,7 @@
      </ul> 
      <h2 id="view-modes">View Modes</h2> 
      <p>When running queries interactively, or scheduling them for later execution, you can specify the format in which the results should be output. When running a query via url, you can specify the view mode to be used using the <code>viewMode</code> parameter. View mode names are case sensitive. Some view modes are not available for certain types of queries.</p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>View Mode</th> 
@@ -1361,7 +1375,7 @@
      <!--NewPage--> 
      <h1 id="multiple-statements">Multiple Statements</h1> 
      <p>You may want to run some statements before or after the select statement for your query, e.g. to create a temporary table, create an index etc. Enter all your statements in the sql source section of the query, with each statement ending in a <code>;</code> and specify which statement should be used as the query's results by setting the <strong>Display Resultset</strong> field in the Define Query page.</p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Display ResultSet</th> 
@@ -1388,7 +1402,7 @@
       </tbody> 
      </table> 
      <p>If you set the Display Resultset to -2 to use the last statement, ensure that your database driver is at least JDBC 3.0 compliant. Some RDBMSs may require extra configuration to allow for execution of multiple statements in a query, and some may not support it at all.</p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>RDBMS</th> 
@@ -1526,7 +1540,7 @@
 </pre> 
      </div> 
      <h2 id="operators">Operators</h2> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Operator</th> 
@@ -1782,7 +1796,7 @@
       <li>In the direct URL, set the <strong>viewMode</strong> parameter value to <strong>rss20</strong><br /> This URL, when executed via a browser or RSS reader/aggregator will return an RSS feed.</li> 
      </ul> 
      <p>As a minimum, the query should contain a column named <strong>title</strong> or <strong>description</strong>. </p> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Element Name</th> 
@@ -2804,7 +2818,7 @@
       <li>If you have any questions or comments, post these on the ART Help Discussion forum, <a href="http://sourceforge.net/p/art/discussion/352129/">http://sourceforge.net/p/art/discussion/352129/</a></li> 
      </ul> 
      <h2 id="resources">Resources</h2> 
-     <table border="1" cellpadding="5" cellspacing="0"> 
+     <table border="1"> 
       <thead> 
        <tr> 
         <th>Item</th> 

@@ -35,7 +35,7 @@ Display art database configuration page
 		</div>
 
 		<div class="row">
-			<div class="col-lg-6 col-lg-offset-3">
+			<div class="col-md-6 col-md-offset-3">
 				<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabaseForm">
 					<fieldset>
 						<legend class="text-center">
@@ -57,10 +57,10 @@ Display art database configuration page
 						</c:if>
 
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="databaseType">
+							<label class="control-label col-md-4" for="databaseType">
 								<spring:message code="artDatabase.label.databaseType"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<div class='input-group'>
 									<select name="databaseType" id="databaseType" class="form-control"
 											onchange="setDatasourceFields(this.value, 'driver', 'url', 'connectionTestSql');">
@@ -83,43 +83,43 @@ Display art database configuration page
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="driver">
+							<label class="control-label col-md-4" for="driver">
 								<spring:message code="artDatabase.label.jdbcDriver"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<form:input path="driver" type="text" name="driver" id="driver" class="form-control" />
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="url">
+							<label class="control-label col-md-4" for="url">
 								<spring:message code="artDatabase.label.jdbcUrl"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<form:input path="url" name="url" id="url" class="form-control" />
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="username">
+							<label class="control-label col-md-4" for="username">
 								<spring:message code="artDatabase.label.username"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<form:input path="username" name="username" id="username"
 											class="form-control" />
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="password">
+							<label class="control-label col-md-4" for="password">
 								<spring:message code="artDatabase.label.password"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<form:password path="password" name="password" id="password" class="form-control" />
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="connectionTestSql">
+							<label class="control-label col-md-4" for="connectionTestSql">
 								<spring:message code="artDatabase.label.connectionTestSql"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<div class="input-group">
 									<form:input path="connectionTestSql" name="connectionTestSql"
 												id="connectionTestSql" class="form-control" />
@@ -135,10 +135,10 @@ Display art database configuration page
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="connectionPoolTimeout">
+							<label class="control-label col-md-4" for="connectionPoolTimeout">
 								<spring:message code="artDatabase.label.connectionPoolTimeout"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<div class="input-group">
 									<form:input path="connectionPoolTimeout" name="connectionPoolTimeout"
 												id="connectionPoolTimeout" class="form-control" />
@@ -156,10 +156,10 @@ Display art database configuration page
 							</div>
 						</div>
 						<div class="form-group">
-							<label class="control-label col-lg-4" for="maxPoolConnections">
+							<label class="control-label col-md-4" for="maxPoolConnections">
 								<spring:message code="artDatabase.label.maxPoolConnections"/>
 							</label>
-							<div class="col-lg-8">
+							<div class="col-md-8">
 								<div class="input-group">
 									<form:input path="maxPoolConnections" name="maxPoolConnections"
 												id="maxPoolConnections" class="form-control" />
@@ -176,7 +176,7 @@ Display art database configuration page
 							</div>
 						</div>
 						<div class="form-group">
-							<div class="col-lg-12">
+							<div class="col-md-12">
 								<button type="submit" class="btn btn-primary pull-right">
 									<spring:message code="artDatabase.button.save"/>
 								</button>
@@ -186,7 +186,7 @@ Display art database configuration page
 				</form:form>
 			</div>
 			<c:if test="${not empty initialSetup}">
-				<div class="col-lg-3">
+				<div class="col-md-3">
 					<div class="alert alert-info">
 						<p>
 							Welcome to the ART Reporting Tool. You need to configure the

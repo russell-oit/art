@@ -18,12 +18,12 @@ Display logout page. Only used with auto login
 <t:headerlessPage title="${pageTitle}">
 	<jsp:body>
 		<div class="row">
-			<div class="col-lg-12 alert alert-info text-center">
+			<div class="col-md-12 alert alert-info text-center">
 				<spring:message code="logout.message.sessionEnded"/>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-lg-6 col-lg-offset-3 text-center">
+			<div class="col-md-6 col-md-offset-3 text-center">
 				<a class="btn btn-default" href="${pageContext.request.contextPath}/login.do">
 					<spring:message code="logout.link.login"/>
 				</a>

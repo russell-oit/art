@@ -646,8 +646,7 @@ CREATE TABLE ART_SETTINGS
 	HELP_MESSAGE VARCHAR(100)
 );
 -- insert settings
-INSERT INTO ART_SETTINGS (SETTING_ID, SETTING_NAME, SETTING_VALUE, HELP_MESSAGE) VALUES 
-(1,'database version','3.0-alpha1');
+INSERT INTO ART_SETTINGS VALUES (1,'administrator.email','','');
 
 
 -- Default Data

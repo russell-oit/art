@@ -43,7 +43,7 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 	</jsp:attribute>
 
 	<jsp:body>
-		<div class="well col-lg-6 col-lg-offset-3">
+		<div class="well col-md-6 col-md-offset-3">
 			<form class="form-horizontal" method="POST" action="">
 				<fieldset>
 					<legend class="text-center">ART</legend>
@@ -82,10 +82,10 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 
 					<c:if test="${authenticationMethod eq WINDOWS_DOMAIN_AUTHENTICATION}">
 						<div class="form-group">
-							<label class="control-label col-lg-2" for="windowsDomain">
+							<label class="control-label col-md-2" for="windowsDomain">
 								<spring:message code="login.label.domain"/>
 							</label>
-							<div class="col-lg-10">
+							<div class="col-md-10">
 								<select name="windowsDomain" id="windowsDomain" class="form-control">
 									<c:forTokens var="domain" items='${domains}' delims=",">
 										<option value="${domain}" ${domain == selectedDomain ? "selected" : ""}>${domain}</option>
@@ -95,26 +95,26 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 						</div>
 					</c:if>
 					<div class="form-group">
-						<label class="control-label col-lg-2" for="username">
+						<label class="control-label col-md-2" for="username">
 							<spring:message code="login.label.username"/>
 						</label>
-						<div class="col-lg-10">
+						<div class="col-md-10">
 							<input type="text" name="username" id="username" class="form-control" value="${selectedUsername}">
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-lg-2" for="password">
+						<label class="control-label col-md-2" for="password">
 							<spring:message code="login.label.password"/>
 						</label>
-						<div class="col-lg-10">
+						<div class="col-md-10">
 							<input type="password" name="password" id="password" class="form-control">
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-lg-2" for="lang">
+						<label class="control-label col-md-2" for="lang">
 							<spring:message code="login.label.language"/>
 						</label>
-						<div class="col-lg-10">
+						<div class="col-md-10">
 							<select name="lang" id="lang" class="form-control">
 								<option value="en">English</option>
 								<c:forEach var="language" items="${languages}">
@@ -124,7 +124,7 @@ value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
 						</div>
 					</div>
 					<div class="form-group">
-						<div class="col-lg-10 col-lg-offset-2">
+						<div class="col-md-10 col-md-offset-2">
 							<button type="submit" class="btn btn-default">
 								<spring:message code="login.button.login"/>
 							</button>

@@ -18,7 +18,7 @@ Display an error without the main header
 <t:headerlessPage title="${pageTitle}">
 	<jsp:body>
 		<div class="row">
-			<div class="col-lg-6 col-lg-offset-3 alert alert-danger text-center">
+			<div class="col-md-6 col-md-offset-3 alert alert-danger text-center">
 				<spring:message code="${message}"/>
 			</div>
 		</div>
