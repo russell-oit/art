@@ -16,9 +16,6 @@ Login page
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<c:set var="WINDOWS_DOMAIN_AUTHENTICATION"
-value="<%= art.login.AuthenticationMethod.WindowsDomain.getValue()%>"/>
-
 <c:set var="localeCode" value="${pageContext.response.locale}" />
 
 <spring:message code="page.title.login" var="pageTitle" scope="page"/>

@@ -18,7 +18,7 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabaseForm;
 import art.dbcp.DataSource;
-import art.login.AuthenticationMethod;
+import art.enums.ArtAuthenticationMethod;
 import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
@@ -131,8 +131,10 @@ public class ArtConfig extends HttpServlet {
 		ServletContext ctx = getServletConfig().getServletContext();
 		String artVersion = ctx.getInitParameter("versionNumber");
 
-		//save version in application scope for access from jsp pages
+		//save variables in application scope for access from jsp pages
 		ctx.setAttribute("artVersion", artVersion);
+		ctx.setAttribute("WINDOWS_DOMAIN_AUTHENTICATION", ArtAuthenticationMethod.WindowsDomain.getValue());
+		ctx.setAttribute("INTERNAL_AUTHENTICATION", ArtAuthenticationMethod.Internal.getValue());
 
 		//set application path
 		appPath = ctx.getRealPath("");
@@ -286,15 +288,15 @@ public class ArtConfig extends HttpServlet {
 				loginMethod = as.getSetting("index_page_default");
 
 				if (StringUtils.equalsIgnoreCase(loginMethod, "ldaplogin")) {
-					loginMethod = AuthenticationMethod.Ldap.getValue();
+					loginMethod = ArtAuthenticationMethod.Ldap.getValue();
 				} else if (StringUtils.equalsIgnoreCase(loginMethod, "ntlogin")) {
-					loginMethod = AuthenticationMethod.WindowsDomain.getValue();
+					loginMethod = ArtAuthenticationMethod.WindowsDomain.getValue();
 				} else if (StringUtils.equalsIgnoreCase(loginMethod, "dblogin")) {
-					loginMethod = AuthenticationMethod.Database.getValue();
+					loginMethod = ArtAuthenticationMethod.Database.getValue();
 				} else if (StringUtils.equalsIgnoreCase(loginMethod, "autologin")) {
-					loginMethod = AuthenticationMethod.Auto.getValue();
+					loginMethod = ArtAuthenticationMethod.Auto.getValue();
 				} else {
-					loginMethod = AuthenticationMethod.Internal.getValue();
+					loginMethod = ArtAuthenticationMethod.Internal.getValue();
 				}
 				as.setSetting("authentication_method", loginMethod);
 			}
@@ -498,7 +500,7 @@ public class ArtConfig extends HttpServlet {
 	public static String getAuthenticationMethod() {
 		String authenticationMethod = as.getSetting("authentication_method");
 		if (StringUtils.isBlank(authenticationMethod)) {
-			authenticationMethod = AuthenticationMethod.Internal.getValue();
+			authenticationMethod = ArtAuthenticationMethod.Internal.getValue();
 		}
 
 		return authenticationMethod;

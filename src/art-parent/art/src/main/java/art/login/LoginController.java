@@ -1,5 +1,6 @@
 package art.login;
 
+import art.enums.ArtAuthenticationMethod;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.user.UserService;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,7 +36,7 @@ public class LoginController {
 	final static Logger logger = LoggerFactory.getLogger(LoginController.class);
 	@Autowired
 	private UserService userService;
-
+	
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
@@ -68,10 +70,10 @@ public class LoginController {
 			authenticationMethod = authenticationMethodSetting;
 		}
 
-		AuthenticationMethod loginMethod = AuthenticationMethod.getEnum(authenticationMethod);
+		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
 
 		//if auto login, no login page is displayed as user is authenticated by application server
-		if (loginMethod == AuthenticationMethod.Auto) {
+		if (loginMethod == ArtAuthenticationMethod.Auto) {
 			//TODO also ensure app setting is auto? to avoid unintended, 
 			//unauthorised access if machine not locked?
 			//or add separate auto login allowed setting?
@@ -116,8 +118,8 @@ public class LoginController {
 			//give message and change default to internal login
 			model.addAttribute("autoLoginUser", username);
 			model.addAttribute("autoLoginMessage", "login.message.invalidAutoLoginUser");
-			loginMethod = AuthenticationMethod.Internal;
-		} else if (loginMethod == AuthenticationMethod.WindowsDomain) {
+			loginMethod = ArtAuthenticationMethod.Internal;
+		} else if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {
 			String domains = ArtConfig.getArtSetting("mswin_domains");
 			if (domains != null) {
 				model.addAttribute("domains", domains);
@@ -162,7 +164,7 @@ public class LoginController {
 
 		HttpSession session = request.getSession();
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
-		AuthenticationMethod loginMethod = AuthenticationMethod.getEnum(authenticationMethod);
+		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
 
 		String ip = request.getRemoteAddr();
 		LoginHelper loginHelper = new LoginHelper();
@@ -183,13 +185,13 @@ public class LoginController {
 			result.setMessage("login.message.artUserDisabled");
 			result.setDetails(ArtUtils.ART_USER_DISABLED);
 		} else {
-			if (loginMethod == AuthenticationMethod.Internal) {
+			if (loginMethod == ArtAuthenticationMethod.Internal) {
 				result = InternalLogin.authenticate(username, password);
-			} else if (loginMethod == AuthenticationMethod.Database) {
+			} else if (loginMethod == ArtAuthenticationMethod.Database) {
 				result = DbLogin.authenticate(username, password);
-			} else if (loginMethod == AuthenticationMethod.Ldap) {
+			} else if (loginMethod == ArtAuthenticationMethod.Ldap) {
 				result = LdapLogin.authenticate(username, password);
-			} else if (loginMethod == AuthenticationMethod.WindowsDomain) {
+			} else if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {
 				result = WindowsDomainLogin.authenticate(windowsDomain, username, password);
 			} else {
 				//enum has other possible values but they aren't relevant here
@@ -201,12 +203,12 @@ public class LoginController {
 		//log result
 		loginHelper.log(loginMethod, result, username, ip);
 
-		if (!result.isAuthenticated() && user != null && loginMethod != AuthenticationMethod.Internal) {
+		if (!result.isAuthenticated() && user != null && loginMethod != ArtAuthenticationMethod.Internal) {
 			//external authentication failed. try internal authentication
 			result = InternalLogin.authenticate(username, password);
 			if (result.isAuthenticated()) {
 				//log access using internal authentication
-				loginMethod = AuthenticationMethod.Internal;
+				loginMethod = ArtAuthenticationMethod.Internal;
 				loginHelper.logSuccess(loginMethod, username, ip);
 			}
 		}
@@ -217,7 +219,7 @@ public class LoginController {
 			//authentication failed or user doesn't exist or user is disabled
 			//allow login if credentials match the repository user
 			if (isValidRepositoryUser(username, password)) {
-				loginMethod = AuthenticationMethod.Repository;
+				loginMethod = ArtAuthenticationMethod.Repository;
 				user = new User();
 				user.setAccessLevel(-1); //repository user 
 
@@ -245,7 +247,7 @@ public class LoginController {
 	}
 
 	private String getLoginSuccessNextPage(HttpSession session, User user,
-			AuthenticationMethod loginMethod, SessionStatus sessionStatus) {
+			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus) {
 		//prepare session
 
 		//TODO remove once refactoring is complete

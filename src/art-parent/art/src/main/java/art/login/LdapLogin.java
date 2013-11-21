@@ -2,7 +2,6 @@ package art.login;
 
 import art.servlets.ArtConfig;
 import com.unboundid.ldap.sdk.BindRequest;
-import com.unboundid.ldap.sdk.BindResult;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.DIGESTMD5BindRequest;
 import com.unboundid.ldap.sdk.ExtendedResult;
@@ -22,7 +21,6 @@ import com.unboundid.util.ssl.TrustAllTrustManager;
 import java.security.GeneralSecurityException;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.logging.Level;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;

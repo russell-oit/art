@@ -12,9 +12,6 @@ Header that appears at the top of all pages, except the login and logs pages
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<c:set var="INTERNAL_AUTHENTICATION"
-value="<%= art.login.AuthenticationMethod.Internal.getValue()%>"/>
-
 <div id="header">
 	<!-- Fixed navbar -->
 	<div class="navbar navbar-default navbar-fixed-top">

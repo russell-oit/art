@@ -1,11 +1,11 @@
-package art.login;
+package art.enums;
 
 /**
- * Enum for login or authentication methods
+ * Enum for application authentication methods
  *
  * @author Timothy Anyona
  */
-public enum AuthenticationMethod {
+public enum ArtAuthenticationMethod {
 
 	//values used by the login page
 	Internal("internal"), Auto("auto"), WindowsDomain("windowsDomain"),
@@ -14,7 +14,7 @@ public enum AuthenticationMethod {
 	Repository("repository"), Custom("custom"), Public("public"), Unknown("unknown");
 	private String value;
 
-	private AuthenticationMethod(String value) {
+	private ArtAuthenticationMethod(String value) {
 		this.value = value;
 	}
 
@@ -22,8 +22,8 @@ public enum AuthenticationMethod {
 		return value;
 	}
 
-	public static AuthenticationMethod getEnum(String method) {
-		for (AuthenticationMethod v : values()) {
+	public static ArtAuthenticationMethod getEnum(String method) {
+		for (ArtAuthenticationMethod v : values()) {
 			if (v.value.equalsIgnoreCase(method)) {
 				return v;
 			}

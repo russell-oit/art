@@ -1,5 +1,6 @@
 package art.login;
 
+import art.enums.ArtAuthenticationMethod;
 import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,11 +16,11 @@ public class LogoutController {
 	@RequestMapping("/logout")
 	public String logout(HttpSession session) {
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
-		AuthenticationMethod loginMethod = AuthenticationMethod.getEnum(authenticationMethod);
+		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
 
 		session.invalidate();
 
-		if (loginMethod == AuthenticationMethod.Auto) {
+		if (loginMethod == ArtAuthenticationMethod.Auto) {
 			//display logout page for auto login.
 			return "logout";
 		} else {

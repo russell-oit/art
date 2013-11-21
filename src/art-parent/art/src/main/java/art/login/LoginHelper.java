@@ -1,5 +1,6 @@
 package art.login;
 
+import art.enums.ArtAuthenticationMethod;
 import art.utils.ArtHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class LoginHelper {
 	 * @param username
 	 * @param ip ip address from which login was done or attempted
 	 */
-	public void log(AuthenticationMethod loginMethod, LoginResult result,
+	public void log(ArtAuthenticationMethod loginMethod, LoginResult result,
 			String username, String ip) {
 
 		log(loginMethod, result.isAuthenticated(), username, ip, result.getDetails());
@@ -35,7 +36,7 @@ public class LoginHelper {
 	 * @param ip
 	 * @param failureMessage
 	 */
-	private void log(AuthenticationMethod loginMethod, boolean success,
+	private void log(ArtAuthenticationMethod loginMethod, boolean success,
 			String username, String ip, String failureMessage) {
 
 		String loginStatus;
@@ -54,13 +55,13 @@ public class LoginHelper {
 		logger.info("{}. username={}, message={}", new Object[]{loginStatus, username, logMessage});
 	}
 
-	public void logSuccess(AuthenticationMethod loginMethod,
+	public void logSuccess(ArtAuthenticationMethod loginMethod,
 			String username, String ip) {
 
 		log(loginMethod, true, username, ip, "");
 	}
 
-	public void logFailure(AuthenticationMethod loginMethod,
+	public void logFailure(ArtAuthenticationMethod loginMethod,
 			String username, String ip, String message) {
 
 		log(loginMethod, false, username, ip, message);

@@ -1,6 +1,6 @@
 package art.servlets;
 
-import art.login.AuthenticationMethod;
+import art.enums.ArtAuthenticationMethod;
 import art.login.LoginHelper;
 import art.user.User;
 import art.user.UserService;
@@ -69,7 +69,7 @@ public class AuthorizationFilter implements Filter {
 			if (user == null) {
 				//custom authentication, public user session or session expired
 
-				AuthenticationMethod loginMethod = AuthenticationMethod.Unknown;
+				ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.Unknown;
 
 				//test custom authentication
 				String username = (String) session.getAttribute("username");
@@ -79,10 +79,10 @@ public class AuthorizationFilter implements Filter {
 					if (request.getParameter("public_user") != null
 							|| request.getParameter("_public_user") != null) {
 						username = ArtUtils.PUBLIC_USER;
-						loginMethod = AuthenticationMethod.Public;
+						loginMethod = ArtAuthenticationMethod.Public;
 					}
 				} else {
-					loginMethod = AuthenticationMethod.Custom;
+					loginMethod = ArtAuthenticationMethod.Custom;
 				}
 
 				if (username != null) {
@@ -108,7 +108,7 @@ public class AuthorizationFilter implements Filter {
 					} else {
 						//valid access
 						//ensure public user always has 0 access level
-						if (loginMethod == AuthenticationMethod.Public) {
+						if (loginMethod == ArtAuthenticationMethod.Public) {
 							user.setAccessLevel(0);
 						}
 						session.setAttribute("sessionUser", user);
