@@ -7,8 +7,7 @@ package art.enums;
  */
 public enum DisplayNullValue {
 
-	Yes("yes"), NoNumbersAsBlank("no-numbers-blank"), NoNumbersAsZero("no-numbers-zero"),
-	Unknown("unknown");
+	Yes("yes"), NoNumbersAsBlank("no-numbers-blank"), NoNumbersAsZero("no-numbers-zero");
 	private String value;
 
 	private DisplayNullValue(String value) {
@@ -19,9 +18,9 @@ public enum DisplayNullValue {
 		return value;
 	}
 
-	public static DisplayNullValue getEnum(String method) {
+	public static DisplayNullValue getEnum(String value) {
 		for (DisplayNullValue v : values()) {
-			if (v.value.equalsIgnoreCase(method)) {
+			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}

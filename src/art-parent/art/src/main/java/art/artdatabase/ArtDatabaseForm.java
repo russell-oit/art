@@ -11,12 +11,12 @@ public class ArtDatabaseForm implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String driver;
-	private String url;
+	private String url = "demo";
 	private String username;
 	private String password;
 	private String connectionTestSql;
-	private int connectionPoolTimeout;
-	private int maxPoolConnections; //setting used by art database and all datasources
+	private int connectionPoolTimeout = 20;
+	private int maxPoolConnections = 20; //setting used by art database and all datasources
 
 	/**
 	 * Get the value of maxPoolConnections

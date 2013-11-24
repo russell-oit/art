@@ -11,7 +11,7 @@ public enum ArtAuthenticationMethod {
 	Internal("internal"), Auto("auto"), WindowsDomain("windowsDomain"),
 	Ldap("ldap"), Database("database"),
 	//values used internally by ART
-	Repository("repository"), Custom("custom"), Public("public"), Unknown("unknown");
+	Repository("repository"), Custom("custom"), Public("public");
 	private String value;
 
 	private ArtAuthenticationMethod(String value) {
@@ -22,9 +22,9 @@ public enum ArtAuthenticationMethod {
 		return value;
 	}
 
-	public static ArtAuthenticationMethod getEnum(String method) {
+	public static ArtAuthenticationMethod getEnum(String value) {
 		for (ArtAuthenticationMethod v : values()) {
-			if (v.value.equalsIgnoreCase(method)) {
+			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}

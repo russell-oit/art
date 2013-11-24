@@ -8,48 +8,48 @@ import art.enums.PdfPageSize;
 
 /**
  * Class to hold application settings
- * 
+ *
  * @author Timothy Anyona
  */
 public class Settings {
-	
+
 	private String administratorEmail;
 	private String smtpServer;
 	private String smtpUsername;
 	private String smtpPassword;
-	private ConnectionEncryptionMethod smtpConnectionEncryptionMethod;
-	private int smtpPort;
-	private PdfPageSize pdfPageSize;
+	private ConnectionEncryptionMethod smtpConnectionEncryptionMethod = ConnectionEncryptionMethod.None;
+	private int smtpPort = 25;
+	private PdfPageSize pdfPageSize = PdfPageSize.A4;
 	private String pdfFontName;
 	private String pdfFontFile;
 	private String pdfFontDirectory;
 	private String pdfFontEncoding;
 	private boolean pdfFontEmbedded;
-	private int maxRowsDefault;
+	private int maxRowsDefault = 10000;
 	private String maxRowsSpecific;
 	private boolean showHeaderInPublicUserSession;
 	private String rssLink;
 	private int mondrianCacheExpiryPeriod;
-	private String dateFormat;
-	private String timeFormat;
-	private boolean schedulingEnabled;
-	private String availableViewModes;
-	private int maxRunningReports;
-	private DisplayNullValue displayNullValue;
-	private ArtAuthenticationMethod artAuthenticationMethod;
+	private String dateFormat = "dd-MMM-yyyy";
+	private String timeFormat = "HH:mm:ss";
+	private boolean schedulingEnabled = true;
+	private String availableReportFormats = "htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
+	private int maxRunningReports = 1000;
+	private DisplayNullValue displayNullValue = DisplayNullValue.NoNumbersAsBlank;
+	private ArtAuthenticationMethod artAuthenticationMethod = ArtAuthenticationMethod.Internal;
 	private String windowsDomainController;
 	private String allowedWindowsDomains;
 	private String jdbcAuthenticationDriver;
 	private String jdbcAuthenticationUrl;
 	private String ldapServer;
-	private int ldapPort;
-	private ConnectionEncryptionMethod ldapConnectionEncryptionMethod;
+	private int ldapPort = 389;
+	private ConnectionEncryptionMethod ldapConnectionEncryptionMethod = ConnectionEncryptionMethod.None;
 	private String ldapUrl;
 	private String ldapBaseDn;
 	private String ldapBindDn;
 	private String ldapBindPassword;
-	private String ldapUserIdAttribute;
-	private LdapAuthenticationMethod ldapAuthenticationMethod;
+	private String ldapUserIdAttribute = "uid";
+	private LdapAuthenticationMethod ldapAuthenticationMethod = LdapAuthenticationMethod.Simple;
 	private String ldapRealm;
 
 	/**
@@ -360,21 +360,21 @@ public class Settings {
 	}
 
 	/**
-	 * Get the value of availableViewModes
+	 * Get the value of availableReportFormats
 	 *
-	 * @return the value of availableViewModes
+	 * @return the value of availableReportFormats
 	 */
-	public String getAvailableViewModes() {
-		return availableViewModes;
+	public String getAvailableReportFormats() {
+		return availableReportFormats;
 	}
 
 	/**
-	 * Set the value of availableViewModes
+	 * Set the value of availableReportFormats
 	 *
-	 * @param availableViewModes new value of availableViewModes
+	 * @param availableReportFormats new value of availableReportFormats
 	 */
-	public void setAvailableViewModes(String availableViewModes) {
-		this.availableViewModes = availableViewModes;
+	public void setAvailableReportFormats(String availableReportFormats) {
+		this.availableReportFormats = availableReportFormats;
 	}
 
 	/**
@@ -660,7 +660,8 @@ public class Settings {
 	/**
 	 * Set the value of smtpConnectionEncryptionMethod
 	 *
-	 * @param smtpConnectionEncryptionMethod new value of smtpConnectionEncryptionMethod
+	 * @param smtpConnectionEncryptionMethod new value of
+	 * smtpConnectionEncryptionMethod
 	 */
 	public void setSmtpConnectionEncryptionMethod(ConnectionEncryptionMethod smtpConnectionEncryptionMethod) {
 		this.smtpConnectionEncryptionMethod = smtpConnectionEncryptionMethod;
@@ -737,6 +738,4 @@ public class Settings {
 	public void setAdministratorEmail(String administratorEmail) {
 		this.administratorEmail = administratorEmail;
 	}
-
-	
 }

@@ -53,12 +53,12 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureSettings.do">
+								<a href="${pageContext.request.contextPath}/app/settings.do">
 									<spring:message code="header.link.configureSettings"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureDatasources.do">
+								<a href="${pageContext.request.contextPath}/app/datasources.do">
 									<spring:message code="header.link.configureDatasources"/>
 								</a>
 							</li>
@@ -68,12 +68,12 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureReportGroups.do">
+								<a href="${pageContext.request.contextPath}/app/reportGroups.do">
 									<spring:message code="header.link.configureReportGroups"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/users.do">
+								<a href="${pageContext.request.contextPath}/app/configureUsers.do">
 									<spring:message code="header.link.configureUsers"/>
 								</a>
 							</li>

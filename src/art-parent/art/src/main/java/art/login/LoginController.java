@@ -9,6 +9,7 @@ import art.utils.DbUtils;
 import art.utils.LanguageUtils;
 import art.utils.UserEntity;
 import java.sql.Connection;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -30,13 +31,18 @@ import org.springframework.web.bind.support.SessionStatus;
  * @author Timothy Anyona
  */
 @Controller
-@SessionAttributes({"languages", "domains", "selectedDomain", "selectedUsername"})
+@SessionAttributes({"domains", "selectedDomain", "selectedUsername"})
 public class LoginController {
 
 	final static Logger logger = LoggerFactory.getLogger(LoginController.class);
 	@Autowired
 	private UserService userService;
-	
+
+	@ModelAttribute("languages")
+	public Map<String, String> addLanguages() {
+		return LanguageUtils.getLanguages();
+	}
+
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
@@ -50,7 +56,7 @@ public class LoginController {
 			user.setAccessLevel(-1); //repository user 
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
-			
+
 			return "redirect:/app/artDatabase.do";
 		}
 
@@ -103,7 +109,7 @@ public class LoginController {
 					loginHelper.logSuccess(loginMethod, username, ip);
 
 					//go to next page
-					return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
+					return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus, model);
 				}
 			} else {
 				//user not authenticated. should never get here as browser won't have authenticated?
@@ -129,8 +135,6 @@ public class LoginController {
 		//store auth method in normal session attribute rather than spring session attribute
 		//it will be used even after login
 		session.setAttribute("authenticationMethod", loginMethod.getValue());
-
-		model.addAttribute("languages", LanguageUtils.getLanguages());
 
 		return "login";
 	}
@@ -235,7 +239,7 @@ public class LoginController {
 		if (result.isAuthenticated() && user != null) {
 			//access granted 
 
-			return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
+			return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus, model);
 		} else {
 			//login failure. always display invalid account message rather than actual result details
 			//better for security if less details are displayed
@@ -247,7 +251,7 @@ public class LoginController {
 	}
 
 	private String getLoginSuccessNextPage(HttpSession session, User user,
-			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus) {
+			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus, Model model) {
 		//prepare session
 
 		//TODO remove once refactoring is complete
@@ -278,6 +282,9 @@ public class LoginController {
 		if (nextPage == null) {
 			nextPage = "/app/reports.do";
 		}
+
+		//clear model attributes to that they don't appear in url on redirect
+		model.asMap().clear();
 
 		return "redirect:" + nextPage;
 	}

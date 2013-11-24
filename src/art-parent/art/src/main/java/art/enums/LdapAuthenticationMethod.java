@@ -7,7 +7,7 @@ package art.enums;
  */
 public enum LdapAuthenticationMethod {
 
-	Simple("simple"), DigestMD5("digest-md5"), Unknown("unknown");
+	Simple("Simple"), DigestMD5("Digest-MD5");
 	private String value;
 
 	private LdapAuthenticationMethod(String value) {
@@ -18,9 +18,9 @@ public enum LdapAuthenticationMethod {
 		return value;
 	}
 
-	public static LdapAuthenticationMethod getEnum(String method) {
+	public static LdapAuthenticationMethod getEnum(String value) {
 		for (LdapAuthenticationMethod v : values()) {
-			if (v.value.equalsIgnoreCase(method)) {
+			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}

@@ -12,7 +12,9 @@ ART 3.0
 * Renamed "Report on Column" query types to "Group"
 * Renamed "Graph" query types to "Chart"
 * Renamed "Query" concept to "Report"
+* Renamed "View Modes" to "Report Formats"
 * Modified application settings configuration. Settings need to be manually re-entered.
+* Modified application urls. Previously bookmarked urls may no longer work.
 * Updated cewolf to 1.2.4
 
 ART 2.5.2

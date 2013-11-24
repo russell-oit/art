@@ -7,7 +7,7 @@ package art.enums;
  */
 public enum ConnectionEncryptionMethod {
 
-	None("none"), SSL("ssl"), StartTLS("starttls"), Unknown("unknown");
+	None("none"), SSL("ssl"), StartTLS("starttls");
 	private String value;
 
 	private ConnectionEncryptionMethod(String value) {
@@ -18,9 +18,9 @@ public enum ConnectionEncryptionMethod {
 		return value;
 	}
 
-	public static ConnectionEncryptionMethod getEnum(String method) {
+	public static ConnectionEncryptionMethod getEnum(String value) {
 		for (ConnectionEncryptionMethod v : values()) {
-			if (v.value.equalsIgnoreCase(method)) {
+			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}

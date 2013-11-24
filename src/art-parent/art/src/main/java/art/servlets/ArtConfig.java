@@ -19,6 +19,7 @@ package art.servlets;
 import art.artdatabase.ArtDatabaseForm;
 import art.dbcp.DataSource;
 import art.enums.ArtAuthenticationMethod;
+import art.settings.Settings;
 import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
@@ -28,7 +29,6 @@ import art.utils.QuartzProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -72,15 +72,17 @@ public class ArtConfig extends HttpServlet {
 	private static int defaultMaxRows;
 	private static String artPropertiesFilePath; //full path to art.properties file
 	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
-	private static String dateFormat; //for date fields, format of date portion
-	private static String timeFormat; //for date fields, format of time portion
+	private static SimpleDateFormat dateFormatter;
+	private static SimpleDateFormat timeFormatter;
+	private static SimpleDateFormat dateTimeFormatter;
 	private static String jobsPath;
 	private static boolean customExportDirectory = false; //to enable custom export path
 	private static String webinfPath;
-	private static String artDatabaseFilePath; //full path to art-database file
+	private static String artDatabaseFilePath;
 	private static String hsqldbPath;
-	private final static int DEFAULT_CONNECTION_POOL_TIMEOUT = 20;
 	private static ArtDatabaseForm artDatabaseConfiguration;
+	private static String settingsFilePath;
+	private static Settings settings;
 
 	/**
 	 * {@inheritDoc}
@@ -178,6 +180,9 @@ public class ArtConfig extends HttpServlet {
 		//set art-database file path
 		artDatabaseFilePath = webinfPath + "art-database.json";
 
+		//set settings file path
+		settingsFilePath = webinfPath + "art-settings.json";
+
 		//construct all view modes list
 		allViewModes = new ArrayList<String>();
 
@@ -200,6 +205,9 @@ public class ArtConfig extends HttpServlet {
 
 		//initialize datasources
 		initializeDatasources();
+
+		//load settings
+		settings = loadSettings();
 
 		//load settings from art.properties file
 		if (loadArtSettings()) {
@@ -254,17 +262,22 @@ public class ArtConfig extends HttpServlet {
 
 			//set date format
 			final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
-			dateFormat = as.getSetting("date_format");
+			String dateFormat = as.getSetting("date_format");
 			if (StringUtils.isBlank(dateFormat)) {
 				dateFormat = DEFAULT_DATE_FORMAT;
 			}
 
 			//set time format
 			final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
-			timeFormat = as.getSetting("time_format");
+			String timeFormat = as.getSetting("time_format");
 			if (StringUtils.isBlank(timeFormat)) {
 				timeFormat = DEFAULT_TIME_FORMAT;
 			}
+
+			//initialize date formatters
+			timeFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
+			dateFormatter = new SimpleDateFormat(dateFormat);
+			dateTimeFormatter = new SimpleDateFormat(dateFormat + " " + timeFormat);
 
 			//set user view modes. if a view mode is not in the list, then it's hidden
 			String modes = as.getSetting("view_modes");
@@ -431,10 +444,7 @@ public class ArtConfig extends HttpServlet {
 						jndiDatasource = false;
 					}
 
-					int timeout = NumberUtils.toInt(rs.getString("POOL_TIMEOUT"));
-					if (timeout <= 0) {
-						timeout = DEFAULT_CONNECTION_POOL_TIMEOUT;
-					}
+					int timeout = rs.getInt("POOL_TIMEOUT");
 
 					DataSource ds = new DataSource(timeout, jndiDatasource);
 					ds.setName(rs.getString("NAME"));
@@ -1028,20 +1038,18 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Get string to be displayed in query output for a date field
 	 *
-	 * @param dt
+	 * @param date
 	 * @return
 	 */
-	public static String getDateDisplayString(java.util.Date dt) {
+	public static String getDateDisplayString(java.util.Date date) {
 		String dateString;
-		SimpleDateFormat zf = new SimpleDateFormat("HH:mm:ss.SSS");
-		SimpleDateFormat df = new SimpleDateFormat(dateFormat);
-		SimpleDateFormat dtf = new SimpleDateFormat(dateFormat + " " + timeFormat);
-		if (dt == null) {
+
+		if (date == null) {
 			dateString = "";
-		} else if (zf.format(dt).equals("00:00:00.000")) {
-			dateString = df.format(dt);
+		} else if (timeFormatter.format(date).equals("00:00:00.000")) {
+			dateString = dateFormatter.format(date);
 		} else {
-			dateString = dtf.format(dt);
+			dateString = dateTimeFormatter.format(date);
 		}
 		return dateString;
 	}
@@ -1071,20 +1079,11 @@ public class ArtConfig extends HttpServlet {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabaseForm = mapper.readValue(artDatabaseFile, ArtDatabaseForm.class);
 
+				//de-obfuscate password fields
 				artDatabaseForm.setPassword(Encrypter.decrypt(artDatabaseForm.getPassword()));
-
-				if (artDatabaseForm.getConnectionPoolTimeout() <= 0) {
-					artDatabaseForm.setConnectionPoolTimeout(DEFAULT_CONNECTION_POOL_TIMEOUT);
-				}
-
-				final int DEFAULT_MAX_POOL_CONNECTIONS = 20;
-				if (artDatabaseForm.getMaxPoolConnections() <= 0) {
-					artDatabaseForm.setMaxPoolConnections(DEFAULT_MAX_POOL_CONNECTIONS);
-				}
 			} else {
 				logger.info("ART Database configuration file not found");
 			}
-
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 		}
@@ -1098,8 +1097,8 @@ public class ArtConfig extends HttpServlet {
 	 * @param artDatabaseForm
 	 * @param artDatabaseFilePath
 	 */
-	public static void SaveArtDatabaseConfiguration(ArtDatabaseForm artDatabaseForm)
-			throws FileNotFoundException, IOException {
+	public static void saveArtDatabaseConfiguration(ArtDatabaseForm artDatabaseForm)
+			throws IOException {
 
 		//obfuscate password field
 		artDatabaseForm.setPassword(Encrypter.encrypt(artDatabaseForm.getPassword()));
@@ -1107,6 +1106,65 @@ public class ArtConfig extends HttpServlet {
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabaseForm);
+	}
+
+	/**
+	 * Load application settings
+	 *
+	 * @return object with configured settings or new object if settings not
+	 * configured or error occurs
+	 */
+	private static Settings loadSettings() {
+		Settings newSettings = null;
+
+		try {
+			File settingsFile = new File(settingsFilePath);
+			if (settingsFile.exists()) {
+				ObjectMapper mapper = new ObjectMapper();
+				newSettings = mapper.readValue(settingsFile, Settings.class);
+
+				//de-obfuscate password fields
+				newSettings.setSmtpPassword(Encrypter.decrypt(newSettings.getSmtpPassword()));
+				newSettings.setLdapBindPassword(Encrypter.decrypt(newSettings.getLdapBindPassword()));
+			}
+		} catch (Exception ex) {
+			logger.error("Error", ex);
+		}
+
+		//use default settings if error or none specified
+		if (newSettings == null) {
+			newSettings = new Settings();
+		}
+
+		return newSettings;
+	}
+
+	/**
+	 * Save settings to file
+	 *
+	 * @param newSettings
+	 * @throws IOException
+	 */
+	public static void saveSettings(Settings newSettings) throws IOException {
+		//obfuscate password fields
+		newSettings.setSmtpPassword(Encrypter.encrypt(newSettings.getSmtpPassword()));
+		newSettings.setLdapBindPassword(Encrypter.encrypt(newSettings.getLdapBindPassword()));
+
+		File settingsFile = new File(settingsFilePath);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, newSettings);
+
+		settings = null;
+		settings = newSettings;
+	}
+
+	/**
+	 * Get current settings
+	 *
+	 * @return
+	 */
+	public static Settings getSettings() {
+		return settings;
 	}
 
 	private static void createQuartzScheduler() {

@@ -69,7 +69,7 @@ public class AuthorizationFilter implements Filter {
 			if (user == null) {
 				//custom authentication, public user session or session expired
 
-				ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.Unknown;
+				ArtAuthenticationMethod loginMethod = null;
 
 				//test custom authentication
 				String username = (String) session.getAttribute("username");
@@ -85,7 +85,7 @@ public class AuthorizationFilter implements Filter {
 					loginMethod = ArtAuthenticationMethod.Custom;
 				}
 
-				if (username != null) {
+				if (username != null && loginMethod != null) {
 					//either custom authentication or public user session
 					//ensure user exists
 					LoginHelper loginHelper = new LoginHelper();
@@ -192,6 +192,11 @@ public class AuthorizationFilter implements Filter {
 		} else if (StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
 			//super admins only, and repository user
 			if (accessLevel >= 100 || accessLevel == -1) {
+				authorised = true;
+			}
+		} else if (StringUtils.startsWith(requestUri, path + "settings.do")) {
+			//senior admins and above
+			if (accessLevel >= 80) {
 				authorised = true;
 			}
 		}

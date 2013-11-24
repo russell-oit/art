@@ -87,7 +87,7 @@ Display art database configuration page
 								<spring:message code="artDatabase.label.jdbcDriver"/>
 							</label>
 							<div class="col-md-8">
-								<form:input path="driver" type="text" name="driver" id="driver" class="form-control" />
+								<form:input path="driver" name="driver" id="driver" class="form-control" />
 							</div>
 						</div>
 						<div class="form-group">
@@ -141,7 +141,7 @@ Display art database configuration page
 							<div class="col-md-8">
 								<div class="input-group">
 									<form:input path="connectionPoolTimeout" name="connectionPoolTimeout"
-												id="connectionPoolTimeout" class="form-control" />
+												id="connectionPoolTimeout" maxlength="5" class="form-control" />
 									<spring:message code="artDatabase.help.connectionPoolTimeout"
 													var="help" htmlEscape="false" />
 									<span class="input-group-btn" >
@@ -162,7 +162,7 @@ Display art database configuration page
 							<div class="col-md-8">
 								<div class="input-group">
 									<form:input path="maxPoolConnections" name="maxPoolConnections"
-												id="maxPoolConnections" class="form-control" />
+												id="maxPoolConnections" maxlength="3" class="form-control" />
 									<spring:message code="artDatabase.help.maxPoolConnections"
 													var="help" />
 									<span class="input-group-btn" >

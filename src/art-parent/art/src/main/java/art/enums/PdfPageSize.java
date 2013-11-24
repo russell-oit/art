@@ -7,8 +7,8 @@ package art.enums;
  */
 public enum PdfPageSize {
 
-	A4("A4"), A4Landscape("A4-landscape"), Letter("Letter"),
-	LetterLandscape("Letter-landscape"), Unknown("unknown");
+	A4("A4"), A4Landscape("A4 Landscape"), Letter("Letter"),
+	LetterLandscape("Letter Landscape");
 	
 	private String value;
 
@@ -20,9 +20,9 @@ public enum PdfPageSize {
 		return value;
 	}
 
-	public static PdfPageSize getEnum(String method) {
+	public static PdfPageSize getEnum(String value) {
 		for (PdfPageSize v : values()) {
-			if (v.value.equalsIgnoreCase(method)) {
+			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}

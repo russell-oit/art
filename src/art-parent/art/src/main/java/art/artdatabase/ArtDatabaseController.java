@@ -31,7 +31,7 @@ public class ArtDatabaseController {
 	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
 
 	@ModelAttribute("databaseTypes")
-	public Map<String, String> getDatabaseTypes() {
+	public Map<String, String> addDatabaseTypes() {
 		return ArtUtils.getDatabaseTypes();
 	}
 
@@ -41,9 +41,8 @@ public class ArtDatabaseController {
 		ArtDatabaseForm artDatabaseForm = ArtConfig.getArtDatabaseConfiguration();
 
 		if (artDatabaseForm == null) {
-			//art database not configured
+			//art database not configured. use default values
 			artDatabaseForm=new ArtDatabaseForm();
-			artDatabaseForm.setUrl("demo");
 		} 
 
 		model.addAttribute("artDatabaseForm", artDatabaseForm);
@@ -54,10 +53,9 @@ public class ArtDatabaseController {
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.POST)
 	public String processArtDatabaseConfiguration(
 			@ModelAttribute("artDatabaseForm") @Valid ArtDatabaseForm artDatabaseForm,
-			BindingResult result,
-			Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 		
-		if(result.hasErrors()){
+		if (result.hasErrors()) {
 			return "artDatabase";
 		}
 
@@ -119,7 +117,7 @@ public class ArtDatabaseController {
 			}
 
 			//save settings
-			ArtConfig.SaveArtDatabaseConfiguration(artDatabaseForm);
+			ArtConfig.saveArtDatabaseConfiguration(artDatabaseForm);
 
 			ArtConfig.refreshConnections();
 
