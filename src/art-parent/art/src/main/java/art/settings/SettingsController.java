@@ -1,8 +1,13 @@
 package art.settings;
 
+import art.enums.ArtAuthenticationMethod;
+import art.enums.ConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.servlets.ArtConfig;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.validation.Valid;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -26,6 +31,24 @@ public class SettingsController {
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
 		return PdfPageSize.values();
+	}
+	
+	@ModelAttribute("connectionEncryptionMethods")
+	public ConnectionEncryptionMethod[] addConnectionEncryptionMethods(){
+		return ConnectionEncryptionMethod.values();
+	}
+	
+	@ModelAttribute("artAuthenticationMethods")
+	public List<ArtAuthenticationMethod> addArtAuthenticationMethods(){
+		List<ArtAuthenticationMethod> methods= new ArrayList<ArtAuthenticationMethod>();
+		methods.addAll(Arrays.asList(ArtAuthenticationMethod.values()));
+		
+		//remove irrelevant methods
+		methods.remove(ArtAuthenticationMethod.Custom);
+		methods.remove(ArtAuthenticationMethod.Public);
+		methods.remove(ArtAuthenticationMethod.Repository);
+		
+		return methods;
 	}
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.GET)

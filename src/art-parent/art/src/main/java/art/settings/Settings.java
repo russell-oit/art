@@ -2,9 +2,10 @@ package art.settings;
 
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionEncryptionMethod;
-import art.enums.DisplayNullValue;
+import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.PdfPageSize;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * Class to hold application settings
@@ -19,7 +20,7 @@ public class Settings {
 	private String smtpPassword;
 	private ConnectionEncryptionMethod smtpConnectionEncryptionMethod = ConnectionEncryptionMethod.None;
 	private int smtpPort = 25;
-	private PdfPageSize pdfPageSize = PdfPageSize.A4;
+	private PdfPageSize pdfPageSize = PdfPageSize.A4Landscape;
 	private String pdfFontName;
 	private String pdfFontFile;
 	private String pdfFontDirectory;
@@ -30,17 +31,20 @@ public class Settings {
 	private boolean showHeaderInPublicUserSession;
 	private String rssLink;
 	private int mondrianCacheExpiryPeriod;
+	@NotBlank
 	private String dateFormat = "dd-MMM-yyyy";
+	@NotBlank
 	private String timeFormat = "HH:mm:ss";
 	private boolean schedulingEnabled = true;
+	@NotBlank
 	private String availableReportFormats = "htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
 	private int maxRunningReports = 1000;
-	private DisplayNullValue displayNullValue = DisplayNullValue.NoNumbersAsBlank;
+	private DisplayNull displayNull = DisplayNull.NoNumbersAsZero;
 	private ArtAuthenticationMethod artAuthenticationMethod = ArtAuthenticationMethod.Internal;
 	private String windowsDomainController;
 	private String allowedWindowsDomains;
-	private String jdbcAuthenticationDriver;
-	private String jdbcAuthenticationUrl;
+	private String databaseAuthenticationDriver;
+	private String databaseAuthenticationUrl;
 	private String ldapServer;
 	private int ldapPort = 389;
 	private ConnectionEncryptionMethod ldapConnectionEncryptionMethod = ConnectionEncryptionMethod.None;
@@ -234,39 +238,39 @@ public class Settings {
 	}
 
 	/**
-	 * Get the value of jdbcAuthenticationUrl
+	 * Get the value of databaseAuthenticationUrl
 	 *
-	 * @return the value of jdbcAuthenticationUrl
+	 * @return the value of databaseAuthenticationUrl
 	 */
-	public String getJdbcAuthenticationUrl() {
-		return jdbcAuthenticationUrl;
+	public String getDatabaseAuthenticationUrl() {
+		return databaseAuthenticationUrl;
 	}
 
 	/**
-	 * Set the value of jdbcAuthenticationUrl
+	 * Set the value of databaseAuthenticationUrl
 	 *
-	 * @param jdbcAuthenticationUrl new value of jdbcAuthenticationUrl
+	 * @param databaseAuthenticationUrl new value of databaseAuthenticationUrl
 	 */
-	public void setJdbcAuthenticationUrl(String jdbcAuthenticationUrl) {
-		this.jdbcAuthenticationUrl = jdbcAuthenticationUrl;
+	public void setDatabaseAuthenticationUrl(String databaseAuthenticationUrl) {
+		this.databaseAuthenticationUrl = databaseAuthenticationUrl;
 	}
 
 	/**
-	 * Get the value of jdbcAuthenticationDriver
+	 * Get the value of databaseAuthenticationDriver
 	 *
-	 * @return the value of jdbcAuthenticationDriver
+	 * @return the value of databaseAuthenticationDriver
 	 */
-	public String getJdbcAuthenticationDriver() {
-		return jdbcAuthenticationDriver;
+	public String getDatabaseAuthenticationDriver() {
+		return databaseAuthenticationDriver;
 	}
 
 	/**
-	 * Set the value of jdbcAuthenticationDriver
+	 * Set the value of databaseAuthenticationDriver
 	 *
-	 * @param jdbcAuthenticationDriver new value of jdbcAuthenticationDriver
+	 * @param databaseAuthenticationDriver new value of databaseAuthenticationDriver
 	 */
-	public void setJdbcAuthenticationDriver(String jdbcAuthenticationDriver) {
-		this.jdbcAuthenticationDriver = jdbcAuthenticationDriver;
+	public void setDatabaseAuthenticationDriver(String databaseAuthenticationDriver) {
+		this.databaseAuthenticationDriver = databaseAuthenticationDriver;
 	}
 
 	/**
@@ -310,7 +314,7 @@ public class Settings {
 	 *
 	 * @return the value of artAuthenticationMethod
 	 */
-	public ArtAuthenticationMethod getAuthenticationMethod() {
+	public ArtAuthenticationMethod getArtAuthenticationMethod() {
 		return artAuthenticationMethod;
 	}
 
@@ -319,26 +323,26 @@ public class Settings {
 	 *
 	 * @param artAuthenticationMethod new value of artAuthenticationMethod
 	 */
-	public void setAuthenticationMethod(ArtAuthenticationMethod authenticationMethod) {
-		this.artAuthenticationMethod = authenticationMethod;
+	public void setArtAuthenticationMethod(ArtAuthenticationMethod artAuthenticationMethod) {
+		this.artAuthenticationMethod = artAuthenticationMethod;
 	}
 
 	/**
-	 * Get the value of displayNullValue
+	 * Get the value of displayNull
 	 *
-	 * @return the value of displayNullValue
+	 * @return the value of displayNull
 	 */
-	public DisplayNullValue getDisplayNullValue() {
-		return displayNullValue;
+	public DisplayNull getDisplayNull() {
+		return displayNull;
 	}
 
 	/**
-	 * Set the value of displayNullValue
+	 * Set the value of displayNull
 	 *
-	 * @param displayNullValue new value of displayNullValue
+	 * @param displayNull new value of displayNull
 	 */
-	public void setDisplayNullValue(DisplayNullValue displayNullValue) {
-		this.displayNullValue = displayNullValue;
+	public void setDisplayNull(DisplayNull displayNull) {
+		this.displayNull = displayNull;
 	}
 
 	/**

@@ -301,7 +301,7 @@ public class ArtConfig extends HttpServlet {
 				loginMethod = as.getSetting("index_page_default");
 
 				if (StringUtils.equalsIgnoreCase(loginMethod, "ldaplogin")) {
-					loginMethod = ArtAuthenticationMethod.Ldap.getValue();
+					loginMethod = ArtAuthenticationMethod.LDAP.getValue();
 				} else if (StringUtils.equalsIgnoreCase(loginMethod, "ntlogin")) {
 					loginMethod = ArtAuthenticationMethod.WindowsDomain.getValue();
 				} else if (StringUtils.equalsIgnoreCase(loginMethod, "dblogin")) {

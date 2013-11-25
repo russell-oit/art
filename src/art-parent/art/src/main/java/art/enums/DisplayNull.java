@@ -1,18 +1,16 @@
 package art.enums;
 
 /**
- * Enum for pdf page size
+ * Enum for null value display setting
  *
  * @author Timothy Anyona
  */
-public enum PdfPageSize {
+public enum DisplayNull {
 
-	A4("A4"), A4Landscape("A4 Landscape"), Letter("Letter"),
-	LetterLandscape("Letter Landscape");
-	
+	Yes("yes"), NoNumbersAsBlank("no-numbers-blank"), NoNumbersAsZero("no-numbers-zero");
 	private String value;
 
-	private PdfPageSize(String value) {
+	private DisplayNull(String value) {
 		this.value = value;
 	}
 
@@ -31,13 +29,13 @@ public enum PdfPageSize {
 	 * @param value
 	 * @return
 	 */
-	public static PdfPageSize getEnum(String value) {
-		for (PdfPageSize v : values()) {
+	public static DisplayNull getEnum(String value) {
+		for (DisplayNull v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
-		return A4; //default
+		return Yes; //default
 	}
 	
 	/**

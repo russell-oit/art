@@ -193,7 +193,7 @@ public class LoginController {
 				result = InternalLogin.authenticate(username, password);
 			} else if (loginMethod == ArtAuthenticationMethod.Database) {
 				result = DbLogin.authenticate(username, password);
-			} else if (loginMethod == ArtAuthenticationMethod.Ldap) {
+			} else if (loginMethod == ArtAuthenticationMethod.LDAP) {
 				result = LdapLogin.authenticate(username, password);
 			} else if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {
 				result = WindowsDomainLogin.authenticate(windowsDomain, username, password);

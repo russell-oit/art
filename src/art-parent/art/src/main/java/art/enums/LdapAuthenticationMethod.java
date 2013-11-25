@@ -14,10 +14,21 @@ public enum LdapAuthenticationMethod {
 		this.value = value;
 	}
 
+	/**
+	 * Get enum value
+	 *
+	 * @return
+	 */
 	public String getValue() {
 		return value;
 	}
 
+	/**
+	 * Get enum object based on a string
+	 *
+	 * @param value
+	 * @return
+	 */
 	public static LdapAuthenticationMethod getEnum(String value) {
 		for (LdapAuthenticationMethod v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
@@ -25,5 +36,15 @@ public enum LdapAuthenticationMethod {
 			}
 		}
 		return Simple; //default
+	}
+	
+	/**
+	 * Get enum description. In case description needs to be different from
+	 * value. Only used for display in user interface.
+	 *
+	 * @return
+	 */
+	public String getDescription() {
+		return value;
 	}
 }
