@@ -1,6 +1,7 @@
 package art.artdatabase;
 
 import java.io.Serializable;
+import javax.validation.constraints.Min;
 
 /**
  * Class to act as a form backing bean for art database configuration
@@ -15,7 +16,9 @@ public class ArtDatabaseForm implements Serializable {
 	private String username;
 	private String password;
 	private String connectionTestSql;
+	@Min(1)
 	private int connectionPoolTimeout = 20;
+	@Min(1)
 	private int maxPoolConnections = 20; //setting used by art database and all datasources
 
 	/**

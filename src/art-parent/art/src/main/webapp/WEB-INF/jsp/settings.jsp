@@ -28,14 +28,21 @@ Settings configuration page
 
 				$('input[name=smtpConnectionEncryptionMethod]').change(function() {
 					switch ($('input[name=smtpConnectionEncryptionMethod]:checked').val()) {
-						case 'None':
-							$('#smtpPort').val('25');
-							break;
 						case 'StartTLS':
 							$('#smtpPort').val('587');
 							break;
 						default:
-							$('#smtpPort').val('');
+							$('#smtpPort').val('25');
+					}
+				});
+				
+				$('input[name=ldapConnectionEncryptionMethod]').change(function() {
+					switch ($('input[name=ldapConnectionEncryptionMethod]:checked').val()) {
+						case 'SSL':
+							$('#ldapPort').val('636');
+							break;
+						default:
+							$('#ldapPort').val('389');
 					}
 				});
 			});
@@ -112,7 +119,7 @@ Settings configuration page
 									<spring:message code="settings.label.smtpConnectionEncryptionMethod"/>
 								</label>
 								<div class="col-md-8">
-									<c:forEach var="smtpEncryptionMethod" items="${connectionEncryptionMethods}">
+									<c:forEach var="smtpEncryptionMethod" items="${smtpConnectionEncryptionMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="smtpConnectionEncryptionMethod"
 															  name="smtpConnectionEncryptionMethod"
@@ -180,11 +187,11 @@ Settings configuration page
 									<spring:message code="settings.label.artAuthenticationMethod"/>
 								</label>
 								<div class="col-md-8">
-									<c:forEach var="artAuthMethod" items="${artAuthenticationMethods}">
+									<c:forEach var="artAuthenticationMethod" items="${artAuthenticationMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="artAuthenticationMethod"
 															  name="artAuthenticationMethod"
-															  value="${artAuthMethod}"/> ${artAuthMethod.description}
+															  value="${artAuthenticationMethod}"/> ${artAuthenticationMethod.description}
 										</label>
 									</c:forEach>
 								</div>
@@ -267,7 +274,7 @@ Settings configuration page
 									<spring:message code="settings.label.ldapConnectionEncryptionMethod"/>
 								</label>
 								<div class="col-md-8">
-									<c:forEach var="ldapEncryptionMethod" items="${connectionEncryptionMethods}">
+									<c:forEach var="ldapEncryptionMethod" items="${ldapConnectionEncryptionMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="ldapConnectionEncryptionMethod"
 															  name="ldapConnectionEncryptionMethod"
@@ -302,6 +309,93 @@ Settings configuration page
 									<div class="input-group">
 										<form:input path="ldapBaseDn" name="ldapBaseDn" id="ldapBaseDn" class="form-control" />
 										<spring:message code="settings.help.ldapBaseDn"
+														var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4">
+									<spring:message code="settings.label.ldapBindDn"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="ldapBindDn" name="ldapBindDn" id="ldapBindDn" class="form-control" />
+										<spring:message code="settings.help.ldapBindDn"
+														var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4">
+									<spring:message code="settings.label.ldapBindPassword"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:password path="ldapBindPassword" name="ldapBindPassword" id="ldapBindPassword" class="form-control" />
+										<spring:message code="settings.help.ldapBindPassword"
+														var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4">
+									<spring:message code="settings.label.ldapUserIdAttribute"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="ldapUserIdAttribute" name="ldapUserIdAttribute" id="ldapUserIdAttribute" class="form-control" />
+										<spring:message code="settings.help.ldapUserIdAttribute"
+														var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+									<form:errors path="ldapUserIdAttribute" cssClass="error" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4">
+									<spring:message code="settings.label.ldapAuthenticationMethod"/>
+								</label>
+								<div class="col-md-8">
+									<c:forEach var="ldapAuthenticationMethod" items="${ldapAuthenticationMethods}">
+										<label class="radio-inline">
+											<form:radiobutton path="ldapAuthenticationMethod"
+															  name="ldapAuthenticationMethod"
+															  value="${ldapAuthenticationMethod}"/> ${ldapAuthenticationMethod.description}
+										</label>
+									</c:forEach>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4">
+									<spring:message code="settings.label.ldapRealm"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="ldapRealm" name="ldapRealm" id="ldapRealm" class="form-control" />
+										<spring:message code="settings.help.ldapRealm"
 														var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"

@@ -1,9 +1,10 @@
 package art.settings;
 
 import art.enums.ArtAuthenticationMethod;
-import art.enums.ConnectionEncryptionMethod;
+import art.enums.SmtpConnectionEncryptionMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
+import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -18,7 +19,7 @@ public class Settings {
 	private String smtpServer;
 	private String smtpUsername;
 	private String smtpPassword;
-	private ConnectionEncryptionMethod smtpConnectionEncryptionMethod = ConnectionEncryptionMethod.None;
+	private SmtpConnectionEncryptionMethod smtpConnectionEncryptionMethod = SmtpConnectionEncryptionMethod.None;
 	private int smtpPort = 25;
 	private PdfPageSize pdfPageSize = PdfPageSize.A4Landscape;
 	private String pdfFontName;
@@ -47,11 +48,12 @@ public class Settings {
 	private String databaseAuthenticationUrl;
 	private String ldapServer;
 	private int ldapPort = 389;
-	private ConnectionEncryptionMethod ldapConnectionEncryptionMethod = ConnectionEncryptionMethod.None;
+	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod = LdapConnectionEncryptionMethod.None;
 	private String ldapUrl;
 	private String ldapBaseDn;
 	private String ldapBindDn;
 	private String ldapBindPassword;
+	@NotBlank
 	private String ldapUserIdAttribute = "uid";
 	private LdapAuthenticationMethod ldapAuthenticationMethod = LdapAuthenticationMethod.Simple;
 	private String ldapRealm;
@@ -187,7 +189,7 @@ public class Settings {
 	 *
 	 * @return the value of ldapConnectionEncryptionMethod
 	 */
-	public ConnectionEncryptionMethod getLdapConnectionEncryptionMethod() {
+	public LdapConnectionEncryptionMethod getLdapConnectionEncryptionMethod() {
 		return ldapConnectionEncryptionMethod;
 	}
 
@@ -197,7 +199,7 @@ public class Settings {
 	 * @param ldapConnectionEncryptionMethod new value of
 	 * ldapConnectionEncryptionMethod
 	 */
-	public void setLdapConnectionEncryptionMethod(ConnectionEncryptionMethod ldapConnectionEncryptionMethod) {
+	public void setLdapConnectionEncryptionMethod(LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod) {
 		this.ldapConnectionEncryptionMethod = ldapConnectionEncryptionMethod;
 	}
 
@@ -657,7 +659,7 @@ public class Settings {
 	 *
 	 * @return the value of smtpConnectionEncryptionMethod
 	 */
-	public ConnectionEncryptionMethod getSmtpConnectionEncryptionMethod() {
+	public SmtpConnectionEncryptionMethod getSmtpConnectionEncryptionMethod() {
 		return smtpConnectionEncryptionMethod;
 	}
 
@@ -667,7 +669,7 @@ public class Settings {
 	 * @param smtpConnectionEncryptionMethod new value of
 	 * smtpConnectionEncryptionMethod
 	 */
-	public void setSmtpConnectionEncryptionMethod(ConnectionEncryptionMethod smtpConnectionEncryptionMethod) {
+	public void setSmtpConnectionEncryptionMethod(SmtpConnectionEncryptionMethod smtpConnectionEncryptionMethod) {
 		this.smtpConnectionEncryptionMethod = smtpConnectionEncryptionMethod;
 	}
 

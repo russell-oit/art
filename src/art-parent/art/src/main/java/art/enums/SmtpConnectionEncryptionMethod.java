@@ -1,16 +1,16 @@
 package art.enums;
 
 /**
- * Enum for ldap connection encryption methods e.g. smtp connection, ldap connection
+ * Enum for smtp connection encryption methods
  *
  * @author Timothy Anyona
  */
-public enum ConnectionEncryptionMethod {
+public enum SmtpConnectionEncryptionMethod {
 
 	None("None"), StartTLS("StartTLS");
 	private String value;
 
-	private ConnectionEncryptionMethod(String value) {
+	private SmtpConnectionEncryptionMethod(String value) {
 		this.value = value;
 	}
 
@@ -29,8 +29,8 @@ public enum ConnectionEncryptionMethod {
 	 * @param value
 	 * @return
 	 */
-	public static ConnectionEncryptionMethod getEnum(String value) {
-		for (ConnectionEncryptionMethod v : values()) {
+	public static SmtpConnectionEncryptionMethod getEnum(String value) {
+		for (SmtpConnectionEncryptionMethod v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}

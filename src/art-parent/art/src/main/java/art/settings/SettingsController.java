@@ -1,7 +1,9 @@
 package art.settings;
 
 import art.enums.ArtAuthenticationMethod;
-import art.enums.ConnectionEncryptionMethod;
+import art.enums.LdapAuthenticationMethod;
+import art.enums.LdapConnectionEncryptionMethod;
+import art.enums.SmtpConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.servlets.ArtConfig;
 import java.io.IOException;
@@ -33,9 +35,14 @@ public class SettingsController {
 		return PdfPageSize.values();
 	}
 	
-	@ModelAttribute("connectionEncryptionMethods")
-	public ConnectionEncryptionMethod[] addConnectionEncryptionMethods(){
-		return ConnectionEncryptionMethod.values();
+	@ModelAttribute("smtpConnectionEncryptionMethods")
+	public SmtpConnectionEncryptionMethod[] addSmtpConnectionEncryptionMethods(){
+		return SmtpConnectionEncryptionMethod.values();
+	}
+	
+	@ModelAttribute("ldapConnectionEncryptionMethods")
+	public LdapConnectionEncryptionMethod[] addLdapConnectionEncryptionMethods(){
+		return LdapConnectionEncryptionMethod.values();
 	}
 	
 	@ModelAttribute("artAuthenticationMethods")
@@ -49,6 +56,11 @@ public class SettingsController {
 		methods.remove(ArtAuthenticationMethod.Repository);
 		
 		return methods;
+	}
+	
+	@ModelAttribute("ldapAuthenticationMethods")
+	public LdapAuthenticationMethod[] addLdapAuthenticationMethods(){
+		return LdapAuthenticationMethod.values();
 	}
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.GET)
