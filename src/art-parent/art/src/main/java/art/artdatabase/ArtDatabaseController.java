@@ -42,8 +42,11 @@ public class ArtDatabaseController {
 
 		if (artDatabaseForm == null) {
 			//art database not configured. use default values
-			artDatabaseForm=new ArtDatabaseForm();
-		} 
+			artDatabaseForm = new ArtDatabaseForm();
+		}
+
+		//use blank password should always start as false
+		artDatabaseForm.setUseBlankPassword(false);
 
 		model.addAttribute("artDatabaseForm", artDatabaseForm);
 
@@ -54,10 +57,22 @@ public class ArtDatabaseController {
 	public String processArtDatabaseConfiguration(
 			@ModelAttribute("artDatabaseForm") @Valid ArtDatabaseForm artDatabaseForm,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-		
+
 		if (result.hasErrors()) {
 			return "artDatabase";
 		}
+
+		//if password field blank, use existing password as appropriate
+		String clearTextPassword = artDatabaseForm.getPassword();
+		if (StringUtils.isEmpty(clearTextPassword)) {
+			//either explicitly using blank password
+			//or password field blank to indicate use of current password
+			if (!artDatabaseForm.isUseBlankPassword()) {
+				//use current password
+				clearTextPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+			}
+		}
+		artDatabaseForm.setPassword(clearTextPassword);
 
 		//verify database settings
 		Connection conn = null;

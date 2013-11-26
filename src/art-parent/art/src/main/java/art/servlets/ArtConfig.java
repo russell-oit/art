@@ -379,9 +379,12 @@ public class ArtConfig extends HttpServlet {
 	private static void initializeDatasources() {
 
 		//load art database settings
-		artDatabaseConfiguration = null;
-		artDatabaseConfiguration = loadArtDatabaseConfiguration();
-		if (artDatabaseConfiguration != null) {
+		ArtDatabaseForm artDatabaseForm = loadArtDatabaseConfiguration();
+
+		if (artDatabaseForm != null) {
+			artDatabaseConfiguration = null;
+			artDatabaseConfiguration = artDatabaseForm;
+
 			//initialize art repository datasource
 			artDbDriver = artDatabaseConfiguration.getDriver();
 			artDbUrl = artDatabaseConfiguration.getUrl();
@@ -1079,7 +1082,7 @@ public class ArtConfig extends HttpServlet {
 				ObjectMapper mapper = new ObjectMapper();
 				artDatabaseForm = mapper.readValue(artDatabaseFile, ArtDatabaseForm.class);
 
-				//de-obfuscate password fields
+				//de-obfuscate password field
 				artDatabaseForm.setPassword(Encrypter.decrypt(artDatabaseForm.getPassword()));
 			} else {
 				logger.info("ART Database configuration file not found");
@@ -1100,12 +1103,20 @@ public class ArtConfig extends HttpServlet {
 	public static void saveArtDatabaseConfiguration(ArtDatabaseForm artDatabaseForm)
 			throws IOException {
 
-		//obfuscate password field
-		artDatabaseForm.setPassword(Encrypter.encrypt(artDatabaseForm.getPassword()));
+		//obfuscate password field for storing
+		String clearTextPassword = artDatabaseForm.getPassword();
+		artDatabaseForm.setPassword(Encrypter.encrypt(clearTextPassword));
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabaseForm);
+
+		//update configuration object
+		artDatabaseConfiguration = null;
+		artDatabaseConfiguration = artDatabaseForm;
+
+		//restore clear text password in configuration object
+		artDatabaseConfiguration.setPassword(clearTextPassword);
 	}
 
 	/**

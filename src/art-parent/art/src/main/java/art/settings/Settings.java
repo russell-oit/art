@@ -6,6 +6,7 @@ import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
@@ -13,34 +14,16 @@ import org.hibernate.validator.constraints.NotBlank;
  *
  * @author Timothy Anyona
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Settings {
 
-	private String administratorEmail;
 	private String smtpServer;
 	private String smtpUsername;
 	private String smtpPassword;
 	private SmtpConnectionEncryptionMethod smtpConnectionEncryptionMethod = SmtpConnectionEncryptionMethod.None;
 	private int smtpPort = 25;
-	private PdfPageSize pdfPageSize = PdfPageSize.A4Landscape;
-	private String pdfFontName;
-	private String pdfFontFile;
-	private String pdfFontDirectory;
-	private String pdfFontEncoding;
-	private boolean pdfFontEmbedded;
 	private int maxRowsDefault = 10000;
 	private String maxRowsSpecific;
-	private boolean showHeaderInPublicUserSession;
-	private String rssLink;
-	private int mondrianCacheExpiryPeriod;
-	@NotBlank
-	private String dateFormat = "dd-MMM-yyyy";
-	@NotBlank
-	private String timeFormat = "HH:mm:ss";
-	private boolean schedulingEnabled = true;
-	@NotBlank
-	private String availableReportFormats = "htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
-	private int maxRunningReports = 1000;
-	private DisplayNull displayNull = DisplayNull.NoNumbersAsZero;
 	private ArtAuthenticationMethod artAuthenticationMethod = ArtAuthenticationMethod.Internal;
 	private String windowsDomainController;
 	private String allowedWindowsDomains;
@@ -57,6 +40,25 @@ public class Settings {
 	private String ldapUserIdAttribute = "uid";
 	private LdapAuthenticationMethod ldapAuthenticationMethod = LdapAuthenticationMethod.Simple;
 	private String ldapRealm;
+	private PdfPageSize pdfPageSize = PdfPageSize.A4Landscape;
+	private String pdfFontName;
+	private String pdfFontFile;
+	private String pdfFontDirectory;
+	private String pdfFontEncoding;
+	private boolean pdfFontEmbedded;
+	private boolean showHeaderInPublicUserSession;
+	private String rssLink;
+	private int mondrianCacheExpiryPeriod;
+	@NotBlank
+	private String dateFormat = "dd-MMM-yyyy";
+	@NotBlank
+	private String timeFormat = "HH:mm:ss";
+	private boolean schedulingEnabled = true;
+	@NotBlank
+	private String availableReportFormats = "htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
+	private int maxRunningReports = 1000;
+	private DisplayNull displayNull = DisplayNull.NoNumbersAsZero;
+	private String administratorEmail;
 
 	/**
 	 * Get the value of ldapRealm
@@ -269,7 +271,8 @@ public class Settings {
 	/**
 	 * Set the value of databaseAuthenticationDriver
 	 *
-	 * @param databaseAuthenticationDriver new value of databaseAuthenticationDriver
+	 * @param databaseAuthenticationDriver new value of
+	 * databaseAuthenticationDriver
 	 */
 	public void setDatabaseAuthenticationDriver(String databaseAuthenticationDriver) {
 		this.databaseAuthenticationDriver = databaseAuthenticationDriver;

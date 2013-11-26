@@ -1,25 +1,50 @@
 package art.artdatabase;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
 import javax.validation.constraints.Min;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * Class to act as a form backing bean for art database configuration
  *
  * @author Timothy Anyona
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ArtDatabaseForm implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String driver;
+	@NotBlank
 	private String url = "demo";
 	private String username;
 	private String password;
+	@JsonIgnore
+	private boolean useBlankPassword;
 	private String connectionTestSql;
 	@Min(1)
 	private int connectionPoolTimeout = 20;
 	@Min(1)
 	private int maxPoolConnections = 20; //setting used by art database and all datasources
+
+	/**
+	 * Get the value of useBlankPassword
+	 *
+	 * @return the value of useBlankPassword
+	 */
+	public boolean isUseBlankPassword() {
+		return useBlankPassword;
+	}
+
+	/**
+	 * Set the value of useBlankPassword
+	 *
+	 * @param useBlankPassword new value of useBlankPassword
+	 */
+	public void setUseBlankPassword(boolean useBlankPassword) {
+		this.useBlankPassword = useBlankPassword;
+	}
 
 	/**
 	 * Get the value of maxPoolConnections
