@@ -37,14 +37,4 @@ public enum LdapAuthenticationMethod {
 		}
 		return Simple; //default
 	}
-	
-	/**
-	 * Get enum description. In case description needs to be different from
-	 * value. Only used for display in user interface.
-	 *
-	 * @return
-	 */
-	public String getDescription() {
-		return value;
-	}
 }

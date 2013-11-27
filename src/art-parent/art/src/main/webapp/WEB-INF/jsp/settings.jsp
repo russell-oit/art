@@ -93,8 +93,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:input path="smtpUsername" id="smtpUsername" class="form-control" />
-										<spring:message code="settings.help.smtpUsername"
-														var="help" />
+										<spring:message code="settings.help.smtpUsername" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -109,7 +108,22 @@ Settings configuration page
 									<spring:message code="settings.label.smtpPassword"/>
 								</label>
 								<div class="col-md-8">
-									<form:password path="smtpPassword" id="smtpPassword" autocomplete="off" class="form-control" />
+									<div class="input-group">
+										<form:password path="smtpPassword" id="smtpPassword" autocomplete="off" class="form-control" />
+										<spring:message code="settings.help.smtpPassword" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+									<div class="checkbox">
+										<label>
+											<form:checkbox path="useBlankSmtpPassword" />
+											<spring:message code="settings.checkbox.useBlankSmtpPassword"/>
+										</label>
+									</div>
 								</div>
 							</div>
 							<div class="form-group">
@@ -120,7 +134,7 @@ Settings configuration page
 									<c:forEach var="smtpEncryptionMethod" items="${smtpConnectionEncryptionMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="smtpConnectionEncryptionMethod"
-															  value="${smtpEncryptionMethod}"/> ${smtpEncryptionMethod.description}
+															  value="${smtpEncryptionMethod}"/> ${smtpEncryptionMethod.value}
 										</label>
 									</c:forEach>
 								</div>
@@ -146,8 +160,7 @@ Settings configuration page
 									<div class="input-group">
 										<form:input path="maxRowsDefault" 
 													id="maxRowsDefault" maxlength="6" class="form-control" />
-										<spring:message code="settings.help.maxRowsDefault"
-														var="help" />
+										<spring:message code="settings.help.maxRowsDefault" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -166,8 +179,7 @@ Settings configuration page
 									<div class="input-group">
 										<form:input path="maxRowsSpecific" 
 													id="maxRowsSpecific" class="form-control" />
-										<spring:message code="settings.help.maxRowsSpecific"
-														var="help" />
+										<spring:message code="settings.help.maxRowsSpecific" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -189,7 +201,7 @@ Settings configuration page
 									<c:forEach var="artAuthenticationMethod" items="${artAuthenticationMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="artAuthenticationMethod"
-															  value="${artAuthenticationMethod}"/> ${artAuthenticationMethod.description}
+															  value="${artAuthenticationMethod}"/> ${artAuthenticationMethod.displayValue}
 										</label>
 									</c:forEach>
 								</div>
@@ -203,8 +215,7 @@ Settings configuration page
 									<div class="input-group">
 										<form:input path="windowsDomainController"
 													id="windowsDomainController" class="form-control" />
-										<spring:message code="settings.help.windowsDomainController"
-														var="help" />
+										<spring:message code="settings.help.windowsDomainController" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -222,8 +233,7 @@ Settings configuration page
 									<div class="input-group">
 										<form:input path="allowedWindowsDomains"
 													id="allowedWindowsDomains" class="form-control" />
-										<spring:message code="settings.help.allowedWindowsDomains"
-														var="help" />
+										<spring:message code="settings.help.allowedWindowsDomains" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -260,8 +270,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:input path="ldapServer" id="ldapServer" class="form-control" />
-										<spring:message code="settings.help.ldapServer"
-														var="help" />
+										<spring:message code="settings.help.ldapServer" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -288,7 +297,7 @@ Settings configuration page
 									<c:forEach var="ldapEncryptionMethod" items="${ldapConnectionEncryptionMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="ldapConnectionEncryptionMethod"
-															  value="${ldapEncryptionMethod}"/> ${ldapEncryptionMethod.description}
+															  value="${ldapEncryptionMethod}"/> ${ldapEncryptionMethod.value}
 										</label>
 									</c:forEach>
 								</div>
@@ -300,8 +309,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:input path="ldapUrl" id="ldapUrl" class="form-control" />
-										<spring:message code="settings.help.ldapUrl"
-														var="help" />
+										<spring:message code="settings.help.ldapUrl" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -318,8 +326,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:input path="ldapBaseDn" id="ldapBaseDn" class="form-control" />
-										<spring:message code="settings.help.ldapBaseDn"
-														var="help" />
+										<spring:message code="settings.help.ldapBaseDn" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -336,8 +343,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:input path="ldapBindDn" id="ldapBindDn" class="form-control" />
-										<spring:message code="settings.help.ldapBindDn"
-														var="help" />
+										<spring:message code="settings.help.ldapBindDn" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -355,14 +361,19 @@ Settings configuration page
 									<div class="input-group">
 										<form:password path="ldapBindPassword" 
 													   id="ldapBindPassword" autocomplete="off" class="form-control" />
-										<spring:message code="settings.help.ldapBindPassword"
-														var="help" />
+										<spring:message code="settings.help.ldapBindPassword" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
 												<i class="fa fa-info"></i>
 											</button>
 										</span>
+									</div>
+									<div class="checkbox">
+										<label>
+											<form:checkbox path="useBlankLdapBindPassword" />
+											<spring:message code="settings.checkbox.useBlankLdapBindPassword"/>
+										</label>
 									</div>
 								</div>
 							</div>
@@ -373,8 +384,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:input path="ldapUserIdAttribute" id="ldapUserIdAttribute" class="form-control" />
-										<spring:message code="settings.help.ldapUserIdAttribute"
-														var="help" />
+										<spring:message code="settings.help.ldapUserIdAttribute" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -393,7 +403,7 @@ Settings configuration page
 									<c:forEach var="ldapAuthenticationMethod" items="${ldapAuthenticationMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="ldapAuthenticationMethod"
-															  value="${ldapAuthenticationMethod}"/> ${ldapAuthenticationMethod.description}
+															  value="${ldapAuthenticationMethod}"/> ${ldapAuthenticationMethod.value}
 										</label>
 									</c:forEach>
 								</div>
@@ -405,8 +415,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:input path="ldapRealm" id="ldapRealm" class="form-control" />
-										<spring:message code="settings.help.ldapRealm"
-														var="help" />
+										<spring:message code="settings.help.ldapRealm" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -427,7 +436,7 @@ Settings configuration page
 									<c:forEach var="pageSize" items="${pdfPageSizes}">
 										<label class="radio-inline">
 											<form:radiobutton path="pdfPageSize"
-															  value="${pageSize}"/> ${pageSize.description}
+															  value="${pageSize}"/> ${pageSize.value}
 										</label>
 									</c:forEach>
 								</div>

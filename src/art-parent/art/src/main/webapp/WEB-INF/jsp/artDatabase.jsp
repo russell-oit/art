@@ -71,8 +71,7 @@ Display art database configuration page
 											<option value="${dbType.key}">${dbType.value}</option>
 										</c:forEach>
 									</select>
-									<spring:message code="artDatabase.help.databaseType"
-													var="help" />
+									<spring:message code="artDatabase.help.databaseType" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
 												data-toggle="tooltip" title="${help}">
@@ -96,6 +95,7 @@ Display art database configuration page
 							</label>
 							<div class="col-md-8">
 								<form:input path="url" id="url" class="form-control" />
+								<form:errors path="url" cssClass="error" />
 							</div>
 						</div>
 						<div class="form-group">
@@ -113,8 +113,7 @@ Display art database configuration page
 							<div class="col-md-8">
 								<div class="input-group">
 									<form:password path="password" id="password" autocomplete="off" class="form-control" />
-									<spring:message code="artDatabase.help.password"
-													var="help" />
+									<spring:message code="artDatabase.help.password" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
 												data-toggle="tooltip" title="${help}">
@@ -125,7 +124,7 @@ Display art database configuration page
 								<div class="checkbox">
 									<label>
 										<form:checkbox path="useBlankPassword" />
-										<spring:message code="artDatabase.text.blank"/>
+										<spring:message code="artDatabase.checkbox.useBlankPassword"/>
 									</label>
 								</div>
 							</div>
@@ -138,8 +137,7 @@ Display art database configuration page
 								<div class="input-group">
 									<form:input path="connectionTestSql" 
 												id="connectionTestSql" class="form-control" />
-									<spring:message code="artDatabase.help.connectionTestSql"
-													var="help" />
+									<spring:message code="artDatabase.help.connectionTestSql" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
 												data-toggle="tooltip" title="${help}">
@@ -178,8 +176,7 @@ Display art database configuration page
 								<div class="input-group">
 									<form:input path="maxPoolConnections" 
 												id="maxPoolConnections" maxlength="3" class="form-control" />
-									<spring:message code="artDatabase.help.maxPoolConnections"
-													var="help" />
+									<spring:message code="artDatabase.help.maxPoolConnections" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
 												data-toggle="tooltip" title="${help}">

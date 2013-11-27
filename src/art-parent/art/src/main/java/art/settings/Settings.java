@@ -6,6 +6,7 @@ import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.validator.constraints.NotBlank;
 
@@ -20,6 +21,8 @@ public class Settings {
 	private String smtpServer;
 	private String smtpUsername;
 	private String smtpPassword;
+	@JsonIgnore
+	private boolean useBlankSmtpPassword;
 	private SmtpConnectionEncryptionMethod smtpConnectionEncryptionMethod = SmtpConnectionEncryptionMethod.None;
 	private int smtpPort = 25;
 	private int maxRowsDefault = 10000;
@@ -36,6 +39,8 @@ public class Settings {
 	private String ldapBaseDn;
 	private String ldapBindDn;
 	private String ldapBindPassword;
+	@JsonIgnore
+	private boolean useBlankLdapBindPassword;
 	@NotBlank
 	private String ldapUserIdAttribute = "uid";
 	private LdapAuthenticationMethod ldapAuthenticationMethod = LdapAuthenticationMethod.Simple;
@@ -59,6 +64,42 @@ public class Settings {
 	private int maxRunningReports = 1000;
 	private DisplayNull displayNull = DisplayNull.NoNumbersAsZero;
 	private String administratorEmail;
+	
+	/**
+	 * Get the value of useBlankLdapBindPassword
+	 *
+	 * @return the value of useBlankLdapBindPassword
+	 */
+	public boolean isUseBlankLdapBindPassword() {
+		return useBlankLdapBindPassword;
+	}
+
+	/**
+	 * Set the value of useBlankLdapBindPassword
+	 *
+	 * @param useBlankLdapBindPassword new value of useBlankLdapBindPassword
+	 */
+	public void setUseBlankLdapBindPassword(boolean useBlankLdapBindPassword) {
+		this.useBlankLdapBindPassword = useBlankLdapBindPassword;
+	}
+
+	/**
+	 * Get the value of useBlankSmtpPassword
+	 *
+	 * @return the value of useBlankSmtpPassword
+	 */
+	public boolean isUseBlankSmtpPassword() {
+		return useBlankSmtpPassword;
+	}
+
+	/**
+	 * Set the value of useBlankSmtpPassword
+	 *
+	 * @param useBlankSmtpPassword new value of useBlankSmtpPassword
+	 */
+	public void setUseBlankSmtpPassword(boolean useBlankSmtpPassword) {
+		this.useBlankSmtpPassword = useBlankSmtpPassword;
+	}
 
 	/**
 	 * Get the value of ldapRealm

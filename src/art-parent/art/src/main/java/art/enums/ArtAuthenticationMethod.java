@@ -43,12 +43,12 @@ public enum ArtAuthenticationMethod {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * value. Only used for display in user interface.
+	 * Get enum display value for use in the user interface. In case display
+	 * value needs to be different from internal value
 	 *
 	 * @return
 	 */
-	public String getDescription() {
+	public String getDisplayValue() {
 		switch (this) {
 			case WindowsDomain:
 				return "Windows Domain";

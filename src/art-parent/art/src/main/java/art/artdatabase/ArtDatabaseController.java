@@ -29,6 +29,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ArtDatabaseController {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
+	final String ART_DATABASE_FORM_ATTRIBUTE = "artDatabaseForm";
+	final String ART_DATABASE_PASSWORD_ATTRIBUTE = "artDatabasePassword";
 
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
@@ -48,31 +50,34 @@ public class ArtDatabaseController {
 		//use blank password should always start as false
 		artDatabaseForm.setUseBlankPassword(false);
 
-		model.addAttribute("artDatabaseForm", artDatabaseForm);
+		//put current password in session for use by POST method
+		session.setAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE, artDatabaseForm.getPassword());
+
+		model.addAttribute(ART_DATABASE_FORM_ATTRIBUTE, artDatabaseForm);
 
 		return "artDatabase";
 	}
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.POST)
-	public String processArtDatabaseConfiguration(
-			@ModelAttribute("artDatabaseForm") @Valid ArtDatabaseForm artDatabaseForm,
+	public String processArtDatabaseConfiguration(HttpSession session,
+			@ModelAttribute(ART_DATABASE_FORM_ATTRIBUTE) @Valid ArtDatabaseForm artDatabaseForm,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			return "artDatabase";
 		}
 
-		//if password field blank, use existing password as appropriate
-		String clearTextPassword = artDatabaseForm.getPassword();
-		if (StringUtils.isEmpty(clearTextPassword)) {
-			//either explicitly using blank password
-			//or password field blank to indicate use of current password
-			if (!artDatabaseForm.isUseBlankPassword()) {
-				//use current password
-				clearTextPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+		//set password field as appropriate
+		String newPassword = artDatabaseForm.getPassword();
+		if (artDatabaseForm.isUseBlankPassword()) {
+			newPassword = "";
+		} else {
+			if (StringUtils.isEmpty(newPassword)) {
+				//password field blank. use current password
+				newPassword = (String) session.getAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE);
 			}
 		}
-		artDatabaseForm.setPassword(clearTextPassword);
+		artDatabaseForm.setPassword(newPassword);
 
 		//verify database settings
 		Connection conn = null;
