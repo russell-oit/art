@@ -1,5 +1,6 @@
 package art.servlets;
 
+import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
 import art.login.LoginHelper;
 import art.user.User;
@@ -169,34 +170,35 @@ public class AuthorizationFilter implements Filter {
 		//TODO use permissions instead of access level
 		if (StringUtils.startsWith(requestUri, path + "reports.do")) {
 			//everyone can access
-			//NOTE: "everyone" excludes the special codes when accessing as
-			//the art repository user (-1)
-			if (accessLevel >= 0) {
+			//NOTE: "everyone" doesn't include when accessing as the art repository user
+			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "jobs.do")) {
 			//everyone
-			if (accessLevel >= 0) {
+			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "logs")) {
 			//standard admins and above
-			if (accessLevel >= 40) {
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "users.do")) {
 			//standard admins and above, and repository user
-			if (accessLevel >= 40 || accessLevel == -1) {
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
+					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
 			//super admins only, and repository user
-			if (accessLevel >= 100 || accessLevel == -1) {
+			if (accessLevel == AccessLevel.SuperAdmin.getValue()
+					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.startsWith(requestUri, path + "settings.do")) {
 			//senior admins and above
-			if (accessLevel >= 80) {
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
 		}

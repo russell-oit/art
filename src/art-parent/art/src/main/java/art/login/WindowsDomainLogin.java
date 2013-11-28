@@ -45,7 +45,7 @@ public class WindowsDomainLogin {
 				//if domainController provided was a hostname, name could not be resolved
 				logger.error("Error. username={}", username, ex);
 
-				result.setMessage("login.message.errorOccurred");
+				result.setMessage("page.message.errorOccurred");
 				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			} catch (SmbAuthException ex) {
@@ -59,7 +59,7 @@ public class WindowsDomainLogin {
 				// NETWORK PROBLEMS? failed to connect to dc
 				logger.error("Error. username={}", username, ex);
 
-				result.setMessage("login.message.errorOccurred");
+				result.setMessage("page.message.errorOccurred");
 				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			}

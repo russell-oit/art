@@ -1158,8 +1158,11 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static void saveSettings(Settings newSettings) throws IOException {
 		//obfuscate password fields
-		newSettings.setSmtpPassword(Encrypter.encrypt(newSettings.getSmtpPassword()));
-		newSettings.setLdapBindPassword(Encrypter.encrypt(newSettings.getLdapBindPassword()));
+		String clearTextSmtpPassword = newSettings.getSmtpPassword();
+		String clearTextLdapBindPassword = newSettings.getLdapBindPassword();
+
+		newSettings.setSmtpPassword(Encrypter.encrypt(clearTextSmtpPassword));
+		newSettings.setLdapBindPassword(Encrypter.encrypt(clearTextLdapBindPassword));
 
 		File settingsFile = new File(settingsFilePath);
 		ObjectMapper mapper = new ObjectMapper();
@@ -1167,6 +1170,10 @@ public class ArtConfig extends HttpServlet {
 
 		settings = null;
 		settings = newSettings;
+
+		//restore clear text passwords
+		settings.setSmtpPassword(clearTextSmtpPassword);
+		settings.setLdapBindPassword(clearTextLdapBindPassword);
 	}
 
 	/**

@@ -65,7 +65,7 @@ public class InternalLogin {
 		} catch (SQLException ex) {
 			logger.error("Error. username={}", username, ex);
 
-			result.setMessage("login.message.errorOccurred");
+			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
 			result.setError(ex.toString());
 		} finally {

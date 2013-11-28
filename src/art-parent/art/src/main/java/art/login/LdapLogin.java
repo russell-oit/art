@@ -93,7 +93,7 @@ public class LdapLogin {
 						ldapConnection.close();
 						ldapConnection = null;
 
-						result.setMessage("login.message.errorOccurred");
+						result.setMessage("page.message.errorOccurred");
 						result.setDetails("starttls negotiation failed");
 					}
 				} else {
@@ -140,7 +140,7 @@ public class LdapLogin {
 								// The bind failed for some reason.
 								logger.error("Error", le);
 
-								result.setMessage("login.message.errorOccurred");
+								result.setMessage("page.message.errorOccurred");
 								result.setDetails(le.getMessage());
 								result.setError(le.toString());
 
@@ -157,13 +157,13 @@ public class LdapLogin {
 			} catch (LDAPException ex) {
 				logger.error("Error", ex);
 
-				result.setMessage("login.message.errorOccurred");
+				result.setMessage("page.message.errorOccurred");
 				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			} catch (GeneralSecurityException ex) {
 				logger.error("Error", ex);
 
-				result.setMessage("login.message.errorOccurred");
+				result.setMessage("page.message.errorOccurred");
 				result.setDetails(ex.getMessage());
 				result.setError(ex.toString());
 			}

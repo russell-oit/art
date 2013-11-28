@@ -1,5 +1,6 @@
 package art.login;
 
+import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.ArtConfig;
 import art.user.User;
@@ -53,7 +54,7 @@ public class LoginController {
 
 		if (!ArtConfig.isArtDatabaseConfigured()) {
 			User user = new User();
-			user.setAccessLevel(-1); //repository user 
+			user.setAccessLevel(AccessLevel.RepositoryUser.getValue());
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
 
@@ -225,7 +226,7 @@ public class LoginController {
 			if (isValidRepositoryUser(username, password)) {
 				loginMethod = ArtAuthenticationMethod.Repository;
 				user = new User();
-				user.setAccessLevel(-1); //repository user 
+				user.setAccessLevel(AccessLevel.RepositoryUser.getValue());
 
 				result = new LoginResult();
 				result.setAuthenticated(true);

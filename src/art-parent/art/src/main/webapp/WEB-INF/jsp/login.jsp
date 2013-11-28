@@ -93,7 +93,7 @@ Login page
 					</c:if>
 					<div class="form-group">
 						<label class="control-label col-md-2" for="username">
-							<spring:message code="login.label.username"/>
+							<spring:message code="page.label.username"/>
 						</label>
 						<div class="col-md-10">
 							<input type="text" name="username" id="username" class="form-control" value="${selectedUsername}">
@@ -101,7 +101,7 @@ Login page
 					</div>
 					<div class="form-group">
 						<label class="control-label col-md-2" for="password">
-							<spring:message code="login.label.password"/>
+							<spring:message code="page.label.password"/>
 						</label>
 						<div class="col-md-10">
 							<input type="password" name="password" id="password" class="form-control">

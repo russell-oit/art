@@ -100,7 +100,7 @@ Display art database configuration page
 						</div>
 						<div class="form-group">
 							<label class="control-label col-md-4" for="username">
-								<spring:message code="artDatabase.label.username"/>
+								<spring:message code="page.label.username"/>
 							</label>
 							<div class="col-md-8">
 								<form:input path="username" id="username" class="form-control" />
@@ -108,12 +108,12 @@ Display art database configuration page
 						</div>
 						<div class="form-group">
 							<label class="control-label col-md-4" for="password">
-								<spring:message code="artDatabase.label.password"/>
+								<spring:message code="page.label.password"/>
 							</label>
 							<div class="col-md-8">
 								<div class="input-group">
 									<form:password path="password" id="password" autocomplete="off" class="form-control" />
-									<spring:message code="artDatabase.help.password" var="help" />
+									<spring:message code="page.help.password" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
 												data-toggle="tooltip" title="${help}">
@@ -124,7 +124,7 @@ Display art database configuration page
 								<div class="checkbox">
 									<label>
 										<form:checkbox path="useBlankPassword" />
-										<spring:message code="artDatabase.checkbox.useBlankPassword"/>
+										<spring:message code="page.checkbox.useBlankPassword"/>
 									</label>
 								</div>
 							</div>
@@ -190,7 +190,7 @@ Display art database configuration page
 						<div class="form-group">
 							<div class="col-md-12">
 								<button type="submit" class="btn btn-primary pull-right">
-									<spring:message code="artDatabase.button.save"/>
+									<spring:message code="page.button.save"/>
 								</button>
 							</div>
 						</div>

@@ -28,7 +28,7 @@ public enum ArtAuthenticationMethod {
 	}
 
 	/**
-	 * Get enum object based on a string
+	 * Get enum object based on a value
 	 *
 	 * @param value
 	 * @return

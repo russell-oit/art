@@ -110,7 +110,7 @@ Settings configuration page
 								<div class="col-md-8">
 									<div class="input-group">
 										<form:password path="smtpPassword" id="smtpPassword" autocomplete="off" class="form-control" />
-										<spring:message code="settings.help.smtpPassword" var="help" />
+										<spring:message code="page.help.password" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -121,7 +121,7 @@ Settings configuration page
 									<div class="checkbox">
 										<label>
 											<form:checkbox path="useBlankSmtpPassword" />
-											<spring:message code="settings.checkbox.useBlankSmtpPassword"/>
+											<spring:message code="page.checkbox.useBlankPassword"/>
 										</label>
 									</div>
 								</div>
@@ -361,7 +361,7 @@ Settings configuration page
 									<div class="input-group">
 										<form:password path="ldapBindPassword" 
 													   id="ldapBindPassword" autocomplete="off" class="form-control" />
-										<spring:message code="settings.help.ldapBindPassword" var="help" />
+										<spring:message code="page.help.password" var="help" />
 										<span class="input-group-btn" >
 											<button class="btn btn-default" type="button"
 													data-toggle="tooltip" title="${help}">
@@ -372,7 +372,7 @@ Settings configuration page
 									<div class="checkbox">
 										<label>
 											<form:checkbox path="useBlankLdapBindPassword" />
-											<spring:message code="settings.checkbox.useBlankLdapBindPassword"/>
+											<spring:message code="page.checkbox.useBlankPassword"/>
 										</label>
 									</div>
 								</div>
@@ -441,11 +441,98 @@ Settings configuration page
 									</c:forEach>
 								</div>
 							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="pdfFontName">
+									<spring:message code="settings.label.pdfFontName"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="pdfFontName" id="pdfFontName" class="form-control" />
+										<spring:message code="settings.help.pdfFontName" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="pdfFontFile">
+									<spring:message code="settings.label.pdfFontFile"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="pdfFontFile" id="pdfFontFile" class="form-control" />
+										<spring:message code="settings.help.pdfFontFile" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="pdfFontDirectory">
+									<spring:message code="settings.label.pdfFontDirectory"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="pdfFontDirectory" id="pdfFontDirectory" class="form-control" />
+										<spring:message code="settings.help.pdfFontDirectory" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="pdfFontEncoding">
+									<spring:message code="settings.label.pdfFontEncoding"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="pdfFontEncoding" id="pdfFontEncoding" class="form-control" />
+										<spring:message code="settings.help.pdfFontEncoding" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="pdfFontEmbedded">
+									<spring:message code="settings.label.pdfFontEmbedded"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<div class="checkbox">
+											<form:checkbox path="pdfFontEmbedded" id="pdfFontEmbedded" />
+										</div>
+										<spring:message code="settings.help.pdfFontEmbedded" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
 						</fieldset>
 						<div class="form-group">
 							<div class="col-md-12">
 								<button type="submit" class="btn btn-primary pull-right">
-									<spring:message code="settings.button.save"/>
+									<spring:message code="page.button.save"/>
 								</button>
 							</div>
 						</div>
