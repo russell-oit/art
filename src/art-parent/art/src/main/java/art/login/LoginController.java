@@ -70,14 +70,13 @@ public class LoginController {
 			DbUtils.closeConnection(conn);
 		}
 
-		String authenticationMethodSetting = ArtConfig.getAuthenticationMethod();
-
+		ArtAuthenticationMethod loginMethod;
 		if (authenticationMethod == null) {
 			//authentication method not specified in url. use application setting
-			authenticationMethod = authenticationMethodSetting;
+			loginMethod=ArtConfig.getSettings().getArtAuthenticationMethod();
+		} else {
+			loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
 		}
-
-		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
 
 		//if auto login, no login page is displayed as user is authenticated by application server
 		if (loginMethod == ArtAuthenticationMethod.Auto) {

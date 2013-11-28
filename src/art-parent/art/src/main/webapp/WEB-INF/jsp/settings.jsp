@@ -529,6 +529,179 @@ Settings configuration page
 								</div>
 							</div>
 						</fieldset>
+						<fieldset>
+							<legend><spring:message code="settings.text.general" /></legend>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="administratorEmail">
+									<spring:message code="settings.label.administratorEmail"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="administratorEmail" id="administratorEmail" class="form-control" />
+										<spring:message code="settings.help.administratorEmail" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="dateFormat">
+									<spring:message code="settings.label.dateFormat"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="dateFormat" id="dateFormat" class="form-control" />
+										<spring:message code="settings.help.dateFormat" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+									<form:errors path="dateFormat" cssClass="error" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="timeFormat">
+									<spring:message code="settings.label.timeFormat"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="timeFormat" id="timeFormat" class="form-control" />
+										<spring:message code="settings.help.timeFormat" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+									<form:errors path="timeFormat" cssClass="error" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="reportFormats">
+									<spring:message code="settings.label.reportFormats"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="reportFormats" id="reportFormats" class="form-control" />
+										<spring:message code="settings.help.reportFormats" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+									<form:errors path="reportFormats" cssClass="error" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="displayNull">
+									<spring:message code="settings.label.displayNull"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<c:forEach var="displayNullOption" items="${displayNullOptions}">
+											<label class="radio-inline">
+												<form:radiobutton path="displayNull"
+																  value="${displayNullOption}"/>
+												<spring:message code="${displayNullOption.displayValue}" />
+											</label>
+										</c:forEach>
+										<spring:message code="settings.help.displayNull" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="maxRunningReports">
+									<spring:message code="settings.label.maxRunningReports"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="maxRunningReports" id="maxRunningReports" class="form-control" />
+										<spring:message code="settings.help.maxRunningReports" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+									<form:errors path="maxRunningReports" cssClass="error" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="showHeaderInPublicUserSession">
+									<spring:message code="settings.label.showHeaderInPublicUserSession"/>
+								</label>
+								<div class="col-md-8">
+									<div class="checkbox">
+										<form:checkbox path="showHeaderInPublicUserSession"
+													   id="showHeaderInPublicUserSession" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="mondrianCacheExpiryPeriod">
+									<spring:message code="settings.label.mondrianCacheExpiryPeriod"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="mondrianCacheExpiryPeriod" id="mondrianCacheExpiryPeriod" class="form-control" />
+										<spring:message code="settings.help.mondrianCacheExpiryPeriod" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+									<form:errors path="mondrianCacheExpiryPeriod" cssClass="error" />
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="schedulingEnabled">
+									<spring:message code="settings.label.schedulingEnabled"/>
+								</label>
+								<div class="col-md-8">
+									<div class="checkbox">
+										<form:checkbox path="schedulingEnabled"
+													   id="schedulingEnabled" />
+									</div>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="rssLink">
+									<spring:message code="settings.label.rssLink"/>
+								</label>
+								<div class="col-md-8">
+									<div class="input-group">
+										<form:input path="rssLink" id="rssLink" class="form-control" />
+										<spring:message code="settings.help.rssLink" var="help" />
+										<span class="input-group-btn" >
+											<button class="btn btn-default" type="button"
+													data-toggle="tooltip" title="${help}">
+												<i class="fa fa-info"></i>
+											</button>
+										</span>
+									</div>
+								</div>
+							</div>
+						</fieldset>
+
 						<div class="form-group">
 							<div class="col-md-12">
 								<button type="submit" class="btn btn-primary pull-right">

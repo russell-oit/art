@@ -405,7 +405,7 @@ public class pdfOutput implements ArtOutputInterface {
 		if (ArtConfig.isUseCustomPdfFont()) {
 			String fontName = ArtConfig.getArtSetting("pdf_font_name");
 			String encoding = ArtConfig.getArtSetting("pdf_font_encoding");
-			boolean embedded = ArtConfig.isPdfFontEmbedded();
+			boolean embedded = ArtConfig.getSettings().isPdfFontEmbedded();
 
 			Font bodyFont = FontFactory.getFont(fontName, encoding, embedded);
 			bodyFont.setSize(8);

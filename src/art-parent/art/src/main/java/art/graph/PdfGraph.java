@@ -119,7 +119,7 @@ public class PdfGraph {
 				String pdfFontDirectory = ArtConfig.getArtSetting("pdf_font_directory");
 				String pdfFontFile = ArtConfig.getArtSetting("pdf_font_file");
 				String pdfFontEncoding = ArtConfig.getArtSetting("pdf_font_encoding");
-				boolean pdfFontEmbedded = ArtConfig.isPdfFontEmbedded();
+				boolean pdfFontEmbedded = ArtConfig.getSettings().isPdfFontEmbedded();
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					mapper.insertDirectory(pdfFontDirectory);
 					fp = mapper.getBaseFontParameters(pdfFontName);

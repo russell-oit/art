@@ -71,7 +71,7 @@ public class ExecuteQuery extends HttpServlet {
 		super.init(config);
 
 		//load all view modes
-		List<String> allViewModes = ArtConfig.getAllViewModes();
+		List<String> allViewModes = ArtConfig.getAllReportFormats();
 		viewModes = new HashMap<String, java.lang.Class>(allViewModes.size());
 		ClassLoader cl = this.getClass().getClassLoader();
 		String vm = "";
@@ -282,7 +282,7 @@ public class ExecuteQuery extends HttpServlet {
 
 
 			//run query            
-			if (currentNumberOfRunningQueries <= ArtConfig.getMaxRunningQueries()) {
+			if (currentNumberOfRunningQueries <= ArtConfig.getSettings().getMaxRunningReports()) {
 				int probe = 0; // used for debugging
 				int numberOfRows = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
 

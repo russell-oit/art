@@ -58,23 +58,20 @@ public class ArtConfig extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	final static Logger logger = LoggerFactory.getLogger(ArtConfig.class);
-	private static String artDbPassword, artDbDriver, artDbUrl;
 	private static String exportPath;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
 	private static ArtSettings as;
-	private static ArrayList<String> userViewModes; //view modes shown to users
+	private static ArrayList<String> reportFormats = new ArrayList<String>(); //report formats available to users
+	private static ArrayList<String> allReportFormats = new ArrayList<String>(); //all report formats
 	private static String templatesPath; //full path to templates directory where formatted report templates and mondiran cube definitions are stored
 	private static String relativeTemplatesPath; //relative path to templates directory. used by showAnalysis.jsp
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
-	private static ArrayList<String> allViewModes; //all view modes
-	private static int defaultMaxRows;
 	private static String artPropertiesFilePath; //full path to art.properties file
-	private static boolean useCustomPdfFont = false; //to allow use of custom font for pdf output, enabling display of non-ascii characters
-	private static SimpleDateFormat dateFormatter;
-	private static SimpleDateFormat timeFormatter;
-	private static SimpleDateFormat dateTimeFormatter;
+	private static SimpleDateFormat dateFormatter = new SimpleDateFormat();
+	private static SimpleDateFormat timeFormatter = new SimpleDateFormat();
+	private static SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
 	private static String jobsPath;
 	private static boolean customExportDirectory = false; //to enable custom export path
 	private static String webinfPath;
@@ -183,40 +180,28 @@ public class ArtConfig extends HttpServlet {
 		//set settings file path
 		settingsFilePath = webinfPath + "art-settings.json";
 
-		//construct all view modes list
-		allViewModes = new ArrayList<String>();
+		//populate all report formats list
+		allReportFormats.add("tsvGz");
+		allReportFormats.add("xml");
+		allReportFormats.add("rss20");
+		allReportFormats.add("htmlGrid");
+		allReportFormats.add("html");
+		allReportFormats.add("xls");
+		allReportFormats.add("xlsx");
+		allReportFormats.add("pdf");
+		allReportFormats.add("htmlPlain");
+		allReportFormats.add("xlsZip");
+		allReportFormats.add("slk");
+		allReportFormats.add("slkZip");
+		allReportFormats.add("tsv");
+		allReportFormats.add("tsvZip");
+		allReportFormats.add("htmlDataTable");
 
-		//add all supported view modes
-		allViewModes.add("tsvGz");
-		allViewModes.add("xml");
-		allViewModes.add("rss20");
-		allViewModes.add("htmlGrid");
-		allViewModes.add("html");
-		allViewModes.add("xls");
-		allViewModes.add("xlsx");
-		allViewModes.add("pdf");
-		allViewModes.add("htmlPlain");
-		allViewModes.add("xlsZip");
-		allViewModes.add("slk");
-		allViewModes.add("slkZip");
-		allViewModes.add("tsv");
-		allViewModes.add("tsvZip");
-		allViewModes.add("htmlDataTable");
+		//load settings and initialize variables
+		refreshSettings();
 
 		//initialize datasources
 		initializeDatasources();
-
-		//load settings
-		settings = loadSettings();
-
-		//load settings from art.properties file
-		if (loadArtSettings()) {
-			//register pdf fonts
-			registerPdfFonts();
-		} else {
-			//art.properties not available
-			logger.warn("ART settings not available. Admin should define ART settings on first logon.");
-		}
 	}
 
 	/**
@@ -231,88 +216,6 @@ public class ArtConfig extends HttpServlet {
 
 		if (as.load(artPropertiesFilePath)) {
 			// settings defined
-
-			artDbPassword = as.getSetting("art_password");
-			// de-obfuscate the password
-			artDbPassword = Encrypter.decrypt(artDbPassword);
-
-			artDbUrl = as.getSetting("art_jdbc_url");
-			if (artDbUrl == null) {
-				artDbUrl = as.getSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
-				as.setSetting("art_jdbc_url", artDbUrl);
-			}
-			artDbDriver = as.getSetting("art_jdbc_driver");
-
-			//register authentication jdbc driver
-			if (StringUtils.isNotBlank(artDbDriver)) {
-				try {
-					Class.forName(artDbDriver).newInstance();
-					logger.info("Authentication JDBC Driver Registered: {}", artDbDriver);
-				} catch (Exception e) {
-					logger.error("Error while registering Authentication JDBC Driver: {}", artDbDriver, e);
-				}
-			}
-
-			String pdfFontName = as.getSetting("pdf_font_name");
-			if (StringUtils.isBlank(pdfFontName)) {
-				useCustomPdfFont = false; //font name must be defined in order to use custom font
-			} else {
-				useCustomPdfFont = true;
-			}
-
-			//set date format
-			final String DEFAULT_DATE_FORMAT = "dd-MMM-yyyy";
-			String dateFormat = as.getSetting("date_format");
-			if (StringUtils.isBlank(dateFormat)) {
-				dateFormat = DEFAULT_DATE_FORMAT;
-			}
-
-			//set time format
-			final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
-			String timeFormat = as.getSetting("time_format");
-			if (StringUtils.isBlank(timeFormat)) {
-				timeFormat = DEFAULT_TIME_FORMAT;
-			}
-
-			//initialize date formatters
-			timeFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
-			dateFormatter = new SimpleDateFormat(dateFormat);
-			dateTimeFormatter = new SimpleDateFormat(dateFormat + " " + timeFormat);
-
-			//set user view modes. if a view mode is not in the list, then it's hidden
-			String modes = as.getSetting("view_modes");
-			String[] viewModes = StringUtils.split(modes, ",");
-			if (userViewModes == null) {
-				userViewModes = new ArrayList<String>();
-			} else {
-				userViewModes.clear();
-			}
-			if (viewModes != null) {
-				userViewModes.addAll(Arrays.asList(viewModes));
-			}
-
-			//set default max rows
-			final int DEFAULT_MAX_ROWS = 1000; //default in case of incorrect setting
-			defaultMaxRows = NumberUtils.toInt(as.getSetting("default_max_rows"), DEFAULT_MAX_ROWS);
-
-			//cater for change of authentication method identifiers, from 2.5.2 - 3.0
-			String loginMethod = as.getSetting("authentication_method");
-			if (loginMethod == null) {
-				loginMethod = as.getSetting("index_page_default");
-
-				if (StringUtils.equalsIgnoreCase(loginMethod, "ldaplogin")) {
-					loginMethod = ArtAuthenticationMethod.LDAP.getValue();
-				} else if (StringUtils.equalsIgnoreCase(loginMethod, "ntlogin")) {
-					loginMethod = ArtAuthenticationMethod.WindowsDomain.getValue();
-				} else if (StringUtils.equalsIgnoreCase(loginMethod, "dblogin")) {
-					loginMethod = ArtAuthenticationMethod.Database.getValue();
-				} else if (StringUtils.equalsIgnoreCase(loginMethod, "autologin")) {
-					loginMethod = ArtAuthenticationMethod.Auto.getValue();
-				} else {
-					loginMethod = ArtAuthenticationMethod.Internal.getValue();
-				}
-				as.setSetting("authentication_method", loginMethod);
-			}
 
 			//change of admin email setting name
 			String adminEmail = as.getSetting("administrator_email");
@@ -335,24 +238,24 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Register custom fonts to be used in pdf output
 	 */
-	public static void registerPdfFonts() {
+	private static void registerPdfFonts() {
 		//register pdf fonts. 
 		//fresh registering of 661 fonts in c:\windows\fonts can take as little as 10 secs
 		//re-registering already registered directory of 661 fonts takes as little as 1 sec
 
-		if (useCustomPdfFont) {
+		String pdfFontName = settings.getPdfFontName();
+		if (StringUtils.isNotBlank(pdfFontName)) {
 			//register pdf font if not already registered
-			String pdfFontName = getArtSetting("pdf_font_name");
 			if (!FontFactory.isRegistered(pdfFontName)) {
 				//font not registered. register any defined font files or directories
-				String pdfFontDirectory = as.getSetting("pdf_font_directory");
+				String pdfFontDirectory = settings.getPdfFontDirectory();
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					logger.info("Registering fonts from directory: {}", pdfFontDirectory);
 					int i = FontFactory.registerDirectory(pdfFontDirectory);
 					logger.info("{} fonts registered", i);
 				}
 
-				String pdfFontFile = as.getSetting("pdf_font_file");
+				String pdfFontFile = settings.getPdfFontFile();
 				if (StringUtils.isNotBlank(pdfFontFile)) {
 					logger.info("Registering font file: {}", pdfFontFile);
 					FontFactory.register(pdfFontFile);
@@ -386,29 +289,24 @@ public class ArtConfig extends HttpServlet {
 			artDatabaseConfiguration = artDatabaseForm;
 
 			//initialize art repository datasource
-			artDbDriver = artDatabaseConfiguration.getDriver();
-			artDbUrl = artDatabaseConfiguration.getUrl();
-			String username = artDatabaseConfiguration.getUsername();
-			artDbPassword = artDatabaseConfiguration.getPassword();
+			String artDbDriver = artDatabaseConfiguration.getDriver();
 			String artDbTestSql = artDatabaseConfiguration.getConnectionTestSql();
 			int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
 			int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
 
 			boolean jndiDatasource = false;
 
-
 			if (StringUtils.isBlank(artDbDriver)) {
 				jndiDatasource = true;
 			}
 			DataSource artdb = new DataSource(artDbPoolTimeout * 60L, jndiDatasource);
 			artdb.setName("ART Repository");  //custom name
-			artdb.setUrl(artDbUrl); //for jndi datasources, the url contains the jndi name/resource reference
-			artdb.setUsername(username);
-			artdb.setPassword(artDbPassword);
+			artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
+			artdb.setUsername(artDatabaseConfiguration.getUsername());
+			artdb.setPassword(artDatabaseConfiguration.getPassword());
 			artdb.setLogToStandardOutput(true);
 			artdb.setMaxConnections(maxPoolConnections);
 			artdb.setDriver(artDbDriver);
-
 			if (StringUtils.length(artDbTestSql) > 3) {
 				artdb.setTestSQL(artDbTestSql);
 			}
@@ -506,47 +404,16 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get default authentication method configured for the application
-	 *
-	 * @return default authentication method configured for the application
-	 */
-	public static String getAuthenticationMethod() {
-		String authenticationMethod = as.getSetting("authentication_method");
-		if (StringUtils.isBlank(authenticationMethod)) {
-			authenticationMethod = ArtAuthenticationMethod.Internal.getValue();
-		}
-
-		return authenticationMethod;
-	}
-
-	/**
-	 * Get bottom logo image path
-	 *
-	 * @return bottom logo image path
-	 */
-	public static String getBottomLogoPath() {
-		String bottomLogoPath = as.getSetting("bottom_logo");
-
-		if (StringUtils.isBlank(bottomLogoPath)) {
-			bottomLogoPath = "/images/artminiicon.png";
-		}
-
-		return bottomLogoPath;
-	}
-
-	/**
 	 * Determine if art database has been configured
 	 *
 	 * @return
 	 */
 	public static boolean isArtDatabaseConfigured() {
-		boolean configured = false;
-
 		if (artDatabaseConfiguration != null) {
-			configured = true;
+			return true;
+		} else {
+			return false;
 		}
-
-		return configured;
 	}
 
 	/**
@@ -637,16 +504,11 @@ public class ArtConfig extends HttpServlet {
 	 * @return <code>true</code> if a custom font should be used in pdf output
 	 */
 	public static boolean isUseCustomPdfFont() {
-		return useCustomPdfFont;
-	}
-
-	/**
-	 * Determine if the custom pdf font should be embedded in the generated pdf
-	 *
-	 * @return <code>true</code> if the custom pdf font should be embedded
-	 */
-	public static boolean isPdfFontEmbedded() {
-		return BooleanUtils.toBoolean(as.getSetting("pdf_font_embedded"));
+		if (StringUtils.isBlank(settings.getPdfFontName())) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -660,41 +522,12 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Determine if displaying null value is enabled.
-	 *
-	 * @return <code>true</code> if displaying null value is enabled
-	 */
-	public static boolean isNullValueEnabled() {
-		return BooleanUtils.toBoolean(as.getSetting("null_value_enabled"));
-	}
-
-	/**
 	 * Determine if a custom export path is in use
 	 *
 	 * @return <code>true</code> if a custom export path is in use
 	 */
 	public static boolean isCustomExportDirectory() {
 		return customExportDirectory;
-	}
-
-	/**
-	 * Determine if displaying null numbers as blank or as zero when display
-	 * null value is no
-	 *
-	 * @return <code>true</code> if displaying null numbers as blank. Otherwise,
-	 * display null numbers as zero
-	 */
-	public static boolean isNullNumbersAsBlank() {
-		boolean nullNumbersAsBlank = false;
-
-		String nullValue = as.getSetting("null_value_enabled");
-
-		//setting can be "yes", "no_numbers_as_blank" or "no_numbers_as_zero"
-		if (StringUtils.equalsIgnoreCase(nullValue, "no_numbers_as_blank")) {
-			nullNumbersAsBlank = true;
-		}
-
-		return nullNumbersAsBlank;
 	}
 
 	/**
@@ -778,15 +611,22 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static Connection getAdminConnection() throws SQLException, NamingException {
 		logger.debug("Getting admin connection");
+
 		// Create a connection to the ART repository for this admin and store it in the
 		// admin session (we are not getting this from the pool since it should not be in Autocommit mode)
+
 		Connection connArt;
-		if (StringUtils.isNotBlank(artDbDriver)) {
-			connArt = DriverManager.getConnection(artDbUrl, as.getSetting("art_username"), artDbPassword);
+
+		String url = artDatabaseConfiguration.getUrl();
+		String username = artDatabaseConfiguration.getUsername();
+		String password = artDatabaseConfiguration.getPassword();
+
+		if (StringUtils.isNotBlank(artDatabaseConfiguration.getDriver())) {
+			connArt = DriverManager.getConnection(url, username, password);
 			connArt.setAutoCommit(false);
 		} else {
 			//using jndi datasource
-			connArt = getJndiConnection(artDbUrl);
+			connArt = getJndiConnection(url);
 			connArt.setAutoCommit(false);
 		}
 
@@ -827,7 +667,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return the password used to connect to the ART repository
 	 */
 	public static String getRepositoryPassword() {
-		return artDbPassword;
+		return as.getSetting("art_password");
 	}
 
 	/**
@@ -910,54 +750,21 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get the list of available view modes. To allow users to select how to
-	 * display the query result Note: not all the viewmodes are displayed here,
-	 * see web.xml
+	 * Get user selectable report formats
 	 *
-	 * @return list of available view modes
+	 * @return user selectable report formats
 	 */
-	public static List<String> getUserViewModes() {
-		return userViewModes;
+	public static List<String> getReportFormats() {
+		return reportFormats;
 	}
 
 	/**
-	 * Get the list of all valid view modes.
+	 * Get all supported report formats
 	 *
-	 * @return list of all valid view modes
+	 * @return all supported report formats
 	 */
-	public static List<String> getAllViewModes() {
-		return allViewModes;
-	}
-
-	/**
-	 * Determine if job scheduling is enabled.
-	 *
-	 * @return <code>true</code> if job scheduling is enabled
-	 */
-	public static boolean isSchedulingEnabled() {
-		return BooleanUtils.toBoolean(as.getSetting("scheduling_enabled"));
-	}
-
-	/**
-	 * Get mondrian cache expiry period in hours
-	 *
-	 * @return mondrian cache expiry period in hours
-	 */
-	public static int getMondrianCacheExpiry() {
-		int cacheExpiry = 0;
-		String cacheExpiryString = "";
-
-		try {
-			cacheExpiryString = getArtSetting("mondrian_cache_expiry");
-			if (NumberUtils.isNumber(cacheExpiryString)) {
-				cacheExpiry = Integer.parseInt(cacheExpiryString);
-			}
-		} catch (NumberFormatException e) {
-			//invalid number set for cache expiry. default to 0 (no automatic clearing of cache)
-			logger.warn("Invalid number for mondrian cache expiry: {}", cacheExpiryString, e);
-		}
-
-		return cacheExpiry;
+	public static List<String> getAllReportFormats() {
+		return allReportFormats;
 	}
 
 	/**
@@ -979,63 +786,27 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get the max rows for the given view mode
+	 * Get the max rows for the given report format
 	 *
-	 * @param viewMode
-	 * @return the max rows for the given view mode
+	 * @param reportFormat
+	 * @return the max rows for the given report format
 	 */
-	public static int getMaxRows(String viewMode) {
-		int max = defaultMaxRows;
+	public static int getMaxRows(String reportFormat) {
+		int max = settings.getMaxRowsDefault();
 
-		String setting = as.getSetting("specific_max_rows");
+		String setting = settings.getMaxRowsSpecific();
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {
-				if (maxSetting.indexOf(viewMode) != -1) {
+				if (maxSetting.indexOf(reportFormat) != -1) {
 					String value = StringUtils.substringAfter(maxSetting, ":");
-					try {
-						max = Integer.parseInt(value);
-					} catch (NumberFormatException e) {
-						//invalid number
-						logger.warn("Invalid max rows value for setting: {}", maxSetting, e);
-					}
+					max = NumberUtils.toInt(value);
 					break;
 				}
 			}
 		}
 
 		return max;
-	}
-
-	/**
-	 * Get the maximum number of running queries
-	 *
-	 * @return the maximum number of running queries
-	 */
-	public static int getMaxRunningQueries() {
-		int maxQueries = 1000;
-		String maxQueriesString = "";
-
-		try {
-			maxQueriesString = getArtSetting("max_running_queries");
-			maxQueries = Integer.parseInt(maxQueriesString);
-		} catch (NumberFormatException e) {
-			//invalid number
-			logger.warn("Invalid number for max running queries: {}", maxQueriesString, e);
-		}
-
-		return maxQueries;
-	}
-
-	public static List<String> getWindowsDomains() {
-		List<String> domainsList = new ArrayList<String>();
-
-		String[] domains = StringUtils.split(getArtSetting("mswin_domains"), ",");
-		if (domains != null) {
-			domainsList.addAll(Arrays.asList(domains));
-		}
-
-		return domainsList;
 	}
 
 	/**
@@ -1104,8 +875,7 @@ public class ArtConfig extends HttpServlet {
 			throws IOException {
 
 		//obfuscate password field for storing
-		String clearTextPassword = artDatabaseForm.getPassword();
-		artDatabaseForm.setPassword(Encrypter.encrypt(clearTextPassword));
+		artDatabaseForm.setPassword(Encrypter.encrypt(artDatabaseForm.getPassword()));
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
@@ -1113,10 +883,44 @@ public class ArtConfig extends HttpServlet {
 
 		//update configuration object
 		artDatabaseConfiguration = null;
-		artDatabaseConfiguration = artDatabaseForm;
+		artDatabaseConfiguration = loadArtDatabaseConfiguration();
+	}
 
-		//restore clear text password in configuration object
-		artDatabaseConfiguration.setPassword(clearTextPassword);
+	/**
+	 * Load application settings and refresh variables
+	 */
+	private static void refreshSettings() {
+		settings = null;
+		settings = loadSettings();
+
+		//set date formatters
+		String dateFormat = settings.getDateFormat();
+		timeFormatter.applyPattern("HH:mm:ss.SSS");
+		dateFormatter.applyPattern(dateFormat);
+		dateTimeFormatter.applyPattern(dateFormat + " " + settings.getTimeFormat());
+
+		//set available report formats
+		String reportFormatsString = settings.getReportFormats();
+		String[] tmpReportFormatsArray = StringUtils.split(reportFormatsString, ",");
+		String[] reportFormatsArray = StringUtils.stripAll(tmpReportFormatsArray);
+		reportFormats.clear();
+		if (reportFormatsArray != null) {
+			reportFormats.addAll(Arrays.asList(reportFormatsArray));
+		}
+
+		//register pdf fonts 
+		registerPdfFonts();
+
+		//register database authentication jdbc driver
+		String driver = settings.getDatabaseAuthenticationDriver();
+		if (StringUtils.isNotBlank(driver)) {
+			try {
+				Class.forName(driver).newInstance();
+				logger.info("Database Authentication JDBC Driver Registered: {}", driver);
+			} catch (Exception e) {
+				logger.error("Error while registering Database Authentication JDBC Driver: {}", driver, e);
+			}
+		}
 	}
 
 	/**
@@ -1168,12 +972,8 @@ public class ArtConfig extends HttpServlet {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, newSettings);
 
-		settings = null;
-		settings = newSettings;
-
-		//restore clear text passwords
-		settings.setSmtpPassword(clearTextSmtpPassword);
-		settings.setLdapBindPassword(clearTextLdapBindPassword);
+		//refresh settings
+		refreshSettings();
 	}
 
 	/**
@@ -1204,7 +1004,7 @@ public class ArtConfig extends HttpServlet {
 				SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
 				scheduler = schedulerFactory.getScheduler();
 
-				if (ArtConfig.isSchedulingEnabled()) {
+				if (settings.isSchedulingEnabled()) {
 					scheduler.start();
 				} else {
 					scheduler.standby();

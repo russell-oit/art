@@ -180,7 +180,7 @@ public class Scheduler extends HttpServlet {
 
 		long mondrianCacheExpiry; //cache expiry duration in milliseconds
 
-		mondrianCacheExpiry = (long) ArtConfig.getMondrianCacheExpiry();
+		mondrianCacheExpiry = (long) ArtConfig.getSettings().getMondrianCacheExpiryPeriod();
 		mondrianCacheExpiry = mondrianCacheExpiry * 60 * 60 * 1000; //convert period defined in hours to milliseconds
 
 		if (mondrianCacheExpiry > 0) {

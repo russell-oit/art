@@ -185,7 +185,7 @@ String settingsFilePath = ArtConfig.getSettingsFilePath();
 			SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
 			scheduler = schedulerFactory.getScheduler();
 
-			if (ArtConfig.isSchedulingEnabled()){
+			if (ArtConfig.getSettings().isSchedulingEnabled()){
 				scheduler.start();
 			}
 			else {
@@ -201,9 +201,6 @@ String settingsFilePath = ArtConfig.getSettingsFilePath();
 		}
 	}
 	
-	//register pdf font if not already registered
-	ArtConfig.registerPdfFonts();
-				
 	//use client side redirect instead of jsp:forward to avoid job being resubmitted if browser refresh is done immediately after saving the job
 	response.sendRedirect("adminConsole.jsp");
 	return;

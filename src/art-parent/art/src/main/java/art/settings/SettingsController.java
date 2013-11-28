@@ -1,6 +1,7 @@
 package art.settings;
 
 import art.enums.ArtAuthenticationMethod;
+import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.SmtpConnectionEncryptionMethod;
@@ -66,6 +67,12 @@ public class SettingsController {
 	public LdapAuthenticationMethod[] addLdapAuthenticationMethods() {
 		return LdapAuthenticationMethod.values();
 	}
+	
+	@ModelAttribute("displayNullOptions")
+	public DisplayNull[] addDisplayNullOptions(){
+		return DisplayNull.values();
+	}
+	
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.GET)
 	public String showSettings(HttpSession session, Model model) {
@@ -113,6 +120,8 @@ public class SettingsController {
 
 		try {
 			ArtConfig.saveSettings(settings);
+			
+			//save administrator email in application context
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("success", "true");

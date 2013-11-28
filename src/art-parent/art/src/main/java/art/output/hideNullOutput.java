@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.enums.DisplayNull;
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
@@ -109,7 +110,7 @@ public class hideNullOutput implements ArtOutputInterface {
 	@Override
 	public void addCellDouble(Double d) {
 		if (d == null) {
-			if (ArtConfig.isNullNumbersAsBlank()) {
+			if (ArtConfig.getSettings().getDisplayNull()== DisplayNull.NoNumbersAsBlank) {
 				artOutputInterface.addCellString(" "); //display nulls as blank space
 			} else {
 				artOutputInterface.addCellDouble(0.0D); //display nulls as 0
@@ -122,7 +123,7 @@ public class hideNullOutput implements ArtOutputInterface {
 	@Override
 	public void addCellLong(Long i) {
 		if (i == null) {
-			if (ArtConfig.isNullNumbersAsBlank()) {
+			if (ArtConfig.getSettings().getDisplayNull()== DisplayNull.NoNumbersAsBlank) {
 				artOutputInterface.addCellString(" "); //display nulls as blank space
 			} else {
 				artOutputInterface.addCellLong(0L); //display nulls as 0

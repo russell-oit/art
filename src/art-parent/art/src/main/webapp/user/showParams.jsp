@@ -36,6 +36,8 @@ if(queryType==112 || queryType==113 || queryType==114){
 	showResultsInline=false;
 }
 
+boolean schedulingEnabled=ArtConfig.getSettings().isSchedulingEnabled();
+
 %>
 
 <script type="text/javascript" src="<%= request.getContextPath() %>/js/date.js"></script>
@@ -183,13 +185,13 @@ if(queryType==112 || queryType==113 || queryType==114){
                         %>    <span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
                         <SELECT name="viewMode" id="viewMode" size="1">
                             <%
-                            List<String> viewModes = ArtConfig.getUserViewModes();
+                            List<String> viewModes = ArtConfig.getReportFormats();
                             for(String viewMode : viewModes){
                             %>
                             <OPTION VALUE="<%=viewMode%>"> <%=messages.getString(viewMode)%> </OPTION>
                             <% } %>
 
-                            <% if (accessLevel>=5 && ArtConfig.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && schedulingEnabled) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <% } %>
 
@@ -208,7 +210,7 @@ if(queryType==112 || queryType==113 || queryType==114){
                             <OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
                             <OPTION VALUE="xlsx"><%=messages.getString("xlsx")%></OPTION>
                             <OPTION VALUE="html"><%=messages.getString("htmlJasper")%></OPTION>
-                            <% if (accessLevel>=5 && ArtConfig.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && schedulingEnabled) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <% } %>
 
@@ -222,7 +224,7 @@ if(queryType==112 || queryType==113 || queryType==114){
 					<span style="font-size:95%"><i><%=messages.getString("viewMode")%></i></span>
 					<SELECT name="viewMode" id="viewMode" size="1">			     		
 					<OPTION VALUE="xls"><%=messages.getString("xls")%></OPTION>
-					 <% if (ue.getAccessLevel() >=5 && ArtConfig.isSchedulingEnabled()) { %>
+					 <% if (ue.getAccessLevel() >=5 && schedulingEnabled) { %>
 					<OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
 					 <% } %>
 						 </SELECT>
@@ -248,7 +250,7 @@ if(queryType==112 || queryType==113 || queryType==114){
                             <OPTION VALUE="graph"><%= messages.getString("htmlPlain") %></OPTION>
                             <OPTION VALUE="pdfgraph"><%=messages.getString("pdf")%></OPTION>
                             <OPTION VALUE="pnggraph"><%=messages.getString("png")%></OPTION>
-                            <% if (accessLevel>=5 && ArtConfig.isSchedulingEnabled()) { %>
+                            <% if (accessLevel>=5 && schedulingEnabled) { %>
                             <OPTION VALUE="SCHEDULE"><%=messages.getString("scheduleJob")%></OPTION>
                             <%}%>
                         </SELECT>

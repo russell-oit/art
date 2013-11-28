@@ -92,7 +92,7 @@ dq.create(queryId,queryPosition);
                     <option value="ALL" <%="ALL".equals(value)?"selected":""%> > All </option>
 					<option value="default" <%="default".equals(value)?"selected":""%> > Default </option>
                     <%
-                       List<String> viewModes = ArtConfig.getUserViewModes();
+                       List<String> viewModes = ArtConfig.getReportFormats();
                        for(String viewMode : viewModes){
 						%>
 						<option value="<%=viewMode%>" <%=viewMode.equals(value)?"selected":""%> > <%=messages.getString(viewMode)%> </option>

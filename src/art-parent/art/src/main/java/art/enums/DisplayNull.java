@@ -37,7 +37,7 @@ public enum DisplayNull {
 		}
 		return Yes; //default
 	}
-	
+
 	/**
 	 * Get enum display value for use in the user interface. In case display
 	 * value needs to be different from internal value
@@ -45,6 +45,15 @@ public enum DisplayNull {
 	 * @return
 	 */
 	public String getDisplayValue() {
-		return value;
+		switch (this) {
+			case Yes:
+				return "settings.displayNullOption.yes";
+			case NoNumbersAsBlank:
+				return "settings.displayNullOption.noNumbersAsBlank";
+			case NoNumbersAsZero:
+				return "settings.displayNullOption.noNumbersAsZero";
+			default:
+				return "";
+		}
 	}
 }

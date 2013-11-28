@@ -16,6 +16,7 @@
  */
 package art.output;
 
+import art.enums.DisplayNull;
 import art.servlets.ArtConfig;
 import art.utils.ArtException;
 import art.utils.ArtQueryParam;
@@ -129,7 +130,7 @@ public class ArtOutHandler {
 		HashMap<String, String> params = new HashMap<String, String>();
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (!ArtConfig.isNullValueEnabled()) { //setting set to "No"
+		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
 			o = new hideNullOutput(o);
 		}
 
@@ -181,17 +182,17 @@ public class ArtOutHandler {
 						java.sql.Clob clob = rs.getClob(i + 1);
 						String clobValue;
 						try {
-							clobValue=clob.getSubString(1, (int) clob.length());
+							clobValue = clob.getSubString(1, (int) clob.length());
 							o.addCellString(clobValue);
 						} catch (SQLException e) {
 							logger.error("Error", e);
-							clobValue="Exception getting CLOB: " + e;
+							clobValue = "Exception getting CLOB: " + e;
 							o.addCellString(clobValue);
 						}
 						columnValues.add(clobValue);
 						break;
 					default:
-						String defaultValue=rs.getString(i + 1);
+						String defaultValue = rs.getString(i + 1);
 						columnValues.add(defaultValue);
 						o.addCellString(defaultValue);
 				}
@@ -224,7 +225,7 @@ public class ArtOutHandler {
 					if (drilldownParams != null) {
 						for (ArtQueryParam param : drilldownParams) {
 							paramLabel = param.getParamLabel();
-							paramValue = columnValues.get(param.getDrilldownColumn()-1);
+							paramValue = columnValues.get(param.getDrilldownColumn() - 1);
 							if (paramValue != null) {
 								try {
 									paramValue = URLEncoder.encode(paramValue, "UTF-8");
@@ -343,7 +344,7 @@ public class ArtOutHandler {
 		}
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (!ArtConfig.isNullValueEnabled()) { //setting set to "No"
+		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
 			o = new hideNullOutput(o);
 		}
 

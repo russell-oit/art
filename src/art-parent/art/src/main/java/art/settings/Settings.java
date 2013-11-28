@@ -51,19 +51,23 @@ public class Settings {
 	private String pdfFontDirectory;
 	private String pdfFontEncoding;
 	private boolean pdfFontEmbedded;
-	private boolean showHeaderInPublicUserSession;
-	private String rssLink;
-	private int mondrianCacheExpiryPeriod;
+	private String administratorEmail;
 	@NotBlank
 	private String dateFormat = "dd-MMM-yyyy";
 	@NotBlank
 	private String timeFormat = "HH:mm:ss";
-	private boolean schedulingEnabled = true;
 	@NotBlank
-	private String availableReportFormats = "htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
-	private int maxRunningReports = 1000;
+	private String reportFormats = "htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
 	private DisplayNull displayNull = DisplayNull.NoNumbersAsZero;
-	private String administratorEmail;
+	private int maxRunningReports = 1000;
+	private boolean showHeaderInPublicUserSession;
+	private int mondrianCacheExpiryPeriod;
+	private boolean schedulingEnabled = true;
+	private String rssLink;
+	
+	
+	
+	
 	
 	/**
 	 * Get the value of useBlankLdapBindPassword
@@ -410,21 +414,21 @@ public class Settings {
 	}
 
 	/**
-	 * Get the value of availableReportFormats
+	 * Get the value of reportFormats
 	 *
-	 * @return the value of availableReportFormats
+	 * @return the value of reportFormats
 	 */
-	public String getAvailableReportFormats() {
-		return availableReportFormats;
+	public String getReportFormats() {
+		return reportFormats;
 	}
 
 	/**
-	 * Set the value of availableReportFormats
+	 * Set the value of reportFormats
 	 *
-	 * @param availableReportFormats new value of availableReportFormats
+	 * @param reportFormats new value of reportFormats
 	 */
-	public void setAvailableReportFormats(String availableReportFormats) {
-		this.availableReportFormats = availableReportFormats;
+	public void setReportFormats(String reportFormats) {
+		this.reportFormats = reportFormats;
 	}
 
 	/**

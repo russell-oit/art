@@ -78,7 +78,7 @@ owner=request.getParameter("OWNER");
 	//get scheduler instance
 	org.quartz.Scheduler scheduler=ArtConfig.getScheduler();
 
-	boolean schedulingEnabled=ArtConfig.isSchedulingEnabled();
+	boolean schedulingEnabled=ArtConfig.getSettings().isSchedulingEnabled();
   
     if ( action.equals("run") ) { 
 	
