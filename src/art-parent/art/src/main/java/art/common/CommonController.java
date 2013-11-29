@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * Controller for simple pages that require have much logic
+ * Controller for simple pages that don't have much logic
  * 
  * @author Timothy Anyona
  */

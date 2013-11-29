@@ -22,10 +22,8 @@ public class DbLogin {
 	public static LoginResult authenticate(String username, String password) {
 		LoginResult result = new LoginResult();
 
-		String url = ArtConfig.getArtSetting("jdbc_auth_url");
+		String url = ArtConfig.getSettings().getDatabaseAuthenticationUrl();
 		
-		//TODO remove references to commons lang 2.x (org.apache.commons.lang). use commons lang 3.x (org.apache.commons.lang3)
-
 		if (StringUtils.isBlank(url)) {
 			logger.info("Database authentication not configured. username={}", username);
 
@@ -34,6 +32,7 @@ public class DbLogin {
 		} else {
 			try {
 				Connection conn = DriverManager.getConnection(url, username, password);
+				
 				//if we are here, authentication is successful
 				result.setAuthenticated(true);
 				DbUtils.closeConnection(conn);

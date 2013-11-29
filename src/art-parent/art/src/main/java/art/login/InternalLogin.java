@@ -38,7 +38,7 @@ public class InternalLogin {
 
 			rs = ps.executeQuery();
 			if (rs.next()) {
-				if (rs.getBoolean("ACTIVE") == true) {
+				if (rs.getBoolean("ACTIVE")) {
 					boolean passwordVerified = false;
 					try {
 						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"));

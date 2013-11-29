@@ -7,8 +7,7 @@ package art.enums;
  */
 public enum LdapConnectionEncryptionMethod {
 
-	//include ssl when secure unboundid ssl authentication code is done
-	None("None"), StartTLS("StartTLS");
+	None("None"), SSL("SSL"), StartTLS("StartTLS");
 	private String value;
 
 	private LdapConnectionEncryptionMethod(String value) {

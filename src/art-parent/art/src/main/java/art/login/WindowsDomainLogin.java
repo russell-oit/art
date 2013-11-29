@@ -23,7 +23,7 @@ public class WindowsDomainLogin {
 	public static LoginResult authenticate(String domain, String username, String password) {
 		LoginResult result = new LoginResult();
 
-		String domainController = ArtConfig.getArtSetting("mswin_auth_server");
+		String domainController = ArtConfig.getSettings().getWindowsDomainController();
 
 		if (StringUtils.isBlank(domainController)) {
 			logger.info("Windows Domain authentication not configured. username={}", username);
@@ -34,11 +34,13 @@ public class WindowsDomainLogin {
 			try {
 				//See http://jcifs.samba.org/FAQ.html
 				UniAddress dc = UniAddress.getByName(domainController);
+				
 				//if we are here, domainController is an ip address or a valid machine name
 				//domainController can also be any machine that is a member of the domain,
 				//doesn't have to be the domain controller
 				NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(domain, username, password);
 				SmbSession.logon(dc, auth);
+				
 				//if we are here, authentication is successful
 				result.setAuthenticated(true);
 			} catch (UnknownHostException ex) {
