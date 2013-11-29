@@ -114,6 +114,7 @@ public class AuthorizationFilter implements Filter {
 						}
 						session.setAttribute("sessionUser", user);
 						session.setAttribute("authenticationMethod", loginMethod.getValue());
+						session.setAttribute("administratorEmail", ArtConfig.getSettings().getAdministratorEmail());
 						//log success
 						loginHelper.logSuccess(loginMethod, username, ip);
 					}

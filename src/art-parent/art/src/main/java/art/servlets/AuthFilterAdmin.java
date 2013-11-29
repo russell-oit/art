@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.servlets;
 
@@ -36,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public final class AuthFilterAdmin implements Filter {
 
 	final static Logger logger = LoggerFactory.getLogger(AuthFilterAdmin.class);
+
 	/**
 	 *
 	 */
@@ -90,18 +90,14 @@ public final class AuthFilterAdmin implements Filter {
 					String username = hrequest.getParameter("username");
 					String password = hrequest.getParameter("password");
 					String sessionUser = (String) session.getAttribute("username");
-					if (username != null || sessionUser!=null) {
+					if (username != null || sessionUser != null) {
 						//we have come from a login page. authenticate
-						boolean isArtRepositoryUser = false;
 						try {
 							String msg = ArtHelper.authenticateSession(hrequest);
 							if (msg == null) {
 								//no error messages. authentication succeeded
-								if (StringUtils.equals(username, ArtConfig.getRepositoryUsername())
-										&& StringUtils.equals(password, ArtConfig.getRepositoryPassword()) && StringUtils.isNotBlank(username)) {
-									// using repository username and password
-									isArtRepositoryUser = true;
-								}
+								ArtHelper artHelper = new ArtHelper();
+								boolean isArtRepositoryUser = artHelper.isValidRepositoryUser(username, password);
 								if (isArtRepositoryUser) {
 									hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
 									return; //not needed but retained in case code changes later giving execution path after redirect
@@ -124,7 +120,7 @@ public final class AuthFilterAdmin implements Filter {
 //								if (hrequest.getQueryString() != null) {
 //									nextPage = nextPage + "?" + hrequest.getQueryString();
 //								}
-								String nextPage=StringUtils.substringAfter(hrequest.getRequestURI(),hrequest.getContextPath());
+								String nextPage = StringUtils.substringAfter(hrequest.getRequestURI(), hrequest.getContextPath());
 								session.setAttribute("nextPage", nextPage);
 
 								//display appropriate login page
@@ -141,7 +137,7 @@ public final class AuthFilterAdmin implements Filter {
 //						if (hrequest.getQueryString() != null) {
 //							nextPage = nextPage + "?" + hrequest.getQueryString();
 //						}
-						String nextPage=StringUtils.substringAfter(hrequest.getRequestURI(),hrequest.getContextPath());
+						String nextPage = StringUtils.substringAfter(hrequest.getRequestURI(), hrequest.getContextPath());
 						session.setAttribute("nextPage", nextPage);
 
 						java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.ArtMessages", hrequest.getLocale());

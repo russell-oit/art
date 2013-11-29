@@ -48,6 +48,8 @@ public class ArtHelper {
 	 * @throws Exception
 	 */
 	public static String authenticateSession(HttpServletRequest request) throws Exception {
+		//TODO remove this method once refactoring is complete
+		
 		String msg = null;
 		HttpSession session = request.getSession();
 		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
@@ -55,7 +57,9 @@ public class ArtHelper {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		if (username != null && password != null) {
-			if (StringUtils.equals(username, ArtConfig.getRepositoryUsername()) && StringUtils.equals(password, ArtConfig.getRepositoryPassword()) && StringUtils.isNotBlank(username)) {
+			ArtHelper artHelper = new ArtHelper();
+			boolean isArtRepositoryUser = artHelper.isValidRepositoryUser(username, password);
+			if (isArtRepositoryUser) {
 				accessLevel = 100;
 				log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + accessLevel);
 			} else {
@@ -64,7 +68,7 @@ public class ArtHelper {
 				ResultSet rs = null;
 				try {
 					String SqlQuery = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL"
-							+ " FROM ART_USERS " 
+							+ " FROM ART_USERS "
 							+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
 					conn = ArtConfig.getConnection();
 					if (conn == null) {
@@ -98,7 +102,7 @@ public class ArtHelper {
 			try {
 				username = (String) session.getAttribute("username");
 				String SqlQuery = "SELECT ACCESS_LEVEL "
-						+ " FROM ART_USERS " 
+						+ " FROM ART_USERS "
 						+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
 				conn = ArtConfig.getConnection();
 				if (conn == null) {
@@ -147,6 +151,7 @@ public class ArtHelper {
 	 * @return
 	 */
 	public static String getDataTablesLanguageUrl(HttpServletRequest request) {
+		//TODO remove this method once refactoring is complete
 		String url = "";
 		String languageFileName = "dataTables." + request.getLocale().toString() + ".txt";
 		String sep = File.separator;
@@ -237,5 +242,28 @@ public class ArtHelper {
 		} finally {
 			DbUtils.close(ps, conn);
 		}
+	}
+
+	/**
+	 * Determine if given credentils match those of the art database
+	 *
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public boolean isValidRepositoryUser(String username, String password) {
+		//TODO remove this method once refactoring is complete
+		boolean validRepositoryUser = false;
+
+		String artDbUsername = ArtConfig.getArtDatabaseConfiguration().getUsername();
+		String artDbPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+		if (StringUtils.equals(username, artDbUsername)
+				&& StringUtils.equals(password, artDbPassword)
+				&& StringUtils.isNotBlank(username)) {
+			//repository user
+			validRepositoryUser = true;
+		}
+
+		return validRepositoryUser;
 	}
 }

@@ -45,15 +45,6 @@ public enum DisplayNull {
 	 * @return
 	 */
 	public String getDisplayValue() {
-		switch (this) {
-			case Yes:
-				return "settings.displayNullOption.yes";
-			case NoNumbersAsBlank:
-				return "settings.displayNullOption.noNumbersAsBlank";
-			case NoNumbersAsZero:
-				return "settings.displayNullOption.noNumbersAsZero";
-			default:
-				return "";
-		}
+		return "settings.displayNullOption." + this.toString();
 	}
 }

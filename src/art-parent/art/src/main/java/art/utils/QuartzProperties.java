@@ -96,8 +96,8 @@ public class QuartzProperties {
 					dbUrl = ArtConfig.getArtSetting("art_url"); //for 2.2.1 to 2.3+ migration. property name changed from art_url to art_jdbc_url
 				}
 				dbDriver = ArtConfig.getArtSetting("art_jdbc_driver");
-				dbUsername = ArtConfig.getRepositoryUsername();
-				dbPassword = ArtConfig.getRepositoryPassword(); //has already been decrypted
+				dbUsername = ArtConfig.getArtDatabaseConfiguration().getUsername();
+				dbPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
 
 				//load properties from quartz properties file if it exists
 				props = new Properties();

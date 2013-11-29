@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -43,6 +44,7 @@ import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
@@ -198,7 +200,7 @@ public class ArtConfig extends HttpServlet {
 		allReportFormats.add("htmlDataTable");
 
 		//load settings and initialize variables
-		refreshSettings();
+		loadSettings();
 
 		//initialize datasources
 		initializeDatasources();
@@ -210,20 +212,13 @@ public class ArtConfig extends HttpServlet {
 	 * @return <code>true</code> if file found. <code>false</code> otherwise.
 	 */
 	public static boolean loadArtSettings() {
+		//TODO remove this method once refactoring is complete
 		logger.debug("Loading art settings");
 
 		as = new ArtSettings();
 
 		if (as.load(artPropertiesFilePath)) {
 			// settings defined
-
-			//change of admin email setting name
-			String adminEmail = as.getSetting("administrator_email");
-			if (adminEmail == null) {
-				//use old setting
-				adminEmail = as.getSetting("administrator");
-				as.setSetting("administrator_email", adminEmail);
-			}
 
 			artSettingsLoaded = true;
 
@@ -651,26 +646,6 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get the username used to connect to the ART repository.
-	 *
-	 *
-	 * @return the username used to connect to the ART repository
-	 */
-	public static String getRepositoryUsername() {
-		return as.getSetting("art_username");
-
-	}
-
-	/**
-	 * Get the password used to connect to the ART repository.
-	 *
-	 * @return the password used to connect to the ART repository
-	 */
-	public static String getRepositoryPassword() {
-		return as.getSetting("art_password");
-	}
-
-	/**
 	 * Get an ART setting as defined in the art.properties file
 	 *
 	 * @param key setting name
@@ -887,12 +862,34 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Load application settings and refresh variables
+	 * Load application settings and set appropriate configurations
+	 *
 	 */
-	private static void refreshSettings() {
-		settings = null;
-		settings = loadSettings();
+	private static void loadSettings() {
+		Settings newSettings = null;
 
+		try {
+			File settingsFile = new File(settingsFilePath);
+			if (settingsFile.exists()) {
+				ObjectMapper mapper = new ObjectMapper();
+				newSettings = mapper.readValue(settingsFile, Settings.class);
+
+				//de-obfuscate password fields
+				newSettings.setSmtpPassword(Encrypter.decrypt(newSettings.getSmtpPassword()));
+				newSettings.setLdapBindPassword(Encrypter.decrypt(newSettings.getLdapBindPassword()));
+			}
+		} catch (Exception ex) {
+			logger.error("Error", ex);
+		}
+
+		//use default settings if error or none specified
+		if (newSettings == null) {
+			newSettings = new Settings();
+		}
+		
+		settings=null;
+		settings=newSettings;
+		
 		//set date formatters
 		String dateFormat = settings.getDateFormat();
 		timeFormatter.applyPattern("HH:mm:ss.SSS");
@@ -921,37 +918,25 @@ public class ArtConfig extends HttpServlet {
 				logger.error("Error while registering Database Authentication JDBC Driver: {}", driver, e);
 			}
 		}
-	}
 
-	/**
-	 * Load application settings
-	 *
-	 * @return object with configured settings or new object if settings not
-	 * configured or error occurs
-	 */
-	private static Settings loadSettings() {
-		Settings newSettings = null;
-
-		try {
-			File settingsFile = new File(settingsFilePath);
-			if (settingsFile.exists()) {
-				ObjectMapper mapper = new ObjectMapper();
-				newSettings = mapper.readValue(settingsFile, Settings.class);
-
-				//de-obfuscate password fields
-				newSettings.setSmtpPassword(Encrypter.decrypt(newSettings.getSmtpPassword()));
-				newSettings.setLdapBindPassword(Encrypter.decrypt(newSettings.getLdapBindPassword()));
+		//update scheduler
+		if (scheduler != null) {
+			try {
+				if (settings.isSchedulingEnabled()) {
+					//start scheduler if it was in stand by. otherwise, it's already started
+					if (scheduler.isInStandbyMode()) {
+						scheduler.start();
+					}
+				} else {
+					//put scheduler in stand by mode if it was running
+					if (!scheduler.isInStandbyMode()) {
+						scheduler.standby();
+					}
+				}
+			} catch (SchedulerException ex) {
+				logger.error("error", ex);
 			}
-		} catch (Exception ex) {
-			logger.error("Error", ex);
 		}
-
-		//use default settings if error or none specified
-		if (newSettings == null) {
-			newSettings = new Settings();
-		}
-
-		return newSettings;
 	}
 
 	/**
@@ -972,8 +957,8 @@ public class ArtConfig extends HttpServlet {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, newSettings);
 
-		//refresh settings
-		refreshSettings();
+		//refresh settings and related configuration
+		loadSettings();
 	}
 
 	/**

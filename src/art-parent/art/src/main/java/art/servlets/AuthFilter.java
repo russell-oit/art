@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public final class AuthFilter implements Filter {
 
 	final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
-	private boolean isArtRepositoryUser;
 
 	/**
 	 *
@@ -78,7 +77,6 @@ public final class AuthFilter implements Filter {
 					hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
 					return; //not needed but retained in case code changes later giving execution path after redirect
 				} else {
-					isArtRepositoryUser = false;
 					try {
 						//String msg = AuthenticateSession(hrequest);
 						String msg = ArtHelper.authenticateSession(hrequest);
@@ -86,11 +84,8 @@ public final class AuthFilter implements Filter {
 							//no error messages. authentication succeeded
 							String username = hrequest.getParameter("username");
 							String password = hrequest.getParameter("password");
-							if (StringUtils.equals(username,ArtConfig.getRepositoryUsername())
-									&& StringUtils.equals(password,ArtConfig.getRepositoryPassword()) && StringUtils.isNotBlank(username)) {
-								// using repository username and password. 
-								isArtRepositoryUser = true;
-							}
+							ArtHelper artHelper=new ArtHelper();
+							boolean isArtRepositoryUser=artHelper.isValidRepositoryUser(username, password);
 							if (isArtRepositoryUser) {
 								hresponse.sendRedirect(hresponse.encodeRedirectURL(hrequest.getContextPath() + "/admin/adminConsole.jsp"));
 								return; //not needed but retained in case code changes later giving execution path after redirect

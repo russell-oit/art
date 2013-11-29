@@ -11,9 +11,6 @@ Footer that appears on all pages
 
 <spring:htmlEscape defaultHtmlEscape="true"/>
 
-<c:set var="administratorEmail" 
-value='<%= art.servlets.ArtConfig.getArtSetting("administrator_email")%>'/>
-
 <div id="footer">
 	<div class="container"> 
 		<span class="navbar-text text-muted">

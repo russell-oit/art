@@ -55,7 +55,7 @@ Settings configuration page
 		</div>
 
 		<div class="row">
-			<div class="col-md-7 col-md-offset-3">
+			<div class="col-md-8 col-md-offset-2">
 				<form:form class="form-horizontal" method="POST" action="" modelAttribute="settings">
 					<fieldset>
 						<legend class="text-center">
@@ -79,18 +79,18 @@ Settings configuration page
 						<fieldset>
 							<legend>SMTP</legend>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="smtpServer">
+								<label class="control-label col-md-5" for="smtpServer">
 									<spring:message code="settings.label.smtpServer"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<form:input path="smtpServer" id="smtpServer" class="form-control" />
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="smtpUsername">
+								<label class="control-label col-md-5" for="smtpUsername">
 									<spring:message code="settings.label.smtpUsername"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="smtpUsername" id="smtpUsername" class="form-control" />
 										<spring:message code="settings.help.smtpUsername" var="help" />
@@ -104,10 +104,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="smtpPassword">
+								<label class="control-label col-md-5" for="smtpPassword">
 									<spring:message code="settings.label.smtpPassword"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:password path="smtpPassword" id="smtpPassword" autocomplete="off" class="form-control" />
 										<spring:message code="page.help.password" var="help" />
@@ -127,10 +127,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="smtpConnectionEncryptionMethod">
+								<label class="control-label col-md-5" for="smtpConnectionEncryptionMethod">
 									<spring:message code="settings.label.smtpConnectionEncryptionMethod"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<c:forEach var="smtpEncryptionMethod" items="${smtpConnectionEncryptionMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="smtpConnectionEncryptionMethod"
@@ -140,10 +140,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="smtpPort">
+								<label class="control-label col-md-5" for="smtpPort">
 									<spring:message code="settings.label.smtpPort"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<form:input path="smtpPort" id="smtpPort" maxlength="6" class="form-control" />
 									<form:errors path="smtpPort" cssClass="error" />
 								</div>
@@ -153,10 +153,10 @@ Settings configuration page
 						<fieldset>
 							<legend><spring:message code="settings.text.maxRows"/></legend>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="maxRowsDefault">
+								<label class="control-label col-md-5" for="maxRowsDefault">
 									<spring:message code="settings.label.maxRowsDefault"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="maxRowsDefault" 
 													id="maxRowsDefault" maxlength="6" class="form-control" />
@@ -172,10 +172,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="maxRowsSpecific">
+								<label class="control-label col-md-5" for="maxRowsSpecific">
 									<spring:message code="settings.label.maxRowsSpecific"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="maxRowsSpecific" 
 													id="maxRowsSpecific" class="form-control" />
@@ -194,10 +194,10 @@ Settings configuration page
 						<fieldset>
 							<legend><spring:message code="settings.text.authentication"/></legend>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="artAuthenticationMethod">
+								<label class="control-label col-md-5" for="artAuthenticationMethod">
 									<spring:message code="settings.label.artAuthenticationMethod"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<c:forEach var="artAuthenticationMethod" items="${artAuthenticationMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="artAuthenticationMethod"
@@ -208,10 +208,10 @@ Settings configuration page
 							</div>
 							<hr>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="windowsDomainController">
+								<label class="control-label col-md-5" for="windowsDomainController">
 									<spring:message code="settings.label.windowsDomainController"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="windowsDomainController"
 													id="windowsDomainController" class="form-control" />
@@ -226,10 +226,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="allowedWindowsDomains">
+								<label class="control-label col-md-5" for="allowedWindowsDomains">
 									<spring:message code="settings.label.allowedWindowsDomains"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="allowedWindowsDomains"
 													id="allowedWindowsDomains" class="form-control" />
@@ -245,29 +245,29 @@ Settings configuration page
 							</div>
 							<hr>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="databaseAuthenticationDriver">
+								<label class="control-label col-md-5" for="databaseAuthenticationDriver">
 									<spring:message code="settings.label.databaseAuthenticationDriver"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<form:input path="databaseAuthenticationDriver"
 												id="databaseAuthenticationDriver" class="form-control" />
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="databaseAuthenticationUrl">
+								<label class="control-label col-md-5" for="databaseAuthenticationUrl">
 									<spring:message code="settings.label.databaseAuthenticationUrl"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<form:input path="databaseAuthenticationUrl"
 												id="databaseAuthenticationUrl" class="form-control" />
 								</div>
 							</div>
 							<hr>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapServer">
+								<label class="control-label col-md-5" for="ldapServer">
 									<spring:message code="settings.label.ldapServer"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="ldapServer" id="ldapServer" class="form-control" />
 										<spring:message code="settings.help.ldapServer" var="help" />
@@ -281,19 +281,19 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapPort">
+								<label class="control-label col-md-5" for="ldapPort">
 									<spring:message code="settings.label.ldapPort"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<form:input path="ldapPort" id="ldapPort" class="form-control" />
 									<form:errors path="ldapPort" cssClass="error" />
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapServer">
+								<label class="control-label col-md-5" for="ldapServer">
 									<spring:message code="settings.label.ldapConnectionEncryptionMethod"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<c:forEach var="ldapEncryptionMethod" items="${ldapConnectionEncryptionMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="ldapConnectionEncryptionMethod"
@@ -303,10 +303,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapUrl">
+								<label class="control-label col-md-5" for="ldapUrl">
 									<spring:message code="settings.label.ldapUrl"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="ldapUrl" id="ldapUrl" class="form-control" />
 										<spring:message code="settings.help.ldapUrl" var="help" />
@@ -320,10 +320,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapBaseDn">
+								<label class="control-label col-md-5" for="ldapBaseDn">
 									<spring:message code="settings.label.ldapBaseDn"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="ldapBaseDn" id="ldapBaseDn" class="form-control" />
 										<spring:message code="settings.help.ldapBaseDn" var="help" />
@@ -337,10 +337,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapBindDn">
+								<label class="control-label col-md-5" for="ldapBindDn">
 									<spring:message code="settings.label.ldapBindDn"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="ldapBindDn" id="ldapBindDn" class="form-control" />
 										<spring:message code="settings.help.ldapBindDn" var="help" />
@@ -354,10 +354,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapBindPassword">
+								<label class="control-label col-md-5" for="ldapBindPassword">
 									<spring:message code="settings.label.ldapBindPassword"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:password path="ldapBindPassword" 
 													   id="ldapBindPassword" autocomplete="off" class="form-control" />
@@ -378,10 +378,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapUserIdAttribute">
+								<label class="control-label col-md-5" for="ldapUserIdAttribute">
 									<spring:message code="settings.label.ldapUserIdAttribute"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="ldapUserIdAttribute" id="ldapUserIdAttribute" class="form-control" />
 										<spring:message code="settings.help.ldapUserIdAttribute" var="help" />
@@ -396,10 +396,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapAuthenticationMethod">
+								<label class="control-label col-md-5" for="ldapAuthenticationMethod">
 									<spring:message code="settings.label.ldapAuthenticationMethod"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<c:forEach var="ldapAuthenticationMethod" items="${ldapAuthenticationMethods}">
 										<label class="radio-inline">
 											<form:radiobutton path="ldapAuthenticationMethod"
@@ -409,10 +409,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="ldapRealm">
+								<label class="control-label col-md-5" for="ldapRealm">
 									<spring:message code="settings.label.ldapRealm"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="ldapRealm" id="ldapRealm" class="form-control" />
 										<spring:message code="settings.help.ldapRealm" var="help" />
@@ -429,10 +429,10 @@ Settings configuration page
 						<fieldset>
 							<legend>PDF</legend>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="pdfPageSize">
+								<label class="control-label col-md-5" for="pdfPageSize">
 									<spring:message code="settings.label.pdfPageSize"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<c:forEach var="pageSize" items="${pdfPageSizes}">
 										<label class="radio-inline">
 											<form:radiobutton path="pdfPageSize"
@@ -442,10 +442,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="pdfFontName">
+								<label class="control-label col-md-5" for="pdfFontName">
 									<spring:message code="settings.label.pdfFontName"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="pdfFontName" id="pdfFontName" class="form-control" />
 										<spring:message code="settings.help.pdfFontName" var="help" />
@@ -459,10 +459,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="pdfFontFile">
+								<label class="control-label col-md-5" for="pdfFontFile">
 									<spring:message code="settings.label.pdfFontFile"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="pdfFontFile" id="pdfFontFile" class="form-control" />
 										<spring:message code="settings.help.pdfFontFile" var="help" />
@@ -476,10 +476,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="pdfFontDirectory">
+								<label class="control-label col-md-5" for="pdfFontDirectory">
 									<spring:message code="settings.label.pdfFontDirectory"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="pdfFontDirectory" id="pdfFontDirectory" class="form-control" />
 										<spring:message code="settings.help.pdfFontDirectory" var="help" />
@@ -493,10 +493,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="pdfFontEncoding">
+								<label class="control-label col-md-5" for="pdfFontEncoding">
 									<spring:message code="settings.label.pdfFontEncoding"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="pdfFontEncoding" id="pdfFontEncoding" class="form-control" />
 										<spring:message code="settings.help.pdfFontEncoding" var="help" />
@@ -510,10 +510,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="pdfFontEmbedded">
+								<label class="control-label col-md-5" for="pdfFontEmbedded">
 									<spring:message code="settings.label.pdfFontEmbedded"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<div class="checkbox">
 											<form:checkbox path="pdfFontEmbedded" id="pdfFontEmbedded" />
@@ -532,10 +532,10 @@ Settings configuration page
 						<fieldset>
 							<legend><spring:message code="settings.text.general" /></legend>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="administratorEmail">
+								<label class="control-label col-md-5" for="administratorEmail">
 									<spring:message code="settings.label.administratorEmail"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="administratorEmail" id="administratorEmail" class="form-control" />
 										<spring:message code="settings.help.administratorEmail" var="help" />
@@ -549,10 +549,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="dateFormat">
+								<label class="control-label col-md-5" for="dateFormat">
 									<spring:message code="settings.label.dateFormat"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="dateFormat" id="dateFormat" class="form-control" />
 										<spring:message code="settings.help.dateFormat" var="help" />
@@ -567,10 +567,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="timeFormat">
+								<label class="control-label col-md-5" for="timeFormat">
 									<spring:message code="settings.label.timeFormat"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="timeFormat" id="timeFormat" class="form-control" />
 										<spring:message code="settings.help.timeFormat" var="help" />
@@ -585,10 +585,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="reportFormats">
+								<label class="control-label col-md-5" for="reportFormats">
 									<spring:message code="settings.label.reportFormats"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="reportFormats" id="reportFormats" class="form-control" />
 										<spring:message code="settings.help.reportFormats" var="help" />
@@ -603,10 +603,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="displayNull">
+								<label class="control-label col-md-5" for="displayNull">
 									<spring:message code="settings.label.displayNull"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<c:forEach var="displayNullOption" items="${displayNullOptions}">
 											<label class="radio-inline">
@@ -626,10 +626,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="maxRunningReports">
+								<label class="control-label col-md-5" for="maxRunningReports">
 									<spring:message code="settings.label.maxRunningReports"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="maxRunningReports" id="maxRunningReports" class="form-control" />
 										<spring:message code="settings.help.maxRunningReports" var="help" />
@@ -644,10 +644,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="showHeaderInPublicUserSession">
+								<label class="control-label col-md-5" for="showHeaderInPublicUserSession">
 									<spring:message code="settings.label.showHeaderInPublicUserSession"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="checkbox">
 										<form:checkbox path="showHeaderInPublicUserSession"
 													   id="showHeaderInPublicUserSession" />
@@ -655,10 +655,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="mondrianCacheExpiryPeriod">
+								<label class="control-label col-md-5" for="mondrianCacheExpiryPeriod">
 									<spring:message code="settings.label.mondrianCacheExpiryPeriod"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="mondrianCacheExpiryPeriod" id="mondrianCacheExpiryPeriod" class="form-control" />
 										<spring:message code="settings.help.mondrianCacheExpiryPeriod" var="help" />
@@ -673,10 +673,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="schedulingEnabled">
+								<label class="control-label col-md-5" for="schedulingEnabled">
 									<spring:message code="settings.label.schedulingEnabled"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="checkbox">
 										<form:checkbox path="schedulingEnabled"
 													   id="schedulingEnabled" />
@@ -684,10 +684,10 @@ Settings configuration page
 								</div>
 							</div>
 							<div class="form-group">
-								<label class="control-label col-md-4" for="rssLink">
+								<label class="control-label col-md-5" for="rssLink">
 									<spring:message code="settings.label.rssLink"/>
 								</label>
-								<div class="col-md-8">
+								<div class="col-md-7">
 									<div class="input-group">
 										<form:input path="rssLink" id="rssLink" class="form-control" />
 										<spring:message code="settings.help.rssLink" var="help" />

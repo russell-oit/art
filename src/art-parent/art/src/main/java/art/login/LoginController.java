@@ -60,6 +60,9 @@ public class LoginController {
 
 			return "redirect:/app/artDatabase.do";
 		}
+		
+		//set administrator email
+		session.setAttribute("administratorEmail", ArtConfig.getSettings().getAdministratorEmail());
 
 		//ensure art database connection is available
 		Connection conn = ArtConfig.getConnection();
@@ -266,6 +269,7 @@ public class LoginController {
 		}
 		//
 
+		//set session attributes
 		session.setAttribute("sessionUser", user);
 		session.setAttribute("authenticationMethod", loginMethod.getValue());
 
@@ -288,12 +292,21 @@ public class LoginController {
 
 		return "redirect:" + nextPage;
 	}
-
-	private boolean isValidRepositoryUser(String username, String password) {
+	
+	/**
+	 * Determine if given credentils match those of the art database user
+	 *
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public boolean isValidRepositoryUser(String username, String password) {
 		boolean validRepositoryUser = false;
 
-		if (StringUtils.equals(username, ArtConfig.getRepositoryUsername())
-				&& StringUtils.equals(password, ArtConfig.getRepositoryPassword())
+		String artDbUsername = ArtConfig.getArtDatabaseConfiguration().getUsername();
+		String artDbPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+		if (StringUtils.equals(username, artDbUsername)
+				&& StringUtils.equals(password, artDbPassword)
 				&& StringUtils.isNotBlank(username)) {
 			//repository user
 			validRepositoryUser = true;
