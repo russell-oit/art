@@ -64,6 +64,7 @@ public class ArtDatabaseController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "true");
 			return "artDatabase";
 		}
 

@@ -48,6 +48,12 @@ Display art database configuration page
 								<spring:message code="artDatabase.message.configurationSaved"/>
 							</div>
 						</c:if>
+						<c:if test="${not empty formErrors}">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+								<spring:message code="page.message.formErrors"/>
+							</div>
+						</c:if>
 						<c:if test="${not empty error}">
 							<div class="alert alert-danger alert-dismissable">
 								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>

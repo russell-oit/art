@@ -93,6 +93,7 @@ public class SettingsController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "true");
 			return "settings";
 		}
 

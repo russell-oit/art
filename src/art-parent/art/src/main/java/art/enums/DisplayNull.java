@@ -7,7 +7,7 @@ package art.enums;
  */
 public enum DisplayNull {
 
-	Yes("yes"), NoNumbersAsBlank("no-numbers-blank"), NoNumbersAsZero("no-numbers-zero");
+	Yes("Yes"), NoNumbersAsBlank("NoNumbersAsBlank"), NoNumbersAsZero("NoNumbersAsZero");
 	private String value;
 
 	private DisplayNull(String value) {

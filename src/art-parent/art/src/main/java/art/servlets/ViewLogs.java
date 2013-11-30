@@ -128,7 +128,7 @@ public class ViewLogs extends HttpServlet {
 			out.append("<h2>Recent Logging Events</h2>");
 			out.append("<table class=\"nav\">");
 			out.append("<tr><td class=\"sexy\"><a href=\"" + contextPath
-					+ "/user/showGroups.jsp\" class=\"sexy\">Main Page</a></td></tr>");
+					+ "/app/reports.do\" class=\"sexy\">Main Page</a></td></tr>");
 			out.append("<tr><td class=\"sexy\"><a href=\"#bottom\" class=\"sexy\">Jump to bottom</a></td></tr>");
 			out.append("</table>");
 

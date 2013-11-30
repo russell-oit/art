@@ -224,8 +224,15 @@ public class LdapLogin {
 		// To get rid of the PartialResultException when using Active Directory
 		env.put(Context.REFERRAL, "follow");
 
-		//always use simple authentication to search
-		env.put(Context.SECURITY_AUTHENTICATION, "simple");
+		LdapAuthenticationMethod authenticationMethod = ArtConfig.getSettings().getLdapAuthenticationMethod();
+		env.put(Context.SECURITY_AUTHENTICATION, authenticationMethod.getValue());
+
+		if (authenticationMethod == LdapAuthenticationMethod.DigestMD5) {
+			String ldapRealm = ArtConfig.getSettings().getLdapRealm();
+			if (StringUtils.isNotBlank(ldapRealm)) {
+				env.put("java.naming.security.sasl.realm", ldapRealm);
+			}
+		}
 
 		String bindDn = ArtConfig.getSettings().getLdapBindDn();
 		if (StringUtils.isNotBlank(bindDn)) {
@@ -264,16 +271,6 @@ public class LdapLogin {
 						env.put(Context.SECURITY_PRINCIPAL, dn);
 						env.put(Context.SECURITY_CREDENTIALS, password);
 
-						LdapAuthenticationMethod authenticationMethod = ArtConfig.getSettings().getLdapAuthenticationMethod();
-						env.put(Context.SECURITY_AUTHENTICATION, authenticationMethod.getValue());
-
-						if (authenticationMethod == LdapAuthenticationMethod.DigestMD5) {
-							String ldapRealm = ArtConfig.getSettings().getLdapRealm();
-							if (StringUtils.isNotBlank(ldapRealm)) {
-								env.put("java.naming.security.sasl.realm", ldapRealm);
-							}
-						}
-
 						DirContext authContext = new InitialDirContext(env);
 
 						//if we are here, authentication was successful
@@ -295,8 +292,7 @@ public class LdapLogin {
 				logger.error("Error. username={}", ex);
 
 				result.setMessage("login.message.invalidCredentials");
-				result.setDetails(ex.getMessage());
-				result.setError(ex.toString());
+				result.setDetails(ex.toString());
 			} finally {
 				if (results != null) {
 					try {
@@ -310,8 +306,7 @@ public class LdapLogin {
 			logger.error("Error. username={}", ex);
 
 			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
+			result.setDetails(ex.toString());
 		} finally {
 			if (ctx != null) {
 				try {

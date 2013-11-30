@@ -45,6 +45,22 @@ Settings configuration page
 							$('#ldapPort').val('389');
 					}
 				});
+
+				$('input[name=artAuthenticationMethod]').change(function() {
+					switch ($('input[name=artAuthenticationMethod]:checked').val()) {
+						case 'WindowsDomain':
+							$('#windowsDomainController').focus();
+							break;
+						case 'Database':
+							$('#databaseAuthenticationDriver').focus();
+							break;
+						case 'LDAP':
+							$('#ldapServer').focus();
+							break;
+						default:
+							//do nothing
+					}
+				});
 			});
 		</script>
 	</jsp:attribute>
@@ -66,6 +82,12 @@ Settings configuration page
 							<div class="alert alert-success alert-dismissable">
 								<a class="close" data-dismiss="alert" href="#">x</a>
 								<spring:message code="settings.message.settingsSaved"/>
+							</div>
+						</c:if>
+						<c:if test="${not empty formErrors}">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+								<spring:message code="page.message.formErrors"/>
 							</div>
 						</c:if>
 						<c:if test="${not empty error}">
