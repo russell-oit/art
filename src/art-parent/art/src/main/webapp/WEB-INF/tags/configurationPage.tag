@@ -18,15 +18,7 @@ Includes the elements in a main page, plus datatables css and javascript
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
-	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
-		
-		<jsp:invoke fragment="css"/>
-	</jsp:attribute>
-		
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$('.datatable').dataTable({

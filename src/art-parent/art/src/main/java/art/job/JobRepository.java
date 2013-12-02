@@ -223,7 +223,7 @@ public class JobRepository {
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		} finally {
-			DbUtils.closeConnection(conn);
+			DbUtils.close(conn);
 		}
 
 		return jobs;

@@ -52,7 +52,7 @@ public class LoginHelper {
 		ArtHelper.log(username, loginStatus, ip, logMessage);
 		
 		//also log to file
-		logger.info("{}. username={}, message={}", new Object[]{loginStatus, username, logMessage});
+		logger.info("{}. username={}, message={}", loginStatus, username, logMessage);
 	}
 
 	public void logSuccess(ArtAuthenticationMethod loginMethod,

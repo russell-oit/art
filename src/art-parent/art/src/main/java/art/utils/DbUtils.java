@@ -36,7 +36,7 @@ public class DbUtils {
 	 *
 	 * @param rs
 	 */
-	public static void closeResultSet(ResultSet rs) {
+	public static void close(ResultSet rs) {
 		if (rs != null) {
 			try {
 				rs.close();
@@ -51,7 +51,7 @@ public class DbUtils {
 	 *
 	 * @param st
 	 */
-	public static void closeStatement(Statement st) {
+	public static void close(Statement st) {
 		if (st != null) {
 			try {
 				st.close();
@@ -66,7 +66,7 @@ public class DbUtils {
 	 *
 	 * @param conn
 	 */
-	public static void closeConnection(Connection conn) {
+	public static void close(Connection conn) {
 		if (conn != null) {
 			try {
 				conn.close();
@@ -84,9 +84,9 @@ public class DbUtils {
 	 * @param conn
 	 */
 	public static void close(ResultSet rs, Statement st, Connection conn) {
-		closeResultSet(rs);
-		closeStatement(st);
-		closeConnection(conn);
+		close(rs);
+		close(st);
+		close(conn);
 	}
 
 	/**

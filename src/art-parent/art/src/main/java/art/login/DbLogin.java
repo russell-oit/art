@@ -35,7 +35,7 @@ public class DbLogin {
 				
 				//if we are here, authentication is successful
 				result.setAuthenticated(true);
-				DbUtils.closeConnection(conn);
+				DbUtils.close(conn);
 			} catch (SQLException ex) {
 				logger.error("Error. username={}", username, ex);
 

@@ -64,10 +64,16 @@ Login page
 							${details}
 						</div>
 					</c:if>
+					<c:if test="${not empty error}">
+						<div class="alert alert-danger">
+							${error}
+						</div>
+					</c:if>
 					<c:if test="${not empty result}">
 						<div class="alert alert-danger">
 							<p><spring:message code="${result.message}"/></p>
 							<p>${result.details}</p>
+							<p>${result.error}</p>
 						</div>
 					</c:if>
 

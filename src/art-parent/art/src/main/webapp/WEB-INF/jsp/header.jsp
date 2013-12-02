@@ -49,17 +49,17 @@ Header that appears at the top of all pages, except the login and logs pages
 						<ul class="dropdown-menu">
 							<li>
 								<a href="${pageContext.request.contextPath}/app/artDatabase.do">
-									<spring:message code="header.link.configureArtDatabase"/>
+									<spring:message code="header.link.artDatabase"/>
 								</a>
 							</li>
 							<li>
 								<a href="${pageContext.request.contextPath}/app/settings.do">
-									<spring:message code="header.link.configureSettings"/>
+									<spring:message code="header.link.settings"/>
 								</a>
 							</li>
 							<li>
 								<a href="${pageContext.request.contextPath}/app/datasources.do">
-									<spring:message code="header.link.configureDatasources"/>
+									<spring:message code="header.link.datasources"/>
 								</a>
 							</li>
 							<li>

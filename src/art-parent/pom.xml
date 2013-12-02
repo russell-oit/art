@@ -34,6 +34,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<jdk.version>1.6</jdk.version>
+		<slf4j.version>1.7.5</slf4j.version>
 	</properties>
 
 	<build>
@@ -118,6 +119,12 @@
 				<groupId>c3p0</groupId>
 				<artifactId>c3p0</artifactId>
 				<version>0.9.1.2</version>
+			</dependency>
+			<!-- slf4j used by art, artmail and artdbcp. use common version -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

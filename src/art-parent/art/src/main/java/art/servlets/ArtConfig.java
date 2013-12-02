@@ -314,6 +314,16 @@ public class ArtConfig extends HttpServlet {
 			//it's not explicitly defined from the admin console
 			dataSources.put(Integer.valueOf(0), artdb);
 
+			//register art database driver. must do this before getting details of other datasources
+			if (StringUtils.isNotBlank(artDbDriver)) {
+				try {
+					Class.forName(artDbDriver).newInstance();
+					logger.info("ART Database JDBC Driver Registered: {}", artDbDriver);
+				} catch (Exception e) {
+					logger.error("Error while registering ART Database JDBC Driver: {}", artDbDriver, e);
+				}
+			}
+
 			//add explicitly defined datasources
 			Connection conn = null;
 			PreparedStatement ps = null;
@@ -372,10 +382,10 @@ public class ArtConfig extends HttpServlet {
 			//use a set (doesn't add duplicate items)
 			Set<String> drivers = new HashSet<String>();
 
-			//get distinct drivers
+			//get distinct drivers. except art database driver which has already been registered
 			if (dataSources != null) {
 				for (DataSource ds : dataSources.values()) {
-					if (ds != null) {
+					if (ds != null && !StringUtils.equals(ds.getDriver(), artDbDriver)) {
 						drivers.add(ds.getDriver());
 					}
 				}
@@ -886,10 +896,10 @@ public class ArtConfig extends HttpServlet {
 		if (newSettings == null) {
 			newSettings = new Settings();
 		}
-		
-		settings=null;
-		settings=newSettings;
-		
+
+		settings = null;
+		settings = newSettings;
+
 		//set date formatters
 		String dateFormat = settings.getDateFormat();
 		timeFormatter.applyPattern("HH:mm:ss.SSS");

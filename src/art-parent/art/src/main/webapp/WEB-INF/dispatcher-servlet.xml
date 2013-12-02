@@ -5,12 +5,13 @@
 	   xmlns:context="http://www.springframework.org/schema/context"
 	   xmlns:p="http://www.springframework.org/schema/p"
 	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:cache="http://www.springframework.org/schema/cache"
 
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
 		  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
-		  
-">
+		  http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+	">
 	
 	<!-- Scans the classpath of this application for @Components to deploy as beans -->
 	<context:component-scan base-package="art">
@@ -23,6 +24,7 @@
 	<!-- Configures the @Controller programming model -->
 	<mvc:annotation-driven/>
 	
+	<!-- start enable i18n -->
 	<!-- Application Message Bundle -->
 	<bean id="messageSource" 
 		  class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
@@ -30,6 +32,7 @@
 		  p:defaultEncoding="UTF-8"
 		  p:fallbackToSystemLocale="false"/>
 		
+	<!-- enable dynamic changing of language -->
 	<mvc:interceptors>    
 		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"
 			  p:paramName="lang" />
@@ -37,10 +40,25 @@
 
 	<bean id="localeResolver"
 		  class="org.springframework.web.servlet.i18n.CookieLocaleResolver" />
+	<!-- end enable i18n -->
 	
 	<bean id="viewResolver"
 		  class="org.springframework.web.servlet.view.InternalResourceViewResolver"
 		  p:prefix="/WEB-INF/jsp/"
 		  p:suffix=".jsp" />
+	
+	<!-- start enable caching -->
+	<!-- Enables the caching through annotations -->
+	<cache:annotation-driven />
+	
+	<!-- use ehcache cache manager -->
+	<bean id="cacheManager"
+		  class="org.springframework.cache.ehcache.EhCacheCacheManager"
+		  p:cacheManager-ref="ehcache"/>
+	
+	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+		  p:configLocation="classpath:ehcache.xml"
+		  p:shared="true"/>
+	<!-- end enable caching -->
 
 </beans>

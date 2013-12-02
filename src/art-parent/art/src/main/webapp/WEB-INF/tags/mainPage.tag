@@ -5,7 +5,7 @@
 
 Template for any main application page.
 Includes bootstrap css, page header (navbar), page footer
-bootstrap js, jquery js
+bootstrap js, jquery js, datatables css, datatables js
 --%>
 
 <%@tag description="Main Page Template" pageEncoding="UTF-8"%>
@@ -19,6 +19,8 @@ bootstrap js, jquery js
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
+		
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 
@@ -26,6 +28,9 @@ bootstrap js, jquery js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/twitter-bootstrap-hover-dropdown.min.js"></script>
+		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
 
 		<jsp:invoke fragment="javascript"/>
 	</jsp:attribute>

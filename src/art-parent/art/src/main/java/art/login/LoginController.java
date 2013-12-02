@@ -70,7 +70,7 @@ public class LoginController {
 			model.addAttribute("message", "page.message.artDatabaseConnectionNotAvailable");
 			return "headerlessError";
 		} else {
-			DbUtils.closeConnection(conn);
+			DbUtils.close(conn);
 		}
 
 		ArtAuthenticationMethod loginMethod;
