@@ -177,7 +177,8 @@ public class UserRepository {
 	 * @return
 	 * @throws SQLException 
 	 */
-	public Set<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
+	public List<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
+		//use set to ensure unique items but return list for consistency
 		Set<ReportGroup> groups = new HashSet<ReportGroup>();
 		
 		System.out.println("cache miss. " + username);
@@ -185,6 +186,10 @@ public class UserRepository {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
+		
+		//use list to avoid retrieving already added groups
+		List<Integer> groupIds=new ArrayList<Integer>();
+		int groupId;
 
 		try {
 			//get groups that user has explicit rights to see
@@ -205,11 +210,13 @@ public class UserRepository {
 				while (rs.next()) {
 					ReportGroup group = new ReportGroup();
 
-					group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
+					groupId=rs.getInt("QUERY_GROUP_ID");
+					group.setReportGroupId(groupId);
 					group.setName(rs.getString("NAME"));
 					group.setDescription(rs.getString("DESCRIPTION"));
 
 					groups.add(group);
+					groupIds.add(Integer.valueOf(groupId));
 				}
 			} finally {
 				DbUtils.close(rs, ps);
@@ -223,6 +230,10 @@ public class UserRepository {
 						+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
 						+ " WHERE AUGA.USERNAME = ? AND AUGA.USER_GROUP_ID = AUGG.USER_GROUP_ID)";
 
+				if(!groupIds.isEmpty()){
+					sql=sql + " AND AQG.QUERY_GROUP_ID NOT IN(" + StringUtils.join(groupIds, ",") + ")";
+				}
+				
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, username);
 
@@ -230,11 +241,13 @@ public class UserRepository {
 				while (rs.next()) {
 					ReportGroup group = new ReportGroup();
 
-					group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
+					groupId=rs.getInt("QUERY_GROUP_ID");
+					group.setReportGroupId(groupId);
 					group.setName(rs.getString("NAME"));
 					group.setDescription(rs.getString("DESCRIPTION"));
 
 					groups.add(group);
+					groupIds.add(Integer.valueOf(groupId));
 				}
 			} finally {
 				DbUtils.close(rs, ps);
@@ -247,6 +260,10 @@ public class UserRepository {
 						+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
 						+ " AND AUQ.USERNAME=? AND AQG.QUERY_GROUP_ID<>0"
 						+ " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120";
+				
+				if(!groupIds.isEmpty()){
+					sql=sql + " AND AQG.QUERY_GROUP_ID NOT IN(" + StringUtils.join(groupIds, ",") + ")";
+				}
 
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, username);
@@ -255,11 +272,13 @@ public class UserRepository {
 				while (rs.next()) {
 					ReportGroup group = new ReportGroup();
 
-					group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
+					groupId=rs.getInt("QUERY_GROUP_ID");
+					group.setReportGroupId(groupId);
 					group.setName(rs.getString("NAME"));
 					group.setDescription(rs.getString("DESCRIPTION"));
 
 					groups.add(group);
+					groupIds.add(Integer.valueOf(groupId));
 				}
 			} finally {
 				DbUtils.close(rs, ps);
@@ -273,6 +292,10 @@ public class UserRepository {
 						+ " AND AQG.QUERY_GROUP_ID<>0 AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
 						+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
 						+ " WHERE AUGA.USERNAME = ? AND AUGA.USER_GROUP_ID = AUGQ.USER_GROUP_ID)";
+				
+				if(!groupIds.isEmpty()){
+					sql=sql + " AND AQG.QUERY_GROUP_ID NOT IN(" + StringUtils.join(groupIds, ",") + ")";
+				}
 
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, username);
@@ -294,6 +317,6 @@ public class UserRepository {
 			DbUtils.close(conn);
 		}
 		
-		return groups;
+		return new ArrayList(groups);
 	}
 }

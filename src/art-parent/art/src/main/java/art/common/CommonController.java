@@ -1,10 +1,16 @@
 package art.common;
 
 import art.reportgroup.ReportGroup;
+import art.reportgroup.ReportGroupEqualsFilter;
 import art.user.User;
 import art.user.UserService;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.iterators.FilterIterator;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -28,12 +34,23 @@ public class CommonController {
 	}
 
 	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
-	public String showReports(HttpSession session, Model model) {
+	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			UserService userService = new UserService();
-			model.addAttribute("reportGroups", userService.getAvailableReportGroups(sessionUser.getUsername()));
+			
+			List<ReportGroup> groups=userService.getAvailableReportGroups(sessionUser.getUsername());
+			
+			//allow to focus public_user in one group only. is this feature used?
+			int groupId=NumberUtils.toInt(request.getParameter("groupId"));
+			if(groupId>0){
+				Predicate predicate=new ReportGroupEqualsFilter(groupId);
+				Iterator<ReportGroup> filteredGroup= new FilterIterator(groups.iterator(), predicate);
+				model.addAttribute("reportGroups", filteredGroup);
+			} else {
+				model.addAttribute("reportGroups", groups);
+			}
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

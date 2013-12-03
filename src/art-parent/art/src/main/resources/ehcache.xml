@@ -5,11 +5,10 @@
 		 dynamicConfig="true" maxBytesLocalHeap="200M">
 	
 	<defaultCache eternal="true"
-				  maxBytesLocalHeap="100M"
+				  maxBytesLocalHeap="50M"
 				  overflowToDisk="false" />
 	
-	<cache name="art" 
+	<cache name="general" 
 		   eternal="true" 
-		   maxBytesLocalHeap="100M"
 		   overflowToDisk="false" />
 </ehcache>

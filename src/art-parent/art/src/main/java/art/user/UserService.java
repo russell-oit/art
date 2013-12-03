@@ -3,7 +3,6 @@ package art.user;
 import art.reportgroup.ReportGroup;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +55,8 @@ public class UserService {
 	 * @return
 	 * @throws SQLException 
 	 */
-	@Cacheable("art")
-	public Set<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
+	@Cacheable(value="general")
+	public List<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
 		return userRepository.getAvailableReportGroups(username);
 	}
 }

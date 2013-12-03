@@ -21,7 +21,8 @@ Reports page. Also main/home page
 				$('.datatable').dataTable({
 					"sPaginationType": "bs_full",
 					"bPaginate": false,
-					"aaSorting": [],
+					"aaSorting": [[ 0, "asc" ]],
+					"bSortCellsTop": true,
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": 5,
 					"oLanguage": {
@@ -62,11 +63,11 @@ Reports page. Also main/home page
 						<tr>
 							<th><spring:message code="reports.text.groups"/></th>
 						</tr>
-					</thead>
-					<tbody>
 						<tr>
 							<td><spring:message code="reports.text.allGroups"/></td>
 						</tr>
+					</thead>
+					<tbody>
 						<c:forEach var="group" items="${reportGroups}">
 							<tr>
 								<td>${fn:escapeXml(group.name)}</td>
