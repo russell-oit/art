@@ -21,7 +21,7 @@ Reports page. Also main/home page
 				$('.datatable').dataTable({
 					"sPaginationType": "bs_full",
 					"bPaginate": false,
-					"aaSorting": [[ 0, "asc" ]],
+					"aaSorting": [[0, "asc"]],
 					"bSortCellsTop": true,
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": 5,
@@ -48,9 +48,14 @@ Reports page. Also main/home page
 	</jsp:attribute>
 
 	<jsp:body>
+		<div class="text-right">
+			<a href="#" target="_blank">
+				<spring:message code="page.link.help"/>
+			</a>
+		</div>
+
 		<c:if test="${not empty error}">
-			<div class="alert alert-danger alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+			<div class="alert alert-danger">
 				<p><spring:message code="page.message.errorOccurred"/></p>
 				<p>${error}</p>
 			</div>
@@ -58,24 +63,33 @@ Reports page. Also main/home page
 
 		<div class="row">
 			<div class="col-md-4 col-md-offset-1">
-				<table class="datatable table table-bordered table-striped table-condensed">
-					<thead>
-						<tr>
-							<th><spring:message code="reports.text.groups"/></th>
-						</tr>
-						<tr>
-							<td><spring:message code="reports.text.allGroups"/></td>
-						</tr>
-					</thead>
-					<tbody>
-						<c:forEach var="group" items="${reportGroups}">
-							<tr>
-								<td>${fn:escapeXml(group.name)}</td>
-							</tr>
-						</c:forEach>
-					</tbody>
-				</table>
-
+				<div class="panel panel-info">
+					<div class="panel-heading">
+						<spring:message code="reports.text.groups"/>
+					</div>
+					<div class="panel-body">
+						<table class="datatable table table-bordered table-striped table-condensed">
+							<thead>
+								<tr>
+									<th><spring:message code="reports.text.group"/></th>
+								</tr>
+								<tr>
+									<td><spring:message code="reports.text.allGroups"/></td>
+								</tr>
+							</thead>
+							<tbody>
+								<c:forEach var="group" items="${reportGroups}">
+									<tr>
+										<td>${fn:escapeXml(group.name)}</td>
+									</tr>
+								</c:forEach>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="alert alert-info">
+					<spring:message code="reports.info.usage"/>
+				</div>
 			</div>
 		</div>
 	</jsp:body>

@@ -66,7 +66,13 @@ Settings configuration page
 	</jsp:attribute>
 
 	<jsp:body>
-		<div style="text-align: center">
+		<div class="text-right">
+			<a href="${pageContext.request.contextPath}/docs/manual.htm#settings" target="_blank">
+				<spring:message code="page.link.help"/>
+			</a>
+		</div>
+			
+		<div class="text-center">
 			${title}
 		</div>
 
