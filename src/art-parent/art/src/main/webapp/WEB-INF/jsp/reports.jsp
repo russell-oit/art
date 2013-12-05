@@ -49,7 +49,7 @@ Reports page. Also main/home page
 
 	<jsp:body>
 		<div class="text-right">
-			<a href="#" target="_blank">
+			<a href="#">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

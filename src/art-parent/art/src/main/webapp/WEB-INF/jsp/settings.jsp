@@ -67,7 +67,7 @@ Settings configuration page
 
 	<jsp:body>
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#settings" target="_blank">
+			<a href="${pageContext.request.contextPath}/docs/manual.htm#settings">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

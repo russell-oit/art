@@ -120,13 +120,13 @@ Header that appears at the top of all pages, except the login and logs pages
 						</ul>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/app/logs" target="_blank">
+						<a href="${pageContext.request.contextPath}/app/logs">
 							<i class="fa fa-reorder"></i> 
 							<spring:message code="header.link.logs"/>
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/docs" target="_blank">
+						<a href="${pageContext.request.contextPath}/docs">
 							<i class="fa fa-book"></i> 
 							<spring:message code="header.link.documentation"/>
 						</a>
