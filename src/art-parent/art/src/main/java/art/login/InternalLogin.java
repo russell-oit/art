@@ -20,6 +20,8 @@ public class InternalLogin {
 	final static Logger logger = LoggerFactory.getLogger(InternalLogin.class);
 
 	public static LoginResult authenticate(String username, String password) {
+		logger.debug("Entering authenticate: username='{}'", username);
+		
 		LoginResult result = new LoginResult();
 
 		Connection conn = null;
@@ -28,7 +30,7 @@ public class InternalLogin {
 
 		try {
 			conn = ArtConfig.getConnection();
-
+			
 			String sql = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL, ACTIVE "
 					+ " FROM ART_USERS "
 					+ " WHERE USERNAME = ?";
@@ -38,13 +40,20 @@ public class InternalLogin {
 
 			rs = ps.executeQuery();
 			if (rs.next()) {
-				if (rs.getBoolean("ACTIVE")) {
+				boolean active=rs.getBoolean("ACTIVE");
+				
+				logger.debug("active={}", active);
+				
+				if (active) {
 					boolean passwordVerified = false;
 					try {
 						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"));
 					} catch (Exception ex) {
-						logger.error("Error. username={}", username, ex);
+						logger.error("Error. username='{}'", username, ex);
 					}
+					
+					logger.debug("passwordVerified={}", passwordVerified);
+					
 					if (passwordVerified) {
 						result.setAuthenticated(true);
 					} else {
@@ -58,12 +67,14 @@ public class InternalLogin {
 					result.setDetails("user disabled");
 				}
 			} else {
+				logger.debug("No records returned");
+				
 				//user doesn't exist
 				result.setMessage("login.message.invalidUser");
 				result.setDetails("invalid user");
 			}
 		} catch (SQLException ex) {
-			logger.error("Error. username={}", username, ex);
+			logger.error("Error. username='{}'", username, ex);
 
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
@@ -72,6 +83,8 @@ public class InternalLogin {
 			DbUtils.close(rs, ps, conn);
 		}
 
+		logger.debug("Leaving authenticate: {}", result);
+		
 		return result;
 	}
 }

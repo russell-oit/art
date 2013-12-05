@@ -63,7 +63,7 @@ Reports page. Also main/home page
 
 		<div class="row">
 			<div class="col-md-4 col-md-offset-1">
-				<div class="panel panel-info">
+				<div class="panel panel-success">
 					<div class="panel-heading">
 						<spring:message code="reports.text.groups"/>
 					</div>
@@ -89,6 +89,17 @@ Reports page. Also main/home page
 				</div>
 				<div class="alert alert-info">
 					<spring:message code="reports.info.usage"/>
+				</div>
+			</div>
+
+			<div class="col-md-5 col-md-offset-1">
+				<div class="panel panel-success">
+					<div class="panel-heading">
+						<spring:message code="reports.text.reports"/>
+					</div>
+					<div class="panel-body">
+
+					</div>
 				</div>
 			</div>
 		</div>

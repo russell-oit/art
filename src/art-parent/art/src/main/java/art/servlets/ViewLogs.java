@@ -45,7 +45,9 @@ public class ViewLogs extends HttpServlet {
 	Logger logger = LoggerFactory.getLogger(ViewLogs.class);
 	CyclicBufferAppender<ILoggingEvent> cyclicBufferAppender;
 	HTMLLayout layout;
-	static String PATTERN = "%date%level%logger%msg"; //"%d%thread%level%logger{25}%mdc{userid}%msg";
+//	static String PATTERN = "%d%thread%level%logger{25}%mdc{userid}%msg";
+//	static String PATTERN = "%date%level%logger{0}%msg";
+	static String PATTERN = "%date%level%logger%msg";
 	private final String CYCLIC_BUFFER_APPENDER_NAME = "CYCLIC"; //name of cyclic appender in logback.xml
 	UrlCssBuilder cssBuilder;
 

@@ -20,31 +20,42 @@ public class DbLogin {
 	final static Logger logger = LoggerFactory.getLogger(DbLogin.class);
 
 	public static LoginResult authenticate(String username, String password) {
+		logger.debug("Entering authenticate: username='{}'", username);
+
 		LoginResult result = new LoginResult();
 
 		String url = ArtConfig.getSettings().getDatabaseAuthenticationUrl();
-		
+
+		logger.debug("Url='{}'", url);
+
 		if (StringUtils.isBlank(url)) {
 			logger.info("Database authentication not configured. username={}", username);
 
 			result.setMessage("login.message.databaseAuthenticationNotConfigured");
 			result.setDetails("database authentication not configured");
-		} else {
-			try {
-				Connection conn = DriverManager.getConnection(url, username, password);
-				
-				//if we are here, authentication is successful
-				result.setAuthenticated(true);
-				DbUtils.close(conn);
-			} catch (SQLException ex) {
-				logger.error("Error. username={}", username, ex);
 
-				result.setMessage("login.message.invalidCredentials");
-				result.setDetails(ex.getMessage());
-				result.setError(ex.toString());
-			}
+			logger.debug("Leaving authenticate: {}", result);
+			return result;
+		}
+		
+		logger.debug("Starting main block");
+		
+		try {
+			Connection conn = DriverManager.getConnection(url, username, password);
+
+			//if we are here, authentication is successful
+			result.setAuthenticated(true);
+			DbUtils.close(conn);
+		} catch (SQLException ex) {
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("login.message.invalidCredentials");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
 		}
 
+		logger.debug("Leaving authenticate: {}", result);
+		
 		return result;
 	}
 }

@@ -46,7 +46,13 @@ public class LdapLogin {
 	final static Logger logger = LoggerFactory.getLogger(LdapLogin.class);
 
 	public static LoginResult authenticate(String username, String password) {
-		if (StringUtils.isBlank(ArtConfig.getSettings().getLdapUrl())) {
+		logger.debug("Entering authenticate: username='{}'", username);
+
+		String ldapUrl = ArtConfig.getSettings().getLdapUrl();
+
+		logger.debug("ldapUrl='{}'", ldapUrl);
+
+		if (StringUtils.isBlank(ldapUrl)) {
 			return authenticateUsingUnboundId(username, password);
 		} else {
 			return authenticateUsingJndi(username, password);
@@ -61,144 +67,182 @@ public class LdapLogin {
 	 * @return
 	 */
 	private static LoginResult authenticateUsingUnboundId(String username, String password) {
+		logger.debug("Entering authenticateUsingUnboundId: username='{}'", username);
+
 		LoginResult result = new LoginResult();
 
 		String ldapServer = ArtConfig.getSettings().getLdapServer();
 		String baseDn = ArtConfig.getSettings().getLdapBaseDn();
-		int ldapPort = ArtConfig.getSettings().getLdapPort();
-		String bindDn = ArtConfig.getSettings().getLdapBindDn();
-		String bindPassword = ArtConfig.getSettings().getLdapBindPassword();
+
+		logger.debug("ldapServer='{}'", ldapServer);
+		logger.debug("baseDn='{}'", baseDn);
+
 
 		if (StringUtils.isBlank(ldapServer)) {
 			result.setMessage("login.message.ldapAuthenticationNotConfigured");
 			result.setDetails("ldap server not defined");
+
+			logger.debug("Leaving authenticateUsingUnboundId: {}", result);
+			return result;
 		} else if (StringUtils.isBlank(baseDn)) {
 			result.setMessage("login.message.ldapAuthenticationNotConfigured");
 			result.setDetails("ldap base dn not defined");
-		} else {
-			LDAPConnection ldapConnection = null;
 
-			try {
-				LdapConnectionEncryptionMethod encryptionMethod = ArtConfig.getSettings().getLdapConnectionEncryptionMethod();
-
-				if (encryptionMethod == LdapConnectionEncryptionMethod.SSL) {
-					//trustall manager isn't secure. review appropriate code to use
-					//see http://stackoverflow.com/questions/11893608/using-unboundid-sdk-with-an-ssl-certificate-file-to-connect-to-ldap-server-in-an
-					// also http://stackoverflow.com/questions/17656392/how-to-use-unboundid-sdk-to-connect-to-an-ldap-server-with-the-ssl-server-certif
-					SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
-					SSLSocketFactory socketFactory = sslUtil.createSSLSocketFactory();
-					if (StringUtils.isBlank(bindDn)) {
-						ldapConnection = new LDAPConnection(socketFactory, ldapServer, ldapPort);
-					} else {
-						ldapConnection = new LDAPConnection(socketFactory, ldapServer, ldapPort, bindDn, bindPassword);
-					}
-				} else {
-					if (StringUtils.isBlank(bindDn)) {
-						ldapConnection = new LDAPConnection(ldapServer, ldapPort);
-					} else {
-						ldapConnection = new LDAPConnection(ldapServer, ldapPort, bindDn, bindPassword);
-					}
-
-					if (encryptionMethod == LdapConnectionEncryptionMethod.StartTLS) {
-						//trustall manager isn't secure even for starttls?
-						SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
-						SSLContext sslContext = sslUtil.createSSLContext();
-						ExtendedResult extendedResult = ldapConnection.processExtendedOperation(
-								new StartTLSExtendedRequest(sslContext));
-
-						if (extendedResult.getResultCode() == ResultCode.SUCCESS) {
-							// The connection is now secure.
-						} else {
-							// The StartTLS negotiation failed for some reason.  
-							// The connection can no longer be used.
-							ldapConnection.close();
-							ldapConnection = null;
-
-							result.setMessage("page.message.errorOccurred");
-							result.setDetails("starttls negotiation failed");
-						}
-					}
-				}
-
-				if (ldapConnection != null) {
-					try {
-						//search for username under the ldap base dn
-						Filter filter = Filter.createEqualityFilter(ArtConfig.getSettings().getLdapUserIdAttribute(), username);
-						SearchRequest searchRequest = new SearchRequest(baseDn, SearchScope.SUB, filter);
-						SearchResult searchResult = ldapConnection.search(searchRequest);
-
-						List<SearchResultEntry> searchEntries = searchResult.getSearchEntries();
-						if (searchEntries.isEmpty()) {
-							//user not found
-							result.setMessage("login.message.invalidUser");
-							result.setDetails("invalid user");
-						} else if (searchEntries.size() > 1) {
-							// The search didn't match exactly one entry.
-							result.setMessage("login.message.multipleUsersFound");
-							result.setDetails("multiple entries found for user");
-						} else {
-							SearchResultEntry entry = searchEntries.get(0);
-							String dn = entry.getDN();
-
-							try {
-								BindRequest bindRequest = null;
-								LdapAuthenticationMethod authenticationMethod = ArtConfig.getSettings().getLdapAuthenticationMethod();
-
-								if (authenticationMethod == LdapAuthenticationMethod.Simple) {
-									bindRequest = new SimpleBindRequest(dn, password);
-								} else if (authenticationMethod == LdapAuthenticationMethod.DigestMD5) {
-									String ldapRealm = ArtConfig.getSettings().getLdapRealm();
-									if (StringUtils.isBlank(ldapRealm)) {
-										bindRequest = new DIGESTMD5BindRequest("dn:" + dn, password);
-									} else {
-										bindRequest = new DIGESTMD5BindRequest("dn:" + dn, null, password, ldapRealm, new Control[0]);
-									}
-								}
-								ldapConnection.bind(bindRequest);
-
-								// If we are here, then authentication was successful.
-								result.setAuthenticated(true);
-							} catch (LDAPException ex) {
-								// The bind failed for some reason.
-								logger.error("Error. username={}", username, ex);
-
-								result.setMessage("login.message.invalidCredentials");
-								result.setDetails(ex.getMessage());
-								result.setError(ex.toString());
-
-								if (!ex.getResultCode().isConnectionUsable()) {
-									ldapConnection.close();
-									ldapConnection = null;
-								}
-							}
-						}
-					} catch (LDAPSearchException ex) {
-						logger.error("Error. username={}", username, ex);
-
-						result.setMessage("page.message.errorOccurred");
-						result.setDetails(ex.getMessage());
-						result.setError(ex.toString());
-					}
-				}
-			} catch (LDAPException ex) {
-				logger.error("Error. username={}", username, ex);
-
-				result.setMessage("page.message.errorOccurred");
-				result.setDetails(ex.getMessage());
-				result.setError(ex.toString());
-			} catch (GeneralSecurityException ex) {
-				logger.error("Error. username={}", username, ex);
-
-				result.setMessage("page.message.errorOccurred");
-				result.setDetails(ex.getMessage());
-				result.setError(ex.toString());
-			}
-
-			if (ldapConnection != null) {
-				ldapConnection.close();
-			}
+			logger.debug("Leaving authenticateUsingUnboundId: {}", result);
+			return result;
 		}
 
+		logger.debug("Starting main block");
+
+		LDAPConnection ldapConnection = null;
+
+		try {
+			int ldapPort = ArtConfig.getSettings().getLdapPort();
+			String bindDn = ArtConfig.getSettings().getLdapBindDn();
+			String bindPassword = ArtConfig.getSettings().getLdapBindPassword();
+			LdapConnectionEncryptionMethod encryptionMethod = ArtConfig.getSettings().getLdapConnectionEncryptionMethod();
+
+			logger.debug("ldapPort={}", ldapPort);
+			logger.debug("bindDn='{}'", bindDn);
+			logger.debug("bindDn='{}'", bindDn);
+			logger.debug("encryptionMethod={}", encryptionMethod);
+
+			if (encryptionMethod == LdapConnectionEncryptionMethod.SSL) {
+				//trustall manager isn't secure. review appropriate code to use
+				//see http://stackoverflow.com/questions/11893608/using-unboundid-sdk-with-an-ssl-certificate-file-to-connect-to-ldap-server-in-an
+				// also http://stackoverflow.com/questions/17656392/how-to-use-unboundid-sdk-to-connect-to-an-ldap-server-with-the-ssl-server-certif
+				SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
+				SSLSocketFactory socketFactory = sslUtil.createSSLSocketFactory();
+
+				if (StringUtils.isBlank(bindDn)) {
+					ldapConnection = new LDAPConnection(socketFactory, ldapServer, ldapPort);
+				} else {
+					ldapConnection = new LDAPConnection(socketFactory, ldapServer, ldapPort, bindDn, bindPassword);
+				}
+			} else {
+				if (StringUtils.isBlank(bindDn)) {
+					ldapConnection = new LDAPConnection(ldapServer, ldapPort);
+				} else {
+					ldapConnection = new LDAPConnection(ldapServer, ldapPort, bindDn, bindPassword);
+				}
+
+				if (encryptionMethod == LdapConnectionEncryptionMethod.StartTLS) {
+					//trustall manager isn't secure even for starttls?
+					SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
+					SSLContext sslContext = sslUtil.createSSLContext();
+					ExtendedResult extendedResult = ldapConnection.processExtendedOperation(
+							new StartTLSExtendedRequest(sslContext));
+
+					logger.debug("extendedResult.getResultCode()={}", extendedResult.getResultCode());
+
+					if (extendedResult.getResultCode() == ResultCode.SUCCESS) {
+						// The connection is now secure.
+						logger.debug("Connection is secure");
+					} else {
+						logger.debug("StartTLS negotiation failed");
+						// The StartTLS negotiation failed for some reason.  
+						// The connection can no longer be used.
+						ldapConnection.close();
+						ldapConnection = null;
+
+						result.setMessage("page.message.errorOccurred");
+						result.setDetails("starttls negotiation failed");
+					}
+				}
+			}
+
+			logger.debug("ldapConnection != null ={}", ldapConnection != null);
+
+			if (ldapConnection != null) {
+				try {
+					//search for username under the ldap base dn
+					Filter filter = Filter.createEqualityFilter(ArtConfig.getSettings().getLdapUserIdAttribute(), username);
+					SearchRequest searchRequest = new SearchRequest(baseDn, SearchScope.SUB, filter);
+					SearchResult searchResult = ldapConnection.search(searchRequest);
+
+					List<SearchResultEntry> searchEntries = searchResult.getSearchEntries();
+
+					logger.debug("searchEntries.size()={}", searchEntries.size());
+
+					if (searchEntries.isEmpty()) {
+						//user not found
+						result.setMessage("login.message.invalidUser");
+						result.setDetails("invalid user");
+					} else if (searchEntries.size() > 1) {
+						// The search didn't match exactly one entry.
+						result.setMessage("login.message.multipleUsersFound");
+						result.setDetails("multiple entries found for user");
+					} else {
+						SearchResultEntry entry = searchEntries.get(0);
+						String dn = entry.getDN();
+
+						try {
+							BindRequest bindRequest = null;
+							LdapAuthenticationMethod authenticationMethod = ArtConfig.getSettings().getLdapAuthenticationMethod();
+
+							logger.debug("authenticationMethod={}", authenticationMethod);
+							logger.debug("dn='{}'", dn);
+
+							if (authenticationMethod == LdapAuthenticationMethod.Simple) {
+								bindRequest = new SimpleBindRequest(dn, password);
+							} else if (authenticationMethod == LdapAuthenticationMethod.DigestMD5) {
+								String ldapRealm = ArtConfig.getSettings().getLdapRealm();
+
+								logger.debug("ldapRealm='{}'", ldapRealm);
+
+								if (StringUtils.isBlank(ldapRealm)) {
+									bindRequest = new DIGESTMD5BindRequest("dn:" + dn, password);
+								} else {
+									bindRequest = new DIGESTMD5BindRequest("dn:" + dn, null, password, ldapRealm, new Control[0]);
+								}
+							}
+							ldapConnection.bind(bindRequest);
+
+							// If we are here, then authentication was successful.
+							result.setAuthenticated(true);
+						} catch (LDAPException ex) {
+							// The bind failed for some reason.
+							logger.error("Error. username={}", username, ex);
+
+							result.setMessage("login.message.invalidCredentials");
+							result.setDetails(ex.getMessage());
+							result.setError(ex.toString());
+
+							logger.debug("ex.getResultCode().isConnectionUsable()={}", ex.getResultCode().isConnectionUsable());
+							if (!ex.getResultCode().isConnectionUsable()) {
+								ldapConnection.close();
+								ldapConnection = null;
+							}
+						}
+					}
+				} catch (LDAPSearchException ex) {
+					logger.error("Error. username='{}'", username, ex);
+
+					result.setMessage("page.message.errorOccurred");
+					result.setDetails(ex.getMessage());
+					result.setError(ex.toString());
+				}
+			}
+		} catch (LDAPException ex) {
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("page.message.errorOccurred");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
+		} catch (GeneralSecurityException ex) {
+			logger.error("Error. username='{}'", username, ex);
+
+			result.setMessage("page.message.errorOccurred");
+			result.setDetails(ex.getMessage());
+			result.setError(ex.toString());
+		}
+
+		logger.debug("ldapConnection != null ={}", ldapConnection != null);
+		if (ldapConnection != null) {
+			ldapConnection.close();
+		}
+
+		logger.debug("Leaving authenticateUsingUnboundId: {}", result);
 		return result;
 	}
 
@@ -214,6 +258,8 @@ public class LdapLogin {
 		//http://stackoverflow.com/questions/12163947/ldap-how-to-authenticate-user-with-connection-details
 		//http://www.adamretter.org.uk/blog/entries/LDAPTest.java
 
+		logger.debug("Entering authenticateUsingJndi: username='{}'", username);
+
 		LoginResult result = new LoginResult();
 
 		Hashtable<String, String> env = new Hashtable<String, String>();
@@ -227,14 +273,22 @@ public class LdapLogin {
 		LdapAuthenticationMethod authenticationMethod = ArtConfig.getSettings().getLdapAuthenticationMethod();
 		env.put(Context.SECURITY_AUTHENTICATION, authenticationMethod.getValue());
 
+		logger.debug("authenticationMethod={}", authenticationMethod);
+
 		if (authenticationMethod == LdapAuthenticationMethod.DigestMD5) {
 			String ldapRealm = ArtConfig.getSettings().getLdapRealm();
+
+			logger.debug("ldapRealm='{}'", ldapRealm);
+
 			if (StringUtils.isNotBlank(ldapRealm)) {
 				env.put("java.naming.security.sasl.realm", ldapRealm);
 			}
 		}
 
 		String bindDn = ArtConfig.getSettings().getLdapBindDn();
+
+		logger.debug("bindDn='{}'", bindDn);
+
 		if (StringUtils.isNotBlank(bindDn)) {
 			env.put(Context.SECURITY_PRINCIPAL, bindDn);
 			env.put(Context.SECURITY_CREDENTIALS, ArtConfig.getSettings().getLdapBindPassword());
@@ -251,21 +305,30 @@ public class LdapLogin {
 				controls.setSearchScope(SearchControls.SUBTREE_SCOPE); // Search Entire Subtree
 				controls.setTimeLimit(5000); // Sets the time limit of these SearchControls in milliseconds
 
-				String searchFilter = "(&(objectClass=person)("
-						+ ArtConfig.getSettings().getLdapUserIdAttribute()
-						+ "=" + username + "))";
+				String userIdAttribute = ArtConfig.getSettings().getLdapUserIdAttribute();
+				logger.debug("userIdAttribute='{}'", userIdAttribute);
+				String searchFilter = "(&(objectClass=person)(" + userIdAttribute + "=" + username + "))";
 
-				results = ctx.search(ArtConfig.getSettings().getLdapBaseDn(), searchFilter, controls);
+				String baseDn = ArtConfig.getSettings().getLdapBaseDn();
+				logger.debug("baseDn='{}'", baseDn);
+				results = ctx.search(baseDn, searchFilter, controls);
 
 				if (results.hasMoreElements()) {
+					logger.debug("results.hasMoreElements()=true");
+
 					javax.naming.directory.SearchResult searchResult = (javax.naming.directory.SearchResult) results.next();
 
 					//make sure there is not another item available, there should be only 1 match
 					if (results.hasMoreElements()) {
+						logger.debug("second results.hasMoreElements()=true");
+
 						result.setMessage("login.message.multipleUsersFound");
 						result.setDetails("multiple entries found for user");
 					} else {
+						logger.debug("second results.hasMoreElements()=false");
+
 						String dn = searchResult.getNameInNamespace();
+						logger.debug("dn='{}'", dn);
 
 						// User Exists, Validate the Password
 						env.put(Context.SECURITY_PRINCIPAL, dn);
@@ -283,13 +346,15 @@ public class LdapLogin {
 						}
 					}
 				} else {
+					logger.debug("results.hasMoreElements()=false");
+
 					//user not found
 					result.setMessage("login.message.invalidUser");
 					result.setDetails("invalid user");
 				}
 
 			} catch (AuthenticationException ex) { // Invalid Login
-				logger.error("Error. username={}", ex);
+				logger.error("Error. username='{}'", ex);
 
 				result.setMessage("login.message.invalidCredentials");
 				result.setDetails(ex.toString());
@@ -303,7 +368,7 @@ public class LdapLogin {
 				}
 			}
 		} catch (NamingException ex) {
-			logger.error("Error. username={}", ex);
+			logger.error("Error. username='{}'", ex);
 
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.toString());
@@ -316,6 +381,8 @@ public class LdapLogin {
 				}
 			}
 		}
+
+		logger.debug("Leaving authenticateUsingJndi: {}", result);
 
 		return result;
 	}

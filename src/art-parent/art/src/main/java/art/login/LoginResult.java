@@ -83,4 +83,10 @@ public class LoginResult {
 	public void setAuthenticated(boolean authenticated) {
 		this.authenticated = authenticated;
 	}
+
+	@Override
+	public String toString() {
+		return "LoginResult{" + "authenticated=" + authenticated + ", message=" + message + ", error=" + error + ", details=" + details + '}';
+	}
+	
 }
