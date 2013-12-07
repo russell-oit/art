@@ -9,8 +9,12 @@
 	margin: 0 auto;
 }
 
+.spacer60 {
+	margin-top: 60px; 
+}
+
 /* for use with spring <form:error tag. by default creates a span with error class */
-span.error{
+.error{
 	color: red;
 }
 

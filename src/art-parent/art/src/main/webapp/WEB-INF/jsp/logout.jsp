@@ -18,7 +18,7 @@ Display logout page. Only used with auto login
 <t:headerlessPage title="${pageTitle}">
 	<jsp:body>
 		<div class="row">
-			<div class="col-md-12 alert alert-info text-center">
+			<div class="col-md-12 alert alert-info text-center spacer60">
 				<spring:message code="logout.message.sessionEnded"/>
 			</div>
 		</div>

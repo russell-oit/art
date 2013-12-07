@@ -1,15 +1,12 @@
 package art.common;
 
 import art.reportgroup.ReportGroup;
-import art.reportgroup.ReportGroupEqualsFilter;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.collections.iterators.FilterIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -46,8 +43,13 @@ public class CommonController {
 
 			//allow to focus public_user in one group only. is this feature used? it's not documented
 			if (groupId != null) {
-				Predicate predicate = new ReportGroupEqualsFilter(groupId);
-				Iterator<ReportGroup> filteredGroup = new FilterIterator(groups.iterator(), predicate);
+				List<ReportGroup> filteredGroup=new ArrayList<ReportGroup>();
+				for(ReportGroup group:groups){
+					if(group.getReportGroupId()==groupId){
+						filteredGroup.add(group);
+						break;
+					}
+				}
 				model.addAttribute("reportGroups", filteredGroup);
 			} else {
 				model.addAttribute("reportGroups", groups);

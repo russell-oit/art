@@ -40,95 +40,97 @@ Login page
 	</jsp:attribute>
 
 	<jsp:body>
-		<div class="well col-md-6 col-md-offset-3">
-			<form class="form-horizontal" method="POST" action="">
-				<fieldset>
-					<legend class="text-center">ART</legend>
-					<div class="form-group">
-						<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
-							 alt="" class="img-responsive centered">
-					</div>
-
-					<c:if test="${not empty message}">
-						<div class="alert alert-danger">
-							<spring:message code="${message}"/>
-						</div>
-					</c:if>
-					<c:if test="${not empty autoLoginMessage}">
-						<div class="alert alert-danger">
-							<spring:message code="${autoLoginMessage}" arguments="${autoLoginUser}"/>
-						</div>
-					</c:if>
-					<c:if test="${not empty details}">
-						<div class="alert alert-danger">
-							${details}
-						</div>
-					</c:if>
-					<c:if test="${not empty error}">
-						<div class="alert alert-danger">
-							${error}
-						</div>
-					</c:if>
-					<c:if test="${not empty result}">
-						<div class="alert alert-danger">
-							<p><spring:message code="${result.message}"/></p>
-							<p>${result.details}</p>
-							<p>${result.error}</p>
-						</div>
-					</c:if>
-
-					<c:if test="${authenticationMethod eq WINDOWS_DOMAIN_AUTHENTICATION}">
+		<div class="row">
+			<div class="well col-md-6 col-md-offset-3 spacer60">
+				<form class="form-horizontal" method="POST" action="">
+					<fieldset>
+						<legend class="text-center">ART</legend>
 						<div class="form-group">
-							<label class="control-label col-md-2" for="windowsDomain">
-								<spring:message code="login.label.domain"/>
+							<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
+								 alt="" class="img-responsive centered">
+						</div>
+
+						<c:if test="${not empty message}">
+							<div class="alert alert-danger">
+								<spring:message code="${message}"/>
+							</div>
+						</c:if>
+						<c:if test="${not empty autoLoginMessage}">
+							<div class="alert alert-danger">
+								<spring:message code="${autoLoginMessage}" arguments="${autoLoginUser}"/>
+							</div>
+						</c:if>
+						<c:if test="${not empty details}">
+							<div class="alert alert-danger">
+								${details}
+							</div>
+						</c:if>
+						<c:if test="${not empty error}">
+							<div class="alert alert-danger">
+								${error}
+							</div>
+						</c:if>
+						<c:if test="${not empty result}">
+							<div class="alert alert-danger">
+								<p><spring:message code="${result.message}"/></p>
+								<p>${result.details}</p>
+								<p>${result.error}</p>
+							</div>
+						</c:if>
+
+						<c:if test="${authenticationMethod eq WINDOWS_DOMAIN_AUTHENTICATION}">
+							<div class="form-group">
+								<label class="control-label col-md-2" for="windowsDomain">
+									<spring:message code="login.label.domain"/>
+								</label>
+								<div class="col-md-10">
+									<select name="windowsDomain" id="windowsDomain" class="form-control">
+										<c:forTokens var="domain" items='${domains}' delims=",">
+											<option value="${domain}" ${domain == selectedDomain ? "selected" : ""}>${domain}</option>
+										</c:forTokens>
+									</select>
+								</div>
+							</div>
+						</c:if>
+						<div class="form-group">
+							<label class="control-label col-md-2" for="username">
+								<spring:message code="page.label.username"/>
 							</label>
 							<div class="col-md-10">
-								<select name="windowsDomain" id="windowsDomain" class="form-control">
-									<c:forTokens var="domain" items='${domains}' delims=",">
-										<option value="${domain}" ${domain == selectedDomain ? "selected" : ""}>${domain}</option>
-									</c:forTokens>
+								<input type="text" name="username" id="username" class="form-control" value="${selectedUsername}">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2" for="password">
+								<spring:message code="page.label.password"/>
+							</label>
+							<div class="col-md-10">
+								<input type="password" name="password" id="password" class="form-control">
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2" for="lang">
+								<spring:message code="login.label.language"/>
+							</label>
+							<div class="col-md-10">
+								<select name="lang" id="lang" class="form-control">
+									<option value="en">English</option>
+									<c:forEach var="language" items="${languages}">
+										<option value="${language.key}" ${localeCode == language.key ? "selected" : ""}>${language.value}</option>
+									</c:forEach>
 								</select>
 							</div>
 						</div>
-					</c:if>
-					<div class="form-group">
-						<label class="control-label col-md-2" for="username">
-							<spring:message code="page.label.username"/>
-						</label>
-						<div class="col-md-10">
-							<input type="text" name="username" id="username" class="form-control" value="${selectedUsername}">
+						<div class="form-group">
+							<div class="col-md-10 col-md-offset-2">
+								<button type="submit" class="btn btn-default">
+									<spring:message code="login.button.login"/>
+								</button>
+							</div>
 						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-md-2" for="password">
-							<spring:message code="page.label.password"/>
-						</label>
-						<div class="col-md-10">
-							<input type="password" name="password" id="password" class="form-control">
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-md-2" for="lang">
-							<spring:message code="login.label.language"/>
-						</label>
-						<div class="col-md-10">
-							<select name="lang" id="lang" class="form-control">
-								<option value="en">English</option>
-								<c:forEach var="language" items="${languages}">
-									<option value="${language.key}" ${localeCode == language.key ? "selected" : ""}>${language.value}</option>
-								</c:forEach>
-							</select>
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-md-10 col-md-offset-2">
-							<button type="submit" class="btn btn-default">
-								<spring:message code="login.button.login"/>
-							</button>
-						</div>
-					</div>
-				</fieldset>
-			</form>
+					</fieldset>
+				</form>
+			</div>
 		</div>
 	</jsp:body>
 </t:genericPage>
