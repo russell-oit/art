@@ -79,8 +79,7 @@ Display job results for the jobs a user has access to
 							</td>
 							<td>
 								<a type="application/octet-stream" 
-								   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}" 
-								   target="_blank">
+								   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
 									${job.lastFileName}
 								</a>
 								<br>

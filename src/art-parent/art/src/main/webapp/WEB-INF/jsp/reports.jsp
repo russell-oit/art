@@ -48,12 +48,6 @@ Reports page. Also main/home page
 	</jsp:attribute>
 
 	<jsp:body>
-		<div class="text-right">
-			<a href="#">
-				<spring:message code="page.link.help"/>
-			</a>
-		</div>
-
 		<c:if test="${not empty error}">
 			<div class="alert alert-danger">
 				<p><spring:message code="page.message.errorOccurred"/></p>
@@ -87,12 +81,13 @@ Reports page. Also main/home page
 						</table>
 					</div>
 				</div>
+								
 				<div class="alert alert-info">
 					<spring:message code="reports.info.usage"/>
 				</div>
 			</div>
 
-			<div class="col-md-5 col-md-offset-1">
+			<div class="col-md-6">
 				<div class="panel panel-success">
 					<div class="panel-heading">
 						<spring:message code="reports.text.reports"/>

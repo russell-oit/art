@@ -171,6 +171,6 @@ public class ReportGroupRepository {
 			DbUtils.close(conn);
 		}
 		
-		return new ArrayList(groups);
+		return new ArrayList<ReportGroup>(groups);
 	}
 }

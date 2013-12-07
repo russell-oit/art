@@ -1,6 +1,5 @@
 package art.user;
 
-import art.reportgroup.ReportGroup;
 import art.servlets.ArtConfig;
 import art.utils.DbUtils;
 import java.sql.Connection;
@@ -8,9 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

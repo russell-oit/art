@@ -4,7 +4,6 @@ import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
-import art.enums.SmtpConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.servlets.ArtConfig;
 import java.io.IOException;
@@ -38,11 +37,6 @@ public class SettingsController {
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
 		return PdfPageSize.values();
-	}
-
-	@ModelAttribute("smtpConnectionEncryptionMethods")
-	public SmtpConnectionEncryptionMethod[] addSmtpConnectionEncryptionMethods() {
-		return SmtpConnectionEncryptionMethod.values();
 	}
 
 	@ModelAttribute("ldapConnectionEncryptionMethods")

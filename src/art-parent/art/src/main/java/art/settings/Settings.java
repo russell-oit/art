@@ -1,7 +1,6 @@
 package art.settings;
 
 import art.enums.ArtAuthenticationMethod;
-import art.enums.SmtpConnectionEncryptionMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
@@ -23,7 +22,7 @@ public class Settings {
 	private String smtpPassword;
 	@JsonIgnore
 	private boolean useBlankSmtpPassword;
-	private SmtpConnectionEncryptionMethod smtpConnectionEncryptionMethod = SmtpConnectionEncryptionMethod.None;
+	private boolean smtpConnectionUseStartTls;
 	private int smtpPort = 25;
 	private int maxRowsDefault = 10000;
 	private String maxRowsSpecific;
@@ -66,8 +65,13 @@ public class Settings {
 	private String rssLink;
 	
 	
-	
-	
+	public boolean isSmtpConnectionUseStartTls() {
+		return smtpConnectionUseStartTls;
+	}
+
+	public void setSmtpConnectionUseStartTls(boolean smtpConnectionUseStartTls) {
+		this.smtpConnectionUseStartTls = smtpConnectionUseStartTls;
+	}
 	
 	/**
 	 * Get the value of useBlankLdapBindPassword
@@ -700,25 +704,6 @@ public class Settings {
 	 */
 	public void setSmtpPort(int smtpPort) {
 		this.smtpPort = smtpPort;
-	}
-
-	/**
-	 * Get the value of smtpConnectionEncryptionMethod
-	 *
-	 * @return the value of smtpConnectionEncryptionMethod
-	 */
-	public SmtpConnectionEncryptionMethod getSmtpConnectionEncryptionMethod() {
-		return smtpConnectionEncryptionMethod;
-	}
-
-	/**
-	 * Set the value of smtpConnectionEncryptionMethod
-	 *
-	 * @param smtpConnectionEncryptionMethod new value of
-	 * smtpConnectionEncryptionMethod
-	 */
-	public void setSmtpConnectionEncryptionMethod(SmtpConnectionEncryptionMethod smtpConnectionEncryptionMethod) {
-		this.smtpConnectionEncryptionMethod = smtpConnectionEncryptionMethod;
 	}
 
 	/**
