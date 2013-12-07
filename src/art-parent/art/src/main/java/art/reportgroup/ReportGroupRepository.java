@@ -16,161 +16,87 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 /**
- * Class to provide data access methods for report groups. Data stored in ART_QUERY_GROUPS
- * 
+ * Class to provide data access methods for report groups. Data stored in
+ * ART_QUERY_GROUPS
+ *
  * @author Timothy Anyona
  */
 @Repository
 public class ReportGroupRepository {
+
 	final static Logger logger = LoggerFactory.getLogger(ReportGroupRepository.class);
-	
+
 	/**
 	 * Get report groups that are available for selection for a given user
-	 * 
+	 *
 	 * @param username
 	 * @return
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public List<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
-		//use set to ensure unique items but return list for consistency
-		Set<ReportGroup> groups = new HashSet<ReportGroup>();
-		
+		List<ReportGroup> groups = new ArrayList<ReportGroup>();
+
 		System.out.println("cache miss. " + username);
 
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
-		//use list to avoid retrieving already added groups
-		List<Integer> groupIds=new ArrayList<Integer>();
-		int groupId;
 
 		try {
-			//get groups that user has explicit rights to see
 			conn = ArtConfig.getConnection();
 
 			String sql;
 
-			try {
-				sql = "SELECT aqg.QUERY_GROUP_ID, aqg.NAME, aqg.DESCRIPTION "
-						+ " FROM ART_USER_QUERY_GROUPS auqg , ART_QUERY_GROUPS aqg "
-						+ " WHERE auqg.USERNAME = ? "
-						+ " AND auqg.QUERY_GROUP_ID = aqg.QUERY_GROUP_ID ";
+			//union will return distinct results
 
-				ps = conn.prepareStatement(sql);
-				ps.setString(1, username);
+			//get groups that user has explicit rights to see
+			sql = "SELECT aqg.QUERY_GROUP_ID, aqg.NAME, aqg.DESCRIPTION "
+					+ " FROM ART_USER_QUERY_GROUPS auqg , ART_QUERY_GROUPS aqg "
+					+ " WHERE auqg.USERNAME = ? "
+					+ " AND auqg.QUERY_GROUP_ID = aqg.QUERY_GROUP_ID "
+					+ " UNION "
+					//add groups to which the user has access through his user group 
+					+ " SELECT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
+					+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERY_GROUPS AQG "
+					+ " WHERE AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
+					+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
+					+ " WHERE AUGA.USERNAME = ? AND AUGA.USER_GROUP_ID = AUGG.USER_GROUP_ID)"
+					+ " UNION "
+					//add groups where user has right to query but not to group
+					+ " SELECT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
+					+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
+					+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
+					+ " AND AUQ.USERNAME = ? AND AQG.QUERY_GROUP_ID<>0"
+					+ " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120"
+					+ " UNION "
+					//add groups where user's group has rights to the query
+					+ " SELECT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
+					+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
+					+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
+					+ " AND AQG.QUERY_GROUP_ID<>0 AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
+					+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
+					+ " WHERE AUGA.USERNAME = ? AND AUGA.USER_GROUP_ID = AUGQ.USER_GROUP_ID)";
 
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					ReportGroup group = new ReportGroup();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, username);
+			ps.setString(2, username);
+			ps.setString(3, username);
+			ps.setString(4, username);
 
-					groupId=rs.getInt("QUERY_GROUP_ID");
-					group.setReportGroupId(groupId);
-					group.setName(rs.getString("NAME"));
-					group.setDescription(rs.getString("DESCRIPTION"));
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				ReportGroup group = new ReportGroup();
 
-					groups.add(group);
-					groupIds.add(Integer.valueOf(groupId));
-				}
-			} finally {
-				DbUtils.close(rs, ps);
-			}
+				group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
+				group.setName(rs.getString("NAME"));
+				group.setDescription(rs.getString("DESCRIPTION"));
 
-			//add groups to which the user has access through his user group 
-			try {
-				sql = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
-						+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERY_GROUPS AQG "
-						+ " WHERE AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
-						+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
-						+ " WHERE AUGA.USERNAME = ? AND AUGA.USER_GROUP_ID = AUGG.USER_GROUP_ID)";
-
-				if(!groupIds.isEmpty()){
-					sql=sql + " AND AQG.QUERY_GROUP_ID NOT IN(" + StringUtils.join(groupIds, ",") + ")";
-				}
-				
-				ps = conn.prepareStatement(sql);
-				ps.setString(1, username);
-
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					ReportGroup group = new ReportGroup();
-
-					groupId=rs.getInt("QUERY_GROUP_ID");
-					group.setReportGroupId(groupId);
-					group.setName(rs.getString("NAME"));
-					group.setDescription(rs.getString("DESCRIPTION"));
-
-					groups.add(group);
-					groupIds.add(Integer.valueOf(groupId));
-				}
-			} finally {
-				DbUtils.close(rs, ps);
-			}
-
-			//add groups where user has right to query but not to group
-			try {
-				sql = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
-						+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
-						+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
-						+ " AND AUQ.USERNAME=? AND AQG.QUERY_GROUP_ID<>0"
-						+ " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120";
-				
-				if(!groupIds.isEmpty()){
-					sql=sql + " AND AQG.QUERY_GROUP_ID NOT IN(" + StringUtils.join(groupIds, ",") + ")";
-				}
-
-				ps = conn.prepareStatement(sql);
-				ps.setString(1, username);
-
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					ReportGroup group = new ReportGroup();
-
-					groupId=rs.getInt("QUERY_GROUP_ID");
-					group.setReportGroupId(groupId);
-					group.setName(rs.getString("NAME"));
-					group.setDescription(rs.getString("DESCRIPTION"));
-
-					groups.add(group);
-					groupIds.add(Integer.valueOf(groupId));
-				}
-			} finally {
-				DbUtils.close(rs, ps);
-			}
-
-			//add groups where user's group has rights to the query
-			try {
-				sql = "SELECT DISTINCT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
-						+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
-						+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
-						+ " AND AQG.QUERY_GROUP_ID<>0 AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 "
-						+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
-						+ " WHERE AUGA.USERNAME = ? AND AUGA.USER_GROUP_ID = AUGQ.USER_GROUP_ID)";
-				
-				if(!groupIds.isEmpty()){
-					sql=sql + " AND AQG.QUERY_GROUP_ID NOT IN(" + StringUtils.join(groupIds, ",") + ")";
-				}
-
-				ps = conn.prepareStatement(sql);
-				ps.setString(1, username);
-
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					ReportGroup group = new ReportGroup();
-
-					group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
-					group.setName(rs.getString("NAME"));
-					group.setDescription(rs.getString("DESCRIPTION"));
-
-					groups.add(group);
-				}
-			} finally {
-				DbUtils.close(rs, ps);
+				groups.add(group);
 			}
 		} finally {
-			DbUtils.close(conn);
+			DbUtils.close(rs, ps, conn);
 		}
-		
-		return new ArrayList<ReportGroup>(groups);
+
+		return (groups);
 	}
 }
