@@ -21,8 +21,8 @@ public class Settings {
 	private String smtpUsername;
 	private String smtpPassword;
 	@JsonIgnore
-	private boolean useBlankSmtpPassword;
-	private boolean smtpConnectionUseStartTls;
+	private boolean useBlankSmtpPassword; //ignore when saving object
+	private boolean smtpUseStartTls;
 	private int smtpPort = 25;
 	private int maxRowsDefault = 10000;
 	private String maxRowsSpecific;
@@ -65,12 +65,12 @@ public class Settings {
 	private String rssLink;
 	
 	
-	public boolean isSmtpConnectionUseStartTls() {
-		return smtpConnectionUseStartTls;
+	public boolean isSmtpUseStartTls() {
+		return smtpUseStartTls;
 	}
 
-	public void setSmtpConnectionUseStartTls(boolean smtpConnectionUseStartTls) {
-		this.smtpConnectionUseStartTls = smtpConnectionUseStartTls;
+	public void setSmtpUseStartTls(boolean smtpUseStartTls) {
+		this.smtpUseStartTls = smtpUseStartTls;
 	}
 	
 	/**

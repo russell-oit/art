@@ -220,8 +220,6 @@ public class LoginController {
 			}
 		}
 
-//TODO test ldap authentication
-
 		if (!result.isAuthenticated()) {
 			//authentication failed or user doesn't exist or user is disabled
 			//allow login if credentials match the repository user

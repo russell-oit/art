@@ -26,24 +26,6 @@ Settings configuration page
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
-				$('#smtpConnectionUseStartTls').change(function() {
-					if (this.checked) {
-						$('#smtpPort').val('587');
-					} else {
-						$('#smtpPort').val('25');
-					}
-				});
-
-				$('input[name=ldapConnectionEncryptionMethod]').change(function() {
-					switch ($('input[name=ldapConnectionEncryptionMethod]:checked').val()) {
-						case 'SSL':
-							$('#ldapPort').val('636');
-							break;
-						default:
-							$('#ldapPort').val('389');
-					}
-				});
-
 				$('input[name=artAuthenticationMethod]').change(function() {
 					switch ($('input[name=artAuthenticationMethod]:checked').val()) {
 						case 'WindowsDomain':
@@ -110,23 +92,23 @@ Settings configuration page
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-5" for="smtpConnectionUseStartTls">
-											<spring:message code="settings.label.smtpConnectionUseStartTls"/>
-										</label>
-										<div class="col-md-7">
-											<div class="checkbox">
-												<form:checkbox path="smtpConnectionUseStartTls"
-															   id="smtpConnectionUseStartTls" />
-											</div>
-										</div>
-									</div>
-									<div class="form-group">
 										<label class="control-label col-md-5" for="smtpPort">
 											<spring:message code="settings.label.smtpPort"/>
 										</label>
 										<div class="col-md-7">
 											<form:input path="smtpPort" id="smtpPort" maxlength="6" class="form-control" />
 											<form:errors path="smtpPort" cssClass="error" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label col-md-5" for="smtpUseStartTls">
+											<spring:message code="settings.label.smtpUseStartTls"/>
+										</label>
+										<div class="col-md-7">
+											<div class="checkbox">
+												<form:checkbox path="smtpUseStartTls"
+															   id="smtpUseStartTls" />
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
@@ -166,47 +148,6 @@ Settings configuration page
 													<form:checkbox path="useBlankSmtpPassword" />
 													<spring:message code="page.checkbox.useBlankPassword"/>
 												</label>
-											</div>
-										</div>
-									</div>
-								</fieldset>
-
-								<fieldset>
-									<legend><spring:message code="settings.text.maxRows"/></legend>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="maxRowsDefault">
-											<spring:message code="settings.label.maxRowsDefault"/>
-										</label>
-										<div class="col-md-7">
-											<div class="input-group">
-												<form:input path="maxRowsDefault" 
-															id="maxRowsDefault" maxlength="6" class="form-control" />
-												<spring:message code="settings.help.maxRowsDefault" var="help" />
-												<span class="input-group-btn" >
-													<button class="btn btn-default" type="button"
-															data-toggle="tooltip" title="${help}">
-														<i class="fa fa-info"></i>
-													</button>
-												</span>
-											</div>
-											<form:errors path="maxRowsDefault" cssClass="error" />
-										</div>
-									</div>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="maxRowsSpecific">
-											<spring:message code="settings.label.maxRowsSpecific"/>
-										</label>
-										<div class="col-md-7">
-											<div class="input-group">
-												<form:input path="maxRowsSpecific" 
-															id="maxRowsSpecific" class="form-control" />
-												<spring:message code="settings.help.maxRowsSpecific" var="help" />
-												<span class="input-group-btn" >
-													<button class="btn btn-default" type="button"
-															data-toggle="tooltip" title="${help}">
-														<i class="fa fa-info"></i>
-													</button>
-												</span>
 											</div>
 										</div>
 									</div>
@@ -302,6 +243,15 @@ Settings configuration page
 										</div>
 									</div>
 									<div class="form-group">
+										<label class="control-label col-md-5" for="ldapPort">
+											<spring:message code="settings.label.ldapPort"/>
+										</label>
+										<div class="col-md-7">
+											<form:input path="ldapPort" id="ldapPort" class="form-control" />
+											<form:errors path="ldapPort" cssClass="error" />
+										</div>
+									</div>
+									<div class="form-group">
 										<label class="control-label col-md-5" for="ldapServer">
 											<spring:message code="settings.label.ldapConnectionEncryptionMethod"/>
 										</label>
@@ -312,15 +262,6 @@ Settings configuration page
 																	  value="${ldapEncryptionMethod}"/> ${ldapEncryptionMethod.value}
 												</label>
 											</c:forEach>
-										</div>
-									</div>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="ldapPort">
-											<spring:message code="settings.label.ldapPort"/>
-										</label>
-										<div class="col-md-7">
-											<form:input path="ldapPort" id="ldapPort" class="form-control" />
-											<form:errors path="ldapPort" cssClass="error" />
 										</div>
 									</div>
 									<div class="form-group">
@@ -447,6 +388,48 @@ Settings configuration page
 										</div>
 									</div>
 								</fieldset>
+
+								<fieldset>
+									<legend><spring:message code="settings.text.maxRows"/></legend>
+									<div class="form-group">
+										<label class="control-label col-md-5" for="maxRowsDefault">
+											<spring:message code="settings.label.maxRowsDefault"/>
+										</label>
+										<div class="col-md-7">
+											<div class="input-group">
+												<form:input path="maxRowsDefault" 
+															id="maxRowsDefault" maxlength="6" class="form-control" />
+												<spring:message code="settings.help.maxRowsDefault" var="help" />
+												<span class="input-group-btn" >
+													<button class="btn btn-default" type="button"
+															data-toggle="tooltip" title="${help}">
+														<i class="fa fa-info"></i>
+													</button>
+												</span>
+											</div>
+											<form:errors path="maxRowsDefault" cssClass="error" />
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="control-label col-md-5" for="maxRowsSpecific">
+											<spring:message code="settings.label.maxRowsSpecific"/>
+										</label>
+										<div class="col-md-7">
+											<div class="input-group">
+												<form:input path="maxRowsSpecific" 
+															id="maxRowsSpecific" class="form-control" />
+												<spring:message code="settings.help.maxRowsSpecific" var="help" />
+												<span class="input-group-btn" >
+													<button class="btn btn-default" type="button"
+															data-toggle="tooltip" title="${help}">
+														<i class="fa fa-info"></i>
+													</button>
+												</span>
+											</div>
+										</div>
+									</div>
+								</fieldset>
+
 								<fieldset>
 									<legend>PDF</legend>
 									<div class="form-group">
@@ -550,6 +533,7 @@ Settings configuration page
 										</div>
 									</div>
 								</fieldset>
+
 								<fieldset>
 									<legend><spring:message code="settings.text.general" /></legend>
 									<div class="form-group">
