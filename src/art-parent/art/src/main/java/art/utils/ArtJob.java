@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
@@ -1303,15 +1304,12 @@ public class ArtJob implements Job, Serializable {
 			/*
 			 * BEGIN EXECUTE QUERY
 			 */
-
 			pq.execute(resultSetType);
 
 
 			/*
 			 * END EXECUTE QUERY
 			 */
-
-
 			/*
 			 * Job Types: 1 = Alert 2 = Mails as attachment 3 = Publish 4 = Just
 			 * Run 5 = Mail with output within the email as html 6 = Mails as
@@ -1321,9 +1319,6 @@ public class ArtJob implements Job, Serializable {
 			 * the result set in the cache database (append) 10 = Cache the
 			 * result set in the cache database (drop/insert)
 			 */
-
-			boolean mailSent = false; //use to check if email was successfully sent
-
 			//trim address fields. to aid in checking if emails are configured
 			userEmail = StringUtils.trim(userEmail);
 			tos = StringUtils.trim(tos);
@@ -1383,7 +1378,7 @@ public class ArtJob implements Job, Serializable {
 
 							//send customized emails to dynamic recipients
 							if (recipientDetails != null) {
-								Mailer m = getMailer();
+								Mailer mailer = getMailer();
 
 								for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 									String email = entry.getKey();
@@ -1406,43 +1401,45 @@ public class ArtJob implements Job, Serializable {
 										}
 									}
 
-									prepareAlertJob(m, customMessage);
+									prepareAlertJob(mailer, customMessage);
 
-									m.setTo(email);
+									mailer.setTo(email);
 
 									//send email for this recipient
-									mailSent = m.send();
+									try {
+										mailer.send();
+										fileName = "-Alert Sent";
+									} catch (MessagingException ex) {
+										logger.debug("Error", ex);
+										fileName = "-Error when sending alert <p>" + ex.toString() + "</p>";
+
+									}
 								}
 
 								if (recipientFilterPresent) {
 									//don't run normal email job after filtered email sent
 									generateEmail = false;
 								}
-
-								//set filename to status of last recipient email sent
-								if (mailSent) {
-									fileName = "-Alert Sent";
-								} else {
-									fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
-								}
 							}
 
 							//send email to normal recipients
 							if (generateEmail) {
-								Mailer m = getMailer();
+								Mailer mailer = getMailer();
 
-								prepareAlertJob(m, message);
+								prepareAlertJob(mailer, message);
 
 								//set recipients						
-								m.setTos(tosEmail);
-								m.setCc(ccs);
-								m.setBcc(bccs);
+								mailer.setTos(tosEmail);
+								mailer.setCcs(ccs);
+								mailer.setBccs(bccs);
 
-								mailSent = m.send(); //check return value to determine if email sent successfully
-								if (mailSent) {
+								try {
+									mailer.send();
 									fileName = "-Alert Sent";
-								} else {
-									fileName = "-Error when sending alert <p>" + m.getSendError() + "</p>";
+								} catch (MessagingException ex) {
+									logger.debug("Error", ex);
+									fileName = "-Error when sending alert <p>" + ex.toString() + "</p>";
+
 								}
 
 							} else {
@@ -1633,7 +1630,7 @@ public class ArtJob implements Job, Serializable {
 
 						//send customized emails to dynamic recipients
 						if (recipientDetails != null) {
-							Mailer m = getMailer();
+							Mailer mailer = getMailer();
 
 							String email = "";
 
@@ -1658,12 +1655,25 @@ public class ArtJob implements Job, Serializable {
 									}
 								}
 
-								prepareEmailJob(m, customMessage);
+								prepareEmailJob(mailer, customMessage);
 
-								m.setTo(email);
+								mailer.setTo(email);
 
 								//send email for this recipient
-								mailSent = m.send();
+								try {
+									mailer.send();
+									fileName = "-File has been emailed";
+								} catch (MessagingException ex) {
+									logger.debug("Error", ex);
+									fileName = "-Error when sending some emails."
+											+ " <p>" + ex.toString() + "</p>";
+
+									String msg = "Error when sending some emails."
+											+ " \n" + ex.toString()
+											+ " \n To: " + email;
+									logger.warn(msg);
+
+								}
 							}
 
 							if (recipientFilterPresent) {
@@ -1677,58 +1687,46 @@ public class ArtJob implements Job, Serializable {
 							if (!deleted) {
 								logger.warn("Email attachment file not deleted: {}", fileName);
 							}
-							if (mailSent) {
-								fileName = "-File has been emailed";
-							} else {
-								//if multiple recipients, some might have succeeded. no way of knowing which
-								fileName = "-Error when sending some emails."
-										+ " <p>" + m.getSendError() + "</p>";
-
-								String msg = "Error when sending some emails."
-										+ " \n" + m.getSendError()
-										+ " \n To: " + email;
-								logger.warn(msg);
-							}
 						}
 
 						//send email to normal recipients
 						if (generateEmail) {
-							Mailer m = getMailer();
+							Mailer mailer = getMailer();
 
-							prepareEmailJob(m, message);
+							prepareEmailJob(mailer, message);
 
 							//set recipients						
-							m.setTos(tosEmail);
-							m.setCc(ccs);
-							m.setBcc(bccs);
+							mailer.setTos(tosEmail);
+							mailer.setCcs(ccs);
+							mailer.setBccs(bccs);
 
 							//check if mail was successfully sent
-							mailSent = m.send();
+							try {
+								mailer.send();
+								fileName = "-File has been emailed";
+							} catch (MessagingException ex) {
+								logger.debug("Error", ex);
+								fileName = "-Error when sending some emails."
+										+ " <p>" + ex.toString() + "</p>";
+
+								String msg = "Error when sending some emails."
+										+ " \n" + ex.toString()
+										+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
+								logger.warn(msg);
+
+							}
 							if (jobType == 2 || jobType == 5 || jobType == 6 || jobType == 7) {
 								// delete the file since it has
 								// been sent via email (for publish jobs it is deleted by the scheduler)
 								File f = new File(fileName);
 								f.delete();
-								if (mailSent) {
-									fileName = "-File has been emailed";
-								} else {
-									//if multiple recipients, some might have succeeded. no way of knowing which
-									fileName = "-Error when sending some emails."
-											+ " <p>" + m.getSendError() + "</p>";
-
-									String msg = "Error when sending some emails."
-											+ " \n" + m.getSendError()
-											+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
-									logger.warn(msg);
-
-								}
 							} else {
-								//publish job reminder email. separate file link and message with a newline character (\n)
-								if (mailSent) {
-									fileName = fileName + RESULT_SEPARATOR + "<p>Reminder email sent</p>";
-								} else {
-									fileName = fileName + RESULT_SEPARATOR + "<p>Error when sending reminder email <br><br>" + m.getSendError() + "</p>";
-								}
+//								//publish job reminder email. separate file link and message with a newline character (\n)
+//								if (mailSent) {
+//									fileName = fileName + RESULT_SEPARATOR + "<p>Reminder email sent</p>";
+//								} else {
+//									fileName = fileName + RESULT_SEPARATOR + "<p>Error when sending reminder email <br><br>" + mailer.getSendError() + "</p>";
+//								}
 							}
 						}
 					}
@@ -1775,27 +1773,25 @@ public class ArtJob implements Job, Serializable {
 	 * Prepare mailer object for sending alert job. Used for normal jobs, and
 	 * dynamic recipient jobs
 	 *
-	 * @param m
+	 * @param mailer
 	 * @param msg
 	 */
-	private void prepareAlertJob(Mailer m, String msg) {
-		m.setSubject(subject);
-		m.setType("text/html;charset=utf-8"); // or m.setType("text/plain");
-		m.setFrom(from);
-		m.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message (ART, Job ID " + jobId + ")</small></html>");
+	private void prepareAlertJob(Mailer mailer, String msg) {
+		mailer.setSubject(subject);
+		mailer.setFrom(from);
+		mailer.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message (ART, Job ID " + jobId + ")</small></html>");
 	}
 
 	/**
 	 * Prepare mailer object for sending email job. Used for normal jobs, and
 	 * dynamic recipient jobs
 	 *
-	 * @param m
+	 * @param mailer
 	 */
-	private void prepareEmailJob(Mailer m, String msg) throws FileNotFoundException, IOException {
+	private void prepareEmailJob(Mailer mailer, String msg) throws FileNotFoundException, IOException {
 
-		m.setSubject(subject);
-		m.setType("text/html;charset=utf-8"); // 20080314 - hint by josher19 to display chinese correctly in emails
-		m.setFrom(from);
+		mailer.setSubject(subject);
+		mailer.setFrom(from);
 
 		if (StringUtils.isBlank(msg)) {
 			msg = "&nbsp;"; //if message is blank, ensure there's a space before the hr
@@ -1805,7 +1801,7 @@ public class ArtJob implements Job, Serializable {
 			// e-mail output as attachment
 			List<File> l = new ArrayList<File>();
 			l.add(new File(fileName));
-			m.setAttachments(l);
+			mailer.setAttachments(l);
 		} else if (jobType == 5 || jobType == 7) {
 			// inline html within email
 			// read the file and include it in the HTML message
@@ -1827,7 +1823,7 @@ public class ArtJob implements Job, Serializable {
 		}
 
 		String autoMessage = "<hr><small>This is an automatically generated message (ART, Job ID " + jobId + ")</small>";
-		m.setMessage("<html>" + msg + autoMessage + "</html>");
+		mailer.setMessage("<html>" + msg + autoMessage + "</html>");
 	}
 
 	/**
@@ -2978,8 +2974,8 @@ public class ArtJob implements Job, Serializable {
 		}
 
 		//pass secure smtp mechanism and smtp port, in case they are required
-		m.setSmtpPort(ArtConfig.getArtSetting("smtp_port"));
-		m.setSecureSmtp(ArtConfig.getArtSetting("secure_smtp"));
+		m.setSmtpPort(ArtConfig.getSettings().getSmtpPort());
+		m.setUseStartTls(ArtConfig.getSettings().isSmtpUseStartTls());
 
 		return m;
 	}
