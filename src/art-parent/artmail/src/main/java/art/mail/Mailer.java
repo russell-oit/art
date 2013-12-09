@@ -74,6 +74,8 @@ public class Mailer {
 	}
 
 	/**
+	 * Set the message type e.g. text/plain, text/html, text/html;charset=utf-8
+	 * 
 	 * @param messageType the messageType to set
 	 */
 	public void setMessageType(String messageType) {
@@ -436,7 +438,7 @@ public class Mailer {
 		logger.debug("Leaving send");
 	}
 
-	private class SMTPAuthenticator extends javax.mail.Authenticator {
+	private class SMTPAuthenticator extends Authenticator {
 
 		@Override
 		public PasswordAuthentication getPasswordAuthentication() {

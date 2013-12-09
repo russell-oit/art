@@ -19,6 +19,7 @@ Settings configuration page
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				toggleSmtpUsernameEnabled(); // enable/disable on page load
+				toggleLdapBindDnEnabled();
 
 				$(function() {
 					$('a[href*="settings.do"]').parent().addClass('active');
@@ -30,6 +31,10 @@ Settings configuration page
 
 				$('#useSmtpAuthentication').change(function() {
 					toggleSmtpUsernameEnabled();
+				});
+
+				$('#useLdapAnonymousBind').change(function() {
+					toggleLdapBindDnEnabled();
 				});
 
 				$('input[name=artAuthenticationMethod]').change(function() {
@@ -51,15 +56,19 @@ Settings configuration page
 
 			function toggleSmtpUsernameEnabled() {
 				if ($('#useSmtpAuthentication').is(':checked')) {
-					$('#smtpUsername').prop('disabled', false);
-					$('#smtpPassword').prop('disabled', false);
-					$('#useBlankSmtpPassword').prop('disabled', false);
-					
+					$('#smtpUsernameFields').prop('disabled', false);
 					$('#smtpUsername').focus();
 				} else {
-					$('#smtpUsername').prop('disabled', true);
-					$('#smtpPassword').prop('disabled', true);
-					$('#useBlankSmtpPassword').prop('disabled', true);
+					$('#smtpUsernameFields').prop('disabled', true);
+				}
+			}
+
+			function toggleLdapBindDnEnabled() {
+				if ($('#useLdapAnonymousBind').is(':checked')) {
+					$('#ldapBindDnFields').prop('disabled', true);
+				} else {
+					$('#ldapBindDnFields').prop('disabled', false);
+					$('#ldapBindDn').focus();
 				}
 			}
 		</script>
@@ -142,46 +151,48 @@ Settings configuration page
 											</div>
 										</div>
 									</div>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="smtpUsername">
-											<spring:message code="settings.label.smtpUsername"/>
-										</label>
-										<div class="col-md-7">
-											<div class="input-group">
-												<form:input path="smtpUsername" id="smtpUsername" class="form-control" />
-												<spring:message code="settings.help.smtpUsername" var="help" />
-												<span class="input-group-btn" >
-													<button class="btn btn-default" type="button"
-															data-toggle="tooltip" title="${help}">
-														<i class="fa fa-info"></i>
-													</button>
-												</span>
+									<fieldset id="smtpUsernameFields">
+										<div class="form-group">
+											<label class="control-label col-md-5" for="smtpUsername">
+												<spring:message code="settings.label.smtpUsername"/>
+											</label>
+											<div class="col-md-7">
+												<div class="input-group">
+													<form:input path="smtpUsername" id="smtpUsername" class="form-control" />
+													<spring:message code="settings.help.smtpUsername" var="help" />
+													<span class="input-group-btn" >
+														<button class="btn btn-default" type="button"
+																data-toggle="tooltip" title="${help}">
+															<i class="fa fa-info"></i>
+														</button>
+													</span>
+												</div>
 											</div>
 										</div>
-									</div>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="smtpPassword">
-											<spring:message code="settings.label.smtpPassword"/>
-										</label>
-										<div class="col-md-7">
-											<div class="input-group">
-												<form:password path="smtpPassword" id="smtpPassword" autocomplete="off" class="form-control" />
-												<spring:message code="page.help.password" var="help" />
-												<span class="input-group-btn" >
-													<button class="btn btn-default" type="button"
-															data-toggle="tooltip" title="${help}">
-														<i class="fa fa-info"></i>
-													</button>
-												</span>
-											</div>
-											<div class="checkbox">
-												<label>
-													<form:checkbox path="useBlankSmtpPassword" id="useBlankSmtpPassword" />
-													<spring:message code="page.checkbox.useBlankPassword"/>
-												</label>
+										<div class="form-group">
+											<label class="control-label col-md-5" for="smtpPassword">
+												<spring:message code="settings.label.smtpPassword"/>
+											</label>
+											<div class="col-md-7">
+												<div class="input-group">
+													<form:password path="smtpPassword" id="smtpPassword" autocomplete="off" class="form-control" />
+													<spring:message code="page.help.password" var="help" />
+													<span class="input-group-btn" >
+														<button class="btn btn-default" type="button"
+																data-toggle="tooltip" title="${help}">
+															<i class="fa fa-info"></i>
+														</button>
+													</span>
+												</div>
+												<div class="checkbox">
+													<label>
+														<form:checkbox path="useBlankSmtpPassword" id="useBlankSmtpPassword" />
+														<spring:message code="page.checkbox.useBlankPassword"/>
+													</label>
+												</div>
 											</div>
 										</div>
-									</div>
+									</fieldset>
 								</fieldset>
 
 								<fieldset>
@@ -330,46 +341,62 @@ Settings configuration page
 										</div>
 									</div>
 									<div class="form-group">
-										<label class="control-label col-md-5" for="ldapBindDn">
-											<spring:message code="settings.label.ldapBindDn"/>
+										<label class="control-label col-md-5" for="useLdapAnonymousBind">
+											<spring:message code="settings.label.useLdapAnonymousBind"/>
 										</label>
 										<div class="col-md-7">
-											<div class="input-group">
-												<form:input path="ldapBindDn" id="ldapBindDn" class="form-control" />
-												<spring:message code="settings.help.ldapBindDn" var="help" />
-												<span class="input-group-btn" >
-													<button class="btn btn-default" type="button"
-															data-toggle="tooltip" title="${help}">
-														<i class="fa fa-info"></i>
-													</button>
-												</span>
-											</div>
-										</div>
-									</div>
-									<div class="form-group">
-										<label class="control-label col-md-5" for="ldapBindPassword">
-											<spring:message code="settings.label.ldapBindPassword"/>
-										</label>
-										<div class="col-md-7">
-											<div class="input-group">
-												<form:password path="ldapBindPassword" 
-															   id="ldapBindPassword" autocomplete="off" class="form-control" />
-												<spring:message code="page.help.password" var="help" />
-												<span class="input-group-btn" >
-													<button class="btn btn-default" type="button"
-															data-toggle="tooltip" title="${help}">
-														<i class="fa fa-info"></i>
-													</button>
-												</span>
-											</div>
 											<div class="checkbox">
 												<label>
-													<form:checkbox path="useBlankLdapBindPassword" id="useBlankLdapBindPassword" />
-													<spring:message code="page.checkbox.useBlankPassword"/>
+													<form:checkbox path="useLdapAnonymousBind"
+																   id="useLdapAnonymousBind" />
+													&nbsp;&nbsp;
 												</label>
 											</div>
 										</div>
 									</div>
+									<fieldset id="ldapBindDnFields">
+										<div class="form-group">
+											<label class="control-label col-md-5" for="ldapBindDn">
+												<spring:message code="settings.label.ldapBindDn"/>
+											</label>
+											<div class="col-md-7">
+												<div class="input-group">
+													<form:input path="ldapBindDn" id="ldapBindDn" class="form-control" />
+													<spring:message code="settings.help.ldapBindDn" var="help" />
+													<span class="input-group-btn" >
+														<button class="btn btn-default" type="button"
+																data-toggle="tooltip" title="${help}">
+															<i class="fa fa-info"></i>
+														</button>
+													</span>
+												</div>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="control-label col-md-5" for="ldapBindPassword">
+												<spring:message code="settings.label.ldapBindPassword"/>
+											</label>
+											<div class="col-md-7">
+												<div class="input-group">
+													<form:password path="ldapBindPassword" 
+																   id="ldapBindPassword" autocomplete="off" class="form-control" />
+													<spring:message code="page.help.password" var="help" />
+													<span class="input-group-btn" >
+														<button class="btn btn-default" type="button"
+																data-toggle="tooltip" title="${help}">
+															<i class="fa fa-info"></i>
+														</button>
+													</span>
+												</div>
+												<div class="checkbox">
+													<label>
+														<form:checkbox path="useBlankLdapBindPassword" id="useBlankLdapBindPassword" />
+														<spring:message code="page.checkbox.useBlankPassword"/>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
 									<div class="form-group">
 										<label class="control-label col-md-5" for="ldapUserIdAttribute">
 											<spring:message code="settings.label.ldapUserIdAttribute"/>

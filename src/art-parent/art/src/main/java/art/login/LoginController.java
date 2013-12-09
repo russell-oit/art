@@ -54,7 +54,10 @@ public class LoginController {
 
 		if (!ArtConfig.isArtDatabaseConfigured()) {
 			User user = new User();
+			
+			user.setUsername("initial setup");
 			user.setAccessLevel(AccessLevel.RepositoryUser.getValue());
+			
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
 
@@ -83,7 +86,7 @@ public class LoginController {
 		}
 
 		//if auto login, no login page is displayed as user is authenticated by application server
-		if (loginMethodAppSetting == ArtAuthenticationMethod.Auto) {
+		if (loginMethod == ArtAuthenticationMethod.Auto && loginMethodAppSetting == ArtAuthenticationMethod.Auto) {
 			//ensure app setting is auto and not just url parameter. 
 			//to avoid unintended, unknowing unauthorised access if machine not locked?
 
@@ -231,6 +234,7 @@ public class LoginController {
 			if (isValidRepositoryUser(username, password)) {
 				loginMethod = ArtAuthenticationMethod.Repository;
 				user = new User();
+				user.setUsername("art db");
 				user.setAccessLevel(AccessLevel.RepositoryUser.getValue());
 
 				result = new LoginResult();

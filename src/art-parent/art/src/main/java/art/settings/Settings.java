@@ -37,6 +37,7 @@ public class Settings {
 	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod = LdapConnectionEncryptionMethod.None;
 	private String ldapUrl;
 	private String ldapBaseDn;
+	private boolean useLdapAnonymousBind = true;
 	private String ldapBindDn;
 	private String ldapBindPassword;
 	@JsonIgnore
@@ -65,7 +66,23 @@ public class Settings {
 	private boolean schedulingEnabled = true;
 	private String rssLink;
 
-	
+	/**
+	 * Get the value of useLdapAnonymousBind
+	 *
+	 * @return the value of useLdapAnonymousBind
+	 */
+	public boolean isUseLdapAnonymousBind() {
+		return useLdapAnonymousBind;
+	}
+
+	/**
+	 * Set the value of useLdapAnonymousBind
+	 *
+	 * @param useLdapAnonymousBind new value of useLdapAnonymousBind
+	 */
+	public void setUseLdapAnonymousBind(boolean useLdapAnonymousBind) {
+		this.useLdapAnonymousBind = useLdapAnonymousBind;
+	}
 
 	/**
 	 * Get the value of useSmtpAuthentication

@@ -77,7 +77,6 @@ public class LdapLogin {
 		logger.debug("ldapServer='{}'", ldapServer);
 		logger.debug("baseDn='{}'", baseDn);
 
-
 		if (StringUtils.isBlank(ldapServer)) {
 			result.setMessage("login.message.ldapAuthenticationNotConfigured");
 			result.setDetails("ldap server not defined");
@@ -101,11 +100,13 @@ public class LdapLogin {
 			String bindDn = ArtConfig.getSettings().getLdapBindDn();
 			String bindPassword = ArtConfig.getSettings().getLdapBindPassword();
 			LdapConnectionEncryptionMethod encryptionMethod = ArtConfig.getSettings().getLdapConnectionEncryptionMethod();
+			boolean useAnonymousBind = ArtConfig.getSettings().isUseLdapAnonymousBind();
 
 			logger.debug("ldapPort={}", ldapPort);
 			logger.debug("bindDn='{}'", bindDn);
 			logger.debug("bindDn='{}'", bindDn);
 			logger.debug("encryptionMethod={}", encryptionMethod);
+			logger.debug("useAnonymousBind={}", useAnonymousBind);
 
 			if (encryptionMethod == LdapConnectionEncryptionMethod.SSL) {
 				//trustall manager isn't secure. review appropriate code to use
@@ -114,13 +115,13 @@ public class LdapLogin {
 				SSLUtil sslUtil = new SSLUtil(new TrustAllTrustManager());
 				SSLSocketFactory socketFactory = sslUtil.createSSLSocketFactory();
 
-				if (StringUtils.isBlank(bindDn)) {
+				if (useAnonymousBind) {
 					ldapConnection = new LDAPConnection(socketFactory, ldapServer, ldapPort);
 				} else {
 					ldapConnection = new LDAPConnection(socketFactory, ldapServer, ldapPort, bindDn, bindPassword);
 				}
 			} else {
-				if (StringUtils.isBlank(bindDn)) {
+				if (useAnonymousBind) {
 					ldapConnection = new LDAPConnection(ldapServer, ldapPort);
 				} else {
 					ldapConnection = new LDAPConnection(ldapServer, ldapPort, bindDn, bindPassword);
@@ -286,10 +287,12 @@ public class LdapLogin {
 		}
 
 		String bindDn = ArtConfig.getSettings().getLdapBindDn();
+		boolean useAnonymousBind = ArtConfig.getSettings().isUseLdapAnonymousBind();
 
 		logger.debug("bindDn='{}'", bindDn);
+		logger.debug("useAnonymousBind={}", useAnonymousBind);
 
-		if (StringUtils.isNotBlank(bindDn)) {
+		if (!useAnonymousBind) {
 			env.put(Context.SECURITY_PRINCIPAL, bindDn);
 			env.put(Context.SECURITY_CREDENTIALS, ArtConfig.getSettings().getLdapBindPassword());
 		}
