@@ -60,7 +60,7 @@ public class LoginController {
 
 			return "redirect:/app/artDatabase.do";
 		}
-		
+
 		//set administrator email
 		session.setAttribute("administratorEmail", ArtConfig.getSettings().getAdministratorEmail());
 
@@ -74,18 +74,18 @@ public class LoginController {
 		}
 
 		ArtAuthenticationMethod loginMethod;
+		ArtAuthenticationMethod loginMethodAppSetting = ArtConfig.getSettings().getArtAuthenticationMethod();
 		if (authenticationMethod == null) {
 			//authentication method not specified in url. use application setting
-			loginMethod=ArtConfig.getSettings().getArtAuthenticationMethod();
+			loginMethod = loginMethodAppSetting;
 		} else {
 			loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
 		}
 
 		//if auto login, no login page is displayed as user is authenticated by application server
-		if (loginMethod == ArtAuthenticationMethod.Auto) {
-			//TODO also ensure app setting is auto? to avoid unintended, 
-			//unauthorised access if machine not locked?
-			//or add separate auto login allowed setting?
+		if (loginMethodAppSetting == ArtAuthenticationMethod.Auto) {
+			//ensure app setting is auto and not just url parameter. 
+			//to avoid unintended, unknowing unauthorised access if machine not locked?
 
 			String ip = request.getRemoteAddr();
 			LoginHelper loginHelper = new LoginHelper();
@@ -127,12 +127,18 @@ public class LoginController {
 			//give message and change default to internal login
 			model.addAttribute("autoLoginUser", username);
 			model.addAttribute("autoLoginMessage", "login.message.invalidAutoLoginUser");
-			loginMethod = ArtAuthenticationMethod.Internal;
-		} else if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {
-			String domains = ArtConfig.getArtSetting("mswin_domains");
+		}
+
+		if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {
+			String domains = ArtConfig.getSettings().getAllowedWindowsDomains();
+			//not allowed to add null attribute to model
 			if (domains != null) {
 				model.addAttribute("domains", domains);
 			}
+		} else if (loginMethod == ArtAuthenticationMethod.Auto) {
+			//if we are here with auto login, authentication failed or not valid
+			//change default to internal login
+			loginMethod = ArtAuthenticationMethod.Internal;
 		}
 
 		//store auth method in normal session attribute rather than spring session attribute
@@ -153,7 +159,6 @@ public class LoginController {
 
 		//explicitly name requestparams to avoid error if code compiled without debug option
 		//see http://www.java-allandsundry.com/2012/10/method-parameter-names-and-spring.html
-
 		//windowsDomain request parameter may not be in the request parameters. 
 		//only available with windows domain authentication
 		if (windowsDomain != null) {
@@ -290,7 +295,7 @@ public class LoginController {
 
 		return "redirect:" + nextPage;
 	}
-	
+
 	/**
 	 * Determine if given credentils match those of the art database user
 	 *

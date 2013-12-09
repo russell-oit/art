@@ -50,6 +50,21 @@ public class Mailer {
 	private boolean useStartTls;
 	private boolean sendPartial = true;
 	private String messageType = "text/html;charset=utf-8";
+	private boolean useSmtpAuthentication;
+
+	/**
+	 * @return the useSmtpAuthentication
+	 */
+	public boolean isUseSmtpAuthentication() {
+		return useSmtpAuthentication;
+	}
+
+	/**
+	 * @param useSmtpAuthentication the useSmtpAuthentication to set
+	 */
+	public void setUseSmtpAuthentication(boolean useSmtpAuthentication) {
+		this.useSmtpAuthentication = useSmtpAuthentication;
+	}
 
 	/**
 	 * @return the messageType
@@ -307,13 +322,11 @@ public class Mailer {
 		Properties props = new Properties();
 
 		logger.debug("useStartTls={}", useStartTls);
-		if (useStartTls) {
-			props.put("mail.smtp.starttls.enable", "true");
-		}
+		props.put("mail.smtp.starttls.enable", useStartTls);
 
 		logger.debug("smtpPort={}", smtpPort);
 		logger.debug("smtpHost='{}'", smtpHost);
-		props.put("mail.smtp.port", String.valueOf(smtpPort));
+		props.put("mail.smtp.port", smtpPort);
 		props.put("mail.smtp.host", smtpHost);
 
 		//If you're sending to multiple recipients, if one recipient address fails,
@@ -321,14 +334,14 @@ public class Mailer {
 		//set the sendpartial property to true to have emails sent to the valid addresses,
 		//even if invalid ones exist
 		logger.debug("sendPartial={}", sendPartial);
-		props.put("mail.smtp.sendpartial", String.valueOf(sendPartial));
+		props.put("mail.smtp.sendpartial", sendPartial);
 
 		logger.debug("username='{}'", username);
 
 		//get Session            
 		Session session;
-		logger.debug("username != null = {}", username != null);
-		if (username != null) {
+		logger.debug("useSmtpAuthentication={}", useSmtpAuthentication);
+		if (useSmtpAuthentication) {
 			//smtp authentication enabled
 			props.put("mail.smtp.auth", "true");
 			Authenticator auth = new SMTPAuthenticator();

@@ -18,12 +18,18 @@ Settings configuration page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
+				toggleSmtpUsernameEnabled(); // enable/disable on page load
+
 				$(function() {
 					$('a[href*="settings.do"]').parent().addClass('active');
 				});
 
 				$(function() {
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
+				});
+
+				$('#useSmtpAuthentication').change(function() {
+					toggleSmtpUsernameEnabled();
 				});
 
 				$('input[name=artAuthenticationMethod]').change(function() {
@@ -42,6 +48,20 @@ Settings configuration page
 					}
 				});
 			});
+
+			function toggleSmtpUsernameEnabled() {
+				if ($('#useSmtpAuthentication').is(':checked')) {
+					$('#smtpUsername').prop('disabled', false);
+					$('#smtpPassword').prop('disabled', false);
+					$('#useBlankSmtpPassword').prop('disabled', false);
+					
+					$('#smtpUsername').focus();
+				} else {
+					$('#smtpUsername').prop('disabled', true);
+					$('#smtpPassword').prop('disabled', true);
+					$('#useBlankSmtpPassword').prop('disabled', true);
+				}
+			}
 		</script>
 	</jsp:attribute>
 
@@ -112,6 +132,17 @@ Settings configuration page
 										</div>
 									</div>
 									<div class="form-group">
+										<label class="control-label col-md-5" for="useSmtpAuthentication">
+											<spring:message code="settings.label.useSmtpAuthentication"/>
+										</label>
+										<div class="col-md-7">
+											<div class="checkbox">
+												<form:checkbox path="useSmtpAuthentication"
+															   id="useSmtpAuthentication" />
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
 										<label class="control-label col-md-5" for="smtpUsername">
 											<spring:message code="settings.label.smtpUsername"/>
 										</label>
@@ -145,7 +176,7 @@ Settings configuration page
 											</div>
 											<div class="checkbox">
 												<label>
-													<form:checkbox path="useBlankSmtpPassword" />
+													<form:checkbox path="useBlankSmtpPassword" id="useBlankSmtpPassword" />
 													<spring:message code="page.checkbox.useBlankPassword"/>
 												</label>
 											</div>
@@ -333,7 +364,7 @@ Settings configuration page
 											</div>
 											<div class="checkbox">
 												<label>
-													<form:checkbox path="useBlankLdapBindPassword" />
+													<form:checkbox path="useBlankLdapBindPassword" id="useBlankLdapBindPassword" />
 													<spring:message code="page.checkbox.useBlankPassword"/>
 												</label>
 											</div>

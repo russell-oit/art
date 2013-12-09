@@ -18,12 +18,13 @@ import org.hibernate.validator.constraints.NotBlank;
 public class Settings {
 
 	private String smtpServer;
+	private int smtpPort = 25;
+	private boolean smtpUseStartTls;
+	private boolean useSmtpAuthentication;
 	private String smtpUsername;
 	private String smtpPassword;
 	@JsonIgnore
 	private boolean useBlankSmtpPassword; //ignore when saving object
-	private boolean smtpUseStartTls;
-	private int smtpPort = 25;
 	private int maxRowsDefault = 10000;
 	private String maxRowsSpecific;
 	private ArtAuthenticationMethod artAuthenticationMethod = ArtAuthenticationMethod.Internal;
@@ -63,12 +64,37 @@ public class Settings {
 	private int mondrianCacheExpiryPeriod;
 	private boolean schedulingEnabled = true;
 	private String rssLink;
+
 	
-	
+
+	/**
+	 * Get the value of useSmtpAuthentication
+	 *
+	 * @return the value of useSmtpAuthentication
+	 */
+	public boolean isUseSmtpAuthentication() {
+		return useSmtpAuthentication;
+	}
+
+	/**
+	 * Set the value of useSmtpAuthentication
+	 *
+	 * @param useSmtpAuthentication new value of useSmtpAuthentication
+	 */
+	public void setUseSmtpAuthentication(boolean useSmtpAuthentication) {
+		this.useSmtpAuthentication = useSmtpAuthentication;
+	}
+
+	/**
+	 * @return the smtpUseStartTls
+	 */
 	public boolean isSmtpUseStartTls() {
 		return smtpUseStartTls;
 	}
 
+	/**
+	 * @param smtpUseStartTls the smtpUseStartTls to set
+	 */
 	public void setSmtpUseStartTls(boolean smtpUseStartTls) {
 		this.smtpUseStartTls = smtpUseStartTls;
 	}

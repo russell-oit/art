@@ -2961,23 +2961,16 @@ public class ArtJob implements Job, Serializable {
 	}
 
 	private Mailer getMailer() {
-		String smtpServer = ArtConfig.getArtSetting("smtp_server");
-		String smtpUsername = ArtConfig.getArtSetting("smtp_username");
-		String smtpPassword = ArtConfig.getArtSetting("smtp_password");
+		Mailer mailer = new Mailer();
+		
+		mailer.setSmtpHost(ArtConfig.getSettings().getSmtpServer());
+		mailer.setSmtpPort(ArtConfig.getSettings().getSmtpPort());
+		mailer.setUseStartTls(ArtConfig.getSettings().isSmtpUseStartTls());
+		mailer.setUseSmtpAuthentication(ArtConfig.getSettings().isUseSmtpAuthentication());
+		mailer.setUsername(ArtConfig.getSettings().getSmtpUsername());
+		mailer.setPassword(ArtConfig.getSettings().getSmtpPassword());
 
-		Mailer m = new Mailer();
-		m.setSmtpHost(smtpServer);
-		if (StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
-			m.setUsername(smtpUsername);
-			smtpPassword = Encrypter.decrypt(smtpPassword);
-			m.setPassword(smtpPassword);
-		}
-
-		//pass secure smtp mechanism and smtp port, in case they are required
-		m.setSmtpPort(ArtConfig.getSettings().getSmtpPort());
-		m.setUseStartTls(ArtConfig.getSettings().isSmtpUseStartTls());
-
-		return m;
+		return mailer;
 	}
 
 	/**
