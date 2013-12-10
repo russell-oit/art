@@ -22,6 +22,14 @@
 			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
 		</license>
 	</licenses>
+	
+	<dependencies>
+		<!-- slf4j version defined in art-parent -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<resources>

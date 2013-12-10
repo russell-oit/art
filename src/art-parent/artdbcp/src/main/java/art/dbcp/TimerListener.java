@@ -24,7 +24,7 @@ package art.dbcp;
 public interface TimerListener {
 
     /**
-     * 
+     * Timeout has elapsed
      */
     public void timeElapsed();
 }

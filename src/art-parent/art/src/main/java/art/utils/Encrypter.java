@@ -103,6 +103,10 @@ public class Encrypter {
 	 * @return clear text
 	 */
 	public static String decrypt(String cryptedtext, String key) {
+		if(cryptedtext==null){
+			return null;
+		}
+		
 		try {
 			Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 			pbeCipher.init(Cipher.DECRYPT_MODE, getKey(key), getParamSpec());

@@ -2963,7 +2963,7 @@ public class ArtJob implements Job, Serializable {
 	private Mailer getMailer() {
 		Mailer mailer = new Mailer();
 		
-		mailer.setSmtpHost(ArtConfig.getSettings().getSmtpServer());
+		mailer.setSmtpServer(ArtConfig.getSettings().getSmtpServer());
 		mailer.setSmtpPort(ArtConfig.getSettings().getSmtpPort());
 		mailer.setUseStartTls(ArtConfig.getSettings().isSmtpUseStartTls());
 		mailer.setUseSmtpAuthentication(ArtConfig.getSettings().isUseSmtpAuthentication());

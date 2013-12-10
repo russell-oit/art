@@ -42,7 +42,7 @@ public class Mailer {
 	private String username;
 	private String password;
 	private List<File> attachments;
-	private String smtpHost;
+	private String smtpServer;
 	private int smtpPort;
 	private boolean sessionDebug;
 	private String[] ccs;
@@ -200,12 +200,21 @@ public class Mailer {
 		tos = new String[1];
 		tos[0] = s;
 	}
+	
+	/**
+	 * Set the smtp server ip or hostname
+	 * 
+	 * @return 
+	 */
+	public String getSmtpServer() {
+		return smtpServer;
+	}
 
 	/**
-	 * @param smtpHost the smtpHost to set
+	 * @param smtpServer the smtpServer to set
 	 */
-	public void setSmtpHost(String smtpHost) {
-		this.smtpHost = smtpHost;
+	public void setSmtpServer(String smtpServer) {
+		this.smtpServer = smtpServer;
 	}
 
 	/**
@@ -327,9 +336,9 @@ public class Mailer {
 		props.put("mail.smtp.starttls.enable", useStartTls);
 
 		logger.debug("smtpPort={}", smtpPort);
-		logger.debug("smtpHost='{}'", smtpHost);
+		logger.debug("smtpHost='{}'", smtpServer);
 		props.put("mail.smtp.port", smtpPort);
-		props.put("mail.smtp.host", smtpHost);
+		props.put("mail.smtp.host", smtpServer);
 
 		//If you're sending to multiple recipients, if one recipient address fails,
 		//by default no email is sent to the other recipients

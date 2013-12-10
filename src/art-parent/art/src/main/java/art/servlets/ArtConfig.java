@@ -298,7 +298,6 @@ public class ArtConfig extends HttpServlet {
 			artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
 			artdb.setUsername(artDatabaseConfiguration.getUsername());
 			artdb.setPassword(artDatabaseConfiguration.getPassword());
-			artdb.setLogToStandardOutput(true);
 			artdb.setMaxConnections(maxPoolConnections);
 			artdb.setDriver(artDbDriver);
 			if (StringUtils.length(artDbTestSql) > 3) {
