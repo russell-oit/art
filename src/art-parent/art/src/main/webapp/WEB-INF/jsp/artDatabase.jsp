@@ -15,7 +15,7 @@ Display art database configuration page
 
 <t:mainPage title="${pageTitle}">
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$(function() {

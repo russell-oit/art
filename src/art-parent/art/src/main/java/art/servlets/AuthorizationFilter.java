@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Filter to ensure user has access to the requested page
@@ -156,6 +157,8 @@ public class AuthorizationFilter implements Filter {
 						return;
 					}
 				}
+				//enable display of username in logs
+				MDC.put("username", user.getUsername());
 				chain.doFilter(srequest, sresponse);
 			} else {
 				//show access denied page. 

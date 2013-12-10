@@ -135,11 +135,8 @@ Settings configuration page
 										</label>
 										<div class="col-md-7">
 											<div class="checkbox">
-												<label>
-													<form:checkbox path="smtpUseStartTls"
-																   id="smtpUseStartTls" />
-													&nbsp;&nbsp;&nbsp;
-												</label>
+												<form:checkbox path="smtpUseStartTls"
+															   id="smtpUseStartTls" />
 											</div>
 										</div>
 									</div>

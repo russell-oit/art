@@ -56,9 +56,6 @@ Includes the elements in a main page, plus datatables css and javascript
 	</jsp:attribute>
 
 	<jsp:body>
-		<div style="text-align: center">
-			${title}
-		</div>
         <jsp:doBody/>
     </jsp:body>
 </t:mainPage>

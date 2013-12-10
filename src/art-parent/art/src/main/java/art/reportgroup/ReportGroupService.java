@@ -35,6 +35,9 @@ public class ReportGroupService {
 	 */
 	@Cacheable(value = "general")
 	public List<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
+//		System.out.println("cache miss. " + username);
+		
+		//TODO test cacheable
 		return reportGroupRepository.getAvailableReportGroups(username);
 	}
 }

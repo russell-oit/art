@@ -32,9 +32,7 @@ public class ReportGroupRepository {
 	 */
 	public List<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
 		List<ReportGroup> groups = new ArrayList<ReportGroup>();
-
-		System.out.println("cache miss. " + username);
-
+		
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
