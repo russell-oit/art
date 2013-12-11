@@ -176,10 +176,6 @@
 		<servlet-name>ExecuteQuery</servlet-name>
 		<servlet-class>art.servlets.ExecuteQuery</servlet-class>
 	</servlet>
-	<servlet>
-		<servlet-name>ViewLogs</servlet-name>
-		<servlet-class>art.servlets.ViewLogs</servlet-class>
-	</servlet>
 	<servlet-mapping>
 		<servlet-name>AjaxTagsDataProvider</servlet-name>
 		<url-pattern>/AjaxTagsDataProvider</url-pattern>
@@ -187,10 +183,6 @@
 	<servlet-mapping>
 		<servlet-name>ExecuteQuery</servlet-name>
 		<url-pattern>/user/ExecuteQuery</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ViewLogs</servlet-name>
-		<url-pattern>/app/logs</url-pattern>
 	</servlet-mapping>
 	<session-config>
 		<!-- 120 minutes -->

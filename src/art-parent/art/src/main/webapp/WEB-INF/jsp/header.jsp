@@ -22,7 +22,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="${pageContext.request.contextPath}/user/showGroups.jsp">
+				<a class="navbar-brand" href="${pageContext.request.contextPath}/app/reports.do">
 					ART
 				</a>
 			</div>
@@ -120,7 +120,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</ul>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/app/logs">
+						<a href="${pageContext.request.contextPath}/app/logs.do">
 							<i class="fa fa-reorder"></i> 
 							<spring:message code="header.link.logs"/>
 						</a>

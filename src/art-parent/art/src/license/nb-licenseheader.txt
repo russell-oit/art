@@ -1,0 +1,21 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}Copyright (C) ${date?date?string("yyyy")} Enrico Liboni <eliboni@users.sourceforge.net>
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}This file is part of ART.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}ART is free software; you can redistribute it and/or
+${licensePrefix}modify it under the terms of the GNU General Public License
+${licensePrefix}as published by the Free Software Foundation, version 2 of the License.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}ART is distributed in the hope that it will be useful,
+${licensePrefix}but WITHOUT ANY WARRANTY; without even the implied warranty of
+${licensePrefix}MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+${licensePrefix}GNU General Public License for more details.
+${licensePrefix?replace(" +$", "", "r")}
+${licensePrefix}You should have received a copy of the GNU General Public License
+${licensePrefix}along with ART. If not, see <http://www.gnu.org/licenses/>.
+<#if licenseLast??>
+${licenseLast}
+</#if>

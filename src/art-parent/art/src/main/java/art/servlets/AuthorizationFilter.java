@@ -131,7 +131,6 @@ public class AuthorizationFilter implements Filter {
 				//forward to login page. 
 				//use forward instead of redirect so that an indication of the
 				//page that was being accessed remains in the browser
-
 				//remember the page the user tried to access in order to forward after the authentication
 				//use relative path (without context path).
 				//that's what redirect in login controller needs
@@ -159,7 +158,11 @@ public class AuthorizationFilter implements Filter {
 				}
 				//enable display of username in logs
 				MDC.put("username", user.getUsername());
-				chain.doFilter(srequest, sresponse);
+				try {
+					chain.doFilter(srequest, sresponse);
+				} finally {
+					MDC.remove("username");
+				}
 			} else {
 				//show access denied page. 
 				//use forward instead of redirect so that the intended url remains in the browser
@@ -183,7 +186,7 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "logs")) {
+		} else if (StringUtils.startsWith(requestUri, path + "logs.do")) {
 			//standard admins and above
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;

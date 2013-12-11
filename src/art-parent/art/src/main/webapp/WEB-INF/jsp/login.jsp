@@ -14,8 +14,6 @@ Login page
 <%@taglib  uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
-<spring:htmlEscape defaultHtmlEscape="true"/>
-
 <c:set var="localeCode" value="${pageContext.response.locale}" />
 
 <spring:message code="page.title.login" var="pageTitle" scope="page"/>
