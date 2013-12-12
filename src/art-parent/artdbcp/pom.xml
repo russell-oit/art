@@ -23,14 +23,6 @@
 		</license>
 	</licenses>
 	
-	<dependencies>
-		<!-- slf4j version defined in art-parent -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-	</dependencies>
-
 	<build>
 		<resources>
 			<!-- include files in default resources location -->
@@ -76,4 +68,12 @@
 			</plugin> -->
 		</plugins>
 	</build>
+	
+	<dependencies>
+		<!-- slf4j version defined in art-parent -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+	</dependencies>
 </project>

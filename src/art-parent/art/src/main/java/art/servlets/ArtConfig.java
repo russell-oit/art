@@ -133,8 +133,8 @@ public class ArtConfig extends HttpServlet {
 
 		//save variables in application scope for access from jsp pages
 		ctx.setAttribute("artVersion", artVersion);
-		ctx.setAttribute("WINDOWS_DOMAIN_AUTHENTICATION", ArtAuthenticationMethod.WindowsDomain.getValue());
-		ctx.setAttribute("INTERNAL_AUTHENTICATION", ArtAuthenticationMethod.Internal.getValue());
+		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
+		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 		ctx.setAttribute("sortDatePattern", "yyyy-MM-dd-HH:mm:ss.SSS"); //to enable correct sorting of dates in tables
 		ctx.setAttribute("displayDatePattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
 
@@ -234,24 +234,28 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Register custom fonts to be used in pdf output
 	 */
-	private static void registerPdfFonts() {
+	private static void registerPdfFonts(Settings pSettings) {
 		//register pdf fonts. 
 		//fresh registering of 661 fonts in c:\windows\fonts can take as little as 10 secs
 		//re-registering already registered directory of 661 fonts takes as little as 1 sec
 
-		String pdfFontName = settings.getPdfFontName();
+		if (pSettings == null) {
+			return;
+		}
+
+		String pdfFontName = pSettings.getPdfFontName();
 		if (StringUtils.isNotBlank(pdfFontName)) {
 			//register pdf font if not already registered
 			if (!FontFactory.isRegistered(pdfFontName)) {
 				//font not registered. register any defined font files or directories
-				String pdfFontDirectory = settings.getPdfFontDirectory();
+				String pdfFontDirectory = pSettings.getPdfFontDirectory();
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					logger.info("Registering fonts from directory: {}", pdfFontDirectory);
 					int i = FontFactory.registerDirectory(pdfFontDirectory);
 					logger.info("{} fonts registered", i);
 				}
 
-				String pdfFontFile = settings.getPdfFontFile();
+				String pdfFontFile = pSettings.getPdfFontFile();
 				if (StringUtils.isNotBlank(pdfFontFile)) {
 					logger.info("Registering font file: {}", pdfFontFile);
 					FontFactory.register(pdfFontFile);
@@ -278,134 +282,133 @@ public class ArtConfig extends HttpServlet {
 	private static void initializeDatasources() {
 
 		//load art database settings
-		ArtDatabaseForm artDatabaseForm = loadArtDatabaseConfiguration();
+		loadArtDatabaseConfiguration();
 
-		if (artDatabaseForm != null) {
-			artDatabaseConfiguration = null;
-			artDatabaseConfiguration = artDatabaseForm;
+		if (artDatabaseConfiguration == null) {
+			return;
+		}
 
-			//initialize art repository datasource
-			String artDbDriver = artDatabaseConfiguration.getDriver();
-			String artDbTestSql = artDatabaseConfiguration.getConnectionTestSql();
-			int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
-			int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
+		//initialize art repository datasource
+		String artDbDriver = artDatabaseConfiguration.getDriver();
+		String artDbTestSql = artDatabaseConfiguration.getConnectionTestSql();
+		int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
+		int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
 
-			boolean jndiDatasource = false;
+		boolean jndiDatasource = false;
 
-			if (StringUtils.isBlank(artDbDriver)) {
-				jndiDatasource = true;
-			}
-			DataSource artdb = new DataSource(artDbPoolTimeout * 60L, jndiDatasource);
-			artdb.setName("ART Repository");  //custom name
-			artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
-			artdb.setUsername(artDatabaseConfiguration.getUsername());
-			artdb.setPassword(artDatabaseConfiguration.getPassword());
-			artdb.setMaxConnections(maxPoolConnections);
-			artdb.setDriver(artDbDriver);
-			if (StringUtils.length(artDbTestSql) > 3) {
-				artdb.setTestSQL(artDbTestSql);
-			}
+		if (StringUtils.isBlank(artDbDriver)) {
+			jndiDatasource = true;
+		}
+		DataSource artdb = new DataSource(artDbPoolTimeout * 60L, jndiDatasource);
+		artdb.setName("ART Repository");  //custom name
+		artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
+		artdb.setUsername(artDatabaseConfiguration.getUsername());
+		artdb.setPassword(artDatabaseConfiguration.getPassword());
+		artdb.setMaxConnections(maxPoolConnections);
+		artdb.setDriver(artDbDriver);
+		if (StringUtils.length(artDbTestSql) > 3) {
+			artdb.setTestSQL(artDbTestSql);
+		}
 
-			//populate dataSources map
-			dataSources = null;
-			dataSources = new LinkedHashMap<Integer, DataSource>();
+		//populate dataSources map
+		dataSources = null;
+		dataSources = new LinkedHashMap<Integer, DataSource>();
 
 			//add art repository database to the dataSources map ("id" = 0). 
-			//it's not explicitly defined from the admin console
-			dataSources.put(Integer.valueOf(0), artdb);
+		//it's not explicitly defined from the admin console
+		dataSources.put(Integer.valueOf(0), artdb);
 
-			//register art database driver. must do this before getting details of other datasources
-			if (StringUtils.isNotBlank(artDbDriver)) {
-				try {
-					Class.forName(artDbDriver).newInstance();
-					logger.info("ART Database JDBC Driver Registered: {}", artDbDriver);
-				} catch (Exception e) {
-					logger.error("Error while registering ART Database JDBC Driver: {}", artDbDriver, e);
-				}
-			}
-
-			//add explicitly defined datasources
-			Connection conn = null;
-			PreparedStatement ps = null;
-			ResultSet rs = null;
-
+		//register art database driver. must do this before getting details of other datasources
+		if (StringUtils.isNotBlank(artDbDriver)) {
 			try {
-				conn = artdb.getConnection();
+				Class.forName(artDbDriver).newInstance();
+				logger.info("ART Database JDBC Driver Registered: {}", artDbDriver);
+			} catch (Exception e) {
+				logger.error("Error while registering ART Database JDBC Driver: {}", artDbDriver, e);
+			}
+		}
+
+		//add explicitly defined datasources
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			conn = artdb.getConnection();
 
 				// ordered by NAME to have datasources inserted in order in the
-				//LinkedHashMap dataSources (note: first item is always the ArtRepository)
-				String sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
-						+ " PASSWORD, TEST_SQL, DATABASE_ID"
-						+ " FROM ART_DATABASES"
-						+ " WHERE ACTIVE=1"
-						+ " ORDER BY NAME";
-				ps = conn.prepareStatement(sql);
+			//LinkedHashMap dataSources (note: first item is always the ArtRepository)
+			String sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
+					+ " PASSWORD, TEST_SQL, DATABASE_ID"
+					+ " FROM ART_DATABASES"
+					+ " WHERE ACTIVE=1"
+					+ " ORDER BY NAME";
+			ps = conn.prepareStatement(sql);
 
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					String driver = rs.getString("DRIVER");
-					if (StringUtils.isBlank(driver)) {
-						jndiDatasource = true;
-					} else {
-						jndiDatasource = false;
-					}
-
-					int timeout = rs.getInt("POOL_TIMEOUT");
-
-					DataSource ds = new DataSource(timeout, jndiDatasource);
-					ds.setName(rs.getString("NAME"));
-					ds.setUrl(rs.getString("URL"));
-					ds.setUsername(rs.getString("USERNAME"));
-					String password = rs.getString("PASSWORD");
-					// decrypt password if stored encrypted
-					if (password.startsWith("o:")) {
-						password = Encrypter.decrypt(password.substring(2));
-					}
-					String testSQL = rs.getString("TEST_SQL");
-					if (StringUtils.length(testSQL) > 3) {
-						ds.setTestSQL(testSQL);
-					}
-					ds.setPassword(password);
-					ds.setMaxConnections(maxPoolConnections);
-					ds.setDriver(driver);
-
-					dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				String driver = rs.getString("DRIVER");
+				if (StringUtils.isBlank(driver)) {
+					jndiDatasource = true;
+				} else {
+					jndiDatasource = false;
 				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			} finally {
-				DbUtils.close(rs, ps, conn);
+
+				int timeout = rs.getInt("POOL_TIMEOUT");
+
+				DataSource ds = new DataSource(timeout, jndiDatasource);
+				ds.setName(rs.getString("NAME"));
+				ds.setUrl(rs.getString("URL"));
+				ds.setUsername(rs.getString("USERNAME"));
+				String password = rs.getString("PASSWORD");
+				// decrypt password if stored encrypted
+				if (password.startsWith("o:")) {
+					password = Encrypter.decrypt(password.substring(2));
+				}
+				String testSQL = rs.getString("TEST_SQL");
+				if (StringUtils.length(testSQL) > 3) {
+					ds.setTestSQL(testSQL);
+				}
+				ds.setPassword(password);
+				ds.setMaxConnections(maxPoolConnections);
+				ds.setDriver(driver);
+
+				dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
 			}
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			DbUtils.close(rs, ps, conn);
+		}
 
 			//register jdbc drivers for datasources in the map
-			//only register a driver once. several datasources may use the same driver
-			//use a set (doesn't add duplicate items)
-			Set<String> drivers = new HashSet<String>();
+		//only register a driver once. several datasources may use the same driver
+		//use a set (doesn't add duplicate items)
+		Set<String> drivers = new HashSet<String>();
 
-			//get distinct drivers. except art database driver which has already been registered
-			if (dataSources != null) {
-				for (DataSource ds : dataSources.values()) {
-					if (ds != null && !StringUtils.equals(ds.getDriver(), artDbDriver)) {
-						drivers.add(ds.getDriver());
-					}
+		//get distinct drivers. except art database driver which has already been registered
+		if (dataSources != null) {
+			for (DataSource ds : dataSources.values()) {
+				if (ds != null && !StringUtils.equals(ds.getDriver(), artDbDriver)) {
+					drivers.add(ds.getDriver());
 				}
 			}
-
-			//register drivers
-			for (String driver : drivers) {
-				if (StringUtils.isNotBlank(driver)) {
-					try {
-						Class.forName(driver).newInstance();
-						logger.info("Datasource JDBC Driver Registered: {}", driver);
-					} catch (Exception e) {
-						logger.error("Error while registering Datasource JDBC Driver: {}", driver, e);
-					}
-				}
-			}
-
-			//create quartz scheduler
-			createQuartzScheduler();
 		}
+
+		//register drivers
+		for (String driver : drivers) {
+			if (StringUtils.isNotBlank(driver)) {
+				try {
+					Class.forName(driver).newInstance();
+					logger.info("Datasource JDBC Driver Registered: {}", driver);
+				} catch (Exception e) {
+					logger.error("Error while registering Datasource JDBC Driver: {}", driver, e);
+				}
+			}
+		}
+
+		//create quartz scheduler
+		createQuartzScheduler();
 	}
 
 	/**
@@ -619,7 +622,6 @@ public class ArtConfig extends HttpServlet {
 
 		// Create a connection to the ART repository for this admin and store it in the
 		// admin session (we are not getting this from the pool since it should not be in Autocommit mode)
-
 		Connection connArt;
 
 		String url = artDatabaseConfiguration.getUrl();
@@ -826,10 +828,8 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Load art database configuration from art-database file
 	 *
-	 * @return object with art database settings or null if file not found or
-	 * error occurred
 	 */
-	private static ArtDatabaseForm loadArtDatabaseConfiguration() {
+	private static void loadArtDatabaseConfiguration() {
 		ArtDatabaseForm artDatabaseForm = null;
 
 		try {
@@ -843,18 +843,24 @@ public class ArtConfig extends HttpServlet {
 			} else {
 				logger.info("ART Database configuration file not found");
 			}
-		} catch (Exception ex) {
+		} catch (IOException ex) {
 			logger.error("Error", ex);
 		}
 
-		return artDatabaseForm;
+		if (artDatabaseForm != null) {
+			artDatabaseConfiguration = null;
+			artDatabaseConfiguration = artDatabaseForm;
+
+			//set defaults for invalid values
+			setArtDatabaseDefaults(artDatabaseConfiguration);
+		}
 	}
 
 	/**
 	 * Save art database configuration to file
 	 *
 	 * @param artDatabaseForm
-	 * @param artDatabaseFilePath
+	 * @throws java.io.IOException
 	 */
 	public static void saveArtDatabaseConfiguration(ArtDatabaseForm artDatabaseForm)
 			throws IOException {
@@ -866,9 +872,8 @@ public class ArtConfig extends HttpServlet {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabaseForm);
 
-		//update configuration object
-		artDatabaseConfiguration = null;
-		artDatabaseConfiguration = loadArtDatabaseConfiguration();
+		//refresh configuration and set defaults for invalid values
+		loadArtDatabaseConfiguration();
 	}
 
 	/**
@@ -888,7 +893,7 @@ public class ArtConfig extends HttpServlet {
 				newSettings.setSmtpPassword(Encrypter.decrypt(newSettings.getSmtpPassword()));
 				newSettings.setLdapBindPassword(Encrypter.decrypt(newSettings.getLdapBindPassword()));
 			}
-		} catch (Exception ex) {
+		} catch (IOException ex) {
 			logger.error("Error", ex);
 		}
 
@@ -899,6 +904,9 @@ public class ArtConfig extends HttpServlet {
 
 		settings = null;
 		settings = newSettings;
+
+		//set defaults for settings with invalid values
+		setSettingsDefaults(settings);
 
 		//set date formatters
 		String dateFormat = settings.getDateFormat();
@@ -916,7 +924,7 @@ public class ArtConfig extends HttpServlet {
 		}
 
 		//register pdf fonts 
-		registerPdfFonts();
+		registerPdfFonts(settings);
 
 		//register database authentication jdbc driver
 		String driver = settings.getDatabaseAuthenticationDriver();
@@ -967,7 +975,7 @@ public class ArtConfig extends HttpServlet {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.writerWithDefaultPrettyPrinter().writeValue(settingsFile, newSettings);
 
-		//refresh settings and related configuration
+		//refresh settings and related configuration, and set defaults for invalid values
 		loadSettings();
 	}
 
@@ -1005,7 +1013,7 @@ public class ArtConfig extends HttpServlet {
 					scheduler.standby();
 				}
 			}
-		} catch (Exception e) {
+		} catch (SchedulerException e) {
 			logger.error("Error", e);
 		}
 
@@ -1014,4 +1022,54 @@ public class ArtConfig extends HttpServlet {
 		ArtJob aj = new ArtJob();
 		aj.migrateJobsToQuartz();
 	}
+
+	/**
+	 * Set defaults for settings that have invalid values
+	 */
+	private static void setSettingsDefaults(Settings pSettings) {
+		if (pSettings == null) {
+			return;
+		}
+
+		if (pSettings.getMaxRowsDefault() <= 0) {
+			pSettings.setMaxRowsDefault(10000);
+		}
+		if (pSettings.getLdapPort() <= 0) {
+			pSettings.setLdapPort(389);
+		}
+		if (StringUtils.isBlank(pSettings.getLdapUserIdAttribute())) {
+			pSettings.setLdapUserIdAttribute("uid");
+		}
+		if (StringUtils.isBlank(pSettings.getDateFormat())) {
+			pSettings.setDateFormat("dd-MMM-yyyy");
+		}
+		if (StringUtils.isBlank(pSettings.getTimeFormat())) {
+			pSettings.setTimeFormat("HH:mm:ss");
+		}
+		if (StringUtils.isBlank(pSettings.getReportFormats())) {
+			pSettings.setReportFormats("htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip");
+		}
+		if (pSettings.getMaxRunningReports() <= 0) {
+			pSettings.setMaxRunningReports(1000);
+		}
+	}
+
+	/**
+	 * Set defaults for art database configuration items that have invalid
+	 * values
+	 */
+	public static void setArtDatabaseDefaults(ArtDatabaseForm artDatabase) {
+		if (artDatabase == null) {
+			return;
+		}
+
+		if (artDatabase.getConnectionPoolTimeout() <= 0) {
+			artDatabase.setConnectionPoolTimeout(20);
+		}
+		if (artDatabase.getMaxPoolConnections() <= 0) {
+			artDatabase.setMaxPoolConnections(20);
+		}
+
+	}
+
 }

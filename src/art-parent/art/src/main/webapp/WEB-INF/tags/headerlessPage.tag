@@ -8,6 +8,8 @@ Includes elements of a generic page plus a page footer
 --%>
 
 <%@tag description="Headerless Page Template" pageEncoding="UTF-8"%>
+<%@tag trimDirectiveWhitespaces="true" %>
+
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>

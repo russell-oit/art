@@ -8,6 +8,7 @@ Includes bootstrap css, font awesome css, art css
 --%>
 
 <%@tag description="Generic Page Template" pageEncoding="UTF-8"%>
+<%@tag trimDirectiveWhitespaces="true" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" required="true"%>
@@ -37,7 +38,6 @@ Includes bootstrap css, font awesome css, art css
 		<jsp:invoke fragment="css"/>
 	</head>
 	<body>
-
 		<div id="wrap">
 			<jsp:invoke fragment="header"/>
 

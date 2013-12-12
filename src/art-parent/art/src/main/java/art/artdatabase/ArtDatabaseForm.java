@@ -17,16 +17,16 @@ public class ArtDatabaseForm implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String driver;
 	@NotBlank
-	private String url = "demo";
+	private String url;
 	private String username;
 	private String password;
 	@JsonIgnore
 	private boolean useBlankPassword;
 	private String connectionTestSql;
 	@Min(1)
-	private int connectionPoolTimeout = 20;
+	private int connectionPoolTimeout;
 	@Min(1)
-	private int maxPoolConnections = 20; //setting used by art database and all datasources
+	private int maxPoolConnections; //setting used by art database and all datasources
 
 	/**
 	 * Get the value of useBlankPassword

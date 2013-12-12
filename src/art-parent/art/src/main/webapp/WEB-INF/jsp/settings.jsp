@@ -6,6 +6,9 @@
 Settings configuration page
 --%>
 
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
+
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -85,7 +88,7 @@ Settings configuration page
 			<div class="col-md-8 col-md-offset-2">
 				<div class="panel panel-success">
 					<div class="panel-heading text-center">
-						<spring:message code="settings.text.configureSettings"/>
+						${pageTitle}
 					</div>
 					<div class="panel-body">
 						<form:form class="form-horizontal" method="POST" action="" modelAttribute="settings">

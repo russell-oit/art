@@ -7,6 +7,8 @@ Header that appears at the top of all pages, except the login and logs pages
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
+
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -117,6 +119,12 @@ Header that appears at the top of all pages, except the login and logs pages
 									<spring:message code="header.link.configureSchedules"/>
 								</a>
 							</li>
+							<li class="divider"></li>
+							<li>
+								<a href="${pageContext.request.contextPath}/app/serverInfo.do">
+									<spring:message code="header.link.serverInfo"/>
+								</a>
+							</li>
 						</ul>
 					</li>
 					<li>
@@ -145,7 +153,7 @@ Header that appears at the top of all pages, except the login and logs pages
 							<b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
-							<c:if test="${authenticationMethod eq INTERNAL_AUTHENTICATION}">
+							<c:if test="${authenticationMethod eq internalAuthentication}">
 								<li>
 									<a href="${pageContext.request.contextPath}/app/changePassword.do">
 										<spring:message code="header.link.changePassword"/>

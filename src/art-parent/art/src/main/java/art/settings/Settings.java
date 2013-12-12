@@ -25,7 +25,7 @@ public class Settings {
 	private String smtpPassword;
 	@JsonIgnore
 	private boolean useBlankSmtpPassword; //ignore when saving object
-	private int maxRowsDefault = 10000;
+	private int maxRowsDefault;
 	private String maxRowsSpecific;
 	private ArtAuthenticationMethod artAuthenticationMethod = ArtAuthenticationMethod.Internal;
 	private String windowsDomainController;
@@ -33,7 +33,7 @@ public class Settings {
 	private String databaseAuthenticationDriver;
 	private String databaseAuthenticationUrl;
 	private String ldapServer;
-	private int ldapPort = 389;
+	private int ldapPort;
 	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod = LdapConnectionEncryptionMethod.None;
 	private String ldapUrl;
 	private String ldapBaseDn;
@@ -43,7 +43,7 @@ public class Settings {
 	@JsonIgnore
 	private boolean useBlankLdapBindPassword;
 	@NotBlank
-	private String ldapUserIdAttribute = "uid";
+	private String ldapUserIdAttribute;
 	private LdapAuthenticationMethod ldapAuthenticationMethod = LdapAuthenticationMethod.Simple;
 	private String ldapRealm;
 	private PdfPageSize pdfPageSize = PdfPageSize.A4Landscape;
@@ -54,11 +54,11 @@ public class Settings {
 	private boolean pdfFontEmbedded;
 	private String administratorEmail;
 	@NotBlank
-	private String dateFormat = "dd-MMM-yyyy";
+	private String dateFormat;
 	@NotBlank
-	private String timeFormat = "HH:mm:ss";
+	private String timeFormat;
 	@NotBlank
-	private String reportFormats = "htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip";
+	private String reportFormats;
 	private DisplayNull displayNull = DisplayNull.NoNumbersAsZero;
 	private int maxRunningReports = 1000;
 	private boolean showHeaderInPublicUserSession;

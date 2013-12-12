@@ -7,6 +7,8 @@ Login page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
+
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -76,7 +78,7 @@ Login page
 							</div>
 						</c:if>
 
-						<c:if test="${authenticationMethod eq WINDOWS_DOMAIN_AUTHENTICATION}">
+						<c:if test="${authenticationMethod eq windowsDomainAuthentication}">
 							<div class="form-group">
 								<label class="control-label col-md-2" for="windowsDomain">
 									<spring:message code="login.label.domain"/>

@@ -43,8 +43,12 @@ public class ArtDatabaseController {
 		ArtDatabaseForm artDatabaseForm = ArtConfig.getArtDatabaseConfiguration();
 
 		if (artDatabaseForm == null) {
-			//art database not configured. use default values
+			//art database not configured. default to demo
 			artDatabaseForm = new ArtDatabaseForm();
+			artDatabaseForm.setUrl("demo");
+			
+			//set default values
+			ArtConfig.setArtDatabaseDefaults(artDatabaseForm);
 		}
 
 		//use blank password should always start as false

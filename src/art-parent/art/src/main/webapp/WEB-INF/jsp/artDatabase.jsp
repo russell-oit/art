@@ -6,6 +6,9 @@
 Display art database configuration page
 --%>
 
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
+
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
@@ -38,7 +41,7 @@ Display art database configuration page
 			<div class="col-md-6 col-md-offset-3">
 				<div class="panel panel-success">
 					<div class="panel-heading text-center">
-						<spring:message code="artDatabase.text.configureArtDatabase"/>
+						${pageTitle}
 					</div>
 					<div class="panel-body">
 						<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabaseForm">

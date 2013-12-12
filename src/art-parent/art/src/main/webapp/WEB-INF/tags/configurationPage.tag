@@ -8,6 +8,8 @@ Includes the elements in a main page, plus datatables css and javascript
 --%>
 
 <%@tag description="Configuration Page Template" pageEncoding="UTF-8"%>
+<%@tag trimDirectiveWhitespaces="true" %>
+
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>

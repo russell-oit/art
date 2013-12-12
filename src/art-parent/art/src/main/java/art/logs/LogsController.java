@@ -21,6 +21,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.read.CyclicBufferAppender;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class LogsController {
 	@RequestMapping(value = "/app/logs", method = RequestMethod.GET)
 	public String showLogs(Model model) {
 		final String CYCLIC_BUFFER_APPENDER_NAME = "CYCLIC"; //name of cyclic appender in logback.xml
-		
+
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		CyclicBufferAppender<ILoggingEvent> cyclicBufferAppender = (CyclicBufferAppender<ILoggingEvent>) context.getLogger(
 				Logger.ROOT_LOGGER_NAME).getAppender(CYCLIC_BUFFER_APPENDER_NAME);
@@ -50,31 +51,25 @@ public class LogsController {
 		int count = -1;
 		if (cyclicBufferAppender != null) {
 			count = cyclicBufferAppender.getLength();
-		}
 
-		if (count > 0 && cyclicBufferAppender != null) {
-			List<LoggingEvent> logs = new ArrayList<LoggingEvent>(100);
-			for (int i = 0; i < count; i++) {
-				logs.add((LoggingEvent) cyclicBufferAppender.get(i));
+			if (count == 0) {
+				model.addAttribute("message", "logs.message.noLoggingEvents");
+			} else if (count > 0) {
+				List<LoggingEvent> logs = new ArrayList<LoggingEvent>(100);
+				for (int i = 0; i < count; i++) {
+					logs.add((LoggingEvent) cyclicBufferAppender.get(i));
+				}
+				model.addAttribute("logs", logs);
 			}
-			
-			LoggingEvent le;
-//			le.get
-
-			model.addAttribute("logs", logs);
 		}
+
+		if (count == -1) {
+			model.addAttribute("message", "logs.message.appenderNotFound");
+		}
+
+		model.addAttribute("now", new Date());
 
 		return "logs";
-	}
-
-//	private void reacquireCBA() {
-//		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-//		cyclicBufferAppender = (CyclicBufferAppender<ILoggingEvent>) context.getLogger(
-//				Logger.ROOT_LOGGER_NAME).getAppender(CYCLIC_BUFFER_APPENDER_NAME);
-//	}
-	@PostConstruct
-	public void init() {
-		logger.info("test logs init");
 	}
 
 }
