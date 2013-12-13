@@ -2,10 +2,10 @@
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:noNamespaceSchemaLocation="ehcache.xsd"
 		 updateCheck="false" monitoring="autodetect"
-		 dynamicConfig="true" maxBytesLocalHeap="200M">
+		 dynamicConfig="true" maxBytesLocalHeap="100M">
 	
 	<defaultCache eternal="true"
-				  maxBytesLocalHeap="50M"
+				  maxBytesLocalHeap="20M"
 				  overflowToDisk="false" />
 	
 	<cache name="general" 

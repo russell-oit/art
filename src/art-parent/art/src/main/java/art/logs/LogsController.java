@@ -23,7 +23,6 @@ import ch.qos.logback.core.read.CyclicBufferAppender;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -49,6 +48,7 @@ public class LogsController {
 				Logger.ROOT_LOGGER_NAME).getAppender(CYCLIC_BUFFER_APPENDER_NAME);
 
 		int count = -1;
+		logger.debug("cyclicBufferAppender != null = {}",cyclicBufferAppender != null);
 		if (cyclicBufferAppender != null) {
 			count = cyclicBufferAppender.getLength();
 
@@ -63,9 +63,13 @@ public class LogsController {
 			}
 		}
 
+		logger.debug("count={}",count);
 		if (count == -1) {
 			model.addAttribute("message", "logs.message.appenderNotFound");
 		}
+		
+		LoggingEvent le;
+//		le.getThrowableProxy().getCause().
 
 		model.addAttribute("now", new Date());
 

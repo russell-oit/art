@@ -41,7 +41,7 @@ Display art database configuration page
 			<div class="col-md-6 col-md-offset-3">
 				<div class="panel panel-success">
 					<div class="panel-heading text-center">
-						${pageTitle}
+						<h4 class="panel-title text-center">${pageTitle}</h4>
 					</div>
 					<div class="panel-body">
 						<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabaseForm">

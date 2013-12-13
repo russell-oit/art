@@ -63,11 +63,11 @@ Display application logs
 						<h4 class="panel-title text-center">${pageTitle}</h4>
 					</div>
 					<div class="panel-body">
-						<div class="text-center clearfix" style="margin-bottom: 10px">
+						<div class="text-center" style="margin-bottom: 10px;">
 							<fmt:formatDate var="nowFormatted" value="${now}" pattern="${displayDatePattern}"/>
 							<spring:message code="logs.message.showingRecentEvents" arguments="${nowFormatted}"/>
 							<span class="pull-right">
-								<a class="btn btn-default" href="#bottom">
+								<a href="#bottom">
 									<spring:message code="logs.button.bottom"/>
 								</a>
 							</span>
@@ -94,8 +94,8 @@ Display application logs
 									<c:forEach var="log" items="${logs}">
 										<tr class="${log.level}">
 											<td>
-												<jsp:useBean id="dateValue" class="java.util.Date" />
-												<jsp:setProperty name="dateValue" property="time" value="${log.timeStamp}" />
+												<jsp:useBean id="dateValue" class="java.util.Date"/>
+												<jsp:setProperty name="dateValue" property="time" value="${log.timeStamp}"/>
 												<t:displayDate date="${dateValue}"/>
 											</td>
 											<td>${log.level}</td>
@@ -105,16 +105,41 @@ Display application logs
 											<td>${log.MDCPropertyMap['req.remoteHost']}</td>
 											<td>${log.MDCPropertyMap['req.requestURI']}</td>
 										</tr>
+										<c:set var="throwable" value="${log.throwableProxy}" />
+										<c:if test="${throwable != null}">
+											<tr>
+												<td class="exception" colspan="7">
+													<c:forEach begin="0" end="10" varStatus="loop">
+														<c:if test="${throwable != null}">
+															<c:set var="commonFrames" value="${throwable.commonFrames}" />
+															<c:if test="${commonFrames gt 0}">
+																<br> Caused by: 
+															</c:if>
+															${throwable.className}: ${throwable.message}
+															<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
+															<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
+																<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}
+															</c:forEach>
+															<c:if test="${commonFrames gt 0}">
+																<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} common frames omitted 
+															</c:if>
+														</c:if>
+														<c:if test="${loop.last && throwable != null}">
+															More causes not listed...
+														</c:if>
+														<c:set var="throwable" value="${throwable.cause}" />
+													</c:forEach>
+												</td>
+											</tr>
+										</c:if>
 									</c:forEach>
 								</tbody>
 							</table>
 						</div>
-						<div id="bottom" class="clearfix">
-							<span class="pull-right">
-								<a class="btn btn-default" href="#top">
-									<spring:message code="logs.button.top"/>
-								</a>
-							</span>
+						<div id="bottom" class="pull-right">
+							<a href="#top">
+								<spring:message code="logs.button.top"/>
+							</a>
 						</div>
 					</div>
 				</div>

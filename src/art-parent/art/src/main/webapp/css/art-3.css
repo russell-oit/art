@@ -23,6 +23,11 @@ tr.WARN{
 	font-weight: bold;
 }
 
+td.exception{
+	/*background: #A2AEE8;*/
+	font-family: courier, monospace;
+}
+
 /* for use with spring <form:error tag. by default creates a span with error class */
 .error{
 	color: red;
