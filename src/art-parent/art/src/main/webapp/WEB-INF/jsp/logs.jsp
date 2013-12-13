@@ -22,36 +22,89 @@ Display application logs
 <t:mainPage title="${pageTitle}">
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
+			//put jstl variables into js variables
 			var allRowsText = "${dataTablesAllRowsText}";
+			var contextPath = "${pageContext.request.contextPath}";
+			var localeCode = "${pageContext.response.locale}";
+			var imagesPath = contextPath + "/images/";
 		</script>
 		<script type="text/javascript" charset="utf-8">
+			/* Formating function for row details */
+			function fnFormatDetails(oTable, nTr)
+			{
+				var aData = oTable.fnGetData(nTr);
+				var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
+				sOut += '<tr><td>Rendering engine:</td><td>' + aData[1] + ' ' + aData[4] + '</td></tr>';
+				sOut += '<tr><td>Link to source:</td><td>Could provide a link here</td></tr>';
+				sOut += '<tr><td>Extra info:</td><td>And any further details here (images etc)</td></tr>';
+				sOut += '</table>';
+
+				return sOut;
+			}
+
 			$(document).ready(function() {
-				$('.datatable').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [[0, "asc"]],
-					"bSortCellsTop": true,
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
-					}
-
-				});
-				$('.datatable').each(function() {
-					var datatable = $(this);
-					// SEARCH - Add the placeholder for Search and Turn this into in-line form control
-					var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input');
-					search_input.attr('placeholder', 'Search');
-					search_input.addClass('form-control input-sm');
-					// LENGTH - Inline-Form control
-					var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
-					length_sel.addClass('form-control input-sm');
-				});
-
 				$(function() {
 					$('a[href*="logs.do"]').parent().addClass('active');
 				});
+
+				// Insert a 'details' column to the table
+				//must be done before datatables initialisation
+				var nCloneTh = document.createElement('th');
+				var nCloneTd = document.createElement('td');
+				nCloneTd.innerHTML = '<img src="' + imagesPath + 'details_open.png">';
+				nCloneTd.className = "centered";
+				var nCloneTdBlank = document.createElement('td');
+
+				$('#logs thead tr').each(function() {
+					this.insertBefore(nCloneTh, this.childNodes[0]);
+				});
+
+				$('#logs tbody tr').each(function() {
+					if($(this).attr("class")==="ERROR"){
+						this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
+					} else {
+						this.insertBefore(nCloneTdBlank.cloneNode(true), this.childNodes[0]);
+					}
+					
+				});
+
+				//Initialise DataTables, with no sorting on the 'details' column (column [0])
+				var oTable = $('#logs').dataTable({
+					"sPaginationType": "bs_full",
+					"aoColumnDefs": [
+						{"bSortable": false, "aTargets": [0]}
+					],
+					"aaSorting": [[1, "asc"]],
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
+					"iDisplayLength": -1,
+					"oLanguage": {
+						"sUrl"
+								: contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
+					}
+				});
+
+				/* Add event listener for opening and closing details
+				 * Note that the indicator for showing which row is open is not controlled by DataTables,
+				 * rather it is done here
+				 */
+				$('#logs tbody td img').on('click', function() {
+					var nTr = $(this).parents('tr')[0];
+					if (oTable.fnIsOpen(nTr))
+					{
+						/* This row is already open - close it */
+						this.src = imagesPath + "details_open.png";
+						oTable.fnClose(nTr);
+					}
+					else
+					{
+						/* Open this row */
+						this.src = imagesPath + "details_close.png";
+						oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
+					}
+				});
+
 			});
+
 		</script>
 	</jsp:attribute>
 
@@ -78,7 +131,7 @@ Display application logs
 							</div>
 						</c:if>
 						<div>
-							<table class="datatable table table-striped table-bordered table-condensed">
+							<table id="logs" class="datatable table table-striped table-bordered table-condensed">
 								<thead>
 									<tr>
 										<th><spring:message code="logs.text.date"/></th>
@@ -105,33 +158,7 @@ Display application logs
 											<td>${log.MDCPropertyMap['req.remoteHost']}</td>
 											<td>${log.MDCPropertyMap['req.requestURI']}</td>
 										</tr>
-										<c:set var="throwable" value="${log.throwableProxy}" />
-										<c:if test="${throwable != null}">
-											<tr>
-												<td class="exception" colspan="7">
-													<c:forEach begin="0" end="10" varStatus="loop">
-														<c:if test="${throwable != null}">
-															<c:set var="commonFrames" value="${throwable.commonFrames}" />
-															<c:if test="${commonFrames gt 0}">
-																<br> Caused by: 
-															</c:if>
-															${throwable.className}: ${throwable.message}
-															<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
-															<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
-																<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}
-															</c:forEach>
-															<c:if test="${commonFrames gt 0}">
-																<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} common frames omitted 
-															</c:if>
-														</c:if>
-														<c:if test="${loop.last && throwable != null}">
-															More causes not listed...
-														</c:if>
-														<c:set var="throwable" value="${throwable.cause}" />
-													</c:forEach>
-												</td>
-											</tr>
-										</c:if>
+
 									</c:forEach>
 								</tbody>
 							</table>
