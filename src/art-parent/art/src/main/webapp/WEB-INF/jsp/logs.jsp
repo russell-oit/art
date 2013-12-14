@@ -60,12 +60,12 @@ Display application logs
 				});
 
 				$('#logs tbody tr').each(function() {
-					if($(this).attr("class")==="ERROR"){
+					if ($(this).attr("class") === "ERROR") {
 						this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
 					} else {
 						this.insertBefore(nCloneTdBlank.cloneNode(true), this.childNodes[0]);
 					}
-					
+
 				});
 
 				//Initialise DataTables, with no sorting on the 'details' column (column [0])
@@ -113,7 +113,7 @@ Display application logs
 			<div class="col-md-12">
 				<div class="panel panel-success">
 					<div class="panel-heading">
-						<h4 class="panel-title text-center">${pageTitle}</h4>
+						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
 					</div>
 					<div class="panel-body">
 						<div class="text-center" style="margin-bottom: 10px;">
@@ -153,12 +153,11 @@ Display application logs
 											</td>
 											<td>${log.level}</td>
 											<td>${log.loggerName}</td>
-											<td>${log.formattedMessage}</td>
-											<td>${log.MDCPropertyMap['username']}</td>
-											<td>${log.MDCPropertyMap['req.remoteHost']}</td>
-											<td>${log.MDCPropertyMap['req.requestURI']}</td>
+											<td>${fn:escapeXml(log.formattedMessage)}</td>
+											<td>${fn:escapeXml(log.MDCPropertyMap['username'])}</td>
+											<td>${fn:escapeXml(log.MDCPropertyMap['req.remoteHost'])}</td>
+											<td>${fn:escapeXml(log.MDCPropertyMap['req.requestURI'])}</td>
 										</tr>
-
 									</c:forEach>
 								</tbody>
 							</table>

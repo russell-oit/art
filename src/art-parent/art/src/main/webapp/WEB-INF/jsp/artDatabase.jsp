@@ -13,19 +13,21 @@ Display art database configuration page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
-<spring:message code="page.title.configureArtDatabase" var="pageTitle" scope="page"/>
+<spring:message code="page.title.artDatabase" var="pageTitle" scope="page"/>
 
 <t:mainPage title="${pageTitle}">
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
-		<script type="text/javascript" charset="utf-8">
+		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
 					$('a[href*="artDatabase.do"]').parent().addClass('active');
 				});
 
 				$(function() {
+					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 			});
@@ -33,15 +35,11 @@ Display art database configuration page
 	</jsp:attribute>
 
 	<jsp:body>
-		<div style="text-align: center">
-			${title}
-		</div>
-
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				<div class="panel panel-success">
 					<div class="panel-heading text-center">
-						<h4 class="panel-title text-center">${pageTitle}</h4>
+						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
 					</div>
 					<div class="panel-body">
 						<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabaseForm">

@@ -13,8 +13,9 @@ Settings configuration page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
-<spring:message code="page.title.configureSettings" var="pageTitle" scope="page"/>
+<spring:message code="page.title.settings" var="pageTitle" scope="page"/>
 
 <t:mainPage title="${pageTitle}">
 	<jsp:attribute name="javascript">
@@ -29,6 +30,7 @@ Settings configuration page
 				});
 
 				$(function() {
+					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
@@ -88,7 +90,7 @@ Settings configuration page
 			<div class="col-md-8 col-md-offset-2">
 				<div class="panel panel-success">
 					<div class="panel-heading text-center">
-						<h4 class="panel-title text-center">${pageTitle}</h4>
+						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
 					</div>
 					<div class="panel-body">
 						<form:form class="form-horizontal" method="POST" action="" modelAttribute="settings">
@@ -109,7 +111,7 @@ Settings configuration page
 									<div class="alert alert-danger alert-dismissable">
 										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 										<p><spring:message code="page.message.errorOccurred"/></p>
-										<p>${error}</p>
+										<p>${fn:escapeXml(error)}</p>
 									</div>
 								</c:if>
 

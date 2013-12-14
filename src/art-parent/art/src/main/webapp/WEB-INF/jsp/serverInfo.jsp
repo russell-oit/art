@@ -15,6 +15,15 @@ Display application server information
 <spring:message code="page.title.serverInfo" var="pageTitle" scope="page"/>
 
 <t:configurationPage title="${pageTitle}">
+	<jsp:attribute name="javascript">
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$(function() {
+					$('a[href*="serverInfo.do"]').parent().addClass('active');
+				});
+			});
+		</script>
+	</jsp:attribute>
 	<jsp:body>
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">

@@ -62,19 +62,19 @@ Login page
 						</c:if>
 						<c:if test="${not empty details}">
 							<div class="alert alert-danger">
-								${details}
+								${fn:escapeXml(details)}
 							</div>
 						</c:if>
 						<c:if test="${not empty error}">
 							<div class="alert alert-danger">
-								${error}
+								${fn:escapeXml(error)}
 							</div>
 						</c:if>
 						<c:if test="${not empty result}">
 							<div class="alert alert-danger">
 								<p><spring:message code="${result.message}"/></p>
-								<p>${result.details}</p>
-								<p>${result.error}</p>
+								<p>${fn:escapeXml(result.details)}</p>
+								<p>${fn:escapeXml(result.error)}</p>
 							</div>
 						</c:if>
 
@@ -86,7 +86,7 @@ Login page
 								<div class="col-md-10">
 									<select name="windowsDomain" id="windowsDomain" class="form-control">
 										<c:forTokens var="domain" items='${domains}' delims=",">
-											<option value="${domain}" ${domain == selectedDomain ? "selected" : ""}>${domain}</option>
+											<option value="${fn:escapeXml(domain)}" ${domain == selectedDomain ? "selected" : ""}>${fn:escapeXml(domain)}</option>
 										</c:forTokens>
 									</select>
 								</div>
@@ -97,7 +97,7 @@ Login page
 								<spring:message code="page.label.username"/>
 							</label>
 							<div class="col-md-10">
-								<input type="text" name="username" id="username" class="form-control" value="${selectedUsername}">
+								<input type="text" name="username" id="username" class="form-control" value="${fn:escapeXml(selectedUsername)}">
 							</div>
 						</div>
 						<div class="form-group">
