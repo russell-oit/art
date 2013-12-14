@@ -208,6 +208,11 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.startsWith(requestUri, path + "serverInfo.do")) {
+			//standard admins and above
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+				authorised = true;
+			}
 		}
 
 		return authorised;

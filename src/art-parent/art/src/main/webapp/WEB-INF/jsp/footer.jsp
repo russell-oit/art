@@ -12,8 +12,6 @@ Footer that appears on all pages
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<spring:htmlEscape defaultHtmlEscape="true"/>
-
 <div id="footer">
 	<div class="container"> 
 		<span class="navbar-text text-muted">

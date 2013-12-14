@@ -7,11 +7,10 @@ Display logout page. Only used with auto login
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+
+<%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
-<spring:htmlEscape defaultHtmlEscape="true"/>
 
 <spring:message code="page.title.logout" var="pageTitle" scope="page"/>
 

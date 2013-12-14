@@ -6,19 +6,39 @@
 Display user configuration page
 --%>
 
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <spring:message code="page.title.configureUsers" var="pageTitle" scope="page"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText" scope="page"/>
 
-<t:configurationPage title="${pageTitle}" dataTablesAllRowsText="${dataTablesAllRowsText}">
+<t:configurationPage title="${pageTitle}">
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$(function() {
 					$('a[href*="users.do"]').parent().addClass('active');
+				});
+				
+				$('.datatable').dataTable({
+					"sPaginationType": "bs_full",
+					"aaSorting": [],
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "All"]],
+					"iDisplayLength": 10,
+					"oLanguage": {
+						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
+					}
+				});
+				$('.datatable').each(function() {
+					var datatable = $(this);
+					// SEARCH - Add the placeholder for Search and Turn this into in-line form control
+					var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input');
+					search_input.attr('placeholder', 'Search');
+					search_input.addClass('form-control input-sm');
+					// LENGTH - Inline-Form control
+					var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
+					length_sel.addClass('form-control input-sm');
 				});
 			});
 		</script>

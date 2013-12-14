@@ -93,7 +93,7 @@ public class ArtConfig extends HttpServlet {
 
 		super.init(config);
 
-		logger.info("ART is starting up...");
+		logger.info("ART is starting up");
 
 		ArtConfigInit();
 	}
@@ -137,6 +137,13 @@ public class ArtConfig extends HttpServlet {
 		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 		ctx.setAttribute("sortDatePattern", "yyyy-MM-dd-HH:mm:ss.SSS"); //to enable correct sorting of dates in tables
 		ctx.setAttribute("displayDatePattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
+		ctx.setAttribute("artHome", ctx.getRealPath(""));
+		ctx.setAttribute("serverName", ctx.getServerInfo());
+		ctx.setAttribute("servletApiSupported", ctx.getMajorVersion() + "." + ctx.getMinorVersion());
+		ctx.setAttribute("javaVendor", System.getProperty("java.vendor"));
+		ctx.setAttribute("javaVersion", System.getProperty("java.version"));
+		ctx.setAttribute("operatingSystem", System.getProperty("os.arch") + "/"
+				+ System.getProperty("os.name") + "/" + System.getProperty("os.version"));
 
 		//set application path
 		appPath = ctx.getRealPath("");
@@ -314,7 +321,7 @@ public class ArtConfig extends HttpServlet {
 		dataSources = null;
 		dataSources = new LinkedHashMap<Integer, DataSource>();
 
-			//add art repository database to the dataSources map ("id" = 0). 
+		//add art repository database to the dataSources map ("id" = 0). 
 		//it's not explicitly defined from the admin console
 		dataSources.put(Integer.valueOf(0), artdb);
 
@@ -336,7 +343,7 @@ public class ArtConfig extends HttpServlet {
 		try {
 			conn = artdb.getConnection();
 
-				// ordered by NAME to have datasources inserted in order in the
+			// ordered by NAME to have datasources inserted in order in the
 			//LinkedHashMap dataSources (note: first item is always the ArtRepository)
 			String sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
 					+ " PASSWORD, TEST_SQL, DATABASE_ID"
@@ -381,7 +388,7 @@ public class ArtConfig extends HttpServlet {
 			DbUtils.close(rs, ps, conn);
 		}
 
-			//register jdbc drivers for datasources in the map
+		//register jdbc drivers for datasources in the map
 		//only register a driver once. several datasources may use the same driver
 		//use a set (doesn't add duplicate items)
 		Set<String> drivers = new HashSet<String>();

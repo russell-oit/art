@@ -29,6 +29,12 @@ public class CommonController {
 	public String showAccessDenied() {
 		return "accessDenied";
 	}
+	
+	@RequestMapping(value = "/app/serverInfo", method = RequestMethod.GET)
+	public String showServerInfo() {
+		//info already in application context, set in ArtConfig init
+		return "serverInfo";
+	}
 
 	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
 	public String showReports(HttpSession session,

@@ -11,7 +11,7 @@ bootstrap js, jquery js, datatables css, datatables js
 <%@tag description="Main Page Template" pageEncoding="UTF-8"%>
 <%@tag trimDirectiveWhitespaces="true" %>
 
-<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
+<%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" %>
