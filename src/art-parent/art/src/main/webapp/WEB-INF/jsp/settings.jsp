@@ -208,7 +208,7 @@ Settings configuration page
 											<c:forEach var="artAuthenticationMethod" items="${artAuthenticationMethods}">
 												<label class="radio-inline">
 													<form:radiobutton path="artAuthenticationMethod"
-																	  value="${artAuthenticationMethod}"/> ${artAuthenticationMethod.displayValue}
+																	  value="${artAuthenticationMethod}"/> ${artAuthenticationMethod.description}
 												</label>
 											</c:forEach>
 										</div>
@@ -304,7 +304,7 @@ Settings configuration page
 											<c:forEach var="ldapEncryptionMethod" items="${ldapConnectionEncryptionMethods}">
 												<label class="radio-inline">
 													<form:radiobutton path="ldapConnectionEncryptionMethod"
-																	  value="${ldapEncryptionMethod}"/> ${ldapEncryptionMethod.value}
+																	  value="${ldapEncryptionMethod}"/> ${ldapEncryptionMethod.description}
 												</label>
 											</c:forEach>
 										</div>
@@ -423,7 +423,7 @@ Settings configuration page
 											<c:forEach var="ldapAuthenticationMethod" items="${ldapAuthenticationMethods}">
 												<label class="radio-inline">
 													<form:radiobutton path="ldapAuthenticationMethod"
-																	  value="${ldapAuthenticationMethod}"/> ${ldapAuthenticationMethod.value}
+																	  value="${ldapAuthenticationMethod}"/> ${ldapAuthenticationMethod.description}
 												</label>
 											</c:forEach>
 										</div>
@@ -498,7 +498,7 @@ Settings configuration page
 											<c:forEach var="pageSize" items="${pdfPageSizes}">
 												<label class="radio-inline">
 													<form:radiobutton path="pdfPageSize"
-																	  value="${pageSize}"/> ${pageSize.value}
+																	  value="${pageSize}"/> ${pageSize.description}
 												</label>
 											</c:forEach>
 										</div>
@@ -675,7 +675,7 @@ Settings configuration page
 													<label class="radio-inline">
 														<form:radiobutton path="displayNull"
 																		  value="${displayNullOption}"/>
-														<spring:message code="${displayNullOption.displayValue}" />
+														<spring:message code="${displayNullOption.localisedDescription}" />
 													</label>
 												</c:forEach>
 												<spring:message code="settings.help.displayNull" var="help" />

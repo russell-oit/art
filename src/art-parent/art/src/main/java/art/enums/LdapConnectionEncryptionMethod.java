@@ -37,4 +37,14 @@ public enum LdapConnectionEncryptionMethod {
 		}
 		return None; //default
 	}
+	
+	/**
+	 * Get enum description. In case description needs to be different from
+	 * internal value
+	 *
+	 * @return
+	 */
+	public String getDescription() {
+		return value;
+	}
 }

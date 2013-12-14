@@ -39,12 +39,21 @@ public enum DisplayNull {
 	}
 
 	/**
-	 * Get enum display value for use in the user interface. In case display
-	 * value needs to be different from internal value
+	 * Get enum description. In case description needs to be different from
+	 * internal value
 	 *
 	 * @return
 	 */
-	public String getDisplayValue() {
+	public String getDescription() {
+		return value;
+	}
+
+	/**
+	 * Get description message string for use in the user interface.
+	 *
+	 * @return
+	 */
+	public String getLocalisedDescription() {
 		return "settings.displayNullOption." + this.toString();
 	}
 }

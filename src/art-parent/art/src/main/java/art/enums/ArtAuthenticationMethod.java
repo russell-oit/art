@@ -9,7 +9,7 @@ public enum ArtAuthenticationMethod {
 
 	//values used by the login page
 	Internal("Internal"), Auto("Auto"), WindowsDomain("windowsDomain"),
-	Database("Database"), LDAP("LDAP"), 
+	Database("Database"), LDAP("LDAP"),
 	//values used internally by ART
 	Repository("repository"), Custom("custom"), Public("public");
 	private String value;
@@ -43,12 +43,12 @@ public enum ArtAuthenticationMethod {
 	}
 
 	/**
-	 * Get enum display value for use in the user interface. In case display
-	 * value needs to be different from internal value
+	 * Get enum description. In case description needs to be different from
+	 * internal value
 	 *
 	 * @return
 	 */
-	public String getDisplayValue() {
+	public String getDescription() {
 		switch (this) {
 			case WindowsDomain:
 				return "Windows Domain";

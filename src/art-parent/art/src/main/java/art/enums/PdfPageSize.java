@@ -39,4 +39,14 @@ public enum PdfPageSize {
 		}
 		return A4; //default
 	}
+	
+	/**
+	 * Get enum description. In case description needs to be different from
+	 * internal value
+	 *
+	 * @return
+	 */
+	public String getDescription() {
+		return value;
+	}
 }

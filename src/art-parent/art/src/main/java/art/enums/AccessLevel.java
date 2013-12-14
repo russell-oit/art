@@ -38,4 +38,33 @@ public enum AccessLevel {
 		}
 		return NormalUser;
 	}
+
+	/**
+	 * Get enum description. In case description needs to be different from
+	 * internal value
+	 *
+	 * @return
+	 */
+	public String getDescription() {
+		switch (this) {
+			case NormalUser:
+				return "NormalUser";
+			case ScheduleUser:
+				return "ScheduleUser";
+			case JuniorAdmin:
+				return "JuniorAdmin";
+			case MidAdmin:
+				return "MidAdmin";
+			case StandardAdmin:
+				return "StandardAdmin";
+			case SeniorAdmin:
+				return "SeniorAdmin";
+			case SuperAdmin:
+				return "SuperAdmin";
+			case RepositoryUser:
+				return "RepositoryUser";
+			default:
+				return String.valueOf(value);
+		}
+	}
 }
