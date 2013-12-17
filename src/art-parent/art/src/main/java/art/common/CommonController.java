@@ -36,35 +36,4 @@ public class CommonController {
 		return "serverInfo";
 	}
 
-	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
-	public String showReports(HttpSession session,
-			@RequestParam(value = "groupId", required = false) Integer groupId,
-			HttpServletRequest request, Model model) {
-		try {
-			User sessionUser = (User) session.getAttribute("sessionUser");
-
-			ReportGroupService reportGroupService = new ReportGroupService();
-
-			List<ReportGroup> groups = reportGroupService.getAvailableReportGroups(sessionUser.getUsername());
-
-			//allow to focus public_user in one group only. is this feature used? it's not documented
-			if (groupId != null) {
-				List<ReportGroup> filteredGroup=new ArrayList<ReportGroup>();
-				for(ReportGroup group:groups){
-					if(group.getReportGroupId()==groupId){
-						filteredGroup.add(group);
-						break;
-					}
-				}
-				model.addAttribute("reportGroups", filteredGroup);
-			} else {
-				model.addAttribute("reportGroups", groups);
-			}
-		} catch (Exception ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return "reports";
-	}
 }

@@ -213,6 +213,12 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.startsWith(requestUri, path + "getReports.do")) {
+			//everyone can access
+			//NOTE: "everyone" doesn't include when accessing as the art repository user
+			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
+				authorised = true;
+			}
 		}
 
 		return authorised;

@@ -13,8 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 /**
- * Class to provide data access methods for report groups. Data stored in
- * ART_QUERY_GROUPS
+ * Class to provide data access methods for report groups
  *
  * @author Timothy Anyona
  */
@@ -92,6 +91,6 @@ public class ReportGroupRepository {
 			DbUtils.close(rs, ps, conn);
 		}
 
-		return (groups);
+		return groups;
 	}
 }

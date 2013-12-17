@@ -15,20 +15,26 @@ Reports page. Also main/home page
 
 <spring:message code="page.title.reports" var="pageTitle" scope="page"/>
 
+<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText" scope="page"/>
+
 <t:mainPage title="${pageTitle}">
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$('.datatable').dataTable({
 					"sPaginationType": "bs_full",
-					"bPaginate": false,
-					"aaSorting": [[0, "asc"]],
-					"bSortCellsTop": true,
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": 5,
+					"iDisplayLength": 10,
 					"oLanguage": {
 						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
-					}
+					},
+					"sAjaxSource": "${pageContext.request.contextPath}/app/getReports.do",
+					"sAjaxDataProp": "",
+					'aoColumns': [
+						{'mData': 'reportGroupName'},
+						{'mData': 'reportName'},
+						{'mData': 'updateDate'}
+					]
 				});
 				$('.datatable').each(function() {
 					var datatable = $(this);
@@ -40,7 +46,6 @@ Reports page. Also main/home page
 					var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
 					length_sel.addClass('form-control input-sm');
 				});
-
 				$(function() {
 					$('a[href*="reports.do"]').parent().addClass('active');
 				});
@@ -57,44 +62,23 @@ Reports page. Also main/home page
 		</c:if>
 
 		<div class="row">
-			<div class="col-md-4 col-md-offset-1">
-				<div class="panel panel-success">
-					<div class="panel-heading">
-						<spring:message code="reports.text.groups"/>
-					</div>
-					<div class="panel-body">
-						<table class="datatable table table-bordered table-striped table-condensed">
-							<thead>
-								<tr>
-									<th><spring:message code="reports.text.group"/></th>
-								</tr>
-								<tr>
-									<td><spring:message code="reports.text.allGroups"/></td>
-								</tr>
-							</thead>
-							<tbody>
-								<c:forEach var="group" items="${reportGroups}">
-									<tr>
-										<td>${fn:escapeXml(group.name)}</td>
-									</tr>
-								</c:forEach>
-							</tbody>
-						</table>
-					</div>
-				</div>
-								
-				<div class="alert alert-info">
-					<spring:message code="reports.info.usage"/>
-				</div>
-			</div>
-
-			<div class="col-md-6">
+			<div class="col-md-6 col-md-offset-3">
 				<div class="panel panel-success">
 					<div class="panel-heading">
 						<spring:message code="reports.text.reports"/>
 					</div>
 					<div class="panel-body">
-
+						<table class="datatable table table-bordered table-striped table-condensed">
+							<thead>
+								<tr>
+									<th><spring:message code="reports.text.groupName"/></th>
+									<th><spring:message code="reports.text.reportName"/></th>
+									<th><spring:message code="reports.text.updated"/></th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
