@@ -26,9 +26,9 @@ import org.slf4j.MDC;
  *
  * @author Timothy Anyona
  */
-public class AuthorizationFilter implements Filter {
+public class AuthorisationFilter implements Filter {
 
-	final static Logger logger = LoggerFactory.getLogger(AuthorizationFilter.class);
+	final static Logger logger = LoggerFactory.getLogger(AuthorisationFilter.class);
 
 	/**
 	 *

@@ -78,7 +78,7 @@ public class ArtConfig extends HttpServlet {
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
 	private static String hsqldbPath;
-	private static ArtDatabaseForm artDatabaseConfiguration;
+	private static ArtDatabase artDatabaseConfiguration;
 	private static String settingsFilePath;
 	private static Settings settings;
 
