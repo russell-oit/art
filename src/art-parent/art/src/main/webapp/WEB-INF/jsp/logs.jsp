@@ -29,19 +29,6 @@ Display application logs
 			var imagesPath = contextPath + "/images/";
 		</script>
 		<script type="text/javascript" charset="utf-8">
-			/* Formating function for row details */
-			function fnFormatDetails(oTable, nTr)
-			{
-				var aData = oTable.fnGetData(nTr);
-				var sOut = '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">';
-				sOut += '<tr><td>Rendering engine:</td><td>' + aData[1] + ' ' + aData[4] + '</td></tr>';
-				sOut += '<tr><td>Link to source:</td><td>Could provide a link here</td></tr>';
-				sOut += '<tr><td>Extra info:</td><td>And any further details here (images etc)</td></tr>';
-				sOut += '</table>';
-
-				return sOut;
-			}
-
 			$(document).ready(function() {
 				$(function() {
 					$('a[href*="logs.do"]').parent().addClass('active');
@@ -52,7 +39,7 @@ Display application logs
 				var nCloneTh = document.createElement('th');
 				var nCloneTd = document.createElement('td');
 				nCloneTd.innerHTML = '<img src="' + imagesPath + 'details_open.png">';
-				nCloneTd.className = "centered";
+				nCloneTd.className = "text-center";
 				var nCloneTdBlank = document.createElement('td');
 
 				$('#logs thead tr').each(function() {
@@ -72,7 +59,8 @@ Display application logs
 				var oTable = $('#logs').dataTable({
 					"sPaginationType": "bs_full",
 					"aoColumnDefs": [
-						{"bSortable": false, "aTargets": [0]}
+						{"bSortable": false, "aTargets": [0]},
+						{"bVisible": false, "aTargets": [-1]} //hide last column (exception details)
 					],
 					"aaSorting": [[1, "asc"]],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
@@ -87,7 +75,7 @@ Display application logs
 				 * Note that the indicator for showing which row is open is not controlled by DataTables,
 				 * rather it is done here
 				 */
-				$('#logs tbody td img').on('click', function() {
+				$('#logs tbody').on('click', 'tr img', function() {
 					var nTr = $(this).parents('tr')[0];
 					if (oTable.fnIsOpen(nTr))
 					{
@@ -102,8 +90,32 @@ Display application logs
 						oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
 					}
 				});
+				
+				//open all rows
+				//openAllRows(oTable);
 
 			});
+			
+			/* Formating function for row details */
+			function fnFormatDetails(oTable, nTr)
+			{
+				var aData = oTable.fnGetData(nTr);
+				var sOut = '<table style="margin-left:50px;">';
+				sOut += '<tr><td>' + aData[8] + '</td></tr>';
+				sOut += '</table>';
+
+				return sOut;
+			}
+			
+			function openAllRows(oTable){
+				oTable.$('tr').each( function () {
+					if ( !oTable.fnIsOpen( this ) ) {
+						alert($(this).text());
+						var nTr = $(this);
+						oTable.fnOpen(nTr, fnFormatDetails(oTable, this), 'details');
+					}
+				});
+			}
 
 		</script>
 	</jsp:attribute>
@@ -141,6 +153,7 @@ Display application logs
 										<th><spring:message code="logs.text.user"/></th>
 										<th><spring:message code="logs.text.ipAddress"/></th>
 										<th><spring:message code="logs.text.url"/></th>
+										<th></th> <%-- exception details column. hidden --%>
 									</tr>
 								</thead>
 								<tbody>
@@ -157,6 +170,31 @@ Display application logs
 											<td>${fn:escapeXml(log.MDCPropertyMap['username'])}</td>
 											<td>${fn:escapeXml(log.MDCPropertyMap['req.remoteHost'])}</td>
 											<td>${fn:escapeXml(log.MDCPropertyMap['req.requestURI'])}</td>
+											<td>
+												<c:set var="throwable" value="${log.throwableProxy}" />
+												<c:if test="${throwable != null}">
+													<c:forEach begin="0" end="10" varStatus="loop">
+														<c:if test="${throwable != null}">
+															<c:set var="commonFrames" value="${throwable.commonFrames}" />
+															<c:if test="${commonFrames gt 0}">
+																<br> Caused by: 
+															</c:if>
+															${throwable.className}: ${throwable.message}
+															<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
+															<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
+																<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}
+															</c:forEach>
+															<c:if test="${commonFrames gt 0}">
+																<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} common frames omitted 
+															</c:if>
+														</c:if>
+														<c:if test="${loop.last && throwable != null}">
+															More causes not listed...
+														</c:if>
+														<c:set var="throwable" value="${throwable.cause}" />
+													</c:forEach>
+												</c:if>
+											</td>
 										</tr>
 									</c:forEach>
 								</tbody>

@@ -32,22 +32,6 @@ Reports page. Also main/home page
 					$('a[href*="reports.do"]').parent().addClass('active');
 				});
 
-				// Insert a 'details' column to the table
-				//must be done before datatables initialisation
-				var nCloneTh = document.createElement('th');
-				var nCloneTd = document.createElement('td');
-				nCloneTd.innerHTML = '<img src="' + imagesPath + 'details_open.png">';
-				nCloneTd.className = "centered";
-
-				$('#reports thead tr').each(function() {
-					this.insertBefore(nCloneTh, this.childNodes[0]);
-				});
-
-				$('#reports tbody tr').each(function() {
-					this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
-
-				});
-
 				//Initialise DataTables, with no sorting on the 'details' column (column [0])
 				var oTable = $('#reports').dataTable({
 					"sPaginationType": "bs_full",
@@ -58,15 +42,15 @@ Reports page. Also main/home page
 					},
 					"aaSorting": [[3, "asc"]],
 					'aoColumnDefs': [
-						{"bSortable": false, "aTargets": [0]},
-						{"bVisible": false, "aTargets": [1, 2]}
+						{"bVisible": false, "aTargets": [1, 2]},
+						{"bSortable": false, "aTargets": [0]}
 					]
 				});
 				/* Add event listener for opening and closing details
 				 * Note that the indicator for showing which row is open is not controlled by DataTables,
 				 * rather it is done here
 				 */
-				$('#reports tbody').on('click','tr img',function() {
+				$('#reports tbody').on('click', 'tr img', function() {
 					var nTr = $(this).parents('tr')[0];
 					if (oTable.fnIsOpen(nTr))
 					{
@@ -88,8 +72,10 @@ Reports page. Also main/home page
 			function fnFormatDetails(oTable, nTr)
 			{
 				var aData = oTable.fnGetData(nTr);
-				var sOut = '<table border="0" style="padding-left:100px;">';
+				var sOut = '<table style="margin-left:30px;">';
+				sOut += '<tbody>';
 				sOut += '<tr><td>Description:</td><td>' + aData[2] + '</td></tr>';
+				sOut += '</tbody>';
 				sOut += '</table>';
 
 				return sOut;
@@ -112,9 +98,10 @@ Reports page. Also main/home page
 						<h4 class="panel-title"><spring:message code="reports.text.reports"/></h4>
 					</div>
 					<div class="panel-body">
-						<table id="reports" class="table table-bordered table-striped table-condensed">
+						<table id="reports" class="datatable table table-bordered">
 							<thead>
 								<tr>
+									<th></th> <%-- details column --%>
 									<th><spring:message code="reports.text.groupName"/></th>
 									<th><spring:message code="reports.text.description"/></th>
 									<th><spring:message code="reports.text.reportName"/></th>
@@ -123,6 +110,9 @@ Reports page. Also main/home page
 							<tbody>
 								<c:forEach var="report" items="${reports}">
 									<tr>
+										<td class="text-center">
+											<img src="${pageContext.request.contextPath}/images/details_open.png"/>
+										</td>
 										<td>${report.reportGroupName}</td>
 										<td>${report.description}</td>
 										<td>${report.name}</td>

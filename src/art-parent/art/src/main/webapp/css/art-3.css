@@ -13,6 +13,15 @@
 	margin-top: 60px; 
 }
 
+/* styling for datatables details data. from datatables demo_table.css */
+td.details {
+	background-color: #d1cfd0;
+	border: 2px solid #A19B9E;
+}
+
+/* remove bootstrap border-top from details row */
+.datatable table tbody>tr>td{border:none;}
+
 /* for styling of application logs */
 tr.ERROR{
 	color: red;
