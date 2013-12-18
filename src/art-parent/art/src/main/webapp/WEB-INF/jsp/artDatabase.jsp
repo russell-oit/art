@@ -42,7 +42,7 @@ Display art database configuration page
 						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
 					</div>
 					<div class="panel-body">
-						<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabaseForm">
+						<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabase">
 							<fieldset>
 								<c:if test="${not empty success}">
 									<div class="alert alert-success alert-dismissable">

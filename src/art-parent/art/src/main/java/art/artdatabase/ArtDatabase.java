@@ -7,12 +7,12 @@ import javax.validation.constraints.Min;
 import org.hibernate.validator.constraints.NotBlank;
 
 /**
- * Class to act as a form backing bean for art database configuration
+ * Class to represent art database configuration
  *
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ArtDatabaseForm implements Serializable {
+public class ArtDatabase implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String driver;

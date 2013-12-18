@@ -16,7 +16,7 @@
  */
 package art.servlets;
 
-import art.artdatabase.ArtDatabaseForm;
+import art.artdatabase.ArtDatabase;
 import art.dbcp.DataSource;
 import art.enums.ArtAuthenticationMethod;
 import art.settings.Settings;
@@ -828,7 +828,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return object with art database settings or null if art database not
 	 * configured
 	 */
-	public static ArtDatabaseForm getArtDatabaseConfiguration() {
+	public static ArtDatabase getArtDatabaseConfiguration() {
 		return artDatabaseConfiguration;
 	}
 
@@ -837,16 +837,16 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 */
 	private static void loadArtDatabaseConfiguration() {
-		ArtDatabaseForm artDatabaseForm = null;
+		ArtDatabase artDatabase = null;
 
 		try {
 			File artDatabaseFile = new File(artDatabaseFilePath);
 			if (artDatabaseFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
-				artDatabaseForm = mapper.readValue(artDatabaseFile, ArtDatabaseForm.class);
+				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
 				//de-obfuscate password field
-				artDatabaseForm.setPassword(Encrypter.decrypt(artDatabaseForm.getPassword()));
+				artDatabase.setPassword(Encrypter.decrypt(artDatabase.getPassword()));
 			} else {
 				logger.info("ART Database configuration file not found");
 			}
@@ -854,9 +854,9 @@ public class ArtConfig extends HttpServlet {
 			logger.error("Error", ex);
 		}
 
-		if (artDatabaseForm != null) {
+		if (artDatabase != null) {
 			artDatabaseConfiguration = null;
-			artDatabaseConfiguration = artDatabaseForm;
+			artDatabaseConfiguration = artDatabase;
 
 			//set defaults for invalid values
 			setArtDatabaseDefaults(artDatabaseConfiguration);
@@ -866,18 +866,18 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Save art database configuration to file
 	 *
-	 * @param artDatabaseForm
+	 * @param artDatabase
 	 * @throws java.io.IOException
 	 */
-	public static void saveArtDatabaseConfiguration(ArtDatabaseForm artDatabaseForm)
+	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase)
 			throws IOException {
 
 		//obfuscate password field for storing
-		artDatabaseForm.setPassword(Encrypter.encrypt(artDatabaseForm.getPassword()));
+		artDatabase.setPassword(Encrypter.encrypt(artDatabase.getPassword()));
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabaseForm);
+		mapper.writerWithDefaultPrettyPrinter().writeValue(artDatabaseFile, artDatabase);
 
 		//refresh configuration and set defaults for invalid values
 		loadArtDatabaseConfiguration();
@@ -1065,7 +1065,7 @@ public class ArtConfig extends HttpServlet {
 	 * Set defaults for art database configuration items that have invalid
 	 * values
 	 */
-	public static void setArtDatabaseDefaults(ArtDatabaseForm artDatabase) {
+	public static void setArtDatabaseDefaults(ArtDatabase artDatabase) {
 		if (artDatabase == null) {
 			return;
 		}

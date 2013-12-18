@@ -29,7 +29,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ArtDatabaseController {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
-	final String ART_DATABASE_FORM_ATTRIBUTE = "artDatabaseForm";
 	final String ART_DATABASE_PASSWORD_ATTRIBUTE = "artDatabasePassword";
 
 	@ModelAttribute("databaseTypes")
@@ -40,31 +39,31 @@ public class ArtDatabaseController {
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
 	public String showArtDatabaseConfiguration(HttpSession session, Model model) {
 
-		ArtDatabaseForm artDatabaseForm = ArtConfig.getArtDatabaseConfiguration();
+		ArtDatabase artDatabase = ArtConfig.getArtDatabaseConfiguration();
 
-		if (artDatabaseForm == null) {
+		if (artDatabase == null) {
 			//art database not configured. default to demo
-			artDatabaseForm = new ArtDatabaseForm();
-			artDatabaseForm.setUrl("demo");
+			artDatabase = new ArtDatabase();
+			artDatabase.setUrl("demo");
 			
 			//set default values
-			ArtConfig.setArtDatabaseDefaults(artDatabaseForm);
+			ArtConfig.setArtDatabaseDefaults(artDatabase);
 		}
 
 		//use blank password should always start as false
-		artDatabaseForm.setUseBlankPassword(false);
+		artDatabase.setUseBlankPassword(false);
 
 		//put current password in session for use by POST method
-		session.setAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE, artDatabaseForm.getPassword());
+		session.setAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE, artDatabase.getPassword());
 
-		model.addAttribute(ART_DATABASE_FORM_ATTRIBUTE, artDatabaseForm);
+		model.addAttribute("artDatabase", artDatabase);
 
 		return "artDatabase";
 	}
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.POST)
 	public String processArtDatabaseConfiguration(HttpSession session,
-			@ModelAttribute(ART_DATABASE_FORM_ATTRIBUTE) @Valid ArtDatabaseForm artDatabaseForm,
+			@ModelAttribute("artDatabase") @Valid ArtDatabase artDatabase,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
@@ -73,8 +72,8 @@ public class ArtDatabaseController {
 		}
 
 		//set password field as appropriate
-		String newPassword = artDatabaseForm.getPassword();
-		if (artDatabaseForm.isUseBlankPassword()) {
+		String newPassword = artDatabase.getPassword();
+		if (artDatabase.isUseBlankPassword()) {
 			newPassword = "";
 		} else {
 			if (StringUtils.isEmpty(newPassword)) {
@@ -82,7 +81,7 @@ public class ArtDatabaseController {
 				newPassword = (String) session.getAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE);
 			}
 		}
-		artDatabaseForm.setPassword(newPassword);
+		artDatabase.setPassword(newPassword);
 
 		//verify database settings
 		Connection conn = null;
@@ -90,10 +89,10 @@ public class ArtDatabaseController {
 
 		try {
 
-			String driver = artDatabaseForm.getDriver();
-			String url = artDatabaseForm.getUrl();
-			String username = artDatabaseForm.getUsername();
-			String password = artDatabaseForm.getPassword();
+			String driver = artDatabase.getDriver();
+			String url = artDatabase.getUrl();
+			String username = artDatabase.getUsername();
+			String password = artDatabase.getPassword();
 
 			String demoDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
 			String sampleDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
@@ -142,7 +141,7 @@ public class ArtDatabaseController {
 			}
 
 			//save settings
-			ArtConfig.saveArtDatabaseConfiguration(artDatabaseForm);
+			ArtConfig.saveArtDatabaseConfiguration(artDatabase);
 
 			ArtConfig.refreshConnections();
 
