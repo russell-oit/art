@@ -16,19 +16,24 @@ Display a formatted date. Also enables correct sorting in datatables
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="date" type="java.util.Date"%>
-<%@attribute name="span" type="java.lang.Boolean" %>
+<%@attribute name="sortable" type="java.lang.Boolean" %>
+<%@attribute name="pattern" %>
 
 <%-- any content can be specified here e.g.: --%>
 
-<%-- set default value for span --%>
-<c:if test="${span == null}">
-	<c:set var="span" value="${true}" />
+<%-- set default values for sortable and pattern attributes --%>
+<c:if test="${sortable == null}">
+	<c:set var="sortable" value="${true}" />
 </c:if>
 
-<c:if test="${span}">
+<c:if test="${empty pattern}">
+	<c:set var="pattern" value="${displayDatePattern}" />
+</c:if>
+
+<c:if test="${sortable}">
 	<%-- hidden span to enable correct sorting of dates --%>
 	<span class="hidden">
 		<fmt:formatDate value="${date}" pattern="${sortDatePattern}"/>
 	</span>
 </c:if>
-<fmt:formatDate value="${date}" pattern="${displayDatePattern}"/>
+<fmt:formatDate value="${date}" pattern="${pattern}"/>

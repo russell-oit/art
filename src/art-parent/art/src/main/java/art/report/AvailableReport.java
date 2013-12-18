@@ -26,10 +26,30 @@ import java.util.Date;
 public class AvailableReport {
 
 	private int reportId;
-	private String reportName;
+	private String name;
 	private String description;
 	private Date updateDate;
 	private String reportGroupName;
+	private int reportGroupId;
+
+	/**
+	 * Get the value of reportGroupId
+	 *
+	 * @return the value of reportGroupId
+	 */
+	public int getReportGroupId() {
+		return reportGroupId;
+	}
+
+	/**
+	 * Set the value of reportGroupId
+	 *
+	 * @param reportGroupId new value of reportGroupId
+	 */
+	public void setReportGroupId(int reportGroupId) {
+		this.reportGroupId = reportGroupId;
+	}
+
 
 	/**
 	 * Get the value of reportGroupName
@@ -64,17 +84,17 @@ public class AvailableReport {
 	}
 
 	/**
-	 * @return the reportName
+	 * @return the name
 	 */
-	public String getReportName() {
-		return reportName;
+	public String getName() {
+		return name;
 	}
 
 	/**
-	 * @param reportName the reportName to set
+	 * @param name the name to set
 	 */
-	public void setReportName(String reportName) {
-		this.reportName = reportName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**

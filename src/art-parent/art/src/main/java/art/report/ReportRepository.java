@@ -16,7 +16,6 @@
  */
 package art.report;
 
-import art.reportgroup.ReportGroup;
 import art.servlets.ArtConfig;
 import art.utils.DbUtils;
 import java.sql.Connection;
@@ -64,7 +63,7 @@ public class ReportRepository {
 			//don't show static lov(119), dynamic lov(120), dynamic job recipient(121) reports
 			
 			sql = "SELECT AQ.QUERY_ID, AQ.NAME AS QUERY_NAME, AQ.DESCRIPTION,"
-					+ " AQ.UPDATE_DATE, AQG.NAME AS GROUP_NAME "
+					+ " AQ.UPDATE_DATE, AQ.QUERY_GROUP_ID, AQG.NAME AS GROUP_NAME "
 					+ " FROM ART_QUERIES AQ "
 					+ " INNER JOIN ART_QUERY_GROUPS AQG "
 					+ " ON AQ.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID "
@@ -76,7 +75,7 @@ public class ReportRepository {
 					+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ "
 					+ " WHERE AUQ.QUERY_ID = AQ.QUERY_ID "
 					+ " AND AUQ.USERNAME=? "
-					+ " UNION "
+					+ " UNION ALL"
 					//add reports to which the user has access through his user group 
 					+ " SELECT AQ.QUERY_ID "
 					+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ "
@@ -84,15 +83,15 @@ public class ReportRepository {
 					+ " AND EXISTS "
 					+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ?"
 					+ " AND AUGA.USER_GROUP_ID=AUGQ.USER_GROUP_ID)"
-					+ " UNION "
+					+ " UNION ALL"
 					// user can run all reports in the report groups he has direct access to
-					+ "SELECT AQ.QUERY_ID "
+					+ " SELECT AQ.QUERY_ID "
 					+ " FROM ART_USER_QUERY_GROUPS AUQG, ART_QUERIES AQ "
 					+ " WHERE AUQG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
 					+ " AND AUQG.USERNAME=? "
-					+ " UNION "
+					+ " UNION ALL"
 					//user can run all reports in the report groups that his user groups have access to
-					+ "SELECT AQ.QUERY_ID "
+					+ " SELECT AQ.QUERY_ID "
 					+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERIES AQ "
 					+ " WHERE AUGG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
 					+ " AND EXISTS "
@@ -112,9 +111,10 @@ public class ReportRepository {
 				AvailableReport report = new AvailableReport();
 
 				report.setReportId(rs.getInt("QUERY_ID"));
-				report.setReportName(rs.getString("QUERY_NAME"));
+				report.setName(rs.getString("QUERY_NAME"));
 				report.setDescription(rs.getString("DESCRIPTION"));
 				report.setUpdateDate(rs.getDate("UPDATE_DATE"));
+				report.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
 				report.setReportGroupName(rs.getString("GROUP_NAME"));
 
 				reports.add(report);

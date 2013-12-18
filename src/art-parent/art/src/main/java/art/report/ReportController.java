@@ -18,6 +18,7 @@ package art.report;
 
 import art.user.User;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -48,6 +49,28 @@ public class ReportController {
 	public String showReports(HttpSession session,
 			@RequestParam(value = "groupId", required = false) Integer groupId,
 			HttpServletRequest request, Model model) {
+		
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			List<AvailableReport> reports = reportService.getAvailableReports(sessionUser.getUsername());
+
+			//allow to focus public_user in one group only. is this feature used? it's not documented
+			if (groupId != null) {
+				List<AvailableReport> filteredReports = new ArrayList<AvailableReport>();
+				for (AvailableReport report : reports) {
+					if (report.getReportGroupId() == groupId) {
+						filteredReports.add(report);
+					}
+				}
+				model.addAttribute("reports", filteredReports);
+			} else {
+				model.addAttribute("reports", reports);
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
 
 		return "reports";
 	}

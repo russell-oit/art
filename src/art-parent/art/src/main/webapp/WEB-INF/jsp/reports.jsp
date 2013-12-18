@@ -19,37 +19,81 @@ Reports page. Also main/home page
 
 <t:mainPage title="${pageTitle}">
 	<jsp:attribute name="javascript">
+		<script type="text/javascript">
+			//put jstl variables into js variables
+			var allRowsText = "${dataTablesAllRowsText}";
+			var contextPath = "${pageContext.request.contextPath}";
+			var localeCode = "${pageContext.response.locale}";
+			var imagesPath = contextPath + "/images/";
+		</script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
-				$('.datatable').dataTable({
+				$(function() {
+					$('a[href*="reports.do"]').parent().addClass('active');
+				});
+
+				// Insert a 'details' column to the table
+				//must be done before datatables initialisation
+				var nCloneTh = document.createElement('th');
+				var nCloneTd = document.createElement('td');
+				nCloneTd.innerHTML = '<img src="' + imagesPath + 'details_open.png">';
+				nCloneTd.className = "centered";
+
+				$('#reports thead tr').each(function() {
+					this.insertBefore(nCloneTh, this.childNodes[0]);
+				});
+
+				$('#reports tbody tr').each(function() {
+					this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
+
+				});
+
+				//Initialise DataTables, with no sorting on the 'details' column (column [0])
+				var oTable = $('#reports').dataTable({
 					"sPaginationType": "bs_full",
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": 10,
 					"oLanguage": {
 						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
 					},
-					"sAjaxSource": "${pageContext.request.contextPath}/app/getReports.do",
-					"sAjaxDataProp": "",
-					'aoColumns': [
-						{'mData': 'reportGroupName'},
-						{'mData': 'reportName'},
-						{'mData': 'updateDate'}
+					"aaSorting": [[3, "asc"]],
+					'aoColumnDefs': [
+						{"bSortable": false, "aTargets": [0]},
+						{"bVisible": false, "aTargets": [1, 2]}
 					]
 				});
-				$('.datatable').each(function() {
-					var datatable = $(this);
-					// SEARCH - Add the placeholder for Search and Turn this into in-line form control
-					var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input');
-					search_input.attr('placeholder', 'Search');
-					search_input.addClass('form-control input-sm');
-					// LENGTH - Inline-Form control
-					var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
-					length_sel.addClass('form-control input-sm');
+				/* Add event listener for opening and closing details
+				 * Note that the indicator for showing which row is open is not controlled by DataTables,
+				 * rather it is done here
+				 */
+				$('#reports tbody').on('click','tr img',function() {
+					var nTr = $(this).parents('tr')[0];
+					if (oTable.fnIsOpen(nTr))
+					{
+						/* This row is already open - close it */
+						this.src = imagesPath + "details_open.png";
+						oTable.fnClose(nTr);
+					}
+					else
+					{
+						/* Open this row */
+						this.src = imagesPath + "details_close.png";
+						oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
+					}
 				});
-				$(function() {
-					$('a[href*="reports.do"]').parent().addClass('active');
-				});
+
 			});
+
+			/* Formating function for row details */
+			function fnFormatDetails(oTable, nTr)
+			{
+				var aData = oTable.fnGetData(nTr);
+				var sOut = '<table border="0" style="padding-left:100px;">';
+				sOut += '<tr><td>Description:</td><td>' + aData[2] + '</td></tr>';
+				sOut += '</table>';
+
+				return sOut;
+			}
 		</script>
 	</jsp:attribute>
 
@@ -64,19 +108,26 @@ Reports page. Also main/home page
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				<div class="panel panel-success">
-					<div class="panel-heading">
-						<spring:message code="reports.text.reports"/>
+					<div class="panel-heading text-center">
+						<h4 class="panel-title"><spring:message code="reports.text.reports"/></h4>
 					</div>
 					<div class="panel-body">
-						<table class="datatable table table-bordered table-striped table-condensed">
+						<table id="reports" class="table table-bordered table-striped table-condensed">
 							<thead>
 								<tr>
 									<th><spring:message code="reports.text.groupName"/></th>
+									<th><spring:message code="reports.text.description"/></th>
 									<th><spring:message code="reports.text.reportName"/></th>
-									<th><spring:message code="reports.text.updated"/></th>
 								</tr>
 							</thead>
 							<tbody>
+								<c:forEach var="report" items="${reports}">
+									<tr>
+										<td>${report.reportGroupName}</td>
+										<td>${report.description}</td>
+										<td>${report.name}</td>
+									</tr>
+								</c:forEach>
 							</tbody>
 						</table>
 					</div>
