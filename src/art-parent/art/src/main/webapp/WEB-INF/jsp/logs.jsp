@@ -65,8 +65,7 @@ Display application logs
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
 					"iDisplayLength": -1,
 					"oLanguage": {
-						"sUrl"
-								: contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
+						"sUrl": contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
 					},
 					"fnInitComplete": function() {
 						$('div.dataTables_filter input').focus();
@@ -176,7 +175,7 @@ Display application logs
 															<c:if test="${commonFrames gt 0}">
 																<br> Caused by: 
 															</c:if>
-															${throwable.className}: ${throwable.message}
+															${throwable.className}: ${fn:escapeXml(throwable.message)}
 															<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
 															<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
 																<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}

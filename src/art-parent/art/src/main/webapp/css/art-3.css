@@ -28,7 +28,7 @@ div.innerDetails {
 }
 
 /* show hand cursor for expandable rows */
-tr.expandable {
+.expandable {
 	cursor: pointer; *cursor: hand;
 }
 
