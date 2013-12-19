@@ -34,6 +34,9 @@ Display application logs
 					$('a[href*="logs.do"]').parent().addClass('active');
 				});
 
+				//array to keep a reference to any TR rows that we 'open'
+				var anOpen = [];
+
 				// Insert a 'details' column to the table
 				//must be done before datatables initialisation
 				var nCloneTh = document.createElement('th');
@@ -52,12 +55,12 @@ Display application logs
 					} else {
 						this.insertBefore(nCloneTdBlank.cloneNode(true), this.childNodes[0]);
 					}
-
 				});
 
 				//Initialise DataTables, with no sorting on the 'details' column (column [0])
 				var oTable = $('#logs').dataTable({
 					"sPaginationType": "bs_full",
+					"bPaginate": false,
 					"aoColumnDefs": [
 						{"bSortable": false, "aTargets": [0]},
 						{"bVisible": false, "aTargets": [-1]} //hide last column (exception details)
@@ -68,6 +71,9 @@ Display application logs
 					"oLanguage": {
 						"sUrl"
 								: contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
+					},
+					"fnInitComplete": function() {
+						$('div.dataTables_filter input').focus();
 					}
 				});
 
@@ -75,46 +81,51 @@ Display application logs
 				 * Note that the indicator for showing which row is open is not controlled by DataTables,
 				 * rather it is done here
 				 */
-				$('#logs tbody').on('click', 'tr img', function() {
-					var nTr = $(this).parents('tr')[0];
-					if (oTable.fnIsOpen(nTr))
-					{
-						/* This row is already open - close it */
-						this.src = imagesPath + "details_open.png";
-						oTable.fnClose(nTr);
+				$('#logs tbody').on('click', 'tr', function() {
+					if (!$(this).hasClass('ERROR')) {
+						return; //only error rows can have details
 					}
-					else
-					{
-						/* Open this row */
-						this.src = imagesPath + "details_close.png";
-						oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
+					
+					var nTr = this;
+
+					//see if the row should be opened or if it is already in the open array, and thus close it
+					var i = $.inArray(nTr, anOpen);
+					if (i === -1) {
+						// Row is not in open array so it's currently closed. Open it
+						var nDetailsRow = oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
+						$('div.innerDetails', nDetailsRow).slideDown();
+
+						//add row to open array
+						anOpen.push(nTr);
+
+						//change icon to indicate the row is now due for closing
+						$('img', this).attr('src', imagesPath + "details_close.png");
+					} else {
+						// Close this row
+						$('div.innerDetails', $(nTr).next()[0]).slideUp('fast',function() {
+							oTable.fnClose(nTr);
+							//remove row from open array
+							anOpen.splice(i, 1);
+						});
+
+						//change icon to indicate the row is now due for opening
+						$('img', this).attr('src', imagesPath + "details_open.png");
 					}
 				});
-				
-				//open all rows
-				//openAllRows(oTable);
 
 			});
-			
+
 			/* Formating function for row details */
 			function fnFormatDetails(oTable, nTr)
 			{
 				var aData = oTable.fnGetData(nTr);
-				var sOut = '<table style="margin-left:50px;">';
+				var sOut = '<div class="innerDetails">';
+				sOut += '<table style="margin-left:50px;">';
 				sOut += '<tr><td>' + aData[8] + '</td></tr>';
 				sOut += '</table>';
+				sOut += '</div>';
 
 				return sOut;
-			}
-			
-			function openAllRows(oTable){
-				oTable.$('tr').each( function () {
-					if ( !oTable.fnIsOpen( this ) ) {
-						alert($(this).text());
-						var nTr = $(this);
-						oTable.fnOpen(nTr, fnFormatDetails(oTable, this), 'details');
-					}
-				});
 			}
 
 		</script>
@@ -143,7 +154,7 @@ Display application logs
 							</div>
 						</c:if>
 						<div>
-							<table id="logs" class="datatable table table-striped table-bordered table-condensed">
+							<table id="logs" class="datatable expandable table table-striped table-bordered table-condensed">
 								<thead>
 									<tr>
 										<th><spring:message code="logs.text.date"/></th>

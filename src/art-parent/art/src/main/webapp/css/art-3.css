@@ -22,19 +22,20 @@ td.details {
 /* remove bootstrap border-top from details row */
 .datatable table tbody>tr>td{border:none;}
 
-/* for styling of application logs */
+/* styling to enable datatables details row slideDown slideUp effect */
+div.innerDetails { 
+	display: none; 
+}
+
+/* styling for application logs */
 tr.ERROR{
 	color: red;
 	font-weight: bold;
+	cursor: pointer; *cursor: hand;
 }
 
 tr.WARN{
 	font-weight: bold;
-}
-
-td.exception{
-	/*background: #A2AEE8;*/
-	font-family: courier, monospace;
 }
 
 /* for use with spring <form:error tag. by default creates a span with error class */
