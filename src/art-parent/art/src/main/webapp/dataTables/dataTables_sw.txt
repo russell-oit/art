@@ -11,9 +11,9 @@
     "sSearch":         "Tafuta:",
     "sZeroRecords":    "Hakuna vifano",
     "oPaginate": {
-        "sFirst":    "Mwanzo",
+        "sFirst":    "Kwanza",
         "sLast":     "Mwisho",
-        "sNext":     "Ifuatayo",
+        "sNext":     "Inayofuata",
         "sPrevious": "Iliyopita"
     },
     "oAria": {
