@@ -4,7 +4,7 @@
 
 	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">		
 		<encoder>
-			<pattern>%X{req.remoteHost} %X{req.requestURI} %X{username} [%level] %date{dd MMM yyyy HH:mm:ss.SSS} |%thread| %logger - %msg%n</pattern>
+			<pattern>[%level] %date{dd MMM yyyy HH:mm:ss.SSS} |%thread| %logger - %msg%n</pattern>
 		</encoder>
 	</appender>
 

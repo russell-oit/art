@@ -121,7 +121,7 @@ Display application logs
 				var aData = oTable.fnGetData(nTr);
 				var sOut = '<div class="innerDetails">';
 				sOut += '<table style="margin-left:50px;">';
-				sOut += '<tr><td>' + aData[8] + '</td></tr>';
+				sOut += '<tr><td>' + aData[5] + '</td></tr>';
 				sOut += '</table>';
 				sOut += '</div>';
 
@@ -161,9 +161,6 @@ Display application logs
 										<th><spring:message code="logs.text.level"/></th>
 										<th><spring:message code="logs.text.logger"/></th>
 										<th><spring:message code="logs.text.message"/></th>
-										<th><spring:message code="logs.text.user"/></th>
-										<th><spring:message code="logs.text.ipAddress"/></th>
-										<th><spring:message code="logs.text.url"/></th>
 										<th></th> <%-- exception details column. hidden --%>
 									</tr>
 								</thead>
@@ -178,9 +175,6 @@ Display application logs
 											<td>${log.level}</td>
 											<td>${log.loggerName}</td>
 											<td>${fn:escapeXml(log.formattedMessage)}</td>
-											<td>${fn:escapeXml(log.MDCPropertyMap['username'])}</td>
-											<td>${fn:escapeXml(log.MDCPropertyMap['req.remoteHost'])}</td>
-											<td>${fn:escapeXml(log.MDCPropertyMap['req.requestURI'])}</td>
 											<td>
 												<c:set var="throwable" value="${log.throwableProxy}" />
 												<c:if test="${throwable != null}">
