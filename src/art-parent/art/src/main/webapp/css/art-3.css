@@ -13,7 +13,7 @@
 	margin-top: 60px; 
 }
 
-/* styling for datatables details data. from datatables demo_table.css */
+/* styling for datatables details row. from datatables demo_table.css */
 td.details {
 	background-color: #d1cfd0;
 	border: 2px solid #A19B9E;
@@ -22,9 +22,14 @@ td.details {
 /* remove bootstrap border-top from details row */
 .datatable table tbody>tr>td{border:none;}
 
-/* styling to enable datatables details row slideDown slideUp effect */
+/* styling to enable datatables details row slideDown, slideUp effect */
 div.innerDetails { 
 	display: none; 
+}
+
+/* show hand cursor for expandable rows */
+tr.expandable {
+	cursor: pointer; *cursor: hand;
 }
 
 /* styling for application logs */

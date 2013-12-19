@@ -34,9 +34,6 @@ Display application logs
 					$('a[href*="logs.do"]').parent().addClass('active');
 				});
 
-				//array to keep a reference to any TR rows that we 'open'
-				var anOpen = [];
-
 				// Insert a 'details' column to the table
 				//must be done before datatables initialisation
 				var nCloneTh = document.createElement('th');
@@ -57,15 +54,14 @@ Display application logs
 					}
 				});
 
-				//Initialise DataTables, with no sorting on the 'details' column (column [0])
+				//Initialise DataTables
 				var oTable = $('#logs').dataTable({
 					"sPaginationType": "bs_full",
 					"bPaginate": false,
 					"aoColumnDefs": [
-						{"bSortable": false, "aTargets": [0]},
-						{"bVisible": false, "aTargets": [-1]} //hide last column (exception details)
+						{"bSortable": false, "aTargets": [0]}, //no sorting on details column
+						{"bVisible": false, "aTargets": [-1]} //hide last column (error details)
 					],
-					"aaSorting": [[1, "asc"]],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
 					"iDisplayLength": -1,
 					"oLanguage": {
@@ -77,15 +73,15 @@ Display application logs
 					}
 				});
 
-				/* Add event listener for opening and closing details
-				 * Note that the indicator for showing which row is open is not controlled by DataTables,
-				 * rather it is done here
-				 */
+				//array to keep a reference to any TR rows that we 'open'
+				var anOpen = [];
+				
+				// Add event listener for opening and closing details
 				$('#logs tbody').on('click', 'tr', function() {
 					if (!$(this).hasClass('ERROR')) {
-						return; //only error rows can have details
+						return; //only ERROR rows can have details
 					}
-					
+
 					var nTr = this;
 
 					//see if the row should be opened or if it is already in the open array, and thus close it
@@ -102,7 +98,7 @@ Display application logs
 						$('img', this).attr('src', imagesPath + "details_close.png");
 					} else {
 						// Close this row
-						$('div.innerDetails', $(nTr).next()[0]).slideUp('fast',function() {
+						$('div.innerDetails', $(nTr).next()[0]).slideUp('fast', function() {
 							oTable.fnClose(nTr);
 							//remove row from open array
 							anOpen.splice(i, 1);
@@ -139,9 +135,7 @@ Display application logs
 						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
 					</div>
 					<div class="panel-body">
-						<div class="text-center" style="margin-bottom: 10px;">
-							<fmt:formatDate var="nowFormatted" value="${now}" pattern="${displayDatePattern}"/>
-							<spring:message code="logs.message.showingRecentEvents" arguments="${nowFormatted}"/>
+						<div class="clearfix" style="margin-bottom: 10px;">
 							<span class="pull-right">
 								<a href="#bottom">
 									<spring:message code="logs.button.bottom"/>
@@ -154,23 +148,21 @@ Display application logs
 							</div>
 						</c:if>
 						<div>
-							<table id="logs" class="datatable expandable table table-striped table-bordered table-condensed">
+							<table id="logs" class="datatable table table-striped table-bordered table-condensed">
 								<thead>
 									<tr>
 										<th><spring:message code="logs.text.date"/></th>
 										<th><spring:message code="logs.text.level"/></th>
 										<th><spring:message code="logs.text.logger"/></th>
 										<th><spring:message code="logs.text.message"/></th>
-										<th></th> <%-- exception details column. hidden --%>
+										<th></th> <%-- error details column. hidden --%>
 									</tr>
 								</thead>
 								<tbody>
 									<c:forEach var="log" items="${logs}">
 										<tr class="${log.level}">
 											<td>
-												<jsp:useBean id="dateValue" class="java.util.Date"/>
-												<jsp:setProperty name="dateValue" property="time" value="${log.timeStamp}"/>
-												<t:displayDate date="${dateValue}"/>
+												<t:displayDate timestamp="${log.timeStamp}"/>
 											</td>
 											<td>${log.level}</td>
 											<td>${log.loggerName}</td>
@@ -205,10 +197,12 @@ Display application logs
 								</tbody>
 							</table>
 						</div>
-						<div id="bottom" class="pull-right">
-							<a href="#top">
-								<spring:message code="logs.button.top"/>
-							</a>
+						<div id="bottom" class="clearfix">
+							<span class="pull-right">
+								<a href="#top">
+									<spring:message code="logs.button.top"/>
+								</a>
+							</span>
 						</div>
 					</div>
 				</div>

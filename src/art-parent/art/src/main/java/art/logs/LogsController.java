@@ -23,6 +23,7 @@ import ch.qos.logback.core.read.CyclicBufferAppender;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -55,23 +56,18 @@ public class LogsController {
 			if (count == 0) {
 				model.addAttribute("message", "logs.message.noLoggingEvents");
 			} else if (count > 0) {
-				List<LoggingEvent> logs = new ArrayList<LoggingEvent>(100);
+				List<ILoggingEvent> logs = new ArrayList<ILoggingEvent>(50);
 				for (int i = 0; i < count; i++) {
-					logs.add((LoggingEvent) cyclicBufferAppender.get(i));
+					logs.add(cyclicBufferAppender.get(i));
 				}
 				model.addAttribute("logs", logs);
 			}
 		}
-
+ 
 		logger.debug("count={}",count);
 		if (count == -1) {
 			model.addAttribute("message", "logs.message.appenderNotFound");
 		}
-		
-		LoggingEvent le;
-//		le.getThrowableProxy().getCause().
-
-		model.addAttribute("now", new Date());
 
 		return "logs";
 	}

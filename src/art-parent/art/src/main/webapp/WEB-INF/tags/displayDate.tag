@@ -16,6 +16,7 @@ Display a formatted date. Also enables correct sorting in datatables
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="date" type="java.util.Date"%>
+<%@attribute name="timestamp" type="java.lang.Long" %>
 <%@attribute name="sortable" type="java.lang.Boolean" %>
 <%@attribute name="pattern" %>
 
@@ -30,9 +31,15 @@ Display a formatted date. Also enables correct sorting in datatables
 	<c:set var="pattern" value="${displayDatePattern}" />
 </c:if>
 
+<c:if test="${timestamp != null}">
+	<jsp:useBean id="dateValue" class="java.util.Date"/>
+	<jsp:setProperty name="dateValue" property="time" value="${timestamp}"/>
+	<c:set var="date" value="${dateValue}"/>
+</c:if>
+
 <c:if test="${sortable}">
 	<%-- hidden span to enable correct sorting of dates --%>
-	<span class="hidden">
+	<span style="display: none;">
 		<fmt:formatDate value="${date}" pattern="${sortDatePattern}"/>
 	</span>
 </c:if>
