@@ -18,35 +18,39 @@ import org.hibernate.validator.constraints.NotBlank;
 public class Settings {
 
 	private String smtpServer;
-	private int smtpPort = 25;
+	private int smtpPort;
 	private boolean smtpUseStartTls;
 	private boolean useSmtpAuthentication;
 	private String smtpUsername;
 	private String smtpPassword;
 	@JsonIgnore
+	private String currentSmtpPassword; //only used for user interface logic
+	@JsonIgnore
 	private boolean useBlankSmtpPassword; //ignore when saving object
 	private int maxRowsDefault;
 	private String maxRowsSpecific;
-	private ArtAuthenticationMethod artAuthenticationMethod = ArtAuthenticationMethod.Internal;
+	private ArtAuthenticationMethod artAuthenticationMethod;
 	private String windowsDomainController;
 	private String allowedWindowsDomains;
 	private String databaseAuthenticationDriver;
 	private String databaseAuthenticationUrl;
 	private String ldapServer;
 	private int ldapPort;
-	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod = LdapConnectionEncryptionMethod.None;
+	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod;
 	private String ldapUrl;
 	private String ldapBaseDn;
 	private boolean useLdapAnonymousBind = true;
 	private String ldapBindDn;
 	private String ldapBindPassword;
 	@JsonIgnore
-	private boolean useBlankLdapBindPassword;
+	private String currentLdapBindPassword; //only used for user interface logic
+	@JsonIgnore
+	private boolean useBlankLdapBindPassword; //only used for user interface logic
 	@NotBlank
 	private String ldapUserIdAttribute;
-	private LdapAuthenticationMethod ldapAuthenticationMethod = LdapAuthenticationMethod.Simple;
+	private LdapAuthenticationMethod ldapAuthenticationMethod;
 	private String ldapRealm;
-	private PdfPageSize pdfPageSize = PdfPageSize.A4Landscape;
+	private PdfPageSize pdfPageSize;
 	private String pdfFontName;
 	private String pdfFontFile;
 	private String pdfFontDirectory;
@@ -59,12 +63,48 @@ public class Settings {
 	private String timeFormat;
 	@NotBlank
 	private String reportFormats;
-	private DisplayNull displayNull = DisplayNull.NoNumbersAsZero;
-	private int maxRunningReports = 1000;
+	private DisplayNull displayNull;
+	private int maxRunningReports;
 	private boolean showHeaderInPublicUserSession;
 	private int mondrianCacheExpiryPeriod;
 	private boolean schedulingEnabled = true;
 	private String rssLink;
+
+	/**
+	 * Get the value of currentLdapBindPassword
+	 *
+	 * @return the value of currentLdapBindPassword
+	 */
+	public String getCurrentLdapBindPassword() {
+		return currentLdapBindPassword;
+	}
+
+	/**
+	 * Set the value of currentLdapBindPassword
+	 *
+	 * @param currentLdapBindPassword new value of currentLdapBindPassword
+	 */
+	public void setCurrentLdapBindPassword(String currentLdapBindPassword) {
+		this.currentLdapBindPassword = currentLdapBindPassword;
+	}
+
+	/**
+	 * Get the value of currentSmtpPassword
+	 *
+	 * @return the value of currentSmtpPassword
+	 */
+	public String getCurrentSmtpPassword() {
+		return currentSmtpPassword;
+	}
+
+	/**
+	 * Set the value of currentSmtpPassword
+	 *
+	 * @param currentSmtpPassword new value of currentSmtpPassword
+	 */
+	public void setCurrentSmtpPassword(String currentSmtpPassword) {
+		this.currentSmtpPassword = currentSmtpPassword;
+	}
 
 	/**
 	 * Get the value of useLdapAnonymousBind

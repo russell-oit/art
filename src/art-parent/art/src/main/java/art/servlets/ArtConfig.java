@@ -19,6 +19,10 @@ package art.servlets;
 import art.artdatabase.ArtDatabase;
 import art.dbcp.DataSource;
 import art.enums.ArtAuthenticationMethod;
+import art.enums.DisplayNull;
+import art.enums.LdapAuthenticationMethod;
+import art.enums.LdapConnectionEncryptionMethod;
+import art.enums.PdfPageSize;
 import art.settings.Settings;
 import art.utils.ArtJob;
 import art.utils.ArtSettings;
@@ -1038,6 +1042,9 @@ public class ArtConfig extends HttpServlet {
 			return;
 		}
 
+		if (pSettings.getSmtpPort() <= 0) {
+			pSettings.setSmtpPort(25);
+		}
 		if (pSettings.getMaxRowsDefault() <= 0) {
 			pSettings.setMaxRowsDefault(10000);
 		}
@@ -1058,6 +1065,21 @@ public class ArtConfig extends HttpServlet {
 		}
 		if (pSettings.getMaxRunningReports() <= 0) {
 			pSettings.setMaxRunningReports(1000);
+		}
+		if (pSettings.getArtAuthenticationMethod() == null) {
+			pSettings.setArtAuthenticationMethod(ArtAuthenticationMethod.Internal);
+		}
+		if (pSettings.getLdapConnectionEncryptionMethod() == null) {
+			pSettings.setLdapConnectionEncryptionMethod(LdapConnectionEncryptionMethod.None);
+		}
+		if (pSettings.getLdapAuthenticationMethod() == null) {
+			pSettings.setLdapAuthenticationMethod(LdapAuthenticationMethod.Simple);
+		}
+		if (pSettings.getPdfPageSize() == null) {
+			pSettings.setPdfPageSize(PdfPageSize.A4Landscape);
+		}
+		if (pSettings.getDisplayNull() == null) {
+			pSettings.setDisplayNull(DisplayNull.NoNumbersAsZero);
 		}
 	}
 

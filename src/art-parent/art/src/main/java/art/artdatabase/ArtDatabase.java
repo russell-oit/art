@@ -21,12 +21,33 @@ public class ArtDatabase implements Serializable {
 	private String username;
 	private String password;
 	@JsonIgnore
-	private boolean useBlankPassword;
+	private String currentPassword; //only used for user interface logic
+	@JsonIgnore
+	private boolean useBlankPassword; //only used for user interface logic
 	private String connectionTestSql;
 	@Min(1)
 	private int connectionPoolTimeout;
 	@Min(1)
 	private int maxPoolConnections; //setting used by art database and all datasources
+	
+	/**
+	 * Get the value of currentPassword
+	 *
+	 * @return the value of currentPassword
+	 */
+	public String getCurrentPassword() {
+		return currentPassword;
+	}
+
+	/**
+	 * Set the value of currentPassword
+	 *
+	 * @param currentPassword new value of currentPassword
+	 */
+	public void setCurrentPassword(String currentPassword) {
+		this.currentPassword = currentPassword;
+	}
+
 
 	/**
 	 * Get the value of useBlankPassword
