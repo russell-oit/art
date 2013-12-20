@@ -115,7 +115,7 @@ public class LoginController {
 					loginHelper.logSuccess(loginMethod, username, ip);
 
 					//go to next page
-					return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus, model);
+					return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
 				}
 			} else {
 				//user not authenticated. should never get here as browser won't have authenticated?
@@ -249,7 +249,7 @@ public class LoginController {
 		if (result.isAuthenticated() && user != null) {
 			//access granted 
 
-			return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus, model);
+			return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
 		} else {
 			//login failure. always display invalid account message rather than actual result details
 			//better for security if less details are displayed
@@ -261,7 +261,7 @@ public class LoginController {
 	}
 
 	private String getLoginSuccessNextPage(HttpSession session, User user,
-			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus, Model model) {
+			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus) {
 		//prepare session
 
 		//TODO remove once refactoring is complete
@@ -294,14 +294,11 @@ public class LoginController {
 			nextPage = "/app/reports.do";
 		}
 
-		//clear model attributes to that they don't appear in url on redirect
-		model.asMap().clear();
-
 		return "redirect:" + nextPage;
 	}
 
 	/**
-	 * Determine if given credentils match those of the art database user
+	 * Determine if given credentials match those of the art database user
 	 *
 	 * @param username
 	 * @param password

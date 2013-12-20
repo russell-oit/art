@@ -22,7 +22,8 @@
 	</context:component-scan>
 
 	<!-- Configures the @Controller programming model -->
-	<mvc:annotation-driven/>
+	<!-- don't add model attributes to redirect url -->
+	<mvc:annotation-driven ignoreDefaultModelOnRedirect="true"/>
 	
 	<!-- start enable i18n -->
 	<!-- Application Message Bundle -->
