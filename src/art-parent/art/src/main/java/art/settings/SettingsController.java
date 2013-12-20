@@ -10,10 +10,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.servlet.http.HttpSession;
+import javax.servlet.ServletContext;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,7 +37,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class SettingsController {
 
 	final static org.slf4j.Logger logger = LoggerFactory.getLogger(SettingsController.class);
-
+	
+	@Autowired
+	private ServletContext ctx;
+	
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
 		return PdfPageSize.values();
@@ -120,7 +124,8 @@ public class SettingsController {
 		try {
 			ArtConfig.saveSettings(settings);
 			
-			//TODO save administrator email in application context. or session context?
+			//save administrator email in application context. for display in footer
+			ctx.setAttribute("administratorEmail", settings.getAdministratorEmail());
 			
 			//clear SessionAttributes
 			sessionStatus.setComplete();
