@@ -24,8 +24,6 @@ public class Settings {
 	private String smtpUsername;
 	private String smtpPassword;
 	@JsonIgnore
-	private String currentSmtpPassword; //only used for user interface logic
-	@JsonIgnore
 	private boolean useBlankSmtpPassword; //ignore when saving object
 	private int maxRowsDefault;
 	private String maxRowsSpecific;
@@ -42,8 +40,6 @@ public class Settings {
 	private boolean useLdapAnonymousBind = true;
 	private String ldapBindDn;
 	private String ldapBindPassword;
-	@JsonIgnore
-	private String currentLdapBindPassword; //only used for user interface logic
 	@JsonIgnore
 	private boolean useBlankLdapBindPassword; //only used for user interface logic
 	@NotBlank
@@ -69,42 +65,6 @@ public class Settings {
 	private int mondrianCacheExpiryPeriod;
 	private boolean schedulingEnabled = true;
 	private String rssLink;
-
-	/**
-	 * Get the value of currentLdapBindPassword
-	 *
-	 * @return the value of currentLdapBindPassword
-	 */
-	public String getCurrentLdapBindPassword() {
-		return currentLdapBindPassword;
-	}
-
-	/**
-	 * Set the value of currentLdapBindPassword
-	 *
-	 * @param currentLdapBindPassword new value of currentLdapBindPassword
-	 */
-	public void setCurrentLdapBindPassword(String currentLdapBindPassword) {
-		this.currentLdapBindPassword = currentLdapBindPassword;
-	}
-
-	/**
-	 * Get the value of currentSmtpPassword
-	 *
-	 * @return the value of currentSmtpPassword
-	 */
-	public String getCurrentSmtpPassword() {
-		return currentSmtpPassword;
-	}
-
-	/**
-	 * Set the value of currentSmtpPassword
-	 *
-	 * @param currentSmtpPassword new value of currentSmtpPassword
-	 */
-	public void setCurrentSmtpPassword(String currentSmtpPassword) {
-		this.currentSmtpPassword = currentSmtpPassword;
-	}
 
 	/**
 	 * Get the value of useLdapAnonymousBind
@@ -155,7 +115,7 @@ public class Settings {
 	public void setSmtpUseStartTls(boolean smtpUseStartTls) {
 		this.smtpUseStartTls = smtpUseStartTls;
 	}
-	
+
 	/**
 	 * Get the value of useBlankLdapBindPassword
 	 *

@@ -17,9 +17,12 @@ Page to display success message
 
 <t:mainPage title="${pageTitle}">
 	<c:if test="${not empty message}">
-		<div class="alert alert-success alert-dismissable">
-			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-			<spring:message code="${message}"/>
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3">
+				<div class="alert alert-success text-center">
+					<spring:message code="${message}"/>
+				</div>
+			</div>
 		</div>
 	</c:if>
 </t:mainPage>

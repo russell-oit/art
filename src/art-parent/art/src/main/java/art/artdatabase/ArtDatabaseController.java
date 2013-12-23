@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.Map;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,12 +28,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  * @author Timothy Anyona
  */
 @Controller
-//put form object in session attributes so that properties that are not included
-//in the form are retained when the form is posted. Otherwise they will be null.
-@SessionAttributes("artDatabase")
 public class ArtDatabaseController {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
+	final String ART_DATABASE_PASSWORD_ATTRIBUTE = "artDatabasePassword";
 
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
@@ -40,7 +39,7 @@ public class ArtDatabaseController {
 	}
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
-	public String showArtDatabaseConfiguration(Model model) {
+	public String showArtDatabaseConfiguration(HttpSession session, Model model) {
 
 		ArtDatabase artDatabase = ArtConfig.getArtDatabaseConfiguration();
 
@@ -57,7 +56,7 @@ public class ArtDatabaseController {
 		artDatabase.setUseBlankPassword(false);
 
 		//save current password for use by POST method
-		artDatabase.setCurrentPassword(artDatabase.getPassword());
+		session.setAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE, artDatabase.getPassword());
 
 		model.addAttribute("artDatabase", artDatabase);
 
@@ -65,10 +64,9 @@ public class ArtDatabaseController {
 	}
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.POST)
-	public String processArtDatabaseConfiguration(
+	public String processArtDatabaseConfiguration(HttpSession session,
 			@ModelAttribute("artDatabase") @Valid ArtDatabase artDatabase,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			SessionStatus sessionStatus) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "true");
@@ -82,7 +80,7 @@ public class ArtDatabaseController {
 		} else {
 			if (StringUtils.isEmpty(newPassword)) {
 				//password field blank. use current password
-				newPassword = artDatabase.getCurrentPassword();
+				newPassword = (String) session.getAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE);
 			}
 		}
 		artDatabase.setPassword(newPassword);
@@ -147,9 +145,9 @@ public class ArtDatabaseController {
 			ArtConfig.saveArtDatabaseConfiguration(artDatabase);
 
 			ArtConfig.refreshConnections();
-			
-			//clear SessionAttributes
-			sessionStatus.setComplete();
+
+			//clear session attributes
+			session.removeAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE);
 
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)
