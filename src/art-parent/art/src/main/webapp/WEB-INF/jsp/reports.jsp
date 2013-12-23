@@ -51,6 +51,7 @@ Reports page. Also main/home page
 				//Initialise DataTables, with no sorting on the 'details' column (column [0])
 				var oTable = $('#reports').dataTable({
 					"sPaginationType": "bs_full",
+					"sScrollY": "400px",
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
 					"iDisplayLength": 10,
 					"oLanguage": {
@@ -136,7 +137,7 @@ Reports page. Also main/home page
 						<h4 class="panel-title"><spring:message code="reports.text.reports"/></h4>
 					</div>
 					<div class="panel-body">
-						<table id="reports" class="datatable table table-bordered">
+						<table id="reports" class="expandable table table-bordered">
 							<thead>
 								<tr>
 									<th></th> <%-- group name. hidden --%>

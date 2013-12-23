@@ -212,6 +212,11 @@ public class AuthorisationFilter implements Filter {
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.startsWith(requestUri, path + "success.do")) {
+			//all can access
+			if (accessLevel >= AccessLevel.RepositoryUser.getValue()) {
+				authorised = true;
+			}
 		}
 
 		return authorised;

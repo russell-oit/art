@@ -8,7 +8,8 @@
 		</encoder>
 	</appender>
 
-	<!-- appender used to display logs from application interface. name must be CYCLIC as per ViewLogs.java -->
+	<!-- appender used to display logs from application interface. -->
+	<!-- don't change name from CYCLIC. hardcoded and used in application code -->
 	<appender name="CYCLIC" class="ch.qos.logback.core.read.CyclicBufferAppender">
 		<MaxSize>512</MaxSize>
 	</appender>

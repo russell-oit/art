@@ -72,7 +72,7 @@ public class ReportGroup implements Serializable, Comparable<ReportGroup> {
 
 	@Override
 	public String toString() {
-		return "ReportGroup{" + "reportGroupId=" + reportGroupId + ", name=" + name + ", description=" + description + '}';
+		return "ReportGroup{" + "reportGroupId=" + reportGroupId + ", name=" + name + '}';
 	}
 
 	@Override

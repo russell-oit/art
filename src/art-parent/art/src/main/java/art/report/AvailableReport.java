@@ -16,6 +16,7 @@
  */
 package art.report;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -23,8 +24,9 @@ import java.util.Date;
  *
  * @author Timothy Anyona
  */
-public class AvailableReport {
+public class AvailableReport implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private int reportId;
 	private String name;
 	private String description;
@@ -125,4 +127,31 @@ public class AvailableReport {
 		this.updateDate = updateDate;
 	}
 
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 29 * hash + this.reportId;
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final AvailableReport other = (AvailableReport) obj;
+		if (this.reportId != other.reportId) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "AvailableReport{" + "reportId=" + reportId + ", name=" + name + '}';
+	}
+	
 }

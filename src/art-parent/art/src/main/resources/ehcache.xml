@@ -2,14 +2,14 @@
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:noNamespaceSchemaLocation="ehcache.xsd"
 		 updateCheck="false" monitoring="autodetect"
-		 dynamicConfig="true" maxBytesLocalHeap="200M">
+		 dynamicConfig="true">
 	
 	<defaultCache eternal="true"
-				  maxBytesLocalHeap="100M"
+				  maxEntriesLocalHeap="1000"
 				  overflowToDisk="false" />
 	
-	<cache name="general" 
+	<cache name="reports" 
 		   eternal="true" 
-		   maxBytesLocalHeap="100M"
+		   maxEntriesLocalHeap="1000"
 		   overflowToDisk="false" />
 </ehcache>

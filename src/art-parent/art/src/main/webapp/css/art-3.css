@@ -20,7 +20,9 @@ td.details {
 }
 
 /* remove bootstrap border-top from details row */
-.datatable table tbody>tr>td{border:none;}
+table.expandable table tbody>tr>td {
+	border:none;
+}
 
 /* styling to enable datatables details row slideDown, slideUp effect */
 div.innerDetails { 
@@ -28,7 +30,7 @@ div.innerDetails {
 }
 
 /* show hand cursor for expandable rows */
-.expandable {
+tr.expandable td.expandable {
 	cursor: pointer; *cursor: hand;
 }
 

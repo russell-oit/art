@@ -147,7 +147,7 @@ Display application logs
 							</div>
 						</c:if>
 						<div>
-							<table id="logs" class="datatable table table-striped table-bordered table-condensed">
+							<table id="logs" class="expandable table table-striped table-bordered table-condensed">
 								<thead>
 									<tr>
 										<th><spring:message code="logs.text.date"/></th>
@@ -169,7 +169,7 @@ Display application logs
 											<td>
 												<c:set var="throwable" value="${log.throwableProxy}" />
 												<c:if test="${throwable != null}">
-													<c:forEach begin="0" end="10" varStatus="loop">
+													<c:forEach begin="0" end="5" varStatus="loop">
 														<c:if test="${throwable != null}">
 															<c:set var="commonFrames" value="${throwable.commonFrames}" />
 															<c:if test="${commonFrames gt 0}">

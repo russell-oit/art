@@ -53,9 +53,10 @@ public class ReportService {
 	 * @return
 	 * @throws SQLException
 	 */
-	@Cacheable(value="general")
+	@Cacheable(value="reports")
 	public List<AvailableReport> getAvailableReports(String username) throws SQLException {
 		logger.info("test cache miss"); //TODO remove
+		
 		return reportRepository.getAvailableReports(username);
 	}
 	
