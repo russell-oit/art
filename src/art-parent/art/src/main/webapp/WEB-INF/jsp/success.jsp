@@ -16,13 +16,15 @@ Page to display success message
 <spring:message code="page.title.success" var="pageTitle"/>
 
 <t:mainPage title="${pageTitle}">
-	<c:if test="${not empty message}">
-		<div class="row">
-			<div class="col-md-6 col-md-offset-3">
-				<div class="alert alert-success text-center">
-					<spring:message code="${message}"/>
+	<jsp:body>
+		<c:if test="${not empty message}">
+			<div class="row">
+				<div class="col-md-6 col-md-offset-3">
+					<div class="alert alert-success text-center">
+						<spring:message code="${message}"/>
+					</div>
 				</div>
 			</div>
-		</div>
-	</c:if>
+		</c:if>
+	</jsp:body>
 </t:mainPage>

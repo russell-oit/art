@@ -911,6 +911,10 @@ public class ArtConfig extends HttpServlet {
 		//use default settings if error or none specified
 		if (newSettings == null) {
 			newSettings = new Settings();
+			
+			//set defaults for boolean properties that need to default to true
+			newSettings.setUseLdapAnonymousBind(true);
+			newSettings.setSchedulingEnabled(true);
 		}
 
 		settings = null;

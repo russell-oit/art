@@ -17,8 +17,11 @@ Reports page. Also main/home page
 
 <spring:message code="datatables.text.showAllRows" var="allRowsText"/>
 <spring:message code="reports.text.description" var="descriptionText"/>
+<spring:message code="reports.text.reports" var="mainPanelTitle"/>
 
-<t:mainPage title="${pageTitle}">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${mainPanelTitle}"
+					 mainColumnClass="col-md-6 col-md-offset-3">
+	
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			//put jsp variables into js variables
@@ -122,47 +125,37 @@ Reports page. Also main/home page
 		</script>
 	</jsp:attribute>
 
-	<jsp:body>
+	<jsp:attribute name="aboveMainPanel">
 		<c:if test="${not empty error}">
 			<div class="alert alert-danger">
 				<p><spring:message code="page.message.errorOccurred"/></p>
 				<p>${fn:escapeXml(error)}</p>
 			</div>
 		</c:if>
+	</jsp:attribute>
 
-		<div class="row">
-			<div class="col-md-6 col-md-offset-3">
-				<div class="panel panel-success">
-					<div class="panel-heading text-center">
-						<h4 class="panel-title"><spring:message code="reports.text.reports"/></h4>
-					</div>
-					<div class="panel-body">
-						<table id="reports" class="expandable table table-bordered">
-							<thead>
-								<tr>
-									<th></th> <%-- group name. hidden --%>
-									<th></th> <%-- description column. hidden --%>
-									<th><spring:message code="reports.text.reportName"/></th>
-								</tr>
-							</thead>
-							<tbody>
-								<c:forEach var="report" items="${reports}">
-									<tr>
-										<td>${fn:escapeXml(report.reportGroupName)}</td>
-										<td>${fn:escapeXml(report.description)}</td>
-										<td>
-											<a href="#">
-												${fn:escapeXml(report.name)}
-											</a>
-										</td>
-									</tr>
-								</c:forEach>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
+	<jsp:body>
+		<table id="reports" class="expandable table table-bordered">
+			<thead>
+				<tr>
+					<th></th> <%-- group name. hidden --%>
+					<th></th> <%-- description column. hidden --%>
+					<th><spring:message code="reports.text.reportName"/></th>
+				</tr>
+			</thead>
+			<tbody>
+				<c:forEach var="report" items="${reports}">
+					<tr>
+						<td>${fn:escapeXml(report.reportGroupName)}</td>
+						<td>${fn:escapeXml(report.description)}</td>
+						<td>
+							<a href="#">
+								${fn:escapeXml(report.name)}
+							</a>
+						</td>
+					</tr>
+				</c:forEach>
+			</tbody>
+		</table>
 	</jsp:body>
-
-</t:mainPage>
+</t:mainPageWithPanel>

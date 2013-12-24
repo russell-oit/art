@@ -15,11 +15,13 @@ Display application logs
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-<spring:message code="page.title.logs" var="pageTitle" scope="page"/>
+<spring:message code="page.title.logs" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText" scope="page"/>
+<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 
-<t:mainPage title="${pageTitle}">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${pageTitle}"
+					 mainColumnClass="col-md-12">
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			//put jstl variables into js variables
@@ -74,7 +76,7 @@ Display application logs
 
 				//array to keep a reference to any TR rows that we 'open'
 				var anOpen = [];
-				
+
 				// Add event listener for opening and closing details
 				$('#logs tbody').on('click', 'tr', function() {
 					if (!$(this).hasClass('ERROR')) {
@@ -127,86 +129,74 @@ Display application logs
 	</jsp:attribute>
 
 	<jsp:body>
-		<div class="row">
-			<div class="col-md-12">
-				<div class="panel panel-success">
-					<div class="panel-heading">
-						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
-					</div>
-					<div class="panel-body">
-						<div class="clearfix" style="margin-bottom: 10px;">
-							<span class="pull-right">
-								<a href="#bottom">
-									<spring:message code="logs.button.bottom"/>
-								</a>
-							</span>
-						</div>
-						<c:if test="${not empty message}">
-							<div class="alert alert-info">
-								<spring:message code="${message}"/>
-							</div>
-						</c:if>
-						<div>
-							<table id="logs" class="expandable table table-striped table-bordered table-condensed">
-								<thead>
-									<tr>
-										<th><spring:message code="logs.text.date"/></th>
-										<th><spring:message code="logs.text.level"/></th>
-										<th><spring:message code="logs.text.logger"/></th>
-										<th><spring:message code="logs.text.message"/></th>
-										<th></th> <%-- error details column. hidden --%>
-									</tr>
-								</thead>
-								<tbody>
-									<c:forEach var="log" items="${logs}">
-										<tr class="${log.level}">
-											<td>
-												<t:displayDate timestamp="${log.timeStamp}"/>
-											</td>
-											<td>${log.level}</td>
-											<td>${log.loggerName}</td>
-											<td>${fn:escapeXml(log.formattedMessage)}</td>
-											<td>
-												<c:set var="throwable" value="${log.throwableProxy}" />
-												<c:if test="${throwable != null}">
-													<c:forEach begin="0" end="5" varStatus="loop">
-														<c:if test="${throwable != null}">
-															<c:set var="commonFrames" value="${throwable.commonFrames}" />
-															<c:if test="${commonFrames gt 0}">
-																<br> Caused by: 
-															</c:if>
-															${throwable.className}: ${fn:escapeXml(throwable.message)}
-															<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
-															<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
-																<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}
-															</c:forEach>
-															<c:if test="${commonFrames gt 0}">
-																<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} common frames omitted 
-															</c:if>
-														</c:if>
-														<c:if test="${loop.last && throwable != null}">
-															More causes not listed...
-														</c:if>
-														<c:set var="throwable" value="${throwable.cause}" />
-													</c:forEach>
-												</c:if>
-											</td>
-										</tr>
-									</c:forEach>
-								</tbody>
-							</table>
-						</div>
-						<div id="bottom" class="clearfix">
-							<span class="pull-right">
-								<a href="#top">
-									<spring:message code="logs.button.top"/>
-								</a>
-							</span>
-						</div>
-					</div>
-				</div>
+		<div class="clearfix" style="margin-bottom: 10px;">
+			<span class="pull-right">
+				<a href="#bottom">
+					<spring:message code="logs.button.bottom"/>
+				</a>
+			</span>
+		</div>
+		<c:if test="${not empty message}">
+			<div class="alert alert-info">
+				<spring:message code="${message}"/>
 			</div>
+		</c:if>
+		<div>
+			<table id="logs" class="expandable table table-striped table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th><spring:message code="logs.text.date"/></th>
+						<th><spring:message code="logs.text.level"/></th>
+						<th><spring:message code="logs.text.logger"/></th>
+						<th><spring:message code="logs.text.message"/></th>
+						<th></th> <%-- error details column. hidden --%>
+					</tr>
+				</thead>
+				<tbody>
+					<c:forEach var="log" items="${logs}">
+						<tr class="${log.level}">
+							<td>
+								<t:displayDate timestamp="${log.timeStamp}"/>
+							</td>
+							<td>${log.level}</td>
+							<td>${log.loggerName}</td>
+							<td>${fn:escapeXml(log.formattedMessage)}</td>
+							<td>
+								<c:set var="throwable" value="${log.throwableProxy}" />
+								<c:if test="${throwable != null}">
+									<c:forEach begin="0" end="5" varStatus="loop">
+										<c:if test="${throwable != null}">
+											<c:set var="commonFrames" value="${throwable.commonFrames}" />
+											<c:if test="${commonFrames gt 0}">
+												<br> Caused by: 
+											</c:if>
+											${throwable.className}: ${fn:escapeXml(throwable.message)}
+											<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
+											<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
+												<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}
+											</c:forEach>
+											<c:if test="${commonFrames gt 0}">
+												<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} common frames omitted 
+											</c:if>
+										</c:if>
+										<c:if test="${loop.last && throwable != null}">
+											More causes not listed...
+										</c:if>
+										<c:set var="throwable" value="${throwable.cause}" />
+									</c:forEach>
+								</c:if>
+							</td>
+						</tr>
+					</c:forEach>
+				</tbody>
+			</table>
+		</div>
+		<div id="bottom" class="clearfix">
+			<span class="pull-right">
+				<a href="#top">
+					<spring:message code="logs.button.top"/>
+				</a>
+			</span>
 		</div>
 	</jsp:body>
-</t:mainPage>
-
+</t:mainPageWithPanel>

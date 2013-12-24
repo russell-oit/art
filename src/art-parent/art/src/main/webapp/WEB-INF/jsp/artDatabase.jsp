@@ -17,7 +17,9 @@ Display art database configuration page
 
 <spring:message code="page.title.artDatabase" var="pageTitle" scope="page"/>
 
-<t:mainPage title="${pageTitle}">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${pageTitle}"
+					 mainColumnClass="col-md-6 col-md-offset-3">
+	
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
 		<script type="text/javascript">
@@ -34,203 +36,195 @@ Display art database configuration page
 		</script>
 	</jsp:attribute>
 
-	<jsp:body>
-		<div class="row">
-			<div class="col-md-6 col-md-offset-3">
-				<div class="panel panel-success">
-					<div class="panel-heading text-center">
-						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
-					</div>
-					<div class="panel-body">
-						<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabase">
-							<fieldset>
-								<c:if test="${not empty success}">
-									<div class="alert alert-success alert-dismissable">
-										<a class="close" data-dismiss="alert" href="#">x</a>
-										<spring:message code="artDatabase.message.configurationSaved"/>
-									</div>
-								</c:if>
-								<c:if test="${not empty formErrors}">
-									<div class="alert alert-danger alert-dismissable">
-										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-										<spring:message code="page.message.formErrors"/>
-									</div>
-								</c:if>
-								<c:if test="${not empty error}">
-									<div class="alert alert-danger alert-dismissable">
-										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-										<p><spring:message code="page.message.errorOccurred"/></p>
-										<p>${error}</p>
-									</div>
-								</c:if>
-
-								<div class="form-group">
-									<label class="control-label col-md-4" for="databaseType">
-										<spring:message code="artDatabase.label.databaseType"/>
-									</label>
-									<div class="col-md-8">
-										<div class='input-group'>
-											<select name="databaseType" id="databaseType" class="form-control"
-													onchange="setDatasourceFields(this.value, 'driver', 'url', 'connectionTestSql');">
-												<option value="">
-													<spring:message code="artDatabase.text.selectDatabaseType"/>
-												</option>
-												<c:forEach var="dbType" items="${databaseTypes}">
-													<option value="${dbType.key}">${dbType.value}</option>
-												</c:forEach>
-											</select>
-											<spring:message code="artDatabase.help.databaseType" var="help" />
-											<span class="input-group-btn" >
-												<button class="btn btn-default" type="button"
-														data-toggle="tooltip" title="${help}">
-													<i class="fa fa-info"></i>
-												</button>
-											</span>
-										</div>
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label col-md-4" for="driver">
-										<spring:message code="artDatabase.label.jdbcDriver"/>
-									</label>
-									<div class="col-md-8">
-										<form:input path="driver" id="driver" class="form-control" />
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label col-md-4" for="url">
-										<spring:message code="artDatabase.label.jdbcUrl"/>
-									</label>
-									<div class="col-md-8">
-										<form:input path="url" id="url" class="form-control" />
-										<form:errors path="url" cssClass="error" />
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label col-md-4" for="username">
-										<spring:message code="page.label.username"/>
-									</label>
-									<div class="col-md-8">
-										<form:input path="username" id="username" class="form-control" />
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label col-md-4" for="password">
-										<spring:message code="page.label.password"/>
-									</label>
-									<div class="col-md-8">
-										<div class="input-group">
-											<form:password path="password" id="password" autocomplete="off" class="form-control" />
-											<spring:message code="page.help.password" var="help" />
-											<span class="input-group-btn" >
-												<button class="btn btn-default" type="button"
-														data-toggle="tooltip" title="${help}">
-													<i class="fa fa-info"></i>
-												</button>
-											</span>
-										</div>
-										<div class="checkbox">
-											<label>
-												<form:checkbox path="useBlankPassword" />
-												<spring:message code="page.checkbox.useBlankPassword"/>
-											</label>
-										</div>
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label col-md-4" for="connectionTestSql">
-										<spring:message code="artDatabase.label.connectionTestSql"/>
-									</label>
-									<div class="col-md-8">
-										<div class="input-group">
-											<form:input path="connectionTestSql" 
-														id="connectionTestSql" class="form-control" />
-											<spring:message code="artDatabase.help.connectionTestSql" var="help" />
-											<span class="input-group-btn" >
-												<button class="btn btn-default" type="button"
-														data-toggle="tooltip" title="${help}">
-													<i class="fa fa-info"></i>
-												</button>
-											</span>
-										</div>
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label col-md-4" for="connectionPoolTimeout">
-										<spring:message code="artDatabase.label.connectionPoolTimeout"/>
-									</label>
-									<div class="col-md-8">
-										<div class="input-group">
-											<form:input path="connectionPoolTimeout" 
-														id="connectionPoolTimeout" maxlength="5" class="form-control" />
-											<spring:message code="artDatabase.help.connectionPoolTimeout"
-															var="help" />
-											<span class="input-group-btn" >
-												<button class="btn btn-default" type="button"
-														data-toggle="tooltip" data-html="true" title="${help}">
-													<i class="fa fa-info"></i>
-												</button>
-											</span>
-											</span>
-										</div>
-										<form:errors path="connectionPoolTimeout" cssClass="error" />
-									</div>
-								</div>
-								<div class="form-group">
-									<label class="control-label col-md-4" for="maxPoolConnections">
-										<spring:message code="artDatabase.label.maxPoolConnections"/>
-									</label>
-									<div class="col-md-8">
-										<div class="input-group">
-											<form:input path="maxPoolConnections" 
-														id="maxPoolConnections" maxlength="3" class="form-control" />
-											<spring:message code="artDatabase.help.maxPoolConnections" var="help" />
-											<span class="input-group-btn" >
-												<button class="btn btn-default" type="button"
-														data-toggle="tooltip" title="${help}">
-													<i class="fa fa-info"></i>
-												</button>
-											</span>
-										</div>
-										<form:errors path="maxPoolConnections" cssClass="error" />
-									</div>
-								</div>
-								<div class="form-group">
-									<div class="col-md-12">
-										<button type="submit" class="btn btn-primary pull-right">
-											<spring:message code="page.button.save"/>
-										</button>
-									</div>
-								</div>
-							</fieldset>
-						</form:form>
-					</div>
+	<jsp:attribute name="rightMainPanel">
+		<c:if test="${not empty initialSetup}">
+			<div class="col-md-3">
+				<div class="alert alert-info">
+					<p>
+						Welcome to the ART Reporting Tool. You need to configure the
+						<b>ART Database</b> before being able to use ART. The ART Database
+						stores data used by the application e.g. users, report definitions etc.
+					</p>
+					<p>
+						After saving the ART Database configuration, use the
+						<b>Configure | Users</b> menu to create some users. Create at least
+						one Super Admin user which you can use to administer all aspects
+						of the application. After creating users, <b>Log Out</b> and log in 
+						using one of the users, and continue using the application.
+					</p>
+					<p>
+						A demo database is provided with a few sample reports.
+						To use it, select <b>Demo</b> as the Database Type and Save,
+						The demo database has 2 users with username/password of admin/admin
+						and auser/auser.
+					</p>
 				</div>
 			</div>
-			<c:if test="${not empty initialSetup}">
-				<div class="col-md-3">
-					<div class="alert alert-info">
-						<p>
-							Welcome to the ART Reporting Tool. You need to configure the
-							<b>ART Database</b> before being able to use ART. The ART Database
-							stores data used by the application e.g. users, report definitions etc.
-						</p>
-						<p>
-							After saving the ART Database configuration, use the
-							<b>Configure | Users</b> menu to create some users. Create at least
-							one Super Admin user which you can use to administer all aspects
-							of the application. After creating users, <b>Log Out</b> and log in 
-							using one of the users, and continue using the application.
-						</p>
-						<p>
-							A demo database is provided with a few sample reports.
-							To use it, select <b>Demo</b> as the Database Type and Save,
-							The demo database has 2 users with username/password of admin/admin
-							and auser/auser.
-						</p>
+		</c:if>
+	</jsp:attribute>
+
+	<jsp:body>
+		<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabase">
+			<fieldset>
+				<c:if test="${not empty success}">
+					<div class="alert alert-success alert-dismissable">
+						<a class="close" data-dismiss="alert" href="#">x</a>
+						<spring:message code="artDatabase.message.configurationSaved"/>
+					</div>
+				</c:if>
+				<c:if test="${not empty formErrors}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="page.message.formErrors"/>
+					</div>
+				</c:if>
+				<c:if test="${not empty error}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<p><spring:message code="page.message.errorOccurred"/></p>
+						<p>${error}</p>
+					</div>
+				</c:if>
+
+				<div class="form-group">
+					<label class="control-label col-md-4" for="databaseType">
+						<spring:message code="artDatabase.label.databaseType"/>
+					</label>
+					<div class="col-md-8">
+						<div class='input-group'>
+							<select name="databaseType" id="databaseType" class="form-control"
+									onchange="setDatasourceFields(this.value, 'driver', 'url', 'connectionTestSql');">
+								<option value="">
+									<spring:message code="artDatabase.text.selectDatabaseType"/>
+								</option>
+								<c:forEach var="dbType" items="${databaseTypes}">
+									<option value="${dbType.key}">${dbType.value}</option>
+								</c:forEach>
+							</select>
+							<spring:message code="artDatabase.help.databaseType" var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
 					</div>
 				</div>
-			</c:if>
-		</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="driver">
+						<spring:message code="artDatabase.label.jdbcDriver"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="driver" id="driver" class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="url">
+						<spring:message code="artDatabase.label.jdbcUrl"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="url" id="url" class="form-control" />
+						<form:errors path="url" cssClass="error" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="username">
+						<spring:message code="page.label.username"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="username" id="username" class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="password">
+						<spring:message code="page.label.password"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:password path="password" id="password" autocomplete="off" class="form-control" />
+							<spring:message code="page.help.password" var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="useBlankPassword" />
+								<spring:message code="page.checkbox.useBlankPassword"/>
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="connectionTestSql">
+						<spring:message code="artDatabase.label.connectionTestSql"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="connectionTestSql" 
+										id="connectionTestSql" class="form-control" />
+							<spring:message code="artDatabase.help.connectionTestSql" var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="connectionPoolTimeout">
+						<spring:message code="artDatabase.label.connectionPoolTimeout"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="connectionPoolTimeout" 
+										id="connectionPoolTimeout" maxlength="5" class="form-control" />
+							<spring:message code="artDatabase.help.connectionPoolTimeout"
+											var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" data-html="true" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+							</span>
+						</div>
+						<form:errors path="connectionPoolTimeout" cssClass="error" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="maxPoolConnections">
+						<spring:message code="artDatabase.label.maxPoolConnections"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="maxPoolConnections" 
+										id="maxPoolConnections" maxlength="3" class="form-control" />
+							<spring:message code="artDatabase.help.maxPoolConnections" var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="maxPoolConnections" cssClass="error" />
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12">
+						<button type="submit" class="btn btn-primary pull-right">
+							<spring:message code="page.button.save"/>
+						</button>
+					</div>
+				</div>
+			</fieldset>
+		</form:form>
 	</jsp:body>
-</t:mainPage>
+</t:mainPageWithPanel>

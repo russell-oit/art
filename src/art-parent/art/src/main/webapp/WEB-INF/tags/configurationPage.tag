@@ -4,7 +4,7 @@
     Author     : Timothy Anyona
 
 Template for configuration pages
-Includes the elements in a main page, plus datatables css and javascript
+Includes the elements in a main page, plus highlighting of the configure menu
 --%>
 
 <%@tag description="Configuration Page Template" pageEncoding="UTF-8"%>

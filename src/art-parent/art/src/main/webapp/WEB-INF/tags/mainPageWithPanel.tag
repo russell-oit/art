@@ -7,7 +7,7 @@ Template for main page with contents in one panel
 Includes main page, plus a bootstrap panel where the contents go
 --%>
 
-<%@tag description="Template for main page with contents in one panel" pageEncoding="UTF-8"%>
+<%@tag description="Template for main page with contents in one main panel" pageEncoding="UTF-8"%>
 <%@tag trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
@@ -15,32 +15,45 @@ Includes main page, plus a bootstrap panel where the contents go
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" required="true" %>
-<%@attribute name="columnClass" required="true" %>
+<%@attribute name="mainColumnClass" required="true" %>
+<%@attribute name="mainPanelTitle" required="true" %>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
+<%@attribute name="aboveMainPanel" fragment="true" %>
+<%@attribute name="belowMainPanel" fragment="true" %>
+<%@attribute name="leftMainPanel" fragment="true" %>
+<%@attribute name="rightMainPanel" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
 	<jsp:attribute name="css">
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
-	
+		
 	<jsp:attribute name="javascript">
 		<jsp:invoke fragment="javascript"/>
 	</jsp:attribute>
 
 	<jsp:body>
+		<jsp:invoke fragment="aboveMainPanel"/>
+
 		<div class="row">
-			<div class="${columnClass}">
+			<jsp:invoke fragment="leftMainPanel"/>
+
+			<div class="${mainColumnClass}">
 				<div class="panel panel-success">
 					<div class="panel-heading">
-						<h4 class="panel-title text-center">${fn:escapeXml(title)}</h4>
+						<h4 class="panel-title text-center">${fn:escapeXml(mainPanelTitle)}</h4>
 					</div>
 					<div class="panel-body">
 						<jsp:doBody/>
 					</div>
 				</div>
 			</div>
+
+			<jsp:invoke fragment="rightMainPanel"/>
 		</div>
+
+		<jsp:invoke fragment="belowMainPanel"/>
     </jsp:body>
 </t:mainPage>

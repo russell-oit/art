@@ -37,7 +37,7 @@ public class Settings {
 	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod;
 	private String ldapUrl;
 	private String ldapBaseDn;
-	private boolean useLdapAnonymousBind = true;
+	private boolean useLdapAnonymousBind;
 	private String ldapBindDn;
 	private String ldapBindPassword;
 	@JsonIgnore
@@ -63,7 +63,7 @@ public class Settings {
 	private int maxRunningReports;
 	private boolean showHeaderInPublicUserSession;
 	private int mondrianCacheExpiryPeriod;
-	private boolean schedulingEnabled = true;
+	private boolean schedulingEnabled;
 	private String rssLink;
 
 	/**
