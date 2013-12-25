@@ -15,10 +15,10 @@ Includes main page, plus a bootstrap panel where the contents go
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" required="true" %>
-<%@attribute name="mainColumnClass" required="true" %>
-<%@attribute name="mainPanelTitle" required="true" %>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
+<%@attribute name="mainColumnClass" required="true" %>
+<%@attribute name="mainPanelTitle" required="true" %>
 <%@attribute name="aboveMainPanel" fragment="true" %>
 <%@attribute name="belowMainPanel" fragment="true" %>
 <%@attribute name="leftMainPanel" fragment="true" %>
