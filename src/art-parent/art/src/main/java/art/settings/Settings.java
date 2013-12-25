@@ -7,7 +7,6 @@ import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * Class to hold application settings
@@ -42,7 +41,6 @@ public class Settings {
 	private String ldapBindPassword;
 	@JsonIgnore
 	private boolean useBlankLdapBindPassword; //only used for user interface logic
-	@NotBlank
 	private String ldapUserIdAttribute;
 	private LdapAuthenticationMethod ldapAuthenticationMethod;
 	private String ldapRealm;
@@ -53,11 +51,8 @@ public class Settings {
 	private String pdfFontEncoding;
 	private boolean pdfFontEmbedded;
 	private String administratorEmail;
-	@NotBlank
 	private String dateFormat;
-	@NotBlank
 	private String timeFormat;
-	@NotBlank
 	private String reportFormats;
 	private DisplayNull displayNull;
 	private int maxRunningReports;
