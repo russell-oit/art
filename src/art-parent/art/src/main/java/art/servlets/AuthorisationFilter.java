@@ -7,6 +7,7 @@ import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -93,7 +94,11 @@ public class AuthorisationFilter implements Filter {
 					String ip = request.getRemoteAddr();
 
 					UserService userService = new UserService();
-					user = userService.getUser(username);
+					try {
+						user = userService.getUser(username);
+					} catch (SQLException ex) {
+						logger.error("Error", ex);
+					}
 					if (user == null) {
 						//user doesn't exist
 						//always display invalidAccount message in login page. log actual cause
@@ -108,9 +113,9 @@ public class AuthorisationFilter implements Filter {
 						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_DISABLED);
 					} else {
 						//valid access
-						//ensure public user always has 0 access level
+						//ensure public user always has normal user access level
 						if (loginMethod == ArtAuthenticationMethod.Public) {
-							user.setAccessLevel(0);
+							user.setAccessLevel(AccessLevel.NormalUser);
 						}
 						session.setAttribute("sessionUser", user);
 						session.setAttribute("authenticationMethod", loginMethod.getValue());
@@ -142,7 +147,7 @@ public class AuthorisationFilter implements Filter {
 
 			//if we are here, user is authenticated
 			//ensure they have access to the specific page. if not show access denied page
-			int accessLevel = user.getAccessLevel();
+			int accessLevel = user.getAccessLevel().getValue();
 			String requestUri = request.getRequestURI();
 			String path = request.getContextPath() + "/app/";
 
@@ -210,11 +215,6 @@ public class AuthorisationFilter implements Filter {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art repository user
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
-				authorised = true;
-			}
-		} else if (StringUtils.startsWith(requestUri, path + "success.do")) {
-			//all can access
-			if (accessLevel >= AccessLevel.RepositoryUser.getValue()) {
 				authorised = true;
 			}
 		}

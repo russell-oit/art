@@ -1,5 +1,7 @@
 package art.user;
 
+import java.sql.SQLException;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -8,23 +10,27 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Spring controller for the user configuration process
- * 
+ *
  * @author Timothy Anyona
  */
 @Controller
 public class UserController {
-	
-	private final UserService userService;
-	
+
+	final static org.slf4j.Logger logger = LoggerFactory.getLogger(UserController.class);
+
 	@Autowired
-	public UserController(UserService userService){
-		this.userService=userService;
-	}
-	
-	@RequestMapping(value="/app/users", method= RequestMethod.GET)
-	public String showUsers(Model model){
-		model.addAttribute("users", userService.getAllUsers());
+	private UserService userService;
+
+	@RequestMapping(value = "/app/users", method = RequestMethod.GET)
+	public String showUsers(Model model) {
+		try {
+			model.addAttribute("users", userService.getAllUsers());
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+		
 		return "users";
 	}
-	
+
 }

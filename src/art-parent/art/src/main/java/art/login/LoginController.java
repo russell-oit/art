@@ -10,6 +10,7 @@ import art.utils.DbUtils;
 import art.utils.LanguageUtils;
 import art.utils.UserEntity;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -54,10 +55,10 @@ public class LoginController {
 
 		if (!ArtConfig.isArtDatabaseConfigured()) {
 			User user = new User();
-			
+
 			user.setUsername("initial setup");
-			user.setAccessLevel(AccessLevel.RepositoryUser.getValue());
-			
+			user.setAccessLevel(AccessLevel.RepositoryUser);
+
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
 
@@ -100,7 +101,13 @@ public class LoginController {
 
 			if (StringUtils.isNotBlank(username)) {
 				//user authenticated. ensure they are a valid ART user
-				User user = userService.getUser(username);
+				User user = null;
+				try {
+					user = userService.getUser(username);
+				} catch (SQLException ex) {
+					logger.error("Error", ex);
+				}
+
 				if (user == null) {
 					//user doesn't exist
 					result = new LoginResult();
@@ -186,7 +193,13 @@ public class LoginController {
 
 		LoginResult result;
 
-		User user = userService.getUser(username);
+		User user = null;
+		try {
+			user = userService.getUser(username);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
+
 		if (user == null) {
 			//user doesn't exist
 			result = new LoginResult();
@@ -235,7 +248,7 @@ public class LoginController {
 				loginMethod = ArtAuthenticationMethod.Repository;
 				user = new User();
 				user.setUsername("art db");
-				user.setAccessLevel(AccessLevel.RepositoryUser.getValue());
+				user.setAccessLevel(AccessLevel.RepositoryUser);
 
 				result = new LoginResult();
 				result.setAuthenticated(true);
@@ -266,10 +279,10 @@ public class LoginController {
 
 		//TODO remove once refactoring is complete
 		UserEntity ue = new UserEntity(user.getUsername());
-		ue.setAccessLevel(user.getAccessLevel());
+		ue.setAccessLevel(user.getAccessLevel().getValue());
 		session.setAttribute("ue", ue);
 		session.setAttribute("username", user.getUsername());
-		if (user.getAccessLevel() >= 10) {
+		if (user.getAccessLevel().getValue() >= 10) {
 			session.setAttribute("AdminSession", "Y");
 			session.setAttribute("AdminLevel", user.getAccessLevel());
 			session.setAttribute("AdminUsername", user.getUsername());

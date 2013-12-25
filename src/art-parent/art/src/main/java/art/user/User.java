@@ -1,5 +1,6 @@
 package art.user;
 
+import art.enums.AccessLevel;
 import java.io.Serializable;
 
 /**
@@ -11,12 +12,11 @@ public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String username;
-	private int accessLevel;
+	private AccessLevel accessLevel;
 	private String email;
 	private String fullName;
 	private String password;
 	private int defaultQueryGroup;
-	private String canChangePassword;
 	private String hashingAlgorithm;
 	private String startQuery;
 	private boolean active;
@@ -73,24 +73,6 @@ public class User implements Serializable {
 	 */
 	public void setHashingAlgorithm(String hashingAlgorithm) {
 		this.hashingAlgorithm = hashingAlgorithm;
-	}
-
-	/**
-	 * Get the value of canChangePassword
-	 *
-	 * @return the value of canChangePassword
-	 */
-	public String getCanChangePassword() {
-		return canChangePassword;
-	}
-
-	/**
-	 * Set the value of canChangePassword
-	 *
-	 * @param canChangePassword new value of canChangePassword
-	 */
-	public void setCanChangePassword(String canChangePassword) {
-		this.canChangePassword = canChangePassword;
 	}
 
 	/**
@@ -170,7 +152,7 @@ public class User implements Serializable {
 	 *
 	 * @return the value of accessLevel
 	 */
-	public int getAccessLevel() {
+	public AccessLevel getAccessLevel() {
 		return accessLevel;
 	}
 
@@ -179,7 +161,7 @@ public class User implements Serializable {
 	 *
 	 * @param accessLevel new value of accessLevel
 	 */
-	public void setAccessLevel(int accessLevel) {
+	public void setAccessLevel(AccessLevel accessLevel) {
 		this.accessLevel = accessLevel;
 	}
 
@@ -200,4 +182,32 @@ public class User implements Serializable {
 	public void setUsername(String username) {
 		this.username = username;
 	}
+
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 29 * hash + (this.username != null ? this.username.hashCode() : 0);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final User other = (User) obj;
+		if ((this.username == null) ? (other.username != null) : !this.username.equals(other.username)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "User{" + "username=" + username + '}';
+	}
+	
 }

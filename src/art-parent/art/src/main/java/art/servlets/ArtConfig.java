@@ -146,8 +146,8 @@ public class ArtConfig extends HttpServlet {
 		ctx.setAttribute("servletApiSupported", ctx.getMajorVersion() + "." + ctx.getMinorVersion());
 		ctx.setAttribute("javaVendor", System.getProperty("java.vendor"));
 		ctx.setAttribute("javaVersion", System.getProperty("java.version"));
-		ctx.setAttribute("operatingSystem", System.getProperty("os.arch") + "/"
-				+ System.getProperty("os.name") + "/" + System.getProperty("os.version"));
+		ctx.setAttribute("operatingSystem", System.getProperty("os.name") + "/"
+				+ System.getProperty("os.version") + "/" + System.getProperty("os.arch"));
 
 		//set application path
 		appPath = ctx.getRealPath("");

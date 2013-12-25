@@ -1,5 +1,6 @@
 package art.user;
 
+import art.enums.AccessLevel;
 import art.servlets.ArtConfig;
 import art.utils.DbUtils;
 import java.sql.Connection;
@@ -22,6 +23,10 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
+	final String USERS_QUERY = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
+			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, "
+			+ " HASHING_ALGORITHM, START_QUERY "
+			+ " FROM ART_USERS ";
 
 	/**
 	 * Get a user object for the given username
@@ -29,7 +34,7 @@ public class UserService {
 	 * @param username
 	 * @return populated user object if username exists, otherwise null
 	 */
-	public User getUser(String username) {
+	public User getUser(String username) throws SQLException {
 		User user = null;
 
 		Connection conn = null;
@@ -40,11 +45,7 @@ public class UserService {
 			conn = ArtConfig.getConnection();
 			String sql;
 
-			sql = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, ACTIVE, "
-					+ " PASSWORD, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, "
-					+ " HASHING_ALGORITHM, START_QUERY "
-					+ " FROM ART_USERS "
-					+ " WHERE USERNAME = ? ";
+			sql = USERS_QUERY + " WHERE USERNAME = ? ";
 
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
@@ -53,22 +54,11 @@ public class UserService {
 			if (rs.next()) {
 				user = new User();
 
-				user.setUsername(rs.getString("USERNAME"));
-				user.setEmail(rs.getString("EMAIL"));
-				user.setAccessLevel(rs.getInt("ACCESS_LEVEL"));
-				user.setFullName(rs.getString("FULL_NAME"));
-				user.setActive(rs.getBoolean("ACTIVE"));
-				user.setPassword(rs.getString("PASSWORD"));
-				user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
-				user.setCanChangePassword(rs.getString("CAN_CHANGE_PASSWORD"));
-				user.setHashingAlgorithm(rs.getString("HASHING_ALGORITHM"));
-				user.setStartQuery(rs.getString("START_QUERY"));
+				populateUser(user, rs);
 
 				//set user properties whose values may come from user groups
 				populateGroupValues(conn, user);
 			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
@@ -77,12 +67,31 @@ public class UserService {
 	}
 
 	/**
+	 * Populate user object with row from users table
+	 *
+	 * @param user
+	 * @param rs
+	 * @throws SQLException
+	 */
+	private void populateUser(User user, ResultSet rs) throws SQLException {
+		user.setUsername(rs.getString("USERNAME"));
+		user.setEmail(rs.getString("EMAIL"));
+		user.setAccessLevel(AccessLevel.getEnum(rs.getInt("ACCESS_LEVEL")));
+		user.setFullName(rs.getString("FULL_NAME"));
+		user.setActive(rs.getBoolean("ACTIVE"));
+		user.setPassword(rs.getString("PASSWORD"));
+		user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+		user.setHashingAlgorithm(rs.getString("HASHING_ALGORITHM"));
+		user.setStartQuery(rs.getString("START_QUERY"));
+	}
+
+	/**
 	 * Set user properties whose values may come from user groups
 	 *
 	 * @param conn
 	 * @param user
 	 */
-	private void populateGroupValues(Connection conn, User user) {
+	private void populateGroupValues(Connection conn, User user) throws SQLException {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
@@ -111,8 +120,6 @@ public class UserService {
 
 			user.setDefaultQueryGroup(defaultQueryGroup);
 			user.setStartQuery(startQuery);
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(rs, ps);
 		}
@@ -123,7 +130,7 @@ public class UserService {
 	 *
 	 * @return all users
 	 */
-	public List<User> getAllUsers() {
+	public List<User> getAllUsers() throws SQLException {
 		List<User> users = new ArrayList<User>();
 
 		Connection conn = null;
@@ -134,10 +141,7 @@ public class UserService {
 			conn = ArtConfig.getConnection();
 			String sql;
 
-			sql = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, ACTIVE, "
-					+ " PASSWORD, DEFAULT_QUERY_GROUP, CAN_CHANGE_PASSWORD, "
-					+ " HASHING_ALGORITHM, START_QUERY "
-					+ " FROM ART_USERS ";
+			sql = USERS_QUERY;
 
 			ps = conn.prepareStatement(sql);
 
@@ -145,21 +149,10 @@ public class UserService {
 			while (rs.next()) {
 				User user = new User();
 
-				user.setUsername(rs.getString("USERNAME"));
-				user.setEmail(rs.getString("EMAIL"));
-				user.setAccessLevel(rs.getInt("ACCESS_LEVEL"));
-				user.setFullName(rs.getString("FULL_NAME"));
-				user.setActive(rs.getBoolean("ACTIVE"));
-				user.setPassword(rs.getString("PASSWORD"));
-				user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
-				user.setCanChangePassword(rs.getString("CAN_CHANGE_PASSWORD"));
-				user.setHashingAlgorithm(rs.getString("HASHING_ALGORITHM"));
-				user.setStartQuery(rs.getString("START_QUERY"));
+				populateUser(user, rs);
 
 				users.add(user);
 			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}

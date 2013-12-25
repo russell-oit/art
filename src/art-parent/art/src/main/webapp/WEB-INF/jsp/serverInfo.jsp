@@ -19,6 +19,7 @@ Display application server information
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
+					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="serverInfo.do"]').parent().addClass('active');
 				});
 			});

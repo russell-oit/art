@@ -63,58 +63,58 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureReports.do">
-									<spring:message code="header.link.configureReports"/>
+								<a href="${pageContext.request.contextPath}/app/reportsConfiguration.do">
+									<spring:message code="header.link.reportsConfiguration"/>
 								</a>
 							</li>
 							<li>
 								<a href="${pageContext.request.contextPath}/app/reportGroups.do">
-									<spring:message code="header.link.configureReportGroups"/>
+									<spring:message code="header.link.reportGroups"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureUsers.do">
-									<spring:message code="header.link.configureUsers"/>
+								<a href="${pageContext.request.contextPath}/app/users.do">
+									<spring:message code="header.link.users"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureUserGroups.do">
-									<spring:message code="header.link.configureUserGroups"/>
+								<a href="${pageContext.request.contextPath}/app/userGroups.do">
+									<spring:message code="header.link.userGroups"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureUserGroupMembership.do">
-									<spring:message code="header.link.configureUserGroupMembership"/>
+								<a href="${pageContext.request.contextPath}/app/userGroupMembership.do">
+									<spring:message code="header.link.userGroupMembership"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureAccessRights.do">
-									<spring:message code="header.link.configureAccessRights"/>
+								<a href="${pageContext.request.contextPath}/app/accessRights.do">
+									<spring:message code="header.link.accessRights"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureAdminRights.do">
-									<spring:message code="header.link.configureAdminRights"/>
+								<a href="${pageContext.request.contextPath}/app/adminRights.do">
+									<spring:message code="header.link.adminRights"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureRules.do">
-									<spring:message code="header.link.configureRules"/>
+								<a href="${pageContext.request.contextPath}/app/rules.do">
+									<spring:message code="header.link.rules"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureRuleValues.do">
-									<spring:message code="header.link.configureRuleValues"/>
+								<a href="${pageContext.request.contextPath}/app/ruleValues.do">
+									<spring:message code="header.link.ruleValues"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureJobs.do">
-									<spring:message code="header.link.configureJobs"/>
+								<a href="${pageContext.request.contextPath}/app/jobsConfiguration.do">
+									<spring:message code="header.link.jobsConfiguration"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/configureSchedules.do">
-									<spring:message code="header.link.configureSchedules"/>
+								<a href="${pageContext.request.contextPath}/app/schedules.do">
+									<spring:message code="header.link.schedules"/>
 								</a>
 							</li>
 							<li class="divider"></li>

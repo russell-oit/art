@@ -28,6 +28,7 @@ Settings configuration page
 				toggleLdapBindDnEnabled();
 
 				$(function() {
+					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="settings.do"]').parent().addClass('active');
 				});
 

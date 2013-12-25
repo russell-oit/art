@@ -92,7 +92,6 @@ public class DataSource implements TimerListener {
 	private int maxReachedPoolSize;
 	private int maxConnections = 10;
 	private String testSQL;
-	private boolean enableTest = false;
 	LocalTimer t;
 	private List<EnhancedConnection> connectionPool = new ArrayList<EnhancedConnection>(maxConnections); // this vector stores active connections
 	private long thisObjectTicket; // for debug

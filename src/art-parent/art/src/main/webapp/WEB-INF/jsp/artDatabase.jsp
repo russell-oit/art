@@ -25,6 +25,7 @@ Display art database configuration page
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
+					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="artDatabase.do"]').parent().addClass('active');
 				});
 
@@ -82,7 +83,7 @@ Display art database configuration page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
+						<p>${fn:escapeXml(error)}</p>
 					</div>
 				</c:if>
 
