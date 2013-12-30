@@ -22,7 +22,7 @@ bootstrap js, jquery js, datatables css, datatables js
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
-		
+
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 
@@ -30,9 +30,17 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/twitter-bootstrap-hover-dropdown.min.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
+
+		<script type="text/javascript">
+			$('#spinner').ajaxStart(function() {
+				$(this).fadeIn('fast');
+			}).ajaxStop(function() {
+				$(this).stop().fadeOut('fast');
+			});
+		</script>
 
 		<jsp:invoke fragment="javascript"/>
 	</jsp:attribute>
@@ -46,6 +54,9 @@ bootstrap js, jquery js, datatables css, datatables js
 	</jsp:attribute>
 
 	<jsp:body>
+		<div id="spinner">
+		<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Executing..." />
+	</div>
         <jsp:doBody/>
     </jsp:body>
 </t:genericPage>

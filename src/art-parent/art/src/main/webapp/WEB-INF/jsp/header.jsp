@@ -13,6 +13,7 @@ Header that appears at the top of all pages, except the login and logs pages
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <div id="header">
+	
 	<!-- Fixed navbar -->
 	<div class="navbar navbar-default navbar-fixed-top">
 		<div class="container">

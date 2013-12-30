@@ -17,8 +17,7 @@ Display art database configuration page
 
 <spring:message code="page.title.artDatabase" var="pageTitle" scope="page"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${pageTitle}"
-					 mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>

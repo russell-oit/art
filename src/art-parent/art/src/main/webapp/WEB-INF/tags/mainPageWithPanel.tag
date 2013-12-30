@@ -12,13 +12,14 @@ Includes main page, plus a bootstrap panel where the contents go
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%-- The list of normal or fragment attributes can be specified here: --%>
 <%@attribute name="title" required="true" %>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
 <%@attribute name="mainColumnClass" required="true" %>
-<%@attribute name="mainPanelTitle" required="true" %>
+<%@attribute name="mainPanelTitle" %>
 <%@attribute name="aboveMainPanel" fragment="true" %>
 <%@attribute name="belowMainPanel" fragment="true" %>
 <%@attribute name="leftMainPanel" fragment="true" %>
@@ -29,7 +30,7 @@ Includes main page, plus a bootstrap panel where the contents go
 	<jsp:attribute name="css">
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
-		
+
 	<jsp:attribute name="javascript">
 		<jsp:invoke fragment="javascript"/>
 	</jsp:attribute>
@@ -43,7 +44,16 @@ Includes main page, plus a bootstrap panel where the contents go
 			<div class="${mainColumnClass}">
 				<div class="panel panel-success">
 					<div class="panel-heading">
-						<h4 class="panel-title text-center">${fn:escapeXml(mainPanelTitle)}</h4>
+						<h4 class="panel-title text-center">
+							<c:choose>
+								<c:when test="${empty mainPanelTitle}">
+									${fn:escapeXml(title)}
+								</c:when>
+								<c:otherwise>
+									${fn:escapeXml(mainPanelTitle)}
+								</c:otherwise>
+							</c:choose>
+						</h4>
 					</div>
 					<div class="panel-body">
 						<jsp:doBody/>

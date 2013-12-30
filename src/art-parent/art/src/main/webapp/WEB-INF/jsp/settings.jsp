@@ -17,8 +17,7 @@ Settings configuration page
 
 <spring:message code="page.title.settings" var="pageTitle" scope="page"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${pageTitle}"
-					 mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 	
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>

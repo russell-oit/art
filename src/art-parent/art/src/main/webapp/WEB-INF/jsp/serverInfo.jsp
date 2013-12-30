@@ -12,9 +12,9 @@ Display application server information
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<spring:message code="page.title.serverInfo" var="pageTitle" scope="page"/>
+<spring:message code="page.title.serverInfo" var="pageTitle"/>
 
-<t:configurationPage title="${pageTitle}">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function() {
@@ -25,46 +25,35 @@ Display application server information
 			});
 		</script>
 	</jsp:attribute>
-		
+
 	<jsp:body>
-		<div class="row">
-			<div class="col-md-6 col-md-offset-3">
-				<div class="panel panel-success">
-					<div class="panel-heading">
-						<h4 class="panel-title text-center">${fn:escapeXml(pageTitle)}</h4>
-					</div>
-					<div class="panel-body">
-						<table class="table table-striped table-bordered">
-							<tbody>
-								<tr>
-									<td><spring:message code="serverInfo.text.artHome"/></td>
-									<td>${artHome}</td>
-								</tr>
-								<tr>
-									<td><spring:message code="serverInfo.text.serverName"/></td>
-									<td>${serverName}</td>
-								</tr>
-								<tr>
-									<td><spring:message code="serverInfo.text.servletApiSupported"/></td>
-									<td>${servletApiSupported}</td>
-								</tr>
-								<tr>
-									<td><spring:message code="serverInfo.text.javaVendor"/></td>
-									<td>${javaVendor}</td>
-								</tr>
-								<tr>
-									<td><spring:message code="serverInfo.text.javaVersion"/></td>
-									<td>${javaVersion}</td>
-								</tr>
-								<tr>
-									<td><spring:message code="serverInfo.text.operatingSystem"/></td>
-									<td>${operatingSystem}</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
+		<table class="table table-striped table-bordered">
+			<tbody>
+				<tr>
+					<td><spring:message code="serverInfo.text.artHome"/></td>
+					<td>${artHome}</td>
+				</tr>
+				<tr>
+					<td><spring:message code="serverInfo.text.serverName"/></td>
+					<td>${serverName}</td>
+				</tr>
+				<tr>
+					<td><spring:message code="serverInfo.text.servletApiSupported"/></td>
+					<td>${servletApiSupported}</td>
+				</tr>
+				<tr>
+					<td><spring:message code="serverInfo.text.javaVendor"/></td>
+					<td>${javaVendor}</td>
+				</tr>
+				<tr>
+					<td><spring:message code="serverInfo.text.javaVersion"/></td>
+					<td>${javaVersion}</td>
+				</tr>
+				<tr>
+					<td><spring:message code="serverInfo.text.operatingSystem"/></td>
+					<td>${operatingSystem}</td>
+				</tr>
+			</tbody>
+		</table>
 	</jsp:body>
-</t:configurationPage>
+</t:mainPageWithPanel>

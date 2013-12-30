@@ -19,8 +19,7 @@ Reports page. Also main/home page
 <spring:message code="reports.text.description" var="descriptionText"/>
 <spring:message code="reports.text.reports" var="mainPanelTitle"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${mainPanelTitle}"
-					 mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
@@ -54,9 +53,9 @@ Reports page. Also main/home page
 				//Initialise DataTables, with no sorting on the 'details' column (column [0])
 				var oTable = $('#reports').dataTable({
 					"sPaginationType": "bs_full",
-					"sScrollY": "400px",
+//					"sScrollY": "400px",
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
-					"iDisplayLength": 10,
+					"iDisplayLength": -1,
 					"oLanguage": {
 						"sUrl": contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
 					},

@@ -15,8 +15,7 @@ Display user configuration page
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${pageTitle}"
-					 mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" charset="utf-8">
@@ -26,10 +25,10 @@ Display user configuration page
 					$('a[href*="users.do"]').parent().addClass('active');
 				});
 
-				$('#users').dataTable({
+				var oTable = $('#users').dataTable({
 					"sPaginationType": "bs_full",
-					"bPaginate": false,
-					"sScrollY": "365px",
+//					"bPaginate": false,
+//					"sScrollY": "365px",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": -1,
@@ -40,7 +39,32 @@ Display user configuration page
 						$('div.dataTables_filter input').focus();
 					}
 				});
+
+				$('#users tbody').on('click', '.del', function() {
+					var row = $(this).closest("tr"); //jquery object
+					var nRow = row[0]; //dom element/node
+					var aPos = oTable.fnGetPosition(nRow);
+					var id = row.attr('id').replace('row-', '');
+					$.ajax({
+						type: "POST",
+						url: "${pageContext.request.contextPath}/app/deleteUser.do",
+						data: {username: id},
+						success: function(response) {
+							if (response.success) {
+								$("#response").addClass("alert alert-success").html(response.successMessage);
+								oTable.fnDeleteRow(aPos);
+							} else {
+								$("#response").addClass("alert alert-danger").html(response.errorDetails);
+							}
+						},
+						error: function(xhr, status, error) {
+							alert(xhr.responseText);
+						}
+					});
+
+				});
 			});
+
 		</script>
 	</jsp:attribute>
 
@@ -52,6 +76,10 @@ Display user configuration page
 			</div>
 		</c:if>
 
+		<div id="response">
+
+		</div>
+
 		<table id="users" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
@@ -62,27 +90,27 @@ Display user configuration page
 				</tr>
 			</thead>
 			<tbody>
-			<c:forEach var="user" items="${users}">
-				<tr>
-					<td>${user.username}</td>
-					<td>${user.fullName}</td>
-					<td>${user.active}</td>
-					<td>
-						<div class="btn-group">
-							<a class="btn btn-default" href="#">
-								<i class="fa fa-pencil-square-o"></i>
-								<spring:message code="users.action.edit"/>
-							</a>
-							<a class="btn btn-default" href="#">
-								<i class="fa fa-trash-o"></i>
-								<spring:message code="users.action.delete"/>
-							</a>
-						</div>
-					</td>
-				</tr>
-			</c:forEach>
-		</tbody>
-	</table>
-</jsp:body>
+				<c:forEach var="user" items="${users}">
+					<tr id="row-${user.username}">
+						<td>${user.username}</td>
+						<td>${user.fullName}</td>
+						<td>${user.active}</td>
+						<td>
+							<div class="btn-group">
+								<a class="btn btn-default" href="#">
+									<i class="fa fa-pencil-square-o"></i>
+									<spring:message code="users.action.edit"/>
+								</a>
+								<button type="button" class="btn btn-default del" id="${user.username}">
+									<i class="fa fa-trash-o"></i>
+									<spring:message code="users.action.delete"/>
+								</button>
+							</div>
+						</td>
+					</tr>
+				</c:forEach>
+			</tbody>
+		</table>
+	</jsp:body>
 </t:mainPageWithPanel>
 

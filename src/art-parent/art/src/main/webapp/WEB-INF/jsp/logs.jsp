@@ -19,8 +19,7 @@ Display application logs
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${pageTitle}"
-					 mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">

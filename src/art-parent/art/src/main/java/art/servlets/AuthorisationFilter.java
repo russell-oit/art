@@ -217,7 +217,13 @@ public class AuthorisationFilter implements Filter {
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
-		}
+		} else if (StringUtils.startsWith(requestUri, path + "deleteUser.do")) {
+			//standard admins and above, and repository user
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
+					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
+				authorised = true;
+			}
+		} 
 
 		return authorised;
 	}
