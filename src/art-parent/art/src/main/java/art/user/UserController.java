@@ -46,14 +46,17 @@ public class UserController {
 	AjaxResponse deleteUser(@RequestParam("username") String username, Locale locale) {
 		AjaxResponse response = new AjaxResponse();
 
+		String message;
+
 		try {
 			userService.deleteUser(username);
 			response.setSuccess(true);
-			response.setSuccessMessage(messages.getMessage("users.message.userDeleted", null, locale));
+			message = messages.getMessage("users.message.userDeleted", null, locale);
+			response.setSuccessMessage(message + ": " + username);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
-			String message=messages.getMessage("page.message.errorOccurred", null, locale);
-			response.setErrorDetails(message + "<p>" + ex.toString());
+			message = messages.getMessage("page.message.errorOccurred", null, locale);
+			response.setErrorDetails("<p>" + message + "</p><p>" + ex.toString() + "</p>");
 		}
 
 		return response;

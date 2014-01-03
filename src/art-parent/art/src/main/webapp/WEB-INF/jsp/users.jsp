@@ -14,6 +14,11 @@ Display user configuration page
 <spring:message code="page.title.configureUsers" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="users.message.userDeleted" var="userDeletedText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="dialog.message.deleteUser" var="deleteUserText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -24,7 +29,6 @@ Display user configuration page
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="users.do"]').parent().addClass('active');
 				});
-
 				var oTable = $('#users').dataTable({
 					"sPaginationType": "bs_full",
 //					"bPaginate": false,
@@ -40,29 +44,46 @@ Display user configuration page
 					}
 				});
 
-				$('#users tbody').on('click', '.del', function() {
+				$('#users tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
 					var aPos = oTable.fnGetPosition(nRow);
-					var id = row.attr('id').replace('row-', '');
-					$.ajax({
-						type: "POST",
-						url: "${pageContext.request.contextPath}/app/deleteUser.do",
-						data: {username: id},
-						success: function(response) {
-							if (response.success) {
-								$("#response").addClass("alert alert-success").html(response.successMessage);
-								oTable.fnDeleteRow(aPos);
-							} else {
-								$("#response").addClass("alert alert-danger").html(response.errorDetails);
+					var username = row.data("username");
+					bootbox.confirm({
+						message: "${deleteUserText}: " + username + " ?",
+						buttons: {
+							'cancel': {
+								label: "${cancelText}"
+							},
+							'confirm': {
+								label: "${okText}"
 							}
 						},
-						error: function(xhr, status, error) {
-							alert(xhr.responseText);
+						callback: function(result) {
+							if (result) {
+								$.ajax({
+									type: "POST",
+									url: "${pageContext.request.contextPath}/app/deleteUser.do",
+									data: {username: username},
+									success: function(response) {
+										if (response.success) {
+											$("#response").addClass("alert alert-success").html(response.successMessage);
+											oTable.fnDeleteRow(aPos);
+											$.notify("${userDeletedText}","success");
+										} else {
+											$("#response").addClass("alert alert-danger").html(response.errorDetails);
+											$.notify("${errorOccurredText}","error");
+										}
+									},
+									error: function(xhr, status, error) {
+										alert(xhr.responseText);
+									}
+								});
+							}
 						}
 					});
-
 				});
+
 			});
 
 		</script>
@@ -91,7 +112,7 @@ Display user configuration page
 			</thead>
 			<tbody>
 				<c:forEach var="user" items="${users}">
-					<tr id="row-${user.username}">
+					<tr data-username="${user.username}">
 						<td>${user.username}</td>
 						<td>${user.fullName}</td>
 						<td>${user.active}</td>
@@ -101,7 +122,7 @@ Display user configuration page
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="users.action.edit"/>
 								</a>
-								<button type="button" class="btn btn-default del" id="${user.username}">
+								<button type="button" class="btn btn-default delete">
 									<i class="fa fa-trash-o"></i>
 									<spring:message code="users.action.delete"/>
 								</button>
