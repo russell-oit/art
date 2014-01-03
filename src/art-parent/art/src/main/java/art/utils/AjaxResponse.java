@@ -26,7 +26,7 @@ package art.utils;
 public class AjaxResponse {
 	private boolean success;
 	private String successMessage;
-	private String errorDetails;
+	private String errorMessage;
 
 	/**
 	 * @return the success
@@ -57,17 +57,17 @@ public class AjaxResponse {
 	}
 
 	/**
-	 * @return the errorDetails
+	 * @return the errorMessage
 	 */
-	public String getErrorDetails() {
-		return errorDetails;
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
 	/**
-	 * @param errorDetails the errorDetails to set
+	 * @param errorMessage the errorMessage to set
 	 */
-	public void setErrorDetails(String errorDetails) {
-		this.errorDetails = errorDetails;
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 
 }

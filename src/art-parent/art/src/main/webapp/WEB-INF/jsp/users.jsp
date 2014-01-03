@@ -49,6 +49,7 @@ Display user configuration page
 					var nRow = row[0]; //dom element/node
 					var aPos = oTable.fnGetPosition(nRow);
 					var username = row.data("username");
+					var msg;
 					bootbox.confirm({
 						message: "${deleteUserText}: " + username + " ?",
 						buttons: {
@@ -67,11 +68,13 @@ Display user configuration page
 									data: {username: username},
 									success: function(response) {
 										if (response.success) {
-											$("#response").addClass("alert alert-success").html(response.successMessage);
+											msg="${userDeletedText}: " + username;
+											$("#response").addClass("alert alert-success").html(msg);
 											oTable.fnDeleteRow(aPos);
 											$.notify("${userDeletedText}","success");
 										} else {
-											$("#response").addClass("alert alert-danger").html(response.errorDetails);
+											msg="<p>${errorOccurredText}</p><p>" + response.errorMessage + "</p>";
+											$("#response").addClass("alert alert-danger").html(msg);
 											$.notify("${errorOccurredText}","error");
 										}
 									},

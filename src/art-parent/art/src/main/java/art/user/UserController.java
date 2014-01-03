@@ -2,10 +2,9 @@ package art.user;
 
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
-import java.util.Locale;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,9 +25,6 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private MessageSource messages;
-
 	@RequestMapping(value = "/app/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
 		try {
@@ -43,20 +39,15 @@ public class UserController {
 
 	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteUser(@RequestParam("username") String username, Locale locale) {
+	AjaxResponse deleteUser(@RequestParam("username") String username) {
 		AjaxResponse response = new AjaxResponse();
-
-		String message;
 
 		try {
 			userService.deleteUser(username);
 			response.setSuccess(true);
-			message = messages.getMessage("users.message.userDeleted", null, locale);
-			response.setSuccessMessage(message + ": " + username);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
-			message = messages.getMessage("page.message.errorOccurred", null, locale);
-			response.setErrorDetails("<p>" + message + "</p><p>" + ex.toString() + "</p>");
+			response.setErrorMessage(StringEscapeUtils.escapeHtml4(ex.toString()));
 		}
 
 		return response;
