@@ -22,6 +22,12 @@
 			<url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt</url>
 		</license>
 	</licenses>
+	
+	<properties>
+		<poi.version>3.7</poi.version>
+		<spring.version>3.2.5.RELEASE</spring.version>
+		<owasp.encoder.version>1.1</owasp.encoder.version>
+	</properties>
 
 	<build>
 		<finalName>${project.artifactId}</finalName>
@@ -100,11 +106,6 @@
 			<url>http://repository.pentaho.org/artifactory/repo</url>
 		</repository>
 	</repositories>
-
-	<properties>
-		<poi.version>3.7</poi.version>
-		<spring.version>3.2.5.RELEASE</spring.version>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -449,7 +450,12 @@
 		<dependency>
 			<groupId>org.owasp.encoder</groupId>
 			<artifactId>encoder</artifactId>
-			<version>1.1</version>
+			<version>${owasp.encoder.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.owasp.encoder</groupId>
+			<artifactId>encoder-jsp</artifactId>
+			<version>${owasp.encoder.version}</version>
 		</dependency>
 	</dependencies>
 

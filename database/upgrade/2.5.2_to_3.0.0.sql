@@ -1,13 +1,26 @@
 -- Upgrade script from ART 2.5.2 to ART 3.0
---
+
 -- Purpose: create/update the tables needed to 
 --          . update database version
---          . reset x_axis_label for non-graph queries
+--          . reset x_axis_label column for non-graph queries
+--          . decrease size of x_axis_label column
 --          . allow datasources to be disabled
 --          . add reference table for query types
 --          . add reference table for job types
 --          . change active_status fields from varchar to integer
+--          . increase size of username columns
+--          . rename update_time column
+--          . increase size of log_type column
+--          . change update_date columns to timestamps
+
+-- NOTES:
+-- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
+-- for postgresql, replace the MODIFY keyword with ALTER COLUMN <column name> TYPE <data type>
 --
+-- for oracle, postgresql, replace the SUBSTRING keyword with SUBSTR
+--
+-- for sql server, replace TIMESTAMP data type with DATETIME
+
 -- ------------------------------------------------
 
 
@@ -20,18 +33,51 @@ CREATE TABLE ART_DATABASE_VERSION
 -- insert database version
 INSERT INTO ART_DATABASE_VERSION VALUES('3.0-alpha1');
 
--- reset x_axis_label for non-graph queries
+-- reset x_axis_label column for non-graph queries
 UPDATE ART_QUERIES SET X_AXIS_LABEL='' WHERE QUERY_TYPE>=0;
+
+-- decrease size of x_axis_label column
+UPDATE ART_QUERIES SET X_AXIS_LABEL=SUBSTRING(X_AXIS_LABEL,1,50);
+ALTER TABLE ART_QUERIES MODIFY X_AXIS_LABEL VARCHAR(50);
 
 -- allow datasources to be disabled
 ALTER TABLE ART_DATABASES ADD ACTIVE INTEGER;
 UPDATE ART_DATABASES SET ACTIVE=1;
-ALTER TABLE ART_DATABASES DROP COLUMN ACTIVE_STATUS;
 
 -- change active_status fields from varchar to integer
 ALTER TABLE ART_USERS ADD ACTIVE INTEGER;
 UPDATE ART_USERS SET ACTIVE=1 WHERE ACTIVE_STATUS='A' OR ACTIVE_STATUS IS NULL;
 ALTER TABLE ART_USERS DROP COLUMN ACTIVE_STATUS;
+
+-- rename update_time column
+ALTER TABLE ART_LOGS ADD LOG_DATE TIMESTAMP;
+UPDATE ART_LOGS SET LOG_DATE=UPDATE_TIME;
+ALTER TABLE ART_LOGS DROP COLUMN UPDATE_TIME;
+
+-- increase size of log_type column
+ALTER TABLE ART_LOGS MODIFY LOG_TYPE VARCHAR(30);
+
+-- increase size of username columns
+ALTER TABLE ART_USERS MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_DATABASES MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_ADMIN_PRIVILEGES MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_USER_QUERIES MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_USER_QUERY_GROUPS MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_USER_RULES MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_JOBS MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_JOBS_AUDIT MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_LOGS MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_USER_JOBS MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_USER_GROUP_ASSIGNMENT MODIFY USERNAME VARCHAR(30);
+ALTER TABLE ART_JOB_ARCHIVES MODIFY USERNAME VARCHAR(30);
+
+-- change update_date columns to timestamps
+ ALTER TABLE ART_USERS MODIFY UPDATE_DATE TIMESTAMP;
+ ALTER TABLE ART_DATABASES MODIFY UPDATE_DATE TIMESTAMP;
+ ALTER TABLE ART_QUERIES MODIFY UPDATE_DATE TIMESTAMP;
+ ALTER TABLE ART_USER_QUERIES MODIFY UPDATE_DATE TIMESTAMP;
+ ALTER TABLE ART_QUERY_FIELDS MODIFY UPDATE_DATE TIMESTAMP;
+
 
 -- add reference table for query types
 CREATE TABLE ART_QUERY_TYPES
@@ -97,9 +143,3 @@ INSERT INTO ART_JOB_TYPES VALUES(7,'Conditional Email Output (Inline)');
 INSERT INTO ART_JOB_TYPES VALUES(8,'Conditional Publish');
 INSERT INTO ART_JOB_TYPES VALUES(9,'Cache ResultSet (Append)');
 INSERT INTO ART_JOB_TYPES VALUES(10,'Cache ResultSet (Delete & Insert)');
-
-
-
-
-
-

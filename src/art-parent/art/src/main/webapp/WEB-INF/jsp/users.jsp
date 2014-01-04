@@ -10,6 +10,7 @@ Display user configuration page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="page.title.configureUsers" var="pageTitle"/>
 
@@ -69,7 +70,7 @@ Display user configuration page
 									success: function(response) {
 										if (response.success) {
 											msg="${userDeletedText}: " + username;
-											$("#response").addClass("alert alert-success").html(msg);
+											$("#response").addClass("alert alert-success").text(msg).html();
 											oTable.fnDeleteRow(aPos);
 											$.notify("${userDeletedText}","success");
 										} else {
@@ -116,7 +117,7 @@ Display user configuration page
 			<tbody>
 				<c:forEach var="user" items="${users}">
 					<tr data-username="${user.username}">
-						<td>${user.username}</td>
+						<td>${encode:forHtmlContent(user.username)}</td>
 						<td>${user.fullName}</td>
 						<td>${user.active}</td>
 						<td>

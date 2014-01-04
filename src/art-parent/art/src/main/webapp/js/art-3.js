@@ -59,12 +59,40 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "";
 		urlElement.value = "demo";
 		testSqlElement.value = "";
-		
+
 		var usernameElement = document.getElementById("username");
 		if (usernameElement !== null) {
 			usernameElement.value = "";
 		}
 	}
 }
+
+var MAP = {'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;',
+	'"': '&quot;',
+	"'": '&#39;'};
+
+function escapeHtml(s, forAttribute) {
+	return s.replace(forAttribute ? /[&<>'"]/g : /[&<>]/g, function(c) {
+		return MAP[c];
+	});
+}
+
+// Use the browser's built-in functionality to quickly and safely escape the string
+function escapeHtml2(str) {
+	var div = document.createElement('div');
+	div.appendChild(document.createTextNode(str));
+	return div.innerHTML;
+}
+
+// UNSAFE with unsafe strings; only use on previously-escaped ones!
+function unescapeHtml(escapedStr) {
+	var div = document.createElement('div');
+	div.innerHTML = escapedStr;
+	var child = div.childNodes[0];
+	return child ? child.nodeValue : '';
+}
+
 
 

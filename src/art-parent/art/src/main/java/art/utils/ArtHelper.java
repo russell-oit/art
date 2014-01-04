@@ -185,7 +185,7 @@ public class ArtHelper {
 			Timestamp now = new Timestamp(new Date().getTime());
 			conn = ArtConfig.getConnection();
 			String sql = "INSERT INTO ART_LOGS"
-					+ " (UPDATE_TIME, USERNAME, LOG_TYPE, IP, QUERY_ID,"
+					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, QUERY_ID,"
 					+ " TOTAL_TIME, FETCH_TIME, MESSAGE) "
 					+ " VALUES (?,?,?,?,?,?,?,?) ";
 
@@ -226,7 +226,7 @@ public class ArtHelper {
 			Timestamp now = new Timestamp(new Date().getTime());
 			conn = ArtConfig.getConnection();
 			String sql = "INSERT INTO ART_LOGS"
-					+ " (UPDATE_TIME, USERNAME, LOG_TYPE, IP, MESSAGE) "
+					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, MESSAGE) "
 					+ " VALUES (?,?,?,?,?) ";
 			ps = conn.prepareStatement(sql);
 

@@ -19,7 +19,7 @@
 package art.utils;
 
 /**
- * Class to hold ajax response
+ * Class to hold ajax response. To be returned as json.
  * 
  * @author Timothy Anyona
  */

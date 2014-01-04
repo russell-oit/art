@@ -58,7 +58,7 @@ Display application logs
 				//Initialise DataTables
 				var oTable = $('#logs').dataTable({
 					"sPaginationType": "bs_full",
-					"bPaginate": false,
+//					"bPaginate": false,
 					"aoColumnDefs": [
 						{"bSortable": false, "aTargets": [0]}, //no sorting on details column
 						{"bVisible": false, "aTargets": [-1]} //hide last column (error details)
