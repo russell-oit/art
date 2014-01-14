@@ -3,7 +3,6 @@ package art.user;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.owasp.encoder.Encoder;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

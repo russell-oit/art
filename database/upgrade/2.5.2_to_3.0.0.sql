@@ -1,17 +1,18 @@
 -- Upgrade script from ART 2.5.2 to ART 3.0
 
--- Purpose: create/update the tables needed to 
---          . update database version
---          . reset x_axis_label column for non-graph queries
---          . decrease size of x_axis_label column
---          . allow datasources to be disabled
---          . add reference table for query types
---          . add reference table for job types
---          . change active_status fields from varchar to integer
---          . increase size of username columns
---          . rename update_time column
---          . increase size of log_type column
---          . change update_date columns to timestamps
+-- CHANGES:
+-- update database version
+-- reset x_axis_label column for non-graph queries
+-- decrease size of x_axis_label column
+-- allow datasources to be disabled
+-- add reference table for query types
+-- add reference table for job types
+-- change active_status fields from varchar to integer
+-- increase size of username columns
+-- rename update_time column
+-- increase size of log_type column
+-- change update_date columns to timestamps
+-- add user_id columns
 
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
@@ -77,6 +78,22 @@ ALTER TABLE ART_JOB_ARCHIVES MODIFY USERNAME VARCHAR(30);
  ALTER TABLE ART_QUERIES MODIFY UPDATE_DATE TIMESTAMP;
  ALTER TABLE ART_USER_QUERIES MODIFY UPDATE_DATE TIMESTAMP;
  ALTER TABLE ART_QUERY_FIELDS MODIFY UPDATE_DATE TIMESTAMP;
+ 
+-- change jobs start and end dates to timestamps
+ALTER TABLE ART_JOBS MODIFY START_DATE TIMESTAMP;
+ALTER TABLE ART_JOBS MODIFY END_DATE TIMESTAMP;
+
+-- add user_id columns
+ALTER TABLE ART_USERS ADD USER_ID INTEGER;
+ALTER TABLE ART_ADMIN_PRIVILEGES ADD USER_ID INTEGER;
+ALTER TABLE ART_USER_QUERIES ADD USER_ID INTEGER;
+ALTER TABLE ART_USER_QUERY_GROUPS ADD USER_ID INTEGER;
+ALTER TABLE ART_USER_RULES ADD USER_ID INTEGER;
+ALTER TABLE ART_JOBS ADD USER_ID INTEGER;
+ALTER TABLE ART_LOGS ADD USER_ID INTEGER;
+ALTER TABLE ART_USER_JOBS ADD USER_ID INTEGER;
+ALTER TABLE ART_USER_GROUP_ASSIGNMENT ADD USER_ID INTEGER;
+ALTER TABLE ART_JOB_ARCHIVES ADD USER_ID INTEGER;
 
 
 -- add reference table for query types

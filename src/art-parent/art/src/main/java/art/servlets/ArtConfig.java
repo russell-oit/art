@@ -67,24 +67,21 @@ public class ArtConfig extends HttpServlet {
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
 	private static ArtSettings as;
-	private static ArrayList<String> reportFormats = new ArrayList<String>(); //report formats available to users
-	private static ArrayList<String> allReportFormats = new ArrayList<String>(); //all report formats
-	private static String templatesPath; //full path to templates directory where formatted report templates and mondiran cube definitions are stored
-	private static String relativeTemplatesPath; //relative path to templates directory. used by showAnalysis.jsp
+	private static final ArrayList<String> reportFormats = new ArrayList<String>(); //report formats available to users
+	private static final ArrayList<String> allReportFormats = new ArrayList<String>(); //all report formats
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static String artPropertiesFilePath; //full path to art.properties file
-	private static SimpleDateFormat dateFormatter = new SimpleDateFormat();
-	private static SimpleDateFormat timeFormatter = new SimpleDateFormat();
-	private static SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
-	private static String jobsPath;
+	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
+	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
+	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
 	private static boolean customExportDirectory = false; //to enable custom export path
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
-	private static String hsqldbPath;
 	private static ArtDatabase artDatabaseConfiguration;
 	private static String settingsFilePath;
 	private static Settings settings;
+	private static final String sep = java.io.File.separator;
 
 	/**
 	 * {@inheritDoc}
@@ -151,18 +148,9 @@ public class ArtConfig extends HttpServlet {
 
 		//set application path
 		appPath = ctx.getRealPath("");
-
-		String sep = java.io.File.separator;
-
+		
 		//set web-inf path
-		webinfPath = appPath + sep + "WEB-INF" + sep;
-
-		//set hsqldb path
-		hsqldbPath = webinfPath + sep + "hsqldb" + sep;
-
-		//set templates path
-		templatesPath = appPath + sep + "WEB-INF" + sep + "templates" + sep;
-		relativeTemplatesPath = "/WEB-INF/templates/";
+		webinfPath=appPath + sep + "WEB-INF" + sep;
 
 		//set export path
 		exportPath = appPath + sep + "export" + sep;
@@ -181,9 +169,6 @@ public class ArtConfig extends HttpServlet {
 		} catch (NamingException e) {
 			logger.debug("Custom export directory not configured", e);
 		}
-
-		//set jobs path
-		jobsPath = exportPath + "jobs" + sep;
 
 		//set art.properties file path
 		artPropertiesFilePath = webinfPath + "art.properties";
@@ -450,7 +435,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the web-inf directory
 	 */
 	public static String getWebinfPath() {
-		return webinfPath;
+		return appPath + sep + "WEB-INF" + sep;
 	}
 
 	/**
@@ -459,7 +444,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the hsqldb directory
 	 */
 	public static String getHsqldbPath() {
-		return hsqldbPath;
+		return webinfPath + "hsqldb" + sep;
 	}
 
 	/**
@@ -477,7 +462,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the jobs directory
 	 */
 	public static String getJobsPath() {
-		return jobsPath;
+		return exportPath + "jobs" + sep;
 	}
 
 	/**
@@ -486,7 +471,16 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the templates directory
 	 */
 	public static String getTemplatesPath() {
-		return templatesPath;
+		return webinfPath + "templates" + sep;
+	}
+	
+	/**
+	 * Get full path to the WEB-INF\tmp directory.
+	 *
+	 * @return full path to the templates directory
+	 */
+	public static String getArtTempPath() {
+		return webinfPath + "tmp" + sep;
 	}
 
 	/**
@@ -496,7 +490,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return relative path to the templates directory
 	 */
 	public static String getRelativeTemplatesPath() {
-		return relativeTemplatesPath;
+		return "/WEB-INF/templates/";
 	}
 
 	/**

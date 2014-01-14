@@ -29,10 +29,13 @@
  */
 package art.servlets;
 
+import art.utils.UpgradeHelper;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Date;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -54,7 +57,6 @@ public class Scheduler extends HttpServlet {
 	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
 	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
 	long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
-	final String MONDRIAN_CACHE_CLEARED_FILE_NAME = "mondrian-cache-cleared.txt"; //file to indicate when the mondrian cache was last cleared
 	Timer t;
 
 	/**
@@ -71,13 +73,31 @@ public class Scheduler extends HttpServlet {
 
 			logger.debug("ART Scheduler starting up");
 
+			//run upgrade steps
+			upgrade();
+
 			//start clean thread timer
 			t = new Timer(this);
 			t.start();
 
 			logger.debug("ART scheduler running");
-		} catch (Exception e) {
+		} catch (ServletException e) {
 			logger.error("Error", e);
+		}
+	}
+
+	/**
+	 * run upgrade steps
+	 */
+	private void upgrade() {
+		File upgradeFile = new File(ArtConfig.getArtTempPath() + "upgrade.txt");
+		if (upgradeFile.exists()) {
+			try {
+				UpgradeHelper.upgrade();
+				upgradeFile.delete();
+			} catch (SQLException ex) {
+				logger.error("Error", ex);
+			}
 		}
 	}
 
@@ -110,25 +130,25 @@ public class Scheduler extends HttpServlet {
 				File exportFiles = new File(ArtConfig.getExportPath());
 				File[] fileNames = exportFiles.listFiles();
 				long lastModified;
-				long actualTime = new java.util.Date().getTime();
+				long actualTime = new Date().getTime();
 				String fileName;
-				for (int i = 0; i < fileNames.length; i++) {
-					lastModified = fileNames[i].lastModified();
-					fileName = fileNames[i].getName();
+				for (File file : fileNames) {
+					lastModified = file.lastModified();
+					fileName = file.getName();
 					// Delete the file if it is older than INTERVAL_DELETE_FILES
 					// and the name is not "index.html"
 					// This is a workaround in order to avoid a user to
 					// view all the export files though the browser...
 					if ((actualTime - lastModified) > INTERVAL_DELETE_FILES) {
 						//delete directories that may be created by jasper report html output
-						if (fileNames[i].isDirectory()) {
+						if (file.isDirectory()) {
 							if (!fileName.equals("jobs")) {
-								deleteDirectory(fileNames[i]);
+								deleteDirectory(file);
 							}
-						} else if (!fileName.equals("index.html") && !fileName.equals(MONDRIAN_CACHE_CLEARED_FILE_NAME)) {
-							boolean deleted = fileNames[i].delete();
+						} else if (!fileName.equals("index.html")) {
+							boolean deleted = file.delete();
 							if (!deleted) {
-								logger.warn("File not deleted: {}", fileNames[i]);
+								logger.warn("File not deleted: {}", file);
 							}
 						}
 					}
@@ -158,13 +178,13 @@ public class Scheduler extends HttpServlet {
 
 		if (path.exists()) {
 			File[] files = path.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (files[i].isDirectory()) {
-					deleteDirectory(files[i]);
+			for (File file : files) {
+				if (file.isDirectory()) {
+					deleteDirectory(file);
 				} else {
-					boolean deleted = files[i].delete();
+					boolean deleted = file.delete();
 					if (!deleted) {
-						logger.warn("File not deleted: {}", files[i]);
+						logger.warn("File not deleted: {}", file);
 					}
 				}
 			}
@@ -176,7 +196,7 @@ public class Scheduler extends HttpServlet {
 	 * clear mondrian cache according to configured cache expiry
 	 */
 	private void clearMondrianCache() {
-		logger.debug("Entering clear mondrian cache");
+		logger.debug("Entering clearMondrianCache");
 
 		long mondrianCacheExpiry; //cache expiry duration in milliseconds
 
@@ -185,13 +205,13 @@ public class Scheduler extends HttpServlet {
 
 		if (mondrianCacheExpiry > 0) {
 			boolean clearCache = false;
-			long actualTime = new java.util.Date().getTime();
-			String cacheFilePath = ArtConfig.getExportPath() + MONDRIAN_CACHE_CLEARED_FILE_NAME;
+			long nowTimestamp = new Date().getTime();
+			String cacheFilePath = ArtConfig.getArtTempPath() + "mondrian-cache-cleared.txt";
 			File cacheFile = new File(cacheFilePath);
 			if (cacheFile.exists()) {
 				//check last modified date
 				long lastModified = cacheFile.lastModified();
-				if ((actualTime - lastModified) > mondrianCacheExpiry) {
+				if ((nowTimestamp - lastModified) > mondrianCacheExpiry) {
 					clearCache = true;
 					boolean deleted = cacheFile.delete();
 					if (!deleted) {
@@ -218,9 +238,9 @@ public class Scheduler extends HttpServlet {
 				try {
 					//create file that indicates when the cache was last cleared
 					out = new BufferedWriter(new FileWriter(cacheFilePath));
-					java.util.Date now = new java.util.Date();
+					Date now = new Date();
 					out.write(now.toString());
-				} catch (Exception e) {
+				} catch (IOException e) {
 					logger.error("Error", e);
 				} finally {
 					//Close the BufferedWriter
