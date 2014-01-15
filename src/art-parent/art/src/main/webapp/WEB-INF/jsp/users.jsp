@@ -6,6 +6,9 @@
 Display user configuration page
 --%>
 
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
+
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
@@ -18,7 +21,7 @@ Display user configuration page
 <spring:message code="users.message.userDeleted" var="userDeletedText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="dialog.button.delete" var="deleteText"/>
 <spring:message code="dialog.message.deleteUser" var="deleteUserText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
@@ -50,6 +53,7 @@ Display user configuration page
 					var nRow = row[0]; //dom element/node
 					var aPos = oTable.fnGetPosition(nRow);
 					var username = row.data("username");
+					var userId = row.data("id");
 					var msg;
 					bootbox.confirm({
 						message: "${deleteUserText}: " + username + " ?",
@@ -58,7 +62,7 @@ Display user configuration page
 								label: "${cancelText}"
 							},
 							'confirm': {
-								label: "${okText}"
+								label: "${deleteText}"
 							}
 						},
 						callback: function(result) {
@@ -66,17 +70,17 @@ Display user configuration page
 								$.ajax({
 									type: "POST",
 									url: "${pageContext.request.contextPath}/app/deleteUser.do",
-									data: {username: username},
+									data: {userId: userId},
 									success: function(response) {
 										if (response.success) {
-											msg="${userDeletedText}: " + username;
-											$("#response").addClass("alert alert-success").text(msg).html();
+											msg = "${userDeletedText}: " + username;
+											$("#response").addClass("alert alert-success").text(msg);
 											oTable.fnDeleteRow(aPos);
-											$.notify("${userDeletedText}","success");
+											$.notify("${userDeletedText}", "success");
 										} else {
-											msg="<p>${errorOccurredText}</p><p>" + response.errorMessage + "</p>";
+											msg = "<p>${errorOccurredText}</p><p>" + response.errorMessage + "</p>";
 											$("#response").addClass("alert alert-danger").html(msg);
-											$.notify("${errorOccurredText}","error");
+											$.notify("${errorOccurredText}", "error");
 										}
 									},
 									error: function(xhr, status, error) {
@@ -108,6 +112,7 @@ Display user configuration page
 		<table id="users" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th><spring:message code="users.text.id"/></th>
 					<th><spring:message code="users.text.username"/></th>
 					<th><spring:message code="users.text.fullName"/></th>
 					<th><spring:message code="users.text.active"/></th>
@@ -116,7 +121,9 @@ Display user configuration page
 			</thead>
 			<tbody>
 				<c:forEach var="user" items="${users}">
-					<tr data-username="${user.username}">
+					<tr data-username="${encode:forHtmlAttribute(user.username)}"
+						data-id="${user.userId}">
+						<td>${user.userId}</td>
 						<td>${encode:forHtmlContent(user.username)}</td>
 						<td>${user.fullName}</td>
 						<td>${user.active}</td>

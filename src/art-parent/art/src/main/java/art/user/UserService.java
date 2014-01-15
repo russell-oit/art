@@ -26,7 +26,7 @@ public class UserService {
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
 	final String ALL_USERS_SQL = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
 			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, "
-			+ " HASHING_ALGORITHM, START_QUERY "
+			+ " HASHING_ALGORITHM, START_QUERY, USER_ID "
 			+ " FROM ART_USERS ";
 
 	/**
@@ -85,6 +85,7 @@ public class UserService {
 		user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 		user.setHashingAlgorithm(rs.getString("HASHING_ALGORITHM"));
 		user.setStartQuery(rs.getString("START_QUERY"));
+		user.setUserId(rs.getInt("USER_ID"));
 	}
 
 	/**
@@ -166,10 +167,10 @@ public class UserService {
 	/**
 	 * Delete a user and all related records
 	 * 
-	 * @param username
+	 * @param userId
 	 * @throws SQLException 
 	 */
-	public void deleteUser(String username) throws SQLException{
+	public void deleteUser(int userId) throws SQLException{
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -179,51 +180,52 @@ public class UserService {
 			String sql;
 			
 			//delete user-report relationships
-			sql = "DELETE FROM ART_USER_QUERIES WHERE USERNAME=?";
+			sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			ps.setInt(1, userId);
 			ps.executeUpdate();
 
 			//delete user-report group relationships
-			sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USERNAME=?";
+			sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			ps.setInt(1, userId);
 			ps.executeUpdate();
 
 			//delete user-rules relationships
-			sql = "DELETE FROM ART_USER_RULES WHERE USERNAME=?";
+			sql = "DELETE FROM ART_USER_RULES WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			ps.setInt(1, userId);
 			ps.executeUpdate();
 
 			//delete user-user group relationships
-			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USERNAME=?";
+			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			ps.setInt(1, userId);
 			ps.executeUpdate();
 
 			//delete user-shared job relationships
-			sql = "DELETE FROM ART_USER_JOBS WHERE USERNAME=?";
+			sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			ps.setInt(1, userId);
 			ps.executeUpdate();
 
 			//delete user's jobs. this will delete all records related to the job e.g. quartz records, job parameters etc
-			sql = "SELECT JOB_ID FROM ART_JOBS WHERE USERNAME=?";
+			sql = "SELECT JOB_ID FROM ART_JOBS WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			ps.setInt(1, userId);
 			
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				ArtJob aj = new ArtJob();
-				aj.load(rs.getInt("JOB_ID"), username);
-				aj.delete();
+				//TODO delete jor using user id
+//				ArtJob aj = new ArtJob();
+//				aj.load(rs.getInt("JOB_ID"), userId);
+//				aj.delete();
 			}
 
 			//lastly, delete user
-			sql = "DELETE FROM ART_USERS WHERE USERNAME=?";
+			sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			ps.setInt(1, userId);
 			ps.executeUpdate();
 			
 		} finally {

@@ -20,6 +20,25 @@ public class User implements Serializable {
 	private String hashingAlgorithm;
 	private String startQuery;
 	private boolean active;
+	private int userId;
+
+	/**
+	 * Get the value of userId
+	 *
+	 * @return the value of userId
+	 */
+	public int getUserId() {
+		return userId;
+	}
+
+	/**
+	 * Set the value of userId
+	 *
+	 * @param userId new value of userId
+	 */
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
 
 	/**
 	 * Get the value of active

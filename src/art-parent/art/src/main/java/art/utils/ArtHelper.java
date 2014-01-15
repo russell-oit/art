@@ -44,6 +44,7 @@ public class ArtHelper {
 	 * Authenticate the session.
 	 *
 	 * @param request
+	 * @return 
 	 * @throws ArtException if couldn't authenticate
 	 * @throws Exception
 	 */

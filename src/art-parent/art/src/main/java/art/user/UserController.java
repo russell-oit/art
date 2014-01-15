@@ -2,7 +2,6 @@ package art.user;
 
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,15 +38,15 @@ public class UserController {
 
 	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteUser(@RequestParam("username") String username) {
+	AjaxResponse deleteUser(@RequestParam("userId") int userId) {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userService.deleteUser(username);
+			userService.deleteUser(userId);
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
-			response.setErrorMessage(StringEscapeUtils.escapeHtml4(ex.toString()));
+			response.setErrorMessage(ex.toString());
 		}
 		
 		return response;
