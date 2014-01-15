@@ -86,7 +86,10 @@ Login page
 								<div class="col-md-10">
 									<select name="windowsDomain" id="windowsDomain" class="form-control">
 										<c:forTokens var="domain" items='${domains}' delims=",">
-											<option value="${fn:escapeXml(domain)}" ${domain == selectedDomain ? "selected" : ""}>${fn:escapeXml(domain)}</option>
+											<option value="${fn:escapeXml(domain)}"
+													${domain == selectedDomain ? "selected" : ""}>
+												${fn:escapeXml(domain)}
+											</option>
 										</c:forTokens>
 									</select>
 								</div>
@@ -97,7 +100,8 @@ Login page
 								<spring:message code="page.label.username"/>
 							</label>
 							<div class="col-md-10">
-								<input type="text" name="username" id="username" class="form-control" value="${fn:escapeXml(selectedUsername)}">
+								<input type="text" name="username" id="username"
+									   maxlength="30" class="form-control" value="${fn:escapeXml(selectedUsername)}">
 							</div>
 						</div>
 						<div class="form-group">
@@ -105,7 +109,8 @@ Login page
 								<spring:message code="page.label.password"/>
 							</label>
 							<div class="col-md-10">
-								<input type="password" name="password" id="password" class="form-control">
+								<input type="password" name="password" id="password"
+									   maxlength="40" class="form-control">
 							</div>
 						</div>
 						<div class="form-group">

@@ -116,7 +116,7 @@ Display art database configuration page
 						<spring:message code="artDatabase.label.jdbcDriver"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="driver" id="driver" class="form-control" />
+						<form:input path="driver" id="driver" maxlength="100" class="form-control" />
 					</div>
 				</div>
 				<div class="form-group">
@@ -124,7 +124,7 @@ Display art database configuration page
 						<spring:message code="artDatabase.label.jdbcUrl"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="url" id="url" class="form-control" />
+						<form:input path="url" id="url" maxlength="2000" class="form-control" />
 						<form:errors path="url" cssClass="error" />
 					</div>
 				</div>
@@ -133,7 +133,7 @@ Display art database configuration page
 						<spring:message code="page.label.username"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="username" id="username" class="form-control" />
+						<form:input path="username" id="username" maxlength="30" class="form-control" />
 					</div>
 				</div>
 				<div class="form-group">
@@ -142,7 +142,7 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:password path="password" id="password" autocomplete="off" class="form-control" />
+							<form:password path="password" id="password" autocomplete="off" maxlength="40" class="form-control" />
 							<spring:message code="page.help.password" var="help" />
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -166,7 +166,7 @@ Display art database configuration page
 					<div class="col-md-8">
 						<div class="input-group">
 							<form:input path="connectionTestSql" 
-										id="connectionTestSql" class="form-control" />
+										id="connectionTestSql" maxlength="100" class="form-control" />
 							<spring:message code="artDatabase.help.connectionTestSql" var="help" />
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
