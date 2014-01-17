@@ -78,7 +78,8 @@ INSERT INTO ART_DATABASE_VERSION VALUES('3.0-alpha2');
 -- ACCESS_LEVEL: 0 = normal user, 5 = normal user who can schedule jobs
 -- 10 = junior admin, 30 = mid admin, 40 = standard admin, 80 = senior admin
 -- 100 = super admin
--- ACTIVE: boolean value. 0=false, 1=true
+-- ACTIVE: boolean value. 1=true, 0=false
+-- CAN_CHANGE_PASSWORD: boolean value. 1=true, 0=false
 
 CREATE TABLE ART_USERS
 (
@@ -91,7 +92,7 @@ CREATE TABLE ART_USERS
 	ACCESS_LEVEL INTEGER,
 	DEFAULT_QUERY_GROUP INTEGER,
 	START_QUERY VARCHAR(500),
-	CAN_CHANGE_PASSWORD VARCHAR(1), 
+	CAN_CHANGE_PASSWORD INTEGER, 
 	ACTIVE INTEGER, 
 	UPDATE_DATE TIMESTAMP  
 );
@@ -102,7 +103,7 @@ ALTER TABLE ART_USERS ADD CONSTRAINT art_users_uc_username UNIQUE (USERNAME);
 -- ART_DATABASES
 -- Stores Target Database definitions
 
--- ACTIVE: boolean value. 0=false, 1=true
+-- ACTIVE: boolean value. 1=true, 0=false
 
 CREATE TABLE ART_DATABASES
 (

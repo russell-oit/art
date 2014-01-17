@@ -21,6 +21,25 @@ public class User implements Serializable {
 	private String startQuery;
 	private boolean active;
 	private int userId;
+	private boolean canChangePassword;
+
+	/**
+	 * Get the value of canChangePassword
+	 *
+	 * @return the value of canChangePassword
+	 */
+	public boolean isCanChangePassword() {
+		return canChangePassword;
+	}
+
+	/**
+	 * Set the value of canChangePassword
+	 *
+	 * @param canChangePassword new value of canChangePassword
+	 */
+	public void setCanChangePassword(boolean canChangePassword) {
+		this.canChangePassword = canChangePassword;
+	}
 
 	/**
 	 * Get the value of userId

@@ -147,11 +147,10 @@ public class AuthorisationFilter implements Filter {
 
 			//if we are here, user is authenticated
 			//ensure they have access to the specific page. if not show access denied page
-			int accessLevel = user.getAccessLevel().getValue();
 			String requestUri = request.getRequestURI();
 			String path = request.getContextPath() + "/app/";
 
-			if (canAccessPage(requestUri, path, accessLevel)) {
+			if (canAccessPage(requestUri, path, user,session)) {
 				if (!ArtConfig.isArtDatabaseConfigured()) {
 					//if art database not configured, only allow access to artDatabase.do
 					if (!StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
@@ -169,8 +168,10 @@ public class AuthorisationFilter implements Filter {
 		}
 	}
 
-	private boolean canAccessPage(String requestUri, String path, int accessLevel) {
+	private boolean canAccessPage(String requestUri, String path, User user, HttpSession session) {
 		boolean authorised = false;
+		
+		int accessLevel = user.getAccessLevel().getValue();
 
 		//TODO use permissions instead of access level
 		if (StringUtils.startsWith(requestUri, path + "reports.do")) {
@@ -226,6 +227,12 @@ public class AuthorisationFilter implements Filter {
 		} else if (StringUtils.startsWith(requestUri, path + "language.do")) {
 			//all can access
 			authorised = true;
+		} else if (StringUtils.startsWith(requestUri, path + "password.do")) {
+			//everyone, plus user can change password
+			String authenticationMethod=(String)session.getAttribute("authenticationMethod");
+			if (user.isCanChangePassword() && StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
+				authorised = true;
+			}
 		}
 
 		return authorised;

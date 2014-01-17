@@ -8,7 +8,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,7 +28,7 @@ public class UserService {
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
 	final String ALL_USERS_SQL = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
 			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, "
-			+ " HASHING_ALGORITHM, START_QUERY, USER_ID "
+			+ " HASHING_ALGORITHM, START_QUERY, USER_ID, CAN_CHANGE_PASSWORD "
 			+ " FROM ART_USERS ";
 
 	/**
@@ -86,6 +88,7 @@ public class UserService {
 		user.setHashingAlgorithm(rs.getString("HASHING_ALGORITHM"));
 		user.setStartQuery(rs.getString("START_QUERY"));
 		user.setUserId(rs.getInt("USER_ID"));
+		user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
 	}
 
 	/**
@@ -163,22 +166,22 @@ public class UserService {
 
 		return users;
 	}
-	
+
 	/**
 	 * Delete a user and all related records
-	 * 
+	 *
 	 * @param userId
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public void deleteUser(int userId) throws SQLException{
+	public void deleteUser(int userId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		
-		try{
+
+		try {
 			conn = ArtConfig.getConnection();
 			String sql;
-			
+
 			//delete user-report relationships
 			sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
@@ -213,7 +216,7 @@ public class UserService {
 			sql = "SELECT JOB_ID FROM ART_JOBS WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, userId);
-			
+
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				//TODO delete jor using user id
@@ -227,9 +230,41 @@ public class UserService {
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, userId);
 			ps.executeUpdate();
-			
+
 		} finally {
-			DbUtils.close(rs,ps, conn);
+			DbUtils.close(rs, ps, conn);
+		}
+	}
+
+	/**
+	 * Update a user's password
+	 *
+	 * @param userId
+	 * @param newPassword bcrypt hash
+	 * @throws SQLException
+	 */
+	public void updatePassword(int userId, String newPassword) throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+		String sql;
+
+		try {
+			conn = ArtConfig.getConnection();
+
+			sql = "UPDATE ART_USERS SET PASSWORD = ?, UPDATE_DATE = ?, HASHING_ALGORITHM='bcrypt' "
+					+ " WHERE USER_ID = ?";
+
+			ps = conn.prepareStatement(sql);
+			
+			Timestamp now = new Timestamp(new Date().getTime());
+
+			ps.setString(1, newPassword);
+			ps.setTimestamp(2, now);
+			ps.setInt(3, userId);
+
+			ps.executeUpdate();
+		} finally {
+			DbUtils.close(ps, conn);
 		}
 	}
 }

@@ -13,6 +13,7 @@
 -- increase size of log_type column
 -- change update_date columns to timestamps
 -- add user_id columns
+-- change can_change_password field from varchar to integer
 
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
@@ -94,6 +95,13 @@ ALTER TABLE ART_LOGS ADD USER_ID INTEGER;
 ALTER TABLE ART_USER_JOBS ADD USER_ID INTEGER;
 ALTER TABLE ART_USER_GROUP_ASSIGNMENT ADD USER_ID INTEGER;
 ALTER TABLE ART_JOB_ARCHIVES ADD USER_ID INTEGER;
+
+-- change can_change_password field from varchar to integer
+ALTER TABLE ART_USERS ADD TMP_CAN_CHANGE_PASSWORD VARCHAR(1);
+UPDATE ART_USERS SET TMP_CAN_CHANGE_PASSWORD=CAN_CHANGE_PASSWORD;
+ALTER TABLE ART_USERS DROP COLUMN CAN_CHANGE_PASSWORD;
+ALTER TABLE ART_USERS ADD CAN_CHANGE_PASSWORD INTEGER;
+UPDATE ART_USERS SET CAN_CHANGE_PASSWORD=1 WHERE TMP_CAN_CHANGE_PASSWORD='Y' OR TMP_CAN_CHANGE_PASSWORD IS NULL;
 
 
 -- add reference table for query types

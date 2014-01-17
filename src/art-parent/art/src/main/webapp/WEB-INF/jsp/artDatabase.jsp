@@ -90,7 +90,7 @@ Display art database configuration page
 						<spring:message code="artDatabase.label.databaseType"/>
 					</label>
 					<div class="col-md-8">
-						<div class='input-group'>
+						<div class="input-group">
 							<select name="databaseType" id="databaseType" class="form-control"
 									onchange="setDatasourceFields(this.value, 'driver', 'url', 'connectionTestSql');">
 								<option value="">

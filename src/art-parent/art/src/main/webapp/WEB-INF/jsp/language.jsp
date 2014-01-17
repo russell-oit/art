@@ -35,8 +35,7 @@ Display application language selection page
 		<form class="form-horizontal" method="POST" action="">
 			<fieldset>
 				<c:if test="${not empty success}">
-					<div class="alert alert-success alert-dismissable">
-						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+					<div class="alert alert-success">
 						<spring:message code="language.message.languageUpdated"/>
 					</div>
 				</c:if>

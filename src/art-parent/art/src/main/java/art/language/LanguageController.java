@@ -42,7 +42,7 @@ public class LanguageController {
 	}
 
 	@RequestMapping(value = "/app/language", method = RequestMethod.POST)
-	public String showLanguage(RedirectAttributes redirectAttributes) {
+	public String processLanguage(RedirectAttributes redirectAttributes) {
 		redirectAttributes.addFlashAttribute("success", "true");
 		return "redirect:/app/language.do";
 	}
