@@ -115,7 +115,7 @@ Login page
 						</div>
 						<div class="form-group">
 							<label class="control-label col-md-2" for="lang">
-								<spring:message code="login.label.language"/>
+								<spring:message code="page.label.language"/>
 							</label>
 							<div class="col-md-10">
 								<select name="lang" id="lang" class="form-control">

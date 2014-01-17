@@ -223,7 +223,10 @@ public class AuthorisationFilter implements Filter {
 					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
 				authorised = true;
 			}
-		} 
+		} else if (StringUtils.startsWith(requestUri, path + "language.do")) {
+			//all can access
+			authorised = true;
+		}
 
 		return authorised;
 	}

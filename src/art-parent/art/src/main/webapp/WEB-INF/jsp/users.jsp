@@ -23,6 +23,7 @@ Display user configuration page
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.delete" var="deleteText"/>
 <spring:message code="dialog.message.deleteUser" var="deleteUserText"/>
+<spring:message code="dialog.title.confirm" var="confirmText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -52,11 +53,12 @@ Display user configuration page
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
 					var aPos = oTable.fnGetPosition(nRow);
-					var username = row.data("username");
+					var username = escapeHtmlContent(row.data("username"));
 					var userId = row.data("id");
 					var msg;
 					bootbox.confirm({
-						message: "${deleteUserText}: " + username + " ?",
+						message: "${deleteUserText}: " + username,
+						title: "${confirmText}",
 						buttons: {
 							'cancel': {
 								label: "${cancelText}"
@@ -74,11 +76,11 @@ Display user configuration page
 									success: function(response) {
 										if (response.success) {
 											msg = "${userDeletedText}: " + username;
-											$("#response").addClass("alert alert-success").text(msg);
+											$("#response").addClass("alert alert-success").html(msg);
 											oTable.fnDeleteRow(aPos);
 											$.notify("${userDeletedText}", "success");
 										} else {
-											msg = "<p>${errorOccurredText}</p><p>" + response.errorMessage + "</p>";
+											msg = "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 											$("#response").addClass("alert alert-danger").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
@@ -105,6 +107,12 @@ Display user configuration page
 			</div>
 		</c:if>
 
+		<div>
+			<button class="btn btn-default add">
+				<i class="fa fa-plus"></i>
+				<spring:message code="page.action.add"/>
+			</button>
+		</div>
 		<div id="response">
 
 		</div>
@@ -131,11 +139,11 @@ Display user configuration page
 							<div class="btn-group">
 								<a class="btn btn-default" href="#">
 									<i class="fa fa-pencil-square-o"></i>
-									<spring:message code="users.action.edit"/>
+									<spring:message code="page.action.edit"/>
 								</a>
 								<button type="button" class="btn btn-default delete">
 									<i class="fa fa-trash-o"></i>
-									<spring:message code="users.action.delete"/>
+									<spring:message code="page.action.delete"/>
 								</button>
 							</div>
 						</td>

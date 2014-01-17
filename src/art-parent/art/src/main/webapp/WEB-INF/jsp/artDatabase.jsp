@@ -15,12 +15,11 @@ Display art database configuration page
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
-<spring:message code="page.title.artDatabase" var="pageTitle" scope="page"/>
+<spring:message code="page.title.artDatabase" var="pageTitle"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
@@ -68,7 +67,7 @@ Display art database configuration page
 			<fieldset>
 				<c:if test="${not empty success}">
 					<div class="alert alert-success alert-dismissable">
-						<a class="close" data-dismiss="alert" href="#">x</a>
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<spring:message code="artDatabase.message.configurationSaved"/>
 					</div>
 				</c:if>

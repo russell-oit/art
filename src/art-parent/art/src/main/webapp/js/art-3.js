@@ -90,12 +90,3 @@ function escapeHtmlAttribute(s) {
 		return MAP[c];
 	});
 }
-
-function escapeHtml2(str) {
-	var div = document.createElement('div');
-	div.appendChild(document.createTextNode(str));
-	return div.innerHTML;
-}
-
-
-

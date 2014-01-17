@@ -13,7 +13,7 @@ Header that appears at the top of all pages, except the login and logs pages
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <div id="header">
-	
+
 	<!-- Fixed navbar -->
 	<div class="navbar navbar-default navbar-fixed-top">
 		<div class="container">
@@ -139,29 +139,29 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
+						<a href="${pageContext.request.contextPath}/app/language.do">
+							<i class="fa fa-comment"></i> 
+							<spring:message code="header.link.language"/>
+						</a>
+					</li>
+					<c:if test="${authenticationMethod eq internalAuthentication}">
+						<li>
+							<a href="${pageContext.request.contextPath}/app/changePassword.do">
+								<i class="fa fa-lock"></i> 
+								<spring:message code="header.link.password"/>
+							</a>
+						</li>
+					</c:if>
+					<li>
 						<a href="${pageContext.request.contextPath}/logout.do">
 							<i class="fa fa-sign-out"></i> 
 							<spring:message code="header.link.logout"/>
 						</a>
 					</li>
 				</ul>
-				<ul class="nav navbar-nav navbar-right">
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
-							<i class="fa fa-user"></i> ${sessionUser.username} 
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-							<c:if test="${authenticationMethod eq internalAuthentication}">
-								<li>
-									<a href="${pageContext.request.contextPath}/app/changePassword.do">
-										<spring:message code="header.link.changePassword"/>
-									</a>
-								</li>
-							</c:if>
-						</ul>
-					</li>
-				</ul>
+				<div class="nav navbar-nav navbar-right navbar-text">
+					<i class="fa fa-user"></i> ${sessionUser.username} 
+				</div>
 			</div><!--/.nav-collapse -->
 		</div>
 	</div>
