@@ -71,6 +71,45 @@ public class UserService {
 	}
 
 	/**
+	 * Get a user object
+	 *
+	 * @param userId
+	 * @return
+	 * @throws SQLException
+	 */
+	public User getUser(int userId) throws SQLException {
+		User user = null;
+
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			conn = ArtConfig.getConnection();
+			String sql;
+
+			sql = ALL_USERS_SQL + " WHERE USER_ID = ? ";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, userId);
+
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				user = new User();
+
+				populateUser(user, rs);
+
+				//set user properties whose values may come from user groups
+				populateGroupValues(conn, user);
+			}
+		} finally {
+			DbUtils.close(rs, ps, conn);
+		}
+
+		return user;
+	}
+
+	/**
 	 * Populate user object with row from users table
 	 *
 	 * @param user
@@ -255,7 +294,7 @@ public class UserService {
 					+ " WHERE USER_ID = ?";
 
 			ps = conn.prepareStatement(sql);
-			
+
 			Timestamp now = new Timestamp(new Date().getTime());
 
 			ps.setString(1, newPassword);

@@ -149,11 +149,12 @@ public class AuthorisationFilter implements Filter {
 			//ensure they have access to the specific page. if not show access denied page
 			String requestUri = request.getRequestURI();
 			String path = request.getContextPath() + "/app/";
+			String page = StringUtils.substringBetween(requestUri, path, ".do");
 
-			if (canAccessPage(requestUri, path, user,session)) {
+			if (canAccessPage(page, user, session)) {
 				if (!ArtConfig.isArtDatabaseConfigured()) {
 					//if art database not configured, only allow access to artDatabase.do
-					if (!StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
+					if (!StringUtils.equals(page, "artDatabase")) {
 						request.setAttribute("message", "page.message.artDatabaseNotConfigured");
 						request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
 						return;
@@ -168,68 +169,57 @@ public class AuthorisationFilter implements Filter {
 		}
 	}
 
-	private boolean canAccessPage(String requestUri, String path, User user, HttpSession session) {
+	private boolean canAccessPage(String page, User user, HttpSession session) {
 		boolean authorised = false;
-		
+
 		int accessLevel = user.getAccessLevel().getValue();
 
 		//TODO use permissions instead of access level
-		if (StringUtils.startsWith(requestUri, path + "reports.do")) {
+		if (StringUtils.equals(page, "reports")) {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art repository user
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "jobs.do")) {
+		} else if (StringUtils.equals(page, "jobs")) {
 			//everyone
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "logs.do")) {
+		} else if (StringUtils.equals(page, "logs")) {
 			//standard admins and above
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "users.do")) {
+		} else if (StringUtils.equals(page, "users") || StringUtils.endsWith(page, "User")) {
+			//users.do, addUser.do, editUser.do, deleteUser.do
 			//standard admins and above, and repository user
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
 					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "artDatabase.do")) {
+		} else if (StringUtils.equals(page, "artDatabase")) {
 			//super admins only, and repository user
 			if (accessLevel == AccessLevel.SuperAdmin.getValue()
 					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "settings.do")) {
+		} else if (StringUtils.equals(page, "settings")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "serverInfo.do")) {
+		} else if (StringUtils.equals(page, "serverInfo")) {
 			//standard admins and above
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.startsWith(requestUri, path + "getReports.do")) {
-			//everyone can access
-			//NOTE: "everyone" doesn't include when accessing as the art repository user
-			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
-				authorised = true;
-			}
-		} else if (StringUtils.startsWith(requestUri, path + "deleteUser.do")) {
-			//standard admins and above, and repository user
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
-					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
-				authorised = true;
-			}
-		} else if (StringUtils.startsWith(requestUri, path + "language.do")) {
+		} else if (StringUtils.equals(page, "language")) {
 			//all can access
 			authorised = true;
-		} else if (StringUtils.startsWith(requestUri, path + "password.do")) {
-			//everyone, plus user can change password
-			String authenticationMethod=(String)session.getAttribute("authenticationMethod");
+		} else if (StringUtils.equals(page, "password")) {
+			//everyone, plus user can change password, plus internal authentication
+			String authenticationMethod = (String) session.getAttribute("authenticationMethod");
 			if (user.isCanChangePassword() && StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
 				authorised = true;
 			}

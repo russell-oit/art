@@ -13,7 +13,7 @@ Display change password page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<spring:message code="page.title.changePassword" var="pageTitle"/>
+<spring:message code="page.title.password" var="pageTitle"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 

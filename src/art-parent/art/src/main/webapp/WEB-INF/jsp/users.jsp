@@ -28,6 +28,7 @@ Display user configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$(function() {
@@ -76,12 +77,12 @@ Display user configuration page
 									success: function(response) {
 										if (response.success) {
 											msg = "${userDeletedText}: " + username;
-											$("#response").addClass("alert alert-success").html(msg);
+											$("#deleteResponse").addClass("alert alert-success").html(msg);
 											oTable.fnDeleteRow(aPos);
 											$.notify("${userDeletedText}", "success");
 										} else {
 											msg = "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#response").addClass("alert alert-danger").html(msg);
+											$("#deleteResponse").addClass("alert alert-danger").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},
@@ -100,21 +101,21 @@ Display user configuration page
 	</jsp:attribute>
 
 	<jsp:body>
-		<c:if test="${not empty error}">
+		<c:if test="${error != null}">
 			<div class="alert alert-danger">
 				<p><spring:message code="page.message.errorOccurred"/></p>
 				<p>${fn:escapeXml(error)}</p>
 			</div>
 		</c:if>
 
-		<div>
-			<button class="btn btn-default add">
+		<div id="deleteResponse">
+		</div>
+		
+		<div style="margin-bottom: 10px;">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addUser.do">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
-			</button>
-		</div>
-		<div id="response">
-
+			</a>
 		</div>
 
 		<table id="users" class="table table-bordered table-striped table-condensed">
@@ -137,7 +138,7 @@ Display user configuration page
 						<td>${user.active}</td>
 						<td>
 							<div class="btn-group">
-								<a class="btn btn-default" href="#">
+								<a class="btn btn-default" href="${pageContext.request.contextPath}/app/editUser.do?userId=${user.userId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

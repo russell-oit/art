@@ -93,7 +93,8 @@ public class Scheduler extends HttpServlet {
 		File upgradeFile = new File(ArtConfig.getArtTempPath() + "upgrade.txt");
 		if (upgradeFile.exists()) {
 			try {
-				UpgradeHelper.upgrade();
+				UpgradeHelper upgradeHelper=new UpgradeHelper();
+				upgradeHelper.upgrade();
 				upgradeFile.delete();
 			} catch (SQLException ex) {
 				logger.error("Error", ex);

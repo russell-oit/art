@@ -37,7 +37,7 @@ public class UpgradeHelper {
 	 * Perform upgrade steps
 	 * @throws java.sql.SQLException
 	 */
-	public static void upgrade() throws SQLException {
+	public void upgrade() throws SQLException {
 		logger.info("Performing additional upgrade steps...");
 		addUserIds();
 		logger.info("Done performing additional upgrade steps");
@@ -46,7 +46,7 @@ public class UpgradeHelper {
 	/**
 	 * Populate user_id columns. Columns added in 3.0
 	 */
-	private static void addUserIds() throws SQLException {
+	private void addUserIds() throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;

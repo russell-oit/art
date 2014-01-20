@@ -52,24 +52,24 @@ public class PasswordController {
 			@RequestParam("newPassword2") String newPassword2,
 			Model model, RedirectAttributes redirectAttributes) {
 
-		try {
-			if (!StringUtils.equals(newPassword1, newPassword2)) {
-				model.addAttribute("errorMessage", "password.message.passwordsDontMatch");
-			} else {
-				//change password
-				String passwordHash = Encrypter.HashPasswordBcrypt(newPassword1);
-				UserService userService = new UserService();
-				User user = (User) session.getAttribute("sessionUser");
+		if (!StringUtils.equals(newPassword1, newPassword2)) {
+			model.addAttribute("errorMessage", "password.message.passwordsDontMatch");
+		} else {
+			//change password
+			String passwordHash = Encrypter.HashPasswordBcrypt(newPassword1);
+			UserService userService = new UserService();
+			User user = (User) session.getAttribute("sessionUser");
+			try {
 				userService.updatePassword(user.getUserId(), passwordHash);
-
+				
 				redirectAttributes.addFlashAttribute("success", "true");
 				return "redirect:/app/password.do";
+			} catch (SQLException ex) {
+				logger.error("Error", ex);
+				model.addAttribute("error", ex);
 			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
 		}
-		
+
 		return "password";
 	}
 

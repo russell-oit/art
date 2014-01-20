@@ -32,13 +32,13 @@ public class UserController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-
+		
 		return "users";
 	}
 
-	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST)
+	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST, produces = "application/json")
 	public @ResponseBody
-	AjaxResponse deleteUser(@RequestParam("userId") int userId) {
+	AjaxResponse deleteUser(@RequestParam("userId") Integer userId) {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
@@ -48,8 +48,31 @@ public class UserController {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
-		
+
 		return response;
+	}
+
+	@RequestMapping(value = "/app/addUser", method = RequestMethod.GET)
+	public String showAddUser(Model model) {
+		model.addAttribute("user", new User());
+		model.addAttribute("action", "add");
+
+		return "editUser";
+	}
+
+	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
+	public String showEditUser(@RequestParam("userId") Integer userId, Model model) {
+		User user = null;
+		
+		try {
+			user = userService.getUser(userId);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		model.addAttribute("user", user);
+		return "editUser";
 	}
 
 }
