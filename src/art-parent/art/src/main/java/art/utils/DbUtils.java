@@ -17,6 +17,7 @@
 package art.utils;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -25,10 +26,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Class for utility methods related to databases
- * 
+ *
  * @author Timothy Anyona
  */
 public class DbUtils {
+
 	final static Logger logger = LoggerFactory.getLogger(DbUtils.class);
 
 	/**
@@ -98,15 +100,95 @@ public class DbUtils {
 	public static void close(Statement st, Connection conn) {
 		close(null, st, conn);
 	}
-	
+
 	/**
 	 * Close resultset and statement
-	 * 
+	 *
 	 * @param rs
-	 * @param st 
+	 * @param st
 	 */
 	public static void close(ResultSet rs, Statement st) {
 		close(rs, st, null);
 	}
-	
+
+	/**
+	 * Set the given parameter values in the given PreparedStatement.
+	 *
+	 * @param ps The PreparedStatement to set the given parameter values in.
+	 * @param values The parameter values to be set in the created
+	 * PreparedStatement.
+	 * @throws SQLException If something fails during setting the
+	 * PreparedStatement values.
+	 */
+	public static void setValues(PreparedStatement ps, Object... values)
+			throws SQLException {
+		for (int i = 0; i < values.length; i++) {
+			ps.setObject(i + 1, values[i]);
+		}
+	}
+
+	/**
+	 * Converts the given java.util.Date to java.sql.Date
+	 *
+	 * @param date The java.util.Date to be converted to java.sql.Date.
+	 * @return The converted java.sql.Date.
+	 */
+	public static java.sql.Date toSqlDate(java.util.Date date) {
+		return (date != null) ? new java.sql.Date(date.getTime()) : null;
+	}
+
+	/**
+	 * Converts the given java.util.Date to java.sql.Timestamp
+	 *
+	 * @param date The java.util.Date to be converted to java.sql.Date.
+	 * @return The converted java.sql.Timestamp
+	 */
+	public static java.sql.Timestamp toSqlTimestamp(java.util.Date date) {
+		return (date != null) ? new java.sql.Timestamp(date.getTime()) : null;
+	}
+
+	/**
+	 * Gets the current time as a java.sql.Timestamp
+	 *
+	 * @return
+	 */
+	public static java.sql.Timestamp getCurrentTimeStamp() {
+		return new java.sql.Timestamp(System.currentTimeMillis());
+	}
+
+	/**
+	 * Execute a select statement i.e. sql query that returns a resultset
+	 *
+	 * @param conn
+	 * @param ps
+	 * @param sql
+	 * @param values
+	 * @return
+	 * @throws SQLException
+	 */
+	public static ResultSet executeQuery(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
+		ps = conn.prepareStatement(sql);
+		setValues(ps, values);
+
+		return ps.executeQuery();
+	}
+
+	/**
+	 * Execute an update statement i.e. sql query that doesn't return a
+	 * resultset
+	 *
+	 * @param conn
+	 * @param ps
+	 * @param sql
+	 * @param values
+	 * @return
+	 * @throws SQLException
+	 */
+	public static int executeUpdate(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
+		ps = conn.prepareStatement(sql);
+		setValues(ps, values);
+
+		return ps.executeUpdate();
+	}
+
 }

@@ -2,6 +2,7 @@ package art.user;
 
 import art.enums.AccessLevel;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Class to represent a user. Data stored in the ART_USERS table
@@ -22,6 +23,45 @@ public class User implements Serializable {
 	private boolean active;
 	private int userId;
 	private boolean canChangePassword;
+	private Date creationDate;
+	private Date updateDate;
+
+	/**
+	 * Get the value of updateDate
+	 *
+	 * @return the value of updateDate
+	 */
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	/**
+	 * Set the value of updateDate
+	 *
+	 * @param updateDate new value of updateDate
+	 */
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+
+
+	/**
+	 * Get the value of creationDate
+	 *
+	 * @return the value of creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * Set the value of creationDate
+	 *
+	 * @param creationDate new value of creationDate
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 
 	/**
 	 * Get the value of canChangePassword

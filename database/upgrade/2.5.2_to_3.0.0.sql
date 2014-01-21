@@ -14,6 +14,7 @@
 -- change update_date columns to timestamps
 -- add user_id columns
 -- change can_change_password field from varchar to integer
+-- add creation_date columns
 
 -- NOTES:
 -- for hsqldb, sql server, replace the MODIFY keyword with ALTER COLUMN
@@ -102,6 +103,10 @@ UPDATE ART_USERS SET TMP_CAN_CHANGE_PASSWORD=CAN_CHANGE_PASSWORD;
 ALTER TABLE ART_USERS DROP COLUMN CAN_CHANGE_PASSWORD;
 ALTER TABLE ART_USERS ADD CAN_CHANGE_PASSWORD INTEGER;
 UPDATE ART_USERS SET CAN_CHANGE_PASSWORD=1 WHERE TMP_CAN_CHANGE_PASSWORD='Y' OR TMP_CAN_CHANGE_PASSWORD IS NULL;
+ALTER TABLE ART_USERS DROP COLUMN TMP_CAN_CHANGE_PASSWORD;
+
+-- add creation_date columns
+ALTER TABLE ART_USERS ADD CREATION_DATE TIMESTAMP NULL;
 
 
 -- add reference table for query types

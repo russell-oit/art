@@ -2,15 +2,12 @@ package art.user;
 
 import art.enums.AccessLevel;
 import art.servlets.ArtConfig;
-import art.utils.ArtJob;
 import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,9 +23,9 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
-	final String ALL_USERS_SQL = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
-			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, "
-			+ " HASHING_ALGORITHM, START_QUERY, USER_ID, CAN_CHANGE_PASSWORD "
+	final String SQL_GET_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
+			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, HASHING_ALGORITHM, START_QUERY, "
+			+ " USER_ID, CAN_CHANGE_PASSWORD, CREATION_DATE, UPDATE_DATE "
 			+ " FROM ART_USERS ";
 
 	/**
@@ -45,21 +42,18 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
+		String sql = SQL_GET_ALL_USERS + " WHERE USERNAME = ? ";
+
+		Object[] values = {
+			username
+		};
+
 		try {
 			conn = ArtConfig.getConnection();
-			String sql;
-
-			sql = ALL_USERS_SQL + " WHERE USERNAME = ? ";
-
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
-
-			rs = ps.executeQuery();
+			rs = DbUtils.executeQuery(conn, ps, sql, values);
 			if (rs.next()) {
 				user = new User();
-
 				populateUser(user, rs);
-
 				//set user properties whose values may come from user groups
 				populateGroupValues(conn, user);
 			}
@@ -74,7 +68,7 @@ public class UserService {
 	 * Get a user object
 	 *
 	 * @param userId
-	 * @return
+	 * @return user object if user found, null otherwise
 	 * @throws SQLException
 	 */
 	public User getUser(int userId) throws SQLException {
@@ -84,21 +78,18 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
+		String sql = SQL_GET_ALL_USERS + " WHERE USER_ID = ? ";
+
+		Object[] values = {
+			userId
+		};
+
 		try {
 			conn = ArtConfig.getConnection();
-			String sql;
-
-			sql = ALL_USERS_SQL + " WHERE USER_ID = ? ";
-
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-
-			rs = ps.executeQuery();
+			rs = DbUtils.executeQuery(conn, ps, sql, values);
 			if (rs.next()) {
 				user = new User();
-
 				populateUser(user, rs);
-
 				//set user properties whose values may come from user groups
 				populateGroupValues(conn, user);
 			}
@@ -128,6 +119,8 @@ public class UserService {
 		user.setStartQuery(rs.getString("START_QUERY"));
 		user.setUserId(rs.getInt("USER_ID"));
 		user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
+		user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+		user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 	}
 
 	/**
@@ -183,20 +176,14 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
+		String sql = SQL_GET_ALL_USERS;
+
 		try {
 			conn = ArtConfig.getConnection();
-			String sql;
-
-			sql = ALL_USERS_SQL;
-
-			ps = conn.prepareStatement(sql);
-
-			rs = ps.executeQuery();
+			rs = DbUtils.executeQuery(conn, ps, sql);
 			while (rs.next()) {
 				User user = new User();
-
 				populateUser(user, rs);
-
 				users.add(user);
 			}
 		} finally {
@@ -220,6 +207,7 @@ public class UserService {
 		try {
 			conn = ArtConfig.getConnection();
 			String sql;
+			int affectedRows;
 
 			//delete user-report relationships
 			sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
@@ -268,7 +256,10 @@ public class UserService {
 			sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, userId);
-			ps.executeUpdate();
+			affectedRows = ps.executeUpdate();
+			if (affectedRows == 0) {
+				logger.warn("Delete user failed. User not found. User Id={}", userId);
+			}
 
 		} finally {
 			DbUtils.close(rs, ps, conn);
@@ -285,23 +276,23 @@ public class UserService {
 	public void updatePassword(int userId, String newPassword) throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
-		String sql;
+
+		String sql = "UPDATE ART_USERS SET PASSWORD = ?, UPDATE_DATE = ?,"
+				+ " HASHING_ALGORITHM='bcrypt'"
+				+ " WHERE USER_ID = ?";
+
+		Object[] values = {
+			newPassword,
+			DbUtils.getCurrentTimeStamp(),
+			userId
+		};
 
 		try {
 			conn = ArtConfig.getConnection();
-
-			sql = "UPDATE ART_USERS SET PASSWORD = ?, UPDATE_DATE = ?, HASHING_ALGORITHM='bcrypt' "
-					+ " WHERE USER_ID = ?";
-
-			ps = conn.prepareStatement(sql);
-
-			Timestamp now = new Timestamp(new Date().getTime());
-
-			ps.setString(1, newPassword);
-			ps.setTimestamp(2, now);
-			ps.setInt(3, userId);
-
-			ps.executeUpdate();
+			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+			if (affectedRows == 0) {
+				logger.warn("Update password failed. User not found. User ID={}", userId);
+			}
 		} finally {
 			DbUtils.close(ps, conn);
 		}
