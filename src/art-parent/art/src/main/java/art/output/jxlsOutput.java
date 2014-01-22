@@ -210,7 +210,7 @@ public class jxlsOutput {
 
 				String extension = "." + FilenameUtils.getExtension(templateFileName);
 
-				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString() + extension;
+				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString() + extension;
 				fileName = ArtUtils.cleanFileName(fileName); //replace characters that would make an invalid filename
 				fullOutputFileName = exportPath + fileName;
 

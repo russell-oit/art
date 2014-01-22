@@ -229,7 +229,7 @@ public class ExportGraph {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		fullFileNameWithoutExt = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString();
+		fullFileNameWithoutExt = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString();
 		fullFileNameWithoutExt = ArtUtils.cleanFileName(fullFileNameWithoutExt);
 
 		fullFileNameWithoutExt = exportPath + fullFileNameWithoutExt;

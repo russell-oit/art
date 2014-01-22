@@ -2,14 +2,18 @@ package art.user;
 
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import javax.validation.Valid;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Spring controller for the user configuration process
@@ -72,6 +76,32 @@ public class UserController {
 		}
 
 		model.addAttribute("user", user);
+		model.addAttribute("action", "edit");
+		return "editUser";
+	}
+	
+	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
+	public String processAddUser(
+			@ModelAttribute("user") @Valid User user,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+		
+		if(result.hasErrors()){
+			model.addAttribute("formErrors", "");
+			model.addAttribute("action", "add");
+			return "editUser";
+		}
+		
+		try{
+			user.setHashingAlgorithm("bcrypt");
+			userService.addUser(user);
+			redirectAttributes.addFlashAttribute("successMessage", "users.message.userAdded");
+			return "redirect:/app/users.do";
+		} catch(SQLException ex){
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		model.addAttribute("action", "add");
 		return "editUser";
 	}
 

@@ -15,7 +15,7 @@ Display edit user page
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
 <c:choose>
-	<c:when test="${action eq 'add'}">
+	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addUser" var="pageTitle"/>
 	</c:when>
 	<c:otherwise>
@@ -58,15 +58,13 @@ Display edit user page
 					</div>
 				</c:if>
 
-				<form:hidden path="userId"/>
+				<input type="hidden" value="${action}">
 				<div class="form-group">
 					<label class="col-md-4 control-label">
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action != 'add'}">
-							<p class="form-control-static">${user.userId}</p>
-						</c:if>
+						<form:input path="userId" readonly="true" class="form-control"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -83,6 +81,13 @@ Display edit user page
 					</label>
 					<div class="col-md-8">
 						<form:password path="password" maxlength="40" autocomplete="off" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-12">
+						<button type="submit" class="btn btn-primary pull-right">
+							<spring:message code="page.button.save"/>
+						</button>
 					</div>
 				</div>
 

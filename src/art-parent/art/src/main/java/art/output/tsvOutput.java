@@ -310,7 +310,7 @@ public class tsvOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString() + ".tsv";
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString() + ".tsv";
 		filename = ArtUtils.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename;
 	}

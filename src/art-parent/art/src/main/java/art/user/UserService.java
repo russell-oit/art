@@ -2,6 +2,7 @@ package art.user;
 
 import art.enums.AccessLevel;
 import art.servlets.ArtConfig;
+import art.utils.ArtUtils;
 import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,10 +293,95 @@ public class UserService {
 			conn = ArtConfig.getConnection();
 			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
 			if (affectedRows == 0) {
-				logger.warn("Update password failed. User not found. User ID={}", userId);
+				logger.warn("Update password - no rows affected. User ID={}", userId);
 			}
 		} finally {
 			DbUtils.close(ps, conn);
 		}
+	}
+
+	/**
+	 * Add a new user to the database
+	 *
+	 * @param user
+	 * @throws SQLException
+	 */
+	public void addUser(User user) throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
+				+ " HASHING_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
+				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
+				+ " ACTIVE=?, CREATION_DATE=?"
+				+ " WHERE USER_ID=?";
+
+		try {
+			conn = ArtConfig.getConnection();
+			int newId = allocateNewId(conn);
+			if (newId > 0) {
+				Object[] values = {
+					user.getUsername(),
+					user.getPassword(),
+					user.getHashingAlgorithm(),
+					user.getFullName(),
+					user.getEmail(),
+					user.getAccessLevel().getValue(),
+					user.getDefaultQueryGroup(),
+					user.getStartQuery(),
+					user.isActive(),
+					DbUtils.getCurrentTimeStamp(),
+					newId
+				};
+				int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+				if (affectedRows == 0) {
+					logger.warn("Add user - no rows affected. Username='{}'", user.getUsername());
+				}
+			} else {
+				logger.warn("User not added. Allocate new ID failed. Username='{}'", user.getUsername());
+			}
+		} finally {
+			DbUtils.close(ps, conn);
+		}
+	}
+
+	private synchronized int allocateNewId(Connection conn) throws SQLException {
+		int newId = 0;
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		PreparedStatement psInsert = null;
+
+		try {
+			//generate new id
+			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
+			rs = DbUtils.executeQuery(conn, ps, sql);
+			if (rs.next()) {
+				newId = rs.getInt(1) + 1;
+
+				//add dummy record with new id. fill all not null columns
+				//username has unique constraint
+				String allocatingUsername = "allocating-" + RandomStringUtils.randomAlphanumeric(5);
+				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME,PASSWORD,HASHING_ALGORITHM)"
+						+ " VALUES(?,?,'','')";
+
+				Object[] values = {
+					newId,
+					allocatingUsername
+				};
+
+				int affectedRows = DbUtils.executeUpdate(conn, psInsert, sql, values);
+				if (affectedRows == 0) {
+					logger.warn("allocateNewId - no rows affected. ID={}", newId);
+				}
+			} else {
+				logger.warn("Could not get max id");
+			}
+		} finally {
+			DbUtils.close(psInsert);
+			DbUtils.close(rs, ps);
+		}
+
+		return newId;
 	}
 }

@@ -336,7 +336,7 @@ public class xlsOutput implements ArtOutputInterface {
         SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
         h_m_s = timeFormatter.format(today);
 
-        filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString() + ".xls";
+        filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString() + ".xls";
         filename=ArtUtils.cleanFileName(filename); //replace characters that would make an invalid filename
         
         fullFileName = exportPath + filename;

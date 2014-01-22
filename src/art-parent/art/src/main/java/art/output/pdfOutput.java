@@ -437,7 +437,7 @@ public class pdfOutput implements ArtOutputInterface {
 		dateFormatter.applyPattern(timeFormat);
 		h_m_s = dateFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString() + ".pdf";
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString() + ".pdf";
 		filename = ArtUtils.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename;
 	}

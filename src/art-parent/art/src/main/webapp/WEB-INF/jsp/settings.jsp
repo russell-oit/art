@@ -115,7 +115,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="smtpUseStartTls">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.smtpUseStartTls"/>
 						</label>
 						<div class="col-md-7">
@@ -125,12 +125,12 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="useSmtpAuthentication">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.useSmtpAuthentication"/>
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="useSmtpAuthentication"/>
+								<form:checkbox path="useSmtpAuthentication" id="useSmtpAuthentication"/>
 							</div>
 						</div>
 					</div>
@@ -181,7 +181,7 @@ Settings configuration page
 				<fieldset>
 					<legend><spring:message code="settings.text.authentication"/></legend>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="artAuthenticationMethod">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.artAuthenticationMethod"/>
 						</label>
 						<div class="col-md-7">
@@ -273,7 +273,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="ldapConnectionEncryptionMethod">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.ldapConnectionEncryptionMethod"/>
 						</label>
 						<div class="col-md-7">
@@ -320,12 +320,12 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="useLdapAnonymousBind">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.useLdapAnonymousBind"/>
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="useLdapAnonymousBind"/>
+								<form:checkbox path="useLdapAnonymousBind" id="useLdapAnonymousBind"/>
 							</div>
 						</div>
 					</div>
@@ -390,7 +390,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="ldapAuthenticationMethod">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.ldapAuthenticationMethod"/>
 						</label>
 						<div class="col-md-7">
@@ -463,7 +463,7 @@ Settings configuration page
 				<fieldset>
 					<legend>PDF</legend>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="pdfPageSize">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.pdfPageSize"/>
 						</label>
 						<div class="col-md-7">
@@ -544,7 +544,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="pdfFontEmbedded">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.pdfFontEmbedded"/>
 						</label>
 						<div class="col-md-7">
@@ -638,7 +638,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="displayNull">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.displayNull"/>
 						</label>
 						<div class="col-md-7">
@@ -679,7 +679,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="showHeaderInPublicUserSession">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.showHeaderInPublicUserSession"/>
 						</label>
 						<div class="col-md-7">
@@ -707,7 +707,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5" for="schedulingEnabled">
+						<label class="control-label col-md-5">
 							<spring:message code="settings.label.schedulingEnabled"/>
 						</label>
 						<div class="col-md-7">

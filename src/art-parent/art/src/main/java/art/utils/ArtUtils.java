@@ -104,9 +104,10 @@ public class ArtUtils {
 	 *
 	 * @return random string to be appended to output filenames
 	 */
-	public static String getRandomString() {
+	public static String getRandomFileNameString() {
 		return "-" + RandomStringUtils.randomAlphanumeric(10);
 	}
+	
 
 	/**
 	 * Get a string to be used for correctly sorting dates irrespective of the

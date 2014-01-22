@@ -612,7 +612,7 @@ public class ExecuteQuery extends HttpServlet {
 									//set base file name
 									java.util.Date today = new java.util.Date();
 									SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-									String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtUtils.getRandomString();
+									String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtUtils.getRandomFileNameString();
 									filename = ArtUtils.cleanFileName(filename);
 									request.setAttribute("baseFileName", filename);
 

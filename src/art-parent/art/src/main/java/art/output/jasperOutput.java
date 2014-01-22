@@ -323,7 +323,7 @@ public class jasperOutput {
 				SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 				h_m_s = timeFormatter.format(today);
 
-				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString();
+				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString();
 				fileName = ArtUtils.cleanFileName(fileName); //replace characters that would make an invalid filename
 				String fullFileNameWithoutExt = exportPath + fileName;
 

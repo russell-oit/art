@@ -21,7 +21,7 @@ public class User implements Serializable {
 	private String hashingAlgorithm;
 	private String startQuery;
 	private boolean active;
-	private int userId;
+	private Integer userId;
 	private boolean canChangePassword;
 	private Date creationDate;
 	private Date updateDate;
@@ -86,7 +86,7 @@ public class User implements Serializable {
 	 *
 	 * @return the value of userId
 	 */
-	public int getUserId() {
+	public Integer getUserId() {
 		return userId;
 	}
 
@@ -95,7 +95,7 @@ public class User implements Serializable {
 	 *
 	 * @param userId new value of userId
 	 */
-	public void setUserId(int userId) {
+	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 

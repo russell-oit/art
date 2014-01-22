@@ -1570,7 +1570,7 @@ public class ArtJob implements Job, Serializable {
 								SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
 								String datePart = dateFormatter.format(new java.util.Date());
 
-								fileName = jobFileUsername + "-" + queryName + "-" + datePart + ArtUtils.getRandomString() + ".html";
+								fileName = jobFileUsername + "-" + queryName + "-" + datePart + ArtUtils.getRandomFileNameString() + ".html";
 								fileName = ArtUtils.cleanFileName(fileName);
 								fileName = jobsPath + fileName;
 

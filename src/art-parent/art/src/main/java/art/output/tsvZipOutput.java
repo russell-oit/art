@@ -310,7 +310,7 @@ public class tsvZipOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		h_m_s = timeFormatter.format(today);
 
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString();
+		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString();
 		filename = ArtUtils.cleanFileName(filename); //replace characters that would make an invalid filename
 		fullFileName = exportPath + filename + ".zip";
 	}

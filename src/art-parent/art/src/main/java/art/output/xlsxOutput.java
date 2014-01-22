@@ -450,7 +450,7 @@ public class xlsxOutput implements ArtOutputInterface {
 		SimpleDateFormat timeFormatter = new SimpleDateFormat("HH_mm_ss");
 		h_m_s = timeFormatter.format(today);
 
-		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomString();
+		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString();
 		baseName = ArtUtils.cleanFileName(baseName);
 
 		filename = baseName + ".xlsx";

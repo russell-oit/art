@@ -85,7 +85,7 @@ Reports page. Also main/home page
 					if (i === -1) {
 						// Row is not in open array so it's currently closed. Open it
 						var nDetailsRow = oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
-						$('div.innerDetails', nDetailsRow).slideDown();
+						$('div.innerDetails', nDetailsRow).slideDown('fast');
 
 						//add row to open array
 						anOpen.push(nTr);
