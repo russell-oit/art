@@ -91,7 +91,7 @@ public class SettingsController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "true");
+			model.addAttribute("formErrors", "");
 			return "settings";
 		}
 
@@ -128,8 +128,8 @@ public class SettingsController {
 			session.removeAttribute(LDAP_BIND_PASSWORD_ATTRIBUTE);
 
 			//use redirect after successful submission 
-			redirectAttributes.addFlashAttribute("success", "true");
-			return "redirect:/app/settings.do";
+			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");
+			return "redirect:/app/success.do";
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

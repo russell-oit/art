@@ -223,6 +223,9 @@ public class AuthorisationFilter implements Filter {
 			if (user.isCanChangePassword() && StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "success")) {
+			//all can access
+			authorised = true;
 		}
 
 		return authorised;

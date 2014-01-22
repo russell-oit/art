@@ -67,7 +67,7 @@ public class ArtDatabaseController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "true");
+			model.addAttribute("formErrors", "");
 			return "artDatabase";
 		}
 
@@ -149,8 +149,8 @@ public class ArtDatabaseController {
 
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)
-			redirectAttributes.addFlashAttribute("success", "true");
-			return "redirect:/app/artDatabase.do";
+			redirectAttributes.addFlashAttribute("message", "artDatabase.message.configurationSaved");
+			return "redirect:/app/success.do";
 		} catch (Exception ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

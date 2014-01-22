@@ -71,10 +71,18 @@ Display edit user page
 				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="username">
-						<spring:message code="users.label.username"/>
+						<spring:message code="page.label.username"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="username" id="username" maxlength="30" class="form-control"/>
+						<form:input path="username" maxlength="30" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label" for="password">
+						<spring:message code="page.label.password"/>
+					</label>
+					<div class="col-md-8">
+						<form:password path="password" maxlength="40" autocomplete="off" class="form-control"/>
 					</div>
 				</div>
 

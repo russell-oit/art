@@ -62,12 +62,12 @@ public class PasswordController {
 			try {
 				userService.updatePassword(user.getUserId(), passwordHash);
 				
-				//update user object
+				//update session user object
 				user.setPassword(passwordHash);
 				user.setHashingAlgorithm("bcrypt");
 				
-				redirectAttributes.addFlashAttribute("success", "");
-				return "redirect:/app/password.do";
+				redirectAttributes.addFlashAttribute("message", "password.message.passwordUpdated");
+				return "redirect:/app/success.do";
 			} catch (SQLException ex) {
 				logger.error("Error", ex);
 				model.addAttribute("error", ex);

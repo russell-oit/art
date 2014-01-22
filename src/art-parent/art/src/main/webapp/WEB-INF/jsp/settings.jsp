@@ -43,28 +43,12 @@ Settings configuration page
 				$('#useLdapAnonymousBind').change(function() {
 					toggleLdapBindDnEnabled();
 				});
-
-				$('input[name=artAuthenticationMethod]').change(function() {
-					switch ($('input[name=artAuthenticationMethod]:checked').val()) {
-						case 'WindowsDomain':
-							$('#windowsDomainController').focus();
-							break;
-						case 'Database':
-							$('#databaseAuthenticationDriver').focus();
-							break;
-						case 'LDAP':
-							$('#ldapServer').focus();
-							break;
-						default:
-							//do nothing
-					}
-				});
+				
 			});
 
 			function toggleSmtpUsernameEnabled() {
 				if ($('#useSmtpAuthentication').is(':checked')) {
 					$('#smtpUsernameFields').prop('disabled', false);
-					$('#smtpUsername').focus();
 				} else {
 					$('#smtpUsernameFields').prop('disabled', true);
 				}
@@ -75,7 +59,6 @@ Settings configuration page
 					$('#ldapBindDnFields').prop('disabled', true);
 				} else {
 					$('#ldapBindDnFields').prop('disabled', false);
-					$('#ldapBindDn').focus();
 				}
 			}
 		</script>
@@ -92,13 +75,13 @@ Settings configuration page
 	<jsp:body>
 		<form:form class="form-horizontal" method="POST" action="" modelAttribute="settings">
 			<fieldset>
-				<c:if test="${not empty success}">
+				<c:if test="${success != null}">
 					<div class="alert alert-success alert-dismissable">
 						<a class="close" data-dismiss="alert" href="#">x</a>
 						<spring:message code="settings.message.settingsSaved"/>
 					</div>
 				</c:if>
-				<c:if test="${not empty formErrors}">
+				<c:if test="${formErrors !=null}">
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<spring:message code="page.message.formErrors"/>
@@ -119,7 +102,7 @@ Settings configuration page
 							<spring:message code="settings.label.smtpServer"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="smtpServer" id="smtpServer" maxlength="100" class="form-control" />
+							<form:input path="smtpServer" maxlength="100" class="form-control" />
 						</div>
 					</div>
 					<div class="form-group">
@@ -127,7 +110,7 @@ Settings configuration page
 							<spring:message code="settings.label.smtpPort"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="smtpPort" id="smtpPort" maxlength="6" class="form-control" />
+							<form:input path="smtpPort" maxlength="6" class="form-control" />
 							<form:errors path="smtpPort" cssClass="error" />
 						</div>
 					</div>
@@ -137,8 +120,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="smtpUseStartTls"
-											   id="smtpUseStartTls" />
+								<form:checkbox path="smtpUseStartTls"/>
 							</div>
 						</div>
 					</div>
@@ -148,8 +130,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="useSmtpAuthentication"
-											   id="useSmtpAuthentication" />
+								<form:checkbox path="useSmtpAuthentication"/>
 							</div>
 						</div>
 					</div>
@@ -160,7 +141,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:input path="smtpUsername" id="smtpUsername" maxlength="100" class="form-control" />
+									<form:input path="smtpUsername" maxlength="100" class="form-control" />
 									<spring:message code="settings.help.smtpUsername" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
@@ -177,8 +158,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:password path="smtpPassword" id="smtpPassword"
-												   autocomplete="off" maxlength="50" class="form-control" />
+									<form:password path="smtpPassword" maxlength="40" autocomplete="off" class="form-control" />
 									<spring:message code="page.help.password" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
@@ -189,7 +169,7 @@ Settings configuration page
 								</div>
 								<div class="checkbox">
 									<label>
-										<form:checkbox path="useBlankSmtpPassword" id="useBlankSmtpPassword" />
+										<form:checkbox path="useBlankSmtpPassword"/>
 										<spring:message code="page.checkbox.useBlankPassword"/>
 									</label>
 								</div>
@@ -220,8 +200,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="windowsDomainController"
-											id="windowsDomainController" maxlength="50" class="form-control" />
+								<form:input path="windowsDomainController" maxlength="50" class="form-control" />
 								<spring:message code="settings.help.windowsDomainController" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -238,8 +217,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="allowedWindowsDomains"
-											id="allowedWindowsDomains" maxlength="200" class="form-control" />
+								<form:input path="allowedWindowsDomains" maxlength="200" class="form-control" />
 								<spring:message code="settings.help.allowedWindowsDomains" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -256,8 +234,7 @@ Settings configuration page
 							<spring:message code="settings.label.databaseAuthenticationDriver"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="databaseAuthenticationDriver"
-										id="databaseAuthenticationDriver" maxlength="100" class="form-control" />
+							<form:input path="databaseAuthenticationDriver" maxlength="100" class="form-control" />
 						</div>
 					</div>
 					<div class="form-group">
@@ -265,8 +242,7 @@ Settings configuration page
 							<spring:message code="settings.label.databaseAuthenticationUrl"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="databaseAuthenticationUrl"
-										id="databaseAuthenticationUrl" maxlength="2000" class="form-control" />
+							<form:input path="databaseAuthenticationUrl" maxlength="2000" class="form-control" />
 						</div>
 					</div>
 					<hr>
@@ -276,7 +252,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="ldapServer" id="ldapServer" maxlength="100" class="form-control" />
+								<form:input path="ldapServer" maxlength="100" class="form-control" />
 								<spring:message code="settings.help.ldapServer" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -292,7 +268,7 @@ Settings configuration page
 							<spring:message code="settings.label.ldapPort"/>
 						</label>
 						<div class="col-md-7">
-							<form:input path="ldapPort" id="ldapPort" maxlength="6" class="form-control" />
+							<form:input path="ldapPort" maxlength="6" class="form-control" />
 							<form:errors path="ldapPort" cssClass="error" />
 						</div>
 					</div>
@@ -315,7 +291,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="ldapUrl" id="ldapUrl" maxlength="2000" class="form-control" />
+								<form:input path="ldapUrl" maxlength="2000" class="form-control" />
 								<spring:message code="settings.help.ldapUrl" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -332,7 +308,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="ldapBaseDn" id="ldapBaseDn" maxlength="500" class="form-control" />
+								<form:input path="ldapBaseDn" maxlength="500" class="form-control" />
 								<spring:message code="settings.help.ldapBaseDn" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -349,8 +325,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="useLdapAnonymousBind"
-											   id="useLdapAnonymousBind" />
+								<form:checkbox path="useLdapAnonymousBind"/>
 							</div>
 						</div>
 					</div>
@@ -361,7 +336,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:input path="ldapBindDn" id="ldapBindDn" maxlength="500" class="form-control" />
+									<form:input path="ldapBindDn" maxlength="500" class="form-control" />
 									<spring:message code="settings.help.ldapBindDn" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
@@ -378,9 +353,7 @@ Settings configuration page
 							</label>
 							<div class="col-md-7">
 								<div class="input-group">
-									<form:password path="ldapBindPassword" 
-												   id="ldapBindPassword" autocomplete="off"
-												   maxlength="40" class="form-control" />
+									<form:password path="ldapBindPassword" maxlength="40" autocomplete="off" class="form-control" />
 									<spring:message code="page.help.password" var="help" />
 									<span class="input-group-btn" >
 										<button class="btn btn-default" type="button"
@@ -391,7 +364,7 @@ Settings configuration page
 								</div>
 								<div class="checkbox">
 									<label>
-										<form:checkbox path="useBlankLdapBindPassword" id="useBlankLdapBindPassword" />
+										<form:checkbox path="useBlankLdapBindPassword"/>
 										<spring:message code="page.checkbox.useBlankPassword"/>
 									</label>
 								</div>
@@ -404,8 +377,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="ldapUserIdAttribute" id="ldapUserIdAttribute"
-											maxlength="50" class="form-control" />
+								<form:input path="ldapUserIdAttribute" maxlength="50" class="form-control" />
 								<spring:message code="settings.help.ldapUserIdAttribute" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -436,7 +408,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="ldapRealm" id="ldapRealm" maxlength="200" class="form-control" />
+								<form:input path="ldapRealm" maxlength="200" class="form-control" />
 								<spring:message code="settings.help.ldapRealm" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -457,8 +429,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="maxRowsDefault" 
-											id="maxRowsDefault" maxlength="6" class="form-control" />
+								<form:input path="maxRowsDefault" maxlength="6" class="form-control" />
 								<spring:message code="settings.help.maxRowsDefault" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -476,8 +447,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="maxRowsSpecific" 
-											id="maxRowsSpecific" maxlength="500" class="form-control" />
+								<form:input path="maxRowsSpecific" maxlength="500" class="form-control" />
 								<spring:message code="settings.help.maxRowsSpecific" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -511,7 +481,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontName" id="pdfFontName" maxlength="100" class="form-control" />
+								<form:input path="pdfFontName" maxlength="100" class="form-control" />
 								<spring:message code="settings.help.pdfFontName" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -528,7 +498,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontFile" id="pdfFontFile" maxlength="2000" class="form-control" />
+								<form:input path="pdfFontFile" maxlength="2000" class="form-control" />
 								<spring:message code="settings.help.pdfFontFile" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -545,7 +515,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontDirectory" id="pdfFontDirectory" maxlength="2000" class="form-control" />
+								<form:input path="pdfFontDirectory" maxlength="2000" class="form-control" />
 								<spring:message code="settings.help.pdfFontDirectory" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -562,7 +532,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="pdfFontEncoding" id="pdfFontEncoding" maxlength="100" class="form-control" />
+								<form:input path="pdfFontEncoding" maxlength="100" class="form-control" />
 								<spring:message code="settings.help.pdfFontEncoding" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -580,7 +550,7 @@ Settings configuration page
 						<div class="col-md-7">
 							<div class="input-group">
 								<div class="checkbox">
-									<form:checkbox path="pdfFontEmbedded" id="pdfFontEmbedded" />
+									<form:checkbox path="pdfFontEmbedded"/>
 								</div>
 								<spring:message code="settings.help.pdfFontEmbedded" var="help" />
 								<span class="input-group-btn" >
@@ -602,7 +572,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="administratorEmail" id="administratorEmail" maxlength="100" class="form-control" />
+								<form:input path="administratorEmail" maxlength="100" class="form-control" />
 								<spring:message code="settings.help.administratorEmail" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -619,7 +589,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="dateFormat" id="dateFormat" maxlength="100" class="form-control" />
+								<form:input path="dateFormat" maxlength="100" class="form-control" />
 								<spring:message code="settings.help.dateFormat" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -637,7 +607,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="timeFormat" id="timeFormat" maxlength="100" class="form-control" />
+								<form:input path="timeFormat" maxlength="100" class="form-control" />
 								<spring:message code="settings.help.timeFormat" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -655,7 +625,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="reportFormats" id="reportFormats" maxlength="500" class="form-control" />
+								<form:input path="reportFormats" maxlength="500" class="form-control" />
 								<spring:message code="settings.help.reportFormats" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -696,7 +666,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="maxRunningReports" id="maxRunningReports" maxlength="6" class="form-control" />
+								<form:input path="maxRunningReports" maxlength="6" class="form-control" />
 								<spring:message code="settings.help.maxRunningReports" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -714,8 +684,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="showHeaderInPublicUserSession"
-											   id="showHeaderInPublicUserSession" />
+								<form:checkbox path="showHeaderInPublicUserSession"/>
 							</div>
 						</div>
 					</div>
@@ -725,8 +694,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="mondrianCacheExpiryPeriod" id="mondrianCacheExpiryPeriod"
-											maxlength="6" class="form-control" />
+								<form:input path="mondrianCacheExpiryPeriod" maxlength="6" class="form-control" />
 								<spring:message code="settings.help.mondrianCacheExpiryPeriod" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
@@ -744,8 +712,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="schedulingEnabled"
-											   id="schedulingEnabled" />
+								<form:checkbox path="schedulingEnabled"/>
 							</div>
 						</div>
 					</div>
@@ -755,7 +722,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
-								<form:input path="rssLink" id="rssLink" maxlength="2000" class="form-control" />
+								<form:input path="rssLink" maxlength="2000" class="form-control" />
 								<spring:message code="settings.help.rssLink" var="help" />
 								<span class="input-group-btn" >
 									<button class="btn btn-default" type="button"
