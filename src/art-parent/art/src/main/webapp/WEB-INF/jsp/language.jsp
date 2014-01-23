@@ -34,12 +34,6 @@ Display application language selection page
 	<jsp:body>
 		<form class="form-horizontal" method="POST" action="">
 			<fieldset>
-				<c:if test="${not empty success}">
-					<div class="alert alert-success">
-						<spring:message code="language.message.languageUpdated"/>
-					</div>
-				</c:if>
-				
 				<div class="form-group">
 					<label class="control-label col-md-2" for="lang">
 						<spring:message code="page.label.language"/>

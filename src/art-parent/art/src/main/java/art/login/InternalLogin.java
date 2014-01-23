@@ -31,7 +31,7 @@ public class InternalLogin {
 		try {
 			conn = ArtConfig.getConnection();
 			
-			String sql = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL, ACTIVE "
+			String sql = "SELECT PASSWORD, PASSWORD_ALGORITHM, ACCESS_LEVEL, ACTIVE "
 					+ " FROM ART_USERS "
 					+ " WHERE USERNAME = ?";
 
@@ -47,7 +47,7 @@ public class InternalLogin {
 				if (active) {
 					boolean passwordVerified = false;
 					try {
-						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"));
+						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("PASSWORD_ALGORITHM"));
 					} catch (Exception ex) {
 						logger.error("Error. username='{}'", username, ex);
 					}
@@ -58,7 +58,7 @@ public class InternalLogin {
 						result.setAuthenticated(true);
 					} else {
 						//invalid password
-						result.setMessage("login.message.invalidPassword");
+						result.setMessage("login.message.invalidCredentials");
 						result.setDetails("invalid password");
 					}
 				} else {

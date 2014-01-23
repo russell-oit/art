@@ -32,20 +32,15 @@ Display change password page
 	<jsp:body>
 		<form class="form-horizontal" method="POST" action="">
 			<fieldset>
-				<c:if test="${success != null}">
-					<div class="alert alert-success">
-						<spring:message code="password.message.passwordUpdated"/>
+				<c:if test="${error != null}">
+					<div class="alert alert-danger">
+						<p><spring:message code="page.message.errorOccurred"/></p>
+						<p>${error}</p>
 					</div>
 				</c:if>
 				<c:if test="${not empty errorMessage}">
 					<div class="alert alert-danger">
 						<spring:message code="${errorMessage}"/>
-					</div>
-				</c:if>
-				<c:if test="${not empty error}">
-					<div class="alert alert-danger">
-						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
 					</div>
 				</c:if>
 				

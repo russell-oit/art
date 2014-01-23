@@ -8,59 +8,59 @@ package art.login;
 public class LoginResult {
 
 	private boolean authenticated;
-	private String message; //i18n message. only for use in the login page
-	private String error; //full exception details
-	private String details; //exception message or custom message. for display or logging
+	private String message; //i18n message. for display
+	private String error; //exception details
+	private String details; //custom message. for logging
 
 	/**
-	 * Get the exception message or custom message
+	 * Get the custom message for logging
 	 *
-	 * @return the exception message or custom message
+	 * @return the custom message for logging
 	 */
 	public String getDetails() {
 		return details;
 	}
 
 	/**
-	 * Set the exception message or custom message
+	 * Set the custom message for logging
 	 *
-	 * @param details the exception message or custom message
+	 * @param details the custom message for logging
 	 */
 	public void setDetails(String details) {
 		this.details = details;
 	}
 
 	/**
-	 * Get the full exception details
+	 * Get the exception details
 	 *
-	 * @return the full exception details
+	 * @return the exception details
 	 */
 	public String getError() {
 		return error;
 	}
 
 	/**
-	 * Set the full exception details
+	 * Set the exception details
 	 *
-	 * @param error the full exception details
+	 * @param error the exception details
 	 */
 	public void setError(String error) {
 		this.error = error;
 	}
 
 	/**
-	 * Get the i18n message. only for use in the login page
+	 * Get the i18n message for display
 	 *
-	 * @return the i18n message
+	 * @return the i18n message for display
 	 */
 	public String getMessage() {
 		return message;
 	}
 
 	/**
-	 * Set the i18n message. only for use in the login page
+	 * Set the i18n message for display
 	 *
-	 * @param message the i18n message
+	 * @param message the i18n message for display
 	 */
 	public void setMessage(String message) {
 		this.message = message;

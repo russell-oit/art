@@ -18,7 +18,7 @@ public class User implements Serializable {
 	private String fullName;
 	private String password;
 	private int defaultQueryGroup;
-	private String hashingAlgorithm;
+	private String passwordAlgorithm;
 	private String startQuery;
 	private boolean active;
 	private Integer userId;
@@ -136,21 +136,21 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Get the value of hashingAlgorithm
+	 * Get the value of passwordAlgorithm
 	 *
-	 * @return the value of hashingAlgorithm
+	 * @return the value of passwordAlgorithm
 	 */
-	public String getHashingAlgorithm() {
-		return hashingAlgorithm;
+	public String getPasswordAlgorithm() {
+		return passwordAlgorithm;
 	}
 
 	/**
-	 * Set the value of hashingAlgorithm
+	 * Set the value of passwordAlgorithm
 	 *
-	 * @param hashingAlgorithm new value of hashingAlgorithm
+	 * @param passwordAlgorithm new value of passwordAlgorithm
 	 */
-	public void setHashingAlgorithm(String hashingAlgorithm) {
-		this.hashingAlgorithm = hashingAlgorithm;
+	public void setPasswordAlgorithm(String passwordAlgorithm) {
+		this.passwordAlgorithm = passwordAlgorithm;
 	}
 
 	/**

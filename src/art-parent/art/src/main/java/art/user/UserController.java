@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UserController {
 
 	final static org.slf4j.Logger logger = LoggerFactory.getLogger(UserController.class);
-
+	
 	@Autowired
 	private UserService userService;
 
@@ -60,10 +60,34 @@ public class UserController {
 	public String showAddUser(Model model) {
 		model.addAttribute("user", new User());
 		model.addAttribute("action", "add");
-
 		return "editUser";
 	}
 
+	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
+	public String processAddUser(@RequestParam("action") String action,
+			@ModelAttribute("user") @Valid User user,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+		
+		if(result.hasErrors()){
+			model.addAttribute("formErrors","");
+			model.addAttribute("action", action);
+			return "editUser";
+		}
+		
+		try{
+			userService.addUser(user);
+			redirectAttributes.addFlashAttribute("userAdded","");
+			redirectAttributes.addFlashAttribute("username",user.getUsername());
+			return "redirect:/app/users.do";
+		} catch(SQLException ex){
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		model.addAttribute("action", action);
+		return "editUser";
+	}
+	
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
 	public String showEditUser(@RequestParam("userId") Integer userId, Model model) {
 		User user = null;
@@ -77,31 +101,6 @@ public class UserController {
 
 		model.addAttribute("user", user);
 		model.addAttribute("action", "edit");
-		return "editUser";
-	}
-	
-	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
-	public String processAddUser(
-			@ModelAttribute("user") @Valid User user,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-		
-		if(result.hasErrors()){
-			model.addAttribute("formErrors", "");
-			model.addAttribute("action", "add");
-			return "editUser";
-		}
-		
-		try{
-			user.setHashingAlgorithm("bcrypt");
-			userService.addUser(user);
-			redirectAttributes.addFlashAttribute("successMessage", "users.message.userAdded");
-			return "redirect:/app/users.do";
-		} catch(SQLException ex){
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		model.addAttribute("action", "add");
 		return "editUser";
 	}
 

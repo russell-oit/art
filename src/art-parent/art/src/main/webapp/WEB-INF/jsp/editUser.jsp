@@ -50,7 +50,7 @@ Display edit user page
 						<spring:message code="page.message.formErrors"/>
 					</div>
 				</c:if>
-				<c:if test="${not empty error}">
+				<c:if test="${error != null}">
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
@@ -58,7 +58,7 @@ Display edit user page
 					</div>
 				</c:if>
 
-				<input type="hidden" value="${action}">
+				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="col-md-4 control-label">
 						<spring:message code="page.label.id"/>

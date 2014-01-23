@@ -50,35 +50,33 @@ Login page
 								 alt="" class="img-responsive centered">
 						</div>
 
-						<c:if test="${not empty message}">
+						<c:if test="${invalidLogin != null}">
 							<div class="alert alert-danger">
-								<spring:message code="${message}"/>
+								<spring:message code="login.message.invalidCredentials"/>
 							</div>
 						</c:if>
-						<c:if test="${not empty autoLoginMessage}">
+						<c:if test="${invalidAutoLogin != null}">
 							<div class="alert alert-danger">
-								<spring:message code="${autoLoginMessage}" arguments="${autoLoginUser}"/>
+								<spring:message code="login.message.invalidAutoLoginUser" arguments="${autoLoginUser}"/>
 							</div>
 						</c:if>
-						<c:if test="${not empty details}">
+							
+							<%-- don't display actual error or result details							 
+						<c:if test="${error != null}">
 							<div class="alert alert-danger">
-								${fn:escapeXml(details)}
+								<p><spring:message code="page.message.errorOccurred"/></p>
+								<p>${fn:escapeXml(error)}</p>
 							</div>
 						</c:if>
-						<c:if test="${not empty error}">
-							<div class="alert alert-danger">
-								${fn:escapeXml(error)}
-							</div>
-						</c:if>
-						<c:if test="${not empty result}">
+						<c:if test="${result != null}">
 							<div class="alert alert-danger">
 								<p><spring:message code="${result.message}"/></p>
-								<p>${fn:escapeXml(result.details)}</p>
 								<p>${fn:escapeXml(result.error)}</p>
 							</div>
 						</c:if>
+							--%>
 
-						<c:if test="${authenticationMethod eq windowsDomainAuthentication}">
+						<c:if test="${authenticationMethod == windowsDomainAuthentication}">
 							<div class="form-group">
 								<label class="control-label col-md-2" for="windowsDomain">
 									<spring:message code="login.label.domain"/>

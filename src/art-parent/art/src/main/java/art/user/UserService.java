@@ -2,7 +2,6 @@ package art.user;
 
 import art.enums.AccessLevel;
 import art.servlets.ArtConfig;
-import art.utils.ArtUtils;
 import art.utils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,9 +25,13 @@ public class UserService {
 
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
 	final String SQL_GET_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
-			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, HASHING_ALGORITHM, START_QUERY, "
+			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, PASSWORD_ALGORITHM, START_QUERY, "
 			+ " USER_ID, CAN_CHANGE_PASSWORD, CREATION_DATE, UPDATE_DATE "
 			+ " FROM ART_USERS ";
+	final String SQL_UPDATE_USER = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
+				+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
+				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
+				+ " ACTIVE=?";
 
 	/**
 	 * Get a user object for the given username
@@ -117,7 +120,7 @@ public class UserService {
 		user.setActive(rs.getBoolean("ACTIVE"));
 		user.setPassword(rs.getString("PASSWORD"));
 		user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
-		user.setHashingAlgorithm(rs.getString("HASHING_ALGORITHM"));
+		user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
 		user.setStartQuery(rs.getString("START_QUERY"));
 		user.setUserId(rs.getInt("USER_ID"));
 		user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
@@ -272,20 +275,22 @@ public class UserService {
 	 * Update a user's password
 	 *
 	 * @param userId
-	 * @param newPassword bcrypt hash
+	 * @param newPassword password hash
+	 * @param passwordAlgorithm
 	 * @throws SQLException
 	 */
-	public void updatePassword(int userId, String newPassword) throws SQLException {
+	public void updatePassword(int userId, String newPassword, String passwordAlgorithm) throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 
-		String sql = "UPDATE ART_USERS SET PASSWORD = ?, UPDATE_DATE = ?,"
-				+ " HASHING_ALGORITHM='bcrypt'"
+		String sql = "UPDATE ART_USERS SET PASSWORD=?, UPDATE_DATE=?,"
+				+ " PASSWORD_ALGORITHM=?"
 				+ " WHERE USER_ID = ?";
 
 		Object[] values = {
 			newPassword,
 			DbUtils.getCurrentTimeStamp(),
+			passwordAlgorithm,
 			userId
 		};
 
@@ -310,10 +315,7 @@ public class UserService {
 		Connection conn = null;
 		PreparedStatement ps = null;
 
-		String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
-				+ " HASHING_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
-				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-				+ " ACTIVE=?, CREATION_DATE=?"
+		String sql = SQL_UPDATE_USER + ", CREATION_DATE=?"
 				+ " WHERE USER_ID=?";
 
 		try {
@@ -323,7 +325,7 @@ public class UserService {
 				Object[] values = {
 					user.getUsername(),
 					user.getPassword(),
-					user.getHashingAlgorithm(),
+					user.getPasswordAlgorithm(),
 					user.getFullName(),
 					user.getEmail(),
 					user.getAccessLevel().getValue(),
@@ -361,9 +363,9 @@ public class UserService {
 
 				//add dummy record with new id. fill all not null columns
 				//username has unique constraint
-				String allocatingUsername = "allocating-" + RandomStringUtils.randomAlphanumeric(5);
-				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME,PASSWORD,HASHING_ALGORITHM)"
-						+ " VALUES(?,?,'','')";
+				String allocatingUsername = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
+				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME)"
+						+ " VALUES(?,?)";
 
 				Object[] values = {
 					newId,

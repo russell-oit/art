@@ -75,19 +75,13 @@ Settings configuration page
 	<jsp:body>
 		<form:form class="form-horizontal" method="POST" action="" modelAttribute="settings">
 			<fieldset>
-				<c:if test="${success != null}">
-					<div class="alert alert-success alert-dismissable">
-						<a class="close" data-dismiss="alert" href="#">x</a>
-						<spring:message code="settings.message.settingsSaved"/>
-					</div>
-				</c:if>
 				<c:if test="${formErrors !=null}">
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<spring:message code="page.message.formErrors"/>
 					</div>
 				</c:if>
-				<c:if test="${not empty error}">
+				<c:if test="${error != null}">
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>

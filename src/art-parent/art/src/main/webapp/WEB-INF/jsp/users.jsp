@@ -76,7 +76,7 @@ Display user configuration page
 									data: {userId: userId},
 									success: function(response) {
 										if (response.success) {
-											msg = "${userDeletedText}";
+											msg = "${userDeletedText}: " + username;
 											$("#deleteResponse").addClass("alert alert-success").html(msg);
 											oTable.fnDeleteRow(aPos);
 											$.notify("${userDeletedText}", "success");
@@ -101,9 +101,14 @@ Display user configuration page
 	</jsp:attribute>
 
 	<jsp:body>
-		<c:if test="${not empty successMessage}">
+		<c:if test="${userAdded != null}">
 			<div class="alert alert-success">
-				<spring:message code="${successMessage}"/>
+				<spring:message code="users.message.userAdded"/>: ${username}
+			</div>
+		</c:if>
+		<c:if test="${userUpdated != null}">
+			<div class="alert alert-success">
+				<spring:message code="users.message.userUpdated"/>: ${username}
 			</div>
 		</c:if>
 		<c:if test="${error != null}">

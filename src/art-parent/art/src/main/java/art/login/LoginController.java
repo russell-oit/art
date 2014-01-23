@@ -106,6 +106,7 @@ public class LoginController {
 					user = userService.getUser(username);
 				} catch (SQLException ex) {
 					logger.error("Error", ex);
+					model.addAttribute("error", ex);
 				}
 
 				if (user == null) {
@@ -135,8 +136,8 @@ public class LoginController {
 			loginHelper.logFailure(loginMethod, username, ip, result.getDetails());
 
 			//give message and change default to internal login
+			model.addAttribute("invalidAutoLogin", "");
 			model.addAttribute("autoLoginUser", username);
-			model.addAttribute("autoLoginMessage", "login.message.invalidAutoLoginUser");
 		}
 
 		if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {
@@ -198,6 +199,7 @@ public class LoginController {
 			user = userService.getUser(username);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
+			model.addAttribute("error", ex);
 		}
 
 		if (user == null) {
@@ -266,7 +268,10 @@ public class LoginController {
 		} else {
 			//login failure. always display invalid account message rather than actual result details
 			//better for security if less details are displayed
-			model.addAttribute("message", "login.message.invalidCredentials");
+			model.addAttribute("invalidLogin", "");
+			
+			//add result to be available for display, although not displayed
+			model.addAttribute("result", result); 
 
 			return "login";
 
@@ -275,19 +280,6 @@ public class LoginController {
 
 	private String getLoginSuccessNextPage(HttpSession session, User user,
 			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus) {
-		//prepare session
-
-		//TODO remove once refactoring is complete
-		UserEntity ue = new UserEntity(user.getUsername());
-		ue.setAccessLevel(user.getAccessLevel().getValue());
-		session.setAttribute("ue", ue);
-		session.setAttribute("username", user.getUsername());
-		if (user.getAccessLevel().getValue() >= 10) {
-			session.setAttribute("AdminSession", "Y");
-			session.setAttribute("AdminLevel", user.getAccessLevel());
-			session.setAttribute("AdminUsername", user.getUsername());
-		}
-		//
 
 		//set session attributes
 		session.setAttribute("sessionUser", user);
@@ -297,17 +289,16 @@ public class LoginController {
 		sessionStatus.setComplete();
 
 		//get next page
-		//TODO encode url. String nextPage = response.encodeRedirectURL((String) session.getAttribute("nextPage"));
-		String nextPage = (String) session.getAttribute("nextPage");
+		String nextPageAfterLogin = (String) session.getAttribute("nextPageAfterLogin");
 		//remove nextpage attribute. 
 		//it should only be set by the authorization filter, when the session expires
-		session.removeAttribute("nextPage");
+		session.removeAttribute("nextPageAfterLogin");
 
-		if (nextPage == null) {
-			nextPage = "/app/reports.do";
+		if (nextPageAfterLogin == null) {
+			nextPageAfterLogin = "/app/reports.do";
 		}
 
-		return "redirect:" + nextPage;
+		return "redirect:" + nextPageAfterLogin;
 	}
 
 	/**
