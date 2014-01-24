@@ -51,30 +51,34 @@ Login page
 						</div>
 
 						<c:if test="${invalidLogin != null}">
-							<div class="alert alert-danger">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 								<spring:message code="login.message.invalidCredentials"/>
 							</div>
 						</c:if>
 						<c:if test="${invalidAutoLogin != null}">
-							<div class="alert alert-danger">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 								<spring:message code="login.message.invalidAutoLoginUser" arguments="${autoLoginUser}"/>
 							</div>
 						</c:if>
 							
-							<%-- don't display actual error or result details							 
+							<%-- don't display actual error or result details
 						<c:if test="${error != null}">
-							<div class="alert alert-danger">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 								<p><spring:message code="page.message.errorOccurred"/></p>
 								<p>${fn:escapeXml(error)}</p>
 							</div>
 						</c:if>
 						<c:if test="${result != null}">
-							<div class="alert alert-danger">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 								<p><spring:message code="${result.message}"/></p>
 								<p>${fn:escapeXml(result.error)}</p>
 							</div>
 						</c:if>
-							--%>
+							<%-- --%>
 
 						<c:if test="${authenticationMethod == windowsDomainAuthentication}">
 							<div class="form-group">

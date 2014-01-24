@@ -76,13 +76,13 @@ Display user configuration page
 									data: {userId: userId},
 									success: function(response) {
 										if (response.success) {
-											msg = "${userDeletedText}: " + username;
-											$("#deleteResponse").addClass("alert alert-success").html(msg);
+											msg = alertCloseButton + "${userDeletedText}";
+											$("#deleteResponse").addClass("alert alert-success alert-dismissable").html(msg);
 											oTable.fnDeleteRow(aPos);
 											$.notify("${userDeletedText}", "success");
 										} else {
-											msg = "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#deleteResponse").addClass("alert alert-danger").html(msg);
+											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+											$("#deleteResponse").addClass("alert alert-danger alert-dismissable").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},
@@ -101,18 +101,15 @@ Display user configuration page
 	</jsp:attribute>
 
 	<jsp:body>
-		<c:if test="${userAdded != null}">
-			<div class="alert alert-success">
-				<spring:message code="users.message.userAdded"/>: ${username}
-			</div>
-		</c:if>
-		<c:if test="${userUpdated != null}">
-			<div class="alert alert-success">
-				<spring:message code="users.message.userUpdated"/>: ${username}
+		<c:if test="${not empty message}">
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<spring:message code="${message}"/>
 			</div>
 		</c:if>
 		<c:if test="${error != null}">
-			<div class="alert alert-danger">
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
 				<p>${fn:escapeXml(error)}</p>
 			</div>

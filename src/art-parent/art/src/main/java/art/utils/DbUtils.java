@@ -120,8 +120,7 @@ public class DbUtils {
 	 * @throws SQLException If something fails during setting the
 	 * PreparedStatement values.
 	 */
-	public static void setValues(PreparedStatement ps, Object... values)
-			throws SQLException {
+	public static void setValues(PreparedStatement ps, Object... values) throws SQLException {
 		for (int i = 0; i < values.length; i++) {
 			ps.setObject(i + 1, values[i]);
 		}
@@ -134,7 +133,11 @@ public class DbUtils {
 	 * @return The converted java.sql.Date.
 	 */
 	public static java.sql.Date toSqlDate(java.util.Date date) {
-		return (date != null) ? new java.sql.Date(date.getTime()) : null;
+		if (date == null) {
+			return null;
+		}
+
+		return new java.sql.Date(date.getTime());
 	}
 
 	/**
@@ -144,7 +147,11 @@ public class DbUtils {
 	 * @return The converted java.sql.Timestamp
 	 */
 	public static java.sql.Timestamp toSqlTimestamp(java.util.Date date) {
-		return (date != null) ? new java.sql.Timestamp(date.getTime()) : null;
+		if (date == null) {
+			return null;
+		}
+
+		return new java.sql.Timestamp(date.getTime());
 	}
 
 	/**

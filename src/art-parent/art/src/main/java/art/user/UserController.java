@@ -76,8 +76,7 @@ public class UserController {
 		
 		try{
 			userService.addUser(user);
-			redirectAttributes.addFlashAttribute("userAdded","");
-			redirectAttributes.addFlashAttribute("username",user.getUsername());
+			redirectAttributes.addFlashAttribute("message", "users.message.userAdded");
 			return "redirect:/app/users.do";
 		} catch(SQLException ex){
 			logger.error("Error", ex);

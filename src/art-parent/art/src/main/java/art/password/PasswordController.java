@@ -18,7 +18,6 @@ package art.password;
 
 import art.user.User;
 import art.user.UserService;
-import art.utils.ArtUtils;
 import art.utils.Encrypter;
 import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
@@ -58,7 +57,7 @@ public class PasswordController {
 			Model model, RedirectAttributes redirectAttributes) {
 
 		if (!StringUtils.equals(newPassword1, newPassword2)) {
-			model.addAttribute("errorMessage", "password.message.passwordsDontMatch");
+			model.addAttribute("message", "password.message.passwordsDontMatch");
 		} else {
 			//change password
 			String passwordHash = Encrypter.HashPasswordBcrypt(newPassword1);

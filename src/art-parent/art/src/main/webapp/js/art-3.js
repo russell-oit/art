@@ -90,3 +90,5 @@ function escapeHtmlAttribute(s) {
 		return MAP[c];
 	});
 }
+
+var alertCloseButton='<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>';

@@ -136,7 +136,8 @@ Display application logs
 			</span>
 		</div>
 		<c:if test="${not empty message}">
-			<div class="alert alert-info">
+			<div class="alert alert-info alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<spring:message code="${message}"/>
 			</div>
 		</c:if>

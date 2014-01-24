@@ -126,7 +126,8 @@ Reports page. Also main/home page
 
 	<jsp:attribute name="aboveMainPanel">
 		<c:if test="${error != null}">
-			<div class="alert alert-danger">
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
 				<p>${fn:escapeXml(error)}</p>
 			</div>

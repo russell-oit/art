@@ -29,9 +29,9 @@ public class UserService {
 			+ " USER_ID, CAN_CHANGE_PASSWORD, CREATION_DATE, UPDATE_DATE "
 			+ " FROM ART_USERS ";
 	final String SQL_UPDATE_USER = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
-				+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
-				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-				+ " ACTIVE=?";
+			+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
+			+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
+			+ " ACTIVE=?";
 
 	/**
 	 * Get a user object for the given username
@@ -322,13 +322,18 @@ public class UserService {
 			conn = ArtConfig.getConnection();
 			int newId = allocateNewId(conn);
 			if (newId > 0) {
+				Integer accessLevel = null;
+				if (user.getAccessLevel() != null) {
+					accessLevel = Integer.valueOf(user.getAccessLevel().getValue());
+				}
+
 				Object[] values = {
 					user.getUsername(),
 					user.getPassword(),
 					user.getPasswordAlgorithm(),
 					user.getFullName(),
 					user.getEmail(),
-					user.getAccessLevel().getValue(),
+					accessLevel,
 					user.getDefaultQueryGroup(),
 					user.getStartQuery(),
 					user.isActive(),
@@ -364,8 +369,8 @@ public class UserService {
 				//add dummy record with new id. fill all not null columns
 				//username has unique constraint
 				String allocatingUsername = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
-				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME)"
-						+ " VALUES(?,?)";
+				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME,PASSWORD,PASSWORD_ALGORITHM)"
+						+ " VALUES(?,?,'','')";
 
 				Object[] values = {
 					newId,
