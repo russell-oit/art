@@ -7,7 +7,7 @@ import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
 import art.utils.DbUtils;
-import art.utils.LanguageUtils;
+import art.language.LanguageUtils;
 import art.utils.UserEntity;
 import java.sql.Connection;
 import java.sql.SQLException;

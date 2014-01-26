@@ -89,16 +89,14 @@ public class UserController {
 	
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
 	public String showEditUser(@RequestParam("userId") Integer userId, Model model) {
-		User user = null;
-		
 		try {
-			user = userService.getUser(userId);
+			User user = userService.getUser(userId);
+			model.addAttribute("user", user);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		model.addAttribute("user", user);
 		model.addAttribute("action", "edit");
 		return "editUser";
 	}

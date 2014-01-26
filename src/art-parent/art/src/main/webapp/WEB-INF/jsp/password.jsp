@@ -52,7 +52,7 @@ Display change password page
 					</label>
 					<div class="col-md-8">
 						<input type="password" name="newPassword1" id="newPassword1"
-							   maxlength="40" class="form-control">
+							   maxlength="50" class="form-control">
 					</div>
 				</div>
 				<div class="form-group">
@@ -61,7 +61,7 @@ Display change password page
 					</label>
 					<div class="col-md-8">
 						<input type="password" name="newPassword2" id="newPassword2"
-							   maxlength="40" class="form-control">
+							   maxlength="50" class="form-control">
 					</div>
 				</div>
 				<div class="form-group">

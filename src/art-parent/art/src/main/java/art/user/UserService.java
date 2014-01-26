@@ -369,8 +369,8 @@ public class UserService {
 				//add dummy record with new id. fill all not null columns
 				//username has unique constraint
 				String allocatingUsername = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
-				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME,PASSWORD,PASSWORD_ALGORITHM)"
-						+ " VALUES(?,?,'','')";
+				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME,PASSWORD)"
+						+ " VALUES(?,?,'')";
 
 				Object[] values = {
 					newId,
@@ -379,7 +379,7 @@ public class UserService {
 
 				int affectedRows = DbUtils.executeUpdate(conn, psInsert, sql, values);
 				if (affectedRows == 0) {
-					logger.warn("allocateNewId - no rows affected. ID={}", newId);
+					logger.warn("allocateNewId - no rows affected. id={}", newId);
 				}
 			} else {
 				logger.warn("Could not get max id");

@@ -14,13 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Encrypt / Decrypt a string given a fixed key
- *
- * Note: this does provide an obfuscation-like protection for strings, but using
- * this class and the same key it is possible to decrypt string (i.e. it is not
- * as sure as private/public keys)
- */
+
 package art.utils;
 
 import java.io.UnsupportedEncodingException;
@@ -32,7 +26,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +43,8 @@ import org.slf4j.LoggerFactory;
 public class Encrypter {
 
 	final static Logger logger = LoggerFactory.getLogger(Encrypter.class);
-	private static String staticKey = "d-jhbgy&5153tygo8176!"; // this is used as an additional static key
-	private static String defaultPassword = "1tra"; //to allow use and single point of replacing the default password
+	private static final String staticKey = "d-jhbgy&5153tygo8176!"; // this is used as an additional static key
+	private static final String defaultPassword = "1tra"; //to allow use and single point of replacing the default password
 
 	/**
 	 * Encrypt overload that uses default password
@@ -103,10 +97,10 @@ public class Encrypter {
 	 * @return clear text
 	 */
 	public static String decrypt(String cryptedtext, String key) {
-		if(cryptedtext==null){
+		if (cryptedtext == null) {
 			return null;
 		}
-		
+
 		try {
 			Cipher pbeCipher = Cipher.getInstance("PBEWithMD5AndDES");
 			pbeCipher.init(Cipher.DECRYPT_MODE, getKey(key), getParamSpec());
@@ -156,8 +150,6 @@ public class Encrypter {
 	 *
 	 * @param clearText
 	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws UnsupportedEncodingException
 	 */
 	public static String HashPasswordBcrypt(String clearText) {
 		return HashPasswordBcrypt(clearText, 6);
@@ -168,16 +160,19 @@ public class Encrypter {
 	 * password.
 	 *
 	 * @param clearText
+	 * @param rounds
 	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws UnsupportedEncodingException
 	 */
 	public static String HashPasswordBcrypt(String clearText, int rounds) {
-		//NOTE: bcrypt only uses the first 72 bytes so long texts with the first 72 bytes the same will give the same hash
-		//rounds must be 4-31. increase gensalt factor to have slower password generation
+		//NOTE: bcrypt only uses the first 72 bytes so long texts
+		//with the first 72 bytes the same will give the same hash
+
+		//rounds must be 4-31
+		//increase rounds to have slower password generation
 		if (rounds < 4 || rounds > 31) {
 			rounds = 6; //default
 		}
+
 		return BCrypt.hashpw(clearText, BCrypt.gensalt(rounds));
 	}
 
@@ -189,17 +184,13 @@ public class Encrypter {
 	 * @return <code>true</code> if password matches hash
 	 */
 	public static boolean VerifyPasswordBcrypt(String clearText, String hashedPassword) {
-		boolean verified;
-		
-		//hashedPassword must not be blank otherwise error will be thrown
-		if (StringUtils.isBlank(hashedPassword)) {
-			verified = false;
-		} else {
-			//hashedPassword must be a valid bcrypt hash otherwise error will be thrown
-			verified = BCrypt.checkpw(clearText, hashedPassword);
+		if (clearText == null || hashedPassword == null || hashedPassword.length() == 0) {
+			return false;
 		}
 
-		return verified;
+		//hashedPassword must not be empty string otherwise error will be thrown
+		//hashedPassword must be a valid bcrypt hash otherwise error will be thrown
+		return BCrypt.checkpw(clearText, hashedPassword);
 	}
 
 	/**
@@ -208,45 +199,32 @@ public class Encrypter {
 	 *
 	 * @param clearText clear text password
 	 * @param algorithm algorithm to use
-	 * @return hashed password
+	 * @return hashed password. null if clearText or algorithm is null
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
 	public static String HashPassword(String clearText, String algorithm)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
-		String hashedPassword;
-
-		// Algorithm MD5 will generate a 128bit (16 byte) digested byte[]
-		// otherwise, SHA-1 algorithm  will produce a 160bit (20 byte) digested byte[]
-
-		if (algorithm == null || clearText == null || algorithm.equals("none")) {
-			hashedPassword = clearText;
-		} else {
-			//either md5,sha-1,sha-256,sha-512
-			MessageDigest mdg = MessageDigest.getInstance(algorithm);
-
-			// To avoid the use of the (implicit) platform-specific encoding
-			// that can undermine portability of an existent ART instance
-			// we enforce the "UTF-8" encoding
-
-			byte[] hashedMsg = mdg.digest(clearText.getBytes("UTF-8"));
-			// The String is now digested
-
-			int v;
-			StringBuilder d = new StringBuilder(22);
-			for (int i = 0; i < hashedMsg.length; i++) {
-				v = hashedMsg[i] & 0xFF;
-				if (v < 16) {
-					d.append("0");
-				}
-				d.append(Integer.toString(v, 16));
-			}
-
-			hashedPassword = d.toString();
+		if (algorithm == null || clearText == null) {
+			return null;
 		}
 
-		return hashedPassword;
+		//valid algorithm strings - MD2,MD5,SHA-1,SHA-256,SHA-384,SHA-512
+		//Algorithm MD5 will generate a 128bit (16 byte) digested byte[]
+		//SHA-1 algorithm  will produce a 160bit (20 byte) digested byte[]
+		MessageDigest mdg = MessageDigest.getInstance(algorithm);
+
+		// To avoid the use of the (implicit) platform-specific encoding
+		// that can undermine portability of an existent ART instance
+		// we enforce the "UTF-8" encoding
+		byte[] hashedMsg = mdg.digest(clearText.getBytes("UTF-8"));
+		// The String is now digested
+
+		
+		//convert byte array to string in hex format
+		return Hex.encodeHexString(hashedMsg);
+		
 	}
 
 	/**
@@ -262,11 +240,15 @@ public class Encrypter {
 	public static boolean VerifyPassword(String clearText, String hashedPassword, String algorithm)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
+		if (clearText == null || hashedPassword == null || algorithm == null) {
+			return false;
+		}
+
 		boolean verified = false;
 
-		if (StringUtils.equals(algorithm, "bcrypt")) {
+		if (algorithm.equals("bcrypt")) {
 			verified = VerifyPasswordBcrypt(clearText, hashedPassword);
-		} else if (StringUtils.equals(hashedPassword, HashPassword(clearText, algorithm))) {
+		} else if (hashedPassword.equals(HashPassword(clearText, algorithm))) {
 			verified = true;
 		}
 

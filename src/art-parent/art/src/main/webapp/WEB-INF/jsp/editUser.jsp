@@ -80,7 +80,7 @@ Display edit user page
 						<spring:message code="page.label.password"/>
 					</label>
 					<div class="col-md-8">
-						<form:password path="password" maxlength="40" autocomplete="off" class="form-control"/>
+						<form:password path="password" maxlength="50" autocomplete="off" class="form-control"/>
 					</div>
 				</div>
 				<div class="form-group">

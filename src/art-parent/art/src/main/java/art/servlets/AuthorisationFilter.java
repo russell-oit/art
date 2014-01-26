@@ -170,6 +170,10 @@ public class AuthorisationFilter implements Filter {
 	}
 
 	private boolean canAccessPage(String page, User user, HttpSession session) {
+		if (user.getAccessLevel() == null) {
+			return false;
+		}
+
 		boolean authorised = false;
 
 		int accessLevel = user.getAccessLevel().getValue();

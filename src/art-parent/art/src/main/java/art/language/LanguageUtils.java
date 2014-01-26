@@ -1,4 +1,4 @@
-package art.utils;
+package art.language;
 
 import java.util.Map;
 import java.util.TreeMap;
