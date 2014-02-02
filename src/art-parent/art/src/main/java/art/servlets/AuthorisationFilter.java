@@ -139,6 +139,9 @@ public class AuthorisationFilter implements Filter {
 				//use relative path (without context path).
 				//that's what redirect in login controller needs
 				String nextPageAfterLogin = StringUtils.substringAfter(request.getRequestURI(), request.getContextPath());
+				if (request.getQueryString() != null) {
+					nextPageAfterLogin = nextPageAfterLogin + "?" + request.getQueryString();
+				}
 				session.setAttribute("nextPageAfterLogin", nextPageAfterLogin);
 				request.setAttribute("message", message);
 				request.getRequestDispatcher("/login.do").forward(request, response);

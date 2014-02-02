@@ -31,6 +31,18 @@ Display art database configuration page
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
+				
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					iconBase: 'fa',
+					tickIcon: 'fa-check-square'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('.dropdown-toggle').dropdownHover({
+					delay: 100
+				});
 			});
 		</script>
 	</jsp:attribute>
@@ -85,10 +97,10 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<select name="databaseType" id="databaseType" class="form-control"
+							<select name="databaseType" id="databaseType" class="form-control selectpicker"
 									onchange="setDatasourceFields(this.value, 'driver', 'url', 'connectionTestSql');">
 								<option value="">
-									<spring:message code="artDatabase.text.selectDatabaseType"/>
+									<spring:message code="select.text.none"/>
 								</option>
 								<c:forEach var="dbType" items="${databaseTypes}">
 									<option value="${dbType.key}">${dbType.value}</option>

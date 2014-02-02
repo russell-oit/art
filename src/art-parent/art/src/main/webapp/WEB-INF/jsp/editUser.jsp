@@ -23,6 +23,10 @@ Display edit user page
 	</c:otherwise>
 </c:choose>
 
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
@@ -37,17 +41,22 @@ Display edit user page
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
-				
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					iconBase: "fa",
-					tickIcon: 'fa-check-square'
+					iconBase: 'fa',
+					tickIcon: 'fa-check-square',
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}'
 				});
-				
-//				$('.dropdown-toggle').dropdownHover();
-				
-				
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('.dropdown-toggle').dropdownHover({
+					delay: 100
+				});
 
 			});
 		</script>
@@ -69,37 +78,6 @@ Display edit user page
 						<p>${error}</p>
 					</div>
 				</c:if>
-
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="userGroups">
-						<spring:message code="users.label.userGroups"/>
-					</label>
-					<div class="col-md-8">
-						<div class="btn-group bootstrap-select show-tick">
-							<button class="btn dropdown-toggle selectpicker" data-toggle="dropdown">Button <span class="caret"></span></button>
-							<div class="dropdown-menu open" style="max-height: 156.4px; overflow: hidden; min-height: 0px;">
-								<ul class="dropdown-menu selectpicker inner"
-									role="menu" style="max-height: 469px; overflow-x: hidden; overflow-y: hidden; min-height: 0px; ">
-									<li class="selected" rel="0"><a tabindex="0" class="" style=""><i class="fa fa-check-square icon-ok check-mark"></i><span class="text">test</span></a></li><li class="selected" rel="1"><a tabindex="0" class="" style=""><i class="fa fa-check-square icon-ok check-mark"></i><span class="text">a group</span></a></li>
-								</ul>
-							</div>
-						</div>  
-					</div>  
-				</div>  
-
-
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="userGroups">
-						<spring:message code="users.label.userGroups"/>
-					</label>
-					<div class="col-md-8">
-						<spring:message code="select.option.none" var="noneText"/>
-						<form:select path="userGroups" items="${userGroups}"
-									 itemLabel="name" itemValue="userGroupId"
-									 class="form-control selectpicker"
-									 />
-					</div>
-				</div>
 
 				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
@@ -188,7 +166,17 @@ Display edit user page
 						</div>
 					</div>
 				</div>
-
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="userGroups">
+						<spring:message code="users.label.userGroups"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="userGroups" items="${userGroups}"
+									 itemLabel="name" itemValue="userGroupId"
+									 class="form-control selectpicker"
+									 />
+					</div>
+				</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

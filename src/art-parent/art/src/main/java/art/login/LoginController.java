@@ -291,7 +291,7 @@ public class LoginController {
 		//get next page
 		String nextPageAfterLogin = (String) session.getAttribute("nextPageAfterLogin");
 		//remove nextpage attribute. 
-		//it should only be set by the authorization filter, when the session expires
+		//it should only be set by the authorisation filter, when the session expires
 		session.removeAttribute("nextPageAfterLogin");
 
 		if (nextPageAfterLogin == null) {
