@@ -3,8 +3,7 @@ ART 3.0
 * Fix for incorrect sorting of numeric values with grid view mode in italian locale
 * Fix for error when using Conditional Email Output (Inline) jobs
 * Reorganised the code for easier maintenance and enhanced user experience
- - now using maven, spring mvc, jquery ui, datatables,
- - twitter bootstrap, font awesome
+ - now using maven, spring mvc, bootstrap, datatables among other libraries 
 * Enable multi parameter to act as a chained parameter master
 * Allow chained parameter slave to have default values
 * Improved support for sun jdbc-odbc bridge driver

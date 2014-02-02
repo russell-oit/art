@@ -1,5 +1,6 @@
 package art.user;
 
+import art.usergroup.UserGroupService;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import javax.validation.Valid;
@@ -24,9 +25,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UserController {
 
 	final static org.slf4j.Logger logger = LoggerFactory.getLogger(UserController.class);
-	
+
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private UserGroupService userGroupService;
 
 	@RequestMapping(value = "/app/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
@@ -36,7 +39,7 @@ public class UserController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		
+
 		return "users";
 	}
 
@@ -59,6 +62,14 @@ public class UserController {
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.GET)
 	public String showAddUser(Model model) {
 		model.addAttribute("user", new User());
+
+		try {
+			model.addAttribute("userGroups", userGroupService.getAllGroups());
+		} catch (SQLException ex) {
+			logger.error("error", ex);
+			model.addAttribute("error", ex);
+		}
+
 		model.addAttribute("action", "add");
 		return "editUser";
 	}
@@ -67,18 +78,18 @@ public class UserController {
 	public String processAddUser(@RequestParam("action") String action,
 			@ModelAttribute("user") @Valid User user,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-		
-		if(result.hasErrors()){
-			model.addAttribute("formErrors","");
+
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
 			model.addAttribute("action", action);
 			return "editUser";
 		}
-		
-		try{
+
+		try {
 			userService.addUser(user);
 			redirectAttributes.addFlashAttribute("message", "users.message.userAdded");
 			return "redirect:/app/users.do";
-		} catch(SQLException ex){
+		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -86,12 +97,13 @@ public class UserController {
 		model.addAttribute("action", action);
 		return "editUser";
 	}
-	
+
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
 	public String showEditUser(@RequestParam("userId") Integer userId, Model model) {
 		try {
 			User user = userService.getUser(userId);
 			model.addAttribute("user", user);
+			model.addAttribute("userGroups", userGroupService.getAllGroups());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

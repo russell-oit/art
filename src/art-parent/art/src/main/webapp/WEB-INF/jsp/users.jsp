@@ -77,12 +77,12 @@ Display user configuration page
 									success: function(response) {
 										if (response.success) {
 											msg = alertCloseButton + "${userDeletedText}";
-											$("#deleteResponse").addClass("alert alert-success alert-dismissable").html(msg);
+											$("#ajaxResponse").addClass("alert alert-success alert-dismissable").html(msg);
 											oTable.fnDeleteRow(aPos);
 											$.notify("${userDeletedText}", "success");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#deleteResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},
@@ -115,7 +115,7 @@ Display user configuration page
 			</div>
 		</c:if>
 
-		<div id="deleteResponse">
+		<div id="ajaxResponse">
 		</div>
 
 		<div style="margin-bottom: 10px;">

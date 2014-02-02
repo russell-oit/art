@@ -1,8 +1,10 @@
 package art.user;
 
 import art.enums.AccessLevel;
+import art.usergroup.UserGroup;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Class to represent a user. Data stored in the ART_USERS table
@@ -17,14 +19,82 @@ public class User implements Serializable {
 	private String email;
 	private String fullName;
 	private String password;
-	private int defaultQueryGroup;
+	private int defaultReportGroup;
 	private String passwordAlgorithm;
-	private String startQuery;
+	private String startReport;
 	private boolean active;
-	private Integer userId;
+	private int userId;
 	private boolean canChangePassword;
 	private Date creationDate;
 	private Date updateDate;
+	private List<UserGroup> userGroups;
+	private String effectiveStartReport;
+	private int effectiveDefaultReportGroup;
+	private boolean useBlankPassword; //only used for user interface logic
+
+	/**
+	 * Get the value of useBlankPassword. only used for user interface logic
+	 *
+	 * @return the value of useBlankPassword
+	 */
+	public boolean isUseBlankPassword() {
+		return useBlankPassword;
+	}
+
+	/**
+	 * Set the value of useBlankPassword. only used for user interface logic
+	 *
+	 * @param useBlankPassword new value of useBlankPassword
+	 */
+	public void setUseBlankPassword(boolean useBlankPassword) {
+		this.useBlankPassword = useBlankPassword;
+	}
+
+	/**
+	 * @return the effectiveStartReport
+	 */
+	public String getEffectiveStartReport() {
+		return effectiveStartReport;
+	}
+
+	/**
+	 * @param effectiveStartReport the effectiveStartReport to set
+	 */
+	public void setEffectiveStartReport(String effectiveStartReport) {
+		this.effectiveStartReport = effectiveStartReport;
+	}
+
+	/**
+	 * @return the effectiveDefaultReportGroup
+	 */
+	public int getEffectiveDefaultReportGroup() {
+		return effectiveDefaultReportGroup;
+	}
+
+	/**
+	 * @param effectiveDefaultReportGroup the effectiveDefaultReportGroup to set
+	 */
+	public void setEffectiveDefaultReportGroup(int effectiveDefaultReportGroup) {
+		this.effectiveDefaultReportGroup = effectiveDefaultReportGroup;
+	}
+
+	/**
+	 * Get the value of userGroups
+	 *
+	 * @return the value of userGroups
+	 */
+	public List<UserGroup> getUserGroups() {
+		return userGroups;
+	}
+
+	/**
+	 * Set the value of userGroups
+	 *
+	 * @param userGroups new value of userGroups
+	 */
+	public void setUserGroups(List<UserGroup> userGroups) {
+		this.userGroups = userGroups;
+	}
 
 	/**
 	 * Get the value of updateDate
@@ -86,7 +156,7 @@ public class User implements Serializable {
 	 *
 	 * @return the value of userId
 	 */
-	public Integer getUserId() {
+	public int getUserId() {
 		return userId;
 	}
 
@@ -95,7 +165,7 @@ public class User implements Serializable {
 	 *
 	 * @param userId new value of userId
 	 */
-	public void setUserId(Integer userId) {
+	public void setUserId(int userId) {
 		this.userId = userId;
 	}
 
@@ -118,21 +188,21 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Get the value of startQuery
+	 * Get the value of startReport
 	 *
-	 * @return the value of startQuery
+	 * @return the value of startReport
 	 */
-	public String getStartQuery() {
-		return startQuery;
+	public String getStartReport() {
+		return startReport;
 	}
 
 	/**
-	 * Set the value of startQuery
+	 * Set the value of startReport
 	 *
-	 * @param startQuery new value of startQuery
+	 * @param startReport new value of startReport
 	 */
-	public void setStartQuery(String startQuery) {
-		this.startQuery = startQuery;
+	public void setStartReport(String startReport) {
+		this.startReport = startReport;
 	}
 
 	/**
@@ -154,21 +224,21 @@ public class User implements Serializable {
 	}
 
 	/**
-	 * Get the value of defaultQueryGroup
+	 * Get the value of defaultReportGroup
 	 *
-	 * @return the value of defaultQueryGroup
+	 * @return the value of defaultReportGroup
 	 */
-	public int getDefaultQueryGroup() {
-		return defaultQueryGroup;
+	public int getDefaultReportGroup() {
+		return defaultReportGroup;
 	}
 
 	/**
-	 * Set the value of defaultQueryGroup
+	 * Set the value of defaultReportGroup
 	 *
-	 * @param defaultQueryGroup new value of defaultQueryGroup
+	 * @param defaultReportGroup new value of defaultReportGroup
 	 */
-	public void setDefaultQueryGroup(int defaultQueryGroup) {
-		this.defaultQueryGroup = defaultQueryGroup;
+	public void setDefaultReportGroup(int defaultReportGroup) {
+		this.defaultReportGroup = defaultReportGroup;
 	}
 
 	/**

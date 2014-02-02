@@ -109,17 +109,17 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5">
+						<label class="control-label col-md-5" for="smtpUseStartTls">
 							<spring:message code="settings.label.smtpUseStartTls"/>
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="smtpUseStartTls"/>
+								<form:checkbox path="smtpUseStartTls" id="smtpUseStartTls"/>
 							</div>
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5">
+						<label class="control-label col-md-5" for="useSmtpAuthentication">
 							<spring:message code="settings.label.useSmtpAuthentication"/>
 						</label>
 						<div class="col-md-7">
@@ -314,7 +314,7 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5">
+						<label class="control-label col-md-5" for="useLdapAnonymousBind">
 							<spring:message code="settings.label.useLdapAnonymousBind"/>
 						</label>
 						<div class="col-md-7">
@@ -538,13 +538,13 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5">
+						<label class="control-label col-md-5" for="pdfFontEmbedded">
 							<spring:message code="settings.label.pdfFontEmbedded"/>
 						</label>
 						<div class="col-md-7">
 							<div class="input-group">
 								<div class="checkbox">
-									<form:checkbox path="pdfFontEmbedded"/>
+									<form:checkbox path="pdfFontEmbedded" id="pdfFontEmbedded"/>
 								</div>
 								<spring:message code="settings.help.pdfFontEmbedded" var="help" />
 								<span class="input-group-btn" >
@@ -673,12 +673,12 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5">
+						<label class="control-label col-md-5" for="showHeaderInPublicUserSession">
 							<spring:message code="settings.label.showHeaderInPublicUserSession"/>
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="showHeaderInPublicUserSession"/>
+								<form:checkbox path="showHeaderInPublicUserSession" id="showHeaderInPublicUserSession"/>
 							</div>
 						</div>
 					</div>
@@ -701,12 +701,12 @@ Settings configuration page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-5">
+						<label class="control-label col-md-5" for="schedulingEnabled">
 							<spring:message code="settings.label.schedulingEnabled"/>
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="schedulingEnabled"/>
+								<form:checkbox path="schedulingEnabled" id="schedulingEnabled"/>
 							</div>
 						</div>
 					</div>

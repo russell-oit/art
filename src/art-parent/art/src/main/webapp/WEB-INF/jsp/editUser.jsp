@@ -37,6 +37,18 @@ Display edit user page
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
+				
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					iconBase: "fa",
+					tickIcon: 'fa-check-square'
+				});
+				
+//				$('.dropdown-toggle').dropdownHover();
+				
+				
+
 			});
 		</script>
 	</jsp:attribute>
@@ -58,13 +70,46 @@ Display edit user page
 					</div>
 				</c:if>
 
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="userGroups">
+						<spring:message code="users.label.userGroups"/>
+					</label>
+					<div class="col-md-8">
+						<div class="btn-group bootstrap-select show-tick">
+							<button class="btn dropdown-toggle selectpicker" data-toggle="dropdown">Button <span class="caret"></span></button>
+							<div class="dropdown-menu open" style="max-height: 156.4px; overflow: hidden; min-height: 0px;">
+								<ul class="dropdown-menu selectpicker inner"
+									role="menu" style="max-height: 469px; overflow-x: hidden; overflow-y: hidden; min-height: 0px; ">
+									<li class="selected" rel="0"><a tabindex="0" class="" style=""><i class="fa fa-check-square icon-ok check-mark"></i><span class="text">test</span></a></li><li class="selected" rel="1"><a tabindex="0" class="" style=""><i class="fa fa-check-square icon-ok check-mark"></i><span class="text">a group</span></a></li>
+								</ul>
+							</div>
+						</div>  
+					</div>  
+				</div>  
+
+
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="userGroups">
+						<spring:message code="users.label.userGroups"/>
+					</label>
+					<div class="col-md-8">
+						<spring:message code="select.option.none" var="noneText"/>
+						<form:select path="userGroups" items="${userGroups}"
+									 itemLabel="name" itemValue="userGroupId"
+									 class="form-control selectpicker"
+									 />
+					</div>
+				</div>
+
 				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="col-md-4 control-label">
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="userId" readonly="true" class="form-control"/>
+						<c:if test="${action != 'add'}">
+							<form:input path="userId" readonly="true" class="form-control"/>
+						</c:if>
 					</div>
 				</div>
 				<div class="form-group">
@@ -72,17 +117,78 @@ Display edit user page
 						<spring:message code="page.label.username"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="username" maxlength="30" class="form-control"/>
+						<form:input path="username" maxlength="50" class="form-control"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="password">
+					<label class="control-label col-md-4" for="password">
 						<spring:message code="page.label.password"/>
 					</label>
 					<div class="col-md-8">
-						<form:password path="password" maxlength="50" autocomplete="off" class="form-control"/>
+						<div class="input-group">
+							<form:password path="password" autocomplete="off" maxlength="50" class="form-control" />
+							<spring:message code="page.help.password" var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="useBlankPassword"/>
+								<spring:message code="page.checkbox.useBlankPassword"/>
+							</label>
+						</div>
 					</div>
 				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="active">
+						<spring:message code="page.label.active"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="active" id="active"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="fullName">
+						<spring:message code="users.label.fullName"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="fullName" maxlength="40" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="email">
+						<spring:message code="users.label.email"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="email" maxlength="40" class="form-control"/>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="startReport">
+						<spring:message code="users.label.startReport"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="startReport" maxlength="500" class="form-control"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="canChangePassword">
+						<spring:message code="users.label.canChangePassword"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="canChangePassword" id="canChangePassword"/>
+						</div>
+					</div>
+				</div>
+
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
@@ -90,7 +196,6 @@ Display edit user page
 						</button>
 					</div>
 				</div>
-
 			</fieldset>
 		</form:form>
 

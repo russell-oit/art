@@ -22,23 +22,26 @@ bootstrap js, jquery js, datatables css, datatables js
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap-select-1.4.3-modified.min.css">
 
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0.min.js"></script>
-		
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/twitter-bootstrap-hover-dropdown.min.js"></script>
+
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.2.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
-		
+
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3-modified.min.js"></script>
+
 		<script type="text/javascript">
 			$('#spinner').ajaxStart(function() {
 				$(this).fadeIn('fast');
@@ -60,8 +63,8 @@ bootstrap js, jquery js, datatables css, datatables js
 
 	<jsp:body>
 		<div id="spinner">
-		<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Executing..." />
-	</div>
+			<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Executing..." />
+		</div>
         <jsp:doBody/>
     </jsp:body>
 </t:genericPage>

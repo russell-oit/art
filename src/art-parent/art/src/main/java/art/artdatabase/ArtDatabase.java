@@ -26,7 +26,7 @@ public class ArtDatabase implements Serializable {
 	private int maxPoolConnections; //setting used by art database and all datasources
 
 	/**
-	 * Get the value of useBlankPassword
+	 * Get the value of useBlankPassword. only used for user interface logic
 	 *
 	 * @return the value of useBlankPassword
 	 */
@@ -35,7 +35,7 @@ public class ArtDatabase implements Serializable {
 	}
 
 	/**
-	 * Set the value of useBlankPassword
+	 * Set the value of useBlankPassword. only used for user interface logic
 	 *
 	 * @param useBlankPassword new value of useBlankPassword
 	 */

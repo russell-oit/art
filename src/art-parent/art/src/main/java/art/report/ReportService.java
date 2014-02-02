@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -44,13 +43,10 @@ public class ReportService {
 	 * disabled reports and some report types e.g. lovs
 	 *
 	 * @param username
-	 * @return
+	 * @return list of available reports, empty list otherwise
 	 * @throws SQLException
 	 */
-	@Cacheable(value = "reports")
 	public List<AvailableReport> getAvailableReports(String username) throws SQLException {
-		logger.info("test cache miss"); //TODO remove
-
 		List<AvailableReport> reports = new ArrayList<AvailableReport>();
 
 		Connection conn = null;

@@ -3,6 +3,7 @@ package art.user;
 import art.enums.AccessLevel;
 import art.servlets.ArtConfig;
 import art.utils.DbUtils;
+import art.usergroup.UserGroup;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,14 +25,10 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
-	final String SQL_GET_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
+	final String SQL_SELECT_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
 			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, PASSWORD_ALGORITHM, START_QUERY, "
 			+ " USER_ID, CAN_CHANGE_PASSWORD, CREATION_DATE, UPDATE_DATE "
 			+ " FROM ART_USERS ";
-	final String SQL_UPDATE_USER = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
-			+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
-			+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-			+ " ACTIVE=?";
 
 	/**
 	 * Get a user object for the given username
@@ -47,7 +44,7 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_GET_ALL_USERS + " WHERE USERNAME = ? ";
+		String sql = SQL_SELECT_ALL_USERS + " WHERE USERNAME = ? ";
 
 		Object[] values = {
 			username
@@ -83,7 +80,7 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_GET_ALL_USERS + " WHERE USER_ID = ? ";
+		String sql = SQL_SELECT_ALL_USERS + " WHERE USER_ID = ? ";
 
 		Object[] values = {
 			userId
@@ -119,9 +116,9 @@ public class UserService {
 		user.setFullName(rs.getString("FULL_NAME"));
 		user.setActive(rs.getBoolean("ACTIVE"));
 		user.setPassword(rs.getString("PASSWORD"));
-		user.setDefaultQueryGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+		user.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
 		user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
-		user.setStartQuery(rs.getString("START_QUERY"));
+		user.setStartReport(rs.getString("START_QUERY"));
 		user.setUserId(rs.getInt("USER_ID"));
 		user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
 		user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
@@ -138,31 +135,48 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
+		String sql = "SELECT AUG.USER_GROUP_ID, AUG.NAME, AUG.DESCRIPTION,"
+				+ " AUG.DEFAULT_QUERY_GROUP, AUG.START_QUERY "
+				+ " FROM ART_USER_GROUPS AUG"
+				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA "
+				+ " ON AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID"
+				+ " WHERE AUGA.USER_ID=?"
+				+ " ORDER BY AUG.USER_GROUP_ID"; //have order by so that effective values are deterministic
+
+		Object[] values = {
+			user.getUserId()
+		};
+
 		try {
-			String sql = "SELECT AUG.DEFAULT_QUERY_GROUP, AUG.START_QUERY "
-					+ " FROM ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUPS AUG "
-					+ " WHERE AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID "
-					+ " AND AUGA.USERNAME=? "
-					+ " ORDER BY AUG.NAME";
+			int effectiveDefaultReportGroup = user.getDefaultReportGroup();
+			String effectiveStartReport = user.getStartReport();
 
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, user.getUsername());
+			List<UserGroup> groups = new ArrayList<UserGroup>();
 
-			int defaultQueryGroup = user.getDefaultQueryGroup();
-			String startQuery = user.getStartQuery();
-
-			rs = ps.executeQuery();
+			rs = DbUtils.executeQuery(conn, ps, sql, values);
 			while (rs.next()) {
-				if (defaultQueryGroup <= 0) {
-					defaultQueryGroup = rs.getInt("DEFAULT_QUERY_GROUP");
+				UserGroup group = new UserGroup();
+
+				group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
+				group.setName(rs.getString("NAME"));
+				group.setDescription(rs.getString("DESCRIPTION"));
+				group.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+				group.setStartReport(rs.getString("START_QUERY"));
+
+				groups.add(group);
+
+				if (effectiveDefaultReportGroup <= 0) {
+					effectiveDefaultReportGroup = group.getDefaultReportGroup();
 				}
-				if (StringUtils.isBlank(startQuery)) {
-					startQuery = rs.getString("START_QUERY");
+				if (StringUtils.isBlank(effectiveStartReport)) {
+					effectiveStartReport = group.getStartReport();
 				}
 			}
 
-			user.setDefaultQueryGroup(defaultQueryGroup);
-			user.setStartQuery(startQuery);
+			user.setUserGroups(groups);
+
+			user.setEffectiveDefaultReportGroup(effectiveDefaultReportGroup);
+			user.setEffectiveStartReport(effectiveStartReport);
 		} finally {
 			DbUtils.close(rs, ps);
 		}
@@ -181,7 +195,7 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_GET_ALL_USERS;
+		String sql = SQL_SELECT_ALL_USERS;
 
 		try {
 			conn = ArtConfig.getConnection();
@@ -312,56 +326,43 @@ public class UserService {
 	 * @throws SQLException
 	 */
 	public void addUser(User user) throws SQLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
-
-		String sql = SQL_UPDATE_USER + ", CREATION_DATE=?"
-				+ " WHERE USER_ID=?";
-
-		try {
-			conn = ArtConfig.getConnection();
-			int newId = allocateNewId(conn);
-			if (newId > 0) {
-				Integer accessLevel = null;
-				if (user.getAccessLevel() != null) {
-					accessLevel = Integer.valueOf(user.getAccessLevel().getValue());
-				}
-
-				Object[] values = {
-					user.getUsername(),
-					user.getPassword(),
-					user.getPasswordAlgorithm(),
-					user.getFullName(),
-					user.getEmail(),
-					accessLevel,
-					user.getDefaultQueryGroup(),
-					user.getStartQuery(),
-					user.isActive(),
-					DbUtils.getCurrentTimeStamp(),
-					newId
-				};
-				int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
-				if (affectedRows == 0) {
-					logger.warn("Add user - no rows affected. Username='{}'", user.getUsername());
-				}
-			} else {
-				logger.warn("User not added. Allocate new ID failed. Username='{}'", user.getUsername());
-			}
-		} finally {
-			DbUtils.close(ps, conn);
+		int newId = allocateNewId();
+		if (newId > 0) {
+			user.setUserId(newId);
+			saveUser(user, true);
+		} else {
+			logger.warn("User not added. Allocate new ID failed. Username='{}'", user.getUsername());
 		}
 	}
 
-	private synchronized int allocateNewId(Connection conn) throws SQLException {
+	/**
+	 * Update an existing user record
+	 *
+	 * @param user
+	 * @throws SQLException
+	 */
+	public void updateUser(User user) throws SQLException {
+		saveUser(user, false);
+	}
+
+	/**
+	 * Generate a user id and user record for a new user
+	 *
+	 * @return new user id generated, 0 otherwise
+	 * @throws SQLException
+	 */
+	private synchronized int allocateNewId() throws SQLException {
 		int newId = 0;
 
+		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		PreparedStatement psInsert = null;
 
 		try {
+			conn = ArtConfig.getConnection();
 			//generate new id
-			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
+			String sql = "SELEC MAX(USER_ID) FROM ART_USERS";
 			rs = DbUtils.executeQuery(conn, ps, sql);
 			if (rs.next()) {
 				newId = rs.getInt(1) + 1;
@@ -386,9 +387,66 @@ public class UserService {
 			}
 		} finally {
 			DbUtils.close(psInsert);
-			DbUtils.close(rs, ps);
+			DbUtils.close(rs, ps, conn);
 		}
 
 		return newId;
+	}
+
+	/**
+	 * Save a user
+	 *
+	 * @param user
+	 * @param newUser true if this is a new user, false if we are updating an
+	 * existing user
+	 * @throws SQLException
+	 */
+	private void saveUser(User user, boolean newUser) throws SQLException {
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		String dateColumn;
+
+		if (newUser) {
+			dateColumn = "CREATION_DATE";
+		} else {
+			dateColumn = "UPDATE_DATE";
+		}
+
+		final String SQL_UPDATE_USER = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
+				+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
+				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
+				+ " ACTIVE=?";
+
+		String sql = SQL_UPDATE_USER + "," + dateColumn + "=?"
+				+ " WHERE USER_ID=?";
+
+		try {
+			conn = ArtConfig.getConnection();
+			Integer accessLevel = null;
+			if (user.getAccessLevel() != null) {
+				accessLevel = Integer.valueOf(user.getAccessLevel().getValue());
+			}
+
+			Object[] values = {
+				user.getUsername(),
+				user.getPassword(),
+				user.getPasswordAlgorithm(),
+				user.getFullName(),
+				user.getEmail(),
+				accessLevel,
+				user.getDefaultReportGroup(),
+				user.getStartReport(),
+				user.isActive(),
+				DbUtils.getCurrentTimeStamp(),
+				user.getUserId()
+			};
+			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+			if (affectedRows == 0) {
+				logger.warn("Save user - no rows affected. Username='{}'. newUser={}", user.getUsername(), newUser);
+			}
+		} finally {
+			DbUtils.close(ps, conn);
+		}
 	}
 }

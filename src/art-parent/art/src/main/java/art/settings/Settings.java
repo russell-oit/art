@@ -112,7 +112,7 @@ public class Settings {
 	}
 
 	/**
-	 * Get the value of useBlankLdapBindPassword
+	 * Get the value of useBlankLdapBindPassword. only used for user interface logic
 	 *
 	 * @return the value of useBlankLdapBindPassword
 	 */
@@ -121,7 +121,7 @@ public class Settings {
 	}
 
 	/**
-	 * Set the value of useBlankLdapBindPassword
+	 * Set the value of useBlankLdapBindPassword. only used for user interface logic
 	 *
 	 * @param useBlankLdapBindPassword new value of useBlankLdapBindPassword
 	 */
@@ -130,7 +130,7 @@ public class Settings {
 	}
 
 	/**
-	 * Get the value of useBlankSmtpPassword
+	 * Get the value of useBlankSmtpPassword. only used for user interface logic
 	 *
 	 * @return the value of useBlankSmtpPassword
 	 */
@@ -139,7 +139,7 @@ public class Settings {
 	}
 
 	/**
-	 * Set the value of useBlankSmtpPassword
+	 * Set the value of useBlankSmtpPassword. only used for user interface logic
 	 *
 	 * @param useBlankSmtpPassword new value of useBlankSmtpPassword
 	 */
