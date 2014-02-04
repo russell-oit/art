@@ -54,9 +54,11 @@ Display edit user page
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('.dropdown-toggle').dropdownHover({
+				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
+				
+				$('#username').focus();
 
 			});
 		</script>
@@ -171,12 +173,23 @@ Display edit user page
 						<spring:message code="users.label.userGroups"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="userGroups" items="${userGroups}"
+						<form:select path="userGroups" multiple="true" items="${allUserGroups}"
 									 itemLabel="name" itemValue="userGroupId"
-									 class="form-control selectpicker"
+									 class="form-control"
 									 />
+						<form:errors path="userGroups" cssClass="error" />
 					</div>
 				</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="defaultReportGroup">
+							<spring:message code="settings.label.smtpPort"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="defaultReportGroup" maxlength="6" class="form-control" />
+							<form:errors path="defaultReportGroup" cssClass="error" />
+						</div>
+					</div>
+					
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

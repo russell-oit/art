@@ -14,18 +14,15 @@
 	">
 	
 	<!-- Scans the classpath of this application for @Components to deploy as beans -->
-	<context:component-scan base-package="art">
-		<!-- classes whose name ends in Controller, Service or Repository -->
-		<context:include-filter type="regex" expression="\\*Controller"/>
-		<context:include-filter type="regex" expression="\\*Service"/>
-		<context:include-filter type="regex" expression="\\*Repository"/>
-	</context:component-scan>
+	<context:component-scan base-package="art"/>
 
 	<!-- Configures the @Controller programming model -->
 	<!-- don't add model attributes to redirect url -->
-	<mvc:annotation-driven ignoreDefaultModelOnRedirect="true"/>
+	<!-- enable custom formatters and converters -->
+	<mvc:annotation-driven ignoreDefaultModelOnRedirect="true"
+						   conversion-service="conversionService"/>
 	
-	<!-- start enable i18n -->
+	<!-- enable i18n -->
 	<!-- Application Message Bundle -->
 	<bean id="messageSource" 
 		  class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
@@ -39,16 +36,17 @@
 			  p:paramName="lang" />
 	</mvc:interceptors>
 
+	<!-- remember locale using cookies -->
 	<bean id="localeResolver"
 		  class="org.springframework.web.servlet.i18n.CookieLocaleResolver" />
-	<!-- end enable i18n -->
+	<!-- enable i18n -->
 	
 	<bean id="viewResolver"
 		  class="org.springframework.web.servlet.view.InternalResourceViewResolver"
 		  p:prefix="/WEB-INF/jsp/"
 		  p:suffix=".jsp" />
 	
-	<!-- start enable caching -->
+	<!-- enable caching -->
 	<!-- Enables the caching through annotations -->
 	<cache:annotation-driven />
 	
@@ -60,6 +58,6 @@
 	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
 		  p:configLocation="classpath:ehcache.xml"
 		  p:shared="true"/>
-	<!-- end enable caching -->
-
+	<!-- enable caching -->
+	
 </beans>

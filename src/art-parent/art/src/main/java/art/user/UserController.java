@@ -64,7 +64,7 @@ public class UserController {
 		model.addAttribute("user", new User());
 
 		try {
-			model.addAttribute("userGroups", userGroupService.getAllGroups());
+			model.addAttribute("allUserGroups", userGroupService.getAllGroups());
 		} catch (SQLException ex) {
 			logger.error("error", ex);
 			model.addAttribute("error", ex);
@@ -76,12 +76,14 @@ public class UserController {
 
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
 	public String processAddUser(@RequestParam("action") String action,
+			//			@ModelAttribute("allUserGroups") List<UserGroup> allUserGroups,
 			@ModelAttribute("user") @Valid User user,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) throws SQLException {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			model.addAttribute("action", action);
+			model.addAttribute("allUserGroups", userGroupService.getAllGroups());
 			return "editUser";
 		}
 
@@ -95,6 +97,7 @@ public class UserController {
 		}
 
 		model.addAttribute("action", action);
+//		model.addAttribute("allUserGroups", allUserGroups);
 		return "editUser";
 	}
 
@@ -112,5 +115,4 @@ public class UserController {
 		model.addAttribute("action", "edit");
 		return "editUser";
 	}
-
 }

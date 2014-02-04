@@ -93,9 +93,12 @@ public class Scheduler extends HttpServlet {
 		File upgradeFile = new File(ArtConfig.getArtTempPath() + "upgrade.txt");
 		if (upgradeFile.exists()) {
 			try {
-				UpgradeHelper upgradeHelper=new UpgradeHelper();
+				UpgradeHelper upgradeHelper = new UpgradeHelper();
 				upgradeHelper.upgrade();
-				upgradeFile.delete();
+				boolean deleted = upgradeFile.delete();
+				if (!deleted) {
+					logger.warn("Upgrade file not deleted: {}", upgradeFile);
+				}
 			} catch (SQLException ex) {
 				logger.error("Error", ex);
 			}

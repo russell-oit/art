@@ -40,7 +40,7 @@ Display art database configuration page
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization
-				$('.dropdown-toggle').dropdownHover({
+				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
 			});

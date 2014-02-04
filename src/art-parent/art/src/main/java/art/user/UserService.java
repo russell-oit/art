@@ -362,7 +362,7 @@ public class UserService {
 		try {
 			conn = ArtConfig.getConnection();
 			//generate new id
-			String sql = "SELEC MAX(USER_ID) FROM ART_USERS";
+			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
 			rs = DbUtils.executeQuery(conn, ps, sql);
 			if (rs.next()) {
 				newId = rs.getInt(1) + 1;
