@@ -138,12 +138,6 @@ Header that appears at the top of all pages, except the login and logs pages
 							<spring:message code="header.link.documentation"/>
 						</a>
 					</li>
-					<li>
-						<a href="${pageContext.request.contextPath}/app/language.do">
-							<i class="fa fa-comment"></i> 
-							<spring:message code="header.link.language"/>
-						</a>
-					</li>
 					<c:if test="${authenticationMethod eq internalAuthentication}">
 						<li>
 							<a href="${pageContext.request.contextPath}/app/password.do">
@@ -152,6 +146,12 @@ Header that appears at the top of all pages, except the login and logs pages
 							</a>
 						</li>
 					</c:if>
+					<li>
+						<a href="${pageContext.request.contextPath}/app/language.do">
+							<i class="fa fa-comment"></i> 
+							<spring:message code="header.link.language"/>
+						</a>
+					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/logout.do">
 							<i class="fa fa-sign-out"></i> 

@@ -76,7 +76,6 @@ public class UserController {
 
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
 	public String processAddUser(@RequestParam("action") String action,
-			//			@ModelAttribute("allUserGroups") List<UserGroup> allUserGroups,
 			@ModelAttribute("user") @Valid User user,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) throws SQLException {
 
@@ -106,7 +105,7 @@ public class UserController {
 		try {
 			User user = userService.getUser(userId);
 			model.addAttribute("user", user);
-			model.addAttribute("userGroups", userGroupService.getAllGroups());
+			model.addAttribute("allUserGroups", userGroupService.getAllGroups());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

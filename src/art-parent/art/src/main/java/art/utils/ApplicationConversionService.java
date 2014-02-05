@@ -30,13 +30,15 @@ import org.springframework.stereotype.Component;
 @Component("conversionService")
 public class ApplicationConversionService extends DefaultFormattingConversionService  {
 	
-	
 	public ApplicationConversionService(){
-		super(); //creates default formatters and converters. no need for explicit super()?
+		//DefaultFormattingConversionService's default constructor
+		//creates default formatters and converters
+		super(); //no need for explicit super()?
 		
-		//add custom ones
+		//add custom formatters and converters
 		addConverter(new StringToUserGroup());
-		addConverter(new StringToInteger()); //override default StringToInteger converter
+		//TODO reinstate
+//		addConverter(new StringToInteger()); //override default StringToInteger converter
 	}
 	
 }

@@ -57,7 +57,7 @@ Display edit user page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 				$('#username').focus();
 
 			});
@@ -149,7 +149,26 @@ Display edit user page
 						<form:input path="email" maxlength="40" class="form-control"/>
 					</div>
 				</div>
-
+				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="users.label.accessLevel"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="accessLevel" items="${accessLevels}"
+									 itemLabel="description" itemValue="value"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="defaultReportGroup">
+						<spring:message code="users.label.defaultReportGroup"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="defaultReportGroup" items="${allReportGroups}"
+									 itemLabel="name" itemValue="reportGroupId"
+									 class="form-control"
+									 />
+					</div>
+				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="startReport">
 						<spring:message code="users.label.startReport"/>
@@ -175,21 +194,11 @@ Display edit user page
 					<div class="col-md-8">
 						<form:select path="userGroups" multiple="true" items="${allUserGroups}"
 									 itemLabel="name" itemValue="userGroupId"
-									 class="form-control"
+									 class="form-control selectpicker"
 									 />
 						<form:errors path="userGroups" cssClass="error" />
 					</div>
 				</div>
-					<div class="form-group">
-						<label class="control-label col-md-5" for="defaultReportGroup">
-							<spring:message code="settings.label.smtpPort"/>
-						</label>
-						<div class="col-md-7">
-							<form:input path="defaultReportGroup" maxlength="6" class="form-control" />
-							<form:errors path="defaultReportGroup" cssClass="error" />
-						</div>
-					</div>
-					
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

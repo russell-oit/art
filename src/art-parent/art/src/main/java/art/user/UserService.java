@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -445,6 +446,44 @@ public class UserService {
 			if (affectedRows == 0) {
 				logger.warn("Save user - no rows affected. Username='{}'. newUser={}", user.getUsername(), newUser);
 			}
+
+			//save user groups. delete all existing records and recreate
+			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
+			values = new Object[]{
+				user.getUserId()
+			};
+			affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+
+			//insert records afresh
+			List<UserGroup> groups = user.getUserGroups();
+			if (CollectionUtils.isNotEmpty(groups)) {
+				List<Integer> userGroupIds = new ArrayList<Integer>();
+				for (UserGroup group : groups) {
+					if (group != null && group.getUserGroupId() > 0) {
+						userGroupIds.add(group.getUserGroupId());
+					}
+				}
+
+				if (!userGroupIds.isEmpty()) {
+					sql = "INSERT INTO ART_USER_GROUP_ASSIGNMENT (USER_ID,USERNAME,USER_GROUP_ID)"
+							+ " VALUES(?,?,?)";
+					ps = conn.prepareStatement(sql);
+
+					List<Object> valuesList = new ArrayList<Object>();
+					for (Integer id : userGroupIds) {
+						valuesList.clear();
+						valuesList.add(user.getUserId());
+						valuesList.add(user.getUsername());
+						valuesList.add(id);
+
+						DbUtils.setValues(ps, valuesList.toArray());
+						ps.addBatch();
+					}
+
+					ps.executeBatch();
+				}
+			}
+
 		} finally {
 			DbUtils.close(ps, conn);
 		}

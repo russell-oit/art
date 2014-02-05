@@ -36,6 +36,12 @@ Includes bootstrap css, font awesome css, art css
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
 
 		<jsp:invoke fragment="css"/>
+
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+		  <script type='text/javascript' src="${pageContext.request.contextPath}/js/html5shiv-3.7.0.js"></script>
+		  <script type='text/javascript' src="${pageContext.request.contextPath}/js/respond-1.4.2.min.js"></script>
+		<![endif]-->
 	</head>
 	<body>
 		<div id="wrap">
