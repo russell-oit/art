@@ -2,6 +2,7 @@ package art.reportgroup;
 
 import art.servlets.ArtConfig;
 import art.utils.DbUtils;
+import static art.utils.DbUtils.close;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -90,6 +91,41 @@ public class ReportGroupService {
 			DbUtils.close(rs, ps, conn);
 		}
 
+		return groups;
+	}
+
+	/**
+	 * Get all report groups
+	 * 
+	 * @return list of all report groups, empty list otherwise
+	 * @throws SQLException 
+	 */
+	public List<ReportGroup> getAllReportGroups() throws SQLException {
+		List<ReportGroup> groups = new ArrayList<ReportGroup>();
+
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		String sql = "SELECT QUERY_GROUP_ID, NAME, DESCRIPTION"
+				+ " FROM ART_QUERY_GROUPS";
+
+		try {
+			conn = ArtConfig.getConnection();
+			rs = DbUtils.executeQuery(conn, ps, sql);
+			while (rs.next()) {
+				ReportGroup group = new ReportGroup();
+
+				group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
+				group.setName(rs.getString("NAME"));
+				group.setDescription(rs.getString("DESCRIPTION"));
+
+				groups.add(group);
+			}
+		} finally {
+			close(rs, ps, conn);
+		}
+		
 		return groups;
 	}
 

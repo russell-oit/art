@@ -24,7 +24,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -45,10 +44,10 @@ public class UserGroupService {
 	 * @return list of all user groups, empty list otherwise
 	 * @throws SQLException
 	 */
-	public List<UserGroup> getAllGroups() throws SQLException {
+	public List<UserGroup> getAllUserGroups() throws SQLException {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 
-		Connection conn;
+		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
@@ -71,7 +70,7 @@ public class UserGroupService {
 				groups.add(group);
 			}
 		} finally {
-			DbUtils.close(rs, ps);
+			DbUtils.close(rs, ps, conn);
 		}
 
 		return groups;

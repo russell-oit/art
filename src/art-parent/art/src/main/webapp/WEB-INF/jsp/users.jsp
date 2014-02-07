@@ -39,7 +39,7 @@ Display user configuration page
 					"sPaginationType": "bs_full",
 //					"bPaginate": false,
 //					"sScrollY": "365px",
-					"aaSorting": [],
+					"aaSorting": [[2,"asc"]], //sort by username
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": -1,
 					"oLanguage": {
