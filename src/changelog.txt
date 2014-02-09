@@ -14,6 +14,7 @@ ART 3.0
 * Renamed "View Modes" to "Report Formats"
 * Modified application settings configuration. Settings need to be manually re-entered.
 * Modified application urls. Previously bookmarked urls may no longer work.
+* Requires Internet Explorer 8+, or recent versions of other browsers
 * Updated cewolf to 1.2.4
 
 ART 2.5.2

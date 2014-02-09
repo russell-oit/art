@@ -32,7 +32,7 @@ Display application language selection page
 		<form class="form-horizontal" method="POST" action="">
 			<fieldset>
 				<div class="form-group">
-					<label class="control-label col-md-2" for="lang">
+					<label class="col-md-2 control-label" for="lang">
 						<spring:message code="page.label.language"/>
 					</label>
 					<div class="col-md-10">

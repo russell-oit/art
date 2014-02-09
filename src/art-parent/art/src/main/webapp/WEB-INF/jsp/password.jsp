@@ -47,7 +47,7 @@ Display change password page
 				</c:if>
 				
 				<div class="form-group">
-					<label class="control-label col-md-4" for="newPassword1">
+					<label class="col-md-4 control-label" for="newPassword1">
 						<spring:message code="password.label.newPassword"/>
 					</label>
 					<div class="col-md-8">
@@ -56,7 +56,7 @@ Display change password page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="newPassword2">
+					<label class="col-md-4 control-label" for="newPassword2">
 						<spring:message code="password.label.retypeNewPassword"/>
 					</label>
 					<div class="col-md-8">

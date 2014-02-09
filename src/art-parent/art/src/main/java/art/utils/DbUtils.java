@@ -126,20 +126,20 @@ public class DbUtils {
 		}
 	}
 
-	/**
-	 * Set the given parameter values in the given PreparedStatement, starting
-	 * at an arbitrary index, not necessarily 1
-	 *
-	 * @param startIndex start index (from 1 onwards)
-	 * @param ps
-	 * @param values
-	 * @throws SQLException
-	 */
-	public static void setValues(int startIndex, PreparedStatement ps, Object... values) throws SQLException {
-		for (int i = 0; i < values.length; i++) {
-			ps.setObject(i + startIndex, values[i]);
-		}
-	}
+//	/**
+//	 * Set the given parameter values in the given PreparedStatement, starting
+//	 * at an arbitrary index, not necessarily 1
+//	 *
+//	 * @param startIndex start index (from 1 onwards)
+//	 * @param ps
+//	 * @param values
+//	 * @throws SQLException
+//	 */
+//	public static void setValues(int startIndex, PreparedStatement ps, Object... values) throws SQLException {
+//		for (int i = 0; i < values.length; i++) {
+//			ps.setObject(i + startIndex, values[i]);
+//		}
+//	}
 
 	/**
 	 * Converts the given java.util.Date to java.sql.Date

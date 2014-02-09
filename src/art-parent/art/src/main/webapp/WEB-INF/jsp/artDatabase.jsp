@@ -31,7 +31,7 @@ Display art database configuration page
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
-				
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					iconBase: 'fa',
@@ -106,7 +106,7 @@ Display art database configuration page
 									<option value="${dbType.key}">${dbType.value}</option>
 								</c:forEach>
 							</select>
-							<spring:message code="artDatabase.help.databaseType" var="help" />
+							<spring:message code="artDatabase.help.databaseType" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
 										data-toggle="tooltip" title="${help}">
@@ -121,7 +121,8 @@ Display art database configuration page
 						<spring:message code="artDatabase.label.jdbcDriver"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="driver" maxlength="100" class="form-control" />
+						<form:input path="driver" maxlength="100" class="form-control"/>
+						<form:errors path="driver" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -129,8 +130,8 @@ Display art database configuration page
 						<spring:message code="artDatabase.label.jdbcUrl"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="url" maxlength="2000" class="form-control" />
-						<form:errors path="url" cssClass="error" />
+						<form:input path="url" maxlength="2000" class="form-control"/>
+						<form:errors path="url" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -138,7 +139,8 @@ Display art database configuration page
 						<spring:message code="page.label.username"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="username" maxlength="30" class="form-control" />
+						<form:input path="username" maxlength="30" class="form-control"/>
+						<form:errors path="username" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -147,8 +149,8 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:password path="password" autocomplete="off" maxlength="50" class="form-control" />
-							<spring:message code="page.help.password" var="help" />
+							<form:password path="password" autocomplete="off" maxlength="50" class="form-control"/>
+							<spring:message code="page.help.password" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
 										data-toggle="tooltip" title="${help}">
@@ -156,9 +158,10 @@ Display art database configuration page
 								</button>
 							</span>
 						</div>
+						<form:errors path="password" cssClass="error"/>
 						<div class="checkbox">
 							<label>
-								<form:checkbox path="useBlankPassword" />
+								<form:checkbox path="useBlankPassword"/>
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
 						</div>
@@ -170,8 +173,8 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="connectionTestSql" maxlength="100" class="form-control" />
-							<spring:message code="artDatabase.help.connectionTestSql" var="help" />
+							<form:input path="connectionTestSql" maxlength="100" class="form-control"/>
+							<spring:message code="artDatabase.help.connectionTestSql" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
 										data-toggle="tooltip" title="${help}">
@@ -179,6 +182,7 @@ Display art database configuration page
 								</button>
 							</span>
 						</div>
+						<form:errors path="connectionTestSql" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -187,7 +191,7 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="connectionPoolTimeout" maxlength="5" class="form-control" />
+							<form:input path="connectionPoolTimeout" maxlength="5" class="form-control"/>
 							<spring:message code="artDatabase.help.connectionPoolTimeout"
 											var="help" />
 							<span class="input-group-btn" >
@@ -197,7 +201,7 @@ Display art database configuration page
 								</button>
 							</span>
 						</div>
-						<form:errors path="connectionPoolTimeout" cssClass="error" />
+						<form:errors path="connectionPoolTimeout" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -206,8 +210,8 @@ Display art database configuration page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="maxPoolConnections" maxlength="3" class="form-control" />
-							<spring:message code="artDatabase.help.maxPoolConnections" var="help" />
+							<form:input path="maxPoolConnections" maxlength="3" class="form-control"/>
+							<spring:message code="artDatabase.help.maxPoolConnections" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
 										data-toggle="tooltip" title="${help}">
@@ -215,7 +219,7 @@ Display art database configuration page
 								</button>
 							</span>
 						</div>
-						<form:errors path="maxPoolConnections" cssClass="error" />
+						<form:errors path="maxPoolConnections" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
