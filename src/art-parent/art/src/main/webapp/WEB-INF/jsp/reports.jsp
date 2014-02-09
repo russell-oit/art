@@ -59,7 +59,7 @@ Reports page. Also main/home page
 					"oLanguage": {
 						"sUrl": contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
 					},
-					"aaSorting": [[3, "asc"]],
+					"aaSorting": [[3, "asc"]], //sort by report name. 0 is the details column
 					'aoColumnDefs': [
 						{"bVisible": false, "aTargets": [1, 2]},
 						{"bSortable": false, "aTargets": [0]}

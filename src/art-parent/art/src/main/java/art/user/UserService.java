@@ -417,7 +417,7 @@ public class UserService {
 		final String SQL_UPDATE_USER = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 				+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
 				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-				+ " ACTIVE=?";
+				+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?";
 
 		String sql = SQL_UPDATE_USER + "," + dateColumn + "=?"
 				+ " WHERE USER_ID=?";
@@ -438,6 +438,7 @@ public class UserService {
 				accessLevel,
 				user.getDefaultReportGroup(),
 				user.getStartReport(),
+				user.isCanChangePassword(),
 				user.isActive(),
 				DbUtils.getCurrentTimeStamp(),
 				user.getUserId()
@@ -452,13 +453,12 @@ public class UserService {
 			values = new Object[]{
 				user.getUserId()
 			};
-			affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+			DbUtils.executeUpdate(conn, ps, sql, values);
 
 			//insert records afresh
-			List<UserGroup> groups = user.getUserGroups();
-			if (CollectionUtils.isNotEmpty(groups)) {
+			if (CollectionUtils.isNotEmpty(user.getUserGroups())) {
 				List<Integer> userGroupIds = new ArrayList<Integer>();
-				for (UserGroup group : groups) {
+				for (UserGroup group : user.getUserGroups()) {
 					if (group != null && group.getUserGroupId() > 0) {
 						userGroupIds.add(group.getUserGroupId());
 					}

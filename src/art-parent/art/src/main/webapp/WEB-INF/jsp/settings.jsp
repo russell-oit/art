@@ -163,14 +163,13 @@ Settings configuration page
 										</button>
 									</span>
 								</div>
-								<form:errors path="smtpPassword" cssClass="error"/>
 								<div class="checkbox">
 									<label>
 										<form:checkbox path="useBlankSmtpPassword"/>
 										<spring:message code="page.checkbox.useBlankPassword"/>
 									</label>
 								</div>
-
+								<form:errors path="smtpPassword" cssClass="error"/>
 							</div>
 						</div>
 					</fieldset>
@@ -371,14 +370,13 @@ Settings configuration page
 										</button>
 									</span>
 								</div>
-								<form:errors path="ldapBindPassword" cssClass="error"/>
 								<div class="checkbox">
 									<label>
 										<form:checkbox path="useBlankLdapBindPassword"/>
 										<spring:message code="page.checkbox.useBlankPassword"/>
 									</label>
 								</div>
-
+								<form:errors path="ldapBindPassword" cssClass="error"/>
 							</div>
 						</div>
 					</fieldset>

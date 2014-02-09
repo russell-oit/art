@@ -41,4 +41,5 @@ Display a formatted date. Also enables correct sorting in datatables
 		<fmt:formatDate value="${date}" pattern="${sortDatePattern}"/>
 	</span>
 </c:if>
+
 <fmt:formatDate value="${date}" pattern="${pattern}"/>

@@ -158,13 +158,13 @@ Display art database configuration page
 								</button>
 							</span>
 						</div>
-						<form:errors path="password" cssClass="error"/>
 						<div class="checkbox">
 							<label>
 								<form:checkbox path="useBlankPassword"/>
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
 						</div>
+						<form:errors path="password" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

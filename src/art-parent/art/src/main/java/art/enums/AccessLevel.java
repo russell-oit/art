@@ -48,21 +48,21 @@ public enum AccessLevel {
 	public String getDescription() {
 		switch (this) {
 			case NormalUser:
-				return "NormalUser";
+				return "Normal User";
 			case ScheduleUser:
-				return "ScheduleUser";
+				return "Schedule User";
 			case JuniorAdmin:
-				return "JuniorAdmin";
+				return "Junior Admin";
 			case MidAdmin:
-				return "MidAdmin";
+				return "Mid Admin";
 			case StandardAdmin:
-				return "StandardAdmin";
+				return "Standard Admin";
 			case SeniorAdmin:
-				return "SeniorAdmin";
+				return "Senior Admin";
 			case SuperAdmin:
-				return "SuperAdmin";
+				return "Super Admin";
 			case RepositoryUser:
-				return "RepositoryUser";
+				return "Repository User";
 			default:
 				return String.valueOf(value);
 		}

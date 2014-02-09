@@ -24,6 +24,8 @@ Display user configuration page
 <spring:message code="dialog.button.delete" var="deleteText"/>
 <spring:message code="dialog.message.deleteUser" var="deleteUserText"/>
 <spring:message code="dialog.title.confirm" var="confirmText"/>
+<spring:message code="users.activeStatus.active" var="activeText"/>
+<spring:message code="users.activeStatus.disabled" var="disabledText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -39,7 +41,7 @@ Display user configuration page
 					"sPaginationType": "bs_full",
 //					"bPaginate": false,
 //					"sScrollY": "365px",
-					"aaSorting": [[2,"asc"]], //sort by username
+					"aaSorting": [[1, "asc"]], //sort by username
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": -1,
 					"oLanguage": {
@@ -140,9 +142,14 @@ Display user configuration page
 					<tr data-username="${encode:forHtmlAttribute(user.username)}"
 						data-id="${user.userId}">
 						<td>${user.userId}</td>
-						<td>${encode:forHtmlContent(user.username)}</td>
+						<td>${encode:forHtmlContent(user.username)} &nbsp;
+							<t:displayNewLabel date="${user.creationDate}"/>
+						</td>
 						<td>${user.fullName}</td>
-						<td>${user.active}</td>
+						<td><t:displayActiveStatus active="${user.active}"
+											   activeText="${activeText}"
+											   disabledText="${disabledText}"/>
+						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" href="${pageContext.request.contextPath}/app/editUser.do?userId=${user.userId}">

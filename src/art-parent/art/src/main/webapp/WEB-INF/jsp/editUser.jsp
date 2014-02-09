@@ -64,6 +64,14 @@ Display edit user page
 		</script>
 	</jsp:attribute>
 
+	<jsp:attribute name="aboveMainPanel">
+		<div class="text-right">
+			<a href="${pageContext.request.contextPath}/docs/manual.htm#users">
+				<spring:message code="page.link.help"/>
+			</a>
+		</div>
+	</jsp:attribute>
+
 	<jsp:body>
 		<form:form class="form-horizontal" method="POST" action="" modelAttribute="user">
 			<fieldset>
@@ -82,7 +90,7 @@ Display edit user page
 				</c:if>
 
 				<div class="form-group">
-					<label class="col-md-4 control-label">
+					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
@@ -92,7 +100,7 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="username">
+					<label class="control-label col-md-4" for="username">
 						<spring:message code="page.label.username"/>
 					</label>
 					<div class="col-md-8">
@@ -115,17 +123,17 @@ Display edit user page
 								</button>
 							</span>
 						</div>
-						<form:errors path="password" cssClass="error"/>
 						<div class="checkbox">
 							<label>
 								<form:checkbox path="useBlankPassword"/>
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
 						</div>
+						<form:errors path="password" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="fullName">
+					<label class="col-md-4 control-label " for="fullName">
 						<spring:message code="users.label.fullName"/>
 					</label>
 					<div class="col-md-8">
@@ -134,7 +142,7 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="email">
+					<label class="col-md-4 control-label " for="email">
 						<spring:message code="users.label.email"/>
 					</label>
 					<div class="col-md-8">
@@ -143,7 +151,7 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="active">
+					<label class="control-label col-md-4" for="active">
 						<spring:message code="page.label.active"/>
 					</label>
 					<div class="col-md-8">
@@ -153,7 +161,7 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="canChangePassword">
+					<label class="control-label col-md-4" for="canChangePassword">
 						<spring:message code="users.label.canChangePassword"/>
 					</label>
 					<div class="col-md-8">
@@ -163,42 +171,58 @@ Display edit user page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label">
+					<label class="control-label col-md-4">
 						<spring:message code="users.label.accessLevel"/>
 					</label>
 					<div class="col-md-8">
 						<form:select path="accessLevel" items="${accessLevels}"
-									 itemLabel="description" itemValue="value"/>
+									 itemLabel="description" 
+									 class="form-control selectpicker"/>
+						<div class="text-right">
+							<!-- TODO use correct link -->
+							<a href="${pageContext.request.contextPath}/docs/manual.htm">
+								<spring:message code="page.link.help"/>
+							</a>
+						</div>
 						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="defaultReportGroup">
+					<label class="col-md-4 control-label " for="defaultReportGroup">
 						<spring:message code="users.label.defaultReportGroup"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="defaultReportGroup" items="${reportGroups}"
-									 itemLabel="name" itemValue="reportGroupId"  
-									 class="form-control selectpicker"
-									 />
+						<form:select path="defaultReportGroup" class="form-control selectpicker">
+							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
+						</form:select>
 						<form:errors path="defaultReportGroup" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="startReport">
+					<label class="col-md-4 control-label " for="startReport">
 						<spring:message code="users.label.startReport"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="startReport" maxlength="500" class="form-control"/>
+						<div class="input-group">
+							<form:input path="startReport" maxlength="500" class="form-control"/>
+							<spring:message code="users.help.startReport" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
 						<form:errors path="startReport" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label" for="userGroups">
+					<label class="col-md-4 control-label " for="userGroups">
 						<spring:message code="users.label.userGroups"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="userGroups" items="${allUserGroups}" multiple="true" 
+						<form:select path="userGroups" items="${userGroups}" multiple="true" 
 									 itemLabel="name" itemValue="userGroupId" 
 									 class="form-control selectpicker"
 									 />

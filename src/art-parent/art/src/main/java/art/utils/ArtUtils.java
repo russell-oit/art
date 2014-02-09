@@ -44,7 +44,7 @@ public class ArtUtils {
 	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user
 	public static final String ART_USER_INVALID = "user not created in ART"; //log message on login failure
 	public static final String ART_USER_DISABLED = "user disabled in ART"; //log message on login failure
-	public static final int DEFAULT_CONNECTION_POOL_TIMEOUT=20;
+	public static final int DEFAULT_CONNECTION_POOL_TIMEOUT = 20;
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<String>();
@@ -107,7 +107,6 @@ public class ArtUtils {
 	public static String getRandomFileNameString() {
 		return "-" + RandomStringUtils.randomAlphanumeric(10);
 	}
-	
 
 	/**
 	 * Get a string to be used for correctly sorting dates irrespective of the
@@ -162,5 +161,5 @@ public class ArtUtils {
 
 		return databaseTypes;
 	}
-	
+
 }
