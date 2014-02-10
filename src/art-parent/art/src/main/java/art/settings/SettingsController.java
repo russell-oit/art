@@ -33,8 +33,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class SettingsController {
 
 	final static org.slf4j.Logger logger = LoggerFactory.getLogger(SettingsController.class);
-	final String SMTP_PASSWORD_ATTRIBUTE = "smtpPassword";
-	final String LDAP_BIND_PASSWORD_ATTRIBUTE = "ldapBindPassword";
 
 	@Autowired
 	private ServletContext ctx;
@@ -76,12 +74,7 @@ public class SettingsController {
 	public String showSettings(HttpSession session, Model model) {
 		Settings settings = ArtConfig.getSettings();
 
-		//save current smtp and ldap bind password for use in POST
-		session.setAttribute(SMTP_PASSWORD_ATTRIBUTE, settings.getSmtpPassword());
-		session.setAttribute(LDAP_BIND_PASSWORD_ATTRIBUTE, settings.getLdapBindPassword());
-
 		model.addAttribute("settings", settings);
-
 		return "settings";
 	}
 
@@ -102,7 +95,7 @@ public class SettingsController {
 		} else {
 			if (StringUtils.isEmpty(newSmtpPassword)) {
 				//use current password
-				newSmtpPassword = (String) session.getAttribute(SMTP_PASSWORD_ATTRIBUTE);
+				newSmtpPassword = ArtConfig.getSettings().getSmtpPassword();
 			}
 		}
 		settings.setSmtpPassword(newSmtpPassword);
@@ -112,7 +105,8 @@ public class SettingsController {
 			newLdapBindPassword = "";
 		} else {
 			if (StringUtils.isEmpty(newLdapBindPassword)) {
-				newLdapBindPassword = (String) session.getAttribute(LDAP_BIND_PASSWORD_ATTRIBUTE);
+				//use current password
+				newLdapBindPassword = ArtConfig.getSettings().getLdapBindPassword();
 			}
 		}
 		settings.setLdapBindPassword(newLdapBindPassword);
@@ -122,10 +116,6 @@ public class SettingsController {
 
 			//save administrator email in application context. for display in footer
 			ctx.setAttribute("administratorEmail", settings.getAdministratorEmail());
-
-			//clear session attributes
-			session.removeAttribute(SMTP_PASSWORD_ATTRIBUTE);
-			session.removeAttribute(LDAP_BIND_PASSWORD_ATTRIBUTE);
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");

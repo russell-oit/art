@@ -74,7 +74,9 @@ public class Scheduler extends HttpServlet {
 			logger.debug("ART Scheduler starting up");
 
 			//run upgrade steps
-			upgrade();
+			if (ArtConfig.isArtDatabaseConfigured()) {
+				upgrade();
+			}
 
 			//start clean thread timer
 			t = new Timer(this);

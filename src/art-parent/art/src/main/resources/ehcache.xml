@@ -2,14 +2,18 @@
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:noNamespaceSchemaLocation="ehcache.xsd"
 		 updateCheck="false" monitoring="autodetect"
-		 dynamicConfig="true">
+		 dynamicConfig="true"
+		 eternal="false" overflowToDisk="false" maxEntriesLocalHeap="100"
+		 timeToIdleSeconds="180" timeToLiveSeconds="300">
 	
-	<defaultCache eternal="true"
-				  maxEntriesLocalHeap="1000"
-				  overflowToDisk="false" />
+	<diskStore path="java.io.tmpdir" />
 	
-	<cache name="reports" 
-		   eternal="true" 
-		   maxEntriesLocalHeap="1000"
-		   overflowToDisk="false" />
+	<defaultCache eternal="false" maxEntriesLocalHeap="100" overflowToDisk="false" />
+	
+	<cache name="reports"
+		   eternal="false" maxEntriesLocalHeap="50" />
+	
+	<cache name="users"
+		   eternal="true" maxEntriesLocalHeap="50" />
+	
 </ehcache>

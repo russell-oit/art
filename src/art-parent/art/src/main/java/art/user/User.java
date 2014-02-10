@@ -333,8 +333,8 @@ public class User implements Serializable {
 
 	@Override
 	public int hashCode() {
-		int hash = 5;
-		hash = 29 * hash + (this.username != null ? this.username.hashCode() : 0);
+		int hash = 7;
+		hash = 59 * hash + this.userId;
 		return hash;
 	}
 
@@ -347,7 +347,7 @@ public class User implements Serializable {
 			return false;
 		}
 		final User other = (User) obj;
-		if ((this.username == null) ? (other.username != null) : !this.username.equals(other.username)) {
+		if (this.userId != other.userId) {
 			return false;
 		}
 		return true;

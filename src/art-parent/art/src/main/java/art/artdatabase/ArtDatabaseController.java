@@ -29,7 +29,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ArtDatabaseController {
 
 	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
-	final String ART_DATABASE_PASSWORD_ATTRIBUTE = "artDatabasePassword";
 
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
@@ -53,11 +52,7 @@ public class ArtDatabaseController {
 		//use blank password should always start as false
 		artDatabase.setUseBlankPassword(false);
 
-		//save current password for use by POST method
-		session.setAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE, artDatabase.getPassword());
-
 		model.addAttribute("artDatabase", artDatabase);
-
 		return "artDatabase";
 	}
 
@@ -78,7 +73,7 @@ public class ArtDatabaseController {
 		} else {
 			if (StringUtils.isEmpty(newPassword)) {
 				//password field blank. use current password
-				newPassword = (String) session.getAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE);
+				newPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
 			}
 		}
 		artDatabase.setPassword(newPassword);
@@ -143,9 +138,6 @@ public class ArtDatabaseController {
 			ArtConfig.saveArtDatabaseConfiguration(artDatabase);
 
 			ArtConfig.refreshConnections();
-
-			//clear session attributes
-			session.removeAttribute(ART_DATABASE_PASSWORD_ATTRIBUTE);
 
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)

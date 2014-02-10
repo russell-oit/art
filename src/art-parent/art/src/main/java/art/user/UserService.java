@@ -15,6 +15,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,6 +26,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserService {
+	
+	//for caching info, see
+	//http://wangxiangblog.blogspot.com/2013/02/spring-cache.html
+	//http://viralpatel.net/blogs/cache-support-spring-3-1-m1/
 
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
 	final String SQL_SELECT_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
@@ -38,6 +44,7 @@ public class UserService {
 	 * @return populated user object if username exists, otherwise null
 	 * @throws java.sql.SQLException
 	 */
+	@Cacheable("users")
 	public User getUser(String username) throws SQLException {
 		User user = null;
 
@@ -74,6 +81,7 @@ public class UserService {
 	 * @return user object if user found, null otherwise
 	 * @throws SQLException
 	 */
+	@Cacheable("users")
 	public User getUser(int userId) throws SQLException {
 		User user = null;
 
@@ -189,6 +197,7 @@ public class UserService {
 	 * @return all users
 	 * @throws java.sql.SQLException
 	 */
+	@Cacheable(value = "users")
 	public List<User> getAllUsers() throws SQLException {
 		List<User> users = new ArrayList<User>();
 
@@ -219,6 +228,7 @@ public class UserService {
 	 * @param userId
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "users", allEntries = true)
 	public void deleteUser(int userId) throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -294,6 +304,7 @@ public class UserService {
 	 * @param passwordAlgorithm
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "users", allEntries = true)
 	public void updatePassword(int userId, String newPassword, String passwordAlgorithm) throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -342,6 +353,7 @@ public class UserService {
 	 * @param user
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "users", allEntries = true)
 	public void updateUser(User user) throws SQLException {
 		saveUser(user, false);
 	}
