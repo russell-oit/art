@@ -60,9 +60,10 @@ public class ReportService {
 
 			//union will return distinct results
 			//only show active reports
-			//don't show static lov(119), dynamic lov(120), dynamic job recipient(121) reports
+			//don't show dynamic lov(119), static lov(120), dynamic job recipient(121) reports
 			sql = "SELECT AQ.QUERY_ID, AQ.NAME AS QUERY_NAME, AQ.DESCRIPTION,"
-					+ " AQ.UPDATE_DATE, AQ.QUERY_GROUP_ID, AQG.NAME AS GROUP_NAME "
+					+ " AQ.UPDATE_DATE, AQ.QUERY_GROUP_ID, AQG.NAME AS GROUP_NAME,"
+					+ " AQ.CREATION_DATE"
 					+ " FROM ART_QUERIES AQ "
 					+ " INNER JOIN ART_QUERY_GROUPS AQG "
 					+ " ON AQ.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID "
@@ -111,9 +112,10 @@ public class ReportService {
 				report.setReportId(rs.getInt("QUERY_ID"));
 				report.setName(rs.getString("QUERY_NAME"));
 				report.setDescription(rs.getString("DESCRIPTION"));
-				report.setUpdateDate(rs.getDate("UPDATE_DATE"));
+				report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 				report.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
 				report.setReportGroupName(rs.getString("GROUP_NAME"));
+				report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 
 				reports.add(report);
 			}

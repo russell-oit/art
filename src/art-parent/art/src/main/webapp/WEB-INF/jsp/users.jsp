@@ -26,6 +26,7 @@ Display user configuration page
 <spring:message code="dialog.title.confirm" var="confirmText"/>
 <spring:message code="users.activeStatus.active" var="activeText"/>
 <spring:message code="users.activeStatus.disabled" var="disabledText"/>
+<spring:message code="users.text.updated" var="updatedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -143,7 +144,9 @@ Display user configuration page
 						data-id="${user.userId}">
 						<td>${user.userId}</td>
 						<td>${encode:forHtmlContent(user.username)} &nbsp;
-							<t:displayNewLabel date="${user.creationDate}"/>
+							<t:displayNewLabel creationDate="${user.creationDate}"
+											   updateDate="${user.updateDate}"
+											   updatedText="${updatedText}"/>
 						</td>
 						<td>${user.fullName}</td>
 						<td><t:displayActiveStatus active="${user.active}"

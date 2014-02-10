@@ -33,6 +33,25 @@ public class AvailableReport implements Serializable {
 	private Date updateDate;
 	private String reportGroupName;
 	private int reportGroupId;
+	private Date creationDate;
+
+	/**
+	 * Get the value of creationDate
+	 *
+	 * @return the value of creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * Set the value of creationDate
+	 *
+	 * @param creationDate new value of creationDate
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 
 	/**
 	 * Get the value of reportGroupId

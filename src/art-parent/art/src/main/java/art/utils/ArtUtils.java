@@ -18,12 +18,15 @@ package art.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,6 +163,40 @@ public class ArtUtils {
 		databaseTypes.put("other", "Other");
 
 		return databaseTypes;
+	}
+
+	/**
+	 * Return number of days between two dates
+	 *
+	 * @param before earlier date
+	 * @param after later date
+	 * @return days in "civil" time rather than "mathematical" time e.g. Monday
+	 * 10pm to Tuesday 7am will return 1 day, not 0.
+	 */
+	public static int daysBetween(Date before, Date after) {
+		if (before == null || after == null) {
+			return Integer.MAX_VALUE;
+		}
+
+		//consider "civil" days rather than "mathematical" days. so use LocalDate and not DateTime
+		//see //https://stackoverflow.com/questions/3802893/number-of-days-between-two-dates-in-joda-time
+		return Days.daysBetween(new LocalDate(before.getTime()), new LocalDate(after.getTime())).getDays();
+	}
+
+	/**
+	 * Return number of days between a date and today
+	 *
+	 * @param date
+	 * @return positive integer if date is earlier than today. negative
+	 * otherwise. days in "civil" time rather than "mathematical" time e.g.
+	 * Monday 10pm to Tuesday 7am will return 1 day, not 0.
+	 */
+	public static int daysUntilToday(Date date) {
+		if (date == null) {
+			return Integer.MAX_VALUE;
+		}
+
+		return Days.daysBetween(new LocalDate(date.getTime()), new LocalDate()).getDays();
 	}
 
 }

@@ -152,6 +152,8 @@ Reports page. Also main/home page
 							<a href="#">
 								${fn:escapeXml(report.name)}
 							</a>
+							<t:displayNewLabel creationDate="${report.creationDate}"
+											   updateDate="${report.updateDate}"/>
 						</td>
 					</tr>
 				</c:forEach>
