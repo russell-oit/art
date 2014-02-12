@@ -5,6 +5,7 @@ import art.usergroup.UserGroup;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import org.hibernate.validator.constraints.NotBlank;
 
 /**
  * Class to represent a user. Data stored in the ART_USERS table
@@ -14,6 +15,7 @@ import java.util.List;
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	@NotBlank
 	private String username;
 	private AccessLevel accessLevel;
 	private String email;

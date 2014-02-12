@@ -16,4 +16,7 @@
 	<cache name="users"
 		   eternal="true" maxEntriesLocalHeap="50" />
 	
+	<cache name="userGroups"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
 </ehcache>

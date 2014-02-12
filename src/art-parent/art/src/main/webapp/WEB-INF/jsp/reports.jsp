@@ -16,7 +16,7 @@ Reports page. Also main/home page
 <spring:message code="page.title.reports" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="allRowsText"/>
-<spring:message code="reports.text.description" var="descriptionText"/>
+<spring:message code="page.text.description" var="descriptionText"/>
 <spring:message code="reports.text.reports" var="mainPanelTitle"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">

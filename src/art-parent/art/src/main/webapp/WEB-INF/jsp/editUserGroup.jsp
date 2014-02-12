@@ -1,9 +1,9 @@
 <%-- 
-    Document   : editUser
-    Created on : 19-Jan-2014, 11:14:57
+    Document   : editUserGroup
+    Created on : 12-Feb-2014, 12:16:44
     Author     : Timothy Anyona
 
-Display edit user page
+Edit user group page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -16,10 +16,10 @@ Display edit user page
 
 <c:choose>
 	<c:when test="${action == 'add'}">
-		<spring:message code="page.title.addUser" var="pageTitle"/>
+		<spring:message code="page.title.addUserGroup" var="pageTitle"/>
 	</c:when>
 	<c:otherwise>
-		<spring:message code="page.title.editUser" var="pageTitle"/>
+		<spring:message code="page.title.editUserGroup" var="pageTitle"/>
 	</c:otherwise>
 </c:choose>
 
@@ -34,7 +34,7 @@ Display edit user page
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="users.do"]').parent().addClass('active');
+					$('a[href*="userGroups.do"]').parent().addClass('active');
 				});
 
 				$(function() {
@@ -58,7 +58,7 @@ Display edit user page
 					delay: 100
 				});
 
-				$('#username').focus();
+				$('#name').focus();
 
 			});
 		</script>
@@ -66,14 +66,14 @@ Display edit user page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#users">
+			<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
 	</jsp:attribute>
 
 	<jsp:body>
-		<form:form class="form-horizontal" method="POST" action="" modelAttribute="user">
+		<form:form class="form-horizontal" method="POST" action="" modelAttribute="group">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -95,96 +95,26 @@ Display edit user page
 					</label>
 					<div class="col-md-8">
 						<c:if test="${action != 'add'}">
-							<form:input path="userId" readonly="true" class="form-control"/>
+							<form:input path="userGroupId" readonly="true" class="form-control"/>
 						</c:if>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="username">
-						<spring:message code="page.label.username"/>
+					<label class="control-label col-md-4" for="name">
+						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="username" maxlength="50" class="form-control"/>
-						<form:errors path="username" cssClass="error"/>
+						<form:input path="name" maxlength="30" class="form-control"/>
+						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="password">
-						<spring:message code="page.label.password"/>
+					<label class="col-md-4 control-label " for="description">
+						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<div class="input-group">
-							<form:password path="password" autocomplete="off" maxlength="50" class="form-control" />
-							<spring:message code="page.help.password" var="help" />
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<div class="checkbox">
-							<label>
-								<form:checkbox path="useBlankPassword"/>
-								<spring:message code="page.checkbox.useBlankPassword"/>
-							</label>
-						</div>
-						<form:errors path="password" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="fullName">
-						<spring:message code="users.label.fullName"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="fullName" maxlength="40" class="form-control"/>
-						<form:errors path="fullName" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="email">
-						<spring:message code="users.label.email"/>
-					</label>
-					<div class="col-md-8">
-						<form:input path="email" maxlength="40" class="form-control"/>
-						<form:errors path="email" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="active">
-						<spring:message code="page.label.active"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="active" id="active"/>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="canChangePassword">
-						<spring:message code="users.label.canChangePassword"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="canChangePassword" id="canChangePassword"/>
-						</div>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4">
-						<spring:message code="users.label.accessLevel"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="accessLevel" items="${accessLevels}"
-									 itemLabel="description" 
-									 class="form-control selectpicker"/>
-						<div class="text-right">
-							<!-- TODO use correct link -->
-							<a href="${pageContext.request.contextPath}/docs/manual.htm">
-								<spring:message code="page.link.help"/>
-							</a>
-						</div>
-						<form:errors path="accessLevel" cssClass="error"/>
+						<form:input path="description" maxlength="50" class="form-control"/>
+						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -215,18 +145,6 @@ Display edit user page
 							</span>
 						</div>
 						<form:errors path="startReport" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="userGroups">
-						<spring:message code="users.label.userGroups"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="userGroups" items="${userGroups}" multiple="true" 
-									 itemLabel="name" itemValue="userGroupId" 
-									 class="form-control selectpicker"
-									 />
-						<form:errors path="userGroups" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

@@ -3,35 +3,65 @@
  *
  * This file is part of ART.
  *
- * ART is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, version 2 of the License.
+ * ART is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package art.usergroup;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Class to represent a user group
- * 
+ *
  * @author Timothy Anyona
  */
 public class UserGroup implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 	private int userGroupId;
 	private String name;
 	private String description;
 	private int defaultReportGroup;
 	private String startReport;
+	private Date creationDate;
+	private Date updateDate;
+
+	/**
+	 * @return the creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * @param creationDate the creationDate to set
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	/**
+	 * @return the updateDate
+	 */
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	/**
+	 * @param updateDate the updateDate to set
+	 */
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
 
 	/**
 	 * @return the userGroupId
@@ -129,5 +159,5 @@ public class UserGroup implements Serializable {
 	public String toString() {
 		return "UserGroup{" + "userGroupId=" + userGroupId + ", name=" + name + '}';
 	}
-	
+
 }

@@ -337,6 +337,7 @@ public class UserService {
 	 * @param user
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "users", allEntries = true)
 	public void addUser(User user) throws SQLException {
 		int newId = allocateNewId();
 		if (newId > 0) {

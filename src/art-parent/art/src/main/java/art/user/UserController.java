@@ -57,7 +57,7 @@ public class UserController {
 
 	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteUser(@RequestParam("userId") Integer userId) {
+	AjaxResponse deleteUser(@RequestParam("id") Integer userId) {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
@@ -80,7 +80,7 @@ public class UserController {
 		user.setCanChangePassword(true);
 
 		model.addAttribute("user", user);
-		return displayEditUser("add", model, session);
+		return prepareEditUser("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
@@ -90,7 +90,7 @@ public class UserController {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayEditUser("add", model, session);
+			return prepareEditUser("add", model, session);
 		}
 
 		//hash new password
@@ -105,11 +105,11 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return displayEditUser("add", model, session);
+		return prepareEditUser("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
-	public String showEditUser(@RequestParam("userId") Integer userId, Model model,
+	public String showEditUser(@RequestParam("id") Integer userId, Model model,
 			HttpSession session) {
 
 		User user = null;
@@ -127,7 +127,7 @@ public class UserController {
 		}
 
 		model.addAttribute("user", user);
-		return displayEditUser("edit", model, session);
+		return prepareEditUser("edit", model, session);
 	}
 
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.POST)
@@ -142,7 +142,7 @@ public class UserController {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayEditUser("edit", model, session);
+			return prepareEditUser("edit", model, session);
 		}
 
 		//set password as appropriate
@@ -166,7 +166,7 @@ public class UserController {
 			} catch (SQLException ex) {
 				logger.error("Error", ex);
 				model.addAttribute("error", ex);
-				return displayEditUser("edit", model, session);
+				return prepareEditUser("edit", model, session);
 			}
 		} else {
 			//hash new password
@@ -182,7 +182,7 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return displayEditUser("edit", model, session);
+		return prepareEditUser("edit", model, session);
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class UserController {
 	 * @param session
 	 * @return
 	 */
-	private String displayEditUser(String action, Model model, HttpSession session) {
+	private String prepareEditUser(String action, Model model, HttpSession session) {
 		try {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());

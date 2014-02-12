@@ -233,6 +233,15 @@ public class AuthorisationFilter implements Filter {
 		} else if (StringUtils.equals(page, "success")) {
 			//all can access
 			authorised = true;
+		} else if (StringUtils.equals(page, "accessDenied")) {
+			//all can access
+			authorised = true;
+		} else if (StringUtils.equals(page, "userGroups") || StringUtils.endsWith(page, "UserGroup")) {
+			//standard admins and above, and repository user
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
+					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
+				authorised = true;
+			}
 		}
 
 		return authorised;
