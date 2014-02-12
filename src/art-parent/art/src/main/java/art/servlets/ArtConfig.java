@@ -286,7 +286,7 @@ public class ArtConfig extends HttpServlet {
 
 		//initialize art repository datasource
 		String artDbDriver = artDatabaseConfiguration.getDriver();
-		String artDbTestSql = artDatabaseConfiguration.getConnectionTestSql();
+		String artDbTestSql = artDatabaseConfiguration.getTestSql();
 		int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
 		int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
 

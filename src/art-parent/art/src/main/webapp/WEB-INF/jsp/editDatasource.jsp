@@ -1,9 +1,9 @@
 <%-- 
-    Document   : artDatabase
-    Created on : 08-Nov-2013, 09:28:05
+    Document   : editDatasource
+    Created on : 12-Feb-2014, 16:08:55
     Author     : Timothy Anyona
 
-Display art database configuration page
+Edit datasource page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -11,11 +11,21 @@ Display art database configuration page
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
 
-<spring:message code="page.title.artDatabase" var="pageTitle"/>
+<c:choose>
+	<c:when test="${action == 'add'}">
+		<spring:message code="page.title.addDatasource" var="pageTitle"/>
+	</c:when>
+	<c:otherwise>
+		<spring:message code="page.title.editDatasource" var="pageTitle"/>
+	</c:otherwise>
+</c:choose>
+
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
@@ -24,7 +34,7 @@ Display art database configuration page
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="artDatabase.do"]').parent().addClass('active');
+					$('a[href*="datasources.do"]').parent().addClass('active');
 				});
 
 				$(function() {
@@ -34,8 +44,12 @@ Display art database configuration page
 
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
+					liveSearch: true,
 					iconBase: 'fa',
-					tickIcon: 'fa-check-square'
+					tickIcon: 'fa-check-square',
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
@@ -43,39 +57,23 @@ Display art database configuration page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
+
+				$('#name').focus();
+
 			});
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="rightMainPanel">
-		<c:if test="${not empty initialSetup}">
-			<div class="col-md-3">
-				<div class="alert alert-info">
-					<p>
-						Welcome to the ART Reporting Tool. You need to configure the
-						<b>ART Database</b> before being able to use ART. The ART Database
-						stores data used by the application e.g. users, report definitions etc.
-					</p>
-					<p>
-						After saving the ART Database configuration, use the
-						<b>Configure | Users</b> menu to create some users. Create at least
-						one Super Admin user which you can use to administer all aspects
-						of the application. After creating users, <b>Log Out</b> and log in 
-						using one of the users, and continue using the application.
-					</p>
-					<p>
-						A demo database is provided with a few sample reports.
-						To use it, select <b>Demo</b> as the Database Type and Save,
-						The demo database has 2 users with username/password of admin/admin
-						and auser/auser.
-					</p>
-				</div>
-			</div>
-		</c:if>
+	<jsp:attribute name="aboveMainPanel">
+		<div class="text-right">
+			<a href="${pageContext.request.contextPath}/docs/manual.htm#datasources">
+				<spring:message code="page.link.help"/>
+			</a>
+		</div>
 	</jsp:attribute>
 
 	<jsp:body>
-		<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabase">
+		<form:form class="form-horizontal" method="POST" action="" modelAttribute="datasource">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -87,10 +85,39 @@ Display art database configuration page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${fn:escapeXml(error)}</p>
+						<p>${error}</p>
 					</div>
 				</c:if>
 
+				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="page.label.id"/>
+					</label>
+					<div class="col-md-8">
+						<c:if test="${action != 'add'}">
+							<form:input path="datasourceId" readonly="true" class="form-control"/>
+						</c:if>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="name">
+						<spring:message code="page.text.name"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="name" maxlength="25" class="form-control"/>
+						<form:errors path="name" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="active">
+						<spring:message code="page.label.active"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="active" id="active"/>
+						</div>
+					</div>
+				</div>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="databaseType">
 						<spring:message code="page.label.databaseType"/>
@@ -205,24 +232,6 @@ Display art database configuration page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="maxPoolConnections">
-						<spring:message code="artDatabase.label.maxPoolConnections"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="maxPoolConnections" maxlength="3" class="form-control"/>
-							<spring:message code="artDatabase.help.maxPoolConnections" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="maxPoolConnections" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
 							<spring:message code="page.button.save"/>
@@ -231,5 +240,7 @@ Display art database configuration page
 				</div>
 			</fieldset>
 		</form:form>
+
 	</jsp:body>
+
 </t:mainPageWithPanel>

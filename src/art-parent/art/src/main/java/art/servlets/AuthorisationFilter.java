@@ -237,9 +237,13 @@ public class AuthorisationFilter implements Filter {
 			//all can access
 			authorised = true;
 		} else if (StringUtils.equals(page, "userGroups") || StringUtils.endsWith(page, "UserGroup")) {
-			//standard admins and above, and repository user
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
-					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
+			//standard admins and above
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "datasources") || StringUtils.endsWith(page, "Datasource")) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
 		}

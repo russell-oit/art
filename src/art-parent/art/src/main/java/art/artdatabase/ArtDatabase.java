@@ -21,7 +21,7 @@ public class ArtDatabase implements Serializable {
 	private String password;
 	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
-	private String connectionTestSql;
+	private String testSql;
 	private int connectionPoolTimeout;
 	private int maxPoolConnections; //setting used by art database and all datasources
 
@@ -62,21 +62,21 @@ public class ArtDatabase implements Serializable {
 	}
 
 	/**
-	 * Get the value of connectionTestSql
+	 * Get the value of testSql
 	 *
-	 * @return the value of connectionTestSql
+	 * @return the value of testSql
 	 */
-	public String getConnectionTestSql() {
-		return connectionTestSql;
+	public String getTestSql() {
+		return testSql;
 	}
 
 	/**
-	 * Set the value of connectionTestSql
+	 * Set the value of testSql
 	 *
-	 * @param connectionTestSql new value of connectionTestSql
+	 * @param testSql new value of testSql
 	 */
-	public void setConnectionTestSql(String connectionTestSql) {
-		this.connectionTestSql = connectionTestSql;
+	public void setTestSql(String testSql) {
+		this.testSql = testSql;
 	}
 
 	/**

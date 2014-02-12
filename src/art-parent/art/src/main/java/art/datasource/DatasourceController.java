@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.usergroup;
+package art.datasource;
 
-import art.reportgroup.ReportGroupService;
 import art.utils.AjaxResponse;
+import art.utils.ArtUtils;
 import java.sql.SQLException;
 import javax.validation.Valid;
 import org.slf4j.Logger;
@@ -34,40 +34,37 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Controller for user group configuration
+ * Controller for the datasource configuration process
  *
  * @author Timothy Anyona
  */
 @Controller
-public class UserGroupController {
+public class DatasourceController {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserGroupController.class);
-
-	@Autowired
-	private UserGroupService userGroupService;
+	private static final Logger logger = LoggerFactory.getLogger(DatasourceController.class);
 
 	@Autowired
-	private ReportGroupService reportGroupService;
+	private DatasourceService datasourceService;
 
-	@RequestMapping(value = "/app/userGroups", method = RequestMethod.GET)
-	public String showUserGroups(Model model) {
+	@RequestMapping(value = "/app/datasources", method = RequestMethod.GET)
+	public String showDatasources(Model model) {
 		try {
-			model.addAttribute("groups", userGroupService.getAllUserGroups());
+			model.addAttribute("datasources", datasourceService.getAllDatasources());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return "userGroups";
+		return "datasources";
 	}
 
-	@RequestMapping(value = "/app/deleteUserGroup", method = RequestMethod.POST)
+	@RequestMapping(value = "/app/deleteDatasource", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteUserGroup(@RequestParam("id") Integer id) {
+	AjaxResponse deleteDatasource(@RequestParam("id") Integer id) {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userGroupService.deleteUserGroup(id);
+			datasourceService.deleteDatasource(id);
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -77,65 +74,71 @@ public class UserGroupController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.GET)
-	public String showAddUserGroup(Model model) {
-		model.addAttribute("group", new UserGroup());
-		return displayUserGroup("add", model);
+	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.GET)
+	public String showAddDatasource(Model model) {
+		Datasource datasource = new Datasource();
+		
+		//set defaults
+		datasource.setActive(true);
+		datasource.setConnectionPoolTimeout(20);
+		
+		model.addAttribute("datasource", datasource);
+		return displayDatasource("add", model);
 	}
 
-	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.POST)
-	public String processAddUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.POST)
+	public String processAddDatasource(@ModelAttribute("datasource") @Valid Datasource datasource,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayUserGroup("add", model);
+			return displayDatasource("add", model);
 		}
 
 		try {
-			userGroupService.addUserGroup(group);
-			redirectAttributes.addFlashAttribute("message", "userGroups.message.userGroupAdded");
-			return "redirect:/app/userGroups.do";
+			datasourceService.addDatasource(datasource);
+			redirectAttributes.addFlashAttribute("message", "datasources.message.datasourceAdded");
+			return "redirect:/app/datasources.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return displayUserGroup("add", model);
+		return displayDatasource("add", model);
 	}
 
-	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
-	public String showEditUserGroup(@RequestParam("id") Integer id, Model model) {
+	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
+	public String showEditDatasource(@RequestParam("id") Integer id, Model model) {
 
 		try {
-			model.addAttribute("group", userGroupService.getUserGroup(id));
+			model.addAttribute("datasource", datasourceService.getDatasource(id));
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return displayUserGroup("edit", model);
+		return displayDatasource("edit", model);
 	}
 
-	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.POST)
-	public String processEditUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.POST)
+	public String processEditDatasource(@ModelAttribute("datasource") @Valid Datasource datasource,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayUserGroup("edit", model);
+			return displayDatasource("edit", model);
 		}
 
 		try {
-			userGroupService.updateUserGroup(group);
-			redirectAttributes.addFlashAttribute("message", "userGroups.message.userGroupUpdated");
-			return "redirect:/app/userGroups.do";
+			datasourceService.updateDatasource(datasource);
+			redirectAttributes.addFlashAttribute("message", "datasources.message.datasourceUpdated");
+			return "redirect:/app/datasources.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return displayUserGroup("edit", model);
+		return displayDatasource("edit", model);
 	}
 
 	/**
@@ -146,16 +149,10 @@ public class UserGroupController {
 	 * @param session
 	 * @return
 	 */
-	private String displayUserGroup(String action, Model model) {
-		try {
-			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
+	private String displayDatasource(String action, Model model) {
+		model.addAttribute("databaseTypes", ArtUtils.getDatabaseTypes());
 		model.addAttribute("action", action);
-		return "editUserGroup";
+		return "editDatasource";
 	}
 
 }

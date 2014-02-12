@@ -17,12 +17,12 @@ Display user groups
 <spring:message code="page.title.userGroups" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
-<spring:message code="userGroups.message.userGroupDeleted" var="userGroupDeletedText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.delete" var="deleteText"/>
-<spring:message code="dialog.message.deleteUserGroup" var="deleteUserGroupText"/>
 <spring:message code="dialog.title.confirm" var="confirmText"/>
+<spring:message code="dialog.message.deleteUserGroup" var="deleteUserGroupText"/>
+<spring:message code="userGroups.message.userGroupDeleted" var="userGroupDeletedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -51,11 +51,11 @@ Display user groups
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
 					var aPos = oTable.fnGetPosition(nRow);
-					var userGroupName = escapeHtmlContent(row.data("name"));
-					var userGroupId = row.data("id");
+					var name = escapeHtmlContent(row.data("name"));
+					var id = row.data("id");
 					var msg;
 					bootbox.confirm({
-						message: "${deleteUserGroupText}: " + userGroupName,
+						message: "${deleteUserGroupText}: " + name,
 						title: "${confirmText}",
 						buttons: {
 							'cancel': {
@@ -70,7 +70,7 @@ Display user groups
 								$.ajax({
 									type: "POST",
 									url: "${pageContext.request.contextPath}/app/deleteUserGroup.do",
-									data: {id: userGroupId},
+									data: {id: id},
 									success: function(response) {
 										if (response.success) {
 											msg = alertCloseButton + "${userGroupDeletedText}";
@@ -144,7 +144,8 @@ Display user groups
 						<td>${group.description}</td>
 						<td>
 							<div class="btn-group">
-								<a class="btn btn-default" href="${pageContext.request.contextPath}/app/editUserGroup.do?id=${group.userGroupId}">
+								<a class="btn btn-default" 
+								   href="${pageContext.request.contextPath}/app/editUserGroup.do?id=${group.userGroupId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>
@@ -160,5 +161,3 @@ Display user groups
 		</table>
 	</jsp:body>
 </t:mainPageWithPanel>
-
-

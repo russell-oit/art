@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.usergroup;
+package art.datasource;
 
 import art.servlets.ArtConfig;
 import art.utils.DbUtils;
@@ -32,65 +32,66 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to user groups
+ * Class with methods for datasources
  *
  * @author Timothy Anyona
  */
 @Service
-public class UserGroupService {
+public class DatasourceService {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserGroupService.class);
-	final String SQL_SELECT_ALL_USER_GROUPS = "SELECT USER_GROUP_ID, NAME, DESCRIPTION,"
-			+ " DEFAULT_QUERY_GROUP, START_QUERY, CREATION_DATE, UPDATE_DATE "
-			+ " FROM ART_USER_GROUPS";
+	private static final Logger logger = LoggerFactory.getLogger(DatasourceService.class);
+	final String SQL_SELECT_ALL_DATASOURCES = "SELECT DATABASE_ID, NAME, DRIVER,"
+			+ " URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE,"
+			+ " CREATION_DATE, UPDATE_DATE"
+			+ " FROM ART_DATABASES";
 
 	/**
-	 * Get all user groups
+	 * Get all datasources
 	 *
-	 * @return list of all user groups, empty list otherwise
+	 * @return list of all datasources, empty list otherwise
 	 * @throws SQLException
 	 */
-	@Cacheable("userGroups")
-	public List<UserGroup> getAllUserGroups() throws SQLException {
-		List<UserGroup> groups = new ArrayList<UserGroup>();
+	@Cacheable("datasources")
+	public List<Datasource> getAllDatasources() throws SQLException {
+		List<Datasource> datasources = new ArrayList<Datasource>();
 
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_USER_GROUPS;
+		String sql = SQL_SELECT_ALL_DATASOURCES;
 
 		try {
 			conn = ArtConfig.getConnection();
 			rs = DbUtils.executeQuery(conn, ps, sql);
 			while (rs.next()) {
-				UserGroup group = new UserGroup();
-				populateUserGroup(group, rs);
-				groups.add(group);
+				Datasource datasource = new Datasource();
+				populateDatasource(datasource, rs);
+				datasources.add(datasource);
 			}
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
 
-		return groups;
+		return datasources;
 	}
 
 	/**
-	 * Get a user group
+	 * Get a datasource
 	 *
 	 * @param id
-	 * @return populated object if user group found, null otherwise
+	 * @return populated object if datasource found, null otherwise
 	 * @throws SQLException
 	 */
-	@Cacheable("userGroups")
-	public UserGroup getUserGroup(int id) throws SQLException {
-		UserGroup group = null;
+	@Cacheable("datasources")
+	public Datasource getDatasource(int id) throws SQLException {
+		Datasource datasource = null;
 
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_USER_GROUPS + " WHERE USER_GROUP_ID = ? ";
+		String sql = SQL_SELECT_ALL_DATASOURCES + " WHERE DATABASE_ID = ? ";
 
 		Object[] values = {
 			id
@@ -100,41 +101,45 @@ public class UserGroupService {
 			conn = ArtConfig.getConnection();
 			rs = DbUtils.executeQuery(conn, ps, sql, values);
 			if (rs.next()) {
-				group = new UserGroup();
-				populateUserGroup(group, rs);
+				datasource = new Datasource();
+				populateDatasource(datasource, rs);
 			}
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
 
-		return group;
+		return datasource;
 	}
 
 	/**
-	 * Populate object with row from table
+	 * Populate object with row from datasource
 	 *
 	 * @param group
 	 * @param rs
 	 * @throws SQLException
 	 */
-	private void populateUserGroup(UserGroup group, ResultSet rs) throws SQLException {
-		group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
-		group.setName(rs.getString("NAME"));
-		group.setDescription(rs.getString("DESCRIPTION"));
-		group.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
-		group.setStartReport(rs.getString("START_QUERY"));
-		group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-		group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+	private void populateDatasource(Datasource datasource, ResultSet rs) throws SQLException {
+		datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
+		datasource.setName(rs.getString("NAME"));
+		datasource.setDriver(rs.getString("DRIVER"));
+		datasource.setUrl(rs.getString("URL"));
+		datasource.setUsername(rs.getString("USERNAME"));
+		datasource.setPassword(rs.getString("PASSWORD"));
+		datasource.setConnectionPoolTimeout(rs.getInt("POOL_TIMEOUT"));
+		datasource.setTestSql(rs.getString("TEST_SQL"));
+		datasource.setActive(rs.getBoolean("ACTIVE"));
+		datasource.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+		datasource.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 	}
 
 	/**
-	 * Delete a user group
+	 * Delete a datasource
 	 *
 	 * @param id
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
-	public void deleteUserGroup(int id) throws SQLException {
+	@CacheEvict(value = "datasources", allEntries = true)
+	public void deleteDatasource(int id) throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -142,12 +147,12 @@ public class UserGroupService {
 		try {
 			conn = ArtConfig.getConnection();
 
-			String sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
+			String sql = "DELETE FROM ART_DATABASES WHERE DATABASE_ID=?";
 			ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
 			int affectedRows = ps.executeUpdate();
 			if (affectedRows == 0) {
-				logger.warn("Delete user group failed. Group not found. Id={}", id);
+				logger.warn("Delete datasource failed. Datasource not found. Id={}", id);
 			}
 
 		} finally {
@@ -156,41 +161,41 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Add a new user group to the database
+	 * Add a new datasource to the database
 	 *
-	 * @param group
+	 * @param datasource
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
-	public void addUserGroup(UserGroup group) throws SQLException {
+	@CacheEvict(value = "datasources", allEntries = true)
+	public void addDatasource(Datasource datasource) throws SQLException {
 		int newId = allocateNewId();
 		if (newId > 0) {
-			group.setUserGroupId(newId);
-			saveUserGroup(group, true);
+			datasource.setDatasourceId(newId);
+			saveDatasource(datasource, true);
 		} else {
-			logger.warn("User group not added. Allocate new ID failed. User Group='{}'", group.getName());
+			logger.warn("Datasource not added. Allocate new ID failed. Datasource='{}'", datasource.getName());
 		}
 	}
 
 	/**
-	 * Update an existing user group
+	 * Update an existing datasource
 	 *
-	 * @param group
+	 * @param datasource
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = "userGroups", allEntries = true)
-	public void updateUserGroup(UserGroup group) throws SQLException {
-		saveUserGroup(group, false);
+	@CacheEvict(value = "datasources", allEntries = true)
+	public void updateDatasource(Datasource datasource) throws SQLException {
+		saveDatasource(datasource, false);
 	}
 
 	/**
-	 * Save a user group
+	 * Save a datasource
 	 *
-	 * @param group
+	 * @param datasource
 	 * @param newRecord true if this is a new record, false otherwise
 	 * @throws SQLException
 	 */
-	private void saveUserGroup(UserGroup group, boolean newRecord) throws SQLException {
+	private void saveDatasource(Datasource datasource, boolean newRecord) throws SQLException {
 		Connection conn = null;
 		PreparedStatement ps = null;
 
@@ -202,18 +207,22 @@ public class UserGroupService {
 			dateColumn = "UPDATE_DATE";
 		}
 
-		String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
-				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?"
+		String sql = "UPDATE ART_DATABASES SET NAME=?, DRIVER=?, URL=?,"
+				+ " USERNAME=?, PASSWORD=?, POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?"
 				+ " ," + dateColumn + "=?"
-				+ " WHERE USER_GROUP_ID=?";
+				+ " WHERE DATABASE_ID=?";
 
 		Object[] values = {
-			group.getName(),
-			group.getDescription(),
-			group.getDefaultReportGroup(),
-			group.getStartReport(),
+			datasource.getName(),
+			datasource.getDriver(),
+			datasource.getUrl(),
+			datasource.getUsername(),
+			datasource.getPassword(),
+			datasource.getConnectionPoolTimeout(),
+			datasource.getTestSql(),
+			datasource.isActive(),
 			DbUtils.getCurrentTimeStamp(),
-			group.getUserGroupId()
+			datasource.getDatasourceId()
 		};
 
 		try {
@@ -221,7 +230,7 @@ public class UserGroupService {
 
 			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
 			if (affectedRows == 0) {
-				logger.warn("Save user group - no rows affected. User Group='{}', newRecord={}", group.getName(), newRecord);
+				logger.warn("Save datasource - no rows affected. Datasource='{}', newRecord={}", datasource.getName(), newRecord);
 			}
 		} finally {
 			DbUtils.close(ps, conn);
@@ -245,7 +254,7 @@ public class UserGroupService {
 		try {
 			conn = ArtConfig.getConnection();
 			//generate new id
-			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
+			String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
 			rs = DbUtils.executeQuery(conn, ps, sql);
 			if (rs.next()) {
 				newId = rs.getInt(1) + 1;
@@ -253,9 +262,9 @@ public class UserGroupService {
 				//add dummy record with new id. fill all not null columns
 				//name has unique constraint so use a random default value
 				String allocatingName = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
-				sql = "INSERT INTO ART_USER_GROUPS"
-						+ " (USER_GROUP_ID,NAME)"
-						+ " VALUES(?,?)";
+				sql = "INSERT INTO ART_DATABASES"
+						+ " (DATABASE_ID,NAME,DRIVER,URL,USERNAME,PASSWORD)"
+						+ " VALUES(?,?,'','','','')";
 
 				Object[] values = {
 					newId,
