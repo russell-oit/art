@@ -73,7 +73,9 @@ public class ArtDatabaseController {
 		} else {
 			if (StringUtils.isEmpty(newPassword)) {
 				//password field blank. use current password
-				newPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+				if (ArtConfig.isArtDatabaseConfigured()) {
+					newPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+				}
 			}
 		}
 		artDatabase.setPassword(newPassword);
@@ -83,28 +85,28 @@ public class ArtDatabaseController {
 		PreparedStatement ps = null;
 
 		try {
+			String demoDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
+			String sampleDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
+
+			boolean usingDemoDatabase = false;
+			if (StringUtils.equalsIgnoreCase(artDatabase.getUrl(), "demo")) {
+				usingDemoDatabase = true;
+
+				artDatabase.setDriver("org.hsqldb.jdbcDriver");
+				artDatabase.setUrl(demoDbUrl);
+
+				if (StringUtils.isBlank(artDatabase.getUsername())) {
+					//use default username and password
+					artDatabase.setUsername("ART");
+					artDatabase.setPassword("ART");
+				}
+			}
 
 			String driver = artDatabase.getDriver();
 			String url = artDatabase.getUrl();
 			String username = artDatabase.getUsername();
 			String password = artDatabase.getPassword();
 
-			String demoDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
-			String sampleDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
-
-			boolean usingDemoDatabase = false;
-			if (StringUtils.equalsIgnoreCase(url, "demo")) {
-				usingDemoDatabase = true;
-
-				driver = "org.hsqldb.jdbcDriver";
-				url = demoDbUrl;
-
-				if (StringUtils.isBlank(username)) {
-					//use default username and password
-					username = "ART";
-					password = "ART";
-				}
-			}
 			if (StringUtils.isNotBlank(driver)) {
 				Class.forName(driver).newInstance();
 				conn = DriverManager.getConnection(url, username, password);

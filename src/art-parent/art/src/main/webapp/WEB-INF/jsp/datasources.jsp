@@ -21,11 +21,13 @@ Display datasources
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.delete" var="deleteText"/>
 <spring:message code="dialog.title.confirm" var="confirmText"/>
-<spring:message code="dialog.message.deleteDatasource" var="deleteDatasourceText"/>
-<spring:message code="datasources.message.datasourceDeleted" var="datasourceDeletedText"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
+<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="datasources.message.linkedReportsExist" var="linkedReportsExistText"/>
 
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
@@ -56,7 +58,7 @@ Display datasources
 					var id = row.data("id");
 					var msg;
 					bootbox.confirm({
-						message: "${deleteDatasourceText}: " + name,
+						message: "${deleteRecordText}: <b>" + name + "</b>",
 						title: "${confirmText}",
 						buttons: {
 							'cancel': {
@@ -70,14 +72,23 @@ Display datasources
 							if (result) {
 								$.ajax({
 									type: "POST",
+									dataType: "json",
 									url: "${pageContext.request.contextPath}/app/deleteDatasource.do",
 									data: {id: id},
 									success: function(response) {
 										if (response.success) {
-											msg = alertCloseButton + "${datasourceDeletedText}";
+											msg = alertCloseButton + "${recordDeletedText}";
 											$("#ajaxResponse").addClass("alert alert-success alert-dismissable").html(msg);
 											oTable.fnDeleteRow(aPos);
-											$.notify("${datasourceDeletedText}", "success");
+											$.notify("${recordDeletedText}", "success");
+										} else if (response.linkedReports.length > 0) {
+											msg = alertCloseButton + "${linkedReportsExistText}" + "<ul>";
+											$.each(response.linkedReports, function(index, value) {
+												msg += "<li>" + value.name + "</li>";
+											});
+											msg += "</ul>";
+											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$.notify("${cannotDeleteRecordText}", "error");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
@@ -128,7 +139,7 @@ Display datasources
 				<tr>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
-					<th><spring:message code="datasources.text.url"/></th>
+					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
@@ -143,7 +154,7 @@ Display datasources
 							<t:displayNewLabel creationDate="${datasource.creationDate}"
 											   updateDate="${datasource.updateDate}"/>
 						</td>
-						<td>${datasource.url}</td>
+						<td>${datasource.description}</td>
 						<td><t:displayActiveStatus active="${datasource.active}"/>
 						</td>
 						<td>

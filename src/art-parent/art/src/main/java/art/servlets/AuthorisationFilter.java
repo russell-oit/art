@@ -241,7 +241,8 @@ public class AuthorisationFilter implements Filter {
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "datasources") || StringUtils.endsWith(page, "Datasource")) {
+		} else if (StringUtils.equals(page, "datasources") || StringUtils.endsWith(page, "Datasource")
+				|| StringUtils.equals(page, "testDatasource")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;

@@ -5,7 +5,9 @@
 -- (found in the quartz directory)
 
 -- NOTES:
--- for sql server, replace TIMESTAMP data type with DATETIME
+-- for sql server, replace TIMESTAMP with DATETIME
+--
+-- for mysql, replace TIMESTAMP with TIMESTAMP NULL
 
 -- UPGRADING:
 -- if you are upgrading, don't use this script. run the scripts available in the
@@ -110,6 +112,7 @@ CREATE TABLE ART_DATABASES
 (
 	DATABASE_ID       INTEGER NOT NULL PRIMARY KEY,
 	NAME	          VARCHAR(25) NOT NULL,
+	DESCRIPTION VARCHAR(500),
 	DRIVER            VARCHAR(200) NOT NULL,
 	URL               VARCHAR(2000) NOT NULL,
 	USERNAME          VARCHAR(25) NOT NULL,

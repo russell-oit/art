@@ -26,11 +26,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class UserService {
-	
+
 	//for caching info, see
 	//http://wangxiangblog.blogspot.com/2013/02/spring-cache.html
 	//http://viralpatel.net/blogs/cache-support-spring-3-1-m1/
-
 	final static Logger logger = LoggerFactory.getLogger(UserService.class);
 	final String SQL_SELECT_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
 			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, PASSWORD_ALGORITHM, START_QUERY, "
@@ -469,7 +468,8 @@ public class UserService {
 			DbUtils.executeUpdate(conn, ps, sql, values);
 
 			//insert records afresh
-			if (CollectionUtils.isNotEmpty(user.getUserGroups())) {
+			List<UserGroup> groups = user.getUserGroups();
+			if (groups != null && !groups.isEmpty()) {
 				List<Integer> userGroupIds = new ArrayList<Integer>();
 				for (UserGroup group : user.getUserGroups()) {
 					if (group != null && group.getUserGroupId() > 0) {

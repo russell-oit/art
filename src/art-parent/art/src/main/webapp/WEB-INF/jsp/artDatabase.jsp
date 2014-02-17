@@ -130,7 +130,16 @@ Display art database configuration page
 						<spring:message code="page.label.jdbcUrl"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="url" maxlength="2000" class="form-control"/>
+						<div class="input-group">
+							<form:input path="url" maxlength="2000" class="form-control"/>
+							<spring:message code="page.help.jdbcUrl" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
 						<form:errors path="url" cssClass="error"/>
 					</div>
 				</div>

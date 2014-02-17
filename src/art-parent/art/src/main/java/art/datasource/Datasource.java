@@ -39,6 +39,25 @@ public class Datasource implements Serializable {
 	private String testSql;
 	private int connectionPoolTimeout;
 	private boolean useBlankPassword; //only used for user interface logic
+	private String description;
+
+	/**
+	 * Get the value of description
+	 *
+	 * @return the value of description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Set the value of description
+	 *
+	 * @param description new value of description
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	/**
 	 * Get the value of useBlankPassword

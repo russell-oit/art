@@ -26,10 +26,13 @@ Edit datasource page
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
+<spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
@@ -40,6 +43,37 @@ Edit datasource page
 				$(function() {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
+				});
+
+				$('#testConnection').on('click', function() {
+					var id = $("#datasourceId").val();
+					var driver = $("#driver").val();
+					var url = $("#url").val();
+					var username = $("#username").val();
+					var password = $("#password").val();
+					var useBlankPassword = $("#useBlankPassword").is(":checked");
+
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/app/testDatasource.do",
+						data: {id: id, driver: driver, url: url, username: username,
+							password: password, useBlankPassword: useBlankPassword},
+						success: function(response) {
+							if (response.success) {
+								msg = alertCloseButton + "${connectionSuccessfulText}";
+								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
+								$.notify("${connectionSuccessfulText}", "success");
+							} else {
+								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
+								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+								$.notify("${errorOccurredText}", "error");
+							}
+						},
+						error: function(xhr, status, error) {
+							alert(xhr.responseText);
+						}
+					});
 				});
 
 				//Enable Bootstrap-Select
@@ -59,10 +93,8 @@ Edit datasource page
 				});
 
 				$('#name').focus();
-
-			});
-		</script>
-	</jsp:attribute>
+			});</script>
+		</jsp:attribute>
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
@@ -75,6 +107,12 @@ Edit datasource page
 	<jsp:body>
 		<form:form class="form-horizontal" method="POST" action="" modelAttribute="datasource">
 			<fieldset>
+				<c:if test="${not empty message}">
+					<div class="alert alert-success alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="${message}"/>
+					</div>
+				</c:if>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
@@ -89,14 +127,22 @@ Edit datasource page
 					</div>
 				</c:if>
 
+				<div id="ajaxResponse">
+				</div>
+
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action != 'add'}">
-							<form:input path="datasourceId" readonly="true" class="form-control"/>
-						</c:if>
+						<c:choose>
+							<c:when test="${action == 'add'}">
+								<form:hidden path="datasourceId"/>
+							</c:when>
+							<c:otherwise>
+								<form:input path="datasourceId" readonly="true" class="form-control"/>
+							</c:otherwise>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">
@@ -106,6 +152,15 @@ Edit datasource page
 					<div class="col-md-8">
 						<form:input path="name" maxlength="25" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="description">
+						<spring:message code="page.text.description"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="description" maxlength="500" class="form-control"/>
+						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -157,7 +212,16 @@ Edit datasource page
 						<spring:message code="page.label.jdbcUrl"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="url" maxlength="2000" class="form-control"/>
+						<div class="input-group">
+							<form:input path="url" maxlength="2000" class="form-control"/>
+							<spring:message code="page.help.jdbcUrl" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
 						<form:errors path="url" cssClass="error"/>
 					</div>
 				</div>
@@ -187,7 +251,7 @@ Edit datasource page
 						</div>
 						<div class="checkbox">
 							<label>
-								<form:checkbox path="useBlankPassword"/>
+								<form:checkbox path="useBlankPassword" id="useBlankPassword"/>
 								<spring:message code="page.checkbox.useBlankPassword"/>
 							</label>
 						</div>
@@ -219,8 +283,7 @@ Edit datasource page
 					<div class="col-md-8">
 						<div class="input-group">
 							<form:input path="connectionPoolTimeout" maxlength="5" class="form-control"/>
-							<spring:message code="page.help.connectionPoolTimeout"
-											var="help" />
+							<spring:message code="page.help.connectionPoolTimeout" var="help" />
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
 										data-toggle="tooltip" data-html="true" title="${help}">
@@ -233,9 +296,14 @@ Edit datasource page
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
-						<button type="submit" class="btn btn-primary pull-right">
-							<spring:message code="page.button.save"/>
-						</button>
+						<span class="pull-right">
+							<button type="button" id="testConnection" class="btn btn-default">
+								<spring:message code="datasources.button.test"/>
+							</button>
+							<button type="submit" class="btn btn-primary">
+								<spring:message code="page.button.save"/>
+							</button>
+						</span>
 					</div>
 				</div>
 			</fieldset>

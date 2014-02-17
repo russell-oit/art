@@ -175,6 +175,12 @@ public class UserController {
 
 		try {
 			userService.updateUser(user);
+			//update session user if appropriate
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if(user.equals(sessionUser)){
+				session.removeAttribute("sessionUser");
+				session.setAttribute("sessionUser", userService.getUser(user.getUserId()));
+			}
 			redirectAttributes.addFlashAttribute("message", "users.message.userUpdated");
 			return "redirect:/app/users.do";
 		} catch (SQLException ex) {

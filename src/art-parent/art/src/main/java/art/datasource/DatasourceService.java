@@ -16,6 +16,7 @@
  */
 package art.datasource;
 
+import art.report.AvailableReport;
 import art.servlets.ArtConfig;
 import art.utils.DbUtils;
 import java.sql.Connection;
@@ -40,8 +41,8 @@ import org.springframework.stereotype.Service;
 public class DatasourceService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatasourceService.class);
-	final String SQL_SELECT_ALL_DATASOURCES = "SELECT DATABASE_ID, NAME, DRIVER,"
-			+ " URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE,"
+	final String SQL_SELECT_ALL_DATASOURCES = "SELECT DATABASE_ID, DESCRIPTION,"
+			+ " NAME, DRIVER, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE,"
 			+ " CREATION_DATE, UPDATE_DATE"
 			+ " FROM ART_DATABASES";
 
@@ -121,6 +122,7 @@ public class DatasourceService {
 	private void populateDatasource(Datasource datasource, ResultSet rs) throws SQLException {
 		datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
 		datasource.setName(rs.getString("NAME"));
+		datasource.setDescription(rs.getString("DESCRIPTION"));
 		datasource.setDriver(rs.getString("DRIVER"));
 		datasource.setUrl(rs.getString("URL"));
 		datasource.setUsername(rs.getString("USERNAME"));
@@ -284,6 +286,46 @@ public class DatasourceService {
 		}
 
 		return newId;
+	}
+	
+	/**
+	 * Get reports that use a given datasource
+	 * 
+	 * @param datasourceId
+	 * @return list with link reports, empty list otherwise
+	 * @throws SQLException 
+	 */
+	public List<AvailableReport> getLinkedReports(int datasourceId) throws SQLException{
+		List<AvailableReport> reports=new ArrayList<AvailableReport>();
+		
+		Connection conn=null;
+		PreparedStatement ps=null;
+		ResultSet rs=null;
+		
+		String sql="SELECT QUERY_ID, NAME"
+				+ " FROM ART_QUERIES"
+				+ " WHERE DATABASE_ID=?";
+		
+		Object[] values={
+			datasourceId
+		};
+		
+		try{
+			conn=ArtConfig.getConnection();
+			rs=DbUtils.executeQuery(conn, ps, sql, values);
+			while(rs.next()){
+				AvailableReport report=new AvailableReport();
+				report.setReportId(rs.getInt("QUERY_ID"));
+				report.setName(rs.getString("NAME"));
+				
+				reports.add(report);
+			}
+		} finally{
+			DbUtils.close(rs, ps, conn);
+		}
+		
+		return reports;
+		
 	}
 
 }
