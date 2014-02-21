@@ -25,6 +25,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +53,36 @@ public class UserGroupService {
 	private final String SQL_SELECT = "SELECT * FROM ART_USER_GROUPS";
 
 	/**
+	 * Class to map resultset to an object
+	 */
+	private class UserGroupMapper extends BasicRowProcessor {
+
+		@Override
+		public List<UserGroup> toBeanList(ResultSet rs, Class type) throws SQLException {
+			List<UserGroup> list = new ArrayList<UserGroup>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public UserGroup toBean(ResultSet rs, Class type) throws SQLException {
+			UserGroup group = new UserGroup();
+
+			group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
+			group.setName(rs.getString("NAME"));
+			group.setDescription(rs.getString("DESCRIPTION"));
+			group.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+			group.setStartReport(rs.getString("START_QUERY"));
+			group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+			group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+
+			return group;
+		}
+	}
+
+	/**
 	 * Get all user groups
 	 *
 	 * @return list of all user groups, empty list otherwise
@@ -56,25 +90,8 @@ public class UserGroupService {
 	 */
 	@Cacheable("userGroups")
 	public List<UserGroup> getAllUserGroups() throws SQLException {
-		List<UserGroup> groups = new ArrayList<UserGroup>();
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		String sql = SQL_SELECT;
-
-		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.query(conn, ps, sql);
-			while (rs.next()) {
-				groups.add(mapRow(rs));
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return groups;
+		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<UserGroup>(UserGroup.class, new UserGroupService.UserGroupMapper());
+		return dbService.query(SQL_SELECT, h);
 	}
 
 	/**
@@ -86,50 +103,9 @@ public class UserGroupService {
 	 */
 	@Cacheable("userGroups")
 	public UserGroup getUserGroup(int id) throws SQLException {
-		UserGroup group = null;
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
 		String sql = SQL_SELECT + " WHERE USER_GROUP_ID = ? ";
-
-		Object[] values = {
-			id
-		};
-
-		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.query(conn, ps, sql, values);
-			if (rs.next()) {
-				group = mapRow(rs);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return group;
-	}
-
-	/**
-	 * Populate object with row from table
-	 *
-	 * @param rs
-	 * @return new object with properties filled from the database
-	 * @throws SQLException
-	 */
-	private UserGroup mapRow(ResultSet rs) throws SQLException {
-		UserGroup group = new UserGroup();
-
-		group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
-		group.setName(rs.getString("NAME"));
-		group.setDescription(rs.getString("DESCRIPTION"));
-		group.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
-		group.setStartReport(rs.getString("START_QUERY"));
-		group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-		group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-
-		return group;
+		ResultSetHandler<UserGroup> h = new BeanHandler<UserGroup>(UserGroup.class, new UserGroupService.UserGroupMapper());
+		return dbService.query(sql, h, id);
 	}
 
 	/**

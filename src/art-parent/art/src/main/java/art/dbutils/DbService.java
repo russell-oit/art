@@ -16,16 +16,12 @@
  */
 package art.dbutils;
 
-import art.datasource.Datasource;
-import art.datasource.DatasourceMapper;
 import art.servlets.ArtConfig;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -64,14 +60,39 @@ public class DbService {
 		return affectedRows;
 	}
 
+	/**
+	 * Execute a select statement without parameters and fill an appropriate
+	 * object or object list
+	 *
+	 * @param <T>
+	 * @param sql
+	 * @param rsh
+	 * @return
+	 * @throws SQLException
+	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh) throws SQLException {
+		return query(sql, rsh, (Object[]) null);
+	}
+
+	/**
+	 * Execute a select statement with parameters and fill an appropriate object
+	 * or object list
+	 *
+	 * @param <T>
+	 * @param sql
+	 * @param rsh
+	 * @param params
+	 * @return
+	 * @throws SQLException
+	 */
+	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		Connection conn = null;
 
 		try {
 			conn = ArtConfig.getConnection();
 			QueryRunner run = new QueryRunner();
 
-			return run.query(conn, sql, rsh);
+			return run.query(conn, sql, rsh, params);
 		} finally {
 			DbUtils.close(conn);
 		}
