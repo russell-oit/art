@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtSettings {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtSettings.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtSettings.class);
 	Properties p;
 
 	/**

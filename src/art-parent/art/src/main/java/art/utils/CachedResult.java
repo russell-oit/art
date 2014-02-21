@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CachedResult {
 
-	final static Logger logger = LoggerFactory.getLogger(CachedResult.class);
+	private static final Logger logger = LoggerFactory.getLogger(CachedResult.class);
 	final String sVERSION = "0.1";
 	Connection conn; //target connection
 	ResultSet rs; // resultsetto reverse in the target connection

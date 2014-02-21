@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QuartzProperties {
 
-	final static Logger logger = LoggerFactory.getLogger(QuartzProperties.class);
+	private static final Logger logger = LoggerFactory.getLogger(QuartzProperties.class);
 	String quartzPropertiesFilePath;
 
 	/**

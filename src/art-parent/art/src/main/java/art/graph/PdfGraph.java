@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PdfGraph {
 
-	final static Logger logger = LoggerFactory.getLogger(PdfGraph.class);
+	private static final Logger logger = LoggerFactory.getLogger(PdfGraph.class);
 
 	public static void createPdf(Object chartObject, String filename, String title) {
 		createPdf(chartObject, filename, title, null, null);

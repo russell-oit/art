@@ -21,8 +21,8 @@ Display user groups
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.delete" var="deleteText"/>
 <spring:message code="dialog.title.confirm" var="confirmText"/>
-<spring:message code="dialog.message.deleteUserGroup" var="deleteUserGroupText"/>
-<spring:message code="userGroups.message.userGroupDeleted" var="userGroupDeletedText"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
+<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -55,7 +55,7 @@ Display user groups
 					var id = row.data("id");
 					var msg;
 					bootbox.confirm({
-						message: "${deleteUserGroupText}: " + name,
+						message: "${deleteRecordText}: <b>" + name + "</b>",
 						title: "${confirmText}",
 						buttons: {
 							'cancel': {
@@ -73,13 +73,13 @@ Display user groups
 									data: {id: id},
 									success: function(response) {
 										if (response.success) {
-											msg = alertCloseButton + "${userGroupDeletedText}";
-											$("#ajaxResponse").addClass("alert alert-success alert-dismissable").html(msg);
+											msg = alertCloseButton + "${recordDeletedText}";
+											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											oTable.fnDeleteRow(aPos);
-											$.notify("${userGroupDeletedText}", "success");
+											$.notify("${recordDeletedText}", "success");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},
@@ -135,13 +135,13 @@ Display user groups
 				<c:forEach var="group" items="${groups}">
 					<tr data-name="${encode:forHtmlAttribute(group.name)}"
 						data-id="${group.userGroupId}">
-						
+
 						<td>${group.userGroupId}</td>
 						<td>${encode:forHtmlContent(group.name)} &nbsp;
 							<t:displayNewLabel creationDate="${group.creationDate}"
 											   updateDate="${group.updateDate}"/>
 						</td>
-						<td>${group.description}</td>
+						<td>${encode:forHtmlContent(group.description)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

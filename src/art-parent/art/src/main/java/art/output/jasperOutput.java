@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
  */
 public class jasperOutput {
 
-	final static Logger logger = LoggerFactory.getLogger(jasperOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(jasperOutput.class);
 	String fullFileName = "-No File";
 	String queryName;
 	String fileUserName;

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JobSchedule {
 
-	final static Logger logger = LoggerFactory.getLogger(JobSchedule.class);
+	private static final Logger logger = LoggerFactory.getLogger(JobSchedule.class);
 	String minute = "";
 	String hour = "";
 	String day = "";

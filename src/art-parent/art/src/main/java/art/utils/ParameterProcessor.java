@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ParameterProcessor {
 
-	final static Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
+	private static final Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
 
 	/**
 	 *

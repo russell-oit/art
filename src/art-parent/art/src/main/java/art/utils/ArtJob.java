@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
 public class ArtJob implements Job, Serializable {
 
 	private static final long serialVersionUID = 2L; //implement serializable to enable job object in session to be serialized
-	final static Logger logger = LoggerFactory.getLogger(ArtJob.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtJob.class);
 	String username, outputFormat, tos, from, message, queryName, subject;
 	String enableAudit = "N";
 	String activeStatus = "A";

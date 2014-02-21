@@ -70,7 +70,7 @@ public class ArtXY implements ArtGraph, DatasetProducer, XYItemLinkGenerator, Ch
 	//classes implementing chartpostprocessor need to be serializable to use cewolf 1.1+
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ArtXY.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtXY.class);
 	String title = "Title";
 	String xAxisLabel = "x Label";
 	String yAxisLabel = "y Label";

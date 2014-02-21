@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Datasource {
 
-	final static Logger logger = LoggerFactory.getLogger(Datasource.class);
+	private static final Logger logger = LoggerFactory.getLogger(Datasource.class);
 	int datasourceId;
 	String name = "";
 	String driver = "";

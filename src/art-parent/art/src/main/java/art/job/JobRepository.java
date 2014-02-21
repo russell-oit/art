@@ -1,7 +1,7 @@
 package art.job;
 
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JobRepository {
 
-	final static Logger logger = LoggerFactory.getLogger(JobRepository.class);
+	private static final Logger logger = LoggerFactory.getLogger(JobRepository.class);
 
 	/**
 	 * Get all the jobs a user has access to. Both the jobs the user owns and

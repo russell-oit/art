@@ -6,7 +6,7 @@ import art.servlets.ArtConfig;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import art.language.LanguageUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -35,7 +35,7 @@ import org.springframework.web.bind.support.SessionStatus;
 @SessionAttributes({"domains", "selectedDomain", "selectedUsername"})
 public class LoginController {
 
-	final static Logger logger = LoggerFactory.getLogger(LoginController.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 	@Autowired
 	private UserService userService;
 

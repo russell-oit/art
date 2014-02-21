@@ -78,34 +78,34 @@ public class UserGroupController {
 	}
 
 	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.GET)
-	public String showAddUserGroup(Model model) {
+	public String addUserGroup(Model model) {
 		model.addAttribute("group", new UserGroup());
-		return displayUserGroup("add", model);
+		return showUserGroup("add", model);
 	}
 
 	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.POST)
-	public String processAddUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+	public String addUserGroup(@ModelAttribute("group") @Valid UserGroup group,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayUserGroup("add", model);
+			return showUserGroup("add", model);
 		}
 
 		try {
 			userGroupService.addUserGroup(group);
-			redirectAttributes.addFlashAttribute("message", "userGroups.message.userGroupAdded");
+			redirectAttributes.addFlashAttribute("message", "page.message.recordAdded");
 			return "redirect:/app/userGroups.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return displayUserGroup("add", model);
+		return showUserGroup("add", model);
 	}
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
-	public String showEditUserGroup(@RequestParam("id") Integer id, Model model) {
+	public String editUserGroup(@RequestParam("id") Integer id, Model model) {
 
 		try {
 			model.addAttribute("group", userGroupService.getUserGroup(id));
@@ -114,28 +114,28 @@ public class UserGroupController {
 			model.addAttribute("error", ex);
 		}
 
-		return displayUserGroup("edit", model);
+		return showUserGroup("edit", model);
 	}
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.POST)
-	public String processEditUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+	public String editUserGroup(@ModelAttribute("group") @Valid UserGroup group,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayUserGroup("edit", model);
+			return showUserGroup("edit", model);
 		}
 
 		try {
 			userGroupService.updateUserGroup(group);
-			redirectAttributes.addFlashAttribute("message", "userGroups.message.userGroupUpdated");
+			redirectAttributes.addFlashAttribute("message", "page.message.recordUpdated");
 			return "redirect:/app/userGroups.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return displayUserGroup("edit", model);
+		return showUserGroup("edit", model);
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class UserGroupController {
 	 * @param session
 	 * @return
 	 */
-	private String displayUserGroup(String action, Model model) {
+	private String showUserGroup(String action, Model model) {
 		try {
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
 		} catch (SQLException ex) {

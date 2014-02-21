@@ -5,9 +5,7 @@
 -- (found in the quartz directory)
 
 -- NOTES:
--- for sql server, replace TIMESTAMP with DATETIME
---
--- for mysql, replace TIMESTAMP with TIMESTAMP NULL
+-- for sql server, mysql replace TIMESTAMP with DATETIME
 
 -- UPGRADING:
 -- if you are upgrading, don't use this script. run the scripts available in the
@@ -160,19 +158,23 @@ ALTER TABLE ART_QUERY_GROUPS ADD CONSTRAINT art_query_groups_uc_name UNIQUE (NAM
 -- -15 = Stacked vertical bar 2D, -16 = Horizontal bar 2D
 -- -17 = Stacked horizontal bar 2D
 
+-- USES_RULES: boolean. 0=false, 1=true
+-- SHOW_PARAMETERS: boolean. 0=false, 1=true. indicates whether
+-- selected report parameters will be shown in the report output
+
 CREATE TABLE ART_QUERIES
 (
-	QUERY_ID    INTEGER NOT NULL PRIMARY KEY,
-	QUERY_GROUP_ID  INTEGER NOT NULL,
+	QUERY_ID    INTEGER NOT NULL PRIMARY KEY,	
 	NAME              VARCHAR(50) NOT NULL,
 	SHORT_DESCRIPTION VARCHAR(254),
 	DESCRIPTION       VARCHAR(2000),
-	USES_RULES  VARCHAR(1),
+	QUERY_TYPE        INTEGER,
+	QUERY_GROUP_ID  INTEGER NOT NULL,	
 	DATABASE_ID	    INTEGER NOT NULL,
-	QUERY_TYPE        INTEGER,      	
-	CONTACT_PERSON        VARCHAR(20),  
-	ACTIVE_STATUS    VARCHAR(1),
-	SHOW_PARAMETERS VARCHAR(1),
+	CONTACT_PERSON        VARCHAR(20), 
+	USES_RULES  INTEGER,	 
+	REPORT_STATUS    VARCHAR(50),
+	SHOW_PARAMETERS INTEGER,
 	X_AXIS_LABEL VARCHAR(50),
 	Y_AXIS_LABEL VARCHAR(50),
 	GRAPH_OPTIONS VARCHAR(200),
@@ -215,7 +217,7 @@ INSERT INTO ART_QUERY_TYPES VALUES (110,'Dashboard');
 INSERT INTO ART_QUERY_TYPES VALUES (111,'Text');
 INSERT INTO ART_QUERY_TYPES VALUES (112,'Pivot Table: Mondrian');
 INSERT INTO ART_QUERY_TYPES VALUES (113,'Pivot Table: Mondrian XMLA');
-INSERT INTO ART_QUERY_TYPES VALUES (114,'Pivot Table: Microsoft XMLA');
+INSERT INTO ART_QUERY_TYPES VALUES (114,'Pivot Table: SQL Server');
 INSERT INTO ART_QUERY_TYPES VALUES (115,'Jasper Report: Template Query');
 INSERT INTO ART_QUERY_TYPES VALUES (116,'Jasper Report: ART Query');
 INSERT INTO ART_QUERY_TYPES VALUES (117,'jXLS Spreadsheet: Template Query');

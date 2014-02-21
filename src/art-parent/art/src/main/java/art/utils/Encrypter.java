@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Encrypter {
 
-	final static Logger logger = LoggerFactory.getLogger(Encrypter.class);
+	private static final Logger logger = LoggerFactory.getLogger(Encrypter.class);
 	private static final String staticKey = "d-jhbgy&5153tygo8176!"; // this is used as an additional static key
 	private static final String defaultPassword = "1tra"; //to allow use and single point of replacing the default password
 

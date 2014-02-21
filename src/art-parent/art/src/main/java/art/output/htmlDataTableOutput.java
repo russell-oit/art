@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class htmlDataTableOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(htmlDataTableOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(htmlDataTableOutput.class);
 	PrintWriter out;
 	int numberOfLines;
 	int maxRows;

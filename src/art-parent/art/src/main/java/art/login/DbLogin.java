@@ -1,7 +1,7 @@
 package art.login;
 
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DbLogin {
 
-	final static Logger logger = LoggerFactory.getLogger(DbLogin.class);
+	private static final Logger logger = LoggerFactory.getLogger(DbLogin.class);
 
 	public static LoginResult authenticate(String username, String password) {
 		logger.debug("Entering authenticate: username='{}'", username);

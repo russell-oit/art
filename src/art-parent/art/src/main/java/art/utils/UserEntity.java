@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class UserEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L; //implement serializable to enable ue object in session to be serialized
-	final static Logger logger = LoggerFactory.getLogger(UserEntity.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserEntity.class);
 	String username = "";
 	String email = "";
 	int accessLevel;

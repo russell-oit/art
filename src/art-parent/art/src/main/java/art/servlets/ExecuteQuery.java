@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 public class ExecuteQuery extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ExecuteQuery.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExecuteQuery.class);
 	private int currentNumberOfRunningQueries = 0;
 	@SuppressWarnings("rawtypes")
 	HashMap<String, java.lang.Class> viewModes;

@@ -17,7 +17,7 @@
 package art.report;
 
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,7 +37,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportService {
 
-	final static Logger logger = LoggerFactory.getLogger(ReportService.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportService.class);
+	final String SQL_SELECT="SELECT AQ.QUERY_ID, AQ.NAME AS QUERY_NAME,"
+			+ " AQ.SHORT_DESCRIPTION, AQ.DESCRIPTION, AQ.QUERY_TYPE, AQ.QUERY_GROUP_ID,"
+			+ " AQG.NAME AS GROUP_NAME, AQ.DATABASE_ID, AD.NAME AS DATASOURCE_NAME,"
+			+ " AQ.CONTACT_PERSON, AQ.USES_RULES, AQ.REPORT_STATUS, AQ.SHOW_PARAMETERS,"
+			+ " AQ.X_AXIS_LABEL, AQ.Y_AXIS_LABEL, AQ.GRAPH_OPTIONS, AQ.TEMPLATE,"
+			+ " AQ.DISPLAY_RESULTSET, AQ.XMLA_URL, AQ.XMLA_CATALOG,"
+			+ " AQ.XMLA_USERNAME, AQ.XMLA_PASSWORD, AQ.CREATION_DATE, AQ.UPDATE_DATE"
+			+ " FROM ART_QUERIES AQ"
+			+ " LEFT JOIN ART_QUERY_GROUPS AQG ON"
+			+ " AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID"
+			+ " LEFT JOIN ART_DATABASES AD ON" 
+			+ " AQ.DATABASE_ID=AD.DATABASE_ID";
 
 	/**
 	 * Get the reports that a user can access from the reports page. Excludes
@@ -46,6 +59,7 @@ public class ReportService {
 	 * @return list of available reports, empty list otherwise
 	 * @throws SQLException
 	 */
+	@Cacheable("reports")
 	public List<AvailableReport> getAvailableReports(String username) throws SQLException {
 		List<AvailableReport> reports = new ArrayList<AvailableReport>();
 
@@ -67,7 +81,7 @@ public class ReportService {
 					+ " FROM ART_QUERIES AQ "
 					+ " INNER JOIN ART_QUERY_GROUPS AQG "
 					+ " ON AQ.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID "
-					+ " WHERE AQ.ACTIVE_STATUS = 'A' "
+					+ " WHERE AQ.REPORT_STATUS = 'Active' "
 					+ " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
 					+ " AND AQ.QUERY_ID IN ("
 					//get reports that user has explicit rights to see
@@ -123,6 +137,30 @@ public class ReportService {
 			DbUtils.close(rs, ps, conn);
 		}
 
+		return reports;
+	}
+	
+	public List<Report> getAllReports() throws SQLException{
+		List<Report> reports=new ArrayList<Report>();
+		
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		String sql = SQL_SELECT;
+		
+		try{
+			conn = ArtConfig.getConnection();
+			rs = DbUtils.query(conn, ps, sql);
+			while (rs.next()) {
+				Report report=new Report();
+				
+				reports.add(report);
+			}
+		} finally{
+			DbUtils.close(rs, ps, conn);
+		}
+		
 		return reports;
 	}
 

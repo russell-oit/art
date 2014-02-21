@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class ReportController {
 
-	final static Logger logger = LoggerFactory.getLogger(ReportController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
 
 	@Autowired
 	private ReportService reportService;

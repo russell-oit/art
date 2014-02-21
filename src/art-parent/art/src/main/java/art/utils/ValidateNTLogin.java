@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ValidateNTLogin {
 
-	final static Logger logger = LoggerFactory.getLogger(ValidateNTLogin.class);
+	private static final Logger logger = LoggerFactory.getLogger(ValidateNTLogin.class);
 	UniAddress domainController;
 
 	/**

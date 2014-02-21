@@ -31,14 +31,14 @@ public class DeleteDatasourceResponse extends AjaxResponse {
 	private List<AvailableReport> linkedReports;
 
 	/**
-	 * @return the linkedReports
+	 * @return the linkedAvailableReports
 	 */
 	public List<AvailableReport> getLinkedReports() {
 		return linkedReports;
 	}
 
 	/**
-	 * @param linkedReports the linkedReports to set
+	 * @param linkedReports the linkedAvailableReports to set
 	 */
 	public void setLinkedReports(List<AvailableReport> linkedReports) {
 		this.linkedReports = linkedReports;

@@ -90,7 +90,7 @@ public class ArtCategorySeries implements ArtGraph, DatasetProducer, CategoryIte
 	//classes implementing chartpostprocessor need to be serializable to use cewolf 1.1+
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ArtCategorySeries.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtCategorySeries.class);
 	String title = "Title";
 	String xAxisLabel = "x Label";
 	String yAxisLabel = "y Label";

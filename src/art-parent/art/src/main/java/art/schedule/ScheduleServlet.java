@@ -23,7 +23,7 @@ public class ScheduleServlet extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ScheduleServlet.class);
+	private static final Logger logger = LoggerFactory.getLogger(ScheduleServlet.class);
 
 	/**
 	 * Processes requests for both HTTP

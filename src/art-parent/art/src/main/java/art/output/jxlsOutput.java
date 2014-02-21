@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class jxlsOutput {
 
-	final static Logger logger = LoggerFactory.getLogger(jxlsOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(jxlsOutput.class);
 	String fullOutputFileName = "-No File";
 	String queryName;
 	String fileUserName;

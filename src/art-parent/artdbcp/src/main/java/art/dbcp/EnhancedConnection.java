@@ -39,19 +39,27 @@ public class EnhancedConnection implements Connection {
 	 returned to the pool
 	 20050612  test conection with a dummy sql, if it fails refresh the connection
 	 */
-	final static Logger logger = LoggerFactory.getLogger(EnhancedConnection.class);
+	private static final Logger logger = LoggerFactory.getLogger(EnhancedConnection.class);
 	private boolean inUse = false;
 	private int inUseCount = 0;
 	private long lastUsedTime = 0;
 	private Connection c;
 	private List<Statement> openStatements;
 
-	EnhancedConnection(String url, String username, String password) throws SQLException {
+	public EnhancedConnection(String url, String username, String password) throws SQLException {
+		this(url, username, password, null);
+	}
+
+	public EnhancedConnection(String url, String username, String password, Properties properties) throws SQLException {
 		logger.debug("Entering constructor");
 
 		Properties dbprops = new Properties();
 		dbprops.put("user", username);
 		dbprops.put("password", password);
+		//add custom connection properties e.g. ApplicationName
+		if (properties != null && properties.size() > 0) {
+			dbprops.putAll(properties);
+		}
 		Driver d = DriverManager.getDriver(url); // get the right driver for the given url
 		c = d.connect(url, dbprops); // get the connection
 		openStatements = new ArrayList<Statement>();

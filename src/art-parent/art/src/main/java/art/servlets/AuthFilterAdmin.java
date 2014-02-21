@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class AuthFilterAdmin implements Filter {
 
-	final static Logger logger = LoggerFactory.getLogger(AuthFilterAdmin.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthFilterAdmin.class);
 
 	/**
 	 *

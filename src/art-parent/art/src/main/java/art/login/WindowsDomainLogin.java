@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class WindowsDomainLogin {
 
-	final static Logger logger = LoggerFactory.getLogger(WindowsDomainLogin.class);
+	private static final Logger logger = LoggerFactory.getLogger(WindowsDomainLogin.class);
 
 	public static LoginResult authenticate(String domain, String username, String password) {
 		logger.debug("Entering authenticate: username='{}'", username);

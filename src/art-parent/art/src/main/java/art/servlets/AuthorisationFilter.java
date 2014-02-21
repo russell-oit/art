@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AuthorisationFilter implements Filter {
 
-	final static Logger logger = LoggerFactory.getLogger(AuthorisationFilter.class);
+	private static final Logger logger = LoggerFactory.getLogger(AuthorisationFilter.class);
 
 	/**
 	 *

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UserGroup {
 
-	final static Logger logger = LoggerFactory.getLogger(UserGroup.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserGroup.class);
 	int groupId = -1;
 	String name = "";
 	String description = "";

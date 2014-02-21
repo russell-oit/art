@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LoginHelper {
 
-	final static Logger logger = LoggerFactory.getLogger(LoginHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoginHelper.class);
 
 	/**
 	 * Log login attempts

@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class xlsZipOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(xlsZipOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(xlsZipOutput.class);
 	FileOutputStream fout;
 	ZipOutputStream zipout;
 	HSSFWorkbook wb;

@@ -11,7 +11,7 @@
 	<defaultCache eternal="false" maxEntriesLocalHeap="100" overflowToDisk="false" />
 	
 	<cache name="reports"
-		   eternal="false" maxEntriesLocalHeap="50" />
+		   eternal="false" maxEntriesLocalHeap="500" />
 	
 	<cache name="users"
 		   eternal="true" maxEntriesLocalHeap="50" />

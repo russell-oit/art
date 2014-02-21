@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PreparedQuery {
 
-	final static Logger logger = LoggerFactory.getLogger(PreparedQuery.class);
+	private static final Logger logger = LoggerFactory.getLogger(PreparedQuery.class);
 	final int MAX_RECURSIVE_LOOKUP = 20;
 	String username; //used to check query access rights, in applying rule values and replacing :username tag
 	int queryId;

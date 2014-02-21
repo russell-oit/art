@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LdapLogin {
 
-	final static Logger logger = LoggerFactory.getLogger(LdapLogin.class);
+	private static final Logger logger = LoggerFactory.getLogger(LdapLogin.class);
 
 	public static LoginResult authenticate(String username, String password) {
 		logger.debug("Entering authenticate: username='{}'", username);

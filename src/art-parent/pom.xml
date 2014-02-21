@@ -100,26 +100,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!-- jpivot needs commons-digester 1.x -->
-			<dependency>
-				<groupId>commons-digester</groupId>
-				<artifactId>commons-digester</artifactId>
-				<version>1.7</version>
-			</dependency>
-			<!-- use dom4j that comes with jpivot -->
-			<dependency>
-				<groupId>dom4j</groupId>
-				<artifactId>dom4j</artifactId>
-				<version>1.3-jpivot</version>
-			</dependency>
-			<!-- specify explicit c3p0 version until quartz upgrades to 0.9.1.2+.
-			c3p0 0.9.1.1 has a problem with some jdbc drivers, e.g. sun jdbc-odbc bridge,
-			which don't support the getHoldability method -->
-			<dependency>
-				<groupId>c3p0</groupId>
-				<artifactId>c3p0</artifactId>
-				<version>0.9.1.2</version>
-			</dependency>
 			<!-- slf4j used by art, artmail and artdbcp. use common version -->
 			<dependency>
 				<groupId>org.slf4j</groupId>

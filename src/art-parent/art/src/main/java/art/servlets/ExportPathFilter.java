@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class ExportPathFilter implements Filter {
 
-	final static Logger logger = LoggerFactory.getLogger(ExportPathFilter.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExportPathFilter.class);
 
 	@Override
 	public void destroy() {

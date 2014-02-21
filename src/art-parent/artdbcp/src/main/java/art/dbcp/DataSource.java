@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import org.slf4j.Logger;
@@ -81,7 +82,7 @@ public class DataSource implements TimerListener {
 
 	 */
 
-	final static Logger logger = LoggerFactory.getLogger(DataSource.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataSource.class);
 	private String name = ""; //datasource name
 	private String url = "";
 	private String username = "";
@@ -98,6 +99,7 @@ public class DataSource implements TimerListener {
 	private String driver = ""; //added to support olap
 	private boolean jndi = false; //determine if this is a jndi datasource
 	private javax.sql.DataSource jndiDatasource = null; //hold jndi datasource object
+	private Properties connectionProperties;
 
 	/**
 	 * create a connection pool object with the connection timeout set to
@@ -178,6 +180,20 @@ public class DataSource implements TimerListener {
 		}
 
 		logger.debug("Leaving startTimer");
+	}
+
+	/**
+	 * @return the connectionProperties
+	 */
+	public Properties getConnectionProperties() {
+		return connectionProperties;
+	}
+
+	/**
+	 * @param connectionProperties the connectionProperties to set
+	 */
+	public void setConnectionProperties(Properties connectionProperties) {
+		this.connectionProperties = connectionProperties;
 	}
 
 	/**
@@ -487,7 +503,7 @@ public class DataSource implements TimerListener {
 	}
 
 	private EnhancedConnection getNewDatabaseConnection() throws SQLException {
-		EnhancedConnection ec = new EnhancedConnection(url, username, password);
+		EnhancedConnection ec = new EnhancedConnection(url, username, password, connectionProperties);
 		connectionPool.add(ec);
 		if (connectionPool.size() > maxReachedPoolSize) {
 			maxReachedPoolSize = connectionPool.size();

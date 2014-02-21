@@ -1,8 +1,7 @@
 package art.reportgroup;
 
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
-import static art.utils.DbUtils.close;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ReportGroupService {
 
-	final static Logger logger = LoggerFactory.getLogger(ReportGroupService.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportGroupService.class);
 
 	/**
 	 * Get report groups that are available for selection for a given user
@@ -112,7 +111,7 @@ public class ReportGroupService {
 
 		try {
 			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql);
+			rs = DbUtils.query(conn, ps, sql);
 			while (rs.next()) {
 				ReportGroup group = new ReportGroup();
 
@@ -123,7 +122,7 @@ public class ReportGroupService {
 				groups.add(group);
 			}
 		} finally {
-			close(rs, ps, conn);
+			DbUtils.close(rs, ps, conn);
 		}
 		
 		return groups;

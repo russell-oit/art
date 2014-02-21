@@ -34,7 +34,7 @@ public class MondrianXmla extends DynamicDatasourceXmlaServlet {
     
     private static final long serialVersionUID = 1L;
     
-    final static Logger logger = LoggerFactory.getLogger(MondrianXmla.class);
+    private static final Logger logger = LoggerFactory.getLogger(MondrianXmla.class);
     
 
     /**

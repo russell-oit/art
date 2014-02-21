@@ -68,7 +68,7 @@ public class ArtPie implements ArtGraph, DatasetProducer, PieToolTipGenerator, C
 	//classes implementing chartpostprocessor need to be serializable to use cewolf 1.1+
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ArtPie.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtPie.class);
 	String title = "Title";
 	String xAxisLabel = "x Label";
 	String yAxisLabel = "y Label";

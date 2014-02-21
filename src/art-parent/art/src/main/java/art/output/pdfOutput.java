@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class pdfOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(pdfOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(pdfOutput.class);
 	String filename;
 	String fullFileName;
 	PrintWriter htmlout;

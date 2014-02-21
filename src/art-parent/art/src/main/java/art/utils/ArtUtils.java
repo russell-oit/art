@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtUtils {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtUtils.class);
 	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
 	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not

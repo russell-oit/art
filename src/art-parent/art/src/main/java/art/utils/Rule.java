@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Rule {
 
-	final static Logger logger = LoggerFactory.getLogger(Rule.class);
+	private static final Logger logger = LoggerFactory.getLogger(Rule.class);
 	String ruleName = "";
 	String description = ""; //for query definition
 	int queryId; //for query rules

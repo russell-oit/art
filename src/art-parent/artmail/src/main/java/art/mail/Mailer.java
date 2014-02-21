@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Mailer {
 
-	final static Logger logger = LoggerFactory.getLogger(Mailer.class);
+	private static final Logger logger = LoggerFactory.getLogger(Mailer.class);
 	private String[] tos;
 	private String subject;
 	private String message;

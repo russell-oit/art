@@ -227,19 +227,13 @@ public class DatasourceController {
 			if (useCurrentPassword) {
 				//password field blank. use current password
 				Datasource currentDatasource = datasourceService.getDatasource(id);
-				password = decryptPassword(currentDatasource.getPassword());
+				if (currentDatasource != null) {
+					password = decryptPassword(currentDatasource.getPassword());
+				}
 			}
 
-			if (StringUtils.isNotBlank(driver)) {
-				Class.forName(driver).newInstance();
-				Connection testConn = DriverManager.getConnection(url, username, password);
-				testConn.close();
-			} else {
-				//jndi datasource
-				Connection testConn = ArtConfig.getJndiConnection(url);
-				testConn.close();
-			}
-
+			testConnection(driver, url, username, password);
+			//if we are here, connection successful
 			response.setSuccess(true);
 		} catch (Exception ex) {
 			logger.error("Error", ex);
@@ -260,6 +254,7 @@ public class DatasourceController {
 	private String displayDatasource(String action, Model model) {
 		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
 		databaseTypes.remove("demo");
+
 		model.addAttribute("databaseTypes", databaseTypes);
 		model.addAttribute("action", action);
 		return "editDatasource";
@@ -279,6 +274,12 @@ public class DatasourceController {
 		datasource.setPassword(password);
 	}
 
+	/**
+	 * Decrypt datasource password
+	 *
+	 * @param password
+	 * @return
+	 */
 	private String decryptPassword(String password) {
 		if (password == null) {
 			password = "";
@@ -305,19 +306,32 @@ public class DatasourceController {
 		String password = decryptPassword(datasource.getPassword());
 
 		if (datasource.isActive()) {
-			if (StringUtils.isNotBlank(driver)) {
-				Class.forName(driver).newInstance();
-				Connection testConn = DriverManager.getConnection(url, username, password);
-				testConn.close();
-			} else {
-				//jndi datasource
-				Connection testConn = ArtConfig.getJndiConnection(url);
-				testConn.close();
-			}
+			testConnection(driver, url, username, password);
 		}
 
 		//Refresh the Art connection pools so that the new connection is ready to use (no manual refresh needed)
 		ArtConfig.refreshConnections();
+	}
+
+	/**
+	 * Test a datasource configuration
+	 *
+	 * @param driver
+	 * @param url
+	 * @param username
+	 * @param password clear text password
+	 * @throws Exception if connection failed, otherwise connection successful
+	 */
+	private void testConnection(String driver, String url, String username, String password) throws Exception {
+		if (StringUtils.isNotBlank(driver)) {
+			Class.forName(driver).newInstance();
+			Connection testConn = DriverManager.getConnection(url, username, password);
+			testConn.close();
+		} else {
+			//jndi datasource
+			Connection testConn = ArtConfig.getJndiConnection(url);
+			testConn.close();
+		}
 	}
 
 }

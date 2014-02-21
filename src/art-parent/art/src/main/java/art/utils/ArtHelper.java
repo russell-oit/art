@@ -16,6 +16,7 @@
  */
 package art.utils;
 
+import art.dbutils.DbUtils;
 import art.servlets.ArtConfig;
 import java.io.File;
 import java.sql.Connection;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtHelper {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
 
 	/**
 	 * Authenticate the session.

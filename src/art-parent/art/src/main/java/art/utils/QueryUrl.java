@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class QueryUrl {
 
-	final static Logger logger = LoggerFactory.getLogger(QueryUrl.class);
+	private static final Logger logger = LoggerFactory.getLogger(QueryUrl.class);
 
 	/**
 	 *

@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Dashboard {
 
-	final static Logger logger = LoggerFactory.getLogger(Dashboard.class);
+	private static final Logger logger = LoggerFactory.getLogger(Dashboard.class);
 	int columnsCount;  // number of columns in this dashboard
 	List<List<String>> portlets; // portlets[0] contains a list of Xml strings representing the portlets in the first column, etc
 	List<String> columnSize;

@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HtmlLovParam implements ParamInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(HtmlLovParam.class);
+	private static final Logger logger = LoggerFactory.getLogger(HtmlLovParam.class);
 	String username, paramHtmlId, paramHtmlName, paramName, paramShortDescr, paramDescr, defaultValue, chainedParamId;
 	boolean useRules;
 	boolean isMulti = false;

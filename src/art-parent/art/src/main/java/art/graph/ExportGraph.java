@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ExportGraph {
 
-	final static Logger logger = LoggerFactory.getLogger(ExportGraph.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExportGraph.class);
 	String fullFileName = "-No File";
 	String fullFileNameWithoutExt;
 	String queryName;

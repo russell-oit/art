@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class CommonController {
 
-	final static Logger logger = LoggerFactory.getLogger(CommonController.class);
+	private static final Logger logger = LoggerFactory.getLogger(CommonController.class);
 
 	@RequestMapping(value = "/app/accessDenied", method = RequestMethod.GET)
 	public String showAccessDenied() {

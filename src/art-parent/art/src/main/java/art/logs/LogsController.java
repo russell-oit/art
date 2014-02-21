@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class LogsController {
 
-	final static Logger logger = LoggerFactory.getLogger(LogsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(LogsController.class);
 
 	@RequestMapping(value = "/app/logs", method = RequestMethod.GET)
 	public String showLogs(Model model) {

@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 public class ArtXYZChart implements ArtGraph, DatasetProducer, ChartPostProcessor, Serializable, XYToolTipGenerator, XYItemLinkGenerator {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
 	String title = "Title";
 	String xAxisLabel = "X label";
 	String yAxisLabel = "Y label";

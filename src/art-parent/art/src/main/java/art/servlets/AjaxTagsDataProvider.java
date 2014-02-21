@@ -18,7 +18,7 @@ package art.servlets;
 
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import art.utils.PreparedQuery;
 import art.utils.UserEntity;
 import java.io.IOException;
@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 public class AjaxTagsDataProvider extends BaseAjaxServlet {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(AjaxTagsDataProvider.class);
+	private static final Logger logger = LoggerFactory.getLogger(AjaxTagsDataProvider.class);
 
 	/**
 	 * Main method from which the other methods that return ajax data are

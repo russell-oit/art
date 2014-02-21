@@ -17,7 +17,7 @@
 package art.schedule;
 
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ScheduleDao {
 
-	final static Logger logger = LoggerFactory.getLogger(ScheduleDao.class);
+	private static final Logger logger = LoggerFactory.getLogger(ScheduleDao.class);
 
 	/**
 	 * Check if a schedule exists

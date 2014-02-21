@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DrilldownQuery {
 
-	final static Logger logger = LoggerFactory.getLogger(DrilldownQuery.class);
+	private static final Logger logger = LoggerFactory.getLogger(DrilldownQuery.class);
 	int queryId;
 	int drilldownQueryId;
 	int queryPosition = -1;

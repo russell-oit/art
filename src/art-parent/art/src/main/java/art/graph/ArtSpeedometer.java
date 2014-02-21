@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
 public class ArtSpeedometer implements ArtGraph, DatasetProducer, ChartPostProcessor, Serializable {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtSpeedometer.class);
 	String title = "Title";
 	String xAxisLabel = "Not Used";
 	String yAxisLabel = "Not Used";

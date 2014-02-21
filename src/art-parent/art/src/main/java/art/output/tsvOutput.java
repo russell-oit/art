@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public class tsvOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(tsvOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(tsvOutput.class);
 	FileOutputStream fout;
 	byte[] buf;
 	String tmpstr;

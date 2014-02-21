@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class tsvGzOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(tsvGzOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(tsvGzOutput.class);
 	FileOutputStream fout;
 	GZIPOutputStream zout;
 	byte[] buf;

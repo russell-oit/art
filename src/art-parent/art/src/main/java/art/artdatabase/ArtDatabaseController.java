@@ -2,7 +2,7 @@ package art.artdatabase;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtUtils;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -28,11 +28,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class ArtDatabaseController {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
 
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
-		return ArtUtils.getDatabaseTypes();
+		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
+		//generic sun jdbc-odbc bridge driver not supported for the art database
+		//for the jdbc-odbc bridge, you can only read column values ONCE
+		//and in the ORDER they appear in the select. Adhering to this is brittle and cumbersome.
+		databaseTypes.remove("odbc");
+		return databaseTypes;
 	}
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
@@ -94,12 +99,8 @@ public class ArtDatabaseController {
 
 				artDatabase.setDriver("org.hsqldb.jdbcDriver");
 				artDatabase.setUrl(demoDbUrl);
-
-				if (StringUtils.isBlank(artDatabase.getUsername())) {
-					//use default username and password
-					artDatabase.setUsername("ART");
-					artDatabase.setPassword("ART");
-				}
+				artDatabase.setUsername("ART");
+				artDatabase.setPassword("ART");
 			}
 
 			String driver = artDatabase.getDriver();

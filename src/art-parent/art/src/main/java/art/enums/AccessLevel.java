@@ -64,7 +64,7 @@ public enum AccessLevel {
 			case RepositoryUser:
 				return "Repository User";
 			default:
-				return String.valueOf(value);
+				return this.name();
 		}
 	}
 }

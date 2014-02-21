@@ -2,7 +2,7 @@ package art.user;
 
 import art.enums.AccessLevel;
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import art.usergroup.UserGroup;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ public class UserService {
 	//for caching info, see
 	//http://wangxiangblog.blogspot.com/2013/02/spring-cache.html
 	//http://viralpatel.net/blogs/cache-support-spring-3-1-m1/
-	final static Logger logger = LoggerFactory.getLogger(UserService.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 	final String SQL_SELECT_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
 			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, PASSWORD_ALGORITHM, START_QUERY, "
 			+ " USER_ID, CAN_CHANGE_PASSWORD, CREATION_DATE, UPDATE_DATE "
@@ -59,7 +58,7 @@ public class UserService {
 
 		try {
 			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql, values);
+			rs = DbUtils.query(conn, ps, sql, values);
 			if (rs.next()) {
 				user = new User();
 				populateUser(user, rs);
@@ -96,7 +95,7 @@ public class UserService {
 
 		try {
 			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql, values);
+			rs = DbUtils.query(conn, ps, sql, values);
 			if (rs.next()) {
 				user = new User();
 				populateUser(user, rs);
@@ -161,7 +160,7 @@ public class UserService {
 
 			List<UserGroup> groups = new ArrayList<UserGroup>();
 
-			rs = DbUtils.executeQuery(conn, ps, sql, values);
+			rs = DbUtils.query(conn, ps, sql, values);
 			while (rs.next()) {
 				UserGroup group = new UserGroup();
 
@@ -208,7 +207,7 @@ public class UserService {
 
 		try {
 			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql);
+			rs = DbUtils.query(conn, ps, sql);
 			while (rs.next()) {
 				User user = new User();
 				populateUser(user, rs);
@@ -321,7 +320,7 @@ public class UserService {
 
 		try {
 			conn = ArtConfig.getConnection();
-			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+			int affectedRows = DbUtils.update(conn, ps, sql, values);
 			if (affectedRows == 0) {
 				logger.warn("Update password - no rows affected. User ID={}", userId);
 			}
@@ -376,7 +375,7 @@ public class UserService {
 			conn = ArtConfig.getConnection();
 			//generate new id
 			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
-			rs = DbUtils.executeQuery(conn, ps, sql);
+			rs = DbUtils.query(conn, ps, sql);
 			if (rs.next()) {
 				newId = rs.getInt(1) + 1;
 
@@ -391,7 +390,7 @@ public class UserService {
 					allocatingUsername
 				};
 
-				int affectedRows = DbUtils.executeUpdate(conn, psInsert, sql, values);
+				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
 				if (affectedRows == 0) {
 					logger.warn("allocateNewId - no rows affected. id={}", newId);
 				}
@@ -455,7 +454,7 @@ public class UserService {
 				DbUtils.getCurrentTimeStamp(),
 				user.getUserId()
 			};
-			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+			int affectedRows = DbUtils.update(conn, ps, sql, values);
 			if (affectedRows == 0) {
 				logger.warn("Save user - no rows affected. Username='{}'. newUser={}", user.getUsername(), newUser);
 			}
@@ -465,7 +464,7 @@ public class UserService {
 			values = new Object[]{
 				user.getUserId()
 			};
-			DbUtils.executeUpdate(conn, ps, sql, values);
+			DbUtils.update(conn, ps, sql, values);
 
 			//insert records afresh
 			List<UserGroup> groups = user.getUserGroups();

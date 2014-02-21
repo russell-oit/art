@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class tsvZipOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(tsvZipOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(tsvZipOutput.class);
 	FileOutputStream fout;
 	ZipOutputStream zout;
 	byte[] buf;

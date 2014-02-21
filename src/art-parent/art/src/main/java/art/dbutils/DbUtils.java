@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.utils;
+package art.dbutils;
 
+import art.servlets.ArtConfig;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DbUtils {
 
-	final static Logger logger = LoggerFactory.getLogger(DbUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(DbUtils.class);
 
 	/**
 	 * Close resultset
@@ -43,7 +44,7 @@ public class DbUtils {
 			try {
 				rs.close();
 			} catch (SQLException ex) {
-				ArtUtils.logger.error("Error", ex);
+				logger.error("Error", ex);
 			}
 		}
 	}
@@ -58,7 +59,7 @@ public class DbUtils {
 			try {
 				st.close();
 			} catch (SQLException ex) {
-				ArtUtils.logger.error("Error", ex);
+				logger.error("Error", ex);
 			}
 		}
 	}
@@ -73,7 +74,7 @@ public class DbUtils {
 			try {
 				conn.close();
 			} catch (SQLException ex) {
-				ArtUtils.logger.error("Error", ex);
+				logger.error("Error", ex);
 			}
 		}
 	}
@@ -140,7 +141,6 @@ public class DbUtils {
 //			ps.setObject(i + startIndex, values[i]);
 //		}
 //	}
-
 	/**
 	 * Converts the given java.util.Date to java.sql.Date
 	 *
@@ -179,7 +179,7 @@ public class DbUtils {
 	}
 
 	/**
-	 * Execute a select statement i.e. sql query that returns a resultset
+	 * Execute an sql statement that returns a resultset
 	 *
 	 * @param conn
 	 * @param ps
@@ -188,7 +188,7 @@ public class DbUtils {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static ResultSet executeQuery(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
+	public static ResultSet query(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
 		ps = conn.prepareStatement(sql);
 		setValues(ps, values);
 
@@ -196,8 +196,7 @@ public class DbUtils {
 	}
 
 	/**
-	 * Execute an update statement i.e. sql query that doesn't return a
-	 * resultset
+	 * Execute an sql statement that doesn't return a resultset
 	 *
 	 * @param conn
 	 * @param ps
@@ -206,7 +205,7 @@ public class DbUtils {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static int executeUpdate(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
+	public static int update(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
 		ps = conn.prepareStatement(sql);
 		setValues(ps, values);
 

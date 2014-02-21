@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class xlsxOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(xlsxOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(xlsxOutput.class);
 	Workbook wb;
 	Sheet sh;
 	CellStyle headerStyle;

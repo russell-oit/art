@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class slkOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(slkOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(slkOutput.class);
 	FileOutputStream fout;
 	byte[] buf;
 	String tmpstr;

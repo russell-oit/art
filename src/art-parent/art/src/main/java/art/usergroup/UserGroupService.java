@@ -16,8 +16,9 @@
  */
 package art.usergroup;
 
+import art.dbutils.DbService;
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,6 +28,7 @@ import java.util.List;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -40,9 +42,11 @@ import org.springframework.stereotype.Service;
 public class UserGroupService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserGroupService.class);
-	final String SQL_SELECT_ALL_USER_GROUPS = "SELECT USER_GROUP_ID, NAME, DESCRIPTION,"
-			+ " DEFAULT_QUERY_GROUP, START_QUERY, CREATION_DATE, UPDATE_DATE "
-			+ " FROM ART_USER_GROUPS";
+
+	@Autowired
+	private DbService dbService;
+
+	private final String SQL_SELECT = "SELECT * FROM ART_USER_GROUPS";
 
 	/**
 	 * Get all user groups
@@ -58,15 +62,13 @@ public class UserGroupService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_USER_GROUPS;
+		String sql = SQL_SELECT;
 
 		try {
 			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql);
+			rs = DbUtils.query(conn, ps, sql);
 			while (rs.next()) {
-				UserGroup group = new UserGroup();
-				populateUserGroup(group, rs);
-				groups.add(group);
+				groups.add(mapRow(rs));
 			}
 		} finally {
 			DbUtils.close(rs, ps, conn);
@@ -90,7 +92,7 @@ public class UserGroupService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_USER_GROUPS + " WHERE USER_GROUP_ID = ? ";
+		String sql = SQL_SELECT + " WHERE USER_GROUP_ID = ? ";
 
 		Object[] values = {
 			id
@@ -98,10 +100,9 @@ public class UserGroupService {
 
 		try {
 			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql, values);
+			rs = DbUtils.query(conn, ps, sql, values);
 			if (rs.next()) {
-				group = new UserGroup();
-				populateUserGroup(group, rs);
+				group = mapRow(rs);
 			}
 		} finally {
 			DbUtils.close(rs, ps, conn);
@@ -113,11 +114,13 @@ public class UserGroupService {
 	/**
 	 * Populate object with row from table
 	 *
-	 * @param group
 	 * @param rs
+	 * @return new object with properties filled from the database
 	 * @throws SQLException
 	 */
-	private void populateUserGroup(UserGroup group, ResultSet rs) throws SQLException {
+	private UserGroup mapRow(ResultSet rs) throws SQLException {
+		UserGroup group = new UserGroup();
+
 		group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
 		group.setName(rs.getString("NAME"));
 		group.setDescription(rs.getString("DESCRIPTION"));
@@ -125,6 +128,8 @@ public class UserGroupService {
 		group.setStartReport(rs.getString("START_QUERY"));
 		group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+
+		return group;
 	}
 
 	/**
@@ -135,23 +140,10 @@ public class UserGroupService {
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
 	public void deleteUserGroup(int id) throws SQLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			conn = ArtConfig.getConnection();
-
-			String sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			int affectedRows = ps.executeUpdate();
-			if (affectedRows == 0) {
-				logger.warn("Delete user group failed. Group not found. Id={}", id);
-			}
-
-		} finally {
-			DbUtils.close(rs, ps, conn);
+		String sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
+		int affectedRows = dbService.update(sql, id);
+		if (affectedRows == 0) {
+			logger.warn("Delete user group failed. Group not found. Id={}", id);
 		}
 	}
 
@@ -191,9 +183,6 @@ public class UserGroupService {
 	 * @throws SQLException
 	 */
 	private void saveUserGroup(UserGroup group, boolean newRecord) throws SQLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
-
 		String dateColumn;
 
 		if (newRecord) {
@@ -216,15 +205,9 @@ public class UserGroupService {
 			group.getUserGroupId()
 		};
 
-		try {
-			conn = ArtConfig.getConnection();
-
-			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
-			if (affectedRows == 0) {
-				logger.warn("Save user group - no rows affected. User Group='{}', newRecord={}", group.getName(), newRecord);
-			}
-		} finally {
-			DbUtils.close(ps, conn);
+		int affectedRows = dbService.update(sql, values);
+		if (affectedRows == 0) {
+			logger.warn("Save user group - no rows affected. User Group='{}', newRecord={}", group.getName(), newRecord);
 		}
 	}
 
@@ -246,7 +229,7 @@ public class UserGroupService {
 			conn = ArtConfig.getConnection();
 			//generate new id
 			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			rs = DbUtils.executeQuery(conn, ps, sql);
+			rs = DbUtils.query(conn, ps, sql);
 			if (rs.next()) {
 				newId = rs.getInt(1) + 1;
 
@@ -262,7 +245,7 @@ public class UserGroupService {
 					allocatingName
 				};
 
-				int affectedRows = DbUtils.executeUpdate(conn, psInsert, sql, values);
+				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
 				if (affectedRows == 0) {
 					logger.warn("allocateNewId - no rows affected. id={}", newId);
 				}

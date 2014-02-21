@@ -40,7 +40,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class PasswordController {
 
-	final static Logger logger = LoggerFactory.getLogger(PasswordController.class);
+	private static final Logger logger = LoggerFactory.getLogger(PasswordController.class);
 	
 	@Autowired
 	private UserService userService;

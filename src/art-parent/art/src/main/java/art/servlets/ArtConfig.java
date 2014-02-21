@@ -27,7 +27,7 @@ import art.settings.Settings;
 import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 public class ArtConfig extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(ArtConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtConfig.class);
 	private static String exportPath;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
@@ -148,9 +148,9 @@ public class ArtConfig extends HttpServlet {
 
 		//set application path
 		appPath = ctx.getRealPath("");
-		
+
 		//set web-inf path
-		webinfPath=appPath + sep + "WEB-INF" + sep;
+		webinfPath = appPath + sep + "WEB-INF" + sep;
 
 		//set export path
 		exportPath = appPath + sep + "export" + sep;
@@ -306,6 +306,9 @@ public class ArtConfig extends HttpServlet {
 			artdb.setTestSQL(artDbTestSql);
 		}
 
+		//set application name connection property
+		setConnectionProperties(artdb);
+
 		//populate dataSources map
 		dataSources = null;
 		dataSources = new LinkedHashMap<Integer, DataSource>();
@@ -368,6 +371,9 @@ public class ArtConfig extends HttpServlet {
 				ds.setPassword(password);
 				ds.setMaxConnections(maxPoolConnections);
 				ds.setDriver(driver);
+
+				//set application name connection property
+				setConnectionProperties(ds);
 
 				dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
 			}
@@ -473,7 +479,7 @@ public class ArtConfig extends HttpServlet {
 	public static String getTemplatesPath() {
 		return webinfPath + "templates" + sep;
 	}
-	
+
 	/**
 	 * Get full path to the WEB-INF\tmp directory.
 	 *
@@ -905,7 +911,7 @@ public class ArtConfig extends HttpServlet {
 		//use default settings if error or none specified
 		if (newSettings == null) {
 			newSettings = new Settings();
-			
+
 			//set defaults for boolean properties that need to default to true
 			newSettings.setUseLdapAnonymousBind(true);
 			newSettings.setSchedulingEnabled(true);
@@ -1097,6 +1103,43 @@ public class ArtConfig extends HttpServlet {
 			artDatabase.setMaxPoolConnections(20);
 		}
 
+	}
+
+	/**
+	 * Set application name connection property to identify ART connections
+	 *
+	 * @param ds
+	 */
+	private static void setConnectionProperties(DataSource ds) {
+		String connectionName = "ART - " + ds.getName();
+		//ApplicationName property
+		//see http://docs.oracle.com/javase/7/docs/api/java/sql/Connection.html#setClientInfo%28java.lang.String,%20java.lang.String%29
+		//has different name and maxlength for different drivers
+		//maxlength mostly in the 254 range. Some exceptions include postgresql maxlength=64
+		//some drivers don't seem to define it explicitly so may not support it and throw exception?
+		//e.g. mysql, hsqldb
+
+		String dbUrl = ds.getUrl();
+		Properties properties = new Properties();
+		if (StringUtils.startsWith(dbUrl, "jdbc:oracle")) {
+			properties.put("v$session.program", connectionName);
+		} else if (StringUtils.startsWith(dbUrl, "jdbc:sqlserver")) {
+			properties.put("applicationName", connectionName);
+		} else if (StringUtils.startsWith(dbUrl, "jdbc:jtds")) {
+			properties.put("appName", connectionName);
+		} else if (StringUtils.startsWith(dbUrl, "jdbc:db2") || StringUtils.startsWith(dbUrl, "jdbc:as400")) {
+			//see http://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic=%2Fcom.ibm.db2.luw.apdv.java.doc%2Fsrc%2Ftpc%2Fimjcc_r0052001.html
+			properties.put("ApplicationName", StringUtils.left(connectionName, 32));
+		} else if (StringUtils.startsWith(dbUrl, "jdbc:ids") || StringUtils.startsWith(dbUrl, "jdbc:informix-sqli")) {
+			//see http://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic=%2Fcom.ibm.db2.luw.apdv.java.doc%2Fsrc%2Ftpc%2Fimjcc_r0052001.html
+			properties.put("ApplicationName", StringUtils.left(connectionName, 20));
+		} else if (StringUtils.startsWith(dbUrl, "jdbc:postgresql")) {
+			//see https://stackoverflow.com/questions/19224934/postgresql-how-to-set-application-name-from-jdbc-url
+			properties.put("ApplicationName", connectionName);
+		} 
+
+		//some drivers don't seem to define
+		ds.setConnectionProperties(properties);
 	}
 
 }

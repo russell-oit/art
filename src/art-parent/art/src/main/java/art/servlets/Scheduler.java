@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 public class Scheduler extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	final static Logger logger = LoggerFactory.getLogger(Scheduler.class);
+	private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 	static long INTERVAL_MINUTES = 5; // run clean every x minutes
 	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
 	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds

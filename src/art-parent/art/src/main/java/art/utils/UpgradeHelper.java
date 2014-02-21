@@ -16,6 +16,7 @@
  */
 package art.utils;
 
+import art.dbutils.DbUtils;
 import art.servlets.ArtConfig;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

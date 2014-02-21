@@ -32,7 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LanguageController {
 
-	final static Logger logger = LoggerFactory.getLogger(LanguageController.class);
+	private static final Logger logger = LoggerFactory.getLogger(LanguageController.class);
 
 	@RequestMapping(value = "/app/language", method = RequestMethod.GET)
 	public String showLanguage(Model model) {

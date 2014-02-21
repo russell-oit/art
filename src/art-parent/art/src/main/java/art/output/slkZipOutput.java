@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class slkZipOutput implements ArtOutputInterface {
 
-	final static Logger logger = LoggerFactory.getLogger(slkZipOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(slkZipOutput.class);
 	FileOutputStream fout;
 	ZipOutputStream zout;
 	byte[] buf;

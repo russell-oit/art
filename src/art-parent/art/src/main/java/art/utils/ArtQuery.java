@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtQuery {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtQuery.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtQuery.class);
 	final int MAX_RECURSIVE_LOOKUP = 20;
 	final int MAX_GRAPH_WIDTH = 2048;
 	final int MAX_GRAPH_HEIGHT = 1024;

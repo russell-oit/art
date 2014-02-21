@@ -16,18 +16,23 @@
  */
 package art.datasource;
 
+import art.dbutils.DbService;
 import art.report.AvailableReport;
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -41,7 +46,11 @@ import org.springframework.stereotype.Service;
 public class DatasourceService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatasourceService.class);
-	final String SQL_SELECT_ALL_DATASOURCES = "SELECT DATABASE_ID, DESCRIPTION,"
+
+	@Autowired
+	private DbService dbService;
+
+	private final String SQL_SELECT = "SELECT DATABASE_ID, DESCRIPTION,"
 			+ " NAME, DRIVER, URL, USERNAME, PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE,"
 			+ " CREATION_DATE, UPDATE_DATE"
 			+ " FROM ART_DATABASES";
@@ -52,29 +61,47 @@ public class DatasourceService {
 	 * @return list of all datasources, empty list otherwise
 	 * @throws SQLException
 	 */
-	@Cacheable("datasources")
+//	@Cacheable("datasources")
 	public List<Datasource> getAllDatasources() throws SQLException {
-		List<Datasource> datasources = new ArrayList<Datasource>();
+//		long start=System.currentTimeMillis();
+//		List<Datasource> datasources = new ArrayList<Datasource>();
+//
+//		Connection conn = null;
+//		PreparedStatement ps = null;
+//		ResultSet rs = null;
+//
+//		String sql = SQL_SELECT;
+//
+//		try {
+//			conn = ArtConfig.getConnection();
+//			rs = DbUtils.query(conn, ps, sql);
+//			while (rs.next()) {
+//				Datasource datasource = new Datasource();
+//				populateDatasource(datasource, rs);
+//				datasources.add(datasource);
+//			}
+//		} finally {
+//			DbUtils.close(rs, ps, conn);
+//		}
+//		
+//		long elapsed=System.currentTimeMillis()-start;
+//		System.out.println("elapsed: " + elapsed);
+//		
+//		return datasources;
 
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		String sql = SQL_SELECT_ALL_DATASOURCES;
-
-		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql);
-			while (rs.next()) {
-				Datasource datasource = new Datasource();
-				populateDatasource(datasource, rs);
-				datasources.add(datasource);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
+		long start=System.currentTimeMillis();
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<Datasource>(Datasource.class, new DatasourceMapper());
+		 List<Datasource> datasources=dbService.query(SQL_SELECT, h);
+		
+		long elapsed=System.currentTimeMillis()-start;
+		System.out.println("elapsed: " + elapsed);
+		
 		return datasources;
+
+//		QueryRunner run = new QueryRunner();
+//		ResultSetHandler<List<Datasource>> h = new BeanListHandler<Datasource>(Datasource.class, new DatasourceMapper());
+//
+//		return run.query(conn, SQL_SELECT, h);
 	}
 
 	/**
@@ -92,7 +119,7 @@ public class DatasourceService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_DATASOURCES + " WHERE DATABASE_ID = ? ";
+		String sql = SQL_SELECT + " WHERE DATABASE_ID = ? ";
 
 		Object[] values = {
 			id
@@ -100,7 +127,7 @@ public class DatasourceService {
 
 		try {
 			conn = ArtConfig.getConnection();
-			rs = DbUtils.executeQuery(conn, ps, sql, values);
+			rs = DbUtils.query(conn, ps, sql, values);
 			if (rs.next()) {
 				datasource = new Datasource();
 				populateDatasource(datasource, rs);
@@ -230,7 +257,7 @@ public class DatasourceService {
 		try {
 			conn = ArtConfig.getConnection();
 
-			int affectedRows = DbUtils.executeUpdate(conn, ps, sql, values);
+			int affectedRows = DbUtils.update(conn, ps, sql, values);
 			if (affectedRows == 0) {
 				logger.warn("Save datasource - no rows affected. Datasource='{}', newRecord={}", datasource.getName(), newRecord);
 			}
@@ -257,7 +284,7 @@ public class DatasourceService {
 			conn = ArtConfig.getConnection();
 			//generate new id
 			String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
-			rs = DbUtils.executeQuery(conn, ps, sql);
+			rs = DbUtils.query(conn, ps, sql);
 			if (rs.next()) {
 				newId = rs.getInt(1) + 1;
 
@@ -273,7 +300,7 @@ public class DatasourceService {
 					allocatingName
 				};
 
-				int affectedRows = DbUtils.executeUpdate(conn, psInsert, sql, values);
+				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
 				if (affectedRows == 0) {
 					logger.warn("allocateNewId - no rows affected. id={}", newId);
 				}
@@ -287,45 +314,45 @@ public class DatasourceService {
 
 		return newId;
 	}
-	
+
 	/**
 	 * Get reports that use a given datasource
-	 * 
+	 *
 	 * @param datasourceId
 	 * @return list with link reports, empty list otherwise
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
-	public List<AvailableReport> getLinkedReports(int datasourceId) throws SQLException{
-		List<AvailableReport> reports=new ArrayList<AvailableReport>();
-		
-		Connection conn=null;
-		PreparedStatement ps=null;
-		ResultSet rs=null;
-		
-		String sql="SELECT QUERY_ID, NAME"
+	public List<AvailableReport> getLinkedReports(int datasourceId) throws SQLException {
+		List<AvailableReport> reports = new ArrayList<AvailableReport>();
+
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		String sql = "SELECT QUERY_ID, NAME"
 				+ " FROM ART_QUERIES"
 				+ " WHERE DATABASE_ID=?";
-		
-		Object[] values={
+
+		Object[] values = {
 			datasourceId
 		};
-		
-		try{
-			conn=ArtConfig.getConnection();
-			rs=DbUtils.executeQuery(conn, ps, sql, values);
-			while(rs.next()){
-				AvailableReport report=new AvailableReport();
+
+		try {
+			conn = ArtConfig.getConnection();
+			rs = DbUtils.query(conn, ps, sql, values);
+			while (rs.next()) {
+				AvailableReport report = new AvailableReport();
 				report.setReportId(rs.getInt("QUERY_ID"));
 				report.setName(rs.getString("NAME"));
-				
+
 				reports.add(report);
 			}
-		} finally{
+		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
-		
+
 		return reports;
-		
+
 	}
 
 }

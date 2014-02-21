@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class ArtQueryParam implements Serializable {
 
 	private static final long serialVersionUID = 1L; //need to implement serializable to be used as a field in artgraph classes
-	final static Logger logger = LoggerFactory.getLogger(ArtQueryParam.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtQueryParam.class);
 	String name = "";
 	String shortDescription = "";
 	String description = "";

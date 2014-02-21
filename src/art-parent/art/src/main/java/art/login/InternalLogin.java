@@ -1,7 +1,7 @@
 package art.login;
 
 import art.servlets.ArtConfig;
-import art.utils.DbUtils;
+import art.dbutils.DbUtils;
 import art.utils.Encrypter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 public class InternalLogin {
 
-	final static Logger logger = LoggerFactory.getLogger(InternalLogin.class);
+	private static final Logger logger = LoggerFactory.getLogger(InternalLogin.class);
 
 	public static LoginResult authenticate(String username, String password) {
 		logger.debug("Entering authenticate: username='{}'", username);

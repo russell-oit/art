@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtOutHandler {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtOutHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtOutHandler.class);
 
 	/**
 	 * Flush the output as it is (row by row). For output that can't have drill

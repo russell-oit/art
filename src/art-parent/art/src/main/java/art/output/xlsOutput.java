@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class xlsOutput implements ArtOutputInterface {
 
-    final static Logger logger = LoggerFactory.getLogger(xlsOutput.class);
+    private static final Logger logger = LoggerFactory.getLogger(xlsOutput.class);
     
     FileOutputStream fout;
     HSSFWorkbook wb;

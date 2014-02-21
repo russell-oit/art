@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtJxlsReportManager implements ReportManager {
 
-	final static Logger logger = LoggerFactory.getLogger(ArtJxlsReportManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtJxlsReportManager.class);
 	Connection conn;
 
 	/**
