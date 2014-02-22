@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  */
 public class UpgradeHelper {
 
-	final static org.slf4j.Logger logger = LoggerFactory.getLogger(UpgradeHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(UpgradeHelper.class);
 
 	/**
 	 * Perform upgrade steps

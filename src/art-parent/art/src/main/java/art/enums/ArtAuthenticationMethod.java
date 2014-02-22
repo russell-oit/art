@@ -1,5 +1,8 @@
 package art.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Enum for application authentication methods
  *
@@ -25,6 +28,15 @@ public enum ArtAuthenticationMethod {
 	 */
 	public String getValue() {
 		return value;
+	}
+	
+	/**
+	 * Get a list of all enum values
+	 * 
+	 * @return 
+	 */
+	public static List<ArtAuthenticationMethod> list() {
+		return Arrays.asList(values());
 	}
 
 	/**

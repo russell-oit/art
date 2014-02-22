@@ -1,5 +1,8 @@
 package art.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Enum for null value display setting
  *
@@ -21,6 +24,15 @@ public enum DisplayNull {
 	 */
 	public String getValue() {
 		return value;
+	}
+	
+	/**
+	 * Get a list of all enum values
+	 * 
+	 * @return 
+	 */
+	public static List<DisplayNull> list() {
+		return Arrays.asList(values());
 	}
 
 	/**

@@ -50,7 +50,7 @@ public class UserGroupService {
 	@Autowired
 	private DbService dbService;
 
-	private final String SQL_SELECT = "SELECT * FROM ART_USER_GROUPS";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS";
 
 	/**
 	 * Class to map resultset to an object
@@ -90,8 +90,10 @@ public class UserGroupService {
 	 */
 	@Cacheable("userGroups")
 	public List<UserGroup> getAllUserGroups() throws SQLException {
+		logger.debug("Entering getAllUserGroups");
+
 		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<UserGroup>(UserGroup.class, new UserGroupService.UserGroupMapper());
-		return dbService.query(SQL_SELECT, h);
+		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
 	/**
@@ -103,7 +105,9 @@ public class UserGroupService {
 	 */
 	@Cacheable("userGroups")
 	public UserGroup getUserGroup(int id) throws SQLException {
-		String sql = SQL_SELECT + " WHERE USER_GROUP_ID = ? ";
+		logger.debug("Entering getUserGroup: id={}", id);
+
+		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID = ? ";
 		ResultSetHandler<UserGroup> h = new BeanHandler<UserGroup>(UserGroup.class, new UserGroupService.UserGroupMapper());
 		return dbService.query(sql, h, id);
 	}
@@ -116,10 +120,14 @@ public class UserGroupService {
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
 	public void deleteUserGroup(int id) throws SQLException {
+		logger.debug("Entering deleteUserGroup: id={}", id);
+
 		String sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
 		int affectedRows = dbService.update(sql, id);
+		logger.debug("affectedRows={}", affectedRows);
+
 		if (affectedRows == 0) {
-			logger.warn("Delete user group failed. Group not found. Id={}", id);
+			logger.warn("Delete failed - no rows affected. id={}", id);
 		}
 	}
 
@@ -131,12 +139,16 @@ public class UserGroupService {
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
 	public void addUserGroup(UserGroup group) throws SQLException {
+		logger.debug("Entering addUserGroup: group={}", group);
+
 		int newId = allocateNewId();
+		logger.debug("newId={}", newId);
+
 		if (newId > 0) {
 			group.setUserGroupId(newId);
 			saveUserGroup(group, true);
 		} else {
-			logger.warn("User group not added. Allocate new ID failed. User Group='{}'", group.getName());
+			logger.warn("Add failed. Allocate new ID failed. group={}", group);
 		}
 	}
 
@@ -148,6 +160,8 @@ public class UserGroupService {
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
 	public void updateUserGroup(UserGroup group) throws SQLException {
+		logger.debug("Entering updateUserGroup: group={}", group);
+
 		saveUserGroup(group, false);
 	}
 
@@ -159,6 +173,8 @@ public class UserGroupService {
 	 * @throws SQLException
 	 */
 	private void saveUserGroup(UserGroup group, boolean newRecord) throws SQLException {
+		logger.debug("Entering saveUserGroup: group={}, newRecord={}", group, newRecord);
+
 		String dateColumn;
 
 		if (newRecord) {
@@ -182,8 +198,10 @@ public class UserGroupService {
 		};
 
 		int affectedRows = dbService.update(sql, values);
+		logger.debug("affectedRows={}", affectedRows);
+
 		if (affectedRows == 0) {
-			logger.warn("Save user group - no rows affected. User Group='{}', newRecord={}", group.getName(), newRecord);
+			logger.warn("Save failed - no rows affected. group={}, newRecord={}", group, newRecord);
 		}
 	}
 
@@ -194,6 +212,8 @@ public class UserGroupService {
 	 * @throws SQLException
 	 */
 	private synchronized int allocateNewId() throws SQLException {
+		logger.debug("Entering allocateNewId");
+
 		int newId = 0;
 
 		Connection conn = null;
@@ -208,6 +228,7 @@ public class UserGroupService {
 			rs = DbUtils.query(conn, ps, sql);
 			if (rs.next()) {
 				newId = rs.getInt(1) + 1;
+				logger.debug("newId={}", newId);
 
 				//add dummy record with new id. fill all not null columns
 				//name has unique constraint so use a random default value
@@ -222,8 +243,10 @@ public class UserGroupService {
 				};
 
 				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
+				logger.debug("affectedRows={}", affectedRows);
+
 				if (affectedRows == 0) {
-					logger.warn("allocateNewId - no rows affected. id={}", newId);
+					logger.warn("allocateNewId - no rows affected. newId={}", newId);
 				}
 			} else {
 				logger.warn("Could not get max id");

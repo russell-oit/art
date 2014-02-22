@@ -18,6 +18,10 @@ Login page
 
 <spring:message code="page.title.login" var="pageTitle"/>
 
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
+
 <t:genericPage title="ART - ${pageTitle}">
 	<jsp:attribute name="metaContent">
 		<meta http-equiv="pragma" content="no-cache">
@@ -28,10 +32,33 @@ Login page
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</jsp:attribute>
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap-select-1.4.3-modified.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3-modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.2.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					iconBase: 'fa',
+					tickIcon: 'fa-check-square',
+					noneSelectedText: '${nothingSelectedText}',
+					noneResultsText: '${noResultsMatchText}',
+					countSelectedText: '${selectedCountText}'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('button.dropdown-toggle').dropdownHover({
+					delay: 100
+				});
+
 				$('#username').focus();
 			});
 		</script>
@@ -60,23 +87,23 @@ Login page
 								<spring:message code="login.message.invalidAutoLoginUser" arguments="${autoLoginUser}"/>
 							</div>
 						</c:if>
-							
-							<%-- don't display actual error or result details
-						<c:if test="${error != null}">
-							<div class="alert alert-danger alert-dismissable">
-								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-								<p><spring:message code="page.message.errorOccurred"/></p>
-								<p>${fn:escapeXml(error)}</p>
-							</div>
-						</c:if>
-						<c:if test="${result != null}">
-							<div class="alert alert-danger alert-dismissable">
-								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-								<p><spring:message code="${result.message}"/></p>
-								<p>${fn:escapeXml(result.error)}</p>
-							</div>
-						</c:if>
-							<%-- --%>
+
+						<%-- don't display actual error or result details
+					<c:if test="${error != null}">
+						<div class="alert alert-danger alert-dismissable">
+							<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+							<p><spring:message code="page.message.errorOccurred"/></p>
+							<p>${fn:escapeXml(error)}</p>
+						</div>
+					</c:if>
+					<c:if test="${result != null}">
+						<div class="alert alert-danger alert-dismissable">
+							<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+							<p><spring:message code="${result.message}"/></p>
+							<p>${fn:escapeXml(result.error)}</p>
+						</div>
+					</c:if>
+						<%-- --%>
 
 						<c:if test="${authenticationMethod == windowsDomainAuthentication}">
 							<div class="form-group">
@@ -118,7 +145,15 @@ Login page
 								<spring:message code="page.label.language"/>
 							</label>
 							<div class="col-md-10">
-								<t:languageSelect/>
+								<%-- select must have name of "lang" as per configuration in dispatcher-servlet.xml --%>
+								<c:set var="localeCode" value="${pageContext.response.locale}"/>
+								<select name="lang" id="lang" class="form-control selectpicker">
+									<option value="en">English</option>
+									<option data-divider="true"></option>
+									<c:forEach var="language" items="${languages}">
+										<option value="${language.key}" ${localeCode == language.key ? "selected" : ""}>${language.value}</option>
+									</c:forEach>
+								</select>
 							</div>
 						</div>
 						<div class="form-group">

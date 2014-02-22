@@ -157,7 +157,7 @@ public class UserGroup implements Serializable {
 
 	@Override
 	public String toString() {
-		return "UserGroup{" + "userGroupId=" + userGroupId + ", name=" + name + '}';
+		return "UserGroup{" + "name=" + name + '}';
 	}
 
 }

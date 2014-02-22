@@ -1,5 +1,8 @@
 package art.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Enum for ldap connection encryption methods
  *
@@ -24,6 +27,15 @@ public enum LdapConnectionEncryptionMethod {
 	}
 
 	/**
+	 * Get a list of all enum values
+	 *
+	 * @return
+	 */
+	public static List<LdapConnectionEncryptionMethod> list() {
+		return Arrays.asList(values());
+	}
+
+	/**
 	 * Get enum object based on a string
 	 *
 	 * @param value
@@ -37,7 +49,7 @@ public enum LdapConnectionEncryptionMethod {
 		}
 		return None; //default
 	}
-	
+
 	/**
 	 * Get enum description. In case description needs to be different from
 	 * internal value

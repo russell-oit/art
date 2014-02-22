@@ -16,6 +16,9 @@
  */
 package art.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Enum for report status
  *
@@ -39,6 +42,15 @@ public enum ReportStatus {
 	 */
 	public String getValue() {
 		return value;
+	}
+	
+	/**
+	 * Get a list of all enum values
+	 *
+	 * @return
+	 */
+	public static List<ReportStatus> list() {
+		return Arrays.asList(values());
 	}
 
 	/**

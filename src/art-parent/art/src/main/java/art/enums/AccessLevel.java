@@ -1,5 +1,8 @@
 package art.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Enum for user access levels
  *
@@ -22,6 +25,15 @@ public enum AccessLevel {
 	 */
 	public int getValue() {
 		return value;
+	}
+
+	/**
+	 * Get a list of all enum values
+	 * 
+	 * @return 
+	 */
+	public static List<AccessLevel> list() {
+		return Arrays.asList(values());
 	}
 
 	/**

@@ -42,6 +42,14 @@ Display edit user page
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
+				$('#userGroupsAll').change(function() {
+					if ($('#userGroupsAll').is(':checked')) {
+						$('#userGroups').selectpicker('selectAll');
+					} else {
+						$('#userGroups').selectpicker('deselectAll');
+					}
+				});
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -194,6 +202,7 @@ Display edit user page
 					<div class="col-md-8">
 						<form:select path="defaultReportGroup" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+							<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>
 						<form:errors path="defaultReportGroup" cssClass="error"/>
@@ -226,6 +235,12 @@ Display edit user page
 									 itemLabel="name" itemValue="userGroupId" 
 									 class="form-control selectpicker"
 									 />
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" name="userGroupsAll" id="userGroupsAll">
+								<spring:message code="page.checkbox.all"/>
+							</label>
+						</div>
 						<form:errors path="userGroups" cssClass="error"/>
 					</div>
 				</div>

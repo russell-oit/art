@@ -16,6 +16,9 @@
  */
 package art.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Enum for report types
  *
@@ -45,6 +48,15 @@ public enum ReportType {
 	 */
 	public int getValue() {
 		return value;
+	}
+	
+	/**
+	 * Get a list of all enum values
+	 *
+	 * @return
+	 */
+	public static List<ReportType> list() {
+		return Arrays.asList(values());
 	}
 
 	/**

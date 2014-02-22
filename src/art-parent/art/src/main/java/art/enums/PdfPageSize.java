@@ -1,5 +1,8 @@
 package art.enums;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Enum for pdf page size
  *
@@ -23,6 +26,15 @@ public enum PdfPageSize {
 	 */
 	public String getValue() {
 		return value;
+	}
+	
+	/**
+	 * Get a list of all enum values
+	 *
+	 * @return
+	 */
+	public static List<PdfPageSize> list() {
+		return Arrays.asList(values());
 	}
 
 	/**
