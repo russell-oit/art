@@ -41,15 +41,7 @@ Display edit user page
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
-
-				$('#userGroupsAll').change(function() {
-					if ($('#userGroupsAll').is(':checked')) {
-						$('#userGroups').selectpicker('selectAll');
-					} else {
-						$('#userGroups').selectpicker('deselectAll');
-					}
-				});
-
+				
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -64,6 +56,19 @@ Display edit user page
 				//must come after bootstrap-select initialization
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
+				});
+
+				$('#userGroupsAll').change(function() {
+					if ($('#userGroupsAll').is(':checked')) {
+						$('#userGroups').selectpicker('selectAll');
+					} else {
+						$('#userGroups').selectpicker('deselectAll');
+					}
+				});
+
+				//must come after selectpicker initialization (which creates button with appropriate data-id
+				$('#userGroupsDiv .dropdown-menu > li > a').on('click', function() {
+					$('#userGroupsAll').prop('checked', false);
 				});
 
 				$('#username').focus();
@@ -202,7 +207,7 @@ Display edit user page
 					<div class="col-md-8">
 						<form:select path="defaultReportGroup" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-							<option data-divider="true"></option>
+								<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>
 						<form:errors path="defaultReportGroup" cssClass="error"/>
@@ -226,7 +231,7 @@ Display edit user page
 						<form:errors path="startReport" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
+				<div class="form-group" id="userGroupsDiv">
 					<label class="col-md-4 control-label " for="userGroups">
 						<spring:message code="users.label.userGroups"/>
 					</label>
