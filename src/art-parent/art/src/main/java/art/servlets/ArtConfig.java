@@ -28,6 +28,7 @@ import art.utils.ArtJob;
 import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.dbutils.DbUtils;
+import art.settings.CustomSettings;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,13 +76,14 @@ public class ArtConfig extends HttpServlet {
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
-	private static boolean customExportDirectory = false; //to enable custom export path
+	private static boolean customExportPath = false; //to enable custom export path
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
 	private static ArtDatabase artDatabaseConfiguration;
 	private static String settingsFilePath;
 	private static Settings settings;
 	private static final String sep = java.io.File.separator;
+	private static CustomSettings customSettings;
 
 	/**
 	 * {@inheritDoc}
@@ -128,12 +130,10 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("Initializing variables");
 
-		//Get art version   
 		ServletContext ctx = getServletConfig().getServletContext();
-		String artVersion = ctx.getInitParameter("versionNumber");
 
 		//save variables in application scope for access from jsp pages
-		ctx.setAttribute("artVersion", artVersion);
+		ctx.setAttribute("artVersion", ctx.getInitParameter("versionNumber"));
 		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
 		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 		ctx.setAttribute("sortDatePattern", "yyyy-MM-dd-HH:mm:ss.SSS"); //to enable correct sorting of dates in tables
@@ -154,21 +154,6 @@ public class ArtConfig extends HttpServlet {
 
 		//set export path
 		exportPath = appPath + sep + "export" + sep;
-
-		//set custom export directory
-		try {
-			Context ic = new InitialContext();
-			String customExportPath = (String) ic.lookup("java:comp/env/REPORT_EXPORT_DIRECTORY");
-			if (customExportPath != null) {
-				//custom export path defined
-				exportPath = customExportPath + sep;
-				customExportDirectory = true;
-
-				logger.info("Using custom export path: {}", exportPath);
-			}
-		} catch (NamingException e) {
-			logger.debug("Custom export directory not configured", e);
-		}
 
 		//set art.properties file path
 		artPropertiesFilePath = webinfPath + "art.properties";
@@ -198,6 +183,25 @@ public class ArtConfig extends HttpServlet {
 
 		//load settings and initialize variables
 		loadSettings();
+
+		//load custom settings
+		loadCustomSettings();
+
+		//set show errors custom setting
+		ctx.setAttribute("showErrors", customSettings.isShowErrors());
+
+		//set custom export path
+		String customExportPath = customSettings.getCustomExportPath();
+		if (StringUtils.isNotBlank(customExportPath)) {
+			//custom export path defined
+			exportPath = customExportPath;
+			if (!StringUtils.right(exportPath, 1).equals(sep)) {
+				exportPath = exportPath + sep;
+			}
+			ArtConfig.customExportPath = true;
+
+			logger.info("Using custom export path: '{}'", exportPath);
+		}
 
 		//initialize datasources
 		initializeDatasources();
@@ -545,8 +549,8 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @return <code>true</code> if a custom export path is in use
 	 */
-	public static boolean isCustomExportDirectory() {
-		return customExportDirectory;
+	public static boolean isCustomExportPath() {
+		return customExportPath;
 	}
 
 	/**
@@ -911,10 +915,6 @@ public class ArtConfig extends HttpServlet {
 		//use default settings if error or none specified
 		if (newSettings == null) {
 			newSettings = new Settings();
-
-			//set defaults for boolean properties that need to default to true
-			newSettings.setUseLdapAnonymousBind(true);
-			newSettings.setSchedulingEnabled(true);
 		}
 
 		settings = null;
@@ -1136,10 +1136,45 @@ public class ArtConfig extends HttpServlet {
 		} else if (StringUtils.startsWith(dbUrl, "jdbc:postgresql")) {
 			//see https://stackoverflow.com/questions/19224934/postgresql-how-to-set-application-name-from-jdbc-url
 			properties.put("ApplicationName", connectionName);
-		} 
+		}
 
 		//some drivers don't seem to define
 		ds.setConnectionProperties(properties);
+	}
+
+	/**
+	 * Load custom settings
+	 */
+	private static void loadCustomSettings() {
+		CustomSettings newCustomSettings = null;
+
+		try {
+			String customSettingsFilePath = webinfPath + "art-config.json";
+			File customSettingsFile = new File(customSettingsFilePath);
+			if (customSettingsFile.exists()) {
+				ObjectMapper mapper = new ObjectMapper();
+				newCustomSettings = mapper.readValue(customSettingsFile, CustomSettings.class);
+			}
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+
+		//use default settings if error or none specified
+		if (newCustomSettings == null) {
+			newCustomSettings = new CustomSettings();
+		}
+
+		customSettings = null;
+		customSettings = newCustomSettings;
+	}
+
+	/**
+	 * Get current custom settings
+	 *
+	 * @return
+	 */
+	public static CustomSettings getCustomSettings() {
+		return customSettings;
 	}
 
 }

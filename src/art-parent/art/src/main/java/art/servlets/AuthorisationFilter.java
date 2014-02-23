@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Filter to ensure user has access to the requested page
@@ -163,13 +164,46 @@ public class AuthorisationFilter implements Filter {
 						return;
 					}
 				}
-				chain.doFilter(srequest, sresponse);
+				//authorisation is ok. display page
+
+				//enable display of custom attributes in logs
+				insertMDCAttributes(request, user);
+				try {
+					chain.doFilter(srequest, sresponse);
+				} finally {
+					clearMDCAttributes();
+				}
 			} else {
 				//show access denied page. 
 				//use forward instead of redirect so that the intended url remains in the browser
 				request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
 			}
 		}
+	}
+
+	/**
+	 * Add mdc attributes
+	 *
+	 * @param request
+	 * @param user
+	 */
+	private void insertMDCAttributes(HttpServletRequest request, User user) {
+		MDC.put("user", user.getUsername());
+		MDC.put("remoteAddr", request.getRemoteAddr());
+		MDC.put("requestURI", request.getRequestURI());
+		MDC.put("xForwardedFor", request.getHeader("X-Forwarded-For"));
+	}
+
+	/**
+	 * Clear mdc attributes.
+	 */
+	private void clearMDCAttributes() {
+		//everything added in insert should be removed here
+		//removing a non-existent attribute won't throw an exception
+		MDC.remove("user");
+		MDC.remove("remoteAddr");
+		MDC.remove("requestURI");
+		MDC.remove("xForwardedFor");
 	}
 
 	private boolean canAccessPage(String page, User user, HttpSession session) {

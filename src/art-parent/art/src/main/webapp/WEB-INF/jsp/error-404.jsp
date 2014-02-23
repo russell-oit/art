@@ -6,9 +6,10 @@
 Error page for 404 errors (page not found)
 --%>
 
-<%@page isErrorPage="true" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
+
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <!DOCTYPE html>
 <html>
@@ -19,6 +20,6 @@ Error page for 404 errors (page not found)
     </head>
     <body>
         <h1>Page Not Found</h1>
-		${pageContext.errorData.requestURI}
+		${fn:escapeXml(pageContext.errorData.requestURI)}
     </body>
 </html>

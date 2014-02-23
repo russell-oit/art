@@ -36,7 +36,7 @@ public class Settings {
 	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod;
 	private String ldapUrl;
 	private String ldapBaseDn;
-	private boolean useLdapAnonymousBind;
+	private boolean useLdapAnonymousBind = true;
 	private String ldapBindDn;
 	private String ldapBindPassword;
 	@JsonIgnore
@@ -58,7 +58,7 @@ public class Settings {
 	private int maxRunningReports;
 	private boolean showHeaderInPublicUserSession;
 	private int mondrianCacheExpiryPeriod;
-	private boolean schedulingEnabled;
+	private boolean schedulingEnabled = true;
 	private String rssLink;
 
 	/**
@@ -112,7 +112,8 @@ public class Settings {
 	}
 
 	/**
-	 * Get the value of useBlankLdapBindPassword. only used for user interface logic
+	 * Get the value of useBlankLdapBindPassword. only used for user interface
+	 * logic
 	 *
 	 * @return the value of useBlankLdapBindPassword
 	 */
@@ -121,7 +122,8 @@ public class Settings {
 	}
 
 	/**
-	 * Set the value of useBlankLdapBindPassword. only used for user interface logic
+	 * Set the value of useBlankLdapBindPassword. only used for user interface
+	 * logic
 	 *
 	 * @param useBlankLdapBindPassword new value of useBlankLdapBindPassword
 	 */

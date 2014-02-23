@@ -45,7 +45,7 @@ public class ExportPathFilter implements Filter {
 	public void doFilter(ServletRequest arg0, ServletResponse arg1,
 			FilterChain arg2) throws IOException, ServletException {
 
-		if (ArtConfig.isCustomExportDirectory()) {
+		if (ArtConfig.isCustomExportPath()) {
 			HttpServletRequest request = (HttpServletRequest) arg0;
 			String requestUri = request.getRequestURI();
 			File requestPath = new File(requestUri);

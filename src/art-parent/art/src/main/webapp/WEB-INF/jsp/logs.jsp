@@ -149,7 +149,9 @@ Display application logs
 						<th><spring:message code="logs.text.level"/></th>
 						<th><spring:message code="logs.text.logger"/></th>
 						<th><spring:message code="logs.text.message"/></th>
-						<th></th> <%-- error details column. hidden --%>
+						<th><spring:message code="logs.text.user"/></th>
+						<th><spring:message code="logs.text.ipAddress"/></th>
+						<th></th> <%-- exception details column. must be last column. hidden --%>
 					</tr>
 				</thead>
 				<tbody>
@@ -161,6 +163,8 @@ Display application logs
 							<td>${log.level}</td>
 							<td>${log.loggerName}</td>
 							<td>${fn:escapeXml(log.formattedMessage)}</td>
+							<td>${fn:escapeXml(log.MDCPropertyMap['user'])}</td>
+							<td>${fn:escapeXml(log.MDCPropertyMap['remoteAddr'])}</td>
 							<td>
 								<c:set var="throwable" value="${log.throwableProxy}" />
 								<c:if test="${throwable != null}">
