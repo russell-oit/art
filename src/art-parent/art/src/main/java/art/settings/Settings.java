@@ -36,7 +36,7 @@ public class Settings {
 	private LdapConnectionEncryptionMethod ldapConnectionEncryptionMethod;
 	private String ldapUrl;
 	private String ldapBaseDn;
-	private boolean useLdapAnonymousBind = true;
+	private boolean useLdapAnonymousBind;
 	private String ldapBindDn;
 	private String ldapBindPassword;
 	@JsonIgnore

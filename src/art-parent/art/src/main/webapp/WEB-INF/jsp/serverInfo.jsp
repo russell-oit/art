@@ -11,6 +11,7 @@ Display application server information
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <spring:message code="page.title.serverInfo" var="pageTitle"/>
 
@@ -27,33 +28,35 @@ Display application server information
 	</jsp:attribute>
 
 	<jsp:body>
-		<table class="table table-striped table-bordered">
-			<tbody>
-				<tr>
-					<td><spring:message code="serverInfo.text.artHome"/></td>
-					<td>${artHome}</td>
-				</tr>
-				<tr>
-					<td><spring:message code="serverInfo.text.serverName"/></td>
-					<td>${serverName}</td>
-				</tr>
-				<tr>
-					<td><spring:message code="serverInfo.text.servletApiSupported"/></td>
-					<td>${servletApiSupported}</td>
-				</tr>
-				<tr>
-					<td><spring:message code="serverInfo.text.javaVendor"/></td>
-					<td>${javaVendor}</td>
-				</tr>
-				<tr>
-					<td><spring:message code="serverInfo.text.javaVersion"/></td>
-					<td>${javaVersion}</td>
-				</tr>
-				<tr>
-					<td><spring:message code="serverInfo.text.operatingSystem"/></td>
-					<td>${operatingSystem}</td>
-				</tr>
-			</tbody>
-		</table>
+		<c:if test="${showErrors}">
+			<table class="table table-striped table-bordered">
+				<tbody>
+					<tr>
+						<td><spring:message code="serverInfo.text.artHome"/></td>
+						<td>${artHome}</td>
+					</tr>
+					<tr>
+						<td><spring:message code="serverInfo.text.serverName"/></td>
+						<td>${serverName}</td>
+					</tr>
+					<tr>
+						<td><spring:message code="serverInfo.text.servletApiSupported"/></td>
+						<td>${servletApiSupported}</td>
+					</tr>
+					<tr>
+						<td><spring:message code="serverInfo.text.javaVendor"/></td>
+						<td>${javaVendor}</td>
+					</tr>
+					<tr>
+						<td><spring:message code="serverInfo.text.javaVersion"/></td>
+						<td>${javaVersion}</td>
+					</tr>
+					<tr>
+						<td><spring:message code="serverInfo.text.operatingSystem"/></td>
+						<td>${operatingSystem}</td>
+					</tr>
+				</tbody>
+			</table>
+		</c:if>
 	</jsp:body>
 </t:mainPageWithPanel>

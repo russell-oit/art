@@ -114,10 +114,10 @@ Display application logs
 			/* Formating function for row details */
 			function fnFormatDetails(oTable, nTr)
 			{
-				var aData = oTable.fnGetData(nTr);
+				var aData = oTable.fnGetData(nTr); //aData has column data in an array, index starts from 0. (0 is dynamically inserted expand/collapse column)
 				var sOut = '<div class="innerDetails">';
 				sOut += '<table style="margin-left:50px;">';
-				sOut += '<tr><td>' + aData[5] + '</td></tr>';
+				sOut += '<tr><td>' + aData[6] + '</td></tr>';
 				sOut += '</table>';
 				sOut += '</div>';
 
@@ -150,8 +150,8 @@ Display application logs
 						<th><spring:message code="logs.text.logger"/></th>
 						<th><spring:message code="logs.text.message"/></th>
 						<th><spring:message code="logs.text.user"/></th>
-						<th><spring:message code="logs.text.ipAddress"/></th>
 						<th></th> <%-- exception details column. must be last column. hidden --%>
+						<%-- if change number of columns, must modify array index in fnFormatDetails --%>
 					</tr>
 				</thead>
 				<tbody>
@@ -164,7 +164,6 @@ Display application logs
 							<td>${log.loggerName}</td>
 							<td>${fn:escapeXml(log.formattedMessage)}</td>
 							<td>${fn:escapeXml(log.MDCPropertyMap['user'])}</td>
-							<td>${fn:escapeXml(log.MDCPropertyMap['remoteAddr'])}</td>
 							<td>
 								<c:set var="throwable" value="${log.throwableProxy}" />
 								<c:if test="${throwable != null}">

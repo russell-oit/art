@@ -70,7 +70,7 @@ public class LoginController {
 		//ensure art database connection is available
 		Connection conn = ArtConfig.getConnection();
 		if (conn == null) {
-			model.addAttribute("message", "page.message.artDatabaseConnectionNotAvailable");
+			model.addAttribute("message", "page.message.artDatabaseNotAvailable");
 			return "headerlessError";
 		} else {
 			DbUtils.close(conn);

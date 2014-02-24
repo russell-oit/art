@@ -167,11 +167,11 @@ public class AuthorisationFilter implements Filter {
 				//authorisation is ok. display page
 
 				//enable display of custom attributes in logs
-				insertMDCAttributes(request, user);
+				addMdcAttributes(request, user);
 				try {
 					chain.doFilter(srequest, sresponse);
 				} finally {
-					clearMDCAttributes();
+					removeMdcAttributes();
 				}
 			} else {
 				//show access denied page. 
@@ -187,7 +187,9 @@ public class AuthorisationFilter implements Filter {
 	 * @param request
 	 * @param user
 	 */
-	private void insertMDCAttributes(HttpServletRequest request, User user) {
+	private void addMdcAttributes(HttpServletRequest request, User user) {
+		//http://logback.qos.ch/manual/mdc.html
+		//http://logback.qos.ch/xref/ch/qos/logback/classic/helpers/MDCInsertingServletFilter.html
 		MDC.put("user", user.getUsername());
 		MDC.put("remoteAddr", request.getRemoteAddr());
 		MDC.put("requestURI", request.getRequestURI());
@@ -197,9 +199,8 @@ public class AuthorisationFilter implements Filter {
 	/**
 	 * Clear mdc attributes.
 	 */
-	private void clearMDCAttributes() {
-		//everything added in insert should be removed here
-		//removing a non-existent attribute won't throw an exception
+	private void removeMdcAttributes() {
+		//everything added to mdc should be removed here
 		MDC.remove("user");
 		MDC.remove("remoteAddr");
 		MDC.remove("requestURI");
@@ -228,8 +229,8 @@ public class AuthorisationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "logs")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "users") || StringUtils.endsWith(page, "User")) {
@@ -240,19 +241,19 @@ public class AuthorisationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "artDatabase")) {
-			//super admins only, and repository user
+			//super admins, and repository user
 			if (accessLevel == AccessLevel.SuperAdmin.getValue()
 					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "settings")) {
-			//senior admins and above
-			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+			//super admins
+			if (accessLevel == AccessLevel.SuperAdmin.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "serverInfo")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+			//super admins
+			if (accessLevel == AccessLevel.SuperAdmin.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "language")) {

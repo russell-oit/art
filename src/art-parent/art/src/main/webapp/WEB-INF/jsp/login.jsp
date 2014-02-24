@@ -32,33 +32,10 @@ Login page
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</jsp:attribute>
 
-	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap-select-1.4.3-modified.min.css">
-	</jsp:attribute>
-
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3-modified.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.2.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
-				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker({
-					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
-				});
-
-				//activate dropdown-hover. to make bootstrap-select open on hover
-				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
-
 				$('#username').focus();
 			});
 		</script>
@@ -151,7 +128,7 @@ Login page
 							<div class="col-md-10">
 								<%-- select must have name of "lang" as per configuration in dispatcher-servlet.xml --%>
 								<c:set var="localeCode" value="${pageContext.response.locale}"/>
-								<select name="lang" id="lang" class="form-control selectpicker">
+								<select name="lang" id="lang" class="form-control">
 									<option value="en">English</option>
 									<option data-divider="true"></option>
 									<c:forEach var="language" items="${languages}">

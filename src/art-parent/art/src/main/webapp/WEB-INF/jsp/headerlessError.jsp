@@ -17,9 +17,19 @@ Display an error without the main header
 <t:headerlessPage title="${pageTitle}">
 	<jsp:body>
 		<div class="row spacer60">
-			<div class="col-md-6 col-md-offset-3 alert alert-danger text-center">
-				<spring:message code="${message}"/>
-			</div>
+			<c:if test="${not empty message}">
+				<div class="col-md-6 col-md-offset-3 alert alert-danger text-center">
+					<spring:message code="${message}"/>
+				</div>
+			</c:if>
+
+			<c:if test="${error != null}">
+				<div class="alert alert-danger alert-dismissable">
+					<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+					<p><spring:message code="page.message.errorOccurred"/></p>
+					<p>${error}</p>
+				</div>
+			</c:if>
 		</div>
 	</jsp:body>
 </t:headerlessPage>

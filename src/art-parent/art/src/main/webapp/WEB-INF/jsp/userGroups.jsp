@@ -138,10 +138,7 @@ Display user groups
 						data-id="${group.userGroupId}">
 
 						<td>${group.userGroupId}</td>
-						<td>${encode:forHtmlContent(group.name)} &nbsp;
-							<t:displayNewLabel creationDate="${group.creationDate}"
-											   updateDate="${group.updateDate}"/>
-						</td>
+						<td>${encode:forHtmlContent(group.name)}</td>
 						<td>${encode:forHtmlContent(group.description)}</td>
 						<td>
 							<div class="btn-group">

@@ -184,8 +184,8 @@
 		<url-pattern>/user/ExecuteQuery</url-pattern>
 	</servlet-mapping>
 	<session-config>
-		<!-- 120 minutes -->
-		<session-timeout>120</session-timeout>
+		<!-- timeout in minutes -->
+		<session-timeout>60</session-timeout>
 	</session-config>
 	<!-- JPivot -->
 	<context-param>

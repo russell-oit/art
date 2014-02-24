@@ -36,6 +36,8 @@ Includes bootstrap css, font awesome css, art css
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
 
 		<jsp:invoke fragment="css"/>
+		
+		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>

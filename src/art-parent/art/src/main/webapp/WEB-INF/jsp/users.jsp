@@ -144,11 +144,7 @@ Display user configuration page
 					<tr data-username="${encode:forHtmlAttribute(user.username)}"
 						data-id="${user.userId}">
 						<td>${user.userId}</td>
-						<td>${encode:forHtmlContent(user.username)} &nbsp;
-							<t:displayNewLabel creationDate="${user.creationDate}"
-											   updateDate="${user.updateDate}"
-											   updatedText="${updatedText}"/>
-						</td>
+						<td>${encode:forHtmlContent(user.username)}</td>
 						<td>${user.fullName}</td>
 						<td><t:displayActiveStatus active="${user.active}"
 											   activeText="${activeText}"
