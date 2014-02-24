@@ -7,9 +7,14 @@ Page to provide access to application documentation
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+
 <%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <t:genericPage title="ART - Documentation">
+	<jsp:attribute name="footer">
+		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+	</jsp:attribute>
+
 	<jsp:body>
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3 spacer60">
@@ -22,44 +27,50 @@ Page to provide access to application documentation
 							<tbody>
 								<tr>
 									<td>
-										Features
+										<a href="license.html">License</a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<a href="http://sourceforge.net/p/art/wiki/Home/">
+											Online documentation
+										</a>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<a href="features.htm">Features</a>
 										&nbsp; <a type="application/octet-stream" href="features.pdf">pdf</a>
-										&nbsp; <a href="features.htm">html</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										Installing
+										<a href="installing.htm">Installing</a>
 										&nbsp; <a type="application/octet-stream" href="installing.pdf">pdf</a>
-										&nbsp; <a href="installing.htm">html</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										Upgrading
+										<a href="upgrading.htm">Upgrading</a>
 										&nbsp; <a type="application/octet-stream" href="upgrading.pdf">pdf</a>
-										&nbsp; <a href="upgrading.htm">html</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										Tips
+										<a href="tips.htm">Tips</a>
 										&nbsp; <a type="application/octet-stream" href="tips.pdf">pdf</a>
-										&nbsp; <a href="tips.htm">html</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										Libraries
+										<a href="libraries.htm">Libraries</a>
 										&nbsp; <a type="application/octet-stream" href="libraries.pdf">pdf</a>
-										&nbsp; <a href="libraries.htm">html</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										Manual
+										<a href="manual.htm">Manual</a>
 										&nbsp; <a type="application/octet-stream" href="manual.pdf">pdf</a>
-										&nbsp; <a href="manual.htm">html</a>
 									</td>
 								</tr>
 							</tbody>
