@@ -1,9 +1,9 @@
 <%-- 
-    Document   : userGroups
-    Created on : 12-Feb-2014, 09:24:43
+    Document   : reportsConfig
+    Created on : 25-Feb-2014, 10:46:51
     Author     : Timothy Anyona
 
-Display user groups
+Reports configuration page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -14,7 +14,7 @@ Display user groups
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.userGroups" var="pageTitle"/>
+<spring:message code="page.title.reportsConfiguration" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
@@ -24,7 +24,7 @@ Display user groups
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
@@ -33,9 +33,9 @@ Display user groups
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="userGroups.do"]').parent().addClass('active');
+					$('a[href*="reportsConfig.do"]').parent().addClass('active');
 				});
-				var oTable = $('#userGroups').dataTable({
+				var oTable = $('#reports').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
@@ -48,7 +48,7 @@ Display user groups
 					}
 				});
 
-				$('#userGroups tbody').on('click', '.delete', function() {
+				$('#reports tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
 					var aPos = oTable.fnGetPosition(nRow);
@@ -70,7 +70,7 @@ Display user groups
 							if (result) {
 								$.ajax({
 									type: "POST",
-									url: "${pageContext.request.contextPath}/app/deleteUserGroup.do",
+									url: "${pageContext.request.contextPath}/app/deleteReport.do",
 									data: {id: id},
 									success: function(response) {
 										if (response.success) {
@@ -87,13 +87,13 @@ Display user groups
 									error: function(xhr, status, error) {
 										alert(xhr.responseText);
 									}
-								}); //end ajax
-							} //end if result
-						} //end bootbox callback
-					}); //end bootbox confirm
-				}); //end on click
+								});
+							}
+						}
+					});
+				});
 
-			}); //end document ready
+			});
 		</script>
 	</jsp:attribute>
 
@@ -116,33 +116,35 @@ Display user groups
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addUserGroup.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addReport.do">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
 		</div>
 
-		<table id="userGroups" class="table table-bordered table-striped table-condensed">
+		<table id="reports" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
+					<th><spring:message code="reports.text.status"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="group" items="${groups}">
-					<tr data-name="${encode:forHtmlAttribute(group.name)}"
-						data-id="${group.userGroupId}">
+				<c:forEach var="report" items="${reports}">
+					<tr data-name="${encode:forHtmlAttribute(report.name)}"
+						data-id="${encode:forHtmlAttribute(report.reportId)}">
 
-						<td>${group.userGroupId}</td>
-						<td>${encode:forHtmlContent(group.name)}</td>
-						<td>${encode:forHtmlContent(group.description)}</td>
+						<td>${encode:forHtmlContent(report.reportId)}</td>
+						<td>${encode:forHtmlContent(report.name)}</td>
+						<td>${encode:forHtmlContent(report.description)}</td>
+						<td><spring:message code="${report.reportStatus.localisedDescription}"/></td>
 						<td>
-							<div class="btn-group">
+							<div class="btn-report">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editUserGroup.do?id=${group.userGroupId}">
+								   href="${pageContext.request.contextPath}/app/editReport.do?id=${report.reportId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

@@ -39,7 +39,7 @@ public class Report implements Serializable {
 	private Datasource datasource;
 	private String contactPerson;
 	private boolean usesRules;
-	private ReportStatus status;
+	private ReportStatus reportStatus;
 	private boolean showParameters;
 	private String xAxisLabel;
 	private String yAxisLabel;
@@ -53,6 +53,25 @@ public class Report implements Serializable {
 	private String xmlaPassword;
 	private Date creationDate;
 	private Date updateDate;
+	private String reportSource;
+
+	/**
+	 * Get the value of reportSource
+	 *
+	 * @return the value of reportSource
+	 */
+	public String getReportSource() {
+		return reportSource;
+	}
+
+	/**
+	 * Set the value of reportSource
+	 *
+	 * @param reportSource new value of reportSource
+	 */
+	public void setReportSource(String reportSource) {
+		this.reportSource = reportSource;
+	}
 
 	/**
 	 * @return the reportId
@@ -181,17 +200,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the status
+	 * @return the reportStatus
 	 */
-	public ReportStatus getStatus() {
-		return status;
+	public ReportStatus getReportStatus() {
+		return reportStatus;
 	}
 
 	/**
-	 * @param status the status to set
+	 * @param reportStatus the reportStatus to set
 	 */
-	public void setStatus(ReportStatus status) {
-		this.status = status;
+	public void setReportStatus(ReportStatus reportStatus) {
+		this.reportStatus = reportStatus;
 	}
 
 	/**
@@ -396,6 +415,11 @@ public class Report implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Report [name=" + name + "]";
 	}
 
 }

@@ -58,6 +58,9 @@ public class UserController {
 	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUser(@RequestParam("id") Integer userId) {
+		//object will be automatically converted to json
+		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
+		
 		AjaxResponse response = new AjaxResponse();
 
 		try {

@@ -59,8 +59,8 @@ public class DatasourceService {
 	private class DatasourceMapper extends BasicRowProcessor {
 
 		@Override
-		public List<Datasource> toBeanList(ResultSet rs, Class type) throws SQLException {
-			List<Datasource> list = new ArrayList<Datasource>();
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<T>();
 			while (rs.next()) {
 				list.add(toBean(rs, type));
 			}
@@ -68,7 +68,7 @@ public class DatasourceService {
 		}
 
 		@Override
-		public Datasource toBean(ResultSet rs, Class type) throws SQLException {
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			Datasource datasource = new Datasource();
 
 			datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
@@ -84,7 +84,7 @@ public class DatasourceService {
 			datasource.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			datasource.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 
-			return datasource;
+			return type.cast(datasource);
 		}
 	}
 

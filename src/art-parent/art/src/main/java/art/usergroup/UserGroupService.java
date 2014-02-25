@@ -58,8 +58,8 @@ public class UserGroupService {
 	private class UserGroupMapper extends BasicRowProcessor {
 
 		@Override
-		public List<UserGroup> toBeanList(ResultSet rs, Class type) throws SQLException {
-			List<UserGroup> list = new ArrayList<UserGroup>();
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<T>();
 			while (rs.next()) {
 				list.add(toBean(rs, type));
 			}
@@ -67,7 +67,7 @@ public class UserGroupService {
 		}
 
 		@Override
-		public UserGroup toBean(ResultSet rs, Class type) throws SQLException {
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			UserGroup group = new UserGroup();
 
 			group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
@@ -78,7 +78,7 @@ public class UserGroupService {
 			group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 
-			return group;
+			return type.cast(group);
 		}
 	}
 
@@ -92,7 +92,7 @@ public class UserGroupService {
 	public List<UserGroup> getAllUserGroups() throws SQLException {
 		logger.debug("Entering getAllUserGroups");
 
-		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<UserGroup>(UserGroup.class, new UserGroupService.UserGroupMapper());
+		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<UserGroup>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
@@ -108,7 +108,7 @@ public class UserGroupService {
 		logger.debug("Entering getUserGroup: id={}", id);
 
 		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID = ? ";
-		ResultSetHandler<UserGroup> h = new BeanHandler<UserGroup>(UserGroup.class, new UserGroupService.UserGroupMapper());
+		ResultSetHandler<UserGroup> h = new BeanHandler<UserGroup>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(sql, h, id);
 	}
 
@@ -126,8 +126,8 @@ public class UserGroupService {
 		int affectedRows = dbService.update(sql, id);
 		logger.debug("affectedRows={}", affectedRows);
 
-		if (affectedRows == 0) {
-			logger.warn("Delete failed - no rows affected. id={}", id);
+		if (affectedRows != 1) {
+			logger.warn("Problem with delete. affectedRows={}, id={}", affectedRows, id);
 		}
 	}
 
@@ -178,14 +178,14 @@ public class UserGroupService {
 		String dateColumn;
 
 		if (newRecord) {
-			dateColumn = "CREATION_DATE";
+			dateColumn = "CREATION_DATE=?";
 		} else {
-			dateColumn = "UPDATE_DATE";
+			dateColumn = "UPDATE_DATE=?";
 		}
 
 		String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
-				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?"
-				+ " ," + dateColumn + "=?"
+				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
+				+ dateColumn
 				+ " WHERE USER_GROUP_ID=?";
 
 		Object[] values = {
@@ -200,8 +200,8 @@ public class UserGroupService {
 		int affectedRows = dbService.update(sql, values);
 		logger.debug("affectedRows={}", affectedRows);
 
-		if (affectedRows == 0) {
-			logger.warn("Save failed - no rows affected. group={}, newRecord={}", group, newRecord);
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, group={}, newRecord={}", group, newRecord);
 		}
 	}
 
@@ -245,8 +245,8 @@ public class UserGroupService {
 				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
 				logger.debug("affectedRows={}", affectedRows);
 
-				if (affectedRows == 0) {
-					logger.warn("allocateNewId - no rows affected. newId={}", newId);
+				if (affectedRows != 1) {
+					logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
 				}
 			} else {
 				logger.warn("Could not get max id");

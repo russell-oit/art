@@ -66,6 +66,6 @@ public enum DisplayNull {
 	 * @return
 	 */
 	public String getLocalisedDescription() {
-		return "settings.displayNullOption." + this.toString();
+		return "displayNull.option." + value;
 	}
 }

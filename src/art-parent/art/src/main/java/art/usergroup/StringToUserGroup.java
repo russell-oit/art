@@ -16,6 +16,7 @@
  */
 package art.usergroup;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -29,10 +30,11 @@ public class StringToUserGroup implements Converter<String, UserGroup> {
 
 	@Override
 	public UserGroup convert(String s) {
-		int id = Integer.parseInt(s);
-		//get value from database instead of new object with only id populated? not necessary?
+		int id = NumberUtils.toInt(s);
+
 		UserGroup group = new UserGroup();
 		group.setUserGroupId(id);
+
 		return group;
 	}
 

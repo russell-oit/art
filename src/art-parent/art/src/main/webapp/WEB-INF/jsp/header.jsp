@@ -64,7 +64,7 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/reportsConfiguration.do">
+								<a href="${pageContext.request.contextPath}/app/reportsConfig.do">
 									<spring:message code="header.link.reportsConfiguration"/>
 								</a>
 							</li>

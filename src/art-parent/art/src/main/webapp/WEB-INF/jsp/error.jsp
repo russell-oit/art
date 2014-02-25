@@ -15,6 +15,7 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
 <html>
@@ -30,7 +31,7 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 		<table class="table table-bordered">
 			<tr>
 				<td><b>Error:</b></td>
-				<td><pre>${fn:escapeXml(pageContext.exception)}</pre></td>
+				<td><pre><c:out value="${pageContext.exception}"/></pre></td>
 			</tr>
 			<tr>
 				<td><b>Page:</b></td>
@@ -38,7 +39,7 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 			</tr>
 			<tr>
 				<td><b>Status Code:</b></td>
-				<td>${fn:escapeXml(pageContext.errorData.statusCode)}</td>
+				<td>${pageContext.errorData.statusCode}</td>
 			</tr>
 			<tr>
 				<td><b>Message:</b></td>

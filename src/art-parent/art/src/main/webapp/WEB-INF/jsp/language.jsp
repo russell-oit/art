@@ -28,22 +28,6 @@ Display application language selection page
 					$('a[href*="language.do"]').parent().addClass('active');
 				});
 
-				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker({
-					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
-				});
-
-				//activate dropdown-hover. to make bootstrap-select open on hover
-				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
-				});
-
 				$('#lang').focus();
 			});
 		</script>
@@ -59,7 +43,7 @@ Display application language selection page
 					<div class="col-md-10">
 						<%-- select must have name of "lang" as per configuration in dispatcher-servlet.xml --%>
 						<c:set var="localeCode" value="${pageContext.response.locale}"/>
-						<select name="lang" id="lang" class="form-control selectpicker">
+						<select name="lang" id="lang" class="form-control">
 							<option value="en">English</option>
 							<option data-divider="true"></option>
 							<c:forEach var="language" items="${languages}">

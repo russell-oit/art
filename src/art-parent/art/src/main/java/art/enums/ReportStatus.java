@@ -27,7 +27,7 @@ import java.util.List;
 public enum ReportStatus {
 
 	//enum values will be stored in the database so avoid changing
-	//or update existing database records with the new value
+	//or update existing database records with the new value, and update i18n strings
 	Active("Active"), Disabled("Disabled"), Hidden("Hidden");
 	private String value;
 
@@ -76,6 +76,15 @@ public enum ReportStatus {
 	 */
 	public String getDescription() {
 		return value;
+	}
+	
+	/**
+	 * Get description message string for use in the user interface.
+	 *
+	 * @return
+	 */
+	public String getLocalisedDescription() {
+		return "reportStatus.option." + value;
 	}
 
 }

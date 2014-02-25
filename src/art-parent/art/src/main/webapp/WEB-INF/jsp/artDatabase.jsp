@@ -43,6 +43,8 @@ Display art database configuration page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
+				
+				$('#driver').focus();
 			});
 		</script>
 	</jsp:attribute>

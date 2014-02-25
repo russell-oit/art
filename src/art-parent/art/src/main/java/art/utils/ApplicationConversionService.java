@@ -18,6 +18,7 @@
 
 package art.utils;
 
+import art.report.StringToReportGroup;
 import art.usergroup.StringToUserGroup;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.stereotype.Component;
@@ -33,10 +34,13 @@ public class ApplicationConversionService extends DefaultFormattingConversionSer
 	public ApplicationConversionService(){
 		//DefaultFormattingConversionService's default constructor
 		//creates default formatters and converters
-		super(); //no need for explicit super()?
+		super(); //no need for explicit call to super()?
 		
 		//add custom formatters and converters
 		addConverter(new StringToUserGroup());
+		addConverter(new StringToReportGroup());
+		
+		
 		//TODO reinstate
 //		addConverter(new StringToInteger()); //override default StringToInteger converter
 	}
