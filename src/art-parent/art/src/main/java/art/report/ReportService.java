@@ -56,10 +56,12 @@ public class ReportService {
 	private final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
 
 	private final String SQL_SELECT_ALL = "SELECT AQ.*, "
-			+ " AQG.NAME AS GROUP_NAME"
+			+ " AQG.NAME AS GROUP_NAME, AD.DATABASE_NAME AS DATASOURCE_NAME"
 			+ " FROM ART_QUERIES AQ"
 			+ " LEFT JOIN ART_QUERY_GROUPS AQG ON" //use left join so that all reports are returned
-			+ " AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID";
+			+ " AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID"
+			+ " LEFT JOIN ART_DATABASES AD ON"
+			+ " AQ.DATABASE_ID=AD.DATABASE_ID";
 
 	/**
 	 * Class to map resultset to an object
@@ -92,6 +94,7 @@ public class ReportService {
 
 			Datasource datasource = new Datasource();
 			datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
+			datasource.setName(rs.getString("DATASOURCE_NAME"));
 			report.setDatasource(datasource);
 
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
@@ -357,12 +360,12 @@ public class ReportService {
 				+ " WHERE QUERY_ID=?";
 
 		//set values for possibly null property objects
-		Integer reportGroupId = null;
+		Integer reportGroupId = 0; //database column doesn't allow null
 		if (report.getReportGroup() != null) {
 			reportGroupId = report.getReportGroup().getReportGroupId();
 		}
 
-		Integer datasourceId = null;
+		Integer datasourceId = 0; //database column doesn't allow null
 		if (report.getDatasource() != null) {
 			datasourceId = report.getDatasource().getDatasourceId();
 		}

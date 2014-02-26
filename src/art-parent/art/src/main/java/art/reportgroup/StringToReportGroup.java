@@ -16,9 +16,8 @@
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package art.report;
+package art.reportgroup;
 
-import art.reportgroup.ReportGroup;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
 

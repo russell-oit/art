@@ -7,11 +7,8 @@ import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.servlets.ArtConfig;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -71,7 +68,7 @@ public class SettingsController {
 	}
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.GET)
-	public String showSettings(HttpSession session, Model model) {
+	public String showSettings(Model model) {
 		Settings settings = ArtConfig.getSettings();
 
 		model.addAttribute("settings", settings);
@@ -79,8 +76,7 @@ public class SettingsController {
 	}
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.POST)
-	public String processSettings(HttpSession session,
-			@ModelAttribute("settings") @Valid Settings settings,
+	public String processSettings(@ModelAttribute("settings") @Valid Settings settings,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {

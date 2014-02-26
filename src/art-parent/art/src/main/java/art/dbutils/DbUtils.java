@@ -16,7 +16,6 @@
  */
 package art.dbutils;
 
-import art.servlets.ArtConfig;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

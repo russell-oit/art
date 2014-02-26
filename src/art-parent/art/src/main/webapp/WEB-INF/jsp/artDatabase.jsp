@@ -44,7 +44,6 @@ Display art database configuration page
 					delay: 100
 				});
 				
-				$('#driver').focus();
 			});
 		</script>
 	</jsp:attribute>

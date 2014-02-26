@@ -1,41 +1,41 @@
 <%-- 
-    Document   : reportsConfig
-    Created on : 25-Feb-2014, 10:46:51
+    Document   : caches
+    Created on : 26-Feb-2014, 11:52:09
     Author     : Timothy Anyona
 
-Reports configuration page
+Page to allow manual clearing of caches
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.reportsConfiguration" var="pageTitle"/>
+<spring:message code="page.title.caches" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.delete" var="deleteText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.title.confirm" var="confirmText"/>
-<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
-<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
+<spring:message code="dialog.message.clearCache" var="clearCacheText"/>
+<spring:message code="caches.message.cacheCleared" var="cacheClearedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
-
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+	
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" charset="utf-8">
+		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="reportsConfig.do"]').parent().addClass('active');
+					$('a[href*="caches.do"]').parent().addClass('active');
 				});
-				var oTable = $('#reports').dataTable({
+
+				var oTable = $('#caches').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
@@ -48,36 +48,35 @@ Reports configuration page
 					}
 				});
 
-				$('#reports tbody').on('click', '.delete', function() {
+				$('#caches tbody').on('click', '.clear', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
 					var aPos = oTable.fnGetPosition(nRow);
 					var name = escapeHtmlContent(row.data("name"));
-					var id = row.data("id");
 					var msg;
 					bootbox.confirm({
-						message: "${deleteRecordText}: <b>" + name + "</b>",
+						message: "${clearCacheText}: <b>" + name + "</b>",
 						title: "${confirmText}",
 						buttons: {
 							'cancel': {
 								label: "${cancelText}"
 							},
 							'confirm': {
-								label: "${deleteText}"
+								label: "${okText}"
 							}
 						},
 						callback: function(result) {
 							if (result) {
 								$.ajax({
 									type: "POST",
-									url: "${pageContext.request.contextPath}/app/deleteReport.do",
-									data: {id: id},
+									url: "${pageContext.request.contextPath}/app/clearCache.do",
+									data: {name: name},
 									success: function(response) {
 										if (response.success) {
-											msg = alertCloseButton + "${recordDeletedText}";
+											msg = alertCloseButton + "${cacheClearedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											oTable.fnDeleteRow(aPos);
-											$.notify("${recordDeletedText}", "success");
+											$.notify("${cacheClearedText}", "success");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
@@ -87,12 +86,11 @@ Reports configuration page
 									error: function(xhr, status, error) {
 										alert(xhr.responseText);
 									}
-								});
-							}
-						}
-					});
-				});
-
+								}); //end ajax
+							} //end if result
+						} //end bootbox callback
+					}); //end bootbox confirm
+				}); //end on click
 			});
 		</script>
 	</jsp:attribute>
@@ -115,47 +113,22 @@ Reports configuration page
 		<div id="ajaxResponse">
 		</div>
 
-		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addReport.do">
-				<i class="fa fa-plus"></i>
-				<spring:message code="page.action.add"/>
-			</a>
-		</div>
-
-		<table id="reports" class="table table-bordered table-striped table-condensed">
+		<table id="caches" class="table table-striped table-bordered">
 			<thead>
 				<tr>
-					<th><spring:message code="page.text.id"/></th>
-					<th><spring:message code="page.text.name"/></th>
-					<th><spring:message code="page.text.description"/></th>
-					<th><spring:message code="reports.text.status"/></th>
+					<th><spring:message code="caches.text.cache"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="report" items="${reports}">
-					<tr data-name="${encode:forHtmlAttribute(report.name)}"
-						data-id="${encode:forHtmlAttribute(report.reportId)}">
-
-						<td>${encode:forHtmlContent(report.reportId)}</td>
-						<td>${encode:forHtmlContent(report.name)} &nbsp;
-							<t:displayNewLabel creationDate="${report.creationDate}"
-											   updateDate="${report.updateDate}"/>
-						</td>
-						<td>${encode:forHtmlContent(report.description)}</td>
-						<td><spring:message code="${report.reportStatus.localisedDescription}"/></td>
+				<c:forEach var="cache" items="${caches}">
+					<tr data-name="${cache.value}">
+						<td><spring:message code="${cache.localisedDescription}"/></td>
 						<td>
-							<div class="btn-report">
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editReport.do?id=${report.reportId}">
-									<i class="fa fa-pencil-square-o"></i>
-									<spring:message code="page.action.edit"/>
-								</a>
-								<button type="button" class="btn btn-default delete">
-									<i class="fa fa-trash-o"></i>
-									<spring:message code="page.action.delete"/>
-								</button>
-							</div>
+							<button type="button" class="btn btn-default clear">
+								<i class="fa fa-trash-o"></i>
+								<spring:message code="caches.action.clear"/>
+							</button>
 						</td>
 					</tr>
 				</c:forEach>

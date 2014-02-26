@@ -18,7 +18,7 @@
 
 package art.utils;
 
-import art.report.StringToReportGroup;
+import art.reportgroup.StringToReportGroup;
 import art.usergroup.StringToUserGroup;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.stereotype.Component;

@@ -22,8 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,8 +31,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DbService {
-
-	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
 	 * Execute an sql statement that doesn't return a resultset

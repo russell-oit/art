@@ -120,6 +120,12 @@ Header that appears at the top of all pages, except the login and logs pages
 							</li>
 							<li class="divider"></li>
 							<li>
+								<a href="${pageContext.request.contextPath}/app/caches.do">
+									<spring:message code="header.link.caches"/>
+								</a>
+							</li>
+							<li class="divider"></li>
+							<li>
 								<a href="${pageContext.request.contextPath}/app/serverInfo.do">
 									<spring:message code="header.link.serverInfo"/>
 								</a>

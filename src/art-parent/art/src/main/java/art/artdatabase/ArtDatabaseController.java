@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.Map;
-import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class ArtDatabaseController {
 	}
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
-	public String showArtDatabaseConfiguration(HttpSession session, Model model) {
+	public String showArtDatabaseConfiguration(Model model) {
 
 		ArtDatabase artDatabase = ArtConfig.getArtDatabaseConfiguration();
 
@@ -62,7 +61,7 @@ public class ArtDatabaseController {
 	}
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.POST)
-	public String processArtDatabaseConfiguration(HttpSession session,
+	public String processArtDatabaseConfiguration(
 			@ModelAttribute("artDatabase") @Valid ArtDatabase artDatabase,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 

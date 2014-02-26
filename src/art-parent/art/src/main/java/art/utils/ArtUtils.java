@@ -27,8 +27,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class for utility methods. Only static methods, without dependencies on other
@@ -38,7 +36,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(ArtUtils.class);
 	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
 	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
