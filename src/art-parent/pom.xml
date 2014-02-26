@@ -33,14 +33,14 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<jdk.version>1.6</jdk.version>
+		<jdk.version>1.7</jdk.version>
 		<slf4j.version>1.7.5</slf4j.version>
 	</properties>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!-- set compiler options e.g. show warnings, compile for jdk 1.6 -->
+				<!-- set compiler options -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -55,29 +55,6 @@
 					</configuration>
 				</plugin>
 
-				<!-- ensure only jdk 1.6 apis are used in code -->
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.9</version>
-					<executions>
-						<execution>
-							<id>check-java16</id>
-							<phase>test</phase>
-							<goals>
-								<goal>check</goal>
-							</goals>
-							<configuration>
-								<signature>
-									<groupId>org.codehaus.mojo.signature</groupId>
-									<artifactId>java16</artifactId>
-									<version>1.1</version>
-								</signature>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-
 				<!-- skip tests. none are defined -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -89,13 +66,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-
-		<plugins>
-			<!-- animal-sniffer mainly critical at release time to ensure only java 
-			1.6 apis are used in the code -->
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>animal-sniffer-maven-plugin</artifactId> 
-			</plugin> -->
-		</plugins>
 	</build>
 
 	<dependencyManagement>
@@ -108,5 +78,4 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
 </project>

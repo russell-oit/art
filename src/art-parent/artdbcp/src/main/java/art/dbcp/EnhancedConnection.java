@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +31,11 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  */
 public class EnhancedConnection implements Connection {
-	/* To compile this using jdk 1.3 you should comment the jdk1.4/1.5/1.6 lines 
+	/* To compile this using jdk 1.3 you should comment the jdk 1.4/1.5/1.6/1.7 lines 
 	 at the bottom */
-	/* To compile this using jdk 1.4/1.5 you should also comment the jdk1.6 lines 
+	/* To compile this using jdk 1.4/1.5 you should also comment the jdk 1.6 lines 
+	 at the bottom */
+	/* To compile this using jdk 1.6 you should also comment the jdk 1.7 lines 
 	 at the bottom */
 
 	/* 20050612  Statements are closed automatically when the EnanchedConnection is 
@@ -455,32 +458,31 @@ public class EnhancedConnection implements Connection {
 	/*
 	 * START JDK 1.7 only
 	 */
-	/*
-	 @Override
-	 public void abort(Executor arg0) throws SQLException {
-	 c.abort(arg0);
-	 }
+	@Override
+	public void abort(Executor arg0) throws SQLException {
+		c.abort(arg0);
+	}
 
-	 @Override
-	 public int getNetworkTimeout() throws SQLException {
-	 return c.getNetworkTimeout();
-	 }
+	@Override
+	public int getNetworkTimeout() throws SQLException {
+		return c.getNetworkTimeout();
+	}
 
-	 @Override
-	 public String getSchema() throws SQLException {
-	 return c.getSchema();
-	 }
+	@Override
+	public String getSchema() throws SQLException {
+		return c.getSchema();
+	}
 
-	 @Override
-	 public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException {
-	 c.setNetworkTimeout(arg0, arg1);
-	 }
+	@Override
+	public void setNetworkTimeout(Executor arg0, int arg1) throws SQLException {
+		c.setNetworkTimeout(arg0, arg1);
+	}
 
-	 @Override
-	 public void setSchema(String arg0) throws SQLException {
-	 c.setSchema(arg0);
-	 }
-	 */
+	@Override
+	public void setSchema(String arg0) throws SQLException {
+		c.setSchema(arg0);
+	}
+
 	/*
 	 * END JDK 1.7 only
 	 */

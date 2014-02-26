@@ -15,6 +15,7 @@ ART 3.0
 * Modified application settings configuration. Settings need to be manually re-entered.
 * Modified application urls. Previously bookmarked urls may no longer work.
 * Requires Internet Explorer 8+, or recent versions of other browsers
+* Requires Java 1.7
 * Updated cewolf to 1.2.4
 
 ART 2.5.2
