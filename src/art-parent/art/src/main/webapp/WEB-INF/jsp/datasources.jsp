@@ -38,6 +38,7 @@ Display datasources
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="datasources.do"]').parent().addClass('active');
 				});
+				
 				var oTable = $('#datasources').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
@@ -132,7 +133,7 @@ Display datasources
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addDatasource.do">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
-			</a>
+			</a> 
 		</div>
 
 		<table id="datasources" class="table table-bordered table-striped table-condensed">
@@ -156,8 +157,7 @@ Display datasources
 											   updateDate="${datasource.updateDate}"/>
 						</td>
 						<td>${datasource.description}</td>
-						<td><t:displayActiveStatus active="${datasource.active}"/>
-						</td>
+						<td><t:displayActiveStatus active="${datasource.active}"/></td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

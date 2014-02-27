@@ -173,13 +173,14 @@ public class DatasourceService {
 			dateColumn = "UPDATE_DATE";
 		}
 
-		String sql = "UPDATE ART_DATABASES SET NAME=?, DRIVER=?, URL=?,"
+		String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DRIVER=?, URL=?,"
 				+ " USERNAME=?, PASSWORD=?, POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?"
 				+ " ," + dateColumn + "=?"
 				+ " WHERE DATABASE_ID=?";
 
 		Object[] values = {
 			datasource.getName(),
+			datasource.getDescription(),
 			datasource.getDriver(),
 			datasource.getUrl(),
 			datasource.getUsername(),

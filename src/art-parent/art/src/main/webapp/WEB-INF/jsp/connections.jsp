@@ -1,9 +1,9 @@
 <%-- 
-    Document   : caches
-    Created on : 26-Feb-2014, 11:52:09
+    Document   : connections
+    Created on : 27-Feb-2014, 07:33:53
     Author     : Timothy Anyona
 
-Page to allow manual clearing of caches
+Page to display connections status
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -12,29 +12,28 @@ Page to allow manual clearing of caches
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.caches" var="pageTitle"/>
+<spring:message code="page.title.connections" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.ok" var="okText"/>
-<spring:message code="dialog.title.confirm" var="confirmText"/>
-<spring:message code="dialog.message.clearCache" var="clearCacheText"/>
-<spring:message code="caches.message.cacheCleared" var="cacheClearedText"/>
+<spring:message code="connections.message.connectionReset" var="connectionResetText"/>
+<spring:message code="datasources.text.total" var="totalText"/>
+<spring:message code="datasources.text.inUse" var="inUseText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript">
+		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="caches.do"]').parent().addClass('active');
+					$('a[href*="connections.do"]').parent().addClass('active');
 				});
 
-				var oTable = $('#caches').dataTable({
+				var oTable = $('#connections').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
@@ -47,20 +46,26 @@ Page to allow manual clearing of caches
 					}
 				});
 
-				$('#caches tbody').on('click', '.clear', function() {
+				$('#connections tbody').on('click', '.reset', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
-					var name = escapeHtmlContent(row.data("name"));
+					var id = row.data("id");
 					var msg;
+
 					$.ajax({
 						type: "POST",
-						url: "${pageContext.request.contextPath}/app/clearCache.do",
-						data: {name: name},
+						url: "${pageContext.request.contextPath}/app/resetConnection.do",
+						data: {id: id},
 						success: function(response) {
 							if (response.success) {
-								msg = alertCloseButton + "${cacheClearedText}";
+								msg = alertCloseButton + "${connectionResetText}";
 								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$.notify("${cacheClearedText}", "success");
+								
+								var update="${totalText}: " + response.poolSize +
+										", ${inUseText}: " + response.inUseCount;
+								oTable.fnUpdate(update, nRow , 1);
+								
+								$.notify("${connectionResetText}", "success");
 							} else {
 								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
@@ -70,9 +75,9 @@ Page to allow manual clearing of caches
 						error: function(xhr, status, error) {
 							alert(xhr.responseText);
 						}
-					}); //end ajax
-				}); //end on click
-				
+					});
+				});
+
 			});
 		</script>
 	</jsp:attribute>
@@ -95,21 +100,34 @@ Page to allow manual clearing of caches
 		<div id="ajaxResponse">
 		</div>
 
-		<table id="caches" class="table table-striped table-bordered">
+		<div style="margin-bottom: 10px;">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/resetAllConnections.do">
+				<i class="fa fa-bolt"></i>
+				<spring:message code="connections.action.reset"/>
+			</a>
+		</div>
+
+		<table id="connections" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th><spring:message code="caches.text.cache"/></th>
+					<th><spring:message code="connections.text.datasourceName"/></th>
+					<th><spring:message code="page.text.connections"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="cache" items="${caches}">
-					<tr data-name="${cache.value}">
-						<td><spring:message code="${cache.localisedDescription}"/></td>
+				<c:forEach var="entry" items="${connectionPoolMap}">
+					<tr data-id="${entry.key}">
+						<c:set var="pool" value="${entry.value}"/>
+						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>
-							<button type="button" class="btn btn-default clear">
-								<i class="fa fa-trash-o"></i>
-								<spring:message code="caches.action.clear"/>
+							<spring:message code="datasources.text.total"/>: ${pool.poolSize}, 
+							<spring:message code="datasources.text.inUse"/>: ${pool.inUseCount}
+						</td>
+						<td>
+							<button type="button" class="btn btn-default reset">
+								<i class="fa fa-bolt"></i>
+								<spring:message code="connections.action.reset"/>
 							</button>
 						</td>
 					</tr>

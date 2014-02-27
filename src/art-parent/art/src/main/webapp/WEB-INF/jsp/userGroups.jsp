@@ -71,6 +71,7 @@ Display user groups
 							if (result) {
 								$.ajax({
 									type: "POST",
+									dataType: "json",
 									url: "${pageContext.request.contextPath}/app/deleteUserGroup.do",
 									data: {id: id},
 									success: function(response) {

@@ -115,8 +115,20 @@ public class ArtConfig extends HttpServlet {
 
 			//close connections in the artdbcp connection pool
 			clearConnections();
-		} catch (Exception e) {
-			logger.error("Error", e);
+
+			//deregister jdbc drivers
+			Enumeration<Driver> drivers = DriverManager.getDrivers();
+			while (drivers.hasMoreElements()) {
+				Driver driver = drivers.nextElement();
+				try {
+					DriverManager.deregisterDriver(driver);
+					logger.info("JDBC driver deregistered: {}", driver);
+				} catch (SQLException ex) {
+					logger.error("Error while deregistering JDBC driver: {}", driver, ex);
+				}
+			}
+		} catch (Exception ex) {
+			logger.error("Error", ex);
 		}
 
 		logger.info("ART Stopped.");
@@ -299,7 +311,7 @@ public class ArtConfig extends HttpServlet {
 			jndiDatasource = true;
 		}
 		DataSource artdb = new DataSource(artDbPoolTimeout * 60L, jndiDatasource);
-		artdb.setName("ART Repository");  //custom name
+		artdb.setName("ART Database");  //custom name
 		artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
 		artdb.setUsername(artDatabaseConfiguration.getUsername());
 		artdb.setPassword(artDatabaseConfiguration.getPassword());
@@ -324,9 +336,9 @@ public class ArtConfig extends HttpServlet {
 		if (StringUtils.isNotBlank(artDbDriver)) {
 			try {
 				Class.forName(artDbDriver).newInstance();
-				logger.info("ART Database JDBC Driver Registered: {}", artDbDriver);
+				logger.info("ART Database JDBC driver registered: {}", artDbDriver);
 			} catch (Exception e) {
-				logger.error("Error while registering ART Database JDBC Driver: {}", artDbDriver, e);
+				logger.error("Error while registering ART Database JDBC driver: {}", artDbDriver, e);
 			}
 		}
 
@@ -405,9 +417,9 @@ public class ArtConfig extends HttpServlet {
 			if (StringUtils.isNotBlank(driver)) {
 				try {
 					Class.forName(driver).newInstance();
-					logger.info("Datasource JDBC Driver Registered: {}", driver);
+					logger.info("Datasource JDBC driver registered: {}", driver);
 				} catch (Exception e) {
-					logger.error("Error while registering Datasource JDBC Driver: {}", driver, e);
+					logger.error("Error while registering Datasource JDBC driver: {}", driver, e);
 				}
 			}
 		}

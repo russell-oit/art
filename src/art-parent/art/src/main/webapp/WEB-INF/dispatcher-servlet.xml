@@ -50,14 +50,23 @@
 	<!-- Enables the caching through annotations -->
 	<cache:annotation-driven />
 	
-	<!-- use ehcache cache manager -->
-	<bean id="cacheManager"
+	<!-- ehcache cache manager -->
+<!--	<bean id="cacheManager"
 		  class="org.springframework.cache.ehcache.EhCacheCacheManager"
 		  p:cacheManager-ref="ehcache"/>
 	
 	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
 		  p:configLocation="classpath:ehcache.xml"
-		  p:shared="true"/>
+		  p:shared="true"/>-->
+	<!-- ehcache cache manager -->
+	
+	<!-- No op cache manager -->
+	<!-- to disable caching, comment out the ehcache beans and enable the NoopCacheManager -->
+	<!-- https://stackoverflow.com/questions/14205185/spring-cache-vs-cachemanger -->
+	<bean id="cacheManager"
+		  class="org.springframework.cache.support.NoOpCacheManager"/>
+	<!-- No op cache manager -->
+	
 	<!-- enable caching -->
 	
 </beans>

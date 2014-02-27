@@ -193,7 +193,7 @@ public class DatasourceController {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
-			redirectAttributes.addFlashAttribute("message", "datasources.message.datasourceUpdated");
+			redirectAttributes.addFlashAttribute("message", "page.message.recordUpdated");
 			return "redirect:/app/datasources.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

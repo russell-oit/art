@@ -52,7 +52,7 @@ public class CacheController {
 	AjaxResponse clearCache(@RequestParam("name") String name) {
 		AjaxResponse response = new AjaxResponse();
 
-		String message;
+		String message = null;
 		CacheType cacheType = CacheType.getEnum(name);
 
 		if (cacheType == null) {
@@ -61,14 +61,19 @@ public class CacheController {
 			switch (cacheType) {
 				case Mondrian:
 					cacheHelper.clearMondrian();
+					break;
 				case Reports:
 					cacheHelper.clearReports();
+					break;
 				case Users:
 					cacheHelper.clearUsers();
+					break;
 				case UserGroups:
 					cacheHelper.clearUserGroups();
+					break;
 				case Datasources:
 					cacheHelper.clearDatasources();
+					break;
 				default:
 					message = "Clear cache not available: " + name;
 			}

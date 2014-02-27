@@ -135,9 +135,9 @@ Reports configuration page
 			<tbody>
 				<c:forEach var="report" items="${reports}">
 					<tr data-name="${encode:forHtmlAttribute(report.name)}"
-						data-id="${encode:forHtmlAttribute(report.reportId)}">
+						data-id="${report.reportId}">
 
-						<td>${encode:forHtmlContent(report.reportId)}</td>
+						<td>${report.reportId}</td>
 						<td>${encode:forHtmlContent(report.name)} &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>

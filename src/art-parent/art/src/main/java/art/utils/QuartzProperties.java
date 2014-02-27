@@ -27,6 +27,7 @@ package art.utils;
 import art.servlets.ArtConfig;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -72,8 +73,8 @@ public class QuartzProperties {
 			String dbDriver;
 			String dbUsername;
 			String dbPassword;
-			final String DATASOURCE_NAME = "ArtDS";
 
+			//property names
 			final String INSTANCE_NAME = "org.quartz.scheduler.instanceName";
 			final String SKIP_UPDATE = "org.quartz.scheduler.skipUpdateCheck";
 			final String MAKE_SCHEDULER_DAEMON = "org.quartz.scheduler.makeSchedulerThreadDaemon";
@@ -82,12 +83,7 @@ public class QuartzProperties {
 			final String MAKE_THREADS_DAEMONS = "org.quartz.threadPool.makeThreadsDaemons";
 			final String DRIVER_DELEGATE = "org.quartz.jobStore.driverDelegateClass";
 			final String JOB_STORE_CLASS = "org.quartz.jobStore.class";
-			final String DRIVER = "org.quartz.dataSource." + DATASOURCE_NAME + ".driver";
-			final String URL = "org.quartz.dataSource." + DATASOURCE_NAME + ".URL";
-			final String USER = "org.quartz.dataSource." + DATASOURCE_NAME + ".user";
-			final String PASSWORD = "org.quartz.dataSource." + DATASOURCE_NAME + ".password";
-			final String VALIDATION_QUERY = "org.quartz.dataSource." + DATASOURCE_NAME + ".validationQuery";
-			final String JNDI_URL = "org.quartz.dataSource." + DATASOURCE_NAME + ".jndiURL";
+			final String DATASOURCE_NAME = "org.quartz.jobStore.dataSource";
 
 			//check if art.properties file exists. this will supply data source details
 			if (ArtConfig.isArtSettingsLoaded()) {
@@ -144,7 +140,17 @@ public class QuartzProperties {
 					props.setProperty(JOB_STORE_CLASS, "org.quartz.impl.jdbcjobstore.JobStoreTX");
 				}
 				//data source
-				props.setProperty("org.quartz.jobStore.dataSource", DATASOURCE_NAME);
+				if (props.getProperty(DATASOURCE_NAME) == null) {
+					props.setProperty(DATASOURCE_NAME, "ArtDs");
+				}
+				String dataSource = props.getProperty(DATASOURCE_NAME);
+
+				final String DRIVER = "org.quartz.dataSource." + dataSource + ".driver";
+				final String URL = "org.quartz.dataSource." + dataSource + ".URL";
+				final String USER = "org.quartz.dataSource." + dataSource + ".user";
+				final String PASSWORD = "org.quartz.dataSource." + dataSource + ".password";
+				final String VALIDATION_QUERY = "org.quartz.dataSource." + dataSource + ".validationQuery";
+				final String JNDI_URL = "org.quartz.dataSource." + dataSource + ".jndiURL";
 
 				if (StringUtils.isNotBlank(dbDriver)) {
 					//jdbc datasource
@@ -231,7 +237,7 @@ public class QuartzProperties {
 					}
 				}
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			props = null;
 			logger.error("Error", e);
 		}

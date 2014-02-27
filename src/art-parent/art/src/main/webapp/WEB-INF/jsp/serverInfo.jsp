@@ -7,6 +7,7 @@ Display application server information
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>

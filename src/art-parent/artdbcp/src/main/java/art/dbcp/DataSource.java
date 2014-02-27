@@ -611,4 +611,20 @@ public class DataSource implements TimerListener {
 	public List<EnhancedConnection> getConnectionPool() {
 		return connectionPool;
 	}
+
+	/**
+	 * Get the number of connections that are currently in use
+	 *
+	 * @return
+	 */
+	public int getInUseCount() {
+		int count = 0;
+		for (EnhancedConnection ec : connectionPool) {
+			if (ec.getInUse()) {
+				count++;
+			}
+		}
+
+		return count;
+	}
 }

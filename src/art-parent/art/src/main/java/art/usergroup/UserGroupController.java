@@ -78,13 +78,13 @@ public class UserGroupController {
 	}
 
 	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.GET)
-	public String addUserGroup(Model model) {
+	public String addUserGroupGet(Model model) {
 		model.addAttribute("group", new UserGroup());
 		return showUserGroup("add", model);
 	}
 
 	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.POST)
-	public String addUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+	public String addUserGroupPost(@ModelAttribute("group") @Valid UserGroup group,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
@@ -105,7 +105,7 @@ public class UserGroupController {
 	}
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
-	public String editUserGroup(@RequestParam("id") Integer id, Model model) {
+	public String editUserGroupGet(@RequestParam("id") Integer id, Model model) {
 
 		try {
 			model.addAttribute("group", userGroupService.getUserGroup(id));
@@ -118,7 +118,7 @@ public class UserGroupController {
 	}
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.POST)
-	public String editUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+	public String editUserGroupPost(@ModelAttribute("group") @Valid UserGroup group,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
