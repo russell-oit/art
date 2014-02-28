@@ -14,7 +14,6 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
@@ -35,7 +34,7 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 			</tr>
 			<tr>
 				<td><b>Page:</b></td>
-				<td>${fn:escapeXml(pageContext.errorData.requestURI)}</td>
+				<td><c:out value="${pageContext.errorData.requestURI}"/></td>
 			</tr>
 			<tr>
 				<td><b>Status Code:</b></td>
@@ -46,7 +45,7 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 				<td>
 					<%-- this doesn't have the same content as ${pageContext.exception.message} --%>
 					<pre>
-						${fn:escapeXml(requestScope['javax.servlet.error.message'])}
+						<c:out value="${requestScope['javax.servlet.error.message']}"/>
 					</pre>
 				</td>
 			</tr>

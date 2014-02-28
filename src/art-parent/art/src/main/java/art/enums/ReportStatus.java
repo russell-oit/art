@@ -16,6 +16,7 @@
  */
 package art.enums;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,14 +44,17 @@ public enum ReportStatus {
 	public String getValue() {
 		return value;
 	}
-	
+
 	/**
 	 * Get a list of all enum values
 	 *
 	 * @return
 	 */
 	public static List<ReportStatus> list() {
-		return Arrays.asList(values());
+		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
+		List<ReportStatus> items = new ArrayList<>();
+		items.addAll(Arrays.asList(values()));
+		return items;
 	}
 
 	/**
@@ -77,7 +81,7 @@ public enum ReportStatus {
 	public String getDescription() {
 		return value;
 	}
-	
+
 	/**
 	 * Get description message string for use in the user interface.
 	 *

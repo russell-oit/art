@@ -1,5 +1,6 @@
 package art.enums;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,14 +30,17 @@ public enum ArtAuthenticationMethod {
 	public String getValue() {
 		return value;
 	}
-	
+
 	/**
 	 * Get a list of all enum values
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public static List<ArtAuthenticationMethod> list() {
-		return Arrays.asList(values());
+		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
+		List<ArtAuthenticationMethod> items = new ArrayList<>();
+		items.addAll(Arrays.asList(values()));
+		return items;
 	}
 
 	/**

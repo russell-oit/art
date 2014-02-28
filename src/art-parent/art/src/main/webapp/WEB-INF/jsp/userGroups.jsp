@@ -52,7 +52,6 @@ Display user groups
 				$('#userGroups tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
-					var aPos = oTable.fnGetPosition(nRow);
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
 					var msg;
@@ -76,13 +75,16 @@ Display user groups
 									data: {id: id},
 									success: function(response) {
 										if (response.success) {
+											oTable.fnDeleteRow(nRow);
+											
 											msg = alertCloseButton + "${recordDeletedText}";
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-											oTable.fnDeleteRow(aPos);
+											
 											$.notify("${recordDeletedText}", "success");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+											
 											$.notify("${errorOccurredText}", "error");
 										}
 									},
@@ -113,6 +115,12 @@ Display user groups
 				<p>${error}</p>
 			</div>
 		</c:if>
+		<c:if test="${not empty recordSavedMessage}">
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
+			</div>
+		</c:if>
 
 		<div id="ajaxResponse">
 		</div>
@@ -135,8 +143,8 @@ Display user groups
 			</thead>
 			<tbody>
 				<c:forEach var="group" items="${groups}">
-					<tr data-name="${encode:forHtmlAttribute(group.name)}"
-						data-id="${group.userGroupId}">
+					<tr data-id="${group.userGroupId}" 
+						data-name="${encode:forHtmlAttribute(group.name)}">
 
 						<td>${group.userGroupId}</td>
 						<td>${encode:forHtmlContent(group.name)} &nbsp;

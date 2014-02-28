@@ -19,8 +19,8 @@ Page to display connections status
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="connections.message.connectionReset" var="connectionResetText"/>
-<spring:message code="datasources.text.total" var="totalText"/>
-<spring:message code="datasources.text.inUse" var="inUseText"/>
+<spring:message code="connections.text.total" var="totalText"/>
+<spring:message code="connections.text.inUse" var="inUseText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -49,6 +49,7 @@ Page to display connections status
 				$('#connections tbody').on('click', '.reset', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
+					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
 					var msg;
 
@@ -58,13 +59,13 @@ Page to display connections status
 						data: {id: id},
 						success: function(response) {
 							if (response.success) {
-								msg = alertCloseButton + "${connectionResetText}";
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								
 								var update="${totalText}: " + response.poolSize +
 										", ${inUseText}: " + response.inUseCount;
+								
 								oTable.fnUpdate(update, nRow , 1);
 								
+								msg = alertCloseButton + "${connectionResetText}: " + name;
+								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 								$.notify("${connectionResetText}", "success");
 							} else {
 								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
@@ -100,13 +101,6 @@ Page to display connections status
 		<div id="ajaxResponse">
 		</div>
 
-		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/resetAllConnections.do">
-				<i class="fa fa-bolt"></i>
-				<spring:message code="connections.action.reset"/>
-			</a>
-		</div>
-
 		<table id="connections" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
@@ -117,12 +111,15 @@ Page to display connections status
 			</thead>
 			<tbody>
 				<c:forEach var="entry" items="${connectionPoolMap}">
-					<tr data-id="${entry.key}">
+					<tr data-id="${entry.key}"
+						data-name="${entry.value.name}">
+						
 						<c:set var="pool" value="${entry.value}"/>
+						
 						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>
-							<spring:message code="datasources.text.total"/>: ${pool.poolSize}, 
-							<spring:message code="datasources.text.inUse"/>: ${pool.inUseCount}
+							<spring:message code="connections.text.total"/>: ${pool.poolSize}, 
+							<spring:message code="connections.text.inUse"/>: ${pool.inUseCount}
 						</td>
 						<td>
 							<button type="button" class="btn btn-default reset">

@@ -49,7 +49,6 @@ Page to allow manual clearing of caches
 
 				$('#caches tbody').on('click', '.clear', function() {
 					var row = $(this).closest("tr"); //jquery object
-					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var msg;
 					$.ajax({
@@ -58,7 +57,7 @@ Page to allow manual clearing of caches
 						data: {name: name},
 						success: function(response) {
 							if (response.success) {
-								msg = alertCloseButton + "${cacheClearedText}";
+								msg = alertCloseButton + "${cacheClearedText}: " + name;
 								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 								$.notify("${cacheClearedText}", "success");
 							} else {

@@ -64,11 +64,6 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/connections.do">
-									<spring:message code="header.link.connections"/>
-								</a>
-							</li>
-							<li>
 								<a href="${pageContext.request.contextPath}/app/reportsConfig.do">
 									<spring:message code="header.link.reportsConfiguration"/>
 								</a>
@@ -129,6 +124,11 @@ Header that appears at the top of all pages, except the login and logs pages
 									<spring:message code="header.link.caches"/>
 								</a>
 							</li>
+							<li>
+								<a href="${pageContext.request.contextPath}/app/connections.do">
+									<spring:message code="header.link.connections"/>
+								</a>
+							</li>
 							<li class="divider"></li>
 							<li>
 								<a href="${pageContext.request.contextPath}/app/serverInfo.do">
@@ -164,10 +164,14 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/logout.do">
+						<a href="logout"
+						   onClick="document.getElementById('logoutForm').submit(); return false;">
 							<i class="fa fa-sign-out"></i> 
 							<spring:message code="header.link.logout"/>
 						</a>
+						<form id="logoutForm" method="POST" action="${pageContext.request.contextPath}/logout.do">
+							
+						</form>
 					</li>
 				</ul>
 				<div class="nav navbar-nav navbar-right navbar-text">

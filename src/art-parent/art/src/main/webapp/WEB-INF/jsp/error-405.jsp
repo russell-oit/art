@@ -1,9 +1,9 @@
 <%-- 
-    Document   : error-404
-    Created on : 23-Feb-2014, 11:37:03
+    Document   : error-405
+    Created on : 28-Feb-2014, 16:54:54
     Author     : Timothy Anyona
 
-Error page for 404 errors (page not found)
+Error page for 405 errors (method not allowed)
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -15,12 +15,13 @@ Error page for 404 errors (page not found)
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>ART - Page Not Found</title>
+        <title>ART - Method Not Allowed</title>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/bootstrap-3.0.0.min.css">
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
     </head>
     <body>
-        <h1>Page Not Found</h1>
-		<c:out value="${pageContext.errorData.requestURI}"/>
+        <h1>Method Not Allowed</h1>
+		Message: <c:out value="${requestScope['javax.servlet.error.message']}"/> <br>
+		Page: <c:out value="${pageContext.errorData.requestURI}"/>
     </body>
 </html>

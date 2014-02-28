@@ -1,5 +1,6 @@
 package art.enums;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,14 +26,17 @@ public enum DisplayNull {
 	public String getValue() {
 		return value;
 	}
-	
+
 	/**
 	 * Get a list of all enum values
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public static List<DisplayNull> list() {
-		return Arrays.asList(values());
+		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
+		List<DisplayNull> items = new ArrayList<>();
+		items.addAll(Arrays.asList(values()));
+		return items;
 	}
 
 	/**

@@ -51,22 +51,35 @@
 	<cache:annotation-driven />
 	
 	<!-- ehcache cache manager -->
-<!--	<bean id="cacheManager"
+	<bean id="cacheManager"
 		  class="org.springframework.cache.ehcache.EhCacheCacheManager"
 		  p:cacheManager-ref="ehcache"/>
 	
 	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
-		  p:configLocation="classpath:ehcache.xml"
-		  p:shared="true"/>-->
+	  p:configLocation="classpath:ehcache.xml"
+	  p:shared="true"/>
 	<!-- ehcache cache manager -->
 	
 	<!-- No op cache manager -->
-	<!-- to disable caching, comment out the ehcache beans and enable the NoopCacheManager -->
+	<!-- to disable caching, delete or comment out the ehcache beans and enable the NoopCacheManager -->
 	<!-- https://stackoverflow.com/questions/14205185/spring-cache-vs-cachemanger -->
-	<bean id="cacheManager"
-		  class="org.springframework.cache.support.NoOpCacheManager"/>
+	
+	<!--	<bean id="cacheManager"
+	class="org.springframework.cache.support.NoOpCacheManager"/>-->
+	
 	<!-- No op cache manager -->
 	
 	<!-- enable caching -->
+	
+	<!-- custom error page -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key="java.lang.Exception">redirect:/error.do</prop>
+			</props>
+		</property>
+		<property name="defaultErrorView" value="error"/>
+	</bean>
+	<!-- custom error page -->
 	
 </beans>

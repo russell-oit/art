@@ -94,7 +94,8 @@ public class UserGroupController {
 
 		try {
 			userGroupService.addUserGroup(group);
-			redirectAttributes.addFlashAttribute("message", "page.message.recordAdded");
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			redirectAttributes.addFlashAttribute("recordName", group.getName());
 			return "redirect:/app/userGroups.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -128,7 +129,8 @@ public class UserGroupController {
 
 		try {
 			userGroupService.updateUserGroup(group);
-			redirectAttributes.addFlashAttribute("message", "page.message.recordUpdated");
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			redirectAttributes.addFlashAttribute("recordName", group.getName());
 			return "redirect:/app/userGroups.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

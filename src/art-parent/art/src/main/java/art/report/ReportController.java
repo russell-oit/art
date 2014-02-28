@@ -94,7 +94,7 @@ public class ReportController {
 	@RequestMapping(value = "/app/getReports", method = RequestMethod.GET)
 	public @ResponseBody
 	List<AvailableReport> getReports(HttpSession session, HttpServletRequest request) {
-		//object will be automatically converted to json
+		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
 		User sessionUser = (User) session.getAttribute("sessionUser");
 

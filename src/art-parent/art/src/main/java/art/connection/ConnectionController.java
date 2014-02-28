@@ -18,7 +18,6 @@ package art.connection;
 
 import art.dbcp.DataSource;
 import art.servlets.ArtConfig;
-import art.utils.AjaxResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;

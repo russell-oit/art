@@ -1,5 +1,6 @@
 package art.enums;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public enum PdfPageSize {
 
 	A4("A4"), A4Landscape("A4 Landscape"), Letter("Letter"),
 	LetterLandscape("Letter Landscape");
-	
+
 	private String value;
 
 	private PdfPageSize(String value) {
@@ -27,14 +28,17 @@ public enum PdfPageSize {
 	public String getValue() {
 		return value;
 	}
-	
+
 	/**
 	 * Get a list of all enum values
 	 *
 	 * @return
 	 */
 	public static List<PdfPageSize> list() {
-		return Arrays.asList(values());
+		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
+		List<PdfPageSize> items = new ArrayList<>();
+		items.addAll(Arrays.asList(values()));
+		return items;
 	}
 
 	/**
@@ -51,7 +55,7 @@ public enum PdfPageSize {
 		}
 		return A4; //default
 	}
-	
+
 	/**
 	 * Get enum description. In case description needs to be different from
 	 * internal value

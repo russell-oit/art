@@ -16,7 +16,7 @@
  */
 package art.enums;
 
-import static art.enums.DisplayNull.values;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -50,7 +50,10 @@ public enum CacheType {
 	 * @return
 	 */
 	public static List<CacheType> list() {
-		return Arrays.asList(values());
+		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
+		List<CacheType> items = new ArrayList<>();
+		items.addAll(Arrays.asList(values()));
+		return items;
 	}
 
 	/**
