@@ -164,13 +164,11 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="logout"
-						   onClick="document.getElementById('logoutForm').submit(); return false;">
-							<i class="fa fa-sign-out"></i> 
-							<spring:message code="header.link.logout"/>
-						</a>
 						<form id="logoutForm" method="POST" action="${pageContext.request.contextPath}/logout.do">
-							
+							<button type="submit" class="btn btn-link navbar-btn">
+								<i class="fa fa-sign-out"></i> 
+								<spring:message code="header.link.logout"/>
+							</button>
 						</form>
 					</li>
 				</ul>

@@ -20,14 +20,12 @@ Display user groups
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.delete" var="deleteText"/>
-<spring:message code="dialog.title.confirm" var="confirmText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
@@ -57,7 +55,6 @@ Display user groups
 					var msg;
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
-						title: "${confirmText}",
 						buttons: {
 							'cancel': {
 								label: "${cancelText}"
@@ -89,7 +86,7 @@ Display user groups
 										}
 									},
 									error: function(xhr, status, error) {
-										alert(xhr.responseText);
+										bootbox.alert(xhr.responseText);
 									}
 								}); //end ajax
 							} //end if result

@@ -6,6 +6,7 @@
 Error page for 404 errors (page not found)
 --%>
 
+<%@page isErrorPage="true"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
@@ -21,6 +22,15 @@ Error page for 404 errors (page not found)
     </head>
     <body>
         <h1>Page Not Found</h1>
-		<c:out value="${pageContext.errorData.requestURI}"/>
+		<table class="table table-bordered">
+			<tr>
+				<td><b>Page:</b></td>
+				<td><c:out value="${pageContext.errorData.requestURI}"/></td>
+			</tr>
+			<tr>
+				<td><b>Status Code:</b></td>
+				<td>${pageContext.errorData.statusCode}</td>
+			</tr>
+		</table>
     </body>
 </html>

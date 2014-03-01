@@ -23,7 +23,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Controller to display error page for unhandled exceptions
+ * Controller to display error page for unhandled exceptions at the servlet
+ * container level. That is exceptions that aren't caught by the spring
+ * framework i.e that aren't generated within spring controllers
  *
  * @author Timothy Anyona
  */
@@ -36,10 +38,9 @@ public class ErrorController {
 	@RequestMapping(value = "/error")
 	public String showError(HttpServletRequest request) {
 		Throwable exception = (Throwable) request.getAttribute("javax.servlet.error.exception");
-		Object statusCode= request.getAttribute("javax.servlet.error.status_code");
-		
-		logger.error("Unexpected error: Status Code={}", statusCode, exception);
-		
+
+		logger.error("Unexpected error", exception);
+
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-ajax";

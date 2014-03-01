@@ -16,10 +16,6 @@
 		<param-value>3.0-alpha3</param-value>
 	</context-param>
 	<!-- Error pages -->
-<!--	<error-page>
-		<exception-type>java.lang.Throwable</exception-type>
-		<location>/WEB-INF/jsp/error.jsp</location>
-	</error-page>-->
 	<error-page>
 		<exception-type>java.lang.Throwable</exception-type>
 		<location>/error.do</location>

@@ -124,7 +124,6 @@ Login page
 						<div class="form-group">
 							<label class="control-label col-md-2" for="lang">
 								<spring:message code="page.label.language"/>
-								<%--<spring:message code="page.label.lguagdfde"/>--%>
 							</label>
 							<div class="col-md-10">
 								<%-- select must have name of "lang" as per configuration in dispatcher-servlet.xml --%>

@@ -28,6 +28,26 @@ public class AjaxResponse {
 	private String successMessage;
 	private String errorMessage;
 
+	private Object data;
+
+	/**
+	 * Get the value of data
+	 *
+	 * @return the value of data
+	 */
+	public Object getData() {
+		return data;
+	}
+
+	/**
+	 * Set the value of data
+	 *
+	 * @param data new value of data
+	 */
+	public void setData(Object data) {
+		this.data = data;
+	}
+
 	/**
 	 * @return the success
 	 */

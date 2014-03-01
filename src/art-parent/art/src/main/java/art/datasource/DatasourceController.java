@@ -68,8 +68,8 @@ public class DatasourceController {
 
 	@RequestMapping(value = "/app/deleteDatasource", method = RequestMethod.POST)
 	public @ResponseBody
-	DeleteDatasourceResponse deleteDatasource(@RequestParam("id") Integer id) {
-		DeleteDatasourceResponse response = new DeleteDatasourceResponse();
+	AjaxResponse deleteDatasource(@RequestParam("id") Integer id) {
+		AjaxResponse response = new AjaxResponse();
 
 		try {
 			List<AvailableReport> linkedReports = datasourceService.getLinkedReports(id);
@@ -79,7 +79,7 @@ public class DatasourceController {
 				response.setSuccess(true);
 				ArtConfig.refreshConnections();
 			} else {
-				response.setLinkedReports(linkedReports);
+				response.setData(linkedReports);
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

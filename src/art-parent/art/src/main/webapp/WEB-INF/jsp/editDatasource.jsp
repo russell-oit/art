@@ -71,7 +71,7 @@ Edit datasource page
 							}
 						},
 						error: function(xhr, status, error) {
-							alert(xhr.responseText);
+							bootbox.alert(xhr.responseText);
 						}
 					});
 				});

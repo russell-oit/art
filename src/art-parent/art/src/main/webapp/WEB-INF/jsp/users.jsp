@@ -31,7 +31,6 @@ Display user configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
@@ -91,7 +90,7 @@ Display user configuration page
 										}
 									},
 									error: function(xhr, status, error) {
-										alert(xhr.responseText);
+										bootbox.alert(xhr.responseText);
 									}
 								});
 							}

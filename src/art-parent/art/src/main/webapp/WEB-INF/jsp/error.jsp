@@ -55,18 +55,29 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 					<pre>
 						<%
 							java.io.PrintWriter pOut = new java.io.PrintWriter(out);
-							if (exception instanceof ServletException) {
-								// It's a ServletException: we should extract the root cause
-								ServletException se = (ServletException) exception;
-								Throwable rootCause = se.getRootCause();
-								if (rootCause == null) {
-									rootCause = se;
+							try {
+								// The Servlet spec guarantees this attribute will be available
+								Throwable err = (Throwable) request.getAttribute("javax.servlet.error.exception");
+
+								if (err != null) {
+									if (err instanceof ServletException) {
+										// It's a ServletException: we should extract the root cause
+										ServletException se = (ServletException) err;
+										Throwable rootCause = se.getRootCause();
+										if (rootCause == null) {
+											rootCause = se;
+										}
+										out.println("<b>** Root cause is:</b> " + rootCause.getMessage());
+										rootCause.printStackTrace(pOut);
+									} else {
+										// It's not a ServletException, so we'll just show it
+										err.printStackTrace(pOut);
+									}
+								} else {
+									out.println("No error information available");
 								}
-								out.println("<b>** Root cause is:</b> " + rootCause.getMessage());
-								rootCause.printStackTrace(pOut);
-							} else {
-								// It's not a ServletException, so we'll just show it
-								exception.printStackTrace(pOut);
+							} catch (Exception ex) {
+								ex.printStackTrace(pOut);
 							}
 						%>
 					</pre>

@@ -67,7 +67,7 @@ Page to allow manual clearing of caches
 							}
 						},
 						error: function(xhr, status, error) {
-							alert(xhr.responseText);
+							bootbox.alert(xhr.responseText);
 						}
 					}); //end ajax
 				}); //end on click

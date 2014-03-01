@@ -71,15 +71,4 @@
 	
 	<!-- enable caching -->
 	
-	<!-- custom error page -->
-	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
-		<property name="exceptionMappings">
-			<props>
-				<prop key="java.lang.Exception">redirect:/error.do</prop>
-			</props>
-		</property>
-		<property name="defaultErrorView" value="error"/>
-	</bean>
-	<!-- custom error page -->
-	
 </beans>

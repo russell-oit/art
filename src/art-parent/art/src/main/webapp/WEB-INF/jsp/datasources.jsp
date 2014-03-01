@@ -30,7 +30,6 @@ Display datasources
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
@@ -78,14 +77,15 @@ Display datasources
 									url: "${pageContext.request.contextPath}/app/deleteDatasource.do",
 									data: {id: id},
 									success: function(response) {
+										var linkedReports=response.data;
 										if (response.success) {
 											msg = alertCloseButton + "${recordDeletedText}";
 											$("#ajaxResponse").addClass("alert alert-success alert-dismissable").html(msg);
 											oTable.fnDeleteRow(aPos);
 											$.notify("${recordDeletedText}", "success");
-										} else if (response.linkedReports.length > 0) {
+										} else if (linkedReports.length > 0) {
 											msg = alertCloseButton + "${linkedReportsExistText}" + "<ul>";
-											$.each(response.linkedReports, function(index, value) {
+											$.each(linkedReports, function(index, value) {
 												msg += "<li>" + value.name + "</li>";
 											});
 											msg += "</ul>";
@@ -98,7 +98,7 @@ Display datasources
 										}
 									},
 									error: function(xhr, status, error) {
-										alert(xhr.responseText);
+										bootbox.alert(xhr.responseText);
 									}
 								});
 							}

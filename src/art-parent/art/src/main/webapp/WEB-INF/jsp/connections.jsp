@@ -55,6 +55,7 @@ Page to display connections status
 
 					$.ajax({
 						type: "POST",
+						dataType: "json",
 						url: "${pageContext.request.contextPath}/app/resetConnection.do",
 						data: {id: id},
 						success: function(response) {
@@ -74,7 +75,7 @@ Page to display connections status
 							}
 						},
 						error: function(xhr, status, error) {
-							alert(xhr.responseText);
+							bootbox.alert(xhr.responseText);
 						}
 					});
 				});
