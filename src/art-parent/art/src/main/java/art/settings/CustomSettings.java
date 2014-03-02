@@ -16,12 +16,15 @@
  */
 package art.settings;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Class to represent custom settings that can't be set from the user interface.
  * Mainly to enhance security.
  *
  * @author Timothy Anyona
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomSettings {
 
 	private boolean showErrors = true; //whether exception details are shown in the user interface

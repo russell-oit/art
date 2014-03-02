@@ -99,7 +99,7 @@ public class ReportService {
 
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
 			report.setUsesRules(rs.getBoolean("USES_RULES"));
-			report.setReportStatus(ReportStatus.getEnum(rs.getString("REPORT_STATUS")));
+			report.setReportStatus(ReportStatus.toEnum(rs.getString("REPORT_STATUS")));
 			report.setShowParameters(rs.getBoolean("SHOW_PARAMETERS"));
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));

@@ -129,6 +129,11 @@ Header that appears at the top of all pages, except the login and logs pages
 									<spring:message code="header.link.connections"/>
 								</a>
 							</li>
+							<li>
+								<a href="${pageContext.request.contextPath}/app/loggers.do">
+									<spring:message code="header.link.loggers"/>
+								</a>
+							</li>
 							<li class="divider"></li>
 							<li>
 								<a href="${pageContext.request.contextPath}/app/serverInfo.do">
@@ -164,7 +169,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<form id="logoutForm" method="POST" action="${pageContext.request.contextPath}/logout.do">
+						<form method="POST" action="${pageContext.request.contextPath}/logout.do">
 							<button type="submit" class="btn btn-link navbar-btn">
 								<i class="fa fa-sign-out"></i> 
 								<spring:message code="header.link.logout"/>

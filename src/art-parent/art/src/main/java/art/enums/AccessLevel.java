@@ -41,18 +41,31 @@ public enum AccessLevel {
 	}
 
 	/**
-	 * Get enum object based on a value
+	 * Convert a value to an enum. If the conversion fails, NormalUser is
+	 * returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static AccessLevel getEnum(int value) {
+	public static AccessLevel toEnum(int value) {
+		return toEnum(value, NormalUser);
+	}
+
+	/**
+	 * Convert a value to an enum. If the conversion fails, the specified
+	 * default is returned
+	 *
+	 * @param value
+	 * @param defaultEnum
+	 * @return
+	 */
+	public static AccessLevel toEnum(int value, AccessLevel defaultEnum) {
 		for (AccessLevel v : values()) {
 			if (v.value == value) {
 				return v;
 			}
 		}
-		return NormalUser;
+		return defaultEnum;
 	}
 
 	/**

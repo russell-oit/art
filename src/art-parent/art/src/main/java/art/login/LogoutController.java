@@ -17,7 +17,7 @@ public class LogoutController {
 	@RequestMapping(value = "/logout", method = RequestMethod.POST)
 	public String logout(HttpSession session) {
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
-		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
+		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 
 		session.invalidate();
 

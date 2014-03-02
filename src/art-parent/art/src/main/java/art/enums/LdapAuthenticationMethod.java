@@ -40,18 +40,30 @@ public enum LdapAuthenticationMethod {
 	}
 
 	/**
-	 * Get enum object based on a string
+	 * Convert a value to an enum. If the conversion fails, Simple is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static LdapAuthenticationMethod getEnum(String value) {
+	public static LdapAuthenticationMethod toEnum(String value) {
+		return toEnum(value, Simple);
+	}
+
+	/**
+	 * Convert a value to an enum. If the conversion fails, the specified
+	 * default is returned
+	 *
+	 * @param value
+	 * @param defaultEnum
+	 * @return
+	 */
+	public static LdapAuthenticationMethod toEnum(String value, LdapAuthenticationMethod defaultEnum) {
 		for (LdapAuthenticationMethod v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
-		return Simple; //default
+		return defaultEnum;
 	}
 
 	/**

@@ -40,18 +40,30 @@ public enum DisplayNull {
 	}
 
 	/**
-	 * Get enum object based on a string
+	 * Convert a value to an enum. If the conversion fails, Yes is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static DisplayNull getEnum(String value) {
+	public static DisplayNull toEnum(String value) {
+		return toEnum(value, Yes);
+	}
+
+	/**
+	 * Convert a value to an enum. If the conversion fails, the specified
+	 * default is returned
+	 *
+	 * @param value
+	 * @param defaultEnum
+	 * @return
+	 */
+	public static DisplayNull toEnum(String value, DisplayNull defaultEnum) {
 		for (DisplayNull v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
-		return Yes; //default
+		return defaultEnum;
 	}
 
 	/**

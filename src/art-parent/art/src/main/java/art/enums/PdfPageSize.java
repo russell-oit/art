@@ -42,18 +42,30 @@ public enum PdfPageSize {
 	}
 
 	/**
-	 * Get enum object based on a string
+	 * Convert a value to an enum. If the conversion fails, A4 is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static PdfPageSize getEnum(String value) {
+	public static PdfPageSize toEnum(String value) {
+		return toEnum(value, A4);
+	}
+
+	/**
+	 * Convert a value to an enum. If the conversion fails, the specified
+	 * default is returned
+	 *
+	 * @param value
+	 * @param defaultEnum
+	 * @return
+	 */
+	public static PdfPageSize toEnum(String value, PdfPageSize defaultEnum) {
 		for (PdfPageSize v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
-		return A4; //default
+		return defaultEnum;
 	}
 
 	/**

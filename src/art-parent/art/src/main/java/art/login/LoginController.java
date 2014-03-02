@@ -82,7 +82,7 @@ public class LoginController {
 			//authentication method not specified in url. use application setting
 			loginMethod = loginMethodAppSetting;
 		} else {
-			loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
+			loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 		}
 
 		//if auto login, no login page is displayed as user is authenticated by application server
@@ -186,7 +186,7 @@ public class LoginController {
 
 		HttpSession session = request.getSession();
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
-		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.getEnum(authenticationMethod);
+		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 
 		String ip = request.getRemoteAddr();
 		LoginHelper loginHelper = new LoginHelper();

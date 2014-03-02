@@ -146,7 +146,7 @@ Display application logs
 				<thead>
 					<tr>
 						<th><spring:message code="logs.text.date"/></th>
-						<th><spring:message code="logs.text.level"/></th>
+						<th><spring:message code="page.text.level"/></th>
 						<th><spring:message code="logs.text.logger"/></th>
 						<th><spring:message code="logs.text.message"/></th>
 						<th><spring:message code="logs.text.user"/></th>

@@ -119,7 +119,7 @@ public class UserService {
 	private void populateUser(User user, ResultSet rs) throws SQLException {
 		user.setUsername(rs.getString("USERNAME"));
 		user.setEmail(rs.getString("EMAIL"));
-		user.setAccessLevel(AccessLevel.getEnum(rs.getInt("ACCESS_LEVEL")));
+		user.setAccessLevel(AccessLevel.toEnum(rs.getInt("ACCESS_LEVEL")));
 		user.setFullName(rs.getString("FULL_NAME"));
 		user.setActive(rs.getBoolean("ACTIVE"));
 		user.setPassword(rs.getString("PASSWORD"));

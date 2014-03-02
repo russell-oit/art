@@ -44,18 +44,30 @@ public enum ArtAuthenticationMethod {
 	}
 
 	/**
-	 * Get enum object based on a value
+	 * Convert a value to an enum. If the conversion fails, Internal is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static ArtAuthenticationMethod getEnum(String value) {
+	public static ArtAuthenticationMethod toEnum(String value) {
+		return toEnum(value, Internal);
+	}
+
+	/**
+	 * Convert a value to an enum. If the conversion fails, the specified
+	 * default is returned
+	 *
+	 * @param value
+	 * @param defaultEnum
+	 * @return
+	 */
+	public static ArtAuthenticationMethod toEnum(String value, ArtAuthenticationMethod defaultEnum) {
 		for (ArtAuthenticationMethod v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
-		return Internal; //default
+		return defaultEnum;
 	}
 
 	/**

@@ -29,7 +29,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- *
+ * Controller for the logs page
+ * 
  * @author Timothy Anyona
  */
 @Controller
@@ -53,7 +54,7 @@ public class LogsController {
 			if (count == 0) {
 				model.addAttribute("message", "logs.message.noLoggingEvents");
 			} else if (count > 0) {
-				List<ILoggingEvent> logs = new ArrayList<ILoggingEvent>(50);
+				List<ILoggingEvent> logs = new ArrayList<>(50);
 				for (int i = 0; i < count; i++) {
 					logs.add(cyclicBufferAppender.get(i));
 				}

@@ -53,7 +53,7 @@ public class CacheController {
 		AjaxResponse response = new AjaxResponse();
 
 		String message = null;
-		CacheType cacheType = CacheType.getEnum(name);
+		CacheType cacheType = CacheType.toEnum(name);
 
 		if (cacheType == null) {
 			message = "Unknown cache: " + name;

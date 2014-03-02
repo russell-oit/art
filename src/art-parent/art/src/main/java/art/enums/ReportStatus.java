@@ -58,18 +58,30 @@ public enum ReportStatus {
 	}
 
 	/**
-	 * Get enum object based on a string
+	 * Convert a value to an enum. If the conversion fails, Active is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static ReportStatus getEnum(String value) {
+	public static ReportStatus toEnum(String value) {
+		return toEnum(value, Active);
+	}
+
+	/**
+	 * Convert a value to an enum. If the conversion fails, the specified
+	 * default is returned
+	 *
+	 * @param value
+	 * @param defaultEnum
+	 * @return
+	 */
+	public static ReportStatus toEnum(String value, ReportStatus defaultEnum) {
 		for (ReportStatus v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
-		return Active; //default
+		return defaultEnum;
 	}
 
 	/**

@@ -21,24 +21,17 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for report types
+ * Enum for art configuration logger level
  *
  * @author Timothy Anyona
  */
-public enum ReportType {
+public enum LoggerLevel {
 
-	Tabular(0), Group(1),
-	Update(100), Crosstab(101), CrosstabHtml(102), TabularHtml(103),
-	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerCube(114),
-	JasperReportTemplate(115), JasperReportArt(116), jXLSTemplate(117), jXLSArt(118),
-	LovDynamic(119), LovStatic(120), JobRecipients(121),
-	XY(-1), Pie3D(-2), HorizontalBar3D(-3), VerticalBar3D(-4), Line(-5),
-	TimeSeries(-6), DateSeries(-7), StackedVerticalBar3D(-8), StackedHorizontalBar3D(-9),
-	Speedometer(-10), Bubble(-11), Heatmap(-12), Pie2D(-13), VerticalBar2D(-14),
-	StackedVerticalBar2D(-15), HorizontalBar2D(-16), StackedHorizontalBar2D(-17);
-	private int value;
+	OFF("OFF"), DEBUG("DEBUG"), INFO("INFO"), WARN("WARN"), ERROR("ERROR");
 
-	private ReportType(int value) {
+	private String value;
+
+	private LoggerLevel(String value) {
 		this.value = value;
 	}
 
@@ -47,7 +40,7 @@ public enum ReportType {
 	 *
 	 * @return
 	 */
-	public int getValue() {
+	public String getValue() {
 		return value;
 	}
 
@@ -56,21 +49,21 @@ public enum ReportType {
 	 *
 	 * @return
 	 */
-	public static List<ReportType> list() {
+	public static List<LoggerLevel> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
-		List<ReportType> items = new ArrayList<>();
+		List<LoggerLevel> items = new ArrayList<>();
 		items.addAll(Arrays.asList(values()));
 		return items;
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, Tabular is returned
+	 * Convert a value to an enum. If the conversion fails, OFF is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static ReportType toEnum(int value) {
-		return toEnum(value, Tabular);
+	public static LoggerLevel toEnum(String value) {
+		return toEnum(value, OFF);
 	}
 
 	/**
@@ -81,28 +74,13 @@ public enum ReportType {
 	 * @param defaultEnum
 	 * @return
 	 */
-	public static ReportType toEnum(int value, ReportType defaultEnum) {
-		for (ReportType v : values()) {
-			if (v.value == value) {
+	public static LoggerLevel toEnum(String value, LoggerLevel defaultEnum) {
+		for (LoggerLevel v : values()) {
+			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
 		return defaultEnum;
-	}
-
-	/**
-	 * Get enum object based on a value
-	 *
-	 * @param value
-	 * @return
-	 */
-	public static ReportType toEnum(String value) {
-		for (ReportType v : values()) {
-			if (v.getDescription().equalsIgnoreCase(value)) {
-				return v;
-			}
-		}
-		return Tabular;
 	}
 
 	/**
@@ -112,7 +90,7 @@ public enum ReportType {
 	 * @return
 	 */
 	public String getDescription() {
-		return this.name();
+		return value;
 	}
 
 }
