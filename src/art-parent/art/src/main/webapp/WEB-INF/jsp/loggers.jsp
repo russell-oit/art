@@ -100,7 +100,7 @@ Display current loggers
 						<td>${encode:forHtmlContent(logger.level)}</td>
 						<td>
 							<div class="btn-group">
-								<c:url value="/app/editLogger.do" var="editUrl">
+								<c:url var="editUrl" value="/app/editLogger.do">
 									<c:param name="name" value="${logger.name}"/>
 								</c:url>
 								<a class="btn btn-default" href="${editUrl}">

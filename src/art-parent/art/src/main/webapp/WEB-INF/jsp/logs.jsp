@@ -128,13 +128,6 @@ Display application logs
 	</jsp:attribute>
 
 	<jsp:body>
-		<div class="clearfix" style="margin-bottom: 10px;">
-			<span class="pull-right">
-				<a href="#bottom">
-					<spring:message code="logs.button.bottom"/>
-				</a>
-			</span>
-		</div>
 		<c:if test="${not empty message}">
 			<div class="alert alert-info alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
@@ -150,7 +143,7 @@ Display application logs
 						<th><spring:message code="logs.text.logger"/></th>
 						<th><spring:message code="logs.text.message"/></th>
 						<th><spring:message code="logs.text.user"/></th>
-						<th><spring:message code="logs.text.url"/></th>
+						<th><spring:message code="logs.text.page"/></th>
 						<th></th> <%-- exception details column. must be last column. hidden --%>
 						<%-- if change number of columns, must modify array index in fnFormatDetails --%>
 					</tr>
@@ -195,13 +188,6 @@ Display application logs
 					</c:forEach>
 				</tbody>
 			</table>
-		</div>
-		<div id="bottom" class="clearfix">
-			<span class="pull-right">
-				<a href="#top">
-					<spring:message code="logs.button.top"/>
-				</a>
-			</span>
 		</div>
 	</jsp:body>
 </t:mainPageWithPanel>

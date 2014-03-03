@@ -51,6 +51,8 @@ public class UserGroupController {
 
 	@RequestMapping(value = "/app/userGroups", method = RequestMethod.GET)
 	public String showUserGroups(Model model) {
+		logger.debug("Entering showUserGroups");
+
 		try {
 			model.addAttribute("groups", userGroupService.getAllUserGroups());
 		} catch (SQLException ex) {
@@ -64,6 +66,8 @@ public class UserGroupController {
 	@RequestMapping(value = "/app/deleteUserGroup", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUserGroup(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteUserGroup: id={}", id);
+
 		AjaxResponse response = new AjaxResponse();
 
 		try {
@@ -79,6 +83,8 @@ public class UserGroupController {
 
 	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.GET)
 	public String addUserGroupGet(Model model) {
+		logger.debug("Entering addUserGroupGet");
+
 		model.addAttribute("group", new UserGroup());
 		return showUserGroup("add", model);
 	}
@@ -87,6 +93,9 @@ public class UserGroupController {
 	public String addUserGroupPost(@ModelAttribute("group") @Valid UserGroup group,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
+		logger.debug("Entering addUserGroupPost: group={}", group);
+		
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return showUserGroup("add", model);
@@ -107,6 +116,7 @@ public class UserGroupController {
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
 	public String editUserGroupGet(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editUserGroupGet: id={}", id);
 
 		try {
 			model.addAttribute("group", userGroupService.getUserGroup(id));
@@ -122,6 +132,9 @@ public class UserGroupController {
 	public String editUserGroupPost(@ModelAttribute("group") @Valid UserGroup group,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
+		logger.debug("Entering editUserGroupPost: group={}", group);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return showUserGroup("edit", model);
@@ -149,6 +162,8 @@ public class UserGroupController {
 	 * @return
 	 */
 	private String showUserGroup(String action, Model model) {
+		logger.debug("Entering showUserGroup: action='{}'", action);
+
 		try {
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
 		} catch (SQLException ex) {

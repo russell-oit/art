@@ -235,60 +235,67 @@ public class UserService {
 		try {
 			conn = ArtConfig.getConnection();
 			String sql;
-			int affectedRows;
 
 			//delete user-report relationships
 			sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-			ps.executeUpdate();
+			try{
+				DbUtils.update(conn, ps, sql, userId);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete user-report group relationships
 			sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-			ps.executeUpdate();
+			try{
+				DbUtils.update(conn, ps, sql, userId);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete user-rules relationships
 			sql = "DELETE FROM ART_USER_RULES WHERE USER_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-			ps.executeUpdate();
+			try{
+				DbUtils.update(conn, ps, sql, userId);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete user-user group relationships
 			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-			ps.executeUpdate();
+			try{
+				DbUtils.update(conn, ps, sql, userId);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete user-shared job relationships
 			sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-			ps.executeUpdate();
+			try{
+				DbUtils.update(conn, ps, sql, userId);
+			} finally {
+				DbUtils.close(ps);
+			}
 
-			//delete user's jobs. this will delete all records related to the job e.g. quartz records, job parameters etc
-			sql = "SELECT JOB_ID FROM ART_JOBS WHERE USER_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				//TODO delete jor using user id
+//			//delete user's jobs. this will delete all records related to the job e.g. quartz records, job parameters etc
+//			sql = "SELECT JOB_ID FROM ART_JOBS WHERE USER_ID=?";
+//			ps = conn.prepareStatement(sql);
+//			ps.setInt(1, userId);
+//
+//			rs = ps.executeQuery();
+//			while (rs.next()) {
+//				//TODO delete job using user id
 //				ArtJob aj = new ArtJob();
 //				aj.load(rs.getInt("JOB_ID"), userId);
 //				aj.delete();
-			}
+//			}
 
 			//lastly, delete user
 			sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, userId);
-			affectedRows = ps.executeUpdate();
-			if (affectedRows == 0) {
-				logger.warn("Delete user failed. User not found. User Id={}", userId);
+			try{
+				DbUtils.update(conn, ps, sql, userId);
+			} finally {
+				DbUtils.close(ps);
 			}
-
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}

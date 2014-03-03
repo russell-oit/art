@@ -17,9 +17,11 @@ Edit user group page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addUserGroup" var="pageTitle"/>
+		<c:url var="formUrl" value="/app/addUserGroup.do"/>
 	</c:when>
 	<c:otherwise>
 		<spring:message code="page.title.editUserGroup" var="pageTitle"/>
+		<c:url var="formUrl" value="/app/editUserGroup.do"/>
 	</c:otherwise>
 </c:choose>
 
@@ -73,7 +75,7 @@ Edit user group page
 	</jsp:attribute>
 
 	<jsp:body>
-		<form:form class="form-horizontal" method="POST" action="" modelAttribute="group">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="group">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">

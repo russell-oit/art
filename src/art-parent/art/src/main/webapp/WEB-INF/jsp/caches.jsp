@@ -34,7 +34,7 @@ Page to allow manual clearing of caches
 					$('a[href*="caches.do"]').parent().addClass('active');
 				});
 
-				var oTable = $('#caches').dataTable({
+				$('#caches').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],

@@ -259,41 +259,53 @@ public class ReportService {
 
 			//delete query-user relationships
 			sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID = ?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
+			try {
+				DbUtils.update(conn, ps, sql, id);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete query parameters
 			sql = "DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
+			try {
+				DbUtils.update(conn, ps, sql, id);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete sql source
 			sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
+			try {
+				DbUtils.update(conn, ps, sql, id);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete query-rule relationships
 			sql = "DELETE FROM ART_QUERY_RULES WHERE QUERY_ID = ?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
+			try {
+				DbUtils.update(conn, ps, sql, id);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//delete drilldown queries
 			sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID = ?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
+			try {
+				DbUtils.update(conn, ps, sql, id);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			//lastly, delete query
 			sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID = ?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
-			ps.executeUpdate();
+			try {
+				DbUtils.update(conn, ps, sql, id);
+			} finally {
+				DbUtils.close(ps);
+			}
 		} finally {
-			DbUtils.close(ps, conn);
+			DbUtils.close(conn);
 		}
 	}
 
@@ -422,9 +434,11 @@ public class ReportService {
 			conn = ArtConfig.getConnection();
 			// Delete Old SQL Source
 			String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, reportId);
-			ps.executeUpdate();
+			try{
+				DbUtils.update(conn, ps, sql, reportId);
+			} finally {
+				DbUtils.close(ps);
+			}
 
 			// Write the query in small segments
 			// This guarantees portability across databases with different max VARCHAR sizes

@@ -37,6 +37,7 @@ public class UpgradeHelper {
 
 	/**
 	 * Perform upgrade steps
+	 *
 	 * @throws java.sql.SQLException
 	 */
 	public void upgrade() throws SQLException {
@@ -68,64 +69,74 @@ public class UpgradeHelper {
 				String username = rs.getString("USERNAME");
 
 				sql = "UPDATE ART_USERS SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_ADMIN_PRIVILEGES SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_USER_QUERIES SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_USER_QUERY_GROUPS SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_USER_RULES SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_JOBS SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_LOGS SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_USER_JOBS SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_USER_GROUP_ASSIGNMENT SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 
 				sql = "UPDATE ART_JOB_ARCHIVES SET USER_ID=? WHERE USERNAME=?";
-				psUpdate = conn.prepareStatement(sql);
-				psUpdate.setInt(1, count);
-				psUpdate.setString(2, username);
-				psUpdate.executeUpdate();
+				try {
+					DbUtils.update(conn, psUpdate, sql, count, username);
+				} finally {
+					DbUtils.close(ps);
+				}
 			}
 		} finally {
 			DbUtils.close(psUpdate);

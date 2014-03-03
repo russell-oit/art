@@ -59,7 +59,7 @@ public class UserGroupService {
 
 		@Override
 		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
-			List<T> list = new ArrayList<T>();
+			List<T> list = new ArrayList<>();
 			while (rs.next()) {
 				list.add(toBean(rs, type));
 			}
