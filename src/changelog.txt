@@ -16,6 +16,7 @@ ART 3.0
 * Modified application urls. Previously bookmarked urls may no longer work.
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
+* Requires Servlet 3.0
 * Updated cewolf to 1.2.4
 * Updated jasperreports to 5.5.1
 * Updated jtds to 1.3.1
