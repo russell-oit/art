@@ -13,6 +13,7 @@ Edit user group page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <c:choose>
 	<c:when test="${action == 'add'}">
@@ -87,7 +88,7 @@ Edit user group page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
+						<p>${encode:forHtmlContent(error)}</p>
 					</div>
 				</c:if>
 

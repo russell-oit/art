@@ -92,7 +92,7 @@ public class UserGroupService {
 	public List<UserGroup> getAllUserGroups() throws SQLException {
 		logger.debug("Entering getAllUserGroups");
 
-		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<UserGroup>(UserGroup.class, new UserGroupMapper());
+		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
@@ -108,7 +108,7 @@ public class UserGroupService {
 		logger.debug("Entering getUserGroup: id={}", id);
 
 		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID = ? ";
-		ResultSetHandler<UserGroup> h = new BeanHandler<UserGroup>(UserGroup.class, new UserGroupMapper());
+		ResultSetHandler<UserGroup> h = new BeanHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(sql, h, id);
 	}
 

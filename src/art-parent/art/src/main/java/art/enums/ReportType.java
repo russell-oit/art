@@ -27,7 +27,7 @@ import java.util.List;
  */
 public enum ReportType {
 
-	Tabular(0), Group(1),
+	Tabular(0), Group1(1), Group2(2), Group3(3), Group4(4), Group5(5),
 	Update(100), Crosstab(101), CrosstabHtml(102), TabularHtml(103),
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerCube(114),
 	JasperReportTemplate(115), JasperReportArt(116), jXLSTemplate(117), jXLSArt(118),
@@ -112,7 +112,88 @@ public enum ReportType {
 	 * @return
 	 */
 	public String getDescription() {
-		return this.name();
+		switch (this) {
+			case Tabular:
+				return "Tabular";
+			case Group1:
+				return "Group: 1 column";
+			case Group2:
+				return "Group: 2 columns";
+			case Group3:
+				return "Group: 3 columns";
+			case Group4:
+				return "Group: 4 columns";
+			case Group5:
+				return "Group: 5 columns";
+			case Update:
+				return "Update Statement";
+			case Crosstab:
+				return "Crosstab";
+			case CrosstabHtml:
+				return "Crosstab (html only)";
+			case TabularHtml:
+				return "Tabular (html only)";
+			case Dashboard:
+				return "Dashboard";
+			case Text:
+				return "Text";
+			case Mondrian:
+				return "Pivot Table: Mondrian";
+			case MondrianXmla:
+				return "Pivot Table: Mondrian XMLA";
+			case SqlServerCube:
+				return "Pivot Table: SQL Server";
+			case JasperReportTemplate:
+				return "JasperReport: Template Query";
+			case JasperReportArt:
+				return "JasperReport: ART Query";
+			case jXLSTemplate:
+				return "jXLS Spreadsheet: Template Query";
+			case jXLSArt:
+				return "jXLS Spreadsheet: ART Query";
+			case LovDynamic:
+				return "LOV: Dynamic";
+			case LovStatic:
+				return "LOV: Static";
+			case JobRecipients:
+				return "Dynamic Job Recipients";
+			case XY:
+				return "Chart: XY";
+			case Pie3D:
+				return "Chart: Pie 3D";
+			case HorizontalBar3D:
+				return "Chart: Horizontal Bar 3D";
+			case VerticalBar3D:
+				return "Chart: Vertical Bar 3D";
+			case Line:
+				return "Chart: Line";
+			case TimeSeries:
+				return "Chart: Time Series";
+			case DateSeries:
+				return "Chart: Date Series";
+			case StackedVerticalBar3D:
+				return "Chart: Stacked Vertical Bar 3D";
+			case StackedHorizontalBar3D:
+				return "Chart: Stacked Horizontal Bar 3D";
+			case Speedometer:
+				return "Chart: Speedometer";
+			case Bubble:
+				return "Chart: Bubble Chart";
+			case Heatmap:
+				return "Chart: Heat Map";
+			case Pie2D:
+				return "Chart: Pie 2D";
+			case VerticalBar2D:
+				return "Chart: Vertical Bar 2D";
+			case StackedVerticalBar2D:
+				return "Chart: Stacked Vertical Bar 2D";
+			case HorizontalBar2D:
+				return "Chart: Horizontal Bar 2D";
+			case StackedHorizontalBar2D:
+				return "Chart: Stacked Horizontal Bar 2D";
+			default:
+				return this.name();
+		}
 	}
 
 }

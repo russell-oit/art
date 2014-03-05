@@ -207,7 +207,7 @@ Display edit user page
 					<div class="col-md-8">
 						<form:select path="defaultReportGroup" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-								<option data-divider="true"></option>
+							<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>
 						<form:errors path="defaultReportGroup" cssClass="error"/>

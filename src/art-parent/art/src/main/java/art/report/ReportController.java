@@ -16,6 +16,8 @@
  */
 package art.report;
 
+import art.enums.ReportStatus;
+import art.enums.ReportType;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.utils.AjaxResponse;
@@ -208,6 +210,8 @@ public class ReportController {
 	private String showReport(String action, Model model) {
 		try {
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
+			model.addAttribute("reportStatuses", ReportStatus.list());
+			model.addAttribute("reportTypes", ReportType.list());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

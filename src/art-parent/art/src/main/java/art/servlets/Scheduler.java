@@ -29,16 +29,16 @@
  */
 package art.servlets;
 
+import art.cache.CacheHelper;
 import art.utils.UpgradeHelper;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,72 +130,31 @@ public class Scheduler extends HttpServlet {
 
 		logger.debug("Running clean");
 
-		if (ArtConfig.isArtSettingsLoaded()) {
-			try {
-				// Delete old files in the export directory
-				File exportFiles = new File(ArtConfig.getExportDirectory());
-				File[] fileNames = exportFiles.listFiles();
-				long lastModified;
-				long actualTime = new Date().getTime();
-				String fileName;
-				for (File file : fileNames) {
-					lastModified = file.lastModified();
-					fileName = file.getName();
-					// Delete the file if it is older than INTERVAL_DELETE_FILES
-					// and the name is not "index.html"
-					// This is a workaround in order to avoid a user to
-					// view all the export files though the browser...
-					if ((actualTime - lastModified) > INTERVAL_DELETE_FILES) {
-						//delete directories that may be created by jasper report html output
-						if (file.isDirectory()) {
-							if (!fileName.equals("jobs")) {
-								deleteDirectory(file);
-							}
-						} else if (!fileName.equals("index.html")) {
-							boolean deleted = file.delete();
-							if (!deleted) {
-								logger.warn("File not deleted: {}", file);
-							}
-						}
-					}
-				}
+		// Delete old files in the reports export directory
+		cleanDirectory(ArtConfig.getReportsExportPath());
 
-				//clear mondrian cache
-				clearMondrianCache();
-
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-		} else {
-			logger.debug("ART settings not defined");
-		}
-
+		//clear mondrian cache
+		clearMondrianCache();
 	}
 
 	/**
-	 * Delete directory, including all files and subdirectories under it.
+	 * Delete old files in a directory
 	 *
-	 * @param path directory to delete
-	 * @return <code>true</code> if directory deleted. <code>false</code>
-	 * otherwise.
+	 * @param directoryPath
 	 */
-	private boolean deleteDirectory(File path) {
-		logger.debug("Deleting directory: {}", path);
-
-		if (path.exists()) {
-			File[] files = path.listFiles();
-			for (File file : files) {
-				if (file.isDirectory()) {
-					deleteDirectory(file);
-				} else {
-					boolean deleted = file.delete();
-					if (!deleted) {
-						logger.warn("File not deleted: {}", file);
-					}
+	private void cleanDirectory(String directoryPath) {
+		File directory = new File(directoryPath);
+		File[] files = directory.listFiles();
+		long limit = System.currentTimeMillis() - INTERVAL_DELETE_FILES;
+		for (File file : files) {
+			// Delete the file if it is older than INTERVAL_DELETE_FILES
+			if (FileUtils.isFileOlder(file, limit)) {
+				boolean deleted = FileUtils.deleteQuietly(file);
+				if (!deleted) {
+					logger.warn("File not deleted: {}", file);
 				}
 			}
 		}
-		return (path.delete());
 	}
 
 	/**
@@ -211,56 +170,26 @@ public class Scheduler extends HttpServlet {
 
 		if (mondrianCacheExpiry > 0) {
 			boolean clearCache = false;
-			long nowTimestamp = new Date().getTime();
 			String cacheFilePath = ArtConfig.getArtTempPath() + "mondrian-cache-cleared.txt";
 			File cacheFile = new File(cacheFilePath);
-			if (cacheFile.exists()) {
-				//check last modified date
-				long lastModified = cacheFile.lastModified();
-				if ((nowTimestamp - lastModified) > mondrianCacheExpiry) {
-					clearCache = true;
-					boolean deleted = cacheFile.delete();
-					if (!deleted) {
-						logger.warn("File not deleted: {}", cacheFile);
-					}
-				}
-			} else {
+			long limit = System.currentTimeMillis() - mondrianCacheExpiry;
+			if (!cacheFile.exists() || FileUtils.isFileOlder(cacheFile, limit)) {
 				clearCache = true;
 			}
 
 			if (clearCache) {
 				logger.debug("Actually clearing mondrian cache");
 
-				//clear all mondrian caches
-				java.util.Iterator<mondrian.rolap.RolapSchema> schemaIterator = mondrian.rolap.RolapSchema.getRolapSchemas();
-				while (schemaIterator.hasNext()) {
-					mondrian.rolap.RolapSchema schema = schemaIterator.next();
-					mondrian.olap.CacheControl cacheControl = schema.getInternalConnection().getCacheControl(null);
+				CacheHelper cacheHelper = new CacheHelper();
+				cacheHelper.clearMondrian();
 
-					cacheControl.flushSchemaCache();
-				}
-
-				BufferedWriter out = null;
 				try {
-					//create file that indicates when the cache was last cleared
-					out = new BufferedWriter(new FileWriter(cacheFilePath));
-					Date now = new Date();
-					out.write(now.toString());
+					//create/update file that indicates when the cache was last cleared
+					FileUtils.writeStringToFile(cacheFile, new Date().toString());
 				} catch (IOException e) {
 					logger.error("Error", e);
-				} finally {
-					//Close the BufferedWriter
-					try {
-						if (out != null) {
-							out.flush();
-							out.close();
-						}
-					} catch (IOException e) {
-						logger.error("Error while closing writer", e);
-					}
 				}
 			}
-
 		}
 	}
 
@@ -271,6 +200,7 @@ public class Scheduler extends HttpServlet {
 	 */
 	public long getInterval() {
 		return INTERVAL;
+
 	}
 }
 

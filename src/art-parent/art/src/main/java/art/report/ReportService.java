@@ -56,7 +56,7 @@ public class ReportService {
 	private final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
 
 	private final String SQL_SELECT_ALL = "SELECT AQ.*, "
-			+ " AQG.NAME AS GROUP_NAME, AD.DATABASE_NAME AS DATASOURCE_NAME"
+			+ " AQG.NAME AS GROUP_NAME, AD.NAME AS DATASOURCE_NAME"
 			+ " FROM ART_QUERIES AQ"
 			+ " LEFT JOIN ART_QUERY_GROUPS AQG ON" //use left join so that all reports are returned
 			+ " AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID"
@@ -70,7 +70,7 @@ public class ReportService {
 
 		@Override
 		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
-			List<T> list = new ArrayList<T>();
+			List<T> list = new ArrayList<>();
 			while (rs.next()) {
 				list.add(toBean(rs, type));
 			}
@@ -129,7 +129,7 @@ public class ReportService {
 	 */
 	@Cacheable("reports")
 	public List<AvailableReport> getAvailableReports(String username) throws SQLException {
-		List<AvailableReport> reports = new ArrayList<AvailableReport>();
+		List<AvailableReport> reports = new ArrayList<>();
 
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -218,7 +218,7 @@ public class ReportService {
 	public List<Report> getAllReports() throws SQLException {
 		logger.debug("Entering getAllReports");
 
-		ResultSetHandler<List<Report>> h = new BeanListHandler<Report>(Report.class, new ReportMapper());
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
@@ -234,7 +234,7 @@ public class ReportService {
 		logger.debug("Entering getReport: id={}", id);
 
 		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID = ? ";
-		ResultSetHandler<Report> h = new BeanHandler<Report>(Report.class, new ReportMapper());
+		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, id);
 		populateReportSource(report);
 		return report;

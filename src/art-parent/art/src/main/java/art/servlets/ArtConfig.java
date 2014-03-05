@@ -25,7 +25,6 @@ import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.settings.Settings;
 import art.utils.ArtJob;
-import art.utils.ArtSettings;
 import art.utils.ArtUtils;
 import art.dbutils.DbUtils;
 import art.settings.CustomSettings;
@@ -44,7 +43,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.quartz.SchedulerException;
@@ -63,10 +61,8 @@ public class ArtConfig extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(ArtConfig.class);
-	private static String exportDirectory;
+	private static String exportPath;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
-	private static boolean artSettingsLoaded = false;
-	private static ArtSettings as;
 	private static final ArrayList<String> reportFormats = new ArrayList<String>(); //report formats available to users
 	private static final ArrayList<String> allReportFormats = new ArrayList<String>(); //all report formats
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
@@ -81,7 +77,7 @@ public class ArtConfig extends HttpServlet {
 	private static Settings settings;
 	private static final String sep = java.io.File.separator;
 	private static CustomSettings customSettings;
-	private static String workDirectory;
+	private static String workDirectoryPath;
 
 	/**
 	 * {@inheritDoc}
@@ -164,44 +160,47 @@ public class ArtConfig extends HttpServlet {
 
 		//load custom settings
 		loadCustomSettings();
-		
+
 		//set show errors custom setting
 		ctx.setAttribute("showErrors", customSettings.isShowErrors());
 
 		//set work directory base path
-		workDirectory = webinfPath + sep + "work" + sep; //default work directory
+		workDirectoryPath = webinfPath + sep + "work" + sep; //default work directory
 
 		String customWorkDirectory = customSettings.getWorkDirectory();
 		if (StringUtils.isNotBlank(customWorkDirectory)) {
 			//custom work directory defined
-			workDirectory = customWorkDirectory;
-			if (!StringUtils.right(workDirectory, 1).equals(sep)) {
-				workDirectory = workDirectory + sep;
+			workDirectoryPath = customWorkDirectory;
+			if (!StringUtils.right(workDirectoryPath, 1).equals(sep)) {
+				workDirectoryPath = workDirectoryPath + sep;
 			}
 
-			logger.info("Using custom work directory: '{}'", workDirectory);
+			logger.info("Using custom work directory: '{}'", workDirectoryPath);
 		}
 
 		//set export path
-		exportDirectory = workDirectory + "export" + sep; //default
+		exportPath = workDirectoryPath + "export" + sep; //default
 
 		//set custom export path
 		String customExportDirectory = customSettings.getExportDirectory();
 		if (StringUtils.isNotBlank(customExportDirectory)) {
 			//custom export directory defined
-			exportDirectory = customExportDirectory;
-			if (!StringUtils.right(exportDirectory, 1).equals(sep)) {
-				exportDirectory = exportDirectory + sep;
+			exportPath = customExportDirectory;
+			if (!StringUtils.right(exportPath, 1).equals(sep)) {
+				exportPath = exportPath + sep;
 			}
 
-			logger.info("Using custom export directory: '{}'", exportDirectory);
+			logger.info("Using custom export directory: '{}'", exportPath);
 		}
 
 		//set art-database file path
-		artDatabaseFilePath = workDirectory + "art-database.json";
+		artDatabaseFilePath = workDirectoryPath + "art-database.json";
 
 		//set settings file path
-		settingsFilePath = workDirectory + "art-settings.json";
+		settingsFilePath = workDirectoryPath + "art-settings.json";
+
+		//ensure work directories exist
+		createWorkDirectories();
 
 		//populate all report formats list
 		allReportFormats.add("tsvGz");
@@ -412,6 +411,30 @@ public class ArtConfig extends HttpServlet {
 		//create quartz scheduler
 		createQuartzScheduler();
 	}
+	
+	//TODO remove after refactoring
+	public static String getArtSetting(String value){
+		return value;
+	}
+	
+	//TODO remove after refactoring
+	public static boolean isArtSettingsLoaded() {
+		return false;
+	}
+	
+	//TODO remove after refactoring
+	public static String getSettingsFilePath(){
+		return "";
+	}
+	
+	//TODO remove after refactoring
+	public static void loadArtSettings(){
+	}
+	
+	//TODO remove after refactoring
+	public static boolean isShowResultsInline() {
+		return false;
+	}
 
 	/**
 	 * Determine if art database has been configured
@@ -441,7 +464,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the web-inf directory
 	 */
 	public static String getWebinfPath() {
-		return appPath + sep + "WEB-INF" + sep;
+		return webinfPath;
 	}
 
 	/**
@@ -458,8 +481,8 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @return full path to the export directory
 	 */
-	public static String getExportDirectory() {
-		return exportDirectory;
+	public static String getExportPath() {
+		return exportPath;
 	}
 
 	/**
@@ -467,17 +490,17 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @return full path to the jobs export directory
 	 */
-	public static String getJobsExportDirectory() {
-		return exportDirectory + "jobs" + sep;
+	public static String getJobsExportPath() {
+		return exportPath + "jobs" + sep;
 	}
-	
+
 	/**
 	 * Get full path to the reports export directory.
 	 *
 	 * @return full path to the reports export directory
 	 */
-	public static String getReportsExportDirectory() {
-		return exportDirectory + "reports" + sep;
+	public static String getReportsExportPath() {
+		return exportPath + "reports" + sep;
 	}
 
 	/**
@@ -486,7 +509,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the templates directory
 	 */
 	public static String getTemplatesPath() {
-		return workDirectory + "templates" + sep;
+		return workDirectoryPath + "templates" + sep;
 	}
 
 	/**
@@ -495,7 +518,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the templates directory
 	 */
 	public static String getArtTempPath() {
-		return workDirectory + "tmp" + sep;
+		return workDirectoryPath + "tmp" + sep;
 	}
 
 	/**
@@ -528,27 +551,6 @@ public class ArtConfig extends HttpServlet {
 		} else {
 			return true;
 		}
-	}
-
-	/**
-	 * Determine if query results should be shown on parameters page
-	 *
-	 * @return <code>true</code> if query results should be shown on parameters
-	 * page
-	 */
-	public static boolean isShowResultsInline() {
-		return BooleanUtils.toBoolean(as.getSetting("show_results_inline"));
-	}
-
-	/**
-	 * Determine if art.properties file is available and settings have been
-	 * loaded.
-	 *
-	 * @return <code>true</code> if file is available and settings have been
-	 * loaded correctly. <code>false</code> otherwise.
-	 */
-	public static boolean isArtSettingsLoaded() {
-		return artSettingsLoaded; // is false if art.properties is not defined
 	}
 
 	/**
@@ -660,16 +662,6 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get an ART setting as defined in the art.properties file
-	 *
-	 * @param key setting name
-	 * @return setting value
-	 */
-	public static String getArtSetting(String key) {
-		return as.getSetting(key);
-	}
-
-	/**
 	 * Get a DataSource object.
 	 *
 	 * @param i id of the datasource
@@ -689,7 +681,8 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Properly close connections in the dataSources connection pool
+	 * Properly close connections in the dataSources connection pool and clear
+	 * the datasources list
 	 */
 	private static void clearConnections() {
 		if (dataSources != null) {
@@ -991,7 +984,23 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	private static void createQuartzScheduler() {
+		if (artDatabaseConfiguration == null) {
+			logger.warn("ART Database configuration not available");
+			return;
+		}
+
+		//prepare quartz scheduler properties
+		QuartzProperties qp = new QuartzProperties();
+
+		qp.setPropertiesFilePath(webinfPath + sep + "classes" + sep + "quartz.properties");
+		qp.setDataSourceDriver(artDatabaseConfiguration.getDriver());
+		qp.setDataSourceUrl(artDatabaseConfiguration.getUrl());
+		qp.setDataSourceUsername(artDatabaseConfiguration.getUsername());
+		qp.setDataSourcePassword(artDatabaseConfiguration.getPassword());
+
 		try {
+			Properties props = qp.getProperties();
+
 			//shutdown existing scheduler instance
 			if (scheduler != null) {
 				scheduler.shutdown();
@@ -999,29 +1008,23 @@ public class ArtConfig extends HttpServlet {
 			}
 
 			//create new scheduler instance
-			QuartzProperties qp = new QuartzProperties();
-			Properties props = qp.getProperties();
+			SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
+			scheduler = schedulerFactory.getScheduler();
 
-			if (props == null) {
-				logger.warn("Quartz properties not set. Job scheduling will not be possible");
+			if (settings.isSchedulingEnabled()) {
+				scheduler.start();
 			} else {
-				//start quartz scheduler
-				SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
-				scheduler = schedulerFactory.getScheduler();
-
-				if (settings.isSchedulingEnabled()) {
-					scheduler.start();
-				} else {
-					scheduler.standby();
-				}
+				scheduler.standby();
 			}
-		} catch (SchedulerException e) {
-			logger.error("Error", e);
+
+		} catch (IOException | SchedulerException ex) {
+			logger.error("Error", ex);
 		}
 
 		//migrate existing jobs to quartz, if any exist from previous art versions
 		//quartz scheduler needs to be available
 		ArtJob aj = new ArtJob();
+
 		aj.migrateJobsToQuartz();
 	}
 
@@ -1140,7 +1143,9 @@ public class ArtConfig extends HttpServlet {
 			File customSettingsFile = new File(customSettingsFilePath);
 			if (customSettingsFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
-				newCustomSettings = mapper.readValue(customSettingsFile, CustomSettings.class);
+				newCustomSettings
+						= mapper.readValue(customSettingsFile, CustomSettings.class
+						);
 			}
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -1162,6 +1167,37 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static CustomSettings getCustomSettings() {
 		return customSettings;
+	}
+
+	/**
+	 * Create art work directories
+	 */
+	private void createWorkDirectories() {
+		makeDirectory(getTemplatesPath());
+		makeDirectory(getArtTempPath());
+		makeDirectory(getJobsExportPath());
+		makeDirectory(getReportsExportPath());
+	}
+
+	/**
+	 * Create a directory given a full path
+	 *
+	 * @param directoryPath
+	 */
+	private void makeDirectory(String directoryPath) {
+		if (directoryPath == null) {
+			return;
+		}
+
+		File directory = new File(directoryPath);
+
+		if (!directory.exists()) {
+			boolean created = directory.mkdirs();
+			if (!created) {
+				logger.warn("Directory not created: {}", directory);
+			}
+		}
+
 	}
 
 }

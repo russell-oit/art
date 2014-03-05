@@ -13,16 +13,20 @@ Edit report page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addReport" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/addReport.do"/>
 	</c:when>
 	<c:when test="${action == 'copy'}">
 		<spring:message code="page.title.copyReport" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/copyReport.do"/>
 	</c:when>
 	<c:otherwise>
 		<spring:message code="page.title.editReport" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/editReport.do"/>
 	</c:otherwise>
 </c:choose>
 
@@ -76,7 +80,7 @@ Edit report page
 	</jsp:attribute>
 
 	<jsp:body>
-		<form:form class="form-horizontal" method="POST" action="" modelAttribute="report">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="report">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -88,7 +92,7 @@ Edit report page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
+						<p>${encode:forHtmlContent(error)}</p>
 					</div>
 				</c:if>
 
@@ -97,8 +101,11 @@ Edit report page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action != 'add'}">
-							<form:input path="userGroupId" readonly="true" class="form-control"/>
+						<c:if test="${action == 'edit'}">
+							<form:input path="reportId" readonly="true" class="form-control"/>
+						</c:if>
+						<c:if test="${action == 'copy'}">
+							<form:hidden path="reportId"/>
 						</c:if>
 					</div>
 				</div>
@@ -118,17 +125,42 @@ Edit report page
 					<div class="col-md-8">
 						<form:select path="reportGroup" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+								<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>
 						<form:errors path="reportGroup" cssClass="error"/>
 					</div>
 				</div>
-					<div class="form-group">
+				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="reports.text.status"/>
+					</label>
+					<div class="col-md-8">
+						<c:forEach var="reportStatus" items="${reportStatuses}">
+							<label class="radio-inline">
+								<form:radiobutton path="reportStatus"
+												  value="${reportStatus}"/>
+								<spring:message code="${reportStatus.localisedDescription}"/>
+							</label>
+						</c:forEach>
+						<form:errors path="reportStatus" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
 					<label class="col-md-4 control-label " for="shortDescription">
 						<spring:message code="reports.label.shortDescription"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="shortDescription" maxlength="250" class="form-control"/>
+						<div class="input-group">
+							<form:input path="shortDescription" maxlength="250" class="form-control"/>
+							<spring:message code="reports.help.shortDescription" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
 						<form:errors path="shortDescription" cssClass="error"/>
 					</div>
 				</div>
@@ -139,6 +171,27 @@ Edit report page
 					<div class="col-md-8">
 						<form:textarea path="description" rows="2" cols="40" class="form-control"/>
 						<form:errors path="description" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="contactPerson">
+						<spring:message code="reports.label.contactPerson"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="contactPerson" maxlength="20" class="form-control"/>
+						<form:errors path="contactPerson" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="reportType">
+						<spring:message code="reports.label.reportType"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="reportType" items="${reportType}"
+									 itemLabel="description" itemValue="value" 
+									 class="form-control"
+									 />
+						<form:errors path="reportType" cssClass="error"/>
 					</div>
 				</div>
 
