@@ -157,7 +157,7 @@ public class ArtJob implements Job, Serializable {
 	 * the ART repository (Connection c).
 	 */
 	public ArtJob() {
-		exportPath = ArtConfig.getExportPath();
+		exportPath = ArtConfig.getExportDirectory();
 	}
 
 	/**
@@ -2118,7 +2118,7 @@ public class ArtJob implements Job, Serializable {
 						if (archiveFileName != null && !archiveFileName.startsWith("-")) {
 							List<String> details = ArtUtils.getFileDetailsFromResult(archiveFileName);
 							archiveFileName = details.get(0);
-							String filePath = ArtConfig.getJobsPath() + archiveFileName;
+							String filePath = ArtConfig.getJobsExportDirectory() + archiveFileName;
 							File previousFile = new File(filePath);
 							if (previousFile.exists()) {
 								previousFile.delete();
@@ -3728,7 +3728,7 @@ public class ArtJob implements Job, Serializable {
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
 							List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 							oldFileName = details.get(0);
-							String filePath = ArtConfig.getJobsPath() + oldFileName;
+							String filePath = ArtConfig.getJobsExportDirectory() + oldFileName;
 							File previousFile = new File(filePath);
 							if (previousFile.exists()) {
 								previousFile.delete();
@@ -3763,7 +3763,7 @@ public class ArtJob implements Job, Serializable {
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
 							List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 							oldFileName = details.get(0);
-							String filePath = ArtConfig.getJobsPath() + oldFileName;
+							String filePath = ArtConfig.getJobsExportDirectory() + oldFileName;
 							File previousFile = new File(filePath);
 							if (previousFile.exists()) {
 								previousFile.delete();
@@ -3832,7 +3832,7 @@ public class ArtJob implements Job, Serializable {
 				if (oldFileName != null && !oldFileName.startsWith("-")) {
 					List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 					oldFileName = details.get(0);
-					String filePath = ArtConfig.getJobsPath() + oldFileName;
+					String filePath = ArtConfig.getJobsExportDirectory() + oldFileName;
 					File previousFile = new File(filePath);
 					if (previousFile.exists()) {
 						boolean deleted = previousFile.delete();

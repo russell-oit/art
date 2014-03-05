@@ -63,7 +63,7 @@ public class ArtConfig extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(ArtConfig.class);
-	private static String exportPath;
+	private static String exportDirectory;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static boolean artSettingsLoaded = false;
 	private static ArtSettings as;
@@ -71,11 +71,9 @@ public class ArtConfig extends HttpServlet {
 	private static final ArrayList<String> allReportFormats = new ArrayList<String>(); //all report formats
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
-	private static String artPropertiesFilePath; //full path to art.properties file
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
-	private static boolean customExportPath = false; //to enable custom export path
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
 	private static ArtDatabase artDatabaseConfiguration;
@@ -83,6 +81,7 @@ public class ArtConfig extends HttpServlet {
 	private static Settings settings;
 	private static final String sep = java.io.File.separator;
 	private static CustomSettings customSettings;
+	private static String workDirectory;
 
 	/**
 	 * {@inheritDoc}
@@ -163,17 +162,46 @@ public class ArtConfig extends HttpServlet {
 		//set web-inf path
 		webinfPath = appPath + sep + "WEB-INF" + sep;
 
-		//set export path
-		exportPath = appPath + sep + "export" + sep;
+		//load custom settings
+		loadCustomSettings();
+		
+		//set show errors custom setting
+		ctx.setAttribute("showErrors", customSettings.isShowErrors());
 
-		//set art.properties file path
-		artPropertiesFilePath = webinfPath + "art.properties";
+		//set work directory base path
+		workDirectory = webinfPath + sep + "work" + sep; //default work directory
+
+		String customWorkDirectory = customSettings.getWorkDirectory();
+		if (StringUtils.isNotBlank(customWorkDirectory)) {
+			//custom work directory defined
+			workDirectory = customWorkDirectory;
+			if (!StringUtils.right(workDirectory, 1).equals(sep)) {
+				workDirectory = workDirectory + sep;
+			}
+
+			logger.info("Using custom work directory: '{}'", workDirectory);
+		}
+
+		//set export path
+		exportDirectory = workDirectory + "export" + sep; //default
+
+		//set custom export path
+		String customExportDirectory = customSettings.getExportDirectory();
+		if (StringUtils.isNotBlank(customExportDirectory)) {
+			//custom export directory defined
+			exportDirectory = customExportDirectory;
+			if (!StringUtils.right(exportDirectory, 1).equals(sep)) {
+				exportDirectory = exportDirectory + sep;
+			}
+
+			logger.info("Using custom export directory: '{}'", exportDirectory);
+		}
 
 		//set art-database file path
-		artDatabaseFilePath = webinfPath + "art-database.json";
+		artDatabaseFilePath = workDirectory + "art-database.json";
 
 		//set settings file path
-		settingsFilePath = webinfPath + "art-settings.json";
+		settingsFilePath = workDirectory + "art-settings.json";
 
 		//populate all report formats list
 		allReportFormats.add("tsvGz");
@@ -195,51 +223,8 @@ public class ArtConfig extends HttpServlet {
 		//load settings and initialize variables
 		loadSettings();
 
-		//load custom settings
-		loadCustomSettings();
-
-		//set show errors custom setting
-		ctx.setAttribute("showErrors", customSettings.isShowErrors());
-
-		//set custom export path
-		String customExportPath = customSettings.getCustomExportPath();
-		if (StringUtils.isNotBlank(customExportPath)) {
-			//custom export path defined
-			exportPath = customExportPath;
-			if (!StringUtils.right(exportPath, 1).equals(sep)) {
-				exportPath = exportPath + sep;
-			}
-			ArtConfig.customExportPath = true;
-
-			logger.info("Using custom export path: '{}'", exportPath);
-		}
-
 		//initialize datasources
 		initializeDatasources();
-	}
-
-	/**
-	 * Load art.properties file and initialize variables
-	 *
-	 * @return <code>true</code> if file found. <code>false</code> otherwise.
-	 */
-	public static boolean loadArtSettings() {
-		//TODO remove this method once refactoring is complete
-		logger.debug("Loading art settings");
-
-		as = new ArtSettings();
-
-		if (as.load(artPropertiesFilePath)) {
-			// settings defined
-
-			artSettingsLoaded = true;
-
-		} else {
-			artSettingsLoaded = false;
-		}
-
-		return artSettingsLoaded;
-
 	}
 
 	/**
@@ -473,17 +458,26 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @return full path to the export directory
 	 */
-	public static String getExportPath() {
-		return exportPath;
+	public static String getExportDirectory() {
+		return exportDirectory;
 	}
 
 	/**
-	 * Get full path to the jobs directory.
+	 * Get full path to the jobs export directory.
 	 *
-	 * @return full path to the jobs directory
+	 * @return full path to the jobs export directory
 	 */
-	public static String getJobsPath() {
-		return exportPath + "jobs" + sep;
+	public static String getJobsExportDirectory() {
+		return exportDirectory + "jobs" + sep;
+	}
+	
+	/**
+	 * Get full path to the reports export directory.
+	 *
+	 * @return full path to the reports export directory
+	 */
+	public static String getReportsExportDirectory() {
+		return exportDirectory + "reports" + sep;
 	}
 
 	/**
@@ -492,7 +486,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the templates directory
 	 */
 	public static String getTemplatesPath() {
-		return webinfPath + "templates" + sep;
+		return workDirectory + "templates" + sep;
 	}
 
 	/**
@@ -501,7 +495,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the templates directory
 	 */
 	public static String getArtTempPath() {
-		return webinfPath + "tmp" + sep;
+		return workDirectory + "tmp" + sep;
 	}
 
 	/**
@@ -511,7 +505,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return relative path to the templates directory
 	 */
 	public static String getRelativeTemplatesPath() {
-		return "/WEB-INF/templates/";
+		return "/WEB-INF/work/templates/";
 	}
 
 	/**
@@ -521,15 +515,6 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static String getAppPath() {
 		return appPath;
-	}
-
-	/**
-	 * Get the full path to the art.properties file
-	 *
-	 * @return the full path to the art.properties file
-	 */
-	public static String getSettingsFilePath() {
-		return artPropertiesFilePath;
 	}
 
 	/**
@@ -553,15 +538,6 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static boolean isShowResultsInline() {
 		return BooleanUtils.toBoolean(as.getSetting("show_results_inline"));
-	}
-
-	/**
-	 * Determine if a custom export path is in use
-	 *
-	 * @return <code>true</code> if a custom export path is in use
-	 */
-	public static boolean isCustomExportPath() {
-		return customExportPath;
 	}
 
 	/**

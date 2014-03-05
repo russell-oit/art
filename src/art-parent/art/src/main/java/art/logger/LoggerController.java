@@ -66,9 +66,9 @@ public class LoggerController {
 		return it.hasNext();
 	}
 
-	@RequestMapping(value = "/app/deleteLogger", method = RequestMethod.POST)
+	@RequestMapping(value = "/app/disableLogger", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteLogger(@RequestParam("name") String name) {
+	AjaxResponse disableLogger(@RequestParam("name") String name) {
 		AjaxResponse response = new AjaxResponse();
 
 		ch.qos.logback.classic.Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(name);

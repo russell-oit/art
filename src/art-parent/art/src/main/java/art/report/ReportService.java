@@ -305,7 +305,7 @@ public class ReportService {
 				DbUtils.close(ps);
 			}
 		} finally {
-			DbUtils.close(conn);
+			DbUtils.close(ps, conn);
 		}
 	}
 
@@ -434,7 +434,7 @@ public class ReportService {
 			conn = ArtConfig.getConnection();
 			// Delete Old SQL Source
 			String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
-			try{
+			try {
 				DbUtils.update(conn, ps, sql, reportId);
 			} finally {
 				DbUtils.close(ps);

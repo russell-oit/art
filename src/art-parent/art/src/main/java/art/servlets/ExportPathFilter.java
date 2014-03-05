@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.servlets;
 
@@ -45,33 +44,29 @@ public class ExportPathFilter implements Filter {
 	public void doFilter(ServletRequest arg0, ServletResponse arg1,
 			FilterChain arg2) throws IOException, ServletException {
 
-		if (ArtConfig.isCustomExportPath()) {
-			HttpServletRequest request = (HttpServletRequest) arg0;
-			String requestUri = request.getRequestURI();
-			File requestPath = new File(requestUri);
+		HttpServletRequest request = (HttpServletRequest) arg0;
+		String requestUri = request.getRequestURI();
+		File requestPath = new File(requestUri);
 
-			String filename = URLDecoder.decode(requestPath.getName(), "UTF-8");
-			if (requestUri.contains("/export/jobs/")) {
-				filename = ArtConfig.getJobsPath() + filename;
-			} else {
-				filename = ArtConfig.getExportPath() + filename;
-			}
-			File file = new File(filename);
-
-			FileInputStream fs = new FileInputStream(file);
-			OutputStream os = arg1.getOutputStream();
-			try {
-				IOUtils.copyLarge(fs, os);
-			} finally {
-				IOUtils.closeQuietly(fs);
-				try {
-					os.flush();
-				} catch (IOException e) {
-					logger.debug("Error flushing stream ", e);
-				}
-			}
+		String filename = URLDecoder.decode(requestPath.getName(), "UTF-8");
+		if (requestUri.contains("/export/jobs/")) {
+			filename = ArtConfig.getJobsExportDirectory() + filename;
 		} else {
-			arg2.doFilter(arg0, arg1);
+			filename = ArtConfig.getReportsExportDirectory() + filename;
+		}
+		File file = new File(filename);
+
+		FileInputStream fs = new FileInputStream(file);
+		OutputStream os = arg1.getOutputStream();
+		try {
+			IOUtils.copyLarge(fs, os);
+		} finally {
+			IOUtils.closeQuietly(fs);
+			try {
+				os.flush();
+			} catch (IOException e) {
+				logger.debug("Error flushing stream ", e);
+			}
 		}
 	}
 

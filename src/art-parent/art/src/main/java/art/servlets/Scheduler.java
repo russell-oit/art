@@ -133,7 +133,7 @@ public class Scheduler extends HttpServlet {
 		if (ArtConfig.isArtSettingsLoaded()) {
 			try {
 				// Delete old files in the export directory
-				File exportFiles = new File(ArtConfig.getExportPath());
+				File exportFiles = new File(ArtConfig.getExportDirectory());
 				File[] fileNames = exportFiles.listFiles();
 				long lastModified;
 				long actualTime = new Date().getTime();

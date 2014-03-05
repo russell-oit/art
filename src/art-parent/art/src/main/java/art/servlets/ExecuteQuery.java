@@ -126,7 +126,7 @@ public class ExecuteQuery extends HttpServlet {
 		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 
 		ServletContext ctx = getServletConfig().getServletContext();
-		String baseExportPath = ArtConfig.getExportPath();
+		String baseExportPath = ArtConfig.getExportDirectory();
 		HttpSession session = request.getSession();
 		String username = (String) session.getAttribute("username");
 

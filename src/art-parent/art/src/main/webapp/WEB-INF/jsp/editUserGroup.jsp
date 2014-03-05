@@ -17,11 +17,11 @@ Edit user group page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addUserGroup" var="pageTitle"/>
-		<c:url var="formUrl" value="/app/addUserGroup.do"/>
+		<spring:url var="formUrl" value="/app/addUserGroup.do"/>
 	</c:when>
 	<c:otherwise>
 		<spring:message code="page.title.editUserGroup" var="pageTitle"/>
-		<c:url var="formUrl" value="/app/editUserGroup.do"/>
+		<spring:url var="formUrl" value="/app/editUserGroup.do"/>
 	</c:otherwise>
 </c:choose>
 

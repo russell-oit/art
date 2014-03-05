@@ -100,9 +100,9 @@ Display current loggers
 						<td>${encode:forHtmlContent(logger.level)}</td>
 						<td>
 							<div class="btn-group">
-								<c:url var="editUrl" value="/app/editLogger.do">
-									<c:param name="name" value="${logger.name}"/>
-								</c:url>
+								<spring:url var="editUrl" value="/app/editLogger.do">
+									<spring:param name="name" value="${logger.name}"/>
+								</spring:url>
 								<a class="btn btn-default" href="${editUrl}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>

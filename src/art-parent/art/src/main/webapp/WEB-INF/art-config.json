@@ -1,5 +1,6 @@
 {
 	"showErrors": true,
 	"enableDirectParameterSubstitution" : false,
-	"customExportPath" : ""
+	"exportDirectory" : "",
+	"workDirectory" : ""
 }
