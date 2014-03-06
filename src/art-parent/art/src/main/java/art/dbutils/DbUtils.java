@@ -174,6 +174,11 @@ public class DbUtils {
 	 * @throws SQLException
 	 */
 	public static ResultSet query(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
+		if (conn == null) {
+			logger.warn("Connection not available");
+			return null;
+		}
+
 		ps = conn.prepareStatement(sql);
 		setValues(ps, values);
 
@@ -191,6 +196,11 @@ public class DbUtils {
 	 * @throws SQLException
 	 */
 	public static int update(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
+		if (conn == null) {
+			logger.warn("Connection not available");
+			return 0;
+		}
+
 		ps = conn.prepareStatement(sql);
 		setValues(ps, values);
 

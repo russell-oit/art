@@ -20,6 +20,7 @@ import art.dbutils.DbService;
 import art.report.AvailableReport;
 import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
+import art.enums.AccessLevel;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,7 +52,7 @@ public class DatasourceService {
 	@Autowired
 	private DbService dbService;
 
-	private final String SQL_SELECT = "SELECT * FROM ART_DATABASES";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_DATABASES";
 
 	/**
 	 * Class to map resultset to an object
@@ -60,7 +61,7 @@ public class DatasourceService {
 
 		@Override
 		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
-			List<T> list = new ArrayList<T>();
+			List<T> list = new ArrayList<>();
 			while (rs.next()) {
 				list.add(toBean(rs, type));
 			}
@@ -97,7 +98,7 @@ public class DatasourceService {
 	@Cacheable("datasources")
 	public List<Datasource> getAllDatasources() throws SQLException {
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<Datasource>(Datasource.class, new DatasourceMapper());
-		return dbService.query(SQL_SELECT, h);
+		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class DatasourceService {
 	 */
 	@Cacheable("datasources")
 	public Datasource getDatasource(int id) throws SQLException {
-		String sql = SQL_SELECT + " WHERE DATABASE_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE DATABASE_ID = ? ";
 		ResultSetHandler<Datasource> h = new BeanHandler<Datasource>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h, id);
 	}
@@ -282,7 +283,33 @@ public class DatasourceService {
 		}
 
 		return reports;
+	}
 
+	/**
+	 * Get datasources that an admin can use, according to his access level
+	 *
+	 * @param userId
+	 * @param accessLevel
+	 * @return
+	 * @throws SQLException
+	 */
+	public List<Datasource> getAdminDatasources(int userId, AccessLevel accessLevel) throws SQLException {
+		if(accessLevel==null){
+			return new ArrayList<>();
+		}
+		
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
+		if (accessLevel.getValue() >= AccessLevel.StandardAdmin.getValue()) {
+			//standard admins and above can work with everything
+			return dbService.query(SQL_SELECT_ALL, h);
+		} else {
+			String sql = "SELECT AD.*"
+					+ " FROM ART_DATABASES AD, ART_ADMIN_PRIVILEGES AAP "
+					+ " WHERE AD.DATABASE_ID = AAP.VALUE_ID "
+					+ " AND AAP.PRIVILEGE = 'DB' "
+					+ " AND AAP.USER_ID = ?";
+			return dbService.query(sql, h, userId);
+		}
 	}
 
 }

@@ -3744,6 +3744,7 @@ public class ArtJob implements Job, Serializable {
 						+ " WHERE JOB_ID=?"
 						+ " ORDER BY START_DATE DESC";
 
+				ps.close();
 				ps = conn.prepareStatement(sql);
 				ps.setInt(1, jobId);
 

@@ -149,7 +149,7 @@
 			<artifactId>artmail</artifactId>
 			<version>2.0-SNAPSHOT</version>
 		</dependency>
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
@@ -259,6 +259,12 @@
 			<version>1.0</version>
 			<type>pom</type>
 			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>taglibs</groupId>
+					<artifactId>standard</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- jpivot specific dependencies -->
 		<!-- art needs/uses commons-beanutils-1.8.3 -->
@@ -325,6 +331,12 @@
 			<groupId>jcifs</groupId>
 			<artifactId>jcifs</artifactId>
 			<version>1.3.17</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hsqldb</groupId>

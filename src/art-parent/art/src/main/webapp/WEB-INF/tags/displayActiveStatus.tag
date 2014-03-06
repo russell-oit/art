@@ -16,6 +16,7 @@ Display the active status of a record
 <%@attribute name="active" type="java.lang.Boolean" required="true" %>
 <%@attribute name="activeText" %>
 <%@attribute name="disabledText" %>
+<%@attribute name="hideActive" type="java.lang.Boolean" %>
 
 <%-- any content can be specified here e.g.: --%>
 <c:if test="${empty activeText}">
@@ -27,9 +28,11 @@ Display the active status of a record
 
 <c:choose>
 	<c:when test="${active}">
-		<span class="label label-success">
-			${activeText}
-		</span>
+		<c:if test="${!hideActive}">
+			<span class="label label-success">
+				${activeText}
+			</span>
+		</c:if>
 	</c:when>
 	<c:otherwise>
 		<span class="label label-danger">

@@ -321,15 +321,15 @@ public class DataSource implements TimerListener {
 		Connection conn = null;
 
 		if (!jndi) {
-			logger.debug("t == null ={}", t == null);
+			logger.debug("(t == null) = {}", t == null);
 			if (t == null) {
 				startTimer();
 			}
 			conn = getConnectionFromPool(); // is an EnanchedConnection object
 		} else {
-			logger.debug("url != null = {}", url != null);
+			logger.debug("(url != null) = {}", url != null);
 			if (url != null) {
-				logger.debug("jndiDatasource == null ={}", jndiDatasource == null);
+				logger.debug("(jndiDatasource == null) = {}", jndiDatasource == null);
 				if (jndiDatasource == null) {
 					InitialContext ic = new InitialContext();
 					logger.debug("url='{}'", url);

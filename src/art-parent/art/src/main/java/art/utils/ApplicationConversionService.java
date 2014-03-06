@@ -18,6 +18,7 @@
 
 package art.utils;
 
+import art.datasource.StringToDatasource;
 import art.reportgroup.StringToReportGroup;
 import art.usergroup.StringToUserGroup;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -39,6 +40,7 @@ public class ApplicationConversionService extends DefaultFormattingConversionSer
 		//add custom formatters and converters
 		addConverter(new StringToUserGroup());
 		addConverter(new StringToReportGroup());
+		addConverter(new StringToDatasource());
 		
 		
 		//TODO reinstate

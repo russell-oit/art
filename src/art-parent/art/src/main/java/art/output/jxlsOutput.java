@@ -156,7 +156,7 @@ public class jxlsOutput {
 					//pass connection to template query
 
 					//use dynamic datasource if so configured
-					boolean useDynamicDatasource = false;
+					String dynamicDatasource = null; //id or name of dynamic datasource
 
 					if (htmlParams != null) {
 						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
@@ -169,14 +169,7 @@ public class jxlsOutput {
 								if (paramValueObject != null) {
 									String paramValue = (String) paramValueObject;
 									if (StringUtils.isNotBlank(paramValue)) {
-										useDynamicDatasource = true;
-										if (NumberUtils.isNumber(paramValue)) {
-											//use datasource id
-											connQuery = ArtConfig.getConnection(Integer.parseInt(paramValue));
-										} else {
-											//use datasource name
-											connQuery = ArtConfig.getConnection(paramValue);
-										}
+										dynamicDatasource = paramValue;
 									}
 								}
 								break;
@@ -184,7 +177,15 @@ public class jxlsOutput {
 						}
 					}
 
-					if (!useDynamicDatasource) {
+					if (dynamicDatasource != null) {
+						if (NumberUtils.isNumber(dynamicDatasource)) {
+							//use datasource id
+							connQuery = ArtConfig.getConnection(Integer.parseInt(dynamicDatasource));
+						} else {
+							//use datasource name
+							connQuery = ArtConfig.getConnection(dynamicDatasource);
+						}
+					} else {
 						//not using dynamic datasource. use datasource defined on the query
 						connQuery = ArtConfig.getConnection(datasourceId);
 					}

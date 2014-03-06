@@ -125,7 +125,7 @@ Edit report page
 					<div class="col-md-8">
 						<form:select path="reportGroup" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-								<option data-divider="true"></option>
+							<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>
 						<form:errors path="reportGroup" cssClass="error"/>
@@ -187,11 +187,29 @@ Edit report page
 						<spring:message code="reports.label.reportType"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="reportType" items="${reportType}"
-									 itemLabel="description" itemValue="value" 
-									 class="form-control"
-									 />
+						<form:select path="reportType" class="form-control selectpicker">
+							<form:options items="${reportTypes}"
+										  itemLabel="description" itemValue="value"/>
+							<c:forEach begin="1" end="5" varStatus="loop">
+								<form:option value="${loop.index}">Group: ${loop.index} columns</form:option>
+							</c:forEach>
+						</form:select>
 						<form:errors path="reportType" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="datasource">
+						<spring:message code="reports.label.datasource"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="datasource" class="form-control selectpicker">
+							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+							<option data-divider="true"></option>
+							<c:forEach var="datasource" items="${datasources}">
+								<form:option value="${datasource.datasourceId}" label="${datasource.name}"/>
+							</c:forEach>
+						</form:select>
+						<form:errors path="datasource" cssClass="error"/>
 					</div>
 				</div>
 

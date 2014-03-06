@@ -216,13 +216,17 @@ public class UserGroupService {
 
 		int newId = 0;
 
-		Connection conn = null;
+		Connection conn = ArtConfig.getConnection();
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		PreparedStatement psInsert = null;
+		
+		if (conn == null) {
+			logger.warn("Connection to the ART Database not available");
+			return 0;
+		}
 
 		try {
-			conn = ArtConfig.getConnection();
 			//generate new id
 			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
 			rs = DbUtils.query(conn, ps, sql);

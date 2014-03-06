@@ -16,6 +16,8 @@
  */
 package art.report;
 
+import art.datasource.DatasourceService;
+import art.enums.AccessLevel;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroupService;
@@ -55,6 +57,9 @@ public class ReportController {
 
 	@Autowired
 	private ReportGroupService reportGroupService;
+
+	@Autowired
+	private DatasourceService datasourceService;
 
 	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
 	public String showReports(HttpSession session,
@@ -112,6 +117,9 @@ public class ReportController {
 
 	@RequestMapping(value = "/app/reportsConfig", method = RequestMethod.GET)
 	public String showReportsConfig(Model model) {
+		model.addAttribute("activeStatus", ReportStatus.Active.getValue());
+		model.addAttribute("disabledStatus", ReportStatus.Disabled.getValue());
+
 		try {
 			model.addAttribute("reports", reportService.getAllReports());
 		} catch (SQLException ex) {
@@ -139,18 +147,19 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.GET)
-	public String addReport(Model model) {
+	public String addReport(Model model, HttpSession session) {
 		model.addAttribute("report", new Report());
-		return showReport("add", model);
+		return showReport("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.POST)
 	public String addReport(@ModelAttribute("report") @Valid Report report,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReport("add", model);
+			return showReport("add", model, session);
 		}
 
 		try {
@@ -162,11 +171,12 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport("add", model);
+		return showReport("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
-	public String editReport(@RequestParam("id") Integer id, Model model) {
+	public String editReport(@RequestParam("id") Integer id, Model model,
+			HttpSession session) {
 
 		try {
 			model.addAttribute("report", reportService.getReport(id));
@@ -175,16 +185,17 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport("edit", model);
+		return showReport("edit", model, session);
 	}
 
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.POST)
 	public String editReport(@ModelAttribute("report") @Valid Report report,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReport("edit", model);
+			return showReport("edit", model, session);
 		}
 
 		try {
@@ -196,7 +207,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport("edit", model);
+		return showReport("edit", model, session);
 	}
 
 	/**
@@ -207,11 +218,17 @@ public class ReportController {
 	 * @param session
 	 * @return
 	 */
-	private String showReport(String action, Model model) {
+	private String showReport(String action, Model model, HttpSession session) {
 		try {
-			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			int userId = sessionUser.getUserId();
+			AccessLevel accessLevel = sessionUser.getAccessLevel();
+
+			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(userId, accessLevel));
 			model.addAttribute("reportStatuses", ReportStatus.list());
 			model.addAttribute("reportTypes", ReportType.list());
+
+			model.addAttribute("datasources", datasourceService.getAdminDatasources(userId, accessLevel));
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

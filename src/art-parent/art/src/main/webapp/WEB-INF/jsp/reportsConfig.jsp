@@ -142,7 +142,25 @@ Reports configuration page
 											   updateDate="${report.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(report.description)}</td>
-						<td><spring:message code="${report.reportStatus.localisedDescription}"/></td>
+						<td>
+							<c:choose>
+								<c:when test="${report.reportStatus.value == activeStatus}">
+									<span class="label label-success">
+										<spring:message code="${report.reportStatus.localisedDescription}"/>
+									</span>
+								</c:when>
+								<c:when test="${report.reportStatus.value == disabledStatus}">
+									<span class="label label-danger">
+										<spring:message code="${report.reportStatus.localisedDescription}"/>
+									</span>
+								</c:when>
+								<c:otherwise>
+									<span class="label label-default">
+										<spring:message code="${report.reportStatus.localisedDescription}"/>
+									</span>
+								</c:otherwise>
+							</c:choose>
+						</td>
 						<td>
 							<div class="btn-report">
 								<a class="btn btn-default" 

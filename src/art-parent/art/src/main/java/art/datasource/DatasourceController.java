@@ -90,8 +90,7 @@ public class DatasourceController {
 	}
 
 	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.GET)
-	public String addDatasourceGet(Model model
-	) {
+	public String addDatasourceGet(Model model) {
 		Datasource datasource = new Datasource();
 
 		//set defaults
@@ -105,8 +104,7 @@ public class DatasourceController {
 	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.POST)
 	public String addDatasourcePost(@ModelAttribute("datasource")
 			@Valid Datasource datasource,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes
-	) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
@@ -135,9 +133,7 @@ public class DatasourceController {
 	}
 
 	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
-	public String editDatasourceGet(@RequestParam("id") Integer id, Model model
-	) {
-
+	public String editDatasourceGet(@RequestParam("id") Integer id, Model model) {
 		try {
 			model.addAttribute("datasource", datasourceService.getDatasource(id));
 		} catch (SQLException ex) {

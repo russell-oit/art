@@ -373,7 +373,7 @@ public class Mailer {
 		msg.setFrom(new InternetAddress(from));
 
 		// Set the TO: address(es)
-		logger.debug("tos != null = {}", tos != null);
+		logger.debug("(tos != null) = {}", tos != null);
 		if (tos != null) {
 			logger.debug("tos.length={}", tos.length);
 			InternetAddress[] addressTo = new InternetAddress[tos.length];
@@ -384,7 +384,7 @@ public class Mailer {
 		}
 
 		// Set the CC: address(es)
-		logger.debug("ccs != null = {}", ccs != null);
+		logger.debug("(ccs != null) = {}", ccs != null);
 		if (ccs != null) {
 			logger.debug("ccs.length={}", ccs.length);
 			InternetAddress[] addressCc = new InternetAddress[ccs.length];
@@ -395,7 +395,7 @@ public class Mailer {
 		}
 
 		// Set the BCC: address(es)
-		logger.debug("bccs != null = {}", bccs != null);
+		logger.debug("(bccs != null) = {}", bccs != null);
 		if (bccs != null) {
 			logger.debug("bccs.length={}", bccs.length);
 			InternetAddress[] addressBcc = new InternetAddress[bccs.length];
@@ -412,7 +412,7 @@ public class Mailer {
 		//add attachments if available
 		logger.debug("message='{}'", message);
 		logger.debug("messageType='{}'", messageType);
-		logger.debug("attachments == null = {}", attachments == null);
+		logger.debug("(attachments == null) = {}", attachments == null);
 		if (attachments == null) {
 			msg.setContent(message, messageType);
 		} else {

@@ -23,7 +23,7 @@ Includes bootstrap css, font awesome css, art css
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="UTF-8">
 
 		<title>${title}</title>
 
@@ -56,7 +56,7 @@ Includes bootstrap css, font awesome css, art css
 			</div>
 			<div id="push"></div>
 		</div>
-
+		
 		<jsp:invoke fragment="footer"/>
 
 		<!-- javascript placed at the end of the document so that pages load faster -->

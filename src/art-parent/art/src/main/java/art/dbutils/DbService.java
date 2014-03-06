@@ -22,6 +22,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,6 +33,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DbService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
 	 * Execute an sql statement that doesn't return a resultset
@@ -43,11 +47,15 @@ public class DbService {
 	public int update(String sql, Object... values) throws SQLException {
 		int affectedRows = 0;
 
-		Connection conn = null;
+		Connection conn = ArtConfig.getConnection();
 		PreparedStatement ps = null;
+		
+		if (conn == null) {
+			logger.warn("Connection to the ART Database not available");
+			return 0;
+		}
 
 		try {
-			conn = ArtConfig.getConnection();
 			affectedRows = DbUtils.update(conn, ps, sql, values);
 		} finally {
 			DbUtils.close(ps, conn);
@@ -82,12 +90,15 @@ public class DbService {
 	 * @throws SQLException
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-		Connection conn = null;
+		Connection conn = ArtConfig.getConnection();
+		
+		if (conn == null) {
+			logger.warn("Connection to the ART Database not available");
+			return null;
+		}
 
 		try {
-			conn = ArtConfig.getConnection();
 			QueryRunner run = new QueryRunner();
-
 			return run.query(conn, sql, rsh, params);
 		} finally {
 			DbUtils.close(conn);

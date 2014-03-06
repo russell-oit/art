@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.output;
 
@@ -204,11 +203,8 @@ public class jasperOutput {
 				String settingsFilePath = ArtConfig.getAppPath() + sep + "WEB-INF" + sep + "classes" + sep + "jasperreports.properties";
 				File settingsFile = new File(settingsFilePath);
 				if (settingsFile.exists()) {
-					FileInputStream o = new FileInputStream(settingsFilePath);
-					try {
+					try (FileInputStream o = new FileInputStream(settingsFilePath)) {
 						props.load(o);
-					} finally {
-						o.close();
 					}
 				}
 
@@ -241,23 +237,29 @@ public class jasperOutput {
 
 				//use virtualizer if required
 				if (!props.getProperty(VIRTUALIZER).equals("none")) {
-					if (props.getProperty(VIRTUALIZER).equals("file")) {
-						int maxSize = Integer.parseInt(props.getProperty(FILE_MAX_SIZE));
-						tmpVirtualizer = new JRFileVirtualizer(maxSize, System.getProperty("java.io.tmpdir"));
-						params.put(JRParameter.REPORT_VIRTUALIZER, tmpVirtualizer);
-					} else if (props.getProperty(VIRTUALIZER).equals("gzip")) {
-						int maxSize = Integer.parseInt(props.getProperty(GZIP_MAX_SIZE));
-						tmpVirtualizer = new JRGzipVirtualizer(maxSize);
-						params.put(JRParameter.REPORT_VIRTUALIZER, tmpVirtualizer);
-					} else {
-						//use swap virtualizer by default
-						int maxSize = Integer.parseInt(props.getProperty(SWAP_MAX_SIZE));
-						int blockSize = Integer.parseInt(props.getProperty(SWAP_BLOCK_SIZE));
-						int minGrowCount = Integer.parseInt(props.getProperty(SWAP_MIN_GROW_COUNT));
-
-						JRSwapFile swapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), blockSize, minGrowCount);
-						tmpVirtualizer = new JRSwapFileVirtualizer(maxSize, swapFile);
-						params.put(JRParameter.REPORT_VIRTUALIZER, tmpVirtualizer);
+					switch (props.getProperty(VIRTUALIZER)) {
+						case "file": {
+							int maxSize = Integer.parseInt(props.getProperty(FILE_MAX_SIZE));
+							tmpVirtualizer = new JRFileVirtualizer(maxSize, System.getProperty("java.io.tmpdir"));
+							params.put(JRParameter.REPORT_VIRTUALIZER, tmpVirtualizer);
+							break;
+						}
+						case "gzip": {
+							int maxSize = Integer.parseInt(props.getProperty(GZIP_MAX_SIZE));
+							tmpVirtualizer = new JRGzipVirtualizer(maxSize);
+							params.put(JRParameter.REPORT_VIRTUALIZER, tmpVirtualizer);
+							break;
+						}
+						default: {
+							//use swap virtualizer by default
+							int maxSize = Integer.parseInt(props.getProperty(SWAP_MAX_SIZE));
+							int blockSize = Integer.parseInt(props.getProperty(SWAP_BLOCK_SIZE));
+							int minGrowCount = Integer.parseInt(props.getProperty(SWAP_MIN_GROW_COUNT));
+							JRSwapFile swapFile = new JRSwapFile(System.getProperty("java.io.tmpdir"), blockSize, minGrowCount);
+							tmpVirtualizer = new JRSwapFileVirtualizer(maxSize, swapFile);
+							params.put(JRParameter.REPORT_VIRTUALIZER, tmpVirtualizer);
+							break;
+						}
 					}
 				}
 
@@ -267,7 +269,7 @@ public class jasperOutput {
 					//use template query
 
 					//use dynamic datasource if so configured
-					boolean useDynamicDatasource = false;
+					String dynamicDatasource = null; //id or name of dynamic datasource
 
 					if (htmlParams != null) {
 						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
@@ -280,14 +282,7 @@ public class jasperOutput {
 								if (paramValueObject != null) {
 									String paramValue = (String) paramValueObject;
 									if (StringUtils.isNotBlank(paramValue)) {
-										useDynamicDatasource = true;
-										if (NumberUtils.isNumber(paramValue)) {
-											//use datasource id
-											connQuery = ArtConfig.getConnection(Integer.parseInt(paramValue));
-										} else {
-											//use datasource name
-											connQuery = ArtConfig.getConnection(paramValue);
-										}
+										dynamicDatasource = paramValue;
 									}
 								}
 								break;
@@ -295,7 +290,15 @@ public class jasperOutput {
 						}
 					}
 
-					if (!useDynamicDatasource) {
+					if (dynamicDatasource != null) {
+						if (NumberUtils.isNumber(dynamicDatasource)) {
+							//use datasource id
+							connQuery = ArtConfig.getConnection(Integer.parseInt(dynamicDatasource));
+						} else {
+							//use datasource name
+							connQuery = ArtConfig.getConnection(dynamicDatasource);
+						}
+					} else {
 						//not using dynamic datasource. use datasource defined on the query
 						connQuery = ArtConfig.getConnection(datasourceId);
 					}
@@ -430,7 +433,7 @@ public class jasperOutput {
 				public void visitSubreport(JRSubreport subreport) {
 					try {
 						String subreportName = subreport.getExpression().getText().replace("\"", ""); //file name is quoted
-						subreportName=StringUtils.substringBeforeLast(subreportName, ".");
+						subreportName = StringUtils.substringBeforeLast(subreportName, ".");
 						//Sometimes the same subreport can be used multiple times, but
 						//there is no need to compile multiple times
 						if (completedSubReports.contains(subreportName)) {

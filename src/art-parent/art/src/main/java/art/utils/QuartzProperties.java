@@ -124,6 +124,8 @@ public class QuartzProperties {
 	 * @throws IOException
 	 */
 	public Properties getProperties() throws IOException {
+		logger.debug("Entering getProperties");
+		
 		Properties props = new Properties();
 
 		//quartz property names
@@ -138,6 +140,7 @@ public class QuartzProperties {
 		final String DATASOURCE_NAME = "org.quartz.jobStore.dataSource";
 
 		//load properties from quartz properties file if it exists
+		logger.debug("propertiesFilePath='{}", propertiesFilePath);
 		if (propertiesFilePath != null) {
 			File quartzFile = new File(propertiesFilePath);
 			if (quartzFile.exists()) {

@@ -83,7 +83,7 @@ public class EnhancedConnection implements Connection {
 
 		inUseCount--;
 
-		logger.debug("inUseCount == 0={}", inUseCount == 0);
+		logger.debug("inUseCount={}", inUseCount);
 		if (inUseCount == 0) {
 			// close any open statement / prepared statement
 			logger.debug("openStatements.size()={}", openStatements.size());

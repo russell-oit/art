@@ -27,7 +27,8 @@ import java.util.List;
  */
 public enum ReportType {
 
-	Tabular(0), Group1(1), Group2(2), Group3(3), Group4(4), Group5(5),
+	//group reports (1-99) are too many to list
+	Tabular(0), 
 	Update(100), Crosstab(101), CrosstabHtml(102), TabularHtml(103),
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerCube(114),
 	JasperReportTemplate(115), JasperReportArt(116), jXLSTemplate(117), jXLSArt(118),
@@ -115,16 +116,6 @@ public enum ReportType {
 		switch (this) {
 			case Tabular:
 				return "Tabular";
-			case Group1:
-				return "Group: 1 column";
-			case Group2:
-				return "Group: 2 columns";
-			case Group3:
-				return "Group: 3 columns";
-			case Group4:
-				return "Group: 4 columns";
-			case Group5:
-				return "Group: 5 columns";
 			case Update:
 				return "Update Statement";
 			case Crosstab:

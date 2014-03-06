@@ -30,8 +30,6 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * JQuery DataTables html output mode
@@ -40,7 +38,6 @@ import org.slf4j.LoggerFactory;
  */
 public class htmlDataTableOutput implements ArtOutputInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger(htmlDataTableOutput.class);
 	PrintWriter out;
 	int numberOfLines;
 	int maxRows;
