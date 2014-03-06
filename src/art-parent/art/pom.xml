@@ -200,8 +200,12 @@
 			<version>1.2.1</version>
 			<exclusions>
 				<exclusion>
-					<groupId>javax.servlet.jsp.jstl</groupId>
-					<artifactId>jstl-api</artifactId>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet.jsp</groupId>
+					<artifactId>jsp-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -259,12 +263,6 @@
 			<version>1.0</version>
 			<type>pom</type>
 			<scope>runtime</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>taglibs</groupId>
-					<artifactId>standard</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<!-- jpivot specific dependencies -->
 		<!-- art needs/uses commons-beanutils-1.8.3 -->

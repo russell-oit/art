@@ -15,11 +15,15 @@
 	</appender>
 
 	<logger name="org.quartz">
-		<level value="info" />
+		<level value="info"/>
 	</logger>
 	
 	<logger name="art">
-		<level value="info" />
+		<level value="info"/>
+	</logger>
+	
+	<logger name="org.apache.jasper.compiler.TldLocationsCache">
+		<level value="debug"/>
 	</logger>
 
 	<root>

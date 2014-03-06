@@ -33,12 +33,7 @@
 			<groupId>groovy</groupId>
 			<artifactId>groovy-all-1.0-jsr</artifactId>
 			<version>03</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.1.2</version>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>jaxen</groupId>
 			<artifactId>jaxen</artifactId>
@@ -58,12 +53,7 @@
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
 			<version>1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>taglibs</groupId>
-			<artifactId>standard</artifactId>
-			<version>1.1.2</version>
-		</dependency>
+		</dependency>		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
