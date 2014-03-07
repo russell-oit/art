@@ -123,10 +123,12 @@ Edit report page
 						<spring:message code="reports.label.reportGroup"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="reportGroup" class="form-control selectpicker">
+						<form:select path="reportGroup.reportGroupId" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-							<option data-divider="true"></option>
-							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
+								<option data-divider="true"></option>
+							<c:forEach var="group" items="${reportGroups}">
+								<form:option value="${group.reportGroupId}">${group.name}</form:option>
+							</c:forEach>
 						</form:select>
 						<form:errors path="reportGroup" cssClass="error"/>
 					</div>
@@ -202,14 +204,69 @@ Edit report page
 						<spring:message code="reports.label.datasource"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="datasource" class="form-control selectpicker">
+						<form:select path="datasource.datasourceId" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-							<option data-divider="true"></option>
+								<option data-divider="true"></option>
 							<c:forEach var="datasource" items="${datasources}">
-								<form:option value="${datasource.datasourceId}" label="${datasource.name}"/>
+								<c:set var="datasourceStatus">
+									<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
+								</c:set>
+								<form:option value="${datasource.datasourceId}"
+											 data-content="${datasource.name} ${datasourceStatus}">
+									${datasource.name} 
+								</form:option>
 							</c:forEach>
 						</form:select>
 						<form:errors path="datasource" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="usesRules">
+						<spring:message code="reports.label.usesRules"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="usesRules" id="usesRules"/>
+						</div>
+						<form:errors path="usesRules" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="showParameters">
+						<spring:message code="reports.label.showParameters"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<div class="checkbox">
+								<form:checkbox path="showParameters" id="showParameters"/>
+							</div>
+							<spring:message code="reports.help.showParameters" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="showParameters" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="displayResultset">
+						<spring:message code="reports.label.displayResultset"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="displayResultset" maxlength="2" class="form-control"/>
+							<spring:message code="reports.help.displayResultset" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="displayResultset" cssClass="error"/>
 					</div>
 				</div>
 

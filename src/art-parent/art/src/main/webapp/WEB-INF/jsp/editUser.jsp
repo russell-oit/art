@@ -192,7 +192,6 @@ Display edit user page
 									 itemLabel="description" 
 									 class="form-control selectpicker"/>
 						<div class="text-right">
-							<!-- TODO use correct link -->
 							<a href="${pageContext.request.contextPath}/docs/manual.htm">
 								<spring:message code="page.link.help"/>
 							</a>
