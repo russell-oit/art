@@ -146,7 +146,16 @@ public class UserGroupService {
 
 		if (newId > 0) {
 			group.setUserGroupId(newId);
-			saveUserGroup(group, true);
+			try {
+				saveUserGroup(group, true);
+			} catch (SQLException ex) {
+				//delete placeholder for new record
+				logger.debug("Deleting placeholder for new record");
+				deleteUserGroup(newId);
+
+				//rethrow exception
+				throw ex;
+			}
 		} else {
 			logger.warn("Add failed. Allocate new ID failed. group={}", group);
 		}
@@ -220,7 +229,7 @@ public class UserGroupService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		PreparedStatement psInsert = null;
-		
+
 		if (conn == null) {
 			logger.warn("Connection to the ART Database not available");
 			return 0;

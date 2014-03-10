@@ -74,7 +74,7 @@ Display user groups
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
 											
-											msg = alertCloseButton + "${recordDeletedText}";
+											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											
 											$.notify("${recordDeletedText}", "success");

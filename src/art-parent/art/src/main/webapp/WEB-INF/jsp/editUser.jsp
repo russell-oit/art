@@ -159,7 +159,7 @@ Display edit user page
 						<spring:message code="users.label.email"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="email" maxlength="40" class="form-control"/>
+						<form:input type="email" path="email" maxlength="40" class="form-control"/>
 						<form:errors path="email" cssClass="error"/>
 					</div>
 				</div>

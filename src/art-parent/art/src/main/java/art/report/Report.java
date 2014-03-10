@@ -38,9 +38,9 @@ public class Report implements Serializable {
 	private ReportGroup reportGroup;
 	private Datasource datasource;
 	private String contactPerson;
-	private boolean usesRules;
+	private boolean useRules;
 	private ReportStatus reportStatus;
-	private boolean showParameters;
+	private boolean parametersInOutput;
 	private String xAxisLabel;
 	private String yAxisLabel;
 	private String graphOptions;
@@ -54,6 +54,25 @@ public class Report implements Serializable {
 	private Date creationDate;
 	private Date updateDate;
 	private String reportSource;
+	private boolean useBlankXmlaPassword;
+
+	/**
+	 * Get the value of useBlankXmlaPassword
+	 *
+	 * @return the value of useBlankXmlaPassword
+	 */
+	public boolean isUseBlankXmlaPassword() {
+		return useBlankXmlaPassword;
+	}
+
+	/**
+	 * Set the value of useBlankXmlaPassword
+	 *
+	 * @param useBlankXmlaPassword new value of useBlankXmlaPassword
+	 */
+	public void setUseBlankXmlaPassword(boolean useBlankXmlaPassword) {
+		this.useBlankXmlaPassword = useBlankXmlaPassword;
+	}
 
 	/**
 	 * Get the value of reportSource
@@ -186,17 +205,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the usesRules
+	 * @return the useRules
 	 */
-	public boolean isUsesRules() {
-		return usesRules;
+	public boolean isUseRules() {
+		return useRules;
 	}
 
 	/**
-	 * @param usesRules the usesRules to set
+	 * @param useRules the useRules to set
 	 */
-	public void setUsesRules(boolean usesRules) {
-		this.usesRules = usesRules;
+	public void setUseRules(boolean useRules) {
+		this.useRules = useRules;
 	}
 
 	/**
@@ -214,17 +233,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the showParameters
+	 * @return the parametersInOutput
 	 */
-	public boolean isShowParameters() {
-		return showParameters;
+	public boolean isParametersInOutput() {
+		return parametersInOutput;
 	}
 
 	/**
-	 * @param showParameters the showParameters to set
+	 * @param parametersInOutput the parametersInOutput to set
 	 */
-	public void setShowParameters(boolean showParameters) {
-		this.showParameters = showParameters;
+	public void setParametersInOutput(boolean parametersInOutput) {
+		this.parametersInOutput = parametersInOutput;
 	}
 
 	/**

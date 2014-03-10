@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -147,15 +148,16 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.GET)
-	public String addReport(Model model, HttpSession session) {
+	public String addReportGet(Model model, HttpSession session) {
 		model.addAttribute("report", new Report());
 		return showReport("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.POST)
-	public String addReport(@ModelAttribute("report") @Valid Report report,
+	public String addReportPost(@ModelAttribute("report") @Valid Report report,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session) {
+			HttpSession session,
+			@RequestParam("templateFileData") CommonsMultipartFile templateFileData) {
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
@@ -175,7 +177,7 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
-	public String editReport(@RequestParam("id") Integer id, Model model,
+	public String editReportGet(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
 
 		try {
@@ -189,7 +191,7 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.POST)
-	public String editReport(@ModelAttribute("report") @Valid Report report,
+	public String editReportPost(@ModelAttribute("report") @Valid Report report,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 

@@ -80,7 +80,7 @@ Edit report page
 	</jsp:attribute>
 
 	<jsp:body>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="report">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="report" enctype="multipart/form-data">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -221,34 +221,25 @@ Edit report page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="usesRules">
-						<spring:message code="reports.label.usesRules"/>
+					<label class="control-label col-md-4" for="useRules">
+						<spring:message code="reports.label.useRules"/>
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="usesRules" id="usesRules"/>
+							<form:checkbox path="useRules" id="useRules"/>
 						</div>
-						<form:errors path="usesRules" cssClass="error"/>
+						<form:errors path="useRules" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="showParameters">
-						<spring:message code="reports.label.showParameters"/>
+					<label class="control-label col-md-4" for="parametersInOutput">
+						<spring:message code="reports.label.parametersInOutput"/>
 					</label>
 					<div class="col-md-8">
-						<div class="input-group">
-							<div class="checkbox">
-								<form:checkbox path="showParameters" id="showParameters"/>
-							</div>
-							<spring:message code="reports.help.showParameters" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
+						<div class="checkbox">
+							<form:checkbox path="parametersInOutput" id="parametersInOutput"/>
 						</div>
-						<form:errors path="showParameters" cssClass="error"/>
+						<form:errors path="parametersInOutput" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -269,7 +260,98 @@ Edit report page
 						<form:errors path="displayResultset" cssClass="error"/>
 					</div>
 				</div>
-
+				<div class="form-group">
+					<label class="control-label col-md-4" for="xAxisLabel">
+						<spring:message code="reports.label.xAxisLabel"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="xAxisLabel" maxlength="50" class="form-control"/>
+						<form:errors path="xAxisLabel" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="yAxisLabel">
+						<spring:message code="reports.label.yAxisLabel"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="yAxisLabel" maxlength="50" class="form-control"/>
+						<form:errors path="yAxisLabel" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="template">
+						<spring:message code="reports.label.template"/>
+					</label>
+					<div class="col-md-8">
+						<div>
+							<form:input path="template" maxlength="100" class="form-control"/>
+							<form:errors path="template" cssClass="error"/>
+						</div>
+						<div>
+							<input type="file" name="templateFileData" id="templateFileData" class="form-control"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="xmlaUrl">
+						<spring:message code="reports.label.xmlaUrl"/>
+					</label>
+					<div class="col-md-8">
+						<form:input type="url" path="xmlaUrl" maxlength="2000" class="form-control"/>
+						<form:errors path="xmlaUrl" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="xmlaDatasource">
+						<spring:message code="reports.label.xmlaDatasource"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="xmlaDatasource" maxlength="50" class="form-control"/>
+						<form:errors path="xmlaDatasource" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="xmlaCatalog">
+						<spring:message code="reports.label.xmlaCatalog"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="xmlaCatalog" maxlength="50" class="form-control"/>
+						<form:errors path="xmlaCatalog" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="xmlaUsername">
+						<spring:message code="reports.label.xmlaUsername"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="xmlaUsername" maxlength="50" class="form-control"/>
+						<form:errors path="xmlaUsername" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="xmlaPassword">
+						<spring:message code="reports.label.xmlaPassword"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:password path="xmlaPassword" autocomplete="off" maxlength="50" class="form-control" />
+							<spring:message code="page.help.password" var="help" />
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<div class="checkbox">
+							<label>
+								<form:checkbox path="useBlankXmlaPassword"/>
+								<spring:message code="page.checkbox.useBlankPassword"/>
+							</label>
+						</div>
+						<form:errors path="xmlaPassword" cssClass="error"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

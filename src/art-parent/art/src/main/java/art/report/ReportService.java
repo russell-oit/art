@@ -53,8 +53,6 @@ public class ReportService {
 	@Autowired
 	private DbService dbService;
 
-	private final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
-
 	private final String SQL_SELECT_ALL = "SELECT AQ.*, "
 			+ " AQG.NAME AS GROUP_NAME, AD.NAME AS DATASOURCE_NAME"
 			+ " FROM ART_QUERIES AQ"
@@ -98,9 +96,9 @@ public class ReportService {
 			report.setDatasource(datasource);
 
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
-			report.setUsesRules(rs.getBoolean("USES_RULES"));
+			report.setUseRules(rs.getBoolean("USE_RULES"));
 			report.setReportStatus(ReportStatus.toEnum(rs.getString("REPORT_STATUS")));
-			report.setShowParameters(rs.getBoolean("SHOW_PARAMETERS"));
+			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
 			report.setGraphOptions(rs.getString("GRAPH_OPTIONS"));
@@ -363,8 +361,8 @@ public class ReportService {
 
 		String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 				+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
-				+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_RULES=?, "
-				+ " REPORT_STATUS=?, SHOW_PARAMETERS=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
+				+ " DATABASE_ID=?, CONTACT_PERSON=?, USE_RULES=?, "
+				+ " REPORT_STATUS=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 				+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
 				+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
 				+ " XMLA_USERNAME=?, XMLA_PASSWORD=?,"
@@ -395,9 +393,9 @@ public class ReportService {
 			reportGroupId,
 			datasourceId,
 			report.getContactPerson(),
-			report.isUsesRules(),
+			report.isUseRules(),
 			reportStatus,
-			report.isShowParameters(),
+			report.isParametersInOutput(),
 			report.getxAxisLabel(),
 			report.getyAxisLabel(),
 			report.getGraphOptions(),
@@ -450,6 +448,8 @@ public class ReportService {
 			if (reportSource == null) {
 				reportSource = "";
 			}
+			
+			final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
 
 			int start = 0;
 			int end = SOURCE_CHUNK_LENGTH;
