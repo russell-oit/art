@@ -60,6 +60,26 @@ public class Settings {
 	private int mondrianCacheExpiryPeriod;
 	private boolean schedulingEnabled = true;
 	private String rssLink;
+	private long maxFileUploadSize;
+
+	/**
+	 * Get the value of maxFileUploadSize
+	 *
+	 * @return the value of maxFileUploadSize
+	 */
+	public long getMaxFileUploadSize() {
+		return maxFileUploadSize;
+	}
+
+	/**
+	 * Set the value of maxFileUploadSize
+	 *
+	 * @param maxFileUploadSize new value of maxFileUploadSize
+	 */
+	public void setMaxFileUploadSize(long maxFileUploadSize) {
+		this.maxFileUploadSize = maxFileUploadSize;
+	}
+
 
 	/**
 	 * Get the value of useLdapAnonymousBind

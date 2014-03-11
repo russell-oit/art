@@ -34,11 +34,14 @@ import art.utils.UpgradeHelper;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +56,7 @@ public class Scheduler extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
-	static long INTERVAL_MINUTES = 5; // run clean every x minutes
+	static long INTERVAL_MINUTES = 10; // run clean every x minutes
 	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
 	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
 	long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
@@ -146,12 +149,28 @@ public class Scheduler extends HttpServlet {
 		File directory = new File(directoryPath);
 		File[] files = directory.listFiles();
 		long limit = System.currentTimeMillis() - INTERVAL_DELETE_FILES;
+
+		//only delete expected file types
+		List<String> validExtensions = new ArrayList<>();
+		validExtensions.add("xml");
+		validExtensions.add("pdf");
+		validExtensions.add("xls");
+		validExtensions.add("xlsx");
+		validExtensions.add("html");
+		validExtensions.add("zip");
+		validExtensions.add("slk");
+		validExtensions.add("gz");
+		validExtensions.add("tsv");
+
 		for (File file : files) {
 			// Delete the file if it is older than INTERVAL_DELETE_FILES
 			if (FileUtils.isFileOlder(file, limit)) {
-				boolean deleted = FileUtils.deleteQuietly(file);
-				if (!deleted) {
-					logger.warn("File not deleted: {}", file);
+				String extension = FilenameUtils.getExtension(file.getName()).toLowerCase();
+				if (file.isDirectory() || validExtensions.contains(extension)) {
+					boolean deleted = FileUtils.deleteQuietly(file);
+					if (!deleted) {
+						logger.warn("File not deleted: {}", file);
+					}
 				}
 			}
 		}

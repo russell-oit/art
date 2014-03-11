@@ -753,6 +753,24 @@ Settings configuration page
 							<form:errors path="rssLink" cssClass="error"/>
 						</div>
 					</div>
+						<div class="form-group">
+						<label class="control-label col-md-5" for="maxFileUploadSize">
+							<spring:message code="settings.label.maxFileUploadSize"/>
+						</label>
+						<div class="col-md-7">
+							<div class="input-group">
+								<form:input path="maxFileUploadSize" maxlength="6" class="form-control"/>
+								<spring:message code="settings.help.maxFileUploadSize" var="help"/>
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<form:errors path="maxFileUploadSize" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<div class="form-group">

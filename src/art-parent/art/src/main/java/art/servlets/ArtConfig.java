@@ -157,8 +157,8 @@ public class ArtConfig extends HttpServlet {
 		ctx.setAttribute("servletApiSupported", ctx.getMajorVersion() + "." + ctx.getMinorVersion());
 		ctx.setAttribute("javaVendor", System.getProperty("java.vendor"));
 		ctx.setAttribute("javaVersion", System.getProperty("java.version"));
-		ctx.setAttribute("operatingSystem", System.getProperty("os.name") + "/"
-				+ System.getProperty("os.version") + "/" + System.getProperty("os.arch"));
+		ctx.setAttribute("operatingSystem", System.getProperty("os.name") + " / "
+				+ System.getProperty("os.version") + " / " + System.getProperty("os.arch"));
 
 		//set application path
 		appPath = ctx.getRealPath("");
@@ -1041,6 +1041,10 @@ public class ArtConfig extends HttpServlet {
 	private static void setSettingsDefaults(Settings pSettings) {
 		if (pSettings == null) {
 			return;
+		}
+		
+		if(pSettings.getMaxFileUploadSize()==0){
+			pSettings.setMaxFileUploadSize(5);
 		}
 
 		if (pSettings.getSmtpPort() <= 0) {

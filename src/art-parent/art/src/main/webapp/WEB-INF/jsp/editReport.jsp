@@ -33,10 +33,17 @@ Edit report page
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
+<spring:message code="reports.text.selectFile" var="selectFileText"/>
+<spring:message code="reports.text.change" var="changeText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/jasny-bootstrap-file-input-3.1.0.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-file-input-3.1.0.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
@@ -93,6 +100,12 @@ Edit report page
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
 						<p>${encode:forHtmlContent(error)}</p>
+					</div>
+				</c:if>
+				<c:if test="${not empty message}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="${message}"/>
 					</div>
 				</c:if>
 
@@ -287,8 +300,26 @@ Edit report page
 							<form:input path="template" maxlength="100" class="form-control"/>
 							<form:errors path="template" cssClass="error"/>
 						</div>
+						<div class="fileinput fileinput-new" data-provides="fileinput">
+							<span class="btn btn-default btn-file">
+								<span class="fileinput-new">${selectFileText}</span>
+								<span class="fileinput-exists">${changeText}</span>
+								<input type="file" name="templateFile">
+							</span>
+							<span class="fileinput-filename"></span>
+							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+						</div>
 						<div>
-							<input type="file" name="templateFileData" id="templateFileData" class="form-control"/>
+							Subreport
+						</div>
+						<div class="fileinput fileinput-new" data-provides="fileinput">
+							<span class="btn btn-default btn-file">
+								<span class="fileinput-new">${selectFileText}</span>
+								<span class="fileinput-exists">${changeText}</span>
+								<input type="file" name="subreportFile">
+							</span>
+							<span class="fileinput-filename"></span>
+							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
 						</div>
 					</div>
 				</div>
