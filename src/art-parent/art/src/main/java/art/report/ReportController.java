@@ -26,12 +26,9 @@ import art.user.User;
 import art.utils.AjaxResponse;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -174,12 +171,12 @@ public class ReportController {
 
 		try {
 			String saveFileMessage;
-			saveFileMessage = saveFile(templateFile, report);
+			saveFileMessage = saveFile(templateFile, report); //update report template property
 			if (saveFileMessage != null) {
 				model.addAttribute("message", saveFileMessage);
 				return showReport("add", model, session);
 			}
-			saveFileMessage = saveFile(subreportFile, report);
+			saveFileMessage = saveFile(subreportFile);
 			if (saveFileMessage != null) {
 				model.addAttribute("message", saveFileMessage);
 				return showReport("add", model, session);
@@ -224,12 +221,12 @@ public class ReportController {
 
 		try {
 			String saveFileMessage;
-			saveFileMessage = saveFile(templateFile, report);
+			saveFileMessage = saveFile(templateFile, report); //update report template property
 			if (saveFileMessage != null) {
 				model.addAttribute("message", saveFileMessage);
 				return showReport("edit", model, session);
 			}
-			saveFileMessage = saveFile(subreportFile, report);
+			saveFileMessage = saveFile(subreportFile);
 			if (saveFileMessage != null) {
 				model.addAttribute("message", saveFileMessage);
 				return showReport("edit", model, session);
@@ -274,6 +271,25 @@ public class ReportController {
 		return "editReport";
 	}
 
+	/**
+	 * Save file
+	 *
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	private String saveFile(MultipartFile file) throws IOException {
+		return saveFile(file, null);
+	}
+
+	/**
+	 * Save file and update report template property with the file name
+	 *
+	 * @param file
+	 * @param report
+	 * @return
+	 * @throws IOException
+	 */
 	private String saveFile(MultipartFile file, Report report) throws IOException {
 		//check upload file type
 		List<String> validExtensions = new ArrayList<>();
@@ -291,7 +307,7 @@ public class ReportController {
 			String filename = file.getOriginalFilename();
 			String extension = FilenameUtils.getExtension(filename).toLowerCase();
 
-			if (maxUploadSize > 0 && uploadSize > maxUploadSize) {
+			if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //0 means no uploads allowed
 				return "reports.message.fileBiggerThanMax";
 			}
 
@@ -304,7 +320,9 @@ public class ReportController {
 			File destinationFile = new File(destinationFilename);
 			file.transferTo(destinationFile);
 
-			report.setTemplate(filename);
+			if (report != null) {
+				report.setTemplate(filename);
+			}
 		}
 
 		return null;

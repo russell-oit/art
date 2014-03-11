@@ -1043,10 +1043,6 @@ public class ArtConfig extends HttpServlet {
 			return;
 		}
 		
-		if(pSettings.getMaxFileUploadSize()==0){
-			pSettings.setMaxFileUploadSize(5);
-		}
-
 		if (pSettings.getSmtpPort() <= 0) {
 			pSettings.setSmtpPort(25);
 		}

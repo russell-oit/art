@@ -60,14 +60,14 @@ public class Settings {
 	private int mondrianCacheExpiryPeriod;
 	private boolean schedulingEnabled = true;
 	private String rssLink;
-	private long maxFileUploadSize;
+	private int maxFileUploadSize=5;
 
 	/**
 	 * Get the value of maxFileUploadSize
 	 *
 	 * @return the value of maxFileUploadSize
 	 */
-	public long getMaxFileUploadSize() {
+	public int getMaxFileUploadSize() {
 		return maxFileUploadSize;
 	}
 
@@ -76,7 +76,7 @@ public class Settings {
 	 *
 	 * @param maxFileUploadSize new value of maxFileUploadSize
 	 */
-	public void setMaxFileUploadSize(long maxFileUploadSize) {
+	public void setMaxFileUploadSize(int maxFileUploadSize) {
 		this.maxFileUploadSize = maxFileUploadSize;
 	}
 
