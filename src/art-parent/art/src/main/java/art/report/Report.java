@@ -43,7 +43,7 @@ public class Report implements Serializable {
 	private boolean parametersInOutput;
 	private String xAxisLabel;
 	private String yAxisLabel;
-	private String graphOptions;
+	private String chartOptionsSetting;
 	private String template;
 	private int displayResultset;
 	private String xmlaUrl;
@@ -55,6 +55,25 @@ public class Report implements Serializable {
 	private Date updateDate;
 	private String reportSource;
 	private boolean useBlankXmlaPassword;
+	private ChartOptions chartOptions;
+
+	/**
+	 * Get the value of chartOptions
+	 *
+	 * @return the value of chartOptions
+	 */
+	public ChartOptions getChartOptions() {
+		return chartOptions;
+	}
+
+	/**
+	 * Set the value of chartOptions
+	 *
+	 * @param chartOptions new value of chartOptions
+	 */
+	public void setChartOptions(ChartOptions chartOptions) {
+		this.chartOptions = chartOptions;
+	}
 
 	/**
 	 * Get the value of useBlankXmlaPassword
@@ -275,17 +294,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the graphOptions
+	 * @return the chartOptionsSetting
 	 */
-	public String getGraphOptions() {
-		return graphOptions;
+	public String getChartOptionsSetting() {
+		return chartOptionsSetting;
 	}
 
 	/**
-	 * @param graphOptions the graphOptions to set
+	 * @param chartOptionsSetting the chartOptionsSetting to set
 	 */
-	public void setGraphOptions(String graphOptions) {
-		this.graphOptions = graphOptions;
+	public void setChartOptionsSetting(String chartOptionsSetting) {
+		this.chartOptionsSetting = chartOptionsSetting;
 	}
 
 	/**

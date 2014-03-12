@@ -49,7 +49,6 @@
 						<source>${jdk.version}</source>
 						<target>${jdk.version}</target>
 						<debug>true</debug>
-						<debuglevel>source,lines,vars</debuglevel>
 						<showWarnings>true</showWarnings>
 						<showDeprecation>true</showDeprecation>
 					</configuration>

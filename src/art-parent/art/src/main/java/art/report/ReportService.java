@@ -21,6 +21,7 @@ import art.dbutils.DbService;
 import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
 import art.enums.ReportStatus;
+import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,11 +29,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +105,7 @@ public class ReportService {
 			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
-			report.setGraphOptions(rs.getString("GRAPH_OPTIONS"));
+			report.setChartOptionsSetting(rs.getString("GRAPH_OPTIONS"));
 			report.setTemplate(rs.getString("TEMPLATE"));
 			report.setDisplayResultset(rs.getInt("DISPLAY_RESULTSET"));
 			report.setXmlaUrl(rs.getString("XMLA_URL"));
@@ -113,7 +117,111 @@ public class ReportService {
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 
+			setChartOptions(report);
+
 			return type.cast(report);
+		}
+
+		/**
+		 * Set display options for graphs
+		 *
+		 * @param optionsString
+		 * @param usingShortDescription
+		 */
+		private void setChartOptions(Report report) {
+
+			ChartOptions chartOptions = new ChartOptions();
+
+			String optionsString;
+			boolean usingShortDescription;
+			if (report.getChartOptionsSetting() == null) {
+				//to support legacy configurations where options were saved in short description field
+				usingShortDescription = true;
+				optionsString = report.getShortDescription();
+			} else {
+				usingShortDescription = false;
+				optionsString = report.getChartOptionsSetting();
+			}
+
+			if (optionsString == null) {
+				report.setChartOptions(new ChartOptions());
+				return;
+			}
+
+			int index;
+			index = optionsString.lastIndexOf("@");
+
+			if (usingShortDescription || index > -1) {
+				//set default for showlegend. false for heat maps. true for all other graphs
+				ReportType reportType = ReportType.toEnum(report.getReportType());
+				if (reportType == ReportType.Heatmap) {
+					chartOptions.setShowLegend(false);
+				} else {
+					chartOptions.setShowLegend(true);
+				}
+				//set default for showlabels. true for pie charts. false for all other graphs
+				if (reportType == ReportType.Pie2D || reportType == ReportType.Pie3D) {
+					chartOptions.setShowLabels(true);
+				} else {
+					chartOptions.setShowLabels(false);
+				}
+			}
+
+			String options;
+			if (index > -1) {
+				//options specified as part of short description. for backward compatibility with pre-2.0
+				options = optionsString.substring(index + 1); //+1 so that the @ is not included in the options string
+			} else {
+				if (usingShortDescription) {
+					//no @ symbol so graph options not specified in short description
+					options = "";
+				} else {
+					options = optionsString;
+				}
+			}
+
+			StringTokenizer st = new StringTokenizer(options.trim(), " ");
+
+			String token;
+			while (st.hasMoreTokens()) {
+				token = st.nextToken();
+
+				if (token.startsWith("rotate_at")) {
+					String tmp = StringUtils.substringAfter(token, ":");
+					chartOptions.setRotateAt(NumberUtils.toInt(tmp));
+				} else if (token.startsWith("remove_at")) {
+					String tmp = StringUtils.substringAfter(token, ":");
+					chartOptions.setRemoveAt(NumberUtils.toInt(tmp));
+				} else if (token.startsWith("noleg")) {
+					chartOptions.setShowLegend(false);
+				} else if (token.startsWith("showlegend")) {
+					chartOptions.setShowLegend(true);
+				} else if (token.startsWith("nolab")) {
+					chartOptions.setShowLabels(false);
+				} else if (token.startsWith("showlabels")) {
+					chartOptions.setShowLabels(true);
+				} else if (token.startsWith("showpoints")) {
+					chartOptions.setShowPoints(true);
+				} else if (token.startsWith("showdata")) {
+					chartOptions.setShowData(true);
+				} else if (token.indexOf("x") != -1) { //must come after named options e.g. rotate_at
+					int idx = token.indexOf("x");
+					String width = token.substring(0, idx);
+					String height = token.substring(idx + 1);
+					chartOptions.setWidth(NumberUtils.toInt(width));
+					chartOptions.setHeight(NumberUtils.toInt(height));
+				} else if (token.indexOf(":") != -1) { //must come after named options e.g. rotate_at
+					int idx = token.indexOf(":");
+					String yMin = token.substring(0, idx);
+					String yMax = token.substring(idx + 1);
+					chartOptions.setyAxisMin(NumberUtils.toDouble(yMin));
+					chartOptions.setyAxisMax(NumberUtils.toDouble(yMax));
+				} else if (token.startsWith("#")) {
+					chartOptions.setBgColor(token);
+				}
+			}
+
+			report.setChartOptions(chartOptions);
 		}
 	}
 
@@ -398,7 +506,7 @@ public class ReportService {
 			report.isParametersInOutput(),
 			report.getxAxisLabel(),
 			report.getyAxisLabel(),
-			report.getGraphOptions(),
+			report.getChartOptionsSetting(),
 			report.getTemplate(),
 			report.getDisplayResultset(),
 			report.getXmlaUrl(),
@@ -448,7 +556,7 @@ public class ReportService {
 			if (reportSource == null) {
 				reportSource = "";
 			}
-			
+
 			final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
 
 			int start = 0;

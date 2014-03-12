@@ -230,7 +230,7 @@ Edit report page
 								</form:option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="datasource" cssClass="error"/>
+						<form:errors path="datasource.datasourceId" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -291,6 +291,129 @@ Edit report page
 						<form:errors path="yAxisLabel" cssClass="error"/>
 					</div>
 				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="reports.label.show"/>
+					</label>
+					<div class="col-md-8">
+						<label class="checkbox-inline">
+							<form:checkbox path="chartOptions.showLegend" id="showLegend"/>
+							<spring:message code="reports.label.showLegend"/>
+						</label>
+						<label class="checkbox-inline">
+							<form:checkbox path="chartOptions.showLabels" id="showLabels"/>
+							<spring:message code="reports.label.showLabels"/>
+						</label>
+						<label class="checkbox-inline">
+							<form:checkbox path="chartOptions.showPoints" id="showPoints"/>
+							<spring:message code="reports.label.showPoints"/>
+						</label>
+						<label class="checkbox-inline">
+							<form:checkbox path="chartOptions.showData" id="showData"/>
+							<spring:message code="reports.label.showData"/>
+						</label>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="chartOptions.width">
+						<spring:message code="reports.label.width"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="chartOptions.width" maxlength="4" class="form-control"/>
+						<form:errors path="chartOptions.width" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="chartOptions.height">
+						<spring:message code="reports.label.height"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="chartOptions.height" maxlength="4" class="form-control"/>
+						<form:errors path="chartOptions.height" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="chartOptions.bgColor">
+						<spring:message code="reports.label.height"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="chartOptions.bgColor" maxlength="7" class="form-control"/>
+						<form:errors path="chartOptions.bgColor" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="chartOptions.yAxisMin">
+						<spring:message code="reports.label.yAxisMin"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="chartOptions.yAxisMin" maxlength="15" class="form-control"/>
+							<spring:message code="reports.help.yAxisMinMax" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="chartOptions.yAxisMin" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="chartOptions.yAxisMax">
+						<spring:message code="reports.label.yAxisMax"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="chartOptions.yAxisMax" maxlength="15" class="form-control"/>
+							<spring:message code="reports.help.yAxisMinMax" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="chartOptions.yAxisMax" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="chartOptions.rotateAt">
+						<spring:message code="reports.label.rotateAt"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="chartOptions.rotateAt" maxlength="4" class="form-control"/>
+							<spring:message code="reports.help.rotateAt" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="chartOptions.rotateAt" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="chartOptions.removeAt">
+						<spring:message code="reports.label.removeAt"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="chartOptions.removeAt" maxlength="4" class="form-control"/>
+							<spring:message code="reports.help.removeAt" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="chartOptions.removeAt" cssClass="error"/>
+					</div>
+				</div>
+
 				<div class="form-group">
 					<label class="control-label col-md-4" for="template">
 						<spring:message code="reports.label.template"/>

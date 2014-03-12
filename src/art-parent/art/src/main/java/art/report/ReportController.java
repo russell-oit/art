@@ -291,6 +291,11 @@ public class ReportController {
 	 * @throws IOException
 	 */
 	private String saveFile(MultipartFile file, Report report) throws IOException {
+
+		if (file.isEmpty()) {
+			return null;
+		}
+
 		//check upload file type
 		List<String> validExtensions = new ArrayList<>();
 		validExtensions.add("xml");
@@ -302,27 +307,25 @@ public class ReportController {
 		maxUploadSize = maxUploadSize * 1000 * 1000; //size in bytes
 
 		//save template file
-		if (!file.isEmpty()) {
-			long uploadSize = file.getSize();
-			String filename = file.getOriginalFilename();
-			String extension = FilenameUtils.getExtension(filename).toLowerCase();
+		long uploadSize = file.getSize();
+		String filename = file.getOriginalFilename();
+		String extension = FilenameUtils.getExtension(filename).toLowerCase();
 
-			if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //0 means no uploads allowed
-				return "reports.message.fileBiggerThanMax";
-			}
+		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //0 effectively means no uploads allowed
+			return "reports.message.fileBiggerThanMax";
+		}
 
-			if (!validExtensions.contains(extension)) {
-				return "reports.message.invalidFileType";
-			}
+		if (!validExtensions.contains(extension)) {
+			return "reports.message.invalidFileType";
+		}
 
-			//save file
-			String destinationFilename = ArtConfig.getTemplatesPath() + filename;
-			File destinationFile = new File(destinationFilename);
-			file.transferTo(destinationFile);
+		//save file
+		String destinationFilename = ArtConfig.getTemplatesPath() + filename;
+		File destinationFile = new File(destinationFilename);
+		file.transferTo(destinationFile);
 
-			if (report != null) {
-				report.setTemplate(filename);
-			}
+		if (report != null) {
+			report.setTemplate(filename);
 		}
 
 		return null;

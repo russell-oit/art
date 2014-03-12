@@ -138,26 +138,52 @@ public class UserGroupService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
-	public void addUserGroup(UserGroup group) throws SQLException {
+	public synchronized void addUserGroup(UserGroup group) throws SQLException {
 		logger.debug("Entering addUserGroup: group={}", group);
 
-		int newId = allocateNewId();
-		logger.debug("newId={}", newId);
+		Connection conn = ArtConfig.getConnection();
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		PreparedStatement psInsert = null;
 
-		if (newId > 0) {
-			group.setUserGroupId(newId);
-			try {
-				saveUserGroup(group, true);
-			} catch (SQLException ex) {
-				//delete placeholder for new record
-				logger.debug("Deleting placeholder for new record");
-				deleteUserGroup(newId);
+		if (conn == null) {
+			logger.warn("Connection to the ART Database not available");
+			return;
+		}
 
-				//rethrow exception
-				throw ex;
+		try {
+			//generate new id
+			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
+			rs = DbUtils.query(conn, ps, sql);
+			if (rs.next()) {
+				int newId = rs.getInt(1) + 1;
+				logger.debug("newId={}", newId);
+
+				sql = "INSERT INTO ART_USER_GROUPS"
+						+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
+						+ " START_QUERY, CREATION_DATE)"
+						+ " VALUES(?,?,?,?,?,?)";
+
+				Object[] values = {
+					newId,
+					group.getName(),
+					group.getDescription(),
+					group.getDefaultReportGroup(),
+					group.getStartReport(),
+					DbUtils.getCurrentTimeStamp(),};
+
+				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
+				logger.debug("affectedRows={}", affectedRows);
+
+				if (affectedRows != 1) {
+					logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
+				}
+			} else {
+				logger.warn("Could not get max id");
 			}
-		} else {
-			logger.warn("Add failed. Allocate new ID failed. group={}", group);
+		} finally {
+			DbUtils.close(psInsert);
+			DbUtils.close(rs, ps, conn);
 		}
 	}
 
@@ -171,30 +197,8 @@ public class UserGroupService {
 	public void updateUserGroup(UserGroup group) throws SQLException {
 		logger.debug("Entering updateUserGroup: group={}", group);
 
-		saveUserGroup(group, false);
-	}
-
-	/**
-	 * Save a user group
-	 *
-	 * @param group
-	 * @param newRecord true if this is a new record, false otherwise
-	 * @throws SQLException
-	 */
-	private void saveUserGroup(UserGroup group, boolean newRecord) throws SQLException {
-		logger.debug("Entering saveUserGroup: group={}, newRecord={}", group, newRecord);
-
-		String dateColumn;
-
-		if (newRecord) {
-			dateColumn = "CREATION_DATE=?";
-		} else {
-			dateColumn = "UPDATE_DATE=?";
-		}
-
 		String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
-				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-				+ dateColumn
+				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?"
 				+ " WHERE USER_GROUP_ID=?";
 
 		Object[] values = {
@@ -210,66 +214,7 @@ public class UserGroupService {
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-			logger.warn("Problem with save. affectedRows={}, group={}, newRecord={}", group, newRecord);
+			logger.warn("Problem with save. affectedRows={}, group={}", affectedRows,group);
 		}
 	}
-
-	/**
-	 * Generate an id and record for a new item
-	 *
-	 * @return new id generated, 0 otherwise
-	 * @throws SQLException
-	 */
-	private synchronized int allocateNewId() throws SQLException {
-		logger.debug("Entering allocateNewId");
-
-		int newId = 0;
-
-		Connection conn = ArtConfig.getConnection();
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		PreparedStatement psInsert = null;
-
-		if (conn == null) {
-			logger.warn("Connection to the ART Database not available");
-			return 0;
-		}
-
-		try {
-			//generate new id
-			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			rs = DbUtils.query(conn, ps, sql);
-			if (rs.next()) {
-				newId = rs.getInt(1) + 1;
-				logger.debug("newId={}", newId);
-
-				//add dummy record with new id. fill all not null columns
-				//name has unique constraint so use a random default value
-				String allocatingName = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
-				sql = "INSERT INTO ART_USER_GROUPS"
-						+ " (USER_GROUP_ID,NAME)"
-						+ " VALUES(?,?)";
-
-				Object[] values = {
-					newId,
-					allocatingName
-				};
-
-				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
-				logger.debug("affectedRows={}", affectedRows);
-
-				if (affectedRows != 1) {
-					logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
-				}
-			} else {
-				logger.warn("Could not get max id");
-			}
-		} finally {
-			DbUtils.close(psInsert);
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return newId;
-	}
-
 }
