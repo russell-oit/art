@@ -24,6 +24,7 @@ import art.reportgroup.ReportGroupService;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.AjaxResponse;
+import art.utils.Encrypter;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -33,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,15 +172,10 @@ public class ReportController {
 		}
 
 		try {
-			String saveFileMessage;
-			saveFileMessage = saveFile(templateFile, report); //update report template property
-			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
-				return showReport("add", model, session);
-			}
-			saveFileMessage = saveFile(subreportFile);
-			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
+			//finalise report properties
+			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, false);
+			if (prepareReportMessage != null) {
+				model.addAttribute("message", prepareReportMessage);
 				return showReport("add", model, session);
 			}
 
@@ -220,15 +217,10 @@ public class ReportController {
 		}
 
 		try {
-			String saveFileMessage;
-			saveFileMessage = saveFile(templateFile, report); //update report template property
-			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
-				return showReport("edit", model, session);
-			}
-			saveFileMessage = saveFile(subreportFile);
-			if (saveFileMessage != null) {
-				model.addAttribute("message", saveFileMessage);
+			//finalise report properties
+			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, false);
+			if (prepareReportMessage != null) {
+				model.addAttribute("message", prepareReportMessage);
 				return showReport("edit", model, session);
 			}
 
@@ -326,6 +318,140 @@ public class ReportController {
 
 		if (report != null) {
 			report.setTemplate(filename);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set xmla password and chart options setting properties
+	 *
+	 * @param report
+	 * @param newRecord
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws SQLException
+	 */
+	private String setProperties(Report report, boolean newRecord) throws SQLException {
+		String setXmlaPasswordMessage = setXmlaPassword(report, newRecord);
+		if (setXmlaPasswordMessage != null) {
+			return setXmlaPasswordMessage;
+		}
+
+		//build chart options setting string
+		if (report.getChartOptions() != null) {
+			String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
+			String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
+
+			String showLegend = "";
+			String showLabels = "";
+			String showPoints = "";
+			String showData = "";
+
+			if (report.getChartOptions().isShowLegend()) {
+				showLegend = "showLegend";
+			}
+			if (report.getChartOptions().isShowLabels()) {
+				showLabels = "showLabels";
+			}
+			if (report.getChartOptions().isShowPoints()) {
+				showPoints = "showPoints";
+			}
+			if (report.getChartOptions().isShowData()) {
+				showData = "showData";
+			}
+
+			String rotateAt = "rotateAt:" + report.getChartOptions().getRotateAt();
+			String removeAt = "removeAt:" + report.getChartOptions().getRemoveAt();
+
+			Object[] options = {
+				size,
+				yRange,
+				report.getChartOptions().getBgColor(),
+				showLegend,
+				showLabels,
+				showPoints,
+				showData,
+				rotateAt,
+				removeAt
+			};
+
+			report.setChartOptionsSetting(StringUtils.join(options, " "));
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set xmla password
+	 *
+	 * @param report
+	 * @param newRecord
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws SQLException
+	 */
+	private String setXmlaPassword(Report report, boolean newRecord) throws SQLException {
+		boolean useCurrentXmlaPassword = false;
+		String newXmlaPassword = report.getXmlaPassword();
+
+		if (report.isUseBlankXmlaPassword()) {
+			newXmlaPassword = "";
+		} else {
+			if (StringUtils.isEmpty(newXmlaPassword) && !newRecord) {
+				//password field blank. use current password
+				useCurrentXmlaPassword = true;
+			}
+		}
+
+		if (useCurrentXmlaPassword) {
+			//password field blank. use current password
+			Report currentReport = reportService.getReport(report.getReportId());
+			if (currentReport == null) {
+				return "page.message.cannotUseCurrentXmlaPassword";
+			} else {
+				report.setXmlaPassword(currentReport.getXmlaPassword());
+			}
+		} else {
+			if (StringUtils.isNotEmpty(newXmlaPassword)) {
+				newXmlaPassword = "o:" + Encrypter.encrypt(newXmlaPassword);
+			}
+			report.setXmlaPassword(newXmlaPassword);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Finalise report properties
+	 *
+	 * @param report
+	 * @param templateFile
+	 * @param subreportFile
+	 * @param newRecord
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	private String prepareReport(Report report, MultipartFile templateFile,
+			MultipartFile subreportFile, boolean newRecord) throws IOException, SQLException {
+
+		String message;
+		
+		message = saveFile(templateFile, report); //update report template property
+		if (message != null) {
+			return message;
+		}
+		
+		message = saveFile(subreportFile);
+		if (message != null) {
+			return message;
+		}
+
+		message = setProperties(report, newRecord);
+		if (message != null) {
+			return message;
 		}
 
 		return null;

@@ -186,23 +186,23 @@ public class ReportService {
 			while (st.hasMoreTokens()) {
 				token = st.nextToken();
 
-				if (token.startsWith("rotate_at")) {
+				if (token.startsWith("rotate_at") || token.startsWith("rotateAt")) {
 					String tmp = StringUtils.substringAfter(token, ":");
 					chartOptions.setRotateAt(NumberUtils.toInt(tmp));
-				} else if (token.startsWith("remove_at")) {
+				} else if (token.startsWith("remove_at") || token.startsWith("removeAt")) {
 					String tmp = StringUtils.substringAfter(token, ":");
 					chartOptions.setRemoveAt(NumberUtils.toInt(tmp));
 				} else if (token.startsWith("noleg")) {
 					chartOptions.setShowLegend(false);
-				} else if (token.startsWith("showlegend")) {
+				} else if (StringUtils.startsWithIgnoreCase(token, "showLegend")) {
 					chartOptions.setShowLegend(true);
 				} else if (token.startsWith("nolab")) {
 					chartOptions.setShowLabels(false);
-				} else if (token.startsWith("showlabels")) {
+				} else if (StringUtils.startsWithIgnoreCase(token, "showLabels")) {
 					chartOptions.setShowLabels(true);
-				} else if (token.startsWith("showpoints")) {
+				} else if (StringUtils.startsWithIgnoreCase(token, "showPoints")) {
 					chartOptions.setShowPoints(true);
-				} else if (token.startsWith("showdata")) {
+				} else if (StringUtils.startsWithIgnoreCase(token, "showData")) {
 					chartOptions.setShowData(true);
 				} else if (token.indexOf("x") != -1) { //must come after named options e.g. rotate_at
 					int idx = token.indexOf("x");

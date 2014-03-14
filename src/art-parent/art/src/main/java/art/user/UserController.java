@@ -60,7 +60,7 @@ public class UserController {
 	AjaxResponse deleteUser(@RequestParam("id") Integer userId) {
 		//object will be automatically converted to json
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
-		
+
 		AjaxResponse response = new AjaxResponse();
 
 		try {
@@ -96,10 +96,14 @@ public class UserController {
 			return prepareEditUser("add", model, session);
 		}
 
-		//hash new password
-		hashNewPassword(user, user.getPassword());
-
 		try {
+			//set password as appropriate
+			String setPasswordMessage = setPassword(user, false);
+			if (setPasswordMessage != null) {
+				model.addAttribute("message", setPasswordMessage);
+				return prepareEditUser("add", model, session);
+			}
+
 			userService.addUser(user);
 			redirectAttributes.addFlashAttribute("message", "users.message.userAdded");
 			return "redirect:/app/users.do";
@@ -148,39 +152,18 @@ public class UserController {
 			return prepareEditUser("edit", model, session);
 		}
 
-		//set password as appropriate
-		boolean useCurrentPassword = false;
-		String newPassword = user.getPassword();
-		if (user.isUseBlankPassword()) {
-			newPassword = "";
-		} else {
-			if (StringUtils.isEmpty(newPassword)) {
-				//password field blank. use current password
-				useCurrentPassword = true;
-			}
-		}
-
-		if (useCurrentPassword) {
-			try {
-				//password field blank. use current password
-				User currentUser = userService.getUser(user.getUserId());
-				user.setPassword(currentUser.getPassword());
-				user.setPasswordAlgorithm(currentUser.getPasswordAlgorithm());
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
-				model.addAttribute("error", ex);
+		try {
+			//set password as appropriate
+			String setPasswordMessage = setPassword(user, false);
+			if (setPasswordMessage != null) {
+				model.addAttribute("message", setPasswordMessage);
 				return prepareEditUser("edit", model, session);
 			}
-		} else {
-			//hash new password
-			hashNewPassword(user, newPassword);
-		}
 
-		try {
 			userService.updateUser(user);
 			//update session user if appropriate
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if(user.equals(sessionUser)){
+			if (user.equals(sessionUser)) {
 				session.removeAttribute("sessionUser");
 				session.setAttribute("sessionUser", userService.getUser(user.getUserId()));
 			}
@@ -271,13 +254,42 @@ public class UserController {
 	}
 
 	/**
-	 * Hash and set a new password for a user
+	 * Set password
 	 *
 	 * @param user
-	 * @param newPassword
+	 * @param newRecord
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws SQLException
 	 */
-	private void hashNewPassword(User user, String newPassword) {
-		user.setPassword(Encrypter.HashPasswordBcrypt(newPassword));
-		user.setPasswordAlgorithm("bcrypt");
+	private String setPassword(User user, boolean newRecord) throws SQLException {
+		boolean useCurrentPassword = false;
+		String newPassword = user.getPassword();
+
+		if (user.isUseBlankPassword()) {
+			newPassword = "";
+		} else {
+			if (StringUtils.isEmpty(newPassword) && !newRecord) {
+				//password field blank. use current password
+				useCurrentPassword = true;
+			}
+		}
+
+		if (useCurrentPassword) {
+			//password field blank. use current password
+			User currentUser = userService.getUser(user.getUserId());
+			if (currentUser == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				user.setPassword(currentUser.getPassword());
+				user.setPasswordAlgorithm(currentUser.getPasswordAlgorithm());
+			}
+		} else {
+			//hash new password
+			user.setPassword(Encrypter.HashPasswordBcrypt(newPassword));
+			user.setPasswordAlgorithm("bcrypt");
+		}
+
+		return null;
 	}
 }

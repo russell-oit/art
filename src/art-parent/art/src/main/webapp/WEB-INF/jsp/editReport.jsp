@@ -44,6 +44,23 @@ Edit report page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-file-input-3.1.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce/tinymce.min.js"></script>
+
+		<script type="text/javascript">
+			tinymce.init({
+				selector: "textarea.tinymce",
+				plugins: [
+					"advlist autolink lists link image charmap print preview hr anchor pagebreak",
+					"searchreplace visualblocks visualchars code",
+					"insertdatetime nonbreaking table contextmenu directionality",
+					"paste textcolor"
+				],
+				toolbar1: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent",
+				toolbar2: "print preview | forecolor backcolor | link image | ltr rtl | code",
+				image_advtab: true
+			});
+		</script>
+
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
@@ -506,6 +523,15 @@ Edit report page
 						<form:errors path="xmlaPassword" cssClass="error"/>
 					</div>
 				</div>
+				<label class="col-md-12 control-label" style="text-align: left" for="reportSource">
+					<spring:message code="reports.label.reportSourceSql"/>
+				</label>
+				<div class="form-group">
+					<div class="col-md-12">
+						<form:textarea path="reportSource" rows="20" cols="70" wrap="off" class="form-control tinymce"/>
+						<form:errors path="reportSource" cssClass="error"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">
@@ -515,7 +541,5 @@ Edit report page
 				</div>
 			</fieldset>
 		</form:form>
-
 	</jsp:body>
-
 </t:mainPageWithPanel>

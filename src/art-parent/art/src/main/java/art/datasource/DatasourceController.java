@@ -263,7 +263,7 @@ public class DatasourceController {
 	 * @param password
 	 */
 	private void encryptAndSetPassword(Datasource datasource, String password) {
-		if (!password.equals("")) {
+		if (StringUtils.isNotEmpty(password)) {
 			password = "o:" + Encrypter.encrypt(password);
 		}
 
