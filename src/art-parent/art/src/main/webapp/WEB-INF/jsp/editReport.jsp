@@ -623,7 +623,7 @@ Edit report page
 							<spring:message code="reports.label.xmlaUrl"/>
 						</label>
 						<div class="col-md-8">
-							<form:input type="url" path="xmlaUrl" maxlength="2000" class="form-control"/>
+							<form:input path="xmlaUrl" maxlength="2000" class="form-control"/>
 							<form:errors path="xmlaUrl" cssClass="error"/>
 						</div>
 					</div>

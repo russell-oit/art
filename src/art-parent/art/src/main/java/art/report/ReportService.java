@@ -28,7 +28,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -681,11 +680,12 @@ public class ReportService {
 
 	/**
 	 * Copy a report
-	 * 
+	 *
 	 * @param report new report
 	 * @param originalReportId
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
+	@CacheEvict(value = "reports", allEntries = true)
 	public void copyReport(Report report, int originalReportId) throws SQLException {
 		//insert new report
 		int newId = addReport(report);
@@ -694,14 +694,20 @@ public class ReportService {
 			return;
 		}
 
-		//copy parameters
-		copyTableRow("ART_QUERY_FIELDS", "QUERY_ID", originalReportId, newId);
+		try {
+			//copy parameters
+			copyTableRow("ART_QUERY_FIELDS", "QUERY_ID", originalReportId, newId);
 
-		//copy rules
-		copyTableRow("ART_QUERY_RULES", "QUERY_ID", originalReportId, newId);
+			//copy rules
+			copyTableRow("ART_QUERY_RULES", "QUERY_ID", originalReportId, newId);
 
-		//copy drilldown reports
-		copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId);
+			//copy drilldown reports
+			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId);
+		} catch (SQLException ex) {
+			//if an error occurred when copying report details, delete report also
+			deleteReport(newId);
+			throw ex;
+		}
 	}
 
 	/**
@@ -735,21 +741,15 @@ public class ReportService {
 
 			rs = DbUtils.query(conn, ps, sql, keyId);
 			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
 
-			StringBuilder sb = new StringBuilder();
-			sql = "INSERT INTO " + tableName + " VALUES ( ";
-
-			for (int i = 0; i < rsmd.getColumnCount() - 1; i++) {
-				sb.append("?,");
-			}
-			sb.append("? )");
-
-			sql = sql + sb.toString();
+			sql = "INSERT INTO " + tableName + " VALUES ("
+					+ StringUtils.repeat("?", ",", columnCount) + ")";
 
 			while (rs.next()) {
 				//insert new record for each existing record
 				List<Object> columnValues = new ArrayList<>();
-				for (int i = 0; i < rsmd.getColumnCount(); i++) {
+				for (int i = 0; i < columnCount; i++) {
 					if (StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), keyColumnName)) {
 						columnValues.add(newKeyId);
 					} else {
@@ -757,7 +757,7 @@ public class ReportService {
 					}
 				}
 
-				dbService.update(sql, columnValues);
+				dbService.update(sql, columnValues.toArray());
 				count++;
 			}
 		} finally {
