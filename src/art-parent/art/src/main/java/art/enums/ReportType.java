@@ -28,9 +28,9 @@ import java.util.List;
 public enum ReportType {
 
 	//group reports (1-99) are too many to list
-	Tabular(0), 
-	Update(100), Crosstab(101), CrosstabHtml(102), TabularHtml(103),
-	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerCube(114),
+	Tabular(0), TabularHtml(103),
+	Update(100), Crosstab(101), CrosstabHtml(102), 
+	Dashboard(110), Text(122), TextPublic(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
 	JasperReportTemplate(115), JasperReportArt(116), jXLSTemplate(117), jXLSArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121),
 	XY(-1), Pie3D(-2), HorizontalBar3D(-3), VerticalBar3D(-4), Line(-5),
@@ -92,21 +92,6 @@ public enum ReportType {
 	}
 
 	/**
-	 * Get enum object based on a value
-	 *
-	 * @param value
-	 * @return
-	 */
-	public static ReportType toEnum(String value) {
-		for (ReportType v : values()) {
-			if (v.getDescription().equalsIgnoreCase(value)) {
-				return v;
-			}
-		}
-		return Tabular;
-	}
-
-	/**
 	 * Get enum description. In case description needs to be different from
 	 * internal value
 	 *
@@ -128,12 +113,14 @@ public enum ReportType {
 				return "Dashboard";
 			case Text:
 				return "Text";
+			case TextPublic:
+				return "Text (public)";
 			case Mondrian:
 				return "Pivot Table: Mondrian";
 			case MondrianXmla:
 				return "Pivot Table: Mondrian XMLA";
-			case SqlServerCube:
-				return "Pivot Table: SQL Server";
+			case SqlServerXmla:
+				return "Pivot Table: SQL Server XMLA";
 			case JasperReportTemplate:
 				return "JasperReport: Template Query";
 			case JasperReportArt:

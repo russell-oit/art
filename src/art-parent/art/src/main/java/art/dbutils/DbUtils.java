@@ -100,6 +100,16 @@ public class DbUtils {
 	public static void close(Statement st, Connection conn) {
 		close(null, st, conn);
 	}
+	
+	/**
+	 * Close resultset and connection
+	 *
+	 * @param rs
+	 * @param conn
+	 */
+	public static void close(ResultSet rs, Connection conn) {
+		close(rs, null, conn);
+	}
 
 	/**
 	 * Close resultset and statement

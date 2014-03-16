@@ -26,7 +26,9 @@ import art.reportgroup.ReportGroup;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -342,7 +344,7 @@ public class ReportService {
 		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID = ? ";
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, id);
-		populateReportSource(report);
+		setReportSource(report);
 		return report;
 	}
 
@@ -419,10 +421,11 @@ public class ReportService {
 	 * Add a new report to the database
 	 *
 	 * @param report
+	 * @return new report id if operation is successful, 0 otherwise
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public void addReport(Report report) throws SQLException {
+	public int addReport(Report report) throws SQLException {
 		logger.debug("Entering addReport: report={}", report);
 
 		int newId = allocateNewId();
@@ -434,6 +437,8 @@ public class ReportService {
 		} else {
 			logger.warn("Add failed. Allocate new ID failed. report={}", report);
 		}
+
+		return newId;
 	}
 
 	/**
@@ -590,7 +595,7 @@ public class ReportService {
 	 * @param report
 	 * @throws SQLException
 	 */
-	private void populateReportSource(Report report) throws SQLException {
+	private void setReportSource(Report report) throws SQLException {
 		if (report == null) {
 			return;
 		}
@@ -612,6 +617,8 @@ public class ReportService {
 				sb.append(rs.getString("SOURCE_INFO"));
 			}
 			report.setReportSource(sb.toString());
+			//set html source for use with text reports
+			report.setReportSourceHtml(report.getReportSource());
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
@@ -670,6 +677,94 @@ public class ReportService {
 		}
 
 		return newId;
+	}
+
+	/**
+	 * Copy a report
+	 * 
+	 * @param report new report
+	 * @param originalReportId
+	 * @throws SQLException 
+	 */
+	public void copyReport(Report report, int originalReportId) throws SQLException {
+		//insert new report
+		int newId = addReport(report);
+		if (newId <= 0) {
+			logger.warn("Report not copied: {}", report);
+			return;
+		}
+
+		//copy parameters
+		copyTableRow("ART_QUERY_FIELDS", "QUERY_ID", originalReportId, newId);
+
+		//copy rules
+		copyTableRow("ART_QUERY_RULES", "QUERY_ID", originalReportId, newId);
+
+		//copy drilldown reports
+		copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId);
+	}
+
+	/**
+	 * Copy some aspect of a report
+	 *
+	 * @param tableName
+	 * @param keyColumnName
+	 * @param keyId
+	 * @param newKeyId
+	 * @return the number of records copied, 0 otherwise
+	 * @throws SQLException
+	 */
+	private int copyTableRow(String tableName, String keyColumnName,
+			int keyId, int newKeyId) throws SQLException {
+
+		int count = 0; //number of records copied
+
+		Connection conn = ArtConfig.getConnection();
+
+		if (conn == null) {
+			logger.warn("Connection to the ART Database not available");
+			return 0;
+		}
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
+		try {
+			String sql = "SELECT * FROM " + tableName
+					+ " WHERE " + keyColumnName + " = ?";
+
+			rs = DbUtils.query(conn, ps, sql, keyId);
+			ResultSetMetaData rsmd = rs.getMetaData();
+
+			StringBuilder sb = new StringBuilder();
+			sql = "INSERT INTO " + tableName + " VALUES ( ";
+
+			for (int i = 0; i < rsmd.getColumnCount() - 1; i++) {
+				sb.append("?,");
+			}
+			sb.append("? )");
+
+			sql = sql + sb.toString();
+
+			while (rs.next()) {
+				//insert new record for each existing record
+				List<Object> columnValues = new ArrayList<>();
+				for (int i = 0; i < rsmd.getColumnCount(); i++) {
+					if (StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), keyColumnName)) {
+						columnValues.add(newKeyId);
+					} else {
+						columnValues.add(rs.getObject(i + 1));
+					}
+				}
+
+				dbService.update(sql, columnValues);
+				count++;
+			}
+		} finally {
+			DbUtils.close(rs, ps, conn);
+		}
+
+		return count;
 	}
 
 }

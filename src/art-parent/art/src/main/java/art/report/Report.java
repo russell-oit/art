@@ -56,6 +56,25 @@ public class Report implements Serializable {
 	private String reportSource;
 	private boolean useBlankXmlaPassword;
 	private ChartOptions chartOptions;
+	private String reportSourceHtml; //used with text reports
+
+	/**
+	 * Get the value of reportSourceHtml
+	 *
+	 * @return the value of reportSourceHtml
+	 */
+	public String getReportSourceHtml() {
+		return reportSourceHtml;
+	}
+
+	/**
+	 * Set the value of reportSourceHtml
+	 *
+	 * @param reportSourceHtml new value of reportSourceHtml
+	 */
+	public void setReportSourceHtml(String reportSourceHtml) {
+		this.reportSourceHtml = reportSourceHtml;
+	}
 
 	/**
 	 * Get the value of chartOptions

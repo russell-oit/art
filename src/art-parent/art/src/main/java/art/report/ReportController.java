@@ -166,17 +166,19 @@ public class ReportController {
 			@RequestParam("templateFile") MultipartFile templateFile,
 			@RequestParam("subreportFile") MultipartFile subreportFile) {
 
+		String action = "add";
+
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReport("add", model, session);
+			return showReport(action, model, session);
 		}
 
 		try {
 			//finalise report properties
-			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, false);
+			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
 			if (prepareReportMessage != null) {
 				model.addAttribute("message", prepareReportMessage);
-				return showReport("add", model, session);
+				return showReport(action, model, session);
 			}
 
 			reportService.addReport(report);
@@ -187,7 +189,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport("add", model, session);
+		return showReport(action, model, session);
 	}
 
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
@@ -211,17 +213,19 @@ public class ReportController {
 			@RequestParam("templateFile") MultipartFile templateFile,
 			@RequestParam("subreportFile") MultipartFile subreportFile) {
 
+		String action = "edit";
+
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReport("edit", model, session);
+			return showReport(action, model, session);
 		}
 
 		try {
 			//finalise report properties
-			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, false);
+			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
 			if (prepareReportMessage != null) {
 				model.addAttribute("message", prepareReportMessage);
-				return showReport("edit", model, session);
+				return showReport(action, model, session);
 			}
 
 			reportService.updateReport(report);
@@ -232,7 +236,54 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport("edit", model, session);
+		return showReport(action, model, session);
+	}
+
+	@RequestMapping(value = "/app/copyReport", method = RequestMethod.GET)
+	public String copyReportGet(@RequestParam("id") Integer id, Model model,
+			HttpSession session) {
+
+		try {
+			model.addAttribute("report", reportService.getReport(id));
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showReport("copy", model, session);
+	}
+
+	@RequestMapping(value = "/app/copyReport", method = RequestMethod.POST)
+	public String copyReportPost(@ModelAttribute("report") @Valid Report report,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session,
+			@RequestParam("templateFile") MultipartFile templateFile,
+			@RequestParam("subreportFile") MultipartFile subreportFile) {
+
+		String action = "copy";
+
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showReport(action, model, session);
+		}
+
+		try {
+			//finalise report properties
+			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
+			if (prepareReportMessage != null) {
+				model.addAttribute("message", prepareReportMessage);
+				return showReport(action, model, session);
+			}
+
+			reportService.copyReport(report,report.getReportId());
+			redirectAttributes.addFlashAttribute("message", "page.message.recordAdded");
+			return "redirect:/app/reportsConfig.do";
+		} catch (SQLException | IOException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showReport(action, model, session);
 	}
 
 	/**
@@ -327,19 +378,25 @@ public class ReportController {
 	 * Set xmla password and chart options setting properties
 	 *
 	 * @param report
-	 * @param newRecord
+	 * @param action
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException
 	 */
-	private String setProperties(Report report, boolean newRecord) throws SQLException {
-		String setXmlaPasswordMessage = setXmlaPassword(report, newRecord);
+	private String setProperties(Report report, String action) throws SQLException {
+		String setXmlaPasswordMessage = setXmlaPassword(report, action);
 		if (setXmlaPasswordMessage != null) {
 			return setXmlaPasswordMessage;
 		}
 
+		//set report source for text reports
+		ReportType reportType = ReportType.toEnum(report.getReportType());
+		if (reportType == ReportType.Text || reportType == ReportType.TextPublic) {
+			report.setReportSource(report.getReportSourceHtml());
+		}
+
 		//build chart options setting string
-		if (report.getChartOptions() != null) {
+		if (report.getReportType() < 0 && report.getChartOptions() != null) {
 			String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
 			String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
 
@@ -386,19 +443,19 @@ public class ReportController {
 	 * Set xmla password
 	 *
 	 * @param report
-	 * @param newRecord
+	 * @param action
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException
 	 */
-	private String setXmlaPassword(Report report, boolean newRecord) throws SQLException {
+	private String setXmlaPassword(Report report, String action) throws SQLException {
 		boolean useCurrentXmlaPassword = false;
 		String newXmlaPassword = report.getXmlaPassword();
 
 		if (report.isUseBlankXmlaPassword()) {
 			newXmlaPassword = "";
 		} else {
-			if (StringUtils.isEmpty(newXmlaPassword) && !newRecord) {
+			if (StringUtils.isEmpty(newXmlaPassword) && StringUtils.equals(action, "edit")) {
 				//password field blank. use current password
 				useCurrentXmlaPassword = true;
 			}
@@ -428,28 +485,28 @@ public class ReportController {
 	 * @param report
 	 * @param templateFile
 	 * @param subreportFile
-	 * @param newRecord
+	 * @param action
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws IOException
 	 * @throws SQLException
 	 */
 	private String prepareReport(Report report, MultipartFile templateFile,
-			MultipartFile subreportFile, boolean newRecord) throws IOException, SQLException {
+			MultipartFile subreportFile, String action) throws IOException, SQLException {
 
 		String message;
-		
+
 		message = saveFile(templateFile, report); //update report template property
 		if (message != null) {
 			return message;
 		}
-		
+
 		message = saveFile(subreportFile);
 		if (message != null) {
 			return message;
 		}
 
-		message = setProperties(report, newRecord);
+		message = setProperties(report, action);
 		if (message != null) {
 			return message;
 		}

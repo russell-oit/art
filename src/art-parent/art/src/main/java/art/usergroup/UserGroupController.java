@@ -94,11 +94,13 @@ public class UserGroupController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		logger.debug("Entering addUserGroupPost: group={}", group);
-		
+
+		String action = "add";
+
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserGroup("add", model);
+			return showUserGroup(action, model);
 		}
 
 		try {
@@ -111,7 +113,7 @@ public class UserGroupController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroup("add", model);
+		return showUserGroup(action, model);
 	}
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
@@ -134,10 +136,12 @@ public class UserGroupController {
 
 		logger.debug("Entering editUserGroupPost: group={}", group);
 
+		String action = "edit";
+
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserGroup("edit", model);
+			return showUserGroup(action, model);
 		}
 
 		try {
@@ -150,7 +154,7 @@ public class UserGroupController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroup("edit", model);
+		return showUserGroup(action, model);
 	}
 
 	/**

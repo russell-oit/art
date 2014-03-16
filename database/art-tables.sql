@@ -144,11 +144,11 @@ ALTER TABLE ART_QUERY_GROUPS ADD CONSTRAINT art_query_groups_uc_name UNIQUE (NAM
 -- Query types:
 -- 0 = normal query, 1-99 = group, 100 = update, 101 = crosstab
 -- 102 = crosstab html only, 103 = normal query html only, 110 = dashboard
--- 111 = text object, 112 = mondrian cube, 113 = mondrian cube via xmla
+-- 111 = text (public), 112 = mondrian cube, 113 = mondrian cube via xmla
 -- 114 = sql server analysis services cube via xmla
 -- 115 = jasper report with template query, 116 = jasper report with art query
 -- 117 = jxls spreadsheet with template query, 118 = jxls spreadsheet with art query
--- 119 = dynamic lov, 120 = static lov, 121 = dynamic job recipients
+-- 119 = dynamic lov, 120 = static lov, 121 = dynamic job recipients, 122 = text (standard)
 
 -- Query types for graphs:
 -- -1 = XY, -2 = Pie 3D, -3 = Horizontal bar 3D, -4 = Vertical bar 3D, -5 = Line
@@ -214,10 +214,10 @@ INSERT INTO ART_QUERY_TYPES VALUES (101,'Crosstab');
 INSERT INTO ART_QUERY_TYPES VALUES (102,'Crosstab (html only)');
 INSERT INTO ART_QUERY_TYPES VALUES (103,'Tabular (html only)');
 INSERT INTO ART_QUERY_TYPES VALUES (110,'Dashboard');
-INSERT INTO ART_QUERY_TYPES VALUES (111,'Text');
+INSERT INTO ART_QUERY_TYPES VALUES (111,'Text (public)');
 INSERT INTO ART_QUERY_TYPES VALUES (112,'Pivot Table: Mondrian');
 INSERT INTO ART_QUERY_TYPES VALUES (113,'Pivot Table: Mondrian XMLA');
-INSERT INTO ART_QUERY_TYPES VALUES (114,'Pivot Table: SQL Server');
+INSERT INTO ART_QUERY_TYPES VALUES (114,'Pivot Table: SQL Server XMLA');
 INSERT INTO ART_QUERY_TYPES VALUES (115,'JasperReport: Template Query');
 INSERT INTO ART_QUERY_TYPES VALUES (116,'JasperReport: ART Query');
 INSERT INTO ART_QUERY_TYPES VALUES (117,'jXLS Spreadsheet: Template Query');
@@ -225,6 +225,7 @@ INSERT INTO ART_QUERY_TYPES VALUES (118,'jXLS Spreadsheet: ART Query');
 INSERT INTO ART_QUERY_TYPES VALUES (119,'LOV: Dynamic');
 INSERT INTO ART_QUERY_TYPES VALUES (120,'LOV: Static');
 INSERT INTO ART_QUERY_TYPES VALUES (121,'Dynamic Job Recipients');
+INSERT INTO ART_QUERY_TYPES VALUES (122,'Text');
 INSERT INTO ART_QUERY_TYPES VALUES (-1,'Chart: XY');
 INSERT INTO ART_QUERY_TYPES VALUES (-2,'Chart: Pie 3D');
 INSERT INTO ART_QUERY_TYPES VALUES (-3,'Chart: Horizontal Bar 3D');
