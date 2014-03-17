@@ -617,7 +617,10 @@ public class ReportService {
 			}
 			report.setReportSource(sb.toString());
 			//set html source for use with text reports
-			report.setReportSourceHtml(report.getReportSource());
+			ReportType reportType = ReportType.toEnum(report.getReportType());
+			if (reportType == ReportType.Text || reportType == ReportType.TextPublic) {
+				report.setReportSourceHtml(report.getReportSource());
+			}
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}

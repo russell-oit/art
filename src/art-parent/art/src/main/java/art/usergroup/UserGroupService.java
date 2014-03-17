@@ -29,7 +29,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,49 +141,39 @@ public class UserGroupService {
 	public synchronized void addUserGroup(UserGroup group) throws SQLException {
 		logger.debug("Entering addUserGroup: group={}", group);
 
-		Connection conn = ArtConfig.getConnection();
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		PreparedStatement psInsert = null;
+		//generate new id
+		String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer maxId = dbService.query(sql, h);
+		logger.debug("maxId={}", maxId);
 
-		if (conn == null) {
-			logger.warn("Connection to the ART Database not available");
-			return;
+		if (maxId == null) {
+			//no records in the table
+			maxId = 0;
 		}
 
-		try {
-			//generate new id
-			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
-			rs = DbUtils.query(conn, ps, sql);
-			if (rs.next()) {
-				int newId = rs.getInt(1) + 1;
-				logger.debug("newId={}", newId);
+		Integer newId = maxId + 1;
+		logger.debug("newId={}", newId);
 
-				sql = "INSERT INTO ART_USER_GROUPS"
-						+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
-						+ " START_QUERY, CREATION_DATE)"
-						+ " VALUES(?,?,?,?,?,?)";
+		sql = "INSERT INTO ART_USER_GROUPS"
+				+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
+				+ " START_QUERY, CREATION_DATE)"
+				+ " VALUES(?,?,?,?,?,?)";
 
-				Object[] values = {
-					newId,
-					group.getName(),
-					group.getDescription(),
-					group.getDefaultReportGroup(),
-					group.getStartReport(),
-					DbUtils.getCurrentTimeStamp(),};
+		Object[] values = {
+			newId,
+			group.getName(),
+			group.getDescription(),
+			group.getDefaultReportGroup(),
+			group.getStartReport(),
+			DbUtils.getCurrentTimeStamp()
+		};
 
-				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
-				logger.debug("affectedRows={}", affectedRows);
+		int affectedRows = dbService.update(sql, values);
+		logger.debug("affectedRows={}", affectedRows);
 
-				if (affectedRows != 1) {
-					logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
-				}
-			} else {
-				logger.warn("Could not get max id");
-			}
-		} finally {
-			DbUtils.close(psInsert);
-			DbUtils.close(rs, ps, conn);
+		if (affectedRows != 1) {
+			logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
 		}
 	}
 
@@ -214,7 +204,7 @@ public class UserGroupService {
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-			logger.warn("Problem with save. affectedRows={}, group={}", affectedRows,group);
+			logger.warn("Problem with save. affectedRows={}, group={}", affectedRows, group);
 		}
 	}
 }

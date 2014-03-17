@@ -18,7 +18,6 @@ package art.dbutils;
 
 import art.servlets.ArtConfig;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -33,49 +32,30 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DbService {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
 	 * Execute an sql statement that doesn't return a resultset
 	 *
 	 * @param sql
-	 * @param values
+	 * @param params
 	 * @return
 	 * @throws SQLException
 	 */
-	public int update(String sql, Object... values) throws SQLException {
-		int affectedRows = 0;
-
+	public int update(String sql, Object... params) throws SQLException {
 		Connection conn = ArtConfig.getConnection();
-		PreparedStatement ps = null;
-		
 		if (conn == null) {
 			logger.warn("Connection to the ART Database not available");
 			return 0;
 		}
 
 		try {
-			affectedRows = DbUtils.update(conn, ps, sql, values);
+			QueryRunner run = new QueryRunner();
+			return run.update(conn, sql, params);
 		} finally {
-			DbUtils.close(ps, conn);
+			DbUtils.close(conn);
 		}
-
-		return affectedRows;
-	}
-
-	/**
-	 * Execute a select statement without parameters and fill an appropriate
-	 * object or object list
-	 *
-	 * @param <T>
-	 * @param sql
-	 * @param rsh
-	 * @return
-	 * @throws SQLException
-	 */
-	public <T> T query(String sql, ResultSetHandler<T> rsh) throws SQLException {
-		return query(sql, rsh, (Object[]) null);
 	}
 
 	/**
@@ -91,7 +71,6 @@ public class DbService {
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		Connection conn = ArtConfig.getConnection();
-		
 		if (conn == null) {
 			logger.warn("Connection to the ART Database not available");
 			return null;

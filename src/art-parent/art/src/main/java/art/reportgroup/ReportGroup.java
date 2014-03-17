@@ -3,6 +3,7 @@ package art.reportgroup;
 import java.io.Serializable;
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.Date;
 
 /**
  * Class to represent report groups. Stored in ART_QUERY_GROUPS
@@ -15,6 +16,36 @@ public class ReportGroup implements Serializable, Comparable<ReportGroup> {
 	private int reportGroupId;
 	private String name;
 	private String description;
+	private Date creationDate;
+	private Date updateDate;
+
+	/**
+	 * @return the creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * @param creationDate the creationDate to set
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	/**
+	 * @return the updateDate
+	 */
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	/**
+	 * @param updateDate the updateDate to set
+	 */
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
 
 	/**
 	 * Get the value of description
@@ -72,7 +103,7 @@ public class ReportGroup implements Serializable, Comparable<ReportGroup> {
 
 	@Override
 	public String toString() {
-		return "ReportGroup{" + "reportGroupId=" + reportGroupId + ", name=" + name + '}';
+		return "ReportGroup{" + "name=" + name + '}';
 	}
 
 	@Override

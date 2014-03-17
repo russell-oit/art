@@ -1,9 +1,9 @@
 <%-- 
-    Document   : editUserGroup
-    Created on : 12-Feb-2014, 12:16:44
+    Document   : editReportGroup
+    Created on : 17-Mar-2014, 17:25:15
     Author     : Timothy Anyona
 
-Edit user group page
+Edit report group page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -17,12 +17,12 @@ Edit user group page
 
 <c:choose>
 	<c:when test="${action == 'add'}">
-		<spring:message code="page.title.addUserGroup" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/addUserGroup.do"/>
+		<spring:message code="page.title.addReportGroup" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/addReportGroup.do"/>
 	</c:when>
 	<c:otherwise>
-		<spring:message code="page.title.editUserGroup" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/editUserGroup.do"/>
+		<spring:message code="page.title.editReportGroup" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/editReportGroup.do"/>
 	</c:otherwise>
 </c:choose>
 
@@ -37,28 +37,12 @@ Edit user group page
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="userGroups.do"]').parent().addClass('active');
+					$('a[href*="reportGroups.do"]').parent().addClass('active');
 				});
 
 				$(function() {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				});
-
-				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker({
-					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
-				});
-
-				//activate dropdown-hover. to make bootstrap-select open on hover
-				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
 				});
 
 				$('#name').focus();
@@ -98,7 +82,7 @@ Edit user group page
 					</label>
 					<div class="col-md-8">
 						<c:if test="${action != 'add'}">
-							<form:input path="userGroupId" readonly="true" class="form-control"/>
+							<form:input path="reportGroupId" readonly="true" class="form-control"/>
 						</c:if>
 					</div>
 				</div>
@@ -107,7 +91,7 @@ Edit user group page
 						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="name" maxlength="30" class="form-control"/>
+						<form:input path="name" maxlength="25" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
@@ -116,38 +100,8 @@ Edit user group page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="50" class="form-control"/>
+						<form:input path="description" maxlength="60" class="form-control"/>
 						<form:errors path="description" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="defaultReportGroup">
-						<spring:message code="page.label.defaultReportGroup"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="defaultReportGroup" class="form-control selectpicker">
-							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
-						</form:select>
-						<form:errors path="defaultReportGroup" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="startReport">
-						<spring:message code="page.label.startReport"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="startReport" maxlength="500" class="form-control"/>
-							<spring:message code="page.help.startReport" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="startReport" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

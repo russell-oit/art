@@ -373,6 +373,11 @@ Edit report page
 								<form:option value="${loop.index}">Group: ${loop.index} columns</form:option>
 							</c:forEach>
 						</form:select>
+						<div class="text-right">
+							<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
+								<spring:message code="page.link.help"/>
+							</a>
+						</div>
 						<form:errors path="reportType" cssClass="error"/>
 					</div>
 				</div>
@@ -680,14 +685,7 @@ Edit report page
 					</div>
 				</fieldset>
 
-				<label class="col-md-12 control-label" style="text-align: center">
-					<span id="reportSourceLabel">
-					</span>
-					<span class="pull-right">
-					<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
-						<spring:message code="page.link.help"/>
-					</a>
-				</span>
+				<label id="reportSourceLabel" class="col-md-12 control-label" style="text-align: center">
 				</label>
 
 				<div id="reportSourceDiv" class="form-group">
