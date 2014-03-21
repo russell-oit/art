@@ -104,7 +104,7 @@ Page to allow manual clearing of caches
 			<tbody>
 				<c:forEach var="cache" items="${caches}">
 					<tr data-name="${cache.value}">
-						<td><spring:message code="${cache.localisedDescription}"/></td>
+						<td><spring:message code="${cache.localizedDescription}"/></td>
 						<td>
 							<button type="button" class="btn btn-default clear">
 								<i class="fa fa-trash-o"></i>

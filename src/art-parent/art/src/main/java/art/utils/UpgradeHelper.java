@@ -16,6 +16,7 @@
  */
 package art.utils;
 
+import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.servlets.ArtConfig;
 import java.sql.Connection;
@@ -50,14 +51,18 @@ public class UpgradeHelper {
 	 * Populate user_id columns. Columns added in 3.0
 	 */
 	private void addUserIds() throws SQLException {
-		Connection conn = null;
+		Connection conn = ArtConfig.getConnection();
+		if (conn == null) {
+			logger.warn("Connection to the ART Database not available");
+			return;
+		}
+		
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		String sql;
-		PreparedStatement psUpdate = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			DbService dbService=new DbService();
 
 			sql = "SELECT USER_ID, USERNAME FROM ART_USERS WHERE USER_ID IS NULL";
 			ps = conn.prepareStatement(sql);
@@ -69,77 +74,36 @@ public class UpgradeHelper {
 				String username = rs.getString("USERNAME");
 
 				sql = "UPDATE ART_USERS SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_ADMIN_PRIVILEGES SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_USER_QUERIES SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_USER_QUERY_GROUPS SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_USER_RULES SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_JOBS SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_LOGS SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_USER_JOBS SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_USER_GROUP_ASSIGNMENT SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 
 				sql = "UPDATE ART_JOB_ARCHIVES SET USER_ID=? WHERE USERNAME=?";
-				try {
-					DbUtils.update(conn, psUpdate, sql, count, username);
-				} finally {
-					DbUtils.close(ps);
-				}
+				dbService.update(sql, count,username);
 			}
 		} finally {
-			DbUtils.close(psUpdate);
 			DbUtils.close(rs, ps, conn);
 		}
 	}

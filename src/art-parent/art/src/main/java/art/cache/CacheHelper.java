@@ -80,6 +80,14 @@ public class CacheHelper {
 	public void clearReports() {
 		logger.debug("Entering clearReports");
 	}
+	
+	/**
+	 * Clear report groups cache
+	 */
+	@CacheEvict(value = "reportGroups", allEntries = true)
+	public void clearReportGroups() {
+		logger.debug("Entering clearReportGroups");
+	}
 
 	/**
 	 * Clear users cache

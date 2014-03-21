@@ -30,6 +30,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,11 +135,12 @@ public class UserGroupService {
 	/**
 	 * Add a new user group to the database
 	 *
-	 * @param group
+	 * @param group 
+	 * @return new record id if operation is successful, 0 otherwise
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
-	public synchronized void addUserGroup(UserGroup group) throws SQLException {
+	public synchronized int addUserGroup(UserGroup group) throws SQLException {
 		logger.debug("Entering addUserGroup: group={}", group);
 
 		//generate new id
@@ -147,18 +149,19 @@ public class UserGroupService {
 		Integer maxId = dbService.query(sql, h);
 		logger.debug("maxId={}", maxId);
 
-		if (maxId == null) {
-			//no records in the table
-			maxId = 0;
+		int newId;
+		if (maxId == null || maxId < 0) {
+			//no records in the table, or only hardcoded records
+			newId = 1;
+		} else {
+			newId = maxId + 1;
 		}
-
-		Integer newId = maxId + 1;
 		logger.debug("newId={}", newId);
 
 		sql = "INSERT INTO ART_USER_GROUPS"
 				+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
 				+ " START_QUERY, CREATION_DATE)"
-				+ " VALUES(?,?,?,?,?,?)";
+				+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
 		Object[] values = {
 			newId,
@@ -173,8 +176,11 @@ public class UserGroupService {
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-			logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
+			logger.warn("Problem with add. affectedRows={}, group={}", affectedRows, group);
 		}
+		
+		group.setUserGroupId(newId);
+		return newId;
 	}
 
 	/**
@@ -204,7 +210,7 @@ public class UserGroupService {
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-			logger.warn("Problem with save. affectedRows={}, group={}", affectedRows, group);
+			logger.warn("Problem with update. affectedRows={}, group={}", affectedRows, group);
 		}
 	}
 }

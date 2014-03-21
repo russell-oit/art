@@ -65,6 +65,9 @@ public class CacheController {
 				case Reports:
 					cacheHelper.clearReports();
 					break;
+				case ReportGroups:
+					cacheHelper.clearReportGroups();
+					break;
 				case Users:
 					cacheHelper.clearUsers();
 					break;

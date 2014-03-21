@@ -36,7 +36,7 @@ public class DbService {
 	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
-	 * Execute an sql statement that doesn't return a resultset
+	 * Execute an SQL INSERT, UPDATE, or DELETE query.
 	 *
 	 * @param sql
 	 * @param params
@@ -59,14 +59,13 @@ public class DbService {
 	}
 
 	/**
-	 * Execute a select statement with parameters and fill an appropriate object
-	 * or object list
+	 * Execute an SQL SELECT query and return an appropriate, populated object
 	 *
-	 * @param <T>
+	 * @param <T> The type of object that the handler returns
 	 * @param sql
-	 * @param rsh
+	 * @param rsh The handler that converts the results into an object.
 	 * @param params
-	 * @return
+	 * @return The object returned by the handler.
 	 * @throws SQLException
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
@@ -84,4 +83,27 @@ public class DbService {
 		}
 	}
 
+	/**
+	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
+	 *
+	 * @param sql
+	 * @param params An array of query replacement parameters. Each row in this
+	 * array is one set of batch replacement values.
+	 * @return The number of rows updated per statement.
+	 * @throws SQLException
+	 */
+	public int[] batch(String sql, Object[][] params) throws SQLException {
+		Connection conn = ArtConfig.getConnection();
+		if (conn == null) {
+			logger.warn("Connection to the ART Database not available");
+			return new int[0];
+		}
+
+		try {
+			QueryRunner run = new QueryRunner();
+			return run.batch(conn, sql, params);
+		} finally {
+			DbUtils.close(conn);
+		}
+	}
 }

@@ -205,16 +205,16 @@ public class DbUtils {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static int update(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
-		if (conn == null) {
-			logger.warn("Connection not available");
-			return 0;
-		}
-
-		ps = conn.prepareStatement(sql);
-		setValues(ps, values);
-
-		return ps.executeUpdate();
-	}
+//	public static int update(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
+//		if (conn == null) {
+//			logger.warn("Connection not available");
+//			return 0;
+//		}
+//
+//		ps = conn.prepareStatement(sql);
+//		setValues(ps, values);
+//
+//		return ps.executeUpdate();
+//	}
 
 }

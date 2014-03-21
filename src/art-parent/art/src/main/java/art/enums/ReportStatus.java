@@ -99,7 +99,7 @@ public enum ReportStatus {
 	 *
 	 * @return
 	 */
-	public String getLocalisedDescription() {
+	public String getLocalizedDescription() {
 		return "reportStatus.option." + value;
 	}
 

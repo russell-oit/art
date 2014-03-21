@@ -35,6 +35,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -357,86 +358,125 @@ public class ReportService {
 	public void deleteReport(int id) throws SQLException {
 		logger.debug("Entering deleteReport: id={}", id);
 
-		Connection conn = null;
-		PreparedStatement ps = null;
 		String sql;
 
-		try {
-			conn = ArtConfig.getConnection();
+		//delete query-user relationships
+		sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID = ?";
+		dbService.update(sql, id);
 
-			//delete query-user relationships
-			sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID = ?";
-			try {
-				DbUtils.update(conn, ps, sql, id);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete query parameters
+		sql = "DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ?";
+		dbService.update(sql, id);
 
-			//delete query parameters
-			sql = "DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ?";
-			try {
-				DbUtils.update(conn, ps, sql, id);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete sql source
+		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
+		dbService.update(sql, id);
 
-			//delete sql source
-			sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
-			try {
-				DbUtils.update(conn, ps, sql, id);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete query-rule relationships
+		sql = "DELETE FROM ART_QUERY_RULES WHERE QUERY_ID = ?";
+		dbService.update(sql, id);
 
-			//delete query-rule relationships
-			sql = "DELETE FROM ART_QUERY_RULES WHERE QUERY_ID = ?";
-			try {
-				DbUtils.update(conn, ps, sql, id);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete drilldown queries
+		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID = ?";
+		dbService.update(sql, id);
 
-			//delete drilldown queries
-			sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID = ?";
-			try {
-				DbUtils.update(conn, ps, sql, id);
-			} finally {
-				DbUtils.close(ps);
-			}
-
-			//lastly, delete query
-			sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID = ?";
-			try {
-				DbUtils.update(conn, ps, sql, id);
-			} finally {
-				DbUtils.close(ps);
-			}
-		} finally {
-			DbUtils.close(ps, conn);
-		}
+		//lastly, delete query
+		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID = ?";
+		dbService.update(sql, id);
 	}
 
 	/**
 	 * Add a new report to the database
 	 *
 	 * @param report
-	 * @return new report id if operation is successful, 0 otherwise
+	 * @return new record id if operation is successful, 0 otherwise
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public int addReport(Report report) throws SQLException {
+	public synchronized int addReport(Report report) throws SQLException {
 		logger.debug("Entering addReport: report={}", report);
 
-		int newId = allocateNewId();
+		//generate new id
+		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer maxId = dbService.query(sql, h);
+		logger.debug("maxId={}", maxId);
+
+		int newId;
+		if (maxId == null || maxId < 0) {
+			//no records in the table, or only hardcoded records
+			newId = 1;
+		} else {
+			newId = maxId + 1;
+		}
 		logger.debug("newId={}", newId);
 
-		if (newId > 0) {
-			report.setReportId(newId);
-			saveReport(report, true);
+		sql = "INSERT INTO ART_QUERIES"
+				+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
+				+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USE_RULES,"
+				+ " REPORT_STATUS, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
+				+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET, XMLA_URL,"
+				+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD,"
+				+ " CREATION_DATE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
+
+		//set values for possibly null property objects
+		int reportGroupId; //database column doesn't allow null
+		if (report.getReportGroup() == null) {
+			logger.warn("Report group not defined. Defaulting to 0");
+			reportGroupId = 0;
 		} else {
-			logger.warn("Add failed. Allocate new ID failed. report={}", report);
+			reportGroupId = report.getReportGroup().getReportGroupId();
 		}
 
+		int datasourceId; //database column doesn't allow null
+		if (report.getDatasource() == null) {
+			logger.warn("Datasource not defined. Defaulting to 0");
+			datasourceId = 0;
+		} else {
+			datasourceId = report.getDatasource().getDatasourceId();
+		}
+
+		String reportStatus;
+		if (report.getReportStatus() == null) {
+			logger.warn("Report status not defined. Defaulting to null");
+			reportStatus = null;
+		} else {
+			reportStatus = report.getReportStatus().getValue();
+		}
+
+		Object[] values = {
+			newId,
+			report.getName(),
+			report.getShortDescription(),
+			report.getDescription(),
+			report.getReportType(),
+			reportGroupId,
+			datasourceId,
+			report.getContactPerson(),
+			report.isUseRules(),
+			reportStatus,
+			report.isParametersInOutput(),
+			report.getxAxisLabel(),
+			report.getyAxisLabel(),
+			report.getChartOptionsSetting(),
+			report.getTemplate(),
+			report.getDisplayResultset(),
+			report.getXmlaUrl(),
+			report.getXmlaDatasource(),
+			report.getXmlaCatalog(),
+			report.getXmlaUsername(),
+			report.getXmlaPassword(),
+			DbUtils.getCurrentTimeStamp(),};
+
+		int affectedRows = dbService.update(sql, values);
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with add. affectedRows={}, report={}", affectedRows, report);
+		}
+
+		report.setReportId(newId);
 		return newId;
 	}
 
@@ -450,50 +490,37 @@ public class ReportService {
 	public void updateReport(Report report) throws SQLException {
 		logger.debug("Entering updateReport: report={}", report);
 
-		saveReport(report, false);
-	}
-
-	/**
-	 * Save a report
-	 *
-	 * @param report
-	 * @param newRecord true if this is a new record, false otherwise
-	 * @throws SQLException
-	 */
-	private void saveReport(Report report, boolean newRecord) throws SQLException {
-		logger.debug("Entering saveReport: report={}, newRecord={}", report, newRecord);
-
-		String dateColumn;
-
-		if (newRecord) {
-			dateColumn = "CREATION_DATE=?";
-		} else {
-			dateColumn = "UPDATE_DATE=?";
-		}
-
 		String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 				+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
 				+ " DATABASE_ID=?, CONTACT_PERSON=?, USE_RULES=?, "
 				+ " REPORT_STATUS=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 				+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
 				+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
-				+ " XMLA_USERNAME=?, XMLA_PASSWORD=?,"
-				+ dateColumn
+				+ " XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=?"
 				+ " WHERE QUERY_ID=?";
 
 		//set values for possibly null property objects
-		Integer reportGroupId = 0; //database column doesn't allow null
-		if (report.getReportGroup() != null) {
+		int reportGroupId; //database column doesn't allow null
+		if (report.getReportGroup() == null) {
+			logger.warn("Report group not defined. Defaulting to 0");
+			reportGroupId = 0;
+		} else {
 			reportGroupId = report.getReportGroup().getReportGroupId();
 		}
 
-		Integer datasourceId = 0; //database column doesn't allow null
-		if (report.getDatasource() != null) {
+		int datasourceId; //database column doesn't allow null
+		if (report.getDatasource() == null) {
+			logger.warn("Datasource not defined. Defaulting to 0");
+			datasourceId = 0;
+		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
 		}
 
-		String reportStatus = null;
-		if (report.getReportStatus() != null) {
+		String reportStatus;
+		if (report.getReportStatus() == null) {
+			logger.warn("Report status not defined. Defaulting to null");
+			reportStatus = null;
+		} else {
 			reportStatus = report.getReportStatus().getValue();
 		}
 
@@ -525,67 +552,99 @@ public class ReportService {
 		int affectedRows = dbService.update(sql, values);
 		logger.debug("affectedRows={}", affectedRows);
 
-		//update report source stored in different table
-		updateReportSource(report.getReportId(), report.getReportSource());
+		if (affectedRows != 1) {
+			logger.warn("Problem with update. affectedRows={}, report={}", affectedRows, report);
+		}
+	}
+
+	/**
+	 * Get values for possibly null property objects
+	 *
+	 * @param report
+	 * @return list with values to save. Index 0 = report group id, 1 =
+	 * datasource id, 2 = report status
+	 */
+	private List<Object> getSaveDefaults(Report report) {
+		List<Object> values=new ArrayList<>();
+		
+		int reportGroupId; //database column doesn't allow null
+		if (report.getReportGroup() == null) {
+			logger.warn("Report group not defined. Defaulting to 0");
+			reportGroupId = 0;
+		} else {
+			reportGroupId = report.getReportGroup().getReportGroupId();
+		}
+		values.add(reportGroupId);
+
+		int datasourceId; //database column doesn't allow null
+		if (report.getDatasource() == null) {
+			logger.warn("Datasource not defined. Defaulting to 0");
+			datasourceId = 0;
+		} else {
+			datasourceId = report.getDatasource().getDatasourceId();
+		}
+		values.add(datasourceId);
+
+		String reportStatus;
+		if (report.getReportStatus() == null) {
+			logger.warn("Report status not defined. Defaulting to null");
+			reportStatus = null;
+		} else {
+			reportStatus = report.getReportStatus().getValue();
+		}
+		values.add(reportStatus);
+		
+		return values;
 	}
 
 	/**
 	 * Update the report source for a given report
 	 *
 	 * @param reportId
-	 * @param reportSource
+	 * @param reportSource new report source
 	 * @throws SQLException
 	 */
 	public void updateReportSource(int reportId, String reportSource) throws SQLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
+		// Delete Old Source
+		String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
+		dbService.update(sql, reportId);
 
-		try {
-			conn = ArtConfig.getConnection();
-			// Delete Old SQL Source
-			String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
-			try {
-				DbUtils.update(conn, ps, sql, reportId);
-			} finally {
-				DbUtils.close(ps);
-			}
+		// Write the source in small segments
+		// This guarantees portability across databases with different max VARCHAR sizes
+		sql = "INSERT INTO ART_ALL_SOURCES "
+				+ " (OBJECT_ID, LINE_NUMBER, SOURCE_INFO)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 3) + ")";
 
-			// Write the query in small segments
-			// This guarantees portability across databases with different max VARCHAR sizes
-			sql = "INSERT INTO ART_ALL_SOURCES "
-					+ " (OBJECT_ID, LINE_NUMBER, SOURCE_INFO)"
-					+ " VALUES(?, ?, ?)";
-			ps = conn.prepareStatement(sql);
-
-			if (reportSource == null) {
-				reportSource = "";
-			}
-
-			final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
-
-			int start = 0;
-			int end = SOURCE_CHUNK_LENGTH;
-			int step = 1;
-			int textLength = reportSource.length();
-
-			ps.setInt(1, reportId);
-
-			while (end < textLength) {
-				ps.setInt(2, step++);
-				ps.setString(3, reportSource.substring(start, end));
-
-				ps.addBatch();
-				start = end;
-				end = end + SOURCE_CHUNK_LENGTH;
-			}
-			ps.setInt(2, step);
-			ps.setString(3, reportSource.substring(start));
-
-			ps.addBatch();
-			ps.executeBatch();
-		} finally {
-			DbUtils.close(ps, conn);
+		if (reportSource == null) {
+			reportSource = "";
 		}
+
+		final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
+
+		List<Object[]> valuesList = new ArrayList<>();
+
+		int start = 0;
+		int end = SOURCE_CHUNK_LENGTH;
+		int lineNumber = 1;
+		int textLength = reportSource.length();
+
+		while (end < textLength) {
+			valuesList.add(new Object[]{
+				Integer.valueOf(reportId),
+				Integer.valueOf(lineNumber),
+				reportSource.substring(start, end)
+			});
+			start = end;
+			end = end + SOURCE_CHUNK_LENGTH;
+			lineNumber++;
+		}
+		valuesList.add(new Object[]{
+			Integer.valueOf(reportId),
+			Integer.valueOf(lineNumber),
+			reportSource.substring(start)
+		});
+
+		dbService.batch(sql, valuesList.toArray(new Object[0][]));
 	}
 
 	/**
@@ -624,61 +683,6 @@ public class ReportService {
 		} finally {
 			DbUtils.close(rs, ps, conn);
 		}
-	}
-
-	/**
-	 * Generate an id and record for a new item
-	 *
-	 * @return new id generated, 0 otherwise
-	 * @throws SQLException
-	 */
-	private synchronized int allocateNewId() throws SQLException {
-		logger.debug("Entering allocateNewId");
-
-		int newId = 0;
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		PreparedStatement psInsert = null;
-
-		try {
-			conn = ArtConfig.getConnection();
-			//generate new id
-			String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
-			rs = DbUtils.query(conn, ps, sql);
-			if (rs.next()) {
-				newId = rs.getInt(1) + 1;
-				logger.debug("newId={}", newId);
-
-				//add dummy record with new id. fill all not null columns
-				//name has unique constraint so use a random default value
-				String allocatingName = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
-				sql = "INSERT INTO ART_QUERIES"
-						+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION,"
-						+ " QUERY_GROUP_ID, DATABASE_ID)"
-						+ " VALUES (?,?,'','',0,0)";
-
-				Object[] values = {
-					newId,
-					allocatingName
-				};
-
-				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
-				logger.debug("affectedRows={}", affectedRows);
-
-				if (affectedRows == 0) {
-					logger.warn("allocateNewId - no rows affected. newId={}", newId);
-				}
-			} else {
-				logger.warn("Could not get max id");
-			}
-		} finally {
-			DbUtils.close(psInsert);
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return newId;
 	}
 
 	/**

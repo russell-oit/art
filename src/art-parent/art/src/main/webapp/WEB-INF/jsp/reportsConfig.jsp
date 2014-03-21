@@ -146,17 +146,17 @@ Reports configuration page
 							<c:choose>
 								<c:when test="${report.reportStatus.value == activeStatus}">
 									<span class="label label-success">
-										<spring:message code="${report.reportStatus.localisedDescription}"/>
+										<spring:message code="${report.reportStatus.localizedDescription}"/>
 									</span>
 								</c:when>
 								<c:when test="${report.reportStatus.value == disabledStatus}">
 									<span class="label label-danger">
-										<spring:message code="${report.reportStatus.localisedDescription}"/>
+										<spring:message code="${report.reportStatus.localizedDescription}"/>
 									</span>
 								</c:when>
 								<c:otherwise>
 									<span class="label label-default">
-										<spring:message code="${report.reportStatus.localisedDescription}"/>
+										<spring:message code="${report.reportStatus.localizedDescription}"/>
 									</span>
 								</c:otherwise>
 							</c:choose>

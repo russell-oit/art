@@ -17,12 +17,8 @@
 package art.datasource;
 
 import art.dbutils.DbService;
-import art.report.AvailableReport;
-import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
 import art.enums.AccessLevel;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -31,7 +27,9 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +95,7 @@ public class DatasourceService {
 	 */
 	@Cacheable("datasources")
 	public List<Datasource> getAllDatasources() throws SQLException {
-		ResultSetHandler<List<Datasource>> h = new BeanListHandler<Datasource>(Datasource.class, new DatasourceMapper());
+		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
 
@@ -137,13 +135,47 @@ public class DatasourceService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
-	public void addDatasource(Datasource datasource) throws SQLException {
-		int newId = allocateNewId();
-		if (newId > 0) {
-			datasource.setDatasourceId(newId);
-			saveDatasource(datasource, true);
+	public synchronized void addDatasource(Datasource datasource) throws SQLException {
+		logger.debug("Entering addDatasource: datasource={}", datasource);
+
+		//generate new id
+		String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer maxId = dbService.query(sql, h);
+		logger.debug("maxId={}", maxId);
+
+		int newId;
+		if (maxId == null || maxId < 0) {
+			//no records in the table, or only hardcoded records
+			newId = 1;
 		} else {
-			logger.warn("Datasource not added. Allocate new ID failed. Datasource='{}'", datasource.getName());
+			newId = maxId + 1;
+		}
+		logger.debug("newId={}", newId);
+
+		sql = "INSERT INTO ART_DATABASES"
+				+ " (DATABASE_ID, NAME, DESCRIPTION, DRIVER, URL, USERNAME, PASSWORD,"
+				+ " POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 11) + ")";
+
+		Object[] values = {
+			newId,
+			datasource.getName(),
+			datasource.getDescription(),
+			datasource.getDriver(),
+			datasource.getUrl(),
+			datasource.getUsername(),
+			datasource.getPassword(),
+			datasource.getConnectionPoolTimeout(),
+			datasource.getTestSql(),
+			datasource.isActive(),
+			DbUtils.getCurrentTimeStamp(),};
+
+		int affectedRows = dbService.update(sql, values);
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with add. affectedRows={}, datasource={}", affectedRows, datasource);
 		}
 	}
 
@@ -155,28 +187,11 @@ public class DatasourceService {
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
 	public void updateDatasource(Datasource datasource) throws SQLException {
-		saveDatasource(datasource, false);
-	}
+		logger.debug("Entering updateDatasource: datasource={}", datasource);
 
-	/**
-	 * Save a datasource
-	 *
-	 * @param datasource
-	 * @param newRecord true if this is a new record, false otherwise
-	 * @throws SQLException
-	 */
-	private void saveDatasource(Datasource datasource, boolean newRecord) throws SQLException {
-		String dateColumn;
-
-		if (newRecord) {
-			dateColumn = "CREATION_DATE";
-		} else {
-			dateColumn = "UPDATE_DATE";
-		}
-
-		String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DRIVER=?, URL=?,"
-				+ " USERNAME=?, PASSWORD=?, POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?"
-				+ " ," + dateColumn + "=?"
+		String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DRIVER=?,"
+				+ " URL=?, USERNAME=?, PASSWORD=?, POOL_TIMEOUT=?, TEST_SQL=?,"
+				+ " ACTIVE=?, UPDATE_DATE=?"
 				+ " WHERE DATABASE_ID=?";
 
 		Object[] values = {
@@ -194,58 +209,11 @@ public class DatasourceService {
 		};
 
 		int affectedRows = dbService.update(sql, values);
-		if (affectedRows == 0) {
-			logger.warn("Save datasource - no rows affected. Datasource='{}', newRecord={}", datasource.getName(), newRecord);
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with update. affectedRows={}, datasource={}", affectedRows, datasource);
 		}
-	}
-
-	/**
-	 * Generate an id and record for a new item
-	 *
-	 * @return new id generated, 0 otherwise
-	 * @throws SQLException
-	 */
-	private synchronized int allocateNewId() throws SQLException {
-		int newId = 0;
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		PreparedStatement psInsert = null;
-
-		try {
-			conn = ArtConfig.getConnection();
-			//generate new id
-			String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
-			rs = DbUtils.query(conn, ps, sql);
-			if (rs.next()) {
-				newId = rs.getInt(1) + 1;
-
-				//add dummy record with new id. fill all not null columns
-				//name has unique constraint so use a random default value
-				String allocatingName = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
-				sql = "INSERT INTO ART_DATABASES"
-						+ " (DATABASE_ID,NAME,DRIVER,URL,USERNAME,PASSWORD)"
-						+ " VALUES(?,?,'','','','')";
-
-				Object[] values = {
-					newId,
-					allocatingName
-				};
-
-				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
-				if (affectedRows == 0) {
-					logger.warn("allocateNewId - no rows affected. id={}", newId);
-				}
-			} else {
-				logger.warn("Could not get max id");
-			}
-		} finally {
-			DbUtils.close(psInsert);
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return newId;
 	}
 
 	/**
@@ -255,34 +223,13 @@ public class DatasourceService {
 	 * @return list with link reports, empty list otherwise
 	 * @throws SQLException
 	 */
-	public List<AvailableReport> getLinkedReports(int datasourceId) throws SQLException {
-		List<AvailableReport> reports = new ArrayList<AvailableReport>();
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
+	public List<String> getLinkedReports(int datasourceId) throws SQLException {
 		String sql = "SELECT NAME"
 				+ " FROM ART_QUERIES"
 				+ " WHERE DATABASE_ID=?";
 
-		Object[] values = {
-			datasourceId
-		};
-
-		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.query(conn, ps, sql, values);
-			while (rs.next()) {
-				AvailableReport report = new AvailableReport();
-				report.setName(rs.getString("NAME"));
-				reports.add(report);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return reports;
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
+		return dbService.query(sql, h, datasourceId);
 	}
 
 	/**
@@ -294,10 +241,10 @@ public class DatasourceService {
 	 * @throws SQLException
 	 */
 	public List<Datasource> getAdminDatasources(int userId, AccessLevel accessLevel) throws SQLException {
-		if(accessLevel==null){
+		if (accessLevel == null) {
 			return new ArrayList<>();
 		}
-		
+
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		if (accessLevel.getValue() >= AccessLevel.StandardAdmin.getValue()) {
 			//standard admins and above can work with everything

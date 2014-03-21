@@ -54,7 +54,6 @@ Display datasources
 				$('#datasources tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
-					var aPos = oTable.fnGetPosition(nRow);
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
 					var msg;
@@ -77,18 +76,22 @@ Display datasources
 									url: "${pageContext.request.contextPath}/app/deleteDatasource.do",
 									data: {id: id},
 									success: function(response) {
-										var linkedReports=response.data;
+										var linkedReports = response.data;
 										if (response.success) {
-											msg = alertCloseButton + "${recordDeletedText}";
-											$("#ajaxResponse").addClass("alert alert-success alert-dismissable").html(msg);
-											oTable.fnDeleteRow(aPos);
+											oTable.fnDeleteRow(nRow);
+											
+											msg = alertCloseButton + "${recordDeletedText}: " + name;
+											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											$.notify("${recordDeletedText}", "success");
 										} else if (linkedReports.length > 0) {
 											msg = alertCloseButton + "${linkedReportsExistText}" + "<ul>";
+											
 											$.each(linkedReports, function(index, value) {
-												msg += "<li>" + value.name + "</li>";
+												msg += "<li>" + value + "</li>";
 											});
+											
 											msg += "</ul>";
+
 											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
 											$.notify("${cannotDeleteRecordText}", "error");
 										} else {

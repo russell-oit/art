@@ -18,6 +18,7 @@ package art.reportgroup;
 
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.List;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +68,14 @@ public class ReportGroupController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			reportGroupService.deleteReportGroup(id);
-			response.setSuccess(true);
+			List<String> linkedReports = reportGroupService.getLinkedReports(id);
+			if (linkedReports.isEmpty()) {
+				//no linked reports. go ahead and delete report group
+				reportGroupService.deleteReportGroup(id);
+				response.setSuccess(true);
+			} else {
+				response.setData(linkedReports);
+			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());

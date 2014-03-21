@@ -319,7 +319,7 @@ Edit report page
 							<label class="radio-inline">
 								<form:radiobutton path="reportStatus"
 												  value="${reportStatus}"/>
-								<spring:message code="${reportStatus.localisedDescription}"/>
+								<spring:message code="${reportStatus.localizedDescription}"/>
 							</label>
 						</c:forEach>
 						<form:errors path="reportStatus" cssClass="error"/>

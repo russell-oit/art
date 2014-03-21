@@ -27,8 +27,8 @@ import java.util.List;
  */
 public enum CacheType {
 
-	Mondrian("Mondrian"), Reports("Reports"), Users("Users"),
-	UserGroups("UserGroups"), Datasources("Datasources");
+	Mondrian("Mondrian"), Reports("Reports"), ReportGroups("ReportGroups"),
+	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources");
 	private String value;
 
 	private CacheType(String value) {
@@ -98,7 +98,7 @@ public enum CacheType {
 	 *
 	 * @return
 	 */
-	public String getLocalisedDescription() {
+	public String getLocalizedDescription() {
 		return "cacheType.option." + value;
 	}
 

@@ -1,5 +1,6 @@
 package art.user;
 
+import art.dbutils.DbService;
 import art.enums.AccessLevel;
 import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
@@ -10,10 +11,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -30,10 +33,11 @@ public class UserService {
 	//http://wangxiangblog.blogspot.com/2013/02/spring-cache.html
 	//http://viralpatel.net/blogs/cache-support-spring-3-1-m1/
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
-	final String SQL_SELECT_ALL_USERS = "SELECT USERNAME, EMAIL, ACCESS_LEVEL, FULL_NAME, "
-			+ " ACTIVE, PASSWORD, DEFAULT_QUERY_GROUP, PASSWORD_ALGORITHM, START_QUERY, "
-			+ " USER_ID, CAN_CHANGE_PASSWORD, CREATION_DATE, UPDATE_DATE "
-			+ " FROM ART_USERS ";
+
+	@Autowired
+	private DbService dbService;
+
+	final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS ";
 
 	/**
 	 * Get a user object for the given username
@@ -50,7 +54,7 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_USERS + " WHERE USERNAME = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE USERNAME = ? ";
 
 		Object[] values = {
 			username
@@ -62,7 +66,7 @@ public class UserService {
 			if (rs.next()) {
 				user = new User();
 				populateUser(user, rs);
-				//set user properties whose values may come from user groups
+				//set user properties whose values may come from user users
 				populateGroupValues(conn, user);
 			}
 		} finally {
@@ -87,7 +91,7 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_USERS + " WHERE USER_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE USER_ID = ? ";
 
 		Object[] values = {
 			userId
@@ -99,7 +103,7 @@ public class UserService {
 			if (rs.next()) {
 				user = new User();
 				populateUser(user, rs);
-				//set user properties whose values may come from user groups
+				//set user properties whose values may come from user users
 				populateGroupValues(conn, user);
 			}
 		} finally {
@@ -133,7 +137,7 @@ public class UserService {
 	}
 
 	/**
-	 * Set user properties whose values may come from user groups
+	 * Set user properties whose values may come from user users
 	 *
 	 * @param conn
 	 * @param user
@@ -158,7 +162,7 @@ public class UserService {
 			int effectiveDefaultReportGroup = user.getDefaultReportGroup();
 			String effectiveStartReport = user.getStartReport();
 
-			List<UserGroup> groups = new ArrayList<UserGroup>();
+			List<UserGroup> groups = new ArrayList<>();
 
 			rs = DbUtils.query(conn, ps, sql, values);
 			while (rs.next()) {
@@ -203,7 +207,7 @@ public class UserService {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 
-		String sql = SQL_SELECT_ALL_USERS;
+		String sql = SQL_SELECT_ALL;
 
 		try {
 			conn = ArtConfig.getConnection();
@@ -223,58 +227,32 @@ public class UserService {
 	/**
 	 * Delete a user and all related records
 	 *
-	 * @param userId
+	 * @param id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public void deleteUser(int userId) throws SQLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+	public void deleteUser(int id) throws SQLException {
+		String sql;
 
-		try {
-			conn = ArtConfig.getConnection();
-			String sql;
+		//delete user-report relationships
+		sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
+		dbService.update(sql, id);
 
-			//delete user-report relationships
-			sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
-			try{
-				DbUtils.update(conn, ps, sql, userId);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete user-report user relationships
+		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=?";
+		dbService.update(sql, id);
 
-			//delete user-report group relationships
-			sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=?";
-			try{
-				DbUtils.update(conn, ps, sql, userId);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete user-rules relationships
+		sql = "DELETE FROM ART_USER_RULES WHERE USER_ID=?";
+		dbService.update(sql, id);
 
-			//delete user-rules relationships
-			sql = "DELETE FROM ART_USER_RULES WHERE USER_ID=?";
-			try{
-				DbUtils.update(conn, ps, sql, userId);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete user-user user relationships
+		sql = "DELETE FROM ART_USER_ASSIGNMENT WHERE USER_ID=?";
+		dbService.update(sql, id);
 
-			//delete user-user group relationships
-			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
-			try{
-				DbUtils.update(conn, ps, sql, userId);
-			} finally {
-				DbUtils.close(ps);
-			}
-
-			//delete user-shared job relationships
-			sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
-			try{
-				DbUtils.update(conn, ps, sql, userId);
-			} finally {
-				DbUtils.close(ps);
-			}
+		//delete user-shared job relationships
+		sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
+		dbService.update(sql, id);
 
 //			//delete user's jobs. this will delete all records related to the job e.g. quartz records, job parameters etc
 //			sql = "SELECT JOB_ID FROM ART_JOBS WHERE USER_ID=?";
@@ -288,17 +266,9 @@ public class UserService {
 //				aj.load(rs.getInt("JOB_ID"), userId);
 //				aj.delete();
 //			}
-
-			//lastly, delete user
-			sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
-			try{
-				DbUtils.update(conn, ps, sql, userId);
-			} finally {
-				DbUtils.close(ps);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
+		//lastly, delete user
+		sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
+		dbService.update(sql, id);
 	}
 
 	/**
@@ -311,12 +281,9 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updatePassword(int userId, String newPassword, String passwordAlgorithm) throws SQLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
-
 		String sql = "UPDATE ART_USERS SET PASSWORD=?, UPDATE_DATE=?,"
 				+ " PASSWORD_ALGORITHM=?"
-				+ " WHERE USER_ID = ?";
+				+ " WHERE USER_ID=?";
 
 		Object[] values = {
 			newPassword,
@@ -325,14 +292,9 @@ public class UserService {
 			userId
 		};
 
-		try {
-			conn = ArtConfig.getConnection();
-			int affectedRows = DbUtils.update(conn, ps, sql, values);
-			if (affectedRows == 0) {
-				logger.warn("Update password - no rows affected. User ID={}", userId);
-			}
-		} finally {
-			DbUtils.close(ps, conn);
+		int affectedRows = dbService.update(sql, values);
+		if (affectedRows == 0) {
+			logger.warn("Update password - no rows affected. User ID={}", userId);
 		}
 	}
 
@@ -343,13 +305,58 @@ public class UserService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public void addUser(User user) throws SQLException {
-		int newId = allocateNewId();
-		if (newId > 0) {
-			user.setUserId(newId);
-			saveUser(user, true);
+	public synchronized void addUser(User user) throws SQLException {
+		logger.debug("Entering addUser: user={}", user);
+
+		//generate new id
+		String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer maxId = dbService.query(sql, h);
+		logger.debug("maxId={}", maxId);
+
+		int newId;
+		if (maxId == null || maxId < 0) {
+			//no records in the table, or only hardcoded records
+			newId = 1;
 		} else {
-			logger.warn("User not added. Allocate new ID failed. Username='{}'", user.getUsername());
+			newId = maxId + 1;
+		}
+		logger.debug("newId={}", newId);
+
+		sql = "INSERT INTO ART_USERS"
+				+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
+				+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
+				+ " START_QUERY_GROUP, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
+
+		int accessLevel;
+		if (user.getAccessLevel() == null) {
+			logger.warn("Access level not defined. Defaulting to 0");
+			accessLevel = 0;
+		} else {
+			accessLevel = user.getAccessLevel().getValue();
+		}
+
+		Object[] values = {
+			newId,
+			user.getUsername(),
+			user.getPassword(),
+			user.getPasswordAlgorithm(),
+			user.getFullName(),
+			user.getEmail(),
+			accessLevel,
+			user.getDefaultReportGroup(),
+			user.getStartReport(),
+			user.isCanChangePassword(),
+			user.isActive(),
+			DbUtils.getCurrentTimeStamp()
+		};
+
+		int affectedRows = dbService.update(sql, values);
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with add. affectedRows={}, user={}", affectedRows, user);
 		}
 	}
 
@@ -361,150 +368,42 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updateUser(User user) throws SQLException {
-		saveUser(user, false);
-	}
+		logger.debug("Entering updateUser: user={}", user);
 
-	/**
-	 * Generate a user id and user record for a new user
-	 *
-	 * @return new user id generated, 0 otherwise
-	 * @throws SQLException
-	 */
-	private synchronized int allocateNewId() throws SQLException {
-		int newId = 0;
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		PreparedStatement psInsert = null;
-
-		try {
-			conn = ArtConfig.getConnection();
-			//generate new id
-			String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
-			rs = DbUtils.query(conn, ps, sql);
-			if (rs.next()) {
-				newId = rs.getInt(1) + 1;
-
-				//add dummy record with new id. fill all not null columns
-				//username has unique constraint
-				String allocatingUsername = "allocating-" + RandomStringUtils.randomAlphanumeric(3);
-				sql = "INSERT INTO ART_USERS(USER_ID,USERNAME,PASSWORD)"
-						+ " VALUES(?,?,'')";
-
-				Object[] values = {
-					newId,
-					allocatingUsername
-				};
-
-				int affectedRows = DbUtils.update(conn, psInsert, sql, values);
-				if (affectedRows == 0) {
-					logger.warn("allocateNewId - no rows affected. id={}", newId);
-				}
-			} else {
-				logger.warn("Could not get max id");
-			}
-		} finally {
-			DbUtils.close(psInsert);
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return newId;
-	}
-
-	/**
-	 * Save a user
-	 *
-	 * @param user
-	 * @param newUser true if this is a new user, false if we are updating an
-	 * existing user
-	 * @throws SQLException
-	 */
-	private void saveUser(User user, boolean newUser) throws SQLException {
-		Connection conn = null;
-		PreparedStatement ps = null;
-
-		String dateColumn;
-
-		if (newUser) {
-			dateColumn = "CREATION_DATE";
-		} else {
-			dateColumn = "UPDATE_DATE";
-		}
-
-		final String SQL_UPDATE_USER = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
+		String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 				+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
 				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-				+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?";
-
-		String sql = SQL_UPDATE_USER + "," + dateColumn + "=?"
+				+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?"
 				+ " WHERE USER_ID=?";
 
-		try {
-			conn = ArtConfig.getConnection();
-			Integer accessLevel = null;
-			if (user.getAccessLevel() != null) {
-				accessLevel = Integer.valueOf(user.getAccessLevel().getValue());
-			}
+		int accessLevel;
+		if (user.getAccessLevel() == null) {
+			logger.warn("Access level not defined. Defaulting to 0");
+			accessLevel = 0;
+		} else {
+			accessLevel = user.getAccessLevel().getValue();
+		}
 
-			Object[] values = {
-				user.getUsername(),
-				user.getPassword(),
-				user.getPasswordAlgorithm(),
-				user.getFullName(),
-				user.getEmail(),
-				accessLevel,
-				user.getDefaultReportGroup(),
-				user.getStartReport(),
-				user.isCanChangePassword(),
-				user.isActive(),
-				DbUtils.getCurrentTimeStamp(),
-				user.getUserId()
-			};
-			int affectedRows = DbUtils.update(conn, ps, sql, values);
-			if (affectedRows == 0) {
-				logger.warn("Save user - no rows affected. Username='{}'. newUser={}", user.getUsername(), newUser);
-			}
+		Object[] values = {
+			user.getUsername(),
+			user.getPassword(),
+			user.getPasswordAlgorithm(),
+			user.getFullName(),
+			user.getEmail(),
+			accessLevel,
+			user.getDefaultReportGroup(),
+			user.getStartReport(),
+			user.isCanChangePassword(),
+			user.isActive(),
+			DbUtils.getCurrentTimeStamp(),
+			user.getUserId()
+		};
 
-			//save user groups. delete all existing records and recreate
-			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
-			values = new Object[]{
-				user.getUserId()
-			};
-			DbUtils.update(conn, ps, sql, values);
+		int affectedRows = dbService.update(sql, values);
+		logger.debug("affectedRows={}", affectedRows);
 
-			//insert records afresh
-			List<UserGroup> groups = user.getUserGroups();
-			if (groups != null && !groups.isEmpty()) {
-				List<Integer> userGroupIds = new ArrayList<Integer>();
-				for (UserGroup group : user.getUserGroups()) {
-					if (group != null && group.getUserGroupId() > 0) {
-						userGroupIds.add(group.getUserGroupId());
-					}
-				}
-
-				if (!userGroupIds.isEmpty()) {
-					sql = "INSERT INTO ART_USER_GROUP_ASSIGNMENT (USER_ID,USERNAME,USER_GROUP_ID)"
-							+ " VALUES(?,?,?)";
-					ps = conn.prepareStatement(sql);
-
-					List<Object> valuesList = new ArrayList<Object>();
-					for (Integer id : userGroupIds) {
-						valuesList.clear();
-						valuesList.add(user.getUserId());
-						valuesList.add(user.getUsername());
-						valuesList.add(id);
-
-						DbUtils.setValues(ps, valuesList.toArray());
-						ps.addBatch();
-					}
-
-					ps.executeBatch();
-				}
-			}
-
-		} finally {
-			DbUtils.close(ps, conn);
+		if (affectedRows != 1) {
+			logger.warn("Problem with update. affectedRows={}, user={}", affectedRows, user);
 		}
 	}
 }

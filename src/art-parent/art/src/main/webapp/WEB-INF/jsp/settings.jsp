@@ -665,7 +665,7 @@ Settings configuration page
 									<label class="radio-inline">
 										<form:radiobutton path="displayNull"
 														  value="${displayNullOption}"/>
-										<spring:message code="${displayNullOption.localisedDescription}"/>
+										<spring:message code="${displayNullOption.localizedDescription}"/>
 									</label>
 								</c:forEach>
 								<spring:message code="settings.help.displayNull" var="help" />

@@ -22,6 +22,7 @@ Report groups configuration page
 <spring:message code="dialog.button.delete" var="deleteText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
+<spring:message code="reportGroups.message.linkedReportsExist" var="linkedReportsExistText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -33,7 +34,7 @@ Report groups configuration page
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="reportGroups.do"]').parent().addClass('active');
 				});
-				
+
 				var oTable = $('#reportGroups').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
@@ -71,17 +72,27 @@ Report groups configuration page
 									url: "${pageContext.request.contextPath}/app/deleteReportGroup.do",
 									data: {id: id},
 									success: function(response) {
+										var linkedReports = response.data;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
-											
+
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-											
 											$.notify("${recordDeletedText}", "success");
+										} else if (linkedReports.length > 0) {
+											msg = alertCloseButton + "${linkedReportsExistText}" + "<ul>";
+
+											$.each(linkedReports, function(index, value) {
+												msg += "<li>" + value + "</li>";
+											});
+
+											msg += "</ul>";
+
+											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$.notify("${cannotDeleteRecordText}", "error");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-											
+											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},

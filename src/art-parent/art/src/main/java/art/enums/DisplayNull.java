@@ -81,7 +81,7 @@ public enum DisplayNull {
 	 *
 	 * @return
 	 */
-	public String getLocalisedDescription() {
+	public String getLocalizedDescription() {
 		return "displayNull.option." + value;
 	}
 }

@@ -1,11 +1,8 @@
 package art.reportgroup;
 
 import art.dbutils.DbService;
-import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
 import art.enums.AccessLevel;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -14,6 +11,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,12 +204,13 @@ public class ReportGroupService {
 		Integer maxId = dbService.query(sql, h);
 		logger.debug("maxId={}", maxId);
 
-		if (maxId == null) {
-			//no records in the table
-			maxId = 0;
+		int newId;
+		if (maxId == null || maxId < 0) {
+			//no records in the table, or only hardcoded records
+			newId = 1;
+		} else {
+			newId = maxId + 1;
 		}
-
-		Integer newId = maxId + 1;
 		logger.debug("newId={}", newId);
 
 		sql = "INSERT INTO ART_QUERY_GROUPS"
@@ -260,6 +259,22 @@ public class ReportGroupService {
 		if (affectedRows != 1) {
 			logger.warn("Problem with save. affectedRows={}, group={}", affectedRows, group);
 		}
+	}
+	
+	/**
+	 * Get reports that are in a given report group
+	 *
+	 * @param reportGroupId
+	 * @return list with linked reports, empty list otherwise
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedReports(int reportGroupId) throws SQLException {
+		String sql = "SELECT NAME"
+					+ " FROM ART_QUERIES"
+					+ " WHERE QUERY_GROUP_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
+		return dbService.query(sql, h, reportGroupId);
 	}
 
 }

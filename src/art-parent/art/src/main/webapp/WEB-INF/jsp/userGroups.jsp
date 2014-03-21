@@ -76,12 +76,10 @@ Display user groups
 											
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-											
 											$.notify("${recordDeletedText}", "success");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-											
 											$.notify("${errorOccurredText}", "error");
 										}
 									},

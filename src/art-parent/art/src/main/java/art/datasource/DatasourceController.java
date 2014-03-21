@@ -72,7 +72,7 @@ public class DatasourceController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<AvailableReport> linkedReports = datasourceService.getLinkedReports(id);
+			List<String> linkedReports = datasourceService.getLinkedReports(id);
 			if (linkedReports.isEmpty()) {
 				//no linked reports. go ahead and delete datasource
 				datasourceService.deleteDatasource(id);
