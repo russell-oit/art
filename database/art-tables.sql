@@ -79,12 +79,14 @@ INSERT INTO ART_ACCESS_LEVELS VALUES (100,'Super Admin');
 -- Stores Target Database definitions
 
 -- ACTIVE: boolean. 0=false, 1=true
+-- JNDI: boolean. 0=false, 1=true
 
 CREATE TABLE ART_DATABASES
 (
 	DATABASE_ID INTEGER NOT NULL,
 	NAME	          VARCHAR(25) NOT NULL,
 	DESCRIPTION VARCHAR(500),
+	JNDI INTEGER,
 	DRIVER            VARCHAR(200) NOT NULL,
 	URL               VARCHAR(2000) NOT NULL,
 	USERNAME          VARCHAR(25) NOT NULL,

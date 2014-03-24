@@ -43,7 +43,7 @@ Display art database configuration page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 			});
 		</script>
 	</jsp:attribute>
@@ -114,6 +114,16 @@ Display art database configuration page
 									<i class="fa fa-info"></i>
 								</button>
 							</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="jndi">
+						<spring:message code="page.label.jndi"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="jndi" id="jndi"/>
 						</div>
 					</div>
 				</div>

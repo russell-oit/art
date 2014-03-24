@@ -165,7 +165,7 @@ public class DataSource implements TimerListener {
 	private void startTimer() {
 		logger.debug("Entering startTimer");
 
-		logger.debug("!jndi={}", !jndi);
+		logger.debug("jndi={}", jndi);
 		if (!jndi) {
 			logger.debug("timeout={}", timeout);
 			// Start timer for connection time out

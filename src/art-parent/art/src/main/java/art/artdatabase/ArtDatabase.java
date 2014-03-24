@@ -24,6 +24,25 @@ public class ArtDatabase implements Serializable {
 	private String testSql;
 	private int connectionPoolTimeout;
 	private int maxPoolConnections; //setting used by art database and all datasources
+	private boolean jndi;
+
+	/**
+	 * Get the value of jndi
+	 *
+	 * @return the value of jndi
+	 */
+	public boolean isJndi() {
+		return jndi;
+	}
+
+	/**
+	 * Set the value of jndi
+	 *
+	 * @param jndi new value of jndi
+	 */
+	public void setJndi(boolean jndi) {
+		this.jndi = jndi;
+	}
 
 	/**
 	 * Get the value of useBlankPassword. only used for user interface logic

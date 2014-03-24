@@ -43,10 +43,6 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "net.sf.log4jdbc.DriverSpy";
 		urlElement.value = "jdbc:log4" + urlElement.value;
 		testSqlElement.value = "";
-	} else if (dbType === "jndi") {
-		driverElement.value = "";
-		urlElement.value = "";
-		testSqlElement.value = "";
 	} else if (dbType === "db2") {
 		driverElement.value = "com.ibm.db2.jcc.DB2Driver";
 		urlElement.value = "jdbc:db2://<server_name>/<database_name>";

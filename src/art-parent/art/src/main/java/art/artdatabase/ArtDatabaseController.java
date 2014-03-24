@@ -107,12 +107,11 @@ public class ArtDatabaseController {
 			String username = artDatabase.getUsername();
 			String password = artDatabase.getPassword();
 
-			if (StringUtils.isNotBlank(driver)) {
+			if (artDatabase.isJndi()) {
+				conn = ArtConfig.getJndiConnection(url);
+			} else {
 				Class.forName(driver).newInstance();
 				conn = DriverManager.getConnection(url, username, password);
-			} else {
-				//using jndi datasource
-				conn = ArtConfig.getJndiConnection(url);
 			}
 
 			/* if we are here, Connection to art database is successful.
@@ -127,13 +126,15 @@ public class ArtDatabaseController {
 				sql = "UPDATE ART_DATABASES SET URL=? WHERE DATABASE_ID=?";
 				ps = conn.prepareStatement(sql);
 
-				ps.setString(1, demoDbUrl);
-				ps.setInt(2, 2);
-				ps.executeUpdate();
-
 				ps.setString(1, sampleDbUrl);
 				ps.setInt(2, 1);
-				ps.executeUpdate();
+				ps.addBatch();
+
+				ps.setString(1, demoDbUrl);
+				ps.setInt(2, 2);
+				ps.addBatch();
+
+				ps.executeBatch();
 			}
 
 			//save settings

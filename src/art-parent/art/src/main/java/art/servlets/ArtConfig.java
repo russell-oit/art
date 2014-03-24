@@ -291,18 +291,14 @@ public class ArtConfig extends HttpServlet {
 			return;
 		}
 
-		//initialize art repository datasource
+		//initialize art datasource
 		String artDbDriver = artDatabaseConfiguration.getDriver();
 		String artDbTestSql = artDatabaseConfiguration.getTestSql();
 		int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
 		int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
+		boolean artDbjndi = artDatabaseConfiguration.isJndi();
 
-		boolean jndiDatasource = false;
-
-		if (StringUtils.isBlank(artDbDriver)) {
-			jndiDatasource = true;
-		}
-		DataSource artdb = new DataSource(artDbPoolTimeout * 60L, jndiDatasource);
+		DataSource artdb = new DataSource(artDbPoolTimeout * 60L, artDbjndi);
 		artdb.setName("ART Database");  //custom name
 		artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
 		artdb.setUsername(artDatabaseConfiguration.getUsername());
@@ -318,7 +314,7 @@ public class ArtConfig extends HttpServlet {
 
 		//populate dataSources map
 		dataSources = null;
-		dataSources = new LinkedHashMap<Integer, DataSource>();
+		dataSources = new LinkedHashMap<>();
 
 		//add art repository database to the dataSources map ("id" = 0). 
 		//it's not explicitly defined from the admin console
@@ -344,8 +340,7 @@ public class ArtConfig extends HttpServlet {
 
 			// ordered by NAME to have datasources inserted in order in the
 			//LinkedHashMap dataSources (note: first item is always the ArtRepository)
-			String sql = "SELECT DRIVER, POOL_TIMEOUT, NAME, URL, USERNAME,"
-					+ " PASSWORD, TEST_SQL, DATABASE_ID"
+			String sql = "SELECT *"
 					+ " FROM ART_DATABASES"
 					+ " WHERE ACTIVE=1"
 					+ " ORDER BY NAME";
@@ -353,16 +348,10 @@ public class ArtConfig extends HttpServlet {
 
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				String driver = rs.getString("DRIVER");
-				if (StringUtils.isBlank(driver)) {
-					jndiDatasource = true;
-				} else {
-					jndiDatasource = false;
-				}
-
 				int timeout = rs.getInt("POOL_TIMEOUT");
+				boolean jndi = rs.getBoolean("JNDI");
 
-				DataSource ds = new DataSource(timeout, jndiDatasource);
+				DataSource ds = new DataSource(timeout, jndi);
 				ds.setName(rs.getString("NAME"));
 				ds.setUrl(rs.getString("URL"));
 				ds.setUsername(rs.getString("USERNAME"));
@@ -371,13 +360,14 @@ public class ArtConfig extends HttpServlet {
 				if (password.startsWith("o:")) {
 					password = Encrypter.decrypt(password.substring(2));
 				}
+				ds.setPassword(password);
 				String testSQL = rs.getString("TEST_SQL");
 				if (StringUtils.length(testSQL) > 3) {
 					ds.setTestSQL(testSQL);
 				}
-				ds.setPassword(password);
+
 				ds.setMaxConnections(maxPoolConnections);
-				ds.setDriver(driver);
+				ds.setDriver(rs.getString("DRIVER"));
 
 				//set application name connection property
 				setConnectionProperties(ds);
@@ -419,27 +409,27 @@ public class ArtConfig extends HttpServlet {
 		//create quartz scheduler
 		createQuartzScheduler();
 	}
-	
+
 	//TODO remove after refactoring
-	public static String getArtSetting(String value){
+	public static String getArtSetting(String value) {
 		return value;
 	}
-	
+
 	//TODO remove after refactoring
 	public static boolean isArtSettingsLoaded() {
 		return false;
 	}
-	
+
 	//TODO remove after refactoring
-	public static String getSettingsFilePath(){
+	public static String getSettingsFilePath() {
 		return "";
 	}
-	
+
 	//TODO remove after refactoring
-	public static boolean loadArtSettings(){
+	public static boolean loadArtSettings() {
 		return false;
 	}
-	
+
 	//TODO remove after refactoring
 	public static boolean isShowResultsInline() {
 		return false;
@@ -1042,7 +1032,7 @@ public class ArtConfig extends HttpServlet {
 		if (pSettings == null) {
 			return;
 		}
-		
+
 		if (pSettings.getSmtpPort() <= 0) {
 			pSettings.setSmtpPort(25);
 		}
@@ -1087,7 +1077,7 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Set defaults for art database configuration items that have invalid
 	 * values
-	 * 
+	 *
 	 * @param artDatabase
 	 */
 	public static void setArtDatabaseDefaults(ArtDatabase artDatabase) {
@@ -1208,7 +1198,7 @@ public class ArtConfig extends HttpServlet {
 		}
 
 	}
-	
+
 	/**
 	 * Migrate existing jobs created in art versions before 1.11 to quartz jobs
 	 *

@@ -265,7 +265,7 @@ public class ReportGroupService {
 	 * Get reports that are in a given report group
 	 *
 	 * @param reportGroupId
-	 * @return list with linked reports, empty list otherwise
+	 * @return list with linked report names, empty list otherwise
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int reportGroupId) throws SQLException {

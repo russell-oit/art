@@ -73,6 +73,7 @@ public class DatasourceService {
 			datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
 			datasource.setName(rs.getString("NAME"));
 			datasource.setDescription(rs.getString("DESCRIPTION"));
+			datasource.setJndi(rs.getBoolean("JNDI"));
 			datasource.setDriver(rs.getString("DRIVER"));
 			datasource.setUrl(rs.getString("URL"));
 			datasource.setUsername(rs.getString("USERNAME"));
@@ -154,14 +155,15 @@ public class DatasourceService {
 		logger.debug("newId={}", newId);
 
 		sql = "INSERT INTO ART_DATABASES"
-				+ " (DATABASE_ID, NAME, DESCRIPTION, DRIVER, URL, USERNAME, PASSWORD,"
-				+ " POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 11) + ")";
+				+ " (DATABASE_ID, NAME, DESCRIPTION, JNDI, DRIVER, URL, USERNAME,"
+				+ " PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
 
 		Object[] values = {
 			newId,
 			datasource.getName(),
 			datasource.getDescription(),
+			datasource.isJndi(),
 			datasource.getDriver(),
 			datasource.getUrl(),
 			datasource.getUsername(),
@@ -189,14 +191,15 @@ public class DatasourceService {
 	public void updateDatasource(Datasource datasource) throws SQLException {
 		logger.debug("Entering updateDatasource: datasource={}", datasource);
 
-		String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DRIVER=?,"
-				+ " URL=?, USERNAME=?, PASSWORD=?, POOL_TIMEOUT=?, TEST_SQL=?,"
-				+ " ACTIVE=?, UPDATE_DATE=?"
+		String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, JNDI=?,"
+				+ " DRIVER=?, URL=?, USERNAME=?, PASSWORD=?,"
+				+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?"
 				+ " WHERE DATABASE_ID=?";
 
 		Object[] values = {
 			datasource.getName(),
 			datasource.getDescription(),
+			datasource.isJndi(),
 			datasource.getDriver(),
 			datasource.getUrl(),
 			datasource.getUsername(),
@@ -220,7 +223,7 @@ public class DatasourceService {
 	 * Get reports that use a given datasource
 	 *
 	 * @param datasourceId
-	 * @return list with link reports, empty list otherwise
+	 * @return list with linked report names, empty list otherwise
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int datasourceId) throws SQLException {

@@ -155,7 +155,6 @@ public class ArtUtils {
 		databaseTypes.put("hsqldb-server", "HSQLDB (Server mode)");
 		databaseTypes.put("db2", "DB2");
 		databaseTypes.put("odbc", "Generic ODBC");
-		databaseTypes.put("jndi", "JNDI");
 		databaseTypes.put("log4jdbc", "SQL Logging");
 		databaseTypes.put("other", "Other");
 

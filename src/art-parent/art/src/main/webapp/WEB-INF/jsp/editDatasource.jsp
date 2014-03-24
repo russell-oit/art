@@ -47,6 +47,7 @@ Edit datasource page
 
 				$('#testConnection').on('click', function() {
 					var id = $("#datasourceId").val();
+					var jndi = $("#jndi").is(":checked");
 					var driver = $("#driver").val();
 					var url = $("#url").val();
 					var username = $("#username").val();
@@ -57,7 +58,7 @@ Edit datasource page
 						type: "POST",
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/app/testDatasource.do",
-						data: {id: id, driver: driver, url: url, username: username,
+						data: {id: id, jndi: jndi, driver: driver, url: url, username: username,
 							password: password, useBlankPassword: useBlankPassword},
 						success: function(response) {
 							if (response.success) {
@@ -195,6 +196,16 @@ Edit datasource page
 									<i class="fa fa-info"></i>
 								</button>
 							</span>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="jndi">
+						<spring:message code="page.label.jndi"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="jndi" id="jndi"/>
 						</div>
 					</div>
 				</div>

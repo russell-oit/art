@@ -621,7 +621,7 @@ public class ReportService {
 
 		final int SOURCE_CHUNK_LENGTH = 4000; //length of column that holds report source
 
-		List<Object[]> valuesList = new ArrayList<>();
+		List<Object[]> values = new ArrayList<>();
 
 		int start = 0;
 		int end = SOURCE_CHUNK_LENGTH;
@@ -629,7 +629,7 @@ public class ReportService {
 		int textLength = reportSource.length();
 
 		while (end < textLength) {
-			valuesList.add(new Object[]{
+			values.add(new Object[]{
 				Integer.valueOf(reportId),
 				Integer.valueOf(lineNumber),
 				reportSource.substring(start, end)
@@ -638,13 +638,13 @@ public class ReportService {
 			end = end + SOURCE_CHUNK_LENGTH;
 			lineNumber++;
 		}
-		valuesList.add(new Object[]{
+		values.add(new Object[]{
 			Integer.valueOf(reportId),
 			Integer.valueOf(lineNumber),
 			reportSource.substring(start)
 		});
 
-		dbService.batch(sql, valuesList.toArray(new Object[0][]));
+		dbService.batch(sql, values.toArray(new Object[0][]));
 	}
 
 	/**

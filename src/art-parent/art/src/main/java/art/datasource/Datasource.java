@@ -40,6 +40,25 @@ public class Datasource implements Serializable {
 	private int connectionPoolTimeout;
 	private boolean useBlankPassword; //only used for user interface logic
 	private String description;
+	private boolean jndi;
+
+	/**
+	 * Get the value of jndi
+	 *
+	 * @return the value of jndi
+	 */
+	public boolean isJndi() {
+		return jndi;
+	}
+
+	/**
+	 * Set the value of jndi
+	 *
+	 * @param jndi new value of jndi
+	 */
+	public void setJndi(boolean jndi) {
+		this.jndi = jndi;
+	}
 
 	/**
 	 * Get the value of description
