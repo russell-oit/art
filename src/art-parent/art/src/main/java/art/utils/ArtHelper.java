@@ -40,18 +40,19 @@ import org.slf4j.LoggerFactory;
 public class ArtHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
+	private static final int MAX_LOG_MESSAGE_LENGTH = 500;
 
 	/**
 	 * Authenticate the session.
 	 *
 	 * @param request
-	 * @return 
+	 * @return
 	 * @throws ArtException if couldn't authenticate
 	 * @throws Exception
 	 */
 	public static String authenticateSession(HttpServletRequest request) throws Exception {
 		//TODO remove this method once refactoring is complete
-		
+
 		String msg = null;
 		HttpSession session = request.getSession();
 		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
@@ -177,8 +178,8 @@ public class ArtHelper {
 	 * @param message log message
 	 */
 	public static void log(String user, String type, String ip, int queryId, long totalTime, long fetchTime, String message) {
-		if (StringUtils.length(message) > 4000) {
-			message = message.substring(0, 4000);
+		if (StringUtils.length(message) > MAX_LOG_MESSAGE_LENGTH) {
+			message = message.substring(0, MAX_LOG_MESSAGE_LENGTH);
 		}
 
 		Connection conn = null;
@@ -189,11 +190,11 @@ public class ArtHelper {
 					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, QUERY_ID,"
 					+ " TOTAL_TIME, FETCH_TIME, MESSAGE) "
 					+ " VALUES (?,?,?,?,?,?,?,?) ";
-			
+
 			ps = conn.prepareStatement(sql);
-			
+
 			Timestamp now = new Timestamp(new Date().getTime());
-			
+
 			ps.setTimestamp(1, now);
 			ps.setString(2, user);
 			ps.setString(3, type);
@@ -220,8 +221,8 @@ public class ArtHelper {
 	 * @param message log message
 	 */
 	public static void log(String user, String type, String ip, String message) {
-		if (StringUtils.length(message) > 4000) {
-			message = message.substring(0, 4000);
+		if (StringUtils.length(message) > MAX_LOG_MESSAGE_LENGTH) {
+			message = message.substring(0, MAX_LOG_MESSAGE_LENGTH);
 		}
 
 		Connection conn = null;
