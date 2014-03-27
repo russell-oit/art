@@ -123,10 +123,7 @@ public class DatasourceService {
 	@CacheEvict(value = "datasources", allEntries = true)
 	public void deleteDatasource(int id) throws SQLException {
 		String sql = "DELETE FROM ART_DATABASES WHERE DATABASE_ID=?";
-		int affectedRows = dbService.update(sql, id);
-		if (affectedRows == 0) {
-			logger.warn("Delete datasource failed. Datasource not found. Id={}", id);
-		}
+		dbService.update(sql, id);
 	}
 
 	/**

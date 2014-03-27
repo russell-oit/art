@@ -107,6 +107,17 @@ public class ArtUtils {
 	public static String getRandomFileNameString() {
 		return "-" + RandomStringUtils.randomAlphanumeric(10);
 	}
+	
+	/**
+	 * Get random string that can be used as a unique id e.g. in file names
+	 *
+	 * @return unique id string
+	 */
+	public static String getUniqueId() {
+		//can potentially use randomUUID but it may block if the server lacks sufficient entropy?
+		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
+		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(20);
+	}
 
 	/**
 	 * Get a string to be used for correctly sorting dates irrespective of the
@@ -142,7 +153,7 @@ public class ArtUtils {
 	 */
 	public static Map<String, String> getDatabaseTypes() {
 		//use linkedhashmap so that items are displayed in the order listed here
-		Map<String, String> databaseTypes = new LinkedHashMap<String, String>();
+		Map<String, String> databaseTypes = new LinkedHashMap<>();
 
 		databaseTypes.put("demo", "Demo");
 		databaseTypes.put("cubrid", "CUBRID");

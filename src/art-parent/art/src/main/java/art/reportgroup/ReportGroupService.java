@@ -13,6 +13,7 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,24 +73,24 @@ public class ReportGroupService {
 	 */
 	@Cacheable("reportGroups")
 	public List<ReportGroup> getAvailableReportGroups(String username) throws SQLException {
-		logger.debug("Entering getAvailableReportGroups: username='{}", username);
+		logger.debug("Entering getAvailableReportGroups: username='{}'", username);
 
 		//union will return distinct results
 		//get groups that user has explicit rights to see
-		String sql = "SELECT aqg.QUERY_GROUP_ID, aqg.NAME, aqg.DESCRIPTION "
-				+ " FROM ART_USER_QUERY_GROUPS auqg , ART_QUERY_GROUPS aqg "
-				+ " WHERE auqg.USERNAME = ? "
-				+ " AND auqg.QUERY_GROUP_ID = aqg.QUERY_GROUP_ID "
+		String sql = "SELECT AQG.* "
+				+ " FROM ART_USER_QUERY_GROUPS AUQG , ART_QUERY_GROUPS AQG "
+				+ " WHERE AUQG.USERNAME = ? "
+				+ " AND AUQG.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID "
 				+ " UNION "
 				//add groups to which the user has access through his report group 
-				+ " SELECT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
+				+ " SELECT AQG.* "
 				+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERY_GROUPS AQG "
 				+ " WHERE AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
 				+ " AND EXISTS (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA "
 				+ " WHERE AUGA.USERNAME = ? AND AUGA.QUERY_GROUP_ID = AUGG.QUERY_GROUP_ID)"
 				+ " UNION "
 				//add groups where user has right to query but not to group
-				+ " SELECT AQG.QUERY_GROUP_ID, AQG.NAME, AQG.DESCRIPTION "
+				+ " SELECT AQG.* "
 				+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ, ART_QUERY_GROUPS AQG "
 				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID "
 				+ " AND AUQ.USERNAME = ? AND AQG.QUERY_GROUP_ID<>0"
@@ -178,24 +179,30 @@ public class ReportGroupService {
 	@CacheEvict(value = "reportGroups", allEntries = true)
 	public void deleteReportGroup(int id) throws SQLException {
 		logger.debug("Entering deleteReportGroup: id={}", id);
+		
+		String sql;
 
-		String sql = "DELETE FROM ART_QUERY_GROUPS WHERE QUERY_GROUP_ID=?";
-		int affectedRows = dbService.update(sql, id);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with delete. affectedRows={}, id={}", affectedRows, id);
-		}
+		//delete foreign key records
+		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE QUERY_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE QUERY_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		//finally delete report group
+		sql = "DELETE FROM ART_QUERY_GROUPS WHERE QUERY_GROUP_ID=?";
+		dbService.update(sql, id);
 	}
 
 	/**
 	 * Add a new report group to the database
 	 *
 	 * @param group
+	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
-	public synchronized void addReportGroup(ReportGroup group) throws SQLException {
+	public synchronized int addReportGroup(ReportGroup group) throws SQLException {
 		logger.debug("Entering addReportGroup: group={}", group);
 
 		//generate new id
@@ -215,7 +222,7 @@ public class ReportGroupService {
 
 		sql = "INSERT INTO ART_QUERY_GROUPS"
 				+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE)"
-				+ " VALUES(?,?,?,?)";
+				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
 
 		Object[] values = {
 			newId,
@@ -230,6 +237,8 @@ public class ReportGroupService {
 		if (affectedRows != 1) {
 			logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
 		}
+		
+		return newId;
 	}
 
 	/**

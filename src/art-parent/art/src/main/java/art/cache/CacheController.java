@@ -43,6 +43,8 @@ public class CacheController {
 
 	@RequestMapping(value = "app/caches", method = RequestMethod.GET)
 	public String showCaches(Model model) {
+		logger.debug("Entering showCaches");
+		
 		model.addAttribute("caches", CacheType.list());
 		return "caches";
 	}
@@ -50,6 +52,8 @@ public class CacheController {
 	@RequestMapping(value = "/app/clearCache", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse clearCache(@RequestParam("name") String name) {
+		logger.debug("Entering clearCache: name='{}'", name);
+		
 		AjaxResponse response = new AjaxResponse();
 
 		String message = null;

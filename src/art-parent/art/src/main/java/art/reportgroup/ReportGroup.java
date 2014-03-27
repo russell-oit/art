@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 /**
- * Class to represent report groups. Stored in ART_QUERY_GROUPS
+ * Class to represent report groups
  *
  * @author Timothy Anyona
  */

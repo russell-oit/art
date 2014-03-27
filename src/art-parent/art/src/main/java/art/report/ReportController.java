@@ -50,7 +50,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Spring controller for reports page
+ * Spring controller for reports pages
  *
  * @author Timothy Anyona
  */
@@ -73,6 +73,8 @@ public class ReportController {
 			@RequestParam(value = "reportId", required = false) Integer reportGroupId,
 			HttpServletRequest request, Model model) {
 
+		logger.debug("Entering showReports: reportGroupId={}", reportGroupId);
+
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
@@ -80,7 +82,7 @@ public class ReportController {
 
 			//allow to focus public_user in one report only. is this feature used? it's not documented
 			if (reportGroupId != null) {
-				List<AvailableReport> filteredReports = new ArrayList<AvailableReport>();
+				List<AvailableReport> filteredReports = new ArrayList<>();
 				for (AvailableReport report : reports) {
 					if (report.getReportGroupId() == reportGroupId) {
 						filteredReports.add(report);
@@ -124,6 +126,8 @@ public class ReportController {
 
 	@RequestMapping(value = "/app/reportsConfig", method = RequestMethod.GET)
 	public String showReportsConfig(Model model) {
+		logger.debug("Entering showReportsConfig");
+
 		model.addAttribute("activeStatus", ReportStatus.Active.getValue());
 		model.addAttribute("disabledStatus", ReportStatus.Disabled.getValue());
 
@@ -140,6 +144,8 @@ public class ReportController {
 	@RequestMapping(value = "/app/deleteReport", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReport(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteReport: id={}", id);
+
 		AjaxResponse response = new AjaxResponse();
 
 		try {
@@ -155,6 +161,8 @@ public class ReportController {
 
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.GET)
 	public String addReportGet(Model model, HttpSession session) {
+		logger.debug("Entering addReportGet");
+
 		model.addAttribute("report", new Report());
 		return showReport("add", model, session);
 	}
@@ -166,8 +174,11 @@ public class ReportController {
 			@RequestParam("templateFile") MultipartFile templateFile,
 			@RequestParam("subreportFile") MultipartFile subreportFile) {
 
+		logger.debug("Entering addReportPost: report={}", report);
+
 		String action = "add";
 
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return showReport(action, model, session);
@@ -176,13 +187,15 @@ public class ReportController {
 		try {
 			//finalise report properties
 			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
+			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
 			if (prepareReportMessage != null) {
 				model.addAttribute("message", prepareReportMessage);
 				return showReport(action, model, session);
 			}
 
 			reportService.addReport(report);
-			redirectAttributes.addFlashAttribute("message", "page.message.recordAdded");
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			redirectAttributes.addFlashAttribute("recordName", report.getName());
 			return "redirect:/app/reportsConfig.do";
 		} catch (SQLException | IOException ex) {
 			logger.error("Error", ex);
@@ -195,6 +208,8 @@ public class ReportController {
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
 	public String editReportGet(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
+
+		logger.debug("Entering editReportGet: id={}", id);
 
 		try {
 			model.addAttribute("report", reportService.getReport(id));
@@ -213,8 +228,11 @@ public class ReportController {
 			@RequestParam("templateFile") MultipartFile templateFile,
 			@RequestParam("subreportFile") MultipartFile subreportFile) {
 
+		logger.debug("Entering editReportPost: report={}", report);
+
 		String action = "edit";
 
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return showReport(action, model, session);
@@ -223,13 +241,15 @@ public class ReportController {
 		try {
 			//finalise report properties
 			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
+			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
 			if (prepareReportMessage != null) {
 				model.addAttribute("message", prepareReportMessage);
 				return showReport(action, model, session);
 			}
 
 			reportService.updateReport(report);
-			redirectAttributes.addFlashAttribute("message", "page.message.recordUpdated");
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			redirectAttributes.addFlashAttribute("recordName", report.getName());
 			return "redirect:/app/reportsConfig.do";
 		} catch (SQLException | IOException ex) {
 			logger.error("Error", ex);
@@ -260,8 +280,11 @@ public class ReportController {
 			@RequestParam("templateFile") MultipartFile templateFile,
 			@RequestParam("subreportFile") MultipartFile subreportFile) {
 
+		logger.debug("Entering copyReportPost: report={}", report);
+
 		String action = "copy";
 
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return showReport(action, model, session);
@@ -270,13 +293,15 @@ public class ReportController {
 		try {
 			//finalise report properties
 			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
+			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
 			if (prepareReportMessage != null) {
 				model.addAttribute("message", prepareReportMessage);
 				return showReport(action, model, session);
 			}
 
-			reportService.copyReport(report,report.getReportId());
-			redirectAttributes.addFlashAttribute("message", "page.message.recordAdded");
+			reportService.copyReport(report, report.getReportId());
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			redirectAttributes.addFlashAttribute("recordName", report.getName());
 			return "redirect:/app/reportsConfig.do";
 		} catch (SQLException | IOException ex) {
 			logger.error("Error", ex);
@@ -295,6 +320,8 @@ public class ReportController {
 	 * @return
 	 */
 	private String showReport(String action, Model model, HttpSession session) {
+		logger.debug("Entering showReport: action='{}'", action);
+
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			int userId = sessionUser.getUserId();
@@ -334,7 +361,9 @@ public class ReportController {
 	 * @throws IOException
 	 */
 	private String saveFile(MultipartFile file, Report report) throws IOException {
+		logger.debug("Entering saveFile: report={}", report);
 
+		logger.debug("file.isEmpty()={}", file.isEmpty());
 		if (file.isEmpty()) {
 			return null;
 		}
@@ -352,8 +381,10 @@ public class ReportController {
 		//save template file
 		long uploadSize = file.getSize();
 		String filename = file.getOriginalFilename();
+		logger.debug("filename='{}'", filename);
 		String extension = FilenameUtils.getExtension(filename).toLowerCase();
 
+		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
 		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //0 effectively means no uploads allowed
 			return "reports.message.fileBiggerThanMax";
 		}
@@ -384,42 +415,57 @@ public class ReportController {
 	 * @throws SQLException
 	 */
 	private String setProperties(Report report, String action) throws SQLException {
+		logger.debug("Entering setProperties: report={}, action='{}'", report, action);
+
 		String setXmlaPasswordMessage = setXmlaPassword(report, action);
+		logger.debug("setXmlaPasswordMessage='{}'", setXmlaPasswordMessage);
 		if (setXmlaPasswordMessage != null) {
 			return setXmlaPasswordMessage;
 		}
 
 		//set report source for text reports
+		logger.debug("report.getReportType()={}", report.getReportType());
 		ReportType reportType = ReportType.toEnum(report.getReportType());
 		if (reportType == ReportType.Text || reportType == ReportType.TextPublic) {
 			report.setReportSource(report.getReportSourceHtml());
 		}
 
 		//build chart options setting string
+		logger.debug("(report.getChartOptions() != null) = {}", report.getChartOptions() != null);
 		if (report.getReportType() < 0 && report.getChartOptions() != null) {
 			String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
 			String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
+
+			logger.debug("size='{}'", size);
+			logger.debug("yRange='{}'", yRange);
 
 			String showLegend = "";
 			String showLabels = "";
 			String showPoints = "";
 			String showData = "";
 
+			logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().isShowLegend());
 			if (report.getChartOptions().isShowLegend()) {
 				showLegend = "showLegend";
 			}
+			logger.debug("report.getChartOptions().isShowLabels() = {}", report.getChartOptions().isShowLabels());
 			if (report.getChartOptions().isShowLabels()) {
 				showLabels = "showLabels";
 			}
+			logger.debug("report.getChartOptions().isShowPoints() = {}", report.getChartOptions().isShowPoints());
 			if (report.getChartOptions().isShowPoints()) {
 				showPoints = "showPoints";
 			}
+			logger.debug("report.getChartOptions().isShowData() = {}", report.getChartOptions().isShowData());
 			if (report.getChartOptions().isShowData()) {
 				showData = "showData";
 			}
 
 			String rotateAt = "rotateAt:" + report.getChartOptions().getRotateAt();
 			String removeAt = "removeAt:" + report.getChartOptions().getRemoveAt();
+
+			logger.debug("rotateAt='{}'", rotateAt);
+			logger.debug("removeAt='{}'", removeAt);
 
 			Object[] options = {
 				size,
@@ -433,6 +479,7 @@ public class ReportController {
 				removeAt
 			};
 
+			logger.debug("options='{}'", StringUtils.join(options, " "));
 			report.setChartOptionsSetting(StringUtils.join(options, " "));
 		}
 
@@ -449,27 +496,34 @@ public class ReportController {
 	 * @throws SQLException
 	 */
 	private String setXmlaPassword(Report report, String action) throws SQLException {
+		logger.debug("Entering setXmlapassword: report={}, action='{}'", report, action);
+
 		boolean useCurrentXmlaPassword = false;
 		String newXmlaPassword = report.getXmlaPassword();
 
+		logger.debug("report.isUseBlankXmlaPassword()={}", report.isUseBlankXmlaPassword());
 		if (report.isUseBlankXmlaPassword()) {
 			newXmlaPassword = "";
 		} else {
+			logger.debug("StringUtils.isEmpty(newXmlaPassword)={}", StringUtils.isEmpty(newXmlaPassword));
 			if (StringUtils.isEmpty(newXmlaPassword) && StringUtils.equals(action, "edit")) {
 				//password field blank. use current password
 				useCurrentXmlaPassword = true;
 			}
 		}
 
+		logger.debug("useCurrentXmlaPassword={}", useCurrentXmlaPassword);
 		if (useCurrentXmlaPassword) {
 			//password field blank. use current password
 			Report currentReport = reportService.getReport(report.getReportId());
+			logger.debug("currentReport={}", currentReport);
 			if (currentReport == null) {
 				return "page.message.cannotUseCurrentXmlaPassword";
 			} else {
 				report.setXmlaPassword(currentReport.getXmlaPassword());
 			}
 		} else {
+			logger.debug("StringUtils.isNotEmpty(newXmlaPassword)={}", StringUtils.isNotEmpty(newXmlaPassword));
 			if (StringUtils.isNotEmpty(newXmlaPassword)) {
 				newXmlaPassword = "o:" + Encrypter.encrypt(newXmlaPassword);
 			}
@@ -493,6 +547,8 @@ public class ReportController {
 	 */
 	private String prepareReport(Report report, MultipartFile templateFile,
 			MultipartFile subreportFile, String action) throws IOException, SQLException {
+
+		logger.debug("Entering prepareReport: report={}, action='{}", report, action);
 
 		String message;
 

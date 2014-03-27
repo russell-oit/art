@@ -11,22 +11,19 @@ Display user configuration page
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="page.title.users" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
-<spring:message code="users.message.userDeleted" var="userDeletedText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.delete" var="deleteText"/>
-<spring:message code="dialog.message.deleteUser" var="deleteUserText"/>
-<spring:message code="dialog.title.confirm" var="confirmText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
+<spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
+<spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="users.activeStatus.active" var="activeText"/>
 <spring:message code="users.activeStatus.disabled" var="disabledText"/>
-<spring:message code="users.text.updated" var="updatedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -56,36 +53,36 @@ Display user configuration page
 				$('#users tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
-					var aPos = oTable.fnGetPosition(nRow);
-					var username = escapeHtmlContent(row.data("username"));
-					var userId = row.data("id");
+					var name = escapeHtmlContent(row.data("name"));
+					var id = row.data("id");
 					var msg;
 					bootbox.confirm({
-						message: "${deleteUserText}: " + username,
-						title: "${confirmText}",
+						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
 							'cancel': {
 								label: "${cancelText}"
 							},
 							'confirm': {
-								label: "${deleteText}"
+								label: "${okText}"
 							}
 						},
 						callback: function(result) {
 							if (result) {
 								$.ajax({
 									type: "POST",
+									dataType: "json",
 									url: "${pageContext.request.contextPath}/app/deleteUser.do",
-									data: {id: userId},
+									data: {id: id},
 									success: function(response) {
 										if (response.success) {
-											msg = alertCloseButton + "${userDeletedText}";
-											$("#ajaxResponse").addClass("alert alert-success alert-dismissable").html(msg);
-											oTable.fnDeleteRow(aPos);
-											$.notify("${userDeletedText}", "success");
+											oTable.fnDeleteRow(nRow);
+											
+											msg = alertCloseButton + "${recordDeletedText}: " + name;
+											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
+											$.notify("${recordDeletedText}", "success");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},
@@ -114,7 +111,15 @@ Display user configuration page
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
-				<p>${fn:escapeXml(error)}</p>
+				<c:if test="${showErrors}">
+					<p>${encode:forHtmlContent(error)}</p>
+				</c:if>
+			</div>
+		</c:if>
+		<c:if test="${not empty recordSavedMessage}">
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
 			</div>
 		</c:if>
 
@@ -140,11 +145,12 @@ Display user configuration page
 			</thead>
 			<tbody>
 				<c:forEach var="user" items="${users}">
-					<tr data-username="${encode:forHtmlAttribute(user.username)}"
-						data-id="${user.userId}">
+					<tr data-id="${user.userId}"
+						data-name="${encode:forHtmlAttribute(user.username)}">
+						
 						<td>${user.userId}</td>
 						<td>${encode:forHtmlContent(user.username)}</td>
-						<td>${user.fullName}</td>
+						<td>${encode:forHtmlContent(user.fullName)}</td>
 						<td><t:displayActiveStatus active="${user.active}"
 											   activeText="${activeText}"
 											   disabledText="${disabledText}"/>

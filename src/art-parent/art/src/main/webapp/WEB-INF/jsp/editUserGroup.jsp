@@ -88,7 +88,9 @@ Edit user group page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${encode:forHtmlContent(error)}</p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
 					</div>
 				</c:if>
 
@@ -97,9 +99,11 @@ Edit user group page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action != 'add'}">
-							<form:input path="userGroupId" readonly="true" class="form-control"/>
-						</c:if>
+						<c:choose>
+							<c:if test="${action == 'edit'}">
+								<form:input path="userGroupId" readonly="true" class="form-control"/>
+							</c:if>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">

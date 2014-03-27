@@ -25,12 +25,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -54,8 +56,13 @@ public class DatasourceController {
 	@Autowired
 	private DatasourceService datasourceService;
 
+	@Autowired
+	private MessageSource messageSource;
+
 	@RequestMapping(value = "/app/datasources", method = RequestMethod.GET)
 	public String showDatasources(Model model) {
+		logger.debug("Entering showDatasources");
+
 		try {
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
 		} catch (SQLException ex) {
@@ -69,10 +76,14 @@ public class DatasourceController {
 	@RequestMapping(value = "/app/deleteDatasource", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteDatasource(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteDatasource: id={}", id);
+
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			List<String> linkedReports = datasourceService.getLinkedReports(id);
+
+			logger.debug("linkedReports.isEmpty()={}", linkedReports.isEmpty());
 			if (linkedReports.isEmpty()) {
 				//no linked reports. go ahead and delete datasource
 				datasourceService.deleteDatasource(id);
@@ -91,6 +102,8 @@ public class DatasourceController {
 
 	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.GET)
 	public String addDatasourceGet(Model model) {
+		logger.debug("Entering addDatasourceGet");
+
 		Datasource datasource = new Datasource();
 
 		//set defaults
@@ -98,7 +111,7 @@ public class DatasourceController {
 		datasource.setConnectionPoolTimeout(20);
 
 		model.addAttribute("datasource", datasource);
-		return displayDatasource("add", model);
+		return showDatasource("add", model);
 	}
 
 	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.POST)
@@ -106,34 +119,49 @@ public class DatasourceController {
 			@Valid Datasource datasource,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
+		logger.debug("Entering addDatasourcePost: datasource={}", datasource);
+
+		String action = "add";
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayDatasource("add", model);
+			return showDatasource(action, model);
 		}
 
-		//encrypt and set password
-		encryptAndSetPassword(datasource, datasource.getPassword());
-
 		try {
+			//set password as appropriate
+			String setPasswordMessage = setPassword(datasource, action);
+			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
+			if (setPasswordMessage != null) {
+				model.addAttribute("message", setPasswordMessage);
+				return showDatasource(action, model);
+			}
+
 			datasourceService.addDatasource(datasource);
+
 			try {
-				refreshConnections(datasource);
+				updateConnection(datasource);
 			} catch (Exception ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
-			redirectAttributes.addFlashAttribute("message", "datasources.message.datasourceAdded");
+
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			redirectAttributes.addFlashAttribute("recordName", datasource.getName());
 			return "redirect:/app/datasources.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return displayDatasource("add", model);
+		return showDatasource(action, model);
 	}
 
 	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
 	public String editDatasourceGet(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editDatasourceGet: id={}", id);
+
 		try {
 			model.addAttribute("datasource", datasourceService.getDatasource(id));
 		} catch (SQLException ex) {
@@ -141,7 +169,7 @@ public class DatasourceController {
 			model.addAttribute("error", ex);
 		}
 
-		return displayDatasource("edit", model);
+		return showDatasource("edit", model);
 	}
 
 	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.POST)
@@ -149,54 +177,62 @@ public class DatasourceController {
 			@Valid Datasource datasource,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
+		logger.debug("Entering editDatasourcePost: datasource={}", datasource);
+
+		String action = "edit";
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return displayDatasource("edit", model);
-		}
-
-		//set password as appropriate
-		boolean useCurrentPassword = false;
-		String newPassword = datasource.getPassword();
-		if (datasource.isUseBlankPassword()) {
-			newPassword = "";
-		} else {
-			if (StringUtils.isEmpty(newPassword)) {
-				//password field blank. use current password
-				useCurrentPassword = true;
-			}
-		}
-
-		if (useCurrentPassword) {
-			try {
-				//password field blank. use current password
-				Datasource currentDatasource = datasourceService.getDatasource(datasource.getDatasourceId());
-				datasource.setPassword(currentDatasource.getPassword());
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
-				model.addAttribute("error", ex);
-				return displayDatasource("edit", model);
-			}
-		} else {
-			//encrypt new password
-			encryptAndSetPassword(datasource, newPassword);
+			return showDatasource(action, model);
 		}
 
 		try {
+			//set password as appropriate
+			String setPasswordMessage = setPassword(datasource, action);
+			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
+			if (setPasswordMessage != null) {
+				model.addAttribute("message", setPasswordMessage);
+				return showDatasource(action, model);
+			}
+
 			datasourceService.updateDatasource(datasource);
+
 			try {
-				refreshConnections(datasource);
+				updateConnection(datasource);
 			} catch (Exception ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
-			redirectAttributes.addFlashAttribute("message", "page.message.recordUpdated");
+
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			redirectAttributes.addFlashAttribute("recordName", datasource.getName());
 			return "redirect:/app/datasources.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return displayDatasource("edit", model);
+		return showDatasource(action, model);
+	}
+
+	/**
+	 * Prepare model data and return jsp file to display
+	 *
+	 * @param action
+	 * @param model
+	 * @param session
+	 * @return
+	 */
+	private String showDatasource(String action, Model model) {
+		logger.debug("Entering showDatasource: action='{}'", action);
+
+		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
+		databaseTypes.remove("demo");
+
+		model.addAttribute("databaseTypes", databaseTypes);
+		model.addAttribute("action", action);
+		return "editDatasource";
 	}
 
 	@RequestMapping(value = "/app/testDatasource", method = RequestMethod.POST)
@@ -205,7 +241,11 @@ public class DatasourceController {
 			@RequestParam("jndi") Boolean jndi,
 			@RequestParam("driver") String driver, @RequestParam("url") String url,
 			@RequestParam("username") String username, @RequestParam("password") String password,
-			@RequestParam("useBlankPassword") Boolean useBlankPassword) {
+			@RequestParam("useBlankPassword") Boolean useBlankPassword,
+			Locale locale) {
+
+		logger.debug("Entering testDatasource: jndi={}, driver='{}', url='{}', username='{}', useBlankPassword={}",
+				jndi, driver, url, username, useBlankPassword);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -224,7 +264,11 @@ public class DatasourceController {
 			if (useCurrentPassword) {
 				//password field blank. use current password
 				Datasource currentDatasource = datasourceService.getDatasource(id);
-				if (currentDatasource != null) {
+				logger.debug("currentDatasource={}", currentDatasource);
+				if (currentDatasource == null) {
+					response.setErrorMessage(messageSource.getMessage("page.message.cannotUseCurrentPassword", null, locale));
+					return response;
+				} else {
 					password = decryptPassword(currentDatasource.getPassword());
 				}
 			}
@@ -241,43 +285,14 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
-	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
-	 */
-	private String displayDatasource(String action, Model model) {
-		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
-		databaseTypes.remove("demo");
-
-		model.addAttribute("databaseTypes", databaseTypes);
-		model.addAttribute("action", action);
-		return "editDatasource";
-	}
-
-	/**
-	 * Encrypt and set datasource password
-	 *
-	 * @param datasource
-	 * @param password
-	 */
-	private void encryptAndSetPassword(Datasource datasource, String password) {
-		if (StringUtils.isNotEmpty(password)) {
-			password = "o:" + Encrypter.encrypt(password);
-		}
-
-		datasource.setPassword(password);
-	}
-
-	/**
 	 * Decrypt datasource password
 	 *
 	 * @param password
 	 * @return
 	 */
 	private String decryptPassword(String password) {
+		logger.debug("Entering decryptPassword");
+
 		if (password == null) {
 			password = "";
 		} else {
@@ -296,13 +311,16 @@ public class DatasourceController {
 	 * @param datasource
 	 * @throws Exception
 	 */
-	private void refreshConnections(Datasource datasource) throws Exception {
+	private void updateConnection(Datasource datasource) throws Exception {
+		logger.debug("Entering updateConnection: datasource={}", datasource);
+
 		String driver = datasource.getDriver();
 		String url = datasource.getUrl();
 		String username = datasource.getUsername();
 		String password = decryptPassword(datasource.getPassword());
 		boolean jndi = datasource.isJndi();
 
+		logger.debug("datasource.isActive()={}", datasource.isActive());
 		if (datasource.isActive()) {
 			testConnection(jndi, driver, url, username, password);
 		}
@@ -322,6 +340,9 @@ public class DatasourceController {
 	 * @throws Exception if connection failed, otherwise connection successful
 	 */
 	private void testConnection(boolean jndi, String driver, String url, String username, String password) throws Exception {
+		logger.debug("Entering testConnection: jndi={}, driver='{}', url='{}', username='{}'",
+				jndi, driver, url, username);
+
 		Connection conn = null;
 
 		try {
@@ -334,6 +355,49 @@ public class DatasourceController {
 		} finally {
 			DbUtils.close(conn);
 		}
+	}
+
+	/**
+	 * Set password
+	 *
+	 * @param datasource
+	 * @param action
+	 * @return i18n message to display in the user interface if there was a
+	 * problem, null otherwise
+	 * @throws SQLException
+	 */
+	private String setPassword(Datasource datasource, String action) throws SQLException {
+		logger.debug("Entering setPassword: datasource={}, action='{}'", datasource, action);
+
+		boolean useCurrentPassword = false;
+		String newPassword = datasource.getPassword();
+
+		if (datasource.isUseBlankPassword()) {
+			newPassword = "";
+		} else {
+			if (StringUtils.isEmpty(newPassword) && StringUtils.equals(action, "edit")) {
+				//password field blank. use current password
+				useCurrentPassword = true;
+			}
+		}
+
+		if (useCurrentPassword) {
+			//password field blank. use current password
+			Datasource currentDatasource = datasourceService.getDatasource(datasource.getDatasourceId());
+			if (currentDatasource == null) {
+				return "page.message.cannotUseCurrentPassword";
+			} else {
+				datasource.setPassword(currentDatasource.getPassword());
+			}
+		} else {
+			//encrypt new password
+			if (StringUtils.isNotEmpty(newPassword)) {
+				newPassword = "o:" + Encrypter.encrypt(newPassword);
+			}
+			datasource.setPassword(newPassword);
+		}
+
+		return null;
 	}
 
 }

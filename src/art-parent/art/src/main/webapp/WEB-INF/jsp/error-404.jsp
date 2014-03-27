@@ -22,15 +22,18 @@ Error page for 404 errors (page not found)
     </head>
     <body>
         <h1>Page Not Found</h1>
-		<table class="table table-bordered">
-			<tr>
-				<td><b>Page:</b></td>
-				<td><c:out value="${pageContext.errorData.requestURI}"/></td>
-			</tr>
-			<tr>
-				<td><b>Status Code:</b></td>
-				<td>${pageContext.errorData.statusCode}</td>
-			</tr>
-		</table>
+
+		<c:if test="${showErrors}">
+			<table class="table table-bordered">
+				<tr>
+					<td><b>Page:</b></td>
+					<td><c:out value="${pageContext.errorData.requestURI}"/></td>
+				</tr>
+				<tr>
+					<td><b>Status Code:</b></td>
+					<td>${pageContext.errorData.statusCode}</td>
+				</tr>
+			</table>
+		</c:if>
     </body>
 </html>

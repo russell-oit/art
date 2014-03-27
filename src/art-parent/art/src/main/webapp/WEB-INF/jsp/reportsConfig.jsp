@@ -19,8 +19,7 @@ Reports configuration page
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.delete" var="deleteText"/>
-<spring:message code="dialog.title.confirm" var="confirmText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 
@@ -50,32 +49,32 @@ Reports configuration page
 				$('#reports tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
-					var aPos = oTable.fnGetPosition(nRow);
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
 					var msg;
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
-						title: "${confirmText}",
 						buttons: {
 							'cancel': {
 								label: "${cancelText}"
 							},
 							'confirm': {
-								label: "${deleteText}"
+								label: "${okText}"
 							}
 						},
 						callback: function(result) {
 							if (result) {
 								$.ajax({
 									type: "POST",
+									dataType: "json",
 									url: "${pageContext.request.contextPath}/app/deleteReport.do",
 									data: {id: id},
 									success: function(response) {
 										if (response.success) {
-											msg = alertCloseButton + "${recordDeletedText}";
+											oTable.fnDeleteRow(nRow);
+
+											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-											oTable.fnDeleteRow(aPos);
 											$.notify("${recordDeletedText}", "success");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
@@ -107,7 +106,15 @@ Reports configuration page
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
-				<p>${error}</p>
+				<c:if test="${showErrors}">
+					<p>${encode:forHtmlContent(error)}</p>
+				</c:if>
+			</div>
+		</c:if>
+		<c:if test="${not empty recordSavedMessage}">
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
 			</div>
 		</c:if>
 

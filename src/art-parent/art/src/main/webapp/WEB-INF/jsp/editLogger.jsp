@@ -13,6 +13,7 @@ Edit logger page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <c:choose>
 	<c:when test="${action == 'add'}">
@@ -24,10 +25,6 @@ Edit logger page
 		<c:url var="formUrl" value="/app/editLogger.do"/>
 	</c:otherwise>
 </c:choose>
-
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
@@ -66,7 +63,9 @@ Edit logger page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
 					</div>
 				</c:if>
 

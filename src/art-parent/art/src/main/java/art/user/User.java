@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Class to represent a user. Data stored in the ART_USERS table
+ * Class to represent a user
  *
  * @author Timothy Anyona
  */

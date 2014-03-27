@@ -266,6 +266,7 @@ public class UserService {
 //				aj.load(rs.getInt("JOB_ID"), userId);
 //				aj.delete();
 //			}
+		
 		//lastly, delete user
 		sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
 		dbService.update(sql, id);

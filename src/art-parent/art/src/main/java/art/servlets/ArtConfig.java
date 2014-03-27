@@ -649,6 +649,7 @@ public class ArtConfig extends HttpServlet {
 	 * @param jndiUrl
 	 * @return
 	 * @throws SQLException
+	 * @throws javax.naming.NamingException
 	 */
 	public static Connection getJndiConnection(String jndiUrl) throws SQLException, NamingException {
 		Connection conn;

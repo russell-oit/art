@@ -19,7 +19,7 @@ Display user groups
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.delete" var="deleteText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 
@@ -33,7 +33,7 @@ Display user groups
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="userGroups.do"]').parent().addClass('active');
 				});
-				
+
 				var oTable = $('#userGroups').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
@@ -60,7 +60,7 @@ Display user groups
 								label: "${cancelText}"
 							},
 							'confirm': {
-								label: "${deleteText}"
+								label: "${okText}"
 							}
 						},
 						callback: function(result) {
@@ -73,7 +73,7 @@ Display user groups
 									success: function(response) {
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
-											
+
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											$.notify("${recordDeletedText}", "success");
@@ -107,7 +107,9 @@ Display user groups
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
-				<p>${error}</p>
+				<c:if test="${showErrors}">
+					<p>${encode:forHtmlContent(error)}</p>
+				</c:if>
 			</div>
 		</c:if>
 		<c:if test="${not empty recordSavedMessage}">

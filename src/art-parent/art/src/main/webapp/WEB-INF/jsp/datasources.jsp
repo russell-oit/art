@@ -19,8 +19,7 @@ Display datasources
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.delete" var="deleteText"/>
-<spring:message code="dialog.title.confirm" var="confirmText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
@@ -59,13 +58,12 @@ Display datasources
 					var msg;
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
-						title: "${confirmText}",
 						buttons: {
 							'cancel': {
 								label: "${cancelText}"
 							},
 							'confirm': {
-								label: "${deleteText}"
+								label: "${okText}"
 							}
 						},
 						callback: function(result) {
@@ -125,7 +123,9 @@ Display datasources
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
-				<p>${error}</p>
+				<c:if test="${showErrors}">
+					<p>${encode:forHtmlContent(error)}</p>
+				</c:if>
 			</div>
 		</c:if>
 
@@ -151,15 +151,15 @@ Display datasources
 			</thead>
 			<tbody>
 				<c:forEach var="datasource" items="${datasources}">
-					<tr data-name="${encode:forHtmlAttribute(datasource.name)}"
-						data-id="${datasource.datasourceId}">
+					<tr data-id="${datasource.datasourceId}"
+						data-name="${encode:forHtmlAttribute(datasource.name)}">
 
 						<td>${datasource.datasourceId}</td>
 						<td>${encode:forHtmlContent(datasource.name)} &nbsp;
 							<t:displayNewLabel creationDate="${datasource.creationDate}"
 											   updateDate="${datasource.updateDate}"/>
 						</td>
-						<td>${datasource.description}</td>
+						<td>${encode:forHtmlContent(datasource.description)}</td>
 						<td><t:displayActiveStatus active="${datasource.active}"/></td>
 						<td>
 							<div class="btn-group">

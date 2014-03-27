@@ -123,20 +123,37 @@ public class UserGroupService {
 	public void deleteUserGroup(int id) throws SQLException {
 		logger.debug("Entering deleteUserGroup: id={}", id);
 
-		String sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
-		int affectedRows = dbService.update(sql, id);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with delete. affectedRows={}, id={}", affectedRows, id);
-		}
+		String sql;
+		
+		//delete foreign key records
+		sql = "DELETE FROM ART_USER_GROUP_RULES WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_JOBS WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
+		
+		//finally delete user group
+		sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
+		dbService.update(sql, id);
 	}
 
 	/**
 	 * Add a new user group to the database
 	 *
 	 * @param group 
-	 * @return new record id if operation is successful, 0 otherwise
+	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
@@ -179,7 +196,6 @@ public class UserGroupService {
 			logger.warn("Problem with add. affectedRows={}, group={}", affectedRows, group);
 		}
 		
-		group.setUserGroupId(newId);
 		return newId;
 	}
 

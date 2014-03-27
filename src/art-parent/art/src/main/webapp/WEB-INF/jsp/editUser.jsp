@@ -13,13 +13,16 @@ Display edit user page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addUser" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/addUser.do"/>
 	</c:when>
 	<c:otherwise>
 		<spring:message code="page.title.editUser" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/editUser.do"/>
 	</c:otherwise>
 </c:choose>
 
@@ -86,7 +89,7 @@ Display edit user page
 	</jsp:attribute>
 
 	<jsp:body>
-		<form:form class="form-horizontal" method="POST" action="" modelAttribute="user">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="user">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -98,7 +101,9 @@ Display edit user page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
 					</div>
 				</c:if>
 				<c:if test="${not empty message}">
@@ -113,7 +118,7 @@ Display edit user page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action != 'add'}">
+						<c:if test="${action == 'edit'}">
 							<form:input path="userId" readonly="true" class="form-control"/>
 						</c:if>
 					</div>
@@ -263,7 +268,5 @@ Display edit user page
 				</div>
 			</fieldset>
 		</form:form>
-
 	</jsp:body>
-
 </t:mainPageWithPanel>

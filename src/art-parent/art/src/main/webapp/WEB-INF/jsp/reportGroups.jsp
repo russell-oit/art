@@ -19,7 +19,7 @@ Report groups configuration page
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
-<spring:message code="dialog.button.delete" var="deleteText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="reportGroups.message.linkedReportsExist" var="linkedReportsExistText"/>
@@ -61,7 +61,7 @@ Report groups configuration page
 								label: "${cancelText}"
 							},
 							'confirm': {
-								label: "${deleteText}"
+								label: "${okText}"
 							}
 						},
 						callback: function(result) {
@@ -120,7 +120,9 @@ Report groups configuration page
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
-				<p>${error}</p>
+				<c:if test="${showErrors}">
+					<p>${encode:forHtmlContent(error)}</p>
+				</c:if>
 			</div>
 		</c:if>
 		<c:if test="${not empty recordSavedMessage}">

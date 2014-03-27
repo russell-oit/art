@@ -13,13 +13,16 @@ Edit datasource page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addDatasource" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/addDatasource.do"/>
 	</c:when>
 	<c:otherwise>
 		<spring:message code="page.title.editDatasource" var="pageTitle"/>
+		<spring:url var="formUrl" value="/app/editDatasource.do"/>
 	</c:otherwise>
 </c:choose>
 
@@ -106,14 +109,8 @@ Edit datasource page
 	</jsp:attribute>
 
 	<jsp:body>
-		<form:form class="form-horizontal" method="POST" action="" modelAttribute="datasource">
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="datasource">
 			<fieldset>
-				<c:if test="${not empty message}">
-					<div class="alert alert-success alert-dismissable">
-						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-						<spring:message code="${message}"/>
-					</div>
-				</c:if>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
@@ -124,7 +121,15 @@ Edit datasource page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
+					</div>
+				</c:if>
+				<c:if test="${not empty message}">
+					<div class="alert alert-danger alert-dismissable">
+						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+						<spring:message code="${message}"/>
 					</div>
 				</c:if>
 
@@ -137,12 +142,9 @@ Edit datasource page
 					</label>
 					<div class="col-md-8">
 						<c:choose>
-							<c:when test="${action == 'add'}">
-								<form:hidden path="datasourceId"/>
-							</c:when>
-							<c:otherwise>
+							<c:if test="${action == 'edit'}">
 								<form:input path="datasourceId" readonly="true" class="form-control"/>
-							</c:otherwise>
+							</c:if>
 						</c:choose>
 					</div>
 				</div>
@@ -319,7 +321,5 @@ Edit datasource page
 				</div>
 			</fieldset>
 		</form:form>
-
 	</jsp:body>
-
 </t:mainPageWithPanel>

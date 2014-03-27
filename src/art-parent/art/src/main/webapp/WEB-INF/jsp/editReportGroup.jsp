@@ -26,10 +26,6 @@ Edit report group page
 	</c:otherwise>
 </c:choose>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
-<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
-
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
@@ -38,11 +34,6 @@ Edit report group page
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="reportGroups.do"]').parent().addClass('active');
-				});
-
-				$(function() {
-					//needed if tooltips shown on input-group element or button
-					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
 				$('#name').focus();
@@ -72,7 +63,9 @@ Edit report group page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${encode:forHtmlContent(error)}</p>
+						<c:if test="${showErrors}">
+							<p>${encode:forHtmlContent(error)}</p>
+						</c:if>
 					</div>
 				</c:if>
 
@@ -81,9 +74,11 @@ Edit report group page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:if test="${action != 'add'}">
-							<form:input path="reportGroupId" readonly="true" class="form-control"/>
-						</c:if>
+						<c:choose>
+							<c:if test="${action == 'edit'}">
+								<form:input path="reportGroupId" readonly="true" class="form-control"/>
+							</c:if>
+						</c:choose>
 					</div>
 				</div>
 				<div class="form-group">

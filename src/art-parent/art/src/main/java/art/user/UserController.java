@@ -45,6 +45,8 @@ public class UserController {
 
 	@RequestMapping(value = "/app/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
+		logger.debug("Entering showUsers");
+
 		try {
 			model.addAttribute("users", userService.getAllUsers());
 		} catch (SQLException ex) {
@@ -57,14 +59,15 @@ public class UserController {
 
 	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteUser(@RequestParam("id") Integer userId) {
+	AjaxResponse deleteUser(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteUser: id={}", id);
+
 		//object will be automatically converted to json
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
-
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userService.deleteUser(userId);
+			userService.deleteUser(id);
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -75,7 +78,9 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.GET)
-	public String showAddUser(Model model, HttpSession session) {
+	public String addUserGet(Model model, HttpSession session) {
+		logger.debug("Entering addUserGet");
+
 		User user = new User();
 
 		//set default properties for new users
@@ -83,46 +88,55 @@ public class UserController {
 		user.setCanChangePassword(true);
 
 		model.addAttribute("user", user);
-		return prepareEditUser("add", model, session);
+		return showUser("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
-	public String processAddUser(@ModelAttribute("user") @Valid User user,
+	public String addUserPost(@ModelAttribute("user") @Valid User user,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
+		logger.debug("Entering addUserPost: user={}", user);
+
+		String action = "add";
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return prepareEditUser("add", model, session);
+			return showUser(action, model, session);
 		}
 
 		try {
 			//set password as appropriate
-			String setPasswordMessage = setPassword(user, false);
+			String setPasswordMessage = setPassword(user, action);
+			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
-				return prepareEditUser("add", model, session);
+				return showUser("add", model, session);
 			}
 
 			userService.addUser(user);
-			redirectAttributes.addFlashAttribute("message", "users.message.userAdded");
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			redirectAttributes.addFlashAttribute("recordName", user.getUsername());
 			return "redirect:/app/users.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return prepareEditUser("add", model, session);
+		return showUser("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
-	public String showEditUser(@RequestParam("id") Integer userId, Model model,
+	public String editUserGet(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
+
+		logger.debug("Entering editUserGet: id={}", id);
 
 		User user = null;
 
 		try {
-			user = userService.getUser(userId);
+			user = userService.getUser(id);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -134,47 +148,56 @@ public class UserController {
 		}
 
 		model.addAttribute("user", user);
-		return prepareEditUser("edit", model, session);
+		return showUser("edit", model, session);
 	}
 
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.POST)
-	public String processEditUser(@ModelAttribute("user") @Valid User user,
+	public String editUserPost(@ModelAttribute("user") @Valid User user,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
+
+		logger.debug("Entering editUserPost: user={}", user);
 
 		//ensure an admin cannot edit admins of higher access level than himself
 		if (!canEditUser(session, user)) {
 			return "accessDenied";
 		}
 
+		String action = "edit";
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return prepareEditUser("edit", model, session);
+			return showUser(action, model, session);
 		}
 
 		try {
 			//set password as appropriate
-			String setPasswordMessage = setPassword(user, false);
+			String setPasswordMessage = setPassword(user, action);
+			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
-				return prepareEditUser("edit", model, session);
+				return showUser("edit", model, session);
 			}
 
 			userService.updateUser(user);
 			//update session user if appropriate
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			if (user.equals(sessionUser)) {
+			logger.debug("user.getUserId()={}", user.getUserId());
+			logger.debug("sessionUser.getUserId()={}", sessionUser.getUserId());
+			if (user.getUserId() == sessionUser.getUserId()) {
 				session.removeAttribute("sessionUser");
 				session.setAttribute("sessionUser", userService.getUser(user.getUserId()));
 			}
-			redirectAttributes.addFlashAttribute("message", "users.message.userUpdated");
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			redirectAttributes.addFlashAttribute("recordName", user.getUsername());
 			return "redirect:/app/users.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return prepareEditUser("edit", model, session);
+		return showUser(action, model, session);
 	}
 
 	/**
@@ -185,7 +208,9 @@ public class UserController {
 	 * @param session
 	 * @return
 	 */
-	private String prepareEditUser(String action, Model model, HttpSession session) {
+	private String showUser(String action, Model model, HttpSession session) {
+		logger.debug("Entering showUser: action='{}'", action);
+
 		try {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
@@ -206,7 +231,9 @@ public class UserController {
 	 * @return
 	 */
 	private List<AccessLevel> getAccessLevels(HttpSession session) {
-		List<AccessLevel> levels = new ArrayList<AccessLevel>();
+		logger.debug("Entering getAccessLevels");
+
+		List<AccessLevel> levels = new ArrayList<>();
 
 		//add only relevant levels according to the session user access level
 		//to ensure admin can't give himself a higher level
@@ -218,6 +245,7 @@ public class UserController {
 
 		//only standard admins and above and the repository user can edit users
 		User sessionUser = (User) session.getAttribute("sessionUser");
+		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
 		if (sessionUser.getAccessLevel().getValue() >= AccessLevel.SeniorAdmin.getValue()
 				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
 			levels.add(AccessLevel.SeniorAdmin);
@@ -238,12 +266,18 @@ public class UserController {
 	 * @return
 	 */
 	private boolean canEditUser(HttpSession session, User editUser) {
+		logger.debug("Entering canEditUser");
+
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
+		logger.debug("sessionUser={}", sessionUser);
+		logger.debug("editUser={}", editUser);
 		if (sessionUser == null || editUser == null) {
 			return false;
 		}
 
+		logger.debug("sessionUser.getAccessLevel().getValue()={}", sessionUser.getAccessLevel().getValue());
+		logger.debug("editUser.getAccessLevel().getValue()={}", editUser.getAccessLevel().getValue());
 		if (sessionUser.getAccessLevel().getValue() > editUser.getAccessLevel().getValue()
 				|| sessionUser.getAccessLevel() == AccessLevel.SuperAdmin
 				|| sessionUser.getAccessLevel() == AccessLevel.RepositoryUser) {
@@ -257,27 +291,32 @@ public class UserController {
 	 * Set password
 	 *
 	 * @param user
-	 * @param newRecord
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException
 	 */
-	private String setPassword(User user, boolean newRecord) throws SQLException {
+	private String setPassword(User user, String action) throws SQLException {
+		logger.debug("Entering setPassword: user={}, action='{}'", user, action);
+
 		boolean useCurrentPassword = false;
 		String newPassword = user.getPassword();
 
+		logger.debug("user.isUseBlankPassword()={}", user.isUseBlankPassword());
 		if (user.isUseBlankPassword()) {
 			newPassword = "";
 		} else {
-			if (StringUtils.isEmpty(newPassword) && !newRecord) {
+			logger.debug("StringUtils.isEmpty(newPassword)={}", StringUtils.isEmpty(newPassword));
+			if (StringUtils.isEmpty(newPassword) && StringUtils.equals(action, "edit")) {
 				//password field blank. use current password
 				useCurrentPassword = true;
 			}
 		}
 
+		logger.debug("useCurrentPassword={}", useCurrentPassword);
 		if (useCurrentPassword) {
 			//password field blank. use current password
 			User currentUser = userService.getUser(user.getUserId());
+			logger.debug("currentUser={}", currentUser);
 			if (currentUser == null) {
 				return "page.message.cannotUseCurrentPassword";
 			} else {

@@ -22,24 +22,27 @@ Error page for 405 errors (method not allowed)
     </head>
     <body>
         <h1>Method Not Allowed</h1>
-		<table class="table table-bordered">
-			<tr>
-				<td><b>Page:</b></td>
-				<td><c:out value="${pageContext.errorData.requestURI}"/></td>
-			</tr>
-			<tr>
-				<td><b>Status Code:</b></td>
-				<td>${pageContext.errorData.statusCode}</td>
-			</tr>
-			<tr>
-				<td><b>Message:</b></td>
-				<td>
-					<%-- this doesn't have the same content as ${pageContext.exception.message} --%>
-					<pre>
-						<c:out value="${requestScope['javax.servlet.error.message']}"/>
-					</pre>
-				</td>
-			</tr>
-		</table>
+
+		<c:if test="${showErrors}">
+			<table class="table table-bordered">
+				<tr>
+					<td><b>Page:</b></td>
+					<td><c:out value="${pageContext.errorData.requestURI}"/></td>
+				</tr>
+				<tr>
+					<td><b>Status Code:</b></td>
+					<td>${pageContext.errorData.statusCode}</td>
+				</tr>
+				<tr>
+					<td><b>Message:</b></td>
+					<td>
+						<%-- this doesn't have the same content as ${pageContext.exception.message} --%>
+						<pre>
+							<c:out value="${requestScope['javax.servlet.error.message']}"/>
+						</pre>
+					</td>
+				</tr>
+			</table>
+		</c:if>
     </body>
 </html>

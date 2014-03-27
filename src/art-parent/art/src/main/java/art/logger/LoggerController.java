@@ -17,6 +17,7 @@
 package art.logger;
 
 import art.enums.LoggerLevel;
+import art.servlets.ArtConfig;
 import art.utils.AjaxResponse;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -45,19 +46,25 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LoggerController {
 
+	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(LoggerController.class);
+
 	@RequestMapping(value = "/app/loggers", method = RequestMethod.GET)
 	public String showLoggers(Model model) {
-		//http://mailman.qos.ch/pipermail/logback-user/2008-November/000751.html
+		logger.debug("Entering showLoggers");
 
-		//get only loggers configured in logback.xml
-		LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-		List<ch.qos.logback.classic.Logger> logList = new ArrayList<>();
-		for (ch.qos.logback.classic.Logger log : lc.getLoggerList()) {
-			if (log.getLevel() != null || hasAppenders(log)) {
-				logList.add(log);
+		if (ArtConfig.getCustomSettings().isShowErrors()) {
+			//get only loggers configured in logback.xml
+			//http://mailman.qos.ch/pipermail/logback-user/2008-November/000751.html
+			LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+			List<ch.qos.logback.classic.Logger> logList = new ArrayList<>();
+			for (ch.qos.logback.classic.Logger log : lc.getLoggerList()) {
+				if (log.getLevel() != null || hasAppenders(log)) {
+					logList.add(log);
+				}
 			}
+			model.addAttribute("loggers", logList);
 		}
-		model.addAttribute("loggers", logList);
+
 		return "loggers";
 	}
 
@@ -69,6 +76,8 @@ public class LoggerController {
 	@RequestMapping(value = "/app/disableLogger", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse disableLogger(@RequestParam("name") String name) {
+		logger.debug("Entering disableLogger: name='{}'", name);
+
 		AjaxResponse response = new AjaxResponse();
 
 		ch.qos.logback.classic.Logger log = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(name);
@@ -81,6 +90,8 @@ public class LoggerController {
 
 	@RequestMapping(value = "/app/addLogger", method = RequestMethod.GET)
 	public String addLoggerGet(Model model) {
+		logger.debug("Entering addLoggerGet");
+
 		model.addAttribute("log", new art.logger.Logger());
 		return showLogger("add", model);
 	}
@@ -89,13 +100,18 @@ public class LoggerController {
 	public String addLoggerPost(@ModelAttribute("log") @Valid art.logger.Logger log,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
+		logger.debug("Entering addLoggerPost: log={}", log);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return showLogger("add", model);
 		}
 
 		//create logger
+		logger.debug("(log.getLevel()={}", log.getLevel());
 		if (log.getLevel() != null) {
+			logger.debug("log.getName()={}", log.getName());
 			ch.qos.logback.classic.Logger newLog = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(log.getName()); //this creates logger if it didn't exist
 			newLog.setLevel(Level.toLevel(log.getLevel().getValue()));
 		}
@@ -107,12 +123,14 @@ public class LoggerController {
 
 	@RequestMapping(value = "/app/editLogger", method = RequestMethod.GET)
 	public String editLoggerGet(@RequestParam("name") String name, Model model) {
+		logger.debug("Entering editLoggerGet: name='{}'", name);
 
 		art.logger.Logger log = new art.logger.Logger();
 		log.setName(name);
 
 		//get logger level
 		ch.qos.logback.classic.Logger editLog = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(name);
+		logger.debug("(editLog.getLevel() != null) = {}", editLog.getLevel() != null);
 		if (editLog.getLevel() != null) {
 			log.setLevel(LoggerLevel.toEnum(editLog.getLevel().toString()));
 		}
@@ -125,13 +143,18 @@ public class LoggerController {
 	public String editLoggerPost(@ModelAttribute("log") @Valid art.logger.Logger log,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
+		logger.debug("Entering editLoggerPost: log={}", log);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return showLogger("edit", model);
 		}
 
 		//edit logger
+		logger.debug("(log.getLevel()={}", log.getLevel());
 		if (log.getLevel() != null) {
+			logger.debug("log.getName()={}", log.getName());
 			ch.qos.logback.classic.Logger newLog = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(log.getName());
 			newLog.setLevel(Level.toLevel(log.getLevel().getValue()));
 		}
@@ -150,6 +173,8 @@ public class LoggerController {
 	 * @return
 	 */
 	private String showLogger(String action, Model model) {
+		logger.debug("Entering showLogger: action='{}'", action);
+
 		model.addAttribute("levels", LoggerLevel.list());
 		model.addAttribute("action", action);
 		return "editLogger";
