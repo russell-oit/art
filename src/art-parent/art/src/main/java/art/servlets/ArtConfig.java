@@ -152,13 +152,6 @@ public class ArtConfig extends HttpServlet {
 		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 		ctx.setAttribute("sortDatePattern", "yyyy-MM-dd-HH:mm:ss.SSS"); //to enable correct sorting of dates in tables
 		ctx.setAttribute("displayDatePattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
-		ctx.setAttribute("artHome", ctx.getRealPath(""));
-		ctx.setAttribute("serverName", ctx.getServerInfo());
-		ctx.setAttribute("servletApiSupported", ctx.getMajorVersion() + "." + ctx.getMinorVersion());
-		ctx.setAttribute("javaVendor", System.getProperty("java.vendor"));
-		ctx.setAttribute("javaVersion", System.getProperty("java.version"));
-		ctx.setAttribute("operatingSystem", System.getProperty("os.name") + " / "
-				+ System.getProperty("os.version") + " / " + System.getProperty("os.arch"));
 
 		//set application path
 		appPath = ctx.getRealPath("");

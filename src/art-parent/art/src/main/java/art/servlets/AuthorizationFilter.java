@@ -251,11 +251,6 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel == AccessLevel.SuperAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "serverInfo")) {
-			//super admins
-			if (accessLevel == AccessLevel.SuperAdmin.getValue()) {
-				authorised = true;
-			}
 		} else if (StringUtils.equals(page, "language")) {
 			//all can access
 			authorised = true;

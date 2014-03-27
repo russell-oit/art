@@ -134,12 +134,6 @@ Header that appears at the top of all pages, except the login and logs pages
 									<spring:message code="header.link.loggers"/>
 								</a>
 							</li>
-							<li class="divider"></li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/serverInfo.do">
-									<spring:message code="header.link.serverInfo"/>
-								</a>
-							</li>
 						</ul>
 					</li>
 					<li>
