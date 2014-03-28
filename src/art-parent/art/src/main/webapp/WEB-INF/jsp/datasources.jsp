@@ -77,24 +77,24 @@ Display datasources
 										var linkedReports = response.data;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
-											
+
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											$.notify("${recordDeletedText}", "success");
 										} else if (linkedReports.length > 0) {
 											msg = alertCloseButton + "${linkedReportsExistText}" + "<ul>";
-											
+
 											$.each(linkedReports, function(index, value) {
 												msg += "<li>" + value + "</li>";
 											});
-											
+
 											msg += "</ul>";
 
-											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 											$.notify("${cannotDeleteRecordText}", "error");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},

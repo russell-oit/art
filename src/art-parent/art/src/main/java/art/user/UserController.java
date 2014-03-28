@@ -67,8 +67,15 @@ public class UserController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userService.deleteUser(id);
-			response.setSuccess(true);
+			List<String> linkedJobs = new ArrayList<>();
+			int count = userService.deleteUser(id, linkedJobs);
+			logger.debug("count={}", count);
+			if (count == -1) {
+				//user not deleted because of linked records
+				response.setData(linkedJobs);
+			} else {
+				response.setSuccess(true);
+			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());

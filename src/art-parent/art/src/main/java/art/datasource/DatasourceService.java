@@ -118,12 +118,30 @@ public class DatasourceService {
 	 * Delete a datasource
 	 *
 	 * @param id
+	 * @param linkedReports list that will be populated with linked reports if
+	 * they exist
+	 * @return -1 if the record was not deleted because there are some linked
+	 * records in other tables, otherwise the count of the number of datasources
+	 * deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
-	public void deleteDatasource(int id) throws SQLException {
-		String sql = "DELETE FROM ART_DATABASES WHERE DATABASE_ID=?";
-		dbService.update(sql, id);
+	public int deleteDatasource(int id, List<String> linkedReports) throws SQLException {
+		logger.debug("Entering deleteDatasource: id={}", id);
+		
+		String sql;
+
+		//don't delete if important linked records exist
+		List<String> reports = getLinkedReports(id);
+		if (!reports.isEmpty()) {
+			if (linkedReports != null) {
+				linkedReports.addAll(reports);
+			}
+			return -1;
+		}
+
+		sql = "DELETE FROM ART_DATABASES WHERE DATABASE_ID=?";
+		return dbService.update(sql, id);
 	}
 
 	/**
@@ -224,6 +242,8 @@ public class DatasourceService {
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int datasourceId) throws SQLException {
+		logger.debug("Entering getLinkedReports: datasourceId={}", datasourceId);
+		
 		String sql = "SELECT NAME"
 				+ " FROM ART_QUERIES"
 				+ " WHERE DATABASE_ID=?";

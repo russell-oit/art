@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -201,7 +202,7 @@ public class UserService {
 	 */
 	@Cacheable(value = "users")
 	public List<User> getAllUsers() throws SQLException {
-		List<User> users = new ArrayList<User>();
+		List<User> users = new ArrayList<>();
 
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -228,13 +229,32 @@ public class UserService {
 	 * Delete a user and all related records
 	 *
 	 * @param id
+	 * @param linkedJobs list that will be populated with linked jobs if they
+	 * exist
+	 * @return -1 if the record was not deleted because there are some linked
+	 * records in other tables, otherwise the count of the number of users
+	 * deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public void deleteUser(int id) throws SQLException {
+	public int deleteUser(int id, List<String> linkedJobs) throws SQLException {
+		logger.debug("Entering deleteUser: id={}", id);
+
+		//don't delete if important linked records exist
+		List<String> jobs = getLinkedJobs(id);
+		if (!jobs.isEmpty()) {
+			if (linkedJobs != null) {
+				linkedJobs.addAll(jobs);
+			}
+			return -1;
+		}
+
 		String sql;
 
-		//delete user-report relationships
+		//delete foreign key records
+		sql = "DELETE FROM ART_ADMIN_PRIVILEGES WHERE USER_ID=?";
+		dbService.update(sql, id);
+
 		sql = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=?";
 		dbService.update(sql, id);
 
@@ -246,30 +266,19 @@ public class UserService {
 		sql = "DELETE FROM ART_USER_RULES WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-		//delete user-user user relationships
-		sql = "DELETE FROM ART_USER_ASSIGNMENT WHERE USER_ID=?";
-		dbService.update(sql, id);
-
 		//delete user-shared job relationships
 		sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=?";
 		dbService.update(sql, id);
 
-//			//delete user's jobs. this will delete all records related to the job e.g. quartz records, job parameters etc
-//			sql = "SELECT JOB_ID FROM ART_JOBS WHERE USER_ID=?";
-//			ps = conn.prepareStatement(sql);
-//			ps.setInt(1, userId);
-//
-//			rs = ps.executeQuery();
-//			while (rs.next()) {
-//				//TODO delete job using user id
-//				ArtJob aj = new ArtJob();
-//				aj.load(rs.getInt("JOB_ID"), userId);
-//				aj.delete();
-//			}
-		
+		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_JOB_ARCHIVES WHERE USER_ID=?";
+		dbService.update(sql, id);
+
 		//lastly, delete user
 		sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
-		dbService.update(sql, id);
+		return dbService.update(sql, id);
 	}
 
 	/**
@@ -406,5 +415,23 @@ public class UserService {
 		if (affectedRows != 1) {
 			logger.warn("Problem with update. affectedRows={}, user={}", affectedRows, user);
 		}
+	}
+
+	/**
+	 * Get jobs that are owned by a given user
+	 *
+	 * @param userId
+	 * @return list with linked job names, empty list otherwise
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedJobs(int userId) throws SQLException {
+		logger.debug("Entering getLinkedJobs: userId={}", userId);
+
+		String sql = "SELECT JOB_NAME"
+				+ " FROM ART_JOBS"
+				+ " WHERE USER_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
+		return dbService.query(sql, h, userId);
 	}
 }

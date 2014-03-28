@@ -35,8 +35,8 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -349,14 +349,46 @@ public class ReportService {
 	}
 
 	/**
+	 * Get jobs that use a given report
+	 *
+	 * @param reportId
+	 * @return list with linked job names, empty list otherwise
+	 * @throws SQLException
+	 */
+	public List<String> getLinkedJobs(int reportId) throws SQLException {
+		logger.debug("Entering getLinkedJobs: reportId={}", reportId);
+		
+		String sql = "SELECT JOB_NAME"
+				+ " FROM ART_JOBS"
+				+ " WHERE QUERY_ID=?";
+
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
 	 * Delete a report
 	 *
 	 * @param id
+	 * @param linkedJobs list that will be populated with linked jobs if they
+	 * exist
+	 * @return -1 if the record was not deleted because there are some linked
+	 * records in other tables, otherwise the count of the number of reports
+	 * deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public void deleteReport(int id) throws SQLException {
+	public int deleteReport(int id, List<String> linkedJobs) throws SQLException {
 		logger.debug("Entering deleteReport: id={}", id);
+
+		//don't delete if important linked records exist
+		List<String> jobs = getLinkedJobs(id);
+		if (!jobs.isEmpty()) {
+			if (linkedJobs != null) {
+				linkedJobs.addAll(jobs);
+			}
+			return -1;
+		}
 
 		String sql;
 
@@ -368,21 +400,25 @@ public class ReportService {
 		sql = "DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ?";
 		dbService.update(sql, id);
 
-		//delete sql source
-		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
-		dbService.update(sql, id);
-
 		//delete query-rule relationships
 		sql = "DELETE FROM ART_QUERY_RULES WHERE QUERY_ID = ?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE QUERY_ID = ?";
 		dbService.update(sql, id);
 
 		//delete drilldown queries
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID = ?";
 		dbService.update(sql, id);
 
+		//delete sql source
+		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
+		dbService.update(sql, id);
+
+		
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID = ?";
-		dbService.update(sql, id);
+		return dbService.update(sql, id);
 	}
 
 	/**
@@ -565,8 +601,8 @@ public class ReportService {
 	 * datasource id, 2 = report status
 	 */
 	private List<Object> getSaveDefaults(Report report) {
-		List<Object> values=new ArrayList<>();
-		
+		List<Object> values = new ArrayList<>();
+
 		int reportGroupId; //database column doesn't allow null
 		if (report.getReportGroup() == null) {
 			logger.warn("Report group not defined. Defaulting to 0");
@@ -593,7 +629,7 @@ public class ReportService {
 			reportStatus = report.getReportStatus().getValue();
 		}
 		values.add(reportStatus);
-		
+
 		return values;
 	}
 
@@ -712,7 +748,7 @@ public class ReportService {
 			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId);
 		} catch (SQLException ex) {
 			//if an error occurred when copying report details, delete report also
-			deleteReport(newId);
+			deleteReport(newId, null);
 			throw ex;
 		}
 	}

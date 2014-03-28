@@ -24,6 +24,7 @@ import art.utils.Encrypter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,16 +82,16 @@ public class DatasourceController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedReports = datasourceService.getLinkedReports(id);
-
-			logger.debug("linkedReports.isEmpty()={}", linkedReports.isEmpty());
-			if (linkedReports.isEmpty()) {
-				//no linked reports. go ahead and delete datasource
+			List<String> linkedReports = new ArrayList<>();
+			int count = datasourceService.deleteDatasource(id, linkedReports);
+			logger.debug("count={}", count);
+			if (count == -1) {
+				//datasource not deleted because of linked records
+				response.setData(linkedReports);
+			} else {
 				datasourceService.deleteDatasource(id);
 				response.setSuccess(true);
 				ArtConfig.refreshConnections();
-			} else {
-				response.setData(linkedReports);
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -101,8 +102,8 @@ public class DatasourceController {
 	}
 
 	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.GET)
-	public String addDatasourceGet(Model model) {
-		logger.debug("Entering addDatasourceGet");
+	public String addDatasource(Model model) {
+		logger.debug("Entering addDatasource");
 
 		Datasource datasource = new Datasource();
 

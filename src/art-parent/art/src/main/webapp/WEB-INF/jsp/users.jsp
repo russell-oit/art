@@ -24,6 +24,7 @@ Display user configuration page
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="users.activeStatus.active" var="activeText"/>
 <spring:message code="users.activeStatus.disabled" var="disabledText"/>
+<spring:message code="users.message.linkedJobsExist" var="linkedJobsExistText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -74,12 +75,24 @@ Display user configuration page
 									url: "${pageContext.request.contextPath}/app/deleteUser.do",
 									data: {id: id},
 									success: function(response) {
+										var linkedJobs = response.data;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
-											
+
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											$.notify("${recordDeletedText}", "success");
+										} else if (linkedJobs.length > 0) {
+											msg = alertCloseButton + "${linkedJobsExistText}" + "<ul>";
+
+											$.each(linkedJobs, function(index, value) {
+												msg += "<li>" + value + "</li>";
+											});
+
+											msg += "</ul>";
+
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+											$.notify("${cannotDeleteRecordText}", "error");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);

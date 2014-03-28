@@ -88,11 +88,11 @@ Report groups configuration page
 
 											msg += "</ul>";
 
-											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 											$.notify("${cannotDeleteRecordText}", "error");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#ajaxResponse").addClass("alert alert-danger alert-dismissable").html(msg);
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
 											$.notify("${errorOccurredText}", "error");
 										}
 									},

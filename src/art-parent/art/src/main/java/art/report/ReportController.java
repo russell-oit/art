@@ -149,8 +149,15 @@ public class ReportController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			reportService.deleteReport(id);
-			response.setSuccess(true);
+			List<String> linkedJobs = new ArrayList<>();
+			int count = reportService.deleteReport(id, linkedJobs);
+			logger.debug("count={}", count);
+			if (count == -1) {
+				//report not deleted because of linked records
+				response.setData(linkedJobs);
+			} else {
+				response.setSuccess(true);
+			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());

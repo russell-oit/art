@@ -174,24 +174,38 @@ public class ReportGroupService {
 	 * Delete a report group
 	 *
 	 * @param id
+	 * @param linkedReports list that will be populated with linked reports if
+	 * they exist
+	 * @return -1 if the record was not deleted because there are some linked
+	 * records in other tables, otherwise the count of the number of users
+	 * deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
-	public void deleteReportGroup(int id) throws SQLException {
+	public int deleteReportGroup(int id, List<String> linkedReports) throws SQLException {
 		logger.debug("Entering deleteReportGroup: id={}", id);
-		
+
+		//don't delete if important linked records exist
+		List<String> reports = getLinkedReports(id);
+		if (!reports.isEmpty()) {
+			if (linkedReports != null) {
+				linkedReports.addAll(reports);
+			}
+			return -1;
+		}
+
 		String sql;
 
 		//delete foreign key records
 		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE QUERY_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE QUERY_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		//finally delete report group
 		sql = "DELETE FROM ART_QUERY_GROUPS WHERE QUERY_GROUP_ID=?";
-		dbService.update(sql, id);
+		return dbService.update(sql, id);
 	}
 
 	/**
@@ -237,7 +251,7 @@ public class ReportGroupService {
 		if (affectedRows != 1) {
 			logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
 		}
-		
+
 		return newId;
 	}
 
@@ -269,7 +283,7 @@ public class ReportGroupService {
 			logger.warn("Problem with save. affectedRows={}, group={}", affectedRows, group);
 		}
 	}
-	
+
 	/**
 	 * Get reports that are in a given report group
 	 *
@@ -278,9 +292,11 @@ public class ReportGroupService {
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int reportGroupId) throws SQLException {
+		logger.debug("Entering getLinkedReports: reportGroupId={}", reportGroupId);
+		
 		String sql = "SELECT NAME"
-					+ " FROM ART_QUERIES"
-					+ " WHERE QUERY_GROUP_ID=?";
+				+ " FROM ART_QUERIES"
+				+ " WHERE QUERY_GROUP_ID=?";
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
 		return dbService.query(sql, h, reportGroupId);

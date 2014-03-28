@@ -18,6 +18,7 @@ package art.reportgroup;
 
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -69,13 +70,14 @@ public class ReportGroupController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedReports = reportGroupService.getLinkedReports(id);
-			if (linkedReports.isEmpty()) {
-				//no linked reports. go ahead and delete report group
-				reportGroupService.deleteReportGroup(id);
-				response.setSuccess(true);
-			} else {
+			List<String> linkedReports = new ArrayList<>();
+			int count = reportGroupService.deleteReportGroup(id, linkedReports);
+			logger.debug("count={}", count);
+			if (count == -1) {
+				//report group not deleted because of linked records
 				response.setData(linkedReports);
+			} else {
+				response.setSuccess(true);
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -94,7 +96,7 @@ public class ReportGroupController {
 	}
 
 	@RequestMapping(value = "/app/saveReportGroup", method = RequestMethod.POST)
-	public String addReportGroup(@ModelAttribute("group") @Valid ReportGroup group,
+	public String saveReportGroup(@ModelAttribute("group") @Valid ReportGroup group,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
