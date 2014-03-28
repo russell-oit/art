@@ -20,6 +20,7 @@ import art.reportgroup.ReportGroupService;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,13 +90,12 @@ public class UserGroupController {
 		return showUserGroup("add", model);
 	}
 
-	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.POST)
-	public String addUserGroupPost(@ModelAttribute("group") @Valid UserGroup group,
+	@RequestMapping(value = "/app/saveUserGroup", method = RequestMethod.POST)
+	public String saveUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
-		logger.debug("Entering addUserGroupPost: group={}", group);
-
-		String action = "add";
+		logger.debug("Entering addUserGroupPost: group={}, action='{}'", group, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -104,8 +104,13 @@ public class UserGroupController {
 		}
 
 		try {
-			userGroupService.addUserGroup(group);
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			if (StringUtils.equals(action, "add")) {
+				userGroupService.addUserGroup(group);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				userGroupService.updateUserGroup(group);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
 			redirectAttributes.addFlashAttribute("recordName", group.getName());
 			return "redirect:/app/userGroups.do";
 		} catch (SQLException ex) {
@@ -117,8 +122,8 @@ public class UserGroupController {
 	}
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
-	public String editUserGroupGet(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editUserGroupGet: id={}", id);
+	public String editUserGroup(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editUserGroup: id={}", id);
 
 		try {
 			model.addAttribute("group", userGroupService.getUserGroup(id));
@@ -128,33 +133,6 @@ public class UserGroupController {
 		}
 
 		return showUserGroup("edit", model);
-	}
-
-	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.POST)
-	public String editUserGroupPost(@ModelAttribute("group") @Valid UserGroup group,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering editUserGroupPost: group={}", group);
-
-		String action = "edit";
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showUserGroup(action, model);
-		}
-
-		try {
-			userGroupService.updateUserGroup(group);
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			redirectAttributes.addFlashAttribute("recordName", group.getName());
-			return "redirect:/app/userGroups.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showUserGroup(action, model);
 	}
 
 	/**

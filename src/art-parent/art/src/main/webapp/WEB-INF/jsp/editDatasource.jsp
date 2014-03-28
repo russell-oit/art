@@ -18,12 +18,10 @@ Edit datasource page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addDatasource" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/addDatasource.do"/>
 	</c:when>
-	<c:otherwise>
+	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editDatasource" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/editDatasource.do"/>
-	</c:otherwise>
+	</c:when>
 </c:choose>
 
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
@@ -109,6 +107,7 @@ Edit datasource page
 	</jsp:attribute>
 
 	<jsp:body>
+		<spring:url var="formUrl" value="/app/saveDatasource.do"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="datasource">
 			<fieldset>
 				<c:if test="${formErrors != null}">
@@ -136,6 +135,7 @@ Edit datasource page
 				<div id="ajaxResponse">
 				</div>
 
+				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>

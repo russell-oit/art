@@ -160,23 +160,21 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.GET)
-	public String addReportGet(Model model, HttpSession session) {
-		logger.debug("Entering addReportGet");
+	public String addReport(Model model, HttpSession session) {
+		logger.debug("Entering addReport");
 
 		model.addAttribute("report", new Report());
 		return showReport("add", model, session);
 	}
 
-	@RequestMapping(value = "/app/addReport", method = RequestMethod.POST)
-	public String addReportPost(@ModelAttribute("report") @Valid Report report,
+	@RequestMapping(value = "/app/saveReport", method = RequestMethod.POST)
+	public String saveReport(@ModelAttribute("report") @Valid Report report,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session,
+			HttpSession session, @RequestParam("action") String action,
 			@RequestParam("templateFile") MultipartFile templateFile,
 			@RequestParam("subreportFile") MultipartFile subreportFile) {
 
-		logger.debug("Entering addReportPost: report={}", report);
-
-		String action = "add";
+		logger.debug("Entering saveReport: report={}, action='{}'", report, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -193,8 +191,16 @@ public class ReportController {
 				return showReport(action, model, session);
 			}
 
-			reportService.addReport(report);
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			if (StringUtils.equals(action, "add")) {
+				reportService.addReport(report);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "copy")) {
+				reportService.copyReport(report, report.getReportId());
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				reportService.updateReport(report);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
 			redirectAttributes.addFlashAttribute("recordName", report.getName());
 			return "redirect:/app/reportsConfig.do";
 		} catch (SQLException | IOException ex) {
@@ -206,10 +212,10 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
-	public String editReportGet(@RequestParam("id") Integer id, Model model,
+	public String editReport(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
 
-		logger.debug("Entering editReportGet: id={}", id);
+		logger.debug("Entering editReport: id={}", id);
 
 		try {
 			model.addAttribute("report", reportService.getReport(id));
@@ -221,47 +227,11 @@ public class ReportController {
 		return showReport("edit", model, session);
 	}
 
-	@RequestMapping(value = "/app/editReport", method = RequestMethod.POST)
-	public String editReportPost(@ModelAttribute("report") @Valid Report report,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session,
-			@RequestParam("templateFile") MultipartFile templateFile,
-			@RequestParam("subreportFile") MultipartFile subreportFile) {
-
-		logger.debug("Entering editReportPost: report={}", report);
-
-		String action = "edit";
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showReport(action, model, session);
-		}
-
-		try {
-			//finalise report properties
-			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
-			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
-			if (prepareReportMessage != null) {
-				model.addAttribute("message", prepareReportMessage);
-				return showReport(action, model, session);
-			}
-
-			reportService.updateReport(report);
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			redirectAttributes.addFlashAttribute("recordName", report.getName());
-			return "redirect:/app/reportsConfig.do";
-		} catch (SQLException | IOException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showReport(action, model, session);
-	}
-
 	@RequestMapping(value = "/app/copyReport", method = RequestMethod.GET)
-	public String copyReportGet(@RequestParam("id") Integer id, Model model,
+	public String copyReport(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
+
+		logger.debug("Entering copyReport: id={}", id);
 
 		try {
 			model.addAttribute("report", reportService.getReport(id));
@@ -271,44 +241,6 @@ public class ReportController {
 		}
 
 		return showReport("copy", model, session);
-	}
-
-	@RequestMapping(value = "/app/copyReport", method = RequestMethod.POST)
-	public String copyReportPost(@ModelAttribute("report") @Valid Report report,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session,
-			@RequestParam("templateFile") MultipartFile templateFile,
-			@RequestParam("subreportFile") MultipartFile subreportFile) {
-
-		logger.debug("Entering copyReportPost: report={}", report);
-
-		String action = "copy";
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showReport(action, model, session);
-		}
-
-		try {
-			//finalise report properties
-			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
-			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
-			if (prepareReportMessage != null) {
-				model.addAttribute("message", prepareReportMessage);
-				return showReport(action, model, session);
-			}
-
-			reportService.copyReport(report, report.getReportId());
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
-			redirectAttributes.addFlashAttribute("recordName", report.getName());
-			return "redirect:/app/reportsConfig.do";
-		} catch (SQLException | IOException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showReport(action, model, session);
 	}
 
 	/**

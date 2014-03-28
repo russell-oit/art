@@ -18,12 +18,10 @@ Edit logger page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addLogger" var="pageTitle"/>
-		<c:url var="formUrl" value="/app/addLogger.do"/>
 	</c:when>
-	<c:otherwise>
+	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editLogger" var="pageTitle"/>
-		<c:url var="formUrl" value="/app/editLogger.do"/>
-	</c:otherwise>
+	</c:when>
 </c:choose>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
@@ -51,6 +49,7 @@ Edit logger page
 	</jsp:attribute>
 
 	<jsp:body>
+		<spring:url var="formUrl" value="/app/saveLogger.do"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="log">
 			<fieldset>
 				<c:if test="${formErrors != null}">
@@ -69,6 +68,7 @@ Edit logger page
 					</div>
 				</c:if>
 
+				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="control-label col-md-4" for="name">
 						<spring:message code="page.text.name"/>

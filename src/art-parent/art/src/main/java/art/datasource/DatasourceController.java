@@ -114,14 +114,12 @@ public class DatasourceController {
 		return showDatasource("add", model);
 	}
 
-	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.POST)
-	public String addDatasourcePost(@ModelAttribute("datasource")
-			@Valid Datasource datasource,
+	@RequestMapping(value = "/app/saveDatasource", method = RequestMethod.POST)
+	public String saveDatasource(@ModelAttribute("datasource")
+			@Valid Datasource datasource, @RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
-		logger.debug("Entering addDatasourcePost: datasource={}", datasource);
-
-		String action = "add";
+		logger.debug("Entering saveDatasource: datasource={}, action='{}'", datasource, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -138,7 +136,13 @@ public class DatasourceController {
 				return showDatasource(action, model);
 			}
 
-			datasourceService.addDatasource(datasource);
+			if (StringUtils.equals(action, "add")) {
+				datasourceService.addDatasource(datasource);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				datasourceService.updateDatasource(datasource);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
 
 			try {
 				updateConnection(datasource);
@@ -147,7 +151,6 @@ public class DatasourceController {
 				redirectAttributes.addFlashAttribute("error", ex);
 			}
 
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			redirectAttributes.addFlashAttribute("recordName", datasource.getName());
 			return "redirect:/app/datasources.do";
 		} catch (SQLException ex) {
@@ -159,8 +162,8 @@ public class DatasourceController {
 	}
 
 	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
-	public String editDatasourceGet(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editDatasourceGet: id={}", id);
+	public String editDatasource(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editDatasource: id={}", id);
 
 		try {
 			model.addAttribute("datasource", datasourceService.getDatasource(id));
@@ -170,50 +173,6 @@ public class DatasourceController {
 		}
 
 		return showDatasource("edit", model);
-	}
-
-	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.POST)
-	public String editDatasourcePost(@ModelAttribute("datasource")
-			@Valid Datasource datasource,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering editDatasourcePost: datasource={}", datasource);
-
-		String action = "edit";
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showDatasource(action, model);
-		}
-
-		try {
-			//set password as appropriate
-			String setPasswordMessage = setPassword(datasource, action);
-			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
-			if (setPasswordMessage != null) {
-				model.addAttribute("message", setPasswordMessage);
-				return showDatasource(action, model);
-			}
-
-			datasourceService.updateDatasource(datasource);
-
-			try {
-				updateConnection(datasource);
-			} catch (Exception ex) {
-				logger.error("Error", ex);
-				redirectAttributes.addFlashAttribute("error", ex);
-			}
-
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			redirectAttributes.addFlashAttribute("recordName", datasource.getName());
-			return "redirect:/app/datasources.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showDatasource(action, model);
 	}
 
 	/**

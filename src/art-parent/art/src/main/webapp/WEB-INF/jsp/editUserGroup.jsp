@@ -18,12 +18,10 @@ Edit user group page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addUserGroup" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/addUserGroup.do"/>
 	</c:when>
-	<c:otherwise>
+	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editUserGroup" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/editUserGroup.do"/>
-	</c:otherwise>
+	</c:when>
 </c:choose>
 
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
@@ -76,6 +74,7 @@ Edit user group page
 	</jsp:attribute>
 
 	<jsp:body>
+		<spring:url var="formUrl" value="/app/saveUserGroup.do"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="group">
 			<fieldset>
 				<c:if test="${formErrors != null}">
@@ -94,6 +93,7 @@ Edit user group page
 					</div>
 				</c:if>
 
+				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>

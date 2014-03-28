@@ -18,12 +18,10 @@ Edit report group page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addReportGroup" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/addReportGroup.do"/>
 	</c:when>
-	<c:otherwise>
+	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editReportGroup" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/editReportGroup.do"/>
-	</c:otherwise>
+	</c:when>
 </c:choose>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
@@ -51,6 +49,7 @@ Edit report group page
 	</jsp:attribute>
 
 	<jsp:body>
+		<spring:url var="formUrl" value="/app/saveReportGroup.do"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="group">
 			<fieldset>
 				<c:if test="${formErrors != null}">
@@ -69,6 +68,7 @@ Edit report group page
 					</div>
 				</c:if>
 
+				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>

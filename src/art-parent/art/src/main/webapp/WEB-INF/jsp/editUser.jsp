@@ -18,12 +18,10 @@ Display edit user page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addUser" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/addUser.do"/>
 	</c:when>
-	<c:otherwise>
+	<c:when test="${action == 'edit'}">
 		<spring:message code="page.title.editUser" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/editUser.do"/>
-	</c:otherwise>
+	</c:when>
 </c:choose>
 
 <spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
@@ -89,6 +87,7 @@ Display edit user page
 	</jsp:attribute>
 
 	<jsp:body>
+		<spring:url var="formUrl" value="/app/saveUser.do"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="user">
 			<fieldset>
 				<c:if test="${formErrors != null}">
@@ -113,6 +112,7 @@ Display edit user page
 					</div>
 				</c:if>
 
+				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>

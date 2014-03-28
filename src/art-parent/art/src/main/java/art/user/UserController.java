@@ -78,8 +78,8 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.GET)
-	public String addUserGet(Model model, HttpSession session) {
-		logger.debug("Entering addUserGet");
+	public String addUser(Model model, HttpSession session) {
+		logger.debug("Entering addUser");
 
 		User user = new User();
 
@@ -91,14 +91,20 @@ public class UserController {
 		return showUser("add", model, session);
 	}
 
-	@RequestMapping(value = "/app/addUser", method = RequestMethod.POST)
-	public String addUserPost(@ModelAttribute("user") @Valid User user,
+	@RequestMapping(value = "/app/saveUser", method = RequestMethod.POST)
+	public String saveUser(@ModelAttribute("user") @Valid User user,
+			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
-		logger.debug("Entering addUserPost: user={}", user);
+		logger.debug("Entering saveUser: user={}, action='{}'", user, action);
 
-		String action = "add";
+		if (StringUtils.equals(action, "edit")) {
+			//ensure an admin cannot edit admins of higher access level than himself
+			if (!canEditUser(session, user)) {
+				return "accessDenied";
+			}
+		}
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -112,11 +118,24 @@ public class UserController {
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
-				return showUser("add", model, session);
+				return showUser(action, model, session);
 			}
 
-			userService.addUser(user);
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			if (StringUtils.equals(action, "add")) {
+				userService.addUser(user);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				userService.updateUser(user);
+				//update session user if appropriate
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				logger.debug("user.getUserId()={}", user.getUserId());
+				logger.debug("sessionUser.getUserId()={}", sessionUser.getUserId());
+				if (user.getUserId() == sessionUser.getUserId()) {
+					session.removeAttribute("sessionUser");
+					session.setAttribute("sessionUser", userService.getUser(user.getUserId()));
+				}
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
 			redirectAttributes.addFlashAttribute("recordName", user.getUsername());
 			return "redirect:/app/users.do";
 		} catch (SQLException ex) {
@@ -124,14 +143,14 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUser("add", model, session);
+		return showUser(action, model, session);
 	}
 
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
-	public String editUserGet(@RequestParam("id") Integer id, Model model,
+	public String editUser(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
 
-		logger.debug("Entering editUserGet: id={}", id);
+		logger.debug("Entering editUser: id={}", id);
 
 		User user = null;
 
@@ -149,55 +168,6 @@ public class UserController {
 
 		model.addAttribute("user", user);
 		return showUser("edit", model, session);
-	}
-
-	@RequestMapping(value = "/app/editUser", method = RequestMethod.POST)
-	public String editUserPost(@ModelAttribute("user") @Valid User user,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session) {
-
-		logger.debug("Entering editUserPost: user={}", user);
-
-		//ensure an admin cannot edit admins of higher access level than himself
-		if (!canEditUser(session, user)) {
-			return "accessDenied";
-		}
-
-		String action = "edit";
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showUser(action, model, session);
-		}
-
-		try {
-			//set password as appropriate
-			String setPasswordMessage = setPassword(user, action);
-			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
-			if (setPasswordMessage != null) {
-				model.addAttribute("message", setPasswordMessage);
-				return showUser("edit", model, session);
-			}
-
-			userService.updateUser(user);
-			//update session user if appropriate
-			User sessionUser = (User) session.getAttribute("sessionUser");
-			logger.debug("user.getUserId()={}", user.getUserId());
-			logger.debug("sessionUser.getUserId()={}", sessionUser.getUserId());
-			if (user.getUserId() == sessionUser.getUserId()) {
-				session.removeAttribute("sessionUser");
-				session.setAttribute("sessionUser", userService.getUser(user.getUserId()));
-			}
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			redirectAttributes.addFlashAttribute("recordName", user.getUsername());
-			return "redirect:/app/users.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showUser(action, model, session);
 	}
 
 	/**

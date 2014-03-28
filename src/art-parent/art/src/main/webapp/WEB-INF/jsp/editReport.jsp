@@ -18,15 +18,12 @@ Edit report page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addReport" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/addReport.do"/>
 	</c:when>
 	<c:when test="${action == 'copy'}">
 		<spring:message code="page.title.copyReport" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/copyReport.do"/>
 	</c:when>
 	<c:otherwise>
 		<spring:message code="page.title.editReport" var="pageTitle"/>
-		<spring:url var="formUrl" value="/app/editReport.do"/>
 	</c:otherwise>
 </c:choose>
 
@@ -251,6 +248,7 @@ Edit report page
 	</jsp:attribute>
 
 	<jsp:body>
+		<spring:url var="formUrl" value="/app/saveReport.do"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="report" enctype="multipart/form-data">
 			<fieldset>
 				<c:if test="${formErrors != null}">
@@ -275,6 +273,7 @@ Edit report page
 					</div>
 				</c:if>
 
+				<input type="hidden" name="action" value="${action}">
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>

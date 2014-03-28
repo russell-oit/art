@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -89,26 +90,27 @@ public class LoggerController {
 	}
 
 	@RequestMapping(value = "/app/addLogger", method = RequestMethod.GET)
-	public String addLoggerGet(Model model) {
-		logger.debug("Entering addLoggerGet");
+	public String addLogger(Model model) {
+		logger.debug("Entering addLogger");
 
 		model.addAttribute("log", new art.logger.Logger());
 		return showLogger("add", model);
 	}
 
-	@RequestMapping(value = "/app/addLogger", method = RequestMethod.POST)
-	public String addLoggerPost(@ModelAttribute("log") @Valid art.logger.Logger log,
+	@RequestMapping(value = "/app/saveLogger", method = RequestMethod.POST)
+	public String saveLogger(@ModelAttribute("log") @Valid art.logger.Logger log,
+			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
-		logger.debug("Entering addLoggerPost: log={}", log);
+		logger.debug("Entering saveLogger: log={}, action='{}'", log, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showLogger("add", model);
+			return showLogger(action, model);
 		}
 
-		//create logger
+		//create or edit logger
 		logger.debug("(log.getLevel()={}", log.getLevel());
 		if (log.getLevel() != null) {
 			logger.debug("log.getName()={}", log.getName());
@@ -116,14 +118,18 @@ public class LoggerController {
 			newLog.setLevel(Level.toLevel(log.getLevel().getValue()));
 		}
 
-		redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+		if (StringUtils.equals(action, "add")) {
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+		} else if (StringUtils.equals(action, "edit")) {
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+		}
 		redirectAttributes.addFlashAttribute("recordName", log.getName());
 		return "redirect:/app/loggers.do";
 	}
 
 	@RequestMapping(value = "/app/editLogger", method = RequestMethod.GET)
-	public String editLoggerGet(@RequestParam("name") String name, Model model) {
-		logger.debug("Entering editLoggerGet: name='{}'", name);
+	public String editLogger(@RequestParam("name") String name, Model model) {
+		logger.debug("Entering editLogger: name='{}'", name);
 
 		art.logger.Logger log = new art.logger.Logger();
 		log.setName(name);
@@ -137,31 +143,6 @@ public class LoggerController {
 
 		model.addAttribute("log", log);
 		return showLogger("edit", model);
-	}
-
-	@RequestMapping(value = "/app/editLogger", method = RequestMethod.POST)
-	public String editLoggerPost(@ModelAttribute("log") @Valid art.logger.Logger log,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering editLoggerPost: log={}", log);
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showLogger("edit", model);
-		}
-
-		//edit logger
-		logger.debug("(log.getLevel()={}", log.getLevel());
-		if (log.getLevel() != null) {
-			logger.debug("log.getName()={}", log.getName());
-			ch.qos.logback.classic.Logger newLog = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(log.getName());
-			newLog.setLevel(Level.toLevel(log.getLevel().getValue()));
-		}
-
-		redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-		redirectAttributes.addFlashAttribute("recordName", log.getName());
-		return "redirect:/app/loggers.do";
 	}
 
 	/**

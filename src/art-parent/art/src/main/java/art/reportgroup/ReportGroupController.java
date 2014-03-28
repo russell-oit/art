@@ -20,6 +20,7 @@ import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.List;
 import javax.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,20 +86,19 @@ public class ReportGroupController {
 	}
 
 	@RequestMapping(value = "/app/addReportGroup", method = RequestMethod.GET)
-	public String addReportGroupGet(Model model) {
-		logger.debug("Entering addReportGroupGet");
+	public String addReportGroup(Model model) {
+		logger.debug("Entering addReportGroup");
 
 		model.addAttribute("group", new ReportGroup());
 		return showReportGroup("add", model);
 	}
 
-	@RequestMapping(value = "/app/addReportGroup", method = RequestMethod.POST)
-	public String addReportGroupPost(@ModelAttribute("group") @Valid ReportGroup group,
+	@RequestMapping(value = "/app/saveReportGroup", method = RequestMethod.POST)
+	public String addReportGroup(@ModelAttribute("group") @Valid ReportGroup group,
+			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
-		logger.debug("Entering addReportGroupPost: group={}", group);
-
-		String action = "add";
+		logger.debug("Entering saveReportGroup: group={}, action='{}'", group, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -107,8 +107,13 @@ public class ReportGroupController {
 		}
 
 		try {
-			reportGroupService.addReportGroup(group);
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			if (StringUtils.equals(action, "add")) {
+				reportGroupService.addReportGroup(group);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				reportGroupService.updateReportGroup(group);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
 			redirectAttributes.addFlashAttribute("recordName", group.getName());
 			return "redirect:/app/reportGroups.do";
 		} catch (SQLException ex) {
@@ -120,8 +125,8 @@ public class ReportGroupController {
 	}
 
 	@RequestMapping(value = "/app/editReportGroup", method = RequestMethod.GET)
-	public String editReportGroupGet(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editReportGroupGet: id={}", id);
+	public String editReportGroup(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editReportGroup: id={}", id);
 
 		try {
 			model.addAttribute("group", reportGroupService.getReportGroup(id));
@@ -131,33 +136,6 @@ public class ReportGroupController {
 		}
 
 		return showReportGroup("edit", model);
-	}
-
-	@RequestMapping(value = "/app/editReportGroup", method = RequestMethod.POST)
-	public String editReportGroupPost(@ModelAttribute("group") @Valid ReportGroup group,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering editReportGroupPost: group={}", group);
-
-		String action = "edit";
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showReportGroup(action, model);
-		}
-
-		try {
-			reportGroupService.updateReportGroup(group);
-			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			redirectAttributes.addFlashAttribute("recordName", group.getName());
-			return "redirect:/app/reportGroups.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showReportGroup(action, model);
 	}
 
 	/**
