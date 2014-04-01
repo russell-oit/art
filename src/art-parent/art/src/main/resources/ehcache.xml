@@ -26,4 +26,7 @@
 	<cache name="reportGroups"
 		   eternal="true" maxEntriesLocalHeap="50" />
 	
+	<cache name="schedules"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
 </ehcache>

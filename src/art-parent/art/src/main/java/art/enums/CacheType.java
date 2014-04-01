@@ -28,7 +28,8 @@ import java.util.List;
 public enum CacheType {
 
 	Mondrian("Mondrian"), Reports("Reports"), ReportGroups("ReportGroups"),
-	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources");
+	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
+	Schedules("Schedules");
 	private String value;
 
 	private CacheType(String value) {

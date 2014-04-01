@@ -17,10 +17,7 @@
 package art.usergroup;
 
 import art.dbutils.DbService;
-import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -190,12 +187,7 @@ public class UserGroupService {
 			DbUtils.getCurrentTimeStamp()
 		};
 
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with add. affectedRows={}, group={}", affectedRows, group);
-		}
+		dbService.update(sql, values);
 		
 		return newId;
 	}
@@ -223,11 +215,6 @@ public class UserGroupService {
 			group.getUserGroupId()
 		};
 
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with update. affectedRows={}, group={}", affectedRows, group);
-		}
+		dbService.update(sql, values);
 	}
 }

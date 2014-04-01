@@ -141,11 +141,9 @@ Edit datasource page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:choose>
-							<c:if test="${action == 'edit'}">
-								<form:input path="datasourceId" readonly="true" class="form-control"/>
-							</c:if>
-						</c:choose>
+						<c:if test="${action == 'edit'}">
+							<form:input path="datasourceId" readonly="true" class="form-control"/>
+						</c:if>
 					</div>
 				</div>
 				<div class="form-group">
@@ -162,7 +160,7 @@ Edit datasource page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="500" class="form-control"/>
+						<form:input path="description" maxlength="200" class="form-control"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>

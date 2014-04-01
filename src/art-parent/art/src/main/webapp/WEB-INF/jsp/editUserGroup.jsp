@@ -99,11 +99,9 @@ Edit user group page
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
-						<c:choose>
-							<c:if test="${action == 'edit'}">
-								<form:input path="userGroupId" readonly="true" class="form-control"/>
-							</c:if>
-						</c:choose>
+						<c:if test="${action == 'edit'}">
+							<form:input path="userGroupId" readonly="true" class="form-control"/>
+						</c:if>
 					</div>
 				</div>
 				<div class="form-group">

@@ -583,7 +583,7 @@ public class DataSource implements TimerListener {
 						if (b) {
 							logger.info("Datasource '{}' ({}) was in use for too much time and has been removed it from the pool.", name, i);
 						}
-					} else if (testSQL != null) {
+					} else if (testSQL != null && testSQL.length() > 0) {
 						logger.debug("{} - testSQL='{}'", thisObjectTicket, testSQL);
 						try {
 							e.test(testSQL);

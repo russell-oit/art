@@ -81,6 +81,9 @@ public class CacheController {
 				case Datasources:
 					cacheHelper.clearDatasources();
 					break;
+				case Schedules:
+					cacheHelper.clearSchedules();
+					break;
 				default:
 					message = "Clear cache not available: " + name;
 			}

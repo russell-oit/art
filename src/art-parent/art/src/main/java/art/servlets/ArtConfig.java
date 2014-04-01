@@ -18,6 +18,7 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabase;
 import art.dbcp.DataSource;
+import art.dbutils.DbService;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
@@ -31,18 +32,36 @@ import art.settings.CustomSettings;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.zafarkhaja.semver.Version;
 import com.lowagie.text.FontFactory;
 import java.io.File;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.quartz.CronExpression;
@@ -71,8 +90,8 @@ public class ArtConfig extends HttpServlet {
 	private static final Logger logger = LoggerFactory.getLogger(ArtConfig.class);
 	private static String exportPath;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
-	private static final ArrayList<String> reportFormats = new ArrayList<String>(); //report formats available to users
-	private static final ArrayList<String> allReportFormats = new ArrayList<String>(); //all report formats
+	private static final ArrayList<String> reportFormats = new ArrayList<>(); //report formats available to users
+	private static final ArrayList<String> allReportFormats = new ArrayList<>(); //all report formats
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
@@ -86,6 +105,7 @@ public class ArtConfig extends HttpServlet {
 	private static final String sep = java.io.File.separator;
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
+	private static String artVersion;
 
 	/**
 	 * {@inheritDoc}
@@ -130,7 +150,7 @@ public class ArtConfig extends HttpServlet {
 					logger.error("Error while deregistering JDBC driver: {}", driver, ex);
 				}
 			}
-		} catch (Exception ex) {
+		} catch (SchedulerException | InterruptedException ex) {
 			logger.error("Error", ex);
 		}
 
@@ -147,7 +167,8 @@ public class ArtConfig extends HttpServlet {
 		ServletContext ctx = getServletConfig().getServletContext();
 
 		//save variables in application scope for access from jsp pages
-		ctx.setAttribute("artVersion", ctx.getInitParameter("versionNumber"));
+		artVersion = ctx.getInitParameter("versionNumber");
+		ctx.setAttribute("artVersion", artVersion);
 		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
 		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 		ctx.setAttribute("sortDatePattern", "yyyy-MM-dd-HH:mm:ss.SSS"); //to enable correct sorting of dates in tables
@@ -286,7 +307,6 @@ public class ArtConfig extends HttpServlet {
 
 		//initialize art datasource
 		String artDbDriver = artDatabaseConfiguration.getDriver();
-		String artDbTestSql = artDatabaseConfiguration.getTestSql();
 		int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
 		int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
 		boolean artDbjndi = artDatabaseConfiguration.isJndi();
@@ -298,9 +318,7 @@ public class ArtConfig extends HttpServlet {
 		artdb.setPassword(artDatabaseConfiguration.getPassword());
 		artdb.setMaxConnections(maxPoolConnections);
 		artdb.setDriver(artDbDriver);
-		if (StringUtils.length(artDbTestSql) > 3) {
-			artdb.setTestSQL(artDbTestSql);
-		}
+		artdb.setTestSQL(artDatabaseConfiguration.getTestSql());
 
 		//set application name connection property
 		setConnectionProperties(artdb);
@@ -318,8 +336,8 @@ public class ArtConfig extends HttpServlet {
 			try {
 				Class.forName(artDbDriver).newInstance();
 				logger.info("ART Database JDBC driver registered: {}", artDbDriver);
-			} catch (Exception e) {
-				logger.error("Error while registering ART Database JDBC driver: {}", artDbDriver, e);
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+				logger.error("Error while registering ART Database JDBC driver: {}", artDbDriver, ex);
 			}
 		}
 
@@ -354,11 +372,7 @@ public class ArtConfig extends HttpServlet {
 					password = Encrypter.decrypt(password.substring(2));
 				}
 				ds.setPassword(password);
-				String testSQL = rs.getString("TEST_SQL");
-				if (StringUtils.length(testSQL) > 3) {
-					ds.setTestSQL(testSQL);
-				}
-
+				ds.setTestSQL(rs.getString("TEST_SQL"));
 				ds.setMaxConnections(maxPoolConnections);
 				ds.setDriver(rs.getString("DRIVER"));
 
@@ -367,7 +381,7 @@ public class ArtConfig extends HttpServlet {
 
 				dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
 			}
-		} catch (Exception e) {
+		} catch (SQLException | NamingException e) {
 			logger.error("Error", e);
 		} finally {
 			DbUtils.close(rs, ps, conn);
@@ -376,7 +390,7 @@ public class ArtConfig extends HttpServlet {
 		//register jdbc drivers for datasources in the map
 		//only register a driver once. several datasources may use the same driver
 		//use a set (doesn't add duplicate items)
-		Set<String> drivers = new HashSet<String>();
+		Set<String> drivers = new HashSet<>();
 
 		//get distinct drivers. except art database driver which has already been registered
 		if (dataSources != null) {
@@ -401,6 +415,9 @@ public class ArtConfig extends HttpServlet {
 
 		//create quartz scheduler
 		createQuartzScheduler();
+
+		//run additional steps
+		upgrade();
 	}
 
 	//TODO remove after refactoring
@@ -530,6 +547,15 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static String getAppPath() {
 		return appPath;
+	}
+
+	/**
+	 * Get the art version
+	 *
+	 * @return the art version
+	 */
+	public static String getArtVersion() {
+		return artVersion;
 	}
 
 	/**
@@ -702,7 +728,7 @@ public class ArtConfig extends HttpServlet {
 		//reset datasources array
 		initializeDatasources();
 
-		logger.info("Datasources Refresh: Completed at {}", new java.util.Date().toString());
+		logger.info("Datasources Refresh: Completed at {}", new Date().toString());
 	}
 
 	/**
@@ -721,7 +747,7 @@ public class ArtConfig extends HttpServlet {
 		//reset datasources array
 		initializeDatasources();
 
-		logger.info("Datasources Force Refresh: Completed at {}", new java.util.Date().toString());
+		logger.info("Datasources Force Refresh: Completed at {}", new Date().toString());
 	}
 
 	/**
@@ -790,7 +816,7 @@ public class ArtConfig extends HttpServlet {
 	 * @param date
 	 * @return
 	 */
-	public static String getDateDisplayString(java.util.Date date) {
+	public static String getDateDisplayString(Date date) {
 		String dateString;
 
 		if (date == null) {
@@ -1211,10 +1237,13 @@ public class ArtConfig extends HttpServlet {
 			return;
 		}
 
+		PreparedStatement psUpdate = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+
 		try {
 			String oldJobsSqlString;
 			String updateJobSqlString;
-			PreparedStatement psUpdate;
 
 			//prepare statement for updating migration status			
 			updateJobSqlString = "UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='Y',"
@@ -1229,8 +1258,8 @@ public class ArtConfig extends HttpServlet {
 					+ " FROM ART_JOBS"
 					+ " WHERE MIGRATED_TO_QUARTZ='N'";
 
-			PreparedStatement ps = conn.prepareStatement(oldJobsSqlString);
-			ResultSet rs = ps.executeQuery();
+			ps = conn.prepareStatement(oldJobsSqlString);
+			rs = ps.executeQuery();
 
 			String minute;
 			String hour;
@@ -1239,7 +1268,7 @@ public class ArtConfig extends HttpServlet {
 			String month;
 			String second = "0"; //seconds always 0
 			String cronString;
-			java.util.Date nextRunDate;
+			Date nextRunDate;
 
 			int jobId;
 			String jobName;
@@ -1305,7 +1334,7 @@ public class ArtConfig extends HttpServlet {
 					//ensure that trigger will fire at least once in the future
 					CronTrigger tempTrigger = newTrigger().withSchedule(cronSchedule(cronString)).build();
 
-					nextRunDate = tempTrigger.getFireTimeAfter(new java.util.Date());
+					nextRunDate = tempTrigger.getFireTimeAfter(new Date());
 					if (nextRunDate != null) {
 						//create job
 						migratedRecordCount += 1;
@@ -1340,35 +1369,150 @@ public class ArtConfig extends HttpServlet {
 
 						psUpdate.addBatch();
 						//run executebatch periodically to prevent out of memory errors
-						if (migratedRecordCount % batchSize
-								== 0) {
+						if (migratedRecordCount % batchSize == 0) {
 							ps.executeBatch();
 							ps.clearBatch(); //not sure if this is necessary
 						}
 					}
 				}
 			}
+
 			if (migratedRecordCount > 0) {
 				psUpdate.executeBatch(); //run any remaining updates																
 			}
-			psUpdate.close();
-
-			rs.close();
-			ps.close();
 
 			if (migratedRecordCount > 0) {
 				//output the number of jobs migrated
 				logger.info("Finished migrating jobs to quartz. Migrated {} out of {} jobs", migratedRecordCount, totalRecordCount);
 			}
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (SQLException | SchedulerException ex) {
+			logger.error("Error", ex);
 		} finally {
+			DbUtils.close(psUpdate);
+			DbUtils.close(rs, ps, conn);
+		}
+	}
+
+	/**
+	 * run upgrade steps
+	 */
+	private static void upgrade() {
+		File upgradeFile = new File(ArtConfig.getArtTempPath() + "upgrade.txt");
+		if (upgradeFile.exists()) {
 			try {
-				if (conn != null) {
-					conn.close();
+				//don't consider alpha, beta, rc etc
+				//also, pre-releases, i.e. alpha, beta, etc are considered less than final releases
+				String version=StringUtils.substringBefore(artVersion, "-");
+				logger.debug("version='{}'", version);
+
+				Version currentVersion = Version.valueOf(version);
+
+				//changes introduced in 3.0.0
+				if (currentVersion.greaterThanOrEqualTo(Version.valueOf("3.0.0"))) {
+					addUserIds();
+					addScheduleIds();
 				}
-			} catch (SQLException e) {
-				logger.error("Error", e);
+
+				boolean deleted = upgradeFile.delete();
+				if (!deleted) {
+					logger.warn("Upgrade file not deleted: {}", upgradeFile);
+				}
+			} catch (SQLException ex) {
+				logger.error("Error", ex);
+			}
+		}
+	}
+
+	/**
+	 * Populate user_id columns. Columns added in 3.0
+	 */
+	private static void addUserIds() throws SQLException {
+		logger.debug("Entering addUserIds");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT USERNAME FROM ART_USERS WHERE USER_ID IS NULL";
+		ResultSetHandler<List<String>> h2 = new ColumnListHandler<>("USERNAME");
+		List<String> users = dbService.query(sql, h2);
+
+		logger.debug("users.isEmpty()={}", users.isEmpty());
+		if (!users.isEmpty()) {
+			//generate new id
+			sql = "SELECT MAX(USER_ID) FROM ART_USERS";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer maxId = dbService.query(sql, h);
+			logger.debug("maxId={}", maxId);
+
+			if (maxId == null || maxId < 0) {
+				maxId = 0;
+			}
+
+			for (String user : users) {
+				maxId++;
+
+				sql = "UPDATE ART_USERS SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_ADMIN_PRIVILEGES SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_USER_QUERIES SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_USER_QUERY_GROUPS SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_USER_RULES SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_JOBS SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_USER_JOBS SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_USER_GROUP_ASSIGNMENT SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+
+				sql = "UPDATE ART_JOB_ARCHIVES SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
+			}
+		}
+
+	}
+
+	/**
+	 * Populate schedule_id column. Column added in 3.0
+	 */
+	private static void addScheduleIds() throws SQLException {
+		logger.debug("Entering addScheduleIds");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT SCHEDULE_NAME FROM ART_JOB_SCHEDULES WHERE SCHEDULE_ID IS NULL";
+		ResultSetHandler<List<String>> h2 = new ColumnListHandler<>("SCHEDULE_NAME");
+		List<String> schedules = dbService.query(sql, h2);
+
+		logger.debug("schedules.isEmpty()={}", schedules.isEmpty());
+		if (!schedules.isEmpty()) {
+			//generate new id
+			sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer maxId = dbService.query(sql, h);
+			logger.debug("maxId={}", maxId);
+
+			if (maxId == null || maxId < 0) {
+				maxId = 0;
+			}
+
+			for (String schedule : schedules) {
+				maxId++;
+				sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_ID=? WHERE SCHEDULE_NAME=?";
+				dbService.update(sql, maxId, schedule);
 			}
 		}
 	}

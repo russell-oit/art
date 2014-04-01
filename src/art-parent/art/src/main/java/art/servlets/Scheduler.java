@@ -30,10 +30,8 @@
 package art.servlets;
 
 import art.cache.CacheHelper;
-import art.utils.UpgradeHelper;
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,8 +56,8 @@ public class Scheduler extends HttpServlet {
 	private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 	static long INTERVAL_MINUTES = 10; // run clean every x minutes
 	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
-	long INTERVAL = (1000 * 60 * INTERVAL_MINUTES); // INTERVAL_MINUTES in milliseconds
-	long INTERVAL_DELETE_FILES = (1000 * 60 * DELETE_FILES_MINUTES); // DELETE_FILES_MINUTES in milliseconds
+	long INTERVAL = 1000L * 60L * INTERVAL_MINUTES; // INTERVAL_MINUTES in milliseconds
+	long INTERVAL_DELETE_FILES = 1000L * 60L * DELETE_FILES_MINUTES; // DELETE_FILES_MINUTES in milliseconds
 	Timer t;
 
 	/**
@@ -76,11 +74,6 @@ public class Scheduler extends HttpServlet {
 
 			logger.debug("ART Scheduler starting up");
 
-			//run upgrade steps
-			if (ArtConfig.isArtDatabaseConfigured()) {
-				upgrade();
-			}
-
 			//start clean thread timer
 			t = new Timer(this);
 			t.start();
@@ -88,25 +81,6 @@ public class Scheduler extends HttpServlet {
 			logger.debug("ART scheduler running");
 		} catch (ServletException e) {
 			logger.error("Error", e);
-		}
-	}
-
-	/**
-	 * run upgrade steps
-	 */
-	private void upgrade() {
-		File upgradeFile = new File(ArtConfig.getArtTempPath() + "upgrade.txt");
-		if (upgradeFile.exists()) {
-			try {
-				UpgradeHelper upgradeHelper = new UpgradeHelper();
-				upgradeHelper.upgrade();
-				boolean deleted = upgradeFile.delete();
-				if (!deleted) {
-					logger.warn("Upgrade file not deleted: {}", upgradeFile);
-				}
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
-			}
 		}
 	}
 
@@ -130,7 +104,6 @@ public class Scheduler extends HttpServlet {
 	 * Delete old export files
 	 */
 	public void clean() {
-
 		logger.debug("Running clean");
 
 		// Delete old files in the reports export directory

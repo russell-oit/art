@@ -315,7 +315,7 @@ public class ReportController {
 		validExtensions.add("xlsx");
 
 		long maxUploadSize = ArtConfig.getSettings().getMaxFileUploadSize(); //size in MB
-		maxUploadSize = maxUploadSize * 1000 * 1000; //size in bytes
+		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
 
 		//save template file
 		long uploadSize = file.getSize();

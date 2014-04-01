@@ -89,7 +89,6 @@ public class DatasourceController {
 				//datasource not deleted because of linked records
 				response.setData(linkedReports);
 			} else {
-				datasourceService.deleteDatasource(id);
 				response.setSuccess(true);
 				ArtConfig.refreshConnections();
 			}

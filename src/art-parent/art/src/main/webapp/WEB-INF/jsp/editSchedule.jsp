@@ -1,9 +1,9 @@
 <%-- 
-    Document   : editReportGroup
-    Created on : 17-Mar-2014, 17:25:15
+    Document   : editSchedule
+    Created on : 01-Apr-2014, 11:23:24
     Author     : Timothy Anyona
 
-Edit report group page
+Edit schedule page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -17,10 +17,10 @@ Edit report group page
 
 <c:choose>
 	<c:when test="${action == 'add'}">
-		<spring:message code="page.title.addReportGroup" var="pageTitle"/>
+		<spring:message code="page.title.addSchedule" var="pageTitle"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editReportGroup" var="pageTitle"/>
+		<spring:message code="page.title.editSchedule" var="pageTitle"/>
 	</c:when>
 </c:choose>
 
@@ -31,7 +31,12 @@ Edit report group page
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="reportGroups.do"]').parent().addClass('active');
+					$('a[href*="schedules.do"]').parent().addClass('active');
+				});
+
+				$(function() {
+					//needed if tooltips shown on input-group element or button
+					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
 				$('#name').focus();
@@ -49,8 +54,8 @@ Edit report group page
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveReportGroup.do"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="group">
+		<spring:url var="formUrl" value="/app/saveSchedule.do"/>
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="schedule">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -75,7 +80,7 @@ Edit report group page
 					</label>
 					<div class="col-md-8">
 						<c:if test="${action == 'edit'}">
-							<form:input path="reportGroupId" readonly="true" class="form-control"/>
+							<form:input path="scheduleId" readonly="true" class="form-control"/>
 						</c:if>
 					</div>
 				</div>
@@ -84,7 +89,7 @@ Edit report group page
 						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="name" maxlength="25" class="form-control"/>
+						<form:input path="name" maxlength="50" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
@@ -93,8 +98,53 @@ Edit report group page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="60" class="form-control"/>
+						<form:input path="description" maxlength="200" class="form-control"/>
 						<form:errors path="description" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="minute">
+						<spring:message code="schedules.label.minute"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="minute" maxlength="100" class="form-control"/>
+						<form:errors path="minute" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="hour">
+						<spring:message code="schedules.label.hour"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="hour" maxlength="100" class="form-control"/>
+						<form:errors path="hour" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="day">
+						<spring:message code="schedules.label.day"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="day" maxlength="100" class="form-control"/>
+						<form:errors path="day" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="month">
+						<spring:message code="schedules.label.month"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="month" maxlength="100" class="form-control"/>
+						<form:errors path="month" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="weekday">
+						<spring:message code="schedules.label.weekday"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="weekday" maxlength="100" class="form-control"/>
+						<form:errors path="weekday" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

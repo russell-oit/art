@@ -112,5 +112,13 @@ public class CacheHelper {
 	public void clearDatasources() {
 		logger.debug("Entering clearDatasources");
 	}
+	
+	/**
+	 * Clear schedules cache
+	 */
+	@CacheEvict(value = "schedules", allEntries = true)
+	public void clearSchedules() {
+		logger.debug("Entering clearSchedules");
+	}
 
 }

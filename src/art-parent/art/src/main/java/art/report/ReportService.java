@@ -29,7 +29,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -357,7 +359,7 @@ public class ReportService {
 	 */
 	public List<String> getLinkedJobs(int reportId) throws SQLException {
 		logger.debug("Entering getLinkedJobs: reportId={}", reportId);
-		
+
 		String sql = "SELECT JOB_NAME"
 				+ " FROM ART_JOBS"
 				+ " WHERE QUERY_ID=?";
@@ -415,7 +417,6 @@ public class ReportService {
 		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
 		dbService.update(sql, id);
 
-		
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID = ?";
 		return dbService.update(sql, id);
@@ -425,7 +426,7 @@ public class ReportService {
 	 * Add a new report to the database
 	 *
 	 * @param report
-	 * @return new record id if operation is successful, 0 otherwise
+	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
@@ -457,29 +458,7 @@ public class ReportService {
 				+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
 
 		//set values for possibly null property objects
-		int reportGroupId; //database column doesn't allow null
-		if (report.getReportGroup() == null) {
-			logger.warn("Report group not defined. Defaulting to 0");
-			reportGroupId = 0;
-		} else {
-			reportGroupId = report.getReportGroup().getReportGroupId();
-		}
-
-		int datasourceId; //database column doesn't allow null
-		if (report.getDatasource() == null) {
-			logger.warn("Datasource not defined. Defaulting to 0");
-			datasourceId = 0;
-		} else {
-			datasourceId = report.getDatasource().getDatasourceId();
-		}
-
-		String reportStatus;
-		if (report.getReportStatus() == null) {
-			logger.warn("Report status not defined. Defaulting to null");
-			reportStatus = null;
-		} else {
-			reportStatus = report.getReportStatus().getValue();
-		}
+		Map<String,Object> defaults=getSaveDefaults(report);
 
 		Object[] values = {
 			newId,
@@ -487,11 +466,11 @@ public class ReportService {
 			report.getShortDescription(),
 			report.getDescription(),
 			report.getReportType(),
-			reportGroupId,
-			datasourceId,
+			defaults.get("reportGroupId"),
+			defaults.get("datasourceId"),
 			report.getContactPerson(),
 			report.isUseRules(),
-			reportStatus,
+			defaults.get("reportStatus"),
 			report.isParametersInOutput(),
 			report.getxAxisLabel(),
 			report.getyAxisLabel(),
@@ -503,16 +482,11 @@ public class ReportService {
 			report.getXmlaCatalog(),
 			report.getXmlaUsername(),
 			report.getXmlaPassword(),
-			DbUtils.getCurrentTimeStamp(),};
+			DbUtils.getCurrentTimeStamp()
+		};
 
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with add. affectedRows={}, report={}", affectedRows, report);
-		}
-
-		report.setReportId(newId);
+		dbService.update(sql, values);
+		
 		return newId;
 	}
 
@@ -536,40 +510,18 @@ public class ReportService {
 				+ " WHERE QUERY_ID=?";
 
 		//set values for possibly null property objects
-		int reportGroupId; //database column doesn't allow null
-		if (report.getReportGroup() == null) {
-			logger.warn("Report group not defined. Defaulting to 0");
-			reportGroupId = 0;
-		} else {
-			reportGroupId = report.getReportGroup().getReportGroupId();
-		}
-
-		int datasourceId; //database column doesn't allow null
-		if (report.getDatasource() == null) {
-			logger.warn("Datasource not defined. Defaulting to 0");
-			datasourceId = 0;
-		} else {
-			datasourceId = report.getDatasource().getDatasourceId();
-		}
-
-		String reportStatus;
-		if (report.getReportStatus() == null) {
-			logger.warn("Report status not defined. Defaulting to null");
-			reportStatus = null;
-		} else {
-			reportStatus = report.getReportStatus().getValue();
-		}
+		Map<String,Object> defaults=getSaveDefaults(report);
 
 		Object[] values = {
 			report.getName(),
 			report.getShortDescription(),
 			report.getDescription(),
 			report.getReportType(),
-			reportGroupId,
-			datasourceId,
+			defaults.get("reportGroupId"),
+			defaults.get("datasourceId"),
 			report.getContactPerson(),
 			report.isUseRules(),
-			reportStatus,
+			defaults.get("reportStatus"),
 			report.isParametersInOutput(),
 			report.getxAxisLabel(),
 			report.getyAxisLabel(),
@@ -585,41 +537,35 @@ public class ReportService {
 			report.getReportId()
 		};
 
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with update. affectedRows={}, report={}", affectedRows, report);
-		}
+		dbService.update(sql, values);
 	}
 
 	/**
 	 * Get values for possibly null property objects
 	 *
 	 * @param report
-	 * @return list with values to save. Index 0 = report group id, 1 =
-	 * datasource id, 2 = report status
+	 * @return map with values to save. key = field name, value = field value
 	 */
-	private List<Object> getSaveDefaults(Report report) {
-		List<Object> values = new ArrayList<>();
+	private Map<String, Object> getSaveDefaults(Report report) {
+		Map<String, Object> values = new HashMap<>();
 
-		int reportGroupId; //database column doesn't allow null
+		Integer reportGroupId; //database column doesn't allow null
 		if (report.getReportGroup() == null) {
 			logger.warn("Report group not defined. Defaulting to 0");
 			reportGroupId = 0;
 		} else {
 			reportGroupId = report.getReportGroup().getReportGroupId();
 		}
-		values.add(reportGroupId);
+		values.put("reportGroupId", reportGroupId);
 
-		int datasourceId; //database column doesn't allow null
+		Integer datasourceId; //database column doesn't allow null
 		if (report.getDatasource() == null) {
 			logger.warn("Datasource not defined. Defaulting to 0");
 			datasourceId = 0;
 		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
 		}
-		values.add(datasourceId);
+		values.put("datasourceId", datasourceId);
 
 		String reportStatus;
 		if (report.getReportStatus() == null) {
@@ -628,7 +574,7 @@ public class ReportService {
 		} else {
 			reportStatus = report.getReportStatus().getValue();
 		}
-		values.add(reportStatus);
+		values.put("reportStatus", reportStatus);
 
 		return values;
 	}

@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.usergroup;
+package art.schedule;
 
-import art.reportgroup.ReportGroupService;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import javax.validation.Valid;
@@ -35,44 +34,41 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Controller for user group configuration
+ * Controller for schedule configuration
  *
  * @author Timothy Anyona
  */
 @Controller
-public class UserGroupController {
+public class ScheduleController {
 
-	private static final Logger logger = LoggerFactory.getLogger(UserGroupController.class);
-
-	@Autowired
-	private UserGroupService userGroupService;
+	private static final Logger logger = LoggerFactory.getLogger(ScheduleController.class);
 
 	@Autowired
-	private ReportGroupService reportGroupService;
+	private ScheduleService scheduleService;
 
-	@RequestMapping(value = "/app/userGroups", method = RequestMethod.GET)
-	public String showUserGroups(Model model) {
-		logger.debug("Entering showUserGroups");
+	@RequestMapping(value = "/app/schedules", method = RequestMethod.GET)
+	public String showSchedules(Model model) {
+		logger.debug("Entering showSchedules");
 
 		try {
-			model.addAttribute("groups", userGroupService.getAllUserGroups());
+			model.addAttribute("schedules", scheduleService.getAllSchedules());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return "userGroups";
+		return "schedules";
 	}
 
-	@RequestMapping(value = "/app/deleteUserGroup", method = RequestMethod.POST)
+	@RequestMapping(value = "/app/deleteSchedule", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse deleteUserGroup(@RequestParam("id") Integer id) {
-		logger.debug("Entering deleteUserGroup: id={}", id);
+	AjaxResponse deleteSchedule(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteSchedule: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userGroupService.deleteUserGroup(id);
+			scheduleService.deleteSchedule(id);
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -82,57 +78,57 @@ public class UserGroupController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.GET)
-	public String addUserGroup(Model model) {
-		logger.debug("Entering addUserGroup");
+	@RequestMapping(value = "/app/addSchedule", method = RequestMethod.GET)
+	public String addSchedule(Model model) {
+		logger.debug("Entering addSchedule");
 
-		model.addAttribute("group", new UserGroup());
-		return showUserGroup("add", model);
+		model.addAttribute("schedule", new Schedule());
+		return showSchedule("add", model);
 	}
 
-	@RequestMapping(value = "/app/saveUserGroup", method = RequestMethod.POST)
-	public String saveUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+	@RequestMapping(value = "/app/saveSchedule", method = RequestMethod.POST)
+	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
-		logger.debug("Entering saveUserGroup: group={}, action='{}'", group, action);
+		logger.debug("Entering saveSchedule: schedule={}, action='{}'", schedule, action);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserGroup(action, model);
+			return showSchedule(action, model);
 		}
 
 		try {
 			if (StringUtils.equals(action, "add")) {
-				userGroupService.addUserGroup(group);
+				scheduleService.addSchedule(schedule);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
-				userGroupService.updateUserGroup(group);
+				scheduleService.updateSchedule(schedule);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", group.getName());
-			return "redirect:/app/userGroups.do";
+			redirectAttributes.addFlashAttribute("recordName", schedule.getName());
+			return "redirect:/app/schedules.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroup(action, model);
+		return showSchedule(action, model);
 	}
 
-	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
-	public String editUserGroup(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editUserGroup: id={}", id);
+	@RequestMapping(value = "/app/editSchedule", method = RequestMethod.GET)
+	public String editSchedule(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editSchedule: id={}", id);
 
 		try {
-			model.addAttribute("group", userGroupService.getUserGroup(id));
+			model.addAttribute("schedule", scheduleService.getSchedule(id));
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroup("edit", model);
+		return showSchedule("edit", model);
 	}
 
 	/**
@@ -143,18 +139,11 @@ public class UserGroupController {
 	 * @param session
 	 * @return
 	 */
-	private String showUserGroup(String action, Model model) {
-		logger.debug("Entering showUserGroup: action='{}'", action);
-
-		try {
-			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
+	private String showSchedule(String action, Model model) {
+		logger.debug("Entering showSchedule: action='{}'", action);
 
 		model.addAttribute("action", action);
-		return "editUserGroup";
+		return "editSchedule";
 	}
 
 }

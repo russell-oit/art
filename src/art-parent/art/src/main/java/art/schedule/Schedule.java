@@ -18,21 +18,92 @@
 package art.schedule;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
- * Class to represent a job schedule. Data stored in the ART_JOB_SCHEDULES table
+ * Class to represent a schedule
  *
  * @author Timothy Anyona
  */
 public class Schedule implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private String minute = "";
-	private String hour = "";
-	private String day = "";
-	private String month = "";
-	private String weekday = "";
-	private String scheduleName = "";
+	private String minute;
+	private String hour;
+	private String day;
+	private String month;
+	private String weekday;
+	private String name;
+	private int scheduleId;
+	private Date creationDate;
+	private Date updateDate;
+	private String description;
+
+	/**
+	 * Get the value of description
+	 *
+	 * @return the value of description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * Set the value of description
+	 *
+	 * @param description new value of description
+	 */
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+
+	/**
+	 * @return the creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * @param creationDate the creationDate to set
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	/**
+	 * @return the updateDate
+	 */
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	/**
+	 * @param updateDate the updateDate to set
+	 */
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	/**
+	 * Get the value of scheduleId
+	 *
+	 * @return the value of scheduleId
+	 */
+	public int getScheduleId() {
+		return scheduleId;
+	}
+
+	/**
+	 * Set the value of scheduleId
+	 *
+	 * @param scheduleId new value of scheduleId
+	 */
+	public void setScheduleId(int scheduleId) {
+		this.scheduleId = scheduleId;
+	}
+
 
 	/**
 	 * @return the minute
@@ -105,16 +176,44 @@ public class Schedule implements Serializable {
 	}
 
 	/**
-	 * @return the scheduleName
+	 * @return the name
 	 */
-	public String getScheduleName() {
-		return scheduleName;
+	public String getName() {
+		return name;
 	}
 
 	/**
-	 * @param scheduleName the scheduleName to set
+	 * @param name the name to set
 	 */
-	public void setScheduleName(String scheduleName) {
-		this.scheduleName = scheduleName;
+	public void setName(String name) {
+		this.name = name;
 	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 73 * hash + this.scheduleId;
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Schedule other = (Schedule) obj;
+		if (this.scheduleId != other.scheduleId) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Schedule{" + "name=" + name + '}';
+	}
+	
 }
