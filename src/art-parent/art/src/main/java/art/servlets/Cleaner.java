@@ -14,19 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- *
- * Description: Delete export and job files older than XX minutes
- *
- *
- * Note:	Find a better way to avoid user to read all available export files. The
- * workaround is to have a dummy index.html file so that the web server does not
- * display all the content Anyway, this may not work on all servlet engines. Use
- * ExportPathFilter?
- *
- * @author Enrico Liboni
- * @mail enrico(at)computer.org
- */
+
 package art.servlets;
 
 import art.cache.CacheHelper;
@@ -50,10 +38,10 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class Scheduler extends HttpServlet {
+public class Cleaner extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
+	private static final Logger logger = LoggerFactory.getLogger(Cleaner.class);
 	static long INTERVAL_MINUTES = 10; // run clean every x minutes
 	static long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes
 	long INTERVAL = 1000L * 60L * INTERVAL_MINUTES; // INTERVAL_MINUTES in milliseconds
@@ -199,10 +187,10 @@ public class Scheduler extends HttpServlet {
 //thread that runs scheduler clean method to delete old export files
 class Timer extends Thread {
 
-	art.servlets.Scheduler scheduler;
+	art.servlets.Cleaner scheduler;
 	long interval;
 
-	public Timer(art.servlets.Scheduler s) {
+	public Timer(art.servlets.Cleaner s) {
 		scheduler = s;
 		interval = s.getInterval();
 	}

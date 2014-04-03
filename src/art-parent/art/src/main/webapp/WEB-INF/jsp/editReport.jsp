@@ -44,6 +44,7 @@ Edit report page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-file-input-3.1.0.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.0.19/tinymce.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3-modified.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({

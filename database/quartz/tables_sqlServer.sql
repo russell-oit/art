@@ -1,6 +1,7 @@
 -- script from quartz distribution. removed drop statements to prevent accidental table deletion and added indexes
 
--- # thanks to George Papastamatopoulos for submitting this ... and Marko Lahma for updating it.
+--# thanks to George Papastamatopoulos for submitting this ... and Marko Lahma for
+--# updating it.
 
 
 CREATE TABLE [dbo].[QRTZ_CALENDARS] (
@@ -26,6 +27,7 @@ CREATE TABLE [dbo].[QRTZ_FIRED_TRIGGERS] (
   [TRIGGER_GROUP] [VARCHAR] (200)  NOT NULL ,
   [INSTANCE_NAME] [VARCHAR] (200)  NOT NULL ,
   [FIRED_TIME] [BIGINT] NOT NULL ,
+  [SCHED_TIME] [BIGINT] NOT NULL ,
   [PRIORITY] [INTEGER] NOT NULL ,
   [STATE] [VARCHAR] (16)  NOT NULL,
   [JOB_NAME] [VARCHAR] (200)  NULL ,

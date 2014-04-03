@@ -1,4 +1,5 @@
 -- script from quartz distribution. removed drop statements to prevent accidental table deletion and added indexes
+-- also changed BINARY fields to VARBINARY(16000)
 
 
 CREATE TABLE qrtz_job_details
@@ -119,6 +120,7 @@ CREATE TABLE qrtz_fired_triggers
 	TRIGGER_GROUP VARCHAR(200) NOT NULL,
 	INSTANCE_NAME VARCHAR(200) NOT NULL,
 	FIRED_TIME NUMERIC(13) NOT NULL,
+	SCHED_TIME NUMERIC(13) NOT NULL,
 	PRIORITY INTEGER NOT NULL,
 	STATE VARCHAR(16) NOT NULL,
 	JOB_NAME VARCHAR(200) NULL,

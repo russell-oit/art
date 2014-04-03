@@ -1,6 +1,9 @@
--- Timothy Anyona
--- used tables_mysql.sql as a template and modified the data type definitions for smallint, bigint, blob not null and varchar(1)
+-- script from quartz distribution. removed drop statements to prevent accidental table deletion
+
+-- Thanks to Timothy Anyona for this script
 -- CUBRID 8.4.1+
+
+
 
 CREATE TABLE QRTZ_JOB_DETAILS
   (
@@ -120,6 +123,7 @@ CREATE TABLE QRTZ_FIRED_TRIGGERS
     TRIGGER_GROUP VARCHAR(200) NOT NULL,
     INSTANCE_NAME VARCHAR(200) NOT NULL,
     FIRED_TIME BIGINT NOT NULL,
+    SCHED_TIME BIGINT NOT NULL,
     PRIORITY INTEGER NOT NULL,
     STATE VARCHAR(16) NOT NULL,
     JOB_NAME VARCHAR(200) NULL,

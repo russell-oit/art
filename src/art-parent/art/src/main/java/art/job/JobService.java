@@ -1,15 +1,30 @@
 package art.job;
 
+import art.dbutils.DbService;
 import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.dbutils.BasicRowProcessor;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringUtils;
+import static org.quartz.JobKey.jobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,6 +36,190 @@ import org.springframework.stereotype.Service;
 public class JobService {
 
 	private static final Logger logger = LoggerFactory.getLogger(JobService.class);
+
+	@Autowired
+	private DbService dbService;
+
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS";
+
+	/**
+	 * Class to map resultset to an object
+	 */
+	private class JobMapper extends BasicRowProcessor {
+
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			Job job = new Job();
+
+			job.setJobId(rs.getInt("JOB_ID"));
+			job.setName(rs.getString("JOB_NAME"));
+			job.setReportId(rs.getInt("QUERY_ID"));
+			job.setUserId(rs.getInt("USER_ID"));
+			job.setUsername(rs.getString("USERNAME"));
+
+			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+
+			return type.cast(job);
+		}
+	}
+
+	/**
+	 * Get all jobs
+	 *
+	 * @return list of all jobs, empty list otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public List<Job> getAllJobs() throws SQLException {
+		logger.debug("Entering getAllJobs");
+
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
+
+	/**
+	 * Get a job
+	 *
+	 * @param id
+	 * @return populated object if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("jobs")
+	public Job getJob(int id) throws SQLException {
+		logger.debug("Entering getJob: id={}", id);
+
+		String sql = SQL_SELECT_ALL + " WHERE JOB_ID = ? ";
+		ResultSetHandler<Job> h = new BeanHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Delete a job
+	 *
+	 * @param id
+	 * @throws SQLException
+	 * @throws org.quartz.SchedulerException
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public void deleteJob(int id) throws SQLException, SchedulerException {
+		logger.debug("Entering deleteJob: id={}", id);
+
+		//get job object. need job details in order to delete cached table for cached result jobs
+		Job job = getJob(id);
+		if (job == null) {
+			logger.warn("Cannot delete job: {}. Job not available. ", id);
+			return;
+		}
+
+		//delete records in quartz tables
+		Scheduler scheduler = ArtConfig.getScheduler();
+		if (scheduler == null) {
+			logger.warn("Cannot delete job: {}. Scheduler not available. ", id);
+			return;
+		}
+
+		scheduler.deleteJob(jobKey(String.valueOf(id)));
+
+		String sql;
+
+		//delete foreign key records
+		sql = "DELETE FROM ART_JOBS_PARAMETERS WHERE JOB_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_USER_JOBS WHERE JOB_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE JOB_ID=?";
+		dbService.update(sql, id);
+
+		sql = "DELETE FROM ART_JOB_ARCHIVES WHERE JOB_ID=?";
+		dbService.update(sql, id);
+
+		//finally delete job
+		sql = "DELETE FROM ART_JOBS WHERE JOB_ID=?";
+		dbService.update(sql, id);
+	}
+
+	/**
+	 * Add a new job to the database
+	 *
+	 * @param job
+	 * @return new record id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public synchronized int addJob(Job job) throws SQLException {
+		logger.debug("Entering addJob: job={}", job);
+
+		//generate new id
+		String sql = "SELECT MAX(JOB_ID) FROM ART_JOBS";
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer maxId = dbService.query(sql, h);
+		logger.debug("maxId={}", maxId);
+
+		int newId;
+		if (maxId == null || maxId < 0) {
+			//no records in the table, or only hardcoded records
+			newId = 1;
+		} else {
+			newId = maxId + 1;
+		}
+		logger.debug("newId={}", newId);
+
+		sql = "INSERT INTO ART_JOBS"
+				+ " (JOB_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
+				+ " START_QUERY, CREATION_DATE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
+
+		Object[] values = {
+			newId,
+			job.getName(),
+			job.getDescription(),
+			job.getDefaultReportGroup(),
+			job.getStartReport(),
+			DbUtils.getCurrentTimeStamp()
+		};
+
+		dbService.update(sql, values);
+
+		return newId;
+	}
+
+	/**
+	 * Update an existing job
+	 *
+	 * @param job
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public void updateJob(Job job) throws SQLException {
+		logger.debug("Entering updateJob: job={}", job);
+
+		String sql = "UPDATE ART_JOBS SET NAME=?, DESCRIPTION=?,"
+				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?"
+				+ " WHERE JOB_ID=?";
+
+		Object[] values = {
+			job.getName(),
+			job.getDescription(),
+			job.getDefaultReportGroup(),
+			job.getStartReport(),
+			DbUtils.getCurrentTimeStamp(),
+			job.getJobId()
+		};
+
+		dbService.update(sql, values);
+	}
 
 	/**
 	 * Get all the jobs a user has access to. Both the jobs the user owns and
@@ -73,9 +272,9 @@ public class JobService {
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				Job job = new Job();
-				job.setQueryName(rs.getString("QUERY_NAME"));
-				job.setJobName(rs.getString("JOB_NAME"));
-				job.setUsername(rs.getString("USERNAME"));
+				job.setReportId(rs.getInt("QUERY_ID"));
+				job.setName(rs.getString("JOB_NAME"));
+				job.setUserId(rs.getInt("USER_ID"));
 				job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
 				job.setJobType(rs.getInt("JOB_TYPE"));
 				job.setMailTo(rs.getString("MAIL_TOS"));
@@ -120,7 +319,7 @@ public class JobService {
 			PreparedStatement ps = null;
 			ResultSet rs = null;
 
-			//get shared jobs user has access to via group membership. 
+			//get shared jobs user has access to via job membership. 
 			//non-split jobs. no entries for them in the art_user_jobs table
 			try {
 				sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
@@ -133,7 +332,7 @@ public class JobService {
 						+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID = AUGJ.JOB_ID "
 						+ " AND aj.USERNAME <> ? AND EXISTS "
 						+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ? "
-						+ " AND AUGA.USER_GROUP_ID=AUGJ.USER_GROUP_ID)";
+						+ " AND AUGA.JOB_ID=AUGJ.JOB_ID)";
 
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, username);
@@ -142,8 +341,8 @@ public class JobService {
 				rs = ps.executeQuery();
 				while (rs.next()) {
 					SharedJob job = new SharedJob();
-					job.setQueryName(rs.getString("QUERY_NAME"));
-					job.setJobName(rs.getString("JOB_NAME"));
+					job.setReportId(rs.getInt("QUERY_ID"));
+					job.setName(rs.getString("JOB_NAME"));
 					job.setJobId(rs.getInt("JOB_ID"));
 					job.setJobType(rs.getInt("JOB_TYPE"));
 					job.setUsesRules(rs.getString("USES_RULES"));
@@ -191,8 +390,8 @@ public class JobService {
 				rs = ps.executeQuery();
 				while (rs.next()) {
 					SharedJob job = new SharedJob();
-					job.setQueryName(rs.getString("QUERY_NAME"));
-					job.setJobName(rs.getString("JOB_NAME"));
+					job.setReportId(rs.getInt("QUERY_ID"));
+					job.setName(rs.getString("JOB_NAME"));
 					job.setJobId(rs.getInt("JOB_ID"));
 					job.setJobType(rs.getInt("JOB_TYPE"));
 					job.setUsesRules(rs.getString("USES_RULES"));

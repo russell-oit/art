@@ -120,5 +120,13 @@ public class CacheHelper {
 	public void clearSchedules() {
 		logger.debug("Entering clearSchedules");
 	}
+	
+	/**
+	 * Clear jobs cache
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public void clearJobs() {
+		logger.debug("Entering clearJobs");
+	}
 
 }

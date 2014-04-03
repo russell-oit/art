@@ -28,7 +28,17 @@
 --
 -- for sql server, mysql, replace TIMESTAMP with DATETIME
 
+
 -- ------------------------------------------------
+
+
+-- ***************
+-- IMPORTANT
+
+-- after running this upgrade script, ALSO RUN the tables_xxx.sql script for your database 
+-- (found in the quartz directory) this is not the usual process for upgrades.
+
+-- *****************
 
 
 -- update database version
@@ -137,6 +147,8 @@ ALTER TABLE ART_QUERY_GROUPS ADD CREATION_DATE TIMESTAMP;
 ALTER TABLE ART_QUERY_GROUPS ADD UPDATE_DATE TIMESTAMP;
 ALTER TABLE ART_JOB_SCHEDULES ADD CREATION_DATE TIMESTAMP;
 ALTER TABLE ART_JOB_SCHEDULES ADD UPDATE_DATE TIMESTAMP;
+ALTER TABLE ART_JOBS ADD CREATION_DATE TIMESTAMP;
+ALTER TABLE ART_JOBS ADD UPDATE_DATE TIMESTAMP;
 
 -- change uses_rules column from varchar to integer
 ALTER TABLE ART_QUERIES ADD USE_RULES INTEGER;
@@ -256,3 +268,19 @@ INSERT INTO ART_ACCESS_LEVELS VALUES (30,'Mid Admin');
 INSERT INTO ART_ACCESS_LEVELS VALUES (40,'Standard Admin');
 INSERT INTO ART_ACCESS_LEVELS VALUES (80,'Senior Admin');
 INSERT INTO ART_ACCESS_LEVELS VALUES (100,'Super Admin');
+
+-- delete quartz tables
+DROP TABLE QRTZ_FIRED_TRIGGERS;
+DROP TABLE QRTZ_PAUSED_TRIGGER_GRPS;
+DROP TABLE QRTZ_SCHEDULER_STATE;
+DROP TABLE QRTZ_LOCKS;
+DROP TABLE QRTZ_SIMPLE_TRIGGERS;
+DROP TABLE QRTZ_SIMPROP_TRIGGERS;
+DROP TABLE QRTZ_CRON_TRIGGERS;
+DROP TABLE QRTZ_BLOB_TRIGGERS;
+DROP TABLE QRTZ_TRIGGERS;
+DROP TABLE QRTZ_JOB_DETAILS;
+DROP TABLE QRTZ_CALENDARS;
+
+-- update job migrated to quartz status so that all jobs are recreated in the new quartz tables
+UPDATE ART_JOBS SET MIGRATED_TO_QUARTZ='N';

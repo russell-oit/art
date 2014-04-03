@@ -98,7 +98,7 @@ public class UserGroupService {
 	 * Get a user group
 	 *
 	 * @param id
-	 * @return populated object if user group found, null otherwise
+	 * @return populated object if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("userGroups")

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Class to represent an art job. Data stored in the ART_JOBS table
+ * Class to represent an art job
  *
  * @author Timothy Anyona
  */
@@ -12,7 +12,7 @@ public class Job implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private int jobId;
-	private String jobName;
+	private String name;
 	private int jobType;
 	private Date lastEndDate;
 	private Date lastStartDate;
@@ -21,12 +21,10 @@ public class Job implements Serializable {
 	private String lastFileName;
 	private String usesRules;
 	private String allowSplitting;
-	private String queryName;
 	private String sharedLastFileName;
 	private String sharedLastRunDetails;
 	private Date sharedLastStartDate;
 	private Date sharedLastEndDate;
-	private String username;
 	private String outputFormat;
 	private String mailTo;
 	private String mailMessage;
@@ -37,6 +35,95 @@ public class Job implements Serializable {
 	private String scheduleDay;
 	private String scheduleMonth;
 	private String scheduleWeekday;
+	private int userId;
+	private int reportId;
+	private Date creationDate;
+	private Date updateDate;
+	private String username;
+
+	/**
+	 * Get the value of username
+	 *
+	 * @return the value of username
+	 */
+	public String getUsername() {
+		return username;
+	}
+
+	/**
+	 * Set the value of username
+	 *
+	 * @param username new value of username
+	 */
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	/**
+	 * @return the creationDate
+	 */
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	/**
+	 * @param creationDate the creationDate to set
+	 */
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	/**
+	 * @return the updateDate
+	 */
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	/**
+	 * @param updateDate the updateDate to set
+	 */
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	/**
+	 * Get the value of reportId
+	 *
+	 * @return the value of reportId
+	 */
+	public int getReportId() {
+		return reportId;
+	}
+
+	/**
+	 * Set the value of reportId
+	 *
+	 * @param reportId new value of reportId
+	 */
+	public void setReportId(int reportId) {
+		this.reportId = reportId;
+	}
+
+
+	/**
+	 * Get the value of userId
+	 *
+	 * @return the value of userId
+	 */
+	public int getUserId() {
+		return userId;
+	}
+
+	/**
+	 * Set the value of userId
+	 *
+	 * @param userId new value of userId
+	 */
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+
 
 	/**
 	 * Get the value of scheduleWeekday
@@ -219,24 +306,6 @@ public class Job implements Serializable {
 	}
 
 	/**
-	 * Get the value of username
-	 *
-	 * @return the value of username
-	 */
-	public String getUsername() {
-		return username;
-	}
-
-	/**
-	 * Set the value of username
-	 *
-	 * @param username new value of username
-	 */
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	/**
 	 * Get the value of sharedLastEndDate
 	 *
 	 * @return the value of sharedLastEndDate
@@ -306,24 +375,6 @@ public class Job implements Serializable {
 	 */
 	public void setSharedLastFileName(String sharedLastFileName) {
 		this.sharedLastFileName = sharedLastFileName;
-	}
-
-	/**
-	 * Get the value of queryName
-	 *
-	 * @return the value of queryName
-	 */
-	public String getQueryName() {
-		return queryName;
-	}
-
-	/**
-	 * Set the value of queryName
-	 *
-	 * @param queryName new value of queryName
-	 */
-	public void setQueryName(String queryName) {
-		this.queryName = queryName;
 	}
 
 	/**
@@ -471,21 +522,21 @@ public class Job implements Serializable {
 	}
 
 	/**
-	 * Get the value of jobName
+	 * Get the value of name
 	 *
-	 * @return the value of jobName
+	 * @return the value of name
 	 */
-	public String getJobName() {
-		return jobName;
+	public String getName() {
+		return name;
 	}
 
 	/**
-	 * Set the value of jobName
+	 * Set the value of name
 	 *
-	 * @param jobName new value of jobName
+	 * @param name new value of name
 	 */
-	public void setJobName(String jobName) {
-		this.jobName = jobName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -504,5 +555,32 @@ public class Job implements Serializable {
 	 */
 	public void setJobId(int jobId) {
 		this.jobId = jobId;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 83 * hash + this.jobId;
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Job other = (Job) obj;
+		if (this.jobId != other.jobId) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public String toString() {
+		return "Job{" + "name=" + name + '}';
 	}
 }

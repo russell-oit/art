@@ -38,8 +38,6 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3-modified.min.js"></script>
-		
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 
 		<script type="text/javascript">

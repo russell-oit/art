@@ -13,7 +13,7 @@
     <context-param>
         <description>ART Version Number</description>
         <param-name>versionNumber</param-name>
-		<!-- use semver format, http://semver.org/, e.g. 3.0.0, 3.0.1-beta.1 -->
+        <!-- use semver format, http://semver.org/, e.g. 3.0.0, 3.0.1-beta.1 -->
         <param-value>3.0.0-alpha.3</param-value>
     </context-param>
     <!-- Error pages -->
@@ -169,7 +169,7 @@
 			Periodically perform some actions e.g. clean export files 	   
 		</description>
         <servlet-name>Scheduler</servlet-name>
-        <servlet-class>art.servlets.Scheduler</servlet-class>
+        <servlet-class>art.servlets.Cleaner</servlet-class>
         <!-- load after ArtConfig -->
         <load-on-startup>5</load-on-startup>
     </servlet>

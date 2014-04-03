@@ -98,6 +98,13 @@ public class ScheduleController {
 			model.addAttribute("formErrors", "");
 			return showSchedule(action, model);
 		}
+		
+		//remove spaces in schedule fields. not legal but may commonly be put by users
+		schedule.setMinute(StringUtils.remove(schedule.getMinute(), " "));
+		schedule.setHour(StringUtils.remove(schedule.getHour(), " "));
+		schedule.setDay(StringUtils.remove(schedule.getDay(), " "));
+		schedule.setMonth(StringUtils.remove(schedule.getMonth(), " "));
+		schedule.setWeekday(StringUtils.remove(schedule.getWeekday(), " "));
 
 		try {
 			if (StringUtils.equals(action, "add")) {
