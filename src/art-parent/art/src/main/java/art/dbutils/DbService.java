@@ -36,18 +36,20 @@ public class DbService {
 	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
-	 * Execute an SQL INSERT, UPDATE, or DELETE query.
+	 * Execute an SQL INSERT, UPDATE, or DELETE query. Query executed against
+	 * the art database
 	 *
 	 * @param sql
 	 * @param params
-	 * @return
+	 * @return -1 if connection to the art database is not available, otherwise
+	 * number of records affected
 	 * @throws SQLException
 	 */
 	public int update(String sql, Object... params) throws SQLException {
 		Connection conn = ArtConfig.getConnection();
 		if (conn == null) {
 			logger.warn("Connection to the ART Database not available");
-			return 0;
+			return -1;
 		}
 
 		try {
@@ -56,6 +58,26 @@ public class DbService {
 		} finally {
 			DbUtils.close(conn);
 		}
+	}
+
+	/**
+	 * Execute an SQL INSERT, UPDATE, or DELETE query. Caller is responsible for
+	 * closing the connection
+	 *
+	 * @param conn
+	 * @param sql
+	 * @param params
+	 * @return -1 if connection is null, otherwise number of records affected
+	 * @throws SQLException
+	 */
+	public int update(Connection conn, String sql, Object... params) throws SQLException {
+		if (conn == null) {
+			logger.warn("Connection not available");
+			return -1;
+		}
+
+		QueryRunner run = new QueryRunner();
+		return run.update(conn, sql, params);
 	}
 
 	/**

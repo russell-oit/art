@@ -369,12 +369,7 @@ CREATE TABLE ART_USER_GROUP_RULES
 -- ART_JOBS
 -- Stores scheduled jobs
 
--- OUTPUT: html, pdf, xls etc (viewMode code)
--- JOB_TYPE: 1 = alert, 2 = email with query output as attachment, 3 = publish
--- 4 = just execute (i.e. no output generated), 5 = email with query output inline
--- 6 = conditional email attachment, 7 = conditional inline email
--- 8 = conditional publish, 9 = append to cached table
--- 10 = delete and insert into cached table
+-- OUTPUT_FORMAT: html, pdf, xls etc (viewMode code)
 -- LAST_FILE_NAME: Contains result of last job execution. Either a status message
 -- (if contents start with -), or a file name and status message separated by 
 -- newline character (\n) (for publish jobs)
@@ -391,7 +386,7 @@ CREATE TABLE ART_JOBS
 	USER_ID INTEGER,
 	USERNAME          VARCHAR(50) NOT NULL,
 	OUTPUT_FORMAT            VARCHAR(15) NOT NULL, 
-	JOB_TYPE		    INTEGER NOT NULL,      
+	JOB_TYPE VARCHAR(50),      
 	JOB_MINUTE	    VARCHAR(100),               
 	JOB_HOUR		    VARCHAR(100),               
 	JOB_DAY		    VARCHAR(100),               

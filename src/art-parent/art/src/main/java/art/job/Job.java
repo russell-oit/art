@@ -1,5 +1,8 @@
 package art.job;
 
+import art.enums.JobType;
+import art.report.Report;
+import art.user.User;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -13,7 +16,7 @@ public class Job implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private int jobId;
 	private String name;
-	private int jobType;
+	private JobType jobType;
 	private Date lastEndDate;
 	private Date lastStartDate;
 	private String lastRunDetails;
@@ -35,28 +38,46 @@ public class Job implements Serializable {
 	private String scheduleDay;
 	private String scheduleMonth;
 	private String scheduleWeekday;
-	private int userId;
-	private int reportId;
 	private Date creationDate;
 	private Date updateDate;
-	private String username;
+	private Report report;
+	private User user;
 
 	/**
-	 * Get the value of username
+	 * Get the value of user
 	 *
-	 * @return the value of username
+	 * @return the value of user
 	 */
-	public String getUsername() {
-		return username;
+	public User getUser() {
+		return user;
 	}
 
 	/**
-	 * Set the value of username
+	 * Set the value of user
 	 *
-	 * @param username new value of username
+	 * @param user new value of user
 	 */
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+
+	/**
+	 * Get the value of report
+	 *
+	 * @return the value of report
+	 */
+	public Report getReport() {
+		return report;
+	}
+
+	/**
+	 * Set the value of report
+	 *
+	 * @param report new value of report
+	 */
+	public void setReport(Report report) {
+		this.report = report;
 	}
 
 	/**
@@ -86,44 +107,6 @@ public class Job implements Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
-
-	/**
-	 * Get the value of reportId
-	 *
-	 * @return the value of reportId
-	 */
-	public int getReportId() {
-		return reportId;
-	}
-
-	/**
-	 * Set the value of reportId
-	 *
-	 * @param reportId new value of reportId
-	 */
-	public void setReportId(int reportId) {
-		this.reportId = reportId;
-	}
-
-
-	/**
-	 * Get the value of userId
-	 *
-	 * @return the value of userId
-	 */
-	public int getUserId() {
-		return userId;
-	}
-
-	/**
-	 * Set the value of userId
-	 *
-	 * @param userId new value of userId
-	 */
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
-
 
 	/**
 	 * Get the value of scheduleWeekday
@@ -508,7 +491,7 @@ public class Job implements Serializable {
 	 *
 	 * @return the value of jobType
 	 */
-	public int getJobType() {
+	public JobType getJobType() {
 		return jobType;
 	}
 
@@ -517,7 +500,7 @@ public class Job implements Serializable {
 	 *
 	 * @param jobType new value of jobType
 	 */
-	public void setJobType(int jobType) {
+	public void setJobType(JobType jobType) {
 		this.jobType = jobType;
 	}
 

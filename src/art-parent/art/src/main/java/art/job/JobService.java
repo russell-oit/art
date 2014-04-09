@@ -3,9 +3,11 @@ package art.job;
 import art.dbutils.DbService;
 import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
-import art.utils.ArtUtils;
+import art.enums.JobType;
+import art.report.Report;
+import art.user.User;
+import art.utils.CachedResult;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -19,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,13 @@ public class JobService {
 	@Autowired
 	private DbService dbService;
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS";
+	private final String SQL_SELECT_ALL = "SELECT AJ.*,"
+			+ " AQ.NAME AS REPORT_NAME, AU.USERNAME"
+			+ " FROM ART_JOBS AJ"
+			+ " LEFT JOIN ART_QUERIES AQ"
+			+ " ON AJ.QUERY_ID=AQ.QUERY_ID"
+			+ " LEFT JOIN ART_USERS AU"
+			+ " ON AJ.USER_ID=AU.USER_ID";
 
 	/**
 	 * Class to map resultset to an object
@@ -62,12 +69,19 @@ public class JobService {
 
 			job.setJobId(rs.getInt("JOB_ID"));
 			job.setName(rs.getString("JOB_NAME"));
-			job.setReportId(rs.getInt("QUERY_ID"));
-			job.setUserId(rs.getInt("USER_ID"));
-			job.setUsername(rs.getString("USERNAME"));
 
 			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+
+			Report report = new Report();
+			report.setReportId(rs.getInt("QUERY_ID"));
+			report.setName(rs.getString("REPORT_NAME"));
+			job.setReport(report);
+
+			User user = new User();
+			user.setUserId(rs.getInt("USER_ID"));
+			user.setUsername(rs.getString("USERNAME"));
+			job.setUser(user);
 
 			return type.cast(job);
 		}
@@ -98,6 +112,19 @@ public class JobService {
 	public Job getJob(int id) throws SQLException {
 		logger.debug("Entering getJob: id={}", id);
 
+		return getFreshJob(id);
+	}
+
+	/**
+	 * Get a job. Data always retrieved from the database and not the cache
+	 *
+	 * @param id
+	 * @return populated object if found, null otherwise
+	 * @throws SQLException
+	 */
+	public Job getFreshJob(int id) throws SQLException {
+		logger.debug("Entering getFreshJob: id={}", id);
+
 		String sql = SQL_SELECT_ALL + " WHERE JOB_ID = ? ";
 		ResultSetHandler<Job> h = new BeanHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, id);
@@ -117,18 +144,37 @@ public class JobService {
 		//get job object. need job details in order to delete cached table for cached result jobs
 		Job job = getJob(id);
 		if (job == null) {
-			logger.warn("Cannot delete job: {}. Job not available. ", id);
+			logger.warn("Cannot delete job: {}. Job not available.", id);
 			return;
 		}
 
 		//delete records in quartz tables
 		Scheduler scheduler = ArtConfig.getScheduler();
 		if (scheduler == null) {
-			logger.warn("Cannot delete job: {}. Scheduler not available. ", id);
+			logger.warn("Cannot delete job: {}. Scheduler not available.", id);
 			return;
 		}
-
 		scheduler.deleteJob(jobKey(String.valueOf(id)));
+
+		// Delete the Cached table if this job is a cache result one
+		JobType jobType = job.getJobType();
+		if (jobType == JobType.CacheAppend || jobType == JobType.CacheInsert) {
+			// Delete
+			int targetDatabaseId = Integer.parseInt(job.getOutputFormat());
+			Connection connCache = ArtConfig.getConnection(targetDatabaseId);
+			try {
+				String cachedTableName = job.getCachedTableName();
+				if (StringUtils.isBlank(cachedTableName)) {
+					cachedTableName = job.getReport().getName() + "_J" + job.getJobId();
+				}
+				CachedResult cr = new CachedResult();
+				cr.setTargetConnection(connCache);
+				cr.setCachedTableName(cachedTableName);
+				cr.drop(); //potential sql injection
+			} finally {
+				DbUtils.close(connCache);
+			}
+		}
 
 		String sql;
 
@@ -177,16 +223,16 @@ public class JobService {
 		logger.debug("newId={}", newId);
 
 		sql = "INSERT INTO ART_JOBS"
-				+ " (JOB_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
-				+ " START_QUERY, CREATION_DATE)"
+				+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME, OUTPUT_FORMAT,"
+				+ " JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_WEEKDAY, JOB_MONTH,"
+				+ " MAIL_TOS, MAIL_FROM, MAIL_CC, MAIL_BCC, SUBJECT, MESSAGE,"
+				+ " CACHED_TABLE_NAME, START_DATE, END_DATE, NEXT_RUN_DATE,"
+				+ " CREATION_DATE)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
 		Object[] values = {
 			newId,
 			job.getName(),
-			job.getDescription(),
-			job.getDefaultReportGroup(),
-			job.getStartReport(),
 			DbUtils.getCurrentTimeStamp()
 		};
 
@@ -211,9 +257,6 @@ public class JobService {
 
 		Object[] values = {
 			job.getName(),
-			job.getDescription(),
-			job.getDefaultReportGroup(),
-			job.getStartReport(),
 			DbUtils.getCurrentTimeStamp(),
 			job.getJobId()
 		};
@@ -225,153 +268,66 @@ public class JobService {
 	 * Get all the jobs a user has access to. Both the jobs the user owns and
 	 * jobs shared with him
 	 *
-	 * @param username
+	 * @param userId
 	 * @return all the jobs a user has access to
+	 * @throws java.sql.SQLException
 	 */
-	public List<Job> getAllJobs(String username) {
-		List<Job> jobs = new ArrayList<Job>();
+	@Cacheable("jobs")
+	public List<Job> getJobs(int userId) throws SQLException {
+		List<Job> jobs = new ArrayList<>();
 
-		jobs.addAll(getOwnedJobs(username));
-		jobs.addAll(getSharedJobs(username));
+		jobs.addAll(getOwnedJobs(userId));
+		jobs.addAll(getSharedJobs(userId));
 
 		return jobs;
 	}
 
 	/**
-	 * Get the jobs the user owns
+	 * Get the jobs a user owns
 	 *
-	 * @param username
-	 * @return
+	 * @param userId
+	 * @return list of jobs that the user owns, empty list if none
+	 * @throws java.sql.SQLException
 	 */
-	public List<Job> getOwnedJobs(String username) {
-		List<Job> jobs = new ArrayList<Job>();
+	public List<Job> getOwnedJobs(int userId) throws SQLException {
+		logger.debug("Entering getOwnedJobs: userId={}", userId);
 
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			conn = ArtConfig.getConnection();
-			String sql;
-
-			sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.USERNAME"
-					+ " ,aj.OUTPUT_FORMAT, aj.JOB_TYPE "
-					+ " , aj.MAIL_TOS, aj.MESSAGE , aj.SUBJECT "
-					+ " , aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
-					+ " aj.JOB_MONTH "
-					+ " , aj.JOB_ID, aj.CACHED_TABLE_NAME "
-					+ " , aj.LAST_START_DATE ,  aj.LAST_END_DATE , aj.LAST_FILE_NAME"
-					+ " , aj.NEXT_RUN_DATE "
-					+ " FROM ART_JOBS aj , ART_QUERIES aq "
-					+ " WHERE aq.QUERY_ID = aj.QUERY_ID "
-					+ " AND aj.USERNAME = ? ";
-
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
-
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				Job job = new Job();
-				job.setReportId(rs.getInt("QUERY_ID"));
-				job.setName(rs.getString("JOB_NAME"));
-				job.setUserId(rs.getInt("USER_ID"));
-				job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
-				job.setJobType(rs.getInt("JOB_TYPE"));
-				job.setMailTo(rs.getString("MAIL_TOS"));
-				job.setMailMessage(rs.getString("MESSAGE"));
-				job.setMailSubject(rs.getString("SUBJECT"));
-				job.setScheduleMinute(rs.getString("JOB_MINUTE"));
-				job.setScheduleHour(rs.getString("JOB_HOUR"));
-				job.setScheduleDay(rs.getString("JOB_DAY"));
-				job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
-				job.setScheduleMonth(rs.getString("JOB_MONTH"));
-				job.setJobId(rs.getInt("JOB_ID"));
-				job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
-				job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
-				job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
-				job.setLastFileName(rs.getString("LAST_FILE_NAME"));
-				job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
-
-				jobs.add(job);
-			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return jobs;
+		String sql = SQL_SELECT_ALL + " WHERE AJ.USER_ID=?";
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h);
 	}
 
 	/**
 	 * Get the shared jobs a user has access to
 	 *
+	 * @param userId
 	 * @return the shared jobs a user has access to
+	 * @throws java.sql.SQLException
 	 */
-	public List<SharedJob> getSharedJobs(String username) {
-		List<SharedJob> jobs = new ArrayList<SharedJob>();
+	public List<SharedJob> getSharedJobs(int userId) throws SQLException {
+		logger.debug("Entering getSharedJobs: userId={}", userId);
 
-		Connection conn = null;
+		List<SharedJob> jobs = new ArrayList<>();
+		String sql;
 
-		try {
-			conn = ArtConfig.getConnection();
-			String sql;
-			PreparedStatement ps = null;
-			ResultSet rs = null;
+		//get shared jobs user has access to via job membership. 
+		//non-split jobs. no entries for them in the art_user_jobs table
+		sql = SQL_SELECT_ALL + " INNER JOIN ART_USER_GROUP_JOBS AUGJ"
+				+ " ON AJ.JOB_ID=AUGJ.JOB_ID"
+				+ " WHERE AJ.USER_ID <> ? AND EXISTS "
+				+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USER_ID = ? "
+				+ " AND AUGA.JOB_ID=AUGJ.JOB_ID)";
+		ResultSetHandler<List<SharedJob>> h = new BeanListHandler<>(SharedJob.class, new JobMapper());
+		jobs.addAll(dbService.query(sql, h, userId, userId));
 
-			//get shared jobs user has access to via job membership. 
-			//non-split jobs. no entries for them in the art_user_jobs table
-			try {
-				sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
-						+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
-						+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"
-						+ " aj.CACHED_TABLE_NAME,aj.LAST_END_DATE, aj.OUTPUT_FORMAT, "
-						+ " aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE,aj.JOB_MINUTE,  "
-						+ " aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY, aj.JOB_MONTH "
-						+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_GROUP_JOBS AUGJ "
-						+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID = AUGJ.JOB_ID "
-						+ " AND aj.USERNAME <> ? AND EXISTS "
-						+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ? "
-						+ " AND AUGA.JOB_ID=AUGJ.JOB_ID)";
-
-				ps = conn.prepareStatement(sql);
-				ps.setString(1, username);
-				ps.setString(2, username);
-
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					SharedJob job = new SharedJob();
-					job.setReportId(rs.getInt("QUERY_ID"));
-					job.setName(rs.getString("JOB_NAME"));
-					job.setJobId(rs.getInt("JOB_ID"));
-					job.setJobType(rs.getInt("JOB_TYPE"));
-					job.setUsesRules(rs.getString("USES_RULES"));
-					job.setAllowSplitting(rs.getString("ALLOW_SPLITTING"));
-					job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
-					job.setLastFileName(rs.getString("LAST_FILE_NAME"));
-					job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
-					job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
-					job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
-					job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
-					job.setMailTo(rs.getString("MAIL_TOS"));
-					job.setMailSubject(rs.getString("SUBJECT"));
-					job.setMailMessage(rs.getString("MESSAGE"));
-					job.setScheduleMinute(rs.getString("JOB_MINUTE"));
-					job.setScheduleHour(rs.getString("JOB_HOUR"));
-					job.setScheduleDay(rs.getString("JOB_DAY"));
-					job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
-					job.setScheduleMonth(rs.getString("JOB_MONTH"));
-
-					jobs.add(job);
-				}
-			} finally {
-				DbUtils.close(rs, ps);
-			}
-
-			//get shared jobs user has direct access to. both split and non-split jobs
-			//store in the art_user_jobs table
-			try {
-				sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
+		//get shared jobs user has direct access to, but doesn't own. both split and non-split jobs
+		//stored in the art_user_jobs table
+		sql=SQL_SELECT_ALL + " INNER JOIN ART_USER_JOBS AUJ"
+				+ " ON AJ.JOB_ID=AUJ.JOB_ID"
+				+ " WHERE AJ.USER_ID<>? AND AUJ.USER_ID=?";
+		jobs.addAll(dbService.query(sql, h, userId));
+		
+		sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
 						+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
 						+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"
 						+ " aj.CACHED_TABLE_NAME,auj.LAST_FILE_NAME AS SHARED_FILE_NAME, "
@@ -382,49 +338,7 @@ public class JobService {
 						+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_JOBS auj "
 						+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID=auj.JOB_ID "
 						+ " AND auj.USERNAME = ? AND aj.USERNAME <> ?";
-
-				ps = conn.prepareStatement(sql);
-				ps.setString(1, username);
-				ps.setString(2, username);
-
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					SharedJob job = new SharedJob();
-					job.setReportId(rs.getInt("QUERY_ID"));
-					job.setName(rs.getString("JOB_NAME"));
-					job.setJobId(rs.getInt("JOB_ID"));
-					job.setJobType(rs.getInt("JOB_TYPE"));
-					job.setUsesRules(rs.getString("USES_RULES"));
-					job.setAllowSplitting(rs.getString("ALLOW_SPLITTING"));
-					job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
-					job.setLastFileName(rs.getString("LAST_FILE_NAME"));
-					job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
-					job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
-					job.setSharedLastFileName(rs.getString("SHARED_FILE_NAME"));
-					job.setSharedLastStartDate(rs.getTimestamp("SHARED_START_DATE"));
-					job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
-					job.setSharedLastEndDate(rs.getTimestamp("SHARED_END_DATE"));
-					job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
-					job.setMailTo(rs.getString("MAIL_TOS"));
-					job.setMailSubject(rs.getString("SUBJECT"));
-					job.setMailMessage(rs.getString("MESSAGE"));
-					job.setScheduleMinute(rs.getString("JOB_MINUTE"));
-					job.setScheduleHour(rs.getString("JOB_HOUR"));
-					job.setScheduleDay(rs.getString("JOB_DAY"));
-					job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
-					job.setScheduleMonth(rs.getString("JOB_MONTH"));
-
-					jobs.add(job);
-				}
-			} finally {
-				DbUtils.close(rs, ps);
-			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-		} finally {
-			DbUtils.close(conn);
-		}
-
+		
 		return jobs;
 	}
 

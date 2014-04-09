@@ -166,7 +166,7 @@ Display user jobs and jobs configuration
 						</td>
 						<td><t:displayDate date="${job.nextRunDate}"/></td>
 						<td>
-							<c:if test="${sessionUser.userId == job.userId || action == 'config'}">
+							<c:if test="${sessionUser.userId == job.user.userId || action == 'config'}">
 								<div class="btn-group">
 									<a class="btn btn-default" 
 									   href="${pageContext.request.contextPath}/app/editJob.do?id=${job.jobId}">
