@@ -61,6 +61,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -224,22 +225,22 @@ public class ArtConfig extends HttpServlet {
 		//ensure work directories exist
 		createWorkDirectories();
 
-		//populate all report formats list
-		allReportFormats.add("tsvGz");
-		allReportFormats.add("xml");
-		allReportFormats.add("rss20");
+		//populate all report formats list. only those which have an output class
+		allReportFormats.add("htmlDataTable");
 		allReportFormats.add("htmlGrid");
-		allReportFormats.add("html");
 		allReportFormats.add("xls");
 		allReportFormats.add("xlsx");
 		allReportFormats.add("pdf");
 		allReportFormats.add("htmlPlain");
+		allReportFormats.add("html");
 		allReportFormats.add("xlsZip");
 		allReportFormats.add("slk");
 		allReportFormats.add("slkZip");
 		allReportFormats.add("tsv");
 		allReportFormats.add("tsvZip");
-		allReportFormats.add("htmlDataTable");
+		allReportFormats.add("tsvGz");
+		allReportFormats.add("xml");
+		allReportFormats.add("rss20");
 
 		//load settings and initialize variables
 		loadSettings();
@@ -760,7 +761,8 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get all supported report formats
+	 * Get all supported report formats. Only includes formats which have an
+	 * output class
 	 *
 	 * @return all supported report formats
 	 */
@@ -1402,7 +1404,7 @@ public class ArtConfig extends HttpServlet {
 			try {
 				//don't consider alpha, beta, rc etc
 				//also, pre-releases, i.e. alpha, beta, etc are considered less than final releases
-				String version=StringUtils.substringBefore(artVersion, "-");
+				String version = StringUtils.substringBefore(artVersion, "-");
 				logger.debug("version='{}'", version);
 
 				Version currentVersion = Version.valueOf(version);
@@ -1411,6 +1413,7 @@ public class ArtConfig extends HttpServlet {
 				if (currentVersion.greaterThanOrEqualTo(Version.valueOf("3.0.0"))) {
 					addUserIds();
 					addScheduleIds();
+					addDrilldownIds();
 				}
 
 				boolean deleted = upgradeFile.delete();
@@ -1513,6 +1516,46 @@ public class ArtConfig extends HttpServlet {
 				maxId++;
 				sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_ID=? WHERE SCHEDULE_NAME=?";
 				dbService.update(sql, maxId, schedule);
+			}
+		}
+	}
+
+	/**
+	 * Populate drilldown_id column. Column added in 3.0
+	 */
+	private static void addDrilldownIds() throws SQLException {
+		logger.debug("Entering addDrilldownIds");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT QUERY_ID, DRILLDOWN_QUERY_POSITION"
+				+ " FROM ART_DRILLDOWN_QUERIES"
+				+ " WHERE DRILLDOWN_ID IS NULL";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> drilldowns = dbService.query(sql, h2);
+
+		logger.debug("drilldowns.isEmpty()={}", drilldowns.isEmpty());
+		if (!drilldowns.isEmpty()) {
+			//generate new id
+			sql = "SELECT MAX(DRILLDOWN_ID) FROM ART_DRILLDOWN_QUERIES";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer maxId = dbService.query(sql, h);
+			logger.debug("maxId={}", maxId);
+
+			if (maxId == null || maxId < 0) {
+				maxId = 0;
+			}
+
+			for (Map<String, Object> drilldown : drilldowns) {
+				maxId++;
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer parentReportId = (Integer) drilldown.get("QUERY_ID");
+				Integer position = (Integer) drilldown.get("DRILLDOWN_QUERY_POSITION");
+				sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_ID=?"
+						+ " WHERE QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?";
+				dbService.update(sql, maxId, parentReportId, position);
 			}
 		}
 	}

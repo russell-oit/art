@@ -7,6 +7,8 @@
  *
  * Modifications:
  * Timothy Anyona - 20140201. show tick icon on the left of the text
+ * 
+ * Minified using http://refresh-sf.com/yui/
  */
 
 !function($) {

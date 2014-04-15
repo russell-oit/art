@@ -140,7 +140,6 @@ public class UserGroupController {
 	 *
 	 * @param action
 	 * @param model
-	 * @param session
 	 * @return
 	 */
 	private String showUserGroup(String action, Model model) {

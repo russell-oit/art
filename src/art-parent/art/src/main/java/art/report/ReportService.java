@@ -458,7 +458,7 @@ public class ReportService {
 				+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
 
 		//set values for possibly null property objects
-		Map<String,Object> defaults=getSaveDefaults(report);
+		Map<String, Object> defaults = getSaveDefaults(report);
 
 		Object[] values = {
 			newId,
@@ -486,7 +486,7 @@ public class ReportService {
 		};
 
 		dbService.update(sql, values);
-		
+
 		return newId;
 	}
 
@@ -510,7 +510,7 @@ public class ReportService {
 				+ " WHERE QUERY_ID=?";
 
 		//set values for possibly null property objects
-		Map<String,Object> defaults=getSaveDefaults(report);
+		Map<String, Object> defaults = getSaveDefaults(report);
 
 		Object[] values = {
 			report.getName(),
@@ -754,6 +754,42 @@ public class ReportService {
 		}
 
 		return count;
+	}
+
+	/**
+	 * Get the name of a given report
+	 *
+	 * @param id
+	 * @return
+	 * @throws SQLException
+	 */
+	@Cacheable("reports")
+	public String getReportName(int id) throws SQLException {
+		logger.debug("Entering getReportName: id={}", id);
+
+		String sql = "SELECT NAME FROM ART_QUERIES WHERE QUERY_ID=?";
+		ResultSetHandler<String> h = new ScalarHandler<>(1);
+		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Get candidate drilldown reports
+	 *
+	 * @return
+	 * @throws SQLException
+	 */
+	@Cacheable("reports")
+	public List<Report> getCandidateDrilldownReports() throws SQLException {
+		logger.debug("Entering getCandidateDrilldownReports");
+
+		//candidate drilldown report is a report with at least one inline parameter where drill down column > 0
+		String sql = SQL_SELECT_ALL
+				+ " WHERE EXISTS "
+				+ " (SELECT * FROM ART_QUERY_FIELDS AQF WHERE AQ.QUERY_ID = AQF.QUERY_ID "
+				+ " AND AQF.PARAM_TYPE = 'I' AND AQF.DRILLDOWN_COLUMN > 0)";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
 	}
 
 }

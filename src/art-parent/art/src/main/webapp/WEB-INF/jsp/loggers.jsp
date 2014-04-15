@@ -46,14 +46,6 @@ Display current loggers
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="rightMainPanel">
-		<div class="col-md-3">
-			<div class="alert alert-info">
-				<spring:message code="loggers.info.temporaryConfiguration"/>
-			</div>
-		</div>
-	</jsp:attribute>
-
 	<jsp:body>
 		<c:if test="${not empty message}">
 			<div class="alert alert-success alert-dismissable">
