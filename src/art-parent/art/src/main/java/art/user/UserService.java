@@ -2,16 +2,20 @@ package art.user;
 
 import art.dbutils.DbService;
 import art.enums.AccessLevel;
-import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
+import art.report.Report;
 import art.usergroup.UserGroup;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import art.usergroup.UserGroupService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -38,199 +42,149 @@ public class UserService {
 	@Autowired
 	private DbService dbService;
 
+	@Autowired
+	private UserGroupService userGroupService;
+
 	final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS ";
 
 	/**
-	 * Get a user object for the given username
-	 *
-	 * @param username
-	 * @return populated user object if username exists, otherwise null
-	 * @throws java.sql.SQLException
+	 * Class to map resultset to an object
 	 */
-	@Cacheable("users")
-	public User getUser(String username) throws SQLException {
-		User user = null;
+	private class UserMapper extends BasicRowProcessor {
 
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		String sql = SQL_SELECT_ALL + " WHERE USERNAME = ? ";
-
-		Object[] values = {
-			username
-		};
-
-		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.query(conn, ps, sql, values);
-			if (rs.next()) {
-				user = new User();
-				populateUser(user, rs);
-				//set user properties whose values may come from user users
-				populateGroupValues(conn, user);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return user;
-	}
-
-	/**
-	 * Get a user object
-	 *
-	 * @param userId
-	 * @return user object if user found, null otherwise
-	 * @throws SQLException
-	 */
-	@Cacheable("users")
-	public User getUser(int userId) throws SQLException {
-		User user = null;
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		String sql = SQL_SELECT_ALL + " WHERE USER_ID = ? ";
-
-		Object[] values = {
-			userId
-		};
-
-		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.query(conn, ps, sql, values);
-			if (rs.next()) {
-				user = new User();
-				populateUser(user, rs);
-				//set user properties whose values may come from user users
-				populateGroupValues(conn, user);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return user;
-	}
-
-	/**
-	 * Populate user object with row from users table
-	 *
-	 * @param user
-	 * @param rs
-	 * @throws SQLException
-	 */
-	private void populateUser(User user, ResultSet rs) throws SQLException {
-		user.setUsername(rs.getString("USERNAME"));
-		user.setEmail(rs.getString("EMAIL"));
-		user.setAccessLevel(AccessLevel.toEnum(rs.getInt("ACCESS_LEVEL")));
-		user.setFullName(rs.getString("FULL_NAME"));
-		user.setActive(rs.getBoolean("ACTIVE"));
-		user.setPassword(rs.getString("PASSWORD"));
-		user.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
-		user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
-		user.setStartReport(rs.getString("START_QUERY"));
-		user.setUserId(rs.getInt("USER_ID"));
-		user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
-		user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-		user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-	}
-
-	/**
-	 * Set user properties whose values may come from user users
-	 *
-	 * @param conn
-	 * @param user
-	 */
-	private void populateGroupValues(Connection conn, User user) throws SQLException {
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		String sql = "SELECT AUG.USER_GROUP_ID, AUG.NAME, AUG.DESCRIPTION,"
-				+ " AUG.DEFAULT_QUERY_GROUP, AUG.START_QUERY "
-				+ " FROM ART_USER_GROUPS AUG"
-				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA "
-				+ " ON AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID"
-				+ " WHERE AUGA.USER_ID=?"
-				+ " ORDER BY AUG.USER_GROUP_ID"; //have order by so that effective values are deterministic
-
-		Object[] values = {
-			user.getUserId()
-		};
-
-		try {
-			int effectiveDefaultReportGroup = user.getDefaultReportGroup();
-			String effectiveStartReport = user.getStartReport();
-
-			List<UserGroup> groups = new ArrayList<>();
-
-			rs = DbUtils.query(conn, ps, sql, values);
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
 			while (rs.next()) {
-				UserGroup group = new UserGroup();
-
-				group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
-				group.setName(rs.getString("NAME"));
-				group.setDescription(rs.getString("DESCRIPTION"));
-				group.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
-				group.setStartReport(rs.getString("START_QUERY"));
-
-				groups.add(group);
-
-				if (effectiveDefaultReportGroup <= 0) {
-					effectiveDefaultReportGroup = group.getDefaultReportGroup();
-				}
-				if (StringUtils.isBlank(effectiveStartReport)) {
-					effectiveStartReport = group.getStartReport();
-				}
+				list.add(toBean(rs, type));
 			}
+			return list;
+		}
 
-			user.setUserGroups(groups);
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			User user = new User();
 
-			user.setEffectiveDefaultReportGroup(effectiveDefaultReportGroup);
-			user.setEffectiveStartReport(effectiveStartReport);
-		} finally {
-			DbUtils.close(rs, ps);
+			user.setUsername(rs.getString("USERNAME"));
+			user.setEmail(rs.getString("EMAIL"));
+			user.setAccessLevel(AccessLevel.toEnum(rs.getInt("ACCESS_LEVEL")));
+			user.setFullName(rs.getString("FULL_NAME"));
+			user.setActive(rs.getBoolean("ACTIVE"));
+			user.setPassword(rs.getString("PASSWORD"));
+			user.setDefaultReportGroup(rs.getInt("DEFAULT_QUERY_GROUP"));
+			user.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
+			user.setStartReport(rs.getString("START_QUERY"));
+			user.setUserId(rs.getInt("USER_ID"));
+			user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
+			user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+			user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+
+			return type.cast(user);
 		}
 	}
 
 	/**
 	 * Get all users
 	 *
-	 * @return all users
-	 * @throws java.sql.SQLException
+	 * @return list of all users, empty list otherwise
+	 * @throws SQLException
 	 */
-	@Cacheable(value = "users")
+	@Cacheable("users")
 	public List<User> getAllUsers() throws SQLException {
-		List<User> users = new ArrayList<>();
+		logger.debug("Entering getAllUsers");
 
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(SQL_SELECT_ALL, h);
+	}
 
-		String sql = SQL_SELECT_ALL;
+	/**
+	 * Get admin users (junior admin and above)
+	 *
+	 * @return list of admin users, empty list otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public List<User> getAdminUsers() throws SQLException {
+		logger.debug("Entering getAdminUsers");
 
-		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.query(conn, ps, sql);
-			while (rs.next()) {
-				User user = new User();
-				populateUser(user, rs);
-				users.add(user);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
+		String sql = SQL_SELECT_ALL + "WHERE ACCESS_LEVEL>=?";
+		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
+		return dbService.query(sql, h, AccessLevel.JuniorAdmin.getValue());
+	}
+
+	/**
+	 * Get a user
+	 *
+	 * @param id
+	 * @return populated object if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public User getUser(int id) throws SQLException {
+		logger.debug("Entering getUser: id={}", id);
+
+		String sql = SQL_SELECT_ALL + " WHERE USER_ID = ? ";
+		ResultSetHandler<User> h = new BeanHandler<>(User.class, new UserMapper());
+		User user = dbService.query(sql, h, id);
+		populateUserGroups(user);
+		return user;
+	}
+
+	/**
+	 * Get a user
+	 *
+	 * @param username
+	 * @return populated object if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("users")
+	public User getUser(String username) throws SQLException {
+		logger.debug("Entering getUser: username='{}'", username);
+
+		String sql = SQL_SELECT_ALL + " WHERE USERNAME = ? ";
+		ResultSetHandler<User> h = new BeanHandler<>(User.class, new UserMapper());
+		User user = dbService.query(sql, h, username);
+		populateUserGroups(user);
+		return user;
+	}
+
+	/**
+	 * Populate a user's user groups and set properties whose values may come
+	 * from user groups
+	 *
+	 * @param user
+	 */
+	private void populateUserGroups(User user) throws SQLException {
+		if (user == null) {
+			return;
 		}
 
-		return users;
+		int effectiveDefaultReportGroup = user.getDefaultReportGroup();
+		String effectiveStartReport = user.getStartReport();
+
+		List<UserGroup> groups = userGroupService.getUserGroupsForUser(user.getUserId());
+
+		for (UserGroup group : groups) {
+			if (effectiveDefaultReportGroup <= 0) {
+				effectiveDefaultReportGroup = group.getDefaultReportGroup();
+			}
+			if (StringUtils.isBlank(effectiveStartReport)) {
+				effectiveStartReport = group.getStartReport();
+			}
+		}
+
+		user.setEffectiveDefaultReportGroup(effectiveDefaultReportGroup);
+		user.setEffectiveStartReport(effectiveStartReport);
+
+		user.setUserGroups(groups);
 	}
 
 	/**
 	 * Delete a user and all related records
 	 *
 	 * @param id
-	 * @param linkedJobs list that will be populated with linked jobs if they
-	 * exist
+	 * @param linkedJobs output parameter. list that will be populated with
+	 * linked jobs if they exist
 	 * @return -1 if the record was not deleted because there are some linked
 	 * records in other tables, otherwise the count of the number of users
 	 * deleted
@@ -302,20 +256,18 @@ public class UserService {
 			userId
 		};
 
-		int affectedRows = dbService.update(sql, values);
-		if (affectedRows == 0) {
-			logger.warn("Update password - no rows affected. User ID={}", userId);
-		}
+		dbService.update(sql, values);
 	}
 
 	/**
 	 * Add a new user to the database
 	 *
 	 * @param user
+	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public synchronized void addUser(User user) throws SQLException {
+	public synchronized int addUser(User user) throws SQLException {
 		logger.debug("Entering addUser: user={}", user);
 
 		//generate new id
@@ -339,13 +291,8 @@ public class UserService {
 				+ " START_QUERY_GROUP, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
 
-		int accessLevel;
-		if (user.getAccessLevel() == null) {
-			logger.warn("Access level not defined. Defaulting to 0");
-			accessLevel = 0;
-		} else {
-			accessLevel = user.getAccessLevel().getValue();
-		}
+		//set values for possibly null property objects
+		Map<String, Object> defaults = getSaveDefaults(user);
 
 		Object[] values = {
 			newId,
@@ -354,7 +301,7 @@ public class UserService {
 			user.getPasswordAlgorithm(),
 			user.getFullName(),
 			user.getEmail(),
-			accessLevel,
+			defaults.get("accessLevel"),
 			user.getDefaultReportGroup(),
 			user.getStartReport(),
 			user.isCanChangePassword(),
@@ -362,12 +309,9 @@ public class UserService {
 			DbUtils.getCurrentTimeStamp()
 		};
 
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
+		dbService.update(sql, values);
 
-		if (affectedRows != 1) {
-			logger.warn("Problem with add. affectedRows={}, user={}", affectedRows, user);
-		}
+		return newId;
 	}
 
 	/**
@@ -386,13 +330,8 @@ public class UserService {
 				+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?"
 				+ " WHERE USER_ID=?";
 
-		int accessLevel;
-		if (user.getAccessLevel() == null) {
-			logger.warn("Access level not defined. Defaulting to 0");
-			accessLevel = 0;
-		} else {
-			accessLevel = user.getAccessLevel().getValue();
-		}
+		//set values for possibly null property objects
+		Map<String, Object> defaults = getSaveDefaults(user);
 
 		Object[] values = {
 			user.getUsername(),
@@ -400,7 +339,7 @@ public class UserService {
 			user.getPasswordAlgorithm(),
 			user.getFullName(),
 			user.getEmail(),
-			accessLevel,
+			defaults.get("accessLevel"),
 			user.getDefaultReportGroup(),
 			user.getStartReport(),
 			user.isCanChangePassword(),
@@ -409,12 +348,7 @@ public class UserService {
 			user.getUserId()
 		};
 
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with update. affectedRows={}, user={}", affectedRows, user);
-		}
+		dbService.update(sql, values);
 	}
 
 	/**
@@ -433,5 +367,26 @@ public class UserService {
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
 		return dbService.query(sql, h, userId);
+	}
+	
+	/**
+	 * Get values for possibly null property objects
+	 *
+	 * @param user
+	 * @return map with values to save. key = field name, value = field value
+	 */
+	private Map<String, Object> getSaveDefaults(User user) {
+		Map<String, Object> values = new HashMap<>();
+		
+		Integer accessLevel;
+		if (user.getAccessLevel() == null) {
+			logger.warn("Access level not defined. Defaulting to 0");
+			accessLevel = 0;
+		} else {
+			accessLevel = user.getAccessLevel().getValue();
+		}
+		values.put("accessLevel", accessLevel);
+
+		return values;
 	}
 }

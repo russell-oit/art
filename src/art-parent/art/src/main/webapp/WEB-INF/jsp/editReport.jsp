@@ -38,13 +38,13 @@ Edit report page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/jasny-bootstrap-file-input-3.1.0.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.0/css/jasny-bootstrap.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-file-input-3.1.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.0/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.0.19/tinymce.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3-modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select--modified.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -299,7 +299,7 @@ Edit report page
 				</div>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="reportGroup">
-						<spring:message code="reports.label.reportGroup"/>
+						<spring:message code="page.text.reportGroup"/>
 					</label>
 					<div class="col-md-8">
 						<form:select path="reportGroup.reportGroupId" class="form-control selectpicker">
@@ -385,7 +385,7 @@ Edit report page
 				</div>
 				<div id="datasourceDiv" class="form-group">
 					<label class="col-md-4 control-label " for="datasource">
-						<spring:message code="reports.label.datasource"/>
+						<spring:message code="page.text.datasource"/>
 					</label>
 					<div class="col-md-8">
 						<form:select path="datasource.datasourceId" class="form-control selectpicker">

@@ -48,7 +48,7 @@ public class UserGroupService {
 	@Autowired
 	private DbService dbService;
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS AUG";
 
 	/**
 	 * Class to map resultset to an object
@@ -108,6 +108,26 @@ public class UserGroupService {
 		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID = ? ";
 		ResultSetHandler<UserGroup> h = new BeanHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(sql, h, id);
+	}
+	
+	/**
+	 * Get user groups that a given user belongs to
+	 *
+	 * @param userId
+	 * @return list of the user's user groups, empty list otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("userGroups")
+	public List<UserGroup> getUserGroupsForUser(int userId) throws SQLException {
+		logger.debug("Entering getUserGroupsForUser: userId={}", userId);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA "
+				+ " ON AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID"
+				+ " WHERE AUGA.USER_ID=?"
+				+ " ORDER BY AUG.USER_GROUP_ID"; //have order by so that effective values are deterministic
+		ResultSetHandler<List<UserGroup>> h = new BeanListHandler<>(UserGroup.class, new UserGroupMapper());
+		return dbService.query(sql, h, userId);
 	}
 
 	/**

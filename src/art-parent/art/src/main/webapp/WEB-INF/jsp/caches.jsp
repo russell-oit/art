@@ -47,13 +47,14 @@ Page to allow manual clearing of caches
 				$('#caches tbody').on('click', '.clear', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var name = escapeHtmlContent(row.data("name"));
-					var msg;
+					
 					$.ajax({
 						type: "POST",
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/app/clearCache.do",
 						data: {name: name},
 						success: function(response) {
+							var msg;
 							if (response.success) {
 								msg = alertCloseButton + "${cacheClearedText}: " + name;
 								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);

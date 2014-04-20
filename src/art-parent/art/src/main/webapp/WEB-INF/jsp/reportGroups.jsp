@@ -53,7 +53,6 @@ Report groups configuration page
 					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					var msg;
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
@@ -72,6 +71,7 @@ Report groups configuration page
 									url: "${pageContext.request.contextPath}/app/deleteReportGroup.do",
 									data: {id: id},
 									success: function(response) {
+										var msg;
 										var linkedReports = response.data;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);

@@ -51,7 +51,6 @@ Page to display connections status
 					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					var msg;
 
 					$.ajax({
 						type: "POST",
@@ -59,6 +58,7 @@ Page to display connections status
 						url: "${pageContext.request.contextPath}/app/resetConnection.do",
 						data: {id: id},
 						success: function(response) {
+							var msg;
 							if (response.success) {
 								var update="${totalText}: " + response.poolSize +
 										", ${inUseText}: " + response.inUseCount;

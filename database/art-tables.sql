@@ -228,7 +228,7 @@ INSERT INTO ART_REPORT_TYPES VALUES (-17,'Chart: Stacked Horizontal Bar 2D');
 -- this table is used to limit data extraction for these admins when
 -- viewing available groups and datasources
 
--- PRIVILEGE can be either DB (datasource) or GRP (query group)
+-- PRIVILEGE can be either "DB" (datasource) or "GRP" (query group)
 -- VALUE_ID is the datasource id or query group id
 
 CREATE TABLE ART_ADMIN_PRIVILEGES

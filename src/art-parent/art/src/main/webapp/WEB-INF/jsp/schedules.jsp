@@ -52,7 +52,6 @@ Display schedules
 					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					var msg;
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
@@ -71,6 +70,7 @@ Display schedules
 									url: "${pageContext.request.contextPath}/app/deleteSchedule.do",
 									data: {id: id},
 									success: function(response) {
+										var msg;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
 

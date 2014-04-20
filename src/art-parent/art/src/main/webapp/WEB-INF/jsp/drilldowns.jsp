@@ -29,7 +29,13 @@ Display report drilldowns
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom.min.js"></script>
+		
+		<script type="text/javascript">
+			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
+			$.fn.bsTooltip = $.fn.tooltip.noConflict();
+		</script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom/jquery-ui-1.10.3.custom.min.js"></script>
+		
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
@@ -40,7 +46,7 @@ Display report drilldowns
 				
 				$(function() {
 					//needed if tooltips shown on input-group element or button
-					$("[data-toggle='tooltip']").tooltip({container: 'body'});
+					$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
 				});
 
 				var oTable = $('#drilldowns').dataTable({
@@ -57,8 +63,9 @@ Display report drilldowns
 					sURL: "moveDrilldown.do",
 					sRequestType: "POST",
 					fnSuccess: function(response) {
+						var msg;
 						if (response.success) {
-							msg = alertCloseButton + "${recordMovedText}: " + response.data;
+							msg = alertCloseButton + "${recordMovedText}: " + escapeHtmlContent(response.data);
 							$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 							$.notify("${recordMovedText}", "success");
 						} else {
@@ -78,7 +85,6 @@ Display report drilldowns
 					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					var msg;
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
@@ -97,6 +103,7 @@ Display report drilldowns
 									url: "${pageContext.request.contextPath}/app/deleteDrilldown.do",
 									data: {id: id},
 									success: function(response) {
+										var msg;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
 
@@ -170,11 +177,12 @@ Display report drilldowns
 				<c:forEach var="drilldown" items="${drilldowns}">
 					<tr data-id="${drilldown.drilldownId}" 
 						data-name="${encode:forHtmlAttribute(drilldown.drilldownReport.name)}"
-						id="${drilldown.drilldownId}"
-						data-toggle="tooltip" title="${dragToReorderText}">
+						id="${drilldown.drilldownId}">
 
 						<td>${drilldown.position}</td>
-						<td>${encode:forHtmlContent(drilldown.drilldownReport.name)}</td>
+						<td data-toggle="tooltip" title="${dragToReorderText}">
+							${encode:forHtmlContent(drilldown.drilldownReport.name)}
+						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

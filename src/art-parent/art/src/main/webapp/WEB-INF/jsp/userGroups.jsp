@@ -52,7 +52,7 @@ Display user groups
 					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					var msg;
+					
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
@@ -71,6 +71,7 @@ Display user groups
 									url: "${pageContext.request.contextPath}/app/deleteUserGroup.do",
 									data: {id: id},
 									success: function(response) {
+										var msg;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
 

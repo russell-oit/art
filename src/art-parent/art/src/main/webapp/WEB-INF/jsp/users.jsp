@@ -56,7 +56,6 @@ Display user configuration page
 					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					var msg;
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
@@ -75,6 +74,7 @@ Display user configuration page
 									url: "${pageContext.request.contextPath}/app/deleteUser.do",
 									data: {id: id},
 									success: function(response) {
+										var msg;
 										var linkedJobs = response.data;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
