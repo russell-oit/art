@@ -89,8 +89,8 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/accessRights.do">
-									<spring:message code="header.link.accessRights"/>
+								<a href="${pageContext.request.contextPath}/app/accessRightsConfig.do">
+									<spring:message code="header.link.accessRightsConfiguration"/>
 								</a>
 							</li>
 							<li>

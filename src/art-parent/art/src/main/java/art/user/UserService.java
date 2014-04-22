@@ -3,7 +3,6 @@ package art.user;
 import art.dbutils.DbService;
 import art.enums.AccessLevel;
 import art.dbutils.DbUtils;
-import art.report.Report;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import java.sql.ResultSet;

@@ -3,6 +3,7 @@ package art.reportgroup;
 import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.enums.AccessLevel;
+import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -127,21 +128,22 @@ public class ReportGroupService {
 	/**
 	 * Get report groups that an admin can use, according to his access level
 	 *
-	 * @param userId
-	 * @param accessLevel
-	 * @return
+	 * @param user
+	 * @return list of available report groups, empty list otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("reportGroups")
-	public List<ReportGroup> getAdminReportGroups(int userId, AccessLevel accessLevel) throws SQLException {
-		logger.debug("Entering getAdminReportGroups: userIdd={}, accessLevel={}", userId, accessLevel);
+	public List<ReportGroup> getAdminReportGroups(User user) throws SQLException {
+		logger.debug("Entering getAdminReportGroups: user={}", user);
 
-		if (accessLevel == null) {
+		if (user == null || user.getAccessLevel() == null) {
 			return new ArrayList<>();
 		}
 
+		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
+
 		ResultSetHandler<List<ReportGroup>> h = new BeanListHandler<>(ReportGroup.class, new ReportGroupMapper());
-		if (accessLevel.getValue() >= AccessLevel.StandardAdmin.getValue()) {
+		if (user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
 			//standard admins and above can work with everything
 			return dbService.query(SQL_SELECT_ALL, h);
 		} else {
@@ -150,7 +152,7 @@ public class ReportGroupService {
 					+ " WHERE AQG.QUERY_GROUP_ID = AAP.VALUE_ID "
 					+ " AND AAP.PRIVILEGE = 'GRP' "
 					+ " AND AAP.USER_ID = ? ";
-			return dbService.query(sql, h, userId);
+			return dbService.query(sql, h, user.getUserId());
 		}
 	}
 
@@ -293,7 +295,7 @@ public class ReportGroupService {
 	 */
 	public List<String> getLinkedReports(int reportGroupId) throws SQLException {
 		logger.debug("Entering getLinkedReports: reportGroupId={}", reportGroupId);
-		
+
 		String sql = "SELECT NAME"
 				+ " FROM ART_QUERIES"
 				+ " WHERE QUERY_GROUP_ID=?";

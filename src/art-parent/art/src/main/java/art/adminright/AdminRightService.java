@@ -47,7 +47,7 @@ public class AdminRightService {
 	private DbService dbService;
 
 	private final String SQL_SELECT_ALL_DATASOURCE_RIGHTS
-			= "SELECT AAP.USER_ID, AAP.VALUE_ID, AU.USERNAME, AD.NAME AS DATASOURCE_NAME"
+			= "SELECT AU.USER_ID, AU.USERNAME, AAP.VALUE_ID, AD.NAME AS DATASOURCE_NAME"
 			+ " FROM ART_ADMIN_PRIVILEGES AAP"
 			+ " INNER JOIN ART_USERS AU ON"
 			+ " AAP.USER_ID=AU.USER_ID"
@@ -56,7 +56,7 @@ public class AdminRightService {
 			+ " WHERE AAP.PRIVILEGE='DB'";
 
 	private final String SQL_SELECT_ALL_REPORT_GROUP_RIGHTS
-			= "SELECT AAP.USER_ID, AAP.VALUE_ID, AU.USERNAME, AQG.NAME AS GROUP_NAME"
+			= "SELECT AU.USER_ID, AU.USERNAME, AAP.VALUE_ID, AQG.NAME AS GROUP_NAME"
 			+ " FROM ART_ADMIN_PRIVILEGES AAP"
 			+ " INNER JOIN ART_USERS AU ON"
 			+ " AAP.USER_ID=AU.USER_ID"
@@ -166,7 +166,8 @@ public class AdminRightService {
 	 * @throws SQLException
 	 */
 	public void deleteAdminDatasourceRight(int userId, int datasourceId) throws SQLException {
-		logger.debug("Entering deleteAdminDatasourceRight: userId={}, datasourceId={}", userId, datasourceId);
+		logger.debug("Entering deleteAdminDatasourceRight: userId={}, datasourceId={}",
+				userId, datasourceId);
 
 		String sql;
 
@@ -183,7 +184,8 @@ public class AdminRightService {
 	 * @throws SQLException
 	 */
 	public void deleteAdminReportGroupRight(int userId, int reportGroupId) throws SQLException {
-		logger.debug("Entering deleteAdminReportGroupRight: userId={}, reportGroupId={}", userId, reportGroupId);
+		logger.debug("Entering deleteAdminReportGroupRight: userId={}, reportGroupId={}",
+				userId, reportGroupId);
 
 		String sql;
 
@@ -201,26 +203,28 @@ public class AdminRightService {
 	 * @param reportGroups array of report group ids
 	 * @throws SQLException
 	 */
-	public void updateAdminRights(String action, String[] admins, Integer[] datasources, Integer[] reportGroups) throws SQLException {
+	public void updateAdminRights(String action, String[] admins, Integer[] datasources,
+			Integer[] reportGroups) throws SQLException {
+
 		logger.debug("Entering updateAdminRights: action='{}'", action);
 
 		if (action == null || admins == null) {
 			return;
 		}
 
-		String sqlGroup;
+		String sqlReportGroup;
 		String sqlDatasource;
 
 		if (action.equals("GRANT")) {
-			sqlGroup = "INSERT INTO ART_ADMIN_PRIVILEGES (USER_ID, USERNAME, PRIVILEGE, VALUE_ID) values (? , ?, 'GRP', ? ) ";
 			sqlDatasource = "INSERT INTO ART_ADMIN_PRIVILEGES (USER_ID, USERNAME, PRIVILEGE, VALUE_ID) values (? , ?, 'DB', ? ) ";
+			sqlReportGroup = "INSERT INTO ART_ADMIN_PRIVILEGES (USER_ID, USERNAME, PRIVILEGE, VALUE_ID) values (? , ?, 'GRP', ? ) ";
 		} else {
-			sqlGroup = "DELETE FROM ART_ADMIN_PRIVILEGES WHERE PRIVILEGE = 'GRP' AND USER_ID = ? AND USERNAME=? AND VALUE_ID = ? ";
 			sqlDatasource = "DELETE FROM ART_ADMIN_PRIVILEGES WHERE PRIVILEGE = 'DB' AND USER_ID = ? AND USERNAME=? AND VALUE_ID = ? ";
+			sqlReportGroup = "DELETE FROM ART_ADMIN_PRIVILEGES WHERE PRIVILEGE = 'GRP' AND USER_ID = ? AND USERNAME=? AND VALUE_ID = ? ";
 		}
 
-		String sqlTestGroup = "UPDATE ART_ADMIN_PRIVILEGES SET USER_ID=? WHERE PRIVILEGE='GRP' AND USER_ID = ? AND USERNAME=? AND VALUE_ID = ?";
 		String sqlTestDatasource = "UPDATE ART_ADMIN_PRIVILEGES SET USER_ID=? WHERE PRIVILEGE='DB' AND USER_ID = ? AND USERNAME=? AND VALUE_ID = ?";
+		String sqlTestReportGroup = "UPDATE ART_ADMIN_PRIVILEGES SET USER_ID=? WHERE PRIVILEGE='GRP' AND USER_ID = ? AND USERNAME=? AND VALUE_ID = ?";
 		int affectedRows;
 		boolean updateRight;
 
@@ -258,14 +262,14 @@ public class AdminRightService {
 
 					if (action.equals("GRANT")) {
 						//test if right exists. to avoid integrity constraint error
-						affectedRows = dbService.update(sqlTestGroup, userId, userId, username, reportGroupId);
+						affectedRows = dbService.update(sqlTestReportGroup, userId, userId, username, reportGroupId);
 						if (affectedRows > 0) {
 							//right exists. don't attempt a reinsert.
 							updateRight = false;
 						}
 					}
 					if (updateRight) {
-						dbService.update(sqlGroup, userId, username, reportGroupId);
+						dbService.update(sqlReportGroup, userId, username, reportGroupId);
 					}
 				}
 			}

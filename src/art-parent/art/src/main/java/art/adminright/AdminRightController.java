@@ -50,10 +50,10 @@ public class AdminRightController {
 	private UserService userService;
 
 	@Autowired
-	private ReportGroupService reportGroupService;
+	private DatasourceService datasourceService;
 
 	@Autowired
-	private DatasourceService datasourceService;
+	private ReportGroupService reportGroupService;
 
 	@RequestMapping(value = "/app/adminRights", method = RequestMethod.GET)
 	public String showAdminRights(Model model) {
@@ -96,14 +96,12 @@ public class AdminRightController {
 
 		//id format = <right type>-<admin user id>-<datasource or report group id>
 		String[] values = StringUtils.split(id, "-");
-		String rightType = values[0];
-		int userId = Integer.valueOf(values[1]);
 
 		try {
-			if (StringUtils.equalsIgnoreCase(rightType, "datasourceRight")) {
-				adminRightService.deleteAdminDatasourceRight(userId, NumberUtils.toInt(values[2]));
-			} else if (StringUtils.equalsIgnoreCase(rightType, "reportGroupRight")) {
-				adminRightService.deleteAdminReportGroupRight(userId, NumberUtils.toInt(values[2]));
+			if (StringUtils.equalsIgnoreCase(values[0], "datasourceRight")) {
+				adminRightService.deleteAdminDatasourceRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
+			} else if (StringUtils.equalsIgnoreCase(values[0], "reportGroupRight")) {
+				adminRightService.deleteAdminReportGroupRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
 			}
 			response.setSuccess(true);
 		} catch (SQLException ex) {
@@ -120,10 +118,9 @@ public class AdminRightController {
 			@RequestParam("admins[]") String[] admins,
 			@RequestParam(value = "datasources[]", required = false) Integer[] datasources,
 			@RequestParam(value = "reportGroups[]", required = false) Integer[] reportGroups) {
-		
+
 		//jquery ajax post appends [] to parameter name where data is an array
 		//https://stackoverflow.com/questions/17627056/how-to-pass-multiple-request-parameters-in-spring
-
 		logger.debug("Entering updateAdminRight: action='{}'", action);
 
 		AjaxResponse response = new AjaxResponse();

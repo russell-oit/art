@@ -142,7 +142,7 @@ Display application logs
 						<th><spring:message code="page.text.level"/></th>
 						<th><spring:message code="logs.text.logger"/></th>
 						<th><spring:message code="logs.text.message"/></th>
-						<th><spring:message code="logs.text.user"/></th>
+						<th><spring:message code="page.text.user"/></th>
 						<th><spring:message code="logs.text.page"/></th>
 						<th></th> <%-- exception details column. must be last column. hidden --%>
 						<%-- if change number of columns, must modify array index in fnFormatDetails --%>

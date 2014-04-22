@@ -1,9 +1,9 @@
 <%-- 
-    Document   : adminRightsConfig
-    Created on : 19-Apr-2014, 20:02:45
+    Document   : accessRightsConfig
+    Created on : 22-Apr-2014, 12:03:03
     Author     : Timothy Anyona
 
-Admin rights configuration page
+Access rights configuration
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -14,13 +14,13 @@ Admin rights configuration page
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.adminRightsConfiguration" var="pageTitle"/>
+<spring:message code="page.title.accessRightsConfiguration" var="pageTitle"/>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="page.message.rightsGranted" var="rightsGrantedText"/>
-<spring:message code="adminRights.message.selectAdmin" var="selectAdminText"/>
-<spring:message code="adminRights.message.selectDatasourceOrGroup" var="selectDatasourceOrGroupText"/>
+<spring:message code="accessRights.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
+<spring:message code="accessRights.message.selectReportOrReportGroup" var="selectReportOrReportGroupText"/>
 <spring:message code="page.text.available" var="availableText"/>
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
@@ -39,7 +39,7 @@ Admin rights configuration page
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
+					$('a[href*="accessRightsConfig.do"]').parent().addClass('active');
 				});
 
 				$('.multi-select').multiSelect({
@@ -83,16 +83,17 @@ Admin rights configuration page
 			});
 
 			function updateRights(action) {
-				var admins = $('#admins').val();
-				var datasources = $('#datasources').val();
+				var users = $('#users').val();
+				var userGroups = $('#userGroups').val();
+				var reports = $('#reports').val();
 				var reportGroups = $('#reportGroups').val();
 
-				if (admins === null) {
-					bootbox.alert("${selectAdminText}");
+				if (users === null && userGroups === null) {
+					bootbox.alert("${selectUserOrUserGroupText}");
 					return;
 				}
-				if (datasources === null && reportGroups === null) {
-					bootbox.alert("${selectDatasourceOrGroupText}");
+				if (reports === null && reportGroups === null) {
+					bootbox.alert("${selectReportOrReportGroupText}");
 					return;
 				}
 
@@ -106,9 +107,9 @@ Admin rights configuration page
 				$.ajax({
 					type: "POST",
 					dataType: "json",
-					url: "${pageContext.request.contextPath}/app/updateAdminRight.do",
-					data: {action: action, admins: admins, datasources: datasources,
-						reportGroups: reportGroups},
+					url: "${pageContext.request.contextPath}/app/updateAccessRight.do",
+					data: {action: action, users: users, userGroups: userGroups,
+						reports: reports, reportGroups: reportGroups},
 					success: function(response) {
 						var msg;
 						if (response.success) {
@@ -127,21 +128,30 @@ Admin rights configuration page
 				}); //end ajax
 			}
 
-			$('#select-all-admins').click(function() {
-				$('#admins').multiSelect('select_all');
+			$('#select-all-users').click(function() {
+				$('#users').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-admins').click(function() {
-				$('#admins').multiSelect('deselect_all');
+			$('#deselect-all-users').click(function() {
+				$('#users').multiSelect('deselect_all');
 				return false;
 			});
 
-			$('#select-all-datasources').click(function() {
-				$('#datasources').multiSelect('select_all');
+			$('#select-all-userGroups').click(function() {
+				$('#userGroups').multiSelect('select_all');
 				return false;
 			});
-			$('#deselect-all-datasources').click(function() {
-				$('#datasources').multiSelect('deselect_all');
+			$('#deselect-all-userGroups').click(function() {
+				$('#userGroups').multiSelect('deselect_all');
+				return false;
+			});
+
+			$('#select-all-reports').click(function() {
+				$('#reports').multiSelect('select_all');
+				return false;
+			});
+			$('#deselect-all-reports').click(function() {
+				$('#reports').multiSelect('deselect_all');
 				return false;
 			});
 
@@ -173,35 +183,51 @@ Admin rights configuration page
 				</div>
 
 				<div class="form-group">
-					<label class="control-label col-md-3" for="admins">
-						<spring:message code="adminRights.text.admins"/>
+					<label class="control-label col-md-3" for="users">
+						<spring:message code="page.text.users"/>
 					</label>
 					<div class="col-md-9">
-						<select name="admins" id="admins" multiple="multiple" class="form-control multi-select">
-							<c:forEach var="admin" items="${admins}">
-								<option value="${admin.userId}-${encode:forHtmlAttribute(admin.username)}">
-									<encode:forHtmlContent value="${admin.username}"/>
+						<select name="users" id="users" multiple="multiple" class="form-control multi-select">
+							<c:forEach var="user" items="${users}">
+								<option value="${user.userId}-${encode:forHtmlAttribute(user.username)}">
+									<encode:forHtmlContent value="${user.username}"/>
 								</option>
 							</c:forEach>
 						</select>
-						<a href='#' id='select-all-admins'><spring:message code="page.text.selectAll"/></a> / 
-						<a href='#' id='deselect-all-admins'><spring:message code="page.text.deselectAll"/></a>
+						<a href='#' id='select-all-users'><spring:message code="page.text.selectAll"/></a> / 
+						<a href='#' id='deselect-all-users'><spring:message code="page.text.deselectAll"/></a>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-3" for="datasources">
-						<spring:message code="adminRights.text.datasources"/>
+					<label class="control-label col-md-3" for="userGroups">
+						<spring:message code="page.text.userGroups"/>
 					</label>
 					<div class="col-md-9">
-						<select name="datasources" id="datasources" multiple="multiple" class="form-control multi-select">
-							<c:forEach var="datasource" items="${datasources}">
-								<option value="${datasource.datasourceId}">
-									<encode:forHtmlContent value="${datasource.name}"/>
+						<select name="userGroups" id="userGroups" multiple="multiple" class="form-control multi-select">
+							<c:forEach var="userGroup" items="${userGroups}">
+								<option value="${userGroup.userGroupId}">
+									<encode:forHtmlContent value="${userGroup.name}"/>
 								</option>
 							</c:forEach>
 						</select>
-						<a href='#' id='select-all-datasources'><spring:message code="page.text.selectAll"/></a> / 
-						<a href='#' id='deselect-all-datasources'><spring:message code="page.text.deselectAll"/></a>
+						<a href='#' id='select-all-userGroups'><spring:message code="page.text.selectAll"/></a> / 
+						<a href='#' id='deselect-all-userGroups'><spring:message code="page.text.deselectAll"/></a>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-3" for="reports">
+						<spring:message code="page.text.reports"/>
+					</label>
+					<div class="col-md-9">
+						<select name="reports" id="reports" multiple="multiple" class="form-control multi-select">
+							<c:forEach var="report" items="${reports}">
+								<option value="${report.reportId}">
+									<encode:forHtmlContent value="${report.name}"/>
+								</option>
+							</c:forEach>
+						</select>
+						<a href='#' id='select-all-reports'><spring:message code="page.text.selectAll"/></a> / 
+						<a href='#' id='deselect-all-reports'><spring:message code="page.text.deselectAll"/></a>
 					</div>
 				</div>
 				<div class="form-group">
@@ -224,7 +250,7 @@ Admin rights configuration page
 					<div class="col-md-12">
 						<div class="pull-right">
 							<a class="btn btn-default" 
-							   href="${pageContext.request.contextPath}/app/adminRights.do">
+							   href="${pageContext.request.contextPath}/app/accessRights.do">
 								<spring:message code="page.action.show"/>
 							</a>
 							<button type="button" class="btn btn-default" onclick="updateRights('GRANT');">

@@ -19,6 +19,7 @@ package art.datasource;
 import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.enums.AccessLevel;
+import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -128,7 +129,7 @@ public class DatasourceService {
 	@CacheEvict(value = "datasources", allEntries = true)
 	public int deleteDatasource(int id, List<String> linkedReports) throws SQLException {
 		logger.debug("Entering deleteDatasource: id={}", id);
-		
+
 		String sql;
 
 		//don't delete if important linked records exist
@@ -243,7 +244,7 @@ public class DatasourceService {
 	 */
 	public List<String> getLinkedReports(int datasourceId) throws SQLException {
 		logger.debug("Entering getLinkedReports: datasourceId={}", datasourceId);
-		
+
 		String sql = "SELECT NAME"
 				+ " FROM ART_QUERIES"
 				+ " WHERE DATABASE_ID=?";
@@ -255,18 +256,21 @@ public class DatasourceService {
 	/**
 	 * Get datasources that an admin can use, according to his access level
 	 *
-	 * @param userId
-	 * @param accessLevel
-	 * @return
+	 * @param user
+	 * @return list of available datasources, empty list otherwise
 	 * @throws SQLException
 	 */
-	public List<Datasource> getAdminDatasources(int userId, AccessLevel accessLevel) throws SQLException {
-		if (accessLevel == null) {
+	public List<Datasource> getAdminDatasources(User user) throws SQLException {
+		logger.debug("Entering getAdminDatasources: user={}", user);
+
+		if (user == null || user.getAccessLevel() == null) {
 			return new ArrayList<>();
 		}
 
+		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
+
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
-		if (accessLevel.getValue() >= AccessLevel.StandardAdmin.getValue()) {
+		if (user.getAccessLevel().getValue() >= AccessLevel.StandardAdmin.getValue()) {
 			//standard admins and above can work with everything
 			return dbService.query(SQL_SELECT_ALL, h);
 		} else {
@@ -275,7 +279,7 @@ public class DatasourceService {
 					+ " WHERE AD.DATABASE_ID = AAP.VALUE_ID "
 					+ " AND AAP.PRIVILEGE = 'DB' "
 					+ " AND AAP.USER_ID = ?";
-			return dbService.query(sql, h, userId);
+			return dbService.query(sql, h, user.getUserId());
 		}
 	}
 

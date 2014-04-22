@@ -244,7 +244,7 @@ Display edit user page
 				</div>
 				<div class="form-group" id="userGroupsDiv">
 					<label class="col-md-4 control-label " for="userGroups">
-						<spring:message code="users.label.userGroups"/>
+						<spring:message code="page.text.userGroups"/>
 					</label>
 					<div class="col-md-8">
 						<form:select path="userGroups" items="${userGroups}" multiple="true" 

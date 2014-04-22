@@ -324,6 +324,12 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "accessRights") || StringUtils.endsWith(page, "AccessRight")
+				|| StringUtils.equals(page, "accessRightsConfig")) {
+			//mid admins and above
+			if (accessLevel >= AccessLevel.MidAdmin.getValue()) {
+				authorised = true;
+			}
 		}
 
 		return authorised;

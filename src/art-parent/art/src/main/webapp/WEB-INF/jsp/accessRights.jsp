@@ -1,9 +1,9 @@
 <%-- 
-    Document   : adminRights
-    Created on : 19-Apr-2014, 16:18:54
+    Document   : accessRights
+    Created on : 22-Apr-2014, 11:36:37
     Author     : Timothy Anyona
 
-Display current admin rights
+Display access rights
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -14,7 +14,7 @@ Display current admin rights
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.adminRights" var="pageTitle"/>
+<spring:message code="page.title.accessRights" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
@@ -28,7 +28,7 @@ Display current admin rights
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
+					$('a[href*="accessRightsConfig.do"]').parent().addClass('active');
 				});
 
 				var oTable = $('#rights').dataTable({
@@ -53,13 +53,13 @@ Display current admin rights
 					$.ajax({
 						type: "POST",
 						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/deleteAdminRight.do",
+						url: "${pageContext.request.contextPath}/app/deleteAccessRight.do",
 						data: {id: id},
 						success: function(response) {
 							var msg;
 							if (response.success) {
 								oTable.fnDeleteRow(nRow);
-								
+
 								msg = alertCloseButton + "${rightsRevokedText}: " + name;
 								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 								$.notify("${rightsRevokedText}", "success");
@@ -96,20 +96,22 @@ Display current admin rights
 		<table id="rights" class="table table-striped table-bordered">
 			<thead>
 				<tr>
-					<th><spring:message code="adminRights.text.admin"/></th>
-					<th><spring:message code="page.text.datasource"/></th>
+					<th><spring:message code="page.text.user"/></th>
+					<th><spring:message code="page.text.userGroup"/></th>
+					<th><spring:message code="page.text.report"/></th>
 					<th><spring:message code="page.text.reportGroup"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="datasourceRight" items="${datasourceRights}">
-					<tr data-name="${encode:forHtmlAttribute(datasourceRight.admin.username)} -
-						${encode:forHtmlAttribute(datasourceRight.datasource.name)}"
-						data-id="datasourceRight-${datasourceRight.admin.userId}-${datasourceRight.datasource.datasourceId}">
+				<c:forEach var="userReportRight" items="${userReportRights}">
+					<tr data-name="${encode:forHtmlAttribute(userReportRight.user.username)} -
+						${encode:forHtmlAttribute(userReportRight.report.name)}"
+						data-id="userReportRight-${userReportRight.user.userId}-${userReportRight.report.reportId}">
 
-						<td><encode:forHtmlContent value="${datasourceRight.admin.username}"/></td>
-						<td><encode:forHtmlContent value="${datasourceRight.datasource.name}"/></td>
+						<td><encode:forHtmlContent value="${userReportRight.user.username}"/></td>
+						<td></td>
+						<td><encode:forHtmlContent value="${userReportRight.report.name}"/></td>
 						<td></td>
 						<td>
 							<button type="button" class="btn btn-default revoke">
@@ -119,15 +121,52 @@ Display current admin rights
 						</td>
 					</tr>
 				</c:forEach>
-					
-				<c:forEach var="reportGroupRight" items="${reportGroupRights}">
-					<tr data-name="${encode:forHtmlAttribute(reportGroupRight.admin.username)} -
-						${encode:forHtmlAttribute(reportGroupRight.reportGroup.name)}"
-						data-id="reportGroupRight-${reportGroupRight.admin.userId}-${reportGroupRight.reportGroup.reportGroupId}">
 
-						<td><encode:forHtmlContent value="${reportGroupRight.admin.username}"/></td>
+				<c:forEach var="userReportGroupRight" items="${userReportGroupRights}">
+					<tr data-name="${encode:forHtmlAttribute(userReportGroupRight.user.username)} -
+						${encode:forHtmlAttribute(userReportGroupRight.reportGroup.name)}"
+						data-id="userReportGroupRight-${userReportGroupRight.user.userId}-${userReportGroupRight.reportGroup.reportGroupId}">
+
+						<td><encode:forHtmlContent value="${userReportGroupRight.user.username}"/></td>
 						<td></td>
-						<td><encode:forHtmlContent value="${reportGroupRight.reportGroup.name}"/></td>
+						<td></td>
+						<td><encode:forHtmlContent value="${userReportGroupRight.reportGroup.name}"/></td>
+						<td>
+							<button type="button" class="btn btn-default revoke">
+								<i class="fa fa-trash-o"></i>
+								<spring:message code="page.action.revoke"/>
+							</button>
+						</td>
+					</tr>
+				</c:forEach>
+
+				<c:forEach var="userGroupReportRight" items="${userGroupReportRights}">
+					<tr data-name="${encode:forHtmlAttribute(userGroupReportRight.userGroup.name)} -
+						${encode:forHtmlAttribute(userGroupReportRight.report.name)}"
+						data-id="userGroupReportRight-${userGroupReportRight.userGroup.userGroupId}-${userGroupReportRight.report.reportId}">
+
+						<td></td>
+						<td><encode:forHtmlContent value="${userGroupReportRight.userGroup.name}"/></td>
+						<td><encode:forHtmlContent value="${userGroupReportRight.report.name}"/></td>
+						<td></td>
+						<td>
+							<button type="button" class="btn btn-default revoke">
+								<i class="fa fa-trash-o"></i>
+								<spring:message code="page.action.revoke"/>
+							</button>
+						</td>
+					</tr>
+				</c:forEach>
+
+				<c:forEach var="userGroupReportGroupRight" items="${userGroupReportGroupRights}">
+					<tr data-name="${encode:forHtmlAttribute(userGroupReportGroupRight.userGroup.name)} -
+						${encode:forHtmlAttribute(userGroupReportGroupRight.reportGroup.name)}"
+						data-id="userGroupReportGroupRight-${userGroupReportGroupRight.userGroup.userGroupId}-${userGroupReportGroupRight.reportGroup.reportGroupId}">
+
+						<td></td>
+						<td><encode:forHtmlContent value="${userGroupReportGroupRight.userGroup.name}"/></td>
+						<td></td>
+						<td><encode:forHtmlContent value="${userGroupReportGroupRight.reportGroup.name}"/></td>
 						<td>
 							<button type="button" class="btn btn-default revoke">
 								<i class="fa fa-trash-o"></i>
