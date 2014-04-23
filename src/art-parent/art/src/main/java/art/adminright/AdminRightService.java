@@ -47,7 +47,7 @@ public class AdminRightService {
 	private DbService dbService;
 
 	private final String SQL_SELECT_ALL_DATASOURCE_RIGHTS
-			= "SELECT AU.USER_ID, AU.USERNAME, AAP.VALUE_ID, AD.NAME AS DATASOURCE_NAME"
+			= "SELECT AU.USER_ID, AU.USERNAME, AD.DATABASE_ID, AD.NAME AS DATASOURCE_NAME"
 			+ " FROM ART_ADMIN_PRIVILEGES AAP"
 			+ " INNER JOIN ART_USERS AU ON"
 			+ " AAP.USER_ID=AU.USER_ID"
@@ -56,7 +56,7 @@ public class AdminRightService {
 			+ " WHERE AAP.PRIVILEGE='DB'";
 
 	private final String SQL_SELECT_ALL_REPORT_GROUP_RIGHTS
-			= "SELECT AU.USER_ID, AU.USERNAME, AAP.VALUE_ID, AQG.NAME AS GROUP_NAME"
+			= "SELECT AU.USER_ID, AU.USERNAME, AQG.QUERY_GROUP_ID, AQG.NAME AS GROUP_NAME"
 			+ " FROM ART_ADMIN_PRIVILEGES AAP"
 			+ " INNER JOIN ART_USERS AU ON"
 			+ " AAP.USER_ID=AU.USER_ID"
@@ -89,7 +89,7 @@ public class AdminRightService {
 			right.setAdmin(user);
 
 			Datasource datasource = new Datasource();
-			datasource.setDatasourceId(rs.getInt("VALUE_ID"));
+			datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
 			datasource.setName(rs.getString("DATASOURCE_NAME"));
 
 			right.setDatasource(datasource);
@@ -123,7 +123,7 @@ public class AdminRightService {
 			right.setAdmin(user);
 
 			ReportGroup group = new ReportGroup();
-			group.setReportGroupId(rs.getInt("VALUE_ID"));
+			group.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
 			group.setName(rs.getString("GROUP_NAME"));
 
 			right.setReportGroup(group);
@@ -240,7 +240,6 @@ public class AdminRightService {
 					//stop after the first error. we should continue in the event of an integrity constraint error (access already granted)
 
 					updateRight = true;
-
 					if (action.equals("GRANT")) {
 						//test if right exists. to avoid integrity constraint error
 						affectedRows = dbService.update(sqlTestDatasource, userId, userId, username, datasourceId);
@@ -259,7 +258,6 @@ public class AdminRightService {
 			if (reportGroups != null) {
 				for (Integer reportGroupId : reportGroups) {
 					updateRight = true;
-
 					if (action.equals("GRANT")) {
 						//test if right exists. to avoid integrity constraint error
 						affectedRows = dbService.update(sqlTestReportGroup, userId, userId, username, reportGroupId);
@@ -273,9 +271,7 @@ public class AdminRightService {
 					}
 				}
 			}
-
 		}
-
 	}
 
 }

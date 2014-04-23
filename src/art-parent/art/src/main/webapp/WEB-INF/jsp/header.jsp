@@ -84,18 +84,18 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/userGroupMembership.do">
+								<a href="${pageContext.request.contextPath}/app/userGroupMembershipConfig.do">
 									<spring:message code="header.link.userGroupMembership"/>
 								</a>
 							</li>
 							<li>
 								<a href="${pageContext.request.contextPath}/app/accessRightsConfig.do">
-									<spring:message code="header.link.accessRightsConfiguration"/>
+									<spring:message code="header.link.accessRights"/>
 								</a>
 							</li>
 							<li>
 								<a href="${pageContext.request.contextPath}/app/adminRightsConfig.do">
-									<spring:message code="header.link.adminRightsConfiguration"/>
+									<spring:message code="header.link.adminRights"/>
 								</a>
 							</li>
 							<li>
