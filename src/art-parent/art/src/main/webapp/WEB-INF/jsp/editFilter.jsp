@@ -1,9 +1,9 @@
 <%-- 
-    Document   : editUserGroup
-    Created on : 12-Feb-2014, 12:16:44
+    Document   : editFilter
+    Created on : 24-Apr-2014, 10:06:30
     Author     : Timothy Anyona
 
-Edit user group page
+Edit a filter
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -17,10 +17,10 @@ Edit user group page
 
 <c:choose>
 	<c:when test="${action == 'add'}">
-		<spring:message code="page.title.addUserGroup" var="pageTitle"/>
+		<spring:message code="page.title.addFilter" var="pageTitle"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editUserGroup" var="pageTitle"/>
+		<spring:message code="page.title.editFilter" var="pageTitle"/>
 	</c:when>
 </c:choose>
 
@@ -36,7 +36,7 @@ Edit user group page
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="userGroups.do"]').parent().addClass('active');
+					$('a[href*="filters.do"]').parent().addClass('active');
 				});
 
 				$(function() {
@@ -75,8 +75,8 @@ Edit user group page
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveUserGroup.do"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="group">
+		<spring:url var="formUrl" value="/app/saveFilter.do"/>
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="filter">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -101,7 +101,7 @@ Edit user group page
 					</label>
 					<div class="col-md-8">
 						<c:if test="${action == 'edit'}">
-							<form:input path="userGroupId" readonly="true" class="form-control"/>
+							<form:input path="filterId" readonly="true" class="form-control"/>
 						</c:if>
 					</div>
 				</div>
@@ -110,7 +110,7 @@ Edit user group page
 						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="name" maxlength="30" class="form-control"/>
+						<form:input path="name" maxlength="15" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
@@ -119,40 +119,11 @@ Edit user group page
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="50" class="form-control"/>
+						<form:input path="description" maxlength="40" class="form-control"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="defaultReportGroup">
-						<spring:message code="page.label.defaultReportGroup"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="defaultReportGroup" class="form-control selectpicker">
-							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
-						</form:select>
-						<form:errors path="defaultReportGroup" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="startReport">
-						<spring:message code="page.label.startReport"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="startReport" maxlength="500" class="form-control"/>
-							<spring:message code="page.help.startReport" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="startReport" cssClass="error"/>
-					</div>
-				</div>
+				
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

@@ -17,8 +17,8 @@ User group membership configuration
 <spring:message code="page.title.userGroupMembershipConfiguration" var="pageTitle"/>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.recordsAdded" var="recordsAddedText"/>
-<spring:message code="page.message.recordsRemoved" var="recordsRemovedText"/>
+<spring:message code="page.message.membershipAdded" var="membershipAddedText"/>
+<spring:message code="page.message.membershipRemoved" var="membershipRemovedText"/>
 <spring:message code="userGroupMembership.message.selectUser" var="selectUserText"/>
 <spring:message code="userGroupMembership.message.selectUserGroup" var="selectUserGroupText"/>
 <spring:message code="page.text.available" var="availableText"/>
@@ -97,9 +97,9 @@ User group membership configuration
 
 				var recordsUpdatedMessage;
 				if (action === 'ADD') {
-					recordsUpdatedMessage = "${recordsAddedText}";
+					recordsUpdatedMessage = "${membershipAddedText}";
 				} else {
-					recordsUpdatedMessage = "${recordsRemovedText}";
+					recordsUpdatedMessage = "${membershipRemovedText}";
 				}
 
 				$.ajax({

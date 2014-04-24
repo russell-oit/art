@@ -105,7 +105,7 @@ public class UserGroupService {
 	public UserGroup getUserGroup(int id) throws SQLException {
 		logger.debug("Entering getUserGroup: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE USER_GROUP_ID=?";
 		ResultSetHandler<UserGroup> h = new BeanHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(sql, h, id);
 	}

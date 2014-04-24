@@ -1,9 +1,9 @@
 <%-- 
-    Document   : userGroups
-    Created on : 12-Feb-2014, 09:24:43
+    Document   : filters
+    Created on : 24-Apr-2014, 10:11:46
     Author     : Timothy Anyona
 
-Display user groups
+Display filters
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -14,7 +14,7 @@ Display user groups
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<spring:message code="page.title.userGroups" var="pageTitle"/>
+<spring:message code="page.title.filters" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
@@ -31,10 +31,10 @@ Display user groups
 			$(document).ready(function() {
 				$(function() {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="userGroups.do"]').parent().addClass('active');
+					$('a[href*="filters.do"]').parent().addClass('active');
 				});
 
-				var oTable = $('#userGroups').dataTable({
+				var oTable = $('#filters').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
@@ -47,12 +47,12 @@ Display user groups
 					}
 				});
 
-				$('#userGroups tbody').on('click', '.delete', function() {
+				$('#filters tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					
+
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
@@ -68,7 +68,7 @@ Display user groups
 								$.ajax({
 									type: "POST",
 									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteUserGroup.do",
+									url: "${pageContext.request.contextPath}/app/deleteFilter.do",
 									data: {id: id},
 									success: function(response) {
 										var msg;
@@ -124,13 +124,13 @@ Display user groups
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addUserGroup.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addFilter.do">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
 		</div>
 
-		<table id="userGroups" class="table table-bordered table-striped table-condensed">
+		<table id="filters" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
 					<th><spring:message code="page.text.id"/></th>
@@ -140,20 +140,20 @@ Display user groups
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="group" items="${groups}">
-					<tr data-id="${group.userGroupId}" 
-						data-name="${encode:forHtmlAttribute(group.name)}">
+				<c:forEach var="filter" items="${filters}">
+					<tr data-id="${filter.filterId}" 
+						data-name="${encode:forHtmlAttribute(filter.name)}">
 
-						<td>${group.userGroupId}</td>
-						<td>${encode:forHtmlContent(group.name)} &nbsp;
-							<t:displayNewLabel creationDate="${group.creationDate}"
-											   updateDate="${group.updateDate}"/>
+						<td>${filter.filterId}</td>
+						<td>${encode:forHtmlContent(filter.name)} &nbsp;
+							<t:displayNewLabel creationDate="${filter.creationDate}"
+											   updateDate="${filter.updateDate}"/>
 						</td>
-						<td>${encode:forHtmlContent(group.description)}</td>
+						<td>${encode:forHtmlContent(filter.description)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editUserGroup.do?id=${group.userGroupId}">
+								   href="${pageContext.request.contextPath}/app/editFilter.do?id=${filter.filterId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

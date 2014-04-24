@@ -44,7 +44,7 @@ Edit report page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.0/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.0.19/tinymce.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select--modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -147,10 +147,10 @@ Edit report page
 					case 117: //jxls template
 					case 120: //static lov
 					case 121: //dynamic job recipients
-						$("#useRulesDiv").hide();
+						$("#usesFiltersDiv").hide();
 						break;
 					default:
-						$("#useRulesDiv").show();
+						$("#usesFiltersDiv").show();
 				}
 
 				//show/hide datasource
@@ -404,15 +404,15 @@ Edit report page
 						<form:errors path="datasource.datasourceId" cssClass="error"/>
 					</div>
 				</div>
-				<div id="useRulesDiv" class="form-group">
-					<label class="control-label col-md-4" for="useRules">
-						<spring:message code="reports.label.useRules"/>
+				<div id="usesFiltersDiv" class="form-group">
+					<label class="control-label col-md-4" for="usesFilters">
+						<spring:message code="reports.label.usesFilters"/>
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="useRules" id="useRules"/>
+							<form:checkbox path="usesFilters" id="usesFilters"/>
 						</div>
-						<form:errors path="useRules" cssClass="error"/>
+						<form:errors path="usesFilters" cssClass="error"/>
 					</div>
 				</div>
 				<div id="parametersInOutputDiv" class="form-group">

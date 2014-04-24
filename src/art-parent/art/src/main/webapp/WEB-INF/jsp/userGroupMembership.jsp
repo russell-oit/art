@@ -18,7 +18,7 @@ Display user group membership
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.recordRemoved" var="recordRemovedText"/>
+<spring:message code="page.message.membershipRemoved" var="membershipRemovedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -60,9 +60,9 @@ Display user group membership
 							if (response.success) {
 								oTable.fnDeleteRow(nRow);
 								
-								msg = alertCloseButton + "${recordRemovedText}: " + name;
+								msg = alertCloseButton + "${membershipRemovedText}: " + name;
 								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$.notify("${recordRemovedText}", "success");
+								$.notify("${membershipRemovedText}", "success");
 							} else {
 								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);

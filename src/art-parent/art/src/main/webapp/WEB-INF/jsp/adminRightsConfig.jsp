@@ -17,8 +17,8 @@ Admin rights configuration page
 <spring:message code="page.title.adminRightsConfiguration" var="pageTitle"/>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
-<spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="page.message.rightsGranted" var="rightsGrantedText"/>
+<spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="adminRights.message.selectAdmin" var="selectAdminText"/>
 <spring:message code="adminRights.message.selectDatasourceOrGroup" var="selectDatasourceOrGroupText"/>
 <spring:message code="page.text.available" var="availableText"/>

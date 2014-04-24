@@ -38,7 +38,7 @@ public class Report implements Serializable {
 	private ReportGroup reportGroup;
 	private Datasource datasource;
 	private String contactPerson;
-	private boolean useRules;
+	private boolean usesFilters;
 	private ReportStatus reportStatus;
 	private boolean parametersInOutput;
 	private String xAxisLabel;
@@ -243,17 +243,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the useRules
+	 * @return the usesFilters
 	 */
-	public boolean isUseRules() {
-		return useRules;
+	public boolean isUsesFilters() {
+		return usesFilters;
 	}
 
 	/**
-	 * @param useRules the useRules to set
+	 * @param usesFilters the usesFilters to set
 	 */
-	public void setUseRules(boolean useRules) {
-		this.useRules = useRules;
+	public void setUsesFilters(boolean usesFilters) {
+		this.usesFilters = usesFilters;
 	}
 
 	/**

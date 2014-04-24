@@ -115,7 +115,7 @@ public class UserGroupMembershipController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			userGroupMembershipService.updateUserGroupMemberships(action, users, userGroups);
+			userGroupMembershipService.updateUserGroupMembership(action, users, userGroups);
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

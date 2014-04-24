@@ -99,13 +99,13 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/rules.do">
-									<spring:message code="header.link.rules"/>
+								<a href="${pageContext.request.contextPath}/app/filters.do">
+									<spring:message code="header.link.filters"/>
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/ruleValues.do">
-									<spring:message code="header.link.ruleValues"/>
+								<a href="${pageContext.request.contextPath}/app/filterValues.do">
+									<spring:message code="header.link.filterValues"/>
 								</a>
 							</li>
 							<li>

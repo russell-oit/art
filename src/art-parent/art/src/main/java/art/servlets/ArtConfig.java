@@ -1414,6 +1414,7 @@ public class ArtConfig extends HttpServlet {
 					addUserIds();
 					addScheduleIds();
 					addDrilldownIds();
+					addRuleIds();
 				}
 
 				boolean deleted = upgradeFile.delete();
@@ -1556,6 +1557,50 @@ public class ArtConfig extends HttpServlet {
 				sql = "UPDATE ART_DRILLDOWN_QUERIES SET DRILLDOWN_ID=?"
 						+ " WHERE QUERY_ID=? AND DRILLDOWN_QUERY_POSITION=?";
 				dbService.update(sql, maxId, parentReportId, position);
+			}
+		}
+	}
+	
+	/**
+	 * Populate rule_id column. Column added in 3.0
+	 */
+	private static void addRuleIds() throws SQLException {
+		logger.debug("Entering addRuleIds");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT RULE_NAME FROM ART_RULES WHERE RULE_ID IS NULL";
+		ResultSetHandler<List<String>> h2 = new ColumnListHandler<>(1);
+		List<String> rules = dbService.query(sql, h2);
+
+		logger.debug("rules.isEmpty()={}", rules.isEmpty());
+		if (!rules.isEmpty()) {
+			//generate new id
+			sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer maxId = dbService.query(sql, h);
+			logger.debug("maxId={}", maxId);
+
+			if (maxId == null || maxId < 0) {
+				maxId = 0;
+			}
+
+			for (String rule : rules) {
+				maxId++;
+				
+				sql = "UPDATE ART_RULES SET RULE_ID=? WHERE RULE_NAME=?";
+				dbService.update(sql, maxId, rule);
+				
+				sql = "UPDATE ART_QUERY_RULES SET RULE_ID=? WHERE RULE_NAME=?";
+				dbService.update(sql, maxId, rule);
+				
+				sql = "UPDATE ART_USER_RULES SET RULE_ID=? WHERE RULE_NAME=?";
+				dbService.update(sql, maxId, rule);
+				
+				sql = "UPDATE ART_USER_GROUP_RULES SET RULE_ID=? WHERE RULE_NAME=?";
+				dbService.update(sql, maxId, rule);
 			}
 		}
 	}

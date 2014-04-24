@@ -104,7 +104,7 @@ public class ReportService {
 			report.setDatasource(datasource);
 
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
-			report.setUseRules(rs.getBoolean("USE_RULES"));
+			report.setUsesFilters(rs.getBoolean("USES_FILTERS"));
 			report.setReportStatus(ReportStatus.toEnum(rs.getString("REPORT_STATUS")));
 			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
@@ -364,7 +364,7 @@ public class ReportService {
 				+ " FROM ART_JOBS"
 				+ " WHERE QUERY_ID=?";
 
-		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
 		return dbService.query(sql, h, reportId);
 	}
 
@@ -372,7 +372,7 @@ public class ReportService {
 	 * Delete a report
 	 *
 	 * @param id
-	 * @param linkedJobs list that will be populated with linked jobs if they
+	 * @param linkedJobs output parameter. list that will be populated with linked jobs if they
 	 * exist
 	 * @return -1 if the record was not deleted because there are some linked
 	 * records in other tables, otherwise the count of the number of reports
@@ -450,7 +450,7 @@ public class ReportService {
 
 		sql = "INSERT INTO ART_QUERIES"
 				+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-				+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USE_RULES,"
+				+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
 				+ " REPORT_STATUS, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 				+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET, XMLA_URL,"
 				+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD,"
@@ -469,7 +469,7 @@ public class ReportService {
 			defaults.get("reportGroupId"),
 			defaults.get("datasourceId"),
 			report.getContactPerson(),
-			report.isUseRules(),
+			report.isUsesFilters(),
 			defaults.get("reportStatus"),
 			report.isParametersInOutput(),
 			report.getxAxisLabel(),
@@ -502,7 +502,7 @@ public class ReportService {
 
 		String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 				+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
-				+ " DATABASE_ID=?, CONTACT_PERSON=?, USE_RULES=?, "
+				+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, "
 				+ " REPORT_STATUS=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 				+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
 				+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
@@ -520,7 +520,7 @@ public class ReportService {
 			defaults.get("reportGroupId"),
 			defaults.get("datasourceId"),
 			report.getContactPerson(),
-			report.isUseRules(),
+			report.isUsesFilters(),
 			defaults.get("reportStatus"),
 			report.isParametersInOutput(),
 			report.getxAxisLabel(),

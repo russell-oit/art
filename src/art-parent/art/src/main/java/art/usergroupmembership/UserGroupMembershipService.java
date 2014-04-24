@@ -125,7 +125,7 @@ public class UserGroupMembershipService {
 	 * @param userGroups array of user group ids
 	 * @throws SQLException
 	 */
-	public void updateUserGroupMemberships(String action, String[] users, Integer[] userGroups) throws SQLException {
+	public void updateUserGroupMembership(String action, String[] users, Integer[] userGroups) throws SQLException {
 		logger.debug("Entering updateUserGroupMemberships: action='{}'", action);
 
 		if (action == null || users == null || userGroups == null) {
