@@ -39,7 +39,7 @@ Page to display connections status
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": -1,
 					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/dataTables/dataTables_${pageContext.response.locale}.txt"
+						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
 					"fnInitComplete": function() {
 						$('div.dataTables_filter input').focus();

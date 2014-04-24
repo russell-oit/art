@@ -21,7 +21,7 @@ bootstrap js, jquery js, datatables css, datatables js
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-jowin.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-bootstrap3-jowin/css/datatables.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">
 
 		<jsp:invoke fragment="css"/>
@@ -35,8 +35,8 @@ bootstrap js, jquery js, datatables css, datatables js
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.2.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables-1.9.4.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-jowin.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.9.4/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-bootstrap3-jowin/js/datatables.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 
