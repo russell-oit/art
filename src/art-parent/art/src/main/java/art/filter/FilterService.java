@@ -199,7 +199,7 @@ public class FilterService {
 		sql = "INSERT INTO ART_RULES"
 				+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE, CREATION_DATE)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
-		
+
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(filter);
 
@@ -229,7 +229,7 @@ public class FilterService {
 		String sql = "UPDATE ART_RULES SET RULE_NAME=?, SHORT_DESCRIPTION=?,"
 				+ " DATA_TYPE=?, UPDATE_DATE=?"
 				+ " WHERE RULE_ID=?";
-		
+
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(filter);
 
@@ -263,6 +263,37 @@ public class FilterService {
 		values.put("dataType", dataType);
 
 		return values;
+	}
+
+	/**
+	 * Get the name of a given filter based on a filter key
+	 *
+	 * @param key string in the format filter id-filter name
+	 * @return
+	 * @throws SQLException
+	 */
+	@Cacheable("filters")
+	public String getFilterNameFromKey(String key) throws SQLException {
+		logger.debug("Entering getFilterNameFromKey: key='{}'", key);
+
+		Integer filterId = Integer.valueOf(StringUtils.substringBefore(key, "-"));
+		return getFilterName(filterId);
+	}
+
+	/**
+	 * Get the name of a given filter
+	 *
+	 * @param id
+	 * @return
+	 * @throws SQLException
+	 */
+	@Cacheable("filters")
+	public String getFilterName(int id) throws SQLException {
+		logger.debug("Entering getFilterName: id={}", id);
+
+		String sql = "SELECT RULE_NAME FROM ART_RULES WHERE RULE_ID=?";
+		ResultSetHandler<String> h = new ScalarHandler<>(1);
+		return dbService.query(sql, h, id);
 	}
 
 }

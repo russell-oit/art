@@ -1415,6 +1415,7 @@ public class ArtConfig extends HttpServlet {
 					addScheduleIds();
 					addDrilldownIds();
 					addRuleIds();
+					addReportFilterIds();
 				}
 
 				boolean deleted = upgradeFile.delete();
@@ -1560,7 +1561,7 @@ public class ArtConfig extends HttpServlet {
 			}
 		}
 	}
-	
+
 	/**
 	 * Populate rule_id column. Column added in 3.0
 	 */
@@ -1589,18 +1590,58 @@ public class ArtConfig extends HttpServlet {
 
 			for (String rule : rules) {
 				maxId++;
-				
+
 				sql = "UPDATE ART_RULES SET RULE_ID=? WHERE RULE_NAME=?";
 				dbService.update(sql, maxId, rule);
-				
+
 				sql = "UPDATE ART_QUERY_RULES SET RULE_ID=? WHERE RULE_NAME=?";
 				dbService.update(sql, maxId, rule);
-				
+
 				sql = "UPDATE ART_USER_RULES SET RULE_ID=? WHERE RULE_NAME=?";
 				dbService.update(sql, maxId, rule);
-				
+
 				sql = "UPDATE ART_USER_GROUP_RULES SET RULE_ID=? WHERE RULE_NAME=?";
 				dbService.update(sql, maxId, rule);
+			}
+		}
+	}
+
+	/**
+	 * Populate report filter id column. Column added in 3.0
+	 */
+	private static void addReportFilterIds() throws SQLException {
+		logger.debug("Entering addReportFilterIds");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT QUERY_ID, RULE_NAME"
+				+ " FROM ART_QUERY_RULES"
+				+ " WHERE QUERY_RULE_ID IS NULL";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> reportFilters = dbService.query(sql, h2);
+
+		logger.debug("reportFilters.isEmpty()={}", reportFilters.isEmpty());
+		if (!reportFilters.isEmpty()) {
+			//generate new id
+			sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer maxId = dbService.query(sql, h);
+			logger.debug("maxId={}", maxId);
+
+			if (maxId == null || maxId < 0) {
+				maxId = 0;
+			}
+
+			for (Map<String, Object> reportFilter : reportFilters) {
+				maxId++;
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer reportId = (Integer) reportFilter.get("QUERY_ID");
+				String ruleName = (String) reportFilter.get("RULE_NAME");
+				sql = "UPDATE ART_QUERY_RULES SET QUERY_RULE_ID=?"
+						+ " WHERE QUERY_ID=? AND RULE_NAME=?";
+				dbService.update(sql, maxId, reportId, ruleName);
 			}
 		}
 	}
