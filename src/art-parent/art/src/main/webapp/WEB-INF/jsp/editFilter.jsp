@@ -123,7 +123,17 @@ Edit a filter
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
-				
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="dataType">
+						<spring:message code="page.label.dataType"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="dataType" class="form-control selectpicker">
+							<form:options items="${dataTypes}" itemLabel="description" itemValue="value"/>
+						</form:select>
+						<form:errors path="dataType" cssClass="error"/>
+					</div>
+				</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

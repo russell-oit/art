@@ -16,6 +16,7 @@
  */
 package art.filter;
 
+import art.enums.ParameterDataType;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -150,6 +151,7 @@ public class FilterController {
 	private String showFilter(String action, Model model) {
 		logger.debug("Entering showFilter: action='{}'", action);
 
+		model.addAttribute("dataTypes", ParameterDataType.list());
 		model.addAttribute("action", action);
 		return "editFilter";
 	}

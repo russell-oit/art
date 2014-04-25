@@ -25,6 +25,7 @@ Display user configuration page
 <spring:message code="users.activeStatus.active" var="activeText"/>
 <spring:message code="users.activeStatus.disabled" var="disabledText"/>
 <spring:message code="users.message.linkedJobsExist" var="linkedJobsExistText"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -114,12 +115,6 @@ Display user configuration page
 	</jsp:attribute>
 
 	<jsp:body>
-		<c:if test="${not empty message}">
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-				<spring:message code="${message}"/>
-			</div>
-		</c:if>
 		<c:if test="${error != null}">
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>

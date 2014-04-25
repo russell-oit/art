@@ -97,12 +97,6 @@ Display schedules
 	</jsp:attribute>
 
 	<jsp:body>
-		<c:if test="${not empty message}">
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-				<spring:message code="${message}"/>
-			</div>
-		</c:if>
 		<c:if test="${error != null}">
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>

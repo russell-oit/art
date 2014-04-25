@@ -22,6 +22,8 @@ Display filters
 <spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="datasources.message.linkedReportsExist" var="linkedReportsExistText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -72,12 +74,24 @@ Display filters
 									data: {id: id},
 									success: function(response) {
 										var msg;
+										var linkedReports = response.data;
 										if (response.success) {
 											oTable.fnDeleteRow(nRow);
 
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											$.notify("${recordDeletedText}", "success");
+										} else if (linkedReports.length > 0) {
+											msg = alertCloseButton + "${linkedReportsExistText}" + "<ul>";
+
+											$.each(linkedReports, function(index, value) {
+												msg += "<li>" + value + "</li>";
+											});
+
+											msg += "</ul>";
+
+											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+											$.notify("${cannotDeleteRecordText}", "error");
 										} else {
 											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
 											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
@@ -98,12 +112,6 @@ Display filters
 	</jsp:attribute>
 
 	<jsp:body>
-		<c:if test="${not empty message}">
-			<div class="alert alert-success alert-dismissable">
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-				<spring:message code="${message}"/>
-			</div>
-		</c:if>
 		<c:if test="${error != null}">
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>

@@ -16,6 +16,7 @@
  */
 package art.filter;
 
+import art.enums.ParameterDataType;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -32,6 +33,25 @@ public class Filter implements Serializable {
 	private String description;
 	private Date creationDate;
 	private Date updateDate;
+	private ParameterDataType dataType;
+
+	/**
+	 * Get the value of dataType
+	 *
+	 * @return the value of dataType
+	 */
+	public ParameterDataType getDataType() {
+		return dataType;
+	}
+
+	/**
+	 * Set the value of dataType
+	 *
+	 * @param dataType new value of dataType
+	 */
+	public void setDataType(ParameterDataType dataType) {
+		this.dataType = dataType;
+	}
 
 	/**
 	 * @return the creationDate

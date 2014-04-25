@@ -18,10 +18,13 @@ package art.filter;
 
 import art.dbutils.DbService;
 import art.dbutils.DbUtils;
+import art.enums.ParameterDataType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -72,6 +75,7 @@ public class FilterService {
 			filter.setFilterId(rs.getInt("RULE_ID"));
 			filter.setName(rs.getString("RULE_NAME"));
 			filter.setDescription(rs.getString("SHORT_DESCRIPTION"));
+			filter.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
 			filter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			filter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 
@@ -193,13 +197,17 @@ public class FilterService {
 		logger.debug("newId={}", newId);
 
 		sql = "INSERT INTO ART_RULES"
-				+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+				+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE, CREATION_DATE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
+		
+		//set values for possibly null property objects
+		Map<String, Object> defaults = getSaveDefaults(filter);
 
 		Object[] values = {
 			newId,
 			filter.getName(),
 			filter.getDescription(),
+			defaults.get("dataType"),
 			DbUtils.getCurrentTimeStamp()
 		};
 
@@ -219,17 +227,42 @@ public class FilterService {
 		logger.debug("Entering updateFilter: filter={}", filter);
 
 		String sql = "UPDATE ART_RULES SET RULE_NAME=?, SHORT_DESCRIPTION=?,"
-				+ " UPDATE_DATE=?"
+				+ " DATA_TYPE=?, UPDATE_DATE=?"
 				+ " WHERE RULE_ID=?";
+		
+		//set values for possibly null property objects
+		Map<String, Object> defaults = getSaveDefaults(filter);
 
 		Object[] values = {
 			filter.getName(),
 			filter.getDescription(),
+			defaults.get("dataType"),
 			DbUtils.getCurrentTimeStamp(),
 			filter.getFilterId()
 		};
 
 		dbService.update(sql, values);
+	}
+
+	/**
+	 * Get values for possibly null property objects
+	 *
+	 * @param filter
+	 * @return map with values to save. key = field name, value = field value
+	 */
+	private Map<String, Object> getSaveDefaults(Filter filter) {
+		Map<String, Object> values = new HashMap<>();
+
+		String dataType;
+		if (filter.getDataType() == null) {
+			logger.warn("Data type not defined. Defaulting to varchar");
+			dataType = ParameterDataType.Varchar.getValue();
+		} else {
+			dataType = filter.getDataType().getValue();
+		}
+		values.put("dataType", dataType);
+
+		return values;
 	}
 
 }
