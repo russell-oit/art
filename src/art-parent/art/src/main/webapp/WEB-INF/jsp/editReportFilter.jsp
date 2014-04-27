@@ -1,9 +1,9 @@
 <%-- 
-    Document   : editDrilldown
-    Created on : 14-Apr-2014, 09:25:11
+    Document   : editReportFilter
+    Created on : 27-Apr-2014, 14:37:13
     Author     : Timothy Anyona
 
-Edit a drilldown
+Edit report filter page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -17,10 +17,10 @@ Edit a drilldown
 
 <c:choose>
 	<c:when test="${action == 'add'}">
-		<spring:message code="page.title.addDrilldown" var="pageTitle"/>
+		<spring:message code="page.title.addReportFilter" var="pageTitle"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editDrilldown" var="pageTitle"/>
+		<spring:message code="page.title.editReportFilter" var="pageTitle"/>
 	</c:when>
 </c:choose>
 
@@ -73,8 +73,8 @@ Edit a drilldown
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveDrilldown.do"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="drilldown">
+		<spring:url var="formUrl" value="/app/saveReportFilter.do"/>
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="reportFilter">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -93,47 +93,45 @@ Edit a drilldown
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
-				<input type="hidden" name="parent" value="${parent}">
-				<form:hidden path="parentReportId"/>
-				<form:hidden path="position"/>
+				<input type="hidden" name="reportId" value="${reportId}">
 
 				<div class="form-group">
 					<div class="col-md-12 text-center">
-						<spring:message code="drilldowns.text.parentReport"/>: ${parentReportName}
+						<spring:message code="page.text.report"/>: ${reportName}
 					</div>
 				</div>
 
-				<div class="form-group">
+					<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
 					</label>
 					<div class="col-md-8">
 						<c:if test="${action == 'edit'}">
-							<form:input path="drilldownId" readonly="true" class="form-control"/>
+							<form:input path="reportFilterId" readonly="true" class="form-control"/>
 						</c:if>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="drilldownReport.reportId">
-						<spring:message code="drilldowns.text.drilldownReport"/>
+					<label class="col-md-4 control-label " for="filter.filterId">
+						<spring:message code="page.text.filter"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="drilldownReport.reportId" class="form-control selectpicker">
-							<c:forEach var="drilldownReport" items="${drilldownReports}">
-								<form:option value="${drilldownReport.reportId}">${drilldownReport.name}</form:option>
+						<form:select path="filter.filterId" class="form-control selectpicker">
+							<c:forEach var="filter" items="${filters}">
+								<form:option value="${filter.filterId}">${filter.name}</form:option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="drilldownReport.reportId" cssClass="error"/>
+						<form:errors path="filter.filterId" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="headerText">
-						<spring:message code="drilldowns.label.headerText"/>
+					<label class="col-md-4 control-label " for="reportColumn">
+						<spring:message code="page.text.reportColumn"/>
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="headerText" maxlength="30" class="form-control"/>
-							<spring:message code="drilldowns.help.headerText" var="help"/>
+							<form:input path="reportColumn" maxlength="40" class="form-control"/>
+							<spring:message code="filters.help.reportColumn" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
 										data-toggle="tooltip" title="${help}">
@@ -141,49 +139,7 @@ Edit a drilldown
 								</button>
 							</span>
 						</div>
-						<form:errors path="headerText" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="linkText">
-						<spring:message code="drilldowns.label.linkText"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="linkText" maxlength="30" class="form-control"/>
-							<spring:message code="drilldowns.help.linkText" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="linkText" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="reportFormat">
-						<spring:message code="drilldowns.label.reportFormat"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="reportFormat" class="form-control selectpicker">
-							<form:option value="default"><spring:message code="drilldowns.option.default"/></form:option>
-							<form:option value="ALL"><spring:message code="drilldowns.option.all"/></form:option>
-								<option data-divider="true"></option>
-							<form:options items="${reportFormats}"/>
-						</form:select>
-						<form:errors path="reportFormat" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="openInNewWindow">
-						<spring:message code="drilldowns.label.openInNewWindow"/>
-					</label>
-					<div class="col-md-8">
-						<div class="checkbox">
-							<form:checkbox path="openInNewWindow" id="openInNewWindow"/>
-						</div>
+						<form:errors path="reportColumn" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

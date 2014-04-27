@@ -266,21 +266,6 @@ public class FilterService {
 	}
 
 	/**
-	 * Get the name of a given filter based on a filter key
-	 *
-	 * @param key string in the format filter id-filter name
-	 * @return
-	 * @throws SQLException
-	 */
-	@Cacheable("filters")
-	public String getFilterNameFromKey(String key) throws SQLException {
-		logger.debug("Entering getFilterNameFromKey: key='{}'", key);
-
-		Integer filterId = Integer.valueOf(StringUtils.substringBefore(key, "-"));
-		return getFilterName(filterId);
-	}
-
-	/**
 	 * Get the name of a given filter
 	 *
 	 * @param id

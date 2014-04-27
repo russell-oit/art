@@ -121,7 +121,7 @@ public class ReportFilterController {
 				reportFilterService.updateReportFilter(reportFilter);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			redirectAttributes.addFlashAttribute("recordName", filterService.getFilterNameFromKey(reportFilter.getFilterKey()));
+			redirectAttributes.addFlashAttribute("recordName", filterService.getFilterName(reportFilter.getFilter().getFilterId()));
 			return "redirect:/app/reportFilters.do?reportId=" + reportId;
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

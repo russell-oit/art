@@ -18,6 +18,7 @@ package art.reportfilter;
 
 import art.dbutils.DbService;
 import art.filter.Filter;
+import art.filter.FilterService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class ReportFilterService {
 	@Autowired
 	private DbService dbService;
 
+	@Autowired
+	private FilterService filterService;
+
 	private final String SQL_SELECT_ALL = "SELECT AQR.*, AR.RULE_ID, AR.RULE_NAME"
 			+ " FROM ART_QUERY_RULES AQR"
 			+ " INNER JOIN ART_RULES AR ON"
@@ -74,15 +78,12 @@ public class ReportFilterService {
 			reportFilter.setReportFilterId(rs.getInt("QUERY_RULE_ID"));
 			reportFilter.setReportId(rs.getInt("QUERY_ID"));
 			reportFilter.setReportColumn(rs.getString("FIELD_NAME"));
-			
+
 			Filter filter = new Filter();
 			filter.setFilterId(rs.getInt("RULE_ID"));
 			filter.setName(rs.getString("RULE_NAME"));
 
 			reportFilter.setFilter(filter);
-			
-			String filterKey=filter.getFilterId() + "-" + filter.getName();
-			reportFilter.setFilterKey(filterKey);
 
 			return type.cast(reportFilter);
 		}
@@ -171,8 +172,8 @@ public class ReportFilterService {
 		Object[] values = {
 			newId,
 			reportFilter.getReportId(),
-			StringUtils.substringBefore(reportFilter.getFilterKey(), "-"),
-			StringUtils.substringAfter(reportFilter.getFilterKey(), "-"),
+			reportFilter.getFilter().getFilterId(),
+			filterService.getFilterName(reportFilter.getFilter().getFilterId()), //remove once rule_name is removed
 			reportFilter.getReportColumn()
 		};
 
@@ -195,10 +196,12 @@ public class ReportFilterService {
 				+ " RULE_NAME=?, FIELD_NAME=?"
 				+ " WHERE QUERY_RULE_ID=?";
 
+		String filterName = filterService.getFilterName(reportFilter.getFilter().getFilterId());
+
 		Object[] values = {
 			reportFilter.getReportId(),
-			StringUtils.substringBefore(reportFilter.getFilterKey(), "-"),
-			StringUtils.substringAfter(reportFilter.getFilterKey(), "-"),
+			reportFilter.getFilter().getFilterId(),
+			filterService.getFilterName(reportFilter.getFilter().getFilterId()),
 			reportFilter.getReportColumn(),
 			reportFilter.getReportFilterId()
 		};

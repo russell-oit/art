@@ -33,7 +33,7 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.2.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.9.4/js/jquery.dataTables.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-bootstrap3-jowin/js/datatables.js"></script>

@@ -19,6 +19,7 @@ package art.usergroupmembership;
 import art.user.User;
 import art.usergroup.UserGroup;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Class to represent user group memberships
@@ -57,5 +58,36 @@ public class UserGroupMembership implements Serializable {
 	 */
 	public void setUserGroup(UserGroup userGroup) {
 		this.userGroup = userGroup;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 13 * hash + Objects.hashCode(this.user);
+		hash = 13 * hash + Objects.hashCode(this.userGroup);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final UserGroupMembership other = (UserGroupMembership) obj;
+		if (!Objects.equals(this.user, other.user)) {
+			return false;
+		}
+		if (!Objects.equals(this.userGroup, other.userGroup)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "UserGroupMembership{" + "user=" + user + ", userGroup=" + userGroup + '}';
 	}
 }

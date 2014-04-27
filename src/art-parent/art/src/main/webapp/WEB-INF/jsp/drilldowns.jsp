@@ -34,7 +34,7 @@ Display report drilldowns
 			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
 			$.fn.bsTooltip = $.fn.tooltip.noConflict();
 		</script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom/jquery-ui-1.10.3.custom.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"></script>
 		
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
 		<script type="text/javascript" charset="utf-8">
@@ -163,6 +163,7 @@ Display report drilldowns
 			<thead>
 				<tr>
 					<th><spring:message code="page.text.position"/></th>
+					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="drilldowns.text.drilldownReport"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
@@ -174,6 +175,7 @@ Display report drilldowns
 						id="${drilldown.drilldownId}">
 
 						<td>${drilldown.position}</td>
+						<td>${drilldown.drilldownId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">
 							${encode:forHtmlContent(drilldown.drilldownReport.name)}
 						</td>

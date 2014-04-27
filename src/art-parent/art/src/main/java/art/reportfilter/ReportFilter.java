@@ -31,25 +31,6 @@ public class ReportFilter implements Serializable {
 	private int reportId;
 	private Filter filter;
 	private String reportColumn;
-	private String filterKey; //<rule id>-<rule name>. remove when rule_name column is removed
-
-	/**
-	 * Get the value of filterKey
-	 *
-	 * @return the value of filterKey
-	 */
-	public String getFilterKey() {
-		return filterKey;
-	}
-
-	/**
-	 * Set the value of filterKey
-	 *
-	 * @param filterKey new value of filterKey
-	 */
-	public void setFilterKey(String filterKey) {
-		this.filterKey = filterKey;
-	}
 
 	/**
 	 * @return the reportIdFilterId

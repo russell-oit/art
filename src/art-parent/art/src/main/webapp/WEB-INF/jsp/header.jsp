@@ -42,7 +42,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li class="dropdown">
-						<a id="configure" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown">
+						<a id="configure" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
 							<i class="fa fa-wrench"></i> 
 							<spring:message code="header.link.configure"/>
 							<b class="caret"></b>

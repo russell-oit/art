@@ -25,7 +25,7 @@ Reports configuration page
 <spring:message code="reports.message.linkedJobsExist" var="linkedJobsExistText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
@@ -194,21 +194,35 @@ Reports configuration page
 								</a>
 							</div>
 							<div class="btn-group">
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/reportParameters.do?reportId=${report.reportId}">
-									<i class="fa fa-paperclip"></i>
-									<spring:message code="reports.action.parameters"/>
-								</a>
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/reportFilters.do?reportId=${report.reportId}">
-									<i class="fa fa-filter"></i>
-									<spring:message code="reports.action.filters"/>
-								</a>
-								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${report.reportId}">
-									<i class="fa fa-level-down"></i>
-									<spring:message code="reports.action.drilldowns"/>
-								</a>
+								<button type="button" class="btn btn-default dropdown-toggle"
+										data-toggle="dropdown" data-hover="dropdown"
+										data-delay="100">
+									<spring:message code="reports.action.extras"/>
+									<span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li>
+										<a 
+										   href="${pageContext.request.contextPath}/app/reportParameters.do?reportId=${report.reportId}">
+											<i class="fa fa-paperclip"></i>
+											<spring:message code="reports.action.parameters"/>
+										</a>
+									</li>
+									<li>
+										<a 
+										   href="${pageContext.request.contextPath}/app/reportFilters.do?reportId=${report.reportId}">
+											<i class="fa fa-filter"></i>
+											<spring:message code="reports.action.filters"/>
+										</a>
+									</li>
+									<li>
+										<a 
+										   href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${report.reportId}">
+											<i class="fa fa-level-down"></i>
+											<spring:message code="reports.action.drilldowns"/>
+										</a>
+									</li>
+								</ul>
 							</div>
 						</td>
 					</tr>

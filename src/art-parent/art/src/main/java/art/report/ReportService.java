@@ -324,7 +324,7 @@ public class ReportService {
 	 * @return list of all reports, empty list otherwise
 	 * @throws SQLException
 	 */
-	@Cacheable("reports")
+	@Cacheable(value = "reports", key = "#root.methodName")
 	public List<Report> getAllReports() throws SQLException {
 		logger.debug("Entering getAllReports");
 
@@ -372,8 +372,8 @@ public class ReportService {
 	 * Delete a report
 	 *
 	 * @param id
-	 * @param linkedJobs output parameter. list that will be populated with linked jobs if they
-	 * exist
+	 * @param linkedJobs output parameter. list that will be populated with
+	 * linked jobs if they exist
 	 * @return -1 if the record was not deleted because there are some linked
 	 * records in other tables, otherwise the count of the number of reports
 	 * deleted
@@ -778,7 +778,7 @@ public class ReportService {
 	 * @return
 	 * @throws SQLException
 	 */
-	@Cacheable("reports")
+	@Cacheable(value = "reports", key = "#root.methodName")
 	public List<Report> getCandidateDrilldownReports() throws SQLException {
 		logger.debug("Entering getCandidateDrilldownReports");
 
