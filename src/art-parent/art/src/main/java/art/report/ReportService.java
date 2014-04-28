@@ -324,7 +324,7 @@ public class ReportService {
 	 * @return list of all reports, empty list otherwise
 	 * @throws SQLException
 	 */
-	@Cacheable(value = "reports", key = "#root.methodName")
+	@Cacheable(value = "reports")
 	public List<Report> getAllReports() throws SQLException {
 		logger.debug("Entering getAllReports");
 
@@ -778,7 +778,7 @@ public class ReportService {
 	 * @return
 	 * @throws SQLException
 	 */
-	@Cacheable(value = "reports", key = "#root.methodName")
+	@Cacheable(value = "reports")
 	public List<Report> getCandidateDrilldownReports() throws SQLException {
 		logger.debug("Entering getCandidateDrilldownReports");
 
