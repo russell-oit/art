@@ -21,18 +21,16 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for cache types
+ * Enum to represent parameter types
  *
  * @author Timothy Anyona
  */
-public enum CacheType {
+public enum ParameterType {
 
-	Mondrian("Mondrian"), Reports("Reports"), ReportGroups("ReportGroups"),
-	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
-	Schedules("Schedules"), Jobs("Jobs"), Filters("Filters"), Parameters("Parameters");
+	Inline("Inline"), Multi("Inline");
 	private String value;
 
-	private CacheType(String value) {
+	private ParameterType(String value) {
 		this.value = value;
 	}
 
@@ -50,21 +48,21 @@ public enum CacheType {
 	 *
 	 * @return
 	 */
-	public static List<CacheType> list() {
+	public static List<ParameterType> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
-		List<CacheType> items = new ArrayList<>();
+		List<ParameterType> items = new ArrayList<>();
 		items.addAll(Arrays.asList(values()));
 		return items;
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, null is returned
+	 * Convert a value to an enum. If the conversion fails, Inline is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static CacheType toEnum(String value) {
-		return toEnum(value, null);
+	public static ParameterType toEnum(String value) {
+		return toEnum(value, Inline);
 	}
 
 	/**
@@ -75,8 +73,8 @@ public enum CacheType {
 	 * @param defaultEnum
 	 * @return
 	 */
-	public static CacheType toEnum(String value, CacheType defaultEnum) {
-		for (CacheType v : values()) {
+	public static ParameterType toEnum(String value, ParameterType defaultEnum) {
+		for (ParameterType v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
@@ -93,14 +91,4 @@ public enum CacheType {
 	public String getDescription() {
 		return value;
 	}
-
-	/**
-	 * Get description message string for use in the user interface.
-	 *
-	 * @return
-	 */
-	public String getLocalizedDescription() {
-		return "cacheType.option." + value;
-	}
-
 }

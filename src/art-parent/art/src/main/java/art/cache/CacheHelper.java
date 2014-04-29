@@ -80,7 +80,7 @@ public class CacheHelper {
 	public void clearReports() {
 		logger.debug("Entering clearReports");
 	}
-	
+
 	/**
 	 * Clear report groups cache
 	 */
@@ -112,7 +112,7 @@ public class CacheHelper {
 	public void clearDatasources() {
 		logger.debug("Entering clearDatasources");
 	}
-	
+
 	/**
 	 * Clear schedules cache
 	 */
@@ -120,13 +120,29 @@ public class CacheHelper {
 	public void clearSchedules() {
 		logger.debug("Entering clearSchedules");
 	}
-	
+
 	/**
 	 * Clear jobs cache
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
 	public void clearJobs() {
 		logger.debug("Entering clearJobs");
+	}
+
+	/**
+	 * Clear filters cache
+	 */
+	@CacheEvict(value = "filters", allEntries = true)
+	public void clearFilters() {
+		logger.debug("Entering clearFilters");
+	}
+
+	/**
+	 * Clear parameters cache
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void clearParameters() {
+		logger.debug("Entering clearParameters");
 	}
 
 }

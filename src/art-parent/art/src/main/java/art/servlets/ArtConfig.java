@@ -28,6 +28,8 @@ import art.settings.Settings;
 import art.utils.ArtJob;
 import art.utils.ArtUtils;
 import art.dbutils.DbUtils;
+import art.enums.ParameterDataType;
+import art.enums.ParameterType;
 import art.settings.CustomSettings;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
@@ -63,6 +65,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.quartz.CronExpression;
@@ -1415,7 +1418,8 @@ public class ArtConfig extends HttpServlet {
 					addScheduleIds();
 					addDrilldownIds();
 					addRuleIds();
-					addReportFilterIds();
+					addQueryRuleIds();
+					addParameters();
 				}
 
 				boolean deleted = upgradeFile.delete();
@@ -1607,10 +1611,10 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Populate report filter id column. Column added in 3.0
+	 * Populate query rule id column. Column added in 3.0
 	 */
-	private static void addReportFilterIds() throws SQLException {
-		logger.debug("Entering addReportFilterIds");
+	private static void addQueryRuleIds() throws SQLException {
+		logger.debug("Entering addQueryRuleIds");
 
 		String sql;
 
@@ -1642,6 +1646,113 @@ public class ArtConfig extends HttpServlet {
 				sql = "UPDATE ART_QUERY_RULES SET QUERY_RULE_ID=?"
 						+ " WHERE QUERY_ID=? AND RULE_NAME=?";
 				dbService.update(sql, maxId, reportId, ruleName);
+			}
+		}
+	}
+
+	/**
+	 * Populate art_parameters table. Added in 3.0
+	 */
+	private static void addParameters() throws SQLException {
+		logger.debug("Entering addParameters");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT *"
+				+ " FROM ART_QUERY_FIELDS"
+				+ " WHERE MIGRATED IS NULL";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> parameters = dbService.query(sql, h2);
+
+		logger.debug("parameters.isEmpty()={}", parameters.isEmpty());
+		if (!parameters.isEmpty()) {
+			//generate new parameter id
+			sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
+			ResultSetHandler<Integer> h = new ScalarHandler<>();
+			Integer maxParameterId = dbService.query(sql, h);
+			logger.debug("maxParameterId={}", maxParameterId);
+
+			if (maxParameterId == null || maxParameterId < 0) {
+				maxParameterId = 0;
+			}
+
+			//generate new report parameter id
+			sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
+			ResultSetHandler<Integer> h3 = new ScalarHandler<>();
+			Integer maxReportParameterId = dbService.query(sql, h3);
+			logger.debug("maxReportParameterId={}", maxReportParameterId);
+
+			if (maxReportParameterId == null || maxReportParameterId < 0) {
+				maxReportParameterId = 0;
+			}
+
+			for (Map<String, Object> parameter : parameters) {
+				maxParameterId++;
+
+				//create parameter definition
+				sql = "INSERT INTO ART_PARAMETERS"
+						+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
+						+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
+						+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV, CHAINED_POSITION,"
+						+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
+						+ " USE_DIRECT_SUBSTITUTION)"
+						+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
+
+				ParameterType parameterType;
+				String paramType = (String) parameter.get("PARAM_TYPE");
+				if (StringUtils.equals(paramType, "M")) {
+					parameterType = ParameterType.Multi;
+				} else {
+					parameterType = ParameterType.Inline;
+				}
+
+				ParameterDataType dataType;
+				String dtType = (String) parameter.get("PARAM_DATA_TYPE");
+				dataType = ParameterDataType.toEnum(dtType);
+
+				String useLov = (String) parameter.get("USE_LOV");
+				String useFiltersInLov = (String) parameter.get("APPLY_RULES_TO_LOV");
+				String useDirectSubstitution = (String) parameter.get("DIRECT_SUBSTITUTION");
+
+				Object[] values = {
+					maxParameterId,
+					(String) parameter.get("PARAM_LABEL"), //name. meaning of name and label interchanged
+					(String) parameter.get("SHORT_DESCRIPTION"), //description
+					parameterType.getValue(),
+					(String) parameter.get("NAME"), //label
+					(String) parameter.get("DESCRIPTION"), //help text
+					dataType.getValue(),
+					(String) parameter.get("DEFAULT_VALUE"),
+					false,
+					BooleanUtils.toBoolean(useLov),
+					(Integer) parameter.get("LOV_QUERY_ID"),
+					BooleanUtils.toBoolean(useFiltersInLov),
+					(Integer) parameter.get("CHAINED_PARAM_POSITION"),
+					(Integer) parameter.get("CHAINED_VALUE_POSITION"),
+					(Integer) parameter.get("DRILLDOWN_COLUMN"),
+					BooleanUtils.toBoolean(useDirectSubstitution)
+				};
+
+				dbService.update(sql, values);
+
+				//create report parameter
+				maxReportParameterId++;
+
+				sql = "INSERT INTO ART_REPORT_PARAMETERS"
+						+ " (REPORT_PARAMETER_ID, REPORT_ID, PARAMETER_ID, PARAMETER_POSITION)"
+						+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+
+				Integer reportId = (Integer) parameter.get("QUERY_ID");
+				Integer position = (Integer) parameter.get("FIELD_POSITION");
+
+				dbService.update(sql, maxReportParameterId, reportId, maxParameterId, position);
+
+				//update migrated status
+				sql = "UPDATE ART_QUERY_FIELDS SET MIGRATED=1"
+						+ " WHERE QUERY_ID=? AND FIELD_POSITION=?";
+				dbService.update(sql, reportId, position);
 			}
 		}
 	}

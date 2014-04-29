@@ -35,4 +35,7 @@
 	<cache name="filters"
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
+	<cache name="parameters"
+		   eternal="true" maxEntriesLocalHeap="10" />
+	
 </ehcache>

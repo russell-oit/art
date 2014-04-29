@@ -265,6 +265,58 @@ CREATE TABLE ART_USER_QUERY_GROUPS
 );
 
 
+-- ART_PARAMETERS
+-- Stores parameter definitions
+
+-- NAME: stores the column name for non-labelled MULTI params
+-- or the parameter name for INLINE params or labelled multi params
+-- HIDDEN: boolean
+-- USE_LOV: boolean
+-- USE_FILTERS_IN_LOV: boolean
+-- USE_DIRECT_SUBSTITUTION: boolean
+-- CHAINED_POSITION is the position of the chained parameter
+-- CHAINED_VALUE_POSITION - allow chained parameter value to come from
+-- a different parameter from the previous one in the chained parameter sequence
+-- DRILLDOWN_COLUMN_INDEX - if used in a drilldown report, refers to the column in
+-- the parent report on which the parameter will be applied (index starts from 1)
+
+CREATE TABLE ART_PARAMETERS
+(	
+	PARAMETER_ID INTEGER NOT NULL,		
+	NAME  VARCHAR(60),
+	DESCRIPTION VARCHAR(50),
+	PARAMETER_TYPE VARCHAR(30),           
+	PARAMETER_LABEL     VARCHAR(50),
+	HELP_TEXT            VARCHAR(120),
+	DATA_TYPE         VARCHAR(30),
+	DEFAULT_VALUE     VARCHAR(80),
+	HIDDEN INTEGER,
+	USE_LOV INTEGER, 
+	LOV_REPORT_ID  INTEGER,
+	USE_FILTERS_IN_LOV INTEGER,	
+	CHAINED_POSITION  INTEGER,              
+	CHAINED_VALUE_POSITION INTEGER,
+	DRILLDOWN_COLUMN_INDEX INTEGER,
+	USE_DIRECT_SUBSTITUTION INTEGER,	
+	CREATION_DATE TIMESTAMP,
+	UPDATE_DATE TIMESTAMP,	
+	CONSTRAINT ap_pk PRIMARY KEY (PARAMETER_ID)	
+);
+
+
+-- ART_REPORT_PARAMETERS
+-- Stores parameters used in reports
+
+CREATE TABLE ART_REPORT_PARAMETERS
+(	
+	REPORT_PARAMETER_ID INTEGER NOT NULL,
+	REPORT_ID INTEGER NOT NULL,	
+	PARAMETER_ID INTEGER NOT NULL,	
+	PARAMETER_POSITION INTEGER NOT NULL,
+	CONSTRAINT arp_pk PRIMARY KEY (REPORT_PARAMETER_ID)	
+);
+
+
 -- ART_QUERY_FIELDS
 -- Stores query parameters
 
@@ -298,6 +350,7 @@ CREATE TABLE ART_QUERY_FIELDS
 	CHAINED_VALUE_POSITION INTEGER,
 	DRILLDOWN_COLUMN INTEGER,
 	DIRECT_SUBSTITUTION VARCHAR(1),
+	MIGRATED INTEGER,
 	UPDATE_DATE TIMESTAMP,	
 	CONSTRAINT aqf_pk PRIMARY KEY (QUERY_ID,FIELD_POSITION)	
 );

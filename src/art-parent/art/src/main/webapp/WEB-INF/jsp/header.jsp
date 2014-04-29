@@ -99,6 +99,11 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
+								<a href="${pageContext.request.contextPath}/app/parameters.do">
+									<spring:message code="header.link.parameters"/>
+								</a>
+							</li>
+							<li>
 								<a href="${pageContext.request.contextPath}/app/filters.do">
 									<spring:message code="header.link.filters"/>
 								</a>

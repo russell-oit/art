@@ -86,6 +86,10 @@ public class CacheController {
 					break;
 				case Jobs:
 					cacheHelper.clearJobs();
+				case Filters:
+					cacheHelper.clearFilters();
+				case Parameters:
+					cacheHelper.clearParameters();
 				default:
 					message = "Clear cache not available: " + name;
 			}

@@ -196,8 +196,6 @@ public class ReportFilterService {
 				+ " RULE_NAME=?, FIELD_NAME=?"
 				+ " WHERE QUERY_RULE_ID=?";
 
-		String filterName = filterService.getFilterName(reportFilter.getFilter().getFilterId());
-
 		Object[] values = {
 			reportFilter.getReportId(),
 			reportFilter.getFilter().getFilterId(),
