@@ -16,6 +16,8 @@
  */
 package art.parameter;
 
+import art.enums.ParameterType;
+import art.report.ReportService;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -47,6 +49,9 @@ public class ParameterController {
 
 	@Autowired
 	private ParameterService parameterService;
+
+	@Autowired
+	private ReportService reportService;
 
 	@RequestMapping(value = "/app/parameters", method = RequestMethod.GET)
 	public String showParameters(Model model) {
@@ -149,6 +154,16 @@ public class ParameterController {
 	 */
 	private String showParameter(String action, Model model) {
 		logger.debug("Entering showParameter: action='{}'", action);
+
+		try {
+			model.addAttribute("lovReports", reportService.getLovReports());
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		model.addAttribute("parameterTypes", ParameterType.list());
+		//model.addAttribute("dataTypes", ParameterDataType.list()); //datatypes loaded automatically?
 
 		model.addAttribute("action", action);
 		return "editParameter";

@@ -398,8 +398,8 @@ public class ReportService {
 		sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID = ?";
 		dbService.update(sql, id);
 
-		//delete query parameters
-		sql = "DELETE FROM ART_QUERY_FIELDS WHERE QUERY_ID = ?";
+		//delete report parameters
+		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID = ?";
 		dbService.update(sql, id);
 
 		//delete query-rule relationships
@@ -787,6 +787,23 @@ public class ReportService {
 				+ " WHERE EXISTS "
 				+ " (SELECT * FROM ART_QUERY_FIELDS AQF WHERE AQ.QUERY_ID = AQF.QUERY_ID "
 				+ " AND AQF.PARAM_TYPE = 'I' AND AQF.DRILLDOWN_COLUMN > 0)";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
+	}
+
+	/**
+	 * Get lov reports
+	 *
+	 * @return
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getLovReports() throws SQLException {
+		logger.debug("Entering getLovReports");
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE AQ.QUERY_GROUP_ID=-1 OR QUERY_TYPE=119 OR QUERY_TYPE=120";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);

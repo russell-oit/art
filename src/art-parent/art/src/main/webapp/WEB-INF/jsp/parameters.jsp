@@ -22,6 +22,8 @@ Display parameters
 <spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
+<spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
+<spring:message code="parameters.message.linkedReportsExist" var="linkedReportsExistText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -141,7 +143,7 @@ Display parameters
 				<tr>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
-					<th><spring:message code="page.text.label"/></th>
+					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -155,7 +157,7 @@ Display parameters
 							<t:displayNewLabel creationDate="${parameter.creationDate}"
 											   updateDate="${parameter.updateDate}"/>
 						</td>
-						<td>${encode:forHtmlContent(parameter.label)}</td>
+						<td>${encode:forHtmlContent(parameter.description)}</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

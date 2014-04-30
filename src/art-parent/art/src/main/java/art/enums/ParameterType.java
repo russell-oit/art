@@ -27,7 +27,7 @@ import java.util.List;
  */
 public enum ParameterType {
 
-	Inline("Inline"), Multi("Inline");
+	Inline("Inline"), Multi("Multi");
 	private String value;
 
 	private ParameterType(String value) {

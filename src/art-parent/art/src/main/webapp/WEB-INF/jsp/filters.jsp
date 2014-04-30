@@ -23,7 +23,7 @@ Display filters
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
-<spring:message code="datasources.message.linkedReportsExist" var="linkedReportsExistText"/>
+<spring:message code="filters.message.linkedReportsExist" var="linkedReportsExistText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 

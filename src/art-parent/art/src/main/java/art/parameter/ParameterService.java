@@ -189,7 +189,7 @@ public class ParameterService {
 				+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV, CHAINED_POSITION,"
 				+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
 				+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
+				+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
 
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(parameter);
