@@ -173,7 +173,7 @@ public class DrilldownController {
 
 		try {
 			model.addAttribute("parentReportName", reportService.getReportName(parent));
-			model.addAttribute("drilldownReports", reportService.getCandidateDrilldownReports());
+			model.addAttribute("drilldownReports", reportService.getDrilldownReports());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

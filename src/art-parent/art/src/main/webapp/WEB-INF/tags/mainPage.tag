@@ -41,10 +41,10 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 
 		<script type="text/javascript">
-			$('#spinner').ajaxStart(function() {
-				$(this).fadeIn('fast');
+			$(document).ajaxStart(function() {
+				$('#spinner').show();
 			}).ajaxStop(function() {
-				$(this).stop().fadeOut('fast');
+				$('#spinner').hide();
 			});
 		</script>
 
@@ -61,7 +61,7 @@ bootstrap js, jquery js, datatables css, datatables js
 
 	<jsp:body>
 		<div id="spinner">
-			<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Executing..." />
+			<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
 		</div>
         <jsp:doBody/>
     </jsp:body>

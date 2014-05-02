@@ -20,6 +20,7 @@ import art.datasource.Datasource;
 import art.dbutils.DbService;
 import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
+import art.enums.ParameterType;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
@@ -779,17 +780,18 @@ public class ReportService {
 	 * @throws SQLException
 	 */
 	@Cacheable(value = "reports")
-	public List<Report> getCandidateDrilldownReports() throws SQLException {
-		logger.debug("Entering getCandidateDrilldownReports");
+	public List<Report> getDrilldownReports() throws SQLException {
+		logger.debug("Entering getDrilldownReports");
 
 		//candidate drilldown report is a report with at least one inline parameter where drill down column > 0
 		String sql = SQL_SELECT_ALL
 				+ " WHERE EXISTS "
-				+ " (SELECT * FROM ART_QUERY_FIELDS AQF WHERE AQ.QUERY_ID = AQF.QUERY_ID "
-				+ " AND AQF.PARAM_TYPE = 'I' AND AQF.DRILLDOWN_COLUMN > 0)";
+				+ " (SELECT * FROM ART_REPORT_PARAMETERS ARP, ART_PARAMETERS AP"
+				+ " WHERE AQ.QUERY_ID = ARP.REPORT_ID AND ARP.PARAMETER_ID = AP.PARAMETER_ID"
+				+ " AND AP.PARAMETER_TYPE = ? AND AP.DRILLDOWN_COLUMN_INDEX > 0)";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
-		return dbService.query(sql, h);
+		return dbService.query(sql, h, ParameterType.Inline.getValue());
 	}
 
 	/**
