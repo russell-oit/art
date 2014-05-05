@@ -287,7 +287,7 @@ public class UserService {
 		sql = "INSERT INTO ART_USERS"
 				+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
 				+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
-				+ " START_QUERY_GROUP, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE)"
+				+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
 
 		//set values for possibly null property objects

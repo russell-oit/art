@@ -17,6 +17,10 @@ Display user groups
 <spring:message code="page.title.userGroups" var="pageTitle"/>
 
 <spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showHideColumns" var="showHideColumnsText"/>
+<spring:message code="datatables.text.restoreOriginal" var="restoreOriginalText"/>
+<spring:message code="datatables.text.selectAll" var="selectAllText"/>
+<spring:message code="datatables.text.deselectAll" var="deselectAllText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
@@ -25,34 +29,94 @@ Display user groups
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
+	<jsp:attribute name="css">
+		<style type="text/css">
+			/* ensure tabletools div is right aligned */
+			/* see the css section in https://datatables.net/release-datatables/extensions/TableTools/examples/bootstrap.html */
+			body { font-size: 140%; }
+			div.DTTT { margin-bottom: 0.5em; float: right; }
+			div.dataTables_wrapper { clear: both; }
+		</style>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" charset="utf-8">
+		<script type="text/javascript">
 			$(document).ready(function() {
-				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="userGroups.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="userGroups.do"]').parent().addClass('active');
 
-				var oTable = $('#userGroups').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
+				//Add a text input to each column to be used for column filters
+				//dynamically add row to thead
+//				$(function() {
+//					var tbl = $('#userGroups');
+//
+//					var theadRow = $('<tr>').insertBefore(tbl.find('thead tr:first'));
+//					var colCount = tbl.find("thead th").length;
+//					for (var i = 0; i < colCount; i++) {
+//						$('<th>').html('<input type="text" class="form-control input-sm">').appendTo(theadRow);
+//					}
+//
+//					//add tfoot. tfoot should come before tbody
+//					var tfoot = $('<tfoot>').insertBefore(tbl.find('tbody'));
+//					var tfootRow = $('<tr>').appendTo(tfoot);
+//
+//					$('#headings th').each(function() {
+//						var title = $(this).text();
+//						$('<th>').html(title).appendTo(tfootRow);
+//					});
+//				});
+
+				var table = $('#userGroups').DataTable({
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
-					"fnInitComplete": function() {
+					initComplete: function() {
 						$('div.dataTables_filter input').focus();
 					}
 				});
 
+				// Apply the column filter
+				$("#userGroups thead input").on('keyup change', function() {
+					table
+							.column($(this).parent().index() + ':visible')
+							.search(this.value)
+							.draw();
+				});
+
+				//insert tabletools extension to enable multi select
+				var tableTools = new $.fn.dataTable.TableTools(table, {
+					"sRowSelect": "multi",
+					"aButtons": [
+						{
+							"sExtends": "select_all",
+							"sButtonText": "${selectAllText}"
+						},
+						{
+							"sExtends": "select_none",
+							"sButtonText": "${deselectAllText}"
+						}
+					],
+					"sSwfPath": "${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/TableTools/swf/copy_csv_xls_pdf.swf"
+				});
+				$(tableTools.fnContainer()).insertAfter('#headerActions');
+
+				//insert colvis extension
+				var colvis = new $.fn.dataTable.ColVis(table, {
+//					"activate": "mouseover",
+					"buttonText": "${showHideColumnsText}",
+					"restore": "${restoreOriginalText}"
+				});
+				$(colvis.button()).insertAfter('#headerActions');
+
+
 				$('#userGroups tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
-					var nRow = row[0]; //dom element/node
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
-					
 					bootbox.confirm({
 						message: "${deleteRecordText}: <b>" + name + "</b>",
 						buttons: {
@@ -73,8 +137,7 @@ Display user groups
 									success: function(response) {
 										var msg;
 										if (response.success) {
-											oTable.fnDeleteRow(nRow);
-
+											table.row(row).remove().draw(false);
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
 											$.notify("${recordDeletedText}", "success");
@@ -84,7 +147,7 @@ Display user groups
 											$.notify("${errorOccurredText}", "error");
 										}
 									},
-									error: function(xhr, status, error) {
+									error: function(xhr) {
 										bootbox.alert(xhr.responseText);
 									}
 								}); //end ajax
@@ -117,7 +180,7 @@ Display user groups
 		<div id="ajaxResponse">
 		</div>
 
-		<div style="margin-bottom: 10px;">
+		<div id="headerActions" style="margin-bottom: 10px;">
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addUserGroup.do">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
@@ -126,7 +189,7 @@ Display user groups
 
 		<table id="userGroups" class="table table-bordered table-striped table-condensed">
 			<thead>
-				<tr>
+				<tr id="headings">
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>

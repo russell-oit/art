@@ -50,11 +50,11 @@ Display report drilldowns
 				});
 
 				var oTable = $('#drilldowns').dataTable({
-					"sPaginationType": "bs_full",
+					"sPaginationType": "full_numbers",
 					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
 					"iDisplayLength": -1,
 					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
+						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
 					"fnInitComplete": function() {
 						$('div.dataTables_filter input').focus();

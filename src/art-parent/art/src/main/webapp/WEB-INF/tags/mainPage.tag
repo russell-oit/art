@@ -21,48 +21,53 @@ bootstrap js, jquery js, datatables css, datatables js
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/datatables-bootstrap3-jowin/css/datatables.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">
+		<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/css/jquery.dataTables.min.css"></script>-->
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/ColVis-1.1.0/css/dataTables.colVis.min.css"></script>
+	<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/TableTools-2.2.1/css/dataTables.tableTools.min.css"></script>-->
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.css"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">
 
-		<jsp:invoke fragment="css"/>
-	</jsp:attribute>
+<jsp:invoke fragment="css"/>
+</jsp:attribute>
 
-	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
+<jsp:attribute name="javascript">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.9.4/js/jquery.dataTables.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/datatables-bootstrap3-jowin/js/datatables.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/TableTools-2.2.1/js/dataTables.tableTools.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/ColVis-1.1.0/js/dataTables.colVis.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 
-		<script type="text/javascript">
-			$(document).ajaxStart(function() {
-				$('#spinner').show();
-			}).ajaxStop(function() {
-				$('#spinner').hide();
-			});
-		</script>
+	<script type="text/javascript">
+		$(document).ajaxStart(function() {
+			$('#spinner').show();
+		}).ajaxStop(function() {
+			$('#spinner').hide();
+		});
+	</script>
 
-		<jsp:invoke fragment="javascript"/>
-	</jsp:attribute>
+	<jsp:invoke fragment="javascript"/>
+</jsp:attribute>
 
-	<jsp:attribute name="header">
-		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
-	</jsp:attribute>
+<jsp:attribute name="header">
+	<jsp:include page="/WEB-INF/jsp/header.jsp"/>
+</jsp:attribute>
 
-	<jsp:attribute name="footer">
-		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
-	</jsp:attribute>
+<jsp:attribute name="footer">
+	<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+</jsp:attribute>
 
-	<jsp:body>
-		<div id="spinner">
-			<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
-		</div>
-        <jsp:doBody/>
-    </jsp:body>
+<jsp:body>
+	<div id="spinner">
+		<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
+	</div>
+	<jsp:doBody/>
+</jsp:body>
 </t:genericPage>

@@ -42,14 +42,14 @@ div.innerDetails {
 
 /* show hand cursor for expandable rows */
 tr.expandable td.expandable {
-	cursor: pointer; *cursor: hand;
+	cursor: pointer;
 }
 
 /* styling for application logs */
 tr.ERROR{
 	color: red;
 	font-weight: bold;
-	cursor: pointer; *cursor: hand;
+	cursor: pointer;
 }
 
 tr.WARN{

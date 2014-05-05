@@ -37,17 +37,19 @@ Display user configuration page
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="users.do"]').parent().addClass('active');
 				});
-				var oTable = $('#users').dataTable({
-					"sPaginationType": "bs_full",
-//					"bPaginate": false,
-//					"sScrollY": "365px",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
+				
+				var table = $('#users').dataTable({
+//					scrollX: true,
+//					scrollY: 340,
+//					scrollCollapse: true,
+//					paging: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
-					"fnInitComplete": function() {
+					initComplete: function() {
 						$('div.dataTables_filter input').focus();
 					}
 				});
@@ -78,7 +80,8 @@ Display user configuration page
 										var msg;
 										var linkedJobs = response.data;
 										if (response.success) {
-											oTable.fnDeleteRow(nRow);
+//											table.row(row).remove().draw();
+											table.fnDeleteRow(nRow);
 
 											msg = alertCloseButton + "${recordDeletedText}: " + name;
 											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
