@@ -5,10 +5,16 @@
     Description: ART css
 */
 
+/* have bottom margin to the main datatables div */
+.dtHeader{
+	margin-bottom: 10px;
+}
+
 .centered{
 	margin: 0 auto;
 }
 
+/* space to take into account the bootstrap fixed navbar */
 .spacer60 {
 	margin-top: 60px; 
 }
@@ -24,20 +30,28 @@
 	font-weight: bold;
 }
 
+td.details-control {
+    background: url('../images/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+tr.details td.details-control {
+    background: url('../images/details_close.png') no-repeat center center;
+}
+
 /* styling for datatables details row. from datatables demo_table.css */
 td.details {
 	background-color: #d1cfd0;
 	border: 2px solid #A19B9E;
 }
 
+/* styling for datatables details content */
+div.details { 
+	margin-left:50px;
+}
+
 /* remove bootstrap border-top from details row */
 table.expandable table tbody>tr>td {
 	border:none;
-}
-
-/* styling to enable datatables details row slideDown, slideUp effect */
-div.innerDetails { 
-	display: none; 
 }
 
 /* show hand cursor for expandable rows */

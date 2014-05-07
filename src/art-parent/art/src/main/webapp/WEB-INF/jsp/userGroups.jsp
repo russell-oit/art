@@ -46,41 +46,44 @@ Display user groups
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="userGroups.do"]').parent().addClass('active');
 
-				//Add a text input to each column to be used for column filters
-				//dynamically add row to thead
-//				$(function() {
-//					var tbl = $('#userGroups');
-//
-//					var theadRow = $('<tr>').insertBefore(tbl.find('thead tr:first'));
-//					var colCount = tbl.find("thead th").length;
-//					for (var i = 0; i < colCount; i++) {
-//						$('<th>').html('<input type="text" class="form-control input-sm">').appendTo(theadRow);
-//					}
-//
-//					//add tfoot. tfoot should come before tbody
-//					var tfoot = $('<tfoot>').insertBefore(tbl.find('tbody'));
-//					var tfootRow = $('<tr>').appendTo(tfoot);
-//
-//					$('#headings th').each(function() {
-//						var title = $(this).text();
-//						$('<th>').html(title).appendTo(tfootRow);
-//					});
-//				});
+				var tbl = $('#userGroups');
 
-				var table = $('#userGroups').DataTable({
-					pagingType: "full_numbers",
-					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					pageLength: 10,
-					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
+				//add row to thead to enable column filtering
+				//use clone so that plugins work properly? e.g. colvis
+				var headingRow = tbl.find('thead tr:first');
+				var columnFilterRow = headingRow.clone();
+				//insert cloned row as first row because datatables will put heading styling on the last thead row
+				columnFilterRow.insertBefore(headingRow);
+				//put search fields into cloned row
+				columnFilterRow.find('th').each(function() {
+					var title = $(this).text();
+					$(this).html('<input type="text" class="form-control input-sm" placeholder="' + title + '">');
+				});
+
+				//use initialization that returns a jquery object. to be able to use plugins
+				var oTable = tbl.dataTable({
+//					"scrollX": true, 
+					"orderClasses": false,
+					"pagingType": "full_numbers",
+					"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
+					"pageLength": 10,
+					"language": {
+						"url": "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
-					initComplete: function() {
+					"initComplete": function() {
 						$('div.dataTables_filter input').focus();
 					}
 				});
 
+				//move column filter row after heading row
+				columnFilterRow.insertAfter(columnFilterRow.next());
+
+				//get datatables api object
+				var table = oTable.api();
+
 				// Apply the column filter
-				$("#userGroups thead input").on('keyup change', function() {
+				//https://datatables.net/examples/api/multi_filter.html
+				tbl.find('thead input').on('keyup change', function() {
 					table
 							.column($(this).parent().index() + ':visible')
 							.search(this.value)
@@ -113,7 +116,8 @@ Display user groups
 				$(colvis.button()).insertAfter('#headerActions');
 
 
-				$('#userGroups tbody').on('click', '.delete', function() {
+				//delete record
+				tbl.find('tbody').on('click', '.delete', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var name = escapeHtmlContent(row.data("name"));
 					var id = row.data("id");
@@ -180,7 +184,7 @@ Display user groups
 		<div id="ajaxResponse">
 		</div>
 
-		<div id="headerActions" style="margin-bottom: 10px;">
+		<div id="headerActions" class="dtHeader">
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addUserGroup.do">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
@@ -189,13 +193,14 @@ Display user groups
 
 		<table id="userGroups" class="table table-bordered table-striped table-condensed">
 			<thead>
-				<tr id="headings">
+				<tr>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
+
 			<tbody>
 				<c:forEach var="group" items="${groups}">
 					<tr data-id="${group.userGroupId}" 
@@ -224,5 +229,6 @@ Display user groups
 				</c:forEach>
 			</tbody>
 		</table>
+
 	</jsp:body>
 </t:mainPageWithPanel>

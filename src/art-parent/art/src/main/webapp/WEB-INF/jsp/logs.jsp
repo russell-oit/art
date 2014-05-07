@@ -23,105 +23,84 @@ Display application logs
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
-			//put jstl variables into js variables
-			var allRowsText = "${dataTablesAllRowsText}";
-			var contextPath = "${pageContext.request.contextPath}";
-			var localeCode = "${pageContext.response.locale}";
-			var imagesPath = contextPath + "/images/";
-		</script>
-		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
-				$(function() {
-					$('a[href*="logs.do"]').parent().addClass('active');
+				$('a[href*="logs.do"]').parent().addClass('active');
+
+				var tbl = $('#logs');
+
+				//make error rows expandable
+				tbl.find('tbody tr.ERROR td:first-child').each(function() {
+					$(this).addClass('details-control');
 				});
 
-				// Insert a 'details' column to the table
-				//must be done before datatables initialisation
-				var nCloneTh = document.createElement('th');
-				var nCloneTd = document.createElement('td');
-				nCloneTd.innerHTML = '<img src="' + imagesPath + 'details_open.png">';
-				nCloneTd.className = "text-center";
-				var nCloneTdBlank = document.createElement('td');
-
-				$('#logs thead tr').each(function() {
-					this.insertBefore(nCloneTh, this.childNodes[0]);
-				});
-
-				$('#logs tbody tr').each(function() {
-					if ($(this).attr("class") === "ERROR") {
-						this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
-					} else {
-						this.insertBefore(nCloneTdBlank.cloneNode(true), this.childNodes[0]);
-					}
-				});
-
-				//Initialise DataTables
-				var oTable = $('#logs').dataTable({
-					"sPaginationType": "bs_full",
-//					"bPaginate": false,
-					"aoColumnDefs": [
-						{"bSortable": false, "aTargets": [0]}, //no sorting on details column
-						{"bVisible": false, "aTargets": [-1]} //hide last column (error details)
+				var oTable = tbl.dataTable({
+					"columnDefs": [
+						{
+							"targets": "detailsCol",
+							"orderable": false
+						},
+						{
+							"targets": "exceptionCol", //target name matches class name of th.
+							"visible": false
+						}
 					],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
+					"orderClasses": false,
+					"pagingType": "full_numbers",
+					"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
+					"pageLength": -1,
+					"language": {
+						"url": "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
-					"fnInitComplete": function() {
+					"initComplete": function() {
 						$('div.dataTables_filter input').focus();
 					}
 				});
 
-				//array to keep a reference to any TR rows that we 'open'
-				var anOpen = [];
+				//show/hide details
+				//http://datatables.net/examples/server_side/row_details.html
 
-				// Add event listener for opening and closing details
-				$('#logs tbody').on('click', 'tr', function() {
-					if (!$(this).hasClass('ERROR')) {
-						return; //only ERROR rows can have details
+				//get datatables api instance
+				var dt = oTable.api();
+
+				// Array to track the ids of the details displayed rows
+				var detailRows = [];
+
+				tbl.find('tbody').on('click', 'tr.ERROR', function() {
+					var tr = $(this);
+					var row = dt.row(tr);
+					var idx = $.inArray(tr, detailRows);
+
+					if (row.child.isShown()) {
+						tr.removeClass('details');
+						row.child.hide();
+
+						// Remove from the 'open' array
+						detailRows.splice(idx, 1);
 					}
+					else {
+						tr.addClass('details');
+						row.child(format(row.data()),'details').show(); //add details class to child row td
 
-					var nTr = this;
-
-					//see if the row should be opened or if it is already in the open array, and thus close it
-					var i = $.inArray(nTr, anOpen);
-					if (i === -1) {
-						// Row is not in open array so it's currently closed. Open it
-						var nDetailsRow = oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
-						$('div.innerDetails', nDetailsRow).slideDown();
-
-						//add row to open array
-						anOpen.push(nTr);
-
-						//change icon to indicate the row is now due for closing
-						$('img', this).attr('src', imagesPath + "details_close.png");
-					} else {
-						// Close this row
-						$('div.innerDetails', $(nTr).next()[0]).slideUp('fast', function() {
-							oTable.fnClose(nTr);
-							//remove row from open array
-							anOpen.splice(i, 1);
-						});
-
-						//change icon to indicate the row is now due for opening
-						$('img', this).attr('src', imagesPath + "details_open.png");
+						// Add to the 'open' array
+						if (idx === -1) {
+							detailRows.push(tr);
+						}
 					}
 				});
+
+//				// On each draw, loop over the `detailRows` array and show any child rows
+//				dt.on('draw', function() {
+//					$.each(detailRows, function(i, id) {
+//						$('#' + id + ' td:first-child').trigger('click');
+//					});
+//				});
 
 			});
 
 			/* Formating function for row details */
-			function fnFormatDetails(oTable, nTr)
+			function format(data)
 			{
-				var aData = oTable.fnGetData(nTr); //aData has column data in an array, index starts from 0. (0 is dynamically inserted expand/collapse column)
-				var sOut = '<div class="innerDetails">';
-				sOut += '<table style="margin-left:50px;">';
-				sOut += '<tr><td>' + aData[7] + '</td></tr>'; //exception details column
-				sOut += '</table>';
-				sOut += '</div>';
-
-				return sOut;
+				return '<div class="details">' + data[7] + '</div>';
 			}
 
 		</script>
@@ -138,19 +117,21 @@ Display application logs
 			<table id="logs" class="expandable table table-striped table-bordered table-condensed">
 				<thead>
 					<tr>
+						<th class="detailsCol"></th> <%-- details control column --%>
 						<th><spring:message code="logs.text.date"/></th>
 						<th><spring:message code="page.text.level"/></th>
 						<th><spring:message code="logs.text.logger"/></th>
 						<th><spring:message code="logs.text.message"/></th>
 						<th><spring:message code="page.text.user"/></th>
 						<th><spring:message code="logs.text.page"/></th>
-						<th></th> <%-- exception details column. must be last column. hidden --%>
-						<%-- if change number of columns, must modify array index in fnFormatDetails --%>
+						<th class="exceptionCol"></th> <%-- exception details column. must be last column. hidden --%>
+							<%-- if change number of columns, must modify array index in format function --%>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach var="log" items="${logs}">
 						<tr class="${log.level}">
+							<td></td> <%-- details control column --%>
 							<td>
 								<t:displayDate timestamp="${log.timeStamp}"/>
 							</td>
