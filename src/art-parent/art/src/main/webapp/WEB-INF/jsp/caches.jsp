@@ -16,7 +16,7 @@ Page to allow manual clearing of caches
 
 <spring:message code="page.title.caches" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="caches.message.cacheCleared" var="cacheClearedText"/>
 
@@ -27,50 +27,31 @@ Page to allow manual clearing of caches
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="caches.do"]').parent().addClass('active');
 				});
 
-				$('#caches').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"fnInitComplete": function() {
-						$('div.dataTables_filter input').focus();
-					}
-				});
+				var tbl = $('#caches');
 
-				$('#caches tbody').on('click', '.clear', function() {
-					var row = $(this).closest("tr"); //jquery object
-					var name = escapeHtmlContent(row.data("name"));
-					
-					$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/clearCache.do",
-						data: {name: name},
-						success: function(response) {
-							var msg;
-							if (response.success) {
-								msg = alertCloseButton + "${cacheClearedText}: " + name;
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$.notify("${cacheClearedText}", "success");
-							} else {
-								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
-							}
-						},
-						error: function(xhr, status, error) {
-							bootbox.alert(xhr.responseText);
-						}
-					}); //end ajax
-				}); //end on click
-				
+				//initialize datatable and process delete action
+				initConfigPage(tbl,
+						undefined, //pageLength. pass undefined to use the default
+						"${showAllRowsText}",
+						"${pageContext.request.contextPath}",
+						"${pageContext.response.locale}",
+						false, //addColumnFilters
+						".clearCache", //deleteButtonSelector
+						false, //showConfirmDialog
+						undefined, //deleteRecordText
+						undefined, //okText
+						undefined, //cancelText
+						"clearCache.do", //deleteUrl
+						"${cacheClearedText}", //recordDeletedText
+						"${errorOccurredText}",
+						false, //deleteRow
+						undefined, //cannotDeleteRecordText
+						undefined //linkedRecordsExistText
+						);
+
 			});
 		</script>
 	</jsp:attribute>
@@ -98,10 +79,12 @@ Page to allow manual clearing of caches
 			</thead>
 			<tbody>
 				<c:forEach var="cache" items="${caches}">
-					<tr data-name="${cache.value}">
+					<tr data-id="${cache.value}"
+						data-name="${cache.value}">
+
 						<td><spring:message code="${cache.localizedDescription}"/></td>
 						<td>
-							<button type="button" class="btn btn-default clear">
+							<button type="button" class="btn btn-default clearCache">
 								<i class="fa fa-trash-o"></i>
 								<spring:message code="caches.action.clear"/>
 							</button>

@@ -78,81 +78,54 @@ Admin rights configuration page
 						this.qs1.cache();
 						this.qs2.cache();
 					}
-				});
+				}); //end multiselect
 
-			});
+				$('#actionsDiv').on('click', '.updateRights', function() {
+					var action = $(this).data('action');
 
-			function updateRights(action) {
-				var admins = $('#admins').val();
-				var datasources = $('#datasources').val();
-				var reportGroups = $('#reportGroups').val();
+					var admins = $('#admins').val();
+					var datasources = $('#datasources').val();
+					var reportGroups = $('#reportGroups').val();
 
-				if (admins === null) {
-					bootbox.alert("${selectAdminText}");
-					return;
-				}
-				if (datasources === null && reportGroups === null) {
-					bootbox.alert("${selectDatasourceOrGroupText}");
-					return;
-				}
-
-				var rightsUpdatedMessage;
-				if (action === 'GRANT') {
-					rightsUpdatedMessage = "${rightsGrantedText}";
-				} else {
-					rightsUpdatedMessage = "${rightsRevokedText}";
-				}
-
-				$.ajax({
-					type: "POST",
-					dataType: "json",
-					url: "${pageContext.request.contextPath}/app/updateAdminRight.do",
-					data: {action: action, admins: admins, datasources: datasources,
-						reportGroups: reportGroups},
-					success: function(response) {
-						var msg;
-						if (response.success) {
-							msg = alertCloseButton + rightsUpdatedMessage;
-							$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-							$.notify(rightsUpdatedMessage, "success");
-						} else {
-							msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-							$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-							$.notify("${errorOccurredText}", "error");
-						}
-					},
-					error: function(xhr, status, error) {
-						bootbox.alert(xhr.responseText);
+					if (admins === null) {
+						bootbox.alert("${selectAdminText}");
+						return;
 					}
-				}); //end ajax
-			}
+					if (datasources === null && reportGroups === null) {
+						bootbox.alert("${selectDatasourceOrGroupText}");
+						return;
+					}
 
-			$('#select-all-admins').click(function() {
-				$('#admins').multiSelect('select_all');
-				return false;
-			});
-			$('#deselect-all-admins').click(function() {
-				$('#admins').multiSelect('deselect_all');
-				return false;
-			});
+					var rightsUpdatedMessage;
+					if (action === 'grant') {
+						rightsUpdatedMessage = "${rightsGrantedText}";
+					} else {
+						rightsUpdatedMessage = "${rightsRevokedText}";
+					}
 
-			$('#select-all-datasources').click(function() {
-				$('#datasources').multiSelect('select_all');
-				return false;
-			});
-			$('#deselect-all-datasources').click(function() {
-				$('#datasources').multiSelect('deselect_all');
-				return false;
-			});
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/app/updateAdminRight.do",
+						data: {action: action, admins: admins, datasources: datasources,
+							reportGroups: reportGroups},
+						success: function(response) {
+							if (response.success) {
+								notifyActionSuccess(rightsUpdatedMessage);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
+						},
+						error: ajaxErrorHandler
+					}); //end ajax
+				}); //end on click
 
-			$('#select-all-reportGroups').click(function() {
-				$('#reportGroups').multiSelect('select_all');
-				return false;
-			});
-			$('#deselect-all-reportGroups').click(function() {
-				$('#reportGroups').multiSelect('deselect_all');
-				return false;
-			});
+				//handle select all/deselect all
+				addSelectDeselectAllHandler();
+
+			}); //end document ready
+
+
 		</script>
 	</jsp:attribute>
 
@@ -184,8 +157,8 @@ Admin rights configuration page
 								</option>
 							</c:forEach>
 						</select>
-						<a href='#' id='select-all-admins'><spring:message code="page.text.selectAll"/></a> / 
-						<a href='#' id='deselect-all-admins'><spring:message code="page.text.deselectAll"/></a>
+						<a href="#" class="select-all" data-item="#admins"><spring:message code="page.text.selectAll"/></a> / 
+						<a href="#" class="deselect-all" data-item="#admins"><spring:message code="page.text.deselectAll"/></a>
 					</div>
 				</div>
 				<div class="form-group">
@@ -200,8 +173,8 @@ Admin rights configuration page
 								</option>
 							</c:forEach>
 						</select>
-						<a href='#' id='select-all-datasources'><spring:message code="page.text.selectAll"/></a> / 
-						<a href='#' id='deselect-all-datasources'><spring:message code="page.text.deselectAll"/></a>
+						<a href="#" class="select-all" data-item="#datasources"><spring:message code="page.text.selectAll"/></a> / 
+						<a href="#" class="deselect-all" data-item="#datasources"><spring:message code="page.text.deselectAll"/></a>
 					</div>
 				</div>
 				<div class="form-group">
@@ -216,21 +189,21 @@ Admin rights configuration page
 								</option>
 							</c:forEach>
 						</select>
-						<a href='#' id='select-all-reportGroups'><spring:message code="page.text.selectAll"/></a> / 
-						<a href='#' id='deselect-all-reportGroups'><spring:message code="page.text.deselectAll"/></a>
+						<a href="#" class="select-all" data-item="#reportGroups"><spring:message code="page.text.selectAll"/></a> / 
+						<a href="#" class="deselect-all" data-item="#reportGroups"><spring:message code="page.text.deselectAll"/></a>
 					</div>
 				</div>
 				<div class="form-group">
 					<div class="col-md-12">
-						<div class="pull-right">
+						<div id="actionsDiv" class="pull-right">
 							<a class="btn btn-default" 
 							   href="${pageContext.request.contextPath}/app/adminRights.do">
 								<spring:message code="page.action.show"/>
 							</a>
-							<button type="button" class="btn btn-default" onclick="updateRights('GRANT');">
+							<button type="button" class="btn btn-default updateRights" data-action="grant">
 								<spring:message code="page.action.grant"/>
 							</button>
-							<button type="button" class="btn btn-default" onclick="updateRights('REVOKE');">
+							<button type="button" class="btn btn-default updateRights" data-action="revoke">
 								<spring:message code="page.action.revoke"/>
 							</button>
 						</div>

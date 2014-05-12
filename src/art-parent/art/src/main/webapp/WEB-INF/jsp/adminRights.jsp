@@ -16,7 +16,7 @@ Display current admin rights
 
 <spring:message code="page.title.adminRights" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 
@@ -27,53 +27,31 @@ Display current admin rights
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
 				});
 
-				var oTable = $('#rights').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": 25,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"fnInitComplete": function() {
-						$('div.dataTables_filter input').focus();
-					}
-				});
+				var tbl = $('#rights');
 
-				$('#rights tbody').on('click', '.revoke', function() {
-					var row = $(this).closest("tr"); //jquery object
-					var nRow = row[0]; //dom element/node
-					var name = escapeHtmlContent(row.data("name"));
-					var id = row.data("id");
+				//initialize datatable and process delete action
+				initConfigPage(tbl,
+						undefined, //pageLength. pass undefined to use the default
+						"${showAllRowsText}",
+						"${pageContext.request.contextPath}",
+						"${pageContext.response.locale}",
+						undefined, //addColumnFilters. pass undefined to use default
+						".deleteRecord", //deleteButtonSelector
+						false, //showConfirmDialog
+						undefined, //deleteRecordText
+						undefined, //okText
+						undefined, //cancelText
+						"deleteAdminRight.do", //deleteUrl
+						"${rightsRevokedText}", //recordDeletedText
+						"${errorOccurredText}",
+						true, //deleteRow
+						undefined, //cannotDeleteRecordText
+						undefined //linkedRecordsExistText
+						);
 
-					$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/deleteAdminRight.do",
-						data: {id: id},
-						success: function(response) {
-							var msg;
-							if (response.success) {
-								oTable.fnDeleteRow(nRow);
-								
-								msg = alertCloseButton + "${rightsRevokedText}: " + name;
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$.notify("${rightsRevokedText}", "success");
-							} else {
-								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
-							}
-						},
-						error: function(xhr, status, error) {
-							bootbox.alert(xhr.responseText);
-						}
-					}); //end ajax
-				}); //end on click
 
 			});
 		</script>
@@ -112,14 +90,14 @@ Display current admin rights
 						<td><encode:forHtmlContent value="${datasourceRight.datasource.name}"/></td>
 						<td></td>
 						<td>
-							<button type="button" class="btn btn-default revoke">
+							<button type="button" class="btn btn-default deleteRecord">
 								<i class="fa fa-trash-o"></i>
 								<spring:message code="page.action.revoke"/>
 							</button>
 						</td>
 					</tr>
 				</c:forEach>
-					
+
 				<c:forEach var="reportGroupRight" items="${reportGroupRights}">
 					<tr data-name="${encode:forHtmlAttribute(reportGroupRight.admin.username)} -
 						${encode:forHtmlAttribute(reportGroupRight.reportGroup.name)}"
@@ -129,7 +107,7 @@ Display current admin rights
 						<td></td>
 						<td><encode:forHtmlContent value="${reportGroupRight.reportGroup.name}"/></td>
 						<td>
-							<button type="button" class="btn btn-default revoke">
+							<button type="button" class="btn btn-default deleteRecord">
 								<i class="fa fa-trash-o"></i>
 								<spring:message code="page.action.revoke"/>
 							</button>

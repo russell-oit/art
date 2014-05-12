@@ -51,16 +51,16 @@ public class CacheController {
 
 	@RequestMapping(value = "/app/clearCache", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse clearCache(@RequestParam("name") String name) {
-		logger.debug("Entering clearCache: name='{}'", name);
+	AjaxResponse clearCache(@RequestParam("id") String id) {
+		logger.debug("Entering clearCache: id='{}'", id);
 
 		AjaxResponse response = new AjaxResponse();
 
 		String message = null;
-		CacheType cacheType = CacheType.toEnum(name);
+		CacheType cacheType = CacheType.toEnum(id);
 
 		if (cacheType == null) {
-			message = "Unknown cache: " + name;
+			message = "Unknown cache: " + id;
 		} else {
 			switch (cacheType) {
 				case Mondrian:
@@ -91,7 +91,7 @@ public class CacheController {
 				case Parameters:
 					cacheHelper.clearParameters();
 				default:
-					message = "Clear cache not available: " + name;
+					message = "Clear cache not available: " + id;
 			}
 		}
 

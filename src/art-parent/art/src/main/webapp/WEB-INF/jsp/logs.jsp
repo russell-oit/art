@@ -17,7 +17,7 @@ Display application logs
 
 <spring:message code="page.title.logs" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -28,6 +28,8 @@ Display application logs
 
 				var tbl = $('#logs');
 
+				var columnFilterRow = createColumnFilters(tbl);
+
 				//make error rows expandable
 				tbl.find('tbody tr.ERROR td:first-child').each(function() {
 					$(this).addClass('details-control');
@@ -37,7 +39,8 @@ Display application logs
 					"columnDefs": [
 						{
 							"targets": "detailsCol",
-							"orderable": false
+							"orderable": false,
+							"searchable": false
 						},
 						{
 							"targets": "exceptionCol", //target name matches class name of th.
@@ -46,7 +49,7 @@ Display application logs
 					],
 					"orderClasses": false,
 					"pagingType": "full_numbers",
-					"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
+					"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					"pageLength": -1,
 					"language": {
 						"url": "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
@@ -56,18 +59,24 @@ Display application logs
 					}
 				});
 
+				//move column filter row after heading row
+				columnFilterRow.insertAfter(columnFilterRow.next());
+
+				//get datatables api object
+				var table = oTable.api();
+
+				// Apply the column filter
+				applyColumnFilters(tbl, table);
+
 				//show/hide details
 				//http://datatables.net/examples/server_side/row_details.html
-
-				//get datatables api instance
-				var dt = oTable.api();
 
 				// Array to track the ids of the details displayed rows
 				var detailRows = [];
 
 				tbl.find('tbody').on('click', 'tr.ERROR', function() {
 					var tr = $(this);
-					var row = dt.row(tr);
+					var row = table.row(tr);
 					var idx = $.inArray(tr, detailRows);
 
 					if (row.child.isShown()) {
@@ -79,7 +88,7 @@ Display application logs
 					}
 					else {
 						tr.addClass('details');
-						row.child(format(row.data()),'details').show(); //add details class to child row td
+						row.child(formatDetails(row.data()), 'details').show(); //add details class to child row td
 
 						// Add to the 'open' array
 						if (idx === -1) {
@@ -89,7 +98,7 @@ Display application logs
 				});
 
 //				// On each draw, loop over the `detailRows` array and show any child rows
-//				dt.on('draw', function() {
+//				table.on('draw', function() {
 //					$.each(detailRows, function(i, id) {
 //						$('#' + id + ' td:first-child').trigger('click');
 //					});
@@ -98,9 +107,8 @@ Display application logs
 			});
 
 			/* Formating function for row details */
-			function format(data)
-			{
-				return '<div class="details">' + data[7] + '</div>';
+			function formatDetails(data) {
+				return data[7];
 			}
 
 		</script>
@@ -117,7 +125,7 @@ Display application logs
 			<table id="logs" class="expandable table table-striped table-bordered table-condensed">
 				<thead>
 					<tr>
-						<th class="detailsCol"></th> <%-- details control column --%>
+						<th class="detailsCol noFilter"></th> <%-- details control column --%>
 						<th><spring:message code="logs.text.date"/></th>
 						<th><spring:message code="page.text.level"/></th>
 						<th><spring:message code="logs.text.logger"/></th>

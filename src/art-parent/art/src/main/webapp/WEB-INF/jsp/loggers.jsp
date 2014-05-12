@@ -16,7 +16,7 @@ Display current loggers
 
 <spring:message code="page.title.loggers" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
@@ -32,7 +32,7 @@ Display current loggers
 				$('#loggers').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					"iDisplayLength": -1,
 					"oLanguage": {
 						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"

@@ -22,7 +22,7 @@ Display user jobs and jobs configuration
 	</c:otherwise>
 </c:choose>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
@@ -43,7 +43,7 @@ Display user jobs and jobs configuration
 				var oTable = $('#jobs').dataTable({
 					"sPaginationType": "bs_full",
 					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
+					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					"iDisplayLength": -1,
 					"oLanguage": {
 						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"

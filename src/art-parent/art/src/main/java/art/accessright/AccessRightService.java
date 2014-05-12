@@ -62,7 +62,7 @@ public class AccessRightService {
 			+ " AUQG.USER_ID=AU.USER_ID"
 			+ " INNER JOIN ART_QUERY_GROUPS AQG ON"
 			+ " AUQG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID";
-	
+
 	private final String SQL_SELECT_ALL_USER_GROUP_REPORT_RIGHTS
 			= "SELECT AUG.USER_GROUP_ID, AUG.NAME AS USER_GROUP_NAME, AQ.QUERY_ID, AQ.NAME AS REPORT_NAME"
 			+ " FROM ART_USER_GROUP_QUERIES AUGQ"
@@ -70,7 +70,7 @@ public class AccessRightService {
 			+ " AUGQ.USER_GROUP_ID=AUG.USER_GROUP_ID"
 			+ " INNER JOIN ART_QUERIES AQ ON"
 			+ " AUGQ.QUERY_ID=AQ.QUERY_ID";
-	
+
 	private final String SQL_SELECT_ALL_USER_GROUP_REPORT_GROUP_RIGHTS
 			= "SELECT AUG.USER_GROUP_ID, AUG.NAME AS USER_GROUP_NAME, AQG.QUERY_GROUP_ID,"
 			+ " AQG.NAME AS REPORT_GROUP_NAME"
@@ -147,7 +147,7 @@ public class AccessRightService {
 			return type.cast(right);
 		}
 	}
-	
+
 	/**
 	 * Class to map resultset to an object
 	 */
@@ -241,7 +241,7 @@ public class AccessRightService {
 		ResultSetHandler<List<UserReportGroupRight>> h = new BeanListHandler<>(UserReportGroupRight.class, new UserReportGroupRightMapper());
 		return dbService.query(SQL_SELECT_ALL_USER_REPORT_GROUP_RIGHTS, h);
 	}
-	
+
 	/**
 	 * Get all user group-report rights
 	 *
@@ -299,7 +299,7 @@ public class AccessRightService {
 		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=? AND QUERY_GROUP_ID=?";
 		dbService.update(sql, userId, reportGroupId);
 	}
-	
+
 	/**
 	 * Delete a user group-report right
 	 *
@@ -335,7 +335,7 @@ public class AccessRightService {
 	/**
 	 * Grant or revoke access rights
 	 *
-	 * @param action "GRANT" or "REVOKE"
+	 * @param action "grant" or "revoke". anything else will be treated as revoke
 	 * @param users
 	 * @param userGroups array of user group ids
 	 * @param reports array of report ids
@@ -347,8 +347,11 @@ public class AccessRightService {
 
 		logger.debug("Entering updateAccessRights: action='{}'", action);
 
-		if (action == null) {
-			return;
+		boolean grant;
+		if (StringUtils.equalsIgnoreCase(action, "grant")) {
+			grant = true;
+		} else {
+			grant = false;
 		}
 
 		//update user rights
@@ -356,7 +359,7 @@ public class AccessRightService {
 			String sqlUserReport;
 			String sqlUserReportGroup;
 
-			if (action.equals("GRANT")) {
+			if (grant) {
 				sqlUserReport = "INSERT INTO ART_USER_QUERIES (USER_ID, USERNAME, QUERY_ID) VALUES (?, ?, ?)";
 				sqlUserReportGroup = "INSERT INTO ART_USER_QUERY_GROUPS (USER_ID, USERNAME, QUERY_GROUP_ID) VALUES (?, ?, ?)";
 			} else {
@@ -381,7 +384,7 @@ public class AccessRightService {
 						//stop after the first error. we should continue in the event of an integrity constraint error (access already granted)
 
 						updateRight = true;
-						if (action.equals("GRANT")) {
+						if (grant) {
 							//test if right exists. to avoid integrity constraint error
 							affectedRows = dbService.update(sqlTestUserReport, userId, userId, username, reportId);
 							if (affectedRows > 0) {
@@ -399,7 +402,7 @@ public class AccessRightService {
 				if (reportGroups != null) {
 					for (Integer reportGroupId : reportGroups) {
 						updateRight = true;
-						if (action.equals("GRANT")) {
+						if (grant) {
 							//test if right exists. to avoid integrity constraint error
 							affectedRows = dbService.update(sqlTestUserReportGroup, userId, userId, username, reportGroupId);
 							if (affectedRows > 0) {
@@ -421,7 +424,7 @@ public class AccessRightService {
 			String sqlUserGroupReport;
 			String sqlUserGroupReportGroup;
 
-			if (action.equals("GRANT")) {
+			if (grant) {
 				sqlUserGroupReport = "INSERT INTO ART_USER_GROUP_QUERIES (USER_GROUP_ID, QUERY_ID) VALUES (?, ?)";
 				sqlUserGroupReportGroup = "INSERT INTO ART_USER_GROUP_GROUPS (USER_GROUP_ID, QUERY_GROUP_ID) VALUES (?, ?)";
 			} else {
@@ -442,7 +445,7 @@ public class AccessRightService {
 						//stop after the first error. we should continue in the event of an integrity constraint error (access already granted)
 
 						updateRight = true;
-						if (action.equals("GRANT")) {
+						if (grant) {
 							//test if right exists. to avoid integrity constraint error
 							affectedRows = dbService.update(sqlTestUserGroupReport, userGroupId, userGroupId, reportId);
 							if (affectedRows > 0) {
@@ -460,7 +463,7 @@ public class AccessRightService {
 				if (reportGroups != null) {
 					for (Integer reportGroupId : reportGroups) {
 						updateRight = true;
-						if (action.equals("GRANT")) {
+						if (grant) {
 							//test if right exists. to avoid integrity constraint error
 							affectedRows = dbService.update(sqlTestUserGroupReportGroup, userGroupId, userGroupId, reportGroupId);
 							if (affectedRows > 0) {

@@ -197,7 +197,7 @@ public class AdminRightService {
 	/**
 	 * Grant or revoke admin rights
 	 *
-	 * @param action "GRANT" or "REVOKE"
+	 * @param action "grant" or "revoke". anything else will be treated as revoke
 	 * @param admins
 	 * @param datasources array of datasource ids
 	 * @param reportGroups array of report group ids
@@ -208,14 +208,23 @@ public class AdminRightService {
 
 		logger.debug("Entering updateAdminRights: action='{}'", action);
 
-		if (action == null || admins == null) {
+		logger.debug("(admins == null) = {}", admins == null);
+		if (admins == null) {
+			logger.warn("Update not performed. admins is null");
 			return;
+		}
+		
+		boolean grant;
+		if (StringUtils.equalsIgnoreCase(action, "grant")) {
+			grant = true;
+		} else {
+			grant = false;
 		}
 
 		String sqlReportGroup;
 		String sqlDatasource;
 
-		if (action.equals("GRANT")) {
+		if (grant) {
 			sqlDatasource = "INSERT INTO ART_ADMIN_PRIVILEGES (USER_ID, USERNAME, PRIVILEGE, VALUE_ID) values (? , ?, 'DB', ? ) ";
 			sqlReportGroup = "INSERT INTO ART_ADMIN_PRIVILEGES (USER_ID, USERNAME, PRIVILEGE, VALUE_ID) values (? , ?, 'GRP', ? ) ";
 		} else {
@@ -240,7 +249,7 @@ public class AdminRightService {
 					//stop after the first error. we should continue in the event of an integrity constraint error (access already granted)
 
 					updateRight = true;
-					if (action.equals("GRANT")) {
+					if (grant) {
 						//test if right exists. to avoid integrity constraint error
 						affectedRows = dbService.update(sqlTestDatasource, userId, userId, username, datasourceId);
 						if (affectedRows > 0) {
@@ -258,7 +267,7 @@ public class AdminRightService {
 			if (reportGroups != null) {
 				for (Integer reportGroupId : reportGroups) {
 					updateRight = true;
-					if (action.equals("GRANT")) {
+					if (grant) {
 						//test if right exists. to avoid integrity constraint error
 						affectedRows = dbService.update(sqlTestReportGroup, userId, userId, username, reportGroupId);
 						if (affectedRows > 0) {

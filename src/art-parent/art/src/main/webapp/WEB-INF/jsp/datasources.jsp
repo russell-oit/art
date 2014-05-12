@@ -16,7 +16,7 @@ Display datasources
 
 <spring:message code="page.title.datasources" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
@@ -32,82 +32,31 @@ Display datasources
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
-				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="datasources.do"]').parent().addClass('active');
-				});
-				
-				var oTable = $('#datasources').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"fnInitComplete": function() {
-						$('div.dataTables_filter input').focus();
-					}
-				});
+				$('a[href*="datasources.do"]').parent().addClass('active');
 
-				$('#datasources tbody').on('click', '.delete', function() {
-					var row = $(this).closest("tr"); //jquery object
-					var nRow = row[0]; //dom element/node
-					var name = escapeHtmlContent(row.data("name"));
-					var id = row.data("id");
-					bootbox.confirm({
-						message: "${deleteRecordText}: <b>" + name + "</b>",
-						buttons: {
-							'cancel': {
-								label: "${cancelText}"
-							},
-							'confirm': {
-								label: "${okText}"
-							}
-						},
-						callback: function(result) {
-							if (result) {
-								$.ajax({
-									type: "POST",
-									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteDatasource.do",
-									data: {id: id},
-									success: function(response) {
-										var msg;
-										var linkedReports = response.data;
-										if (response.success) {
-											oTable.fnDeleteRow(nRow);
+				var tbl = $('#datasources');
 
-											msg = alertCloseButton + "${recordDeletedText}: " + name;
-											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-											$.notify("${recordDeletedText}", "success");
-										} else if (linkedReports.length > 0) {
-											msg = alertCloseButton + "${linkedReportsExistText}" + "<ul>";
+				//initialize datatable and process delete action
+				initConfigPage(tbl,
+						undefined, //pageLength. pass undefined to use the default
+						"${showAllRowsText}",
+						"${pageContext.request.contextPath}",
+						"${pageContext.response.locale}",
+						undefined, //addColumnFilters. pass undefined to use default
+						".deleteRecord", //deleteButtonSelector
+						true, //showConfirmDialog
+						"${deleteRecordText}",
+						"${okText}",
+						"${cancelText}",
+						"deleteDatasource.do", //deleteUrl
+						"${recordDeletedText}",
+						"${errorOccurredText}",
+						true, //deleteRow
+						"${cannotDeleteRecordText}", //cannotDeleteRecordText
+						"${linkedReportsExistText}" //linkedRecordsExistText
+						);
 
-											$.each(linkedReports, function(index, value) {
-												msg += "<li>" + value + "</li>";
-											});
-
-											msg += "</ul>";
-
-											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-											$.notify("${cannotDeleteRecordText}", "error");
-										} else {
-											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-											$.notify("${errorOccurredText}", "error");
-										}
-									},
-									error: function(xhr, status, error) {
-										bootbox.alert(xhr.responseText);
-									}
-								});
-							}
-						}
-					});
-				});
-
-			});
+			}); //end document ready
 
 		</script>
 	</jsp:attribute>
@@ -162,7 +111,7 @@ Display datasources
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>
-								<button type="button" class="btn btn-default delete">
+								<button type="button" class="btn btn-default deleteRecord">
 									<i class="fa fa-trash-o"></i>
 									<spring:message code="page.action.delete"/>
 								</button>

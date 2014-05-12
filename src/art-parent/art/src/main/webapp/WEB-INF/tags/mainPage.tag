@@ -21,7 +21,6 @@ bootstrap js, jquery js, datatables css, datatables js
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/ColVis-1.1.0/css/dataTables.colVis.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">
 
@@ -37,9 +36,6 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/js/jquery.dataTables.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/TableTools-2.2.1/js/dataTables.tableTools.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/extensions/ColVis-1.1.0/js/dataTables.colVis.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.columnFilter-1.5.4.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>

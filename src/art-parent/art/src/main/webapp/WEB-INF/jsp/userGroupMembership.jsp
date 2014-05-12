@@ -16,7 +16,7 @@ Display user group membership
 
 <spring:message code="page.title.userGroupMembership" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.membershipRemoved" var="membershipRemovedText"/>
 
@@ -27,53 +27,31 @@ Display user group membership
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="userGroupMembershipConfig.do"]').parent().addClass('active');
 				});
 
-				var oTable = $('#memberships').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": 25,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"fnInitComplete": function() {
-						$('div.dataTables_filter input').focus();
-					}
-				});
+				var tbl = $('#memberships');
 
-				$('#memberships tbody').on('click', '.remove', function() {
-					var row = $(this).closest("tr"); //jquery object
-					var nRow = row[0]; //dom element/node
-					var name = escapeHtmlContent(row.data("name"));
-					var id = row.data("id");
+				//initialize datatable and process delete action
+				initConfigPage(tbl,
+						undefined, //pageLength. pass undefined to use the default
+						"${showAllRowsText}",
+						"${pageContext.request.contextPath}",
+						"${pageContext.response.locale}",
+						undefined, //addColumnFilters. pass undefined to use default
+						".deleteRecord", //deleteButtonSelector
+						true, //showConfirmDialog
+						"${deleteRecordText}",
+						"${okText}",
+						"${cancelText}",
+						"deleteUserGroupMembership.do", //deleteUrl
+						"${recordDeletedText}",
+						"${errorOccurredText}",
+						true, //deleteRow
+						undefined, //cannotDeleteRecordText
+						undefined //linkedRecordsExistText
+						);
 
-					$.ajax({
-						type: "POST",
-						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/deleteUserGroupMembership.do",
-						data: {id: id},
-						success: function(response) {
-							var msg;
-							if (response.success) {
-								oTable.fnDeleteRow(nRow);
-								
-								msg = alertCloseButton + "${membershipRemovedText}: " + name;
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$.notify("${membershipRemovedText}", "success");
-							} else {
-								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
-							}
-						},
-						error: function(xhr, status, error) {
-							bootbox.alert(xhr.responseText);
-						}
-					}); //end ajax
-				}); //end on click
 
 			});
 		</script>
@@ -110,7 +88,7 @@ Display user group membership
 						<td><encode:forHtmlContent value="${membership.user.username}"/></td>
 						<td><encode:forHtmlContent value="${membership.userGroup.name}"/></td>
 						<td>
-							<button type="button" class="btn btn-default remove">
+							<button type="button" class="btn btn-default deleteRecord">
 								<i class="fa fa-trash-o"></i>
 								<spring:message code="page.action.remove"/>
 							</button>

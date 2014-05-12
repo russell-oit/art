@@ -15,7 +15,7 @@ Reports page. Also main/home page
 
 <spring:message code="page.title.reports" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="allRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.text.description" var="descriptionText"/>
 <spring:message code="page.text.reports" var="mainPanelTitle"/>
 
@@ -24,7 +24,7 @@ Reports page. Also main/home page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			//put jsp variables into js variables
-			var allRowsText = "${allRowsText}";
+			var allRowsText = "${showAllRowsText}";
 			var contextPath = "${pageContext.request.contextPath}";
 			var localeCode = "${pageContext.response.locale}";
 			var imagesPath = "${pageContext.request.contextPath}/images/";
@@ -52,19 +52,18 @@ Reports page. Also main/home page
 
 				//Initialise DataTables, with no sorting on the 'details' column (column [0])
 				var oTable = $('#reports').dataTable({
-					"sPaginationType": "bs_full",
-//					"sScrollY": "400px",
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, allRowsText]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": contextPath + "/dataTables/dataTables_" + localeCode + ".txt"
+					"pagingType": "full_numbers",
+					"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					"pageLength": -1,
+					"language": {
+						"url": "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
 					"aaSorting": [[3, "asc"]], //sort by report name. 0 is the details column
 					'aoColumnDefs': [
 						{"bVisible": false, "aTargets": [1, 2]},
 						{"bSortable": false, "aTargets": [0]}
 					],
-					"fnInitComplete": function() {
+					"initComplete": function() {
 						$('div.dataTables_filter input').focus();
 					}
 				});

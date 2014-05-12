@@ -120,7 +120,7 @@ public class UserGroupMembershipService {
 	/**
 	 * Add or remove user group memberships
 	 *
-	 * @param action "ADD" or "REMOVE"
+	 * @param action "add" or "remove". anything else will be treated as remove
 	 * @param users
 	 * @param userGroups array of user group ids
 	 * @throws SQLException
@@ -128,13 +128,23 @@ public class UserGroupMembershipService {
 	public void updateUserGroupMembership(String action, String[] users, Integer[] userGroups) throws SQLException {
 		logger.debug("Entering updateUserGroupMemberships: action='{}'", action);
 
-		if (action == null || users == null || userGroups == null) {
+		logger.debug("(users == null) = {}", users == null);
+		logger.debug("(userGroups == null) = {}", userGroups == null);
+		if (users == null || userGroups == null) {
+			logger.warn("Update not performed. users or userGroups is null.");
 			return;
+		}
+		
+		boolean add;
+		if (StringUtils.equalsIgnoreCase(action, "add")) {
+			add = true;
+		} else {
+			add = false;
 		}
 
 		String sql;
 
-		if (action.equals("ADD")) {
+		if (add) {
 			sql = "INSERT INTO ART_USER_GROUP_ASSIGNMENT (USER_ID, USERNAME, USER_GROUP_ID) VALUES (?, ?, ?)";
 		} else {
 			sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=? AND USERNAME=? AND USER_GROUP_ID=?";
@@ -151,7 +161,7 @@ public class UserGroupMembershipService {
 
 			for (Integer userGroupId : userGroups) {
 				updateRight = true;
-				if (action.equals("ADD")) {
+				if (add) {
 					//test if record exists. to avoid integrity constraint error
 					affectedRows = dbService.update(sqlTest, userId, userId, username, userGroupId);
 					if (affectedRows > 0) {

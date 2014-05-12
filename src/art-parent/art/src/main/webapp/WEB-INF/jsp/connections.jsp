@@ -16,7 +16,7 @@ Page to display connections status
 
 <spring:message code="page.title.connections" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="dataTablesAllRowsText"/>
+<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="connections.message.connectionReset" var="connectionResetText"/>
 <spring:message code="connections.text.total" var="totalText"/>
@@ -33,50 +33,40 @@ Page to display connections status
 					$('a[href*="connections.do"]').parent().addClass('active');
 				});
 
-				var oTable = $('#connections').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${dataTablesAllRowsText}"]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"fnInitComplete": function() {
-						$('div.dataTables_filter input').focus();
-					}
-				});
+				var tbl = $("#connections");
 
-				$('#connections tbody').on('click', '.reset', function() {
+				var oTable = initConfigTable(tbl,
+						undefined, //pageLength. pass undefined to use the default
+						"${showAllRowsText}",
+						"${pageContext.request.contextPath}",
+						"${pageContext.response.locale}",
+						undefined //addColumnFilters. pass undefined to use default
+						);
+
+				tbl.find('tbody').on('click', '.reset', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var nRow = row[0]; //dom element/node
-					var name = escapeHtmlContent(row.data("name"));
-					var id = row.data("id");
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
 
 					$.ajax({
 						type: "POST",
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/app/resetConnection.do",
-						data: {id: id},
+						data: {id: recordId},
 						success: function(response) {
-							var msg;
 							if (response.success) {
-								var update="${totalText}: " + response.poolSize +
+								var update = "${totalText}: " + response.poolSize +
 										", ${inUseText}: " + response.inUseCount;
-								
-								oTable.fnUpdate(update, nRow , 1);
-								
-								msg = alertCloseButton + "${connectionResetText}: " + name;
-								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-								$.notify("${connectionResetText}", "success");
+
+								oTable.fnUpdate(update, nRow, 1);
+
+								notifyActionSuccess("${connectionResetText}", recordName);
 							} else {
-								msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-								$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-								$.notify("${errorOccurredText}", "error");
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 							}
 						},
-						error: function(xhr, status, error) {
-							bootbox.alert(xhr.responseText);
-						}
+						error: ajaxErrorHandler
 					});
 				});
 
@@ -114,9 +104,9 @@ Page to display connections status
 				<c:forEach var="entry" items="${connectionPoolMap}">
 					<tr data-id="${entry.key}"
 						data-name="${entry.value.name}">
-						
+
 						<c:set var="pool" value="${entry.value}"/>
-						
+
 						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>
 							<spring:message code="connections.text.total"/>: ${pool.poolSize}, 
