@@ -72,6 +72,8 @@ public class JobService {
 
 			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			job.setCreatedBy(rs.getString("CREATED_BY"));
+			job.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			Report report = new Report();
 			report.setReportId(rs.getInt("QUERY_ID"));

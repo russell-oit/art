@@ -20,6 +20,7 @@ import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -91,6 +92,8 @@ public class ParameterService {
 			parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
 			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			parameter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			parameter.setCreatedBy(rs.getString("CREATED_BY"));
+			parameter.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			return type.cast(parameter);
 		}
@@ -161,12 +164,13 @@ public class ParameterService {
 	 * Add a new parameter to the database
 	 *
 	 * @param parameter
+	 * @param actionUser
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
-	public synchronized int addParameter(Parameter parameter) throws SQLException {
-		logger.debug("Entering addParameter: parameter={}", parameter);
+	public synchronized int addParameter(Parameter parameter, User actionUser) throws SQLException {
+		logger.debug("Entering addParameter: parameter={}, actionUser={}", parameter, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
@@ -188,8 +192,8 @@ public class ParameterService {
 				+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
 				+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV, CHAINED_POSITION,"
 				+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
-				+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 17) + ")";
+				+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE, CREATED_BY=?)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
 
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(parameter);
@@ -211,7 +215,8 @@ public class ParameterService {
 			parameter.getChainedValuePosition(),
 			parameter.getDrilldownColumnIndex(),
 			parameter.isUseDirectSubstitution(),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
 		};
 
 		dbService.update(sql, values);
@@ -226,15 +231,15 @@ public class ParameterService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
-	public void updateParameter(Parameter parameter) throws SQLException {
-		logger.debug("Entering updateParameter: parameter={}", parameter);
+	public void updateParameter(Parameter parameter, User actionUser) throws SQLException {
+		logger.debug("Entering updateParameter: parameter={}, actionUser={}", parameter, actionUser);
 
 		String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 				+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
 				+ " HIDDEN=?, USE_LOV=?, LOV_REPORT_ID=?, USE_FILTERS_IN_LOV=?,"
 				+ " CHAINED_POSITION=?, CHAINED_VALUE_POSITION=?,"
 				+ " DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
-				+ " UPDATE_DATE=?"
+				+ " UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE PARAMETER_ID=?";
 
 		//set values for possibly null property objects
@@ -257,6 +262,7 @@ public class ParameterService {
 			parameter.getDrilldownColumnIndex(),
 			parameter.isUseDirectSubstitution(),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			parameter.getParameterId()
 		};
 

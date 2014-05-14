@@ -24,6 +24,7 @@ import art.enums.ParameterType;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
+import art.user.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -427,12 +428,13 @@ public class ReportService {
 	 * Add a new report to the database
 	 *
 	 * @param report
+	 * @param actionUser
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public synchronized int addReport(Report report) throws SQLException {
-		logger.debug("Entering addReport: report={}", report);
+	public synchronized int addReport(Report report, User actionUser) throws SQLException {
+		logger.debug("Entering addReport: report={}, actionUser={}", report, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_ID) FROM ART_QUERIES";
@@ -455,8 +457,8 @@ public class ReportService {
 				+ " REPORT_STATUS, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 				+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET, XMLA_URL,"
 				+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD,"
-				+ " CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
+				+ " CREATION_DATE, CREATED_BY)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
 
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(report);
@@ -483,7 +485,8 @@ public class ReportService {
 			report.getXmlaCatalog(),
 			report.getXmlaUsername(),
 			report.getXmlaPassword(),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
 		};
 
 		dbService.update(sql, values);
@@ -495,11 +498,12 @@ public class ReportService {
 	 * Update an existing report
 	 *
 	 * @param report
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public void updateReport(Report report) throws SQLException {
-		logger.debug("Entering updateReport: report={}", report);
+	public void updateReport(Report report, User actionUser) throws SQLException {
+		logger.debug("Entering updateReport: report={}, actionUser={}", report, actionUser);
 
 		String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 				+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
@@ -507,7 +511,7 @@ public class ReportService {
 				+ " REPORT_STATUS=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 				+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
 				+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
-				+ " XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=?"
+				+ " XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE QUERY_ID=?";
 
 		//set values for possibly null property objects
@@ -535,6 +539,7 @@ public class ReportService {
 			report.getXmlaUsername(),
 			report.getXmlaPassword(),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			report.getReportId()
 		};
 
@@ -673,12 +678,13 @@ public class ReportService {
 	 *
 	 * @param report new report
 	 * @param originalReportId
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public void copyReport(Report report, int originalReportId) throws SQLException {
+	public void copyReport(Report report, int originalReportId, User actionUser) throws SQLException {
 		//insert new report
-		int newId = addReport(report);
+		int newId = addReport(report, actionUser);
 		if (newId <= 0) {
 			logger.warn("Report not copied: {}", report);
 			return;

@@ -84,6 +84,8 @@ public class DatasourceService {
 			datasource.setActive(rs.getBoolean("ACTIVE"));
 			datasource.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			datasource.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			datasource.setCreatedBy(rs.getString("CREATED_BY"));
+			datasource.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			return type.cast(datasource);
 		}
@@ -110,7 +112,7 @@ public class DatasourceService {
 	 */
 	@Cacheable("datasources")
 	public Datasource getDatasource(int id) throws SQLException {
-		String sql = SQL_SELECT_ALL + " WHERE DATABASE_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE DATABASE_ID=?";
 		ResultSetHandler<Datasource> h = new BeanHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h, id);
 	}
@@ -149,11 +151,12 @@ public class DatasourceService {
 	 * Add a new datasource to the database
 	 *
 	 * @param datasource
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
-	public synchronized void addDatasource(Datasource datasource) throws SQLException {
-		logger.debug("Entering addDatasource: datasource={}", datasource);
+	public synchronized void addDatasource(Datasource datasource, User actionUser) throws SQLException {
+		logger.debug("Entering addDatasource: datasource={}, actionUser={}", datasource,actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
@@ -172,8 +175,8 @@ public class DatasourceService {
 
 		sql = "INSERT INTO ART_DATABASES"
 				+ " (DATABASE_ID, NAME, DESCRIPTION, JNDI, DRIVER, URL, USERNAME,"
-				+ " PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
+				+ " PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE, CREATED_BY)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
 
 		Object[] values = {
 			newId,
@@ -187,7 +190,9 @@ public class DatasourceService {
 			datasource.getConnectionPoolTimeout(),
 			datasource.getTestSql(),
 			datasource.isActive(),
-			DbUtils.getCurrentTimeStamp(),};
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
+		};
 
 		int affectedRows = dbService.update(sql, values);
 		logger.debug("affectedRows={}", affectedRows);
@@ -204,12 +209,12 @@ public class DatasourceService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
-	public void updateDatasource(Datasource datasource) throws SQLException {
-		logger.debug("Entering updateDatasource: datasource={}", datasource);
+	public void updateDatasource(Datasource datasource, User actionUser) throws SQLException {
+		logger.debug("Entering updateDatasource: datasource={}, actionUser={}", datasource,actionUser);
 
 		String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, JNDI=?,"
 				+ " DRIVER=?, URL=?, USERNAME=?, PASSWORD=?,"
-				+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?"
+				+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE DATABASE_ID=?";
 
 		Object[] values = {
@@ -224,6 +229,7 @@ public class DatasourceService {
 			datasource.getTestSql(),
 			datasource.isActive(),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			datasource.getDatasourceId()
 		};
 

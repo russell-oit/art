@@ -18,6 +18,7 @@ package art.usergroup;
 
 import art.dbutils.DbService;
 import art.dbutils.DbUtils;
+import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -75,6 +76,8 @@ public class UserGroupService {
 			group.setStartReport(rs.getString("START_QUERY"));
 			group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			group.setCreatedBy(rs.getString("CREATED_BY"));
+			group.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			return type.cast(group);
 		}
@@ -109,7 +112,7 @@ public class UserGroupService {
 		ResultSetHandler<UserGroup> h = new BeanHandler<>(UserGroup.class, new UserGroupMapper());
 		return dbService.query(sql, h, id);
 	}
-	
+
 	/**
 	 * Get user groups that a given user belongs to
 	 *
@@ -141,27 +144,26 @@ public class UserGroupService {
 		logger.debug("Entering deleteUserGroup: id={}", id);
 
 		String sql;
-		
+
 		//delete foreign key records
 		sql = "DELETE FROM ART_USER_GROUP_RULES WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_JOBS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
+
 		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
-		
-		
+
 		//finally delete user group
 		sql = "DELETE FROM ART_USER_GROUPS WHERE USER_GROUP_ID=?";
 		dbService.update(sql, id);
@@ -170,13 +172,14 @@ public class UserGroupService {
 	/**
 	 * Add a new user group to the database
 	 *
-	 * @param group 
+	 * @param group
+	 * @param actionUser
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
-	public synchronized int addUserGroup(UserGroup group) throws SQLException {
-		logger.debug("Entering addUserGroup: group={}", group);
+	public synchronized int addUserGroup(UserGroup group, User actionUser) throws SQLException {
+		logger.debug("Entering addUserGroup: group={}, actionUser={}", group, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS";
@@ -195,8 +198,8 @@ public class UserGroupService {
 
 		sql = "INSERT INTO ART_USER_GROUPS"
 				+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
-				+ " START_QUERY, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
+				+ " START_QUERY, CREATION_DATE, CREATED_BY)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 7) + ")";
 
 		Object[] values = {
 			newId,
@@ -204,11 +207,12 @@ public class UserGroupService {
 			group.getDescription(),
 			group.getDefaultReportGroup(),
 			group.getStartReport(),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
 		};
 
 		dbService.update(sql, values);
-		
+
 		return newId;
 	}
 
@@ -216,14 +220,15 @@ public class UserGroupService {
 	 * Update an existing user group
 	 *
 	 * @param group
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
-	public void updateUserGroup(UserGroup group) throws SQLException {
-		logger.debug("Entering updateUserGroup: group={}", group);
+	public void updateUserGroup(UserGroup group, User actionUser) throws SQLException {
+		logger.debug("Entering updateUserGroup: group={}, actionUser={}", group, actionUser);
 
 		String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
-				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?"
+				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE USER_GROUP_ID=?";
 
 		Object[] values = {
@@ -232,6 +237,7 @@ public class UserGroupService {
 			group.getDefaultReportGroup(),
 			group.getStartReport(),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			group.getUserGroupId()
 		};
 

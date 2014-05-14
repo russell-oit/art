@@ -16,8 +16,10 @@
  */
 package art.schedule;
 
+import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -86,44 +88,6 @@ public class ScheduleController {
 		return showSchedule("add", model);
 	}
 
-	@RequestMapping(value = "/app/saveSchedule", method = RequestMethod.POST)
-	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
-			@RequestParam("action") String action,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering saveSchedule: schedule={}, action='{}'", schedule, action);
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showSchedule(action, model);
-		}
-		
-		//remove spaces in schedule fields. not legal but may commonly be put by users
-		schedule.setMinute(StringUtils.remove(schedule.getMinute(), " "));
-		schedule.setHour(StringUtils.remove(schedule.getHour(), " "));
-		schedule.setDay(StringUtils.remove(schedule.getDay(), " "));
-		schedule.setMonth(StringUtils.remove(schedule.getMonth(), " "));
-		schedule.setWeekday(StringUtils.remove(schedule.getWeekday(), " "));
-
-		try {
-			if (StringUtils.equals(action, "add")) {
-				scheduleService.addSchedule(schedule);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
-			} else if (StringUtils.equals(action, "edit")) {
-				scheduleService.updateSchedule(schedule);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			}
-			redirectAttributes.addFlashAttribute("recordName", schedule.getName());
-			return "redirect:/app/schedules.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showSchedule(action, model);
-	}
-
 	@RequestMapping(value = "/app/editSchedule", method = RequestMethod.GET)
 	public String editSchedule(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editSchedule: id={}", id);
@@ -136,6 +100,46 @@ public class ScheduleController {
 		}
 
 		return showSchedule("edit", model);
+	}
+
+	@RequestMapping(value = "/app/saveSchedule", method = RequestMethod.POST)
+	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
+			@RequestParam("action") String action,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveSchedule: schedule={}, action='{}'", schedule, action);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showSchedule(action, model);
+		}
+
+		//remove spaces in schedule fields. not legal but may commonly be put by users
+		schedule.setMinute(StringUtils.remove(schedule.getMinute(), " "));
+		schedule.setHour(StringUtils.remove(schedule.getHour(), " "));
+		schedule.setDay(StringUtils.remove(schedule.getDay(), " "));
+		schedule.setMonth(StringUtils.remove(schedule.getMonth(), " "));
+		schedule.setWeekday(StringUtils.remove(schedule.getWeekday(), " "));
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if (StringUtils.equals(action, "add")) {
+				scheduleService.addSchedule(schedule, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				scheduleService.updateSchedule(schedule, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
+			redirectAttributes.addFlashAttribute("recordName", schedule.getName());
+			return "redirect:/app/schedules.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showSchedule(action, model);
 	}
 
 	/**

@@ -97,6 +97,30 @@ public class UserController {
 		model.addAttribute("user", user);
 		return showUser("add", model, session);
 	}
+	
+	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
+	public String editUser(@RequestParam("id") Integer id, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering editUser: id={}", id);
+
+		User user = null;
+
+		try {
+			user = userService.getUser(id);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		//ensure an admin cannot edit admins of higher access level than himself
+		if (!canEditUser(session, user)) {
+			return "accessDenied";
+		}
+
+		model.addAttribute("user", user);
+		return showUser("edit", model, session);
+	}
 
 	@RequestMapping(value = "/app/saveUser", method = RequestMethod.POST)
 	public String saveUser(@ModelAttribute("user") @Valid User user,
@@ -128,13 +152,14 @@ public class UserController {
 				return showUser(action, model, session);
 			}
 
+			User sessionUser=(User)session.getAttribute("sessionUser");
+			
 			if (StringUtils.equals(action, "add")) {
-				userService.addUser(user);
+				userService.addUser(user,sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
-				userService.updateUser(user);
+				userService.updateUser(user,sessionUser);
 				//update session user if appropriate
-				User sessionUser = (User) session.getAttribute("sessionUser");
 				logger.debug("user.getUserId()={}", user.getUserId());
 				logger.debug("sessionUser.getUserId()={}", sessionUser.getUserId());
 				if (user.getUserId() == sessionUser.getUserId()) {
@@ -151,30 +176,6 @@ public class UserController {
 		}
 
 		return showUser(action, model, session);
-	}
-
-	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
-	public String editUser(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
-
-		logger.debug("Entering editUser: id={}", id);
-
-		User user = null;
-
-		try {
-			user = userService.getUser(id);
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		//ensure an admin cannot edit admins of higher access level than himself
-		if (!canEditUser(session, user)) {
-			return "accessDenied";
-		}
-
-		model.addAttribute("user", user);
-		return showUser("edit", model, session);
 	}
 
 	/**

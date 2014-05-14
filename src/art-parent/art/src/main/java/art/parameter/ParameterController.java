@@ -18,10 +18,12 @@ package art.parameter;
 
 import art.enums.ParameterType;
 import art.report.ReportService;
+import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -100,37 +102,6 @@ public class ParameterController {
 		return showParameter("add", model);
 	}
 
-	@RequestMapping(value = "/app/saveParameter", method = RequestMethod.POST)
-	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
-			@RequestParam("action") String action,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering saveParameter: parameter={}, action='{}'", parameter, action);
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showParameter(action, model);
-		}
-
-		try {
-			if (StringUtils.equals(action, "add")) {
-				parameterService.addParameter(parameter);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
-			} else if (StringUtils.equals(action, "edit")) {
-				parameterService.updateParameter(parameter);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			}
-			redirectAttributes.addFlashAttribute("recordName", parameter.getName());
-			return "redirect:/app/parameters.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showParameter(action, model);
-	}
-
 	@RequestMapping(value = "/app/editParameter", method = RequestMethod.GET)
 	public String editParameter(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editParameter: id={}", id);
@@ -143,6 +114,39 @@ public class ParameterController {
 		}
 
 		return showParameter("edit", model);
+	}
+
+	@RequestMapping(value = "/app/saveParameter", method = RequestMethod.POST)
+	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
+			@RequestParam("action") String action,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveParameter: parameter={}, action='{}'", parameter, action);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showParameter(action, model);
+		}
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if (StringUtils.equals(action, "add")) {
+				parameterService.addParameter(parameter, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				parameterService.updateParameter(parameter, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
+			redirectAttributes.addFlashAttribute("recordName", parameter.getName());
+			return "redirect:/app/parameters.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showParameter(action, model);
 	}
 
 	/**

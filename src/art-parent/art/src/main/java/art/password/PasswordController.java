@@ -63,13 +63,13 @@ public class PasswordController {
 			String passwordHash = Encrypter.HashPasswordBcrypt(newPassword1);
 			String passwordAlgorithm = "bcrypt";
 			
-			User user = (User) session.getAttribute("sessionUser");
+			User sessionUser = (User) session.getAttribute("sessionUser");
 			try {
-				userService.updatePassword(user.getUserId(), passwordHash, passwordAlgorithm);
+				userService.updatePassword(sessionUser.getUserId(), passwordHash, passwordAlgorithm,sessionUser);
 
 				//update session user object
-				user.setPassword(passwordHash);
-				user.setPasswordAlgorithm(passwordAlgorithm);
+				sessionUser.setPassword(passwordHash);
+				sessionUser.setPasswordAlgorithm(passwordAlgorithm);
 
 				redirectAttributes.addFlashAttribute("message", "password.message.passwordUpdated");
 				return "redirect:/app/success.do";

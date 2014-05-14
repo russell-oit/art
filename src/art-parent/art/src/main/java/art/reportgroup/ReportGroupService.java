@@ -60,6 +60,8 @@ public class ReportGroupService {
 			group.setDescription(rs.getString("DESCRIPTION"));
 			group.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			group.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			group.setCreatedBy(rs.getString("CREATED_BY"));
+			group.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			return type.cast(group);
 		}
@@ -167,7 +169,7 @@ public class ReportGroupService {
 	public ReportGroup getReportGroup(int id) throws SQLException {
 		logger.debug("Entering getReportGroup: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE QUERY_GROUP_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_GROUP_ID=?";
 		ResultSetHandler<ReportGroup> h = new BeanHandler<>(ReportGroup.class, new ReportGroupMapper());
 		return dbService.query(sql, h, id);
 	}
@@ -214,12 +216,13 @@ public class ReportGroupService {
 	 * Add a new report group to the database
 	 *
 	 * @param group
+	 * @param actionUser
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
-	public synchronized int addReportGroup(ReportGroup group) throws SQLException {
-		logger.debug("Entering addReportGroup: group={}", group);
+	public synchronized int addReportGroup(ReportGroup group,User actionUser) throws SQLException {
+		logger.debug("Entering addReportGroup: group={}, actionUser={}", group,actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
@@ -237,14 +240,15 @@ public class ReportGroupService {
 		logger.debug("newId={}", newId);
 
 		sql = "INSERT INTO ART_QUERY_GROUPS"
-				+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+				+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE, CREATED_BY)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
 
 		Object[] values = {
 			newId,
 			group.getName(),
 			group.getDescription(),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
 		};
 
 		int affectedRows = dbService.update(sql, values);
@@ -264,17 +268,18 @@ public class ReportGroupService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
-	public void updateReportGroup(ReportGroup group) throws SQLException {
-		logger.debug("Entering updateReportGroup: group={}", group);
+	public void updateReportGroup(ReportGroup group,User actionUser) throws SQLException {
+		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
 		String sql = "UPDATE ART_QUERY_GROUPS SET NAME=?, DESCRIPTION=?,"
-				+ " UPDATE_DATE=?"
+				+ " UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE QUERY_GROUP_ID=?";
 
 		Object[] values = {
 			group.getName(),
 			group.getDescription(),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			group.getReportGroupId()
 		};
 

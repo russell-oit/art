@@ -19,6 +19,7 @@ package art.filter;
 import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.enums.ParameterDataType;
+import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -78,6 +79,8 @@ public class FilterService {
 			filter.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
 			filter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			filter.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			filter.setCreatedBy(rs.getString("CREATED_BY"));
+			filter.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			return type.cast(filter);
 		}
@@ -178,8 +181,8 @@ public class FilterService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "filters", allEntries = true)
-	public synchronized int addFilter(Filter filter) throws SQLException {
-		logger.debug("Entering addFilter: filter={}", filter);
+	public synchronized int addFilter(Filter filter, User actionUser) throws SQLException {
+		logger.debug("Entering addFilter: filter={}, actionUser={}", filter, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
@@ -197,8 +200,9 @@ public class FilterService {
 		logger.debug("newId={}", newId);
 
 		sql = "INSERT INTO ART_RULES"
-				+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
+				+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE,"
+				+ " CREATION_DATE, CREATED_BY)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(filter);
@@ -208,7 +212,8 @@ public class FilterService {
 			filter.getName(),
 			filter.getDescription(),
 			defaults.get("dataType"),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
 		};
 
 		dbService.update(sql, values);
@@ -223,11 +228,11 @@ public class FilterService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "filters", allEntries = true)
-	public void updateFilter(Filter filter) throws SQLException {
-		logger.debug("Entering updateFilter: filter={}", filter);
+	public void updateFilter(Filter filter, User actionUser) throws SQLException {
+		logger.debug("Entering updateFilter: filter={}, actionUser={}", filter, actionUser);
 
 		String sql = "UPDATE ART_RULES SET RULE_NAME=?, SHORT_DESCRIPTION=?,"
-				+ " DATA_TYPE=?, UPDATE_DATE=?"
+				+ " DATA_TYPE=?, UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE RULE_ID=?";
 
 		//set values for possibly null property objects
@@ -238,6 +243,7 @@ public class FilterService {
 			filter.getDescription(),
 			defaults.get("dataType"),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			filter.getFilterId()
 		};
 

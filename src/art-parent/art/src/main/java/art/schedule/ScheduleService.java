@@ -3,23 +3,22 @@
  *
  * This file is part of ART.
  *
- * ART is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, version 2 of the License.
+ * ART is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package art.schedule;
 
 import art.dbutils.DbService;
 import art.dbutils.DbUtils;
+import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -39,11 +38,12 @@ import org.springframework.stereotype.Service;
 
 /**
  * Class to provide methods related to schedules
- * 
+ *
  * @author Timothy Anyona
  */
 @Service
 public class ScheduleService {
+
 	private static final Logger logger = LoggerFactory.getLogger(ScheduleService.class);
 
 	@Autowired
@@ -79,6 +79,8 @@ public class ScheduleService {
 			schedule.setWeekday(rs.getString("JOB_WEEKDAY"));
 			schedule.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			schedule.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			schedule.setCreatedBy(rs.getString("CREATED_BY"));
+			schedule.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			return type.cast(schedule);
 		}
@@ -109,7 +111,7 @@ public class ScheduleService {
 	public Schedule getSchedule(int id) throws SQLException {
 		logger.debug("Entering getSchedule: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE SCHEDULE_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE SCHEDULE_ID=?";
 		ResultSetHandler<Schedule> h = new BeanHandler<>(Schedule.class, new ScheduleMapper());
 		return dbService.query(sql, h, id);
 	}
@@ -125,7 +127,7 @@ public class ScheduleService {
 		logger.debug("Entering deleteSchedule: id={}", id);
 
 		String sql;
-		
+
 		sql = "DELETE FROM ART_JOB_SCHEDULES WHERE SCHEDULE_ID=?";
 		dbService.update(sql, id);
 	}
@@ -133,13 +135,14 @@ public class ScheduleService {
 	/**
 	 * Add a new schedule to the database
 	 *
-	 * @param schedule 
+	 * @param schedule
+	 * @param actionUser
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
-	public synchronized int addSchedule(Schedule schedule) throws SQLException {
-		logger.debug("Entering addSchedule: schedule={}", schedule);
+	public synchronized int addSchedule(Schedule schedule, User actionUser) throws SQLException {
+		logger.debug("Entering addSchedule: schedule={}, actionUser={}", schedule, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
@@ -158,8 +161,8 @@ public class ScheduleService {
 
 		sql = "INSERT INTO ART_JOB_SCHEDULES"
 				+ " (SCHEDULE_ID, SCHEDULE_NAME, DESCRIPTION, JOB_MINUTE,"
-				+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 9) + ")";
+				+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY, CREATION_DATE, CREATED_BY)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
 
 		Object[] values = {
 			newId,
@@ -170,11 +173,12 @@ public class ScheduleService {
 			schedule.getDay(),
 			schedule.getMonth(),
 			schedule.getWeekday(),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
 		};
 
 		dbService.update(sql, values);
-		
+
 		return newId;
 	}
 
@@ -182,15 +186,16 @@ public class ScheduleService {
 	 * Update an existing schedule
 	 *
 	 * @param schedule
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
-	public void updateSchedule(Schedule schedule) throws SQLException {
-		logger.debug("Entering updateSchedule: schedule={}", schedule);
+	public void updateSchedule(Schedule schedule, User actionUser) throws SQLException {
+		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
 
 		String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
 				+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
-				+ " JOB_WEEKDAY=?, UPDATE_DATE=?"
+				+ " JOB_WEEKDAY=?, UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE SCHEDULE_ID=?";
 
 		Object[] values = {
@@ -202,6 +207,7 @@ public class ScheduleService {
 			schedule.getMonth(),
 			schedule.getWeekday(),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			schedule.getScheduleId()
 		};
 

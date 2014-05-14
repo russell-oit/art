@@ -173,6 +173,22 @@ public class ReportController {
 		return showReport("add", model, session);
 	}
 
+	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
+	public String editReport(@RequestParam("id") Integer id, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering editReport: id={}", id);
+
+		try {
+			model.addAttribute("report", reportService.getReport(id));
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showReport("edit", model, session);
+	}
+
 	@RequestMapping(value = "/app/saveReport", method = RequestMethod.POST)
 	public String saveReport(@ModelAttribute("report") @Valid Report report,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -197,14 +213,16 @@ public class ReportController {
 				return showReport(action, model, session);
 			}
 
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
 			if (StringUtils.equals(action, "add")) {
-				reportService.addReport(report);
+				reportService.addReport(report, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "copy")) {
-				reportService.copyReport(report, report.getReportId());
+				reportService.copyReport(report, report.getReportId(), sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
-				reportService.updateReport(report);
+				reportService.updateReport(report, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", report.getName());
@@ -215,22 +233,6 @@ public class ReportController {
 		}
 
 		return showReport(action, model, session);
-	}
-
-	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
-	public String editReport(@RequestParam("id") Integer id, Model model,
-			HttpSession session) {
-
-		logger.debug("Entering editReport: id={}", id);
-
-		try {
-			model.addAttribute("report", reportService.getReport(id));
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showReport("edit", model, session);
 	}
 
 	@RequestMapping(value = "/app/copyReport", method = RequestMethod.GET)

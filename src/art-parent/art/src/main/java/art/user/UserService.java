@@ -44,7 +44,7 @@ public class UserService {
 	@Autowired
 	private UserGroupService userGroupService;
 
-	final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS ";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
 
 	/**
 	 * Class to map resultset to an object
@@ -77,6 +77,8 @@ public class UserService {
 			user.setCanChangePassword(rs.getBoolean("CAN_CHANGE_PASSWORD"));
 			user.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			user.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			user.setCreatedBy(rs.getString("CREATED_BY"));
+			user.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			return type.cast(user);
 		}
@@ -106,9 +108,9 @@ public class UserService {
 	public List<User> getAdminUsers() throws SQLException {
 		logger.debug("Entering getAdminUsers");
 
-		String sql = SQL_SELECT_ALL + "WHERE ACCESS_LEVEL>=?";
+		String sql = SQL_SELECT_ALL + "WHERE ACCESS_LEVEL>=" + AccessLevel.JuniorAdmin.getValue();
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
-		return dbService.query(sql, h, AccessLevel.JuniorAdmin.getValue());
+		return dbService.query(sql, h);
 	}
 
 	/**
@@ -240,18 +242,21 @@ public class UserService {
 	 * @param userId
 	 * @param newPassword password hash
 	 * @param passwordAlgorithm
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public void updatePassword(int userId, String newPassword, String passwordAlgorithm) throws SQLException {
-		String sql = "UPDATE ART_USERS SET PASSWORD=?, UPDATE_DATE=?,"
-				+ " PASSWORD_ALGORITHM=?"
+	public void updatePassword(int userId, String newPassword, String passwordAlgorithm,
+			User actionUser) throws SQLException {
+		String sql = "UPDATE ART_USERS SET PASSWORD=?, PASSWORD_ALGORITHM=?,"
+				+ " UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE USER_ID=?";
 
 		Object[] values = {
 			newPassword,
-			DbUtils.getCurrentTimeStamp(),
 			passwordAlgorithm,
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			userId
 		};
 
@@ -262,12 +267,13 @@ public class UserService {
 	 * Add a new user to the database
 	 *
 	 * @param user
+	 * @param actionUser
 	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public synchronized int addUser(User user) throws SQLException {
-		logger.debug("Entering addUser: user={}", user);
+	public synchronized int addUser(User user, User actionUser) throws SQLException {
+		logger.debug("Entering addUser: user={}, actionUser={}", user,actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
@@ -287,8 +293,8 @@ public class UserService {
 		sql = "INSERT INTO ART_USERS"
 				+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
 				+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
-				+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 12) + ")";
+				+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE, CREATED_BY)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
 
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(user);
@@ -305,7 +311,8 @@ public class UserService {
 			user.getStartReport(),
 			user.isCanChangePassword(),
 			user.isActive(),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername()
 		};
 
 		dbService.update(sql, values);
@@ -317,21 +324,22 @@ public class UserService {
 	 * Update an existing user record
 	 *
 	 * @param user
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public void updateUser(User user) throws SQLException {
-		logger.debug("Entering updateUser: user={}", user);
+	public void updateUser(User user, User actionUser) throws SQLException {
+		logger.debug("Entering updateUser: user={}, actionUser={}", user,actionUser);
 
 		String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
 				+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
 				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-				+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?"
+				+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE USER_ID=?";
 
 		//set values for possibly null property objects
 		Map<String, Object> defaults = getSaveDefaults(user);
-
+		
 		Object[] values = {
 			user.getUsername(),
 			user.getPassword(),
@@ -344,6 +352,7 @@ public class UserService {
 			user.isCanChangePassword(),
 			user.isActive(),
 			DbUtils.getCurrentTimeStamp(),
+			actionUser.getUsername(),
 			user.getUserId()
 		};
 

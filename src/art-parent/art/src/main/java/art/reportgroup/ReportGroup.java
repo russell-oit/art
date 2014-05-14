@@ -18,6 +18,36 @@ public class ReportGroup implements Serializable, Comparable<ReportGroup> {
 	private String description;
 	private Date creationDate;
 	private Date updateDate;
+	private String createdBy;
+	private String updatedBy;
+
+	/**
+	 * @return the createdBy
+	 */
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	/**
+	 * @param createdBy the createdBy to set
+	 */
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	/**
+	 * @return the updatedBy
+	 */
+	public String getUpdatedBy() {
+		return updatedBy;
+	}
+
+	/**
+	 * @param updatedBy the updatedBy to set
+	 */
+	public void setUpdatedBy(String updatedBy) {
+		this.updatedBy = updatedBy;
+	}
 
 	/**
 	 * @return the creationDate

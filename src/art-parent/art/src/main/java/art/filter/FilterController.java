@@ -17,10 +17,12 @@
 package art.filter;
 
 import art.enums.ParameterDataType;
+import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -96,37 +98,6 @@ public class FilterController {
 		return showFilter("add", model);
 	}
 
-	@RequestMapping(value = "/app/saveFilter", method = RequestMethod.POST)
-	public String saveFilter(@ModelAttribute("filter") @Valid Filter filter,
-			@RequestParam("action") String action,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering saveFilter: filter={}, action='{}'", filter, action);
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showFilter(action, model);
-		}
-
-		try {
-			if (StringUtils.equals(action, "add")) {
-				filterService.addFilter(filter);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
-			} else if (StringUtils.equals(action, "edit")) {
-				filterService.updateFilter(filter);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			}
-			redirectAttributes.addFlashAttribute("recordName", filter.getName());
-			return "redirect:/app/filters.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showFilter(action, model);
-	}
-
 	@RequestMapping(value = "/app/editFilter", method = RequestMethod.GET)
 	public String editFilter(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editFilter: id={}", id);
@@ -139,6 +110,39 @@ public class FilterController {
 		}
 
 		return showFilter("edit", model);
+	}
+
+	@RequestMapping(value = "/app/saveFilter", method = RequestMethod.POST)
+	public String saveFilter(@ModelAttribute("filter") @Valid Filter filter,
+			@RequestParam("action") String action,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveFilter: filter={}, action='{}'", filter, action);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showFilter(action, model);
+		}
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if (StringUtils.equals(action, "add")) {
+				filterService.addFilter(filter, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				filterService.updateFilter(filter, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
+			redirectAttributes.addFlashAttribute("recordName", filter.getName());
+			return "redirect:/app/filters.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showFilter(action, model);
 	}
 
 	/**

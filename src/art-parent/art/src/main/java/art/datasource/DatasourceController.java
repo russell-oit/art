@@ -18,6 +18,7 @@ package art.datasource;
 
 import art.dbutils.DbUtils;
 import art.servlets.ArtConfig;
+import art.user.User;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.Encrypter;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -114,10 +116,25 @@ public class DatasourceController {
 		return showDatasource("add", model);
 	}
 
+	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
+	public String editDatasource(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editDatasource: id={}", id);
+
+		try {
+			model.addAttribute("datasource", datasourceService.getDatasource(id));
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showDatasource("edit", model);
+	}
+
 	@RequestMapping(value = "/app/saveDatasource", method = RequestMethod.POST)
 	public String saveDatasource(@ModelAttribute("datasource")
 			@Valid Datasource datasource, @RequestParam("action") String action,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
 
 		logger.debug("Entering saveDatasource: datasource={}, action='{}'", datasource, action);
 
@@ -136,11 +153,13 @@ public class DatasourceController {
 				return showDatasource(action, model);
 			}
 
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
 			if (StringUtils.equals(action, "add")) {
-				datasourceService.addDatasource(datasource);
+				datasourceService.addDatasource(datasource, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
-				datasourceService.updateDatasource(datasource);
+				datasourceService.updateDatasource(datasource, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
@@ -159,20 +178,6 @@ public class DatasourceController {
 		}
 
 		return showDatasource(action, model);
-	}
-
-	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
-	public String editDatasource(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editDatasource: id={}", id);
-
-		try {
-			model.addAttribute("datasource", datasourceService.getDatasource(id));
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showDatasource("edit", model);
 	}
 
 	/**

@@ -17,8 +17,10 @@
 package art.usergroup;
 
 import art.reportgroup.ReportGroupService;
+import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -90,37 +92,6 @@ public class UserGroupController {
 		return showUserGroup("add", model);
 	}
 
-	@RequestMapping(value = "/app/saveUserGroup", method = RequestMethod.POST)
-	public String saveUserGroup(@ModelAttribute("group") @Valid UserGroup group,
-			@RequestParam("action") String action,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-
-		logger.debug("Entering saveUserGroup: group={}, action='{}'", group, action);
-
-		logger.debug("result.hasErrors()={}", result.hasErrors());
-		if (result.hasErrors()) {
-			model.addAttribute("formErrors", "");
-			return showUserGroup(action, model);
-		}
-
-		try {
-			if (StringUtils.equals(action, "add")) {
-				userGroupService.addUserGroup(group);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
-			} else if (StringUtils.equals(action, "edit")) {
-				userGroupService.updateUserGroup(group);
-				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
-			}
-			redirectAttributes.addFlashAttribute("recordName", group.getName());
-			return "redirect:/app/userGroups.do";
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showUserGroup(action, model);
-	}
-
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
 	public String editUserGroup(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editUserGroup: id={}", id);
@@ -133,6 +104,39 @@ public class UserGroupController {
 		}
 
 		return showUserGroup("edit", model);
+	}
+
+	@RequestMapping(value = "/app/saveUserGroup", method = RequestMethod.POST)
+	public String saveUserGroup(@ModelAttribute("group") @Valid UserGroup group,
+			@RequestParam("action") String action,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveUserGroup: group={}, action='{}'", group, action);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showUserGroup(action, model);
+		}
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if (StringUtils.equals(action, "add")) {
+				userGroupService.addUserGroup(group, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
+			} else if (StringUtils.equals(action, "edit")) {
+				userGroupService.updateUserGroup(group, sessionUser);
+				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
+			}
+			redirectAttributes.addFlashAttribute("recordName", group.getName());
+			return "redirect:/app/userGroups.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showUserGroup(action, model);
 	}
 
 	/**
