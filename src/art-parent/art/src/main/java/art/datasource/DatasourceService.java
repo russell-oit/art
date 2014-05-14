@@ -111,7 +111,7 @@ public class DatasourceService {
 	@Cacheable("datasources")
 	public Datasource getDatasource(int id) throws SQLException {
 		String sql = SQL_SELECT_ALL + " WHERE DATABASE_ID = ? ";
-		ResultSetHandler<Datasource> h = new BeanHandler<Datasource>(Datasource.class, new DatasourceMapper());
+		ResultSetHandler<Datasource> h = new BeanHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h, id);
 	}
 
@@ -260,6 +260,7 @@ public class DatasourceService {
 	 * @return list of available datasources, empty list otherwise
 	 * @throws SQLException
 	 */
+	@Cacheable("datasources")
 	public List<Datasource> getAdminDatasources(User user) throws SQLException {
 		logger.debug("Entering getAdminDatasources: user={}", user);
 

@@ -12,6 +12,7 @@ Display user jobs and jobs configuration
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <c:choose>
 	<c:when test="${action == 'config'}">
@@ -155,7 +156,9 @@ Display user jobs and jobs configuration
 
 						<td>${job.jobId}</td>
 						<td>${encode:forHtmlContent(job.name)}</td>
-						<td><t:displayDate date="${job.lastEndDate}"/></td>
+						<td data-sort="${job.lastEndDate.time}">
+							<fmt:formatDate value="${job.lastEndDate}" pattern="${dateDisplayPattern}"/>
+						</td>
 						<td>
 							<a type="application/octet-stream" 
 							   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
@@ -164,7 +167,9 @@ Display user jobs and jobs configuration
 							<br>
 							${job.lastRunDetails}
 						</td>
-						<td><t:displayDate date="${job.nextRunDate}"/></td>
+						<td data-sort="${job.nextRunDate.time}">
+							<fmt:formatDate value="${job.nextRunDate}" pattern="${dateDisplayPattern}"/>
+						</td>
 						<td>
 							<c:if test="${sessionUser.userId == job.user.userId || action == 'config'}">
 								<div class="btn-group">

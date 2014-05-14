@@ -107,7 +107,7 @@ public class ArtUtils {
 	public static String getRandomFileNameString() {
 		return "-" + RandomStringUtils.randomAlphanumeric(10);
 	}
-	
+
 	/**
 	 * Get random string that can be used as a unique id e.g. in file names
 	 *
@@ -204,6 +204,17 @@ public class ArtUtils {
 		}
 
 		return Days.daysBetween(new LocalDate(date.getTime()), new LocalDate()).getDays();
+	}
+
+	/**
+	 * Get a date object from a timestamp. Used in jsp pages to enable using
+	 * jstl formatDate function with timestamp (long) values
+	 *
+	 * @param timestamp
+	 * @return
+	 */
+	public static Date getDate(long timestamp) {
+		return new Date(timestamp);
 	}
 
 }

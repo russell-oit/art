@@ -10,9 +10,11 @@ Display application logs
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
+<%@taglib uri="/WEB-INF/tlds/functions.tld" prefix="f" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.logs" var="pageTitle"/>
@@ -36,25 +38,25 @@ Display application logs
 				});
 
 				var oTable = tbl.dataTable({
-					"columnDefs": [
+					columnDefs: [
 						{
-							"targets": "detailsCol",
-							"orderable": false,
-							"searchable": false
+							targets: "detailsCol",
+							orderable: false,
+							searchable: false
 						},
 						{
-							"targets": "exceptionCol", //target name matches class name of th.
-							"visible": false
+							targets: "exceptionCol", //target name matches class name of th.
+							visible: false
 						}
 					],
-					"orderClasses": false,
-					"pagingType": "full_numbers",
-					"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
-					"pageLength": -1,
-					"language": {
-						"url": "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: -1,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
-					"initComplete": function() {
+					initComplete: function() {
 						$('div.dataTables_filter input').focus();
 					}
 				});
@@ -138,17 +140,18 @@ Display application logs
 				</thead>
 				<tbody>
 					<c:forEach var="log" items="${logs}">
-						<tr class="${log.level}">
+						<tr class="${encode:forHtmlAttribute(log.level)}">
 							<td></td> <%-- details control column --%>
-							<td>
-								<t:displayDate timestamp="${log.timeStamp}"/>
+							<td data-sort="${log.timeStamp}">
+								<fmt:formatDate value="${f:getDate(log.timeStamp)}" pattern="${dateDisplayPattern}"/>
 							</td>
-							<td>${log.level}</td>
-							<td>${log.loggerName}</td>
-							<td>${fn:escapeXml(log.formattedMessage)}</td>
-							<td>${fn:escapeXml(log.MDCPropertyMap['user'])}</td>
-							<td>${fn:escapeXml(log.MDCPropertyMap['requestURI'])}</td>
+							<td><encode:forHtmlContent value="${log.level}"/></td>
+							<td><encode:forHtmlContent value="${log.loggerName}"/></td>
+							<td><encode:forHtmlContent value="${log.formattedMessage}"/></td>
+							<td><encode:forHtmlContent value="${log.MDCPropertyMap['user']}"/></td>
+							<td><encode:forHtmlContent value="${log.MDCPropertyMap['requestURI']}"/></td>
 							<td>
+								<%-- based on ch.qos.logback.classic.html.DefaultThrowableRenderer --%>
 								<c:set var="throwable" value="${log.throwableProxy}" />
 								<c:if test="${throwable != null}">
 									<c:forEach begin="0" end="5" varStatus="loop">
@@ -157,7 +160,7 @@ Display application logs
 											<c:if test="${commonFrames gt 0}">
 												<br> Caused by: 
 											</c:if>
-											${throwable.className}: ${fn:escapeXml(throwable.message)}
+											${throwable.className}: <encode:forHtmlContent value="${throwable.message}"/>
 											<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
 											<c:forEach begin="0" end="${fn:length(traceArray) - commonFrames - 1}" varStatus="loop">
 												<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}

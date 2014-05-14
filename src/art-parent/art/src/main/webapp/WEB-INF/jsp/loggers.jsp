@@ -29,18 +29,16 @@ Display current loggers
 					$('a[href*="loggers.do"]').parent().addClass('active');
 				});
 
-				$('#loggers').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"fnInitComplete": function() {
-						$('div.dataTables_filter input').focus();
-					}
-				});
+				var tbl = $("#loggers");
+
+				initConfigTable(tbl,
+						undefined, //pageLength. pass undefined to use the default
+						"${showAllRowsText}",
+						"${pageContext.request.contextPath}",
+						"${pageContext.response.locale}",
+						false //addColumnFilters
+						);
+
 
 			}); //end document ready
 		</script>

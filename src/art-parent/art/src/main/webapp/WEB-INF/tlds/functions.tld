@@ -14,4 +14,9 @@
 		<function-class>art.utils.ArtUtils</function-class>
 		<function-signature>boolean daysUntilToday(java.util.Date)</function-signature>
 	</function>
+	<function>
+		<name>getDate</name>
+		<function-class>art.utils.ArtUtils</function-class>
+		<function-signature>java.util.Date getDate(long)</function-signature>
+	</function>
 </taglib>

@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
@@ -342,6 +343,7 @@ public class AccessRightService {
 	 * @param reportGroups array of report group ids
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "reports", allEntries = true) //clear reports cache so that reports available to users are updated
 	public void updateAccessRights(String action, String[] users, Integer[] userGroups,
 			Integer[] reports, Integer[] reportGroups) throws SQLException {
 

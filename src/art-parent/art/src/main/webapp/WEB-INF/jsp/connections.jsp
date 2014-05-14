@@ -40,12 +40,14 @@ Page to display connections status
 						"${showAllRowsText}",
 						"${pageContext.request.contextPath}",
 						"${pageContext.response.locale}",
-						undefined //addColumnFilters. pass undefined to use default
+						false //addColumnFilters
 						);
+				
+				//get datatables api instance
+				var table = oTable.api();
 
 				tbl.find('tbody').on('click', '.reset', function() {
 					var row = $(this).closest("tr"); //jquery object
-					var nRow = row[0]; //dom element/node
 					var recordName = escapeHtmlContent(row.data("name"));
 					var recordId = row.data("id");
 
@@ -56,10 +58,10 @@ Page to display connections status
 						data: {id: recordId},
 						success: function(response) {
 							if (response.success) {
-								var update = "${totalText}: " + response.poolSize +
+								var newStatus = "${totalText}: " + response.poolSize +
 										", ${inUseText}: " + response.inUseCount;
 
-								oTable.fnUpdate(update, nRow, 1);
+								table.cell(row,1).data(newStatus);
 
 								notifyActionSuccess("${connectionResetText}", recordName);
 							} else {

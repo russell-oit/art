@@ -214,6 +214,13 @@ function applyColumnFilters(tbl, table) {
 }
 
 /**
+ * Actions to perform when datatables completes initializing a table
+ */
+function datatablesInitComplete(){
+	$('div.dataTables_filter input').focus();
+}
+
+/**
  * Initialise datatable used in configuration pages
  * 
  * @param {jQuery} tbl
@@ -233,23 +240,23 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		addColumnFilters = true;
 	}
 
+	/** @type {jQuery} */
 	var columnFilterRow = null;
 	if (addColumnFilters) {
 		columnFilterRow = createColumnFilters(tbl);
 	}
 
 	//use initialization that returns a jquery object. to be able to use plugins
+	/** @type {jQuery} */
 	var oTable = tbl.dataTable({
-		"orderClasses": false,
-		"pagingType": "full_numbers",
-		"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
-		"pageLength": pageLength,
-		"language": {
-			"url": contextPath + "/js/dataTables-1.10.0/i18n/dataTables_" + localeCode + ".txt"
+		orderClasses: false,
+		pagingType: "full_numbers",
+		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
+		pageLength: pageLength,
+		language: {
+			url: contextPath + "/js/dataTables-1.10.0/i18n/dataTables_" + localeCode + ".txt"
 		},
-		"initComplete": function() {
-			$('div.dataTables_filter input').focus();
-		}
+		initComplete: datatablesInitComplete
 	});
 
 	if (columnFilterRow !== null) {
@@ -257,6 +264,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		columnFilterRow.insertAfter(columnFilterRow.next());
 
 		//get datatables api object
+		/** @type {DataTables.Api} */
 		var table = oTable.api();
 
 		// Apply the column filter
@@ -267,7 +275,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 }
 
 /**
- * Http error handler for ajax calls
+ * Error handler for http errors after ajax calls
  * 
  * @param {jqXHR} xhr
  */
@@ -411,7 +419,7 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
  */
-function deleteRecord(tbl, table, deleteButtonSelector,
+function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 		showConfirmDialog, deleteRecordText, okText, cancelText,
 		contextPath, deleteUrl, recordDeletedText, errorOccurredText,
 		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
@@ -489,7 +497,7 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCod
 	//get datatables api object
 	var table = oTable.api();
 
-	deleteRecord(tbl, table, deleteButtonSelector,
+	addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 			showConfirmDialog, deleteRecordText, okText, cancelText,
 			contextPath, deleteUrl, recordDeletedText, errorOccurredText,
 			deleteRow, cannotDeleteRecordText, linkedRecordsExistText);

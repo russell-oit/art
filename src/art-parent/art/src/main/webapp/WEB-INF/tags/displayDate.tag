@@ -26,7 +26,7 @@ Display a formatted date. Also enables correct sorting in datatables
 </c:if>
 
 <c:if test="${empty pattern}">
-	<c:set var="pattern" value="${displayDatePattern}" />
+	<c:set var="pattern" value="${dateDisplayPattern}" />
 </c:if>
 
 <c:if test="${timestamp != null}">

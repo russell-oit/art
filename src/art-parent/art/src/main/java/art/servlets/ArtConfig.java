@@ -176,7 +176,7 @@ public class ArtConfig extends HttpServlet {
 		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
 		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 		ctx.setAttribute("sortDatePattern", "yyyy-MM-dd-HH:mm:ss.SSS"); //to enable correct sorting of dates in tables
-		ctx.setAttribute("displayDatePattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
+		ctx.setAttribute("dateDisplayPattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
 
 		//set application path
 		appPath = ctx.getRealPath("");

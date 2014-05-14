@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
@@ -203,6 +204,7 @@ public class AdminRightService {
 	 * @param reportGroups array of report group ids
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = {"datasources","reportGroups"}, allEntries = true) //clear caches so that admins can work with new values
 	public void updateAdminRights(String action, String[] admins, Integer[] datasources,
 			Integer[] reportGroups) throws SQLException {
 
