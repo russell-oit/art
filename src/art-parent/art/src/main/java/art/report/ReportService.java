@@ -31,9 +31,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -122,6 +120,8 @@ public class ReportService {
 
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			report.setCreatedBy(rs.getString("CREATED_BY"));
+			report.setUpdatedBy(rs.getString("UPDATED_BY"));
 
 			setChartOptions(report);
 
@@ -345,9 +345,10 @@ public class ReportService {
 	public Report getReport(int id) throws SQLException {
 		logger.debug("Entering getReport: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
 		ResultSetHandler<Report> h = new BeanHandler<>(Report.class, new ReportMapper());
 		Report report = dbService.query(sql, h, id);
+
 		setReportSource(report);
 		return report;
 	}
@@ -421,7 +422,14 @@ public class ReportService {
 
 		//lastly, delete query
 		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID = ?";
-		return dbService.update(sql, id);
+		int affectedRows = dbService.update(sql, id);
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with delete. affectedRows={}, id={}", affectedRows, id);
+		}
+
+		return affectedRows;
 	}
 
 	/**
@@ -451,45 +459,9 @@ public class ReportService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_QUERIES"
-				+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-				+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
-				+ " REPORT_STATUS, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
-				+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET, XMLA_URL,"
-				+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD,"
-				+ " CREATION_DATE, CREATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
+		report.setReportId(newId);
 
-		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(report);
-
-		Object[] values = {
-			newId,
-			report.getName(),
-			report.getShortDescription(),
-			report.getDescription(),
-			report.getReportType(),
-			defaults.get("reportGroupId"),
-			defaults.get("datasourceId"),
-			report.getContactPerson(),
-			report.isUsesFilters(),
-			defaults.get("reportStatus"),
-			report.isParametersInOutput(),
-			report.getxAxisLabel(),
-			report.getyAxisLabel(),
-			report.getChartOptionsSetting(),
-			report.getTemplate(),
-			report.getDisplayResultset(),
-			report.getXmlaUrl(),
-			report.getXmlaDatasource(),
-			report.getXmlaCatalog(),
-			report.getXmlaUsername(),
-			report.getXmlaPassword(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
-
-		dbService.update(sql, values);
+		saveReport(report, true, actionUser);
 
 		return newId;
 	}
@@ -505,56 +477,22 @@ public class ReportService {
 	public void updateReport(Report report, User actionUser) throws SQLException {
 		logger.debug("Entering updateReport: report={}, actionUser={}", report, actionUser);
 
-		String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
-				+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
-				+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, "
-				+ " REPORT_STATUS=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
-				+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
-				+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
-				+ " XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE QUERY_ID=?";
-
-		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(report);
-
-		Object[] values = {
-			report.getName(),
-			report.getShortDescription(),
-			report.getDescription(),
-			report.getReportType(),
-			defaults.get("reportGroupId"),
-			defaults.get("datasourceId"),
-			report.getContactPerson(),
-			report.isUsesFilters(),
-			defaults.get("reportStatus"),
-			report.isParametersInOutput(),
-			report.getxAxisLabel(),
-			report.getyAxisLabel(),
-			report.getChartOptionsSetting(),
-			report.getTemplate(),
-			report.getDisplayResultset(),
-			report.getXmlaUrl(),
-			report.getXmlaDatasource(),
-			report.getXmlaCatalog(),
-			report.getXmlaUsername(),
-			report.getXmlaPassword(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			report.getReportId()
-		};
-
-		dbService.update(sql, values);
+		saveReport(report, false, actionUser);
 	}
 
 	/**
-	 * Get values for possibly null property objects
+	 * Save a report
 	 *
 	 * @param report
-	 * @return map with values to save. key = field name, value = field value
+	 * @param newRecord true if adding a new record, false if updating an
+	 * existing record
+	 * @param actionUser
+	 * @throws SQLException
 	 */
-	private Map<String, Object> getSaveDefaults(Report report) {
-		Map<String, Object> values = new HashMap<>();
+	private void saveReport(Report report, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveReport: report={}, newRecord={}, actionUser={}", report, newRecord, actionUser);
 
+		//set values for possibly null property objects
 		Integer reportGroupId; //database column doesn't allow null
 		if (report.getReportGroup() == null) {
 			logger.warn("Report group not defined. Defaulting to 0");
@@ -562,7 +500,6 @@ public class ReportService {
 		} else {
 			reportGroupId = report.getReportGroup().getReportGroupId();
 		}
-		values.put("reportGroupId", reportGroupId);
 
 		Integer datasourceId; //database column doesn't allow null
 		if (report.getDatasource() == null) {
@@ -571,7 +508,6 @@ public class ReportService {
 		} else {
 			datasourceId = report.getDatasource().getDatasourceId();
 		}
-		values.put("datasourceId", datasourceId);
 
 		String reportStatus;
 		if (report.getReportStatus() == null) {
@@ -580,9 +516,90 @@ public class ReportService {
 		} else {
 			reportStatus = report.getReportStatus().getValue();
 		}
-		values.put("reportStatus", reportStatus);
 
-		return values;
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_QUERIES"
+					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
+					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
+					+ " REPORT_STATUS, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
+					+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET, XMLA_URL,"
+					+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
+
+			Object[] values = {
+				report.getReportId(),
+				report.getName(),
+				report.getShortDescription(),
+				report.getDescription(),
+				report.getReportType(),
+				reportGroupId,
+				datasourceId,
+				report.getContactPerson(),
+				report.isUsesFilters(),
+				reportStatus,
+				report.isParametersInOutput(),
+				report.getxAxisLabel(),
+				report.getyAxisLabel(),
+				report.getChartOptionsSetting(),
+				report.getTemplate(),
+				report.getDisplayResultset(),
+				report.getXmlaUrl(),
+				report.getXmlaDatasource(),
+				report.getXmlaCatalog(),
+				report.getXmlaUsername(),
+				report.getXmlaPassword(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
+					+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
+					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, "
+					+ " REPORT_STATUS=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
+					+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
+					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
+					+ " XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE QUERY_ID=?";
+
+			Object[] values = {
+				report.getName(),
+				report.getShortDescription(),
+				report.getDescription(),
+				report.getReportType(),
+				reportGroupId,
+				datasourceId,
+				report.getContactPerson(),
+				report.isUsesFilters(),
+				reportStatus,
+				report.isParametersInOutput(),
+				report.getxAxisLabel(),
+				report.getyAxisLabel(),
+				report.getChartOptionsSetting(),
+				report.getTemplate(),
+				report.getDisplayResultset(),
+				report.getXmlaUrl(),
+				report.getXmlaDatasource(),
+				report.getXmlaCatalog(),
+				report.getXmlaUsername(),
+				report.getXmlaPassword(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				report.getReportId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, report={}",
+					affectedRows, newRecord, report);
+		}
 	}
 
 	/**
@@ -685,10 +702,6 @@ public class ReportService {
 	public void copyReport(Report report, int originalReportId, User actionUser) throws SQLException {
 		//insert new report
 		int newId = addReport(report, actionUser);
-		if (newId <= 0) {
-			logger.warn("Report not copied: {}", report);
-			return;
-		}
 
 		try {
 			//copy parameters
@@ -780,7 +793,7 @@ public class ReportService {
 	}
 
 	/**
-	 * Get candidate drilldown reports
+	 * Get drilldown reports
 	 *
 	 * @return
 	 * @throws SQLException

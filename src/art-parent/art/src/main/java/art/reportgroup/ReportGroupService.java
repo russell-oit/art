@@ -221,8 +221,8 @@ public class ReportGroupService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
-	public synchronized int addReportGroup(ReportGroup group,User actionUser) throws SQLException {
-		logger.debug("Entering addReportGroup: group={}, actionUser={}", group,actionUser);
+	public synchronized int addReportGroup(ReportGroup group, User actionUser) throws SQLException {
+		logger.debug("Entering addReportGroup: group={}, actionUser={}", group, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS";
@@ -239,24 +239,9 @@ public class ReportGroupService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_QUERY_GROUPS"
-				+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE, CREATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
+		group.setReportGroupId(newId);
 
-		Object[] values = {
-			newId,
-			group.getName(),
-			group.getDescription(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
-
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
-
-		if (affectedRows != 1) {
-			logger.warn("Problem with allocateNewId. affectedRows={}, newId={}", affectedRows, newId);
-		}
+		saveReportGroup(group, true, actionUser);
 
 		return newId;
 	}
@@ -265,29 +250,64 @@ public class ReportGroupService {
 	 * Update an existing report group
 	 *
 	 * @param group
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
-	public void updateReportGroup(ReportGroup group,User actionUser) throws SQLException {
+	public void updateReportGroup(ReportGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateReportGroup: group={}, actionUser={}", group, actionUser);
 
-		String sql = "UPDATE ART_QUERY_GROUPS SET NAME=?, DESCRIPTION=?,"
-				+ " UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE QUERY_GROUP_ID=?";
+		saveReportGroup(group, false, actionUser);
+	}
 
-		Object[] values = {
-			group.getName(),
-			group.getDescription(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			group.getReportGroupId()
-		};
+	/**
+	 * Save a report group
+	 *
+	 * @param group
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	private void saveReportGroup(ReportGroup group, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveReportGroup: group={}, newRecord={}, actionUser={}",
+				group, newRecord, actionUser);
 
-		int affectedRows = dbService.update(sql, values);
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_QUERY_GROUPS"
+					+ " (QUERY_GROUP_ID, NAME, DESCRIPTION, CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 5) + ")";
+
+			Object[] values = {
+				group.getReportGroupId(),
+				group.getName(),
+				group.getDescription(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_QUERY_GROUPS SET NAME=?, DESCRIPTION=?,"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE QUERY_GROUP_ID=?";
+
+			Object[] values = {
+				group.getName(),
+				group.getDescription(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				group.getReportGroupId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-			logger.warn("Problem with save. affectedRows={}, group={}", affectedRows, group);
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, group={}",
+					affectedRows, newRecord, group);
 		}
 	}
 

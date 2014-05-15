@@ -100,7 +100,7 @@ Display report filters
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.filter"/></th>
 					<th><spring:message code="page.text.reportColumn"/></th>
-					<th><spring:message code="page.text.action"/></th>
+					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

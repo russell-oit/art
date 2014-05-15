@@ -187,39 +187,9 @@ public class ParameterService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_PARAMETERS"
-				+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
-				+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
-				+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV, CHAINED_POSITION,"
-				+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
-				+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE, CREATED_BY=?)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
+		parameter.setParameterId(newId);
 
-		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(parameter);
-
-		Object[] values = {
-			newId,
-			parameter.getName(),
-			parameter.getDescription(),
-			defaults.get("parameterType"),
-			parameter.getLabel(),
-			parameter.getHelpText(),
-			defaults.get("dataType"),
-			parameter.getDefaultValue(),
-			parameter.isHidden(),
-			parameter.isUseLov(),
-			parameter.getLovReportId(),
-			parameter.isUseFiltersInLov(),
-			parameter.getChainedPosition(),
-			parameter.getChainedValuePosition(),
-			parameter.getDrilldownColumnIndex(),
-			parameter.isUseDirectSubstitution(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
-
-		dbService.update(sql, values);
+		saveParameter(parameter, true, actionUser);
 
 		return newId;
 	}
@@ -228,56 +198,29 @@ public class ParameterService {
 	 * Update an existing parameter
 	 *
 	 * @param parameter
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public void updateParameter(Parameter parameter, User actionUser) throws SQLException {
 		logger.debug("Entering updateParameter: parameter={}, actionUser={}", parameter, actionUser);
 
-		String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
-				+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
-				+ " HIDDEN=?, USE_LOV=?, LOV_REPORT_ID=?, USE_FILTERS_IN_LOV=?,"
-				+ " CHAINED_POSITION=?, CHAINED_VALUE_POSITION=?,"
-				+ " DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
-				+ " UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE PARAMETER_ID=?";
-
-		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(parameter);
-
-		Object[] values = {
-			parameter.getName(),
-			parameter.getDescription(),
-			defaults.get("parameterType"),
-			parameter.getLabel(),
-			parameter.getHelpText(),
-			defaults.get("dataType"),
-			parameter.getDefaultValue(),
-			parameter.isHidden(),
-			parameter.isUseLov(),
-			parameter.getLovReportId(),
-			parameter.isUseFiltersInLov(),
-			parameter.getChainedPosition(),
-			parameter.getChainedValuePosition(),
-			parameter.getDrilldownColumnIndex(),
-			parameter.isUseDirectSubstitution(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			parameter.getParameterId()
-		};
-
-		dbService.update(sql, values);
+		saveParameter(parameter, false, actionUser);
 	}
 
 	/**
-	 * Get values for possibly null property objects
+	 * Save a parameter
 	 *
 	 * @param parameter
-	 * @return map with values to save. key = field name, value = field value
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
 	 */
-	private Map<String, Object> getSaveDefaults(Parameter parameter) {
-		Map<String, Object> values = new HashMap<>();
+	private void saveParameter(Parameter parameter, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveParameter: parameter={}, newRecord={}, actionUser={}",
+				parameter, newRecord, actionUser);
 
+		//set values for possibly null property objects
 		String parameterType;
 		if (parameter.getParameterType() == null) {
 			logger.warn("Parameter type not defined. Defaulting to null");
@@ -285,7 +228,6 @@ public class ParameterService {
 		} else {
 			parameterType = parameter.getParameterType().getValue();
 		}
-		values.put("parameterType", parameterType);
 
 		String dataType;
 		if (parameter.getDataType() == null) {
@@ -294,9 +236,78 @@ public class ParameterService {
 		} else {
 			dataType = parameter.getDataType().getValue();
 		}
-		values.put("dataType", dataType);
 
-		return values;
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_PARAMETERS"
+					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
+					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
+					+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV, CHAINED_POSITION,"
+					+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
+					+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
+
+			Object[] values = {
+				parameter.getParameterId(),
+				parameter.getName(),
+				parameter.getDescription(),
+				parameterType,
+				parameter.getLabel(),
+				parameter.getHelpText(),
+				dataType,
+				parameter.getDefaultValue(),
+				parameter.isHidden(),
+				parameter.isUseLov(),
+				parameter.getLovReportId(),
+				parameter.isUseFiltersInLov(),
+				parameter.getChainedPosition(),
+				parameter.getChainedValuePosition(),
+				parameter.getDrilldownColumnIndex(),
+				parameter.isUseDirectSubstitution(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
+					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
+					+ " HIDDEN=?, USE_LOV=?, LOV_REPORT_ID=?, USE_FILTERS_IN_LOV=?,"
+					+ " CHAINED_POSITION=?, CHAINED_VALUE_POSITION=?,"
+					+ " DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE PARAMETER_ID=?";
+
+			Object[] values = {
+				parameter.getName(),
+				parameter.getDescription(),
+				parameterType,
+				parameter.getLabel(),
+				parameter.getHelpText(),
+				dataType,
+				parameter.getDefaultValue(),
+				parameter.isHidden(),
+				parameter.isUseLov(),
+				parameter.getLovReportId(),
+				parameter.isUseFiltersInLov(),
+				parameter.getChainedPosition(),
+				parameter.getChainedValuePosition(),
+				parameter.getDrilldownColumnIndex(),
+				parameter.isUseDirectSubstitution(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				parameter.getParameterId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, parameter={}",
+					affectedRows, newRecord, parameter);
+		}
 	}
 
 	/**

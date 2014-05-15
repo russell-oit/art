@@ -76,7 +76,7 @@ Display user group membership
 				<tr>
 					<th><spring:message code="page.text.user"/></th>
 					<th><spring:message code="page.text.userGroup"/></th>
-					<th><spring:message code="page.text.action"/></th>
+					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

@@ -103,6 +103,28 @@ public class DrilldownController {
 		model.addAttribute("drilldown", new Drilldown());
 		return showDrilldown("add", model, locale, parent);
 	}
+	
+	@RequestMapping(value = "/app/editDrilldown", method = RequestMethod.GET)
+	public String editDrilldown(@RequestParam("id") Integer id, Model model,
+			Locale locale) {
+
+		logger.debug("Entering editDrilldown: id={}", id);
+
+		int parentReportId = 0;
+
+		try {
+			Drilldown drilldown = drilldownService.getDrilldown(id);
+			model.addAttribute("drilldown", drilldown);
+			if (drilldown != null) {
+				parentReportId = drilldown.getParentReportId();
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showDrilldown("edit", model, locale, parentReportId);
+	}
 
 	@RequestMapping(value = "/app/saveDrilldown", method = RequestMethod.POST)
 	public String saveDrilldown(@ModelAttribute("drilldown") @Valid Drilldown drilldown,
@@ -135,28 +157,6 @@ public class DrilldownController {
 		}
 
 		return showDrilldown(action, model, locale, parent);
-	}
-
-	@RequestMapping(value = "/app/editDrilldown", method = RequestMethod.GET)
-	public String editDrilldown(@RequestParam("id") Integer id, Model model,
-			Locale locale) {
-
-		logger.debug("Entering editDrilldown: id={}", id);
-
-		int parentReportId = 0;
-
-		try {
-			Drilldown drilldown = drilldownService.getDrilldown(id);
-			model.addAttribute("drilldown", drilldown);
-			if (drilldown != null) {
-				parentReportId = drilldown.getParentReportId();
-			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showDrilldown("edit", model, locale, parentReportId);
 	}
 
 	/**

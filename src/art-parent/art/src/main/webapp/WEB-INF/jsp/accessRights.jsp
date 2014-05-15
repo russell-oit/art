@@ -78,7 +78,7 @@ Display access rights
 					<th><spring:message code="page.text.userGroup"/></th>
 					<th><spring:message code="page.text.report"/></th>
 					<th><spring:message code="page.text.reportGroup"/></th>
-					<th><spring:message code="page.text.action"/></th>
+					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

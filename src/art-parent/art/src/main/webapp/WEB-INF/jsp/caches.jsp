@@ -74,7 +74,7 @@ Page to allow manual clearing of caches
 			<thead>
 				<tr>
 					<th><spring:message code="caches.text.cache"/></th>
-					<th><spring:message code="page.text.action"/></th>
+					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

@@ -159,25 +159,9 @@ public class ScheduleService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_JOB_SCHEDULES"
-				+ " (SCHEDULE_ID, SCHEDULE_NAME, DESCRIPTION, JOB_MINUTE,"
-				+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY, CREATION_DATE, CREATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
+		schedule.setScheduleId(newId);
 
-		Object[] values = {
-			newId,
-			schedule.getName(),
-			schedule.getDescription(),
-			schedule.getMinute(),
-			schedule.getHour(),
-			schedule.getDay(),
-			schedule.getMonth(),
-			schedule.getWeekday(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
-
-		dbService.update(sql, values);
+		saveSchedule(schedule, true, actionUser);
 
 		return newId;
 	}
@@ -193,25 +177,70 @@ public class ScheduleService {
 	public void updateSchedule(Schedule schedule, User actionUser) throws SQLException {
 		logger.debug("Entering updateSchedule: schedule={}, actionUser={}", schedule, actionUser);
 
-		String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
-				+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
-				+ " JOB_WEEKDAY=?, UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE SCHEDULE_ID=?";
+		saveSchedule(schedule, false, actionUser);
+	}
 
-		Object[] values = {
-			schedule.getName(),
-			schedule.getDescription(),
-			schedule.getMinute(),
-			schedule.getHour(),
-			schedule.getDay(),
-			schedule.getMonth(),
-			schedule.getWeekday(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			schedule.getScheduleId()
-		};
+	/**
+	 * Save a schedule
+	 *
+	 * @param schedule
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	private void saveSchedule(Schedule schedule, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveSchedule: schedule={}, newRecord={}, actionUser={}",
+				schedule, newRecord, actionUser);
 
-		dbService.update(sql, values);
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_JOB_SCHEDULES"
+					+ " (SCHEDULE_ID, SCHEDULE_NAME, DESCRIPTION, JOB_MINUTE,"
+					+ " JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY, CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 10) + ")";
+
+			Object[] values = {
+				schedule.getScheduleId(),
+				schedule.getName(),
+				schedule.getDescription(),
+				schedule.getMinute(),
+				schedule.getHour(),
+				schedule.getDay(),
+				schedule.getMonth(),
+				schedule.getWeekday(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
+					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
+					+ " JOB_WEEKDAY=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE SCHEDULE_ID=?";
+
+			Object[] values = {
+				schedule.getName(),
+				schedule.getDescription(),
+				schedule.getMinute(),
+				schedule.getHour(),
+				schedule.getDay(),
+				schedule.getMonth(),
+				schedule.getWeekday(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				schedule.getScheduleId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, schedule={}",
+					affectedRows, newRecord, schedule);
+		}
 	}
 
 }

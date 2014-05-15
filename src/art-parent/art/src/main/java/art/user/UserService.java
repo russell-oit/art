@@ -8,9 +8,7 @@ import art.usergroup.UserGroupService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -273,7 +271,7 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public synchronized int addUser(User user, User actionUser) throws SQLException {
-		logger.debug("Entering addUser: user={}, actionUser={}", user,actionUser);
+		logger.debug("Entering addUser: user={}, actionUser={}", user, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(USER_ID) FROM ART_USERS";
@@ -290,32 +288,9 @@ public class UserService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_USERS"
-				+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
-				+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
-				+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE, CREATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+		user.setUserId(newId);
 
-		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(user);
-
-		Object[] values = {
-			newId,
-			user.getUsername(),
-			user.getPassword(),
-			user.getPasswordAlgorithm(),
-			user.getFullName(),
-			user.getEmail(),
-			defaults.get("accessLevel"),
-			user.getDefaultReportGroup(),
-			user.getStartReport(),
-			user.isCanChangePassword(),
-			user.isActive(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
-
-		dbService.update(sql, values);
+		saveUser(user, true, actionUser);
 
 		return newId;
 	}
@@ -329,34 +304,89 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updateUser(User user, User actionUser) throws SQLException {
-		logger.debug("Entering updateUser: user={}, actionUser={}", user,actionUser);
+		logger.debug("Entering updateUser: user={}, actionUser={}", user, actionUser);
 
-		String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
-				+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
-				+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
-				+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE USER_ID=?";
+		saveUser(user, false, actionUser);
+	}
+
+	/**
+	 * Save a user
+	 *
+	 * @param user
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	private void saveUser(User user, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveUser: user={}, newRecord={}, actionUser={}",
+				user, newRecord, actionUser);
 
 		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(user);
-		
-		Object[] values = {
-			user.getUsername(),
-			user.getPassword(),
-			user.getPasswordAlgorithm(),
-			user.getFullName(),
-			user.getEmail(),
-			defaults.get("accessLevel"),
-			user.getDefaultReportGroup(),
-			user.getStartReport(),
-			user.isCanChangePassword(),
-			user.isActive(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			user.getUserId()
-		};
+		int accessLevel;
+		if (user.getAccessLevel() == null) {
+			logger.warn("Access level not defined. Defaulting to 0");
+			accessLevel = 0;
+		} else {
+			accessLevel = user.getAccessLevel().getValue();
+		}
 
-		dbService.update(sql, values);
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_USERS"
+					+ " (USER_ID, USERNAME, PASSWORD, PASSWORD_ALGORITHM,"
+					+ " FULL_NAME, EMAIL, ACCESS_LEVEL, DEFAULT_QUERY_GROUP,"
+					+ " START_QUERY, CAN_CHANGE_PASSWORD, ACTIVE, CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+
+			Object[] values = {
+				user.getUserId(),
+				user.getUsername(),
+				user.getPassword(),
+				user.getPasswordAlgorithm(),
+				user.getFullName(),
+				user.getEmail(),
+				accessLevel,
+				user.getDefaultReportGroup(),
+				user.getStartReport(),
+				user.isCanChangePassword(),
+				user.isActive(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_USERS SET USERNAME=?, PASSWORD=?,"
+					+ " PASSWORD_ALGORITHM=?, FULL_NAME=?, EMAIL=?,"
+					+ " ACCESS_LEVEL=?, DEFAULT_QUERY_GROUP=?, START_QUERY=?,"
+					+ " CAN_CHANGE_PASSWORD=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE USER_ID=?";
+
+			Object[] values = {
+				user.getUsername(),
+				user.getPassword(),
+				user.getPasswordAlgorithm(),
+				user.getFullName(),
+				user.getEmail(),
+				accessLevel,
+				user.getDefaultReportGroup(),
+				user.getStartReport(),
+				user.isCanChangePassword(),
+				user.isActive(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				user.getUserId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, user={}",
+					affectedRows, newRecord, user);
+		}
 	}
 
 	/**
@@ -376,25 +406,5 @@ public class UserService {
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
 		return dbService.query(sql, h, userId);
 	}
-	
-	/**
-	 * Get values for possibly null property objects
-	 *
-	 * @param user
-	 * @return map with values to save. key = field name, value = field value
-	 */
-	private Map<String, Object> getSaveDefaults(User user) {
-		Map<String, Object> values = new HashMap<>();
-		
-		Integer accessLevel;
-		if (user.getAccessLevel() == null) {
-			logger.warn("Access level not defined. Defaulting to 0");
-			accessLevel = 0;
-		} else {
-			accessLevel = user.getAccessLevel().getValue();
-		}
-		values.put("accessLevel", accessLevel);
 
-		return values;
-	}
 }

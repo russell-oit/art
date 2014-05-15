@@ -177,23 +177,11 @@ public class DrilldownService {
 		}
 		logger.debug("newPosition={}", newPosition);
 
-		sql = "INSERT INTO ART_DRILLDOWN_QUERIES"
-				+ " (DRILLDOWN_ID, QUERY_ID, DRILLDOWN_QUERY_ID, DRILLDOWN_QUERY_POSITION,"
-				+ " DRILLDOWN_TITLE, DRILLDOWN_TEXT, OUTPUT_FORMAT, OPEN_IN_NEW_WINDOW)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
+		drilldown.setDrilldownId(newId);
+		drilldown.setPosition(newPosition);
+		drilldown.setParentReportId(parentReportId);
 
-		Object[] values = {
-			newId,
-			parentReportId,
-			drilldown.getDrilldownReport().getReportId(),
-			newPosition,
-			drilldown.getHeaderText(),
-			drilldown.getLinkText(),
-			drilldown.getReportFormat(),
-			drilldown.isOpenInNewWindow()
-		};
-
-		dbService.update(sql, values);
+		saveDrilldown(drilldown, true);
 
 		return newId;
 	}
@@ -207,23 +195,64 @@ public class DrilldownService {
 	public void updateDrilldown(Drilldown drilldown) throws SQLException {
 		logger.debug("Entering updateDrilldown: drilldown={}", drilldown);
 
-		String sql = "UPDATE ART_DRILLDOWN_QUERIES SET QUERY_ID=?, DRILLDOWN_QUERY_ID=?,"
-				+ " DRILLDOWN_QUERY_POSITION=?, DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
-				+ " OUTPUT_FORMAT=?, OPEN_IN_NEW_WINDOW=?"
-				+ " WHERE DRILLDOWN_ID=?";
+		saveDrilldown(drilldown, false);
+	}
 
-		Object[] values = {
-			drilldown.getParentReportId(),
-			drilldown.getDrilldownReport().getReportId(),
-			drilldown.getPosition(),
-			drilldown.getHeaderText(),
-			drilldown.getLinkText(),
-			drilldown.getReportFormat(),
-			drilldown.isOpenInNewWindow(),
-			drilldown.getDrilldownId()
-		};
+	/**
+	 * Save a drilldown
+	 * 
+	 * @param drilldown
+	 * @param newRecord
+	 * @throws SQLException 
+	 */
+	private void saveDrilldown(Drilldown drilldown, boolean newRecord) throws SQLException {
+		logger.debug("Entering saveDrilldown: drilldown={}", drilldown);
 
-		dbService.update(sql, values);
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_DRILLDOWN_QUERIES"
+					+ " (DRILLDOWN_ID, QUERY_ID, DRILLDOWN_QUERY_ID, DRILLDOWN_QUERY_POSITION,"
+					+ " DRILLDOWN_TITLE, DRILLDOWN_TEXT, OUTPUT_FORMAT, OPEN_IN_NEW_WINDOW)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 8) + ")";
+
+			Object[] values = {
+				drilldown.getDrilldownId(),
+				drilldown.getParentReportId(),
+				drilldown.getDrilldownReport().getReportId(),
+				drilldown.getPosition(),
+				drilldown.getHeaderText(),
+				drilldown.getLinkText(),
+				drilldown.getReportFormat(),
+				drilldown.isOpenInNewWindow()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_DRILLDOWN_QUERIES SET QUERY_ID=?, DRILLDOWN_QUERY_ID=?,"
+					+ " DRILLDOWN_QUERY_POSITION=?, DRILLDOWN_TITLE=?, DRILLDOWN_TEXT=?,"
+					+ " OUTPUT_FORMAT=?, OPEN_IN_NEW_WINDOW=?"
+					+ " WHERE DRILLDOWN_ID=?";
+
+			Object[] values = {
+				drilldown.getParentReportId(),
+				drilldown.getDrilldownReport().getReportId(),
+				drilldown.getPosition(),
+				drilldown.getHeaderText(),
+				drilldown.getLinkText(),
+				drilldown.getReportFormat(),
+				drilldown.isOpenInNewWindow(),
+				drilldown.getDrilldownId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, drilldown={}",
+					affectedRows, newRecord, drilldown);
+		}
 	}
 
 	/**

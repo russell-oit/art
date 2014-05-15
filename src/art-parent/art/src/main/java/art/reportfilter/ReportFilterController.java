@@ -98,6 +98,26 @@ public class ReportFilterController {
 		model.addAttribute("reportFilter", new ReportFilter());
 		return showReportFilter("add", model, reportId);
 	}
+	
+	@RequestMapping(value = "/app/editReportFilter", method = RequestMethod.GET)
+	public String editReportFilter(@RequestParam("id") Integer id, Model model) {
+		logger.debug("Entering editReportFilter: id={}", id);
+
+		int reportId = 0;
+
+		try {
+			ReportFilter reportFilter = reportFilterService.getReportFilter(id);
+			model.addAttribute("reportFilter", reportFilter);
+			if (reportFilter != null) {
+				reportId = reportFilter.getReportId();
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showReportFilter("edit", model, reportId);
+	}
 
 	@RequestMapping(value = "/app/saveReportFilter", method = RequestMethod.POST)
 	public String saveReportFilter(@ModelAttribute("reportFilter") @Valid ReportFilter reportFilter,
@@ -129,26 +149,6 @@ public class ReportFilterController {
 		}
 
 		return showReportFilter(action, model, reportId);
-	}
-
-	@RequestMapping(value = "/app/editReportFilter", method = RequestMethod.GET)
-	public String editReportFilter(@RequestParam("id") Integer id, Model model) {
-		logger.debug("Entering editReportFilter: id={}", id);
-
-		int reportId = 0;
-
-		try {
-			ReportFilter reportFilter = reportFilterService.getReportFilter(id);
-			model.addAttribute("reportFilter", reportFilter);
-			if (reportFilter != null) {
-				reportId = reportFilter.getReportId();
-			}
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
-
-		return showReportFilter("edit", model, reportId);
 	}
 
 	/**

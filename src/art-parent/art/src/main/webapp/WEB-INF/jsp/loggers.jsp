@@ -74,7 +74,7 @@ Display current loggers
 				<tr>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.level"/></th>
-					<th><spring:message code="page.text.action"/></th>
+					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

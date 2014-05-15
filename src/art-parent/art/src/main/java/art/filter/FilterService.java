@@ -177,6 +177,7 @@ public class FilterService {
 	 * Add a new filter to the database
 	 *
 	 * @param filter
+	 * @param actionUser
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -199,24 +200,9 @@ public class FilterService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_RULES"
-				+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE,"
-				+ " CREATION_DATE, CREATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
+		filter.setFilterId(newId);
 
-		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(filter);
-
-		Object[] values = {
-			newId,
-			filter.getName(),
-			filter.getDescription(),
-			defaults.get("dataType"),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
-
-		dbService.update(sql, values);
+		saveFilter(filter, true, actionUser);
 
 		return newId;
 	}
@@ -225,40 +211,29 @@ public class FilterService {
 	 * Update an existing filter
 	 *
 	 * @param filter
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "filters", allEntries = true)
 	public void updateFilter(Filter filter, User actionUser) throws SQLException {
 		logger.debug("Entering updateFilter: filter={}, actionUser={}", filter, actionUser);
 
-		String sql = "UPDATE ART_RULES SET RULE_NAME=?, SHORT_DESCRIPTION=?,"
-				+ " DATA_TYPE=?, UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE RULE_ID=?";
-
-		//set values for possibly null property objects
-		Map<String, Object> defaults = getSaveDefaults(filter);
-
-		Object[] values = {
-			filter.getName(),
-			filter.getDescription(),
-			defaults.get("dataType"),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			filter.getFilterId()
-		};
-
-		dbService.update(sql, values);
+		saveFilter(filter, false, actionUser);
 	}
 
 	/**
-	 * Get values for possibly null property objects
+	 * Save a filter
 	 *
 	 * @param filter
-	 * @return map with values to save. key = field name, value = field value
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
 	 */
-	private Map<String, Object> getSaveDefaults(Filter filter) {
-		Map<String, Object> values = new HashMap<>();
+	private void saveFilter(Filter filter, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveFilter: filter={}, newRecord={},actionUser={}",
+				filter, newRecord, actionUser);
 
+		//set values for possibly null property objects
 		String dataType;
 		if (filter.getDataType() == null) {
 			logger.warn("Data type not defined. Defaulting to varchar");
@@ -266,9 +241,47 @@ public class FilterService {
 		} else {
 			dataType = filter.getDataType().getValue();
 		}
-		values.put("dataType", dataType);
 
-		return values;
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_RULES"
+					+ " (RULE_ID, RULE_NAME, SHORT_DESCRIPTION, DATA_TYPE,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
+
+			Object[] values = {
+				filter.getFilterId(),
+				filter.getName(),
+				filter.getDescription(),
+				dataType,
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_RULES SET RULE_NAME=?, SHORT_DESCRIPTION=?,"
+					+ " DATA_TYPE=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE RULE_ID=?";
+
+			Object[] values = {
+				filter.getName(),
+				filter.getDescription(),
+				dataType,
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				filter.getFilterId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, filter={}",
+					affectedRows, newRecord, filter);
+		}
 	}
 
 	/**

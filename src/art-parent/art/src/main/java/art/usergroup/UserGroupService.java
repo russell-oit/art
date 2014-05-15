@@ -196,22 +196,9 @@ public class UserGroupService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_USER_GROUPS"
-				+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
-				+ " START_QUERY, CREATION_DATE, CREATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 7) + ")";
+		group.setUserGroupId(newId);
 
-		Object[] values = {
-			newId,
-			group.getName(),
-			group.getDescription(),
-			group.getDefaultReportGroup(),
-			group.getStartReport(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
-
-		dbService.update(sql, values);
+		saveUserGroup(group, true, actionUser);
 
 		return newId;
 	}
@@ -227,20 +214,62 @@ public class UserGroupService {
 	public void updateUserGroup(UserGroup group, User actionUser) throws SQLException {
 		logger.debug("Entering updateUserGroup: group={}, actionUser={}", group, actionUser);
 
-		String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
-				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE USER_GROUP_ID=?";
+		saveUserGroup(group, false, actionUser);
+	}
 
-		Object[] values = {
-			group.getName(),
-			group.getDescription(),
-			group.getDefaultReportGroup(),
-			group.getStartReport(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			group.getUserGroupId()
-		};
+	/**
+	 * Save a user group
+	 *
+	 * @param group
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	private void saveUserGroup(UserGroup group, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveUserGroup: group={}, newRecord={}, actionUser={}",
+				group, newRecord, actionUser);
 
-		dbService.update(sql, values);
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_USER_GROUPS"
+					+ " (USER_GROUP_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
+					+ " START_QUERY, CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 7) + ")";
+
+			Object[] values = {
+				group.getUserGroupId(),
+				group.getName(),
+				group.getDescription(),
+				group.getDefaultReportGroup(),
+				group.getStartReport(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_USER_GROUPS SET NAME=?, DESCRIPTION=?,"
+					+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE USER_GROUP_ID=?";
+
+			Object[] values = {
+				group.getName(),
+				group.getDescription(),
+				group.getDefaultReportGroup(),
+				group.getStartReport(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				group.getUserGroupId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, group={}",
+					affectedRows, newRecord, group);
+		}
 	}
 }

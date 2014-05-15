@@ -30,6 +30,7 @@ Display user configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
@@ -58,6 +59,7 @@ Display user configuration page
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
 						"${linkedJobsExistText}" //linkedRecordsExistText
 						);
+				
 			});
 
 		</script>
@@ -97,7 +99,7 @@ Display user configuration page
 					<th><spring:message code="users.text.username"/></th>
 					<th><spring:message code="users.text.fullName"/></th>
 					<th><spring:message code="page.text.active"/></th>
-					<th><spring:message code="page.text.action"/></th>
+					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

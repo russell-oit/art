@@ -1413,7 +1413,7 @@ public class ArtConfig extends HttpServlet {
 				Version currentVersion = Version.valueOf(version);
 
 				//changes introduced in 3.0.0
-				if (currentVersion.greaterThanOrEqualTo(Version.valueOf("3.0.0"))) {
+				if (currentVersion.equals(Version.valueOf("3.0.0"))) {
 					addUserIds();
 					addScheduleIds();
 					addDrilldownIds();

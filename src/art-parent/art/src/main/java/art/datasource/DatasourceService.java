@@ -152,11 +152,12 @@ public class DatasourceService {
 	 *
 	 * @param datasource
 	 * @param actionUser
+	 * @return new record id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
-	public synchronized void addDatasource(Datasource datasource, User actionUser) throws SQLException {
-		logger.debug("Entering addDatasource: datasource={}, actionUser={}", datasource,actionUser);
+	public synchronized int addDatasource(Datasource datasource, User actionUser) throws SQLException {
+		logger.debug("Entering addDatasource: datasource={}, actionUser={}", datasource, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(DATABASE_ID) FROM ART_DATABASES";
@@ -173,71 +174,94 @@ public class DatasourceService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_DATABASES"
-				+ " (DATABASE_ID, NAME, DESCRIPTION, JNDI, DRIVER, URL, USERNAME,"
-				+ " PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE, CREATED_BY)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+		datasource.setDatasourceId(newId);
 
-		Object[] values = {
-			newId,
-			datasource.getName(),
-			datasource.getDescription(),
-			datasource.isJndi(),
-			datasource.getDriver(),
-			datasource.getUrl(),
-			datasource.getUsername(),
-			datasource.getPassword(),
-			datasource.getConnectionPoolTimeout(),
-			datasource.getTestSql(),
-			datasource.isActive(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername()
-		};
+		saveDatasource(datasource, true, actionUser);
 
-		int affectedRows = dbService.update(sql, values);
-		logger.debug("affectedRows={}", affectedRows);
+		return newId;
 
-		if (affectedRows != 1) {
-			logger.warn("Problem with add. affectedRows={}, datasource={}", affectedRows, datasource);
-		}
 	}
 
 	/**
 	 * Update an existing datasource
 	 *
 	 * @param datasource
+	 * @param actionUser
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
 	public void updateDatasource(Datasource datasource, User actionUser) throws SQLException {
-		logger.debug("Entering updateDatasource: datasource={}, actionUser={}", datasource,actionUser);
+		logger.debug("Entering updateDatasource: datasource={}, actionUser={}", datasource, actionUser);
 
-		String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, JNDI=?,"
-				+ " DRIVER=?, URL=?, USERNAME=?, PASSWORD=?,"
-				+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
-				+ " WHERE DATABASE_ID=?";
+		saveDatasource(datasource, false, actionUser);
+	}
 
-		Object[] values = {
-			datasource.getName(),
-			datasource.getDescription(),
-			datasource.isJndi(),
-			datasource.getDriver(),
-			datasource.getUrl(),
-			datasource.getUsername(),
-			datasource.getPassword(),
-			datasource.getConnectionPoolTimeout(),
-			datasource.getTestSql(),
-			datasource.isActive(),
-			DbUtils.getCurrentTimeStamp(),
-			actionUser.getUsername(),
-			datasource.getDatasourceId()
-		};
+	/**
+	 * Save a datasource
+	 *
+	 * @param datasource
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	private void saveDatasource(Datasource datasource, boolean newRecord, User actionUser) throws SQLException {
+		logger.debug("Entering saveDatasource: datasource={}, newRecord={}, actionUser={}",
+				datasource, newRecord, actionUser);
 
-		int affectedRows = dbService.update(sql, values);
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_DATABASES"
+					+ " (DATABASE_ID, NAME, DESCRIPTION, JNDI, DRIVER, URL, USERNAME,"
+					+ " PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+
+			Object[] values = {
+				datasource.getDatasourceId(),
+				datasource.getName(),
+				datasource.getDescription(),
+				datasource.isJndi(),
+				datasource.getDriver(),
+				datasource.getUrl(),
+				datasource.getUsername(),
+				datasource.getPassword(),
+				datasource.getConnectionPoolTimeout(),
+				datasource.getTestSql(),
+				datasource.isActive(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, JNDI=?,"
+					+ " DRIVER=?, URL=?, USERNAME=?, PASSWORD=?,"
+					+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE DATABASE_ID=?";
+
+			Object[] values = {
+				datasource.getName(),
+				datasource.getDescription(),
+				datasource.isJndi(),
+				datasource.getDriver(),
+				datasource.getUrl(),
+				datasource.getUsername(),
+				datasource.getPassword(),
+				datasource.getConnectionPoolTimeout(),
+				datasource.getTestSql(),
+				datasource.isActive(),
+				DbUtils.getCurrentTimeStamp(),
+				actionUser.getUsername(),
+				datasource.getDatasourceId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-			logger.warn("Problem with update. affectedRows={}, datasource={}", affectedRows, datasource);
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, datasource={}",
+					affectedRows, newRecord, datasource);
 		}
 	}
 

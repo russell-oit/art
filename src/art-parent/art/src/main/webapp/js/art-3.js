@@ -216,8 +216,22 @@ function applyColumnFilters(tbl, table) {
 /**
  * Actions to perform when datatables completes initializing a table
  */
-function datatablesInitComplete(){
+function datatablesInitComplete() {
 	$('div.dataTables_filter input').focus();
+	
+//	$('.dataTables_length select').addClass('selectpicker');
+////	$('.dataTables_length select').attr({'data-toggle': 'dropdown', 'data-hover': 'dropdown'});
+////	$('.dataTables_length select').attr('data-hover','dropdown');
+//
+//	//Enable Bootstrap-Select
+//	$('.selectpicker').selectpicker({
+//		iconBase: 'fa',
+//		tickIcon: 'fa-check-square'
+//	});
+//	
+//	$('button.dropdown-toggle').dropdownHover({
+//		delay: 100
+//	});
 }
 
 /**
@@ -355,7 +369,8 @@ function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
 	var linkedRecords = response.data;
 	if (response.success) {
 		if (deleteRow) {
-			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+//			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+			table.row(row).remove();
 		}
 		notifyActionSuccess(recordDeletedText, recordName);
 	} else if (linkedRecords !== null && linkedRecords.length > 0) {
