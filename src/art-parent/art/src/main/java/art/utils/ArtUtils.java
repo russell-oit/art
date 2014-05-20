@@ -109,11 +109,22 @@ public class ArtUtils {
 	}
 
 	/**
-	 * Get random string that can be used as a unique id e.g. in file names
+	 * Get random string that can be used as a unique record id 
 	 *
 	 * @return unique id string
 	 */
 	public static String getUniqueId() {
+		//can potentially use randomUUID but it may block if the server lacks sufficient entropy?
+		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
+		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(10);
+	}
+	
+	/**
+	 * Get random string that can be used as a unique file name
+	 *
+	 * @return 
+	 */
+	public static String getUniqueFileName() {
 		//can potentially use randomUUID but it may block if the server lacks sufficient entropy?
 		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
 		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(20);

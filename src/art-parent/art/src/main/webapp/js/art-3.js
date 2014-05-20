@@ -369,8 +369,7 @@ function deleteDoneHandler(response, table, row, recordDeletedText, recordName, 
 	var linkedRecords = response.data;
 	if (response.success) {
 		if (deleteRow) {
-//			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
-			table.row(row).remove();
+			table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 		}
 		notifyActionSuccess(recordDeletedText, recordName);
 	} else if (linkedRecords !== null && linkedRecords.length > 0) {

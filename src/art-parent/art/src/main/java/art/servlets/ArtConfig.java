@@ -175,7 +175,6 @@ public class ArtConfig extends HttpServlet {
 		ctx.setAttribute("artVersion", artVersion);
 		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
 		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
-		ctx.setAttribute("sortDatePattern", "yyyy-MM-dd-HH:mm:ss.SSS"); //to enable correct sorting of dates in tables
 		ctx.setAttribute("dateDisplayPattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
 
 		//set application path
@@ -1414,12 +1413,18 @@ public class ArtConfig extends HttpServlet {
 
 				//changes introduced in 3.0.0
 				if (currentVersion.equals(Version.valueOf("3.0.0"))) {
+					logger.info("Performing 3.0.0 upgrade steps");
+
 					addUserIds();
 					addScheduleIds();
 					addDrilldownIds();
 					addRuleIds();
 					addQueryRuleIds();
 					addParameters();
+					addUserRuleValueKeys();
+					addUserGroupRuleValueKeys();
+
+					logger.info("Done performing 3.0.0 upgrade steps");
 				}
 
 				boolean deleted = upgradeFile.delete();
@@ -1448,6 +1453,8 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("users.isEmpty()={}", users.isEmpty());
 		if (!users.isEmpty()) {
+			logger.info("Adding user ids");
+			
 			//generate new id
 			sql = "SELECT MAX(USER_ID) FROM ART_USERS";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1508,6 +1515,8 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("schedules.isEmpty()={}", schedules.isEmpty());
 		if (!schedules.isEmpty()) {
+			logger.info("Adding schedule ids");
+			
 			//generate new id
 			sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1544,6 +1553,8 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("drilldowns.isEmpty()={}", drilldowns.isEmpty());
 		if (!drilldowns.isEmpty()) {
+			logger.info("Adding drilldown ids");
+			
 			//generate new id
 			sql = "SELECT MAX(DRILLDOWN_ID) FROM ART_DRILLDOWN_QUERIES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1582,6 +1593,8 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("rules.isEmpty()={}", rules.isEmpty());
 		if (!rules.isEmpty()) {
+			logger.info("Adding rule ids");
+			
 			//generate new id
 			sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1628,6 +1641,8 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("reportFilters.isEmpty()={}", reportFilters.isEmpty());
 		if (!reportFilters.isEmpty()) {
+			logger.info("Adding query rule ids");
+			
 			//generate new id
 			sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1668,6 +1683,8 @@ public class ArtConfig extends HttpServlet {
 
 		logger.debug("parameters.isEmpty()={}", parameters.isEmpty());
 		if (!parameters.isEmpty()) {
+			logger.info("Adding parameters");
+			
 			//generate new parameter id
 			sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1753,6 +1770,72 @@ public class ArtConfig extends HttpServlet {
 				sql = "UPDATE ART_QUERY_FIELDS SET MIGRATED=1"
 						+ " WHERE QUERY_ID=? AND FIELD_POSITION=?";
 				dbService.update(sql, reportId, position);
+			}
+		}
+	}
+
+	/**
+	 * Populate user rule value key column. Column added in 3.0
+	 */
+	private static void addUserRuleValueKeys() throws SQLException {
+		logger.debug("Entering addUserRuleValueKeys");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT *"
+				+ " FROM ART_USER_RULES"
+				+ " WHERE RULE_VALUE_KEY IS NULL AND RULE_TYPE='EXACT'";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> userRules = dbService.query(sql, h2);
+
+		logger.debug("userRules.isEmpty()={}", userRules.isEmpty());
+		if (!userRules.isEmpty()) {
+			logger.info("Adding user rule value keys");
+
+			for (Map<String, Object> userRule : userRules) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				String username = (String) userRule.get("USERNAME");
+				String ruleName = (String) userRule.get("RULE_NAME");
+				String ruleValue = (String) userRule.get("RULE_VALUE");
+				sql = "UPDATE ART_USER_RULES SET RULE_VALUE_KEY=?"
+						+ " WHERE USERNAME=? AND RULE_NAME=? AND RULE_VALUE=?"
+						+ " AND RULE_TYPE='EXACT'";
+				dbService.update(sql, ArtUtils.getUniqueId(), username, ruleName, ruleValue);
+			}
+		}
+	}
+
+	/**
+	 * Populate user group rule value key column. Column added in 3.0
+	 */
+	private static void addUserGroupRuleValueKeys() throws SQLException {
+		logger.debug("Entering addUserGroupRuleValueKeys");
+
+		String sql;
+
+		DbService dbService = new DbService();
+
+		sql = "SELECT *"
+				+ " FROM ART_USER_GROUP_RULES"
+				+ " WHERE RULE_VALUE_KEY IS NULL AND RULE_TYPE='EXACT'";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> userGroupRules = dbService.query(sql, h2);
+
+		logger.debug("userGroupRules.isEmpty()={}", userGroupRules.isEmpty());
+		if (!userGroupRules.isEmpty()) {
+			logger.info("Adding user group rule value keys");
+
+			for (Map<String, Object> userGroupRule : userGroupRules) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer userGroupId = (Integer) userGroupRule.get("USER_GROUP_ID");
+				String ruleName = (String) userGroupRule.get("RULE_NAME");
+				String ruleValue = (String) userGroupRule.get("RULE_VALUE");
+				sql = "UPDATE ART_USER_GROUP_RULES SET RULE_VALUE_KEY=?"
+						+ " WHERE USER_GROUP_ID=? AND RULE_NAME=? AND RULE_VALUE=?"
+						+ " AND RULE_TYPE='EXACT'";
+				dbService.update(sql, ArtUtils.getUniqueId(), userGroupId, ruleName, ruleValue);
 			}
 		}
 	}

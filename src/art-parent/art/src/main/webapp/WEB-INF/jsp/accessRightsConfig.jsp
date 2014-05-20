@@ -19,7 +19,7 @@ Access rights configuration
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="page.message.rightsGranted" var="rightsGrantedText"/>
-<spring:message code="accessRights.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
+<spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
 <spring:message code="accessRights.message.selectReportOrReportGroup" var="selectReportOrReportGroupText"/>
 <spring:message code="page.text.available" var="availableText"/>
 <spring:message code="page.text.selected" var="selectedText"/>

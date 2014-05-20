@@ -109,7 +109,7 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/filterValues.do">
+								<a href="${pageContext.request.contextPath}/app/filterValuesConfig.do">
 									<spring:message code="header.link.filterValues"/>
 								</a>
 							</li>
