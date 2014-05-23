@@ -22,11 +22,11 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 /**
-<i>ArtOutputInterface</i> is implemented by the objects
-which present the queries output (view modes). <br>
+<i>ReportOutputInterface</i> is implemented by the objects
+which present the report output (view modes). <br>
 
 ART retrieves the SQL code and runs it in the target database.
-The resultset is used to feed the objects  who
+The resultset is used to feed the objects  which
 render the output (presentation layer).
 These objects need to implement this interface.<br>
 
@@ -40,27 +40,20 @@ To add a new <i>output type (View Mode)</i>, you need to:
 <li>Create a class that implements this interface, the class name must be
 <code><i>xyz</i>Output</code>, where <i>xyz</i> is a free string.<br>
 Copy the <code>xyzOutput.class</code> file in the same directory where
-<code>ArtOutputInterface.class</code> is stored.
-</li>
-<li>Update, in  web.xml, the two context parameters:
-<code>viewModeCodeList</code> and <code>viewModeDescriptionList</code> 
-so that the new mode will show up in the list ov available view modes. 
-</li>
-<li> <i>(optional)</i> Add a context parameter <code><i>xyz</i>OutputMaxRows</code>
-on the web.xml file if you want to limit the maximum number of rows.
+<code>ReportOutputInterface.class</code> is stored.
 </li>
 </ol>
 <br>
 Technically, the ExecuteQuery servlet (or the scheduler job) receives the <i>output type</i> 
 name (<i>xyz</i>) and tries to instatiate a class named <code>xyzOutput</code>, that is assumed 
-to implement the   <i>ArtOutputInterface</i>.<br>
+to implement the <i>ReportOutputInterface</i>.<br>
 <br>
-Have a look on the existing classes for a real word examples
+Have a look at the existing classes for a real word examples
 (see xmlOutput.java for a simple example).<br>
  * 
  * @author Enrico Liboni
  */
-public interface ArtOutputInterface {
+public interface ReportOutputInterface {
 
     /**     
     Returns the name of this class as it should appear to users in the

@@ -26,7 +26,7 @@
  */
 package art.params;
 
-import art.utils.PreparedQuery;
+import art.report.PreparedQuery;
 import java.util.Map;
 import java.util.ResourceBundle;
 import org.apache.commons.lang3.StringUtils;

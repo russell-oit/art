@@ -20,7 +20,7 @@ import art.servlets.ArtConfig;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
-import art.utils.PreparedQuery;
+import art.report.PreparedQuery;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;

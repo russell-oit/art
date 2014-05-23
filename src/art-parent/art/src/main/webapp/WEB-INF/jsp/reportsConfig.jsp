@@ -155,22 +155,26 @@ Reports configuration page
 									<li>
 										<a 
 										   href="${pageContext.request.contextPath}/app/reportParameters.do?reportId=${report.reportId}">
-											<i class="fa fa-paperclip"></i>
 											<spring:message code="reports.action.parameters"/>
 										</a>
 									</li>
 									<li>
 										<a 
 										   href="${pageContext.request.contextPath}/app/reportFilters.do?reportId=${report.reportId}">
-											<i class="fa fa-filter"></i>
 											<spring:message code="reports.action.filters"/>
 										</a>
 									</li>
 									<li>
 										<a 
 										   href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${report.reportId}">
-											<i class="fa fa-level-down"></i>
 											<spring:message code="reports.action.drilldowns"/>
+										</a>
+									</li>
+									<li class="divider"></li>
+									<li>
+										<a 
+										   href="${pageContext.request.contextPath}/app/showReport.do?reportId=${report.reportId}">
+											<spring:message code="reports.action.preview"/>
 										</a>
 									</li>
 								</ul>

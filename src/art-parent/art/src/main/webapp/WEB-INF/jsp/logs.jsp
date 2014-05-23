@@ -110,7 +110,7 @@ Display application logs
 
 			/* Formating function for row details */
 			function formatDetails(data) {
-				return data[7];
+				return '<div class="details">' + data[7] + '</div>';
 			}
 
 		</script>

@@ -18,6 +18,7 @@ package art.report;
 
 import art.datasource.Datasource;
 import art.enums.ReportStatus;
+import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import java.io.Serializable;
 import java.util.Date;
@@ -59,6 +60,21 @@ public class Report implements Serializable {
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
 	private String updatedBy;
+
+	/**
+	 * Determine whether this is an lov report
+	 *
+	 * @return
+	 */
+	public boolean isLov() {
+		ReportType reportTypeEnum = ReportType.toEnum(reportType);
+
+		if (reportTypeEnum == ReportType.LovDynamic || reportTypeEnum == ReportType.LovDynamic) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/**
 	 * @return the createdBy

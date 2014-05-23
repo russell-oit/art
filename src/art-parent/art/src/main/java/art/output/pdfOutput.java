@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Marios Timotheou
  */
-public class pdfOutput implements ArtOutputInterface {
+public class pdfOutput implements ReportOutputInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(pdfOutput.class);
 	String filename;

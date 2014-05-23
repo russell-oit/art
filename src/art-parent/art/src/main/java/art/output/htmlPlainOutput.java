@@ -35,7 +35,7 @@ import java.util.Map;
  * 
  * @author Enrico Liboni
  */
-public class htmlPlainOutput implements ArtOutputInterface {
+public class htmlPlainOutput implements ReportOutputInterface {
 
     PrintWriter out;
     int numberOfLines;      
@@ -129,7 +129,7 @@ public class htmlPlainOutput implements ArtOutputInterface {
 		
 		if(!displayInline){
 			//display parameters
-			ArtOutHandler.displayParameters(out, displayParams);
+			ReportOuputtHandler.displayParameters(out, displayParams);
 		}
 		
 		//start results table

@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Enrico Liboni
  */
-public class htmlDataTableOutput implements ArtOutputInterface {
+public class htmlDataTableOutput implements ReportOutputInterface {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -187,7 +187,7 @@ public class htmlDataTableOutput implements ArtOutputInterface {
 		out.println("</script>	");
 
 		//display parameters
-		ArtOutHandler.displayParameters(out, displayParams);
+		ReportOuputtHandler.displayParameters(out, displayParams);
 
 		//start results table
 		out.println("<div style=\"border: 1px solid black; width:80%; margin 0 auto\"><table class=\"display\" id=\"" + tableId + "\">");

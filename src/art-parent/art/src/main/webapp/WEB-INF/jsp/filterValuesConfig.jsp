@@ -219,7 +219,7 @@ Configure filter value
 								<spring:message code="page.action.add"/>
 							</button>
 							<button type="button" class="btn btn-default updateValues" data-action="removeAll">
-								<spring:message code="page.action.removeAll"/>
+								<spring:message code="filterValues.action.removeAll"/>
 							</button>
 						</div>
 					</div>

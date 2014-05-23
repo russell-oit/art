@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author Enrico Liboni
  */
-public class rss20Output implements ArtOutputInterface {
+public class rss20Output implements ReportOutputInterface {
 
     PrintWriter out;
     int numberOfLines = 0;

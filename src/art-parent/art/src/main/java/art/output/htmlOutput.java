@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class htmlOutput implements ArtOutputInterface {
+public class htmlOutput implements ReportOutputInterface {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -103,7 +103,9 @@ public class htmlOutput implements ArtOutputInterface {
 	@Override
 	public void beginHeader() {
 		//display parameters
-		ArtOutHandler.displayParameters(out, displayParams);
+		ReportOuputtHandler.displayParameters(out, displayParams);
+		
+		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlOutput.css\">");
 
 		//start results table
 		out.println("<div style=\"border: 3px solid white\"><table class=\"qe\" width=\"80%\"><tr>"); // cellspacing=\"1\" cellpadding=\"0\"

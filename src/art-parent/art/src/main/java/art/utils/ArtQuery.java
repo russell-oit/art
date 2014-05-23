@@ -21,6 +21,7 @@
  */
 package art.utils;
 
+import art.report.PreparedQuery;
 import art.params.*;
 import art.servlets.ArtConfig;
 import java.sql.*;
@@ -2478,7 +2479,7 @@ public class ArtQuery {
 			String sql;
 			ResultSet rs;
 
-			sql = "SELECT SHOW_PARAMETERS "
+			sql = "SELECT PARAMETERS_IN_OUTPUT "
 					+ " FROM ART_QUERIES WHERE QUERY_ID =?";
 
 			ps = conn.prepareStatement(sql);
@@ -2486,10 +2487,7 @@ public class ArtQuery {
 			rs = ps.executeQuery();
 
 			if (rs.next()) {
-				String setting = rs.getString("SHOW_PARAMETERS");
-				if (StringUtils.equals(setting, "A")) {
-					alwaysShow = true;
-				}
+				alwaysShow = rs.getBoolean("PARAMETERS_IN_OUTPUT");
 			}
 			rs.close();
 		} catch (Exception e) {

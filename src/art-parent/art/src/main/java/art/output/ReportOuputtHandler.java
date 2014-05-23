@@ -33,15 +33,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate query output by scrolling the resultset and feeding the
- * ArtOutputInterface object
+ * Generate report output by scrolling the resultset and feeding the
+ * ReportOutputInterface object
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class ArtOutHandler {
+public class ReportOuputtHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(ArtOutHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportOuputtHandler.class);
 
 	/**
 	 * Flush the output as it is (row by row). For output that can't have drill
@@ -55,7 +55,7 @@ public class ArtOutHandler {
 	 * @throws SQLException
 	 * @throws ArtException
 	 */
-	public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
+	public static int flushOutput(ResourceBundle messages, ReportOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
 
 		return flushOutput(messages, o, rs, rsmd, null, null, null, null);
 	}
@@ -75,8 +75,7 @@ public class ArtOutHandler {
 	 * @throws SQLException
 	 * @throws ArtException if max rows reached
 	 */
-	public static int flushOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd, Map<Integer, DrilldownQuery> drilldownQueries, String baseUrl, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException, ArtException {
-
+	public static int flushOutput(ResourceBundle messages, ReportOutputInterface o, ResultSet rs, ResultSetMetaData rsmd, Map<Integer, DrilldownQuery> drilldownQueries, String baseUrl, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException, ArtException {
 
 		int columnCount = rsmd.getColumnCount();
 		int i;
@@ -180,14 +179,19 @@ public class ArtOutHandler {
 					case 4:
 						// convert CLOB to string
 						java.sql.Clob clob = rs.getClob(i + 1);
-						String clobValue;
-						try {
-							clobValue = clob.getSubString(1, (int) clob.length());
-							o.addCellString(clobValue);
-						} catch (SQLException e) {
-							logger.error("Error", e);
-							clobValue = "Exception getting CLOB: " + e;
-							o.addCellString(clobValue);
+
+						String clobValue = null;
+						if (clob == null) {
+							o.addCellString(null);
+						} else {
+							try {
+								clobValue = clob.getSubString(1, (int) clob.length());
+								o.addCellString(clobValue);
+							} catch (SQLException e) {
+								logger.error("Error", e);
+								clobValue = "Exception getting CLOB: " + e;
+								o.addCellString(clobValue);
+							}
 						}
 						columnValues.add(clobValue);
 						break;
@@ -307,7 +311,7 @@ public class ArtOutHandler {
 	 * @throws ArtException if resulset not in format for a crosstab or max rows
 	 * exceeded
 	 */
-	public static int flushXOutput(ResourceBundle messages, ArtOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
+	public static int flushXOutput(ResourceBundle messages, ReportOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
 
 		/*
 		 * input
@@ -335,8 +339,6 @@ public class ArtOutHandler {
 		//           B    24  14  -      	 	    B	14  24   -   
 		//           C    -   04  44      	 	    C	04   -  44   
 		//                   ^--- Jan comes after Feb!			     	 
-
-
 
 		int colCount = rsmd.getColumnCount();
 		if (colCount != 3 && colCount != 5) {
@@ -390,7 +392,6 @@ public class ArtOutHandler {
 			o.beginLines();
 
 			//  _ Jan Feb Mar
-
 			for (j = 0; j < ya.length; j++) {
 				if (!o.newLine()) {
 					throw new ArtException(messages.getString("tooManyRows"));
@@ -434,7 +435,6 @@ public class ArtOutHandler {
 			o.beginLines();
 
 			//  _ Jan Feb Mar
-
 			for (j = 0; j < ya.length; j++) {
 				if (!o.newLine()) {
 					throw new ArtException(messages.getString("tooManyRows"));
@@ -456,10 +456,10 @@ public class ArtOutHandler {
 	}
 
 	/**
-	 * Used to call the right method on ArtOutputInterface when flushing values
-	 * (flushXOutput)
+	 * Used to call the right method on ReportOutputInterface when flushing
+	 * values (flushXOutput)
 	 */
-	private static void addCell(ArtOutputInterface o, Object value, int columnType) {
+	private static void addCell(ReportOutputInterface o, Object value, int columnType) {
 
 		if (columnType == 0) {
 			o.addCellString((String) value);

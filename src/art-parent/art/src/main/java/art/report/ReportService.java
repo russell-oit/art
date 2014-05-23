@@ -20,18 +20,23 @@ import art.datasource.Datasource;
 import art.dbutils.DbService;
 import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
+import art.enums.AccessLevel;
 import art.enums.ParameterType;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.user.User;
+import art.utils.ArtQueryParam;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -58,8 +63,16 @@ public class ReportService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public ReportService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public ReportService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT AQ.*, "
 			+ " AQG.NAME AS GROUP_NAME, AD.NAME AS DATASOURCE_NAME"
@@ -235,89 +248,58 @@ public class ReportService {
 	 * Get the reports that a user can access from the reports page. Excludes
 	 * disabled reports and some report types e.g. lovs
 	 *
-	 * @param username
+	 * @param userId
 	 * @return list of available reports, empty list otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("reports")
-	public List<AvailableReport> getAvailableReports(String username) throws SQLException {
-		List<AvailableReport> reports = new ArrayList<>();
+	public List<Report> getAvailableReports(int userId) throws SQLException {
+		String sql = SQL_SELECT_ALL
+				//only show active reports
+				+ " WHERE AQ.REPORT_STATUS=?"
+				//don't show lov reports
+				+ " AND AQ.QUERY_TYPE NOT IN(?,?)"
+				//don't show job recipient reports
+				+ " AND AQ.QUERY_TYPE <>?"
+				+ " AND("
+				//user can run report if he has direct access to it
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_QUERIES AUQ"
+				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AUQ.USER_ID=?)"
+				+ " OR"
+				//user can run report if he belongs to a user group which has direct access to the report
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_GROUP_QUERIES AUGQ"
+				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
+				+ " ON AUGQ.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " OR"
+				//user can run report if he has access to the report's group
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_QUERY_GROUPS AUQG"
+				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUQG.USER_ID=?)"
+				+ " OR"
+				//user can run report if his user group has access to the report's group
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_GROUP_GROUPS AUGG"
+				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
+				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " WHERE AUGG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUGA.USER_ID=?)"
+				+ ")";
 
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+		Object[] values = {
+			ReportStatus.Active.getValue(), //valid report status
+			ReportType.LovDynamic.getValue(), //omitted report types
+			ReportType.LovStatic.getValue(),
+			ReportType.JobRecipients.getValue(),
+			userId, //user access to report
+			userId, //user group access to report
+			userId, //user access to report group
+			userId //user group access to report group
+		};
 
-		try {
-			conn = ArtConfig.getConnection();
-
-			String sql;
-
-			//union will return distinct results
-			//only show active reports
-			//don't show dynamic lov(119), static lov(120), dynamic job recipient(121) reports
-			sql = "SELECT AQ.QUERY_ID, AQ.NAME AS QUERY_NAME, AQ.DESCRIPTION,"
-					+ " AQ.UPDATE_DATE, AQ.QUERY_GROUP_ID, AQG.NAME AS GROUP_NAME,"
-					+ " AQ.CREATION_DATE"
-					+ " FROM ART_QUERIES AQ "
-					+ " LEFT JOIN ART_QUERY_GROUPS AQG "
-					+ " ON AQ.QUERY_GROUP_ID = AQG.QUERY_GROUP_ID "
-					+ " WHERE AQ.REPORT_STATUS = 'Active' "
-					+ " AND AQ.QUERY_TYPE<>119 AND AQ.QUERY_TYPE<>120 AND AQ.QUERY_TYPE<>121 "
-					+ " AND AQ.QUERY_ID IN ("
-					//get reports that user has explicit rights to see
-					+ " SELECT AQ.QUERY_ID "
-					+ " FROM ART_USER_QUERIES AUQ, ART_QUERIES AQ "
-					+ " WHERE AUQ.QUERY_ID = AQ.QUERY_ID "
-					+ " AND AUQ.USERNAME=? "
-					+ " UNION ALL"
-					//add reports to which the user has access through his report 
-					+ " SELECT AQ.QUERY_ID "
-					+ " FROM ART_USER_GROUP_QUERIES AUGQ, ART_QUERIES AQ "
-					+ " WHERE AUGQ.QUERY_ID = AQ.QUERY_ID "
-					+ " AND EXISTS "
-					+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ?"
-					+ " AND AUGA.USER_GROUP_ID=AUGQ.USER_GROUP_ID)"
-					+ " UNION ALL"
-					// user can run all reports in the report reports he has direct access to
-					+ " SELECT AQ.QUERY_ID "
-					+ " FROM ART_USER_QUERY_GROUPS AUQG, ART_QUERIES AQ "
-					+ " WHERE AUQG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
-					+ " AND AUQG.USERNAME=? "
-					+ " UNION ALL"
-					//user can run all reports in the report reports that his reports have access to
-					+ " SELECT AQ.QUERY_ID "
-					+ " FROM ART_USER_GROUP_GROUPS AUGG, ART_QUERIES AQ "
-					+ " WHERE AUGG.QUERY_GROUP_ID = AQ.QUERY_GROUP_ID "
-					+ " AND EXISTS "
-					+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ?"
-					+ " AND AUGA.USER_GROUP_ID=AUGG.USER_GROUP_ID)"
-					+ " )";
-
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
-			ps.setString(2, username);
-			ps.setString(3, username);
-			ps.setString(4, username);
-
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				AvailableReport report = new AvailableReport();
-
-				report.setReportId(rs.getInt("QUERY_ID"));
-				report.setName(rs.getString("QUERY_NAME"));
-				report.setDescription(rs.getString("DESCRIPTION"));
-				report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-				report.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
-				report.setReportGroupName(rs.getString("GROUP_NAME"));
-				report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-
-				reports.add(report);
-			}
-		} finally {
-			DbUtils.close(rs, ps, conn);
-		}
-
-		return reports;
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h, values);
 	}
 
 	/**
@@ -828,6 +810,177 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
+	}
+
+	/**
+	 * Get all parameters for a query, with the parameter's html name as the key
+	 *
+	 * @param qId query id for the relevant query
+	 * @return all parameters for a query
+	 */
+	public Map<String, ArtQueryParam> getHtmlParams(int qId) {
+		Map<String, ArtQueryParam> params = new HashMap<String, ArtQueryParam>();
+
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		try {
+			conn = ArtConfig.getConnection();
+
+			String sql;
+			ResultSet rs;
+
+			sql = "SELECT FIELD_POSITION, PARAM_LABEL, PARAM_TYPE, DEFAULT_VALUE "
+					+ " FROM ART_QUERY_FIELDS"
+					+ " WHERE QUERY_ID =?";
+
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, qId);
+			rs = ps.executeQuery();
+
+			String htmlName;
+			String label;
+			int position;
+			String paramType;
+			while (rs.next()) {
+				position = rs.getInt("FIELD_POSITION");
+				label = rs.getString("PARAM_LABEL");
+				paramType = rs.getString("PARAM_TYPE");
+				String paramValue = rs.getString("DEFAULT_VALUE");
+
+				if (StringUtils.equals(paramType, "I")) {
+					//inline param                    
+					htmlName = "P_" + label;
+					ArtQueryParam param = new ArtQueryParam();
+					param.create(conn, qId, position);
+					param.setParamValue(paramValue); //set default value for inline params
+					params.put(htmlName, param);
+				} else if (StringUtils.equals(paramType, "M")) {
+					//multi param. can be either labelled (M_label) or non-labelled (M_1)
+					//add entry for labelled param
+					htmlName = "M_" + label;
+					ArtQueryParam param = new ArtQueryParam();
+					param.create(conn, qId, position);
+					params.put(htmlName, param);
+
+					//add entry for non-labelled param
+					htmlName = "M_" + position;
+					params.put(htmlName, param);
+				}
+			}
+			rs.close();
+		} catch (Exception e) {
+			logger.error("Error", e);
+		} finally {
+			try {
+				if (ps != null) {
+					ps.close();
+				}
+			} catch (Exception e) {
+				logger.error("Error", e);
+			}
+			try {
+				if (conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				logger.error("Error", e);
+			}
+		}
+
+		return params;
+	}
+
+	/**
+	 * Determine if a user can run a report
+	 *
+	 * @param userId
+	 * @param reportId
+	 * @return
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
+		String sql;
+
+		//everyone can run lov report
+		sql = "SELECT COUNT(*)"
+				+ " FROM ART_QUERIES AQ"
+				+ " WHERE QUERY_ID=?"
+				+ " AND("
+				//everyone can run lov report
+				+ " QUERY_TYPE IN(?,?)"
+				+ " OR"
+				//everyone can run public text report
+				+ " QUERY_TYPE=?"
+				+ " OR"
+				//everyone can run report if the public user has direct access to it
+				+ " EXISTS (SELECT COUNT(*)"
+				+ " FROM ART_USER_QUERIES AUQ"
+				+ " INNER JOIN ART_USERS AU"
+				+ " ON AUQ.USER_ID=AU.USER_ID"
+				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AU.USERNAME=?)"
+				+ " OR"
+				//everyone can run report if the public user has access to the report's group
+				+ " EXISTS (SELECT COUNT(*)"
+				+ " FROM ART_USER_QUERY_GROUPS AUQG"
+				+ " INNER JOIN ART_USERS AU"
+				+ " ON AUQG.USER_ID=AU.USER_ID"
+				+ " WHERE AUQG.QUERY_GROUP_IN=AQ.QUERY_GROUP_ID AND AU.USERNAME=?)"
+				+ " OR"
+				//admins can run all reports
+				+ " EXISTS (SELECT COUNT(*)"
+				+ " FROM ART_USERS"
+				+ " WHERE USER_ID=? AND ACCESS_LEVEL>=?)"
+				+ " OR"
+				//user can run report if he has direct access to it
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_QUERIES AUQ"
+				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AUQ.USER_ID=?)"
+				+ " OR"
+				//user can run report if he belongs to a user group which has direct access to the report
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_GROUP_QUERIES AUGQ"
+				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
+				+ " ON AUGQ.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " WHERE AUGQ.QUERY_ID=AQ.QUERY_ID AND AUGA.USER_ID=?)"
+				+ " OR"
+				//user can run report if he has access to the report's group
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_QUERY_GROUPS AUQG"
+				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUQG.USER_ID=?)"
+				+ " OR"
+				//user can run report if his user group has access to the report's group
+				+ " EXISTS (SELECT *"
+				+ " FROM ART_USER_GROUP_GROUPS AUGG"
+				+ " INNER JOIN ART_USER_GROUP_ASSIGNMENT AUGA"
+				+ " ON AUGG.USER_GROUP_ID=AUGA.USER_GROUP_ID"
+				+ " WHERE AUGG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AUGA.USER_ID=?)"
+				+ ")";
+
+		Object[] values = {
+			reportId,
+			ReportType.LovDynamic, //lov reports
+			ReportType.LovStatic,
+			reportId, //public text reports
+			ReportType.TextPublic.getValue(),
+			ArtUtils.PUBLIC_USER, //public user access to report
+			ArtUtils.PUBLIC_USER, //public user access to report's group
+			userId, //admin user
+			AccessLevel.JuniorAdmin.getValue(),
+			userId, //user access to report
+			userId, //user group access to report
+			userId, //user access to report group
+			userId //user group access to report group
+		};
+
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer recordCount = dbService.query(sql, h, values);
+		if (recordCount == null || recordCount == 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 }

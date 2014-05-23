@@ -24,9 +24,9 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Map;
 
-public class hideNullOutput implements ArtOutputInterface {
+public class hideNullOutput implements ReportOutputInterface {
 
-	private final ArtOutputInterface artOutputInterface;
+	private final ReportOutputInterface artOutputInterface;
 
 	@Override
 	public String getName() {
@@ -158,7 +158,7 @@ public class hideNullOutput implements ArtOutputInterface {
 		return artOutputInterface.isShowQueryHeaderAndFooter();
 	}
 
-	public hideNullOutput(ArtOutputInterface artOutputInterface) {
+	public hideNullOutput(ReportOutputInterface artOutputInterface) {
 		super();
 		this.artOutputInterface = artOutputInterface;
 	}

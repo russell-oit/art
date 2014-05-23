@@ -1,0 +1,90 @@
+/**
+Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+
+This file is part of ART.
+
+ART is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, version 2 of the License.
+
+ART is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with ART. If not, see <http://www.gnu.org/licenses/>.
+*/
+/* 
+    Created on : 21-May-2014, 15:32:40
+    Author     : Timothy Anyona
+
+css for html grid output
+*/
+
+table.sortable {
+	background-color: transparent;
+	border-top: 1px solid black;
+	border-bottom: 1px solid #000000;
+	border-left: 1px solid black;
+	border-right: 1px solid #000000;
+	font-size: 11px;
+	color: black;
+	cursor: default;
+	font-family: tahoma, verdana, sans-serif;
+}
+
+table.sortable th {
+	background-color: #d4d0c8;
+	text-align: center;
+	border-top: 1px solid white;
+	border-right: 1px solid black;
+	border-left: 1px solid white;
+	border-bottom: 1px solid black;
+	font-weight: normal;
+}
+
+table.sortable a.sortheader {
+	background-color: #d4d0c8;
+	color: #666666;
+	font-weight: bold;
+	text-decoration: none;
+	display: block;
+}
+
+table.sortable tr {
+	height: 0px;
+}
+
+table.sortable td {
+	border-left: 1px solid #E0E0E0;
+	border-bottom: 1px solid #E0E0E0;
+	vertical-align: text-top;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+tr.hiliterows {
+	font-weight: normal;
+	background-color: #d3d3d3;
+	color: black;
+	height: 0px;
+}
+
+tr.rows {
+	font-weight: normal;
+	background-color: white;
+	height: 0px;
+}
+
+tr.slct {
+	background-color: yellow;
+	height: 0px;
+}
+
+tr.slct2 {
+	background-color: green;
+	color: white;
+	height: 0px;
+}
+

@@ -1,265 +1,273 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-    <!-- General description of ART -->
-    <display-name>ART - A Reporting Tool</display-name>
-    <description>
+	<!-- General description of ART -->
+	<display-name>ART - A Reporting Tool</display-name>
+	<description>
 		This is an application to perform
 		a wild and wonderful task, based on servlets and jsp.
 		It was written by eliboni@users.sourceforge.net
 		who should be contacted for more information.
 		Web site http://art.sourceforge.net
 	</description>
-    <!-- Version information -->
-    <context-param>
-        <description>ART Version Number</description>
-        <param-name>versionNumber</param-name>
-        <!-- use semver format, http://semver.org/, e.g. 3.0.0, 3.0.1-beta.1 -->
-        <param-value>3.0.0-alpha.3</param-value>
-    </context-param>
-    <!-- Error pages -->
-    <error-page>
-        <exception-type>java.lang.Throwable</exception-type>
-        <location>/error.do</location>
-    </error-page>
-    <error-page>
-        <error-code>404</error-code>
-        <location>/WEB-INF/jsp/error-404.jsp</location>
-    </error-page>
-    <error-page>
-        <error-code>405</error-code>
-        <location>/WEB-INF/jsp/error-405.jsp</location>
-    </error-page>
-    <!-- Filters -->
-    <filter>
-        <!-- ensure all parameter values are retrieved using utf-8 encoding
+	<!-- Version information -->
+	<context-param>
+		<description>ART Version Number</description>
+		<param-name>versionNumber</param-name>
+		<!-- use semver format, http://semver.org/, e.g. 3.0.0, 3.0.1-beta.1 -->
+		<param-value>3.0.0-alpha.3</param-value>
+	</context-param>
+	<!-- Error pages -->
+	<error-page>
+		<exception-type>java.lang.Throwable</exception-type>
+		<location>/error.do</location>
+	</error-page>
+	<error-page>
+		<error-code>404</error-code>
+		<location>/WEB-INF/jsp/error-404.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>405</error-code>
+		<location>/WEB-INF/jsp/error-405.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>400</error-code>
+		<location>/WEB-INF/jsp/error-400.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/WEB-INF/jsp/error-500.jsp</location>
+	</error-page>
+	<!-- Filters -->
+	<filter>
+		<!-- ensure all parameter values are retrieved using utf-8 encoding
 	   This filter simply calls request.setCharacterEncoding()
 	   Must be the first filter. This applies to POST requests.
 	   (request.setCharacterEncoding() only has effect when the request is a POST 
 	   request and the request body is not processed yet.)
 		-->
-        <filter-name>CharacterEncodingFilter</filter-name>
-        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
-        <init-param>
-            <param-name>encoding</param-name>
-            <param-value>UTF-8</param-value>
-        </init-param>
-        <init-param>
-            <param-name>forceEncoding</param-name>
-            <param-value>true</param-value>
-        </init-param>
-    </filter>
-    <filter>
-        <filter-name>AuthorizationFilter</filter-name>
-        <filter-class>art.servlets.AuthorizationFilter</filter-class>
-    </filter>
-    <filter>
-        <filter-name>AuthFilter</filter-name>
-        <filter-class>art.servlets.AuthFilter</filter-class>
-    </filter>
-    <filter>
-        <filter-name>AuthFilterAdmin</filter-name>
-        <filter-class>art.servlets.AuthFilterAdmin</filter-class>
-    </filter>
-    <filter>
-        <filter-name>ExportPathFilter</filter-name>
-        <filter-class>art.servlets.ExportPathFilter</filter-class>
-    </filter>
-    <filter>
-        <filter-name>JPivotController</filter-name>
-        <filter-class>com.tonbeller.wcf.controller.RequestFilter</filter-class>
-        <init-param>
-            <description>URI of error page</description>
-            <param-name>errorJSP</param-name>
-            <param-value>/user/jpivotError.jsp</param-value>
-        </init-param>
-        <init-param>
-            <description>This page is displayed if a user clicks
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter>
+		<filter-name>AuthorizationFilter</filter-name>
+		<filter-class>art.servlets.AuthorizationFilter</filter-class>
+	</filter>
+	<filter>
+		<filter-name>AuthFilter</filter-name>
+		<filter-class>art.servlets.AuthFilter</filter-class>
+	</filter>
+	<filter>
+		<filter-name>AuthFilterAdmin</filter-name>
+		<filter-class>art.servlets.AuthFilterAdmin</filter-class>
+	</filter>
+	<filter>
+		<filter-name>ExportPathFilter</filter-name>
+		<filter-class>art.servlets.ExportPathFilter</filter-class>
+	</filter>
+	<filter>
+		<filter-name>JPivotController</filter-name>
+		<filter-class>com.tonbeller.wcf.controller.RequestFilter</filter-class>
+		<init-param>
+			<description>URI of error page</description>
+			<param-name>errorJSP</param-name>
+			<param-value>/user/jpivotError.jsp</param-value>
+		</init-param>
+		<init-param>
+			<description>This page is displayed if a user clicks
 				on a query before the previous query has finished
 			</description>
-            <param-name>busyJSP</param-name>
-            <param-value>/user/jpivotBusy.jsp</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>CharacterEncodingFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AuthorizationFilter</filter-name>
-        <url-pattern>/app/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AuthFilter</filter-name>
-        <url-pattern>/user/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>AuthFilterAdmin</filter-name>
-        <url-pattern>/admin/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>ExportPathFilter</filter-name>
-        <url-pattern>/export/*</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>JPivotController</filter-name>
-        <url-pattern>/user/showAnalysis.jsp</url-pattern>
-    </filter-mapping>
-    <!-- Servlets -->
-    <servlet>
-        <servlet-name>CewolfServlet</servlet-name>
-        <servlet-class>de.laures.cewolf.CewolfRenderer</servlet-class>
-        <!-- sets overlib.js location relative to webapp -->
-        <init-param>
-            <param-name>overliburl</param-name>
-            <param-value>/js/overlib.js</param-value>
-        </init-param>
-        <!-- turn on or off debugging logging -->
-        <init-param>
-            <param-name>debug</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <init-param>
-            <param-name>storage</param-name>
-            <param-value>de.laures.cewolf.storage.TransientSessionStorage</param-value>
-        </init-param>
-        <init-param>
-            <param-name>maxImageWidth</param-name>
-            <param-value>2048</param-value>
-        </init-param>
-        <init-param>
-            <param-name>maxImageHeight</param-name>
-            <param-value>1024</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>CewolfServlet</servlet-name>
-        <url-pattern>/cewolf/*</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <servlet-name>dispatcher</servlet-name>
-        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-        <load-on-startup>2</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>dispatcher</servlet-name>
-        <url-pattern>*.do</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <!-- description, if it exists, must come before servlet-name -->
-        <description>
+			<param-name>busyJSP</param-name>
+			<param-value>/user/jpivotBusy.jsp</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>AuthorizationFilter</filter-name>
+		<url-pattern>/app/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>AuthFilter</filter-name>
+		<url-pattern>/user/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>AuthFilterAdmin</filter-name>
+		<url-pattern>/admin/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>ExportPathFilter</filter-name>
+		<url-pattern>/export/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>JPivotController</filter-name>
+		<url-pattern>/user/showAnalysis.jsp</url-pattern>
+	</filter-mapping>
+	<!-- Servlets -->
+	<servlet>
+		<servlet-name>CewolfServlet</servlet-name>
+		<servlet-class>de.laures.cewolf.CewolfRenderer</servlet-class>
+		<!-- sets overlib.js location relative to webapp -->
+		<init-param>
+			<param-name>overliburl</param-name>
+			<param-value>/js/overlib.js</param-value>
+		</init-param>
+		<!-- turn on or off debugging logging -->
+		<init-param>
+			<param-name>debug</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+			<param-name>storage</param-name>
+			<param-value>de.laures.cewolf.storage.TransientSessionStorage</param-value>
+		</init-param>
+		<init-param>
+			<param-name>maxImageWidth</param-name>
+			<param-value>2048</param-value>
+		</init-param>
+		<init-param>
+			<param-name>maxImageHeight</param-name>
+			<param-value>1024</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CewolfServlet</servlet-name>
+		<url-pattern>/cewolf/*</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>dispatcher</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>*.do</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<!-- description, if it exists, must come before servlet-name -->
+		<description>
 			Initialize ART settings and database connection pools
 		</description>
-        <servlet-name>ArtConfig</servlet-name>
-        <servlet-class>art.servlets.ArtConfig</servlet-class>
-        <!-- Load this servlet at server startup time -->
-        <load-on-startup>3</load-on-startup>
-    </servlet>
-    <servlet>
-        <description>
+		<servlet-name>ArtConfig</servlet-name>
+		<servlet-class>art.servlets.ArtConfig</servlet-class>
+		<!-- Load this servlet at server startup time -->
+		<load-on-startup>3</load-on-startup>
+	</servlet>
+	<servlet>
+		<description>
 			Get data for AjaxTags components
 		</description>
-        <servlet-name>AjaxTagsDataProvider</servlet-name>
-        <servlet-class>art.servlets.AjaxTagsDataProvider</servlet-class>
-        <!-- load after ArtConfig -->
-        <load-on-startup>4</load-on-startup>
-    </servlet>
-    <servlet>
-        <description>
+		<servlet-name>AjaxTagsDataProvider</servlet-name>
+		<servlet-class>art.servlets.AjaxTagsDataProvider</servlet-class>
+		<!-- load after ArtConfig -->
+		<load-on-startup>4</load-on-startup>
+	</servlet>
+	<servlet>
+		<description>
 			Periodically perform some actions e.g. clean export files 	   
 		</description>
-        <servlet-name>Scheduler</servlet-name>
-        <servlet-class>art.servlets.Cleaner</servlet-class>
-        <!-- load after ArtConfig -->
-        <load-on-startup>5</load-on-startup>
-    </servlet>
-    <servlet>
-        <description>
+		<servlet-name>Scheduler</servlet-name>
+		<servlet-class>art.servlets.Cleaner</servlet-class>
+		<!-- load after ArtConfig -->
+		<load-on-startup>5</load-on-startup>
+	</servlet>
+	<servlet>
+		<description>
 			Execute the query and show the results
 		</description>
-        <servlet-name>ExecuteQuery</servlet-name>
-        <servlet-class>art.servlets.ExecuteQuery</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>AjaxTagsDataProvider</servlet-name>
-        <url-pattern>/AjaxTagsDataProvider</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ExecuteQuery</servlet-name>
-        <url-pattern>/user/ExecuteQuery</url-pattern>
-    </servlet-mapping>
-    <session-config>
-        <!-- timeout in minutes -->
-        <session-timeout>120</session-timeout>
-    </session-config>
-    <!-- JPivot -->
-    <context-param>
-        <param-name>contextFactory</param-name>
-        <param-value>com.tonbeller.wcf.controller.RequestContextFactoryImpl</param-value>
-    </context-param>
-    <listener>
-        <listener-class>mondrian.web.taglib.Listener</listener-class>
-    </listener>
-    <!-- resources initializer -->
-    <listener>
-        <listener-class>com.tonbeller.tbutils.res.ResourcesFactoryContextListener</listener-class>
-    </listener>
-    <servlet>
-        <servlet-name>MDXQueryServlet</servlet-name>
-        <servlet-class>mondrian.web.servlet.MdxQueryServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>MondrianXmlaServlet</servlet-name>
-        <servlet-class>art.servlets.MondrianXmla</servlet-class>
-        <init-param>
-            <param-name>CharacterEncoding</param-name>
-            <param-value>UTF-8</param-value>
-        </init-param>
-    </servlet>
-    <!-- jfreechart provided servlet -->
-    <servlet>
-        <servlet-name>DisplayChart</servlet-name>
-        <servlet-class>org.jfree.chart.servlet.DisplayChart</servlet-class>
-    </servlet>
-    <servlet>
-        <description>Default configuration created for servlet.</description>
-        <display-name>GetChart</display-name>
-        <servlet-name>GetChart</servlet-name>
-        <servlet-class>com.tonbeller.jpivot.chart.GetChart</servlet-class>
-    </servlet>
-    <servlet>
-        <description>Default configuration created for servlet.</description>
-        <display-name>Print</display-name>
-        <servlet-name>Print</servlet-name>
-        <servlet-class>com.tonbeller.jpivot.print.PrintServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>DisplayChart</servlet-name>
-        <url-pattern>/DisplayChart</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>Print</servlet-name>
-        <url-pattern>/Print</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>GetChart</servlet-name>
-        <url-pattern>/GetChart</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>MondrianXmlaServlet</servlet-name>
-        <url-pattern>/xmla</url-pattern>
-    </servlet-mapping>
-    <jsp-config>
-        <taglib>
-            <taglib-uri>http://www.tonbeller.com/wcf</taglib-uri>
-            <taglib-location>/WEB-INF/wcf/wcf-tags.tld</taglib-location>
-        </taglib>
-        <taglib>
-            <taglib-uri>http://www.tonbeller.com/jpivot</taglib-uri>
-            <taglib-location>
+		<servlet-name>ExecuteQuery</servlet-name>
+		<servlet-class>art.servlets.ExecuteQuery</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AjaxTagsDataProvider</servlet-name>
+		<url-pattern>/AjaxTagsDataProvider</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ExecuteQuery</servlet-name>
+		<url-pattern>/user/ExecuteQuery</url-pattern>
+	</servlet-mapping>
+	<session-config>
+		<!-- timeout in minutes -->
+		<session-timeout>120</session-timeout>
+	</session-config>
+	<!-- JPivot -->
+	<context-param>
+		<param-name>contextFactory</param-name>
+		<param-value>com.tonbeller.wcf.controller.RequestContextFactoryImpl</param-value>
+	</context-param>
+	<listener>
+		<listener-class>mondrian.web.taglib.Listener</listener-class>
+	</listener>
+	<!-- resources initializer -->
+	<listener>
+		<listener-class>com.tonbeller.tbutils.res.ResourcesFactoryContextListener</listener-class>
+	</listener>
+	<servlet>
+		<servlet-name>MDXQueryServlet</servlet-name>
+		<servlet-class>mondrian.web.servlet.MdxQueryServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>MondrianXmlaServlet</servlet-name>
+		<servlet-class>art.servlets.MondrianXmla</servlet-class>
+		<init-param>
+			<param-name>CharacterEncoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</servlet>
+	<!-- jfreechart provided servlet -->
+	<servlet>
+		<servlet-name>DisplayChart</servlet-name>
+		<servlet-class>org.jfree.chart.servlet.DisplayChart</servlet-class>
+	</servlet>
+	<servlet>
+		<description>Default configuration created for servlet.</description>
+		<display-name>GetChart</display-name>
+		<servlet-name>GetChart</servlet-name>
+		<servlet-class>com.tonbeller.jpivot.chart.GetChart</servlet-class>
+	</servlet>
+	<servlet>
+		<description>Default configuration created for servlet.</description>
+		<display-name>Print</display-name>
+		<servlet-name>Print</servlet-name>
+		<servlet-class>com.tonbeller.jpivot.print.PrintServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DisplayChart</servlet-name>
+		<url-pattern>/DisplayChart</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Print</servlet-name>
+		<url-pattern>/Print</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>GetChart</servlet-name>
+		<url-pattern>/GetChart</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>MondrianXmlaServlet</servlet-name>
+		<url-pattern>/xmla</url-pattern>
+	</servlet-mapping>
+	<jsp-config>
+		<taglib>
+			<taglib-uri>http://www.tonbeller.com/wcf</taglib-uri>
+			<taglib-location>/WEB-INF/wcf/wcf-tags.tld</taglib-location>
+		</taglib>
+		<taglib>
+			<taglib-uri>http://www.tonbeller.com/jpivot</taglib-uri>
+			<taglib-location>
 				/WEB-INF/jpivot/jpivot-tags.tld
 			</taglib-location>
-        </taglib>
-    </jsp-config>
-    <!-- End JPivot -->
+		</taglib>
+	</jsp-config>
+	<!-- End JPivot -->
 </web-app>

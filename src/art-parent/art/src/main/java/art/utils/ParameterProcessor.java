@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * ParameterProcessor.java
@@ -24,10 +23,15 @@
  */
 package art.utils;
 
+import art.report.PreparedQuery;
+import art.report.Report;
+import art.report.ReportService;
+import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,14 +77,16 @@ public class ParameterProcessor {
 	 * @return parameters to be shown in report if show parameters option is
 	 * selected
 	 */
-	public static Map<Integer, ArtQueryParam> processParameters(HttpServletRequest request, Map<String, String> inlineParams, Map<String, String[]> multiParams, int queryId, Map<String, ArtQueryParam> htmlParams) {
+	public static Map<Integer, ArtQueryParam> processParameters(
+			HttpServletRequest request, Map<String, String> inlineParams,
+			Map<String, String[]> multiParams, int queryId,
+			Map<String, ArtQueryParam> htmlParams) {
 
 		@SuppressWarnings("rawtypes")
 		Enumeration names = request.getParameterNames();
 		String htmlName; //html element htmlName
 		String label; //parameter label        
 		Map<Integer, ArtQueryParam> displayParams = new TreeMap<Integer, ArtQueryParam>(); //display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
-
 
 		boolean showParams;
 		ArtQuery aq = new ArtQuery();

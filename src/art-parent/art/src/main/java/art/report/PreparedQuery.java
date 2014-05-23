@@ -21,13 +21,20 @@
  * selected query apply smartRules add multi params apply inline params apply
  * tags parse&apply dynamic SQL set bind parameters
  */
-package art.utils;
+package art.report;
 
+import art.enums.ReportStatus;
 import art.servlets.ArtConfig;
+import art.utils.ArtException;
+import art.utils.ArtQuery;
+import art.utils.ArtQueryParam;
+import art.utils.XmlInfo;
+import art.utils.XmlParser;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +54,6 @@ public class PreparedQuery {
 	final int MAX_RECURSIVE_LOOKUP = 20;
 	String username; //used to check query access rights, in applying rule values and replacing :username tag
 	int queryId;
-	int queryDatabaseId = -1;
 	StringBuilder sb;
 	Map<String, String> bindParams;
 	Map<String, String[]> multiParams;
@@ -55,18 +61,15 @@ public class PreparedQuery {
 	TreeMap<Integer, String> treeInline; //  stores the inline values sorted by the ? in the SQL
 	boolean adminSession = false;
 	boolean useRules = false;
-	boolean isLov = false;
 	PreparedStatement psQuery; // this is the ps object produced by this query
 	Connection connQuery; // this is the connection to the datasource for this query
 	Connection conn; // connection to the art repository
 	String preparedStatementSQL; //final sql statement. if query has inline parameters, sql will still have ?
 	private String finalSQL = ""; //final sql statement. if query has inline parameters, sql will have query values
-	String queryStatus;
 	Map<String, List<String>> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter label and value as corresponding object e.g. Double, Long. for jasper reports
 	Map<String, String> jxlsMultiParams; //hash map will contain multi parameter label and values instead of parameter id e.g. M_2 and string array of values. for jxls reports
 	int queryType; //to enable special handling of template queries where sql source is not executed
-	boolean viewingTextQuery = false; //flag used to check if user has rights to edit a text query
 	Map<String, ArtQueryParam> htmlParams; //all the queries parameters, with the html name as the key
 	private boolean recipientFilterPresent; //dynamic recipient filter label present
 	private final String RECIPIENT_LABEL = "#recipient#"; //for dynamic recipients, label for recipient in data query
@@ -75,6 +78,7 @@ public class PreparedQuery {
 	private String recipientIdType = "VARCHAR";
 	int displayResultset;
 	int updateCount; //update count of display resultset
+	private Report report;
 
 	/**
 	 *
@@ -85,6 +89,20 @@ public class PreparedQuery {
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
 		jasperMultiParams = new HashMap<String, List<String>>(); //to populate hash map with multi parameter names and values
 		jxlsMultiParams = new HashMap<String, String>(); //save parameters in special hash map for jxls reports        
+	}
+
+	/**
+	 * @return the report
+	 */
+	public Report getReport() {
+		return report;
+	}
+
+	/**
+	 * @param report the report to set
+	 */
+	public void setReport(Report report) {
+		this.report = report;
 	}
 
 	/**
@@ -171,14 +189,6 @@ public class PreparedQuery {
 
 	/**
 	 *
-	 * @return active status of query
-	 */
-	public String getQueryStatus() {
-		return queryStatus;
-	}
-
-	/**
-	 *
 	 * @return sql to be executed by database with ? where inline parameters
 	 * should be
 	 */
@@ -225,17 +235,6 @@ public class PreparedQuery {
 		multiParams = h;
 	}
 
-	/**
-	 * Set the map that contains the bind parameters. The map contains: <br>the
-	 * bind parameter code (Py where y is the index of the ? or
-	 * Py_year/Py_month/Py_day for dates) as key <br>the parameter value
-	 * (String[])
-	 *
-	 * @param h
-	 */
-	public void setBindParams(Map<String, String> h) {
-		bindParams = h;
-	}
 
 	/**
 	 * Set the map that contains the general purpose parameters. <br>Art will
@@ -247,14 +246,6 @@ public class PreparedQuery {
 	 */
 	public void setInlineParams(Map<String, String> h) {
 		inlineParams = h;
-	}
-
-	/**
-	 *
-	 * @return query's datasource
-	 */
-	public int getTargetDatasource() {
-		return queryDatabaseId;
 	}
 
 	/**
@@ -389,7 +380,7 @@ public class PreparedQuery {
 				throw new ArtException("<p>Not able to get query. Are you sure you have been granted rights to execute this query?</p>");
 			}
 
-			if (StringUtils.equals(queryStatus, "D") && !adminSession) {
+			if (report.getReportStatus() == ReportStatus.Disabled && !adminSession) {
 				throw new ArtException("<p>Query is disabled. Please contact the ART administrator. </p>");
 			}
 		} catch (Exception e) {
@@ -465,42 +456,25 @@ public class PreparedQuery {
 		preparedStatementSQL = null;
 
 		try {
+			if (report == null) {
+				ReportService reportService = new ReportService();
+				report = reportService.getReport(queryId);
+			}
+		} catch (SQLException ex) {
+			java.util.logging.Logger.getLogger(PreparedQuery.class.getName()).log(Level.SEVERE, null, ex);
+		}
+
+		try {
 			conn = ArtConfig.getConnection();
 
-			// Get some properties of the query
-			String sql = "SELECT DATABASE_ID, QUERY_GROUP_ID, ACTIVE_STATUS, QUERY_TYPE"
-					+ " , USES_RULES, DISPLAY_RESULTSET "
-					+ " FROM ART_QUERIES"
-					+ " WHERE QUERY_ID=?";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, queryId);
-			ResultSet rs = ps.executeQuery();
-			if (rs.next()) {
-				queryDatabaseId = rs.getInt("DATABASE_ID");
-				queryStatus = rs.getString("ACTIVE_STATUS");
-				queryType = rs.getInt("QUERY_TYPE");
-				displayResultset = rs.getInt("DISPLAY_RESULTSET");
+			queryType = report.getReportType();
+			displayResultset = report.getDisplayResultset();
+			useRules = report.isUsesFilters();
 
-				int groupId = rs.getInt("QUERY_GROUP_ID");
-				if (groupId == 0 || queryType == 119 || queryType == 120) {
-					isLov = true;
-				} else {
-					isLov = false;
-				}
-
-				String usesRules = rs.getString("USES_RULES");
-				if (StringUtils.equals(usesRules, "Y")) {
-					useRules = true;
-				} else {
-					useRules = false;
-				}
-				//override use rules setting if required, especially for lovs
-				if (overrideUseRules) {
-					useRules = newUseRules;
-				}
+			//override use rules setting if required, especially for lovs
+			if (overrideUseRules) {
+				useRules = newUseRules;
 			}
-			rs.close();
-			ps.close();
 
 			//get the raw sql source and determine if the user has access to the query. exception will be thrown if user can't excecute query
 			verifyQueryAccess();
@@ -565,7 +539,8 @@ public class PreparedQuery {
 
 			if (!useDynamicDatasource) {
 				//not using dynamic datasource. use datasource defined on the query
-				connQuery = ArtConfig.getConnection(queryDatabaseId);
+				int reportDatasourceId = report.getDatasource().getDatasourceId();
+				connQuery = ArtConfig.getConnection(reportDatasourceId);
 			}
 
 			if (connQuery == null) {
@@ -613,12 +588,23 @@ public class PreparedQuery {
 			}
 		} else if (displayResultset == -2) {
 			//use last statement. driver must be jdbc 3.0 compliant (and above)
-			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT) != false || psQuery.getUpdateCount() != -1) {
+			//otherwise this will result in endless loop
+			final int MAX_LOOPS = 20;
+			int count = 0;
+			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT) != false
+					|| psQuery.getUpdateCount() != -1) {
+
+				count++;
+
 				if (rs != null) {
 					rs.close();
 				}
 				rs = psQuery.getResultSet();
 				updateCount = psQuery.getUpdateCount();
+
+				if (count > MAX_LOOPS) {
+					break;
+				}
 			}
 		} else if (displayResultset > 1) {
 			//use specific statment. statement 2, 3, etc. statement 1 already retrieved by initial getresultset call
@@ -783,24 +769,6 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Determine if a user can edit a text query. User needs direct access to
-	 * edit it
-	 *
-	 * @param uname
-	 * @param qid
-	 * @return <code>true</code> if user can edit the text query
-	 */
-	public boolean canEditTextQuery(String uname, int qid) {
-		username = uname;
-		queryId = qid;
-		adminSession = false;
-
-		viewingTextQuery = true;
-
-		return canExecuteQuery();
-	}
-
-	/**
 	 *
 	 * @return <code>true</code> if user can execute this query
 	 */
@@ -848,9 +816,10 @@ public class PreparedQuery {
 		sb = null;
 		sb = new StringBuilder(1024 * 2);
 
-		if (isLov || adminSession) {
+		logger.debug("report.isLov() = {}, adminSession = {}", report.isLov(), adminSession);
+
+		if (report.isLov() || adminSession) {
 			// don't check security for Lovs or during Admin session
-			logger.debug("isLov = {}, adminSession = {}", isLov, adminSession);
 
 			stmt = "SELECT AAS.SOURCE_INFO "
 					+ "  FROM ART_ALL_SOURCES AAS "
@@ -913,50 +882,48 @@ public class PreparedQuery {
 
 			//User can also execute all queries in a query group he has been assigned to
 			//text queries must be assigned direct access
-			if (!viewingTextQuery) {
-				if (last_stmt_retrieved_rows == 0) {
-					//user doesn't belong to a group with direct access to the query. check if user has access to the query's group
-					stmt = "SELECT AAS.SOURCE_INFO "
-							+ " FROM ART_ALL_SOURCES AAS, ART_USER_QUERY_GROUPS AUQG, ART_QUERIES aq "
-							+ " WHERE AAS.OBJECT_ID=aq.QUERY_ID AND aq.QUERY_GROUP_ID = AUQG.QUERY_GROUP_ID"
-							+ " AND AAS.OBJECT_ID = ? AND AUQG.USERNAME= ? "
-							+ " ORDER BY LINE_NUMBER";
+			if (last_stmt_retrieved_rows == 0) {
+				//user doesn't belong to a group with direct access to the query. check if user has access to the query's group
+				stmt = "SELECT AAS.SOURCE_INFO "
+						+ " FROM ART_ALL_SOURCES AAS, ART_USER_QUERY_GROUPS AUQG, ART_QUERIES aq "
+						+ " WHERE AAS.OBJECT_ID=aq.QUERY_ID AND aq.QUERY_GROUP_ID = AUQG.QUERY_GROUP_ID"
+						+ " AND AAS.OBJECT_ID = ? AND AUQG.USERNAME= ? "
+						+ " ORDER BY LINE_NUMBER";
 
-					//try access based on user's right to query group
-					ps = conn.prepareStatement(stmt);
-					ps.setInt(1, queryId);
-					ps.setString(2, username);
-					rs = ps.executeQuery();
-					while (rs.next()) {
-						sb.append(rs.getString(1));
-						last_stmt_retrieved_rows++;
-					}
-					rs.close();
-					ps.close();
+				//try access based on user's right to query group
+				ps = conn.prepareStatement(stmt);
+				ps.setInt(1, queryId);
+				ps.setString(2, username);
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					sb.append(rs.getString(1));
+					last_stmt_retrieved_rows++;
 				}
+				rs.close();
+				ps.close();
+			}
 
-				if (last_stmt_retrieved_rows == 0) {
-					//user doesn't have direct access to query group. check if he belongs to a user group which has direct access to the query group
-					stmt = "SELECT DISTINCT AAS.SOURCE_INFO, AAS.LINE_NUMBER "
-							+ " FROM ART_ALL_SOURCES AAS, ART_USER_GROUP_GROUPS AUGG, ART_QUERIES aq "
-							+ " WHERE AAS.OBJECT_ID=aq.QUERY_ID AND aq.QUERY_GROUP_ID = AUGG.QUERY_GROUP_ID "
-							+ " AND AAS.OBJECT_ID = ? AND EXISTS "
-							+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ? "
-							+ " AND AUGA.USER_GROUP_ID = AUGG.USER_GROUP_ID) "
-							+ " ORDER BY AAS.LINE_NUMBER";
+			if (last_stmt_retrieved_rows == 0) {
+				//user doesn't have direct access to query group. check if he belongs to a user group which has direct access to the query group
+				stmt = "SELECT DISTINCT AAS.SOURCE_INFO, AAS.LINE_NUMBER "
+						+ " FROM ART_ALL_SOURCES AAS, ART_USER_GROUP_GROUPS AUGG, ART_QUERIES aq "
+						+ " WHERE AAS.OBJECT_ID=aq.QUERY_ID AND aq.QUERY_GROUP_ID = AUGG.QUERY_GROUP_ID "
+						+ " AND AAS.OBJECT_ID = ? AND EXISTS "
+						+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USERNAME = ? "
+						+ " AND AUGA.USER_GROUP_ID = AUGG.USER_GROUP_ID) "
+						+ " ORDER BY AAS.LINE_NUMBER";
 
-					ps = conn.prepareStatement(stmt);
-					ps.setInt(1, queryId);
-					ps.setString(2, username);
+				ps = conn.prepareStatement(stmt);
+				ps.setInt(1, queryId);
+				ps.setString(2, username);
 
-					rs = ps.executeQuery();
-					while (rs.next()) {
-						sb.append(rs.getString(1));
-						last_stmt_retrieved_rows++;
-					}
-					rs.close();
-					ps.close();
+				rs = ps.executeQuery();
+				while (rs.next()) {
+					sb.append(rs.getString(1));
+					last_stmt_retrieved_rows++;
 				}
+				rs.close();
+				ps.close();
 			}
 
 		}
@@ -1116,7 +1083,6 @@ public class PreparedQuery {
 						// NOTE: HAVING is not handled.
 						// tmpSb.toSting().substring(1) is the <list> of allowed values for the current rule,
 						// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
-
 						if (insertPosLast > 0) {
 							// We have a GROUP BY or an ORDER BY clause
 							// NOTE: sb changes dynamically
@@ -1336,7 +1302,6 @@ public class PreparedQuery {
 		//  in order to leave unchanged the original length of SQL string
 		final String blanks = "                                                       "; //any length as long as we don't have a parameter label of longer length
 
-
 		if (inlineParams == null) {
 			return;
 		}
@@ -1399,7 +1364,6 @@ public class PreparedQuery {
 
 				//replace occurrences of param labels with ? one by one so that correct ps.set methods are used in prepareInlineParameters()
 				//can't do replaceAll because there will be a mismatch with the ps.set methods
-
 				startPos = sb.toString().indexOf("#" + paramLabel + "#"); //find #label#
 				Object checker;
 
@@ -1465,7 +1429,6 @@ public class PreparedQuery {
 		 * }
 		 * // </PROPS>
 		 */
-
 		// <IF> element
 		element = "IF";
 
@@ -2088,7 +2051,6 @@ public class PreparedQuery {
 		/*
 		 * Update query :TAG
 		 */
-
 		String querySql = sb.toString();
 
 
@@ -2116,7 +2078,6 @@ public class PreparedQuery {
 		querySql = querySql.replaceAll("(?iu):date", "'" + date + "'");
 		querySql = querySql.replaceAll("(?iu):time", "'" + time + "'");
 
-
 		//update sb with new sql
 		sb.replace(0, sb.length(), querySql);
 
@@ -2133,7 +2094,6 @@ public class PreparedQuery {
 		 * YEAR automatic substitution ... automatic substitution con o senza
 		 * apici etc
 		 */
-
 	}
 
 	/**

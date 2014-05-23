@@ -268,9 +268,9 @@ public class LoginController {
 			//login failure. always display invalid account message rather than actual result details
 			//better for security if less details are displayed
 			model.addAttribute("invalidLogin", "");
-			
+
 			//add result to be available for display, although not displayed
-			model.addAttribute("result", result); 
+			model.addAttribute("result", result);
 
 			return "login";
 
@@ -294,7 +294,12 @@ public class LoginController {
 		session.removeAttribute("nextPageAfterLogin");
 
 		if (nextPageAfterLogin == null) {
-			nextPageAfterLogin = "/app/reports.do";
+			String startReport = user.getEffectiveStartReport();
+			if (StringUtils.isBlank(startReport)) {
+				nextPageAfterLogin = "/app/reports.do";
+			} else {
+				nextPageAfterLogin = "/app/runReport.do?reportId=" + startReport;
+			}
 		}
 
 		return "redirect:" + nextPageAfterLogin;

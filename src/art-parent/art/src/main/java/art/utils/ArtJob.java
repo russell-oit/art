@@ -26,10 +26,11 @@
  */
 package art.utils;
 
+import art.report.PreparedQuery;
 import art.graph.ExportGraph;
 import art.mail.Mailer;
-import art.output.ArtOutHandler;
-import art.output.ArtOutputInterface;
+import art.output.ReportOuputtHandler;
+import art.output.ReportOutputInterface;
 import art.output.jasperOutput;
 import art.output.jxlsOutput;
 import art.servlets.ArtConfig;
@@ -1294,12 +1295,10 @@ public class ArtJob implements Job, Serializable {
 				}
 			}
 
-			int resultSetType;
-			if (queryType < 0) {
-				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
-			} else {
-				resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-			}
+			//need scrollable resultset for graphs for show data option
+			//also jxls always requires scrollable resultset
+			//much worse performance compared to forward only?
+			int resultSetType=ResultSet.TYPE_SCROLL_INSENSITIVE;
 
 			/*
 			 * BEGIN EXECUTE QUERY
@@ -1550,13 +1549,13 @@ public class ArtJob implements Job, Serializable {
 						}
 						fileName = jxls.getFileName();
 					} else {
-						ArtOutputInterface o;
+						ReportOutputInterface o;
 
 						String classToLoad = "art.output." + outputFormat + "Output";
 						ClassLoader cl = this.getClass().getClassLoader();
 						Object obj = cl.loadClass(classToLoad).newInstance();
 
-						o = (ArtOutputInterface) obj;
+						o = (ReportOutputInterface) obj;
 
 						o.setMaxRows(ArtConfig.getMaxRows(outputFormat));
 
@@ -1593,9 +1592,9 @@ public class ArtJob implements Job, Serializable {
 
 						ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages");
 						if (queryType == 101 || queryType == 102) {
-							ArtOutHandler.flushXOutput(messages, o, rs, rsmd);
+							ReportOuputtHandler.flushXOutput(messages, o, rs, rsmd);
 						} else {
-							ArtOutHandler.flushOutput(messages, o, rs, rsmd);
+							ReportOuputtHandler.flushOutput(messages, o, rs, rsmd);
 						}
 
 						/*

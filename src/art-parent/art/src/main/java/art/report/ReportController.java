@@ -66,7 +66,7 @@ public class ReportController {
 
 	@Autowired
 	private DatasourceService datasourceService;
-
+	
 	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
 	public String showReports(HttpSession session,
 			@RequestParam(value = "reportId", required = false) Integer reportGroupId,
@@ -77,13 +77,13 @@ public class ReportController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
-			List<AvailableReport> reports = reportService.getAvailableReports(sessionUser.getUsername());
+			List<Report> reports = reportService.getAvailableReports(sessionUser.getUserId());
 
 			//allow to focus public_user in one report only. is this feature used? it's not documented
 			if (reportGroupId != null) {
-				List<AvailableReport> filteredReports = new ArrayList<>();
-				for (AvailableReport report : reports) {
-					if (report.getReportGroupId() == reportGroupId) {
+				List<Report> filteredReports = new ArrayList<>();
+				for (Report report : reports) {
+					if (report.getReportGroup().getReportGroupId() == reportGroupId) {
 						filteredReports.add(report);
 					}
 				}
@@ -98,6 +98,23 @@ public class ReportController {
 
 		return "reports";
 	}
+	
+	@RequestMapping(value = "/app/showReport", method = RequestMethod.GET)
+	public String showReport(@RequestParam("reportId") Integer reportId,
+			Model model) {
+		logger.debug("Entering showReport");
+
+		try {
+			Report report = reportService.getReport(reportId);
+			if (report != null) {
+				model.addAttribute("report", report);
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+		return "showReport";
+	}
 
 	/**
 	 * Return available reports using ajax
@@ -108,14 +125,14 @@ public class ReportController {
 	 */
 	@RequestMapping(value = "/app/getReports", method = RequestMethod.GET)
 	public @ResponseBody
-	List<AvailableReport> getReports(HttpSession session, HttpServletRequest request) {
+	List<Report> getReports(HttpSession session, HttpServletRequest request) {
 		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
-		List<AvailableReport> reports = null;
+		List<Report> reports = null;
 		try {
-			reports = reportService.getAvailableReports(sessionUser.getUsername());
+			reports = reportService.getAvailableReports(sessionUser.getUserId());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}

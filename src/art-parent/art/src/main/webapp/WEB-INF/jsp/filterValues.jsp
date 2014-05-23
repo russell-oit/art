@@ -67,6 +67,12 @@ Display filter values
 				</c:if>
 			</div>
 		</c:if>
+		<c:if test="${not empty recordSavedMessage}">
+			<div class="alert alert-success alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<spring:message code="${recordSavedMessage}"/>: <encode:forHtmlContent value="${recordName}"/>
+			</div>
+		</c:if>
 
 		<div id="ajaxResponse">
 		</div>

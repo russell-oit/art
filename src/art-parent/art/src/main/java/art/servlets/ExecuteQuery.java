@@ -16,6 +16,7 @@
  */
 package art.servlets;
 
+import art.report.PreparedQuery;
 import art.graph.*;
 import art.output.*;
 import art.utils.*;
@@ -145,7 +146,7 @@ public class ExecuteQuery extends HttpServlet {
 			 * and output modes that do not generate html)
 			 */
 			boolean showHeaderAndFooter = true; // default generic HTML output
-			ArtOutputInterface o = null;
+			ReportOutputInterface o = null;
 			String str; //for error logging strings
 
 			//get query details. don't declare query variables at class level. causes issues with dashboards            
@@ -245,12 +246,12 @@ public class ExecuteQuery extends HttpServlet {
 				return; // a return is needed otherwise the flow would proceed!
 			} else {
 				// This is not a request to schedule, produce a graph or an "htmlReport" or an update query
-				// => Load the appropriate ArtOutputInterface for the view mode
+				// => Load the appropriate ReportOutputInterface for the view mode
 
 				try {
 					@SuppressWarnings("rawtypes")
 					java.lang.Class classx = viewModes.get(viewMode);
-					o = (ArtOutputInterface) classx.newInstance();
+					o = (ReportOutputInterface) classx.newInstance();
 
 					// Set the content type according to the object
 					String contentType = o.getContentType();
@@ -506,12 +507,12 @@ public class ExecuteQuery extends HttpServlet {
 
 						//display parameters
 						if (showParams) {
-							ArtOutHandler.displayParameters(out, displayParams, messages);
+							ReportOuputtHandler.displayParameters(out, displayParams, messages);
 						}
 
 						//display final sql
 						if (showSQL) {
-							ArtOutHandler.displayFinalSQL(out, finalSQL);
+							ReportOuputtHandler.displayFinalSQL(out, finalSQL);
 						}
 
 						out.flush();
@@ -631,7 +632,7 @@ public class ExecuteQuery extends HttpServlet {
 										/*
 										 * CROSSTAB
 										 */
-										numberOfRows = ArtOutHandler.flushXOutput(messages, o, rs, rsmd);
+										numberOfRows = ReportOuputtHandler.flushXOutput(messages, o, rs, rsmd);
 									} else {
 										/*
 										 * NORMAL TABULAR OUTPUT
@@ -643,7 +644,7 @@ public class ExecuteQuery extends HttpServlet {
 											//only drill down for html output. drill down query launched from hyperlink                                            
 											drilldownQueries = aq.getDrilldownQueries(queryId);
 										}
-										numberOfRows = ArtOutHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+										numberOfRows = ReportOuputtHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
 									}
 									probe = 130;
 								}

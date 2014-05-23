@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.report.PreparedQuery;
 import art.servlets.ArtConfig;
 import art.utils.*;
 import java.io.File;

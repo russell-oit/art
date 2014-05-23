@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Enrico Liboni
  */
-public class tsvOutput implements ArtOutputInterface {
+public class tsvOutput implements ReportOutputInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(tsvOutput.class);
 	FileOutputStream fout;

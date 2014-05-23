@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author Enrico Liboni
  */
-public class xmlOutput implements ArtOutputInterface {
+public class xmlOutput implements ReportOutputInterface {
 
     PrintWriter out;
     int numberOfLines = 0;       

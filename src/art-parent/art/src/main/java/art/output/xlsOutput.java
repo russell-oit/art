@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class xlsOutput implements ArtOutputInterface {
+public class xlsOutput implements ReportOutputInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(xlsOutput.class);
     

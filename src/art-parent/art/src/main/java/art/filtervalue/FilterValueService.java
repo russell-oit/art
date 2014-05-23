@@ -17,7 +17,6 @@
 package art.filtervalue;
 
 import art.dbutils.DbService;
-import art.dbutils.DbUtils;
 import art.enums.ParameterDataType;
 import art.filter.Filter;
 import art.user.User;

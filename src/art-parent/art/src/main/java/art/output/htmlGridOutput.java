@@ -21,7 +21,6 @@ package art.output;
 
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
-import art.utils.ArtUtils;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -33,7 +32,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class htmlGridOutput implements ArtOutputInterface {
+public class htmlGridOutput implements ReportOutputInterface {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -112,9 +111,11 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void beginHeader() {
+		
+		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlGridOutput.css\">");
 
 		//display parameters
-		ArtOutHandler.displayParameters(out, displayParams);
+		ReportOuputtHandler.displayParameters(out, displayParams);
 
 		//start results table
 		out.println("<div style=\"border: 3px solid white\"><table class=\"sortable\" name=\"maintable\" id=\"maintable\" cellpadding=\"2\" cellspacing=\"0\" width=\"80%\">");
@@ -171,7 +172,16 @@ public class htmlGridOutput implements ArtOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + ArtUtils.getDateSortString(d) + "\" >" + ArtConfig.getDateDisplayString(d) + "</td>");
+		String formattedValue;
+		long sortValue;
+		if (d == null) {
+			sortValue = 0;
+			formattedValue = "";
+		} else {
+			sortValue = d.getTime();
+			formattedValue = ArtConfig.getDateDisplayString(d);
+		}
+		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + sortValue + "\" >" + formattedValue + "</td>");
 	}
 
 	@Override

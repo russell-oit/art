@@ -11,7 +11,7 @@ Reports page. Also main/home page
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="page.title.reports" var="pageTitle"/>
 
@@ -20,95 +20,87 @@ Reports page. Also main/home page
 <spring:message code="page.text.reports" var="mainPanelTitle"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="javascript">
-		<script type="text/javascript">
-			//put jsp variables into js variables
-			var allRowsText = "${showAllRowsText}";
-			var contextPath = "${pageContext.request.contextPath}";
-			var localeCode = "${pageContext.response.locale}";
-			var imagesPath = "${pageContext.request.contextPath}/images/";
-			var descriptionText = "${descriptionText}";
-		</script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function() {
 				$(function() {
 					$('a[href*="reports.do"]').parent().addClass('active');
 				});
 
-				// Insert a 'details' column to the table
-				var nCloneTh = document.createElement('th');
-				var nCloneTd = document.createElement('td');
-				nCloneTd.innerHTML = '<img src="' + imagesPath + 'details_open.png">';
-				nCloneTd.className = "text-center expandable";
+				var tbl = $('#reports');
 
-				$('#reports thead tr').each(function() {
-					this.insertBefore(nCloneTh, this.childNodes[0]);
-				});
-
-				$('#reports tbody tr').each(function() {
-					this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
-				});
-
-				//Initialise DataTables, with no sorting on the 'details' column (column [0])
-				var oTable = $('#reports').dataTable({
-					"pagingType": "full_numbers",
-					"lengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
-					"pageLength": -1,
-					"language": {
-						"url": "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"aaSorting": [[3, "asc"]], //sort by report name. 0 is the details column
-					'aoColumnDefs': [
-						{"bVisible": false, "aTargets": [1, 2]},
-						{"bSortable": false, "aTargets": [0]}
+				var oTable = tbl.dataTable({
+					columnDefs: [
+						{
+							targets: "detailsCol",
+							orderable: false,
+							searchable: false
+						},
+						{
+							targets: ["reportGroupCol", "descriptionCol"], //target name matches class name of th.
+							visible: false
+						}
 					],
-					"initComplete": function() {
+					orderClasses: false,
+					order: [3, "asc"], //sort by report name. 0 is the details column
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.0/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: function() {
 						$('div.dataTables_filter input').focus();
 					}
 				});
 
-				//array to keep a reference to any TR rows that we 'open'
-				var anOpen = [];
+				//get datatables api object
+				var table = oTable.api();
 
-				// Add event listener for opening and closing details
-				$('#reports tbody').on('click', 'td.expandable', function() {
-					if ($(this).parent('tr').hasClass('details')) {
-						return; //only expandable rows can have details
+				//show/hide details
+				//http://datatables.net/examples/server_side/row_details.html
+
+				// Array to track the ids of the details displayed rows
+				var detailRows = [];
+
+				tbl.find('tbody').on('click', 'tr td:first-child', function() {
+					var tr = $(this).closest('tr');
+					var row = table.row(tr);
+					var idx = $.inArray(tr, detailRows);
+
+					if (row.child.isShown()) {
+						tr.removeClass('details');
+						row.child.hide();
+
+						// Remove from the 'open' array
+						detailRows.splice(idx, 1);
 					}
+					else {
+						tr.addClass('details');
+						row.child(formatDetails(row.data()), 'details').show(); //add details class to child row td
 
-					var nTr = this.parentNode;
-
-					//see if the row should be opened or if it is already in the open array, and thus close it
-					var i = $.inArray(nTr, anOpen);
-					if (i === -1) {
-						// Row is not in open array so it's currently closed. Open it
-						var nDetailsRow = oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
-						$('div.innerDetails', nDetailsRow).slideDown('fast');
-
-						//add row to open array
-						anOpen.push(nTr);
-
-						//change icon to indicate the row is now due for closing
-						$('img', this).attr('src', imagesPath + "details_close.png");
-					} else {
-						// Close this row
-						$('div.innerDetails', $(nTr).next()[0]).slideUp('fast', function() {
-							oTable.fnClose(nTr);
-							//remove row from open array
-							anOpen.splice(i, 1);
-						});
-
-						//change icon to indicate the row is now due for opening
-						$('img', this).attr('src', imagesPath + "details_open.png");
+						// Add to the 'open' array
+						if (idx === -1) {
+							detailRows.push(tr);
+						}
 					}
 				});
 
 			});
 
 			/* Formating function for row details */
+			function formatDetails(data) {
+				var descriptionText = "${descriptionText}";
+				return '<div class="details">' + descriptionText + ': '
+						+ data[7] + '</div>';
+			}
+
+			/* Formating function for row details */
 			function fnFormatDetails(oTable, nTr)
 			{
+				var descriptionText = "${descriptionText}";
+
 				var aData = oTable.fnGetData(nTr);
 				var sOut = '<div class="innerDetails">';
 				sOut += '<table style="margin-left:30px;">';
@@ -128,7 +120,7 @@ Reports page. Also main/home page
 			<div class="alert alert-danger alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
-				<p>${fn:escapeXml(error)}</p>
+				<p><encode:forHtmlContent value="${error}"/></p>
 			</div>
 		</c:if>
 	</jsp:attribute>
@@ -137,19 +129,21 @@ Reports page. Also main/home page
 		<table id="reports" class="expandable table table-bordered">
 			<thead>
 				<tr>
-					<th></th> <%-- group name. hidden --%>
-					<th></th> <%-- description column. hidden --%>
+					<th class="detailsCol noFilter"></th> <%-- details control column --%>
+					<th class="reportGroupCol"></th> <%-- group name. hidden --%>
+					<th class="descriptionCol"></th> <%-- description column. hidden --%>
 					<th><spring:message code="reports.text.reportName"/></th>
 				</tr>
 			</thead>
 			<tbody>
 				<c:forEach var="report" items="${reports}">
 					<tr>
-						<td>${fn:escapeXml(report.reportGroupName)}</td>
-						<td>${fn:escapeXml(report.description)}</td>
+						<td class="details-control"></td> <%-- details control column --%>
+						<td><encode:forHtmlContent value="${report.reportGroup.name}</td>"/>
+						<td><encode:forHtmlContent value="${report.description}</td>"/>
 						<td>
-							<a href="#">
-								${fn:escapeXml(report.name)}
+							<a href="${pageContext.request.contextPath}/app/showReport.do?reportId=${report.reportId}">
+								<encode:forHtmlContent value="${report.name}"/>
 							</a>
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>

@@ -19,7 +19,7 @@ package art.servlets;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.dbutils.DbUtils;
-import art.utils.PreparedQuery;
+import art.report.PreparedQuery;
 import art.utils.UserEntity;
 import java.io.IOException;
 import java.sql.Connection;

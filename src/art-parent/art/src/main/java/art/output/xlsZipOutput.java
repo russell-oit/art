@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class xlsZipOutput implements ArtOutputInterface {
+public class xlsZipOutput implements ReportOutputInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(xlsZipOutput.class);
 	FileOutputStream fout;

@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Generate tsv zip output
  */
-public class tsvZipOutput implements ArtOutputInterface {
+public class tsvZipOutput implements ReportOutputInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(tsvZipOutput.class);
 	FileOutputStream fout;
