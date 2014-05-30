@@ -1,5 +1,5 @@
 <%-- 
-    Document   : runReportInlineError
+    Document   : reportErrorInline
     Created on : 22-May-2014, 10:21:37
     Author     : Timothy Anyona
 
@@ -11,6 +11,7 @@ Display error when running a report inline (using ajax)
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <c:if test="${not empty message}">
 	<div class="col-md-6 col-md-offset-3 alert alert-danger text-center">
@@ -19,11 +20,10 @@ Display error when running a report inline (using ajax)
 </c:if>
 
 <c:if test="${error != null}">
-	<div class="alert alert-danger alert-dismissable">
-		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+	<div class="alert alert-danger">
 		<p><spring:message code="page.message.errorOccurred"/></p>
 		<c:if test="${showErrors}">
 			<p><encode:forHtmlContent value="${error}"/></p>
 		</c:if>
-</div>
+	</div>
 </c:if>

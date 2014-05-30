@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -110,6 +111,7 @@ public class ArtConfig extends HttpServlet {
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
 	private static String artVersion;
+	private static HashMap<String, Class> reportFormatClasses;
 
 	/**
 	 * {@inheritDoc}
@@ -244,11 +246,26 @@ public class ArtConfig extends HttpServlet {
 		allReportFormats.add("xml");
 		allReportFormats.add("rss20");
 
+		//load classes for all report formats
+		reportFormatClasses = new HashMap<>(allReportFormats.size());
+		ClassLoader cl = this.getClass().getClassLoader();
+		for (String reportFormat : allReportFormats) {
+			try {
+				reportFormatClasses.put(reportFormat, cl.loadClass("art.output." + reportFormat + "Output"));
+			} catch (ClassNotFoundException ex) {
+				logger.error("Error while loading report format: {}", reportFormat, ex);
+			}
+		}
+
 		//load settings and initialize variables
 		loadSettings();
 
 		//initialize datasources
 		initializeDatasources();
+	}
+	
+	public static Map<String,Class> getReportFormatClasses(){
+		return reportFormatClasses;
 	}
 
 	/**
@@ -1454,7 +1471,7 @@ public class ArtConfig extends HttpServlet {
 		logger.debug("users.isEmpty()={}", users.isEmpty());
 		if (!users.isEmpty()) {
 			logger.info("Adding user ids");
-			
+
 			//generate new id
 			sql = "SELECT MAX(USER_ID) FROM ART_USERS";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1516,7 +1533,7 @@ public class ArtConfig extends HttpServlet {
 		logger.debug("schedules.isEmpty()={}", schedules.isEmpty());
 		if (!schedules.isEmpty()) {
 			logger.info("Adding schedule ids");
-			
+
 			//generate new id
 			sql = "SELECT MAX(SCHEDULE_ID) FROM ART_JOB_SCHEDULES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1554,7 +1571,7 @@ public class ArtConfig extends HttpServlet {
 		logger.debug("drilldowns.isEmpty()={}", drilldowns.isEmpty());
 		if (!drilldowns.isEmpty()) {
 			logger.info("Adding drilldown ids");
-			
+
 			//generate new id
 			sql = "SELECT MAX(DRILLDOWN_ID) FROM ART_DRILLDOWN_QUERIES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1594,7 +1611,7 @@ public class ArtConfig extends HttpServlet {
 		logger.debug("rules.isEmpty()={}", rules.isEmpty());
 		if (!rules.isEmpty()) {
 			logger.info("Adding rule ids");
-			
+
 			//generate new id
 			sql = "SELECT MAX(RULE_ID) FROM ART_RULES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1642,7 +1659,7 @@ public class ArtConfig extends HttpServlet {
 		logger.debug("reportFilters.isEmpty()={}", reportFilters.isEmpty());
 		if (!reportFilters.isEmpty()) {
 			logger.info("Adding query rule ids");
-			
+
 			//generate new id
 			sql = "SELECT MAX(QUERY_RULE_ID) FROM ART_QUERY_RULES";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();
@@ -1684,7 +1701,7 @@ public class ArtConfig extends HttpServlet {
 		logger.debug("parameters.isEmpty()={}", parameters.isEmpty());
 		if (!parameters.isEmpty()) {
 			logger.info("Adding parameters");
-			
+
 			//generate new parameter id
 			sql = "SELECT MAX(PARAMETER_ID) FROM ART_PARAMETERS";
 			ResultSetHandler<Integer> h = new ScalarHandler<>();

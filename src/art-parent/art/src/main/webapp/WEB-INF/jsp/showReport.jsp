@@ -21,36 +21,46 @@ Display report parameters and initiate running of report
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function() {
+				$("#schedule").click(function(e) {
+					e.preventDefault();
+					var url = "${pageContext.request.contextPath}/app/scheduleReport.do";
+					$('#parametersForm').attr('action', url).submit();
+				});
+
 				$("#runInNewPage").click(function(e) {
+					$("#showInline").val("false");
 					$("#parametersForm").submit();
 				});
 
 				$("#runInline").click(function(e) {
-
 					e.preventDefault();
 
 					var $form = $(this).closest('form');
 
-					//disable execute button
-					$('.run').attr('disabled', 'disabled');
+					//disable buttons
+					$('.action').prop('disabled', true);
 
-					$("#reportOutput").load("${pageContext.request.contextPath}/app/runReport.do",
-							$form.serialize(), function(responseText, statusText, xhr) {
-						//callback funtion for when jquery load has finished
+					var url = "${pageContext.request.contextPath}/app/runReport.do";
+					$("#reportOutput").load(url, $form.serialize(),
+							function(responseText, statusText, xhr) {
+								//callback funtion for when jquery load has finished
 
-						if (statusText == "success") {
-							//make htmlgrid output sortable
+								if (statusText === "success") {
+									//make htmlgrid output sortable
 
-						} else if (statusText == "error") {
-							alert("An error occurred: " + xhr.status + " - " + xhr.statusText);
-						}
+								} else if (statusText === "error") {
+									bootbox.alert("<b>${errorOccurredText}</b><br>"
+											+ xhr.status + "<br>" + responseText);
+								}
 
-						//enable submit button
-						$('.run').removeAttr('disabled');
+								//enable buttons
+								$('.action').prop('disabled', false);
 
-					});
+							});
 
 				});
+				
+//				$("#runInline").click();
 
 
 			}); //end document ready
@@ -71,20 +81,29 @@ Display report parameters and initiate running of report
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				<spring:url var="formUrl" value="/app/runReport.do"/>
-				<form id="parametersForm" class="form-horizontal" method="GET" action="${formUrl}">
+				<form id="parametersForm" class="form-horizontal" method="POST" action="${formUrl}">
 					<fieldset>
 						<input type="hidden" name="reportId" value="${report.reportId}">
-					</fieldset>
-					<div class="form-group">
-						<div class="col-md-12 pull-right">
-							<button type="button" id="runInNewPage" class="btn btn-default run">
-								<spring:message code="reports.action.runInNewPage"/>
-							</button>
-							<button type="submit" id="runInline" class="btn btn-primary run">
-								<spring:message code="page.action.run"/>
-							</button>
+						<input type="hidden" name="showInline" id="showInline" value="true">
+
+						<div class="form-group">
+							<div class="col-md-12">
+								<div id="actionsDiv" class="pull-right">
+									<c:if test="${enableSchedule}">
+										<button type="button"id="schedule" class="btn btn-default action">
+											<spring:message code="reports.action.schedule"/>
+										</button>
+									</c:if>
+									<button type="button" id="runInNewPage" class="btn btn-default action">
+										<spring:message code="reports.action.runInNewPage"/>
+									</button>
+									<button type="submit" id="runInline" class="btn btn-primary action">
+										<spring:message code="page.action.run"/>
+									</button>
+								</div>
+							</div>
 						</div>
-					</div>
+					</fieldset>
 				</form>
 			</div>
 		</div>

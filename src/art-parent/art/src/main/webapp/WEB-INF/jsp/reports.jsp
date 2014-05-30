@@ -144,7 +144,7 @@ Reports page. Also main/home page
 						<td>
 							<a href="${pageContext.request.contextPath}/app/showReport.do?reportId=${report.reportId}">
 								<encode:forHtmlContent value="${report.name}"/>
-							</a>
+							</a> &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>
 						</td>

@@ -66,7 +66,7 @@ public class ReportController {
 
 	@Autowired
 	private DatasourceService datasourceService;
-	
+
 	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
 	public String showReports(HttpSession session,
 			@RequestParam(value = "reportId", required = false) Integer reportGroupId,
@@ -98,15 +98,19 @@ public class ReportController {
 
 		return "reports";
 	}
-	
+
 	@RequestMapping(value = "/app/showReport", method = RequestMethod.GET)
 	public String showReport(@RequestParam("reportId") Integer reportId,
 			Model model) {
-		logger.debug("Entering showReport");
+
+		logger.debug("Entering showReport: reportId={}", reportId);
 
 		try {
 			Report report = reportService.getReport(reportId);
-			if (report != null) {
+			if (report == null) {
+				model.addAttribute("message", "reports.message.reportNotFound");
+				return "reportError";
+			} else {
 				model.addAttribute("report", report);
 			}
 		} catch (SQLException ex) {

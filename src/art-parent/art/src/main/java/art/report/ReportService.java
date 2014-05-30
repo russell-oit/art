@@ -899,12 +899,11 @@ public class ReportService {
 	 * @return
 	 * @throws SQLException
 	 */
-	@Cacheable(value = "reports")
+//	@Cacheable(value = "reports") 
 	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
-		String sql;
-
-		//everyone can run lov report
-		sql = "SELECT COUNT(*)"
+		logger.debug("Entering canUserRunReport: userId={}, reportId={}",userId,reportId);
+		
+		String sql = "SELECT COUNT(*)"
 				+ " FROM ART_QUERIES AQ"
 				+ " WHERE QUERY_ID=?"
 				+ " AND("
@@ -915,21 +914,21 @@ public class ReportService {
 				+ " QUERY_TYPE=?"
 				+ " OR"
 				//everyone can run report if the public user has direct access to it
-				+ " EXISTS (SELECT COUNT(*)"
+				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_QUERIES AUQ"
 				+ " INNER JOIN ART_USERS AU"
 				+ " ON AUQ.USER_ID=AU.USER_ID"
 				+ " WHERE AUQ.QUERY_ID=AQ.QUERY_ID AND AU.USERNAME=?)"
 				+ " OR"
 				//everyone can run report if the public user has access to the report's group
-				+ " EXISTS (SELECT COUNT(*)"
+				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_QUERY_GROUPS AUQG"
 				+ " INNER JOIN ART_USERS AU"
 				+ " ON AUQG.USER_ID=AU.USER_ID"
-				+ " WHERE AUQG.QUERY_GROUP_IN=AQ.QUERY_GROUP_ID AND AU.USERNAME=?)"
+				+ " WHERE AUQG.QUERY_GROUP_ID=AQ.QUERY_GROUP_ID AND AU.USERNAME=?)"
 				+ " OR"
 				//admins can run all reports
-				+ " EXISTS (SELECT COUNT(*)"
+				+ " EXISTS (SELECT *"
 				+ " FROM ART_USERS"
 				+ " WHERE USER_ID=? AND ACCESS_LEVEL>=?)"
 				+ " OR"
@@ -960,10 +959,9 @@ public class ReportService {
 
 		Object[] values = {
 			reportId,
-			ReportType.LovDynamic, //lov reports
-			ReportType.LovStatic,
-			reportId, //public text reports
-			ReportType.TextPublic.getValue(),
+			ReportType.LovDynamic.getValue(), //lov reports
+			ReportType.LovStatic.getValue(),
+			ReportType.TextPublic.getValue(), //public text report
 			ArtUtils.PUBLIC_USER, //public user access to report
 			ArtUtils.PUBLIC_USER, //public user access to report's group
 			userId, //admin user
@@ -974,8 +972,8 @@ public class ReportService {
 			userId //user group access to report group
 		};
 
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer recordCount = dbService.query(sql, h, values);
+		ResultSetHandler<Long> h = new ScalarHandler<>();
+		Long recordCount = dbService.query(sql, h, values);
 		if (recordCount == null || recordCount == 0) {
 			return false;
 		} else {

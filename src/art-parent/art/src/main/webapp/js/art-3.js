@@ -56,7 +56,7 @@ var alertCloseButton = '<button type="button" class="close" data-dismiss="alert"
 //http://jslinterrors.com/unused-a
 /*jslint unparam: true, node: true */
 /*jshint unused: true, node: true */
-/*exported setDatasourceFields,escapeHtml,escapeHtmlAttribute,initConfigPage,addSelectDeselectAllHandler */
+/*exported setDatasourceFields,escapeHtml,escapeHtmlAttribute,initConfigPage,addSelectDeselectAllHandler,displayReportInfo,displayReportProgress */
 
 
 //possibly enclose functions in immediately executed function and have global use strict? but jshint/jslint will warn about unused functions
@@ -535,4 +535,20 @@ function addSelectDeselectAllHandler() {
 		var item = $(this).data('item');
 		$(item).multiSelect('deselect_all');
 	});
+}
+
+/**
+ * Display report progress. used in reportHeader.jsp. called by runReportController
+ * @param {string} message
+ */
+function displayReportProgress(message) {
+	$("#reportProgress").text(message);
+}
+
+/**
+ * Display report info. used in reportHeader.jsp. called by runReportController
+ * @param {string} message
+ */
+function displayReportInfo(message) {
+	document.getElementById("reportInfo").innerHTML = message;
 }

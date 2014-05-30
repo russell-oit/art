@@ -11,7 +11,7 @@ Footer that appears on all pages
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div id="footer">
 	<div class="container"> 
@@ -22,7 +22,7 @@ Footer that appears on all pages
 		</span>
 		<c:if test="${not empty administratorEmail}">
 			<span class="navbar-text pull-right">
-				<a href="mailto:${fn:escapeXml(administratorEmail)}?subject=ART">
+				<a href="mailto:${encode:forHtmlAttribute(administratorEmail)}?subject=ART">
 					<spring:message code="footer.link.contactSupport"/>
 				</a>
 			</span>
