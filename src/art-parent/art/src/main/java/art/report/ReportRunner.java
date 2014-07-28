@@ -48,12 +48,12 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class PreparedQuery {
+public class ReportRunner {
 
-	private static final Logger logger = LoggerFactory.getLogger(PreparedQuery.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportRunner.class);
 	final int MAX_RECURSIVE_LOOKUP = 20;
 	String username; //used to check query access rights, in applying rule values and replacing :username tag
-	int queryId;
+	int reportId;
 	StringBuilder sb;
 	Map<String, String> bindParams;
 	Map<String, String[]> multiParams;
@@ -83,7 +83,7 @@ public class PreparedQuery {
 	/**
 	 *
 	 */
-	public PreparedQuery() {
+	public ReportRunner() {
 		sb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
 
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
@@ -206,12 +206,12 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Set the query id to execute
+	 * Set the report id to execute
 	 *
 	 * @param i
 	 */
-	public void setQueryId(int i) {
-		queryId = i;
+	public void setReportId(int i) {
+		reportId = i;
 	}
 
 	/**
@@ -458,10 +458,10 @@ public class PreparedQuery {
 		try {
 			if (report == null) {
 				ReportService reportService = new ReportService();
-				report = reportService.getReport(queryId);
+				report = reportService.getReport(reportId);
 			}
 		} catch (SQLException ex) {
-			java.util.logging.Logger.getLogger(PreparedQuery.class.getName()).log(Level.SEVERE, null, ex);
+			java.util.logging.Logger.getLogger(ReportRunner.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
 		try {
@@ -762,7 +762,7 @@ public class PreparedQuery {
 	 */
 	public boolean canExecuteQuery(String uname, int qid, boolean admin) {
 		username = uname;
-		queryId = qid;
+		reportId = qid;
 		adminSession = admin;
 
 		return canExecuteQuery();
@@ -827,7 +827,7 @@ public class PreparedQuery {
 					+ " ORDER BY LINE_NUMBER";
 
 			ps = conn.prepareStatement(stmt);
-			ps.setInt(1, queryId);
+			ps.setInt(1, reportId);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				sb.append(rs.getString(1));
@@ -847,7 +847,7 @@ public class PreparedQuery {
 					+ " ORDER BY LINE_NUMBER";
 
 			ps = conn.prepareStatement(stmt);
-			ps.setInt(1, queryId);
+			ps.setInt(1, reportId);
 			ps.setString(2, username);
 			rs = ps.executeQuery();
 			while (rs.next()) {
@@ -868,7 +868,7 @@ public class PreparedQuery {
 						+ " ORDER BY AAS.LINE_NUMBER";
 
 				ps = conn.prepareStatement(stmt);
-				ps.setInt(1, queryId);
+				ps.setInt(1, reportId);
 				ps.setString(2, username);
 
 				rs = ps.executeQuery();
@@ -892,7 +892,7 @@ public class PreparedQuery {
 
 				//try access based on user's right to query group
 				ps = conn.prepareStatement(stmt);
-				ps.setInt(1, queryId);
+				ps.setInt(1, reportId);
 				ps.setString(2, username);
 				rs = ps.executeQuery();
 				while (rs.next()) {
@@ -914,7 +914,7 @@ public class PreparedQuery {
 						+ " ORDER BY AAS.LINE_NUMBER";
 
 				ps = conn.prepareStatement(stmt);
-				ps.setInt(1, queryId);
+				ps.setInt(1, reportId);
 				ps.setString(2, username);
 
 				rs = ps.executeQuery();
@@ -940,7 +940,7 @@ public class PreparedQuery {
 					+ " ORDER BY LINE_NUMBER";
 
 			ps = conn.prepareStatement(stmt);
-			ps.setInt(1, queryId);
+			ps.setInt(1, reportId);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				sb.append(rs.getString(1));
@@ -960,10 +960,10 @@ public class PreparedQuery {
 	}
 
 	/**
-	 * Apply Rules v 0.5 - embedded in PreparedQuery v 0.4 - Return null instead
-	 * of raising an exception if the usernames has not been granted to the rule
-	 * v 0.3 - Handle "LOOKUP" rule type, with a recursive approach v 0.2 -
-	 * Handle "ALL_ITEMS" rule value v 0.1 -
+	 * Apply Rules v 0.5 - embedded in ReportRunner v 0.4 - Return null instead
+ of raising an exception if the usernames has not been granted to the rule
+ v 0.3 - Handle "LOOKUP" rule type, with a recursive approach v 0.2 -
+ Handle "ALL_ITEMS" rule value v 0.1 -
 	 */
 	private boolean applyRules(StringBuilder sb) throws SQLException {
 
@@ -1013,7 +1013,7 @@ public class PreparedQuery {
 				+ " FROM ART_QUERY_RULES"
 				+ " WHERE QUERY_ID=?";
 		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setInt(1, queryId);
+		ps.setInt(1, reportId);
 		rs = ps.executeQuery();
 
 		// for each rule build and add the AND column IN (list) string to the query
@@ -1330,7 +1330,7 @@ public class PreparedQuery {
 			//replace all inline parameters that use direct substitution first
 			if (htmlParams == null) {
 				ArtQuery aq = new ArtQuery();
-				htmlParams = aq.getHtmlParams(queryId);
+				htmlParams = aq.getHtmlParams(reportId);
 			}
 
 			for (Map.Entry<String, String> entry : inlineParams.entrySet()) {
@@ -1708,7 +1708,7 @@ public class PreparedQuery {
 		// Enable looking up of param label (column name for non-labelled params) from the html name
 		if (htmlParams == null) {
 			ArtQuery aq = new ArtQuery();
-			htmlParams = aq.getHtmlParams(queryId);
+			htmlParams = aq.getHtmlParams(reportId);
 		}
 
 		//check if query uses labelled multi parameters
@@ -1926,7 +1926,7 @@ public class PreparedQuery {
 					+ " ORDER BY AAS.LINE_NUMBER";
 
 			psLovQuery = conn.prepareStatement(sqlLovQuery);
-			psLovQuery.setInt(1, queryId);
+			psLovQuery.setInt(1, reportId);
 			psLovQuery.setString(2, paramLabel);
 
 			rsLovQuery = psLovQuery.executeQuery();
@@ -1984,7 +1984,7 @@ public class PreparedQuery {
 						//parameter chained on another parameter. get filter parameter html name
 						ArtQueryParam param = new ArtQueryParam();
 						String filterLabel;
-						String valueParamHtmlName = param.getHtmlName(queryId, filterPosition);
+						String valueParamHtmlName = param.getHtmlName(reportId, filterPosition);
 						//get filter value. 						
 						if (StringUtils.startsWith(valueParamHtmlName, "P_")) {
 							filterLabel = valueParamHtmlName.substring(2);
@@ -2116,7 +2116,7 @@ public class PreparedQuery {
 
 			if (htmlParams == null) {
 				ArtQuery aq = new ArtQuery();
-				htmlParams = aq.getHtmlParams(queryId);
+				htmlParams = aq.getHtmlParams(reportId);
 			}
 
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");

@@ -17,6 +17,7 @@
 package art.reportgroup;
 
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -72,14 +73,14 @@ public class ReportGroupController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedReports = new ArrayList<>();
-			int count = reportGroupService.deleteReportGroup(id, linkedReports);
-			logger.debug("count={}", count);
-			if (count == -1) {
-				//report group not deleted because of linked records
-				response.setData(linkedReports);
-			} else {
+			ActionResult deleteResult = reportGroupService.deleteReportGroup(id);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
+			} else {
+				//report group not deleted because of linked reports
+				response.setData(deleteResult.getData());
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

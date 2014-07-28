@@ -19,6 +19,7 @@ package art.datasource;
 import art.dbutils.DbUtils;
 import art.servlets.ArtConfig;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.Encrypter;
@@ -84,15 +85,15 @@ public class DatasourceController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedReports = new ArrayList<>();
-			int count = datasourceService.deleteDatasource(id, linkedReports);
-			logger.debug("count={}", count);
-			if (count == -1) {
-				//datasource not deleted because of linked records
-				response.setData(linkedReports);
-			} else {
+			ActionResult deleteResult = datasourceService.deleteDatasource(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
 				ArtConfig.refreshConnections();
+			} else {
+				//datasource not deleted because of linked reports
+				response.setData(deleteResult.getData());
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

@@ -21,6 +21,7 @@ import art.dbutils.DbUtils;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class ParameterService {
 	@Autowired
 	private DbService dbService;
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PARAMETERS";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PARAMETERS AP";
 
 	/**
 	 * Class to map resultset to an object
@@ -128,34 +129,53 @@ public class ParameterService {
 	}
 
 	/**
+	 * Get all parameters for a report
+	 *
+	 * @param reportId
+	 * @return list of all parameters, empty list otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<Parameter> getReportParameters(int reportId) throws SQLException {
+		logger.debug("Entering getReportParameters");
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
+				+ " ON AP.PARAMETER_ID=ARP.PARAMETER_ID"
+				+ " WHERE ARP.REPORT_ID=?";
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(sql, h, reportId);
+	}
+
+	/**
 	 * Delete a parameter
 	 *
 	 * @param id
-	 * @param linkedReports output parameter. list that will be populated with
-	 * linked jobs if they exist
-	 * @return -1 if the record was not deleted because there are some linked
-	 * records in other tables, otherwise the count of the number of reports
-	 * deleted
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * reports which prevented the parameter from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
-	public int deleteParameter(int id, List<String> linkedReports) throws SQLException {
+	public ActionResult deleteParameter(int id) throws SQLException {
 		logger.debug("Entering deleteParameter: id={}", id);
 
+		ActionResult result = new ActionResult();
+
 		//don't delete if important linked records exist
-		List<String> reports = getLinkedReports(id);
-		if (!reports.isEmpty()) {
-			if (linkedReports != null) {
-				linkedReports.addAll(reports);
-			}
-			return -1;
+		List<String> linkedReports = getLinkedReports(id);
+		if (!linkedReports.isEmpty()) {
+			result.setData(linkedReports);
+			return result;
 		}
 
 		String sql;
 
 		//finally delete parameter
 		sql = "DELETE FROM ART_PARAMETERS WHERE PARAMETER_ID=?";
-		return dbService.update(sql, id);
+		dbService.update(sql, id);
+
+		result.setSuccess(true);
+		return result;
 	}
 
 	/**

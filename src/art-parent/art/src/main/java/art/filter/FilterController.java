@@ -18,6 +18,7 @@ package art.filter;
 
 import art.enums.ParameterDataType;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -73,14 +74,14 @@ public class FilterController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedReports = new ArrayList<>();
-			int count = filterService.deleteFilter(id, linkedReports);
-			logger.debug("count={}", count);
-			if (count == -1) {
-				//filter not deleted because of linked records
-				response.setData(linkedReports);
-			} else {
+			ActionResult deleteResult = filterService.deleteFilter(id);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
+			} else {
+				//filter not deleted because of linked reports
+				response.setData(deleteResult.getData());
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

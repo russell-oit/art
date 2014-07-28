@@ -4,6 +4,7 @@ import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.enums.AccessLevel;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -178,24 +179,21 @@ public class ReportGroupService {
 	 * Delete a report group
 	 *
 	 * @param id
-	 * @param linkedReports list that will be populated with linked reports if
-	 * they exist
-	 * @return -1 if the record was not deleted because there are some linked
-	 * records in other tables, otherwise the count of the number of users
-	 * deleted
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * reports which prevented the report group from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
-	public int deleteReportGroup(int id, List<String> linkedReports) throws SQLException {
+	public ActionResult deleteReportGroup(int id) throws SQLException {
 		logger.debug("Entering deleteReportGroup: id={}", id);
 
+		ActionResult result = new ActionResult();
+
 		//don't delete if important linked records exist
-		List<String> reports = getLinkedReports(id);
-		if (!reports.isEmpty()) {
-			if (linkedReports != null) {
-				linkedReports.addAll(reports);
-			}
-			return -1;
+		List<String> linkedReports = getLinkedReports(id);
+		if (!linkedReports.isEmpty()) {
+			result.setData(linkedReports);
+			return result;
 		}
 
 		String sql;
@@ -209,7 +207,10 @@ public class ReportGroupService {
 
 		//finally delete report group
 		sql = "DELETE FROM ART_QUERY_GROUPS WHERE QUERY_GROUP_ID=?";
-		return dbService.update(sql, id);
+		dbService.update(sql, id);
+
+		result.setSuccess(true);
+		return result;
 	}
 
 	/**

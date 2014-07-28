@@ -16,7 +16,7 @@
  */
 package art.servlets;
 
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import art.graph.*;
 import art.output.*;
 import art.utils.*;
@@ -288,7 +288,7 @@ public class ExecuteQuery extends HttpServlet {
 				int numberOfRows = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
 
 				ResultSet rs = null;
-				PreparedQuery pq = null;
+				ReportRunner pq = null;
 
 				try {
 					ResultSetMetaData rsmd;
@@ -308,7 +308,7 @@ public class ExecuteQuery extends HttpServlet {
 
 					/*
 					 * ***********************************
-					 * BEGIN: Create the PreparedQuery object and feed it (this
+					 * BEGIN: Create the ReportRunner object and feed it (this
 					 * obj is a "wrapper" around the SQL string with some
 					 * methods to act on it to apply rules, multi params etc)
 					 */
@@ -320,9 +320,9 @@ public class ExecuteQuery extends HttpServlet {
 						adminSession = true;
 					}
 
-					pq = new PreparedQuery();
+					pq = new ReportRunner();
 					pq.setUsername(username);
-					pq.setQueryId(queryId);
+					pq.setReportId(queryId);
 					pq.setAdminSession(adminSession);
 
 
@@ -507,12 +507,12 @@ public class ExecuteQuery extends HttpServlet {
 
 						//display parameters
 						if (showParams) {
-							ReportOuputtHandler.displayParameters(out, displayParams, messages);
+							ReportOutputHandler.displayParameters(out, displayParams, messages);
 						}
 
 						//display final sql
 						if (showSQL) {
-							ReportOuputtHandler.displayFinalSQL(out, finalSQL);
+							ReportOutputHandler.displayFinalSQL(out, finalSQL);
 						}
 
 						out.flush();
@@ -632,7 +632,7 @@ public class ExecuteQuery extends HttpServlet {
 										/*
 										 * CROSSTAB
 										 */
-										numberOfRows = ReportOuputtHandler.flushXOutput(messages, o, rs, rsmd);
+										numberOfRows = ReportOutputHandler.flushXOutput(messages, o, rs, rsmd);
 									} else {
 										/*
 										 * NORMAL TABULAR OUTPUT
@@ -644,7 +644,7 @@ public class ExecuteQuery extends HttpServlet {
 											//only drill down for html output. drill down query launched from hyperlink                                            
 											drilldownQueries = aq.getDrilldownQueries(queryId);
 										}
-										numberOfRows = ReportOuputtHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+										numberOfRows = ReportOutputHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
 									}
 									probe = 130;
 								}
@@ -769,7 +769,7 @@ public class ExecuteQuery extends HttpServlet {
 		 * A note about security: A malicious user cannot execute arbitrary
 		 * queries because ExecuteQuery checks that the query is viewable by the
 		 * authenticated or public user before the SQL code is executed (in
-		 * PreparedQuery)
+		 * ReportRunner)
 		 */
 
 		if (request.getParameter("QUERY_ID") == null && request.getParameter("queryId") == null) {

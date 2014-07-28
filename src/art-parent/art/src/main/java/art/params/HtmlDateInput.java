@@ -25,7 +25,7 @@ Used in showParams.jsp page to display date and datetime parameter fields
  */
 package art.params;
 
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ResourceBundle;
@@ -84,7 +84,7 @@ public class HtmlDateInput implements ParamInterface {
         }
 
         //convert default value to a valid date string
-        Date defaultDate = PreparedQuery.getDefaultValueDate(defaultValue);
+        Date defaultDate = ReportRunner.getDefaultValueDate(defaultValue);
         SimpleDateFormat dateFormatter = new SimpleDateFormat(defaultDateFormat);
         this.defaultValue = dateFormatter.format(defaultDate);
     }

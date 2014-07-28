@@ -20,7 +20,7 @@ import art.servlets.ArtConfig;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
@@ -189,8 +189,8 @@ public class jasperOutput {
 				Map<String, Object> params = new HashMap<String, Object>();
 
 				//process inline parameters to obtain appropriate jasper data type objects and multi parameters to obtain parameter names instead of parameter identifiers
-				PreparedQuery pq = new PreparedQuery();
-				pq.setQueryId(queryId);
+				ReportRunner pq = new ReportRunner();
+				pq.setReportId(queryId);
 				pq.setInlineParams(inlineParams);
 				pq.setMultiParams(multiParams);
 

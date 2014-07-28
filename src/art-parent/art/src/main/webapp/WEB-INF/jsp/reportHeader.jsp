@@ -17,6 +17,5 @@ Header section of report output for html output reports
 		<encode:forHtmlContent value="${reportName}"/>
 	</span>
 	<span id="reportProgress" class="pull-right">
-		<spring:message code="reports.message.preparing"/>
 	</span>
 </div>

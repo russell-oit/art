@@ -21,7 +21,7 @@
  */
 package art.utils;
 
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import art.params.*;
 import art.servlets.ArtConfig;
 import java.sql.*;
@@ -1136,7 +1136,7 @@ public class ArtQuery {
 
 				currentRule = rs.getString("RULE_NAME");
 				columnDataType = rs.getString("FIELD_DATA_TYPE");
-				PreparedQuery pq = new PreparedQuery();
+				ReportRunner pq = new ReportRunner();
 				tmpSb = pq.getRuleValues(conn, username, currentRule, 1, columnDataType);
 				if (tmpSb != null) {
 					String s = tmpSb.toString();

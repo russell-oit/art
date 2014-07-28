@@ -12,7 +12,7 @@ header fragment for displaying report output in a new page
 	<head>
 		<meta charset="UTF-8">
 
-		<title>${title}</title>
+		<title>ART - ${title}</title>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.3/css/font-awesome.min.css">

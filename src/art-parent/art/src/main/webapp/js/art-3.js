@@ -542,7 +542,7 @@ function addSelectDeselectAllHandler() {
  * @param {string} message
  */
 function displayReportProgress(message) {
-	$("#reportProgress").text(message);
+	$("#reportProgress").html(message);
 }
 
 /**
@@ -550,5 +550,5 @@ function displayReportProgress(message) {
  * @param {string} message
  */
 function displayReportInfo(message) {
-	document.getElementById("reportInfo").innerHTML = message;
+	$("#reportInfo").html(message);
 }

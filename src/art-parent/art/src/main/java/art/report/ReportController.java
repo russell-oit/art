@@ -22,6 +22,7 @@ import art.enums.ReportType;
 import art.reportgroup.ReportGroupService;
 import art.servlets.ArtConfig;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.Encrypter;
 import java.io.File;
@@ -169,14 +170,14 @@ public class ReportController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedJobs = new ArrayList<>();
-			int count = reportService.deleteReport(id, linkedJobs);
-			logger.debug("count={}", count);
-			if (count == -1) {
-				//report not deleted because of linked records
-				response.setData(linkedJobs);
-			} else {
+			ActionResult deleteResult = reportService.deleteReport(id);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
+			} else {
+				//report not deleted because of linked jobs
+				response.setData(deleteResult.getData());
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

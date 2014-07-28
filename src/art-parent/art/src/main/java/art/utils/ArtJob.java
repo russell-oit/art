@@ -26,10 +26,10 @@
  */
 package art.utils;
 
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import art.graph.ExportGraph;
 import art.mail.Mailer;
-import art.output.ReportOuputtHandler;
+import art.output.ReportOutputHandler;
 import art.output.ReportOutputInterface;
 import art.output.jasperOutput;
 import art.output.jxlsOutput;
@@ -1059,7 +1059,7 @@ public class ArtJob implements Job, Serializable {
 
 	private void runDynamicRecipientsJob(Connection conn) {
 
-		PreparedQuery recipientsQuery = null; //recipients query
+		ReportRunner recipientsQuery = null; //recipients query
 		try {
 			//get recipient data
 			recipientsQuery = prepareQuery(username, recipientsQueryId, false);
@@ -1268,7 +1268,7 @@ public class ArtJob implements Job, Serializable {
 		//set job start date. relevant for split jobs
 		jobStartDate = new Timestamp(new java.util.Date().getTime());
 
-		PreparedQuery pq = null;
+		ReportRunner pq = null;
 
 		fileName = "-No File"; //reset file name
 
@@ -1470,7 +1470,7 @@ public class ArtJob implements Job, Serializable {
 
 				if (jobType == 6 || jobType == 7 || jobType == 8) {
 					//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
-					PreparedQuery pqCount = prepareQuery(user);
+					ReportRunner pqCount = prepareQuery(user);
 					pqCount.setAdminSession(true);
 					pqCount.execute();
 					ResultSet rsCount = pqCount.getResultSet();
@@ -1592,9 +1592,9 @@ public class ArtJob implements Job, Serializable {
 
 						ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages");
 						if (queryType == 101 || queryType == 102) {
-							ReportOuputtHandler.flushXOutput(messages, o, rs, rsmd);
+							ReportOutputHandler.flushXOutput(messages, o, rs, rsmd);
 						} else {
-							ReportOuputtHandler.flushOutput(messages, o, rs, rsmd);
+							ReportOutputHandler.flushOutput(messages, o, rs, rsmd);
 						}
 
 						/*
@@ -2748,7 +2748,7 @@ public class ArtJob implements Job, Serializable {
 							} else {
 								dateFormat = "yyyy-MM-dd HH:mm:ss";
 							}
-							java.util.Date defaultDate = PreparedQuery.getDefaultValueDate(value);
+							java.util.Date defaultDate = ReportRunner.getDefaultValueDate(value);
 							SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 							value = dateFormatter.format(defaultDate);
 
@@ -2761,8 +2761,8 @@ public class ArtJob implements Job, Serializable {
 						if (param.usesLov()) {
 							//get all possible lov values.							
 							try {
-								PreparedQuery pq = new PreparedQuery();
-								pq.setQueryId(param.getLovQueryId());
+								ReportRunner pq = new ReportRunner();
+								pq.setReportId(param.getLovQueryId());
 								Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
 								param.setLovValues(lov);
 							} catch (Exception e) {
@@ -2789,8 +2789,8 @@ public class ArtJob implements Job, Serializable {
 						if (param.usesLov()) {
 							//get all possible lov values.							
 							try {
-								PreparedQuery pq = new PreparedQuery();
-								pq.setQueryId(param.getLovQueryId());
+								ReportRunner pq = new ReportRunner();
+								pq.setReportId(param.getLovQueryId());
 								Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
 								param.setLovValues(lov);
 							} catch (Exception e) {
@@ -2884,7 +2884,7 @@ public class ArtJob implements Job, Serializable {
 
 	}
 
-	private PreparedQuery prepareQuery(String user) throws SQLException {
+	private ReportRunner prepareQuery(String user) throws SQLException {
 		return prepareQuery(user, queryId, true);
 	}
 
@@ -2892,7 +2892,7 @@ public class ArtJob implements Job, Serializable {
 	 * Prepares a job for its execution Loads additional info needed to execute
 	 * (immediately) the job (query id, datasource etc).
 	 */
-	private PreparedQuery prepareQuery(String user, int qId, boolean buildParams) throws SQLException {
+	private ReportRunner prepareQuery(String user, int qId, boolean buildParams) throws SQLException {
 		logger.debug("Job Id {}. prepare()", jobId);
 
 		//build parameter objects from parameters saved in the database
@@ -2900,9 +2900,9 @@ public class ArtJob implements Job, Serializable {
 			buildParameters(qId);
 		}
 
-		PreparedQuery pq = new PreparedQuery();
+		ReportRunner pq = new ReportRunner();
 		pq.setUsername(user);
-		pq.setQueryId(qId);
+		pq.setReportId(qId);
 		pq.setAdminSession(false);
 		pq.setInlineParams(inlineParams);
 		pq.setMultiParams(multiParams);

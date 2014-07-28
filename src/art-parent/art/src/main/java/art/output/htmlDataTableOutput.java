@@ -187,7 +187,7 @@ public class htmlDataTableOutput implements ReportOutputInterface {
 		out.println("</script>	");
 
 		//display parameters
-		ReportOuputtHandler.displayParameters(out, displayParams);
+		ReportOutputHandler.displayParameters(out, displayParams);
 
 		//start results table
 		out.println("<div style=\"border: 1px solid black; width:80%; margin 0 auto\"><table class=\"display\" id=\"" + tableId + "\">");

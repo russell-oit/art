@@ -5,6 +5,7 @@ import art.enums.AccessLevel;
 import art.dbutils.DbUtils;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -182,24 +183,21 @@ public class UserService {
 	 * Delete a user and all related records
 	 *
 	 * @param id
-	 * @param linkedJobs output parameter. list that will be populated with
-	 * linked jobs if they exist
-	 * @return -1 if the record was not deleted because there are some linked
-	 * records in other tables, otherwise the count of the number of users
-	 * deleted
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * jobs which prevented the user from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
-	public int deleteUser(int id, List<String> linkedJobs) throws SQLException {
+	public ActionResult deleteUser(int id) throws SQLException {
 		logger.debug("Entering deleteUser: id={}", id);
 
+		ActionResult result = new ActionResult();
+
 		//don't delete if important linked records exist
-		List<String> jobs = getLinkedJobs(id);
-		if (!jobs.isEmpty()) {
-			if (linkedJobs != null) {
-				linkedJobs.addAll(jobs);
-			}
-			return -1;
+		List<String> linkedJobs = getLinkedJobs(id);
+		if (!linkedJobs.isEmpty()) {
+			result.setData(linkedJobs);
+			return result;
 		}
 
 		String sql;
@@ -231,7 +229,10 @@ public class UserService {
 
 		//lastly, delete user
 		sql = "DELETE FROM ART_USERS WHERE USER_ID=?";
-		return dbService.update(sql, id);
+		dbService.update(sql, id);
+
+		result.setSuccess(true);
+		return result;
 	}
 
 	/**

@@ -20,6 +20,7 @@ import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.enums.ParameterDataType;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -138,24 +139,21 @@ public class FilterService {
 	 * Delete a filter
 	 *
 	 * @param id
-	 * @param linkedReports output parameter. list that will be populated with
-	 * linked jobs if they exist
-	 * @return -1 if the record was not deleted because there are some linked
-	 * records in other tables, otherwise the count of the number of reports
-	 * deleted
+	 * @return ActionResult. if delete was not successful, data contains a list
+	 * of linked reports which prevented the filter from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "filters", allEntries = true)
-	public int deleteFilter(int id, List<String> linkedReports) throws SQLException {
+	public ActionResult deleteFilter(int id) throws SQLException {
 		logger.debug("Entering deleteFilter: id={}", id);
 
+		ActionResult result = new ActionResult();
+
 		//don't delete if important linked records exist
-		List<String> reports = getLinkedReports(id);
-		if (!reports.isEmpty()) {
-			if (linkedReports != null) {
-				linkedReports.addAll(reports);
-			}
-			return -1;
+		List<String> linkedReports = getLinkedReports(id);
+		if (!linkedReports.isEmpty()) {
+			result.setData(linkedReports);
+			return result;
 		}
 
 		String sql;
@@ -168,7 +166,10 @@ public class FilterService {
 
 		//finally delete filter
 		sql = "DELETE FROM ART_RULES WHERE RULE_ID=?";
-		return dbService.update(sql, id);
+		dbService.update(sql, id);
+		
+		result.setSuccess(true);
+		return result;
 	}
 
 	/**

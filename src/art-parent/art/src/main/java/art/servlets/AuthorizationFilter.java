@@ -79,8 +79,7 @@ public class AuthorizationFilter implements Filter {
 
 				if (username == null) {
 					//not using custom authentication. test public user session
-					if (request.getParameter("public_user") != null
-							|| request.getParameter("_public_user") != null) {
+					if (request.getParameter("public_user") != null) {
 						username = ArtUtils.PUBLIC_USER;
 						loginMethod = ArtAuthenticationMethod.Public;
 					}

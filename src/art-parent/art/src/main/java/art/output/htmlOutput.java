@@ -103,7 +103,7 @@ public class htmlOutput implements ReportOutputInterface {
 	@Override
 	public void beginHeader() {
 		//display parameters
-		ReportOuputtHandler.displayParameters(out, displayParams);
+		ReportOutputHandler.displayParameters(out, displayParams);
 		
 		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlOutput.css\">");
 

@@ -18,6 +18,7 @@ package art.output;
 
 import art.enums.DisplayNull;
 import art.servlets.ArtConfig;
+import art.utils.ActionResult;
 import art.utils.ArtException;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
@@ -39,43 +40,47 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class ReportOuputtHandler {
+public class ReportOutputHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(ReportOuputtHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportOutputHandler.class);
 
 	/**
 	 * Flush the output as it is (row by row). For output that can't have drill
 	 * down queries and needs to show parameters in output
 	 *
-	 * @param messages resourcebundle for error message translation
 	 * @param o output object
 	 * @param rs query resultset
-	 * @param rsmd resultset metadata
-	 * @return number of rows in the resultset
+	 * @return ActionResult. if successful, data contains the number of rows in
+	 * the resultset. if not, message contains the i18n message indicating the
+	 * problem
 	 * @throws SQLException
-	 * @throws ArtException
 	 */
-	public static int flushOutput(ResourceBundle messages, ReportOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
+	public static ActionResult flushOutput(ReportOutputInterface o, ResultSet rs) throws SQLException {
 
-		return flushOutput(messages, o, rs, rsmd, null, null, null, null);
+		return flushOutput(o, rs, null, null, null, null);
 	}
 
 	/**
 	 * Output query results
 	 *
-	 * @param messages resourcebundle for error message translation
 	 * @param o output object
 	 * @param rs query resultset
-	 * @param rsmd resultset metadata
 	 * @param drilldownQueries drill down queries
 	 * @param baseUrl url to art application
 	 * @param inlineParams inline parameters
 	 * @param multiParams multi parameters
-	 * @return number of rows in the resultset
+	 * @return ActionResult. if successful, data contains the number of rows in
+	 * the resultset. if not, message contains the i18n message indicating the
+	 * problem
 	 * @throws SQLException
-	 * @throws ArtException if max rows reached
 	 */
-	public static int flushOutput(ResourceBundle messages, ReportOutputInterface o, ResultSet rs, ResultSetMetaData rsmd, Map<Integer, DrilldownQuery> drilldownQueries, String baseUrl, Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException, ArtException {
+	public static ActionResult flushOutput(ReportOutputInterface o, ResultSet rs,
+			Map<Integer, DrilldownQuery> drilldownQueries, String baseUrl,
+			Map<String, String> inlineParams, Map<String, String[]> multiParams) throws SQLException {
+
+		ActionResult result = new ActionResult();
+
+		ResultSetMetaData rsmd = rs.getMetaData();
 
 		int columnCount = rsmd.getColumnCount();
 		int i;
@@ -135,11 +140,11 @@ public class ReportOuputtHandler {
 
 		while (rs.next()) {
 			if (!o.newLine()) {
-				if (o instanceof xlsxOutput) {
-					throw new ArtException(messages.getString("tooManyRowsOrError"));
-				} else {
-					throw new ArtException(messages.getString("tooManyRows"));
-				}
+				//couldn't create new line. row limit exceeded
+				//for xlsx, it's also possible that an error occurred.
+				//just show one message. if error occurred, it will be logged
+				result.setMessage("tooManyRows");
+				return result;
 			}
 
 			//save column values for use in drill down columns.
@@ -295,23 +300,23 @@ public class ReportOuputtHandler {
 		}
 		o.endLines();
 
-		return counter;
+		result.setSuccess(true);
+		result.setData(counter);
+		return result;
 	}
 
 	/**
 	 * Generate crosstab output.
 	 *
-	 * @param messages resourcebundle for error message translation
 	 * @param o output object
 	 * @param rs query resultset
-	 * @param rsmd resultset metadata
-	 * @param displayParams parameters to be displayed in output
-	 * @return number of rows in resultset
+	 * @return ActionResult. if successful, data contains the number of rows in
+	 * the resultset. if not, message contains the i18n message indicating the
+	 * problem
 	 * @throws SQLException
-	 * @throws ArtException if resulset not in format for a crosstab or max rows
-	 * exceeded
 	 */
-	public static int flushXOutput(ResourceBundle messages, ReportOutputInterface o, ResultSet rs, ResultSetMetaData rsmd) throws SQLException, ArtException {
+	public static ActionResult flushXOutput(ReportOutputInterface o, ResultSet rs)
+			throws SQLException {
 
 		/*
 		 * input
@@ -340,9 +345,13 @@ public class ReportOuputtHandler {
 		//           C    -   04  44      	 	    C	04   -  44   
 		//                   ^--- Jan comes after Feb!			     	 
 
+		ActionResult result = new ActionResult();
+
+		ResultSetMetaData rsmd = rs.getMetaData();
 		int colCount = rsmd.getColumnCount();
 		if (colCount != 3 && colCount != 5) {
-			throw new ArtException(messages.getString("notACrosstab"));
+			result.setMessage("reports.message.invalidCrosstab");
+			return result;
 		}
 
 		//checking to see if Display Null Value optional setting is set to "No"
@@ -394,7 +403,8 @@ public class ReportOuputtHandler {
 			//  _ Jan Feb Mar
 			for (j = 0; j < ya.length; j++) {
 				if (!o.newLine()) {
-					throw new ArtException(messages.getString("tooManyRows"));
+					result.setMessage("reports.message.tooManyRows");
+					return result;
 				}
 				Object Dy = ya[j];
 				//o.addHeaderCell(y.get(Dy).toString()); //column 1 data displayed as a header
@@ -437,7 +447,8 @@ public class ReportOuputtHandler {
 			//  _ Jan Feb Mar
 			for (j = 0; j < ya.length; j++) {
 				if (!o.newLine()) {
-					throw new ArtException(messages.getString("tooManyRows"));
+					result.setMessage("reports.message.tooManyRows");
+					return result;
 				}
 				Object Dy = ya[j];
 				//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
@@ -452,7 +463,9 @@ public class ReportOuputtHandler {
 
 		o.endLines();
 
-		return counter;
+		result.setSuccess(true);
+		result.setData(counter);
+		return result;
 	}
 
 	/**
@@ -540,17 +553,21 @@ public class ReportOuputtHandler {
 		}
 	}
 
-	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams) {
-		displayParameters(out, displayParams, null);
-	}
+//	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams) {
+//		displayParameters(out, displayParams, null);
+//	}
 
 	/**
 	 * Display parameters for html view modes
 	 *
 	 * @param out
 	 * @param displayParams
+	 * @param allParametersText string to be displayed for multi parameter where
+	 * "All" was selected
 	 */
-	public static void displayParameters(PrintWriter out, Map<Integer, ArtQueryParam> displayParams, ResourceBundle messages) {
+	public static void displayParameters(PrintWriter out,
+			Map<Integer, ArtQueryParam> displayParams, String allParametersText) {
+
 		// display parameters if they are available
 		if (displayParams != null && !displayParams.isEmpty() && out != null) {
 			out.println("<div align=\"center\">");
@@ -565,11 +582,7 @@ public class ReportOuputtHandler {
 
 				if (pValue == null) {
 					//multi parameter with all selected
-					String allString = "All";
-					if (messages != null) {
-						allString = messages.getString("allItems");
-					}
-					outputString = paramName + ": " + allString + " <br> ";
+					outputString = paramName + ": " + allParametersText + " <br> ";
 					out.println(outputString);
 				} else if (pValue instanceof String) {
 					String paramValue = (String) pValue;

@@ -31,7 +31,7 @@ public enum ReportType {
 	Tabular(0), TabularHtml(103),
 	Update(100), Crosstab(101), CrosstabHtml(102), 
 	Dashboard(110), Text(122), TextPublic(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
-	JasperReportTemplate(115), JasperReportArt(116), jXLSTemplate(117), jXLSArt(118),
+	JasperReportsTemplate(115), JasperReportsArt(116), jXLSTemplate(117), jXLSArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121),
 	XY(-1), Pie3D(-2), HorizontalBar3D(-3), VerticalBar3D(-4), Line(-5),
 	TimeSeries(-6), DateSeries(-7), StackedVerticalBar3D(-8), StackedHorizontalBar3D(-9),
@@ -121,14 +121,14 @@ public enum ReportType {
 				return "Pivot Table: Mondrian XMLA";
 			case SqlServerXmla:
 				return "Pivot Table: SQL Server XMLA";
-			case JasperReportTemplate:
-				return "JasperReport: Template Query";
-			case JasperReportArt:
-				return "JasperReport: ART Query";
+			case JasperReportsTemplate:
+				return "JasperReports: Template Query";
+			case JasperReportsArt:
+				return "JasperReports: ART Query";
 			case jXLSTemplate:
-				return "jXLS Spreadsheet: Template Query";
+				return "jXLS: Template Query";
 			case jXLSArt:
-				return "jXLS Spreadsheet: ART Query";
+				return "jXLS: ART Query";
 			case LovDynamic:
 				return "LOV: Dynamic";
 			case LovStatic:

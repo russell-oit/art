@@ -19,6 +19,7 @@ package art.parameter;
 import art.enums.ParameterType;
 import art.report.ReportService;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -77,14 +78,14 @@ public class ParameterController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedReports = new ArrayList<>();
-			int count = parameterService.deleteParameter(id, linkedReports);
-			logger.debug("count={}", count);
-			if (count == -1) {
-				//parameter not deleted because of linked records
-				response.setData(linkedReports);
-			} else {
+			ActionResult deleteResult = parameterService.deleteParameter(id);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
+			} else {
+				//parameter not deleted because of linked reports
+				response.setData(deleteResult.getData());
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

@@ -26,7 +26,7 @@
  */
 package art.params;
 
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import java.util.Map;
 import java.util.ResourceBundle;
 import org.apache.commons.lang3.StringUtils;
@@ -184,12 +184,12 @@ public class HtmlLovParam implements ParamInterface {
 			initialValue = defaultValue;
 		}
 
-		PreparedQuery pq = null;
+		ReportRunner pq = null;
 
 		try {
-			pq = new PreparedQuery();
+			pq = new ReportRunner();
 			pq.setUsername(username); //in case lov should use rules
-			pq.setQueryId(lovQueryId);
+			pq.setReportId(lovQueryId);
 
 			String selected;
 			String value;

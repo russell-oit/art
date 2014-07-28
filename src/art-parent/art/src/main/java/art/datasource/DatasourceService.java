@@ -20,6 +20,7 @@ import art.dbutils.DbService;
 import art.dbutils.DbUtils;
 import art.enums.AccessLevel;
 import art.user.User;
+import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -121,30 +122,30 @@ public class DatasourceService {
 	 * Delete a datasource
 	 *
 	 * @param id
-	 * @param linkedReports list that will be populated with linked reports if
-	 * they exist
-	 * @return -1 if the record was not deleted because there are some linked
-	 * records in other tables, otherwise the count of the number of datasources
-	 * deleted
+	 * @return ActionResult. if not successful, data contains a list
+	 * of linked reports which prevented the datasource from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
-	public int deleteDatasource(int id, List<String> linkedReports) throws SQLException {
+	public ActionResult deleteDatasource(int id) throws SQLException {
 		logger.debug("Entering deleteDatasource: id={}", id);
+
+		ActionResult result = new ActionResult();
+
+		//don't delete if important linked records exist
+		List<String> linkedReports = getLinkedReports(id);
+		if (!linkedReports.isEmpty()) {
+			result.setData(linkedReports);
+			return result;
+		}
 
 		String sql;
 
-		//don't delete if important linked records exist
-		List<String> reports = getLinkedReports(id);
-		if (!reports.isEmpty()) {
-			if (linkedReports != null) {
-				linkedReports.addAll(reports);
-			}
-			return -1;
-		}
-
 		sql = "DELETE FROM ART_DATABASES WHERE DATABASE_ID=?";
-		return dbService.update(sql, id);
+		dbService.update(sql, id);
+
+		result.setSuccess(true);
+		return result;
 	}
 
 	/**

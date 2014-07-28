@@ -23,12 +23,14 @@
  */
 package art.utils;
 
-import art.report.PreparedQuery;
+import art.parameter.Parameter;
+import art.report.ReportRunner;
 import art.report.Report;
 import art.report.ReportService;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -72,15 +74,15 @@ public class ParameterProcessor {
 	 * @param request http request
 	 * @param inlineParams new hashmap to store inline parameters
 	 * @param multiParams new hashmap to store multi parameters
-	 * @param queryId query id
-	 * @param htmlParams map that contains all the query's defined parameters
+	 * @param reportId report id
+	 * @param reportParams all the report's defined parameters
 	 * @return parameters to be shown in report if show parameters option is
 	 * selected
 	 */
 	public static Map<Integer, ArtQueryParam> processParameters(
 			HttpServletRequest request, Map<String, String> inlineParams,
-			Map<String, String[]> multiParams, int queryId,
-			Map<String, ArtQueryParam> htmlParams) {
+			Map<String, String[]> multiParams, int reportId,
+			List<Parameter> reportParams) {
 
 		@SuppressWarnings("rawtypes")
 		Enumeration names = request.getParameterNames();
@@ -91,21 +93,17 @@ public class ParameterProcessor {
 		boolean showParams;
 		ArtQuery aq = new ArtQuery();
 
-		if (aq.alwaysShowParameters(queryId)) {
+		if (aq.alwaysShowParameters(reportId)) {
 			//always show params, regardless of whether _showParams html parameter exists. especially for drill down queries
 			showParams = true;
 		} else {
 			//consider the user's choice
-			if (request.getParameter("_showParams") != null) {
-				showParams = true;
-			} else {
-				showParams = false;
-			}
+			showParams=Boolean.valueOf(request.getParameter("showParams"));
 		}
 
-		if (htmlParams == null) {
+		if (reportParams == null) {
 			//get list of all valid parameters. used with display params and counters sql injection from direct url execution            
-			htmlParams = aq.getHtmlParams(queryId);
+			reportParams = aq.getHtmlParams(reportId);
 		}
 
 		//set parameter values from url
@@ -118,7 +116,7 @@ public class ParameterProcessor {
 				label = htmlName.substring(2);
 				String paramValue = request.getParameter(htmlName);
 				//only add parameters that actually exist. with direct url, someone can type non-existent parameters
-				ArtQueryParam param = htmlParams.get(htmlName);
+				ArtQueryParam param = reportParams.get(htmlName);
 				if (param != null) {
 					logger.debug("Adding inline parameter: {}", htmlName);
 
@@ -132,7 +130,7 @@ public class ParameterProcessor {
 				String firstValue = paramValues[0];
 
 				//only add parameters that actually exist. with direct url, someone can type non-existent parameter
-				ArtQueryParam param = htmlParams.get(htmlName);
+				ArtQueryParam param = reportParams.get(htmlName);
 				if (param != null) {
 					if (!firstValue.equals("ALL_ITEMS")) { // if it is not ALL_ITEMS, add to the list
 						logger.debug("Adding multi parameter: {}", htmlName);
@@ -153,19 +151,19 @@ public class ParameterProcessor {
 
 		if (showParams) {
 			//prepare display params
-			for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+			for (Map.Entry<String, ArtQueryParam> entry : reportParams.entrySet()) {
 				ArtQueryParam param = entry.getValue();
 				//for lov parameters, show both parameter value and friendly value
 				if (param.usesLov()) {
 					//get all possible lov values.							
 					try {
-						PreparedQuery pq = new PreparedQuery();
-						pq.setQueryId(param.getLovQueryId());
+						ReportRunner pq = new ReportRunner();
+						pq.setReportId(param.getLovQueryId());
 						//for chained parameters, handle #filter# parameter
 						int filterPosition = param.getFilterPosition();
 						if (filterPosition > 0) {
 							//parameter chained on another parameter. get filter value
-							String valueParamLabel = param.getLabel(queryId, filterPosition);
+							String valueParamLabel = param.getLabel(reportId, filterPosition);
 							String filter = inlineParams.get(valueParamLabel);
 							Map<String, String> filterParam = new HashMap<String, String>();
 							filterParam.put("filter", filter);

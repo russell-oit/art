@@ -26,6 +26,7 @@ import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.user.User;
+import art.utils.ActionResult;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.sql.Connection;
@@ -357,24 +358,21 @@ public class ReportService {
 	 * Delete a report
 	 *
 	 * @param id
-	 * @param linkedJobs output parameter. list that will be populated with
-	 * linked jobs if they exist
-	 * @return -1 if the record was not deleted because there are some linked
-	 * records in other tables, otherwise the count of the number of reports
-	 * deleted
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * jobs which prevented the report from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public int deleteReport(int id, List<String> linkedJobs) throws SQLException {
+	public ActionResult deleteReport(int id) throws SQLException {
 		logger.debug("Entering deleteReport: id={}", id);
 
+		ActionResult result = new ActionResult();
+
 		//don't delete if important linked records exist
-		List<String> jobs = getLinkedJobs(id);
-		if (!jobs.isEmpty()) {
-			if (linkedJobs != null) {
-				linkedJobs.addAll(jobs);
-			}
-			return -1;
+		List<String> linkedJobs = getLinkedJobs(id);
+		if (!linkedJobs.isEmpty()) {
+			result.setData(linkedJobs);
+			return result;
 		}
 
 		String sql;
@@ -411,7 +409,8 @@ public class ReportService {
 			logger.warn("Problem with delete. affectedRows={}, id={}", affectedRows, id);
 		}
 
-		return affectedRows;
+		result.setSuccess(true);
+		return result;
 	}
 
 	/**
@@ -696,7 +695,7 @@ public class ReportService {
 			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId);
 		} catch (SQLException ex) {
 			//if an error occurred when copying report details, delete report also
-			deleteReport(newId, null);
+			deleteReport(newId);
 			throw ex;
 		}
 	}
@@ -901,8 +900,8 @@ public class ReportService {
 	 */
 //	@Cacheable(value = "reports") 
 	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
-		logger.debug("Entering canUserRunReport: userId={}, reportId={}",userId,reportId);
-		
+		logger.debug("Entering canUserRunReport: userId={}, reportId={}", userId, reportId);
+
 		String sql = "SELECT COUNT(*)"
 				+ " FROM ART_QUERIES AQ"
 				+ " WHERE QUERY_ID=?"

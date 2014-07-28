@@ -96,7 +96,17 @@ public class ArtUtils {
 	 * @return modified query name to be used in file names
 	 */
 	public static String cleanFileName(String fileName) {
-		return fileName.replace('/', '_').replace('*', '_').replace('&', '_').replace('?', '_').replace('!', '_').replace('\\', '_').replace('[', '_').replace(']', '_').replace(':', '_').replace('|', '_').replace('<', '_').replace('>', '_').replace('"', '_');
+		//or only allow english alphabets, numbers, dot and underscore
+		//String sane = filename.replaceAll("[^a-zA-Z0-9\\._]+", "_");
+		
+		String cleanName= fileName.replace('/', '_').replace('*', '_').replace('&', '_')
+				.replace('?', '_').replace('!', '_').replace('\\', '_')
+				.replace('[', '_').replace(']', '_').replace(':', '_')
+				.replace('|', '_').replace('<', '_').replace('>', '_')
+				.replace('"', '_');
+		
+		//replace accents
+		return cleanName.replaceAll("[^\\p{ASCII}]", "_");
 	}
 
 	/**

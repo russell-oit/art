@@ -19,7 +19,7 @@ package art.servlets;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.dbutils.DbUtils;
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import art.utils.UserEntity;
 import java.io.IOException;
 import java.sql.Connection;
@@ -131,9 +131,9 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 				}
 
 				//execute lov to get values to display
-				PreparedQuery pq = new PreparedQuery();
+				ReportRunner pq = new ReportRunner();
 				pq.setUsername(username);
-				pq.setQueryId(queryId);
+				pq.setReportId(queryId);
 
 				Map<String, String> inlineParams = new HashMap<String, String>();
 				Map<String, String[]> multiParams = new HashMap<String, String[]>();

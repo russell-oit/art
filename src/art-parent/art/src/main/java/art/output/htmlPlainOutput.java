@@ -129,7 +129,7 @@ public class htmlPlainOutput implements ReportOutputInterface {
 		
 		if(!displayInline){
 			//display parameters
-			ReportOuputtHandler.displayParameters(out, displayParams);
+			ReportOutputHandler.displayParameters(out, displayParams);
 		}
 		
 		//start results table

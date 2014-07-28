@@ -33,6 +33,14 @@ public class User implements Serializable {
 	private boolean useBlankPassword; //only used for user interface logic
 	private String createdBy;
 	private String updatedBy;
+	
+	public boolean isAdminUser(){
+		if (accessLevel==null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	/**
 	 * @return the createdBy

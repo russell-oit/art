@@ -16,7 +16,7 @@
  */
 package art.report;
 
-import art.enums.AccessLevel;
+import art.enums.ParameterType;
 import art.enums.ReportStatus;
 import art.graph.ArtCategorySeries;
 import art.graph.ArtDateSeries;
@@ -26,16 +26,18 @@ import art.graph.ArtSpeedometer;
 import art.graph.ArtTimeSeries;
 import art.graph.ArtXY;
 import art.graph.ArtXYZChart;
-import art.output.ReportOuputtHandler;
+import art.output.ReportOutputHandler;
 import art.output.ReportOutputInterface;
 import art.output.htmlDataTableOutput;
 import art.output.htmlPlainOutput;
 import art.output.htmlReportOutWriter;
 import art.output.jasperOutput;
 import art.output.jxlsOutput;
+import art.parameter.Parameter;
+import art.parameter.ParameterService;
 import art.servlets.ArtConfig;
 import art.user.User;
-import art.utils.ArtException;
+import art.utils.ActionResult;
 import art.utils.ArtHelper;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
@@ -55,15 +57,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ResourceBundle;
-import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
@@ -86,7 +85,6 @@ public class RunReportController {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunReportController.class);
 
-//	HashMap<String, java.lang.Class> reportFormatClasses;
 	private int runningReportsCount = 0;
 
 	@Autowired
@@ -97,22 +95,9 @@ public class RunReportController {
 
 	@Autowired
 	private MessageSource messageSource;
-
-	@PostConstruct
-	public void init() {
-		//load classes for all report formats
-//		List<String> reportFormats = ArtConfig.getAllReportFormats();
-//		reportFormatClasses = new HashMap<>(reportFormats.size());
-//		ClassLoader cl = this.getClass().getClassLoader();
-//		for (String reportFormat : reportFormats) {
-//			try {
-//				reportFormatClasses.put(reportFormat, cl.loadClass("art.output." + reportFormat + "Output"));
-//			} catch (ClassNotFoundException ex) {
-//				logger.error("Error while loading report format: {}", reportFormat, ex);
-//			}
-//		}
-
-	}
+	
+	@Autowired
+	private ParameterService parameterService;
 
 	//use post to allow for large parameter input and get to allow for direct url execution
 	@RequestMapping(value = "/app/runReport", method = {RequestMethod.GET, RequestMethod.POST})
@@ -152,7 +137,7 @@ public class RunReportController {
 		model.addAttribute("reportName", report.getName());
 
 		//admins can run all reports, even disabled ones. only check for non admin users
-		if (sessionUser.getAccessLevel().getValue() < AccessLevel.JuniorAdmin.getValue()) {
+		if (!sessionUser.isAdminUser()) {
 			if (report.getReportStatus() == ReportStatus.Disabled) {
 				model.addAttribute("message", "reports.message.reportDisabled");
 				return errorPage;
@@ -180,19 +165,13 @@ public class RunReportController {
 		Map<String, Class> reportFormatClasses = ArtConfig.getReportFormatClasses();
 
 		// check if the html code should be rendered as an html fragmnet (without <html> and </html> tags)
-		boolean isFragment;
-		if (request.getParameter("_isFragment") != null) {
-			isFragment = true;
-		} else {
-			isFragment = false;
-		}
+		boolean isFragment=Boolean.valueOf(request.getParameter("isFragment"));
 
 		// make sure the browser does not cache the result using Ajax (this happens in IE)
 		if (isFragment) {
 			response.setHeader("Cache-control", "no-cache");
 		}
 
-		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
 		String baseExportPath = ArtConfig.getExportPath();
 
 		/*
@@ -326,12 +305,11 @@ public class RunReportController {
 			}
 		}
 
-		//should never be null here. explicit check for ide warnings
-		if (out == null) {
-			response.setContentType("text/html; charset=UTF-8");
-			out = response.getWriter();
-		}
-
+//		//should never be null here. explicit check for ide warnings
+//		if (out == null) {
+//			response.setContentType("text/html; charset=UTF-8");
+//			out = response.getWriter();
+//		}
 		if (!showInline) {
 			try {
 				request.setAttribute("title", reportName);
@@ -353,6 +331,9 @@ public class RunReportController {
 				return errorPage;
 			}
 			out.flush();
+
+			//display initial report progress
+			displayReportProgress(out, messageSource.getMessage("reports.message.configuring", null, locale));
 		}
 
 		//run query            
@@ -360,14 +341,11 @@ public class RunReportController {
 		int rowsRetrieved = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
 
 		ResultSet rs = null;
-		PreparedQuery pq = null;
+		ReportRunner reportRunner = null;
 
 		try {
-			ResultSetMetaData rsmd;
-			long startQueryTime;
-			long endQueryTime;
-			long startTime = new java.util.Date().getTime(); //overall start time                    
-			String startTimeString = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.MEDIUM, request.getLocale()).format(new java.util.Date(startTime)); //for display in query output header
+			long overallStartTime = System.currentTimeMillis(); //overall start time                    
+			String startTimeString = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.MEDIUM, request.getLocale()).format(new java.util.Date(overallStartTime)); //for display in query output header
 
 			/*
 			 * Increment the currentNumberOfRunningQueries Note if an
@@ -378,97 +356,43 @@ public class RunReportController {
 			 */
 			runningReportsCount++;
 
-			/*
-			 * ***********************************
-			 * BEGIN: Create the PreparedQuery object and feed it (this
-			 * obj is a "wrapper" around the SQL string with some
-			 * methods to act on it to apply rules, multi params etc)
-			 */
-			probe = 10;
-			boolean adminSession = false;
-			// check if the servlet has been called from the admin session
-			if (session.getAttribute("AdminSession") != null) {
-				adminSession = true;
-			}
 
-			pq = new PreparedQuery();
-			pq.setUsername(username);
-			pq.setQueryId(reportId);
-			pq.setAdminSession(adminSession);
+			reportRunner = new ReportRunner();
+			reportRunner.setUsername(username);
+			reportRunner.setReportId(reportId);
+			reportRunner.setAdminSession(sessionUser.isAdminUser());
 
-			/**
-			 * ***************************************************************************
-			 *
-			 * ON QUERY PARAMETERS
-			 *
-			 * INLINE parameters has the format P_<param_name> and the
-			 * #param_name# values are substituted in the SQL query before
-			 * executing it.
-			 *
-			 * A MULTI parameter name begins with the sting 'M_' followed by the
-			 * column name The following string is created AND
-			 * MULTIPLE_FIELD_NAME in ('value1', 'value2', ..., 'valueN') and
-			 * inserted on the prepared statement (handling the case where we
-			 * have a GROUP BY expression)
-			 *
-			 * BIND parameters are deprecated, us INILINE instead BIND parameter
-			 * name begins with the string 'Py' where y is the ? index on the
-			 * prepared statement. For example P3=HELLO means the third ? on the
-			 * prepared statement will be substituted with the HELLO string (the
-			 * same for VARCHAR, INTEGER, NUMBER ...) For dates, there are 3
-			 * params to store each date parameter: day, month and year Py_days
-			 * or Py_month or Py_year (for Dec 12, 2008 => P3_days = 12,
-			 * P3_month = 3, P3_year=2008)
-			 *
-			 * The first step is to build the parameter lists
-			 * ***************************************************************************
-			 */
-			probe = 40;
-
-			/*
-			 * *************************************
-			 * BEGIN: Build parameters hash tables
-			 */
-			Map<String, String[]> multiParams = new HashMap<String, String[]>();
-			Map<String, String> inlineParams = new HashMap<String, String>();
+			//prepare report parameters
+			Map<String, String[]> multiParams = new HashMap<>();
+			Map<String, String> inlineParams = new HashMap<>();
 
 			ArtQuery aq = new ArtQuery();
-			Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(reportId);
+			List<Parameter> reportParams = parameterService.getReportParameters(reportId);
 
 			//set default parameter values. so that they don't have to be specified on the url
-			if (!htmlParams.isEmpty()) {
-				for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
-					ArtQueryParam param = entry.getValue();
-					if (StringUtils.equals(param.getParamType(), "I")) {
-						inlineParams.put(param.getParamLabel(), (String) param.getParamValue());
+			if (!reportParams.isEmpty()) {
+				for (Parameter param : reportParams) {
+					if (param.getParameterType()==ParameterType.Inline) {
+						inlineParams.put(param.getName(), param.getDefaultValue());
 					}
 
 				}
 			}
 
-			/*
-			 * ParameterProcessor has a static function to parse the
-			 * request and fill the hashmaps that store the parameters
-			 */
-			Map<Integer, ArtQueryParam> displayParams = ParameterProcessor.processParameters(request, inlineParams, multiParams, reportId, htmlParams);
+			Map<Integer, ArtQueryParam> displayParams = ParameterProcessor.processParameters(request, inlineParams, multiParams, reportId, reportParams);
 
-			//set showparams flag. flag not only determined by presense of _showParams. may also be true if query set to always show params
+			//set showparams flag. flag not only determined by presense of _showParams.
+			//may also be true if query set to always show params
 			boolean showParams = false;
 			if (!displayParams.isEmpty()) {
 				showParams = true;
 			}
 
-			// Set the hash tables in the pq object
-			pq.setMultiParams(multiParams);
-			pq.setInlineParams(inlineParams);
+			reportRunner.setMultiParams(multiParams);
+			reportRunner.setInlineParams(inlineParams);
+			reportRunner.setHtmlParams(reportParams);
 
-			pq.setHtmlParams(htmlParams);
-
-			/*
-			 * END ***********************************
-			 */
-			probe = 50;
-
+			//is scroll insensitive much slower than forward only?
 			int resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 //				int resultSetType;
 //				if (queryType == 116 || queryType == 118) {
@@ -483,33 +407,16 @@ public class RunReportController {
 
 			// JavaScript code to write status
 			if (showHeaderAndFooter) {
-				out.println("<script type='text/javascript'>displayReportProgress('"
-						+ messageSource.getMessage("reports.message.running", null, locale)
-						+ "');</script>");
-				out.flush();
+				displayReportProgress(out, messageSource.getMessage("reports.message.running", null, locale));
 			}
 
-			startQueryTime = new java.util.Date().getTime();
-
-			/*
-			 * *************
-			 ***************
-			 *****RUN IT**** ************** *************
-			 */
-			pq.execute(resultSetType);
-
-			probe = 75;
-
-			/*
-			 * *************
-			 ***************
-			 ***************
-			 **************
-			 */
-			endQueryTime = new java.util.Date().getTime();
+			//run report
+			long reportStartTime = System.currentTimeMillis();
+			reportRunner.execute(resultSetType);
+			long reportEndTime = System.currentTimeMillis();
 
 			//get final sql with parameter placeholders replaced with parameter values
-			String finalSQL = pq.getFinalSQL();
+			String finalSQL = reportRunner.getFinalSQL();
 
 			//determine if final sql should be shown. only admins can see sql
 			boolean showSQL = false;
@@ -564,9 +471,6 @@ public class RunReportController {
 
 			// display status information, parameters and final sql
 			if (showHeaderAndFooter) {
-				out.println("<script type='text/javascript'>displayReportProgress('"
-						+ messageSource.getMessage("reports.message.gettingData", null, locale)
-						+ "');</script>");
 				String description = "";
 				shortDescription = StringUtils.trim(shortDescription);
 				if (StringUtils.length(shortDescription) > 0) {
@@ -574,14 +478,17 @@ public class RunReportController {
 				}
 				out.println("<script type=\"text/javascript\">displayReportInfo(\"<b>" + reportName + "</b>" + description + " :: " + startTimeString + "\");</script>");
 
+				displayReportProgress(out, messageSource.getMessage("reports.message.fetchingData", null, locale));
+
 				//display parameters
 				if (showParams) {
-					ReportOuputtHandler.displayParameters(out, displayParams, messages);
+					ReportOutputHandler.displayParameters(out, displayParams,
+							messageSource.getMessage("reports.text.allItems", null, locale));
 				}
 
 				//display final sql
 				if (showSQL) {
-					ReportOuputtHandler.displayFinalSQL(out, finalSQL);
+					ReportOutputHandler.displayFinalSQL(out, finalSQL);
 				}
 
 				out.flush();
@@ -599,11 +506,11 @@ public class RunReportController {
 				jasper.setWriter(out);
 				if (queryType == 115) {
 					//report will use query in the report template
-					jasper.createFile(null, reportId, inlineParams, multiParams, htmlParams);
+					jasper.createFile(null, reportId, inlineParams, multiParams, reportParams);
 				} else {
 					//report will use data from art query
-					rs = pq.getResultSet();
-					jasper.createFile(rs, reportId, inlineParams, multiParams, htmlParams);
+					rs = reportRunner.getResultSet();
+					jasper.createFile(rs, reportId, inlineParams, multiParams, reportParams);
 					rowsRetrieved = getNumberOfRows(rs);
 				}
 			} else if (queryType == 117 || queryType == 118) {
@@ -616,21 +523,20 @@ public class RunReportController {
 				jxls.setWriter(out);
 				if (queryType == 117) {
 					//report will use query in the jxls template
-					jxls.createFile(null, reportId, inlineParams, multiParams, htmlParams);
+					jxls.createFile(null, reportId, inlineParams, multiParams, reportParams);
 				} else {
 					//report will use data from art query
-					rs = pq.getResultSet();
-					jxls.createFile(rs, reportId, inlineParams, multiParams, htmlParams);
+					rs = reportRunner.getResultSet();
+					jxls.createFile(rs, reportId, inlineParams, multiParams, reportParams);
 					rowsRetrieved = getNumberOfRows(rs);
 				}
 			} else {
 				//get query results
-				rs = pq.getResultSet();
+				rs = reportRunner.getResultSet();
 
 				if (rs != null) {
 					// it is a "select" query or a procedure ending with a select statement
-					probe = 93;
-					rsmd = rs.getMetaData();
+					ResultSetMetaData rsmd = rs.getMetaData();
 
 					try {
 						if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
@@ -697,11 +603,13 @@ public class RunReportController {
 
 							probe = 110;
 						} else {
+							ActionResult outputResult;
+
 							if (queryType == 101 || queryType == 102) {
 								/*
 								 * CROSSTAB
 								 */
-								rowsRetrieved = ReportOuputtHandler.flushXOutput(messages, o, rs, rsmd);
+								outputResult = ReportOutputHandler.flushXOutput(o, rs);
 							} else {
 								/*
 								 * NORMAL TABULAR OUTPUT
@@ -713,22 +621,27 @@ public class RunReportController {
 									//only drill down for html output. drill down query launched from hyperlink                                            
 									drilldownQueries = aq.getDrilldownQueries(reportId);
 								}
-								rowsRetrieved = ReportOuputtHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+								outputResult = ReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+
 							}
-							probe = 130;
+
+							if (outputResult.isSuccess()) {
+								rowsRetrieved = (Integer) outputResult.getData();
+							} else {
+								model.addAttribute("message", outputResult.getMessage());
+								return errorPage;
+							}
 						}
 
-					} catch (ArtException e) { // "known" exceptions
-						throw new ArtException(e.getMessage());
-					} catch (Exception e) {    // other "unknown" exceptions                                
-						str = "Error while running query ID " + reportId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
-						logger.error("Error: {}", str, e);
-						throw new ArtException(messages.getString("queryFetchException") + " <br>" + messages.getString("step") + ": " + probe + "<br>" + messages.getString("details") + "<code> " + e + "</code><br>" + messages.getString("contactSupport") + "</p>");
+					} catch (Exception ex) {
+						logger.error("Error. report={}, user={}", report, sessionUser, ex);
+						model.addAttribute("error", ex);
+						return errorPage;
 					}
 
 				} else {
 					//this is an update query
-					int rowsUpdated = pq.getUpdateCount(); // will be -1 if query has multiple statements
+					int rowsUpdated = reportRunner.getUpdateCount(); // will be -1 if query has multiple statements
 					request.setAttribute("rowsUpdated", "" + rowsUpdated);
 //						ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
 				}
@@ -741,9 +654,9 @@ public class RunReportController {
 			// is "cached and transmitted" over the network by the servlet engine.
 			long endTime = new java.util.Date().getTime();
 
-			long totalTime = (endTime - startTime) / (1000);
-			long fetchTime = (endQueryTime - startQueryTime) / (1000);
-			double preciseTotalTime = (endTime - startTime) / (double) 1000;
+			long totalTime = (endTime - overallStartTime) / (1000);
+			long fetchTime = (reportEndTime - reportStartTime) / (1000);
+			double preciseTotalTime = (endTime - overallStartTime) / (double) 1000;
 			NumberFormat nf = NumberFormat.getInstance(request.getLocale());
 			DecimalFormat df = (DecimalFormat) nf;
 			df.applyPattern("#,##0.0##");
@@ -751,9 +664,13 @@ public class RunReportController {
 			String msg;
 
 			if (showHeaderAndFooter) {
-				request.setAttribute("timeTaken", df.format(preciseTotalTime) + " " + messages.getString("seconds"));
+				Object[] value = {
+					df.format(preciseTotalTime)
+				};
+				msg = messageSource.getMessage("reports.text.timeTakenInSeconds", value, locale);
+				request.setAttribute("timeTaken", msg);
 				if (rowsRetrieved == -1) {
-					msg = messageSource.getMessage("reports.message.unknown", null, locale);
+					msg = messageSource.getMessage("reports.text.unknown", null, locale);
 					request.setAttribute("rowsRetrieved", msg);
 				} else {
 					df.applyPattern("#,##0");
@@ -768,7 +685,7 @@ public class RunReportController {
 				}
 
 				//clear report progress
-				out.println("<script type='text/javascript'>displayReportProgress('');</script>");
+				displayReportProgress(out, "");
 			}
 
 			if (!showInline) {
@@ -804,7 +721,11 @@ public class RunReportController {
 			str = "Error while running query ID " + reportId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
 			logger.error("Error: {}", str, e);
 
-			request.setAttribute("errorMessage", messages.getString("anException") + "<hr>" + messages.getString("step") + ":" + probe + "<br><code>" + e + "</code>");
+//			String msg=messageSource.getMessage("page.message.errorOccurred", null, locale)
+//					+ "<hr>" + messageSource.getMessage("step",null,locale) 
+//					+ ":" + probe + "<br><code>" + e + "</code>";
+//
+//			request.setAttribute("message", msg );
 			if (!showInline) { // we already flushed something: let's include the page
 				request.setAttribute("headerOff", "true");
 				request.setAttribute("error", e);
@@ -829,8 +750,8 @@ public class RunReportController {
 				if (rs != null) {
 					rs.close();
 				}
-				if (pq != null) {
-					pq.close();
+				if (reportRunner != null) {
+					reportRunner.close();
 				}
 				runningReportsCount--;
 			} catch (SQLException e) {
@@ -1132,6 +1053,13 @@ public class RunReportController {
 		}
 
 		return rowsRetrieved;
+	}
+
+	private void displayReportProgress(PrintWriter out, String message) {
+		out.println("<script type='text/javascript'>displayReportProgress('"
+				+ message
+				+ "');</script>");
+		out.flush();
 	}
 
 }

@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.report.PreparedQuery;
+import art.report.ReportRunner;
 import art.servlets.ArtConfig;
 import art.utils.*;
 import java.io.File;
@@ -144,8 +144,8 @@ public class jxlsOutput {
 
 				//process multi parameters to obtain parameter labels instead of parameter identifiers
 				HashMap<String, String> mParams = new HashMap<String, String>();
-				PreparedQuery pq = new PreparedQuery();
-				pq.setQueryId(queryId);
+				ReportRunner pq = new ReportRunner();
+				pq.setReportId(queryId);
 				pq.setMultiParams(multiParams);
 				mParams.putAll(pq.getJxlsMultiParams(querySql));
 

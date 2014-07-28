@@ -13,6 +13,6 @@ Footer section of report output for html output reports
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div class="reportBanner">
-	<spring:message code="reports.message.rowsRetrieved"/>: ${rowsRetrieved} <br>
-	<spring:message code="reports.message.timeTaken"/>: ${timeTaken}
+	<spring:message code="reports.text.rowsRetrieved"/>: ${rowsRetrieved} <br>
+	<spring:message code="reports.text.timeTaken"/>: ${timeTaken}
 </div>

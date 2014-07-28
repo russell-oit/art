@@ -115,7 +115,7 @@ public class htmlGridOutput implements ReportOutputInterface {
 		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlGridOutput.css\">");
 
 		//display parameters
-		ReportOuputtHandler.displayParameters(out, displayParams);
+		ReportOutputHandler.displayParameters(out, displayParams);
 
 		//start results table
 		out.println("<div style=\"border: 3px solid white\"><table class=\"sortable\" name=\"maintable\" id=\"maintable\" cellpadding=\"2\" cellspacing=\"0\" width=\"80%\">");

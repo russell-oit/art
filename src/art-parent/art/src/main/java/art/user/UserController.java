@@ -3,6 +3,7 @@ package art.user;
 import art.enums.AccessLevel;
 import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroupService;
+import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.Encrypter;
 import java.sql.SQLException;
@@ -67,14 +68,14 @@ public class UserController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			List<String> linkedJobs = new ArrayList<>();
-			int count = userService.deleteUser(id, linkedJobs);
-			logger.debug("count={}", count);
-			if (count == -1) {
-				//user not deleted because of linked records
-				response.setData(linkedJobs);
-			} else {
+			ActionResult deleteResult = userService.deleteUser(id);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
+			} else {
+				//user not deleted because of linked jobs
+				response.setData(deleteResult.getData());
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -97,7 +98,7 @@ public class UserController {
 		model.addAttribute("user", user);
 		return showUser("add", model, session);
 	}
-	
+
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
 	public String editUser(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
@@ -152,13 +153,13 @@ public class UserController {
 				return showUser(action, model, session);
 			}
 
-			User sessionUser=(User)session.getAttribute("sessionUser");
-			
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
 			if (StringUtils.equals(action, "add")) {
-				userService.addUser(user,sessionUser);
+				userService.addUser(user, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
 			} else if (StringUtils.equals(action, "edit")) {
-				userService.updateUser(user,sessionUser);
+				userService.updateUser(user, sessionUser);
 				//update session user if appropriate
 				logger.debug("user.getUserId()={}", user.getUserId());
 				logger.debug("sessionUser.getUserId()={}", sessionUser.getUserId());
