@@ -50,8 +50,16 @@ public class ParameterService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ParameterService.class);
 
+	private final DbService dbService;
+	
 	@Autowired
-	private DbService dbService;
+	public ParameterService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public ParameterService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_PARAMETERS AP";
 
@@ -346,6 +354,27 @@ public class ParameterService {
 
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
 		return dbService.query(sql, h, parameterId);
+	}
+	
+	/**
+	 * Get the parameter for a given report that is in a given position
+	 * 
+	 * @param reportId
+	 * @param position
+	 * @return populated object if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public Parameter getParameter(int reportId,int position) throws SQLException{
+		logger.debug("Entering getParameter: reportId={}, position={}", reportId,position);
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
+				+ " ARP.PARAMETER_ID=AP.PARAMETER_ID"
+				+ " WHERE ARP.REPORT_ID=? AND ARP.PARAMETER_POSITION=?";
+
+		ResultSetHandler<Parameter> h = new BeanHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(sql, h, reportId,position);
 	}
 
 }

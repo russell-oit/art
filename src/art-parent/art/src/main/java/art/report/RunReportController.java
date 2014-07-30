@@ -16,7 +16,6 @@
  */
 package art.report;
 
-import art.enums.ParameterType;
 import art.enums.ReportStatus;
 import art.graph.ArtCategorySeries;
 import art.graph.ArtDateSeries;
@@ -33,8 +32,8 @@ import art.output.htmlPlainOutput;
 import art.output.htmlReportOutWriter;
 import art.output.jasperOutput;
 import art.output.jxlsOutput;
-import art.parameter.Parameter;
-import art.parameter.ParameterService;
+import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterService;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.ActionResult;
@@ -95,9 +94,9 @@ public class RunReportController {
 
 	@Autowired
 	private MessageSource messageSource;
-	
+
 	@Autowired
-	private ParameterService parameterService;
+	private ReportParameterService reportParameterService;
 
 	//use post to allow for large parameter input and get to allow for direct url execution
 	@RequestMapping(value = "/app/runReport", method = {RequestMethod.GET, RequestMethod.POST})
@@ -165,7 +164,7 @@ public class RunReportController {
 		Map<String, Class> reportFormatClasses = ArtConfig.getReportFormatClasses();
 
 		// check if the html code should be rendered as an html fragmnet (without <html> and </html> tags)
-		boolean isFragment=Boolean.valueOf(request.getParameter("isFragment"));
+		boolean isFragment = Boolean.valueOf(request.getParameter("isFragment"));
 
 		// make sure the browser does not cache the result using Ajax (this happens in IE)
 		if (isFragment) {
@@ -356,7 +355,6 @@ public class RunReportController {
 			 */
 			runningReportsCount++;
 
-
 			reportRunner = new ReportRunner();
 			reportRunner.setUsername(username);
 			reportRunner.setReportId(reportId);
@@ -365,21 +363,12 @@ public class RunReportController {
 			//prepare report parameters
 			Map<String, String[]> multiParams = new HashMap<>();
 			Map<String, String> inlineParams = new HashMap<>();
+			Map<String, ReportParameter> reportParams = new HashMap();
 
 			ArtQuery aq = new ArtQuery();
-			List<Parameter> reportParams = parameterService.getReportParameters(reportId);
 
-			//set default parameter values. so that they don't have to be specified on the url
-			if (!reportParams.isEmpty()) {
-				for (Parameter param : reportParams) {
-					if (param.getParameterType()==ParameterType.Inline) {
-						inlineParams.put(param.getName(), param.getDefaultValue());
-					}
-
-				}
-			}
-
-			Map<Integer, ArtQueryParam> displayParams = ParameterProcessor.processParameters(request, inlineParams, multiParams, reportId, reportParams);
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			Map<Integer, ArtQueryParam> displayParams = paramProcessor.processParameters(request, reportId, inlineParams, multiParams, reportParams);
 
 			//set showparams flag. flag not only determined by presense of _showParams.
 			//may also be true if query set to always show params

@@ -20,6 +20,7 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Class to represent a parameter
@@ -49,6 +50,52 @@ public class Parameter implements Serializable {
 	private String description;
 	private String createdBy;
 	private String updatedBy;
+	private Map<String, String> lovValues = null; //store value and label for lov parameters
+
+	/**
+	 * @return the lovValues
+	 */
+	public Map<String, String> getLovValues() {
+		return lovValues;
+	}
+
+	/**
+	 * @param lovValues the lovValues to set
+	 */
+	public void setLovValues(Map<String, String> lovValues) {
+		this.lovValues = lovValues;
+	}
+	
+	/**
+	 * Utility method to determine, if the parameter is chained (it's value
+	 * depends on another one), the position of the parameter which determines
+	 * this parameter's value
+	 *
+	 * @return the position of the parameter which determines this parameter's
+	 * value
+	 */
+	public int getEffectiveChainedValuePosition() {
+		if (chainedPosition > 0 && chainedValuePosition > 0) {
+			//parameter is chained, but value doesn't come from the master parameter
+			return chainedValuePosition;
+		} else {
+			return chainedPosition;
+		}
+	}
+
+	/**
+	 * Utility method to determine if the parameter is chained (it's value
+	 * depends on another parameter)
+	 *
+	 * @return <code>true</code> if parameter is chained
+	 */
+	public boolean isChained() {
+		if (chainedPosition > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/**
 	 * @return the createdBy
