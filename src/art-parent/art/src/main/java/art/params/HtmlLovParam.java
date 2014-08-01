@@ -211,7 +211,7 @@ public class HtmlLovParam implements ParamInterface {
 				sb.append("<option value=\"ALL_ITEMS\" ").append(selected).append(">").append(allString).append("</option>");
 			}
 
-			Map<String, String> lov = pq.executeLovQuery(useRules); //override lov use rules setting with setting defined in the parameter definition
+			Map<String, String> lov = pq.getLovValues(useRules); //override lov use rules setting with setting defined in the parameter definition
 			for (Map.Entry<String, String> entry : lov.entrySet()) {
 				// build html option list
 				value = entry.getKey();

@@ -25,7 +25,9 @@ import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
@@ -127,13 +129,36 @@ public class ReportParameterService {
 	 */
 	@Cacheable("parameters")
 	public List<ReportParameter> getReportParameters(int reportId) throws SQLException {
-		logger.debug("Entering getAllReportParameters: reportId={}", reportId);
+		logger.debug("Entering getReportParameters: reportId={}", reportId);
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE REPORT_ID=? AND PARAMETER_POSITION=?";
 
 		ResultSetHandler<List<ReportParameter>> h = new BeanListHandler<>(ReportParameter.class, new ReportParameterMapper());
 		return dbService.query(sql, h, reportId);
+	}
+
+	/**
+	 * Get all report parameters for a given report
+	 *
+	 * @param reportId
+	 * @return map of all report parameters for a given report. the key is the
+	 * parameter name
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public Map<String, ReportParameter> getReportParametersMap(int reportId) throws SQLException {
+		logger.debug("Entering getReportParametersMap: reportId={}", reportId);
+
+		List<ReportParameter> reportParamsList = getReportParameters(reportId);
+
+		//build map
+		Map<String, ReportParameter> paramsMap = new HashMap<>();
+		for (ReportParameter param : reportParamsList) {
+			paramsMap.put(param.getParameter().getName(), param);
+		}
+
+		return paramsMap;
 	}
 //
 //	/**

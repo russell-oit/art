@@ -32,6 +32,8 @@ import art.output.htmlPlainOutput;
 import art.output.htmlReportOutWriter;
 import art.output.jasperOutput;
 import art.output.jxlsOutput;
+import art.parameter.Parameter;
+import art.parameter.ParameterService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.servlets.ArtConfig;
@@ -56,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -368,14 +371,47 @@ public class RunReportController {
 			ArtQuery aq = new ArtQuery();
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
-			Map<Integer, ArtQueryParam> displayParams = paramProcessor.processParameters(request, reportId, inlineParams, multiParams, reportParams);
+			paramProcessor.processParameters(request, reportId, reportParams);
 
-			//set showparams flag. flag not only determined by presense of _showParams.
-			//may also be true if query set to always show params
-			boolean showParams = false;
-			if (!displayParams.isEmpty()) {
+			//display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
+			Map<Integer, ArtQueryParam> displayParams = new TreeMap<>();
+
+			//see if we should show parameter values in report output
+			boolean showParams = Boolean.valueOf(request.getParameter("showParams"));
+			if (report.isParametersInOutput()) {
+				//always show params. especially for drill down reports
 				showParams = true;
 			}
+			
+			if (showParams) {
+			//get display values for selections from lov parameters
+			ParameterService parameterService = new ParameterService();
+
+			for (Map.Entry<String, ReportParameter> entry : reportParams.entrySet()) {
+				ReportParameter reportParam = entry.getValue();
+
+				Parameter param = reportParam.getParameter();
+				if (param.isUseLov()) {
+					//get all possible lov values.							
+					ReportRunner reportRunner = new ReportRunner();
+					reportRunner.setReportId(param.getLovReportId());
+					//for chained parameters, handle #filter# parameter
+					int filterPosition = param.getEffectiveChainedValuePosition();
+					if (filterPosition > 0) {
+						//parameter chained on another parameter. get filter value
+						Parameter filterParam = parameterService.getParameter(reportId, filterPosition);
+						if (filterParam != null) {
+							ReportParameter filterReportParam = reportParams.get(filterParam.getName());
+							if (filterReportParam != null) {
+								String[] filterValues = filterReportParam.getParameterValues();
+								reportRunner.setFilterValues(filterValues);
+							}
+						}
+					}
+					reportParam.setLovValues(reportRunner.getLovValues(false)); //false=don't apply rules
+				}
+			}
+		}
 
 			reportRunner.setMultiParams(multiParams);
 			reportRunner.setInlineParams(inlineParams);

@@ -21,6 +21,7 @@ package art.reportparameter;
 import art.parameter.Parameter;
 import art.report.Report;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Class to represent report parameter
@@ -34,7 +35,27 @@ public class ReportParameter implements Serializable {
 	private Report report;
 	private Parameter parameter;
 	private int position;
-	private String value; //not saved in db. used for run report logic
+	private String[] parameterValues; //used for run report logic
+	private Map<String, String> lovValues; //store value and label for lov parameters
+
+	/**
+	 * Get the value of lovValues
+	 *
+	 * @return the value of lovValues
+	 */
+	public Map<String, String> getLovValues() {
+		return lovValues;
+	}
+
+	/**
+	 * Set the value of lovValues
+	 *
+	 * @param lovValues new value of lovValues
+	 */
+	public void setLovValues(Map<String, String> lovValues) {
+		this.lovValues = lovValues;
+	}
+
 
 	/**
 	 * @return the reportParameterId
@@ -93,17 +114,17 @@ public class ReportParameter implements Serializable {
 	}
 
 	/**
-	 * @return the value
+	 * @return the parameterValues
 	 */
-	public String getValue() {
-		return value;
+	public String[] getParameterValues() {
+		return parameterValues;
 	}
 
 	/**
-	 * @param value the value to set
+	 * @param parameterValues the parameterValues to set
 	 */
-	public void setValue(String value) {
-		this.value = value;
+	public void setParameterValues(String[] parameterValues) {
+		this.parameterValues = parameterValues;
 	}
 
 	@Override

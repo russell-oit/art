@@ -176,7 +176,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 
 				pq.setHtmlParams(htmlParams);
 
-				Map<String, String> lov = pq.executeLovQuery(false); //don't apply rules
+				Map<String, String> lov = pq.getLovValues(false); //don't apply rules
 
 				if (isMulti) {
 					//add All as the first item displayed

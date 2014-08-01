@@ -79,6 +79,8 @@ public class ReportRunner {
 	int displayResultset;
 	int updateCount; //update count of display resultset
 	private Report report;
+	private String[] filterValues; //value of filter used with chained parameters
+
 
 	/**
 	 *
@@ -89,6 +91,24 @@ public class ReportRunner {
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
 		jasperMultiParams = new HashMap<String, List<String>>(); //to populate hash map with multi parameter names and values
 		jxlsMultiParams = new HashMap<String, String>(); //save parameters in special hash map for jxls reports        
+	}
+	
+	/**
+	 * Get the value of filterValues
+	 *
+	 * @return the value of filterValues
+	 */
+	public String[] getFilterValues() {
+		return filterValues;
+	}
+
+	/**
+	 * Set the value of filterValues
+	 *
+	 * @param filterValues new value of filterValues
+	 */
+	public void setFilterValues(String[] filterValues) {
+		this.filterValues = filterValues;
 	}
 
 	/**
@@ -668,36 +688,39 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Execute and get the result set for an lov query
+	 * Run lov report and return the lov values (value and label)
 	 *
 	 * @return values for an lov
 	 * @throws SQLException
 	 * @throws ArtException
 	 */
-	public Map<String, String> executeLovQuery() throws SQLException, ArtException {
-		return executeLovQuery(false, false);
+	public Map<String, String> getLovValues() throws SQLException, ArtException {
+		return getLovValues(false, false);
 	}
 
 	/**
-	 * Execute and get the result set for an lov query
+	 * Run lov report and return the lov values (value and label)
 	 *
+	 * @param newUseRules
 	 * @return values for an lov
 	 * @throws SQLException
 	 * @throws ArtException
 	 */
-	public Map<String, String> executeLovQuery(boolean newUseRules) throws SQLException, ArtException {
-		return executeLovQuery(true, newUseRules);
+	public Map<String, String> getLovValues(boolean newUseRules) throws SQLException, ArtException {
+		return getLovValues(true, newUseRules);
 	}
 
 	/**
-	 * Execute and get the result set for an lov query
+	 * Run lov report and return the lov values (value and label)
 	 *
+	 * @param overrideUseRules
+	 * @param newUseRules
 	 * @return values for an lov
 	 * @throws SQLException
 	 * @throws ArtException
 	 */
-	public Map<String, String> executeLovQuery(boolean overrideUseRules, boolean newUseRules) throws SQLException, ArtException {
-		Map<String, String> lov = new LinkedHashMap<String, String>();
+	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException, ArtException {
+		Map<String, String> lov = new LinkedHashMap<>();
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 
