@@ -39,38 +39,38 @@ Page to provide access to application documentation
 								</tr>
 								<tr>
 									<td>
-										<a href="features.htm">Features</a>
-										&nbsp; <a type="application/octet-stream" href="features.pdf">pdf</a>
+										<a href="Features.html">Features</a>
+										&nbsp; <a type="application/octet-stream" href="Features.pdf">pdf</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<a href="installing.htm">Installing</a>
-										&nbsp; <a type="application/octet-stream" href="installing.pdf">pdf</a>
+										<a href="Installing.html">Installing</a>
+										&nbsp; <a type="application/octet-stream" href="Installing.pdf">pdf</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<a href="upgrading.htm">Upgrading</a>
-										&nbsp; <a type="application/octet-stream" href="upgrading.pdf">pdf</a>
+										<a href="Upgrading.html">Upgrading</a>
+										&nbsp; <a type="application/octet-stream" href="Upgrading.pdf">pdf</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<a href="tips.htm">Tips</a>
-										&nbsp; <a type="application/octet-stream" href="tips.pdf">pdf</a>
+										<a href="Tips.html">Tips</a>
+										&nbsp; <a type="application/octet-stream" href="Tips.pdf">pdf</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<a href="libraries.htm">Libraries</a>
-										&nbsp; <a type="application/octet-stream" href="libraries.pdf">pdf</a>
+										<a href="Libraries.html">Libraries</a>
+										&nbsp; <a type="application/octet-stream" href="Libraries.pdf">pdf</a>
 									</td>
 								</tr>
 								<tr>
 									<td>
-										<a href="manual.htm">Manual</a>
-										&nbsp; <a type="application/octet-stream" href="manual.pdf">pdf</a>
+										<a href="Manual.html">Manual</a>
+										&nbsp; <a type="application/octet-stream" href="Manual.pdf">pdf</a>
 									</td>
 								</tr>
 							</tbody>
