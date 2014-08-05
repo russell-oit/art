@@ -3,7 +3,7 @@
  <head> 
   <meta content="text/html; charset=UTF-8" http-equiv="content-type" /> 
   <meta name="pdfTitle" content="ART Manual" /> 
-  <meta name="version" content="3.0-alpha1" /> 
+  <meta name="version" content="2.5" /> 
   <title>ART - Manual</title> 
   <style type="text/css">
 			table
@@ -309,7 +309,7 @@
        </tr> 
        <tr> 
         <td><strong>PDF Font Name</strong></td> 
-        <td>Name of a custom font that should be used in generation of pdf output, and charts. For jasper reports, custom fonts need to be defined in the jrxml file. See the <a class="alink" href="/p/art/wiki/Tips/">[wiki:Tips]</a> documentation for details on how to use custom fonts with jasper reports.</td> 
+        <td>Name of a custom font that should be used in generation of pdf output, and charts. For jasper reports, custom fonts need to be defined in the jrxml file. See the <a class="alink" href="/p/art/wiki/Tips">[wiki:Tips]</a> documentation for details on how to use custom fonts with jasper reports.</td> 
        </tr> 
        <tr> 
         <td><strong>PDF Font File</strong></td> 
@@ -483,11 +483,11 @@
      <p>Database: <strong>MySQL</strong></p> 
      <p>Driver Name: com.mysql.jdbc.Driver</p> 
      <p>JDBC URL: <code>jdbc:mysql://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 3306)</p> 
-     <p>Driver Available from: <a href="http://dev.mysql.com/downloads/connector/j/" rel="nofollow">http://dev.mysql.com/downloads/connector/j/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://dev.mysql.com/downloads/connector/j" rel="nofollow">http://dev.mysql.com/downloads/connector/j/</a><br /> <br /><br /></p> 
      <p>Database: <strong>PostgreSQL</strong></p> 
      <p>Driver Name: org.postgresql.Driver</p> 
      <p>JDBC URL: <code>jdbc:postgresql://&lt;server_name&gt;[:port]/&lt;database_name&gt;[?&lt;property&gt;=&lt;value&gt;[&amp;...]</code> (default port is 5432)</p> 
-     <p>Driver Available from: <a href="http://jdbc.postgresql.org/" rel="nofollow">http://jdbc.postgresql.org/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://jdbc.postgresql.org" rel="nofollow">http://jdbc.postgresql.org/</a><br /> <br /><br /></p> 
      <p>Database: <strong>SQL Server (Microsoft driver)</strong></p> 
      <p>Driver Name: com.microsoft.sqlserver.jdbc.SQLServerDriver</p> 
      <p>JDBC URL: <code>jdbc:sqlserver://&lt;server_name&gt;[:port];databaseName=&lt;database_name&gt;[;instanceName=&lt;instance_name&gt;][;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 1433)</p> 
@@ -499,11 +499,11 @@
      <p>Database: <strong>HSQLDB (Standalone mode)</strong></p> 
      <p>Driver Name: org.hsqldb.jdbcDriver</p> 
      <p>JDBC URL: <code>jdbc:hsqldb:file:&lt;file_path&gt;[;shutdown=true;hsqldb.write_delay=false;create=false][;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
-     <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://hsqldb.org" rel="nofollow">http://hsqldb.org/</a><br /> <br /><br /></p> 
      <p>Database: <strong>HSQLDB (Server mode)</strong></p> 
      <p>Driver Name: org.hsqldb.jdbcDriver</p> 
      <p>JDBC URL: <code>jdbc:hsqldb:hsql://&lt;server_name&gt;[:port]/&lt;database_alias&gt;[;&lt;property&gt;=&lt;value&gt;[;...]</code> (default port is 9001)</p> 
-     <p>Driver Available from: <a href="http://hsqldb.org/" rel="nofollow">http://hsqldb.org/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://hsqldb.org" rel="nofollow">http://hsqldb.org/</a><br /> <br /><br /></p> 
      <p>Database: <strong>DB2 (IBM Data Server Driver for JDBC and SQLJ)</strong></p> 
      <p>Driver Name: com.ibm.db2.jcc.DB2Driver</p> 
      <p>JDBC URL: <code>jdbc:db2://&lt;server_name&gt;[:port]/&lt;database_name&gt;[:&lt;property&gt;=&lt;value&gt;[;...]</code> (default port for IBM DB2 is many times one of the following: 446, 6789, or 50000)</p> 
@@ -511,7 +511,7 @@
      <p>Database: <strong>DB2 for iSeries (Toolbox driver)</strong></p> 
      <p>Driver Name: com.ibm.as400.access.AS400JDBCDriver</p> 
      <p>JDBC URL: <code>jdbc:as400://&lt;server_name&gt;;prompt=false;translate binary=true[;&lt;property&gt;=&lt;value&gt;[;...]</code></p> 
-     <p>Driver Available from: <a href="http://jt400.sourceforge.net/">http://jt400.sourceforge.net/</a><br /> <br /><br /></p> 
+     <p>Driver Available from: <a href="http://jt400.sourceforge.net">http://jt400.sourceforge.net/</a><br /> <br /><br /></p> 
      <p>Database: <strong>Generic ODBC Datasource</strong></p> 
      <p>Driver Name: sun.jdbc.odbc.JdbcOdbcDriver</p> 
      <p>JDBC URL: <code>jdbc:odbc:&lt;dsn_name&gt;</code><br /> <br /><br /></p> 
@@ -1947,7 +1947,7 @@
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="jxls-spreadsheets">jXLS Spreadsheets</h1> 
-     <p>ART uses the <a class="" href="http://jxls.sourceforge.net/">jXLS</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these jXLS templates, see the documentation available on the jXLS website. Generally, you'll follow the following steps to create a jXLS spreadsheet query.</p> 
+     <p>ART uses the <a class="" href="http://jxls.sourceforge.net">jXLS</a> library to provide support for reports based on pre-formatted MS Excel spreadsheets. For details on the syntax of these jXLS templates, see the documentation available on the jXLS website. Generally, you'll follow the following steps to create a jXLS spreadsheet query.</p> 
      <ul> 
       <li>Create an Excel file (either xls or xlsx) with any text and formatting that will be required in the final look report</li> 
       <li>Insert jXLS syntax as appropriate to define where the raw data should go</li> 
@@ -1987,7 +1987,7 @@
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="pivot-tables-olap">Pivot Tables (OLAP)</h1> 
-     <p>ART uses the <a class="" href="http://mondrian.pentaho.com/" rel="nofollow">Mondrian</a> OLAP server to provide OLAP functionality. There are 3 query types that can be created to provide OLAP analysis.</p> 
+     <p>ART uses the <a class="" href="http://mondrian.pentaho.com" rel="nofollow">Mondrian</a> OLAP server to provide OLAP functionality. There are 3 query types that can be created to provide OLAP analysis.</p> 
      <h2 id="mondrian">Mondrian</h2> 
      <p>This query type uses ART's internal mondrian engine to execute OLAP queries. To use it, do the following.</p> 
      <ul> 
@@ -2015,7 +2015,7 @@
         <li>Connect to the SSAS server using SQL Server Management Studio</li> 
         <li>Expand the required database and right-click on the <strong>Roles</strong> section</li> 
         <li>Select the <strong>New Role</strong> menu to create a new role</li> 
-        <li>In the <strong>Membership</strong> section, add the required users. If HTTP access is configured for anonymous access, add the <strong>IUSR_</strong> user. If not, add the user whose credentials will be used to access the cube</li> 
+        <li>In the <strong>Membership</strong> section, add the required users. If HTTP access is configured for anonymous access, add the <strong>IUSR_&lt;machinename&gt;</strong> user. If not, add the user whose credentials will be used to access the cube</li> 
         <li>Save the role</li> 
        </ul> </li> 
       <li>Enter the url of the SSAS server</li> 
@@ -2342,7 +2342,7 @@
     <div class="markdown_content"> 
      <!--NewPage--> 
      <h1 id="single-sign-on">Single Sign On</h1> 
-     <p>ART uses the spnego library available at <a href="http://spnego.sourceforge.net/">http://spnego.sourceforge.net/</a> to provide Single Sign On/Integrated Windows Authentication functionality. These instructions are largely based on the documentation found on that project's website.</p> 
+     <p>ART uses the spnego library available at <a href="http://spnego.sourceforge.net">http://spnego.sourceforge.net/</a> to provide Single Sign On/Integrated Windows Authentication functionality. These instructions are largely based on the documentation found on that project's website.</p> 
      <h2 id="prerequisites">Prerequisites</h2> 
      <p>You need to have at least 3 separate machines as follows</p> 
      <ul> 
@@ -2558,7 +2558,7 @@
      <p>In addition to being available on the application server's standard output log files, e.g stdout.log or catalina.log on Tomcat, application logs can also be viewed from within ART. This means that you don't need to have access to the application server machine in order to view application logs. </p> 
      <p>Application logs can be viewed from the <strong>Logs</strong> link on the top left corner of the Start Page. The most recent logs can be viewed by using the <strong>Jump to bottom</strong> button, or alternatively by scrolling manually to the bottom of the page. New logs are added to the bottom and you'll need to refresh the page to view them. Only administrators can view the logs. Also note that this page doesn't display all the logs ever generated by the application, only the most recent ones.</p> 
      <h2 id="sql-logging">SQL Logging</h2> 
-     <p>You can set up logging for the sql that is generated when queries are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART comes with the <a class="" href="http://code.google.com/p/log4jdbc/" rel="nofollow">log4jdbc</a> library that enables such logging. Take the following steps to configure sql logging.</p> 
+     <p>You can set up logging for the sql that is generated when queries are run, e.g. to see the final sql generated, or to see how long queries take to execute. ART comes with the <a class="" href="http://code.google.com/p/log4jdbc" rel="nofollow">log4jdbc</a> library that enables such logging. Take the following steps to configure sql logging.</p> 
      <ul> 
       <li>From the <strong>Admin Console</strong>, select the <strong>Datasources</strong> option and MODIFY the datasource you're interested in</li> 
       <li>Set the <strong>JDBC Driver</strong> to <code>net.sf.log4jdbc.DriverSpy</code></li> 
@@ -2569,8 +2569,8 @@
         <pre><span class="o">&lt;</span><span class="n">logger</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;jdbc.sqltiming&quot;</span><span class="o">&gt;</span>
 <span class="o">&lt;</span><span class="n">level</span> <span class="n">value</span><span class="o">=</span><span class="s">&quot;info&quot;</span> <span class="o">/&gt;</span>
 </pre> 
-       </div> <p></p> </li> 
-      <li> <p>The available loggers and what events they log can be found on the log4jdbc project home page, <a href="http://code.google.com/p/log4jdbc/" rel="nofollow">http://code.google.com/p/log4jdbc/</a></p> </li> 
+       </div> <p>&lt;/logger&gt;</p> </li> 
+      <li> <p>The available loggers and what events they log can be found on the log4jdbc project home page, <a href="http://code.google.com/p/log4jdbc" rel="nofollow">http://code.google.com/p/log4jdbc/</a></p> </li> 
       <li>That's all. The logging information will now be included in the application logs when queries are run against that datasource.</li> 
      </ul> 
     </div> 
@@ -2675,7 +2675,7 @@
      <h3 id="setting-up-apache-ant">Setting up Apache Ant</h3> 
      <p>If you are going to customize the application source code, you may want to setup Apache Ant to make compiling your changes easier. To do this, take the following steps</p> 
      <ul> 
-      <li>Download the Apache Ant zip package from <a href="http://ant.apache.org/" rel="nofollow">http://ant.apache.org/</a></li> 
+      <li>Download the Apache Ant zip package from <a href="http://ant.apache.org" rel="nofollow">http://ant.apache.org/</a></li> 
       <li>Extract the zip file to C:\, or other directory of your choice. A new directory will be created e.g. C:\apache-ant-1.8.1</li> 
       <li>Add the Ant bin directory to the PATH environment variable e.g. <code>C:\apache-ant-1.8.1\bin</code></li> 
      </ul> 
@@ -2702,7 +2702,7 @@
      <h3 id="updating-jasperreports">Updating jasperreports</h3> 
      <p>If you are using a version of iReport that is different from the jasperreports version contained in ART, you may want to update the jasperreports version contained in ART to match your iReport version. This may not be necessary, but would be useful if you encounter problems while running reports. Take the following steps to update the jasperreports library and template files.</p> 
      <ul> 
-      <li>Download the required jasperreports .jar from the jasperreports sourceforge page, <a href="http://sourceforge.net/projects/jasperreports/files/jasperreports/">http://sourceforge.net/projects/jasperreports/files/jasperreports/</a> e.g download the file jasperreports-5.0.1.jar from the JasperReports 5.0.1 folder.</li> 
+      <li>Download the required jasperreports .jar from the jasperreports sourceforge page, <a href="http://sourceforge.net/projects/jasperreports/files/jasperreports">http://sourceforge.net/projects/jasperreports/files/jasperreports/</a> e.g download the file jasperreports-5.0.1.jar from the JasperReports 5.0.1 folder.</li> 
       <li>Ensure Apache Ant is set up as described above</li> 
       <li>Stop Tomcat</li> 
       <li>Backup the contents of the <strong>ART_HOME\WEB-INF\templates</strong> directory, where the jasperreport template files reside</li> 
@@ -2745,7 +2745,7 @@
      <p>You can take the following steps to modify ART source code, using Apache Maven as the build tool. ART source files with a maven structure will be found in the <code>PACKAGE_PATH\src</code> directory.</p> 
      <ul> 
       <li>Install Maven</li> 
-      <li>Install a maven repository manager e.g. <a class="" href="http://www.sonatype.org/nexus/" rel="nofollow">Sonatype Nexus</a>. A repository manager is optional but greatly increases productivity.</li> 
+      <li>Install a maven repository manager e.g. <a class="" href="http://www.sonatype.org/nexus" rel="nofollow">Sonatype Nexus</a>. A repository manager is optional but greatly increases productivity.</li> 
      </ul> 
      <h3 id="using-maven-without-an-ide">Using Maven without an IDE</h3> 
      <ul> 
@@ -2815,7 +2815,7 @@
      <!--NewPage--> 
      <h1 id="support">Support</h1> 
      <ul> 
-      <li>If you have any questions or comments, post these on the ART Help Discussion forum, <a href="http://sourceforge.net/p/art/discussion/352129/">http://sourceforge.net/p/art/discussion/352129/</a></li> 
+      <li>If you have any questions or comments, post these on the ART Help Discussion forum, <a href="http://sourceforge.net/p/art/discussion/352129">http://sourceforge.net/p/art/discussion/352129/</a></li> 
      </ul> 
      <h2 id="resources">Resources</h2> 
      <table border="1"> 
@@ -2834,6 +2834,7 @@
      </table> 
     </div> 
    </div> 
+   <p></p> 
    <p></p> 
   </div>  
  </body>

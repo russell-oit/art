@@ -35,7 +35,7 @@
       <li>Start Tomcat </li> 
      </ul> </li> 
     <li>Copy the contents of the backup <strong>art\WEB-INF\templates</strong> directory to the new version's templates directory</li> 
-    <li>If you were using the default HSQLDB database for your repository, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="alink" href="/p/art/wiki/Tips/">[wiki:Tips]</a> documentation to see how you can upgrade an HSQLDB database.</li> 
+    <li>If you were using the default HSQLDB database for your repository, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="alink" href="/p/art/wiki/Tips">[wiki:Tips]</a> documentation to see how you can upgrade an HSQLDB database.</li> 
     <li> <p>If you are using JasperReports templates and the new ART version has included an updated jasperreports engine, delete all the <strong>.jasper</strong> files contained in the templates directory so that they will be recompiled with the new engine. Alternatively, if you have Apache Ant set up, run the following commands</p> 
      <div class="codehilite"> 
       <pre><span class="n">cd</span> <span class="n">art</span>
