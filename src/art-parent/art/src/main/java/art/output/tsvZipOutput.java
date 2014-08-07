@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
-//smileybits 20100215. create zipped tsv output
+//tanyona 20100215. create zipped tsv output
 //adapted from gzipped tsv output class  tsvGzOutput.java
 package art.output;
 
