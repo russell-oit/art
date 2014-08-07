@@ -48,7 +48,7 @@ public class ParameterProcessor {
 	 * parameters
 	 * @throws java.sql.SQLException
 	 */
-	public void processParameters(HttpServletRequest request, int reportId,
+	public void processHttpParameters(HttpServletRequest request, int reportId,
 			Map<String, ReportParameter> reportParams) throws SQLException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);

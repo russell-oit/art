@@ -371,7 +371,7 @@ public class RunReportController {
 			ArtQuery aq = new ArtQuery();
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
-			paramProcessor.processParameters(request, reportId, reportParams);
+			paramProcessor.processHttpParameters(request, reportId, reportParams);
 
 			//display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
 			Map<Integer, ArtQueryParam> displayParams = new TreeMap<>();
