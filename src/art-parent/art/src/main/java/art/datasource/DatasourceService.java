@@ -24,6 +24,7 @@ import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -296,7 +297,7 @@ public class DatasourceService {
 		logger.debug("Entering getAdminDatasources: user={}", user);
 
 		if (user == null || user.getAccessLevel() == null) {
-			return new ArrayList<>();
+			return Collections.EMPTY_LIST;
 		}
 
 		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
