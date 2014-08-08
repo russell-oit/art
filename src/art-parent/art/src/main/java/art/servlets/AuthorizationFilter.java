@@ -78,8 +78,8 @@ public class AuthorizationFilter implements Filter {
 				String username = (String) session.getAttribute("username");
 
 				if (username == null) {
-					//not using custom authentication. test public user session
-					if (request.getParameter("publicUser") != null) {
+					//not using custom authentication. check if this is a public session
+					if (Boolean.valueOf(request.getParameter("publicUser"))) {
 						username = ArtUtils.PUBLIC_USER;
 						loginMethod = ArtAuthenticationMethod.Public;
 					}
