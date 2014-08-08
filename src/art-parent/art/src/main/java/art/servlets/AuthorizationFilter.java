@@ -71,7 +71,6 @@ public class AuthorizationFilter implements Filter {
 			User user = (User) session.getAttribute("sessionUser");
 			if (user == null) {
 				//custom authentication, public user session or session expired
-
 				ArtAuthenticationMethod loginMethod = null;
 
 				//test custom authentication
@@ -87,7 +86,8 @@ public class AuthorizationFilter implements Filter {
 					loginMethod = ArtAuthenticationMethod.Custom;
 				}
 
-				if (username != null && loginMethod != null) {
+				if (loginMethod == ArtAuthenticationMethod.Custom
+						|| loginMethod == ArtAuthenticationMethod.Public) {
 					//either custom authentication or public user session
 					//ensure user exists
 					LoginHelper loginHelper = new LoginHelper();
