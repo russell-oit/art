@@ -86,8 +86,10 @@ public class AuthorizationFilter implements Filter {
 					loginMethod = ArtAuthenticationMethod.Custom;
 				}
 
-				if (loginMethod == ArtAuthenticationMethod.Custom
-						|| loginMethod == ArtAuthenticationMethod.Public) {
+				if (loginMethod == null) {
+					//session expired or just unauthorized access attempt
+					message = "login.message.sessionExpired";
+				} else {
 					//either custom authentication or public user session
 					//ensure user exists
 					LoginHelper loginHelper = new LoginHelper();
@@ -99,6 +101,7 @@ public class AuthorizationFilter implements Filter {
 					} catch (SQLException ex) {
 						logger.error("Error", ex);
 					}
+					
 					if (user == null) {
 						//user doesn't exist
 						//always display invalidAccount message in login page. log actual cause
@@ -113,19 +116,12 @@ public class AuthorizationFilter implements Filter {
 						loginHelper.logFailure(loginMethod, username, ip, ArtUtils.ART_USER_DISABLED);
 					} else {
 						//valid access
-						//ensure public user always has normal user access level
-						if (loginMethod == ArtAuthenticationMethod.Public) {
-							user.setAccessLevel(AccessLevel.NormalUser);
-						}
 						session.setAttribute("sessionUser", user);
 						session.setAttribute("authenticationMethod", loginMethod.getValue());
 						session.setAttribute("administratorEmail", ArtConfig.getSettings().getAdministratorEmail());
 						//log success
 						loginHelper.logSuccess(loginMethod, username, ip);
 					}
-				} else {
-					//session expired or just unauthorized access attempt
-					message = "login.message.sessionExpired";
 				}
 			}
 

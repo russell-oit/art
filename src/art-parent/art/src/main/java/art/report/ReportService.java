@@ -261,7 +261,7 @@ public class ReportService {
 				//don't show lov reports
 				+ " AND AQ.QUERY_TYPE NOT IN(?,?)"
 				//don't show job recipient reports
-				+ " AND AQ.QUERY_TYPE <>?"
+				+ " AND AQ.QUERY_TYPE<>?"
 				+ " AND("
 				//user can run report if he has direct access to it
 				+ " EXISTS (SELECT *"
@@ -663,7 +663,7 @@ public class ReportService {
 			report.setReportSource(sb.toString());
 			//set html source for use with text reports
 			ReportType reportType = ReportType.toEnum(report.getReportType());
-			if (reportType == ReportType.Text || reportType == ReportType.TextPublic) {
+			if (reportType == ReportType.Text) {
 				report.setReportSourceHtml(report.getReportSource());
 			}
 		} finally {
@@ -960,7 +960,6 @@ public class ReportService {
 			reportId,
 			ReportType.LovDynamic.getValue(), //lov reports
 			ReportType.LovStatic.getValue(),
-			ReportType.TextPublic.getValue(), //public text report
 			ArtUtils.PUBLIC_USER, //public user access to report
 			ArtUtils.PUBLIC_USER, //public user access to report's group
 			userId, //admin user

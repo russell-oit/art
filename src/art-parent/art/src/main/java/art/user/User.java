@@ -2,9 +2,11 @@ package art.user;
 
 import art.enums.AccessLevel;
 import art.usergroup.UserGroup;
+import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Class to represent a user
@@ -33,9 +35,9 @@ public class User implements Serializable {
 	private boolean useBlankPassword; //only used for user interface logic
 	private String createdBy;
 	private String updatedBy;
-	
-	public boolean isAdminUser(){
-		if (accessLevel==null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
+
+	public boolean isAdminUser() {
+		if (accessLevel == null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
 			return false;
 		} else {
 			return true;
@@ -151,7 +153,6 @@ public class User implements Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
-
 
 	/**
 	 * Get the value of creationDate
@@ -339,7 +340,12 @@ public class User implements Serializable {
 	 * @return the value of accessLevel
 	 */
 	public AccessLevel getAccessLevel() {
-		return accessLevel;
+		//ensure public user always has normal user access level
+		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
+			return AccessLevel.NormalUser;
+		} else {
+			return accessLevel;
+		}
 	}
 
 	/**
@@ -395,5 +401,5 @@ public class User implements Serializable {
 	public String toString() {
 		return "User{" + "username=" + username + '}';
 	}
-	
+
 }

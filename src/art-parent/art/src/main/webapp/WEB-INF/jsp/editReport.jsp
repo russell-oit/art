@@ -105,7 +105,7 @@ Edit report page
 				var reportType = parseInt($('#reportType option:selected').val(), 10);
 
 				//show/hide report source textarea
-				if (reportType === 111 || reportType === 122) {
+				if (reportType === 111) {
 					//text
 					$("#reportSourceHtmlDiv").show();
 					$("#reportSourceDiv").hide();
@@ -118,7 +118,6 @@ Edit report page
 				var reportSourceType;
 				switch (reportType) {
 					case 111:
-					case 122:
 						//text
 						reportSourceType = "(HTML)";
 						break;
@@ -141,8 +140,7 @@ Edit report page
 				//show/hide use rules
 				switch (reportType) {
 					case 110: //dashboard
-					case 111: //text public
-					case 122: //text
+					case 111: //text
 					case 115: //jasperreport template
 					case 117: //jxls template
 					case 120: //static lov
@@ -156,8 +154,7 @@ Edit report page
 				//show/hide datasource
 				switch (reportType) {
 					case 110: //dashboard
-					case 111: //text public
-					case 122: //text
+					case 111: //text
 					case 113: //mondrian xmla
 					case 114: //sql server xmla
 					case 120: //static lov
@@ -199,8 +196,7 @@ Edit report page
 				//show/hide display resultset
 				switch (reportType) {
 					case 110: //dashboard
-					case 111: //text public
-					case 122: //text
+					case 111: //text
 					case 112: //mondrian
 					case 113: //mondrian xmla
 					case 114: //sql server xmla

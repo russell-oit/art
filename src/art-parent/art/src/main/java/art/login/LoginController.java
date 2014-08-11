@@ -279,7 +279,7 @@ public class LoginController {
 
 	private String getLoginSuccessNextPage(HttpSession session, User user,
 			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus) {
-
+		
 		//set session attributes
 		session.setAttribute("sessionUser", user);
 		session.setAttribute("authenticationMethod", loginMethod.getValue());

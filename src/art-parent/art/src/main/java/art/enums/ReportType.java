@@ -30,7 +30,7 @@ public enum ReportType {
 	//group reports (1-99) are too many to list
 	Tabular(0), TabularHtml(103),
 	Update(100), Crosstab(101), CrosstabHtml(102), 
-	Dashboard(110), Text(122), TextPublic(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
+	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), jXLSTemplate(117), jXLSArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121),
 	XY(-1), Pie3D(-2), HorizontalBar3D(-3), VerticalBar3D(-4), Line(-5),
@@ -113,8 +113,6 @@ public enum ReportType {
 				return "Dashboard";
 			case Text:
 				return "Text";
-			case TextPublic:
-				return "Text (public)";
 			case Mondrian:
 				return "Pivot Table: Mondrian";
 			case MondrianXmla:
