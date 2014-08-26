@@ -363,6 +363,9 @@ public class RunReportController {
 
 			//prepare report parameters
 			ArtQuery aq = new ArtQuery();
+			
+			Map<String, String> inlineParams=new HashMap<>();
+			Map<String, String[]> multiParams=new HashMap<>();
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
 			Map<String, ReportParameter> reportParams = paramProcessor.processHttpParameters(request, reportId);
@@ -410,17 +413,16 @@ public class RunReportController {
 			reportRunner.setReportParams(reportParams);
 
 			//is scroll insensitive much slower than forward only?
-			int resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-//				int resultSetType;
-//				if (queryType == 116 || queryType == 118) {
-//					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset in order to determine record count
-//				} else if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
-//					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-//				} else if (queryType < 0) {
-//					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
-//				} else {
-//					resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-//				}
+				int resultSetType;
+				if (reportTypeId == 116 || reportTypeId == 118) {
+					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset in order to determine record count
+				} else if (StringUtils.equalsIgnoreCase(reportFormat, "htmlreport")) {
+					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+				} else if (reportTypeId < 0) {
+					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
+				} else {
+					resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+				}
 
 			// JavaScript code to write status
 			if (showHeaderAndFooter) {
@@ -538,11 +540,11 @@ public class RunReportController {
 				jxls.setWriter(out);
 				if (reportTypeId == 117) {
 					//report will use query in the jxls template
-					jxls.createFile(null, reportId, reportParams);
+//					jxls.createFile(null, reportId, reportParams);
 				} else {
 					//report will use data from art query
 					rs = reportRunner.getResultSet();
-					jxls.createFile(rs, reportId, inlineParams, multiParams, reportParams);
+//					jxls.createFile(rs, reportId, inlineParams, multiParams, reportParams);
 					rowsRetrieved = getNumberOfRows(rs);
 				}
 			} else {
@@ -591,7 +593,7 @@ public class RunReportController {
 							Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(reportId);
 
 							//build graph dataset
-							ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
+//							ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
 
 							//set other properties relevant for the graph display
 							if (showSQL) {

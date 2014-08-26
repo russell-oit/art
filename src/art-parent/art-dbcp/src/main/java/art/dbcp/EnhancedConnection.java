@@ -31,13 +31,6 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  */
 public class EnhancedConnection implements Connection {
-	/* To compile this using jdk 1.3 you should comment the jdk 1.4/1.5/1.6/1.7 lines 
-	 at the bottom */
-	/* To compile this using jdk 1.4/1.5 you should also comment the jdk 1.6 lines 
-	 at the bottom */
-	/* To compile this using jdk 1.6 you should also comment the jdk 1.7 lines 
-	 at the bottom */
-
 	/* 20050612  Statements are closed automatically when the EnanchedConnection is 
 	 returned to the pool
 	 20050612  test conection with a dummy sql, if it fails refresh the connection
@@ -129,13 +122,10 @@ public class EnhancedConnection implements Connection {
 	 * @throws SQLException
 	 */
 	protected void test(String testSQL) throws SQLException {
-		Statement st = c.createStatement();
-		ResultSet rs = st.executeQuery(testSQL);
-		//why iterate?
-		while (rs.next()) {
+		try (Statement st = c.createStatement(); ResultSet rs = st.executeQuery(testSQL)) {
+			while (rs.next()) {
+			}
 		}
-		rs.close();
-		st.close();
 	}
 
 	/**
@@ -306,7 +296,7 @@ public class EnhancedConnection implements Connection {
 	}
 
 	/*
-	 * START JDK 1.4/1.5 only
+	 * START JDK 1.4/1.5 only (JDBC 3)
 	 */
 	@Override
 	public void setHoldability(int i) throws SQLException {
@@ -385,7 +375,7 @@ public class EnhancedConnection implements Connection {
 
 
 	/*
-	 * START JDK 1.6 only
+	 * START JDK 1.6 only (JDBC 4)
 	 */
 	@Override
 	public Clob createClob() throws SQLException {
@@ -456,7 +446,7 @@ public class EnhancedConnection implements Connection {
 	 * END JDK 1.6 only
 	 */
 	/*
-	 * START JDK 1.7 only
+	 * START JDK 1.7 only (JDBC 4.1)
 	 */
 	@Override
 	public void abort(Executor arg0) throws SQLException {

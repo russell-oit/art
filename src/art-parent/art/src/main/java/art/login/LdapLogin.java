@@ -321,7 +321,7 @@ public class LdapLogin {
 				if (results.hasMoreElements()) {
 					logger.debug("results.hasMoreElements()=true");
 
-					javax.naming.directory.SearchResult searchResult = (javax.naming.directory.SearchResult) results.next();
+					javax.naming.directory.SearchResult searchResult = results.next();
 
 					//make sure there is not another item available, there should be only 1 match
 					if (results.hasMoreElements()) {

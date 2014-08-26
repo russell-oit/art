@@ -30,18 +30,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements a database connections pool. Features: <ul> <li> The
- * pool dynamically increase/decrease. An unused connection is removed from the
- * pool after <code>timeout</code> seconds </li> <li> The underlying work is
+ * This class implements a database connection pool. Features: <ul> <li> The
+ * pool dynamically increases/decreases. An unused connection is removed from
+ * the pool after {@code timeout} seconds. </li> <li> The underlying work is
  * transparent from the developer point of view. A connection is obtained from
  * the pool using the getConnection() method. A connection is returned to the
  * pool by simply closing the connection (any open statement is automatically
- * closed thus you might avoid to close statements and resultsets). </li> <li>
- * Too long opened connection are garbaged automatically to prevent your
- * application to hang because of buggy drivers or network problems </li> <li> A
- * logging facility is provided to monitor the database pool, plus a method
- * exists to get the pool detail status with some statistics. </li> </ul> Usage
- * Example:
+ * closed thus you might not need to close statements and resultsets). </li>
+ * <li>
+ * Connections that are open for too long are removed automatically to prevent
+ * your application from hanging because of buggy drivers or network problems
+ * </li> <li> A logging facility is provided to monitor the database pool, plus
+ * a method exists to get the pool status with some statistics. </li> </ul>
+ * Usage Example:
  * <pre>
  * // load drivers
  * DataSource db = new DataSource();
@@ -49,9 +50,6 @@ import org.slf4j.LoggerFactory;
  * db.setUrl(DB_URL);
  * db.setUsername(USERNAME);
  * db.setPassword(PASSWORD);
- * // (optional)
- * db.setLogPath(LOG_PATH);
- * db.setLogFileName(LOG_FILE_NAME);
  * // (optional)
  * db.setTestSQL("SELECT 'OK' FROM DUAL"); // oracle
  *
@@ -64,23 +62,15 @@ import org.slf4j.LoggerFactory;
  *            //The internal timer will really close an idle connection after
  *            // a timeout (default 30 min)
  * //
- * db.close(); // really close all connections in the pool and stop internal timer.
- * </pre> <br> Changes on version 2.1: <ul> <li> open statements are closed
- * automatically when a connection is returned to the pool <li> getConnection()
- * now throws a SQLException instead of returning a null object (if an issue
- * prevents the method to return a new working connection). <li> open() has been
- * deprecated (use getConnection()) instead <li> status is available in xml
- * format getXmlStatus() </ul>
+ * db.close(); // really close all connections in the pool and stop the internal timer.
+ * </pre>
+ *
+ * Known issue: a connection may appear not in use if it has been returned by
+ * getOlderConnection
  *
  * @author Enrico Liboni
- * @version 2.0.0 ******************************
  */
 public class DataSource implements TimerListener {
-	/*
-	 Known issue: a connection may appear not in use if it has been
-	 returned by getOlderConnection
-
-	 */
 
 	private static final Logger logger = LoggerFactory.getLogger(DataSource.class);
 	private String name = ""; //datasource name

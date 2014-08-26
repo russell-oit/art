@@ -89,7 +89,7 @@ public class Mailer {
 		if (tos == null) {
 			return null;
 		} else {
-			return (String[]) tos.clone();
+			return tos;
 		}
 	}
 
@@ -100,7 +100,7 @@ public class Mailer {
 		if (tos == null) {
 			this.tos = null;
 		} else {
-			this.tos = (String[]) tos.clone();
+			this.tos = tos;
 		}
 	}
 
@@ -270,7 +270,7 @@ public class Mailer {
 		if (ccs == null) {
 			return null;
 		} else {
-			return (String[]) ccs.clone();
+			return ccs;
 		}
 	}
 
@@ -281,7 +281,7 @@ public class Mailer {
 		if (ccs == null) {
 			this.ccs = null;
 		} else {
-			this.ccs = (String[]) ccs.clone();
+			this.ccs = ccs;
 		}
 	}
 
@@ -292,7 +292,7 @@ public class Mailer {
 		if (bccs == null) {
 			return null;
 		} else {
-			return (String[]) bccs.clone();
+			return bccs;
 		}
 	}
 
@@ -303,7 +303,7 @@ public class Mailer {
 		if (bccs == null) {
 			this.bccs = null;
 		} else {
-			this.bccs = (String[]) bccs.clone();
+			this.bccs = bccs;
 		}
 	}
 

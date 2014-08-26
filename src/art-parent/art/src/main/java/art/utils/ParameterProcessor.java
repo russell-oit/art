@@ -238,9 +238,6 @@ public class ParameterProcessor {
 		return reportParams;
 	}
 
-	private Object processDefaultValue(String defaultValue) {
-
-	}
 
 	private Date processDateValue(String defaultValue) {
 		/*

@@ -1520,17 +1520,17 @@ public class ArtJob implements Job, Serializable {
 					} else if (queryType == 115 || queryType == 116) {
 						//jasper report
 						JasperReportsOutput jasper = new JasperReportsOutput();
-						jasper.setQueryName(queryName);
-						jasper.setFileUserName(jobFileUsername);
+//						jasper.setQueryName(queryName);
+//						jasper.setFileUserName(jobFileUsername);
 						jasper.setExportPath(jobsPath);
 						jasper.setReportFormat(outputFormat);
 
 						if (queryType == 115) {
 							//report will use query in the report template
-							jasper.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
+//							jasper.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						} else {
 							//report will use data from art query
-							jasper.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
+//							jasper.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						}
 						fileName = jasper.getFileName();
 					} else if (queryType == 117 || queryType == 118) {
@@ -1592,9 +1592,9 @@ public class ArtJob implements Job, Serializable {
 
 						ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages");
 						if (queryType == 101 || queryType == 102) {
-							ReportOutputHandler.flushXOutput(messages, o, rs, rsmd);
+//							ReportOutputHandler.flushXOutput(messages, o, rs, rsmd);
 						} else {
-							ReportOutputHandler.flushOutput(messages, o, rs, rsmd);
+//							ReportOutputHandler.flushOutput(messages, o, rs, rsmd);
 						}
 
 						/*

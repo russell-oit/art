@@ -2316,7 +2316,7 @@ public class ReportRunner {
 
 			conn = ArtConfig.getConnection();
 			StringBuilder builder = new StringBuilder(1024 * 2);
-			builder.append(querySql);
+//			builder.append(querySql);
 
 			applyInlineParameters(builder);
 			prepareInlineParameters(null);

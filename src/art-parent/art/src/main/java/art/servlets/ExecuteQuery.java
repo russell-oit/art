@@ -71,19 +71,19 @@ public class ExecuteQuery extends HttpServlet {
 
 		super.init(config);
 
-		//load all view modes
-		List<String> allViewModes = ArtConfig.getAllReportFormats();
-		viewModes = new HashMap<String, java.lang.Class>(allViewModes.size());
-		ClassLoader cl = this.getClass().getClassLoader();
-		String vm = "";
-		try {
-			for (String viewMode : allViewModes) {
-				vm = viewMode;
-				viewModes.put(vm, cl.loadClass("art.output." + vm + "Output"));
-			}
-		} catch (Exception e) {
-			logger.error("Error while loading view mode: {}", vm, e);
-		}
+//		//load all view modes
+//		List<String> allViewModes = ArtConfig.getAllReportFormats();
+//		viewModes = new HashMap<String, java.lang.Class>(allViewModes.size());
+//		ClassLoader cl = this.getClass().getClassLoader();
+//		String vm = "";
+//		try {
+//			for (String viewMode : allViewModes) {
+//				vm = viewMode;
+//				viewModes.put(vm, cl.loadClass("art.output." + vm + "Output"));
+//			}
+//		} catch (Exception e) {
+//			logger.error("Error while loading view mode: {}", vm, e);
+//		}
 	}
 
 	
@@ -99,655 +99,655 @@ public class ExecuteQuery extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 
-		request.setCharacterEncoding("UTF-8"); // THIS MUST BE THE FIRST LINE
-		// make sure your server knows input is codified in UTF-8
-		// note: on Tomcat you need to set the URIEncoding="UTF-8" on tomcat connector in server.xml
-
-
-		// check if the html code should be rendered as an html fragmnet (without <html> and </html> tags)
-		boolean isFragment;
-		if (request.getParameter("_isFragment") != null) {
-			isFragment = true;
-		} else {
-			isFragment = false;
-		}
-
-		// make sure the browser does not cache the result using Ajax (this happens in IE)
-		if (isFragment) {
-			response.setHeader("Cache-control", "no-cache");
-		}
-
-		// check if output is being displayed within the showparams page
-		boolean isInline = false;
-		if (request.getParameter("_isInline") != null) {
-			isInline = true;
-		}
-
-		PrintWriter out = null; // this will be initialized according to the content type of the view mode
-		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
-
-		ServletContext ctx = getServletConfig().getServletContext();
-		String baseExportPath = ArtConfig.getExportPath();
-		HttpSession session = request.getSession();
-		String username = (String) session.getAttribute("username");
-
-		//generate output
-		if (username == null) {
-			//invalid session
-			request.setAttribute("errorMessage", messages.getString("invalidSession"));
-			ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-		} else {
-			// the session is valid if the username is not null
-
-			/*
-			 * isFlushEnabled states if this servlet can produce html output.
-			 * This is used to avoid to print on the page if the page control
-			 * has to be redirected to another page (this is the case of graphs
-			 * and output modes that do not generate html)
-			 */
-			boolean showHeaderAndFooter = true; // default generic HTML output
-			ReportOutputInterface o = null;
-			String str; //for error logging strings
-
-			//get query details. don't declare query variables at class level. causes issues with dashboards            
-			int queryId = 0;
-			int queryType;
-			String queryName;
-			String xAxisLabel;
-			String yAxisLabel;
-			String graphOptions;
-			String shortDescription;
-
-			//support queryId as well as existing QUERY_ID
-			String queryIdString = request.getParameter("queryId");
-			String queryIdString2 = request.getParameter("QUERY_ID");
-			if (queryIdString != null) {
-				queryId = Integer.parseInt(queryIdString);
-			} else if (queryIdString2 != null) {
-				queryId = Integer.parseInt(queryIdString2);
-			}
-
-			try {
-				Connection conn = ArtConfig.getConnection();
-				ArtQuery aq = new ArtQuery();
-				aq.create(conn, queryId);
-
-				queryName = aq.getName();
-				queryType = aq.getQueryType();
-				xAxisLabel = aq.getXaxisLabel();
-				yAxisLabel = aq.getYaxisLabel();
-				graphOptions = aq.getGraphOptions();
-				shortDescription = aq.getShortDescription();
-
-				conn.close();
-			} catch (Exception e) {
-				logger.error("Error while getting query details", e);
-				request.setAttribute("errorMessage", "Error while getting query details: " + e);
-				ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-				return;
-			}
-
-			request.setAttribute("queryName", queryName);
-
-			String viewMode = request.getParameter("viewMode");
-			if (viewMode == null || StringUtils.equalsIgnoreCase(viewMode, "default")) {
-				if (queryType < 0) {
-					//graph
-					viewMode = "graph";
-				} else if (queryType > 0 && queryType < 100) {
-					//group
-					viewMode = "htmlreport";
-				} else if (queryType == 115 || queryType == 116) {
-					//jasper report
-					viewMode = "pdf";
-				} else {
-					viewMode = "html";
-				}
-			}
-
-			//ensure html only queries only output as html
-			if (queryType == 102 || queryType == 103) {
-				//crosstab html only or normal query html only
-				viewMode = "html";
-			}
-
-			/*
-			 * Find if output allows this servlet to print the header&footer
-			 * (flush active or not)
-			 */
-			if (StringUtils.equalsIgnoreCase(viewMode, "SCHEDULE")) {
-				// forward to the editJob page
-				ctx.getRequestDispatcher("/user/editJob.jsp").forward(request, response);
-				return; // a return is needed otherwise the flow would proceed!
-			} else if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
-				showHeaderAndFooter = false; // graphs are created in memory and displayed by showGraph.jsp page
-			} else if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
-				response.setContentType("text/html; charset=UTF-8");
-				out = response.getWriter();
-			} else if (queryType == 115 || queryType == 116 || queryType == 117 || queryType == 118) {
-				//jasper report or jxls spreadsheet
-				response.setContentType("text/html; charset=UTF-8");
-				out = response.getWriter();
-			} else if (queryType == 100) {
-				//update query
-				response.setContentType("text/html; charset=UTF-8");
-				out = response.getWriter();
-			} else if (queryType == 110) {
-				// forward to the showDashboard page
-				ctx.getRequestDispatcher("/user/showDashboard.jsp").forward(request, response);
-				return; // a return is needed otherwise the flow would proceed!
-			} else if (queryType == 111) {
-				// forward to the showText page
-				ctx.getRequestDispatcher("/user/showText.jsp").forward(request, response);
-				return; // a return is needed otherwise the flow would proceed!
-			} else if (queryType == 112 || queryType == 113 || queryType == 114) {
-				// forward to the showAnalysis page
-				ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
-				return; // a return is needed otherwise the flow would proceed!
-			} else {
-				// This is not a request to schedule, produce a graph or an "htmlReport" or an update query
-				// => Load the appropriate ReportOutputInterface for the view mode
-
-				try {
-					@SuppressWarnings("rawtypes")
-					java.lang.Class classx = viewModes.get(viewMode);
-					o = (ReportOutputInterface) classx.newInstance();
-
-					// Set the content type according to the object
-					String contentType = o.getContentType();
-					response.setContentType(contentType);
-					// initialize the output stream - this is here
-					// this need to appear after response.setContent!!!
-					out = response.getWriter();
-
-					// the view mode drives if this servlet uses the std header&footer,
-					// if false the view mode needs to take care of all the output
-					showHeaderAndFooter = o.isShowQueryHeaderAndFooter();
-
-					if (isFragment) {
-						showHeaderAndFooter = false; // disable in any case header&footer if isFragment is true
-					}
-
-				} catch (Exception e) {
-					logger.error("Error while instantiating class: {}", viewMode, e);
-					request.setAttribute("errorMessage", "Error while initializing " + viewMode + " view mode:" + e);
-					ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-					return;
-				}
-			}
-
-			if (showHeaderAndFooter) {
-				ctx.getRequestDispatcher("/user/queryHeader.jsp").include(request, response);
-				out.flush();
-			}
-
-
-			//run query            
-			if (currentNumberOfRunningQueries <= ArtConfig.getSettings().getMaxRunningReports()) {
-				int probe = 0; // used for debugging
-				int numberOfRows = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
-
-				ResultSet rs = null;
-				ReportRunner pq = null;
-
-				try {
-					ResultSetMetaData rsmd;
-					long startQueryTime;
-					long endQueryTime;
-					long startTime = new java.util.Date().getTime(); //overall start time                    
-					String startTimeString = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.MEDIUM, request.getLocale()).format(new java.util.Date(startTime)); //for display in query output header
-
-					/*
-					 * Increment the currentNumberOfRunningQueries Note if an
-					 * exception kills the current thread the value may be not
-					 * decremented correctly This value is shown in the the
-					 * "Show Connection Status" link from the Datasource page
-					 * (ART Admin part)
-					 */
-					currentNumberOfRunningQueries++;
-
-					/*
-					 * ***********************************
-					 * BEGIN: Create the ReportRunner object and feed it (this
-					 * obj is a "wrapper" around the SQL string with some
-					 * methods to act on it to apply rules, multi params etc)
-					 */
-
-					probe = 10;
-					boolean adminSession = false;
-					// check if the servlet has been called from the admin session
-					if (session.getAttribute("AdminSession") != null) {
-						adminSession = true;
-					}
-
-					pq = new ReportRunner();
-					pq.setUsername(username);
-					pq.setReportId(queryId);
-					pq.setAdminSession(adminSession);
-
-
-					/**
-					 * ***************************************************************************
-					 *
-					 * ON QUERY PARAMETERS
-					 *
-					 * INLINE parameters has the format P_<param_name> and the
-					 * #param_name# values are substituted in the SQL query
-					 * before executing it.
-					 *
-					 * A MULTI parameter name begins with the sting 'M_'
-					 * followed by the column name The following string is
-					 * created AND MULTIPLE_FIELD_NAME in ('value1', 'value2',
-					 * ..., 'valueN') and inserted on the prepared statement
-					 * (handling the case where we have a GROUP BY expression)
-					 *
-					 * BIND parameters are deprecated, us INILINE instead BIND
-					 * parameter name begins with the string 'Py' where y is the
-					 * ? index on the prepared statement. For example P3=HELLO
-					 * means the third ? on the prepared statement will be
-					 * substituted with the HELLO string (the same for VARCHAR,
-					 * INTEGER, NUMBER ...) For dates, there are 3 params to
-					 * store each date parameter: day, month and year Py_days or
-					 * Py_month or Py_year (for Dec 12, 2008 => P3_days = 12,
-					 * P3_month = 3, P3_year=2008)
-					 *
-					 * The first step is to build the parameter lists
-					 * ***************************************************************************
-					 */
-					probe = 40;
-
-					/*
-					 * *************************************
-					 * BEGIN: Build parameters hash tables
-					 */
-
-					Map<String, String[]> multiParams = new HashMap<String, String[]>();
-					Map<String, String> inlineParams = new HashMap<String, String>();
-
-					ArtQuery aq = new ArtQuery();
-					Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
-
-					//set default parameter values. so that they don't have to be specified on the url
-					if (!htmlParams.isEmpty()) {
-						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
-							ArtQueryParam param = entry.getValue();
-							if (StringUtils.equals(param.getParamType(), "I")) {
-								inlineParams.put(param.getParamLabel(), (String) param.getParamValue());
-							}
-
-						}
-					}
-
-					/*
-					 * ParameterProcessor has a static function to parse the
-					 * request and fill the hashmaps that store the parameters
-					 */
-					Map<Integer, ArtQueryParam> displayParams = ParameterProcessor.processParameters(request, inlineParams, multiParams, queryId, htmlParams);
-
-					//set showparams flag. flag not only determined by presense of _showParams. may also be true if query set to always show params
-					boolean showParams = false;
-					if (!displayParams.isEmpty()) {
-						showParams = true;
-					}
-
-					// Set the hash tables in the pq object
-					pq.setMultiParams(multiParams);
-					pq.setInlineParams(inlineParams);
-
-					pq.setHtmlParams(htmlParams);
-
-					/*
-					 * END ***********************************
-					 */
-
-					probe = 50;
-
-					int resultSetType;
-					if (queryType == 116 || queryType == 118) {
-						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset in order to determine record count
-					} else if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
-						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-					} else if (queryType < 0) {
-						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
-					} else {
-						resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-					}
-
-					// JavaScript code to write status
-					if (showHeaderAndFooter) {
-						out.println("<script type=\"text/javascript\">writeStatus(\"" + messages.getString("queryExecuting") + "\");</script>");
-						out.flush();
-					}
-
-
-					startQueryTime = new java.util.Date().getTime();
-
-					/*
-					 * *************
-					 ***************
-					 *****RUN IT**** ************** *************
-					 */
-
-					pq.execute(resultSetType);
-
-					probe = 75;
-
-					/*
-					 * *************
-					 ***************
-					 ***************
-					 **************
-					 */
-
-					endQueryTime = new java.util.Date().getTime();
-
-
-					//get final sql with parameter placeholders replaced with parameter values
-					String finalSQL = pq.getFinalSQL();
-
-					//determine if final sql should be shown. only admins can see sql
-					boolean showSQL = false;
-					int accessLevel = 0;
-					UserEntity ue = (UserEntity) session.getAttribute("ue");
-					if (ue != null) {
-						accessLevel = ue.getAccessLevel();
-					}
-					if (request.getParameter("_showSQL") != null && accessLevel > 5) {
-						showSQL = true;
-					}
-
-					//set output object properties if required
-					if (o != null) {
-						try {
-							probe = 77;
-
-							o.setMaxRows(ArtConfig.getMaxRows(viewMode));
-							o.setWriter(out);
-							o.setQueryName(queryName);
-							o.setFileUserName(username);
-							o.setExportPath(baseExportPath);
-
-							//don't set displayparams for html view modes. parameters will be displayed by this servlet
-							if (!StringUtils.containsIgnoreCase(viewMode, "html")) {
-								o.setDisplayParameters(displayParams);
-							}
-
-							//ensure htmlplain output doesn't display parameters if inline
-							if (o instanceof htmlPlainOutput) {
-								htmlPlainOutput hpo = (htmlPlainOutput) o;
-								hpo.setDisplayInline(isInline);
-
-								//ensure parameters are displayed if not in inline mode
-								hpo.setDisplayParameters(displayParams);
-							}
-
-							//enable localization for datatable output
-							if (o instanceof htmlDataTableOutput) {
-								htmlDataTableOutput dt = (htmlDataTableOutput) o;
-								dt.setLocale(request.getLocale());
-							}
-
-						} catch (Exception e) {
-							logger.error("Error setting properties for class: {}", viewMode, e);
-							request.setAttribute("errorMessage", "Error while initializing " + viewMode + " view mode:" + e);
-							ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-							return;
-						}
-					}
-
-					// display status information, parameters and final sql
-					if (showHeaderAndFooter) {
-						out.println("<script type=\"text/javascript\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
-						String description = "";
-						shortDescription = StringUtils.trim(shortDescription);
-						if (StringUtils.length(shortDescription) > 0) {
-							description = " :: " + shortDescription;
-						}
-						out.println("<script type=\"text/javascript\">writeInfo(\"<b>" + queryName + "</b>" + description + " :: " + startTimeString + "\");</script>");
-
-						//display parameters
-						if (showParams) {
-							ReportOutputHandler.displayParameters(out, displayParams, messages);
-						}
-
-						//display final sql
-						if (showSQL) {
-							ReportOutputHandler.displayFinalSQL(out, finalSQL);
-						}
-
-						out.flush();
-					}
-					probe = 90;
-
-					//handle jasper report output
-					if (queryType == 115 || queryType == 116) {
-						probe = 91;
-						JasperReportsOutput jasper = new JasperReportsOutput();
-						jasper.setQueryName(queryName);
-						jasper.setFileUserName(username);
-						jasper.setExportPath(baseExportPath);
-						jasper.setReportFormat(viewMode);
-						jasper.setWriter(out);
-						if (queryType == 115) {
-							//report will use query in the report template
-							jasper.createFile(null, queryId, inlineParams, multiParams, htmlParams);
-						} else {
-							//report will use data from art query
-							rs = pq.getResultSet();
-							jasper.createFile(rs, queryId, inlineParams, multiParams, htmlParams);
-							numberOfRows = getNumberOfRows(rs);
-						}
-					} else if (queryType == 117 || queryType == 118) {
-						//jxls spreadsheet
-						probe = 92;
-						jxlsOutput jxls = new jxlsOutput();
-						jxls.setQueryName(queryName);
-						jxls.setFileUserName(username);
-						jxls.setExportPath(baseExportPath);
-						jxls.setWriter(out);
-						if (queryType == 117) {
-							//report will use query in the jxls template
-							jxls.createFile(null, queryId, inlineParams, multiParams, htmlParams);
-						} else {
-							//report will use data from art query
-							rs = pq.getResultSet();
-							jxls.createFile(rs, queryId, inlineParams, multiParams, htmlParams);
-							numberOfRows = getNumberOfRows(rs);
-						}
-					} else {
-						//get query results
-						rs = pq.getResultSet();
-
-						if (rs != null) {
-							// it is a "select" query or a procedure ending with a select statement
-							probe = 93;
-							rsmd = rs.getMetaData();
-
-							try {
-								if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
-									/*
-									 * HTML REPORT
-									 */
-									int splitCol;
-									if (request.getParameter("SPLITCOL") == null) {
-										splitCol = queryType;
-									} else {
-										splitCol = Integer.parseInt(request.getParameter("SPLITCOL"));
-									}
-									numberOfRows = htmlReportOut(out, rs, rsmd, splitCol);
-									probe = 100;
-								} else if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
-									/*
-									 * GRAPH
-									 */
-									probe = 105;
-
-									//do initial preparation of graph object
-									ArtGraph ag = artGraphOut(rsmd, request, graphOptions, shortDescription, queryType);
-
-									//set some graph properties
-									ag.setXAxisLabel(xAxisLabel);
-									if (yAxisLabel == null) {
-										yAxisLabel = rsmd.getColumnLabel(1);
-									}
-									ag.setYAxisLabel(yAxisLabel);
-
-									if (showParams) {
-										request.setAttribute("showParams", "true");
-										ag.setDisplayParameters(displayParams);
-									}
-
-									//add drill down queries
-									Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(queryId);
-
-									//build graph dataset
-									ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
-
-									//set other properties relevant for the graph display
-									if (showSQL) {
-										request.setAttribute("showSQL", "true");
-										request.setAttribute("finalSQL", finalSQL);
-									}
-
-									//enable file names to contain query name
-									//set base file name
-									java.util.Date today = new java.util.Date();
-									SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-									String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtUtils.getRandomFileNameString();
-									filename = ArtUtils.cleanFileName(filename);
-									request.setAttribute("baseFileName", filename);
-
-									//allow direct url not to need _query_id
-									request.setAttribute("queryType", Integer.valueOf(queryType));
-
-									//allow use of both QUERY_ID and queryId in direct url
-									request.setAttribute("queryId", Integer.valueOf(queryId));
-
-									//pass graph object
-									request.setAttribute("artGraph", ag);
-
-									probe = 110;
-								} else {
-									if (queryType == 101 || queryType == 102) {
-										/*
-										 * CROSSTAB
-										 */
-										numberOfRows = ReportOutputHandler.flushXOutput(messages, o, rs, rsmd);
-									} else {
-										/*
-										 * NORMAL TABULAR OUTPUT
-										 */
-
-										//add support for drill down queries
-										Map<Integer, DrilldownQuery> drilldownQueries = null;
-										if (StringUtils.containsIgnoreCase(viewMode, "html")) {
-											//only drill down for html output. drill down query launched from hyperlink                                            
-											drilldownQueries = aq.getDrilldownQueries(queryId);
-										}
-										numberOfRows = ReportOutputHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
-									}
-									probe = 130;
-								}
-
-							} catch (ArtException e) { // "known" exceptions
-								throw new ArtException(e.getMessage());
-							} catch (Exception e) {    // other "unknown" exceptions                                
-								str = "Error while running query ID " + queryId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
-								logger.error("Error: {}", str, e);
-								throw new ArtException(messages.getString("queryFetchException") + " <br>" + messages.getString("step") + ": " + probe + "<br>" + messages.getString("details") + "<code> " + e + "</code><br>" + messages.getString("contactSupport") + "</p>");
-							}
-
-						} else {
-							//this is an update query
-							int rowsUpdated = pq.getUpdateCount(); // will be -1 if query has multiple statements
-							request.setAttribute("rowsUpdated", "" + rowsUpdated);
-							ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
-						}
-					}
-
-					// Print the "working" time elapsed
-					// The "working"  time elapsed is the time elapsed
-					// from the when the query is created  (doPost()) to now (endTime).
-					// The time elapsed from a user perspective can be bigger because the servlet output
-					// is "cached and transmitted" over the network by the servlet engine.
-
-					long endTime = new java.util.Date().getTime();
-
-					long totalTime = (endTime - startTime) / (1000);
-					long fetchTime = (endQueryTime - startQueryTime) / (1000);
-					double preciseTotalTime = (endTime - startTime) / (double) 1000;
-					NumberFormat nf = NumberFormat.getInstance(request.getLocale());
-					DecimalFormat df = (DecimalFormat) nf;
-					df.applyPattern("#,##0.0##");
-
-					if (showHeaderAndFooter) {
-						request.setAttribute("timeElapsed", df.format(preciseTotalTime) + " " + messages.getString("seconds"));
-						if (numberOfRows == -1) {
-							request.setAttribute("numberOfRows", "Unknown");
-						} else {
-							df.applyPattern("#,##0");
-							request.setAttribute("numberOfRows", df.format(numberOfRows));
-						}
-						ctx.getRequestDispatcher("/user/queryFooter.jsp").include(request, response);
-					}
-
-					ArtHelper.log(username, "query", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
-					probe = 200;
-
-					if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
-						//graph. set output format and forward to the rendering page
-						if (StringUtils.equalsIgnoreCase(viewMode, "graph")) {
-							//only display graph on the browser
-							request.setAttribute("outputToFile", "nofile");
-						} else if (StringUtils.equalsIgnoreCase(viewMode, "pdfgraph")) {
-							//additionally generate graph in a pdf file
-							request.setAttribute("outputToFile", "pdf");
-						} else if (StringUtils.equalsIgnoreCase(viewMode, "pnggraph")) {
-							//additionally generate graph as a png file
-							request.setAttribute("outputToFile", "png");
-						}
-
-						ctx.getRequestDispatcher("/user/showGraph.jsp").forward(request, response);
-					}
-
-				} catch (Exception e) { // we can't dispatch this error to a new page since we need to know if this servlet has already flushed something                    
-					str = "Error while running query ID " + queryId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
-					logger.error("Error: {}", str, e);
-
-					request.setAttribute("errorMessage", messages.getString("anException") + "<hr>" + messages.getString("step") + ":" + probe + "<br><code>" + e + "</code>");
-					if (showHeaderAndFooter) { // we already flushed something: let's include the page
-						request.setAttribute("headerOff", "true");
-						ctx.getRequestDispatcher("/user/error.jsp").include(request, response);
-					} else { // let's forward to the error page
-						ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-					}
-					// do not put a return here otherwise we risk the open connection to be maintained out of the pool
-
-				} finally {
-					// Decrement the currentNumberOfRunningQueries
-					// close statements and return the connection to the pool
-					try {
-						if (rs != null) {
-							rs.close();
-						}
-						if (pq != null) {
-							pq.close();
-						}
-						currentNumberOfRunningQueries--;
-					} catch (SQLException e) {
-						currentNumberOfRunningQueries--;
-						logger.error("Error while closing connections", e);
-					}
-				}
-
-			} else { //  maxNumberOfRunningQueries reached
-				logger.warn("Query not executed. Max running queries reached. User={}, queryId={}", username, queryId);
-
-				request.setAttribute("errorMessage", messages.getString("maxRunnningQueriesReached"));
-				ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-			} // END maxNumberOfRunningQueries IF
-
-		}
+//		request.setCharacterEncoding("UTF-8"); // THIS MUST BE THE FIRST LINE
+//		// make sure your server knows input is codified in UTF-8
+//		// note: on Tomcat you need to set the URIEncoding="UTF-8" on tomcat connector in server.xml
+//
+//
+//		// check if the html code should be rendered as an html fragmnet (without <html> and </html> tags)
+//		boolean isFragment;
+//		if (request.getParameter("_isFragment") != null) {
+//			isFragment = true;
+//		} else {
+//			isFragment = false;
+//		}
+//
+//		// make sure the browser does not cache the result using Ajax (this happens in IE)
+//		if (isFragment) {
+//			response.setHeader("Cache-control", "no-cache");
+//		}
+//
+//		// check if output is being displayed within the showparams page
+//		boolean isInline = false;
+//		if (request.getParameter("_isInline") != null) {
+//			isInline = true;
+//		}
+//
+//		PrintWriter out = null; // this will be initialized according to the content type of the view mode
+//		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
+//
+//		ServletContext ctx = getServletConfig().getServletContext();
+//		String baseExportPath = ArtConfig.getExportPath();
+//		HttpSession session = request.getSession();
+//		String username = (String) session.getAttribute("username");
+//
+//		//generate output
+//		if (username == null) {
+//			//invalid session
+//			request.setAttribute("errorMessage", messages.getString("invalidSession"));
+//			ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
+//		} else {
+//			// the session is valid if the username is not null
+//
+//			/*
+//			 * isFlushEnabled states if this servlet can produce html output.
+//			 * This is used to avoid to print on the page if the page control
+//			 * has to be redirected to another page (this is the case of graphs
+//			 * and output modes that do not generate html)
+//			 */
+//			boolean showHeaderAndFooter = true; // default generic HTML output
+//			ReportOutputInterface o = null;
+//			String str; //for error logging strings
+//
+//			//get query details. don't declare query variables at class level. causes issues with dashboards            
+//			int queryId = 0;
+//			int queryType;
+//			String queryName;
+//			String xAxisLabel;
+//			String yAxisLabel;
+//			String graphOptions;
+//			String shortDescription;
+//
+//			//support queryId as well as existing QUERY_ID
+//			String queryIdString = request.getParameter("queryId");
+//			String queryIdString2 = request.getParameter("QUERY_ID");
+//			if (queryIdString != null) {
+//				queryId = Integer.parseInt(queryIdString);
+//			} else if (queryIdString2 != null) {
+//				queryId = Integer.parseInt(queryIdString2);
+//			}
+//
+//			try {
+//				Connection conn = ArtConfig.getConnection();
+//				ArtQuery aq = new ArtQuery();
+//				aq.create(conn, queryId);
+//
+//				queryName = aq.getName();
+//				queryType = aq.getQueryType();
+//				xAxisLabel = aq.getXaxisLabel();
+//				yAxisLabel = aq.getYaxisLabel();
+//				graphOptions = aq.getGraphOptions();
+//				shortDescription = aq.getShortDescription();
+//
+//				conn.close();
+//			} catch (Exception e) {
+//				logger.error("Error while getting query details", e);
+//				request.setAttribute("errorMessage", "Error while getting query details: " + e);
+//				ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
+//				return;
+//			}
+//
+//			request.setAttribute("queryName", queryName);
+//
+//			String viewMode = request.getParameter("viewMode");
+//			if (viewMode == null || StringUtils.equalsIgnoreCase(viewMode, "default")) {
+//				if (queryType < 0) {
+//					//graph
+//					viewMode = "graph";
+//				} else if (queryType > 0 && queryType < 100) {
+//					//group
+//					viewMode = "htmlreport";
+//				} else if (queryType == 115 || queryType == 116) {
+//					//jasper report
+//					viewMode = "pdf";
+//				} else {
+//					viewMode = "html";
+//				}
+//			}
+//
+//			//ensure html only queries only output as html
+//			if (queryType == 102 || queryType == 103) {
+//				//crosstab html only or normal query html only
+//				viewMode = "html";
+//			}
+//
+//			/*
+//			 * Find if output allows this servlet to print the header&footer
+//			 * (flush active or not)
+//			 */
+//			if (StringUtils.equalsIgnoreCase(viewMode, "SCHEDULE")) {
+//				// forward to the editJob page
+//				ctx.getRequestDispatcher("/user/editJob.jsp").forward(request, response);
+//				return; // a return is needed otherwise the flow would proceed!
+//			} else if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
+//				showHeaderAndFooter = false; // graphs are created in memory and displayed by showGraph.jsp page
+//			} else if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
+//				response.setContentType("text/html; charset=UTF-8");
+//				out = response.getWriter();
+//			} else if (queryType == 115 || queryType == 116 || queryType == 117 || queryType == 118) {
+//				//jasper report or jxls spreadsheet
+//				response.setContentType("text/html; charset=UTF-8");
+//				out = response.getWriter();
+//			} else if (queryType == 100) {
+//				//update query
+//				response.setContentType("text/html; charset=UTF-8");
+//				out = response.getWriter();
+//			} else if (queryType == 110) {
+//				// forward to the showDashboard page
+//				ctx.getRequestDispatcher("/user/showDashboard.jsp").forward(request, response);
+//				return; // a return is needed otherwise the flow would proceed!
+//			} else if (queryType == 111) {
+//				// forward to the showText page
+//				ctx.getRequestDispatcher("/user/showText.jsp").forward(request, response);
+//				return; // a return is needed otherwise the flow would proceed!
+//			} else if (queryType == 112 || queryType == 113 || queryType == 114) {
+//				// forward to the showAnalysis page
+//				ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
+//				return; // a return is needed otherwise the flow would proceed!
+//			} else {
+//				// This is not a request to schedule, produce a graph or an "htmlReport" or an update query
+//				// => Load the appropriate ReportOutputInterface for the view mode
+//
+//				try {
+//					@SuppressWarnings("rawtypes")
+//					java.lang.Class classx = viewModes.get(viewMode);
+//					o = (ReportOutputInterface) classx.newInstance();
+//
+//					// Set the content type according to the object
+//					String contentType = o.getContentType();
+//					response.setContentType(contentType);
+//					// initialize the output stream - this is here
+//					// this need to appear after response.setContent!!!
+//					out = response.getWriter();
+//
+//					// the view mode drives if this servlet uses the std header&footer,
+//					// if false the view mode needs to take care of all the output
+//					showHeaderAndFooter = o.isShowQueryHeaderAndFooter();
+//
+//					if (isFragment) {
+//						showHeaderAndFooter = false; // disable in any case header&footer if isFragment is true
+//					}
+//
+//				} catch (Exception e) {
+//					logger.error("Error while instantiating class: {}", viewMode, e);
+//					request.setAttribute("errorMessage", "Error while initializing " + viewMode + " view mode:" + e);
+//					ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
+//					return;
+//				}
+//			}
+//
+//			if (showHeaderAndFooter) {
+//				ctx.getRequestDispatcher("/user/queryHeader.jsp").include(request, response);
+//				out.flush();
+//			}
+//
+//
+//			//run query            
+//			if (currentNumberOfRunningQueries <= ArtConfig.getSettings().getMaxRunningReports()) {
+//				int probe = 0; // used for debugging
+//				int numberOfRows = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
+//
+//				ResultSet rs = null;
+//				ReportRunner pq = null;
+//
+//				try {
+//					ResultSetMetaData rsmd;
+//					long startQueryTime;
+//					long endQueryTime;
+//					long startTime = new java.util.Date().getTime(); //overall start time                    
+//					String startTimeString = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.MEDIUM, request.getLocale()).format(new java.util.Date(startTime)); //for display in query output header
+//
+//					/*
+//					 * Increment the currentNumberOfRunningQueries Note if an
+//					 * exception kills the current thread the value may be not
+//					 * decremented correctly This value is shown in the the
+//					 * "Show Connection Status" link from the Datasource page
+//					 * (ART Admin part)
+//					 */
+//					currentNumberOfRunningQueries++;
+//
+//					/*
+//					 * ***********************************
+//					 * BEGIN: Create the ReportRunner object and feed it (this
+//					 * obj is a "wrapper" around the SQL string with some
+//					 * methods to act on it to apply rules, multi params etc)
+//					 */
+//
+//					probe = 10;
+//					boolean adminSession = false;
+//					// check if the servlet has been called from the admin session
+//					if (session.getAttribute("AdminSession") != null) {
+//						adminSession = true;
+//					}
+//
+//					pq = new ReportRunner();
+//					pq.setUsername(username);
+//					pq.setReportId(queryId);
+//					pq.setAdminSession(adminSession);
+//
+//
+//					/**
+//					 * ***************************************************************************
+//					 *
+//					 * ON QUERY PARAMETERS
+//					 *
+//					 * INLINE parameters has the format P_<param_name> and the
+//					 * #param_name# values are substituted in the SQL query
+//					 * before executing it.
+//					 *
+//					 * A MULTI parameter name begins with the sting 'M_'
+//					 * followed by the column name The following string is
+//					 * created AND MULTIPLE_FIELD_NAME in ('value1', 'value2',
+//					 * ..., 'valueN') and inserted on the prepared statement
+//					 * (handling the case where we have a GROUP BY expression)
+//					 *
+//					 * BIND parameters are deprecated, us INILINE instead BIND
+//					 * parameter name begins with the string 'Py' where y is the
+//					 * ? index on the prepared statement. For example P3=HELLO
+//					 * means the third ? on the prepared statement will be
+//					 * substituted with the HELLO string (the same for VARCHAR,
+//					 * INTEGER, NUMBER ...) For dates, there are 3 params to
+//					 * store each date parameter: day, month and year Py_days or
+//					 * Py_month or Py_year (for Dec 12, 2008 => P3_days = 12,
+//					 * P3_month = 3, P3_year=2008)
+//					 *
+//					 * The first step is to build the parameter lists
+//					 * ***************************************************************************
+//					 */
+//					probe = 40;
+//
+//					/*
+//					 * *************************************
+//					 * BEGIN: Build parameters hash tables
+//					 */
+//
+//					Map<String, String[]> multiParams = new HashMap<String, String[]>();
+//					Map<String, String> inlineParams = new HashMap<String, String>();
+//
+//					ArtQuery aq = new ArtQuery();
+//					Map<String, ArtQueryParam> htmlParams = aq.getHtmlParams(queryId);
+//
+//					//set default parameter values. so that they don't have to be specified on the url
+//					if (!htmlParams.isEmpty()) {
+//						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
+//							ArtQueryParam param = entry.getValue();
+//							if (StringUtils.equals(param.getParamType(), "I")) {
+//								inlineParams.put(param.getParamLabel(), (String) param.getParamValue());
+//							}
+//
+//						}
+//					}
+//
+//					/*
+//					 * ParameterProcessor has a static function to parse the
+//					 * request and fill the hashmaps that store the parameters
+//					 */
+//					Map<Integer, ArtQueryParam> displayParams = ParameterProcessor.processParameters(request, inlineParams, multiParams, queryId, htmlParams);
+//
+//					//set showparams flag. flag not only determined by presense of _showParams. may also be true if query set to always show params
+//					boolean showParams = false;
+//					if (!displayParams.isEmpty()) {
+//						showParams = true;
+//					}
+//
+//					// Set the hash tables in the pq object
+//					pq.setMultiParams(multiParams);
+//					pq.setInlineParams(inlineParams);
+//
+//					pq.setHtmlParams(htmlParams);
+//
+//					/*
+//					 * END ***********************************
+//					 */
+//
+//					probe = 50;
+//
+//					int resultSetType;
+//					if (queryType == 116 || queryType == 118) {
+//						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset in order to determine record count
+//					} else if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
+//						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+//					} else if (queryType < 0) {
+//						resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
+//					} else {
+//						resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+//					}
+//
+//					// JavaScript code to write status
+//					if (showHeaderAndFooter) {
+//						out.println("<script type=\"text/javascript\">writeStatus(\"" + messages.getString("queryExecuting") + "\");</script>");
+//						out.flush();
+//					}
+//
+//
+//					startQueryTime = new java.util.Date().getTime();
+//
+//					/*
+//					 * *************
+//					 ***************
+//					 *****RUN IT**** ************** *************
+//					 */
+//
+//					pq.execute(resultSetType);
+//
+//					probe = 75;
+//
+//					/*
+//					 * *************
+//					 ***************
+//					 ***************
+//					 **************
+//					 */
+//
+//					endQueryTime = new java.util.Date().getTime();
+//
+//
+//					//get final sql with parameter placeholders replaced with parameter values
+//					String finalSQL = pq.getFinalSQL();
+//
+//					//determine if final sql should be shown. only admins can see sql
+//					boolean showSQL = false;
+//					int accessLevel = 0;
+//					UserEntity ue = (UserEntity) session.getAttribute("ue");
+//					if (ue != null) {
+//						accessLevel = ue.getAccessLevel();
+//					}
+//					if (request.getParameter("_showSQL") != null && accessLevel > 5) {
+//						showSQL = true;
+//					}
+//
+//					//set output object properties if required
+//					if (o != null) {
+//						try {
+//							probe = 77;
+//
+//							o.setMaxRows(ArtConfig.getMaxRows(viewMode));
+//							o.setWriter(out);
+//							o.setQueryName(queryName);
+//							o.setFileUserName(username);
+//							o.setExportPath(baseExportPath);
+//
+//							//don't set displayparams for html view modes. parameters will be displayed by this servlet
+//							if (!StringUtils.containsIgnoreCase(viewMode, "html")) {
+//								o.setDisplayParameters(displayParams);
+//							}
+//
+//							//ensure htmlplain output doesn't display parameters if inline
+//							if (o instanceof htmlPlainOutput) {
+//								htmlPlainOutput hpo = (htmlPlainOutput) o;
+//								hpo.setDisplayInline(isInline);
+//
+//								//ensure parameters are displayed if not in inline mode
+//								hpo.setDisplayParameters(displayParams);
+//							}
+//
+//							//enable localization for datatable output
+//							if (o instanceof htmlDataTableOutput) {
+//								htmlDataTableOutput dt = (htmlDataTableOutput) o;
+//								dt.setLocale(request.getLocale());
+//							}
+//
+//						} catch (Exception e) {
+//							logger.error("Error setting properties for class: {}", viewMode, e);
+//							request.setAttribute("errorMessage", "Error while initializing " + viewMode + " view mode:" + e);
+//							ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
+//							return;
+//						}
+//					}
+//
+//					// display status information, parameters and final sql
+//					if (showHeaderAndFooter) {
+//						out.println("<script type=\"text/javascript\">writeStatus(\"" + messages.getString("queryFetching") + "\");</script>");
+//						String description = "";
+//						shortDescription = StringUtils.trim(shortDescription);
+//						if (StringUtils.length(shortDescription) > 0) {
+//							description = " :: " + shortDescription;
+//						}
+//						out.println("<script type=\"text/javascript\">writeInfo(\"<b>" + queryName + "</b>" + description + " :: " + startTimeString + "\");</script>");
+//
+//						//display parameters
+//						if (showParams) {
+//							ReportOutputHandler.displayParameters(out, displayParams, messages);
+//						}
+//
+//						//display final sql
+//						if (showSQL) {
+//							ReportOutputHandler.displayFinalSQL(out, finalSQL);
+//						}
+//
+//						out.flush();
+//					}
+//					probe = 90;
+//
+//					//handle jasper report output
+//					if (queryType == 115 || queryType == 116) {
+//						probe = 91;
+//						JasperReportsOutput jasper = new JasperReportsOutput();
+//						jasper.setQueryName(queryName);
+//						jasper.setFileUserName(username);
+//						jasper.setExportPath(baseExportPath);
+//						jasper.setReportFormat(viewMode);
+//						jasper.setWriter(out);
+//						if (queryType == 115) {
+//							//report will use query in the report template
+//							jasper.createFile(null, queryId, inlineParams, multiParams, htmlParams);
+//						} else {
+//							//report will use data from art query
+//							rs = pq.getResultSet();
+//							jasper.createFile(rs, queryId, inlineParams, multiParams, htmlParams);
+//							numberOfRows = getNumberOfRows(rs);
+//						}
+//					} else if (queryType == 117 || queryType == 118) {
+//						//jxls spreadsheet
+//						probe = 92;
+//						jxlsOutput jxls = new jxlsOutput();
+//						jxls.setQueryName(queryName);
+//						jxls.setFileUserName(username);
+//						jxls.setExportPath(baseExportPath);
+//						jxls.setWriter(out);
+//						if (queryType == 117) {
+//							//report will use query in the jxls template
+//							jxls.createFile(null, queryId, inlineParams, multiParams, htmlParams);
+//						} else {
+//							//report will use data from art query
+//							rs = pq.getResultSet();
+//							jxls.createFile(rs, queryId, inlineParams, multiParams, htmlParams);
+//							numberOfRows = getNumberOfRows(rs);
+//						}
+//					} else {
+//						//get query results
+//						rs = pq.getResultSet();
+//
+//						if (rs != null) {
+//							// it is a "select" query or a procedure ending with a select statement
+//							probe = 93;
+//							rsmd = rs.getMetaData();
+//
+//							try {
+//								if (StringUtils.equalsIgnoreCase(viewMode, "htmlreport")) {
+//									/*
+//									 * HTML REPORT
+//									 */
+//									int splitCol;
+//									if (request.getParameter("SPLITCOL") == null) {
+//										splitCol = queryType;
+//									} else {
+//										splitCol = Integer.parseInt(request.getParameter("SPLITCOL"));
+//									}
+//									numberOfRows = htmlReportOut(out, rs, rsmd, splitCol);
+//									probe = 100;
+//								} else if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
+//									/*
+//									 * GRAPH
+//									 */
+//									probe = 105;
+//
+//									//do initial preparation of graph object
+//									ArtGraph ag = artGraphOut(rsmd, request, graphOptions, shortDescription, queryType);
+//
+//									//set some graph properties
+//									ag.setXAxisLabel(xAxisLabel);
+//									if (yAxisLabel == null) {
+//										yAxisLabel = rsmd.getColumnLabel(1);
+//									}
+//									ag.setYAxisLabel(yAxisLabel);
+//
+//									if (showParams) {
+//										request.setAttribute("showParams", "true");
+//										ag.setDisplayParameters(displayParams);
+//									}
+//
+//									//add drill down queries
+//									Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(queryId);
+//
+//									//build graph dataset
+//									ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
+//
+//									//set other properties relevant for the graph display
+//									if (showSQL) {
+//										request.setAttribute("showSQL", "true");
+//										request.setAttribute("finalSQL", finalSQL);
+//									}
+//
+//									//enable file names to contain query name
+//									//set base file name
+//									java.util.Date today = new java.util.Date();
+//									SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
+//									String filename = username + "-" + queryName + "-" + dateFormatter.format(today) + ArtUtils.getRandomFileNameString();
+//									filename = ArtUtils.cleanFileName(filename);
+//									request.setAttribute("baseFileName", filename);
+//
+//									//allow direct url not to need _query_id
+//									request.setAttribute("queryType", Integer.valueOf(queryType));
+//
+//									//allow use of both QUERY_ID and queryId in direct url
+//									request.setAttribute("queryId", Integer.valueOf(queryId));
+//
+//									//pass graph object
+//									request.setAttribute("artGraph", ag);
+//
+//									probe = 110;
+//								} else {
+//									if (queryType == 101 || queryType == 102) {
+//										/*
+//										 * CROSSTAB
+//										 */
+//										numberOfRows = ReportOutputHandler.flushXOutput(messages, o, rs, rsmd);
+//									} else {
+//										/*
+//										 * NORMAL TABULAR OUTPUT
+//										 */
+//
+//										//add support for drill down queries
+//										Map<Integer, DrilldownQuery> drilldownQueries = null;
+//										if (StringUtils.containsIgnoreCase(viewMode, "html")) {
+//											//only drill down for html output. drill down query launched from hyperlink                                            
+//											drilldownQueries = aq.getDrilldownQueries(queryId);
+//										}
+//										numberOfRows = ReportOutputHandler.flushOutput(messages, o, rs, rsmd, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+//									}
+//									probe = 130;
+//								}
+//
+//							} catch (ArtException e) { // "known" exceptions
+//								throw new ArtException(e.getMessage());
+//							} catch (Exception e) {    // other "unknown" exceptions                                
+//								str = "Error while running query ID " + queryId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
+//								logger.error("Error: {}", str, e);
+//								throw new ArtException(messages.getString("queryFetchException") + " <br>" + messages.getString("step") + ": " + probe + "<br>" + messages.getString("details") + "<code> " + e + "</code><br>" + messages.getString("contactSupport") + "</p>");
+//							}
+//
+//						} else {
+//							//this is an update query
+//							int rowsUpdated = pq.getUpdateCount(); // will be -1 if query has multiple statements
+//							request.setAttribute("rowsUpdated", "" + rowsUpdated);
+//							ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
+//						}
+//					}
+//
+//					// Print the "working" time elapsed
+//					// The "working"  time elapsed is the time elapsed
+//					// from the when the query is created  (doPost()) to now (endTime).
+//					// The time elapsed from a user perspective can be bigger because the servlet output
+//					// is "cached and transmitted" over the network by the servlet engine.
+//
+//					long endTime = new java.util.Date().getTime();
+//
+//					long totalTime = (endTime - startTime) / (1000);
+//					long fetchTime = (endQueryTime - startQueryTime) / (1000);
+//					double preciseTotalTime = (endTime - startTime) / (double) 1000;
+//					NumberFormat nf = NumberFormat.getInstance(request.getLocale());
+//					DecimalFormat df = (DecimalFormat) nf;
+//					df.applyPattern("#,##0.0##");
+//
+//					if (showHeaderAndFooter) {
+//						request.setAttribute("timeElapsed", df.format(preciseTotalTime) + " " + messages.getString("seconds"));
+//						if (numberOfRows == -1) {
+//							request.setAttribute("numberOfRows", "Unknown");
+//						} else {
+//							df.applyPattern("#,##0");
+//							request.setAttribute("numberOfRows", df.format(numberOfRows));
+//						}
+//						ctx.getRequestDispatcher("/user/queryFooter.jsp").include(request, response);
+//					}
+//
+//					ArtHelper.log(username, "query", request.getRemoteAddr(), queryId, totalTime, fetchTime, "query, " + viewMode);
+//					probe = 200;
+//
+//					if (StringUtils.containsIgnoreCase(viewMode, "graph")) {
+//						//graph. set output format and forward to the rendering page
+//						if (StringUtils.equalsIgnoreCase(viewMode, "graph")) {
+//							//only display graph on the browser
+//							request.setAttribute("outputToFile", "nofile");
+//						} else if (StringUtils.equalsIgnoreCase(viewMode, "pdfgraph")) {
+//							//additionally generate graph in a pdf file
+//							request.setAttribute("outputToFile", "pdf");
+//						} else if (StringUtils.equalsIgnoreCase(viewMode, "pnggraph")) {
+//							//additionally generate graph as a png file
+//							request.setAttribute("outputToFile", "png");
+//						}
+//
+//						ctx.getRequestDispatcher("/user/showGraph.jsp").forward(request, response);
+//					}
+//
+//				} catch (Exception e) { // we can't dispatch this error to a new page since we need to know if this servlet has already flushed something                    
+//					str = "Error while running query ID " + queryId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
+//					logger.error("Error: {}", str, e);
+//
+//					request.setAttribute("errorMessage", messages.getString("anException") + "<hr>" + messages.getString("step") + ":" + probe + "<br><code>" + e + "</code>");
+//					if (showHeaderAndFooter) { // we already flushed something: let's include the page
+//						request.setAttribute("headerOff", "true");
+//						ctx.getRequestDispatcher("/user/error.jsp").include(request, response);
+//					} else { // let's forward to the error page
+//						ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
+//					}
+//					// do not put a return here otherwise we risk the open connection to be maintained out of the pool
+//
+//				} finally {
+//					// Decrement the currentNumberOfRunningQueries
+//					// close statements and return the connection to the pool
+//					try {
+//						if (rs != null) {
+//							rs.close();
+//						}
+//						if (pq != null) {
+//							pq.close();
+//						}
+//						currentNumberOfRunningQueries--;
+//					} catch (SQLException e) {
+//						currentNumberOfRunningQueries--;
+//						logger.error("Error while closing connections", e);
+//					}
+//				}
+//
+//			} else { //  maxNumberOfRunningQueries reached
+//				logger.warn("Query not executed. Max running queries reached. User={}, queryId={}", username, queryId);
+//
+//				request.setAttribute("errorMessage", messages.getString("maxRunnningQueriesReached"));
+//				ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
+//			} // END maxNumberOfRunningQueries IF
+//
+//		}
 
 	} // end doPost
 
