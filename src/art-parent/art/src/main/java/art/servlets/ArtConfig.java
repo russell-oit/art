@@ -96,7 +96,6 @@ public class ArtConfig extends HttpServlet {
 	private static String exportPath;
 	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static final ArrayList<String> reportFormats = new ArrayList<>(); //report formats available to users
-	private static final ArrayList<String> allReportFormats = new ArrayList<>(); //all report formats
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
@@ -111,7 +110,7 @@ public class ArtConfig extends HttpServlet {
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
 	private static String artVersion;
-	private static HashMap<String, Class> reportFormatClasses;
+	private static HashMap<String, Class<?>> directOutputReportClasses;
 
 	/**
 	 * {@inheritDoc}
@@ -229,31 +228,32 @@ public class ArtConfig extends HttpServlet {
 		//ensure work directories exist
 		createWorkDirectories();
 
-		//populate all report formats list. only those which have an output class
-		allReportFormats.add("htmlDataTable");
-		allReportFormats.add("htmlGrid");
-		allReportFormats.add("xls");
-		allReportFormats.add("xlsx");
-		allReportFormats.add("pdf");
-		allReportFormats.add("htmlPlain");
-		allReportFormats.add("html");
-		allReportFormats.add("xlsZip");
-		allReportFormats.add("slk");
-		allReportFormats.add("slkZip");
-		allReportFormats.add("tsv");
-		allReportFormats.add("tsvZip");
-		allReportFormats.add("tsvGz");
-		allReportFormats.add("xml");
-		allReportFormats.add("rss20");
+		//list report output classes that do direct output (they create output themselves and don't delegate to another entity e.g. jasperreports)
+		ArrayList<String> directOutputReportClassNames = new ArrayList<>();
+		directOutputReportClassNames.add("htmlDataTable");
+		directOutputReportClassNames.add("htmlGrid");
+		directOutputReportClassNames.add("xls");
+		directOutputReportClassNames.add("xlsx");
+		directOutputReportClassNames.add("pdf");
+		directOutputReportClassNames.add("htmlPlain");
+		directOutputReportClassNames.add("html");
+		directOutputReportClassNames.add("xlsZip");
+		directOutputReportClassNames.add("slk");
+		directOutputReportClassNames.add("slkZip");
+		directOutputReportClassNames.add("tsv");
+		directOutputReportClassNames.add("tsvZip");
+		directOutputReportClassNames.add("tsvGz");
+		directOutputReportClassNames.add("xml");
+		directOutputReportClassNames.add("rss20");
 
 		//load classes for all report formats
-		reportFormatClasses = new HashMap<>(allReportFormats.size());
+		directOutputReportClasses = new HashMap<>(directOutputReportClassNames.size());
 		ClassLoader cl = this.getClass().getClassLoader();
-		for (String reportFormat : allReportFormats) {
+		for (String reportOutputClass : directOutputReportClassNames) {
 			try {
-				reportFormatClasses.put(reportFormat, cl.loadClass("art.output." + reportFormat + "Output"));
+				directOutputReportClasses.put(reportOutputClass, cl.loadClass("art.output." + reportOutputClass + "Output"));
 			} catch (ClassNotFoundException ex) {
-				logger.error("Error while loading report format: {}", reportFormat, ex);
+				logger.error("Error while loading report output class: {}", reportOutputClass, ex);
 			}
 		}
 
@@ -264,8 +264,8 @@ public class ArtConfig extends HttpServlet {
 		initializeDatasources();
 	}
 	
-	public static Map<String,Class> getReportFormatClasses(){
-		return reportFormatClasses;
+	public static Map<String,Class<?>> getDirectOutputReportClasses(){
+		return directOutputReportClasses;
 	}
 
 	/**
@@ -503,6 +503,15 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static String getHsqldbPath() {
 		return webinfPath + "hsqldb" + sep;
+	}
+	
+	/**
+	 * Get full path to the classes directory.
+	 *
+	 * @return full path to the classes directory
+	 */
+	public static String getClassesPath() {
+		return webinfPath + "classes" + sep;
 	}
 
 	/**
@@ -777,16 +786,6 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static List<String> getReportFormats() {
 		return reportFormats;
-	}
-
-	/**
-	 * Get all supported report formats. Only includes formats which have an
-	 * output class
-	 *
-	 * @return all supported report formats
-	 */
-	public static List<String> getAllReportFormats() {
-		return allReportFormats;
 	}
 
 	/**
@@ -1737,9 +1736,9 @@ public class ArtConfig extends HttpServlet {
 				ParameterType parameterType;
 				String paramType = (String) parameter.get("PARAM_TYPE");
 				if (StringUtils.equals(paramType, "M")) {
-					parameterType = ParameterType.Multi;
+					parameterType = ParameterType.MultiValue;
 				} else {
-					parameterType = ParameterType.Inline;
+					parameterType = ParameterType.SingleValue;
 				}
 
 				ParameterDataType dataType;

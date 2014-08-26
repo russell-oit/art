@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package art.enums;
 
 import java.util.ArrayList;
@@ -21,16 +22,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum to represent parameter types
- *
+ * Enum for report formats
+ * 
  * @author Timothy Anyona
  */
-public enum ParameterType {
-
-	SingleValue("Single-Value"), MultiValue("Multi-Value"), Filter("Filter");
+public enum ReportFormat {
+	Active("Active"), Disabled("Disabled"), Hidden("Hidden");
 	private String value;
 
-	private ParameterType(String value) {
+	private ReportFormat(String value) {
 		this.value = value;
 	}
 
@@ -48,21 +48,21 @@ public enum ParameterType {
 	 *
 	 * @return
 	 */
-	public static List<ParameterType> list() {
+	public static List<ReportFormat> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
-		List<ParameterType> items = new ArrayList<>();
+		List<ReportFormat> items = new ArrayList<>();
 		items.addAll(Arrays.asList(values()));
 		return items;
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, SingleValue is returned
+	 * Convert a value to an enum. If the conversion fails, Active is returned
 	 *
 	 * @param value
 	 * @return
 	 */
-	public static ParameterType toEnum(String value) {
-		return toEnum(value, SingleValue);
+	public static ReportFormat toEnum(String value) {
+		return toEnum(value, Active);
 	}
 
 	/**
@@ -73,8 +73,8 @@ public enum ParameterType {
 	 * @param defaultEnum
 	 * @return
 	 */
-	public static ParameterType toEnum(String value, ParameterType defaultEnum) {
-		for (ParameterType v : values()) {
+	public static ReportFormat toEnum(String value, ReportFormat defaultEnum) {
+		for (ReportFormat v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
@@ -91,4 +91,14 @@ public enum ParameterType {
 	public String getDescription() {
 		return value;
 	}
+
+	/**
+	 * Get description message string for use in the user interface.
+	 *
+	 * @return
+	 */
+	public String getLocalizedDescription() {
+		return "reportStatus.option." + value;
+	}
+
 }

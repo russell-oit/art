@@ -126,7 +126,7 @@ public class QuartzProperties {
 	public Properties getProperties() throws IOException {
 		logger.debug("Entering getProperties");
 		
-		Properties props = new Properties();
+		Properties properties = new Properties();
 
 		//quartz property names
 		final String INSTANCE_NAME = "org.quartz.scheduler.instanceName";
@@ -145,7 +145,7 @@ public class QuartzProperties {
 			File quartzFile = new File(propertiesFilePath);
 			if (quartzFile.exists()) {
 				try (FileInputStream o = new FileInputStream(propertiesFilePath)) {
-					props.load(o);
+					properties.load(o);
 				}
 			}
 		}
@@ -153,129 +153,131 @@ public class QuartzProperties {
 		//finalize properties object. 
 		//use values from the properties file if they exist and use defaults for those that don't exist
 		//instance name
-		if (props.getProperty(INSTANCE_NAME) == null) {
-			props.setProperty(INSTANCE_NAME, "ArtScheduler");
+		if (properties.getProperty(INSTANCE_NAME) == null) {
+			properties.setProperty(INSTANCE_NAME, "ArtScheduler");
 		}
 		//make scheduler thread daemon
-		if (props.getProperty(MAKE_SCHEDULER_DAEMON) == null) {
-			props.setProperty(MAKE_SCHEDULER_DAEMON, "true");
+		if (properties.getProperty(MAKE_SCHEDULER_DAEMON) == null) {
+			properties.setProperty(MAKE_SCHEDULER_DAEMON, "true");
 		}
 		//skip update
-		if (props.getProperty(SKIP_UPDATE) == null) {
-			props.setProperty(SKIP_UPDATE, "true");
+		if (properties.getProperty(SKIP_UPDATE) == null) {
+			properties.setProperty(SKIP_UPDATE, "true");
 		}
 		//threads
-		if (props.getProperty(THREAD_POOL_CLASS) == null) {
-			props.setProperty(THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
+		if (properties.getProperty(THREAD_POOL_CLASS) == null) {
+			properties.setProperty(THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
 		}
-		if (props.getProperty(THREAD_COUNT) == null) {
-			props.setProperty(THREAD_COUNT, "5");
+		if (properties.getProperty(THREAD_COUNT) == null) {
+			properties.setProperty(THREAD_COUNT, "5");
 		}
-		if (props.getProperty(MAKE_THREADS_DAEMONS) == null) {
-			props.setProperty(MAKE_THREADS_DAEMONS, "true");
+		if (properties.getProperty(MAKE_THREADS_DAEMONS) == null) {
+			properties.setProperty(MAKE_THREADS_DAEMONS, "true");
 		}
 		//job store class
-		if (props.getProperty(JOB_STORE_CLASS) == null) {
-			props.setProperty(JOB_STORE_CLASS, "org.quartz.impl.jdbcjobstore.JobStoreTX");
+		if (properties.getProperty(JOB_STORE_CLASS) == null) {
+			properties.setProperty(JOB_STORE_CLASS, "org.quartz.impl.jdbcjobstore.JobStoreTX");
 		}
 		//data source
-		if (props.getProperty(DATASOURCE_NAME) == null) {
-			props.setProperty(DATASOURCE_NAME, "ArtDs");
+		if (properties.getProperty(DATASOURCE_NAME) == null) {
+			properties.setProperty(DATASOURCE_NAME, "ArtDs");
 		}
-		String dataSource = props.getProperty(DATASOURCE_NAME);
-
-		final String DRIVER = "org.quartz.dataSource." + dataSource + ".driver";
-		final String URL = "org.quartz.dataSource." + dataSource + ".URL";
-		final String USER = "org.quartz.dataSource." + dataSource + ".user";
-		final String PASSWORD = "org.quartz.dataSource." + dataSource + ".password";
-		final String VALIDATION_QUERY = "org.quartz.dataSource." + dataSource + ".validationQuery";
-		final String JNDI_URL = "org.quartz.dataSource." + dataSource + ".jndiURL";
+		
+		//set datasource property names
+		String datasourceName = properties.getProperty(DATASOURCE_NAME);
+		
+		final String DRIVER = "org.quartz.dataSource." + datasourceName + ".driver";
+		final String URL = "org.quartz.dataSource." + datasourceName + ".URL";
+		final String USER = "org.quartz.dataSource." + datasourceName + ".user";
+		final String PASSWORD = "org.quartz.dataSource." + datasourceName + ".password";
+		final String VALIDATION_QUERY = "org.quartz.dataSource." + datasourceName + ".validationQuery";
+		final String JNDI_URL = "org.quartz.dataSource." + datasourceName + ".jndiURL";
 
 		if (StringUtils.isNotBlank(dataSourceDriver)) {
 			//jdbc datasource
-			if (props.getProperty(DRIVER) == null) {
-				props.setProperty(DRIVER, dataSourceDriver);
+			if (properties.getProperty(DRIVER) == null) {
+				properties.setProperty(DRIVER, dataSourceDriver);
 			}
-			if (props.getProperty(URL) == null) {
-				props.setProperty(URL, dataSourceUrl);
+			if (properties.getProperty(URL) == null) {
+				properties.setProperty(URL, dataSourceUrl);
 			}
-			if (props.getProperty(USER) == null) {
-				props.setProperty(USER, dataSourceUsername);
+			if (properties.getProperty(USER) == null) {
+				properties.setProperty(USER, dataSourceUsername);
 			}
-			if (props.getProperty(PASSWORD) == null) {
-				props.setProperty(PASSWORD, dataSourcePassword);
+			if (properties.getProperty(PASSWORD) == null) {
+				properties.setProperty(PASSWORD, dataSourcePassword);
 			}
 
 			//set properties that depend on the database type
 			if (StringUtils.startsWith(dataSourceUrl, "jdbc:oracle")) {
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.oracle.OracleDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1 from dual");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from dual");
 				}
 			} else if (StringUtils.startsWith(dataSourceUrl, "jdbc:db2") || StringUtils.startsWith(dataSourceUrl, "jdbc:as400")) {
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1 from sysibm.sysdummy1");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from sysibm.sysdummy1");
 				}
 			} else if (StringUtils.startsWith(dataSourceUrl, "jdbc:hsqldb")) {
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.HSQLDBDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS");
 				}
 			} else if (StringUtils.startsWith(dataSourceUrl, "jdbc:postgresql")) {
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
 				}
 			} else if (StringUtils.startsWith(dataSourceUrl, "jdbc:cubrid")) {
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.CUBRIDDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.CUBRIDDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
 				}
 			} else if (StringUtils.startsWith(dataSourceUrl, "jdbc:sqlserver") || StringUtils.startsWith(dataSourceUrl, "jdbc:jtds")) {
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.MSSQLDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.MSSQLDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
 				}
 			} else if (StringUtils.startsWith(dataSourceUrl, "jdbc:ids") || StringUtils.startsWith(dataSourceUrl, "jdbc:informix-sqli")) {
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1 from systables where tabid = 1");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1 from systables where tabid = 1");
 				}
 			} else {
 				//MySQL and any other databases that use the standard
 				//jdbc delegate and have "select 1" as a valid query
-				if (props.getProperty(DRIVER_DELEGATE) == null) {
-					props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+				if (properties.getProperty(DRIVER_DELEGATE) == null) {
+					properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
 				}
-				if (props.getProperty(VALIDATION_QUERY) == null) {
-					props.setProperty(VALIDATION_QUERY, "select 1");
+				if (properties.getProperty(VALIDATION_QUERY) == null) {
+					properties.setProperty(VALIDATION_QUERY, "select 1");
 				}
 			}
 		} else {
 			//jndi datasource
-			if (props.getProperty(DRIVER_DELEGATE) == null) {
-				props.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+			if (properties.getProperty(DRIVER_DELEGATE) == null) {
+				properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
 			}
-			if (props.getProperty(JNDI_URL) == null) {
-				props.setProperty(JNDI_URL, ArtUtils.getJndiDatasourceUrl(dataSourceUrl));
+			if (properties.getProperty(JNDI_URL) == null) {
+				properties.setProperty(JNDI_URL, ArtUtils.getJndiDatasourceUrl(dataSourceUrl));
 			}
 		}
 
-		return props;
+		return properties;
 	}
 }

@@ -251,9 +251,10 @@ public class AuthorizationFilter implements Filter {
 			//all can access
 			authorised = true;
 		} else if (StringUtils.equals(page, "password")) {
-			//everyone, plus user can change password, plus internal authentication
+			//everyone, if enabled to change password and is using internal authentication
 			String authenticationMethod = (String) session.getAttribute("authenticationMethod");
-			if (user.isCanChangePassword() && StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
+			if (user.isCanChangePassword()
+					&& StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "success")) {

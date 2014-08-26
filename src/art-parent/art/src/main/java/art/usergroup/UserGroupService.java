@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -242,7 +242,7 @@ public class UserGroupService {
 				group.getDescription(),
 				group.getDefaultReportGroup(),
 				group.getStartReport(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -257,7 +257,7 @@ public class UserGroupService {
 				group.getDescription(),
 				group.getDefaultReportGroup(),
 				group.getStartReport(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				group.getUserGroupId()
 			};

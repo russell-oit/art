@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -123,8 +123,8 @@ public class DatasourceService {
 	 * Delete a datasource
 	 *
 	 * @param id
-	 * @return ActionResult. if not successful, data contains a list
-	 * of linked reports which prevented the datasource from being deleted
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * reports which prevented the datasource from being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
@@ -229,7 +229,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeout(),
 				datasource.getTestSql(),
 				datasource.isActive(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -251,7 +251,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeout(),
 				datasource.getTestSql(),
 				datasource.isActive(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				datasource.getDatasourceId()
 			};
@@ -297,7 +297,7 @@ public class DatasourceService {
 		logger.debug("Entering getAdminDatasources: user={}", user);
 
 		if (user == null || user.getAccessLevel() == null) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());

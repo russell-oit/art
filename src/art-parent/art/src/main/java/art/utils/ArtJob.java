@@ -31,7 +31,7 @@ import art.graph.ExportGraph;
 import art.mail.Mailer;
 import art.output.ReportOutputHandler;
 import art.output.ReportOutputInterface;
-import art.output.jasperOutput;
+import art.output.JasperReportsOutput;
 import art.output.jxlsOutput;
 import art.servlets.ArtConfig;
 import java.io.*;
@@ -1519,11 +1519,11 @@ public class ArtJob implements Job, Serializable {
 						fileName = eg.getFileName();
 					} else if (queryType == 115 || queryType == 116) {
 						//jasper report
-						jasperOutput jasper = new jasperOutput();
+						JasperReportsOutput jasper = new JasperReportsOutput();
 						jasper.setQueryName(queryName);
 						jasper.setFileUserName(jobFileUsername);
 						jasper.setExportPath(jobsPath);
-						jasper.setOutputFormat(outputFormat);
+						jasper.setReportFormat(outputFormat);
 
 						if (queryType == 115) {
 							//report will use query in the report template

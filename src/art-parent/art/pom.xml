@@ -10,7 +10,7 @@
 
 	<artifactId>art</artifactId>
 	<packaging>war</packaging>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.0-SNAPSHOT</version>
 
 	<name>art</name>
 	<url>http://art.sourceforge.net</url>
@@ -36,7 +36,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>2.3</version>
+					<version>2.4</version>
 					<configuration>
 						<webResources>
 							<!-- include java source files in generated art.war -->
@@ -71,10 +71,16 @@
 						<failIfMissing>true</failIfMissing>
 					</configuration>
 				</plugin>
+				
 			</plugins>
 		</pluginManagement>
 
 		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			
 			<!-- uncomment and use maven-license-plugin as required e.g. mvn license:check, 
 			license:format, license:remove -->
 
@@ -157,13 +163,13 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>artdbcp</artifactId>
+			<groupId>net.sf.art</groupId>
+			<artifactId>art-dbcp</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>artmail</artifactId>
+			<groupId>net.sf.art</groupId>
+			<artifactId>art-mail</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
 		<!--		<dependency>
@@ -225,6 +231,11 @@
 					<artifactId>jsp-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.zafarkhaja</groupId>
@@ -347,7 +358,7 @@
 			<artifactId>commons-codec</artifactId>
 			<version>1.9</version>
 		</dependency>
-<!--		<dependency>
+		<!--		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.0</version>
@@ -545,7 +556,11 @@
 			<artifactId>encoder-jsp</artifactId>
 			<version>${owasp.encoder.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP-java6</artifactId>
+			<version>2.0.1</version>
+		</dependency>
 	</dependencies>
-
 
 </project>

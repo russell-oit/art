@@ -47,7 +47,7 @@ public class ArtUtils {
 	public static final int DEFAULT_CONNECTION_POOL_TIMEOUT = 20;
 
 	public static List<String> getFileDetailsFromResult(String result) {
-		List<String> details = new ArrayList<String>();
+		List<String> details = new ArrayList<>();
 		if (StringUtils.indexOf(result, "\n") > -1) {
 			String fileName = StringUtils.substringBefore(result, "\n");
 			fileName = StringUtils.replace(fileName, "\r", "");
@@ -98,13 +98,13 @@ public class ArtUtils {
 	public static String cleanFileName(String fileName) {
 		//or only allow english alphabets, numbers, dot and underscore
 		//String sane = filename.replaceAll("[^a-zA-Z0-9\\._]+", "_");
-		
-		String cleanName= fileName.replace('/', '_').replace('*', '_').replace('&', '_')
+
+		String cleanName = fileName.replace('/', '_').replace('*', '_').replace('&', '_')
 				.replace('?', '_').replace('!', '_').replace('\\', '_')
 				.replace('[', '_').replace(']', '_').replace(':', '_')
 				.replace('|', '_').replace('<', '_').replace('>', '_')
 				.replace('"', '_');
-		
+
 		//replace accents
 		return cleanName.replaceAll("[^\\p{ASCII}]", "_");
 	}
@@ -119,7 +119,7 @@ public class ArtUtils {
 	}
 
 	/**
-	 * Get random string that can be used as a unique record id 
+	 * Get random string that can be used as a unique record id
 	 *
 	 * @return unique id string
 	 */
@@ -128,16 +128,19 @@ public class ArtUtils {
 		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
 		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(10);
 	}
-	
+
 	/**
 	 * Get random string that can be used as a unique file name
 	 *
-	 * @return 
+	 * @param objectId report id or job id
+	 * @param extension file extension to use e.g. pdf, xls etc
+	 * @return
 	 */
-	public static String getUniqueFileName() {
+	public static String getUniqueFileName(int objectId, String extension) {
 		//can potentially use randomUUID but it may block if the server lacks sufficient entropy?
 		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
-		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(20);
+		return objectId + "-" + System.currentTimeMillis() + "-"
+				+ RandomStringUtils.randomAlphanumeric(20) + "." + extension;
 	}
 
 	/**

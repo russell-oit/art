@@ -522,11 +522,11 @@ public class ExecuteQuery extends HttpServlet {
 					//handle jasper report output
 					if (queryType == 115 || queryType == 116) {
 						probe = 91;
-						jasperOutput jasper = new jasperOutput();
+						JasperReportsOutput jasper = new JasperReportsOutput();
 						jasper.setQueryName(queryName);
 						jasper.setFileUserName(username);
 						jasper.setExportPath(baseExportPath);
-						jasper.setOutputFormat(viewMode);
+						jasper.setReportFormat(viewMode);
 						jasper.setWriter(out);
 						if (queryType == 115) {
 							//report will use query in the report template

@@ -1,0 +1,2 @@
+artmail 2.0.0
+* Use slf4j for logging

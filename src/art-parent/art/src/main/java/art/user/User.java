@@ -36,11 +36,29 @@ public class User implements Serializable {
 	private String createdBy;
 	private String updatedBy;
 
+	/**
+	 * Determine if this is an admin user
+	 * 
+	 * @return 
+	 */
 	public boolean isAdminUser() {
 		if (accessLevel == null || accessLevel.getValue() < AccessLevel.JuniorAdmin.getValue()) {
 			return false;
 		} else {
 			return true;
+		}
+	}
+	
+	/**
+	 * Determine if this is the public user
+	 * 
+	 * @return 
+	 */
+	public boolean isPublicUser(){
+		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -178,7 +196,12 @@ public class User implements Serializable {
 	 * @return the value of canChangePassword
 	 */
 	public boolean isCanChangePassword() {
-		return canChangePassword;
+		//public user can't change password
+		if (isPublicUser()) {
+			return false;
+		} else {
+			return canChangePassword;
+		}
 	}
 
 	/**
@@ -341,7 +364,7 @@ public class User implements Serializable {
 	 */
 	public AccessLevel getAccessLevel() {
 		//ensure public user always has normal user access level
-		if (StringUtils.equals(username, ArtUtils.PUBLIC_USER)) {
+		if (isPublicUser()) {
 			return AccessLevel.NormalUser;
 		} else {
 			return accessLevel;

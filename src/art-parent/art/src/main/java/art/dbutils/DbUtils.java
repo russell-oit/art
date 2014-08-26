@@ -16,11 +16,13 @@
  */
 package art.dbutils;
 
+import art.reportutils.JdbcValue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,7 +102,7 @@ public class DbUtils {
 	public static void close(Statement st, Connection conn) {
 		close(null, st, conn);
 	}
-	
+
 	/**
 	 * Close resultset and connection
 	 *
@@ -132,7 +134,17 @@ public class DbUtils {
 	 */
 	public static void setValues(PreparedStatement ps, Object... values) throws SQLException {
 		for (int i = 0; i < values.length; i++) {
-			ps.setObject(i + 1, values[i]);
+			if (values[i] instanceof JdbcValue) {
+				//use setobject overload that can properly handle null values because type information is included
+				//see http://docs.oracle.com/javase/7/docs/api/java/sql/PreparedStatement.html#setObject%28int,%20java.lang.Object%29
+				JdbcValue jdbcValue = (JdbcValue) values[i];
+				ps.setObject(i + 1, jdbcValue.getValue(), jdbcValue.getSqlType());
+			} else {
+				if (values[i] == null) {
+					logger.warn("non-typed null value passed. Driver may throw an exception");
+				}
+				ps.setObject(i + 1, values[i]);
+			}
 		}
 	}
 
@@ -169,7 +181,7 @@ public class DbUtils {
 	 *
 	 * @return
 	 */
-	public static java.sql.Timestamp getCurrentTimeStamp() {
+	public static java.sql.Timestamp getCurrentTimeAsSqlTimestamp() {
 		return new java.sql.Timestamp(System.currentTimeMillis());
 	}
 
@@ -182,12 +194,10 @@ public class DbUtils {
 	 * @param values
 	 * @return
 	 * @throws SQLException
+	 * @throws NullPointerException if conn is null
 	 */
 	public static ResultSet query(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
-		if (conn == null) {
-			logger.warn("Connection not available");
-			return null;
-		}
+		Objects.requireNonNull(conn, "Connection must not be null");
 
 		ps = conn.prepareStatement(sql);
 		setValues(ps, values);
@@ -204,17 +214,14 @@ public class DbUtils {
 	 * @param values
 	 * @return
 	 * @throws SQLException
+	 * @throws NullPointerException if conn is null
 	 */
 //	public static int update(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
-//		if (conn == null) {
-//			logger.warn("Connection not available");
-//			return 0;
-//		}
+//		Objects.requireNonNull(conn, "Connection must not be null");
 //
 //		ps = conn.prepareStatement(sql);
 //		setValues(ps, values);
 //
 //		return ps.executeUpdate();
 //	}
-
 }

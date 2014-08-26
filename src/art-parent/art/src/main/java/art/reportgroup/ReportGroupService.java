@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.reportgroup;
 
 import art.dbutils.DbService;
@@ -141,7 +157,7 @@ public class ReportGroupService {
 		logger.debug("Entering getAdminReportGroups: user={}", user);
 
 		if (user == null || user.getAccessLevel() == null) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		logger.debug("user.getAccessLevel()={}", user.getAccessLevel());
@@ -284,7 +300,7 @@ public class ReportGroupService {
 				group.getReportGroupId(),
 				group.getName(),
 				group.getDescription(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -297,7 +313,7 @@ public class ReportGroupService {
 			Object[] values = {
 				group.getName(),
 				group.getDescription(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				group.getReportGroupId()
 			};

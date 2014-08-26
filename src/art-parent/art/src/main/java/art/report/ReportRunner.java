@@ -24,6 +24,7 @@
 package art.report;
 
 import art.enums.ReportStatus;
+import art.reportparameter.ReportParameter;
 import art.servlets.ArtConfig;
 import art.utils.ArtException;
 import art.utils.ArtQuery;
@@ -66,7 +67,7 @@ public class ReportRunner {
 	Connection conn; // connection to the art repository
 	String preparedStatementSQL; //final sql statement. if query has inline parameters, sql will still have ?
 	private String finalSQL = ""; //final sql statement. if query has inline parameters, sql will have query values
-	Map<String, List<String>> jasperMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
+	Map<String, List<String>> jasperReportsMultiParams; //hash map will contain multi parameter name and values instead of parameter id e.g. M_2 and string array of values. for jasper reports
 	Map<String, Object> jasperInlineParams; //hash map will contain inline parameter label and value as corresponding object e.g. Double, Long. for jasper reports
 	Map<String, String> jxlsMultiParams; //hash map will contain multi parameter label and values instead of parameter id e.g. M_2 and string array of values. for jxls reports
 	int queryType; //to enable special handling of template queries where sql source is not executed
@@ -80,19 +81,34 @@ public class ReportRunner {
 	int updateCount; //update count of display resultset
 	private Report report;
 	private String[] filterValues; //value of filter used with chained parameters
+	private Map<String, ReportParameter> reportParams;
 
-
-	/**
-	 *
-	 */
 	public ReportRunner() {
 		sb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
 
 		jasperInlineParams = new HashMap<String, Object>(); //save parameters in special hash map for jasper reports
-		jasperMultiParams = new HashMap<String, List<String>>(); //to populate hash map with multi parameter names and values
+		jasperReportsMultiParams = new HashMap<String, List<String>>(); //to populate hash map with multi parameter names and values
 		jxlsMultiParams = new HashMap<String, String>(); //save parameters in special hash map for jxls reports        
 	}
-	
+
+	/**
+	 * Get the value of reportParams
+	 *
+	 * @return the value of reportParams
+	 */
+	public Map<String, ReportParameter> getReportParams() {
+		return reportParams;
+	}
+
+	/**
+	 * Set the value of reportParams
+	 *
+	 * @param reportParams new value of reportParams
+	 */
+	public void setReportParams(Map<String, ReportParameter> reportParams) {
+		this.reportParams = reportParams;
+	}
+
 	/**
 	 * Get the value of filterValues
 	 *
@@ -255,7 +271,6 @@ public class ReportRunner {
 		multiParams = h;
 	}
 
-
 	/**
 	 * Set the map that contains the general purpose parameters. <br>Art will
 	 * substiture the general param label with the value specified by the user
@@ -285,10 +300,9 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Returns the SQL query with: :TAG applied Dynamic SQL applied inline
-	 * parameters converted to bind multi parameters and rules applied.
+	 * Process the report source and apply tags, dynamic sql and parameters
 	 */
-	private String getQuerySQL() throws ArtException {
+	private String processReportSource() throws ArtException {
 
 		/*
 		 * Apply :Tags (:TAGS are substituted with their values)
@@ -487,7 +501,7 @@ public class ReportRunner {
 		try {
 			conn = ArtConfig.getConnection();
 
-			queryType = report.getReportType();
+			queryType = report.getReportTypeId();
 			displayResultset = report.getDisplayResultset();
 			useRules = report.isUsesFilters();
 
@@ -502,7 +516,7 @@ public class ReportRunner {
 			//Get the SQL String with rules, inline, multi params and tags already applied.
 			//don't process the source for jasper, jxls template, static lov queries
 			if (queryType != 115 && queryType != 117 && queryType != 120) {
-				preparedStatementSQL = getQuerySQL();
+				preparedStatementSQL = processReportSource();
 			}
 
 		} catch (Exception e) {
@@ -984,9 +998,9 @@ public class ReportRunner {
 
 	/**
 	 * Apply Rules v 0.5 - embedded in ReportRunner v 0.4 - Return null instead
- of raising an exception if the usernames has not been granted to the rule
- v 0.3 - Handle "LOOKUP" rule type, with a recursive approach v 0.2 -
- Handle "ALL_ITEMS" rule value v 0.1 -
+	 * of raising an exception if the usernames has not been granted to the rule
+	 * v 0.3 - Handle "LOOKUP" rule type, with a recursive approach v 0.2 -
+	 * Handle "ALL_ITEMS" rule value v 0.1 -
 	 */
 	private boolean applyRules(StringBuilder sb) throws SQLException {
 
@@ -1323,7 +1337,7 @@ public class ReportRunner {
 		// Change applied by Giacomo Ferrari on 2005-09-23
 		//  to perform the padding during inline prameter replacement.
 		//  in order to leave unchanged the original length of SQL string
-		final String blanks = "                                                       "; //any length as long as we don't have a parameter label of longer length
+		final String blanks = StringUtils.repeat(" ", 50); //any length as long as we don't have a parameter label of longer length
 
 		if (inlineParams == null) {
 			return;
@@ -1682,7 +1696,7 @@ public class ReportRunner {
 			}
 		}
 
-		return jasperMultiParams;
+		return jasperReportsMultiParams;
 	}
 
 	/**
@@ -1718,7 +1732,7 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Multi parameters as applied to the SQL
+	 * Apply multi-value parameters to the sql
 	 */
 	private void applyMultiParameters(StringBuilder sb) throws SQLException {
 
@@ -1822,10 +1836,10 @@ public class ReportRunner {
 						SqlAndParamIn.append(finalEscapedValues);
 						SqlAndParamIn.append(") ");
 
-						//populate jasper multi parameters hash map
-						jasperMultiParams.put(paramLabel, paramValuesList);
+						//populate jasper reports multi-value parameters hash map
+						jasperReportsMultiParams.put(paramLabel, paramValuesList);
 
-						//populate jxls multi parameters hash table
+						//populate jxls multi-value parameters hash table
 						jxlsMultiParams.put(paramLabel, finalEscapedValues);
 
 						/*
@@ -1880,7 +1894,7 @@ public class ReportRunner {
 		String paramLabel = param.getParamLabel();
 
 		//populate jasper multi parameters hash map
-		jasperMultiParams.put(paramLabel, paramValuesList);
+		jasperReportsMultiParams.put(paramLabel, paramValuesList);
 
 		//populate jxls multi parameters hash table
 		jxlsMultiParams.put(paramLabel, finalEscapedValues);
@@ -2180,7 +2194,7 @@ public class ReportRunner {
 					dateValue = getDefaultValueDate(paramValue);
 					if (ps != null) {
 						ps.setDate(i, new java.sql.Date(dateValue.getTime()));
-					}
+					} 
 					jasperInlineParams.put(paramName, dateValue);
 				} else if (paramDataType.equals("DATETIME")) {
 					dateValue = getDefaultValueDate(paramValue);
@@ -2287,13 +2301,16 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Process inline parameters and generate a hash map with parameter name and
-	 * values. To be used for jasper reports
+	 * Process report parameters and generate a hash map with parameter name and
+	 * values to be used with jasper reports.
 	 *
 	 * @param querySql
-	 * @return inline parameters to be used for jasper reports
+	 * @return parameters to be used with jasper reports
 	 */
-	public Map<String, Object> getJasperInlineParams(String querySql) {
+	public Map<String, Object> getJasperReportsParameters(Report report,
+			Map<String, ReportParameter> reportParams) {
+		
+		Map<String, Object> jasperReportsParams = new HashMap<>();
 
 		try {
 
@@ -2303,6 +2320,11 @@ public class ReportRunner {
 
 			applyInlineParameters(builder);
 			prepareInlineParameters(null);
+			jasperReportsParams.putAll(jasperInlineParams);
+
+			jasperReportsMultiParams = new HashMap<String, List<String>>(); //to populate hash map with multi parameter names and values
+			applyMultiParameters(builder);
+			jasperReportsParams.putAll(jasperReportsMultiParams);
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -2316,6 +2338,6 @@ public class ReportRunner {
 			}
 		}
 
-		return jasperInlineParams;
+		return jasperReportsParams;
 	}
 }

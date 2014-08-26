@@ -21,6 +21,7 @@ package art.reportparameter;
 import art.parameter.Parameter;
 import art.report.Report;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,8 +36,28 @@ public class ReportParameter implements Serializable {
 	private Report report;
 	private Parameter parameter;
 	private int position;
-	private String[] parameterValues; //used for run report logic
+	private String[] passedParameterValues; //used for run report logic
 	private Map<String, String> lovValues; //store value and label for lov parameters
+	private List<Object> actualParameterValues;
+
+	/**
+	 * Get the value of actualParameterValues
+	 *
+	 * @return the value of actualParameterValues
+	 */
+	public List<Object> getActualParameterValues() {
+		return actualParameterValues;
+	}
+
+	/**
+	 * Set the value of actualParameterValues
+	 *
+	 * @param actualParameterValues new value of actualParameterValues
+	 */
+	public void setActualParameterValues(List<Object> actualParameterValues) {
+		this.actualParameterValues = actualParameterValues;
+	}
+
 
 	/**
 	 * Get the value of lovValues
@@ -114,17 +135,17 @@ public class ReportParameter implements Serializable {
 	}
 
 	/**
-	 * @return the parameterValues
+	 * @return the passedParameterValues
 	 */
-	public String[] getParameterValues() {
-		return parameterValues;
+	public String[] getPassedParameterValues() {
+		return passedParameterValues;
 	}
 
 	/**
-	 * @param parameterValues the parameterValues to set
+	 * @param passedParameterValues the passedParameterValues to set
 	 */
-	public void setParameterValues(String[] parameterValues) {
-		this.parameterValues = parameterValues;
+	public void setPassedParameterValues(String[] passedParameterValues) {
+		this.passedParameterValues = passedParameterValues;
 	}
 
 	@Override

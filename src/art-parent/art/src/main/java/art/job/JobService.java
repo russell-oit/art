@@ -235,7 +235,7 @@ public class JobService {
 		Object[] values = {
 			newId,
 			job.getName(),
-			DbUtils.getCurrentTimeStamp()
+			DbUtils.getCurrentTimeAsSqlTimestamp()
 		};
 
 		dbService.update(sql, values);
@@ -259,7 +259,7 @@ public class JobService {
 
 		Object[] values = {
 			job.getName(),
-			DbUtils.getCurrentTimeStamp(),
+			DbUtils.getCurrentTimeAsSqlTimestamp(),
 			job.getJobId()
 		};
 

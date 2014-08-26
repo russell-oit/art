@@ -29,7 +29,7 @@ public enum ReportType {
 
 	//group reports (1-99) are too many to list
 	Tabular(0), TabularHtml(103),
-	Update(100), Crosstab(101), CrosstabHtml(102), 
+	Update(100), Crosstab(101), CrosstabHtml(102),
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), jXLSTemplate(117), jXLSArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121),
@@ -41,6 +41,58 @@ public enum ReportType {
 
 	private ReportType(int value) {
 		this.value = value;
+	}
+
+	/**
+	 * Determine if this is a jasper reports type
+	 *
+	 * @return
+	 */
+	public boolean isJasperReports() {
+		if (this == JasperReportsArt || this == JasperReportsTemplate) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Determine if this is a jxls report type
+	 *
+	 * @return
+	 */
+	public boolean isJxls() {
+		if (this == jXLSArt || this == jXLSTemplate) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Determine if this is a group report
+	 *
+	 * @return
+	 */
+	public boolean isGroupReport() {
+		if (value >= 1 && value <= 99) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Determine if this is a chart report
+	 *
+	 * @return
+	 */
+	public boolean isChart() {
+		if (value < 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**

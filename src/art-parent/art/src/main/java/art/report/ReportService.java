@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -105,7 +105,7 @@ public class ReportService {
 			report.setName(rs.getString("NAME"));
 			report.setShortDescription(rs.getString("SHORT_DESCRIPTION"));
 			report.setDescription(rs.getString("DESCRIPTION"));
-			report.setReportType(rs.getInt("QUERY_TYPE"));
+			report.setReportTypeId(rs.getInt("QUERY_TYPE"));
 
 			ReportGroup reportGroup = new ReportGroup();
 			reportGroup.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
@@ -173,7 +173,7 @@ public class ReportService {
 
 			if (usingShortDescription || index > -1) {
 				//set default for showlegend. false for heat maps. true for all other graphs
-				ReportType reportType = ReportType.toEnum(report.getReportType());
+				ReportType reportType = ReportType.toEnum(report.getReportTypeId());
 				if (reportType == ReportType.Heatmap) {
 					chartOptions.setShowLegend(false);
 				} else {
@@ -514,7 +514,7 @@ public class ReportService {
 				report.getName(),
 				report.getShortDescription(),
 				report.getDescription(),
-				report.getReportType(),
+				report.getReportTypeId(),
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
@@ -531,7 +531,7 @@ public class ReportService {
 				report.getXmlaCatalog(),
 				report.getXmlaUsername(),
 				report.getXmlaPassword(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -550,7 +550,7 @@ public class ReportService {
 				report.getName(),
 				report.getShortDescription(),
 				report.getDescription(),
-				report.getReportType(),
+				report.getReportTypeId(),
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
@@ -567,7 +567,7 @@ public class ReportService {
 				report.getXmlaCatalog(),
 				report.getXmlaUsername(),
 				report.getXmlaPassword(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
 			};
@@ -662,7 +662,7 @@ public class ReportService {
 			}
 			report.setReportSource(sb.toString());
 			//set html source for use with text reports
-			ReportType reportType = ReportType.toEnum(report.getReportType());
+			ReportType reportType = ReportType.toEnum(report.getReportTypeId());
 			if (reportType == ReportType.Text) {
 				report.setReportSourceHtml(report.getReportSource());
 			}
@@ -709,6 +709,8 @@ public class ReportService {
 	 * @param newKeyId
 	 * @return the number of records copied, 0 otherwise
 	 * @throws SQLException
+	 * @throws IllegalStateException if connection to the art database is not
+	 * available
 	 */
 	private int copyTableRow(String tableName, String keyColumnName,
 			int keyId, int newKeyId) throws SQLException {
@@ -718,8 +720,7 @@ public class ReportService {
 		Connection conn = ArtConfig.getConnection();
 
 		if (conn == null) {
-			logger.warn("Connection to the ART Database not available");
-			return 0;
+			throw new IllegalStateException("Connection to the ART Database not available");
 		}
 
 		PreparedStatement ps = null;
@@ -791,7 +792,7 @@ public class ReportService {
 				+ " AND AP.PARAMETER_TYPE = ? AND AP.DRILLDOWN_COLUMN_INDEX > 0)";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
-		return dbService.query(sql, h, ParameterType.Inline.getValue());
+		return dbService.query(sql, h, ParameterType.SingleValue.getValue());
 	}
 
 	/**

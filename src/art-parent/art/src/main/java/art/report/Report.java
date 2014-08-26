@@ -35,7 +35,7 @@ public class Report implements Serializable {
 	private String name;
 	private String shortDescription;
 	private String description;
-	private int reportType;
+	private int reportTypeId;
 	private ReportGroup reportGroup;
 	private Datasource datasource;
 	private String contactPerson;
@@ -67,7 +67,7 @@ public class Report implements Serializable {
 	 * @return
 	 */
 	public boolean isLov() {
-		ReportType reportTypeEnum = ReportType.toEnum(reportType);
+		ReportType reportTypeEnum = ReportType.toEnum(reportTypeId);
 
 		if (reportTypeEnum == ReportType.LovDynamic || reportTypeEnum == ReportType.LovDynamic) {
 			return true;
@@ -233,17 +233,17 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the reportType
+	 * @return the reportTypeId
 	 */
-	public int getReportType() {
-		return reportType;
+	public int getReportTypeId() {
+		return reportTypeId;
 	}
 
 	/**
-	 * @param reportType the reportType to set
+	 * @param reportTypeId the reportTypeId to set
 	 */
-	public void setReportType(int reportType) {
-		this.reportType = reportType;
+	public void setReportTypeId(int reportTypeId) {
+		this.reportTypeId = reportTypeId;
 	}
 
 	/**

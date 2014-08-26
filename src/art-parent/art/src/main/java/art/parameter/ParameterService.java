@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -51,7 +51,7 @@ public class ParameterService {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterService.class);
 
 	private final DbService dbService;
-	
+
 	@Autowired
 	public ParameterService(DbService dbService) {
 		this.dbService = dbService;
@@ -290,7 +290,7 @@ public class ParameterService {
 				parameter.getChainedValuePosition(),
 				parameter.getDrilldownColumnIndex(),
 				parameter.isUseDirectSubstitution(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -320,7 +320,7 @@ public class ParameterService {
 				parameter.getChainedValuePosition(),
 				parameter.getDrilldownColumnIndex(),
 				parameter.isUseDirectSubstitution(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()
 			};
@@ -355,18 +355,18 @@ public class ParameterService {
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>(1);
 		return dbService.query(sql, h, parameterId);
 	}
-	
+
 	/**
 	 * Get the parameter for a given report that is in a given position
-	 * 
+	 *
 	 * @param reportId
 	 * @param position
 	 * @return populated object if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
-	public Parameter getParameter(int reportId,int position) throws SQLException{
-		logger.debug("Entering getParameter: reportId={}, position={}", reportId,position);
+	public Parameter getParameter(int reportId, int position) throws SQLException {
+		logger.debug("Entering getParameter: reportId={}, position={}", reportId, position);
 
 		String sql = SQL_SELECT_ALL
 				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
@@ -374,7 +374,7 @@ public class ParameterService {
 				+ " WHERE ARP.REPORT_ID=? AND ARP.PARAMETER_POSITION=?";
 
 		ResultSetHandler<Parameter> h = new BeanHandler<>(Parameter.class, new ParameterMapper());
-		return dbService.query(sql, h, reportId,position);
+		return dbService.query(sql, h, reportId, position);
 	}
 
 }

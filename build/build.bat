@@ -13,7 +13,7 @@ rem create archive from hg repo
 hg archive --repository ..\hg -t files -- build-hg
 
 rem copy changelog
-copy /Y build-hg\src\changelog.txt art-nightly
+copy /Y build-hg\src\art-parent\art\changelog.txt art-nightly
 
 rem copy readme
 copy /Y build-hg\build\readme.txt art-nightly

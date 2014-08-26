@@ -11,7 +11,7 @@ T ool
  data exportable to spreadsheet & pdf.
  
  100% Java, works on Apache Tomcat and other Java EE engines
- (Minimum requirements: Servlet 2.5/JSP 2.1, Java 1.6)
+ (Minimum requirements: Servlet 3.0, Java 1.7)
  
  The name ART stands for A Reporting Tool.
 
@@ -29,7 +29,7 @@ T ool
      
   2. Deploy the art.war archive in a java application server, go
      to  http://server_name:port/art and follow on screen
-     instructions to connect to your ART Repository      
+     instructions to connect to your ART Database      
   
 * UPGRADE
 	See the Upgrading manual in the docs folder
@@ -40,10 +40,8 @@ T ool
   3. ART Web Application:
      Deploy the new art.war archive, log in and save ART
      settings as they were before.
-	 
-     As usual ART is backward compatible.         
-     Check the changelog file for changes that might impact
-     existing objects.
+	               
+     Check the changelog file for changes that might impact existing objects.     
     
 * COMPILE
 	See the Admin manual in the docs folder

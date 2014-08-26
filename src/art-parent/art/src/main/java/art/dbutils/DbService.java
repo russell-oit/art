@@ -19,6 +19,7 @@ package art.dbutils;
 import art.servlets.ArtConfig;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.slf4j.Logger;
@@ -37,19 +38,19 @@ public class DbService {
 
 	/**
 	 * Execute an SQL INSERT, UPDATE, or DELETE query. Query executed against
-	 * the art database
+	 * the art database.
 	 *
 	 * @param sql
 	 * @param params
-	 * @return -1 if connection to the art database is not available, otherwise
-	 * number of records affected
+	 * @return number of records affected
 	 * @throws SQLException
+	 * @throws IllegalStateException if connection to the art database is not
+	 * available
 	 */
 	public int update(String sql, Object... params) throws SQLException {
 		Connection conn = ArtConfig.getConnection();
 		if (conn == null) {
-			logger.warn("Connection to the ART Database not available");
-			return -1;
+			throw new IllegalStateException("Connection to the ART Database not available");
 		}
 
 		try {
@@ -69,12 +70,10 @@ public class DbService {
 	 * @param params
 	 * @return -1 if connection is null, otherwise number of records affected
 	 * @throws SQLException
+	 * @throws NullPointerException if conn is null
 	 */
 	public int update(Connection conn, String sql, Object... params) throws SQLException {
-		if (conn == null) {
-			logger.warn("Connection not available");
-			return -1;
-		}
+		Objects.requireNonNull(conn, "Connection must not be null");
 
 		QueryRunner run = new QueryRunner();
 		return run.update(conn, sql, params);
@@ -89,12 +88,13 @@ public class DbService {
 	 * @param params
 	 * @return The object returned by the handler.
 	 * @throws SQLException
+	 * @throws IllegalStateException if connection to the art database is not
+	 * available
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
 		Connection conn = ArtConfig.getConnection();
 		if (conn == null) {
-			logger.warn("Connection to the ART Database not available");
-			return null;
+			throw new IllegalStateException("Connection to the ART Database not available");
 		}
 
 		try {
@@ -113,12 +113,13 @@ public class DbService {
 	 * array is one set of batch replacement values.
 	 * @return The number of rows updated per statement.
 	 * @throws SQLException
+	 * @throws IllegalStateException if connection to the art database is not
+	 * available
 	 */
 	public int[] batch(String sql, Object[][] params) throws SQLException {
 		Connection conn = ArtConfig.getConnection();
 		if (conn == null) {
-			logger.warn("Connection to the ART Database not available");
-			return new int[0];
+			throw new IllegalStateException("Connection to the ART Database not available");
 		}
 
 		try {

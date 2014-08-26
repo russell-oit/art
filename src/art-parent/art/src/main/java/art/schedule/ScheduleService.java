@@ -208,7 +208,7 @@ public class ScheduleService {
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -227,7 +227,7 @@ public class ScheduleService {
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				schedule.getScheduleId()
 			};

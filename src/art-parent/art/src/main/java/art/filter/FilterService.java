@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -167,7 +167,7 @@ public class FilterService {
 		//finally delete filter
 		sql = "DELETE FROM ART_RULES WHERE RULE_ID=?";
 		dbService.update(sql, id);
-		
+
 		result.setSuccess(true);
 		return result;
 	}
@@ -253,7 +253,7 @@ public class FilterService {
 				filter.getName(),
 				filter.getDescription(),
 				dataType,
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -267,7 +267,7 @@ public class FilterService {
 				filter.getName(),
 				filter.getDescription(),
 				dataType,
-				DbUtils.getCurrentTimeStamp(),
+				DbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				filter.getFilterId()
 			};

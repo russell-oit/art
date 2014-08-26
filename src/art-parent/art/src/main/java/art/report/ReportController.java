@@ -384,15 +384,15 @@ public class ReportController {
 		}
 
 		//set report source for text reports
-		logger.debug("report.getReportType()={}", report.getReportType());
-		ReportType reportType = ReportType.toEnum(report.getReportType());
+		logger.debug("report.getReportType()={}", report.getReportTypeId());
+		ReportType reportType = ReportType.toEnum(report.getReportTypeId());
 		if (reportType == ReportType.Text) {
 			report.setReportSource(report.getReportSourceHtml());
 		}
 
 		//build chart options setting string
 		logger.debug("(report.getChartOptions() != null) = {}", report.getChartOptions() != null);
-		if (report.getReportType() < 0 && report.getChartOptions() != null) {
+		if (report.getReportTypeId() < 0 && report.getChartOptions() != null) {
 			String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
 			String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
 

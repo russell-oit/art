@@ -275,8 +275,6 @@ CREATE TABLE ART_USER_QUERY_GROUPS
 -- ART_PARAMETERS
 -- Stores parameter definitions
 
--- NAME: stores the column name for non-labelled MULTI params
--- or the parameter name for INLINE params or labelled multi params
 -- HIDDEN: boolean
 -- USE_LOV: boolean
 -- USE_FILTERS_IN_LOV: boolean

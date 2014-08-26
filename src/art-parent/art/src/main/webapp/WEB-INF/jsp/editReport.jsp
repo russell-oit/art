@@ -89,7 +89,7 @@ Edit report page
 					delay: 100
 				});
 
-				$("#reportType").change(function() {
+				$("#reportTypeId").change(function() {
 					toggleVisibleFields();
 				});
 
@@ -102,10 +102,10 @@ Edit report page
 
 		<script type="text/javascript">
 			function toggleVisibleFields() {
-				var reportType = parseInt($('#reportType option:selected').val(), 10);
+				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
 
 				//show/hide report source textarea
-				if (reportType === 111) {
+				if (reportTypeId === 111) {
 					//text
 					$("#reportSourceHtmlDiv").show();
 					$("#reportSourceDiv").hide();
@@ -116,7 +116,7 @@ Edit report page
 
 				//set report source label text
 				var reportSourceType;
-				switch (reportType) {
+				switch (reportTypeId) {
 					case 111:
 						//text
 						reportSourceType = "(HTML)";
@@ -138,7 +138,7 @@ Edit report page
 				$("#reportSourceLabel").html(reportSourceLabel);
 
 				//show/hide use rules
-				switch (reportType) {
+				switch (reportTypeId) {
 					case 110: //dashboard
 					case 111: //text
 					case 115: //jasperreport template
@@ -152,7 +152,7 @@ Edit report page
 				}
 
 				//show/hide datasource
-				switch (reportType) {
+				switch (reportTypeId) {
 					case 110: //dashboard
 					case 111: //text
 					case 113: //mondrian xmla
@@ -165,7 +165,7 @@ Edit report page
 				}
 
 				//show/hide template
-				switch (reportType) {
+				switch (reportTypeId) {
 					case 115: //jasper template
 					case 116: //jasper art
 					case 117: //jxls template
@@ -178,7 +178,7 @@ Edit report page
 				}
 
 				//show/hide xmla fields
-				switch (reportType) {
+				switch (reportTypeId) {
 					case 113: //mondrian xmla
 						$("#xmlaFields").show();
 						$("#xmlaDatasourceDiv").show();
@@ -194,7 +194,7 @@ Edit report page
 				}
 
 				//show/hide display resultset
-				switch (reportType) {
+				switch (reportTypeId) {
 					case 110: //dashboard
 					case 111: //text
 					case 112: //mondrian
@@ -210,7 +210,7 @@ Edit report page
 				}
 
 				//show/hide display parameters in output
-				if (reportType <= 99 || reportType === 101 || reportType === 102 || reportType === 103) {
+				if (reportTypeId <= 99 || reportTypeId === 101 || reportTypeId === 102 || reportTypeId === 103) {
 					//show parameters only for chart, tabular, group, and crosstab reports
 					$("#displayResultsetDiv").show();
 				} else {
@@ -218,9 +218,9 @@ Edit report page
 				}
 
 				//show/hide chart fields
-				if (reportType < 0) {
+				if (reportTypeId < 0) {
 					$("#chartFields").show();
-					switch (reportType) {
+					switch (reportTypeId) {
 						case -2: //pie 3d
 						case -13: //pie 2d
 						case -10: //speedometer
@@ -360,13 +360,14 @@ Edit report page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="reportType">
+					<label class="col-md-4 control-label " for="reportTypeId">
 						<spring:message code="reports.label.reportType"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="reportType" class="form-control selectpicker">
+						<form:select path="reportTypeId" class="form-control selectpicker">
 							<form:options items="${reportTypes}"
 										  itemLabel="description" itemValue="value"/>
+							<%-- add group reports --%>
 							<c:forEach begin="1" end="5" varStatus="loop">
 								<form:option value="${loop.index}">Group: ${loop.index} columns</form:option>
 							</c:forEach>
