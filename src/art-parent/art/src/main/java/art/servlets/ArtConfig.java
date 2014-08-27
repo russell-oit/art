@@ -34,7 +34,6 @@ import art.settings.CustomSettings;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.zafarkhaja.semver.Version;
 import com.lowagie.text.FontFactory;
 import java.io.File;
 import java.io.IOException;
@@ -1425,11 +1424,9 @@ public class ArtConfig extends HttpServlet {
 				String version = StringUtils.substringBefore(artVersion, "-");
 				logger.debug("version='{}'", version);
 
-				Version currentVersion = Version.valueOf(version);
-
-				//changes introduced in 3.0.0
-				if (currentVersion.equals(Version.valueOf("3.0.0"))) {
-					logger.info("Performing 3.0.0 upgrade steps");
+				//changes introduced in 3.0
+				if (StringUtils.equals(version,"3.0")){
+					logger.info("Performing 3.0 upgrade steps");
 
 					addUserIds();
 					addScheduleIds();
@@ -1440,7 +1437,7 @@ public class ArtConfig extends HttpServlet {
 					addUserRuleValueKeys();
 					addUserGroupRuleValueKeys();
 
-					logger.info("Done performing 3.0.0 upgrade steps");
+					logger.info("Done performing 3.0 upgrade steps");
 				}
 
 				boolean deleted = upgradeFile.delete();

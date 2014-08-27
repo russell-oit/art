@@ -1,2 +1,5 @@
-artdbcp 2.0.0
+art-dbcp 3.0.0
 * Use slf4j for logging
+* Implemented javax.sql.DataSource
+* Renamed DataSource class to ArtDBCPDataSource
+* Requires Java 7

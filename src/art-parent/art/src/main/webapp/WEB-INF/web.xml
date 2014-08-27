@@ -13,8 +13,7 @@
 	<context-param>
 		<description>ART Version Number</description>
 		<param-name>versionNumber</param-name>
-		<!-- use semver format, http://semver.org/, e.g. 3.0.0, 3.0.1-beta.1 -->
-		<param-value>3.0.0-alpha.3</param-value>
+		<param-value>3.0-alpha3</param-value>
 	</context-param>
 	<!-- Error pages -->
 	<error-page>

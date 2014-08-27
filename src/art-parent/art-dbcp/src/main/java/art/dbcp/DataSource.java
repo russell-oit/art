@@ -73,10 +73,10 @@ import org.slf4j.LoggerFactory;
 public class DataSource implements TimerListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataSource.class);
-	private String name = ""; //datasource name
-	private String url = "";
-	private String username = "";
-	private String password = "";
+	private String name; //datasource name
+	private String url;
+	private String username;
+	private String password;
 	private long timeout = 30 * 60 * 1000; //30 mins     
 	private long maxQueryRunningTime = 20 * 60 * 1000; // 20 minutes max running time for a query, before forcibly removing its connection from the pool
 	private long totalConnections;
@@ -84,9 +84,9 @@ public class DataSource implements TimerListener {
 	private int maxConnections = 10;
 	private String testSQL;
 	LocalTimer t;
-	private List<EnhancedConnection> connectionPool = new ArrayList<EnhancedConnection>(maxConnections); // this vector stores active connections
-	private long thisObjectTicket; // for debug
-	private String driver = ""; //added to support olap
+	private List<EnhancedConnection> connectionPool = new ArrayList<>(maxConnections); //stores active connections
+	private long thisObjectTicket; // for debugging
+	private String driver; //added to support olap
 	private boolean jndi = false; //determine if this is a jndi datasource
 	private javax.sql.DataSource jndiDatasource = null; //hold jndi datasource object
 	private Properties connectionProperties;
@@ -306,7 +306,7 @@ public class DataSource implements TimerListener {
 	 * @throws javax.naming.NamingException
 	 */
 	public Connection getConnection() throws SQLException, NamingException {
-		logger.debug("{} - Entering getConnection. jndi={}", thisObjectTicket, jndi);
+		logger.debug("{} - Entering getConnection: jndi={}", thisObjectTicket, jndi);
 
 		Connection conn = null;
 
@@ -339,14 +339,13 @@ public class DataSource implements TimerListener {
 			}
 		}
 
-		logger.debug("{} - Leaving getConnection", thisObjectTicket);
 		return conn;
 	}
 
 	/**
-	 * Close all active connections (the internal timer is stopped too)
+	 * Close all active connections and stop the internal timer
 	 */
-	public void close() { // close all active connection and stops timer
+	public void close() { 
 		logger.debug("{} - Entering close. jndi={}", thisObjectTicket, jndi);
 
 		if (!jndi) {
@@ -368,11 +367,10 @@ public class DataSource implements TimerListener {
 			jndiDatasource = null;
 		}
 
-		logger.debug("{} - Leaving close", thisObjectTicket);
 	}
 
 	/**
-	 * Remove all existing connection from the pool closing them properly.
+	 * Remove all existing connections from the pool, closing them properly.
 	 *
 	 */
 	public void refreshConnection() {
@@ -395,7 +393,6 @@ public class DataSource implements TimerListener {
 			jndiDatasource = null;
 		}
 
-		logger.debug("{} - Leaving refreshConnection. Datasource='{}'. jndi={}", thisObjectTicket, name, jndi);
 	}
 
 	/**
@@ -418,7 +415,6 @@ public class DataSource implements TimerListener {
 			jndiDatasource = null;
 		}
 
-		logger.debug("{} - Leaving forceRefreshConnection. Datasource='{}'. jndi={}", thisObjectTicket, name, jndi);
 	}
 
 	private synchronized Connection getConnectionFromPool() throws SQLException {
@@ -430,7 +426,7 @@ public class DataSource implements TimerListener {
 			logger.debug("{} - connectionPool.size()={}", thisObjectTicket, connectionPool.size());
 			logger.debug("{} - maxConnections={}", thisObjectTicket, maxConnections);
 			if (connectionPool.isEmpty()) {
-				logger.debug("{} - getNew. connection pool is empty.", thisObjectTicket);
+				logger.debug("{} - getNew (first)", thisObjectTicket);
 				return getNewDatabaseConnection();
 			} else if (isThereAFreeConnection()) {
 				logger.debug("{} - getFree", thisObjectTicket);
@@ -439,13 +435,13 @@ public class DataSource implements TimerListener {
 				logger.debug("{} - getNew", thisObjectTicket);
 				return getNewDatabaseConnection();
 			} else {
-				//return the "older" used connection, i.e. the one that likely
-				//will become free first
-				logger.debug("{} - getOlder", thisObjectTicket);
-				return getOlderConnection();
+				//return the "oldest" used connection. the one that was used last.
+				//the one that likely will become free first
+				logger.debug("{} - getOldest", thisObjectTicket);
+				return getOldestConnection();
 			}
 		} catch (SQLException ex) {
-			logger.error("Error. Datasource='{}'", name);
+			logger.error("Error. Datasource='{}'", name,ex);
 			throw new SQLException("getConnectionFromPool exception: " + ex.getMessage());
 		}
 	}
@@ -475,7 +471,7 @@ public class DataSource implements TimerListener {
 		return null;
 	}
 
-	private EnhancedConnection getOlderConnection() {
+	private EnhancedConnection getOldestConnection() {
 		int i;
 		long last = -1;
 		int index = -1;
@@ -487,7 +483,7 @@ public class DataSource implements TimerListener {
 				index = i;
 			}
 		}
-		s = connectionPool.get(index); // this is the older one
+		s = connectionPool.get(index); // this is the oldest one
 		s.open(); // this is useless as it is already opened - just set a new last used date
 		return s;
 	}
@@ -546,10 +542,10 @@ public class DataSource implements TimerListener {
 			int i;
 			long currentTime = new java.util.Date().getTime();
 			EnhancedConnection e;
-			boolean b;
+			boolean inUse;
 			try {
 				for (i = (connectionPool.size() - 1); i >= 0; i--) {
-					b = false;
+					inUse = false;
 					e = connectionPool.get(i);
 					// if      the connection is free and was created before TIMEOUT millis
 					//   or
@@ -560,25 +556,25 @@ public class DataSource implements TimerListener {
 					// then 
 					//         perform a connection test
 					if ((!e.getInUse() && (currentTime - e.getLastUsedTime()) > timeout)
-							|| (b = e.getInUse() && (currentTime - e.getLastUsedTime()) > maxQueryRunningTime)) {
+							|| (inUse = e.getInUse() && (currentTime - e.getLastUsedTime()) > maxQueryRunningTime)) {
 						logger.debug("{} - closing connection", thisObjectTicket);
 						// 20090909 the two lines below have been swapped: 
 						// connection is now removed from the pool before trying to close it
 						// since if the connection is broken, and exception would be raised on .realClose()
 						connectionPool.remove(i);
-						if (!b) {
+						if (!inUse) {
 							e.realClose(); // close it only if not used - this sometimes hangs in buggy drivers
 						}
 						e = null; // just to be sure the GC does its work...
-						if (b) {
-							logger.info("Datasource '{}' ({}) was in use for too much time and has been removed it from the pool.", name, i);
+						if (inUse) {
+							logger.info("Connection {i} (Pool='{}') was in use for too much time and has been removed from the pool.", i,name);
 						}
 					} else if (testSQL != null && testSQL.length() > 0) {
 						logger.debug("{} - testSQL='{}'", thisObjectTicket, testSQL);
 						try {
 							e.test(testSQL);
 						} catch (SQLException ex) {
-							logger.error("Test sql failed. '{}'. Datasource='{}' ({}). ", testSQL, name, i, ex);
+							logger.error("Connection test failed. Datasource='{}', Connection {}, testSql='{}'", name, i,testSQL, ex);
 							connectionPool.remove(i);
 							//e.realClose();
 						}
@@ -590,7 +586,6 @@ public class DataSource implements TimerListener {
 			}
 		}
 
-		logger.debug("{} - Leaving timeElapsed. jndi={}", thisObjectTicket, jndi);
 	}
 
 	/**
@@ -603,11 +598,11 @@ public class DataSource implements TimerListener {
 	}
 
 	/**
-	 * Get the number of connections that are currently in use
+	 * Get the number of connections that are currently in use in the whole pool
 	 *
 	 * @return
 	 */
-	public int getInUseCount() {
+	public int getTotalInUseCount() {
 		int count = 0;
 		for (EnhancedConnection ec : connectionPool) {
 			if (ec.getInUse()) {
