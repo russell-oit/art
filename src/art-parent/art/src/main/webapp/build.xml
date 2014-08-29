@@ -1,13 +1,11 @@
 <!-- ART build.xml
 
   To compile art code:
-  * install Apache Ant
+  * install Apache Ant. Ensure the ant\bin directory is included in the system path
 
-  in the directory where the art.war file was unzipped,
-
-  type "ant" or "ant compile" to compile any changed classes
-  type "ant clean" to remove compiled class files
-  type "ant war" to create the war file
+  * type "ant" or "ant compile" to compile any changed classes
+  * type "ant clean" to remove compiled class files
+  * type "ant war" to create the war file
   
   This script compiles classes inline,
    the war file is created in this folder
@@ -18,17 +16,15 @@
         ART ant script
 	</description>
 
-
 	<property name="dist" location="."/>
 	<property name="jars.dir" value="${dist}/WEB-INF/lib"/>
 
 	<path id="classpath">
 		<fileset dir="${jars.dir}" includes="*.jar"/>
-		<pathelement location="WEB-INF/etc/servlet-api.jar" />
+		<pathelement location="WEB-INF/etc/servlet-api.jar"/>
 	</path>
 
-
-	<!-- Compile all -->
+	<!-- Compile -->
 	<target name="compile"  description="Compile source code inline" >
 		<javac classpathref="classpath"  source="1.7" target="1.7"
 		srcdir="${dist}/WEB-INF/classes" includeAntRuntime="no"
@@ -36,7 +32,6 @@
 			<!-- <compilerarg value="-Xlint"/> -->
 		</javac>
 	</target>
-
 
 	<!-- Clean -->
 	<target name="clean" description="Delete compiled code" >
@@ -46,9 +41,8 @@
 			<fileset dir="." includes="**/*.class"/>			
 		</delete>
 	</target>
-	
 		
-	<!-- Create art war file -->
+	<!-- Create war file -->
 	<target name="war" depends="clean,compile"  description="Create war file" >		
 		<delete file="${dist}/art.war"/>
 		<zip destfile="${dist}/art.war" basedir="${dist}"/>

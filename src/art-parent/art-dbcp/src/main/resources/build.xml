@@ -1,37 +1,35 @@
-<!-- artdbcp build.xml
-  -->
+<!-- art-dbcp build.xml -->
 
-<project name="ART" default="compile" basedir=".">
+<project name="art-dbcp" default="compile" basedir=".">
 	<description>
-        artdbcp ant script
+		art-dbcp ant script
 	</description>
 
 	<property name="dist" location="."/> 
 
-
 	<!-- Compile all -->
 	<target name="compile"  description="Compile source code inline" >
-		<javac  source="1.6" target="1.6" srcdir="${dist}/" includeAntRuntime="no" debug="true" debuglevel="lines,source" />	
+		<javac source="1.7" target="1.7" srcdir="${dist}/"
+			   includeAntRuntime="no" debug="true" />	
 	</target>
 
 	<!-- Create jar file -->
 	<target name="jar"  description="Create jar file" >
-		<delete file="${dist}/artdbcp.jar"/>
-		<jar    destfile="${dist}/artdbcp.jar" basedir="${dist}"/>
+		<delete file="${dist}/art-dbcp.jar"/>
+		<jar destfile="${dist}/art-dbcp.jar" basedir="${dist}"/>
 	</target>
 
-
-	<!-- Javadoc -->
+	<!-- Create javadoc -->
 	<target name="docs" description="Create Javadoc" >
 		<javadoc destdir="../api"
-           author="true"
-           version="true"
-           use="true"
-           windowtitle="ART DBCP API">
+				 author="true"
+				 version="true"
+				 use="true"
+				 windowtitle="ART DBCP API">
 			<fileset dir="${dist}" defaultexcludes="yes">
-				<include name="art/dbcp/DataSource.java"/>
+				<include name="art/dbcp/ArtDBCPDataSource.java"/>
 			</fileset>
-			<doctitle><![CDATA[<h1>Art DBCP</h1>]]></doctitle>
+			<doctitle><![CDATA[<h1>ART DBCP</h1>]]></doctitle>
 			<bottom><![CDATA[<a href="art.sourceforge.net">art.sourceforge.net</a>]]></bottom>
 		</javadoc>
 	</target>

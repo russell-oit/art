@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 public class Mailer {
 
 	private static final Logger logger = LoggerFactory.getLogger(Mailer.class);
-	private String[] tos;
+	private String[] to;
 	private String subject;
 	private String message;
 	private String from;
@@ -45,12 +45,13 @@ public class Mailer {
 	private String smtpServer;
 	private int smtpPort;
 	private boolean sessionDebug;
-	private String[] ccs;
-	private String[] bccs;
+	private String[] cc;
+	private String[] bcc;
 	private boolean useStartTls;
 	private boolean sendPartial = true;
 	private String messageType = "text/html;charset=utf-8";
 	private boolean useSmtpAuthentication;
+	private static final String[] EMPTY_STRING_ARRAY = {};
 
 	/**
 	 * @return the useSmtpAuthentication
@@ -75,7 +76,7 @@ public class Mailer {
 
 	/**
 	 * Set the message type e.g. text/plain, text/html, text/html;charset=utf-8
-	 * 
+	 *
 	 * @param messageType the messageType to set
 	 */
 	public void setMessageType(String messageType) {
@@ -83,25 +84,34 @@ public class Mailer {
 	}
 
 	/**
-	 * @return the tos
+	 * @return the to
 	 */
-	public String[] getTos() {
-		if (tos == null) {
-			return null;
+	public String[] getTo() {
+		if (to == null) {
+			return EMPTY_STRING_ARRAY;
 		} else {
-			return tos;
+			return to.clone(); //clone mutable objects for enhanced security
 		}
 	}
 
 	/**
-	 * @param tos the tos to set
+	 * @param to the to to set
 	 */
-	public void setTos(String[] tos) {
-		if (tos == null) {
-			this.tos = null;
+	public void setTo(String[] to) {
+		if (to == null) {
+			this.to = null;
 		} else {
-			this.tos = tos;
+			this.to = to.clone(); //clone mutable objects for enhanced security
 		}
+	}
+
+	/**
+	 * Set single to address
+	 *
+	 * @param s
+	 */
+	public void setTo(String s) {
+		to = new String[]{s};
 	}
 
 	/**
@@ -191,20 +201,9 @@ public class Mailer {
 	}
 
 	/**
-	 * Set single to address
-	 *
-	 * @param s
-	 */
-	public void setTo(String s) {
-		tos = null;
-		tos = new String[1];
-		tos[0] = s;
-	}
-	
-	/**
 	 * Set the smtp server ip or hostname
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public String getSmtpServer() {
 		return smtpServer;
@@ -264,47 +263,65 @@ public class Mailer {
 	}
 
 	/**
-	 * @return the ccs
+	 * @return the cc
 	 */
-	public String[] getCcs() {
-		if (ccs == null) {
-			return null;
+	public String[] getCc() {
+		if (cc == null) {
+			return EMPTY_STRING_ARRAY;
 		} else {
-			return ccs;
+			return cc.clone(); //clone mutable objects for enhanced security
 		}
 	}
 
 	/**
-	 * @param ccs the ccs to set
+	 * @param cc the cc to set
 	 */
-	public void setCcs(String[] ccs) {
-		if (ccs == null) {
-			this.ccs = null;
+	public void setCc(String[] cc) {
+		if (cc == null) {
+			this.cc = null;
 		} else {
-			this.ccs = ccs;
+			this.cc = cc.clone();
 		}
 	}
 
 	/**
-	 * @return the bccs
+	 * Set single cc address
+	 *
+	 * @param s
 	 */
-	public String[] getBccs() {
-		if (bccs == null) {
-			return null;
+	public void setCc(String s) {
+		cc = new String[]{s};
+	}
+
+	/**
+	 * @return the bcc
+	 */
+	public String[] getBcc() {
+		if (bcc == null) {
+			return EMPTY_STRING_ARRAY;
 		} else {
-			return bccs;
+			return bcc.clone(); //clone mutable objects for enhanced security
 		}
 	}
 
 	/**
-	 * @param bccs the bccs to set
+	 * @param bcc the bcc to set
 	 */
-	public void setBccs(String[] bccs) {
-		if (bccs == null) {
-			this.bccs = null;
+	public void setBcc(String[] bcc) {
+		if (bcc == null) {
+			this.bcc = null;
 		} else {
-			this.bccs = bccs;
+			this.bcc = bcc.clone(); //clone mutable objects for enhanced security
 		}
+	}
+
+	/**
+	 * Set single bcc address
+	 *
+	 * @param s
+	 */
+	public void setBcc(String s) {
+		bcc = new String[]{s};
 	}
 
 	/**
@@ -336,7 +353,7 @@ public class Mailer {
 		props.put("mail.smtp.starttls.enable", useStartTls);
 
 		logger.debug("smtpPort={}", smtpPort);
-		logger.debug("smtpHost='{}'", smtpServer);
+		logger.debug("smtpServer='{}'", smtpServer);
 		props.put("mail.smtp.port", smtpPort);
 		props.put("mail.smtp.host", smtpServer);
 
@@ -353,7 +370,6 @@ public class Mailer {
 		Session session;
 		logger.debug("useSmtpAuthentication={}", useSmtpAuthentication);
 		if (useSmtpAuthentication) {
-			//smtp authentication enabled
 			props.put("mail.smtp.auth", "true");
 			Authenticator auth = new SMTPAuthenticator();
 			session = Session.getInstance(props, auth);
@@ -373,34 +389,34 @@ public class Mailer {
 		msg.setFrom(new InternetAddress(from));
 
 		// Set the TO: address(es)
-		logger.debug("(tos != null) = {}", tos != null);
-		if (tos != null) {
-			logger.debug("tos.length={}", tos.length);
-			InternetAddress[] addressTo = new InternetAddress[tos.length];
-			for (int i = 0; i < tos.length; i++) {
-				addressTo[i] = new InternetAddress(tos[i]);
+		logger.debug("(to != null) = {}", to != null);
+		if (to != null) {
+			logger.debug("to.length={}", to.length);
+			InternetAddress[] addressTo = new InternetAddress[to.length];
+			for (int i = 0; i < to.length; i++) {
+				addressTo[i] = new InternetAddress(to[i]);
 			}
 			msg.setRecipients(Message.RecipientType.TO, addressTo);
 		}
 
 		// Set the CC: address(es)
-		logger.debug("(ccs != null) = {}", ccs != null);
-		if (ccs != null) {
-			logger.debug("ccs.length={}", ccs.length);
-			InternetAddress[] addressCc = new InternetAddress[ccs.length];
-			for (int i = 0; i < ccs.length; i++) {
-				addressCc[i] = new InternetAddress(ccs[i]);
+		logger.debug("(cc != null) = {}", cc != null);
+		if (cc != null) {
+			logger.debug("cc.length={}", cc.length);
+			InternetAddress[] addressCc = new InternetAddress[cc.length];
+			for (int i = 0; i < cc.length; i++) {
+				addressCc[i] = new InternetAddress(cc[i]);
 			}
 			msg.setRecipients(Message.RecipientType.CC, addressCc);
 		}
 
 		// Set the BCC: address(es)
-		logger.debug("(bccs != null) = {}", bccs != null);
-		if (bccs != null) {
-			logger.debug("bccs.length={}", bccs.length);
-			InternetAddress[] addressBcc = new InternetAddress[bccs.length];
-			for (int i = 0; i < bccs.length; i++) {
-				addressBcc[i] = new InternetAddress(bccs[i]);
+		logger.debug("(bcc != null) = {}", bcc != null);
+		if (bcc != null) {
+			logger.debug("bcc.length={}", bcc.length);
+			InternetAddress[] addressBcc = new InternetAddress[bcc.length];
+			for (int i = 0; i < bcc.length; i++) {
+				addressBcc[i] = new InternetAddress(bcc[i]);
 			}
 			msg.setRecipients(Message.RecipientType.BCC, addressBcc);
 		}
@@ -430,6 +446,8 @@ public class Mailer {
 
 				FileDataSource fds = new FileDataSource(file);
 				DataHandler dh = new DataHandler(fds);
+
+				logger.debug("file.getName()='{}'", file.getName());
 				filePart.setFileName(file.getName());
 				filePart.setDisposition(Part.ATTACHMENT);
 				filePart.setDescription("Attached file: " + file.getName());

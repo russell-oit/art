@@ -1428,9 +1428,9 @@ public class ArtJob implements Job, Serializable {
 								prepareAlertJob(mailer, message);
 
 								//set recipients						
-								mailer.setTos(tosEmail);
-								mailer.setCcs(ccs);
-								mailer.setBccs(bccs);
+								mailer.setTo(tosEmail);
+								mailer.setCc(ccs);
+								mailer.setBcc(bccs);
 
 								try {
 									mailer.send();
@@ -1695,9 +1695,9 @@ public class ArtJob implements Job, Serializable {
 							prepareEmailJob(mailer, message);
 
 							//set recipients						
-							mailer.setTos(tosEmail);
-							mailer.setCcs(ccs);
-							mailer.setBccs(bccs);
+							mailer.setTo(tosEmail);
+							mailer.setCc(ccs);
+							mailer.setBcc(bccs);
 
 							//check if mail was successfully sent
 							try {

@@ -18,7 +18,7 @@
 
 package art.dbutils;
 
-import art.dbcp.DataSource;
+import art.dbcp.ArtDBCPDataSource;
 import java.util.LinkedHashMap;
 
 /**
@@ -26,6 +26,6 @@ import java.util.LinkedHashMap;
  * @author Timothy Anyona
  */
 public class DbConnections {
-	private static LinkedHashMap<Integer, DataSource> connectionPools; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
+	private static LinkedHashMap<InArtDBCPDataSourceaSource> connectionPools; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	
 }

@@ -16,7 +16,7 @@
  */
 package art.connection;
 
-import art.dbcp.DataSource;
+import art.dbcp.ArtDBCPDataSource;
 import art.servlets.ArtConfig;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,11 +45,11 @@ public class ConnectionController {
 	ResetConnectionResponse resetDatasource(@RequestParam("id") Integer id) {
 		ResetConnectionResponse response = new ResetConnectionResponse();
 
-		DataSource ds = ArtConfig.getDataSource(id);
+		ArtDBCPDataSource ds = ArtConfig.getDataSource(id);
 		if (ds != null) {
-			ds.refreshConnection();
+			ds.refreshConnections();
 			response.setSuccess(true);
-			response.setPoolSize(ds.getPoolSize());
+			response.setPoolSize(ds.getCurrentPoolSize());
 			response.setInUseCount(ds.getTotalInUseCount());
 		} else {
 			response.setErrorMessage("Connection pool not found: " + id);

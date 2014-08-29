@@ -17,7 +17,7 @@
 package art.servlets;
 
 import art.artdatabase.ArtDatabase;
-import art.dbcp.DataSource;
+import art.dbcp.ArtDBCPDataSource;
 import art.dbutils.DbService;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
@@ -93,7 +93,7 @@ public class ArtConfig extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = LoggerFactory.getLogger(ArtConfig.class);
 	private static String exportPath;
-	private static LinkedHashMap<Integer, DataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
+	private static LinkedHashMap<Integer, ArtDBCPDataSource> dataSources; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
 	private static final ArrayList<String> reportFormats = new ArrayList<>(); //report formats available to users
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
 	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
@@ -140,7 +140,7 @@ public class ArtConfig extends HttpServlet {
 				Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
 			}
 
-			//close connections in the artdbcp connection pool
+			//close connections in the art-dbcp connection pool
 			clearConnections();
 
 			//deregister jdbc drivers
@@ -330,14 +330,14 @@ public class ArtConfig extends HttpServlet {
 		int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
 		boolean artDbjndi = artDatabaseConfiguration.isJndi();
 
-		DataSource artdb = new DataSource(artDbPoolTimeout * 60L, artDbjndi);
+		ArtDBCPDataSource artdb = new ArtDBCPDataSource(artDbPoolTimeout * 60L, artDbjndi);
 		artdb.setName("ART Database");  //custom name
 		artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
 		artdb.setUsername(artDatabaseConfiguration.getUsername());
 		artdb.setPassword(artDatabaseConfiguration.getPassword());
 		artdb.setMaxConnections(maxPoolConnections);
 		artdb.setDriver(artDbDriver);
-		artdb.setTestSQL(artDatabaseConfiguration.getTestSql());
+		artdb.setTestSql(artDatabaseConfiguration.getTestSql());
 
 		//set application name connection property
 		setConnectionProperties(artdb);
@@ -381,7 +381,7 @@ public class ArtConfig extends HttpServlet {
 				int timeout = rs.getInt("POOL_TIMEOUT");
 				boolean jndi = rs.getBoolean("JNDI");
 
-				DataSource ds = new DataSource(timeout, jndi);
+				ArtDBCPDataSource ds = new ArtDBCPDataSource(timeout, jndi);
 				ds.setName(rs.getString("NAME"));
 				ds.setUrl(rs.getString("URL"));
 				ds.setUsername(rs.getString("USERNAME"));
@@ -391,7 +391,7 @@ public class ArtConfig extends HttpServlet {
 					password = Encrypter.decrypt(password.substring(2));
 				}
 				ds.setPassword(password);
-				ds.setTestSQL(rs.getString("TEST_SQL"));
+				ds.setTestSql(rs.getString("TEST_SQL"));
 				ds.setMaxConnections(maxPoolConnections);
 				ds.setDriver(rs.getString("DRIVER"));
 
@@ -413,7 +413,7 @@ public class ArtConfig extends HttpServlet {
 
 		//get distinct drivers. except art database driver which has already been registered
 		if (dataSources != null) {
-			for (DataSource ds : dataSources.values()) {
+			for (ArtDBCPDataSource ds : dataSources.values()) {
 				if (ds != null && !StringUtils.equals(ds.getDriver(), artDbDriver)) {
 					drivers.add(ds.getDriver());
 				}
@@ -611,7 +611,7 @@ public class ArtConfig extends HttpServlet {
 
 		try {
 			if (dataSources != null) {
-				DataSource ds = dataSources.get(Integer.valueOf(i));
+				ArtDBCPDataSource ds = dataSources.get(Integer.valueOf(i));
 				conn = ds.getConnection(); // i=0 => ART Repository
 			}
 		} catch (Exception e) {
@@ -643,7 +643,7 @@ public class ArtConfig extends HttpServlet {
 
 		try {
 			if (dataSources != null) {
-				for (DataSource ds : dataSources.values()) {
+				for (ArtDBCPDataSource ds : dataSources.values()) {
 					if (ds != null) {
 						if (StringUtils.equalsIgnoreCase(name, ds.getName())) {
 							//this is the required datasource. get connection and exit loop
@@ -709,12 +709,12 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get a DataSource object.
+	 * Get a ArtDBCPDataSource object.
 	 *
 	 * @param i id of the datasource
-	 * @return DataSource object
+	 * @return ArtDBCPDataSource object
 	 */
-	public static DataSource getDataSource(int i) {
+	public static ArtDBCPDataSource getDataSource(int i) {
 		return dataSources.get(Integer.valueOf(i));
 	}
 
@@ -723,7 +723,7 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @return all datasources
 	 */
-	public static Map<Integer, DataSource> getDataSources() {
+	public static Map<Integer, ArtDBCPDataSource> getDataSources() {
 		return dataSources;
 	}
 
@@ -734,7 +734,7 @@ public class ArtConfig extends HttpServlet {
 	private static void clearConnections() {
 		if (dataSources != null) {
 			for (Integer key : dataSources.keySet()) {
-				DataSource ds = dataSources.get(key);
+				ArtDBCPDataSource ds = dataSources.get(key);
 				if (ds != null) {
 					ds.close();
 				}
@@ -1138,7 +1138,7 @@ public class ArtConfig extends HttpServlet {
 	 *
 	 * @param ds
 	 */
-	private static void setConnectionProperties(DataSource ds) {
+	private static void setConnectionProperties(ArtDBCPDataSource ds) {
 		String connectionName = "ART - " + ds.getName();
 		//ApplicationName property
 		//see http://docs.oracle.com/javase/7/docs/api/java/sql/Connection.html#setClientInfo%28java.lang.String,%20java.lang.String%29

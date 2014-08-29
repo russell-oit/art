@@ -1,28 +1,50 @@
-<!-- artmail build.xml
-  -->
+<!-- art-mail build.xml
 
-<project name="ART" default="compile" basedir=".">
+  To compile art-mail code:
+  * install Apache Ant. Ensure the ant\bin directory is included in the system path
+  
+  * put dependencies (javax.mail, slf4j-api) in a directory called lib
+
+  * type "ant" or "ant compile" to compile any changed classes
+  * type "ant clean" to remove compiled class files
+  * type "ant jar" to create the jar file
+  
+  This script compiles classes inline,
+   the jar file is created in this folder
+
+-->
+
+<project name="art-mail" default="compile" basedir=".">
 	<description>
-        artmail ant script
+		art-mail ant script
 	</description>
 
-	<property name="dist" location="."/> 
+	<property name="dist" location="."/>
 	<property name="jars.dir" value="lib"/>
 
 	<path id="classpath">
 		<fileset dir="${jars.dir}" includes="*.jar"/>		
 	</path>
 
-
-	<!-- Compile all -->
+	<!-- Compile -->
 	<target name="compile"  description="Compile source code inline" >  	
-		<javac  source="1.6" target="1.6" classpathref="classpath" srcdir="${dist}/" includeAntRuntime="no" debug="true" debuglevel="lines,source" />	
+		<javac source="1.7" target="1.7" classpathref="classpath"
+			   srcdir="${dist}/" includeAntRuntime="no" debug="true"/>	
+	</target>
+	
+	<!-- Clean -->
+	<target name="clean" description="Delete compiled code" >
+		<delete file="${dist}/art-mail.jar"/>
+		<delete>
+			<fileset dir="." includes="*.jar"/>
+			<fileset dir="." includes="**/*.class"/>			
+		</delete>
 	</target>
 
 	<!-- Create jar file -->
 	<target name="jar"  description="Create jar file" >
-		<delete file="${dist}/artmail.jar"/>
-		<jar    destfile="${dist}/artmail.jar" basedir="${dist}/src"/>
+		<delete file="${dist}/art-mail.jar"/>
+		<jar destfile="${dist}/art-mail.jar" basedir="${dist}/src"/>
 	</target>
 
 </project>

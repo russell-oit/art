@@ -95,7 +95,7 @@
 	
 	<dependencyManagement>
 		<dependencies>
-			<!-- slf4j used by art, artmail and artdbcp. use common version -->
+			<!-- slf4j used by art, art-mail and art-dbcp. use common version -->
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
