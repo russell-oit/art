@@ -111,7 +111,7 @@ Page to display connections status
 
 						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>
-							<spring:message code="connections.text.total"/>: ${pool.poolSize}, 
+							<spring:message code="connections.text.total"/>: ${pool.currentPoolSize}, 
 							<spring:message code="connections.text.inUse"/>: ${pool.inUseCount}
 						</td>
 						<td>

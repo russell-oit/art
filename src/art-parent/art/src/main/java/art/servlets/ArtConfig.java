@@ -330,13 +330,13 @@ public class ArtConfig extends HttpServlet {
 		int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
 		boolean artDbjndi = artDatabaseConfiguration.isJndi();
 
-		ArtDBCPDataSource artdb = new ArtDBCPDataSource(artDbPoolTimeout * 60L, artDbjndi);
-		artdb.setName("ART Database");  //custom name
+		ArtDBCPDataSource artdb = new ArtDBCPDataSource(artDbPoolTimeout * 60L);
+		artdb.setPoolName("ART Database");  //custom name
 		artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
 		artdb.setUsername(artDatabaseConfiguration.getUsername());
 		artdb.setPassword(artDatabaseConfiguration.getPassword());
-		artdb.setMaxConnections(maxPoolConnections);
-		artdb.setDriver(artDbDriver);
+		artdb.setMaxPoolSize(maxPoolConnections);
+		artdb.setDriverClassName(artDbDriver);
 		artdb.setTestSql(artDatabaseConfiguration.getTestSql());
 
 		//set application name connection property
@@ -381,8 +381,8 @@ public class ArtConfig extends HttpServlet {
 				int timeout = rs.getInt("POOL_TIMEOUT");
 				boolean jndi = rs.getBoolean("JNDI");
 
-				ArtDBCPDataSource ds = new ArtDBCPDataSource(timeout, jndi);
-				ds.setName(rs.getString("NAME"));
+				ArtDBCPDataSource ds = new ArtDBCPDataSource(timeout);
+				ds.setPoolName(rs.getString("NAME"));
 				ds.setUrl(rs.getString("URL"));
 				ds.setUsername(rs.getString("USERNAME"));
 				String password = rs.getString("PASSWORD");
@@ -392,15 +392,15 @@ public class ArtConfig extends HttpServlet {
 				}
 				ds.setPassword(password);
 				ds.setTestSql(rs.getString("TEST_SQL"));
-				ds.setMaxConnections(maxPoolConnections);
-				ds.setDriver(rs.getString("DRIVER"));
+				ds.setMaxPoolSize(maxPoolConnections);
+				ds.setDriverClassName(rs.getString("DRIVER"));
 
 				//set application name connection property
 				setConnectionProperties(ds);
 
 				dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
 			}
-		} catch (SQLException | NamingException e) {
+		} catch (SQLException e) {
 			logger.error("Error", e);
 		} finally {
 			DbUtils.close(rs, ps, conn);
@@ -414,8 +414,8 @@ public class ArtConfig extends HttpServlet {
 		//get distinct drivers. except art database driver which has already been registered
 		if (dataSources != null) {
 			for (ArtDBCPDataSource ds : dataSources.values()) {
-				if (ds != null && !StringUtils.equals(ds.getDriver(), artDbDriver)) {
-					drivers.add(ds.getDriver());
+				if (ds != null && !StringUtils.equals(ds.getDriverClassName(), artDbDriver)) {
+					drivers.add(ds.getDriverClassName());
 				}
 			}
 		}
@@ -645,7 +645,7 @@ public class ArtConfig extends HttpServlet {
 			if (dataSources != null) {
 				for (ArtDBCPDataSource ds : dataSources.values()) {
 					if (ds != null) {
-						if (StringUtils.equalsIgnoreCase(name, ds.getName())) {
+						if (StringUtils.equalsIgnoreCase(name, ds.getPoolName())) {
 							//this is the required datasource. get connection and exit loop
 							conn = ds.getConnection();
 							break;
@@ -1139,7 +1139,7 @@ public class ArtConfig extends HttpServlet {
 	 * @param ds
 	 */
 	private static void setConnectionProperties(ArtDBCPDataSource ds) {
-		String connectionName = "ART - " + ds.getName();
+		String connectionName = "ART - " + ds.getPoolName();
 		//ApplicationName property
 		//see http://docs.oracle.com/javase/7/docs/api/java/sql/Connection.html#setClientInfo%28java.lang.String,%20java.lang.String%29
 		//has different name and maxlength for different drivers
