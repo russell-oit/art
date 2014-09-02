@@ -21,6 +21,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import org.slf4j.Logger;
@@ -33,13 +34,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Enrico Liboni
  */
-public class EnhancedConnection implements Connection {
+public class PooledConnection implements Connection {
 	/* 20050612  Statements are closed automatically when the EnanchedConnection is 
 	 returned to the pool
-	 20050612  test conection with a dummy sql, if it fails refresh the connection
+	 20050612  isValid conection with a dummy sql, if it fails refresh the connection
 	 */
 
-	private static final Logger logger = LoggerFactory.getLogger(EnhancedConnection.class);
+	private static final Logger logger = LoggerFactory.getLogger(PooledConnection.class);
 	private boolean inUse;
 	private int inUseCount;
 	private long lastOpenTime;
@@ -56,7 +57,7 @@ public class EnhancedConnection implements Connection {
 	 * @param password password to use in making the connection
 	 * @throws SQLException
 	 */
-	public EnhancedConnection(String url, String username, String password) throws SQLException {
+	public PooledConnection(String url, String username, String password) throws SQLException {
 		this(url, username, password, null);
 	}
 
@@ -70,8 +71,8 @@ public class EnhancedConnection implements Connection {
 	 * @param properties any additional connection properties
 	 * @throws SQLException
 	 */
-	public EnhancedConnection(String url, String username, String password, Properties properties) throws SQLException {
-		logger.debug("Entering constructor: url='{}', username='{}", url, username);
+	public PooledConnection(String url, String username, String password, Properties properties) throws SQLException {
+		logger.debug("Entering PooledConnection: url='{}', username='{}", url, username);
 
 		Properties dbProperties = new Properties();
 		dbProperties.put("user", username);
@@ -86,8 +87,8 @@ public class EnhancedConnection implements Connection {
 	}
 
 	/**
-	 * Mark the connection as in use and update usage statistics. Always call
-	 * open before providing a connection to users
+	 * Mark the connection as in use(set inUse=true) and update usage
+	 * statistics. Always call open before providing a connection to users
 	 */
 	public void open() {
 		logger.debug("Entering open");
@@ -101,8 +102,8 @@ public class EnhancedConnection implements Connection {
 	}
 
 	/**
-	 * Close any open statements and mark the connection as available
-	 * (inUse=false). The underlying database connection is not closed.
+	 * Close any open statements and mark the connection as available (set
+	 * inUse=false). The underlying database connection is not closed.
 	 *
 	 * @throws SQLException
 	 */
@@ -143,55 +144,82 @@ public class EnhancedConnection implements Connection {
 	protected void realClose() throws SQLException {
 		logger.debug("Entering realClose");
 
-		try {
-			//20140829 Timothy Anyona. reinstate this.close(). to at least clear the openStatements list?
-			this.close();
-			//this.close(); // close all the open statements: not needed... since the driver should do this
-			conn.close();    // note: the caller (ArtDBCPDataSource) must remove the object from the pool
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			throw new SQLException("EnhancedConnection: error in realClose(): cause: " + ex.getMessage());
-		}
-
+		//20140829 Timothy Anyona. reinstate this.close(). to at least clear the openStatements list?
+		this.close();
+		//this.close(); // close all the open statements: not needed... since the driver should do this
+		conn.close();    // note: the caller (ArtDBCPDataSource) must remove the object from the pool
 	}
 
 	/**
-	 * Execute an sql statement on the connection, in order to test if the
-	 * connection is still valid
+	 * Determine if the connection is valid by executing an sql statement
 	 *
-	 * @param testSql
-	 * @throws SQLException
+	 * @param testSql the sql statement to test the connection
+	 * @return true if the connection is valid, false otherwise
 	 */
-	protected void test(String testSql) throws SQLException {
-		try (Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(testSql)) {
-			while (rs.next()) {
+	protected boolean isValid(String testSql) {
+		logger.debug("Entering isValid: testSql='{}'", testSql);
+
+		Objects.requireNonNull(testSql, "testSql must not be null");
+
+		boolean valid = false;
+
+		try {
+			if (testSql.equals("isValid")) {
+				//use jdbc 4 connection isValid method
+				final int TIMEOUT_SECONDS = 10;
+				valid = conn.isValid(TIMEOUT_SECONDS);
+			} else {
+				try (Statement st = conn.createStatement()) {
+					st.executeQuery(testSql);
+					//if no exception thrown, connection is valid
+					valid = true;
+				}
 			}
+		} catch (SQLException ex) {
+			logger.error("Connection test failed", ex);
 		}
+
+		return valid;
 	}
 
 	/**
+	 * Determine if the connection is currently in use
 	 *
-	 * @return
+	 * @return true if the connection is in use, false otherwise
 	 */
 	public boolean isInUse() {
 		return inUse;
 	}
 
 	/**
+	 * Get the number of clients/threads who are using this connection
 	 *
-	 * @return
+	 * @return the number of clients/threads who are using this connection
 	 */
 	public int getInUseCount() {
 		return inUseCount;
 	}
 
 	/**
-	 * The last time that the connection was requested
+	 * The last time that the connection was opened (requested)
 	 *
-	 * @return
+	 * @return last time that the connection was opened (requested) as
+	 * milliseconds
 	 */
 	public long getLastOpenTime() {
 		return lastOpenTime;
+	}
+
+	/**
+	 * The last time that the connection was closed (returned to the pool)
+	 *
+	 * @return last time that the connection was closed (returned to the pool)
+	 * as milliseconds
+	 *
+	 * @since 3.0.0
+	 */
+	public long getLastCloseTime() {
+		return lastCloseTime;
 	}
 
 	/**

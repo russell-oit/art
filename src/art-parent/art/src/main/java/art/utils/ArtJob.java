@@ -90,7 +90,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ArtJob implements Job, Serializable {
 
-	private static final long serialVersionUID = 2L; //implement serializable to enable job object in session to be serialized
+	private static final long serialVersionUID = 1L; //implement serializable to enable job object in session to be serialized
 	private static final Logger logger = LoggerFactory.getLogger(ArtJob.class);
 	String username, outputFormat, tos, from, message, queryName, subject;
 	String enableAudit = "N";
@@ -2962,10 +2962,10 @@ public class ArtJob implements Job, Serializable {
 	private Mailer getMailer() {
 		Mailer mailer = new Mailer();
 		
-		mailer.setSmtpServer(ArtConfig.getSettings().getSmtpServer());
-		mailer.setSmtpPort(ArtConfig.getSettings().getSmtpPort());
+		mailer.setHost(ArtConfig.getSettings().getSmtpServer());
+		mailer.setPort(ArtConfig.getSettings().getSmtpPort());
 		mailer.setUseStartTls(ArtConfig.getSettings().isSmtpUseStartTls());
-		mailer.setUseSmtpAuthentication(ArtConfig.getSettings().isUseSmtpAuthentication());
+		mailer.setUseAuthentication(ArtConfig.getSettings().isUseSmtpAuthentication());
 		mailer.setUsername(ArtConfig.getSettings().getSmtpUsername());
 		mailer.setPassword(ArtConfig.getSettings().getSmtpPassword());
 

@@ -16,10 +16,10 @@
 package art.mail;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import javax.activation.DataHandler;
-import javax.activation.FileDataSource;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
@@ -42,29 +42,29 @@ public class Mailer {
 	private String username;
 	private String password;
 	private List<File> attachments;
-	private String smtpServer;
-	private int smtpPort;
-	private boolean sessionDebug;
+	private String host;
+	private int port;
+	private boolean debug;
 	private String[] cc;
 	private String[] bcc;
 	private boolean useStartTls;
 	private boolean sendPartial = true;
-	private String messageType = "text/html;charset=utf-8";
-	private boolean useSmtpAuthentication;
+	private String messageType;
+	private boolean useAuthentication;
 	private static final String[] EMPTY_STRING_ARRAY = {};
 
 	/**
-	 * @return the useSmtpAuthentication
+	 * @return the useAuthentication
 	 */
-	public boolean isUseSmtpAuthentication() {
-		return useSmtpAuthentication;
+	public boolean isUseAuthentication() {
+		return useAuthentication;
 	}
 
 	/**
-	 * @param useSmtpAuthentication the useSmtpAuthentication to set
+	 * @param useAuthentication the useAuthentication to set
 	 */
-	public void setUseSmtpAuthentication(boolean useSmtpAuthentication) {
-		this.useSmtpAuthentication = useSmtpAuthentication;
+	public void setUseAuthentication(boolean useAuthentication) {
+		this.useAuthentication = useAuthentication;
 	}
 
 	/**
@@ -205,43 +205,43 @@ public class Mailer {
 	 *
 	 * @return
 	 */
-	public String getSmtpServer() {
-		return smtpServer;
+	public String getHost() {
+		return host;
 	}
 
 	/**
-	 * @param smtpServer the smtpServer to set
+	 * @param host the host to set
 	 */
-	public void setSmtpServer(String smtpServer) {
-		this.smtpServer = smtpServer;
+	public void setHost(String host) {
+		this.host = host;
 	}
 
 	/**
-	 * @return the smtpPort
+	 * @return the port
 	 */
-	public int getSmtpPort() {
-		return smtpPort;
+	public int getPort() {
+		return port;
 	}
 
 	/**
-	 * @param smtpPort the smtpPort to set
+	 * @param port the port to set
 	 */
-	public void setSmtpPort(int smtpPort) {
-		this.smtpPort = smtpPort;
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 	/**
-	 * @return the sessionDebug
+	 * @return the debug
 	 */
-	public boolean isSessionDebug() {
-		return sessionDebug;
+	public boolean isDebug() {
+		return debug;
 	}
 
 	/**
-	 * @param sessionDebug the sessionDebug to set
+	 * @param debug the debug to set
 	 */
-	public void setSessionDebug(boolean sessionDebug) {
-		this.sessionDebug = sessionDebug;
+	public void setDebug(boolean debug) {
+		this.debug = debug;
 	}
 
 	/**
@@ -342,21 +342,25 @@ public class Mailer {
 	 * Send the email
 	 *
 	 * @throws MessagingException
+	 * @throws java.io.IOException
 	 */
-	public void send() throws MessagingException {
+	public void send() throws MessagingException, IOException {
 		logger.debug("Entering send");
 
-		//Set smtp properties
+		//Set session properties
 		Properties props = new Properties();
+
+		logger.debug("port={}", port);
+		logger.debug("host='{}'", host);
+		props.put("mail.smtp.port", port);
+		props.put("mail.smtp.host", host);
 
 		logger.debug("useStartTls={}", useStartTls);
 		props.put("mail.smtp.starttls.enable", useStartTls);
 
-		logger.debug("smtpPort={}", smtpPort);
-		logger.debug("smtpServer='{}'", smtpServer);
-		props.put("mail.smtp.port", smtpPort);
-		props.put("mail.smtp.host", smtpServer);
-
+		//TODO needed if using transport overload with user and password?
+//		logger.debug("useAuthentication={}", useAuthentication);
+//		props.put("mail.smtp.auth", useAuthentication);
 		//If you're sending to multiple recipients, if one recipient address fails,
 		//by default no email is sent to the other recipients
 		//set the sendpartial property to true to have emails sent to the valid addresses,
@@ -364,22 +368,11 @@ public class Mailer {
 		logger.debug("sendPartial={}", sendPartial);
 		props.put("mail.smtp.sendpartial", sendPartial);
 
-		logger.debug("username='{}'", username);
+		logger.debug("debug={}", debug);
+		props.put("mail.debug", debug);
 
 		//get Session            
-		Session session;
-		logger.debug("useSmtpAuthentication={}", useSmtpAuthentication);
-		if (useSmtpAuthentication) {
-			props.put("mail.smtp.auth", "true");
-			Authenticator auth = new SMTPAuthenticator();
-			session = Session.getInstance(props, auth);
-		} else {
-			session = Session.getDefaultInstance(props, null);
-		}
-
-		//enable session debug
-		logger.debug("sessionDebug={}", sessionDebug);
-		session.setDebug(sessionDebug);
+		Session session = Session.getInstance(props);
 
 		// Create a message
 		Message msg = new MimeMessage(session);
@@ -394,6 +387,7 @@ public class Mailer {
 			logger.debug("to.length={}", to.length);
 			InternetAddress[] addressTo = new InternetAddress[to.length];
 			for (int i = 0; i < to.length; i++) {
+				logger.debug("to[{}]='{}'", i, to[i]);
 				addressTo[i] = new InternetAddress(to[i]);
 			}
 			msg.setRecipients(Message.RecipientType.TO, addressTo);
@@ -405,6 +399,7 @@ public class Mailer {
 			logger.debug("cc.length={}", cc.length);
 			InternetAddress[] addressCc = new InternetAddress[cc.length];
 			for (int i = 0; i < cc.length; i++) {
+				logger.debug("cc[{}]='{}'", i, cc[i]);
 				addressCc[i] = new InternetAddress(cc[i]);
 			}
 			msg.setRecipients(Message.RecipientType.CC, addressCc);
@@ -416,6 +411,7 @@ public class Mailer {
 			logger.debug("bcc.length={}", bcc.length);
 			InternetAddress[] addressBcc = new InternetAddress[bcc.length];
 			for (int i = 0; i < bcc.length; i++) {
+				logger.debug("bcc[{}]='{}'", i, bcc[i]);
 				addressBcc[i] = new InternetAddress(bcc[i]);
 			}
 			msg.setRecipients(Message.RecipientType.BCC, addressBcc);
@@ -425,7 +421,11 @@ public class Mailer {
 		logger.debug("subject='{}'", subject);
 		msg.setSubject(subject);
 
-		//add attachments if available
+		//set message content
+		final String DEFAULT_MESSAGE_TYPE = "text/html;charset=utf-8";
+		if (messageType == null) {
+			messageType = DEFAULT_MESSAGE_TYPE;
+		}
 		logger.debug("message='{}'", message);
 		logger.debug("messageType='{}'", messageType);
 		logger.debug("(attachments == null) = {}", attachments == null);
@@ -434,42 +434,32 @@ public class Mailer {
 		} else {
 			MimeMultipart mp = new MimeMultipart();
 
-			MimeBodyPart text = new MimeBodyPart();
-			text.setDisposition(Part.INLINE);
-			text.setContent(message, messageType);
+			MimeBodyPart textPart = new MimeBodyPart();
+			textPart.setDisposition(Part.INLINE);
+			textPart.setContent(message, messageType);
 
-			mp.addBodyPart(text);
+			mp.addBodyPart(textPart);
 
 			logger.debug("attachments.size()={}", attachments.size());
 			for (File file : attachments) {
 				MimeBodyPart filePart = new MimeBodyPart();
-
-				FileDataSource fds = new FileDataSource(file);
-				DataHandler dh = new DataHandler(fds);
-
-				logger.debug("file.getName()='{}'", file.getName());
-				filePart.setFileName(file.getName());
-				filePart.setDisposition(Part.ATTACHMENT);
-				filePart.setDescription("Attached file: " + file.getName());
-				filePart.setDataHandler(dh);
-
+				filePart.attachFile(file);
 				mp.addBodyPart(filePart);
 			}
 
 			msg.setContent(mp);
 		}
 
+		//set sent date (sets date headers)
+		msg.setSentDate(new Date());
+
 		// Send the email
-		Transport.send(msg);
-
-		logger.debug("Leaving send");
-	}
-
-	private class SMTPAuthenticator extends Authenticator {
-
-		@Override
-		public PasswordAuthentication getPasswordAuthentication() {
-			return new PasswordAuthentication(getUsername(), getPassword());
+		logger.debug("useAuthentication={}", useAuthentication);
+		if (useAuthentication) {
+			logger.debug("username='{}'", username);
+			Transport.send(msg, username, password);
+		} else {
+			Transport.send(msg);
 		}
 	}
 }

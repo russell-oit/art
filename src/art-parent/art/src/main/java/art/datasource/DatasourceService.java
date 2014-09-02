@@ -56,44 +56,6 @@ public class DatasourceService {
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_DATABASES";
 
 	/**
-	 * Class to map resultset to an object
-	 */
-	private class DatasourceMapper extends BasicRowProcessor {
-
-		@Override
-		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
-			List<T> list = new ArrayList<>();
-			while (rs.next()) {
-				list.add(toBean(rs, type));
-			}
-			return list;
-		}
-
-		@Override
-		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-			Datasource datasource = new Datasource();
-
-			datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
-			datasource.setName(rs.getString("NAME"));
-			datasource.setDescription(rs.getString("DESCRIPTION"));
-			datasource.setJndi(rs.getBoolean("JNDI"));
-			datasource.setDriver(rs.getString("DRIVER"));
-			datasource.setUrl(rs.getString("URL"));
-			datasource.setUsername(rs.getString("USERNAME"));
-			datasource.setPassword(rs.getString("PASSWORD"));
-			datasource.setConnectionPoolTimeout(rs.getInt("POOL_TIMEOUT"));
-			datasource.setTestSql(rs.getString("TEST_SQL"));
-			datasource.setActive(rs.getBoolean("ACTIVE"));
-			datasource.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-			datasource.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-			datasource.setCreatedBy(rs.getString("CREATED_BY"));
-			datasource.setUpdatedBy(rs.getString("UPDATED_BY"));
-
-			return type.cast(datasource);
-		}
-	}
-
-	/**
 	 * Get all datasources
 	 *
 	 * @return list of all datasources, empty list otherwise

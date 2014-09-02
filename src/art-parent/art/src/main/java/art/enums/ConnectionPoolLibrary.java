@@ -83,13 +83,4 @@ public enum ConnectionPoolLibrary {
 		return value;
 	}
 
-	/**
-	 * Get description message string for use in the user interface.
-	 *
-	 * @return
-	 */
-	public String getLocalizedDescription() {
-		return value;
-	}
-
 }

@@ -50,7 +50,7 @@ public class ConnectionController {
 			ds.refreshConnections();
 			response.setSuccess(true);
 			response.setPoolSize(ds.getCurrentPoolSize());
-			response.setInUseCount(ds.getTotalInUseCount());
+			response.setInUseCount(ds.getInUseCount());
 		} else {
 			response.setErrorMessage("Connection pool not found: " + id);
 		}

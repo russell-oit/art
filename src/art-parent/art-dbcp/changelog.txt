@@ -1,5 +1,6 @@
 art-dbcp 3.0.0
 * Use slf4j for logging
-* Implemented javax.sql.DataSource
+* Implemented javax.sql.DataSource interface
 * Renamed DataSource class to ArtDBCPDataSource
+* Renamed EnhancedConnection class to PooledConnection
 * Requires Java 7

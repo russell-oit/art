@@ -18,19 +18,20 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabase;
 import art.dbcp.ArtDBCPDataSource;
+import art.dbutils.DbConnections;
 import art.dbutils.DbService;
+import art.dbutils.DbUtils;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
+import art.enums.ParameterDataType;
+import art.enums.ParameterType;
 import art.enums.PdfPageSize;
+import art.settings.CustomSettings;
 import art.settings.Settings;
 import art.utils.ArtJob;
 import art.utils.ArtUtils;
-import art.dbutils.DbUtils;
-import art.enums.ParameterDataType;
-import art.enums.ParameterType;
-import art.settings.CustomSettings;
 import art.utils.Encrypter;
 import art.utils.QuartzProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +50,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,8 +140,8 @@ public class ArtConfig extends HttpServlet {
 				Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
 			}
 
-			//close connections in the art-dbcp connection pool
-			clearConnections();
+			//close database connections
+			DbConnections.closeAllConnections();
 
 			//deregister jdbc drivers
 			Enumeration<Driver> drivers = DriverManager.getDrivers();
@@ -262,8 +262,8 @@ public class ArtConfig extends HttpServlet {
 		//initialize datasources
 		initializeDatasources();
 	}
-	
-	public static Map<String,Class<?>> getDirectOutputReportClasses(){
+
+	public static Map<String, Class<?>> getDirectOutputReportClasses() {
 		return directOutputReportClasses;
 	}
 
@@ -324,119 +324,23 @@ public class ArtConfig extends HttpServlet {
 			return;
 		}
 
-		//initialize art datasource
-		String artDbDriver = artDatabaseConfiguration.getDriver();
-		int artDbPoolTimeout = artDatabaseConfiguration.getConnectionPoolTimeout();
-		int maxPoolConnections = artDatabaseConfiguration.getMaxPoolConnections();
-		boolean artDbjndi = artDatabaseConfiguration.isJndi();
-
-		ArtDBCPDataSource artdb = new ArtDBCPDataSource(artDbPoolTimeout * 60L);
-		artdb.setPoolName("ART Database");  //custom name
-		artdb.setUrl(artDatabaseConfiguration.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
-		artdb.setUsername(artDatabaseConfiguration.getUsername());
-		artdb.setPassword(artDatabaseConfiguration.getPassword());
-		artdb.setMaxPoolSize(maxPoolConnections);
-		artdb.setDriverClassName(artDbDriver);
-		artdb.setTestSql(artDatabaseConfiguration.getTestSql());
-
-		//set application name connection property
-		setConnectionProperties(artdb);
-
-		//populate dataSources map
-		dataSources = null;
-		dataSources = new LinkedHashMap<>();
-
-		//add art repository database to the dataSources map ("id" = 0). 
-		//it's not explicitly defined from the admin console
-		dataSources.put(Integer.valueOf(0), artdb);
-
-		//register art database driver. must do this before getting details of other datasources
-		if (StringUtils.isNotBlank(artDbDriver)) {
-			try {
-				Class.forName(artDbDriver).newInstance();
-				logger.info("ART Database JDBC driver registered: {}", artDbDriver);
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-				logger.error("Error while registering ART Database JDBC driver: {}", artDbDriver, ex);
-			}
-		}
-
-		//add explicitly defined datasources
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
 		try {
-			conn = artdb.getConnection();
+			//create connection pools
+			DbConnections.createConnectionPools(settings, artDatabaseConfiguration);
 
-			// ordered by NAME to have datasources inserted in order in the
-			//LinkedHashMap dataSources (note: first item is always the ArtRepository)
-			String sql = "SELECT *"
-					+ " FROM ART_DATABASES"
-					+ " WHERE ACTIVE=1"
-					+ " ORDER BY NAME";
-			ps = conn.prepareStatement(sql);
+			//create quartz scheduler
+			createQuartzScheduler();
 
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int timeout = rs.getInt("POOL_TIMEOUT");
-				boolean jndi = rs.getBoolean("JNDI");
+			//migrate existing jobs to quartz, if any exist from previous art versions
+			//quartz scheduler needs to be available
+			migrateJobsToQuartz();
 
-				ArtDBCPDataSource ds = new ArtDBCPDataSource(timeout);
-				ds.setPoolName(rs.getString("NAME"));
-				ds.setUrl(rs.getString("URL"));
-				ds.setUsername(rs.getString("USERNAME"));
-				String password = rs.getString("PASSWORD");
-				// decrypt password if stored encrypted
-				if (password.startsWith("o:")) {
-					password = Encrypter.decrypt(password.substring(2));
-				}
-				ds.setPassword(password);
-				ds.setTestSql(rs.getString("TEST_SQL"));
-				ds.setMaxPoolSize(maxPoolConnections);
-				ds.setDriverClassName(rs.getString("DRIVER"));
-
-				//set application name connection property
-				setConnectionProperties(ds);
-
-				dataSources.put(Integer.valueOf(rs.getInt("DATABASE_ID")), ds);
-			}
-		} catch (SQLException e) {
-			logger.error("Error", e);
-		} finally {
-			DbUtils.close(rs, ps, conn);
+			//run additional steps
+			upgrade();
+		} catch (NamingException | SQLException ex) {
+			logger.error("Error", ex);
 		}
 
-		//register jdbc drivers for datasources in the map
-		//only register a driver once. several datasources may use the same driver
-		//use a set (doesn't add duplicate items)
-		Set<String> drivers = new HashSet<>();
-
-		//get distinct drivers. except art database driver which has already been registered
-		if (dataSources != null) {
-			for (ArtDBCPDataSource ds : dataSources.values()) {
-				if (ds != null && !StringUtils.equals(ds.getDriverClassName(), artDbDriver)) {
-					drivers.add(ds.getDriverClassName());
-				}
-			}
-		}
-
-		//register drivers
-		for (String driver : drivers) {
-			if (StringUtils.isNotBlank(driver)) {
-				try {
-					Class.forName(driver).newInstance();
-					logger.info("Datasource JDBC driver registered: {}", driver);
-				} catch (Exception e) {
-					logger.error("Error while registering Datasource JDBC driver: {}", driver, e);
-				}
-			}
-		}
-
-		//create quartz scheduler
-		createQuartzScheduler();
-
-		//run additional steps
-		upgrade();
 	}
 
 	//TODO remove after refactoring
@@ -503,7 +407,7 @@ public class ArtConfig extends HttpServlet {
 	public static String getHsqldbPath() {
 		return webinfPath + "hsqldb" + sep;
 	}
-	
+
 	/**
 	 * Get full path to the classes directory.
 	 *
@@ -1058,10 +962,6 @@ public class ArtConfig extends HttpServlet {
 		} catch (IOException | SchedulerException ex) {
 			logger.error("Error", ex);
 		}
-
-		//migrate existing jobs to quartz, if any exist from previous art versions
-		//quartz scheduler needs to be available
-		migrateJobsToQuartz();
 	}
 
 	/**
@@ -1242,9 +1142,9 @@ public class ArtConfig extends HttpServlet {
 	 * Migrate existing jobs created in art versions before 1.11 to quartz jobs
 	 *
 	 */
-	private static void migrateJobsToQuartz() {
+	private static void migrateJobsToQuartz() throws SQLException {
 
-		Connection conn = ArtConfig.getConnection();
+		Connection conn = DbConnections.getArtDbConnection();
 
 		if (conn == null) {
 			logger.info("Can't migrate jobs to Quartz. Connection to ART repository not available");
@@ -1425,7 +1325,7 @@ public class ArtConfig extends HttpServlet {
 				logger.debug("version='{}'", version);
 
 				//changes introduced in 3.0
-				if (StringUtils.equals(version,"3.0")){
+				if (StringUtils.equals(version, "3.0")) {
 					logger.info("Performing 3.0 upgrade steps");
 
 					addUserIds();

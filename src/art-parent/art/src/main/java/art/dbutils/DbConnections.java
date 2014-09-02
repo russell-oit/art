@@ -18,23 +18,27 @@
 package art.dbutils;
 
 import art.artdatabase.ArtDatabase;
+import art.datasource.Datasource;
+import art.datasource.DatasourceMapper;
 import art.dbcp.ArtDBCPDataSource;
 import art.enums.ConnectionPoolLibrary;
 import art.settings.Settings;
-import art.utils.Encrypter;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.Set;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.apache.commons.dbutils.QueryRunner;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,163 +51,140 @@ public class DbConnections {
 
 	private static final Logger logger = LoggerFactory.getLogger(DbConnections.class);
 
-	private static Map<Integer, DataSource> connectionPoolMap; //use a LinkedHashMap that should store items sorted as per the order the items are inserted in the map...
+	private static Map<Integer, ConnectionPoolWrapper> connectionPoolMap;
 
-	private static void createConnectionPools(Settings artSettings, ArtDatabase artDbConfig) {
+	public static void createConnectionPools(Settings artSettings, ArtDatabase artDbConfig) throws NamingException, SQLException {
 		Objects.requireNonNull(artSettings, "artSettings must not be null");
+		Objects.requireNonNull(artDbConfig, "artDbConfig must not be null");
 
 		ConnectionPoolLibrary connectionPoolLibrary = artSettings.getConnectionPoolLibrary();
 
-		if (connectionPoolLibrary == ConnectionPoolLibrary.HikariCP) {
-
-		} else {
-			createArtDBCPConnectionPools(artDbConfig);
-		}
-	}
-
-	private static void createHikariCPConnectionPools() {
-		HikariConfig config = new HikariConfig();
-		config.setMaximumPoolSize(100);
-		config.setJdbcUrl(null);
-		config.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDataSource");
-		config.addDataSourceProperty("serverName", "localhost");
-		config.addDataSourceProperty("port", "3306");
-		config.addDataSourceProperty("databaseName", "mydb");
-		config.addDataSourceProperty("user", "bart");
-		config.addDataSourceProperty("password", "51mp50n");
-
-		HikariDataSource ds = new HikariDataSource(config);
-	}
-
-	private static void createArtDBCPConnectionPools(ArtDatabase artDbConfig) {
-
-		if (artDbConfig == null) {
-			return;
-		}
-
-		//create art database connection pool
-		String artDbDriver = artDbConfig.getDriver();
-		int artDbPoolTimeoutInMins = artDbConfig.getConnectionPoolTimeout();
-		long artDbPoolTimeoutInSeconds = artDbPoolTimeoutInMins * 60L;
+		//reset pools map
+		closeAllConnections();
+		connectionPoolMap = new HashMap<>();
 
 		int maxPoolSize = artDbConfig.getMaxPoolConnections(); //will apply to all connection pools
 
-		ArtDBCPDataSource artDbPool = new ArtDBCPDataSource(artDbPoolTimeoutInSeconds);
-		artDbPool.setPoolName("ART Database");
-		artDbPool.setJndi(artDbConfig.isJndi());
-		artDbPool.setUrl(artDbConfig.getUrl()); //for jndi datasources, the url contains the jndi name/resource reference
-		artDbPool.setUsername(artDbConfig.getUsername());
-		artDbPool.setPassword(artDbConfig.getPassword());
-		artDbPool.setMaxPoolSize(maxPoolSize);
-		artDbPool.setDriverClassName(artDbDriver);
-		artDbPool.setTestSql(artDbConfig.getTestSql());
+		//create art database connection pool
+		Datasource ds = new Datasource();
+		ds.setName("ART Database");
+		ds.setDatasourceId(0); //custom id for the art database
+		ds.setJndi(artDbConfig.isJndi());
+		ds.setUrl(artDbConfig.getUrl());
+		ds.setDriver(artDbConfig.getDriver());
+		ds.setConnectionPoolTimeout(artDbConfig.getConnectionPoolTimeout());
+		ds.setUsername(artDbConfig.getUsername());
+		ds.setPassword(artDbConfig.getPassword());
+		ds.setTestSql(artDbConfig.getTestSql());
 
-		//set application name connection property
-		setConnectionProperties(artDbPool);
-
-		//populate pools map
-		connectionPoolMap = null;
-		connectionPoolMap = new HashMap<>();
-
-		//add art repository database to the connection pool map. 
-		//"id" = 0. it's not explicitly defined in the admin console
-		connectionPoolMap.put(0, artDbPool);
-
-		//register art database driver. must do this before getting details of other datasources
-		if (StringUtils.isNotBlank(artDbDriver)) {
-			try {
-				Class.forName(artDbDriver).newInstance();
-				logger.info("ART Database JDBC driver registered: {}", artDbDriver);
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-				logger.error("Error while registering ART Database JDBC driver: {}", artDbDriver, ex);
-			}
-		}
+		createConnectionPool(ds, maxPoolSize, connectionPoolLibrary);
 
 		//create connection pools for report datasources
 		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		//save driver names for later registration
-		//only register a driver once. several datasources may use the same driver
-		//use a set (doesn't add duplicate items)
-		Set<String> datasourceDrivers = new HashSet<>();
 
 		try {
-			conn = artDbPool.getConnection();
+			//don't use DbService to avoid circular references
+			conn = getArtDbConnection();
 
 			String sql = "SELECT *"
 					+ " FROM ART_DATABASES"
 					+ " WHERE ACTIVE=1";
-			ps = conn.prepareStatement(sql);
 
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int timeoutInMins = rs.getInt("POOL_TIMEOUT");
-				long timeoutInSeconds = timeoutInMins * 60L;
+			ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 
-				ArtDBCPDataSource pool = new ArtDBCPDataSource(timeoutInSeconds);
-				pool.setPoolName(rs.getString("NAME")); //use the datasoure name as the connection pool name
-				pool.setJndi(rs.getBoolean("JNDI"));
-				pool.setUrl(rs.getString("URL"));
-				pool.setUsername(rs.getString("USERNAME"));
-				String password = rs.getString("PASSWORD");
-				// decrypt password if stored encrypted
-				if (password.startsWith("o:")) {
-					password = Encrypter.decrypt(password.substring(2));
-				}
-				pool.setPassword(password);
-				pool.setTestSql(rs.getString("TEST_SQL"));
-				pool.setMaxPoolSize(maxPoolSize);
-				String driver = rs.getString("DRIVER");
-				pool.setDriverClassName(driver);
-
-				//set application name connection property
-				setConnectionProperties(pool);
-
-				connectionPoolMap.put(rs.getInt("DATABASE_ID"), pool);
-
-				//save driver name for later registration
-				if (!StringUtils.equals(driver, artDbDriver)) {
-					//art database driver is already registered
-					datasourceDrivers.add(driver);
-				}
+			QueryRunner run = new QueryRunner();
+			List<Datasource> datasources = run.query(conn, sql, h);
+			for (Datasource datasource : datasources) {
+				createConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
 			}
-		} catch (SQLException e) {
-			logger.error("Error", e);
 		} finally {
-			DbUtils.close(rs, ps, conn);
+			DbUtils.close(conn);
 		}
-
-		registerDrivers(datasourceDrivers);
 	}
 
-	private static void registerDrivers(Set<String> drivers) {
-		//register jdbc drivers for datasources in the map
-		//only register a driver once. several datasources may use the same driver
-		//use a set (doesn't add duplicate items)
+	private static DataSource createArtDBCPConnectionPool(Datasource ds, int maxPoolSize) {
+		long timeoutSeconds = ds.getConnectionPoolTimeout() * 60L;  //convert timeout mins to seconds
+		ArtDBCPDataSource pool = new ArtDBCPDataSource(timeoutSeconds);
 
-		Objects.requireNonNull(drivers, "drivers must not be null");
+		pool.setPoolName(ds.getName()); //use the datasoure name as the connection pool name
+		pool.setUsername(ds.getUsername());
+		pool.setPassword(ds.getPassword());
+		pool.setMaxPoolSize(maxPoolSize);
+		pool.setUrl(ds.getUrl());
+		pool.setDriverClassName(ds.getDriver());
+		pool.setTestSql(ds.getTestSql());
 
-		for (String driver : drivers) {
-			if (StringUtils.isNotBlank(driver)) {
-				//blank is valid. for jndi datasources
-				try {
-					Class.forName(driver).newInstance();
-					logger.info("Datasource JDBC driver registered: {}", driver);
-				} catch (ClassNotFoundException | IllegalAccessException | InstantiationException ex) {
-					logger.error("Error while registering Datasource JDBC driver: {}", driver, ex);
-				}
-			}
+		//set application name connection property
+		pool.setConnectionProperties(getAppNameProperty(ds.getUrl(), ds.getName()));
+
+		return pool;
+	}
+
+	private static DataSource createHikariCPConnectionPool(Datasource ds, int maxPoolSize) {
+		HikariConfig config = new HikariConfig();
+
+		config.setPoolName(ds.getName());
+		config.setUsername(ds.getUsername());
+		config.setPassword(ds.getPassword());
+		config.setMaximumPoolSize(maxPoolSize);
+		config.setJdbcUrl(ds.getUrl());
+		config.setDriverClassName(ds.getDriver());
+		if (StringUtils.equals(ds.getTestSql(), "isValid")) {
+			config.setJdbc4ConnectionTest(true);
+		} else {
+			config.setJdbc4ConnectionTest(false);
+			config.setConnectionTestQuery(ds.getTestSql());
+		}
+
+		long idleTimeoutMillis = ds.getConnectionPoolTimeout() * 60L * 1000L;  //convert timeout mins to milliseconds
+		config.setIdleTimeout(idleTimeoutMillis);
+
+		//set application name connection property
+		config.setDataSourceProperties(getAppNameProperty(ds.getUrl(), ds.getName()));
+
+		return new HikariDataSource(config);
+	}
+
+	private static void createConnectionPool(Datasource ds, int maxPoolSize,
+			ConnectionPoolLibrary connectionPoolLibrary) throws NamingException {
+
+		DataSource pool;
+
+		if (ds.isJndi()) {
+			//for jndi datasources, the url contains the jndi name/resource reference
+			pool = getJndiDataSource(ds.getUrl());
+		} else if (connectionPoolLibrary == ConnectionPoolLibrary.HikariCP) {
+			pool = createHikariCPConnectionPool(ds, maxPoolSize);
+			//hikaricp registers drivers when setdriverclassname is called
+		} else {
+			//use art-dbcp
+			pool = createArtDBCPConnectionPool(ds, maxPoolSize);
+			registerDriver(ds.getDriver());
+		}
+
+		ConnectionPoolWrapper wrapper = new ConnectionPoolWrapper(pool);
+		wrapper.setPoolName(ds.getName());
+		wrapper.setPoolId(ds.getDatasourceId());
+
+		//add art database to the connection pool map. 
+		connectionPoolMap.put(wrapper.getPoolId(), wrapper);
+	}
+
+	private static void registerDriver(String driver) {
+		try {
+			Class.forName(driver).newInstance();
+			logger.info("JDBC driver registered: {}", driver);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+			logger.error("Error while registering JDBC driver: '{}'", driver, ex);
 		}
 	}
 
 	/**
-	 * Set application name connection property to identify ART connections
+	 * Get application name connection property to identify ART connections
 	 *
 	 * @param pool
 	 */
-	private static void setConnectionProperties(ArtDBCPDataSource pool) {
+	private static Properties getAppNameProperty(String dbUrl, String poolName) {
 		//ApplicationName property
 		//see http://docs.oracle.com/javase/7/docs/api/java/sql/Connection.html#setClientInfo%28java.lang.String,%20java.lang.String%29
 		//has different name and maxlength for different drivers
@@ -213,8 +194,7 @@ public class DbConnections {
 
 		Properties properties = new Properties();
 
-		String connectionName = "ART - " + pool.getPoolName();
-		String dbUrl = pool.getUrl();
+		String connectionName = "ART - " + poolName;
 
 		if (StringUtils.startsWith(dbUrl, "jdbc:oracle")) {
 			properties.put("v$session.program", connectionName);
@@ -233,28 +213,32 @@ public class DbConnections {
 			properties.put("ApplicationName", connectionName);
 		}
 
-		//some drivers don't seem to define
-		pool.setConnectionProperties(properties);
+		return properties;
 	}
 
 	/**
 	 * Get a database connection from the connection pool for the datasource
-	 * with the given ID from the connection
+	 * with the given ID
 	 *
 	 * @param datasourceId datasource id. 0 = ART database.
-	 * @return connection to datasource
+	 * @return database connection for the given datasource
 	 * @throws java.sql.SQLException if connection doesn't exist or there was a
 	 * database error
 	 */
 	public static Connection getConnection(int datasourceId) throws SQLException {
+		//some connection pool libraries don't provide a pool name property
+		//so for maximum flexibility don't provide access using datasource name
+		//or implement another map with n
+
 		if (connectionPoolMap == null) {
 			throw new IllegalStateException("connectionPoolMap is null");
 		}
 
-		DataSource pool = connectionPoolMap.get(Integer.valueOf(datasourceId));
-		if (pool == null) {
+		ConnectionPoolWrapper wrapper = connectionPoolMap.get(Integer.valueOf(datasourceId));
+		if (wrapper == null) {
 			throw new SQLException("Connection pool doesn't exist for datasource id " + datasourceId);
 		} else {
+			DataSource pool = wrapper.getPool();
 			return pool.getConnection();
 		}
 
@@ -268,43 +252,72 @@ public class DbConnections {
 	 * @throws java.sql.SQLException
 	 */
 	public static Connection getArtDbConnection() throws SQLException {
-		return getConnection(0); // i=0 => ART Repository
+		return getConnection(0); // i=0 => ART database
 	}
 
 	/**
-	 * Get a datasource connection based on the datasource name.
+	 * Get a database connection from the connection pool for the datasource
+	 * with the given nme
 	 *
-	 * @param name datasource name
-	 * @return connection to the datasource or null if connection doesn't exist
-	 * @throws java.sql.SQLException
+	 * @param datasourceName datasource name
+	 * @return database connection for the given datasource
+	 * @throws java.sql.SQLException if connection doesn't exist or there was a
+	 * database error
 	 */
-	public static Connection getConnection(String name) throws SQLException {
-		if (connectionPoolMap == null) {
-			throw new IllegalStateException("connectionPoolMap is null");
-		}
-
+	public static Connection getConnection(String datasourceName) throws SQLException {
 		Connection conn = null;
-		for (DataSource pool : connectionPoolMap.values()) {
-			if (pool != null) {
-				if (pool instanceof ArtDBCPDataSource) {
-					ArtDBCPDataSource artDbcpPool = (ArtDBCPDataSource) pool;
-					if (StringUtils.equalsIgnoreCase(name, artDbcpPool.getPoolName())) {
-						//this is the required datasource. get connection and exit loop
-						conn = pool.getConnection();
-						break;
-					}
-				} else if (pool instanceof HikariDataSource) {
-					HikariDataSource hikariPool = (HikariDataSource) pool;
-					if (StringUtils.equalsIgnoreCase(name, hikariPool.getPoolName())) {
-						//this is the required datasource. get connection and exit loop
-						conn = pool.getConnection();
-						break;
-					}
-				}
+
+		for (Entry<Integer, ConnectionPoolWrapper> entry : connectionPoolMap.entrySet()) {
+			ConnectionPoolWrapper wrapper = entry.getValue();
+			if (StringUtils.equalsIgnoreCase(wrapper.getPoolName(), datasourceName)) {
+				conn = wrapper.getPool().getConnection();
 			}
 		}
 
 		return conn;
+	}
+
+	private static DataSource getJndiDataSource(String jndiName) throws NamingException {
+		logger.debug("Entering getConnectionFromJndi");
+
+		//throw exception if jndi url is null, rather than returning a null connection, which would be useless
+		Objects.requireNonNull(jndiName, "jndiName must not be null");
+
+		//first time we are getting a connection from jndi. get the jndi datasource object
+		InitialContext ic = new InitialContext();
+		logger.debug("jndiName='{}'", jndiName);
+		String finalJndiName;
+		if (jndiName.startsWith("java:")) {
+			//full jndi name provided. use as is
+			finalJndiName = jndiName;
+		} else {
+			//relative name provided. add default jndi prefix
+			finalJndiName = "java:comp/env/" + jndiName;
+		}
+		logger.debug("finalJndiName='{}'", finalJndiName);
+		return (DataSource) ic.lookup(finalJndiName);
+	}
+
+	/**
+	 * Close all connection pools (really close all connections in all the
+	 * connection pools) and clear and nullify the connection pool map
+	 */
+	public static void closeAllConnections() {
+		if (connectionPoolMap != null) {
+			for (Entry<Integer, ConnectionPoolWrapper> entry : connectionPoolMap.entrySet()) {
+				ConnectionPoolWrapper wrapper = entry.getValue();
+				DataSource ds = wrapper.getPool();
+				if (ds instanceof ArtDBCPDataSource) {
+					ArtDBCPDataSource pool = (ArtDBCPDataSource) ds;
+					pool.close();
+				} else if (ds instanceof HikariDataSource) {
+					HikariDataSource pool = (HikariDataSource) ds;
+					pool.close();
+				}
+			}
+			connectionPoolMap.clear();
+			connectionPoolMap = null;
+		}
 	}
 
 }

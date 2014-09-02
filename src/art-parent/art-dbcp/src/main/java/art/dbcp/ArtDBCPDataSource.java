@@ -24,10 +24,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +32,12 @@ import org.slf4j.LoggerFactory;
 /**
  * This class implements a database connection pool. Features: <ul> <li> The
  * pool dynamically increases/decreases. An unused connection is removed from
- * the pool after <code>timeout</code> seconds. </li> <li> The underlying work is
- * transparent from the developer's point of view. A connection is obtained from
- * the pool using the getConnection() method. A connection is returned to the
- * pool by simply closing the connection (any open statement is automatically
- * closed thus you might not need to close statements and resultsets). </li>
+ * the pool after <code>timeout</code> seconds. </li> <li> The underlying work
+ * is transparent from the developer's point of view. A connection is obtained
+ * from the pool using the getConnection() method. A connection is returned to
+ * the pool by simply closing the connection (any open statement is
+ * automatically closed thus you might not need to close statements and
+ * resultsets). </li>
  * <li>
  * Connections that are open for too long are removed automatically to prevent
  * your application from hanging because of buggy drivers or network problems
@@ -79,20 +77,18 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	private String url;
 	private String username;
 	private String password;
-	private static final long DEFAULT_TIMEOUT = 30 * 60 * 1000; //30 minutes
-	private long timeout = DEFAULT_TIMEOUT; //timeout after which idle connections are closed
-	private static final long DEFAULT_MAX_QUERY_RUNNING_TIME = 20 * 60 * 1000; // 20 minutes
-	private long maxQueryRunningTime; // max running time for a query, before its connection is forcibly removed from the pool
+	private static final long DEFAULT_TIMEOUT_MILLIS = 30 * 60 * 1000; //30 minutes
+	private long timeoutMillis = DEFAULT_TIMEOUT_MILLIS; //timeout after which idle connections are closed
+	private static final long DEFAULT_MAX_QUERY_RUNNING_TIME_MILLIS = 20 * 60 * 1000; // 20 minutes
+	private long maxQueryRunningTimeMillis; // max running time for a query, before its connection is forcibly removed from the pool
 	private long totalConnectionRequests;
 	private int biggestPoolSizeReached;
 	private int maxPoolSize = 10; //max number of underlying connections that can be created
 	private String testSql;
 	LocalTimer t;
-	private final List<EnhancedConnection> pool = new ArrayList<>(maxPoolSize); //stores active connections
+	private final List<PooledConnection> pool = new ArrayList<>(maxPoolSize); //stores active connections
 	private long thisObjectTicket; // for debugging
 	private String driverClassName; //The fully qualified Java class name of the JDBC driver to be used
-	private boolean jndi; //if this is a jndi datasource
-	private DataSource jndiDataSource; //hold the jndi datasource object
 	private Properties connectionProperties; //any additional connection properties, apart from the "user" and "password" properties
 
 	/**
@@ -118,21 +114,24 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 * minutes means a connection problem - this will allow your application to
 	 * run smoothly.
 	 *
-	 * @param timeout
-	 * @param maxQueryRunningTime
+	 * @param timeoutSeconds
+	 * @param maxQueryRunningTimeSeconds
 	 */
-	public ArtDBCPDataSource(long timeout, long maxQueryRunningTime) {
-		if (timeout < 0) {
-			throw new IllegalArgumentException("Invalid timeout - " + timeout
-					+ ". timeout cannot be < 0");
+	public ArtDBCPDataSource(long timeoutSeconds, long maxQueryRunningTimeSeconds) {
+		logger.debug("Entering ArtDBCPDataSource: timeoutSeconds={}, maxQueryRunningTimeSeconds={}",
+				timeoutSeconds, maxQueryRunningTimeSeconds);
+
+		if (timeoutSeconds < 0) {
+			throw new IllegalArgumentException("Invalid timeoutSeconds: " + timeoutSeconds
+					+ ". timeoutSeconds cannot be < 0");
 		}
-		if (maxQueryRunningTime < 0) {
-			throw new IllegalArgumentException("Invalid maxQueryRunningTime - "
-					+ maxQueryRunningTime + ". maxQueryRunningTime cannot be < 0");
+		if (maxQueryRunningTimeSeconds < 0) {
+			throw new IllegalArgumentException("Invalid maxQueryRunningTimeSeconds: "
+					+ maxQueryRunningTimeSeconds + ". maxQueryRunningTimeSeconds cannot be < 0");
 		}
 
-		this.timeout = timeout * 1000;
-		this.maxQueryRunningTime = maxQueryRunningTime * 1000;
+		this.timeoutMillis = timeoutSeconds * 1000;
+		this.maxQueryRunningTimeMillis = maxQueryRunningTimeSeconds * 1000;
 		startTimer();
 	}
 
@@ -143,7 +142,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 * @param timeout
 	 */
 	public ArtDBCPDataSource(long timeout) {
-		this(timeout, DEFAULT_MAX_QUERY_RUNNING_TIME);
+		this(timeout, DEFAULT_MAX_QUERY_RUNNING_TIME_MILLIS);
 	}
 
 	/**
@@ -152,50 +151,31 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 *
 	 */
 	public ArtDBCPDataSource() {
-		this(DEFAULT_TIMEOUT, DEFAULT_MAX_QUERY_RUNNING_TIME);
+		this(DEFAULT_TIMEOUT_MILLIS, DEFAULT_MAX_QUERY_RUNNING_TIME_MILLIS);
 	}
 
 	private void startTimer() {
 		logger.debug("Entering startTimer");
 
-		logger.debug("jndi={}", jndi);
-		if (!jndi) {
-			logger.debug("timeout={}", timeout);
+		logger.debug("timeoutMillis={}", timeoutMillis);
 
-			// Start timer for connection timeout
-			t = new LocalTimer((TimerListener) this, timeout);
-			t.start();
+		// Start timer for connection timeout
+		t = new LocalTimer((TimerListener) this, timeoutMillis);
+		t.start();
 
-			thisObjectTicket = System.currentTimeMillis();
-			logger.debug("thisObjectTicket={}", thisObjectTicket);
+		thisObjectTicket = System.currentTimeMillis();
+		logger.debug("thisObjectTicket={}", thisObjectTicket);
 
-			try {
-				//set maximum time to wait for a connection to be made.
-				//some drivers may not honour this, instead using a url parameter e.g. mysql connector/j
-				//see https://stackoverflow.com/questions/1683949/connection-timeout-for-drivermanager-getconnection
-				DriverManager.setLoginTimeout(10);
-			} catch (Exception ex) {
-				logger.error("Driver not able to set login timeout", ex);
-			}
+		try {
+			//set maximum time to wait for a connection to be made.
+			//some drivers may not honour this, using a url parameter instead e.g. mysql connector/j
+			//see https://stackoverflow.com/questions/1683949/connection-timeout-for-drivermanager-getconnection
+			final int TIMEOUT_SECONDS = 10;
+			DriverManager.setLoginTimeout(TIMEOUT_SECONDS);
+		} catch (Exception ex) {
+			logger.error("Driver not able to set login timeout", ex);
 		}
-
 	}
-
-	/**
-	 * @return the jndi
-	 */
-	public boolean isJndi() {
-		return jndi;
-	}
-
-	/**
-	 * @param jndi the jndi to set
-	 */
-	public void setJndi(boolean jndi) {
-		this.jndi = jndi;
-	}
-	
-	
 
 	/**
 	 * @return the connectionProperties
@@ -205,8 +185,8 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	}
 
 	/**
-	 * Properties to be used when making the connection, apart from the "user"
-	 * and "password" properties
+	 * Set additional properties to be passed to the jdbc driver when making the
+	 * connection, apart from the "user" and "password" properties
 	 *
 	 * @param connectionProperties the connectionProperties to set
 	 */
@@ -224,7 +204,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	}
 
 	/**
-	 * Get driverClassName class name
+	 * Get the driver class name
 	 *
 	 * @return
 	 */
@@ -233,61 +213,62 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	}
 
 	/**
-	 * Set max number of concurrent active connections. Default is 10.
+	 * Set the maximum number of concurrent active connections. Default is 10.
 	 *
-	 * @param s
+	 * @param maxPoolSize
 	 */
-	public void setMaxPoolSize(int s) {
-		maxPoolSize = s;
+	public void setMaxPoolSize(int maxPoolSize) {
+		this.maxPoolSize = maxPoolSize;
 	}
 
 	/**
 	 * Set the name of the connection pool
 	 *
-	 * @param s
+	 * @param poolName
 	 */
-	public void setPoolName(String s) {
-		poolName = s;
+	public void setPoolName(String poolName) {
+		this.poolName = poolName;
 	}
 
 	/**
 	 * Set the database JDBC url
 	 *
-	 * @param s
+	 * @param url
 	 */
-	public void setUrl(String s) {
-		url = s;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	/**
-	 * Set the database username
+	 * Set the database username to use for making the connection
 	 *
-	 * @param s
+	 * @param username
 	 */
-	public void setUsername(String s) {
-		username = s;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	/**
-	 * Set the database password
+	 * Set the database password to use for making the connection
 	 *
-	 * @param s
+	 * @param password
 	 */
-	public void setPassword(String s) {
-		password = s;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	/**
-	 * Set the test SQL thereby activating connection testing
+	 * Set the sql query to use to test the validity of connections. If not set,
+	 * connection tests will not be done
 	 *
 	 * Every <i>timeout</i> seconds a connection is tested by executing the
-	 * given SQL query. If the query execution raises an exception the
+	 * given sql query. If the query execution raises an exception the
 	 * connection is removed from the pool.
 	 *
-	 * @param s
+	 * @param testSql
 	 */
-	public void setTestSql(String s) {
-		testSql = s;
+	public void setTestSql(String testSql) {
+		this.testSql = testSql;
 	}
 
 	/**
@@ -334,80 +315,35 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public Connection getConnection() throws SQLException {
-		logger.debug("{} - Entering getConnection: jndi={}", thisObjectTicket, jndi);
+		logger.debug("{} - Entering getConnection", thisObjectTicket);
 
-		Connection conn;
-
-		if (jndi) {
-			try {
-				conn = getConnectionFromJndi();
-			} catch (NamingException ex) {
-				//wrap NamingException in SQLException to conform to javax.sql.DataSource interface
-				throw new SQLException(ex);
-			}
-		} else {
-			logger.debug("(t == null) = {}", t == null);
-			if (t == null) {
-				startTimer();
-			}
-			conn = getConnectionFromPool();
+		logger.debug("(t == null) = {}", t == null);
+		if (t == null) {
+			startTimer();
 		}
 
-		return conn;
-	}
-
-	private Connection getConnectionFromJndi() throws NamingException, SQLException {
-		logger.debug("{} - Entering getConnectionFromJndi", thisObjectTicket);
-
-		//throw exception if jndi url is null, rather than returning a null connection, which would be useless
-		Objects.requireNonNull(url, "url must not be null. Connection pool=" + poolName);
-
-		logger.debug("(jndiDatasource == null) = {}", jndiDataSource == null);
-		if (jndiDataSource == null) {
-			//first time we are getting a connection from jndi. get the jndi datasource object
-			InitialContext ic = new InitialContext();
-			logger.debug("url='{}'", url);
-			String finalUrl;
-			if (url.startsWith("java:")) {
-				//full jndi url provided. use as is
-				finalUrl = url;
-			} else {
-				//relative url provided. use default jndi prefix
-				finalUrl = "java:comp/env/" + url;
-			}
-			logger.debug("finalUrl='{}'", finalUrl);
-			jndiDataSource = (DataSource) ic.lookup(finalUrl);
-		}
-
-		return jndiDataSource.getConnection();
+		return getConnectionFromPool();
 	}
 
 	/**
-	 * Close all active connections and stop the internal timer. This really
-	 * closes the underlying database connections.
+	 * Really close all underlying database connections, clear the pool and stop
+	 * the timeout timer
 	 */
 	public void close() {
-		logger.debug("{} - Entering close. jndi={}", thisObjectTicket, jndi);
+		logger.debug("{} - Entering close", thisObjectTicket);
 
-		if (jndi) {
-			//do nothing
-			//jndi datasource is managed by the container. 
-			//there is no way to close it or all it's connections from the application
-		} else {
+		for (PooledConnection conn : pool) {
 			try {
-				logger.debug("pool.size()={}", pool.size());
-				for (int i = (pool.size() - 1); i >= 0; i--) {
-					EnhancedConnection conn = pool.get(i);
-					conn.realClose();
-					pool.remove(i);
-				}
+				conn.realClose();
 			} catch (SQLException ex) {
 				logger.error("Error. Connection pool='{}'", poolName, ex);
 			}
-
-			t.interrupt();
-			t = null;
 		}
+
+		pool.clear();
+
+		t.interrupt();
+		t = null;
 	}
 
 	/**
@@ -415,25 +351,19 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 * This really closes the underlying database connections.
 	 */
 	public void refreshConnections() {
-		logger.debug("{} - Entering refreshConnections. Connection pool='{}'. jndi={}",
-				thisObjectTicket, poolName, jndi);
+		logger.debug("{} - Entering refreshConnections. Connection pool='{}'",
+				thisObjectTicket, poolName);
 
-		if (jndi) {
-			//do nothing
-			//jndi datasource is managed by the container. 
-			//there is no way to close it or all it's connections from the application
-		} else {
-			//really close all connections, and remove them from the pool
-			logger.debug("pool.size()={}", pool.size());
-			for (int i = 0; i < pool.size(); i++) {
-				EnhancedConnection conn = pool.get(i);
-				try {
-					conn.realClose();
-				} catch (SQLException ex) {
-					logger.error("Error. Connection pool='{}'", poolName, ex);
-				}
-				pool.remove(i);
+		//really close all connections, and remove them from the pool
+		logger.debug("pool.size()={}", pool.size());
+		for (int i = 0; i < pool.size(); i++) {
+			PooledConnection conn = pool.get(i);
+			try {
+				conn.realClose();
+			} catch (SQLException ex) {
+				logger.error("Error. Connection pool='{}'", poolName, ex);
 			}
+			pool.remove(i);
 		}
 	}
 
@@ -444,28 +374,22 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 * means something is going wrong with your database.
 	 */
 	public void forceRefreshConnections() {
-		logger.debug("{} - Entering forceRefreshConnections. Connection pool='{}'. jndi={}",
-				thisObjectTicket, poolName, jndi);
+		logger.debug("{} - Entering forceRefreshConnections. Connection pool='{}'",
+				thisObjectTicket, poolName);
 
-		if (jndi) {
-			//do nothing
-			//jndi datasource is managed by the container. 
-			//there is no way to close it or all it's connections from the application
-		} else {
-			//remove all connections from the pool without closing them first
-			pool.clear();
-		}
-
+		//remove all connections from the pool without closing them first
+		pool.clear();
 	}
 
 	private synchronized Connection getConnectionFromPool() throws SQLException {
 		logger.debug("{} - Entering getConnectionFromPool", thisObjectTicket);
 
 		totalConnectionRequests++;
+		logger.debug("totalConnectionRequests={}", totalConnectionRequests);
 
 		try {
 			logger.debug("{} - pool.size()={}", thisObjectTicket, pool.size());
-			logger.debug("{} - maxConnections={}", thisObjectTicket, maxPoolSize);
+			logger.debug("{} - maxPoolSize={}", thisObjectTicket, maxPoolSize);
 			if (pool.isEmpty()) {
 				logger.debug("{} - getNew (first)", thisObjectTicket);
 				return getNewConnection();
@@ -490,7 +414,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	private boolean isThereAFreeConnection() {
 		boolean connectionAvailable = false;
 
-		for (EnhancedConnection conn : pool) {
+		for (PooledConnection conn : pool) {
 			if (!conn.isInUse()) {
 				connectionAvailable = true;
 				break;
@@ -500,8 +424,8 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 		return connectionAvailable;
 	}
 
-	private EnhancedConnection getFreeConnection() {
-		for (EnhancedConnection conn : pool) {
+	private PooledConnection getFreeConnection() {
+		for (PooledConnection conn : pool) {
 			if (!conn.isInUse()) {
 				conn.open();
 				return conn;
@@ -511,25 +435,25 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 		return null; //there was no free connection
 	}
 
-	private EnhancedConnection getOldestConnection() {
+	private PooledConnection getOldestConnection() {
 		long oldestConnectionUsedTime = -1;
 		int oldestConnectionIndex = -1;
 
 		for (int i = 0; i < pool.size(); i++) {
-			EnhancedConnection conn = pool.get(i);
+			PooledConnection conn = pool.get(i);
 			if (conn.getLastOpenTime() > oldestConnectionUsedTime) {
 				oldestConnectionUsedTime = conn.getLastOpenTime();
 				oldestConnectionIndex = i;
 			}
 		}
 
-		EnhancedConnection oldestConnection = pool.get(oldestConnectionIndex);
+		PooledConnection oldestConnection = pool.get(oldestConnectionIndex);
 		oldestConnection.open(); // this is useless as it is already opened - just set a new last used date
 		return oldestConnection;
 	}
 
-	private EnhancedConnection getNewConnection() throws SQLException {
-		EnhancedConnection conn = new EnhancedConnection(url, username, password, connectionProperties);
+	private PooledConnection getNewConnection() throws SQLException {
+		PooledConnection conn = new PooledConnection(url, username, password, connectionProperties);
 		pool.add(conn);
 		if (pool.size() > biggestPoolSizeReached) {
 			biggestPoolSizeReached = pool.size();
@@ -539,7 +463,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	}
 
 	/**
-	 * Get the current pool size.
+	 * Get the current pool size
 	 *
 	 * @return
 	 */
@@ -548,7 +472,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	}
 
 	/**
-	 * Get the biggest pool size ever reached.
+	 * Get the biggest pool size ever reached
 	 *
 	 * @return
 	 */
@@ -557,7 +481,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	}
 
 	/**
-	 * Get the total number of times a connection was requested from the pool.
+	 * Get the total number of times a connection was requested from the pool
 	 *
 	 * @return
 	 */
@@ -577,67 +501,63 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public void timeElapsed() {
-		logger.debug("{} - Entering timeElapsed. jndi={}", thisObjectTicket, jndi);
+		logger.debug("{} - Entering timeElapsed", thisObjectTicket);
 
-		if (!jndi) {
-			try {
-				for (int i = (pool.size() - 1); i >= 0; i--) {
+		try {
+			logger.debug("pool.size()={}", pool.size());
+			for (int i = (pool.size() - 1); i >= 0; i--) {
 					// if      the connection is free and was created before TIMEOUT millis
-					//   or
-					// if      the connection is not free but it was busy from more than MAX_QUERY_RUNNING_TIME millis
-					// then  
-					//         destroy the connection trying to close it only if it is not in use
-					// else if test is enabled (and connection is to be kept)
-					// then 
-					//         perform a connection test
+				//   or
+				// if      the connection is not free but it was busy from more than MAX_QUERY_RUNNING_TIME millis
+				// then  
+				//         destroy the connection trying to close it only if it is not in use
+				// else if isValid is enabled (and connection is to be kept)
+				// then 
+				//         perform a connection isValid
 
-					//20140829 Timothy Anyona. Rearranged the code to make logic easier to understand
-					EnhancedConnection conn = pool.get(i);
-					boolean removeConnection = false;
+				//20140829 Timothy Anyona. Rearranged the code to make logic easier to understand
+				PooledConnection conn = pool.get(i);
+				boolean removeConnection = false;
 
-					if (conn.getIdleTime() > timeout) {
-						removeConnection = true;
-					} else if (conn.getBusyTime() > maxQueryRunningTime) {
-						removeConnection = true;
-						logger.warn("Connection {i} of Connection pool '{}'"
-								+ " was in use for too much time and has been"
-								+ " removed from the pool", i, poolName);
-					} else if (testSql != null && testSql.length() > 0) {
-						logger.debug("{} - testSql='{}'", thisObjectTicket, testSql);
-						try {
-							conn.test(testSql);
-						} catch (SQLException ex) {
-							logger.error("Connection test failed. Connection pool='{}',"
-									+ " Connection {}, testSql='{}'", poolName, i, testSql, ex);
+				long idleTime = conn.getIdleTime();
+				long busyTime = conn.getBusyTime();
 
-							pool.remove(i);
-							//conn.realClose();
-						}
-					}
+				logger.debug("idleTime={}", idleTime);
+				logger.debug("busyTime={}", busyTime);
+				logger.debug("timeoutMillis={}", timeoutMillis);
+				logger.debug("maxQueryRunningTimeMillis={}", maxQueryRunningTimeMillis);
+				logger.debug("testSql='{}'", testSql);
 
-					if (removeConnection) {
-						//don't close busy connection. just remove from the pool.
+				if (idleTime > timeoutMillis) {
+					removeConnection = true;
+				} else if (busyTime > maxQueryRunningTimeMillis) {
+					removeConnection = true;
+					logger.warn("Connection {i} of Connection pool '{}'"
+							+ " was in use for too much time and has been"
+							+ " removed from the pool", i, poolName);
+				} else if (testSql != null && testSql.length() > 0) {
+					if (!conn.isValid(testSql)) {
+						logger.error("Connection test failed. Connection pool='{}',"
+								+ " Connection {}, testSql='{}'", poolName, i, testSql);
+
+						//20140902 Timothy Anyona. remove without realClose means connection will never be closed?
 						pool.remove(i);
-						if (!conn.isInUse()) {
-							conn.realClose();
-						}
+						//conn.realClose();
 					}
-
 				}
-			} catch (SQLException ex) {
-				logger.error("Error. Connection pool='{}'", poolName, ex);
+
+				if (removeConnection) {
+					//don't close busy connection. just remove from the pool.
+					//20140902 Timothy Anyona. remove without realClose means connection will never be closed?
+					pool.remove(i);
+					if (!conn.isInUse()) {
+						conn.realClose();
+					}
+				}
 			}
+		} catch (SQLException ex) {
+			logger.error("Error. Connection pool='{}'", poolName, ex);
 		}
-
-	}
-
-	/**
-	 * Get the whole connection pool
-	 *
-	 * @return
-	 */
-	public List<EnhancedConnection> getPool() {
-		return pool;
 	}
 
 	/**
@@ -645,10 +565,10 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 *
 	 * @return
 	 */
-	public int getTotalInUseCount() {
+	public int getInUseCount() {
 		int count = 0;
-		for (EnhancedConnection ec : pool) {
-			if (ec.isInUse()) {
+		for (PooledConnection conn : pool) {
+			if (conn.isInUse()) {
 				count++;
 			}
 		}
@@ -667,7 +587,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	/**
@@ -678,7 +598,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public PrintWriter getLogWriter() throws SQLException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	/**
@@ -689,7 +609,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	/**
@@ -700,7 +620,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	/**
@@ -711,7 +631,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public int getLoginTimeout() throws SQLException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	/**
@@ -722,7 +642,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	/**
@@ -735,7 +655,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public <T> T unwrap(Class<T> iface) throws SQLException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 
 	/**
@@ -747,6 +667,6 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 */
 	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		throw new UnsupportedOperationException("Not supported.");
 	}
 }

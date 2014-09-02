@@ -16,7 +16,6 @@
  */
 package art.dbutils;
 
-import art.servlets.ArtConfig;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
@@ -48,7 +47,7 @@ public class DbService {
 	 * available
 	 */
 	public int update(String sql, Object... params) throws SQLException {
-		Connection conn = ArtConfig.getConnection();
+		Connection conn = DbConnections.getArtDbConnection();
 		if (conn == null) {
 			throw new IllegalStateException("Connection to the ART Database not available");
 		}
@@ -92,7 +91,7 @@ public class DbService {
 	 * available
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-		Connection conn = ArtConfig.getConnection();
+		Connection conn = DbConnections.getArtDbConnection();
 		if (conn == null) {
 			throw new IllegalStateException("Connection to the ART Database not available");
 		}
@@ -117,7 +116,7 @@ public class DbService {
 	 * available
 	 */
 	public int[] batch(String sql, Object[][] params) throws SQLException {
-		Connection conn = ArtConfig.getConnection();
+		Connection conn = DbConnections.getArtDbConnection();
 		if (conn == null) {
 			throw new IllegalStateException("Connection to the ART Database not available");
 		}

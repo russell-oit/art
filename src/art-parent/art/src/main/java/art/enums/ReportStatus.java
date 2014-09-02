@@ -95,7 +95,8 @@ public enum ReportStatus {
 	}
 
 	/**
-	 * Get description message string for use in the user interface.
+	 * Get description message string for use in the user interface. String must
+	 * exist in i18n files
 	 *
 	 * @return
 	 */

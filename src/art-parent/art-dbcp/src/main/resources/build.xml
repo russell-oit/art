@@ -1,4 +1,21 @@
-<!-- art-dbcp build.xml -->
+<!--
+
+  art-dbcp build.xml
+
+  To compile art-dbcp code:
+  * install Apache Ant. Ensure the ant\bin directory is included in the system path
+  
+  * put dependencies in a directory called lib
+    - slf4j-api (1.7.5)
+
+  * type "ant" or "ant compile" to compile any changed classes
+  * type "ant clean" to remove compiled class files
+  * type "ant jar" to create the jar file
+  
+  This script compiles classes inline,
+  the jar file is created in this folder
+
+-->
 
 <project name="art-dbcp" default="compile" basedir=".">
 	<description>
@@ -6,31 +23,45 @@
 	</description>
 
 	<property name="dist" location="."/> 
+	<property name="jars.dir" value="lib"/>
 
-	<!-- Compile all -->
-	<target name="compile"  description="Compile source code inline" >
-		<javac source="1.7" target="1.7" srcdir="${dist}/"
-			   includeAntRuntime="no" debug="true" />	
+	<path id="classpath">
+		<fileset dir="${jars.dir}" includes="*.jar"/>		
+	</path>
+
+	<!-- Compile -->
+	<target name="compile"  description="Compile source code inline" >  	
+		<javac source="1.7" target="1.7" classpathref="classpath"
+			   srcdir="${dist}/" includeAntRuntime="no" debug="true"/>	
+	</target>
+	
+	<!-- Clean -->
+	<target name="clean" description="Delete compiled code" >
+		<delete>
+			<fileset dir="." includes="*.jar"/>
+			<fileset dir="." includes="**/*.class"/>			
+		</delete>
 	</target>
 
 	<!-- Create jar file -->
 	<target name="jar"  description="Create jar file" >
 		<delete file="${dist}/art-dbcp.jar"/>
-		<jar destfile="${dist}/art-dbcp.jar" basedir="${dist}"/>
+		<jar destfile="${dist}/art-dbcp.jar" basedir="${dist}" excludes="lib/, api/"/>
 	</target>
 
 	<!-- Create javadoc -->
-	<target name="docs" description="Create Javadoc" >
-		<javadoc destdir="../api"
+	<target name="javadoc" description="Create Javadoc" >
+		<javadoc destdir="api"
 				 author="true"
 				 version="true"
 				 use="true"
 				 windowtitle="ART DBCP API">
+			
 			<fileset dir="${dist}" defaultexcludes="yes">
 				<include name="art/dbcp/ArtDBCPDataSource.java"/>
 			</fileset>
 			<doctitle><![CDATA[<h1>ART DBCP</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="art.sourceforge.net">art.sourceforge.net</a>]]></bottom>
+			<bottom><![CDATA[<a href="http://art.sourceforge.net">art.sourceforge.net</a>]]></bottom>
 		</javadoc>
 	</target>
 

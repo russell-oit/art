@@ -1,4 +1,6 @@
-<!-- ART build.xml
+<!--
+
+  ART build.xml
 
   To compile art code:
   * install Apache Ant. Ensure the ant\bin directory is included in the system path
@@ -8,7 +10,8 @@
   * type "ant war" to create the war file
   
   This script compiles classes inline,
-   the war file is created in this folder
+  the war file is created in this folder
+   
   -->
 
 <project name="ART" default="compile" basedir=".">

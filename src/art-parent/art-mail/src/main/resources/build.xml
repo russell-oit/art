@@ -1,16 +1,20 @@
-<!-- art-mail build.xml
+<!--
+
+  art-mail build.xml
 
   To compile art-mail code:
   * install Apache Ant. Ensure the ant\bin directory is included in the system path
   
-  * put dependencies (javax.mail, slf4j-api) in a directory called lib
+  * put dependencies in a directory called lib
+	- javamail api (1.5.2)
+    - slf4j-api (1.7.5)
 
   * type "ant" or "ant compile" to compile any changed classes
   * type "ant clean" to remove compiled class files
   * type "ant jar" to create the jar file
   
   This script compiles classes inline,
-   the jar file is created in this folder
+  the jar file is created in this folder
 
 -->
 
@@ -44,7 +48,7 @@
 	<!-- Create jar file -->
 	<target name="jar"  description="Create jar file" >
 		<delete file="${dist}/art-mail.jar"/>
-		<jar destfile="${dist}/art-mail.jar" basedir="${dist}/src"/>
+		<jar destfile="${dist}/art-mail.jar" basedir="${dist}" excludes="lib/"/>
 	</target>
 
 </project>
