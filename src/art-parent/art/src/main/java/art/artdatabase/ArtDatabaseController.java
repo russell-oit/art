@@ -1,5 +1,6 @@
 package art.artdatabase;
 
+import art.dbutils.DbConnections;
 import art.servlets.ArtConfig;
 import art.utils.ArtUtils;
 import art.dbutils.DbUtils;
@@ -108,7 +109,7 @@ public class ArtDatabaseController {
 			String password = artDatabase.getPassword();
 
 			if (artDatabase.isJndi()) {
-				conn = ArtConfig.getJndiConnection(url);
+				conn = DbConnections.getJndiConnection(url, artDatabase.isUseDefaultJndiNamespace());
 			} else {
 				Class.forName(driver).newInstance();
 				conn = DriverManager.getConnection(url, username, password);

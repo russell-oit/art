@@ -1,6 +1,6 @@
 <!--
 
-  ART build.xml
+  ART
 
   To compile art code:
   * install Apache Ant. Ensure the ant\bin directory is included in the system path

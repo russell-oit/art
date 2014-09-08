@@ -1,6 +1,6 @@
 <!--
 
-  art-mail build.xml
+  art-mail
 
   To compile art-mail code:
   * install Apache Ant. Ensure the ant\bin directory is included in the system path

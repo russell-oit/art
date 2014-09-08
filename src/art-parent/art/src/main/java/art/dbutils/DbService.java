@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Class to provide methods for running queries against the art database
+ * Provides methods for running sql queries against the art database, or some
+ * other database whose connection is provided
  *
  * @author Timothy Anyona
  */
@@ -36,38 +37,26 @@ public class DbService {
 	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
-	 * Execute an SQL INSERT, UPDATE, or DELETE query. Query executed against
-	 * the art database.
+	 * Executes an INSERT, UPDATE or DELETE query against the art database
 	 *
 	 * @param sql
 	 * @param params
 	 * @return number of records affected
 	 * @throws SQLException
-	 * @throws IllegalStateException if connection to the art database is not
-	 * available
 	 */
 	public int update(String sql, Object... params) throws SQLException {
-		Connection conn = DbConnections.getArtDbConnection();
-		if (conn == null) {
-			throw new IllegalStateException("Connection to the ART Database not available");
-		}
-
-		try {
-			QueryRunner run = new QueryRunner();
-			return run.update(conn, sql, params);
-		} finally {
-			DbUtils.close(conn);
-		}
+		QueryRunner run = new QueryRunner(DbConnections.getArtDbConnectionPool());
+		return run.update(sql, params);
 	}
 
 	/**
-	 * Execute an SQL INSERT, UPDATE, or DELETE query. Caller is responsible for
-	 * closing the connection
+	 * Executes an INSERT, UPDATE or DELETE query. The caller is responsible for
+	 * closing the connection.
 	 *
 	 * @param conn
 	 * @param sql
 	 * @param params
-	 * @return -1 if connection is null, otherwise number of records affected
+	 * @return the number of affected records
 	 * @throws SQLException
 	 * @throws NullPointerException if conn is null
 	 */
@@ -79,53 +68,33 @@ public class DbService {
 	}
 
 	/**
-	 * Execute an SQL SELECT query and return an appropriate, populated object
+	 * Executes a SELECT query against the art database and returns an
+	 * appropriate, populated object
 	 *
-	 * @param <T> The type of object that the handler returns
+	 * @param <T> the type of object that the handler returns
 	 * @param sql
-	 * @param rsh The handler that converts the results into an object.
+	 * @param rsh the handler that converts the results into an object
 	 * @param params
-	 * @return The object returned by the handler.
+	 * @return the object returned by the handler
 	 * @throws SQLException
-	 * @throws IllegalStateException if connection to the art database is not
-	 * available
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-		Connection conn = DbConnections.getArtDbConnection();
-		if (conn == null) {
-			throw new IllegalStateException("Connection to the ART Database not available");
-		}
-
-		try {
-			QueryRunner run = new QueryRunner();
-			return run.query(conn, sql, rsh, params);
-		} finally {
-			DbUtils.close(conn);
-		}
+		QueryRunner run = new QueryRunner(DbConnections.getArtDbConnectionPool());
+		return run.query(sql, rsh, params);
 	}
 
 	/**
-	 * Execute a batch of SQL INSERT, UPDATE, or DELETE queries.
+	 * Executes a batch of INSERT, UPDATE, or DELETE queries against the art
+	 * database
 	 *
 	 * @param sql
-	 * @param params An array of query replacement parameters. Each row in this
+	 * @param params the array of query replacement parameters. Each row in this
 	 * array is one set of batch replacement values.
-	 * @return The number of rows updated per statement.
+	 * @return the number of rows updated per statement
 	 * @throws SQLException
-	 * @throws IllegalStateException if connection to the art database is not
-	 * available
 	 */
 	public int[] batch(String sql, Object[][] params) throws SQLException {
-		Connection conn = DbConnections.getArtDbConnection();
-		if (conn == null) {
-			throw new IllegalStateException("Connection to the ART Database not available");
-		}
-
-		try {
-			QueryRunner run = new QueryRunner();
-			return run.batch(conn, sql, params);
-		} finally {
-			DbUtils.close(conn);
-		}
+		QueryRunner run = new QueryRunner(DbConnections.getArtDbConnectionPool());
+		return run.batch(sql, params);
 	}
 }

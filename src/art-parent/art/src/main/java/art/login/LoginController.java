@@ -1,5 +1,6 @@
 package art.login;
 
+import art.dbutils.DbConnections;
 import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.ArtConfig;
@@ -68,12 +69,21 @@ public class LoginController {
 		session.setAttribute("administratorEmail", ArtConfig.getSettings().getAdministratorEmail());
 
 		//ensure art database connection is available
-		Connection conn = ArtConfig.getConnection();
-		if (conn == null) {
+		Connection conn = null;
+		boolean artDbConnectionOk = false;
+		try {
+			conn = DbConnections.getArtDbConnection();
+			artDbConnectionOk = true;
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		} finally {
+			DbUtils.close(conn);
+		}
+
+		if (!artDbConnectionOk) {
 			model.addAttribute("message", "page.message.artDatabaseNotAvailable");
 			return "headerlessError";
-		} else {
-			DbUtils.close(conn);
 		}
 
 		ArtAuthenticationMethod loginMethod;
@@ -165,7 +175,8 @@ public class LoginController {
 			@RequestParam("username") String username,
 			@RequestParam("password") String password,
 			Model model,
-			SessionStatus sessionStatus) {
+			SessionStatus sessionStatus
+	) {
 
 		//explicitly name requestparams to avoid error if code compiled without debug option
 		//see http://www.java-allandsundry.com/2012/10/method-parameter-names-and-spring.html
@@ -279,7 +290,7 @@ public class LoginController {
 
 	private String getLoginSuccessNextPage(HttpSession session, User user,
 			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus) {
-		
+
 		//set session attributes
 		session.setAttribute("sessionUser", user);
 		session.setAttribute("authenticationMethod", loginMethod.getValue());

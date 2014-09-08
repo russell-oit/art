@@ -23,13 +23,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for supported connection pool libraries
+ * Represents the supported connection pool libraries
  *
  * @author Timothy Anyona
  */
 public enum ConnectionPoolLibrary {
 
-	ArtDBCP("ArtDBCP"), HikariCP("HikariCP");
+	HikariCP("HikariCP"), ArtDBCP("ArtDBCP");
 	private final String value;
 
 	private ConnectionPoolLibrary(String value) {

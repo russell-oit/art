@@ -1,5 +1,6 @@
 package art.artdatabase;
 
+import art.enums.ConnectionPoolLibrary;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
@@ -23,8 +24,42 @@ public class ArtDatabase implements Serializable {
 	private boolean useBlankPassword; //only used for user interface logic
 	private String testSql;
 	private int connectionPoolTimeout;
-	private int maxPoolConnections; //setting used by art database and all datasources
+	private int maxPoolConnections; //setting used by art database and all report datasources
 	private boolean jndi;
+	private ConnectionPoolLibrary connectionPoolLibrary; //setting used by art database and all report datasources
+	private boolean useDefaultJndiNamespace;
+
+	/**
+	 * Get the value of useDefaultJndiNamespace
+	 *
+	 * @return the value of useDefaultJndiNamespace
+	 */
+	public boolean isUseDefaultJndiNamespace() {
+		return useDefaultJndiNamespace;
+	}
+
+	/**
+	 * Set the value of useDefaultJndiNamespace
+	 *
+	 * @param useDefaultJndiNamespace new value of useDefaultJndiNamespace
+	 */
+	public void setUseDefaultJndiNamespace(boolean useDefaultJndiNamespace) {
+		this.useDefaultJndiNamespace = useDefaultJndiNamespace;
+	}
+
+	/**
+	 * @return the connectionPoolLibrary
+	 */
+	public ConnectionPoolLibrary getConnectionPoolLibrary() {
+		return connectionPoolLibrary;
+	}
+
+	/**
+	 * @param connectionPoolLibrary the connectionPoolLibrary to set
+	 */
+	public void setConnectionPoolLibrary(ConnectionPoolLibrary connectionPoolLibrary) {
+		this.connectionPoolLibrary = connectionPoolLibrary;
+	}
 
 	/**
 	 * Get the value of jndi

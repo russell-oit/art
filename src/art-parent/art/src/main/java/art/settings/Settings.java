@@ -1,7 +1,6 @@
 package art.settings;
 
 import art.enums.ArtAuthenticationMethod;
-import art.enums.ConnectionPoolLibrary;
 import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
@@ -61,27 +60,7 @@ public class Settings {
 	private int mondrianCacheExpiryPeriod;
 	private boolean schedulingEnabled = true;
 	private String rssLink;
-	private int maxFileUploadSize=5; //size in MB
-	private ConnectionPoolLibrary connectionPoolLibrary;
-
-	/**
-	 * Get the value of connectionPoolLibrary
-	 *
-	 * @return the value of connectionPoolLibrary
-	 */
-	public ConnectionPoolLibrary getConnectionPoolLibrary() {
-		return connectionPoolLibrary;
-	}
-
-	/**
-	 * Set the value of connectionPoolLibrary
-	 *
-	 * @param connectionPoolLibrary new value of connectionPoolLibrary
-	 */
-	public void setConnectionPoolLibrary(ConnectionPoolLibrary connectionPoolLibrary) {
-		this.connectionPoolLibrary = connectionPoolLibrary;
-	}
-
+	private int maxFileUploadSize = 5; //size in MB
 
 	/**
 	 * Get the value of maxFileUploadSize
@@ -100,7 +79,6 @@ public class Settings {
 	public void setMaxFileUploadSize(int maxFileUploadSize) {
 		this.maxFileUploadSize = maxFileUploadSize;
 	}
-
 
 	/**
 	 * Get the value of useLdapAnonymousBind

@@ -15,29 +15,45 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package art.utils;
 
 /**
+ * A generic application exception. This class is used to wrap exceptions of the
+ * underlying code, for example SQLExceptions
  *
  * @author Timothy Anyona
  */
 public class ArtRuntimeException extends RuntimeException {
+
 	private static final long serialVersionUID = 1L;
 
-    public ArtRuntimeException() {
-        super();
-    }
+	/**
+	 * Constructs a new ArtRuntimeException with the given detail message
+	 *
+	 * @param message the detail message of the ArtRuntimeException
+	 */
+	public ArtRuntimeException(String message) {
+		super(message);
+	}
 
-    public ArtRuntimeException(String message) {
-        super(message);
-    }
+	/**
+	 * Constructs a new ArtRuntimeException with the given root cause
+	 *
+	 * @param cause the root cause of the ArtRuntimeException
+	 */
+	public ArtRuntimeException(Throwable cause) {
+		super(cause);
+	}
 
-    public ArtRuntimeException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * Constructs a new ArtRuntimeException with the given detail message and
+	 * root cause
+	 *
+	 * @param message the detail message of the ArtRuntimeException
+	 * @param cause the root cause of the ArtRuntimeException
+	 */
+	public ArtRuntimeException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public ArtRuntimeException(Throwable cause) {
-        super(cause);
-    }
 }

@@ -43,6 +43,26 @@ public class Datasource implements Serializable {
 	private boolean jndi;
 	private String createdBy;
 	private String updatedBy;
+	private boolean useDefaultJndiNamespace;
+
+	/**
+	 * Get the value of useDefaultJndiNamespace
+	 *
+	 * @return the value of useDefaultJndiNamespace
+	 */
+	public boolean isUseDefaultJndiNamespace() {
+		return useDefaultJndiNamespace;
+	}
+
+	/**
+	 * Set the value of useDefaultJndiNamespace
+	 *
+	 * @param useDefaultJndiNamespace new value of useDefaultJndiNamespace
+	 */
+	public void setUseDefaultJndiNamespace(boolean useDefaultJndiNamespace) {
+		this.useDefaultJndiNamespace = useDefaultJndiNamespace;
+	}
+
 
 	/**
 	 * @return the createdBy

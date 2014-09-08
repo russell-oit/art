@@ -33,11 +33,13 @@ import org.slf4j.LoggerFactory;
  * realClose method is provided to really close the underlying connection.
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
+ * @since 3.0.0, rename of art.dbcp.EnhancedConnection
  */
 public class PooledConnection implements Connection {
 	/* 20050612  Statements are closed automatically when the EnanchedConnection is 
 	 returned to the pool
-	 20050612  isValid conection with a dummy sql, if it fails refresh the connection
+	 20050612  test conection with a dummy sql, if it fails refresh the connection
 	 */
 
 	private static final Logger logger = LoggerFactory.getLogger(PooledConnection.class);
@@ -49,30 +51,30 @@ public class PooledConnection implements Connection {
 	private List<Statement> openStatements;
 
 	/**
-	 * Constructor. Creates a connection to the given database using the given
+	 * Creates a connection to the database with the given url using the given
 	 * credentials
 	 *
-	 * @param url jdbc url
-	 * @param username username to use in making the connection
-	 * @param password password to use in making the connection
+	 * @param jdbcUrl
+	 * @param username
+	 * @param password
 	 * @throws SQLException
 	 */
-	public PooledConnection(String url, String username, String password) throws SQLException {
-		this(url, username, password, null);
+	public PooledConnection(String jdbcUrl, String username, String password) throws SQLException {
+		this(jdbcUrl, username, password, null);
 	}
 
 	/**
-	 * Constructor. Creates a connection to the given database using the given
-	 * credentials and properties
+	 * Creates a connection to the database with the given url using the given
+	 * credentials and connection properties
 	 *
-	 * @param url jdbc url
-	 * @param username username to use in making the connection
-	 * @param password password to use in making the connection
+	 * @param jdbcUrl
+	 * @param username
+	 * @param password
 	 * @param properties any additional connection properties
 	 * @throws SQLException
 	 */
-	public PooledConnection(String url, String username, String password, Properties properties) throws SQLException {
-		logger.debug("Entering PooledConnection: url='{}', username='{}", url, username);
+	public PooledConnection(String jdbcUrl, String username, String password, Properties properties) throws SQLException {
+		logger.debug("Entering PooledConnection: jdbcUrl='{}', username='{}", jdbcUrl, username);
 
 		Properties dbProperties = new Properties();
 		dbProperties.put("user", username);
@@ -81,14 +83,14 @@ public class PooledConnection implements Connection {
 		if (properties != null && properties.size() > 0) {
 			dbProperties.putAll(properties);
 		}
-		Driver driver = DriverManager.getDriver(url); // get the right driver for the given url
-		conn = driver.connect(url, dbProperties); // get the connection
+		Driver driver = DriverManager.getDriver(jdbcUrl); // get the right driver for the given url
+		conn = driver.connect(jdbcUrl, dbProperties); // get the connection
 		openStatements = new ArrayList<>();
 	}
 
 	/**
-	 * Mark the connection as in use(set inUse=true) and update usage
-	 * statistics. Always call open before providing a connection to users
+	 * Marks the connection as in use (inUse=true). Always call open before
+	 * providing a connection to users.
 	 */
 	public void open() {
 		logger.debug("Entering open");
@@ -102,8 +104,8 @@ public class PooledConnection implements Connection {
 	}
 
 	/**
-	 * Close any open statements and mark the connection as available (set
-	 * inUse=false). The underlying database connection is not closed.
+	 * Marks the connection as available (inUse=false). The underlying database
+	 * connection is not closed but any open statements are closed.
 	 *
 	 * @throws SQLException
 	 */
@@ -144,10 +146,13 @@ public class PooledConnection implements Connection {
 	protected void realClose() throws SQLException {
 		logger.debug("Entering realClose");
 
-		//20140829 Timothy Anyona. reinstate this.close(). to at least clear the openStatements list?
-		this.close();
-		//this.close(); // close all the open statements: not needed... since the driver should do this
-		conn.close();    // note: the caller (ArtDBCPDataSource) must remove the object from the pool
+		try {
+			//this.close(); // close all the open statements: not needed... since the driver should do this
+			conn.close();    // note: the caller (ArtDBCPDataSource) must remove the object from the pool
+			openStatements.clear();
+		} catch (SQLException ex) {
+			throw new SQLException("PooledConnection: error in realClose(): cause: " + ex.getMessage());
+		}
 	}
 
 	/**
@@ -231,7 +236,6 @@ public class PooledConnection implements Connection {
 	 * @since 3.0.0
 	 */
 	public long getIdleTime() {
-		//20140829 Timothy Anyona. Added method to ease logic in ArtDBCPDataSource
 		if (!inUse) {
 			return System.currentTimeMillis() - lastCloseTime;
 		} else {
@@ -248,7 +252,6 @@ public class PooledConnection implements Connection {
 	 * @since 3.0.0
 	 */
 	public long getBusyTime() {
-		//20140829 Timothy Anyona. Added method to ease logic in ArtDBCPDataSource
 		if (inUse) {
 			return System.currentTimeMillis() - lastOpenTime;
 		} else {

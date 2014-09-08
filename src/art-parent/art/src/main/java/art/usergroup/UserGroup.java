@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -20,13 +20,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Class to represent a user group
+ * Represents a user group
  *
  * @author Timothy Anyona
  */
 public class UserGroup implements Serializable {
 
+	// Constants ---------------------------------------------------------------
 	private static final long serialVersionUID = 1L;
+
+	// Properties --------------------------------------------------------------
 	private int userGroupId;
 	private String name;
 	private String description;
@@ -37,6 +40,7 @@ public class UserGroup implements Serializable {
 	private String createdBy;
 	private String updatedBy;
 
+	// Getters/setters ---------------------------------------------------------
 	/**
 	 * @return the createdBy
 	 */
@@ -163,6 +167,7 @@ public class UserGroup implements Serializable {
 		this.startReport = startReport;
 	}
 
+	// Object overrides --------------------------------------------------------
 	@Override
 	public int hashCode() {
 		int hash = 5;

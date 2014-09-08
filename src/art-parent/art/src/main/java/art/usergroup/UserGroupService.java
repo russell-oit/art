@@ -37,7 +37,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to user groups
+ * Provides methods for retrieving, adding, deleting and updating user groups
  *
  * @author Timothy Anyona
  */
@@ -46,8 +46,16 @@ public class UserGroupService {
 
 	private static final Logger logger = LoggerFactory.getLogger(UserGroupService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public UserGroupService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public UserGroupService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUPS AUG";
 
@@ -86,7 +94,7 @@ public class UserGroupService {
 	/**
 	 * Get all user groups
 	 *
-	 * @return list of all user groups, empty list otherwise
+	 * @return all user groups
 	 * @throws SQLException
 	 */
 	@Cacheable("userGroups")
@@ -98,10 +106,10 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Get a user group
+	 * Get the user group with the given id
 	 *
 	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @return the user group if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("userGroups")
@@ -114,10 +122,10 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Get user groups that a given user belongs to
+	 * Get the user groups that the given user belongs to
 	 *
 	 * @param userId
-	 * @return list of the user's user groups, empty list otherwise
+	 * @return the user's user groups
 	 * @throws SQLException
 	 */
 	@Cacheable("userGroups")
@@ -134,7 +142,7 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Delete a user group
+	 * Delete the user group with the given id
 	 *
 	 * @param id
 	 * @throws SQLException
@@ -170,7 +178,7 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Add a new user group to the database
+	 * Add a new user group
 	 *
 	 * @param group
 	 * @param actionUser

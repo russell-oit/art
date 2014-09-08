@@ -26,6 +26,7 @@
  */
 package art.utils;
 
+import art.dbutils.DbConnections;
 import art.report.ReportRunner;
 import art.graph.ExportGraph;
 import art.mail.Mailer;
@@ -2479,7 +2480,7 @@ public class ArtJob implements Job, Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = DbConnections.getArtDbConnection();
 
 			logger.debug("Loading job. Job Id={}, User={}", jId, usr);
 

@@ -1,6 +1,6 @@
 <!--
 
-  art-dbcp build.xml
+  art-dbcp
 
   To compile art-dbcp code:
   * install Apache Ant. Ensure the ant\bin directory is included in the system path
@@ -51,15 +51,15 @@
 
 	<!-- Create javadoc -->
 	<target name="javadoc" description="Create Javadoc" >
-		<javadoc destdir="api"
-				 author="true"
-				 version="true"
-				 use="true"
-				 windowtitle="ART DBCP API">
+		<javadoc
+			sourcepath="${dist}"
+			destdir="api"
+			author="true"
+			version="true"
+			use="true"
+			windowtitle="ART DBCP API"
+			classpathref="classpath">
 			
-			<fileset dir="${dist}" defaultexcludes="yes">
-				<include name="art/dbcp/ArtDBCPDataSource.java"/>
-			</fileset>
 			<doctitle><![CDATA[<h1>ART DBCP</h1>]]></doctitle>
 			<bottom><![CDATA[<a href="http://art.sourceforge.net">art.sourceforge.net</a>]]></bottom>
 		</javadoc>

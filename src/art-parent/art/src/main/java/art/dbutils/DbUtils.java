@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class for utility methods related to databases
+ * Provides jdbc helper methods
  *
  * @author Timothy Anyona
  */

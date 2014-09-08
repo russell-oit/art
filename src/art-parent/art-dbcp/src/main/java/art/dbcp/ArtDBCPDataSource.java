@@ -30,18 +30,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class implements a database connection pool. Features: <ul> <li> The
- * pool dynamically increases/decreases. An unused connection is removed from
- * the pool after <code>timeout</code> seconds. </li> <li> The underlying work
- * is transparent from the developer's point of view. A connection is obtained
- * from the pool using the getConnection() method. A connection is returned to
- * the pool by simply closing the connection (any open statement is
- * automatically closed thus you might not need to close statements and
- * resultsets). </li>
+ * This class implements a database connection pool. Features:
+ * 
+ * <ul>
+ * <li> The pool dynamically increases/decreases. An unused connection is
+ * removed from the pool after <code>timeout</code> seconds.
+ * </li>
+ * <li> The underlying work is transparent from the developer's point of view. A
+ * connection is obtained from the pool using the getConnection() method. A
+ * connection is returned to the pool by simply closing the connection (any open
+ * statement is automatically closed thus you might not need to close statements
+ * and resultsets).
+ * </li>
  * <li>
  * Connections that are open for too long are removed automatically to prevent
  * your application from hanging because of buggy drivers or network problems
- * </li> </ul>
+ * </li>
+ * </ul>
+ * 
  * Usage Example:
  * <pre>
  * // load drivers
@@ -69,6 +75,8 @@ import org.slf4j.LoggerFactory;
  * getOldestConnection
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
+ * @since 3.0.0, rename of art.dbcp.DataSource
  */
 public class ArtDBCPDataSource implements TimerListener, DataSource {
 
@@ -206,7 +214,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Get the driver class name
 	 *
-	 * @return
+	 * @return the driver class name
 	 */
 	public String getDriverClassName() {
 		return driverClassName;
@@ -274,7 +282,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Get the connection pool name
 	 *
-	 * @return
+	 * @return the connection pool name
 	 */
 	public String getPoolName() {
 		return poolName;
@@ -283,7 +291,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Get the database JDBC URL
 	 *
-	 * @return
+	 * @return the database JDBC URL
 	 */
 	public String getUrl() {
 		return url;
@@ -292,7 +300,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Get the database username
 	 *
-	 * @return
+	 * @return the database username
 	 */
 	public String getUsername() {
 		return username;
@@ -301,16 +309,44 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Get the database password
 	 *
-	 * @return
+	 * @return the database password
 	 */
 	public String getPassword() {
 		return password;
+	}
+	
+	/**
+	 * Get the current pool size
+	 *
+	 * @return the current pool size
+	 */
+	public int getCurrentPoolSize() {
+		return pool.size();
+	}
+
+	/**
+	 * Get the biggest pool size ever reached
+	 *
+	 * @return the biggest pool size ever reached
+	 */
+	public int getBiggestPoolSizeReached() {
+		return biggestPoolSizeReached;
+	}
+
+	/**
+	 * Get the total number of times a connection was requested from the pool
+	 *
+	 * @return the total number of times a connection was requested from the
+	 * pool
+	 */
+	public long getTotalConnectionRequests() {
+		return totalConnectionRequests;
 	}
 
 	/**
 	 * Get a connection from the pool
 	 *
-	 * @return
+	 * @return a useable database connection
 	 * @throws SQLException
 	 */
 	@Override
@@ -463,33 +499,6 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	}
 
 	/**
-	 * Get the current pool size
-	 *
-	 * @return
-	 */
-	public int getCurrentPoolSize() {
-		return pool.size();
-	}
-
-	/**
-	 * Get the biggest pool size ever reached
-	 *
-	 * @return
-	 */
-	public int getBiggestPoolSizeReached() {
-		return biggestPoolSizeReached;
-	}
-
-	/**
-	 * Get the total number of times a connection was requested from the pool
-	 *
-	 * @return
-	 */
-	public long getTotalConnectionRequests() {
-		return totalConnectionRequests;
-	}
-
-	/**
 	 * This method is called automatically on timeouts to check if a connection
 	 * needs to be closed. A connection will be closed if: <ul> <li> it was
 	 * unused for more than the TIMEOUT period </li> </ul> A connection will be
@@ -515,7 +524,6 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 				// then 
 				//         perform a connection isValid
 
-				//20140829 Timothy Anyona. Rearranged the code to make logic easier to understand
 				PooledConnection conn = pool.get(i);
 				boolean removeConnection = false;
 
@@ -563,7 +571,8 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Get the number of connections that are currently in use in the whole pool
 	 *
-	 * @return
+	 * @return the number of connections that are currently in use in the whole
+	 * pool
 	 */
 	public int getInUseCount() {
 		int count = 0;
@@ -582,7 +591,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 *
 	 * @param username
 	 * @param password
-	 * @return
+	 * @return Always throws UnsupportedOperationException
 	 * @throws SQLException
 	 */
 	@Override
@@ -593,7 +602,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Not supported. Always throws UnsupportedOperationException
 	 *
-	 * @return
+	 * @return Always throws UnsupportedOperationException
 	 * @throws SQLException
 	 */
 	@Override
@@ -626,7 +635,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Not supported. Always throws UnsupportedOperationException
 	 *
-	 * @return
+	 * @return Always throws UnsupportedOperationException
 	 * @throws SQLException
 	 */
 	@Override
@@ -637,7 +646,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	/**
 	 * Not supported. Always throws UnsupportedOperationException
 	 *
-	 * @return
+	 * @return Always throws UnsupportedOperationException
 	 * @throws SQLFeatureNotSupportedException
 	 */
 	@Override
@@ -650,7 +659,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 *
 	 * @param <T>
 	 * @param iface
-	 * @return
+	 * @return Always throws UnsupportedOperationException
 	 * @throws SQLException
 	 */
 	@Override
@@ -662,7 +671,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 * Not supported. Always throws UnsupportedOperationException
 	 *
 	 * @param iface
-	 * @return
+	 * @return Always throws UnsupportedOperationException
 	 * @throws SQLException
 	 */
 	@Override

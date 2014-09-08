@@ -149,7 +149,7 @@ public class ArtConfig extends HttpServlet {
 				Driver driver = drivers.nextElement();
 				try {
 					DriverManager.deregisterDriver(driver);
-					logger.info("JDBC driver deregistered: {}", driver);
+					logger.debug("JDBC driver deregistered: {}", driver);
 				} catch (SQLException ex) {
 					logger.error("Error while deregistering JDBC driver: {}", driver, ex);
 				}
@@ -326,7 +326,7 @@ public class ArtConfig extends HttpServlet {
 
 		try {
 			//create connection pools
-			DbConnections.createConnectionPools(settings, artDatabaseConfiguration);
+			DbConnections.createConnectionPools(artDatabaseConfiguration);
 
 			//create quartz scheduler
 			createQuartzScheduler();
@@ -606,7 +606,7 @@ public class ArtConfig extends HttpServlet {
 		Connection conn;
 
 		InitialContext ic = new InitialContext();
-		javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(ArtUtils.getJndiDatasourceUrl(jndiUrl));
+		javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(ArtUtils.getJndiDatasourceLookupName(jndiUrl));
 		conn = ds.getConnection();
 
 		return conn;

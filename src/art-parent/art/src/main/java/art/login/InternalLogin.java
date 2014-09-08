@@ -1,11 +1,10 @@
 package art.login;
 
-import art.servlets.ArtConfig;
-import art.dbutils.DbUtils;
+import art.user.User;
+import art.user.UserService;
 import art.utils.Encrypter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,39 +20,31 @@ public class InternalLogin {
 
 	public static LoginResult authenticate(String username, String password) {
 		logger.debug("Entering authenticate: username='{}'", username);
-		
+
 		LoginResult result = new LoginResult();
 
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+		UserService userService = new UserService();
 
 		try {
-			conn = ArtConfig.getConnection();
-			
-			String sql = "SELECT PASSWORD, PASSWORD_ALGORITHM, ACCESS_LEVEL, ACTIVE "
-					+ " FROM ART_USERS "
-					+ " WHERE USERNAME = ?";
+			User user = userService.getUser(username);
 
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
+			if (user == null) {
+				//user doesn't exist
+				logger.debug("No records returned");
 
-			rs = ps.executeQuery();
-			if (rs.next()) {
-				boolean active=rs.getBoolean("ACTIVE");
-				
-				logger.debug("active={}", active);
-				
-				if (active) {
+				result.setMessage("login.message.invalidUser");
+				result.setDetails("invalid user");
+			} else {
+				if (user.isActive()) {
 					boolean passwordVerified = false;
 					try {
-						passwordVerified = Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("PASSWORD_ALGORITHM"));
-					} catch (Exception ex) {
+						passwordVerified = Encrypter.VerifyPassword(password, user.getPassword(), user.getPasswordAlgorithm());
+					} catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
 						logger.error("Error. username='{}'", username, ex);
 					}
-					
+
 					logger.debug("passwordVerified={}", passwordVerified);
-					
+
 					if (passwordVerified) {
 						result.setAuthenticated(true);
 					} else {
@@ -66,12 +57,6 @@ public class InternalLogin {
 					result.setMessage("login.message.userDisabled");
 					result.setDetails("user disabled");
 				}
-			} else {
-				logger.debug("No records returned");
-				
-				//user doesn't exist
-				result.setMessage("login.message.invalidUser");
-				result.setDetails("invalid user");
 			}
 		} catch (SQLException ex) {
 			logger.error("Error. username='{}'", username, ex);
@@ -79,12 +64,8 @@ public class InternalLogin {
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
 			result.setError(ex.toString());
-		} finally {
-			DbUtils.close(rs, ps, conn);
 		}
 
-		logger.debug("Leaving authenticate: {}", result);
-		
 		return result;
 	}
 }

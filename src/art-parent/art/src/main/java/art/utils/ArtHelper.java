@@ -16,6 +16,7 @@
  */
 package art.utils;
 
+import art.dbutils.DbConnections;
 import art.dbutils.DbUtils;
 import art.servlets.ArtConfig;
 import java.io.File;
@@ -185,7 +186,7 @@ public class ArtHelper {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		try {
-			conn = ArtConfig.getConnection();
+			conn = DbConnections.getArtDbConnection();
 			String sql = "INSERT INTO ART_LOGS"
 					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, QUERY_ID,"
 					+ " TOTAL_TIME, FETCH_TIME, MESSAGE) "
@@ -229,7 +230,7 @@ public class ArtHelper {
 		PreparedStatement ps = null;
 		try {
 			Timestamp now = new Timestamp(new Date().getTime());
-			conn = ArtConfig.getConnection();
+			conn = DbConnections.getArtDbConnection();
 			String sql = "INSERT INTO ART_LOGS"
 					+ " (LOG_DATE, USERNAME, LOG_TYPE, IP, MESSAGE) "
 					+ " VALUES (?,?,?,?,?) ";

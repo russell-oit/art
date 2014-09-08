@@ -53,11 +53,19 @@ public class UserService {
 	//http://viralpatel.net/blogs/cache-support-spring-3-1-m1/
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-	@Autowired
-	private DbService dbService;
+	private final DbService dbService;
+	private final UserGroupService userGroupService;
 
 	@Autowired
-	private UserGroupService userGroupService;
+	public UserService(DbService dbService, UserGroupService userGroupService) {
+		this.dbService = dbService;
+		this.userGroupService = userGroupService;
+	}
+
+	public UserService() {
+		dbService = new DbService();
+		userGroupService = new UserGroupService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
 

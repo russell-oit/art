@@ -201,9 +201,9 @@ public class Mailer {
 	}
 
 	/**
-	 * Set the smtp server ip or hostname
+	 * Get the smtp server ip or hostname
 	 *
-	 * @return
+	 * @return the smtp server ip or hostname
 	 */
 	public String getHost() {
 		return host;
