@@ -17,7 +17,7 @@
  */
 package art.dbutils;
 
-import art.datasource.Datasource;
+import art.datasource.DatasourceInfo;
 import art.dbcp.ArtDBCPDataSource;
 import art.enums.ConnectionPoolLibrary;
 import com.zaxxer.hikari.HikariConfig;
@@ -49,12 +49,12 @@ public class ConnectionPoolWrapper {
 	private String poolName;
 	private DataSource pool;
 
-	public ConnectionPoolWrapper(Datasource ds, int maxPoolSize,
+	public ConnectionPoolWrapper(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary library) throws NamingException {
 
-		Objects.requireNonNull(ds, "ds must not be null");
+		Objects.requireNonNull(datasourceInfo, "datasourceInfo must not be null");
 
-		createConnectionPool(ds, maxPoolSize, library);
+		createConnectionPool(datasourceInfo, maxPoolSize, library);
 	}
 
 	/**
@@ -113,65 +113,65 @@ public class ConnectionPoolWrapper {
 
 		return inUseCount;
 	}
-	
-	private void createConnectionPool(Datasource ds, int maxPoolSize,
+
+	private void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary connectionPoolLibrary) throws NamingException {
 
-		if (ds.isJndi()) {
+		if (datasourceInfo.isJndi()) {
 			//for jndi datasources, the url contains the jndi name/resource reference
-			pool = getJndiDataSource(ds.getUrl(),ds.isUseDefaultJndiNamespace());
+			pool = getJndiDataSource(datasourceInfo.getUrl(), datasourceInfo.isUseDefaultJndiNamespace());
 		} else if (connectionPoolLibrary == ConnectionPoolLibrary.HikariCP) {
-			pool = createHikariCPConnectionPool(ds, maxPoolSize);
+			pool = createHikariCPConnectionPool(datasourceInfo, maxPoolSize);
 		} else {
-			pool = createArtDBCPConnectionPool(ds, maxPoolSize);
+			pool = createArtDBCPConnectionPool(datasourceInfo, maxPoolSize);
 		}
 
-		poolName = ds.getName();
-		poolId = ds.getDatasourceId();
+		poolName = datasourceInfo.getName();
+		poolId = datasourceInfo.getDatasourceId();
 	}
 
-	private DataSource createArtDBCPConnectionPool(Datasource ds, int maxPoolSize) {
-		long timeoutSeconds = ds.getConnectionPoolTimeout() * 60L;  //convert timeout mins to seconds
+	private DataSource createArtDBCPConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
+		long timeoutSeconds = datasourceInfo.getConnectionPoolTimeout() * 60L;  //convert timeout mins to seconds
 		ArtDBCPDataSource newPool = new ArtDBCPDataSource(timeoutSeconds);
 
-		newPool.setPoolName(ds.getName()); //use the datasoure name as the connection pool name
-		newPool.setUsername(ds.getUsername());
-		newPool.setPassword(ds.getPassword());
+		newPool.setPoolName(datasourceInfo.getName()); //use the datasoure name as the connection pool name
+		newPool.setUsername(datasourceInfo.getUsername());
+		newPool.setPassword(datasourceInfo.getPassword());
 		newPool.setMaxPoolSize(maxPoolSize);
-		newPool.setUrl(ds.getUrl());
-		newPool.setDriverClassName(ds.getDriver());
-		newPool.setTestSql(ds.getTestSql());
+		newPool.setUrl(datasourceInfo.getUrl());
+		newPool.setDriverClassName(datasourceInfo.getDriver());
+		newPool.setTestSql(datasourceInfo.getTestSql());
 
 		//set application name connection property
-		newPool.setConnectionProperties(getAppNameProperty(ds.getUrl(), ds.getName()));
+		newPool.setConnectionProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
 
 		//register driver so that connections are immediately usable
-		registerDriver(ds.getDriver());
+		registerDriver(datasourceInfo.getDriver());
 
 		return newPool;
 	}
 
-	private DataSource createHikariCPConnectionPool(Datasource ds, int maxPoolSize) {
+	private DataSource createHikariCPConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
 		HikariConfig config = new HikariConfig();
 
-		config.setPoolName(ds.getName());
-		config.setUsername(ds.getUsername());
-		config.setPassword(ds.getPassword());
+		config.setPoolName(datasourceInfo.getName());
+		config.setUsername(datasourceInfo.getUsername());
+		config.setPassword(datasourceInfo.getPassword());
 		config.setMaximumPoolSize(maxPoolSize);
-		config.setJdbcUrl(ds.getUrl());
-		config.setDriverClassName(ds.getDriver());
-		if (StringUtils.equals(ds.getTestSql(), "isValid")) {
+		config.setJdbcUrl(datasourceInfo.getUrl());
+		config.setDriverClassName(datasourceInfo.getDriver());
+		if (StringUtils.equals(datasourceInfo.getTestSql(), "isValid")) {
 			config.setJdbc4ConnectionTest(true);
 		} else {
 			config.setJdbc4ConnectionTest(false);
-			config.setConnectionTestQuery(ds.getTestSql());
+			config.setConnectionTestQuery(datasourceInfo.getTestSql());
 		}
 
-		long idleTimeoutMillis = ds.getConnectionPoolTimeout() * 60L * 1000L;  //convert timeout mins to milliseconds
+		long idleTimeoutMillis = datasourceInfo.getConnectionPoolTimeout() * 60L * 1000L;  //convert timeout mins to milliseconds
 		config.setIdleTimeout(idleTimeoutMillis);
 
 		//set application name connection property
-		config.setDataSourceProperties(getAppNameProperty(ds.getUrl(), ds.getName()));
+		config.setDataSourceProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
 
 		return new HikariDataSource(config);
 	}
@@ -245,13 +245,13 @@ public class ConnectionPoolWrapper {
 	 * Get connection located by the given jndi name
 	 *
 	 * @param jndiName
-	 * @param useDefaultNamespace
+	 * @param useDefaultJndiNamespace
 	 * @return
 	 * @throws SQLException
 	 * @throws javax.naming.NamingException
 	 */
-	public static Connection getJndiConnection(String jndiName, boolean useDefaultNamespace) throws SQLException, NamingException {
-		return getJndiDataSource(jndiName, useDefaultNamespace).getConnection();
+	protected static Connection getJndiConnection(String jndiName, boolean useDefaultJndiNamespace) throws SQLException, NamingException {
+		return getJndiDataSource(jndiName, useDefaultJndiNamespace).getConnection();
 	}
 
 }

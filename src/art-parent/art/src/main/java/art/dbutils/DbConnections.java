@@ -19,6 +19,7 @@ package art.dbutils;
 
 import art.artdatabase.ArtDatabase;
 import art.datasource.Datasource;
+import art.datasource.DatasourceInfo;
 import art.datasource.DatasourceMapper;
 import art.enums.ConnectionPoolLibrary;
 import java.sql.Connection;
@@ -46,7 +47,6 @@ import org.slf4j.LoggerFactory;
 public class DbConnections {
 
 	private static final Logger logger = LoggerFactory.getLogger(DbConnections.class);
-	private static final int ART_DATABASE_ID = 0; //"datasource id" for the art database
 
 	private static Map<Integer, ConnectionPoolWrapper> connectionPoolMap;
 
@@ -67,23 +67,11 @@ public class DbConnections {
 		ConnectionPoolLibrary connectionPoolLibrary = artDbConfig.getConnectionPoolLibrary();
 		int maxPoolSize = artDbConfig.getMaxPoolConnections(); //will apply to all connection pools
 
-		//create art database connection pool
-		Datasource ds = new Datasource();
-		ds.setName("ART Database");
-		ds.setDatasourceId(ART_DATABASE_ID);
-		ds.setJndi(artDbConfig.isJndi());
-		ds.setUseDefaultJndiNamespace(artDbConfig.isUseDefaultJndiNamespace());
-		ds.setUrl(artDbConfig.getUrl());
-		ds.setDriver(artDbConfig.getDriver());
-		ds.setConnectionPoolTimeout(artDbConfig.getConnectionPoolTimeout());
-		ds.setUsername(artDbConfig.getUsername());
-		ds.setPassword(artDbConfig.getPassword());
-		ds.setTestSql(artDbConfig.getTestSql());
-
-		createConnectionPool(ds, maxPoolSize, connectionPoolLibrary);
+		//create connection pool for the art database
+		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
 
 		//create connection pools for report datasources
-		//don't use DbService to avoid circular references
+		//use QueryRunner directly instead of DbService to avoid circular references
 		String sql = "SELECT *"
 				+ " FROM ART_DATABASES"
 				+ " WHERE ACTIVE=1";
@@ -102,10 +90,10 @@ public class DbConnections {
 		}
 	}
 
-	private static void createConnectionPool(Datasource ds, int maxPoolSize,
+	private static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary library) throws NamingException {
 
-		ConnectionPoolWrapper wrapper = new ConnectionPoolWrapper(ds, maxPoolSize, library);
+		ConnectionPoolWrapper wrapper = new ConnectionPoolWrapper(datasourceInfo, maxPoolSize, library);
 		connectionPoolMap.put(wrapper.getPoolId(), wrapper);
 	}
 
@@ -140,7 +128,7 @@ public class DbConnections {
 	 * @throws java.sql.SQLException
 	 */
 	public static DataSource getArtDbConnectionPool() throws SQLException {
-		return getConnectionPool(ART_DATABASE_ID);
+		return getConnectionPool(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 	}
 
 	/**
@@ -165,7 +153,7 @@ public class DbConnections {
 	 * @throws java.sql.SQLException
 	 */
 	public static Connection getArtDbConnection() throws SQLException {
-		return getConnection(ART_DATABASE_ID);
+		return getConnection(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 	}
 
 	/**
@@ -212,13 +200,13 @@ public class DbConnections {
 	 * Get connection located by the given jndi name
 	 *
 	 * @param jndiName
-	 * @param useDefaultNamespace
+	 * @param useDefaultJndiNamespace
 	 * @return
 	 * @throws SQLException
 	 * @throws javax.naming.NamingException
 	 */
-	public static Connection getJndiConnection(String jndiName, boolean useDefaultNamespace) throws SQLException, NamingException {
-		return ConnectionPoolWrapper.getJndiConnection(jndiName, useDefaultNamespace);
+	public static Connection getJndiConnection(String jndiName, boolean useDefaultJndiNamespace) throws SQLException, NamingException {
+		return ConnectionPoolWrapper.getJndiConnection(jndiName, useDefaultJndiNamespace);
 	}
 
 }
