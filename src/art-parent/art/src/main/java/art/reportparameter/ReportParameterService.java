@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -17,11 +17,8 @@
 package art.reportparameter;
 
 import art.dbutils.DbService;
-import art.dbutils.DbUtils;
-import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.ReportService;
-import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -32,12 +29,9 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.ScalarHandler;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 

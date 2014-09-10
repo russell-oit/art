@@ -229,6 +229,7 @@ Display art database configuration page
 						<form:errors path="connectionPoolTimeout" cssClass="error"/>
 					</div>
 				</div>
+					<hr>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="maxPoolConnections">
 						<spring:message code="artDatabase.label.maxPoolConnections"/>
@@ -247,6 +248,20 @@ Display art database configuration page
 						<form:errors path="maxPoolConnections" cssClass="error"/>
 					</div>
 				</div>
+					<div class="form-group">
+						<label class="control-label col-md-5">
+							<spring:message code="artDatabase.label.connectionPoolLibrary"/>
+						</label>
+						<div class="col-md-7">
+							<c:forEach var="connectionPoolLibrary" items="${connectionPoolLibraries}">
+								<label class="radio-inline">
+									<form:radiobutton path="connectionPoolLibrary"
+													  value="${connectionPoolLibrary}"/> ${connectionPoolLibrary.description}
+								</label>
+							</c:forEach>
+							<form:errors path="connectionPoolLibrary" cssClass="error"/>
+						</div>
+					</div>
 				<div class="form-group">
 					<div class="col-md-12">
 						<button type="submit" class="btn btn-primary pull-right">

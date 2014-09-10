@@ -102,7 +102,7 @@ public class ArtConfig extends HttpServlet {
 	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
 	private static String webinfPath;
 	private static String artDatabaseFilePath;
-	private static ArtDatabase artDatabaseConfiguration;
+	private static ArtDatabase artDbConfig;
 	private static String settingsFilePath;
 	private static Settings settings;
 	private static final String sep = java.io.File.separator;
@@ -320,13 +320,13 @@ public class ArtConfig extends HttpServlet {
 		//load art database settings
 		loadArtDatabaseConfiguration();
 
-		if (artDatabaseConfiguration == null) {
+		if (artDbConfig == null) {
 			return;
 		}
 
 		try {
 			//create connection pools
-			DbConnections.createConnectionPools(artDatabaseConfiguration);
+			DbConnections.createConnectionPools(artDbConfig);
 
 			//create quartz scheduler
 			createQuartzScheduler();
@@ -374,7 +374,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return
 	 */
 	public static boolean isArtDatabaseConfigured() {
-		if (artDatabaseConfiguration != null) {
+		if (artDbConfig != null) {
 			return true;
 		} else {
 			return false;
@@ -578,11 +578,11 @@ public class ArtConfig extends HttpServlet {
 		// admin session (we are not getting this from the pool since it should not be in Autocommit mode)
 		Connection connArt;
 
-		String url = artDatabaseConfiguration.getUrl();
-		String username = artDatabaseConfiguration.getUsername();
-		String password = artDatabaseConfiguration.getPassword();
+		String url = artDbConfig.getUrl();
+		String username = artDbConfig.getUsername();
+		String password = artDbConfig.getPassword();
 
-		if (StringUtils.isNotBlank(artDatabaseConfiguration.getDriver())) {
+		if (StringUtils.isNotBlank(artDbConfig.getDriver())) {
 			connArt = DriverManager.getConnection(url, username, password);
 			connArt.setAutoCommit(false);
 		} else {
@@ -605,8 +605,7 @@ public class ArtConfig extends HttpServlet {
 	public static Connection getJndiConnection(String jndiUrl) throws SQLException, NamingException {
 		Connection conn;
 
-		InitialContext ic = new InitialContext();
-		javax.sql.DataSource ds = (javax.sql.DataSource) ic.lookup(ArtUtils.getJndiDatasourceLookupName(jndiUrl));
+		javax.sql.DataSource ds = ArtUtils.getJndiDataSource(jndiUrl);
 		conn = ds.getConnection();
 
 		return conn;
@@ -758,8 +757,8 @@ public class ArtConfig extends HttpServlet {
 	 * @return object with art database settings or null if art database not
 	 * configured
 	 */
-	public static ArtDatabase getArtDatabaseConfiguration() {
-		return artDatabaseConfiguration;
+	public static ArtDatabase getArtDbConfig() {
+		return artDbConfig;
 	}
 
 	/**
@@ -785,11 +784,11 @@ public class ArtConfig extends HttpServlet {
 		}
 
 		if (artDatabase != null) {
-			artDatabaseConfiguration = null;
-			artDatabaseConfiguration = artDatabase;
+			artDbConfig = null;
+			artDbConfig = artDatabase;
 
 			//set defaults for invalid values
-			setArtDatabaseDefaults(artDatabaseConfiguration);
+			setArtDatabaseDefaults(artDbConfig);
 		}
 	}
 
@@ -926,7 +925,7 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	private static void createQuartzScheduler() {
-		if (artDatabaseConfiguration == null) {
+		if (artDbConfig == null) {
 			logger.warn("ART Database configuration not available");
 			return;
 		}
@@ -935,10 +934,11 @@ public class ArtConfig extends HttpServlet {
 		QuartzProperties qp = new QuartzProperties();
 
 		qp.setPropertiesFilePath(webinfPath + sep + "classes" + sep + "quartz.properties");
-		qp.setDataSourceDriver(artDatabaseConfiguration.getDriver());
-		qp.setDataSourceUrl(artDatabaseConfiguration.getUrl());
-		qp.setDataSourceUsername(artDatabaseConfiguration.getUsername());
-		qp.setDataSourcePassword(artDatabaseConfiguration.getPassword());
+		qp.setDataSourceDriver(artDbConfig.getDriver());
+		qp.setJndiDataSource(artDbConfig.isJndi());
+		qp.setDataSourceUrl(artDbConfig.getUrl());
+		qp.setDataSourceUsername(artDbConfig.getUsername());
+		qp.setDataSourcePassword(artDbConfig.getPassword());
 
 		try {
 			Properties props = qp.getProperties();

@@ -20,13 +20,13 @@ package art.dbutils;
 import art.datasource.DatasourceInfo;
 import art.dbcp.ArtDBCPDataSource;
 import art.enums.ConnectionPoolLibrary;
+import art.utils.ArtUtils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -114,12 +114,16 @@ public class ConnectionPoolWrapper {
 		return inUseCount;
 	}
 
+	public Connection getConnection() throws SQLException {
+		return pool.getConnection();
+	}
+
 	private void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary connectionPoolLibrary) throws NamingException {
 
 		if (datasourceInfo.isJndi()) {
 			//for jndi datasources, the url contains the jndi name/resource reference
-			pool = getJndiDataSource(datasourceInfo.getUrl(), datasourceInfo.isUseDefaultJndiNamespace());
+			pool = ArtUtils.getJndiDataSource(datasourceInfo.getUrl());
 		} else if (connectionPoolLibrary == ConnectionPoolLibrary.HikariCP) {
 			pool = createHikariCPConnectionPool(datasourceInfo, maxPoolSize);
 		} else {
@@ -223,35 +227,4 @@ public class ConnectionPoolWrapper {
 
 		return properties;
 	}
-
-	private static DataSource getJndiDataSource(String jndiName, boolean useDefaultNamespace) throws NamingException {
-		logger.debug("Entering getJndiDataSource: jndiName='{}'", jndiName);
-
-		//throw exception if jndi url is null, rather than returning a null connection, which would be useless
-		Objects.requireNonNull(jndiName, "jndiName must not be null");
-
-		String finalJndiName;
-		if (useDefaultNamespace) {
-			finalJndiName = "java:comp/env/" + jndiName;
-		} else {
-			finalJndiName = jndiName;
-		}
-		InitialContext ic = new InitialContext();
-		logger.debug("finalJndiName='{}'", finalJndiName);
-		return (DataSource) ic.lookup(finalJndiName);
-	}
-
-	/**
-	 * Get connection located by the given jndi name
-	 *
-	 * @param jndiName
-	 * @param useDefaultJndiNamespace
-	 * @return
-	 * @throws SQLException
-	 * @throws javax.naming.NamingException
-	 */
-	protected static Connection getJndiConnection(String jndiName, boolean useDefaultJndiNamespace) throws SQLException, NamingException {
-		return getJndiDataSource(jndiName, useDefaultJndiNamespace).getConnection();
-	}
-
 }

@@ -16,9 +16,7 @@
  */
 package art.dbutils;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.slf4j.Logger;
@@ -26,15 +24,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Provides methods for running sql queries against the art database, or some
- * other database whose connection is provided
+ * Provides methods for running sql queries against the art database
  *
  * @author Timothy Anyona
  */
 @Component
 public class DbService {
-
-	private static final Logger logger = LoggerFactory.getLogger(DbService.class);
 
 	/**
 	 * Executes an INSERT, UPDATE or DELETE query against the art database
@@ -47,24 +42,6 @@ public class DbService {
 	public int update(String sql, Object... params) throws SQLException {
 		QueryRunner run = new QueryRunner(DbConnections.getArtDbConnectionPool());
 		return run.update(sql, params);
-	}
-
-	/**
-	 * Executes an INSERT, UPDATE or DELETE query. The caller is responsible for
-	 * closing the connection.
-	 *
-	 * @param conn
-	 * @param sql
-	 * @param params
-	 * @return the number of affected records
-	 * @throws SQLException
-	 * @throws NullPointerException if conn is null
-	 */
-	public int update(Connection conn, String sql, Object... params) throws SQLException {
-		Objects.requireNonNull(conn, "Connection must not be null");
-
-		QueryRunner run = new QueryRunner();
-		return run.update(conn, sql, params);
 	}
 
 	/**

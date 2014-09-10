@@ -71,7 +71,7 @@ public class DbConnections {
 		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
 
 		//create connection pools for report datasources
-		//use QueryRunner directly instead of DbService to avoid circular references
+		//use QueryRunner directly instead of DbService or DatasourceService to avoid circular references
 		String sql = "SELECT *"
 				+ " FROM ART_DATABASES"
 				+ " WHERE ACTIVE=1";
@@ -171,7 +171,7 @@ public class DbConnections {
 		for (Entry<Integer, ConnectionPoolWrapper> entry : connectionPoolMap.entrySet()) {
 			ConnectionPoolWrapper wrapper = entry.getValue();
 			if (StringUtils.equalsIgnoreCase(wrapper.getPoolName(), datasourceName)) {
-				conn = wrapper.getPool().getConnection();
+				conn = wrapper.getConnection();
 			}
 		}
 
@@ -194,19 +194,6 @@ public class DbConnections {
 
 		connectionPoolMap.clear();
 		connectionPoolMap = null;
-	}
-
-	/**
-	 * Get connection located by the given jndi name
-	 *
-	 * @param jndiName
-	 * @param useDefaultJndiNamespace
-	 * @return
-	 * @throws SQLException
-	 * @throws javax.naming.NamingException
-	 */
-	public static Connection getJndiConnection(String jndiName, boolean useDefaultJndiNamespace) throws SQLException, NamingException {
-		return ConnectionPoolWrapper.getJndiConnection(jndiName, useDefaultJndiNamespace);
 	}
 
 }

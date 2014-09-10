@@ -37,7 +37,6 @@ public abstract class DatasourceInfo {
 	private String testSql;
 	private int connectionPoolTimeout;
 	private boolean jndi;
-	private boolean useDefaultJndiNamespace;
 
 	/**
 	 * @return the datasourceId
@@ -65,24 +64,6 @@ public abstract class DatasourceInfo {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	/**
-	 * Get the value of useDefaultJndiNamespace
-	 *
-	 * @return the value of useDefaultJndiNamespace
-	 */
-	public boolean isUseDefaultJndiNamespace() {
-		return useDefaultJndiNamespace;
-	}
-
-	/**
-	 * Set the value of useDefaultJndiNamespace
-	 *
-	 * @param useDefaultJndiNamespace new value of useDefaultJndiNamespace
-	 */
-	public void setUseDefaultJndiNamespace(boolean useDefaultJndiNamespace) {
-		this.useDefaultJndiNamespace = useDefaultJndiNamespace;
 	}
 
 	/**

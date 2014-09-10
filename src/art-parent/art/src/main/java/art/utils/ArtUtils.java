@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -22,20 +22,26 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Class for utility methods. Only static methods, without dependencies on other
- * art classes
+ * Provides general utility methods
  *
  * @author Timothy Anyona
  */
 public class ArtUtils {
 
+	private static final Logger logger = LoggerFactory.getLogger(ArtUtils.class);
 	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
 	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
@@ -160,15 +166,26 @@ public class ArtUtils {
 		}
 		return sortKey;
 	}
+	
+	public static DataSource getJndiDataSource(String jndiName) throws NamingException {
+		logger.debug("Entering getJndiDataSource: jndiName='{}'", jndiName);
+
+		//throw exception if jndi url is null, rather than returning a null connection, which would be useless
+		Objects.requireNonNull(jndiName, "jndiName must not be null");
+
+		InitialContext ic = new InitialContext();
+		logger.debug("jndiName='{}'", jndiName);
+		return (DataSource) ic.lookup(jndiName);
+	}
 
 	/**
-	 * Get name to be used for jndi lookup of a datasource by prepend
-	 * java:comp/env/ if appropriate
+	 * Get name to be used for jndi lookup of a datasource by prepending
+	 * java:comp/env/ as appropriate
 	 *
 	 * @param jndiName
 	 * @return
 	 */
-	public static String getJndiDatasourceLookupName(String jndiName) {
+	public static String getJndiDatasourceLookupName(String jndiName, boolean useDefaultJndiNamespace) {
 		/*
 		 different app servers add datasources to different locations in the jndi tree
 		
@@ -188,12 +205,10 @@ public class ArtUtils {
 		 */
 
 		String finalName;
-		if (StringUtils.startsWith(jndiName, "java:")) {
-			//to cater for jboss
-			finalName = jndiName;
-		} else {
-			//this will fail for weblogic without resource reference configuration
+		if (useDefaultJndiNamespace) {
 			finalName = "java:comp/env/" + jndiName;
+		} else {
+			finalName = jndiName;
 		}
 
 		return finalName;

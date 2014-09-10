@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -26,8 +26,6 @@ import art.utils.Encrypter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpSession;

@@ -16,8 +16,6 @@
  */
 package art.connection;
 
-import art.dbcp.ArtDBCPDataSource;
-import art.servlets.ArtConfig;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +34,7 @@ public class ConnectionController {
 
 	@RequestMapping(value = "/app/connections", method = RequestMethod.GET)
 	public String showConnections(Model model) {
-		model.addAttribute("connectionPoolMap", ArtConfig.getDataSources());
+//		model.addAttribute("connectionPoolMap", ArtConfig.getDataSources());
 		return "connections";
 	}
 
@@ -45,23 +43,23 @@ public class ConnectionController {
 	ResetConnectionResponse resetDatasource(@RequestParam("id") Integer id) {
 		ResetConnectionResponse response = new ResetConnectionResponse();
 
-		ArtDBCPDataSource ds = ArtConfig.getDataSource(id);
-		if (ds != null) {
-			ds.refreshConnections();
-			response.setSuccess(true);
-			response.setPoolSize(ds.getCurrentPoolSize());
-			response.setInUseCount(ds.getInUseCount());
-		} else {
-			response.setErrorMessage("Connection pool not found: " + id);
-		}
+//		ArtDBCPDataSource ds = ArtConfig.getDataSource(id);
+//		if (ds != null) {
+//			ds.refreshConnections();
+//			response.setSuccess(true);
+//			response.setPoolSize(ds.getCurrentPoolSize());
+//			response.setInUseCount(ds.getInUseCount());
+//		} else {
+//			response.setErrorMessage("Connection pool not found: " + id);
+//		}
 
 		return response;
 	}
 
 	@RequestMapping(value = "/app/resetAllConnections", method = RequestMethod.POST)
 	public String resetAllConnections(RedirectAttributes redirectAttributes) {
-		ArtConfig.refreshConnections();
-		redirectAttributes.addFlashAttribute("message", "connections.message.connectionsReset");
+//		ArtConfig.refreshConnections();
+//		redirectAttributes.addFlashAttribute("message", "connections.message.connectionsReset");
 		return "redirect:/app/connections.do";
 	}
 

@@ -46,6 +46,25 @@ public class QuartzProperties {
 	private String dataSourceUrl;
 	private String dataSourceUsername;
 	private String dataSourcePassword;
+	private boolean jndiDataSource;
+
+	/**
+	 * Get the value of jndiDataSource
+	 *
+	 * @return the value of jndiDataSource
+	 */
+	public boolean isJndiDataSource() {
+		return jndiDataSource;
+	}
+
+	/**
+	 * Set the value of jndiDataSource
+	 *
+	 * @param jndiDataSource new value of jndiDataSource
+	 */
+	public void setJndiDataSource(boolean jndiDataSource) {
+		this.jndiDataSource = jndiDataSource;
+	}
 
 	/**
 	 * @return the propertiesFilePath
@@ -125,7 +144,7 @@ public class QuartzProperties {
 	 */
 	public Properties getProperties() throws IOException {
 		logger.debug("Entering getProperties");
-		
+
 		Properties properties = new Properties();
 
 		//quartz property names
@@ -182,10 +201,10 @@ public class QuartzProperties {
 		if (properties.getProperty(DATASOURCE_NAME) == null) {
 			properties.setProperty(DATASOURCE_NAME, "ArtDs");
 		}
-		
+
 		//set datasource property names
 		String datasourceName = properties.getProperty(DATASOURCE_NAME);
-		
+
 		final String DRIVER = "org.quartz.dataSource." + datasourceName + ".driver";
 		final String URL = "org.quartz.dataSource." + datasourceName + ".URL";
 		final String USER = "org.quartz.dataSource." + datasourceName + ".user";
@@ -193,7 +212,15 @@ public class QuartzProperties {
 		final String VALIDATION_QUERY = "org.quartz.dataSource." + datasourceName + ".validationQuery";
 		final String JNDI_URL = "org.quartz.dataSource." + datasourceName + ".jndiURL";
 
-		if (StringUtils.isNotBlank(dataSourceDriver)) {
+		if (jndiDataSource) {
+			//jndi datasource
+			if (properties.getProperty(DRIVER_DELEGATE) == null) {
+				properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
+			}
+			if (properties.getProperty(JNDI_URL) == null) {
+				properties.setProperty(JNDI_URL, dataSourceUrl);
+			}
+		} else {
 			//jdbc datasource
 			if (properties.getProperty(DRIVER) == null) {
 				properties.setProperty(DRIVER, dataSourceDriver);
@@ -267,14 +294,6 @@ public class QuartzProperties {
 				if (properties.getProperty(VALIDATION_QUERY) == null) {
 					properties.setProperty(VALIDATION_QUERY, "select 1");
 				}
-			}
-		} else {
-			//jndi datasource
-			if (properties.getProperty(DRIVER_DELEGATE) == null) {
-				properties.setProperty(DRIVER_DELEGATE, "org.quartz.impl.jdbcjobstore.StdJDBCDelegate");
-			}
-			if (properties.getProperty(JNDI_URL) == null) {
-				properties.setProperty(JNDI_URL, ArtUtils.getJndiDatasourceLookupName(dataSourceUrl));
 			}
 		}
 

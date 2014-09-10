@@ -1,12 +1,13 @@
 package art.artdatabase;
 
-import art.dbutils.DbConnections;
+import art.dbutils.DbUtils;
+import art.enums.ConnectionPoolLibrary;
 import art.servlets.ArtConfig;
 import art.utils.ArtUtils;
-import art.dbutils.DbUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -40,10 +41,15 @@ public class ArtDatabaseController {
 		return databaseTypes;
 	}
 
+	@ModelAttribute("connectionPoolLibraries")
+	public List<ConnectionPoolLibrary> addConnectionPoolLibraries() {
+		return ConnectionPoolLibrary.list();
+	}
+
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
 	public String showArtDatabaseConfiguration(Model model) {
 
-		ArtDatabase artDatabase = ArtConfig.getArtDatabaseConfiguration();
+		ArtDatabase artDatabase = ArtConfig.getArtDbConfig();
 
 		if (artDatabase == null) {
 			//art database not configured. default to demo
@@ -79,7 +85,7 @@ public class ArtDatabaseController {
 			if (StringUtils.isEmpty(newPassword)) {
 				//password field blank. use current password
 				if (ArtConfig.isArtDatabaseConfigured()) {
-					newPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+					newPassword = ArtConfig.getArtDbConfig().getPassword();
 				}
 			}
 		}
@@ -109,7 +115,7 @@ public class ArtDatabaseController {
 			String password = artDatabase.getPassword();
 
 			if (artDatabase.isJndi()) {
-				conn = DbConnections.getJndiConnection(url, artDatabase.isUseDefaultJndiNamespace());
+				conn = ArtUtils.getJndiDataSource(url).getConnection();
 			} else {
 				Class.forName(driver).newInstance();
 				conn = DriverManager.getConnection(url, username, password);

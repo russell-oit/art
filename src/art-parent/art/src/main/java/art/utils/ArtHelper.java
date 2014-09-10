@@ -261,8 +261,8 @@ public class ArtHelper {
 		//TODO remove this method once refactoring is complete
 		boolean validRepositoryUser = false;
 
-		String artDbUsername = ArtConfig.getArtDatabaseConfiguration().getUsername();
-		String artDbPassword = ArtConfig.getArtDatabaseConfiguration().getPassword();
+		String artDbUsername = ArtConfig.getArtDbConfig().getUsername();
+		String artDbPassword = ArtConfig.getArtDbConfig().getPassword();
 		if (StringUtils.equals(username, artDbUsername)
 				&& StringUtils.equals(password, artDbPassword)
 				&& StringUtils.isNotBlank(username)) {

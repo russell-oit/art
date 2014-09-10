@@ -21,7 +21,7 @@ public class ArtDatabase extends DatasourceInfo implements Serializable {
 	private static final String ART_DATABASE_DATASOURCE_NAME = "ART Database"; //"datasource name" for the art database in the connection pool map
 
 	@Override
-	@JsonIgnore //don't datasource id write to file. definition only required on getters (deserialization). will also apply to setters (serialization)
+	@JsonIgnore
 	public int getDatasourceId() {
 		return ART_DATABASE_DATASOURCE_ID;
 	}

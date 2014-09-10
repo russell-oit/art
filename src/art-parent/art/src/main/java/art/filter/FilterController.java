@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -21,8 +21,6 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
