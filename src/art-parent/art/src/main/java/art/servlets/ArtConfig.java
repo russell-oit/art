@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -33,7 +33,7 @@ import art.settings.Settings;
 import art.utils.ArtJob;
 import art.utils.ArtUtils;
 import art.utils.Encrypter;
-import art.utils.QuartzProperties;
+import art.utils.SchedulerUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
 import java.io.File;
@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import javax.naming.InitialContext;
+import java.util.concurrent.TimeUnit;
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -75,15 +75,15 @@ import static org.quartz.JobBuilder.newJob;
 import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
-import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class that initializes datasource connections and application settings.
+ * Initializes and shuts down the application, including creating and shutting
+ * down database connections and the quartz scheduler. Also provides methods to
+ * retrieve application settings.
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -111,62 +111,60 @@ public class ArtConfig extends HttpServlet {
 	private static String artVersion;
 	private static HashMap<String, Class<?>> directOutputReportClasses;
 
-	/**
-	 * {@inheritDoc}
-	 *
-	 * @param config {@inheritDoc}
-	 * @throws ServletException
-	 */
 	@Override
 	public void init(ServletConfig config) throws ServletException {
-
 		super.init(config);
-
 		logger.info("ART is starting up");
-
 		ArtConfigInit();
 	}
 
 	/**
-	 * Stop quartz scheduler and close datasource connections
+	 * Stops the quartz scheduler, closes database connections and deregisters
+	 * jdbc drivers
 	 */
 	@Override
 	public void destroy() {
+		logger.debug("Entering destroy");
 
+		//shutdown quartz scheduler
+		SchedulerUtils.shutdownScheduler();
 		try {
-			//shutdown quartz scheduler
-			if (scheduler != null) {
-				scheduler.shutdown();
-				Thread.sleep(1000); //allow delay to avoid tomcat reporting that threads weren't stopped. (http://forums.terracotta.org/forums/posts/list/3479.page)
-			}
-
-			//close database connections
-			DbConnections.closeAllConnections();
-
-			//deregister jdbc drivers
-			Enumeration<Driver> drivers = DriverManager.getDrivers();
-			while (drivers.hasMoreElements()) {
-				Driver driver = drivers.nextElement();
-				try {
-					DriverManager.deregisterDriver(driver);
-					logger.debug("JDBC driver deregistered: {}", driver);
-				} catch (SQLException ex) {
-					logger.error("Error while deregistering JDBC driver: {}", driver, ex);
-				}
-			}
-		} catch (SchedulerException | InterruptedException ex) {
+			//have delay to avoid tomcat reporting that threads weren't stopped. 
+			//(http://forums.terracotta.org/forums/posts/list/3479.page)
+			//TODO retest
+			TimeUnit.SECONDS.sleep(1);
+		} catch (InterruptedException ex) {
 			logger.error("Error", ex);
 		}
 
-		logger.info("ART Stopped.");
+		//close database connections
+		DbConnections.closeAllConnections();
+
+		//deregister jdbc drivers
+		deregisterJdbcDrivers();
+
+		logger.info("ART stopped");
+	}
+
+	private void deregisterJdbcDrivers() {
+		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		while (drivers.hasMoreElements()) {
+			Driver driver = drivers.nextElement();
+			try {
+				DriverManager.deregisterDriver(driver);
+				logger.debug("JDBC driver deregistered: {}", driver);
+			} catch (SQLException ex) {
+				logger.error("Error while deregistering JDBC driver: {}", driver, ex);
+			}
+		}
 	}
 
 	/**
-	 * Initialize datasources, viewModes, quartz scheduler, application settings
+	 * Initializes database connections, the quartz scheduler, application
+	 * settings
 	 */
 	private void ArtConfigInit() {
-
-		logger.debug("Initializing variables");
+		logger.debug("Entering ArtConfigInit");
 
 		ServletContext ctx = getServletConfig().getServletContext();
 
@@ -227,7 +225,9 @@ public class ArtConfig extends HttpServlet {
 		//ensure work directories exist
 		createWorkDirectories();
 
-		//list report output classes that do direct output (they create output themselves and don't delegate to another entity e.g. jasperreports)
+		/*load classes for report output classes that do direct output
+		 (they create output themselves and don't delegate to another entity like jasperreports)
+		 */
 		ArrayList<String> directOutputReportClassNames = new ArrayList<>();
 		directOutputReportClassNames.add("htmlDataTable");
 		directOutputReportClassNames.add("htmlGrid");
@@ -245,14 +245,13 @@ public class ArtConfig extends HttpServlet {
 		directOutputReportClassNames.add("xml");
 		directOutputReportClassNames.add("rss20");
 
-		//load classes for all report formats
 		directOutputReportClasses = new HashMap<>(directOutputReportClassNames.size());
 		ClassLoader cl = this.getClass().getClassLoader();
 		for (String reportOutputClass : directOutputReportClassNames) {
 			try {
 				directOutputReportClasses.put(reportOutputClass, cl.loadClass("art.output." + reportOutputClass + "Output"));
 			} catch (ClassNotFoundException ex) {
-				logger.error("Error while loading report output class: {}", reportOutputClass, ex);
+				logger.error("Error while loading report output class: '{}'", reportOutputClass, ex);
 			}
 		}
 
@@ -260,7 +259,7 @@ public class ArtConfig extends HttpServlet {
 		loadSettings();
 
 		//initialize datasources
-		initializeDatasources();
+		initializeArtDatabase();
 	}
 
 	public static Map<String, Class<?>> getDirectOutputReportClasses() {
@@ -286,14 +285,14 @@ public class ArtConfig extends HttpServlet {
 				//font not registered. register any defined font files or directories
 				String pdfFontDirectory = pSettings.getPdfFontDirectory();
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
-					logger.info("Registering fonts from directory: {}", pdfFontDirectory);
+					logger.info("Registering fonts from directory: '{}'", pdfFontDirectory);
 					int i = FontFactory.registerDirectory(pdfFontDirectory);
 					logger.info("{} fonts registered", i);
 				}
 
 				String pdfFontFile = pSettings.getPdfFontFile();
 				if (StringUtils.isNotBlank(pdfFontFile)) {
-					logger.info("Registering font file: {}", pdfFontFile);
+					logger.info("Registering font file: '{}'", pdfFontFile);
 					FontFactory.register(pdfFontFile);
 					logger.info("Font file {} registered", pdfFontFile);
 				}
@@ -313,9 +312,10 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Initialize art repository datasource, and other defined datasources
+	 * Initializes the art database and report datasource connection pools, run
+	 * upgrade steps on the art database and start the quartz scheduler
 	 */
-	private static void initializeDatasources() {
+	private static void initializeArtDatabase() {
 
 		//load art database settings
 		loadArtDatabaseConfiguration();
@@ -374,10 +374,10 @@ public class ArtConfig extends HttpServlet {
 	 * @return
 	 */
 	public static boolean isArtDatabaseConfigured() {
-		if (artDbConfig != null) {
-			return true;
-		} else {
+		if (artDbConfig == null) {
 			return false;
+		} else {
+			return true;
 		}
 	}
 
@@ -503,6 +503,7 @@ public class ArtConfig extends HttpServlet {
 		}
 	}
 
+	//TODO remove after refactoring
 	/**
 	 * Return a connection to the datasource with a given ID from the connection
 	 * pool.
@@ -525,6 +526,7 @@ public class ArtConfig extends HttpServlet {
 		return conn;
 	}
 
+	//TODO remove after refactoring
 	/**
 	 * Return a connection to ART repository from the pool (same as
 	 * getConnection(0))
@@ -536,6 +538,7 @@ public class ArtConfig extends HttpServlet {
 		return getConnection(0); // i=0 => ART Repository
 	}
 
+	//TODO remove after refactoring
 	/**
 	 * Get a datasource connection based on the datasource name.
 	 *
@@ -564,6 +567,7 @@ public class ArtConfig extends HttpServlet {
 		return conn;
 	}
 
+	//TODO remove once refactoring is complete
 	/**
 	 * Return a normal JDBC connection to the ART repository with autocommit
 	 * disabled (used for Admins)
@@ -594,6 +598,7 @@ public class ArtConfig extends HttpServlet {
 		return connArt;
 	}
 
+	//TODO remove once refactoring is complete
 	/**
 	 * Get connection located by the given jndi url
 	 *
@@ -612,42 +617,6 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Get a ArtDBCPDataSource object.
-	 *
-	 * @param i id of the datasource
-	 * @return ArtDBCPDataSource object
-	 */
-	public static ArtDBCPDataSource getDataSource(int i) {
-		return dataSources.get(Integer.valueOf(i));
-	}
-
-	/**
-	 * Get all datasources
-	 *
-	 * @return all datasources
-	 */
-	public static Map<Integer, ArtDBCPDataSource> getDataSources() {
-		return dataSources;
-	}
-
-	/**
-	 * Properly close connections in the dataSources connection pool and clear
-	 * the datasources list
-	 */
-	private static void clearConnections() {
-		if (dataSources != null) {
-			for (Integer key : dataSources.keySet()) {
-				ArtDBCPDataSource ds = dataSources.get(key);
-				if (ds != null) {
-					ds.close();
-				}
-			}
-			dataSources.clear();
-			dataSources = null;
-		}
-	}
-
-	/**
 	 * Refresh all connections in the pool, attempting to properly close the
 	 * connections before recreating them.
 	 *
@@ -657,28 +626,9 @@ public class ArtConfig extends HttpServlet {
 		clearConnections();
 
 		//reset datasources array
-		initializeDatasources();
+		initializeArtDatabase();
 
 		logger.info("Datasources Refresh: Completed at {}", new Date().toString());
-	}
-
-	/**
-	 * Refresh all connections in the pool, without attempting to close any
-	 * existing connections.
-	 *
-	 * This is intended to be used on buggy jdbc drivers where for some reasons
-	 * the connection.close() method hangs. This may produce a memory leak since
-	 * connections are not closed, just removed from the pool: let's hope the
-	 * garbage collector decide to remove them sooner or later...
-	 */
-	public static void forceRefreshConnections() {
-		//no attempt to close connections
-		dataSources = null;
-
-		//reset datasources array
-		initializeDatasources();
-
-		logger.info("Datasources Force Refresh: Completed at {}", new Date().toString());
 	}
 
 	/**
@@ -688,15 +638,6 @@ public class ArtConfig extends HttpServlet {
 	 */
 	public static List<String> getReportFormats() {
 		return reportFormats;
-	}
-
-	/**
-	 * Store the quartz scheduler object
-	 *
-	 * @param s quartz scheduler object
-	 */
-	public static void setScheduler(org.quartz.Scheduler s) {
-		scheduler = s;
 	}
 
 	/**
@@ -721,9 +662,9 @@ public class ArtConfig extends HttpServlet {
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {
-				if (maxSetting.indexOf(reportFormat) != -1) {
+				if (StringUtils.containsIgnoreCase(maxSetting, reportFormat)) {
 					String value = StringUtils.substringAfter(maxSetting, ":");
-					max = NumberUtils.toInt(value);
+					max = NumberUtils.toInt(value, max);
 					break;
 				}
 			}
@@ -772,7 +713,9 @@ public class ArtConfig extends HttpServlet {
 			File artDatabaseFile = new File(artDatabaseFilePath);
 			if (artDatabaseFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
-				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
+				artDatabase
+						= mapper.readValue(artDatabaseFile, ArtDatabase.class
+						);
 
 				//de-obfuscate password field
 				artDatabase.setPassword(Encrypter.decrypt(artDatabase.getPassword()));
@@ -823,7 +766,9 @@ public class ArtConfig extends HttpServlet {
 			File settingsFile = new File(settingsFilePath);
 			if (settingsFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
-				newSettings = mapper.readValue(settingsFile, Settings.class);
+				newSettings
+						= mapper.readValue(settingsFile, Settings.class
+						);
 
 				//de-obfuscate password fields
 				newSettings.setSmtpPassword(Encrypter.decrypt(newSettings.getSmtpPassword()));
@@ -929,39 +874,9 @@ public class ArtConfig extends HttpServlet {
 			logger.warn("ART Database configuration not available");
 			return;
 		}
-
-		//prepare quartz scheduler properties
-		QuartzProperties qp = new QuartzProperties();
-
-		qp.setPropertiesFilePath(webinfPath + sep + "classes" + sep + "quartz.properties");
-		qp.setDataSourceDriver(artDbConfig.getDriver());
-		qp.setJndiDataSource(artDbConfig.isJndi());
-		qp.setDataSourceUrl(artDbConfig.getUrl());
-		qp.setDataSourceUsername(artDbConfig.getUsername());
-		qp.setDataSourcePassword(artDbConfig.getPassword());
-
-		try {
-			Properties props = qp.getProperties();
-
-			//shutdown existing scheduler instance
-			if (scheduler != null) {
-				scheduler.shutdown();
-				scheduler = null;
-			}
-
-			//create new scheduler instance
-			SchedulerFactory schedulerFactory = new StdSchedulerFactory(props);
-			scheduler = schedulerFactory.getScheduler();
-
-			if (settings.isSchedulingEnabled()) {
-				scheduler.start();
-			} else {
-				scheduler.standby();
-			}
-
-		} catch (IOException | SchedulerException ex) {
-			logger.error("Error", ex);
-		}
+		
+		String quartzFilePath=webinfPath + sep + "classes" + sep + "quartz.properties";
+		SchedulerUtils.createScheduler(artDbConfig, quartzFilePath);
 	}
 
 	/**
@@ -1265,7 +1180,8 @@ public class ArtConfig extends HttpServlet {
 						jobName = "job" + jobId;
 						triggerName = "trigger" + jobId;
 
-						JobDetail quartzJob = newJob(ArtJob.class).withIdentity(jobName, ArtUtils.JOB_GROUP).usingJobData("jobid", jobId).build();
+						JobDetail quartzJob = newJob(ArtJob.class
+						).withIdentity(jobName, ArtUtils.JOB_GROUP).usingJobData("jobid", jobId).build();
 
 						//create trigger that defines the schedule for the job						
 						CronTrigger trigger = newTrigger().withIdentity(triggerName, ArtUtils.TRIGGER_GROUP).withSchedule(cronSchedule(cronString)).build();
@@ -1278,17 +1194,25 @@ public class ArtConfig extends HttpServlet {
 						scheduler.scheduleJob(quartzJob, trigger);
 
 						//update jobs table to indicate that the job has been migrated						
-						psUpdate.setTimestamp(1, new java.sql.Timestamp(nextRunDate.getTime()));
-						psUpdate.setString(2, minute);
-						psUpdate.setString(3, hour);
-						psUpdate.setString(4, day);
-						psUpdate.setString(5, weekday);
-						psUpdate.setString(6, month);
-						psUpdate.setInt(7, jobId);
+						psUpdate.setTimestamp(
+								1, new java.sql.Timestamp(nextRunDate.getTime()));
+						psUpdate.setString(
+								2, minute);
+						psUpdate.setString(
+								3, hour);
+						psUpdate.setString(
+								4, day);
+						psUpdate.setString(
+								5, weekday);
+						psUpdate.setString(
+								6, month);
+						psUpdate.setInt(
+								7, jobId);
 
 						psUpdate.addBatch();
 						//run executebatch periodically to prevent out of memory errors
-						if (migratedRecordCount % batchSize == 0) {
+						if (migratedRecordCount % batchSize
+								== 0) {
 							ps.executeBatch();
 							ps.clearBatch(); //not sure if this is necessary
 						}

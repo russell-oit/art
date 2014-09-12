@@ -99,7 +99,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 	} else if (dbType === "hsqldb-standalone") {
 		driverElement.value = "org.hsqldb.jdbcDriver";
 		urlElement.value = "jdbc:hsqldb:file:<file_path>;shutdown=true;hsqldb.write_delay=false";
-		testSqlElement.value = "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS";
+		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-ms") {
 		driverElement.value = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
 		urlElement.value = "jdbc:sqlserver://<server_name>;databaseName=<database_name>";
@@ -115,7 +115,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 	} else if (dbType === "hsqldb-server") {
 		driverElement.value = "org.hsqldb.jdbcDriver";
 		urlElement.value = "jdbc:hsqldb:hsql://<server_name>:9001/<database_alias>";
-		testSqlElement.value = "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS";
+		testSqlElement.value = "values 1";
 	} else if (dbType === "sqlserver-jtds") {
 		driverElement.value = "net.sourceforge.jtds.jdbc.Driver";
 		urlElement.value = "jdbc:jtds:sqlserver://<server_name>/<database_name>";

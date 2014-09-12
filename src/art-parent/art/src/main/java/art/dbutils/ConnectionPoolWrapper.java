@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -57,67 +58,6 @@ public class ConnectionPoolWrapper {
 		createConnectionPool(datasourceInfo, maxPoolSize, library);
 	}
 
-	/**
-	 * @return the poolId
-	 */
-	public int getPoolId() {
-		return poolId;
-	}
-
-	/**
-	 * @return the poolName
-	 */
-	public String getPoolName() {
-		return poolName;
-	}
-
-	/**
-	 * @return the pool
-	 */
-	public DataSource getPool() {
-		return pool;
-	}
-
-	/**
-	 * Closes the connection pool. This will close all the underlying database
-	 * connections in the pool.
-	 */
-	public void closePool() {
-		if (pool instanceof ArtDBCPDataSource) {
-			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
-			artDbcpDataSource.close();
-		} else if (pool instanceof HikariDataSource) {
-			HikariDataSource hikariDataSource = (HikariDataSource) pool;
-			hikariDataSource.close();
-		}
-	}
-
-	public Integer getCurrentPoolSize() {
-		Integer currentPoolSize = null; //use object wrapper rather than primitive for "undefined" status, where library doesn't support the property
-
-		if (pool instanceof ArtDBCPDataSource) {
-			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
-			currentPoolSize = artDbcpDataSource.getCurrentPoolSize();
-		}
-
-		return currentPoolSize;
-	}
-
-	public Integer getInUseCount() {
-		Integer inUseCount = null;
-
-		if (pool instanceof ArtDBCPDataSource) {
-			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
-			inUseCount = artDbcpDataSource.getInUseCount();
-		}
-
-		return inUseCount;
-	}
-
-	public Connection getConnection() throws SQLException {
-		return pool.getConnection();
-	}
-
 	private void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary connectionPoolLibrary) throws NamingException {
 
@@ -135,7 +75,7 @@ public class ConnectionPoolWrapper {
 	}
 
 	private DataSource createArtDBCPConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
-		long timeoutSeconds = datasourceInfo.getConnectionPoolTimeout() * 60L;  //convert timeout mins to seconds
+		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasourceInfo.getConnectionPoolTimeout());  //convert timeout mins to seconds
 		ArtDBCPDataSource newPool = new ArtDBCPDataSource(timeoutSeconds);
 
 		newPool.setPoolName(datasourceInfo.getName()); //use the datasoure name as the connection pool name
@@ -161,6 +101,9 @@ public class ConnectionPoolWrapper {
 		config.setPoolName(datasourceInfo.getName());
 		config.setUsername(datasourceInfo.getUsername());
 		config.setPassword(datasourceInfo.getPassword());
+		//explicitly set minimum idle connection count to a low value to avoid
+		//too many connection errors where you have multiple report datasources using the same server
+		config.setMinimumIdle(1);
 		config.setMaximumPoolSize(maxPoolSize);
 		config.setJdbcUrl(datasourceInfo.getUrl());
 		config.setDriverClassName(datasourceInfo.getDriver());
@@ -176,7 +119,7 @@ public class ConnectionPoolWrapper {
 
 		//set application name connection property
 		config.setDataSourceProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
-
+		
 		return new HikariDataSource(config);
 	}
 
@@ -226,5 +169,66 @@ public class ConnectionPoolWrapper {
 		}
 
 		return properties;
+	}
+	
+	/**
+	 * Closes the connection pool. This will close all the underlying database
+	 * connections in the pool.
+	 */
+	public void closePool() {
+		if (pool instanceof ArtDBCPDataSource) {
+			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
+			artDbcpDataSource.close();
+		} else if (pool instanceof HikariDataSource) {
+			HikariDataSource hikariDataSource = (HikariDataSource) pool;
+			hikariDataSource.close();
+		}
+	}
+	
+	/**
+	 * @return the poolId
+	 */
+	public int getPoolId() {
+		return poolId;
+	}
+
+	/**
+	 * @return the poolName
+	 */
+	public String getPoolName() {
+		return poolName;
+	}
+
+	/**
+	 * @return the pool
+	 */
+	public DataSource getPool() {
+		return pool;
+	}
+	
+	public Integer getCurrentPoolSize() {
+		Integer currentPoolSize = null; //use Integer rather than int for "undefined" status, where library doesn't support the property
+
+		if (pool instanceof ArtDBCPDataSource) {
+			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
+			currentPoolSize = artDbcpDataSource.getCurrentPoolSize();
+		}
+
+		return currentPoolSize;
+	}
+
+	public Integer getInUseCount() {
+		Integer inUseCount = null;
+
+		if (pool instanceof ArtDBCPDataSource) {
+			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
+			inUseCount = artDbcpDataSource.getInUseCount();
+		}
+
+		return inUseCount;
+	}
+
+	public Connection getConnection() throws SQLException {
+		return pool.getConnection();
 	}
 }
