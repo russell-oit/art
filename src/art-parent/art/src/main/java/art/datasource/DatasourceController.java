@@ -309,7 +309,7 @@ public class DatasourceController {
 
 		try {
 			if (jndi) {
-				conn = ArtConfig.getJndiConnection(url);
+				conn = ArtUtils.getJndiConnection(url);
 			} else {
 				Class.forName(driver).newInstance();
 				conn = DriverManager.getConnection(url, username, password);

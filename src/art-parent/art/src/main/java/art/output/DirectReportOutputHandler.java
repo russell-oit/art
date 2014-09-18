@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -19,7 +19,6 @@ package art.output;
 import art.enums.DisplayNull;
 import art.servlets.ArtConfig;
 import art.utils.ActionResult;
-import art.utils.ArtException;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
 import java.io.PrintWriter;
@@ -40,9 +39,9 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class ReportOutputHandler {
+public class DirectReportOutputHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(ReportOutputHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(DirectReportOutputHandler.class);
 
 	/**
 	 * Flush the output as it is (row by row). For output that can't have drill
@@ -135,7 +134,7 @@ public class ReportOutputHandler {
 
 		//checking to see if Display Null Value optional setting is set to "No"
 		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
-			o = new hideNullOutput(o);
+			o = new HideNullOutput(o);
 		}
 
 		while (rs.next()) {
@@ -356,7 +355,7 @@ public class ReportOutputHandler {
 
 		//checking to see if Display Null Value optional setting is set to "No"
 		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
-			o = new hideNullOutput(o);
+			o = new HideNullOutput(o);
 		}
 
 		// Check the data type of the value (last column)

@@ -24,6 +24,7 @@ import art.utils.ArtUtils;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
@@ -91,7 +92,7 @@ public class ConnectionPoolWrapper {
 
 		//register driver so that connections are immediately usable
 		registerDriver(datasourceInfo.getDriver());
-
+		
 		return newPool;
 	}
 
@@ -106,20 +107,25 @@ public class ConnectionPoolWrapper {
 		config.setMinimumIdle(1);
 		config.setMaximumPoolSize(maxPoolSize);
 		config.setJdbcUrl(datasourceInfo.getUrl());
-		config.setDriverClassName(datasourceInfo.getDriver());
-		if (StringUtils.equals(datasourceInfo.getTestSql(), "isValid")) {
+		config.setDriverClassName(datasourceInfo.getDriver()); //registers/loads the driver
+
+		//Either jdbc4ConnectionTest must be enabled or a connectionTestQuery must be specified
+		//othwerise error will be thrown when valid connection check is done
+		//(hikaricp does this check every time a connection is requested)
+		if (StringUtils.isBlank(datasourceInfo.getTestSql())
+				|| StringUtils.equals(datasourceInfo.getTestSql(), "isValid")) {
 			config.setJdbc4ConnectionTest(true);
 		} else {
 			config.setJdbc4ConnectionTest(false);
 			config.setConnectionTestQuery(datasourceInfo.getTestSql());
 		}
 
-		long idleTimeoutMillis = datasourceInfo.getConnectionPoolTimeout() * 60L * 1000L;  //convert timeout mins to milliseconds
-		config.setIdleTimeout(idleTimeoutMillis);
+		long timeoutMillis = TimeUnit.MINUTES.toMillis(datasourceInfo.getConnectionPoolTimeout());
+		config.setIdleTimeout(timeoutMillis);
 
 		//set application name connection property
 		config.setDataSourceProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
-		
+
 		return new HikariDataSource(config);
 	}
 
@@ -127,9 +133,12 @@ public class ConnectionPoolWrapper {
 		logger.debug("Entering registerDriver: driver='{}'", driver);
 
 		try {
-			Class.forName(driver).newInstance();
+			//newInstance only needed for buggy drivers
+			//https://stackoverflow.com/questions/2092659/what-is-difference-between-class-forname-and-class-forname-newinstance/2093236#2093236
+//			Class.forName(driver).newInstance();
+			Class.forName(driver);
 			logger.debug("JDBC driver registered: {}", driver);
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+		} catch (ClassNotFoundException ex) {
 			logger.error("Error while registering JDBC driver: '{}'", driver, ex);
 		}
 	}
@@ -170,7 +179,7 @@ public class ConnectionPoolWrapper {
 
 		return properties;
 	}
-	
+
 	/**
 	 * Closes the connection pool. This will close all the underlying database
 	 * connections in the pool.
@@ -184,7 +193,7 @@ public class ConnectionPoolWrapper {
 			hikariDataSource.close();
 		}
 	}
-	
+
 	/**
 	 * @return the poolId
 	 */
@@ -205,7 +214,7 @@ public class ConnectionPoolWrapper {
 	public DataSource getPool() {
 		return pool;
 	}
-	
+
 	public Integer getCurrentPoolSize() {
 		Integer currentPoolSize = null; //use Integer rather than int for "undefined" status, where library doesn't support the property
 

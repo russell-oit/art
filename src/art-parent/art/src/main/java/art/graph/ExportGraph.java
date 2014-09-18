@@ -270,7 +270,7 @@ public class ExportGraph {
 			//enable use of custom font in pdf output
 			String fontName = "SansSerif"; //for use in speedometer chart creation
 			if (ArtConfig.isUseCustomPdfFont()) {
-				fontName = ArtConfig.getArtSetting("pdf_font_name");
+				fontName = ArtConfig.getSettings().getPdfFontName();
 				Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
 				Font oldLargeFont = chartTheme.getLargeFont();
 				Font oldRegularFont = chartTheme.getRegularFont();

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -16,6 +16,7 @@
  */
 package art.output;
 
+import art.dbutils.DbConnections;
 import art.dbutils.DbUtils;
 import art.enums.ParameterDataType;
 import art.report.Report;
@@ -204,14 +205,14 @@ public class JasperReportsOutput {
 					if (dynamicDatasource != null) {
 						if (NumberUtils.isNumber(dynamicDatasource)) {
 							//use datasource id
-							connQuery = ArtConfig.getConnection(Integer.parseInt(dynamicDatasource));
+							connQuery = DbConnections.getConnection(Integer.parseInt(dynamicDatasource));
 						} else {
 							//use datasource name
-							connQuery = ArtConfig.getConnection(dynamicDatasource);
+							connQuery = DbConnections.getConnection(dynamicDatasource);
 						}
 					} else {
 						//not using dynamic datasource. use datasource defined on the query
-						connQuery = ArtConfig.getConnection(datasourceId);
+						connQuery = DbConnections.getConnection(datasourceId);
 					}
 					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, connQuery);
 				} else {

@@ -3,21 +3,21 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.graph;
 
-import art.output.pdfOutput;
+import art.enums.PdfPageSize;
+import art.output.PdfOutput;
 import art.servlets.ArtConfig;
 import art.utils.ArtQueryParam;
 import com.lowagie.text.*;
@@ -66,17 +66,22 @@ public class PdfGraph {
 
 		Rectangle pageSize;
 
-		switch (Integer.parseInt(ArtConfig.getArtSetting("page_size"))) {
-			case 1:
+		PdfPageSize pdfPageSize = ArtConfig.getSettings().getPdfPageSize();
+		if (pdfPageSize == null) {
+			throw new NullPointerException("pdfPageSize must not be null");
+		}
+
+		switch (pdfPageSize) {
+			case A4:
 				pageSize = PageSize.A4;
 				break;
-			case 2:
+			case A4Landscape:
 				pageSize = PageSize.A4.rotate();
 				break;
-			case 3:
+			case Letter:
 				pageSize = PageSize.LETTER;
 				break;
-			case 4:
+			case LetterLandscape:
 				pageSize = PageSize.LETTER.rotate();
 				break;
 			default:
@@ -101,9 +106,9 @@ public class PdfGraph {
 			//set fonts to be used, incase custom font is defined
 			FontSelector fsBody = new FontSelector();
 			FontSelector fsHeading = new FontSelector();
-			pdfOutput pdfo = new pdfOutput();
+			PdfOutput pdfo = new PdfOutput();
 			pdfo.setFontSelectors(fsBody, fsHeading);
-			
+
 			//output parameters if any
 			pdfo.outputParameters(document, fsBody, displayParams);
 
@@ -115,10 +120,10 @@ public class PdfGraph {
 			if (ArtConfig.isUseCustomPdfFont()) {
 				//enable custom chart font to be used in pdf output
 				BaseFontParameters fp;
-				String pdfFontName = ArtConfig.getArtSetting("pdf_font_name");
-				String pdfFontDirectory = ArtConfig.getArtSetting("pdf_font_directory");
-				String pdfFontFile = ArtConfig.getArtSetting("pdf_font_file");
-				String pdfFontEncoding = ArtConfig.getArtSetting("pdf_font_encoding");
+				String pdfFontName = ArtConfig.getSettings().getPdfFontName();
+				String pdfFontDirectory = ArtConfig.getSettings().getPdfFontDirectory();
+				String pdfFontFile = ArtConfig.getSettings().getPdfFontFile();
+				String pdfFontEncoding = ArtConfig.getSettings().getPdfFontEncoding();
 				boolean pdfFontEmbedded = ArtConfig.getSettings().isPdfFontEmbedded();
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					mapper.insertDirectory(pdfFontDirectory);
@@ -154,10 +159,10 @@ public class PdfGraph {
 
 			//display chart data below graph if so required
 			if (graphData != null) {
-				Paragraph p=new Paragraph(fsBody.process("Data\n"));
-				p.setAlignment(Element.ALIGN_CENTER);				
+				Paragraph p = new Paragraph(fsBody.process("Data\n"));
+				p.setAlignment(Element.ALIGN_CENTER);
 				document.add(p);
-				
+
 				@SuppressWarnings("rawtypes")
 				java.util.List rows = graphData.getRows();
 				DynaProperty[] dynaProperties = null;

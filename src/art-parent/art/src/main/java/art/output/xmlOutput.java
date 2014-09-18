@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author Enrico Liboni
  */
-public class xmlOutput implements ReportOutputInterface {
+public class XmlOutput implements ReportOutputInterface {
 
     PrintWriter out;
     int numberOfLines = 0;       
@@ -40,7 +40,7 @@ public class xmlOutput implements ReportOutputInterface {
     /**
      * Constructor
      */
-    public xmlOutput() {
+    public XmlOutput() {
     }
 
     /**

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -36,9 +36,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Enrico Liboni
  */
-public class tsvOutput implements ReportOutputInterface {
+public class TsvOutput implements ReportOutputInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger(tsvOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(TsvOutput.class);
 	FileOutputStream fout;
 	byte[] buf;
 	String tmpstr;
@@ -61,7 +61,7 @@ public class tsvOutput implements ReportOutputInterface {
 	/**
 	 * Constructor
 	 */
-	public tsvOutput() {
+	public TsvOutput() {
 		exportFileStrBuf = new StringBuffer(8 * 1024);
 		counter = 0;
 		nfPlain = NumberFormat.getInstance();

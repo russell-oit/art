@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class htmlOutput implements ReportOutputInterface {
+public class HtmlFancyOutput implements ReportOutputInterface {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -43,7 +43,7 @@ public class htmlOutput implements ReportOutputInterface {
 	/**
 	 * Constructor
 	 */
-	public htmlOutput() {
+	public HtmlFancyOutput() {
 		numberOfLines = 0;
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);
@@ -105,7 +105,7 @@ public class htmlOutput implements ReportOutputInterface {
 		//display parameters
 //		ReportOutputHandler.displayParameters(out, displayParams);
 		
-		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlOutput.css\">");
+		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlFancyOutput.css\">");
 
 		//start results table
 		out.println("<div style=\"border: 3px solid white\"><table class=\"qe\" width=\"80%\"><tr>"); // cellspacing=\"1\" cellpadding=\"0\"

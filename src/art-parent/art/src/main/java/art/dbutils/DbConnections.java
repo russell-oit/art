@@ -81,12 +81,7 @@ public class DbConnections {
 		List<Datasource> datasources = run.query(sql, h);
 
 		for (Datasource datasource : datasources) {
-			//if creating connections for some datasource fails, continue creating for others
-			try {
-				createConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
-			} catch (NamingException ex) {
-				logger.error("Error creating connection pool. Datasource='{}'", ex, datasource.getName());
-			}
+			createConnectionPool(datasource, maxPoolSize, connectionPoolLibrary);
 		}
 	}
 

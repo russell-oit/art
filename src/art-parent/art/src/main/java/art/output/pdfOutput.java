@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -14,13 +14,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
- * Pdf output using itext. 
- * Version 1.0
- * Marios Timotheou
-
- see http://itextdocs.lowagie.com/examples/com/lowagie/examples/objects/tables/pdfptable/FragmentTable.java
  */
 package art.output;
 
@@ -40,13 +33,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate pdf output
+ * Generate pdf output. See
+ * http://itextdocs.lowagie.com/examples/com/lowagie/examples/objects/tables/pdfptable/FragmentTable.java
  *
  * @author Marios Timotheou
  */
-public class pdfOutput implements ReportOutputInterface {
+public class PdfOutput implements ReportOutputInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger(pdfOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(PdfOutput.class);
 	String filename;
 	String fullFileName;
 	PrintWriter htmlout;
@@ -74,7 +68,7 @@ public class pdfOutput implements ReportOutputInterface {
 	/**
 	 * Constructor
 	 */
-	public pdfOutput() {
+	public PdfOutput() {
 	}
 
 	@Override
@@ -145,7 +139,6 @@ public class pdfOutput implements ReportOutputInterface {
 		 * //end result will have 72pt (1 inch) left and right margins
 		 * table.setLockedWidth(true);
 		 */
-
 		table.setWidthPercentage(100f); //default is 80%
 		table.setHeaderRows(1);
 
@@ -177,7 +170,7 @@ public class pdfOutput implements ReportOutputInterface {
 					ArtQueryParam param = entry.getValue();
 					String paramName = param.getName();
 					Object pValue = param.getParamValue();
-					String outputString="";
+					String outputString = "";
 
 					if (pValue instanceof String) {
 						String paramValue = (String) pValue;
@@ -258,7 +251,7 @@ public class pdfOutput implements ReportOutputInterface {
 		cell.setGrayFill(headergray);
 		table.addCell(cell);
 	}
-	
+
 	@Override
 	public void addHeaderCellLeft(String s) {
 		addHeaderCell(s);
@@ -403,8 +396,8 @@ public class pdfOutput implements ReportOutputInterface {
 
 		//use custom font if defined			
 		if (ArtConfig.isUseCustomPdfFont()) {
-			String fontName = ArtConfig.getArtSetting("pdf_font_name");
-			String encoding = ArtConfig.getArtSetting("pdf_font_encoding");
+			String fontName = ArtConfig.getSettings().getPdfFontName();
+			String encoding = ArtConfig.getSettings().getPdfFontEncoding();
 			boolean embedded = ArtConfig.getSettings().isPdfFontEmbedded();
 
 			Font bodyFont = FontFactory.getFont(fontName, encoding, embedded);
@@ -450,17 +443,17 @@ public class pdfOutput implements ReportOutputInterface {
 
 		try {
 			Rectangle pageSize;
-			switch (Integer.parseInt(ArtConfig.getArtSetting("page_size"))) {
-				case 1:
+			switch (ArtConfig.getSettings().getPdfPageSize()) {
+				case A4:
 					pageSize = PageSize.A4;
 					break;
-				case 2:
+				case A4Landscape:
 					pageSize = PageSize.A4.rotate();
 					break;
-				case 3:
+				case Letter:
 					pageSize = PageSize.LETTER;
 					break;
-				case 4:
+				case LetterLandscape:
 					pageSize = PageSize.LETTER.rotate();
 					break;
 				default:

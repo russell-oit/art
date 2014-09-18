@@ -23,6 +23,7 @@
  */
 package art.report;
 
+import art.dbutils.DbConnections;
 import art.enums.ReportStatus;
 import art.reportparameter.ReportParameter;
 import art.servlets.ArtConfig;
@@ -559,10 +560,10 @@ public class ReportRunner {
 								useDynamicDatasource = true;
 								if (NumberUtils.isNumber(paramValue)) {
 									//use datasource id
-									connQuery = ArtConfig.getConnection(Integer.parseInt(paramValue));
+									connQuery = DbConnections.getConnection(Integer.parseInt(paramValue));
 								} else {
 									//use datasource name
-									connQuery = ArtConfig.getConnection(paramValue);
+									connQuery = DbConnections.getConnection(paramValue);
 								}
 							}
 						}
@@ -2048,7 +2049,7 @@ public class ReportRunner {
 						}
 					}
 
-					connLov = ArtConfig.getConnection(databaseId);
+					connLov = DbConnections.getConnection(databaseId);
 					psLovValues = connLov.prepareStatement(lovSql);
 					rsLovValues = psLovValues.executeQuery();
 

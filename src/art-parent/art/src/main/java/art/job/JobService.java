@@ -1,12 +1,13 @@
 package art.job;
 
 import art.dbutils.DbService;
-import art.servlets.ArtConfig;
 import art.dbutils.DbUtils;
 import art.enums.JobType;
 import art.report.Report;
+import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.CachedResult;
+import art.utils.SchedulerUtils;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,8 +39,16 @@ public class JobService {
 
 	private static final Logger logger = LoggerFactory.getLogger(JobService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public JobService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public JobService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT AJ.*,"
 			+ " AQ.NAME AS REPORT_NAME, AU.USERNAME"
@@ -151,7 +160,7 @@ public class JobService {
 		}
 
 		//delete records in quartz tables
-		Scheduler scheduler = ArtConfig.getScheduler();
+		Scheduler scheduler = SchedulerUtils.getScheduler();
 		if (scheduler == null) {
 			logger.warn("Cannot delete job: {}. Scheduler not available.", id);
 			return;
@@ -172,7 +181,7 @@ public class JobService {
 				CachedResult cr = new CachedResult();
 				cr.setTargetConnection(connCache);
 				cr.setCachedTableName(cachedTableName);
-				cr.drop(); //potential sql injection
+				cr.drop(); //TODO potential sql injection. drop hardcoded table names only
 			} finally {
 				DbUtils.close(connCache);
 			}
@@ -342,6 +351,20 @@ public class JobService {
 						+ " AND auj.USERNAME = ? AND aj.USERNAME <> ?";
 		
 		return jobs;
+	}
+	
+	/**
+	 * Get jobs that have not been migrated to the quartz scheduling system
+	 *
+	 * @return jobs that have not been migrated to the quartz scheduling system
+	 * @throws java.sql.SQLException
+	 */
+	public List<Job> getNonQuartzJobs() throws SQLException {
+		logger.debug("Entering getNonQuartzJobs.");
+
+		String sql = SQL_SELECT_ALL + " WHERE AJ.MIGRATED_TO_QUARTZ='N'";
+		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
+		return dbService.query(sql, h);
 	}
 
 }

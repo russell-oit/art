@@ -44,14 +44,14 @@ public class SchedulerUtils {
 	private static Scheduler scheduler;
 
 	/**
-	 * Creates a new scheduler instance, shutting down the existing one if any.
-	 * The created scheduler can then be retrieved by calling the getScheduler()
-	 * method.
+	 * Creates and starts a new scheduler instance, shutting down the existing
+	 * one if any. The scheduler is stored as a static variable in this class.
 	 *
 	 * @param artDbConfig
 	 * @param propertiesFilePath
+	 * @return
 	 */
-	public static void createScheduler(ArtDatabase artDbConfig, String propertiesFilePath) {
+	public static Scheduler createScheduler(ArtDatabase artDbConfig, String propertiesFilePath) {
 		try {
 			//shutdown existing scheduler instance. if shutdown throws an exception, don't create a new scheduler
 			if (scheduler != null) {
@@ -63,9 +63,12 @@ public class SchedulerUtils {
 			Properties schedulerProperties = getSchedulerProperties(artDbConfig, propertiesFilePath);
 			SchedulerFactory schedulerFactory = new StdSchedulerFactory(schedulerProperties);
 			scheduler = schedulerFactory.getScheduler();
+			scheduler.start();
 		} catch (SchedulerException ex) {
 			logger.error("Error", ex);
 		}
+
+		return scheduler;
 	}
 
 	public static Scheduler getScheduler() {
@@ -91,9 +94,9 @@ public class SchedulerUtils {
 	 * @return populated properties object
 	 */
 	private static Properties getSchedulerProperties(ArtDatabase artDbConfig, String propertiesFilePath) {
-		Objects.requireNonNull(artDbConfig, "artDbConfig must not be null");
-
 		logger.debug("Entering getSchedulerProperties: propertiesFilePath='{}'", propertiesFilePath);
+
+		Objects.requireNonNull(artDbConfig, "artDbConfig must not be null");
 
 		Properties properties = new Properties();
 

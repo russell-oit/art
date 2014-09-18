@@ -25,13 +25,14 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This class implements a database connection pool. Features:
- * 
+ *
  * <ul>
  * <li> The pool dynamically increases/decreases. An unused connection is
  * removed from the pool after <code>timeout</code> seconds.
@@ -47,7 +48,7 @@ import org.slf4j.LoggerFactory;
  * your application from hanging because of buggy drivers or network problems
  * </li>
  * </ul>
- * 
+ *
  * Usage Example:
  * <pre>
  * // load drivers
@@ -85,9 +86,9 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	private String url;
 	private String username;
 	private String password;
-	private static final long DEFAULT_TIMEOUT_MILLIS = 30 * 60 * 1000; //30 minutes
-	private long timeoutMillis = DEFAULT_TIMEOUT_MILLIS; //timeout after which idle connections are closed
-	private static final long DEFAULT_MAX_QUERY_RUNNING_TIME_MILLIS = 20 * 60 * 1000; // 20 minutes
+	private static final long DEFAULT_TIMEOUT_SECONDS = TimeUnit.MINUTES.toSeconds(30); //30 minutes
+	private long timeoutMillis; //timeout after which idle connections are closed
+	private static final long DEFAULT_MAX_QUERY_RUNNING_TIME_SECONDS = TimeUnit.MINUTES.toSeconds(20); // 20 minutes
 	private long maxQueryRunningTimeMillis; // max running time for a query, before its connection is forcibly removed from the pool
 	private long totalConnectionRequests;
 	private int biggestPoolSizeReached;
@@ -138,8 +139,8 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 					+ maxQueryRunningTimeSeconds + ". maxQueryRunningTimeSeconds cannot be < 0");
 		}
 
-		this.timeoutMillis = timeoutSeconds * 1000;
-		this.maxQueryRunningTimeMillis = maxQueryRunningTimeSeconds * 1000;
+		this.timeoutMillis = TimeUnit.SECONDS.toMillis(timeoutSeconds);
+		this.maxQueryRunningTimeMillis = TimeUnit.SECONDS.toMillis(maxQueryRunningTimeSeconds);
 		startTimer();
 	}
 
@@ -150,7 +151,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 * @param timeout
 	 */
 	public ArtDBCPDataSource(long timeout) {
-		this(timeout, DEFAULT_MAX_QUERY_RUNNING_TIME_MILLIS);
+		this(timeout, DEFAULT_MAX_QUERY_RUNNING_TIME_SECONDS);
 	}
 
 	/**
@@ -159,7 +160,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 *
 	 */
 	public ArtDBCPDataSource() {
-		this(DEFAULT_TIMEOUT_MILLIS, DEFAULT_MAX_QUERY_RUNNING_TIME_MILLIS);
+		this(DEFAULT_TIMEOUT_SECONDS, DEFAULT_MAX_QUERY_RUNNING_TIME_SECONDS);
 	}
 
 	private void startTimer() {
@@ -314,7 +315,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	public String getPassword() {
 		return password;
 	}
-	
+
 	/**
 	 * Get the current pool size
 	 *
@@ -515,7 +516,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 		try {
 			logger.debug("pool.size()={}", pool.size());
 			for (int i = (pool.size() - 1); i >= 0; i--) {
-					// if      the connection is free and was created before TIMEOUT millis
+				// if      the connection is free and was created before TIMEOUT millis
 				//   or
 				// if      the connection is not free but it was busy from more than MAX_QUERY_RUNNING_TIME millis
 				// then  

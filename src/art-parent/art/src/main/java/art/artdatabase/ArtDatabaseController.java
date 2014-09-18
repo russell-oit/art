@@ -115,7 +115,7 @@ public class ArtDatabaseController {
 			String password = artDatabase.getPassword();
 
 			if (artDatabase.isJndi()) {
-				conn = ArtUtils.getJndiDataSource(url).getConnection();
+				conn = ArtUtils.getJndiConnection(url);
 			} else {
 				Class.forName(driver).newInstance();
 				conn = DriverManager.getConnection(url, username, password);
@@ -147,7 +147,7 @@ public class ArtDatabaseController {
 			//save settings
 			ArtConfig.saveArtDatabaseConfiguration(artDatabase);
 
-			ArtConfig.refreshConnections();
+			ArtConfig.initializeArtDatabase();
 
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)

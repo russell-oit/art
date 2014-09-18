@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -36,7 +36,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author Enrico Liboni
  */
-public class rss20Output implements ReportOutputInterface {
+public class Rss20Output implements ReportOutputInterface {
 
     PrintWriter out;
     int numberOfLines = 0;
@@ -50,7 +50,7 @@ public class rss20Output implements ReportOutputInterface {
     /**
      * Constructor
      */
-    public rss20Output() {
+    public Rss20Output() {
     }
 
     @Override
@@ -128,7 +128,7 @@ public class rss20Output implements ReportOutputInterface {
 
         out.println("<channel>");
         out.println("<title>" + queryName + "</title>");
-        out.println("<link>" + ArtConfig.getArtSetting("rss_link") + "</link>");
+        out.println("<link>" + ArtConfig.getSettings().getRssLink() + "</link>");
         out.println("<description>" + queryName + " ART Feed</description>");
         out.println("<pubDate>" + getDateAsRFC822String(new java.util.Date()) + "</pubDate> ");
         out.println("<generator>http://art.sourceforge.net</generator> ");

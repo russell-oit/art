@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Map;
 
-public class hideNullOutput implements ReportOutputInterface {
+public class HideNullOutput implements ReportOutputInterface {
 
 	private final ReportOutputInterface artOutputInterface;
 
@@ -158,7 +158,7 @@ public class hideNullOutput implements ReportOutputInterface {
 		return artOutputInterface.isShowQueryHeaderAndFooter();
 	}
 
-	public hideNullOutput(ReportOutputInterface artOutputInterface) {
+	public HideNullOutput(ReportOutputInterface artOutputInterface) {
 		super();
 		this.artOutputInterface = artOutputInterface;
 	}

@@ -30,10 +30,9 @@ import art.dbutils.DbConnections;
 import art.report.ReportRunner;
 import art.graph.ExportGraph;
 import art.mail.Mailer;
-import art.output.ReportOutputHandler;
 import art.output.ReportOutputInterface;
 import art.output.JasperReportsOutput;
-import art.output.jxlsOutput;
+import art.output.JxlsOutput;
 import art.servlets.ArtConfig;
 import java.io.*;
 import java.sql.*;
@@ -1536,7 +1535,7 @@ public class ArtJob implements Job, Serializable {
 						fileName = jasper.getFileName();
 					} else if (queryType == 117 || queryType == 118) {
 						//jxls spreadsheet
-						jxlsOutput jxls = new jxlsOutput();
+						JxlsOutput jxls = new JxlsOutput();
 						jxls.setQueryName(queryName);
 						jxls.setFileUserName(jobFileUsername);
 						jxls.setExportPath(jobsPath);
@@ -1736,7 +1735,7 @@ public class ArtJob implements Job, Serializable {
 				// Cache the result in the cache database
 				int targetDatabaseId = Integer.parseInt(outputFormat);
 
-				Connection cacheDatabaseConnection = ArtConfig.getConnection(targetDatabaseId);
+				Connection cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
 				ResultSet rs = pq.getResultSet();
 				CachedResult cr = new CachedResult();
 				cr.setTargetConnection(cacheDatabaseConnection);
@@ -2396,7 +2395,7 @@ public class ArtJob implements Job, Serializable {
 			String deleteJobName = "job" + jobId;
 			String triggerName = "trigger" + jobId;
 
-			org.quartz.Scheduler scheduler = ArtConfig.getScheduler();
+			org.quartz.Scheduler scheduler = SchedulerUtils.getScheduler();
 			if (scheduler != null) {
 				scheduler.deleteJob(jobKey(deleteJobName, ArtUtils.JOB_GROUP)); //delete job records
 				scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP)); //delete trigger records
@@ -2435,7 +2434,7 @@ public class ArtJob implements Job, Serializable {
 			if (jobType == 9 || jobType == 10) {
 				// Delete
 				int targetDatabaseId = Integer.parseInt(outputFormat);
-				Connection cacheDatabaseConnection = ArtConfig.getConnection(targetDatabaseId);
+				Connection cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
 				CachedResult cr = new CachedResult();
 				cr.setTargetConnection(cacheDatabaseConnection);
 				if (cachedTableName == null || cachedTableName.length() == 0) {
@@ -2980,7 +2979,7 @@ public class ArtJob implements Job, Serializable {
 	public void migrateJobsToQuartz() {
 
 		Connection conn = ArtConfig.getConnection();
-		org.quartz.Scheduler scheduler = ArtConfig.getScheduler();
+		org.quartz.Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (conn == null) {
 			logger.info("Can't migrate jobs to Quartz. Connection to ART repository not available");

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package art.enums;
 
 import java.util.ArrayList;
@@ -23,12 +22,16 @@ import java.util.List;
 
 /**
  * Enum for report formats
- * 
+ *
  * @author Timothy Anyona
  */
 public enum ReportFormat {
-	Active("Active"), Disabled("Disabled"), Hidden("Hidden");
-	private String value;
+
+	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"), htmlGrid("htmlGrid"),
+	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
+	pdf("pdf"), slk("slk"), slkZip("slkZip"), tsv("tsv"), tsvZip("tsvZip"),
+	tsvGz("tsvGz"), xml("xml"), rss20("rss20");
+	private final String value;
 
 	private ReportFormat(String value) {
 		this.value = value;
@@ -41,6 +44,66 @@ public enum ReportFormat {
 	 */
 	public String getValue() {
 		return value;
+	}
+
+	public String getFilenameExtension() {
+		switch (this) {
+			case htmlPlain:
+				return "html";
+			case xls:
+				return "xls";
+			case xlsx:
+				return "xlsx";
+			case pdf:
+				return "pdf";
+			case slk:
+				return "slk";
+			case tsv:
+				return "tsv";
+			case tsvGz:
+				return "tsv.gz";
+			case xlsZip:
+			case slkZip:
+			case tsvZip:
+				return "zip";
+			default:
+				throw new IllegalStateException("Report format does not generate files: " + value);
+		}
+	}
+
+	public String getDirectOutputClassName() {
+		final String PACKAGE_NAME = "art.output.";
+
+		switch (this) {
+			case htmlPlain:
+				return PACKAGE_NAME + "HtmlPlainOutput";
+			case htmlFancy:
+				return PACKAGE_NAME + "HtmlFancyOutput";
+			case htmlGrid:
+				return PACKAGE_NAME + "HtmlGridOutput";
+			case htmlDataTable:
+				return PACKAGE_NAME + "HtmlDataTableOutput";
+			case xls:
+			case xlsZip:
+				return PACKAGE_NAME + "XlsOutput";
+			case xlsx:
+				return PACKAGE_NAME + "XlsxOutput";
+			case pdf:
+				return PACKAGE_NAME + "PdfOutput";
+			case slk:
+			case slkZip:
+				return PACKAGE_NAME + "SlkOutput";
+			case tsv:
+			case tsvZip:
+			case tsvGz:
+				return PACKAGE_NAME + "TsvOutput";
+			case xml:
+				return PACKAGE_NAME + "XmlOutput";
+			case rss20:
+				return PACKAGE_NAME + "Rss20Output";
+			default:
+				return null;
+		}
 	}
 
 	/**
@@ -62,24 +125,12 @@ public enum ReportFormat {
 	 * @return
 	 */
 	public static ReportFormat toEnum(String value) {
-		return toEnum(value, Active);
-	}
-
-	/**
-	 * Convert a value to an enum. If the conversion fails, the specified
-	 * default is returned
-	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
-	 */
-	public static ReportFormat toEnum(String value, ReportFormat defaultEnum) {
 		for (ReportFormat v : values()) {
 			if (v.value.equalsIgnoreCase(value)) {
 				return v;
 			}
 		}
-		return defaultEnum;
+		throw new IllegalArgumentException("Invalid report format: " + value);
 	}
 
 	/**
@@ -98,7 +149,7 @@ public enum ReportFormat {
 	 * @return
 	 */
 	public String getLocalizedDescription() {
-		return "reportStatus.option." + value;
+		return "reportFormat.option." + value;
 	}
 
 }

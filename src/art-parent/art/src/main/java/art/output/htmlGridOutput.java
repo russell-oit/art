@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class htmlGridOutput implements ReportOutputInterface {
+public class HtmlGridOutput implements ReportOutputInterface {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -44,7 +44,7 @@ public class htmlGridOutput implements ReportOutputInterface {
 	/**
 	 * Constructor
 	 */
-	public htmlGridOutput() {
+	public HtmlGridOutput() {
 		numberOfLines = 0;
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);

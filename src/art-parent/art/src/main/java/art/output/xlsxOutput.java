@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -14,11 +14,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
- Generate xlsx output
- Using code based on BigGridDemo (http://svn.apache.org/repos/asf/poi/trunk/src/examples/src/org/apache/poi/xssf/usermodel/examples/BigGridDemo.java)
- in order to enable generation of large xlsx files with limited memory
  */
 package art.output;
 
@@ -40,13 +35,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate xlsx output
+ * Generate xlsx output. Using code based on BigGridDemo
+ * (http://svn.apache.org/repos/asf/poi/trunk/src/examples/src/org/apache/poi/xssf/usermodel/examples/BigGridDemo.java)
+ * in order to enable generation of large xlsx files with limited memory
  *
  * @author Timothy Anyona
  */
-public class xlsxOutput implements ReportOutputInterface {
+public class XlsxOutput implements ReportOutputInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger(xlsxOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
 	Workbook wb;
 	Sheet sh;
 	CellStyle headerStyle;
@@ -79,7 +76,7 @@ public class xlsxOutput implements ReportOutputInterface {
 	/**
 	 * Constructor
 	 */
-	public xlsxOutput() {
+	public XlsxOutput() {
 	}
 
 	@Override
@@ -223,7 +220,7 @@ public class xlsxOutput implements ReportOutputInterface {
 			errorOccurred = true; //set flag so that no more rows are processed
 		}
 	}
-	
+
 	@Override
 	public void addHeaderCellLeft(String s) {
 		addHeaderCell(s);

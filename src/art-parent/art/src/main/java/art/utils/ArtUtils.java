@@ -16,6 +16,8 @@
  */
 package art.utils;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -177,42 +179,11 @@ public class ArtUtils {
 		logger.debug("jndiName='{}'", jndiName);
 		return (DataSource) ic.lookup(jndiName);
 	}
-
-	/**
-	 * Get name to be used for jndi lookup of a datasource by prepending
-	 * java:comp/env/ as appropriate
-	 *
-	 * @param jndiName
-	 * @return
-	 */
-	public static String getJndiDatasourceLookupName(String jndiName, boolean useDefaultJndiNamespace) {
-		/*
-		 different app servers add datasources to different locations in the jndi tree
-		
-		 for a jndi name like jdbc/myDb
-		 tomcat lookup would be java:comp/env/jdbc/myDb
-		 jboss may be java:jdbc/myDb or java:jboss/jdbc/myDb
-		 weblogic would be jdbc/myDb
-		
-		 the only portable way to define jndi datasources is to create
-		 a resource-ref section in the web.xml and then using the app server's
-		 proprietery approach to map this resource to the physical datasource on the server
-		
-		 https://stackoverflow.com/questions/7224216/jndi-path-tomcat-vs-jboss
-		 https://stackoverflow.com/questions/47676/tomcat-vs-weblogic-jndi-lookup
-		 https://stackoverflow.com/questions/6500632/how-to-lookup-jndi-resources-on-weblogic?rq=1
-		 http://www.mastertheboss.com/jboss-web-server/tomcat-to-jboss-migration
-		 */
-
-		String finalName;
-		if (useDefaultJndiNamespace) {
-			finalName = "java:comp/env/" + jndiName;
-		} else {
-			finalName = jndiName;
-		}
-
-		return finalName;
+	
+	public static Connection getJndiConnection(String jndiName) throws NamingException, SQLException {
+		return getJndiDataSource(jndiName).getConnection();
 	}
+
 
 	/**
 	 * Get database types to be displayed when defining a database connection

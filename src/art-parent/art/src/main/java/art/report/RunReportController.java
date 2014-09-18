@@ -26,13 +26,13 @@ import art.graph.ArtSpeedometer;
 import art.graph.ArtTimeSeries;
 import art.graph.ArtXY;
 import art.graph.ArtXYZChart;
-import art.output.ReportOutputHandler;
+import art.output.DirectReportOutputHandler;
 import art.output.ReportOutputInterface;
-import art.output.htmlDataTableOutput;
-import art.output.htmlPlainOutput;
+import art.output.HtmlDataTableOutput;
+import art.output.HtmlPlainOutput;
 import art.output.htmlReportOutWriter;
 import art.output.JasperReportsOutput;
-import art.output.jxlsOutput;
+import art.output.JxlsOutput;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.reportparameter.ReportParameter;
@@ -465,8 +465,8 @@ public class RunReportController {
 					}
 
 					//ensure htmlplain output doesn't display parameters if inline
-					if (o instanceof htmlPlainOutput) {
-						htmlPlainOutput hpo = (htmlPlainOutput) o;
+					if (o instanceof HtmlPlainOutput) {
+						HtmlPlainOutput hpo = (HtmlPlainOutput) o;
 						hpo.setDisplayInline(showInline);
 
 						//ensure parameters are displayed if not in inline mode
@@ -474,8 +474,8 @@ public class RunReportController {
 					}
 
 					//enable localization for datatable output
-					if (o instanceof htmlDataTableOutput) {
-						htmlDataTableOutput dt = (htmlDataTableOutput) o;
+					if (o instanceof HtmlDataTableOutput) {
+						HtmlDataTableOutput dt = (HtmlDataTableOutput) o;
 						dt.setLocale(request.getLocale());
 					}
 
@@ -501,13 +501,13 @@ public class RunReportController {
 
 				//display parameters
 				if (showParams) {
-					ReportOutputHandler.displayParameters(out, displayParams,
+					DirectReportOutputHandler.displayParameters(out, displayParams,
 							messageSource.getMessage("reports.text.allItems", null, locale));
 				}
 
 				//display final sql
 				if (showSQL) {
-					ReportOutputHandler.displayFinalSQL(out, finalSQL);
+					DirectReportOutputHandler.displayFinalSQL(out, finalSQL);
 				}
 
 				out.flush();
@@ -533,7 +533,7 @@ public class RunReportController {
 			} else if (reportTypeId == 117 || reportTypeId == 118) {
 				//jxls spreadsheet
 				probe = 92;
-				jxlsOutput jxls = new jxlsOutput();
+				JxlsOutput jxls = new JxlsOutput();
 				jxls.setQueryName(reportName);
 				jxls.setFileUserName(username);
 				jxls.setExportPath(baseExportPath);
@@ -626,7 +626,7 @@ public class RunReportController {
 								/*
 								 * CROSSTAB
 								 */
-								outputResult = ReportOutputHandler.flushXOutput(o, rs);
+								outputResult = DirectReportOutputHandler.flushXOutput(o, rs);
 							} else {
 								/*
 								 * NORMAL TABULAR OUTPUT
@@ -638,7 +638,7 @@ public class RunReportController {
 									//only drill down for html output. drill down query launched from hyperlink                                            
 									drilldownQueries = aq.getDrilldownQueries(reportId);
 								}
-								outputResult = ReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+								outputResult = DirectReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
 
 							}
 

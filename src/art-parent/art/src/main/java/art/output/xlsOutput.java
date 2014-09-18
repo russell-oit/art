@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -37,9 +37,9 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class xlsOutput implements ReportOutputInterface {
+public class XlsOutput implements ReportOutputInterface {
 
-    private static final Logger logger = LoggerFactory.getLogger(xlsOutput.class);
+    private static final Logger logger = LoggerFactory.getLogger(XlsOutput.class);
     
     FileOutputStream fout;
     HSSFWorkbook wb;
@@ -69,7 +69,7 @@ public class xlsOutput implements ReportOutputInterface {
     /**
      * Constructor
      */
-    public xlsOutput() {
+    public XlsOutput() {
     }
 
     @Override

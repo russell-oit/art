@@ -106,7 +106,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		testSqlElement.value = "select 1";
 	} else if (dbType === "cubrid") {
 		driverElement.value = "cubrid.jdbc.driver.CUBRIDDriver";
-		urlElement.value = "jdbc:cubrid:<server_name>:33000:<database_name>";
+		urlElement.value = "jdbc:cubrid:<server_name>:33000:<database_name>:::";
 		testSqlElement.value = "select 1";
 	} else if (dbType === "other") {
 		driverElement.value = "";

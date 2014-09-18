@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -40,9 +40,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Enrico Liboni
  */
-public class slkOutput implements ReportOutputInterface {
+public class SlkOutput implements ReportOutputInterface {
 
-	private static final Logger logger = LoggerFactory.getLogger(slkOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(SlkOutput.class);
 	FileOutputStream fout;
 	byte[] buf;
 	String tmpstr;
@@ -67,7 +67,7 @@ public class slkOutput implements ReportOutputInterface {
 	/**
 	 * Constructor
 	 */
-	public slkOutput() {
+	public SlkOutput() {
 		exportFileStrBuf = new StringBuffer(8 * 1024);
 		counter = 0;
 		nfPlain = NumberFormat.getInstance();

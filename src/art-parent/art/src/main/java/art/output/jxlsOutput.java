@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.dbutils.DbConnections;
 import art.report.ReportRunner;
 import art.servlets.ArtConfig;
 import art.utils.*;
@@ -42,9 +43,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class jxlsOutput {
+public class JxlsOutput {
 
-	private static final Logger logger = LoggerFactory.getLogger(jxlsOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(JxlsOutput.class);
 	String fullOutputFileName = "-No File";
 	String queryName;
 	String fileUserName;
@@ -181,14 +182,14 @@ public class jxlsOutput {
 					if (dynamicDatasource != null) {
 						if (NumberUtils.isNumber(dynamicDatasource)) {
 							//use datasource id
-							connQuery = ArtConfig.getConnection(Integer.parseInt(dynamicDatasource));
+							connQuery = DbConnections.getConnection(Integer.parseInt(dynamicDatasource));
 						} else {
 							//use datasource name
-							connQuery = ArtConfig.getConnection(dynamicDatasource);
+							connQuery = DbConnections.getConnection(dynamicDatasource);
 						}
 					} else {
 						//not using dynamic datasource. use datasource defined on the query
-						connQuery = ArtConfig.getConnection(datasourceId);
+						connQuery = DbConnections.getConnection(datasourceId);
 					}
 					ReportManager reportManager = new ArtJxlsReportManager(connQuery);
 					beans.put("rm", reportManager);

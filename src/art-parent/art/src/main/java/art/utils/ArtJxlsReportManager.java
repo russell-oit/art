@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.dbutils.DbConnections;
 import java.sql.*;
 import java.util.*;
 import net.sf.jxls.report.ReportManager;
@@ -105,7 +105,7 @@ public class ArtJxlsReportManager implements ReportManager {
 
 		try {
 			//get connection and use it to execute the given sql
-			connQuery = ArtConfig.getConnection(datasourceId);
+			connQuery = DbConnections.getConnection(datasourceId);
 			if (connQuery == null) {
 				logger.warn("Could not get database connection to datasource {}", datasourceId);
 			} else {
@@ -145,7 +145,7 @@ public class ArtJxlsReportManager implements ReportManager {
 
 		try {
 			//get connection and use it to execute the given sql
-			connQuery = ArtConfig.getConnection(datasourceName);
+			connQuery = DbConnections.getConnection(datasourceName);
 			if (connQuery == null) {
 				logger.warn("Could not get database connection to datasource {}", datasourceName);
 			} else {

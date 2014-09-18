@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -14,9 +14,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
- * JQuery DataTables html output mode
  */
 package art.output;
 
@@ -36,7 +33,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Enrico Liboni
  */
-public class htmlDataTableOutput implements ReportOutputInterface {
+public class HtmlDataTableOutput implements ReportOutputInterface {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -51,7 +48,7 @@ public class htmlDataTableOutput implements ReportOutputInterface {
 	/**
 	 * Constructor
 	 */
-	public htmlDataTableOutput() {
+	public HtmlDataTableOutput() {
 		numberOfLines = 0;
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);
