@@ -63,7 +63,6 @@ public class SchedulerUtils {
 			Properties schedulerProperties = getSchedulerProperties(artDbConfig, propertiesFilePath);
 			SchedulerFactory schedulerFactory = new StdSchedulerFactory(schedulerProperties);
 			scheduler = schedulerFactory.getScheduler();
-			scheduler.start();
 		} catch (SchedulerException ex) {
 			logger.error("Error", ex);
 		}
