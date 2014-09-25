@@ -35,8 +35,6 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides connections to databases. All connections are held and managed in
@@ -45,8 +43,6 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class DbConnections {
-
-	private static final Logger logger = LoggerFactory.getLogger(DbConnections.class);
 
 	private static Map<Integer, ConnectionPoolWrapper> connectionPoolMap;
 

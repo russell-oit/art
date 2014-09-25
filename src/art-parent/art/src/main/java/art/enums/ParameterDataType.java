@@ -151,11 +151,11 @@ public enum ParameterDataType {
 		if (value == null) {
 			//return null to allow use of null values for report queries
 			
-			//null doesn't really make sense for select queries.
+			//null doesn't really make sense for select statements. only for insert statements
 			//col = null always returns false so select must have explicit is null statement
 			//query could be for an update report, with an insert that can potentially take nulls?
 			//or query could have multiple resultsets, with some being inserts that can take nulls?
-			//null can be used with dynamic sql tags? isnull operator?
+			//TODO null can be used with dynamic sql tags? add an isnull operator?
 			return null;
 		} else if (StringUtils.isBlank(value)) {
 			return "0";

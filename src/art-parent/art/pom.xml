@@ -233,10 +233,6 @@
 			</exclusions>
 		</dependency>
 		
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-		</dependency>
 <!--		<dependency>
 			<groupId>com.github.zafarkhaja</groupId>
 			<artifactId>java-semver</artifactId>
