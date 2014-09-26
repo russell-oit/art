@@ -19,7 +19,7 @@ package art.servlets;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.dbutils.DbUtils;
-import art.report.ReportRunner;
+import art.runreport.ReportRunner;
 import art.utils.UserEntity;
 import java.io.IOException;
 import java.sql.Connection;

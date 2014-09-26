@@ -91,7 +91,7 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	private static final long DEFAULT_MAX_QUERY_RUNNING_TIME_SECONDS = TimeUnit.MINUTES.toSeconds(20); // 20 minutes
 	private long maxQueryRunningTimeMillis; // max running time for a query, before its connection is forcibly removed from the pool
 	private long totalConnectionRequests;
-	private int biggestPoolSizeReached;
+	private int highestReachedPoolSize;
 	private int maxPoolSize = 10; //max number of underlying connections that can be created
 	private String testSql;
 	LocalTimer t;
@@ -330,8 +330,8 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	 *
 	 * @return the biggest pool size ever reached
 	 */
-	public int getBiggestPoolSizeReached() {
-		return biggestPoolSizeReached;
+	public int getHighestReachedPoolSize() {
+		return highestReachedPoolSize;
 	}
 
 	/**
@@ -392,30 +392,19 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 				thisObjectTicket, poolName);
 
 		//really close all connections, and remove them from the pool
-		logger.debug("pool.size()={}", pool.size());
-		for (int i = 0; i < pool.size(); i++) {
-			PooledConnection conn = pool.get(i);
+		for (PooledConnection conn : pool) {
 			try {
 				conn.realClose();
 			} catch (SQLException ex) {
 				logger.error("Error. Connection pool='{}'", poolName, ex);
 			}
-			pool.remove(i);
 		}
-	}
 
-	/**
-	 * Remove all existing connection from the pool without closing them. Useful
-	 * if the connection.close() method hangs because of buggy drivers or if
-	 * connections are null. In general you should not use this method as it
-	 * means something is going wrong with your database.
-	 */
-	public void forceRefreshConnections() {
-		logger.debug("{} - Entering forceRefreshConnections. Connection pool='{}'",
-				thisObjectTicket, poolName);
-
-		//remove all connections from the pool without closing them first
 		pool.clear();
+
+		//reset counters
+		highestReachedPoolSize = 0;
+		totalConnectionRequests = 0;
 	}
 
 	private synchronized Connection getConnectionFromPool() throws SQLException {
@@ -492,8 +481,8 @@ public class ArtDBCPDataSource implements TimerListener, DataSource {
 	private PooledConnection getNewConnection() throws SQLException {
 		PooledConnection conn = new PooledConnection(url, username, password, connectionProperties);
 		pool.add(conn);
-		if (pool.size() > biggestPoolSizeReached) {
-			biggestPoolSizeReached = pool.size();
+		if (pool.size() > highestReachedPoolSize) {
+			highestReachedPoolSize = pool.size();
 		}
 		conn.open();
 		return conn;

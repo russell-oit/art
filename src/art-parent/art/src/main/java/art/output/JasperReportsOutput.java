@@ -22,7 +22,7 @@ import art.enums.ParameterDataType;
 import art.report.Report;
 import art.servlets.ArtConfig;
 import art.utils.ArtUtils;
-import art.report.ReportRunner;
+import art.runreport.ReportRunner;
 import art.reportparameter.ReportParameter;
 import java.io.File;
 import java.io.FileInputStream;

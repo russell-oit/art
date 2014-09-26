@@ -25,7 +25,7 @@ Used in showParams.jsp page to display date and datetime parameter fields
  */
 package art.params;
 
-import art.report.ReportRunner;
+import art.runreport.ReportRunner;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ResourceBundle;

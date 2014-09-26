@@ -19,10 +19,8 @@ Page to display connections status
 <spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="connections.message.connectionReset" var="connectionResetText"/>
-<spring:message code="connections.text.total" var="totalText"/>
-<spring:message code="connections.text.inUse" var="inUseText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
@@ -46,7 +44,7 @@ Page to display connections status
 				//get datatables api instance
 				var table = oTable.api();
 
-				tbl.find('tbody').on('click', '.reset', function() {
+				tbl.find('tbody').on('click', '.refresh', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var recordName = escapeHtmlContent(row.data("name"));
 					var recordId = row.data("id");
@@ -54,19 +52,17 @@ Page to display connections status
 					$.ajax({
 						type: "POST",
 						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/resetConnection.do",
+						url: "${pageContext.request.contextPath}/app/refreshConnectionPool.do",
 						data: {id: recordId},
 						success: function(response) {
-							if (response.success) {
-								var newStatus = "${totalText}: " + response.poolSize +
-										", ${inUseText}: " + response.inUseCount;
+								var pool=response.data;
 
-								table.cell(row,1).data(newStatus);
+								table.cell(row,3).data(pool.highestReachedPoolSize);
+								table.cell(row,4).data(pool.currentPoolSize);
+								table.cell(row,5).data(pool.inUseCount);
+								table.cell(row,6).data(pool.totalConnectionRequests);
 
 								notifyActionSuccess("${connectionResetText}", recordName);
-							} else {
-								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
-							}
 						},
 						error: ajaxErrorHandler
 					});
@@ -97,27 +93,32 @@ Page to display connections status
 		<table id="connections" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th><spring:message code="connections.text.datasourceId"/></th>
 					<th><spring:message code="connections.text.datasourceName"/></th>
-					<th><spring:message code="page.text.connections"/></th>
+					<th><spring:message code="connections.text.maxConnectionCount"/></th>
+					<th><spring:message code="connections.text.highestReachedConnectionCount"/></th>
+					<th><spring:message code="connections.text.currentConnectionCount"/></th>
+					<th><spring:message code="connections.text.inUseCount"/></th>
+					<th><spring:message code="connections.text.totalConnectionRequests"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>
-				<c:forEach var="entry" items="${connectionPoolMap}">
-					<tr data-id="${entry.key}"
-						data-name="${entry.value.name}">
+				<c:forEach var="pool" items="${connectionPoolDetails}">
+					<tr data-id="${pool.poolId}"
+						data-name="${encode:forHtmlAttribute(pool.name)}">
 
-						<c:set var="pool" value="${entry.value}"/>
-
+						<td>${pool.poolId}</td>
 						<td>${encode:forHtmlContent(pool.name)}</td>
+						<td>${pool.maxPoolSize}</td>
+						<td>${pool.highestReachedPoolSize}</td>
+						<td>${pool.currentPoolSize}</td>
+						<td>${pool.inUseCount}</td>
+						<td>${pool.totalConnectionRequests}</td>
 						<td>
-							<spring:message code="connections.text.total"/>: ${pool.currentPoolSize}, 
-							<spring:message code="connections.text.inUse"/>: ${pool.inUseCount}
-						</td>
-						<td>
-							<button type="button" class="btn btn-default reset">
+							<button type="button" class="btn btn-default refresh">
 								<i class="fa fa-bolt"></i>
-								<spring:message code="connections.action.reset"/>
+								<spring:message code="page.action.refresh"/>
 							</button>
 						</td>
 					</tr>

@@ -26,7 +26,7 @@
  */
 package art.params;
 
-import art.report.ReportRunner;
+import art.runreport.ReportRunner;
 import java.util.Map;
 import java.util.ResourceBundle;
 import org.apache.commons.lang3.StringUtils;

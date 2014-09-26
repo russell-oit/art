@@ -16,7 +16,10 @@
  */
 package art.datasource;
 
+import art.artdatabase.ArtDatabase;
+import art.dbutils.DbConnections;
 import art.dbutils.DbUtils;
+import art.enums.ConnectionPoolLibrary;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.ActionResult;
@@ -88,7 +91,7 @@ public class DatasourceController {
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
-				ArtConfig.refreshConnections();
+				DbConnections.removeConnectionPool(id);
 			} else {
 				//datasource not deleted because of linked reports
 				response.setData(deleteResult.getData());
@@ -163,7 +166,7 @@ public class DatasourceController {
 			}
 
 			try {
-				updateConnection(datasource);
+				updateConnectionPool(datasource);
 			} catch (Exception ex) {
 				logger.error("Error", ex);
 				redirectAttributes.addFlashAttribute("error", ex);
@@ -273,7 +276,7 @@ public class DatasourceController {
 	 * @param datasource
 	 * @throws Exception
 	 */
-	private void updateConnection(Datasource datasource) throws Exception {
+	private void updateConnectionPool(Datasource datasource) throws Exception {
 		logger.debug("Entering updateConnection: datasource={}", datasource);
 
 		String driver = datasource.getDriver();
@@ -287,8 +290,10 @@ public class DatasourceController {
 			testConnection(jndi, driver, url, username, password);
 		}
 
-		//Refresh the Art connection pools so that the new connection is ready to use (no manual refresh needed)
-		ArtConfig.refreshConnections();
+		//recreate connection pool
+		DbConnections.removeConnectionPool(datasource.getDatasourceId());
+		ArtDatabase artDbConfig = ArtConfig.getArtDbConfig();
+		DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 	}
 
 	/**

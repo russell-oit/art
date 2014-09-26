@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -42,7 +42,7 @@ public enum ReportType {
 	private ReportType(int value) {
 		this.value = value;
 	}
-
+	
 	/**
 	 * Determine if this is a jasper reports type
 	 *

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -16,6 +16,8 @@
  */
 package art.connection;
 
+import art.dbutils.DbConnections;
+import art.utils.AjaxResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,33 +36,19 @@ public class ConnectionController {
 
 	@RequestMapping(value = "/app/connections", method = RequestMethod.GET)
 	public String showConnections(Model model) {
-//		model.addAttribute("connectionPoolMap", ArtConfig.getDataSources());
+		model.addAttribute("connectionPoolDetails", DbConnections.getAllConnectionPoolDetails());
 		return "connections";
 	}
 
-	@RequestMapping(value = "/app/resetConnection", method = RequestMethod.POST)
+	@RequestMapping(value = "/app/refreshConnectionPool", method = RequestMethod.POST)
 	public @ResponseBody
-	ResetConnectionResponse resetDatasource(@RequestParam("id") Integer id) {
-		ResetConnectionResponse response = new ResetConnectionResponse();
+	AjaxResponse refreshConnectionPool(@RequestParam("id") Integer datasourceId) {
+		AjaxResponse response = new AjaxResponse();
 
-//		ArtDBCPDataSource ds = ArtConfig.getDataSource(id);
-//		if (ds != null) {
-//			ds.refreshConnections();
-//			response.setSuccess(true);
-//			response.setPoolSize(ds.getCurrentPoolSize());
-//			response.setInUseCount(ds.getInUseCount());
-//		} else {
-//			response.setErrorMessage("Connection pool not found: " + id);
-//		}
+		DbConnections.refreshConnectionPool(datasourceId);
+		response.setData(DbConnections.getConnectionPoolDetails(datasourceId));
 
 		return response;
-	}
-
-	@RequestMapping(value = "/app/resetAllConnections", method = RequestMethod.POST)
-	public String resetAllConnections(RedirectAttributes redirectAttributes) {
-//		ArtConfig.refreshConnections();
-//		redirectAttributes.addFlashAttribute("message", "connections.message.connectionsReset");
-		return "redirect:/app/connections.do";
 	}
 
 }

@@ -24,6 +24,7 @@ import art.datasource.DatasourceMapper;
 import art.enums.ConnectionPoolLibrary;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class DbConnections {
 		}
 	}
 
-	private static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
+	public static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary library) throws NamingException {
 
 		ConnectionPoolWrapper wrapper = new ConnectionPoolWrapper(datasourceInfo, maxPoolSize, library);
@@ -108,7 +109,6 @@ public class DbConnections {
 		} else {
 			return wrapper.getPool();
 		}
-
 	}
 
 	/**
@@ -187,4 +187,42 @@ public class DbConnections {
 		connectionPoolMap = null;
 	}
 
+	public static List<ConnectionPoolDetails> getAllConnectionPoolDetails() {
+		List<ConnectionPoolDetails> details = new ArrayList<>(connectionPoolMap.size());
+
+		for (Entry<Integer, ConnectionPoolWrapper> entry : connectionPoolMap.entrySet()) {
+			ConnectionPoolWrapper wrapper = entry.getValue();
+			details.add(wrapper.getPoolDetails());
+		}
+
+		return details;
+	}
+
+	public static ConnectionPoolDetails getConnectionPoolDetails(int datasourceId) {
+		ConnectionPoolDetails details = null;
+
+		ConnectionPoolWrapper wrapper = connectionPoolMap.get(Integer.valueOf(datasourceId));
+		if (wrapper != null) {
+			details = wrapper.getPoolDetails();
+		}
+
+		return details;
+	}
+
+	public static void refreshConnectionPool(int datasourceId) {
+		ConnectionPoolWrapper wrapper = connectionPoolMap.get(Integer.valueOf(datasourceId));
+		if (wrapper != null) {
+			wrapper.refreshPool();
+		}
+	}
+
+	public static void removeConnectionPool(Integer datasourceId) {
+		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
+		if (wrapper != null) {
+			wrapper.closePool();
+			connectionPoolMap.remove(datasourceId);
+			wrapper = null;
+		}
+	}
+	
 }

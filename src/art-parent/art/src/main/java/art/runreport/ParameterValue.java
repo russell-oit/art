@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -16,21 +16,37 @@
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package art.job;
+package art.runreport;
 
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import java.util.Objects;
 
 /**
- * Class to run jobs
+ * Class to represent a report parameter value
  * 
  * @author Timothy Anyona
  */
-public class JobRunner implements org.quartz.Job {
+public class ParameterValue {
+	private Object value;
+	private JdbcValue jdbcValue;
 
-	@Override
-	public void execute(JobExecutionContext jec) throws JobExecutionException {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public ParameterValue(Object value, JdbcValue jdbcValue) {
+		Objects.requireNonNull(jdbcValue, "jdbcValue must not be null");
+		
+		this.value = value;
+		this.jdbcValue = jdbcValue;
 	}
-	
+
+	/**
+	 * @return the value
+	 */
+	public Object getValue() {
+		return value;
+	}
+
+	/**
+	 * @return the jdbcValue
+	 */
+	public JdbcValue getJdbcValue() {
+		return jdbcValue;
+	}
 }

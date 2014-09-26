@@ -149,9 +149,10 @@ public class PooledConnection implements Connection {
 		try {
 			//this.close(); // close all the open statements: not needed... since the driver should do this
 			conn.close();    // note: the caller (ArtDBCPDataSource) must remove the object from the pool
-			openStatements.clear();
 		} catch (SQLException ex) {
 			throw new SQLException("PooledConnection: error in realClose(): cause: " + ex.getMessage());
+		} finally{
+			openStatements.clear();
 		}
 	}
 

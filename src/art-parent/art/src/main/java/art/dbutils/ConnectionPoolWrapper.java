@@ -49,6 +49,7 @@ public class ConnectionPoolWrapper {
 	private int poolId;
 	private String poolName;
 	private DataSource pool;
+	private int maxPoolSize;
 
 	public ConnectionPoolWrapper(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary library) throws NamingException {
@@ -72,6 +73,7 @@ public class ConnectionPoolWrapper {
 
 		poolName = datasourceInfo.getName();
 		poolId = datasourceInfo.getDatasourceId();
+		this.maxPoolSize = maxPoolSize;
 	}
 
 	private DataSource createArtDBCPConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
@@ -91,7 +93,7 @@ public class ConnectionPoolWrapper {
 
 		//register driver so that connections are immediately usable
 		registerDriver(datasourceInfo.getDriver());
-		
+
 		return newPool;
 	}
 
@@ -191,6 +193,15 @@ public class ConnectionPoolWrapper {
 			HikariDataSource hikariDataSource = (HikariDataSource) pool;
 			hikariDataSource.close();
 		}
+
+		pool = null;
+	}
+
+	public void refreshPool() {
+		if (pool instanceof ArtDBCPDataSource) {
+			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
+			artDbcpDataSource.refreshConnections();
+		}
 	}
 
 	/**
@@ -238,5 +249,44 @@ public class ConnectionPoolWrapper {
 
 	public Connection getConnection() throws SQLException {
 		return pool.getConnection();
+	}
+
+	public int getMaxPoolSize() {
+		return maxPoolSize;
+	}
+
+	public Integer getHighestReachedPoolSize() {
+		Integer highestReachedPoolSize = null;
+
+		if (pool instanceof ArtDBCPDataSource) {
+			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
+			highestReachedPoolSize = artDbcpDataSource.getHighestReachedPoolSize();
+		}
+
+		return highestReachedPoolSize;
+	}
+
+	public Long getTotalConnectionRequests() {
+		Long totalConnectionRequests = null;
+
+		if (pool instanceof ArtDBCPDataSource) {
+			ArtDBCPDataSource artDbcpDataSource = (ArtDBCPDataSource) pool;
+			totalConnectionRequests = artDbcpDataSource.getTotalConnectionRequests();
+		}
+
+		return totalConnectionRequests;
+	}
+
+	public ConnectionPoolDetails getPoolDetails() {
+		ConnectionPoolDetails details = new ConnectionPoolDetails();
+		details.setPoolId(poolId);
+		details.setName(poolName);
+		details.setMaxPoolSize(maxPoolSize);
+		details.setHighestReachedPoolSize(getHighestReachedPoolSize());
+		details.setCurrentPoolSize(getCurrentPoolSize());
+		details.setInUseCount(getInUseCount());
+		details.setTotalConnectionRequests(getTotalConnectionRequests());
+
+		return details;
 	}
 }

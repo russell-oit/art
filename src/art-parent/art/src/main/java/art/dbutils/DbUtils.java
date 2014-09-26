@@ -16,7 +16,7 @@
  */
 package art.dbutils;
 
-import art.reportutils.JdbcValue;
+import art.runreport.JdbcValue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

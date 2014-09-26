@@ -21,7 +21,7 @@
  */
 package art.utils;
 
-import art.report.ReportRunner;
+import art.runreport.ReportRunner;
 import art.params.*;
 import art.servlets.ArtConfig;
 import java.sql.*;

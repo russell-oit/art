@@ -15,25 +15,23 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
-package art.reportutils;
-
-import java.util.Objects;
+package art.runreport;
 
 /**
- * Class to represent a report parameter value
- * 
+ * Class to represent a value to be used when calling preparedstatement
+ * setObject method. Includes type information to properly handle a null values.
+ * Some drivers throw an exception if a null is passed without type information.
+ *
  * @author Timothy Anyona
  */
-public class ParameterValue {
-	private Object value;
-	private JdbcValue jdbcValue;
+public class JdbcValue {
 
-	public ParameterValue(Object value, JdbcValue jdbcValue) {
-		Objects.requireNonNull(jdbcValue, "jdbcValue must not be null");
-		
+	private final Object value;
+	private final int sqlType; //one of java.sql.Types constants
+
+	public JdbcValue(Object value, int sqlType) {
 		this.value = value;
-		this.jdbcValue = jdbcValue;
+		this.sqlType = sqlType;
 	}
 
 	/**
@@ -44,9 +42,9 @@ public class ParameterValue {
 	}
 
 	/**
-	 * @return the jdbcValue
+	 * @return the sqlType
 	 */
-	public JdbcValue getJdbcValue() {
-		return jdbcValue;
+	public int getSqlType() {
+		return sqlType;
 	}
 }

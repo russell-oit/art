@@ -18,7 +18,7 @@
 package art.output;
 
 import art.dbutils.DbConnections;
-import art.report.ReportRunner;
+import art.runreport.ReportRunner;
 import art.servlets.ArtConfig;
 import art.utils.*;
 import java.io.File;

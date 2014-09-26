@@ -15,36 +15,22 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.reportutils;
+
+package art.jobrunner;
+
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 /**
- * Class to represent a value to be used when calling preparedstatement
- * setObject method. Includes type information to properly handle a null values.
- * Some drivers throw an exception if a null is passed without type information.
- *
+ * Class to run jobs
+ * 
  * @author Timothy Anyona
  */
-public class JdbcValue {
+public class ReportJob implements org.quartz.Job {
 
-	private final Object value;
-	private final int sqlType; //one of java.sql.Types constants
-
-	public JdbcValue(Object value, int sqlType) {
-		this.value = value;
-		this.sqlType = sqlType;
+	@Override
+	public void execute(JobExecutionContext jec) throws JobExecutionException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
-
-	/**
-	 * @return the value
-	 */
-	public Object getValue() {
-		return value;
-	}
-
-	/**
-	 * @return the sqlType
-	 */
-	public int getSqlType() {
-		return sqlType;
-	}
+	
 }

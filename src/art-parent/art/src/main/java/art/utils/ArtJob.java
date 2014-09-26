@@ -27,7 +27,7 @@
 package art.utils;
 
 import art.dbutils.DbConnections;
-import art.report.ReportRunner;
+import art.runreport.ReportRunner;
 import art.graph.ExportGraph;
 import art.mail.Mailer;
 import art.output.ReportOutputInterface;

@@ -76,7 +76,6 @@ public class ArtConfig extends HttpServlet {
 	private static String exportPath;
 	private static final ArrayList<String> reportFormats = new ArrayList<>(); //report formats available to users
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
-	private static org.quartz.Scheduler scheduler; //to allow access to scheduler from non-servlet classes
 	private static final SimpleDateFormat dateFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat timeFormatter = new SimpleDateFormat();
 	private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat();
@@ -85,7 +84,7 @@ public class ArtConfig extends HttpServlet {
 	private static ArtDatabase artDbConfig;
 	private static String settingsFilePath;
 	private static Settings settings;
-	private static final String sep = java.io.File.separator;
+	private static final String sep = File.separator;
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
 	private static String artVersion;
@@ -328,18 +327,6 @@ public class ArtConfig extends HttpServlet {
 	}
 
 	/**
-	 * Refresh all connections in the pool, attempting to properly close the
-	 * connections before recreating them.
-	 *
-	 */
-	public static void refreshConnections() {
-		//reset datasources array
-		initializeArtDatabase();
-
-		logger.info("Datasources Refresh: Completed at {}", new Date().toString());
-	}
-
-	/**
 	 * Load art database configuration from art-database file
 	 *
 	 */
@@ -453,24 +440,6 @@ public class ArtConfig extends HttpServlet {
 			}
 		}
 
-		//update scheduler
-		if (scheduler != null) {
-			try {
-				if (settings.isSchedulingEnabled()) {
-					//start scheduler if it was in stand by. otherwise, it's already started
-					if (scheduler.isInStandbyMode()) {
-						scheduler.start();
-					}
-				} else {
-					//put scheduler in stand by mode if it was running
-					if (!scheduler.isInStandbyMode()) {
-						scheduler.standby();
-					}
-				}
-			} catch (SchedulerException ex) {
-				logger.error("error", ex);
-			}
-		}
 	}
 
 	/**

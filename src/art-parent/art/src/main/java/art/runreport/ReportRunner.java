@@ -21,10 +21,12 @@
  * selected query apply smartRules add multi params apply inline params apply
  * tags parse&apply dynamic SQL set bind parameters
  */
-package art.report;
+package art.runreport;
 
 import art.dbutils.DbConnections;
 import art.enums.ReportStatus;
+import art.report.Report;
+import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.servlets.ArtConfig;
 import art.utils.ArtException;

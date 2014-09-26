@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.report;
+package art.runreport;
 
 import art.enums.ReportStatus;
 import art.enums.ReportType;
@@ -35,6 +35,8 @@ import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
+import art.report.Report;
+import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.servlets.ArtConfig;
