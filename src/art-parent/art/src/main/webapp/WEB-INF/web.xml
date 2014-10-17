@@ -13,7 +13,7 @@
     <context-param>
         <description>ART Version Number</description>
         <param-name>versionNumber</param-name>
-        <param-value>3.0-alpha3</param-value>
+        <param-value>3.0-alpha4</param-value>
     </context-param>
     <!-- Error pages -->
     <error-page>
