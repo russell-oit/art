@@ -16,7 +16,6 @@
  */
 package art.dbutils;
 
-import art.runreport.JdbcValue;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -134,17 +133,10 @@ public class DbUtils {
 	 */
 	public static void setValues(PreparedStatement ps, Object... values) throws SQLException {
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] instanceof JdbcValue) {
-				//use setobject overload that can properly handle null values because type information is included
-				//see http://docs.oracle.com/javase/7/docs/api/java/sql/PreparedStatement.html#setObject%28int,%20java.lang.Object%29
-				JdbcValue jdbcValue = (JdbcValue) values[i];
-				ps.setObject(i + 1, jdbcValue.getValue(), jdbcValue.getSqlType());
-			} else {
-				if (values[i] == null) {
-					logger.warn("non-typed null value passed. Driver may throw an exception");
-				}
-				ps.setObject(i + 1, values[i]);
+			if (values[i] == null) {
+				logger.warn("non-typed null value passed. Driver may throw an exception");
 			}
+			ps.setObject(i + 1, values[i]);
 		}
 	}
 

@@ -85,6 +85,9 @@ public class DbConnections {
 	public static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary library) throws NamingException {
 
+		//remove any existing connection pool for this datasource
+		removeConnectionPool(datasourceInfo.getDatasourceId());
+
 		ConnectionPoolWrapper wrapper = new ConnectionPoolWrapper(datasourceInfo, maxPoolSize, library);
 		connectionPoolMap.put(wrapper.getPoolId(), wrapper);
 	}
@@ -103,7 +106,7 @@ public class DbConnections {
 			throw new IllegalStateException("connectionPoolMap is null");
 		}
 
-		ConnectionPoolWrapper wrapper = connectionPoolMap.get(Integer.valueOf(datasourceId));
+		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
 		if (wrapper == null) {
 			throw new SQLException("Connection pool doesn't exist for datasource id " + datasourceId);
 		} else {
@@ -201,7 +204,7 @@ public class DbConnections {
 	public static ConnectionPoolDetails getConnectionPoolDetails(int datasourceId) {
 		ConnectionPoolDetails details = null;
 
-		ConnectionPoolWrapper wrapper = connectionPoolMap.get(Integer.valueOf(datasourceId));
+		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
 		if (wrapper != null) {
 			details = wrapper.getPoolDetails();
 		}
@@ -210,19 +213,18 @@ public class DbConnections {
 	}
 
 	public static void refreshConnectionPool(int datasourceId) {
-		ConnectionPoolWrapper wrapper = connectionPoolMap.get(Integer.valueOf(datasourceId));
+		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
 		if (wrapper != null) {
 			wrapper.refreshPool();
 		}
 	}
 
-	public static void removeConnectionPool(Integer datasourceId) {
+	public static void removeConnectionPool(int datasourceId) {
 		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
 		if (wrapper != null) {
 			wrapper.closePool();
 			connectionPoolMap.remove(datasourceId);
-			wrapper = null;
 		}
 	}
-	
+
 }

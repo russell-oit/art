@@ -19,7 +19,6 @@ package art.datasource;
 import art.artdatabase.ArtDatabase;
 import art.dbutils.DbConnections;
 import art.dbutils.DbUtils;
-import art.enums.ConnectionPoolLibrary;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.ActionResult;
@@ -288,12 +287,10 @@ public class DatasourceController {
 		logger.debug("datasource.isActive()={}", datasource.isActive());
 		if (datasource.isActive()) {
 			testConnection(jndi, driver, url, username, password);
-		}
 
-		//recreate connection pool
-		DbConnections.removeConnectionPool(datasource.getDatasourceId());
-		ArtDatabase artDbConfig = ArtConfig.getArtDbConfig();
-		DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+			ArtDatabase artDbConfig = ArtConfig.getArtDbConfig();
+			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
+		}
 	}
 
 	/**
@@ -316,7 +313,7 @@ public class DatasourceController {
 			if (jndi) {
 				conn = ArtUtils.getJndiConnection(url);
 			} else {
-				Class.forName(driver).newInstance();
+				Class.forName(driver);
 				conn = DriverManager.getConnection(url, username, password);
 			}
 		} finally {

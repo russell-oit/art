@@ -16,16 +16,9 @@
  */
 package art.enums;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.StringTokenizer;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Enum to represent parameter data types
@@ -67,27 +60,6 @@ public enum ParameterDataType {
 			return false;
 		}
 	}
-
-//	public String processDefaultValue(String value) {
-//		String processedValue;
-//
-//		switch (this) {
-//			case Integer:
-//			case Number:
-//			case Datasource:
-//
-//				break;
-//			case Date:
-//			case DateTime:
-//				processedValue = processDefaultDateValue(value);
-//				break;
-//			case Varchar:
-//			case Text:
-//				processedValue = value;
-//		}
-//
-//		return processedValue;
-//	}
 
 	/**
 	 * Get enum value
@@ -146,84 +118,5 @@ public enum ParameterDataType {
 	public String getDescription() {
 		return value;
 	}
-
-	private String processDefaultNumericValue(String value) {
-		if (value == null) {
-			//return null to allow use of null values for report queries
-			
-			//null doesn't really make sense for select statements. only for insert statements
-			//col = null always returns false so select must have explicit is null statement
-			//query could be for an update report, with an insert that can potentially take nulls?
-			//or query could have multiple resultsets, with some being inserts that can take nulls?
-			//TODO null can be used with dynamic sql tags? add an isnull operator?
-			return null;
-		} else if (StringUtils.isBlank(value)) {
-			return "0";
-		} else {
-			return value;
-		}
-	}
-
-	private String processDefaultStringValue(String value) {
-		return value;
-	}
-
-//	private String processDefaultDateValue(String value) {
-//		/*
-//		 * if default value has syntax "ADD DAYS|MONTHS|YEARS <integer>" or "Add
-//		 * day|MoN|Year <integer>" set default value as sysdate plus an offset
-//		 */
-//
-//		if (value == null) {
-//			return null;
-//		}
-//
-//		if (value.toUpperCase().startsWith("ADD")) { // set an offset from today
-//			Calendar calendar = new GregorianCalendar();
-//			try {
-//				StringTokenizer st = new StringTokenizer(value.toUpperCase(), " ");
-//				if (st.hasMoreTokens()) {
-//					st.nextToken(); // skip 1st token
-//					String token = st.nextToken().trim(); // get 2nd token, i.e. one of DAYS, MONTHS or YEARS
-//					int field = (token.startsWith("YEAR") ? GregorianCalendar.YEAR : (token.startsWith("MON") ? GregorianCalendar.MONTH : GregorianCalendar.DAY_OF_MONTH));
-//					token = st.nextToken().trim(); // get last token, i.e. the offset (integer)
-//					int offset = Integer.parseInt(token);
-//					calendar.add(field, offset);
-//				}
-//
-//				return calendar.getTime();
-//
-//			} catch (Exception e) {
-//				logger.error("Error", e);
-//			}
-//		}
-//
-//		//convert default date string as it is to a date
-//		String dateFormat;
-//		if (value.length() < 10) {
-//			dateFormat = "yyyy-M-d";
-//		} else if (value.length() == 10) {
-//			dateFormat = "yyyy-MM-dd";
-//		} else if (value.length() == 16) {
-//			dateFormat = "yyyy-MM-dd HH:mm";
-//		} else {
-//			dateFormat = "yyyy-MM-dd HH:mm:ss";
-//		}
-//		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-//		dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
-//
-//		java.util.Date dateValue;
-//		try {
-//			dateValue = dateFormatter.parse(value);
-//		} catch (ParseException e) {
-//			logger.debug("Defaulting {} to now", value, e);
-//			//string could not be converted to a valid date. default to now
-//			dateValue = new java.util.Date();
-//		}
-//
-//		//return date
-//		return dateValue;
-//
-//	}
 
 }

@@ -40,11 +40,11 @@ Page to display connections status
 						"${pageContext.response.locale}",
 						false //addColumnFilters
 						);
-				
+
 				//get datatables api instance
 				var table = oTable.api();
 
-				tbl.find('tbody').on('click', '.refresh', function() {
+				tbl.find('tbody').on('click', '.reset', function() {
 					var row = $(this).closest("tr"); //jquery object
 					var recordName = escapeHtmlContent(row.data("name"));
 					var recordId = row.data("id");
@@ -55,14 +55,14 @@ Page to display connections status
 						url: "${pageContext.request.contextPath}/app/refreshConnectionPool.do",
 						data: {id: recordId},
 						success: function(response) {
-								var pool=response.data;
+							var pool = response.data;
 
-								table.cell(row,3).data(pool.highestReachedPoolSize);
-								table.cell(row,4).data(pool.currentPoolSize);
-								table.cell(row,5).data(pool.inUseCount);
-								table.cell(row,6).data(pool.totalConnectionRequests);
+							table.cell(row, 3).data(pool.highestReachedPoolSize);
+							table.cell(row, 4).data(pool.currentPoolSize);
+							table.cell(row, 5).data(pool.inUseCount);
+							table.cell(row, 6).data(pool.totalConnectionRequests);
 
-								notifyActionSuccess("${connectionResetText}", recordName);
+							notifyActionSuccess("${connectionResetText}", recordName);
 						},
 						error: ajaxErrorHandler
 					});
@@ -116,9 +116,9 @@ Page to display connections status
 						<td>${pool.inUseCount}</td>
 						<td>${pool.totalConnectionRequests}</td>
 						<td>
-							<button type="button" class="btn btn-default refresh">
+							<button type="button" class="btn btn-default reset">
 								<i class="fa fa-bolt"></i>
-								<spring:message code="page.action.refresh"/>
+								<spring:message code="connections.action.reset"/>
 							</button>
 						</td>
 					</tr>

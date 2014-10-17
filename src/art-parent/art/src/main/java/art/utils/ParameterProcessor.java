@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -101,22 +102,21 @@ public class ParameterProcessor {
 		List<ReportParameter> reportParamsList = reportParameterService.getReportParameters(reportId);
 
 		for (ReportParameter reportParam : reportParamsList) {
-			//set default parameter values. so that they don't have to be specified on the url
 			Parameter param = reportParam.getParameter();
-			logger.debug("param={}", param);
-
-			String defaultValue = param.getDefaultValue();
-			logger.debug("defaultValue='{}'", defaultValue);
-
-			if (defaultValue != null) {
-				String defaultValues[] = defaultValue.split("\\r?\\n");
-				reportParam.setPassedParameterValues(defaultValues);
-			}
 
 			//build map for easier lookup
 			reportParams.put(param.getName(), reportParam);
 		}
 
+		setPassedParameterValues(passedValuesMap, reportParams);
+
+		//set actual values to be used when running the query
+		setActualParameterValues(reportParamsList);
+
+		return reportParams;
+	}
+
+	private void setPassedParameterValues(Map<String, String[]> passedValuesMap, Map<String, ReportParameter> reportParams) {
 		//process report parameters
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
 			String htmlParamName = entry.getKey();
@@ -152,8 +152,9 @@ public class ParameterProcessor {
 				}
 			}
 		}
+	}
 
-		//set actual values to be used when running the query
+	private void setActualParameterValues(List<ReportParameter> reportParamsList) throws NumberFormatException {
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
 			logger.debug("param={}", param);
@@ -170,93 +171,66 @@ public class ParameterProcessor {
 					actualValueString = passedValues[0];
 				}
 
-				//convert string value to appropriate object for use when running sql query
-				ParameterDataType paramDataType = param.getDataType();
-				if (paramDataType.isNumeric()) {
-					if (StringUtils.isBlank(actualValueString)) {
-						//use 0 as default value. so that explicit value doesn't have to be set
-						//for default value field of parameter. explicitly state in application documentation
-						actualValueString = "0";
-					}
-
-					switch (paramDataType) {
-						case Integer:
-							actualValues.add(Long.valueOf(actualValueString));
-							break;
-						case Number:
-							actualValues.add(Double.valueOf(actualValueString));
-							break;
-						case Datasource:
-							actualValues.add(Integer.valueOf(actualValueString));
-							break;
-						default:
-							logger.warn("Unknown numeric parameter data type - {}. Defaulting to integer.", paramDataType);
-							actualValues.add(Integer.valueOf(actualValueString));
-					}
-
-					reportParam.setActualParameterValues(actualValues);
-				} else if (paramDataType.isDate()) {
-					Date actualValueDate = processDateValue(actualValueString);
-
-					//must convert java.util.date to appropriate java.sql types as required by jdbc
-					//some drivers support using java.util.date in
-					//preparedstatement setobject/setdate/settimestamp calls, but not all
-					//see https://stackoverflow.com/questions/21162753/jdbc-resultset-i-need-a-getdatetime-but-there-is-only-getdate-and-gettimestamp
-					//https://stackoverflow.com/questions/2305973/java-util-date-vs-java-sql-date
-					switch (paramDataType) {
-						case Date:
-							//use java.sql.date which has time portion truncated
-							actualValues.add(new java.sql.Date(actualValueDate.getTime()));
-							break;
-						case DateTime:
-							actualValues.add(new java.sql.Timestamp(actualValueDate.getTime()));
-							break;
-						default:
-							logger.warn("Unknown date parameter data type - {}. Defaulting to timestamp.", paramDataType);
-							actualValues.add(new java.sql.Timestamp(actualValueDate.getTime()));
-					}
-
-					reportParam.setActualParameterValues(actualValues);
-				} else {
-					//parameter data types that are treated as strings
-					actualValues = new ArrayList<>();
-					actualValues.add(actualValueString);
-					reportParam.setActualParameterValues(actualValues);
-				}
+				//convert string value to appropriate object
+				Object actualValue = convertParameterValue(actualValueString, param.getDataType());
+				actualValues.add(actualValue);
+				reportParam.setActualParameterValues(actualValues);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
-				String actualValueString;
+				List<String> actualValueStrings = new ArrayList<>();
 				if (passedValues == null) {
 					//parameter value not specified. use default value
-					actualValueString = param.getDefaultValue();
+					String defaultValue = param.getDefaultValue();
+					if (defaultValue != null) {
+						String defaultValues[] = defaultValue.split("\\r?\\n");
+						actualValueStrings.addAll(Arrays.asList(defaultValues));
+					}
 				} else {
-					actualValueString = passedValues[0];
+					actualValueStrings.addAll(Arrays.asList(passedValues));
 				}
+
+				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
+					//use all values
+				} else {
+					for (String actualValueString : actualValueStrings) {
+						//convert string value to appropriate object
+						Object actualValue = convertParameterValue(actualValueString, param.getDataType());
+						actualValues.add(actualValue);
+					}
+					reportParam.setActualParameterValues(actualValues);
+				}
+
 			}
 
 		}
-
-		return reportParams;
 	}
 
-
-	private Date processDateValue(String defaultValue) {
-		/*
-		 * if default value has syntax "ADD DAYS|MONTHS|YEARS <integer>" or "Add
-		 * day|MoN|Year <integer>" set default value as sysdate plus an offset
-		 */
-
-		if (defaultValue == null) {
-			defaultValue = "";
+	private Object convertParameterValue(String value, ParameterDataType paramDataType) {
+		if (paramDataType.isNumeric()) {
+			return convertParameterValueToNumber(value, paramDataType);
+		} else if (paramDataType.isDate()) {
+			return convertParameterValueToDate(value);
+		} else {
+			//parameter data types that are treated as strings
+			return value;
 		}
+	}
 
-		if (defaultValue.toUpperCase().startsWith("ADD")) { // set an offset from today
+	private Date convertParameterValueToDate(String value) {
+		if (StringUtils.startsWithIgnoreCase(value, "add")) {
 			Calendar calendar = new GregorianCalendar();
 			try {
-				StringTokenizer st = new StringTokenizer(defaultValue.toUpperCase(), " ");
+				StringTokenizer st = new StringTokenizer(value, " ");
 				if (st.hasMoreTokens()) {
 					st.nextToken(); // skip 1st token
 					String token = st.nextToken().trim(); // get 2nd token, i.e. one of DAYS, MONTHS or YEARS
-					int field = (token.startsWith("YEAR") ? GregorianCalendar.YEAR : (token.startsWith("MON") ? GregorianCalendar.MONTH : GregorianCalendar.DAY_OF_MONTH));
+					int field;
+					if (StringUtils.startsWithIgnoreCase(token, "year")) {
+						field = GregorianCalendar.YEAR;
+					} else if (StringUtils.startsWithIgnoreCase(token, "month")) {
+						field = GregorianCalendar.MONTH;
+					} else {
+						field = GregorianCalendar.DAY_OF_MONTH;
+					}
 					token = st.nextToken().trim(); // get last token, i.e. the offset (integer)
 					int offset = Integer.parseInt(token);
 					calendar.add(field, offset);
@@ -264,18 +238,18 @@ public class ParameterProcessor {
 
 				return calendar.getTime();
 
-			} catch (Exception e) {
+			} catch (NumberFormatException e) {
 				logger.error("Error", e);
 			}
 		}
 
 		//convert default date string as it is to a date
 		String dateFormat;
-		if (defaultValue.length() < 10) {
+		if (value == null || value.length() < 10) {
 			dateFormat = "yyyy-M-d";
-		} else if (defaultValue.length() == 10) {
+		} else if (value.length() == 10) {
 			dateFormat = "yyyy-MM-dd";
-		} else if (defaultValue.length() == 16) {
+		} else if (value.length() == 16) {
 			dateFormat = "yyyy-MM-dd HH:mm";
 		} else {
 			dateFormat = "yyyy-MM-dd HH:mm:ss";
@@ -285,9 +259,9 @@ public class ParameterProcessor {
 
 		java.util.Date dateValue;
 		try {
-			dateValue = dateFormatter.parse(defaultValue);
+			dateValue = dateFormatter.parse(value);
 		} catch (ParseException e) {
-			logger.debug("Defaulting {} to now", defaultValue, e);
+			logger.debug("Defaulting {} to now", value, e);
 			//string could not be converted to a valid date. default to now
 			dateValue = new java.util.Date();
 		}
@@ -295,6 +269,27 @@ public class ParameterProcessor {
 		//return date
 		return dateValue;
 
+	}
+
+	private Object convertParameterValueToNumber(String value, ParameterDataType paramDataType) {
+		String usedValue;
+		if (StringUtils.isBlank(value)) {
+			usedValue = "0";
+		} else {
+			usedValue = value;
+		}
+
+		switch (paramDataType) {
+			case Integer:
+				return Integer.valueOf(usedValue);
+			case Number:
+				return Double.valueOf(usedValue);
+			case Datasource:
+				return Integer.valueOf(usedValue);
+			default:
+				logger.warn("Unknown numeric parameter data type - {}. Defaulting to integer.", paramDataType);
+				return Integer.valueOf(usedValue);
+		}
 	}
 
 }
