@@ -17,7 +17,7 @@
 package art.reportgroup;
 
 import art.dbutils.DbService;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.enums.AccessLevel;
 import art.user.User;
 import art.utils.ActionResult;
@@ -300,7 +300,7 @@ public class ReportGroupService {
 				group.getReportGroupId(),
 				group.getName(),
 				group.getDescription(),
-				DbUtils.getCurrentTimeAsSqlTimestamp(),
+				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -313,7 +313,7 @@ public class ReportGroupService {
 			Object[] values = {
 				group.getName(),
 				group.getDescription(),
-				DbUtils.getCurrentTimeAsSqlTimestamp(),
+				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				group.getReportGroupId()
 			};

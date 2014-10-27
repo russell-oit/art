@@ -16,25 +16,23 @@
  */
 package art.output;
 
-import art.dbutils.DbConnections;
-import art.dbutils.DbUtils;
-import art.enums.ParameterDataType;
+import art.dbutils.ArtDbUtils;
+import art.enums.ReportFormat;
+import art.enums.ReportType;
 import art.report.Report;
-import art.servlets.ArtConfig;
-import art.utils.ArtUtils;
-import art.runreport.ReportRunner;
 import art.reportparameter.ReportParameter;
+import art.runreport.RunReportHelper;
+import art.servlets.ArtConfig;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
 import net.sf.jasperreports.engine.*;
@@ -64,19 +62,8 @@ import org.slf4j.LoggerFactory;
 public class JasperReportsOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(JasperReportsOutput.class);
-	String fullFileName;
-	String reportFormat;
-	String exportPath;
-	PrintWriter htmlWriter;
 	private final List<String> completedSubReports = new ArrayList<>(); //used with recursive compileReport call
 	private ResultSet resultSet;
-
-	/**
-	 * @return the resultSet
-	 */
-	public ResultSet getResultSet() {
-		return resultSet;
-	}
 
 	/**
 	 * @param resultSet the resultSet to set
@@ -86,203 +73,120 @@ public class JasperReportsOutput {
 	}
 
 	/**
-	 * Set html output object
-	 *
-	 * @param o html output object
-	 */
-	public void setWriter(PrintWriter o) {
-		htmlWriter = o;
-	}
-
-	/**
-	 * Set the directory where the file is to be saved
-	 *
-	 * @param s directory where the file is to be saved
-	 */
-	public void setExportPath(String s) {
-		exportPath = s;
-	}
-
-	/**
-	 * Get the full filename where the output has been saved
-	 *
-	 * @return full filename where the output has been saved
-	 */
-	public String getFileName() {
-		return fullFileName;
-	}
-
-	/**
-	 * Set the report format
-	 *
-	 * @param s report format
-	 */
-	public void setReportFormat(String s) {
-		reportFormat = s;
-	}
-
-	/**
-	 * Generate report output and set final filename
+	 * Generate report output
 	 *
 	 * @param report
 	 * @param reportParams
+	 * @param reportType
+	 * @param reportFormat
+	 * @param outputFileName
+	 * @throws java.io.IOException
+	 * @throws java.sql.SQLException
+	 * @throws net.sf.jasperreports.engine.JRException
 	 */
-	public void generateReport(Report report, Map<String, ReportParameter> reportParams) {
-		Objects.requireNonNull(report, "Report must not be null");
+	public void generateReport(Report report, List<ReportParameter> reportParams,
+			ReportType reportType, ReportFormat reportFormat, String outputFileName)
+			throws IOException, SQLException, JRException {
 
-		Connection connQuery = null;
+		Objects.requireNonNull(report, "report must not be null");
+		Objects.requireNonNull(reportParams, "reportParams must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
 
+		//use JRAbstractLRUVirtualizer instead of JRVirtualizer to have access to setReadOnly() method
 		JRAbstractLRUVirtualizer jrVirtualizer = null;
 
 		try {
 			String templateFileName = report.getTemplate();
-			int datasourceId = report.getDatasource().getDatasourceId();
-			String querySql = report.getReportSource();
-
-			String baseFileName = FilenameUtils.getBaseName(templateFileName);
+			String baseTemplateFileName = FilenameUtils.getBaseName(templateFileName);
 			String templatesPath = ArtConfig.getTemplatesPath();
-			String jasperFilePath = templatesPath + baseFileName + ".jasper";
-			String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
+			String jasperFilePath = templatesPath + baseTemplateFileName + ".jasper";
+			String jrxmlFilePath = templatesPath + baseTemplateFileName + ".jrxml";
 
 			File jasperFile = new File(jasperFilePath);
 			File jrxmlFile = new File(jrxmlFilePath);
 
-			String interactiveLink;
-
-			//only proceed if template file available
+			//check if template file exists
 			if (!jasperFile.exists() && !jrxmlFile.exists()) {
-				//template file doesn't exist.
-				logger.warn("Template file not found: {}.jrxml", templatesPath + baseFileName);
+				throw new IllegalStateException("Template file not found: " + baseTemplateFileName);
+			}
 
-				fullFileName = "-Template file not found";
+			//compile report and subreports if necessary
+			compileReport(baseTemplateFileName);
 
-				//display error message instead of link when running query interactively
-				interactiveLink = "Template file not found";
+			//create object for storing all jasper reports parameters - query parameters, virtualizers, etc
+			Map<String, Object> jasperReportsParams = new HashMap<>();
+
+			//pass query parameters
+			for (ReportParameter reportParam : reportParams) {
+				jasperReportsParams.put(reportParam.getParameter().getName(), reportParam.getActualParameterValues());
+			}
+
+			//pass virtualizer if it's to be used
+			jrVirtualizer = createVirtualizer();
+			if (jrVirtualizer != null) {
+				jasperReportsParams.put(JRParameter.REPORT_VIRTUALIZER, jrVirtualizer);
+			}
+
+			//fill report with data
+			JasperPrint jasperPrint;
+			if (reportType == ReportType.JasperReportsTemplate) {
+				Connection conn = null;
+				try {
+					RunReportHelper runReportHelper = new RunReportHelper();
+					conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
+					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
+				} finally {
+					ArtDbUtils.close(conn);
+				}
 			} else {
-				//compile report and subreports if necessary
-				compileReport(baseFileName);
-
-				//create object for storing all jasper reports parameters - query parameters, virtualizers, etc
-				Map<String, Object> jasperReportsParams = new HashMap<>();
-
-				//prepare virtualizer if it's to be used
-				jrVirtualizer = createVirtualizer();
-				if (jrVirtualizer != null) {
-					jasperReportsParams.put(JRParameter.REPORT_VIRTUALIZER, jrVirtualizer);
-				}
-
-				//process parameters to obtain appropriate jasper reports data type objects
-				ReportRunner reportRunner = new ReportRunner();
-				jasperReportsParams.putAll(reportRunner.getJasperReportsParameters(report, reportParams));
-
-				//fill report with data
-				JasperPrint jasperPrint;
-				if (resultSet == null) {
-					//use template query
-
-					//use dynamic datasource if so configured
-					String dynamicDatasource = null; //id or name of dynamic datasource
-
-					if (reportParams != null) {
-						for (Entry<String, ReportParameter> entry : reportParams.entrySet()) {
-							ReportParameter reportParam = entry.getValue();
-							ParameterDataType paramDataType = reportParam.getParameter().getDataType();
-
-							if (paramDataType == ParameterDataType.Datasource) {
-								//get dynamic connection to use
-								String[] paramValues = reportParam.getPassedParameterValues();
-								if (paramValues != null) {
-									String paramValue = paramValues[0];
-									if (StringUtils.isNotBlank(paramValue)) {
-										dynamicDatasource = paramValue;
-									}
-								}
-								break;
-							}
-						}
-					}
-
-					if (dynamicDatasource != null) {
-						if (NumberUtils.isNumber(dynamicDatasource)) {
-							//use datasource id
-							connQuery = DbConnections.getConnection(Integer.parseInt(dynamicDatasource));
-						} else {
-							//use datasource name
-							connQuery = DbConnections.getConnection(dynamicDatasource);
-						}
-					} else {
-						//not using dynamic datasource. use datasource defined on the query
-						connQuery = DbConnections.getConnection(datasourceId);
-					}
-					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, connQuery);
-				} else {
-					//use recordset from art query
-					JRResultSetDataSource ds;
-					ds = new JRResultSetDataSource(resultSet);
-					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, ds);
-				}
-
-				//set virtualizer as read only to optimize performance
-				//must be set after print object has been generated
-				if (jrVirtualizer != null) {
-					jrVirtualizer.setReadOnly(true);
-				}
-
-				// Build output filename base
-				String fileName = ArtUtils.getUniqueFileName(report.getReportId(), reportFormat);
-				fullFileName = exportPath + fileName;
-
-				//export report
-				if (StringUtils.equals(reportFormat, "pdf")) {
-					JasperExportManager.exportReportToPdfFile(jasperPrint, fullFileName);
-				} else if (StringUtils.equals(reportFormat, "html")) {
-					JRXhtmlExporter exporter = new JRXhtmlExporter();
-
-					exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					exporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, fullFileName);
-
-					exporter.exportReport();
-				} else if (StringUtils.equals(reportFormat, "xls")) {
-					JRXlsExporter exporter = new JRXlsExporter();
-
-					exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					exporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, fullFileName);
-					exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
-					exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-
-					exporter.exportReport();
-				} else if (StringUtils.equals(reportFormat, "xlsx")) {
-					JRXlsxExporter exporter = new JRXlsxExporter();
-
-					exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-					exporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, fullFileName);
-					exporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
-					exporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
-
-					exporter.exportReport();
-				}
-
-				interactiveLink = "<a type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
-						+ fileName + "</a>";
+				//use recordset from art query
+				jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, new JRResultSetDataSource(resultSet));
 			}
 
-			//display link to access report if run interactively
-			if (htmlWriter != null) {
-				htmlWriter.println("<p><div align=\"center\"><table border=\"0\" width=\"90%\">");
-				htmlWriter.println("<tr><td colspan=\"2\" class=\"data\" align=\"center\" >"
-						+ interactiveLink
-						+ "</td></tr>");
-				htmlWriter.println("</table></div></p>");
+			//set virtualizer as read only to optimize performance
+			//must be set after print object has been generated
+			if (jrVirtualizer != null) {
+				jrVirtualizer.setReadOnly(true);
 			}
-		} catch (Exception ex) {
-			logger.error("Error", ex);
-			if (htmlWriter != null) {
-				//display error message on browser
-				htmlWriter.println("<b>Error while generating report:</b> <p>" + ex + "</p>");
+
+			//export report
+			switch (reportFormat) {
+				case pdf:
+					JasperExportManager.exportReportToPdfFile(jasperPrint, outputFileName);
+					break;
+				case html:
+					JRXhtmlExporter htmlExporter = new JRXhtmlExporter();
+
+					htmlExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+					htmlExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
+
+					htmlExporter.exportReport();
+					break;
+				case xls:
+					JRXlsExporter xlsExporter = new JRXlsExporter();
+
+					xlsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+					xlsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
+					xlsExporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
+					xlsExporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
+
+					xlsExporter.exportReport();
+					break;
+				case xlsx:
+					JRXlsxExporter xlsxExporter = new JRXlsxExporter();
+
+					xlsxExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+					xlsxExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
+					xlsxExporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
+					xlsxExporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
+
+					xlsxExporter.exportReport();
+					break;
+				default:
+					throw new IllegalArgumentException("Invalid report format: " + reportFormat);
 			}
 		} finally {
-			DbUtils.close(connQuery);
-
 			if (jrVirtualizer != null) {
 				jrVirtualizer.cleanup();
 			}
@@ -300,7 +204,10 @@ public class JasperReportsOutput {
 	 * @throws IOException
 	 */
 	private JRAbstractLRUVirtualizer createVirtualizer() throws IOException {
-		//use JRAbstractLRUVirtualizer instead of JRVirtualizer so as to be able to call setReadOnly method
+		logger.debug("Entering createVirtualizer");
+
+		//use JRAbstractLRUVirtualizer instead of JRVirtualizer in order to
+		//provide access to setReadOnly() method
 		JRAbstractLRUVirtualizer jrVirtualizer;
 
 		//set virtualizer properties, if virtualizer is to be used
@@ -323,8 +230,6 @@ public class JasperReportsOutput {
 		final String FILE_MAX_SIZE = "file.maxSize";
 		final String FILE_DIRECTORY = "file.directory";
 		final String GZIP_MAX_SIZE = "gzip.maxSize";
-		final String DIRECTORY = "directory";
-		final String MAX_SIZE = "maxSize";
 
 		if (properties.getProperty(VIRTUALIZER) == null) {
 			properties.setProperty(VIRTUALIZER, "swap");
@@ -375,61 +280,50 @@ public class JasperReportsOutput {
 		return jrVirtualizer;
 	}
 
-	public int getIntOrError(String value) {
-		if (NumberUtils.isNumber(value)) {
-			return NumberUtils.toInt(value);
-		} else {
-			throw new IllegalArgumentException("Number expected. Found '" + value + "'");
-		}
-	}
-
 	/**
 	 * Compile a report and all it's subreports
 	 *
 	 * @param baseFileName report file name without the extension
 	 */
-	private void compileReport(String baseFileName) {
+	private void compileReport(String baseFileName) throws JRException {
+		logger.debug("Entering compileReport: baseFileName='{}'", baseFileName);
 
-		//see https://stackoverflow.com/questions/10265576/java-retain-information-in-recursive-function
-		try {
-			String templatesPath = ArtConfig.getTemplatesPath();
-			String jasperFilePath = templatesPath + baseFileName + ".jasper";
-			String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
+		String templatesPath = ArtConfig.getTemplatesPath();
+		String jasperFilePath = templatesPath + baseFileName + ".jasper";
+		String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
 
-			File jasperFile = new File(jasperFilePath);
-			File jrxmlFile = new File(jrxmlFilePath);
+		File jasperFile = new File(jasperFilePath);
+		File jrxmlFile = new File(jrxmlFilePath);
 
-			//compile report if .jasper doesn't exist or is outdated
-			if (!jasperFile.exists() || (jasperFile.lastModified() < jrxmlFile.lastModified())) {
-				JasperCompileManager.compileReportToFile(jrxmlFilePath, jasperFilePath);
-			}
-			//load report object
-			JasperReport jasperReport = (JasperReport) JRLoader.loadObjectFromFile(jasperFilePath);
-
-			//Compile sub reports
-			JRElementsVisitor.visitReport(jasperReport, new JRVisitorSupport() {
-				@Override
-				public void visitSubreport(JRSubreport subreport) {
-					try {
-						String subreportName = subreport.getExpression().getText().replace("\"", ""); //file name is quoted
-						subreportName = StringUtils.substringBeforeLast(subreportName, ".");
-						//Sometimes the same subreport can be used multiple times, but
-						//there is no need to compile multiple times
-						if (completedSubReports.contains(subreportName)) {
-							return;
-						}
-						completedSubReports.add(subreportName);
-
-						//recursively compile any reports within the subreport
-						compileReport(subreportName);
-					} catch (Exception e) {
-						logger.error("Error", e);
-					}
-				}
-			});
-
-		} catch (JRException ex) {
-			logger.error("Error", ex);
+		//compile report if .jasper doesn't exist or is outdated
+		if (!jasperFile.exists() || (jasperFile.lastModified() < jrxmlFile.lastModified())) {
+			JasperCompileManager.compileReportToFile(jrxmlFilePath, jasperFilePath);
 		}
+
+		//load report object
+		JasperReport jasperReport = (JasperReport) JRLoader.loadObjectFromFile(jasperFilePath);
+
+		//Compile sub reports
+		JRElementsVisitor.visitReport(jasperReport, new JRVisitorSupport() {
+			@Override
+			public void visitSubreport(JRSubreport subreport) {
+				String subreportName = subreport.getExpression().getText().replace("\"", ""); //file name is quoted
+				subreportName = StringUtils.substringBeforeLast(subreportName, ".");
+				//Sometimes the same subreport can be used multiple times, but
+				//there is no need to compile multiple times
+				if (completedSubReports.contains(subreportName)) {
+					return;
+				}
+				completedSubReports.add(subreportName);
+
+				//recursively compile any reports within the subreport
+				//see https://stackoverflow.com/questions/10265576/java-retain-information-in-recursive-function
+				try {
+					compileReport(subreportName);
+				} catch (JRException ex) {
+					throw new RuntimeException(ex);
+				}
+			}
+		});
 	}
 }

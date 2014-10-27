@@ -30,7 +30,7 @@ public enum ReportFormat {
 	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"), htmlGrid("htmlGrid"),
 	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
 	pdf("pdf"), slk("slk"), slkZip("slkZip"), tsv("tsv"), tsvZip("tsvZip"),
-	tsvGz("tsvGz"), xml("xml"), rss20("rss20");
+	tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png");
 	private final String value;
 
 	private ReportFormat(String value) {
@@ -66,6 +66,8 @@ public enum ReportFormat {
 			case slkZip:
 			case tsvZip:
 				return "zip";
+			case png:
+				return "png";
 			default:
 				throw new IllegalStateException("Report format does not generate files: " + value);
 		}

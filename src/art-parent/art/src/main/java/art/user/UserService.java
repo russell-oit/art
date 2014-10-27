@@ -18,7 +18,7 @@ package art.user;
 
 import art.dbutils.DbService;
 import art.enums.AccessLevel;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ActionResult;
@@ -131,7 +131,7 @@ public class UserService {
 	public List<User> getAdminUsers() throws SQLException {
 		logger.debug("Entering getAdminUsers");
 
-		String sql = SQL_SELECT_ALL + "WHERE ACCESS_LEVEL>=" + AccessLevel.JuniorAdmin.getValue();
+		String sql = SQL_SELECT_ALL + " WHERE ACCESS_LEVEL>=" + AccessLevel.JuniorAdmin.getValue();
 		ResultSetHandler<List<User>> h = new BeanListHandler<>(User.class, new UserMapper());
 		return dbService.query(sql, h);
 	}
@@ -278,7 +278,7 @@ public class UserService {
 		Object[] values = {
 			newPassword,
 			passwordAlgorithm,
-			DbUtils.getCurrentTimeAsSqlTimestamp(),
+			ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 			actionUser.getUsername(),
 			userId
 		};
@@ -375,7 +375,7 @@ public class UserService {
 				user.getStartReport(),
 				user.isCanChangePassword(),
 				user.isActive(),
-				DbUtils.getCurrentTimeAsSqlTimestamp(),
+				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -398,7 +398,7 @@ public class UserService {
 				user.getStartReport(),
 				user.isCanChangePassword(),
 				user.isActive(),
-				DbUtils.getCurrentTimeAsSqlTimestamp(),
+				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				user.getUserId()
 			};

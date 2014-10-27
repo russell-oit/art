@@ -126,7 +126,7 @@ public class ReportParameterService {
 		logger.debug("Entering getReportParameters: reportId={}", reportId);
 
 		String sql = SQL_SELECT_ALL
-				+ " WHERE REPORT_ID=? AND PARAMETER_POSITION=?";
+				+ " WHERE REPORT_ID=?";
 
 		ResultSetHandler<List<ReportParameter>> h = new BeanListHandler<>(ReportParameter.class, new ReportParameterMapper());
 		return dbService.query(sql, h, reportId);

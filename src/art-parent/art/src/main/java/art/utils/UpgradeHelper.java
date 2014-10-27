@@ -19,7 +19,7 @@ package art.utils;
 
 import art.dbutils.DbConnections;
 import art.dbutils.DbService;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.job.Job;
@@ -217,7 +217,7 @@ public class UpgradeHelper {
 		} catch (SQLException | SchedulerException ex) {
 			logger.error("Error", ex);
 		} finally {
-			DbUtils.close(psUpdate, conn);
+ArtDbUtils.close(psUpdate, conn);
 		}
 	}
 

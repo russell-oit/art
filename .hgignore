@@ -17,3 +17,5 @@ src/art-parent/art-dbcp/.settings/
 src/art-parent/art-mail/.classpath
 src/art-parent/art-mail/.project
 src/art-parent/art-mail/.settings/
+src/art-parent/art-dbcp/nb-configuration.xml
+src/art-parent/art-mail/nb-configuration.xml

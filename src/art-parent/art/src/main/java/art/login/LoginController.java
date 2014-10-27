@@ -7,7 +7,7 @@ import art.servlets.ArtConfig;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.language.LanguageUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -78,7 +78,7 @@ public class LoginController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		} finally {
-			DbUtils.close(conn);
+			ArtDbUtils.close(conn);
 		}
 
 		if (!artDbConnectionOk) {

@@ -19,7 +19,8 @@ package art.report;
 import art.datasource.Datasource;
 import art.dbutils.DbService;
 import art.servlets.ArtConfig;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
+import art.dbutils.DbConnections;
 import art.enums.AccessLevel;
 import art.enums.ParameterType;
 import art.enums.ReportStatus;
@@ -531,7 +532,7 @@ public class ReportService {
 				report.getXmlaCatalog(),
 				report.getXmlaUsername(),
 				report.getXmlaPassword(),
-				DbUtils.getCurrentTimeAsSqlTimestamp(),
+				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -567,7 +568,7 @@ public class ReportService {
 				report.getXmlaCatalog(),
 				report.getXmlaUsername(),
 				report.getXmlaPassword(),
-				DbUtils.getCurrentTimeAsSqlTimestamp(),
+				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
 			};
@@ -654,8 +655,9 @@ public class ReportService {
 				+ " ORDER BY LINE_NUMBER";
 
 		try {
-			conn = ArtConfig.getConnection();
-			rs = DbUtils.query(conn, ps, sql, report.getReportId());
+			//TODO use map list result set handler
+			conn = DbConnections.getArtDbConnection();
+			rs = ArtDbUtils.query(conn, ps, sql, report.getReportId());
 			StringBuilder sb = new StringBuilder(1024);
 			while (rs.next()) {
 				sb.append(rs.getString("SOURCE_INFO"));
@@ -667,7 +669,7 @@ public class ReportService {
 				report.setReportSourceHtml(report.getReportSource());
 			}
 		} finally {
-			DbUtils.close(rs, ps, conn);
+			ArtDbUtils.close(rs, ps, conn);
 		}
 	}
 
@@ -730,7 +732,7 @@ public class ReportService {
 			String sql = "SELECT * FROM " + tableName
 					+ " WHERE " + keyColumnName + " = ?";
 
-			rs = DbUtils.query(conn, ps, sql, keyId);
+			rs = ArtDbUtils.query(conn, ps, sql, keyId);
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int columnCount = rsmd.getColumnCount();
 
@@ -752,7 +754,7 @@ public class ReportService {
 				count++;
 			}
 		} finally {
-			DbUtils.close(rs, ps, conn);
+			ArtDbUtils.close(rs, ps, conn);
 		}
 
 		return count;

@@ -256,5 +256,14 @@ public class ArtUtils {
 	public static Date getDate(long timestamp) {
 		return new Date(timestamp);
 	}
+	
+//	// escape the ' char in a parameter value
+//	public static String escapeSql(String s) {
+//		if (s == null) {
+//			return s;
+//		} else {
+//			return StringUtils.replace(s, "'", "''");
+//		}
+//	}
 
 }

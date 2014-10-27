@@ -18,7 +18,7 @@ package art.servlets;
 
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.runreport.ReportRunner;
 import art.utils.UserEntity;
 import java.io.IOException;
@@ -168,13 +168,13 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 					}
 				}
 
-				if (isChainedValueMulti) {
-					pq.setMultiParams(multiParams);
-				} else {
-					pq.setInlineParams(inlineParams);
-				}
-
-				pq.setHtmlParams(htmlParams);
+//				if (isChainedValueMulti) {
+//					pq.setMultiParams(multiParams);
+//				} else {
+//					pq.setInlineParams(inlineParams);
+//				}
+//
+//				pq.setHtmlParams(htmlParams);
 
 				Map<String, String> lov = pq.getLovValues(false); //don't apply rules
 
@@ -294,7 +294,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			} catch (Exception e) {
 				logger.error("Error", e);
 			} finally {
-				DbUtils.close(rs, ps, conn);
+				ArtDbUtils.close(rs, ps, conn);
 			}
 		}
 
@@ -418,7 +418,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			DbUtils.close(rs, ps, conn);
+			ArtDbUtils.close(rs, ps, conn);
 		}
 
 		return builder.toString();
@@ -464,7 +464,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			} catch (Exception e) {
 				logger.error("Error", e);
 			} finally {
-				DbUtils.close(rs, ps, conn);
+				ArtDbUtils.close(rs, ps, conn);
 			}
 		}
 

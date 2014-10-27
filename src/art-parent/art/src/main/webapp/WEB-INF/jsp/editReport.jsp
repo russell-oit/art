@@ -377,7 +377,7 @@ Edit report page
 								<spring:message code="page.link.help"/>
 							</a>
 						</div>
-						<form:errors path="reportType" cssClass="error"/>
+						<form:errors path="reportTypeId" cssClass="error"/>
 					</div>
 				</div>
 				<div id="datasourceDiv" class="form-group">

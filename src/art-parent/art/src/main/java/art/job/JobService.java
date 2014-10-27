@@ -1,7 +1,7 @@
 package art.job;
 
 import art.dbutils.DbService;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.enums.JobType;
 import art.report.Report;
 import art.servlets.ArtConfig;
@@ -183,7 +183,7 @@ public class JobService {
 				cr.setCachedTableName(cachedTableName);
 				cr.drop(); //TODO potential sql injection. drop hardcoded table names only
 			} finally {
-				DbUtils.close(connCache);
+				ArtDbUtils.close(connCache);
 			}
 		}
 
@@ -244,7 +244,7 @@ public class JobService {
 		Object[] values = {
 			newId,
 			job.getName(),
-			DbUtils.getCurrentTimeAsSqlTimestamp()
+			ArtDbUtils.getCurrentTimeAsSqlTimestamp()
 		};
 
 		dbService.update(sql, values);
@@ -268,7 +268,7 @@ public class JobService {
 
 		Object[] values = {
 			job.getName(),
-			DbUtils.getCurrentTimeAsSqlTimestamp(),
+			ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
 			job.getJobId()
 		};
 

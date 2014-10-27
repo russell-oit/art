@@ -31,7 +31,7 @@ public enum ReportType {
 	Tabular(0), TabularHtml(103),
 	Update(100), Crosstab(101), CrosstabHtml(102),
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
-	JasperReportsTemplate(115), JasperReportsArt(116), jXLSTemplate(117), jXLSArt(118),
+	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121),
 	XY(-1), Pie3D(-2), HorizontalBar3D(-3), VerticalBar3D(-4), Line(-5),
 	TimeSeries(-6), DateSeries(-7), StackedVerticalBar3D(-8), StackedHorizontalBar3D(-9),
@@ -62,7 +62,33 @@ public enum ReportType {
 	 * @return
 	 */
 	public boolean isJxls() {
-		if (this == jXLSArt || this == jXLSTemplate) {
+		if (this == JxlsArt || this == JxlsTemplate) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Returns true if this is an olap report type
+	 *
+	 * @return
+	 */
+	public boolean isOlap() {
+		if (this == Mondrian || this == MondrianXmla || this==SqlServerXmla) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Determine if this is a crosstab type
+	 *
+	 * @return
+	 */
+	public boolean isCrosstab() {
+		if (this == Crosstab || this == CrosstabHtml) {
 			return true;
 		} else {
 			return false;
@@ -175,9 +201,9 @@ public enum ReportType {
 				return "JasperReports: Template Query";
 			case JasperReportsArt:
 				return "JasperReports: ART Query";
-			case jXLSTemplate:
+			case JxlsTemplate:
 				return "jXLS: Template Query";
-			case jXLSArt:
+			case JxlsArt:
 				return "jXLS: ART Query";
 			case LovDynamic:
 				return "LOV: Dynamic";

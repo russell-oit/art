@@ -16,6 +16,8 @@
  */
 package art.runreport;
 
+import art.dbutils.ArtDbUtils;
+import art.enums.ReportFormat;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.graph.ArtCategorySeries;
@@ -27,12 +29,12 @@ import art.graph.ArtTimeSeries;
 import art.graph.ArtXY;
 import art.graph.ArtXYZChart;
 import art.output.DirectReportOutputHandler;
-import art.output.ReportOutputInterface;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlPlainOutput;
-import art.output.htmlReportOutWriter;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
+import art.output.ReportOutputInterface;
+import art.output.htmlReportOutWriter;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.Report;
@@ -54,9 +56,11 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -81,7 +85,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * Controller for run report process
+ * Controller for running reports interactively
  *
  * @author Timothy Anyona
  */
@@ -110,9 +114,17 @@ public class RunReportController {
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale) throws IOException {
 
+		Report report = null;
+		User sessionUser = null;
+		ResultSet rs = null;
+		ReportRunner reportRunner = null;
+
+		runningReportsCount++;
+
 		//check if output is being displayed within the show report page (inline) or in a new page
 		boolean showInline = Boolean.valueOf(request.getParameter("showInline"));
 
+		//set appropriate error page to use
 		String errorPage;
 		if (showInline) {
 			errorPage = "reportErrorInline";
@@ -120,234 +132,169 @@ public class RunReportController {
 			errorPage = "reportError";
 		}
 
-		Report report;
-
 		try {
+			//get report
 			report = reportService.getReport(reportId);
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-			return errorPage;
-		}
 
-		User sessionUser = (User) session.getAttribute("sessionUser");
-		String username = sessionUser.getUsername();
-
-		//check if report can be run
-		if (report == null) {
-			model.addAttribute("message", "reports.message.reportNotFound");
-			return errorPage;
-		}
-
-		model.addAttribute("reportName", report.getName());
-
-		//admins can run all reports, even disabled ones. only check for non admin users
-		if (!sessionUser.isAdminUser()) {
-			if (report.getReportStatus() == ReportStatus.Disabled) {
-				model.addAttribute("message", "reports.message.reportDisabled");
+			if (report == null) {
+				model.addAttribute("message", "reports.message.reportNotFound");
 				return errorPage;
 			}
 
-			try {
+			//check if user has permission to run report
+			//admins can run all reports, even disabled ones. only check for non admin users
+			sessionUser = (User) session.getAttribute("sessionUser");
+			String username = sessionUser.getUsername();
+
+			if (!sessionUser.isAdminUser()) {
+				if (report.getReportStatus() == ReportStatus.Disabled) {
+					model.addAttribute("message", "reports.message.reportDisabled");
+					return errorPage;
+				}
+
 				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
 					model.addAttribute("message", "reports.message.noPermission");
 					return errorPage;
 				}
-			} catch (SQLException ex) {
-				logger.error("Error", ex);
-				model.addAttribute("error", ex);
-				return errorPage;
+
+				if (runningReportsCount > ArtConfig.getSettings().getMaxRunningReports()) {
+					logger.warn("Report not run. Max running reports reached. user={}, report={}", sessionUser, report);
+					model.addAttribute("message", "reports.message.maxRunningReportsReached");
+					return errorPage;
+
+				}
 			}
 
-			if (runningReportsCount > ArtConfig.getSettings().getMaxRunningReports()) {
-				logger.warn("Report not run. Max running reports reached. user={}, report={}", sessionUser, report);
-				model.addAttribute("message", "reports.message.maxRunningReportsReached");
-				return errorPage;
+			//check if the html code should be rendered as an html fragmnet (without <html> and </html> tags)
+			boolean isFragment = Boolean.valueOf(request.getParameter("isFragment"));
 
+			//make sure the browser does not cache the result using Ajax (this happens in IE)
+			if (isFragment) {
+				response.setHeader("Cache-control", "no-cache");
 			}
-		}
 
-		Map<String, Class<?>> directReportOutputClasses = ArtConfig.getDirectOutputReportClasses();
+			String reportName = report.getName();
+			int reportTypeId = report.getReportTypeId();
+			ReportType reportType = ReportType.toEnum(reportTypeId);
+			String xAxisLabel = report.getxAxisLabel();
+			String yAxisLabel = report.getyAxisLabel();
+			String shortDescription = report.getShortDescription();
+			String graphOptions = report.getChartOptionsSetting();
 
-		// check if the html code should be rendered as an html fragmnet (without <html> and </html> tags)
-		boolean isFragment = Boolean.valueOf(request.getParameter("isFragment"));
+			request.setAttribute("reportName", reportName);
 
-		// make sure the browser does not cache the result using Ajax (this happens in IE)
-		if (isFragment) {
-			response.setHeader("Cache-control", "no-cache");
-		}
+			//get report format to use
+			String reportFormatString = request.getParameter("reportFormat");
+			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
+				if (reportType.isJasperReports()) {
+					reportFormatString = ReportFormat.html.getValue();
+				} else {
+					reportFormatString = ReportFormat.htmlDataTable.getValue();
+				}
+			}
 
-		String baseExportPath = ArtConfig.getExportPath();
+			//ensure html-only reports only output as html
+			if (reportType == ReportType.CrosstabHtml || reportType == ReportType.TabularHtml) {
+				reportFormatString = ReportFormat.html.getValue();
+			}
 
-		/*
-		 * isFlushEnabled states if this servlet can produce html output.
-		 * This is used to avoid to print on the page if the page control
-		 * has to be redirected to another page (this is the case of graphs
-		 * and output modes that do not generate html)
-		 */
-		boolean showHeaderAndFooter = true; // default generic HTML output
-		ReportOutputInterface o = null;
-		String str; //for error logging strings
+			ReportFormat reportFormat = ReportFormat.toEnum(reportFormatString);
 
-		String reportName = report.getName();
-		int reportTypeId = report.getReportTypeId();
-		ReportType reportType = ReportType.toEnum(reportTypeId);
-		String xAxisLabel = report.getxAxisLabel();
-		String yAxisLabel = report.getyAxisLabel();
-		String shortDescription = report.getShortDescription();
-		String graphOptions = report.getChartOptionsSetting();
+			//this will be initialized according to the content type of the report output
+			//setContentType() must be called before getWriter()
+			PrintWriter out = null;
 
-		request.setAttribute("reportName", reportName);
+			boolean showReportHeaderAndFooter = true;
+			ReportOutputInterface o = null;
 
-		String reportFormat = request.getParameter("reportFormat");
-		if (reportFormat == null || StringUtils.equalsIgnoreCase(reportFormat, "default")) {
+			//set appropriate html content type and show report header and footer flag
 			if (reportType.isChart()) {
-				reportFormat = "graph";
-			} else if (reportType.isGroupReport()) {
-				reportFormat = "htmlreport";
-			} else if (reportType.isJasperReports()) {
-				reportFormat = "pdf";
-			} else {
-				reportFormat = "html";
-			}
-		}
-
-		//ensure html only reports only output as html
-		if (reportType == ReportType.CrosstabHtml || reportType == ReportType.TabularHtml) {
-			reportFormat = "html";
-		}
-
-		// this will be initialized according to the content type of the report output
-		//setContentType must be called before getWriter
-		PrintWriter out = null;
-
-		/*
-		 * Find if output allows this servlet to print the header&footer
-		 * (flush active or not)
-		 */
-		if (StringUtils.equalsIgnoreCase(reportFormat, "SCHEDULE")) {
-			// forward to the editJob page
-//			ctx.getRequestDispatcher("/user/editJob.jsp").forward(request, response);
-//			return; // a return is needed otherwise the flow would proceed!
-			return "editJob";
-		} else if (StringUtils.containsIgnoreCase(reportFormat, "graph")) {
-			showHeaderAndFooter = false; // graphs are created in memory and displayed by showGraph.jsp page
-		} else if (StringUtils.equalsIgnoreCase(reportFormat, "htmlreport")) {
-			response.setContentType("text/html; charset=UTF-8");
-			out = response.getWriter();
-		} else if (reportTypeId == 115 || reportTypeId == 116 || reportTypeId == 117 || reportTypeId == 118) {
-			//jasper report or jxls spreadsheet
-			response.setContentType("text/html; charset=UTF-8");
-			out = response.getWriter();
-		} else if (reportType == ReportType.Update) {
-			//update query
-			response.setContentType("text/html; charset=UTF-8");
-			out = response.getWriter();
-		} else if (reportType == ReportType.Dashboard) {
-			// forward to the showDashboard page
+				showReportHeaderAndFooter = false; // graphs are created in memory and displayed by showGraph.jsp page
+			} else if (reportType.isGroupReport()
+					|| reportType.isJasperReports() || reportType.isJxls()
+					|| reportType == ReportType.Update) {
+				response.setContentType("text/html; charset=UTF-8");
+				out = response.getWriter();
+			} else if (reportType == ReportType.Dashboard) {
+				// forward to the showDashboard page
 //			ctx.getRequestDispatcher("/user/showDashboard.jsp").forward(request, response);
 //			return; // a return is needed otherwise the flow would proceed!
-			return "showDashboard";
-		} else if (reportType == ReportType.Text) {
+				return "showDashboard";
+			} else if (reportType == ReportType.Text) {
 			// forward to the showText page
 //			ctx.getRequestDispatcher("/user/showText.jsp").forward(request, response);
 //			return; // a return is needed otherwise the flow would proceed!
 
-			//http://jsoup.org/apidocs/org/jsoup/safety/Whitelist.html
-			//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
-			out = response.getWriter();
-			String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
-			String textOutput;
-			if (showInline) {
-				textOutput = cleanSource;
-			} else {
-				textOutput = "<div class=\"row\">"
-						+ "<div class=\"col-md-10 col-md-offset-1\">"
-						+ "<div id=\"reportOutput\">"
-						+ cleanSource
-						+ "</div></div></div>";
-			}
-			out.println(textOutput);
-			return null;
-		} else if (reportTypeId == 112 || reportTypeId == 113 || reportTypeId == 114) {
-			// forward to the showAnalysis page
+				//http://jsoup.org/apidocs/org/jsoup/safety/Whitelist.html
+				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
+				response.setContentType("text/html; charset=UTF-8");
+				out = response.getWriter();
+				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
+				String textOutput;
+				if (showInline) {
+					textOutput = cleanSource;
+				} else {
+					textOutput = "<div class=\"row\">"
+							+ "<div class=\"col-md-10 col-md-offset-1\">"
+							+ "<div id=\"reportOutput\">"
+							+ cleanSource
+							+ "</div></div></div>";
+				}
+				out.println(textOutput);
+				return null;
+			} else if (reportType.isOlap()) {
+				// forward to the showAnalysis page
 //			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
 //			return; // a return is needed otherwise the flow would proceed!
-			return "showAnalysis";
-		} else {
-			// This is not a request to schedule, produce a graph or an "htmlReport" or an update query
-			// => Load the appropriate ReportOutputInterface for the view mode
+				return "showAnalysis";
+			} else {
+				//this is a direct output report
+				Map<String, Class<?>> directReportOutputClasses = ArtConfig.getDirectOutputReportClasses();
 
-			try {
 				//@SuppressWarnings("rawtypes")
-				Class<?> classx = directReportOutputClasses.get(reportFormat);
+				Class<?> classx = directReportOutputClasses.get(reportFormatString);
 				o = (ReportOutputInterface) classx.newInstance();
 
-				// Set the content type according to the object
-				String contentType = o.getContentType();
-				response.setContentType(contentType);
-				// initialize the output stream - this is here
-				// this need to appear after response.setContent!!!
+				//set the content type according to the report output class
+				response.setContentType(o.getContentType());
 				out = response.getWriter();
 
-				// the view mode drives if this servlet uses the std header&footer,
-				// if false the view mode needs to take care of all the output
-				showHeaderAndFooter = o.isShowQueryHeaderAndFooter();
-
 				if (isFragment) {
-					showHeaderAndFooter = false; // disable in any case header&footer if isFragment is true
+					//report header and footer not shown for fragments
+					showReportHeaderAndFooter = false;
+				} else {
+					//the report output class determines if the report header and footer will be shown
+					//if false the output class needs to take care of all the output
+					showReportHeaderAndFooter = o.isShowQueryHeaderAndFooter();
 				}
-
-			} catch (Exception e) {
-				logger.error("Error while instantiating class: {}", reportFormat, e);
-				request.setAttribute("errorMessage", "Error while initializing " + reportFormat + " view mode:" + e);
-//				ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-//				return;
-				return errorPage;
 			}
-		}
 
 //		//should never be null here. explicit check for ide warnings
 //		if (out == null) {
 //			response.setContentType("text/html; charset=UTF-8");
 //			out = response.getWriter();
 //		}
-		if (!showInline) {
-			try {
+			//output page header
+			if (!showInline) {
 				request.setAttribute("title", reportName);
 				ctx.getRequestDispatcher("/WEB-INF/jsp/headerFragment.jsp").include(request, response);
-			} catch (ServletException ex) {
-				logger.error("Error", ex);
-				return errorPage;
+				out.flush();
 			}
-			out.flush();
-		}
 
-		//output report header
-		if (showHeaderAndFooter) {
-			request.setAttribute("reportName", reportName);
-			try {
+			//output report header
+			if (showReportHeaderAndFooter) {
+				request.setAttribute("reportName", reportName);
 				ctx.getRequestDispatcher("/WEB-INF/jsp/reportHeader.jsp").include(request, response);
-			} catch (ServletException ex) {
-				logger.error("Error", ex);
-				return errorPage;
+				out.flush();
+
+				//display initial report progress
+				displayReportProgress(out, messageSource.getMessage("reports.message.configuring", null, locale));
 			}
-			out.flush();
 
-			//display initial report progress
-			displayReportProgress(out, messageSource.getMessage("reports.message.configuring", null, locale));
-		}
+			//run query            
+			int rowsRetrieved = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
 
-		//run query            
-		int probe = 0; // used for debugging
-		int rowsRetrieved = -1; //default to -1 in order to accomodate template reports for which you can't know the number of rows in the report
-
-		ResultSet rs = null;
-		ReportRunner reportRunner = null;
-
-		try {
-			long overallStartTime = System.currentTimeMillis(); //overall start time                    
-			String startTimeString = java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.MEDIUM, request.getLocale()).format(new java.util.Date(overallStartTime)); //for display in query output header
+			long overallStartTime = System.currentTimeMillis(); //overall start time
 
 			/*
 			 * Increment the currentNumberOfRunningQueries Note if an
@@ -356,21 +303,21 @@ public class RunReportController {
 			 * "Show Connection Status" link from the Datasource page
 			 * (ART Admin part)
 			 */
-			runningReportsCount++;
-
 			reportRunner = new ReportRunner();
 			reportRunner.setUsername(username);
-			reportRunner.setReportId(reportId);
+			reportRunner.setReport(report);
 			reportRunner.setAdminSession(sessionUser.isAdminUser());
 
 			//prepare report parameters
 			ArtQuery aq = new ArtQuery();
-			
-			Map<String, String> inlineParams=new HashMap<>();
-			Map<String, String[]> multiParams=new HashMap<>();
+
+			Map<String, String> inlineParams = new HashMap<>();
+			Map<String, String[]> multiParams = new HashMap<>();
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
-			Map<String, ReportParameter> reportParams = paramProcessor.processHttpParameters(request, reportId);
+			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 
 			//display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
 			Map<Integer, ArtQueryParam> displayParams = new TreeMap<>();
@@ -386,7 +333,7 @@ public class RunReportController {
 				//get display values for selections from lov parameters
 				ParameterService parameterService = new ParameterService();
 
-				for (Map.Entry<String, ReportParameter> entry : reportParams.entrySet()) {
+				for (Map.Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 					ReportParameter reportParam = entry.getValue();
 
 					Parameter param = reportParam.getParameter();
@@ -400,7 +347,7 @@ public class RunReportController {
 							//parameter chained on another parameter. get filter value
 							Parameter filterParam = parameterService.getParameter(reportId, filterPosition);
 							if (filterParam != null) {
-								ReportParameter filterReportParam = reportParams.get(filterParam.getName());
+								ReportParameter filterReportParam = reportParamsMap.get(filterParam.getName());
 								if (filterReportParam != null) {
 									String[] filterValues = filterReportParam.getPassedParameterValues();
 									lovReportRunner.setFilterValues(filterValues);
@@ -412,22 +359,24 @@ public class RunReportController {
 				}
 			}
 
-			reportRunner.setReportParams(reportParams);
+			reportRunner.setReportParamsMap(reportParamsMap);
 
 			//is scroll insensitive much slower than forward only?
-				int resultSetType;
-				if (reportTypeId == 116 || reportTypeId == 118) {
-					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset in order to determine record count
-				} else if (StringUtils.equalsIgnoreCase(reportFormat, "htmlreport")) {
-					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-				} else if (reportTypeId < 0) {
-					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE; //need scrollable resultset for graphs for show data option
-				} else {
-					resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-				}
+			int resultSetType;
+			if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt) {
+				//need scrollable resultset in order to determine record count
+				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+			} else if (StringUtils.equalsIgnoreCase(reportFormatString, "htmlreport")) {
+				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+			} else if (reportType.isChart()) {
+				//need scrollable resultset for charts for show data option
+				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+			} else {
+				resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+			}
 
 			// JavaScript code to write status
-			if (showHeaderAndFooter) {
+			if (showReportHeaderAndFooter) {
 				displayReportProgress(out, messageSource.getMessage("reports.message.running", null, locale));
 			}
 
@@ -437,7 +386,7 @@ public class RunReportController {
 			long reportEndTime = System.currentTimeMillis();
 
 			//get final sql with parameter placeholders replaced with parameter values
-			String finalSQL = reportRunner.getFinalSQL();
+			String finalSQL = reportRunner.getFinalSql();
 
 			//determine if final sql should be shown. only admins can see sql
 			boolean showSQL = false;
@@ -450,19 +399,19 @@ public class RunReportController {
 				showSQL = true;
 			}
 
+			String exportPath = ArtConfig.getExportPath();
 			//set output object properties if required
 			if (o != null) {
 				try {
-					probe = 77;
 
-					o.setMaxRows(ArtConfig.getMaxRows(reportFormat));
+					o.setMaxRows(ArtConfig.getMaxRows(reportFormatString));
 					o.setWriter(out);
 					o.setQueryName(reportName);
 					o.setFileUserName(username);
-					o.setExportPath(baseExportPath);
+					o.setExportPath(exportPath);
 
 					//don't set displayparams for html view modes. parameters will be displayed by this servlet
-					if (!StringUtils.containsIgnoreCase(reportFormat, "html")) {
+					if (!StringUtils.containsIgnoreCase(reportFormatString, "html")) {
 						o.setDisplayParameters(displayParams);
 					}
 
@@ -482,8 +431,8 @@ public class RunReportController {
 					}
 
 				} catch (Exception e) {
-					logger.error("Error setting properties for class: {}", reportFormat, e);
-					request.setAttribute("errorMessage", "Error while initializing " + reportFormat + " view mode:" + e);
+					logger.error("Error setting properties for class: {}", reportFormatString, e);
+					request.setAttribute("errorMessage", "Error while initializing " + reportFormatString + " view mode:" + e);
 //						ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
 //						return;
 					return errorPage;
@@ -491,12 +440,16 @@ public class RunReportController {
 			}
 
 			// display status information, parameters and final sql
-			if (showHeaderAndFooter) {
+			if (showReportHeaderAndFooter) {
 				String description = "";
 				shortDescription = StringUtils.trim(shortDescription);
 				if (StringUtils.length(shortDescription) > 0) {
 					description = " :: " + shortDescription;
 				}
+
+				DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, request.getLocale());
+				String startTimeString = df.format(new Date(overallStartTime));
+
 				out.println("<script type=\"text/javascript\">displayReportInfo(\"<b>" + reportName + "</b>" + description + " :: " + startTimeString + "\");</script>");
 
 				displayReportProgress(out, messageSource.getMessage("reports.message.fetchingData", null, locale));
@@ -514,51 +467,63 @@ public class RunReportController {
 
 				out.flush();
 			}
-			probe = 90;
 
-			//handle jasper reports output
-			if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JasperReportsTemplate) {
-				JasperReportsOutput jrOutput = new JasperReportsOutput();
-				jrOutput.setExportPath(baseExportPath);
-				jrOutput.setReportFormat(reportFormat);
-				jrOutput.setWriter(out);
-				if (reportType == ReportType.JasperReportsTemplate) {
-					//report will use query in the report template
-					jrOutput.generateReport(report,reportParams);
+			String fileName = ArtUtils.getUniqueFileName(report.getReportId(), reportFormat.getFilenameExtension());
+			String outputFileName = exportPath + fileName;
+
+			//handle jasper reports and jxls output
+			if (reportType.isJasperReports() || reportType.isJxls()) {
+				if (reportType.isJasperReports()) {
+					JasperReportsOutput jrOutput = new JasperReportsOutput();
+					if (reportType == ReportType.JasperReportsTemplate) {
+						//report will use query in the report template
+						jrOutput.generateReport(report, reportParamsList, reportType, reportFormat, outputFileName);
+					} else {
+						//report will use data from art query
+						rs = reportRunner.getResultSet();
+						jrOutput.setResultSet(rs);
+						jrOutput.generateReport(report, reportParamsList, reportType, reportFormat, outputFileName);
+						rowsRetrieved = getNumberOfRows(rs);
+					}
 				} else {
-					//report will use data from art query
-					rs = reportRunner.getResultSet();
-					jrOutput.setResultSet(rs);
-					jrOutput.generateReport(report,reportParams);
-					rowsRetrieved = getNumberOfRows(rs);
+					//jxls output
+					JxlsOutput jxlsOutput = new JxlsOutput();
+					if (reportType == ReportType.JxlsTemplate) {
+						//report will use query in the jxls template
+						jxlsOutput.generateReport(report, reportParamsList, reportType, reportFormat, outputFileName);
+					} else {
+						//report will use data from art query
+						rs = reportRunner.getResultSet();
+						jxlsOutput.setResultSet(rs);
+						jxlsOutput.generateReport(report, reportParamsList, reportType, reportFormat, outputFileName);
+						rowsRetrieved = getNumberOfRows(rs);
+					}
 				}
-			} else if (reportTypeId == 117 || reportTypeId == 118) {
-				//jxls spreadsheet
-				probe = 92;
-				JxlsOutput jxls = new JxlsOutput();
-				jxls.setQueryName(reportName);
-				jxls.setFileUserName(username);
-				jxls.setExportPath(baseExportPath);
-				jxls.setWriter(out);
-				if (reportTypeId == 117) {
-					//report will use query in the jxls template
-//					jxls.createFile(null, reportId, reportParams);
-				} else {
-					//report will use data from art query
-					rs = reportRunner.getResultSet();
-//					jxls.createFile(rs, reportId, inlineParams, multiParams, reportParams);
-					rowsRetrieved = getNumberOfRows(rs);
-				}
+
+				//display link to access report if run interactively
+				String interactiveLink = "<a type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
+						+ fileName + "</a>";
+
+				out.println("<p><div align=\"center\"><table border=\"0\" width=\"90%\">");
+				out.println("<tr><td colspan=\"2\" class=\"data\" align=\"center\" >"
+						+ interactiveLink
+						+ "</td></tr>");
+				out.println("</table></div></p>");
 			} else {
 				//get query results
 				rs = reportRunner.getResultSet();
 
-				if (rs != null) {
+				if (rs == null) {
+					//this is an update query
+					int rowsUpdated = reportRunner.getUpdateCount(); // will be -1 if query has multiple statements
+					request.setAttribute("rowsUpdated", "" + rowsUpdated);
+//						ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
+				} else {
 					// it is a "select" query or a procedure ending with a select statement
 					ResultSetMetaData rsmd = rs.getMetaData();
 
 					try {
-						if (StringUtils.equalsIgnoreCase(reportFormat, "htmlreport")) {
+						if (reportType.isGroupReport()) {
 							/*
 							 * HTML REPORT
 							 */
@@ -569,13 +534,7 @@ public class RunReportController {
 								splitCol = Integer.parseInt(request.getParameter("SPLITCOL"));
 							}
 							rowsRetrieved = htmlReportOut(out, rs, rsmd, splitCol);
-							probe = 100;
-						} else if (StringUtils.containsIgnoreCase(reportFormat, "graph")) {
-							/*
-							 * GRAPH
-							 */
-							probe = 105;
-
+						} else if (reportType.isChart()) {
 							//do initial preparation of graph object
 							ArtGraph ag = artGraphOut(rsmd, request, graphOptions, shortDescription, reportTypeId);
 
@@ -596,7 +555,6 @@ public class RunReportController {
 
 							//build graph dataset
 //							ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
-
 							//set other properties relevant for the graph display
 							if (showSQL) {
 								request.setAttribute("showSQL", "true");
@@ -605,7 +563,7 @@ public class RunReportController {
 
 							//enable file names to contain query name
 							//set base file name
-							java.util.Date today = new java.util.Date();
+							Date today = new Date();
 							SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
 							String filename = username + "-" + reportName + "-" + dateFormatter.format(today) + ArtUtils.getRandomFileNameString();
 							filename = ArtUtils.cleanFileName(filename);
@@ -620,14 +578,10 @@ public class RunReportController {
 							//pass graph object
 							request.setAttribute("artGraph", ag);
 
-							probe = 110;
 						} else {
 							ActionResult outputResult;
 
-							if (reportTypeId == 101 || reportTypeId == 102) {
-								/*
-								 * CROSSTAB
-								 */
+							if (reportType.isCrosstab()) {
 								outputResult = DirectReportOutputHandler.flushXOutput(o, rs);
 							} else {
 								/*
@@ -636,7 +590,7 @@ public class RunReportController {
 
 								//add support for drill down queries
 								Map<Integer, DrilldownQuery> drilldownQueries = null;
-								if (StringUtils.containsIgnoreCase(reportFormat, "html")) {
+								if (StringUtils.containsIgnoreCase(reportFormatString, "html")) {
 									//only drill down for html output. drill down query launched from hyperlink                                            
 									drilldownQueries = aq.getDrilldownQueries(reportId);
 								}
@@ -658,11 +612,6 @@ public class RunReportController {
 						return errorPage;
 					}
 
-				} else {
-					//this is an update query
-					int rowsUpdated = reportRunner.getUpdateCount(); // will be -1 if query has multiple statements
-					request.setAttribute("rowsUpdated", "" + rowsUpdated);
-//						ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
 				}
 			}
 
@@ -682,7 +631,7 @@ public class RunReportController {
 
 			String msg;
 
-			if (showHeaderAndFooter) {
+			if (showReportHeaderAndFooter) {
 				Object[] value = {
 					df.format(preciseTotalTime)
 				};
@@ -716,18 +665,17 @@ public class RunReportController {
 				}
 			}
 
-			ArtHelper.log(username, "query", request.getRemoteAddr(), reportId, totalTime, fetchTime, "query, " + reportFormat);
-			probe = 200;
+			ArtHelper.log(username, "query", request.getRemoteAddr(), reportId, totalTime, fetchTime, "query, " + reportFormatString);
 
-			if (StringUtils.containsIgnoreCase(reportFormat, "graph")) {
+			if (reportType.isChart()) {
 				//graph. set output format and forward to the rendering page
-				if (StringUtils.equalsIgnoreCase(reportFormat, "graph")) {
+				if (StringUtils.equalsIgnoreCase(reportFormatString, "graph")) {
 					//only display graph on the browser
 					request.setAttribute("outputToFile", "nofile");
-				} else if (StringUtils.equalsIgnoreCase(reportFormat, "pdfgraph")) {
+				} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pdfgraph")) {
 					//additionally generate graph in a pdf file
 					request.setAttribute("outputToFile", "pdf");
-				} else if (StringUtils.equalsIgnoreCase(reportFormat, "pnggraph")) {
+				} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pnggraph")) {
 					//additionally generate graph as a png file
 					request.setAttribute("outputToFile", "png");
 				}
@@ -736,52 +684,23 @@ public class RunReportController {
 				return "showGraph";
 			}
 
-		} catch (Exception e) { // we can't dispatch this error to a new page since we need to know if this servlet has already flushed something                    
-			str = "Error while running query ID " + reportId + ", execution for user " + username + ", for session id " + session.getId() + ", at position: " + probe;
-			logger.error("Error: {}", str, e);
-
-//			String msg=messageSource.getMessage("page.message.errorOccurred", null, locale)
-//					+ "<hr>" + messageSource.getMessage("step",null,locale) 
-//					+ ":" + probe + "<br><code>" + e + "</code>";
-//
-//			request.setAttribute("message", msg );
-			if (!showInline) { // we already flushed something: let's include the page
-				request.setAttribute("headerOff", "true");
-				request.setAttribute("error", e);
-				try {
-					ctx.getRequestDispatcher("/WEB-INF/jsp/reportErrorInline.jsp").include(request, response);
-				} catch (ServletException ex) {
-					logger.error("Error", ex);
-					return errorPage;
-				}
-
-			} else { // let's forward to the error page
-//					ctx.getRequestDispatcher("/user/error.jsp").forward(request, response);
-				model.addAttribute("error", e);
-				return errorPage;
+		} catch (Exception ex) {
+			logger.error("Error. {}, {}", report, sessionUser, ex);
+			if (report != null) {
+				model.addAttribute("reportName", report.getName());
 			}
-			// do not put a return here otherwise we risk the open connection to be maintained out of the pool
-
+			model.addAttribute("error", ex);
+			return errorPage;
 		} finally {
-			// Decrement the currentNumberOfRunningQueries
-			// close statements and return the connection to the pool
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (reportRunner != null) {
-					reportRunner.close();
-				}
-				runningReportsCount--;
-			} catch (SQLException e) {
-				runningReportsCount--;
-				logger.error("Error while closing connections", e);
+			runningReportsCount--;
+			ArtDbUtils.close(rs);
+			if (reportRunner != null) {
+				reportRunner.close();
 			}
 		}
 
 		return null;
-
-	} // end doPost
+	}
 
 	/**
 	 * Generate a group report

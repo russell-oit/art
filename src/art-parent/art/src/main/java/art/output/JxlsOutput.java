@@ -17,23 +17,26 @@
  */
 package art.output;
 
-import art.dbutils.DbConnections;
-import art.runreport.ReportRunner;
+import art.dbutils.ArtDbUtils;
+import art.enums.ReportFormat;
+import art.enums.ReportType;
+import art.report.Report;
+import art.reportparameter.ReportParameter;
+import art.runreport.RunReportHelper;
 import art.servlets.ArtConfig;
-import art.utils.*;
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import net.sf.jxls.report.ReportManager;
+import java.util.Objects;
+import net.sf.jxls.exception.ParsePropertyException;
 import net.sf.jxls.transformer.XLSTransformer;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,211 +49,73 @@ import org.slf4j.LoggerFactory;
 public class JxlsOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(JxlsOutput.class);
-	String fullOutputFileName = "-No File";
-	String queryName;
-	String fileUserName;
-	String y_m_d;
-	String h_m_s;
-	String exportPath;
-	PrintWriter htmlout;
+	private ResultSet resultSet;
 
 	/**
-	 * Set html output object
-	 *
-	 * @param o html output object
+	 * @param resultSet the resultSet to set
 	 */
-	public void setWriter(PrintWriter o) {
-		htmlout = o;
+	public void setResultSet(ResultSet resultSet) {
+		this.resultSet = resultSet;
 	}
 
 	/**
-	 * Set the directory where the file is to be saved
+	 * Generate report output
 	 *
-	 * @param s directory where the file is to be saved
+	 * @param report
+	 * @param reportParams
+	 * @param reportType
+	 * @param reportFormat
+	 * @param outputFileName
+	 * @throws java.sql.SQLException
+	 * @throws java.io.IOException
+	 * @throws org.apache.poi.openxml4j.exceptions.InvalidFormatException
 	 */
-	public void setExportPath(String s) {
-		exportPath = s;
-	}
+	public void generateReport(Report report, List<ReportParameter> reportParams,
+			ReportType reportType, ReportFormat reportFormat, String outputFileName)
+			throws SQLException, ParsePropertyException, IOException, InvalidFormatException {
 
-	/**
-	 * Get the full filename where the output has been saved
-	 *
-	 * @return full filename where the output has been saved
-	 */
-	public String getFileName() {
-		return fullOutputFileName;
-	}
+		Objects.requireNonNull(report, "report must not be null");
+		Objects.requireNonNull(reportParams, "reportParams must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
 
-	/**
-	 * Set query name to be used in file name
-	 *
-	 * @param s query name to be used in file name
-	 */
-	public void setQueryName(String s) {
-		queryName = s;
-	}
-
-	/**
-	 * Set username to be used in file name
-	 *
-	 * @param s username to be used in file name
-	 */
-	public void setFileUserName(String s) {
-		fileUserName = s;
-	}
-
-	/**
-	 * Generate output and set final filename
-	 *
-	 * @param rs query resultset
-	 * @param queryId query id
-	 * @param inlineParams inline parameters
-	 * @param multiParams multi parameters
-	 */
-	public void createFile(ResultSet rs, int queryId, Map<String, String> inlineParams, Map<String, String[]> multiParams, Map<String, ArtQueryParam> htmlParams) {
-		Connection connQuery = null;
-		Connection connArt = null;
+		Connection conn = null;
 
 		try {
-			String templateFileName;
-			int datasourceId;
-			String querySql;
-
-			//get query datasource and template file name
-			connArt = ArtConfig.getConnection();
-			ArtQuery aq = new ArtQuery();
-			aq.create(connArt, queryId);
-			templateFileName = aq.getTemplate();
-			datasourceId = aq.getDatabaseId();
-			querySql = aq.getText();
-
+			String templateFileName = report.getTemplate();
 			String templatesPath = ArtConfig.getTemplatesPath();
 			String fullTemplateFileName = templatesPath + templateFileName;
 
-			String interactiveLink;
-
-			//only proceed if template file available
+			//check if template file exists
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
-				//template file doesn't exist.
-				logger.warn("Template file not found: {}", fullTemplateFileName);
+				throw new IllegalStateException("Template file not found: " + templateFileName);
+			}
 
-				fullOutputFileName = "-Template file not found";
+			//set objects to be passed to jxls
+			Map<String, Object> jxlsParams = new HashMap<>();
 
-				//display error message instead of link when running query interactively
-				interactiveLink = "Template file not found. Please contact the ART administrator.";
+			//pass query parameters
+			for (ReportParameter reportParam : reportParams) {
+				jxlsParams.put(reportParam.getParameter().getName(), reportParam.getActualParameterValues());
+			}
+
+			if (reportType == ReportType.JxlsTemplate) {
+				RunReportHelper runReportHelper = new RunReportHelper();
+				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
+				JxlsReportManager reportManager = new JxlsReportManager(conn);
+				jxlsParams.put("rm", reportManager);
 			} else {
-				//set objects to be passed to jxls
-				Map<String, Object> beans = new HashMap<String, Object>();
-
-				//process multi parameters to obtain parameter labels instead of parameter identifiers
-				HashMap<String, String> mParams = new HashMap<String, String>();
-				ReportRunner pq = new ReportRunner();
-				pq.setReportId(queryId);
-				pq.setMultiParams(multiParams);
-				mParams.putAll(pq.getJxlsMultiParams(querySql));
-
-				//pass parameters 
-				beans.putAll(inlineParams);
-				beans.putAll(mParams);
-
-				if (rs == null) {
-					//pass connection to template query
-
-					//use dynamic datasource if so configured
-					String dynamicDatasource = null; //id or name of dynamic datasource
-
-					if (htmlParams != null) {
-						for (Map.Entry<String, ArtQueryParam> entry : htmlParams.entrySet()) {
-							ArtQueryParam param = entry.getValue();
-							String paramDataType = param.getParamDataType();
-
-							if (StringUtils.equalsIgnoreCase(paramDataType, "DATASOURCE")) {
-								//get dynamic connection to use
-								Object paramValueObject = param.getParamValue();
-								if (paramValueObject != null) {
-									String paramValue = (String) paramValueObject;
-									if (StringUtils.isNotBlank(paramValue)) {
-										dynamicDatasource = paramValue;
-									}
-								}
-								break;
-							}
-						}
-					}
-
-					if (dynamicDatasource != null) {
-						if (NumberUtils.isNumber(dynamicDatasource)) {
-							//use datasource id
-							connQuery = DbConnections.getConnection(Integer.parseInt(dynamicDatasource));
-						} else {
-							//use datasource name
-							connQuery = DbConnections.getConnection(dynamicDatasource);
-						}
-					} else {
-						//not using dynamic datasource. use datasource defined on the query
-						connQuery = DbConnections.getConnection(datasourceId);
-					}
-					ReportManager reportManager = new ArtJxlsReportManager(connQuery);
-					beans.put("rm", reportManager);
-				} else {
-					//use recordset based on art query 
-					ArtJxlsResultSetCollection rsc = new ArtJxlsResultSetCollection(rs, false, true);
-					beans.put("results", rsc);
-				}
-
-				//Build output filename 
-				Calendar cal = Calendar.getInstance();
-				java.util.Date today = cal.getTime();
-
-				String dateFormat = "yyyy_MM_dd";
-				SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-				y_m_d = dateFormatter.format(today);
-
-				String timeFormat = "HH_mm_ss";
-				SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
-				h_m_s = timeFormatter.format(today);
-
-				String extension = "." + FilenameUtils.getExtension(templateFileName);
-
-				String fileName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString() + extension;
-				fileName = ArtUtils.cleanFileName(fileName); //replace characters that would make an invalid filename
-				fullOutputFileName = exportPath + fileName;
-
-				//generate output
-				XLSTransformer transformer = new XLSTransformer();
-				transformer.transformXLS(fullTemplateFileName, beans, fullOutputFileName);
-
-				interactiveLink = "<a type=\"application/octet-stream\" href=\"../export/" + fileName + "\"> "
-						+ fileName + "</a>";
+				//use recordset based on art query 
+				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, false, true); //use lowercase properties = false, use column labels =true
+				jxlsParams.put("results", rsdc.getRows());
 			}
 
-			//display link to access report if run interactively
-			if (htmlout != null) {
-				htmlout.println("<p><div align=\"center\"><table border=\"0\" width=\"90%\">");
-				htmlout.println("<tr><td colspan=\"2\" class=\"data\" align=\"center\" >"
-						+ interactiveLink
-						+ "</td></tr>");
-				htmlout.println("</table></div></p>");
-			}
-
-		} catch (Exception e) {
-			logger.error("Error", e);
-			if (htmlout != null) {
-				//display error message on browser
-				htmlout.println("<b>Error while generating report:</b> <p>" + e + "</p>");
-			}
+			//generate output
+			XLSTransformer transformer = new XLSTransformer();
+			transformer.transformXLS(fullTemplateFileName, jxlsParams, outputFileName);
 		} finally {
-			try {
-				if (connQuery != null) {
-					connQuery.close();
-				}
-				if (connArt != null) {
-					connArt.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
+ArtDbUtils.close(conn);
 		}
 	}
 }

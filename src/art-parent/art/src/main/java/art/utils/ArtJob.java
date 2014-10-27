@@ -1522,32 +1522,32 @@ public class ArtJob implements Job, Serializable {
 						JasperReportsOutput jasper = new JasperReportsOutput();
 //						jasper.setQueryName(queryName);
 //						jasper.setFileUserName(jobFileUsername);
-						jasper.setExportPath(jobsPath);
-						jasper.setReportFormat(outputFormat);
+//						jasper.setExportPath(jobsPath);
+//						jasper.setReportFormatString(outputFormat);
 
 						if (queryType == 115) {
 							//report will use query in the report template
-//							jasper.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
+//							jasper.generateReport(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						} else {
 							//report will use data from art query
-//							jasper.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
+//							jasper.generateReport(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
 						}
-						fileName = jasper.getFileName();
+//						fileName = jasper.getFileName();
 					} else if (queryType == 117 || queryType == 118) {
 						//jxls spreadsheet
 						JxlsOutput jxls = new JxlsOutput();
-						jxls.setQueryName(queryName);
-						jxls.setFileUserName(jobFileUsername);
-						jxls.setExportPath(jobsPath);
-
-						if (queryType == 117) {
-							//report will use query in the jxls template
-							jxls.createFile(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
-						} else {
-							//report will use data from art query
-							jxls.createFile(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
-						}
-						fileName = jxls.getFileName();
+//						jxls.setQueryName(queryName);
+//						jxls.setFileUserName(jobFileUsername);
+//						jxls.setExportPath(jobsPath);
+//
+//						if (queryType == 117) {
+//							//report will use query in the jxls template
+//							jxls.generateReport(null, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
+//						} else {
+//							//report will use data from art query
+//							jxls.generateReport(rs, queryId, pq.getInlineParams(), pq.getMultiParams(), htmlParams);
+//						}
+//						fileName = jxls.getFileName();
 					} else {
 						ReportOutputInterface o;
 
@@ -2748,9 +2748,9 @@ public class ArtJob implements Job, Serializable {
 							} else {
 								dateFormat = "yyyy-MM-dd HH:mm:ss";
 							}
-							java.util.Date defaultDate = ReportRunner.getDefaultValueDate(value);
-							SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-							value = dateFormatter.format(defaultDate);
+//							java.util.Date defaultDate = ReportRunner.getDefaultValueDate(value);
+//							SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+//							value = dateFormatter.format(defaultDate);
 
 							//update inline param
 							inlineParams.put(label, value);
@@ -2904,9 +2904,9 @@ public class ArtJob implements Job, Serializable {
 		pq.setUsername(user);
 		pq.setReportId(qId);
 		pq.setAdminSession(false);
-		pq.setInlineParams(inlineParams);
-		pq.setMultiParams(multiParams);
-		pq.setHtmlParams(htmlParams);
+//		pq.setInlineParams(inlineParams);
+//		pq.setMultiParams(multiParams);
+//		pq.setHtmlParams(htmlParams);
 
 		logger.debug("Job Id {}. prepare() finished", jobId);
 

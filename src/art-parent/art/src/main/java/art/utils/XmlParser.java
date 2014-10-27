@@ -1,19 +1,18 @@
-/**
+/*
  * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
  * Very simple and minimal implementation of a XML Parser (parse just ELEMENTS
@@ -38,9 +37,8 @@ public class XmlParser {
 	 * @param xml
 	 * @param element
 	 * @return the text between a given element in a xml string
-	 * @throws ArtException
 	 */
-	public static String getXmlElementValue(String xml, String element) throws ArtException {
+	public static String getXmlElementValue(String xml, String element) {
 
 		String value = null; //return null if start element not found
 
@@ -56,7 +54,7 @@ public class XmlParser {
 
 			// Validate end element
 			if ((end == -1) || (end < start)) {
-				throw new ArtException("End element not found: &lt;/" + element + "&gt;");
+				throw new RuntimeException("End element not found: " + element);
 			}
 
 			// Extract value
@@ -74,9 +72,8 @@ public class XmlParser {
 	 * @param element
 	 * @return list (of strings) with the values between a given element in a
 	 * xml string
-	 * @throws ArtException
 	 */
-	public static List<String> getXmlElementValues(String xml, String element) throws ArtException {
+	public static List<String> getXmlElementValues(String xml, String element) {
 
 		String xmlString = xml;
 		List<String> values = new ArrayList<String>();
@@ -92,7 +89,7 @@ public class XmlParser {
 
 			// validate end element
 			if ((end == -1) || (end < start)) {
-				throw new ArtException("End element not found: &lt;/" + element + "&gt;");
+				throw new RuntimeException("End element not found: " + element);
 			}
 
 			// extract the substring
@@ -113,9 +110,8 @@ public class XmlParser {
 	 * @param offset
 	 * @return XmlInfo object that contains the text between a given element in
 	 * an xml string
-	 * @throws ArtException
 	 */
-	public static XmlInfo getXmlElementInfo(String xml, String element, int offset) throws ArtException {
+	public static XmlInfo getXmlElementInfo(String xml, String element, int offset) {
 
 		XmlInfo info = null;
 
@@ -130,7 +126,7 @@ public class XmlParser {
 
 			// validate end element
 			if ((end == -1) || (end < start)) {
-				throw new ArtException("End element not found: &lt;/" + element + "&gt;");
+				throw new RuntimeException("End element not found: " + element);
 			}
 
 			info = new XmlInfo(xml.substring(start + startElement.length()), start, end);

@@ -1,6 +1,6 @@
 package art.artdatabase;
 
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.enums.ConnectionPoolLibrary;
 import art.servlets.ArtConfig;
 import art.utils.ArtUtils;
@@ -157,7 +157,7 @@ public class ArtDatabaseController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		} finally {
-			DbUtils.close(ps, conn);
+ArtDbUtils.close(ps, conn);
 		}
 
 		return "artDatabase";

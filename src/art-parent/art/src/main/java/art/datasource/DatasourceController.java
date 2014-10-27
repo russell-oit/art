@@ -18,7 +18,7 @@ package art.datasource;
 
 import art.artdatabase.ArtDatabase;
 import art.dbutils.DbConnections;
-import art.dbutils.DbUtils;
+import art.dbutils.ArtDbUtils;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.ActionResult;
@@ -317,7 +317,7 @@ public class DatasourceController {
 				conn = DriverManager.getConnection(url, username, password);
 			}
 		} finally {
-			DbUtils.close(conn);
+ArtDbUtils.close(conn);
 		}
 	}
 

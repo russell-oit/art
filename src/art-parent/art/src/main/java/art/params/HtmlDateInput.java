@@ -84,9 +84,9 @@ public class HtmlDateInput implements ParamInterface {
         }
 
         //convert default value to a valid date string
-        Date defaultDate = ReportRunner.getDefaultValueDate(defaultValue);
-        SimpleDateFormat dateFormatter = new SimpleDateFormat(defaultDateFormat);
-        this.defaultValue = dateFormatter.format(defaultDate);
+//        Date defaultDate = ReportRunner.getDefaultValueDate(defaultValue);
+//        SimpleDateFormat dateFormatter = new SimpleDateFormat(defaultDateFormat);
+//        this.defaultValue = dateFormatter.format(defaultDate);
     }
 	
 	@Override

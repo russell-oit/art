@@ -21,6 +21,8 @@ import art.enums.ParameterType;
 import art.parameter.Parameter;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
+import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportOptions;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -61,7 +63,7 @@ public class ParameterProcessor {
 	 * populated report parameter object
 	 * @throws java.sql.SQLException
 	 */
-	public Map<String, ReportParameter> processHttpParameters(
+	public ParameterProcessorResult processHttpParameters(
 			HttpServletRequest request, int reportId) throws SQLException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
@@ -90,12 +92,12 @@ public class ParameterProcessor {
 	 * value is populated report parameter object
 	 * @throws java.sql.SQLException
 	 */
-	public Map<String, ReportParameter> process(Map<String, String[]> passedValuesMap,
+	public ParameterProcessorResult process(Map<String, String[]> passedValuesMap,
 			int reportId) throws SQLException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
-		Map<String, ReportParameter> reportParams = new HashMap<>();
+		Map<String, ReportParameter> reportParamsMap = new HashMap<>();
 
 		//get list of all defined report parameters
 		ReportParameterService reportParameterService = new ReportParameterService();
@@ -105,15 +107,20 @@ public class ParameterProcessor {
 			Parameter param = reportParam.getParameter();
 
 			//build map for easier lookup
-			reportParams.put(param.getName(), reportParam);
+			reportParamsMap.put(param.getName(), reportParam);
 		}
 
-		setPassedParameterValues(passedValuesMap, reportParams);
+		setPassedParameterValues(passedValuesMap, reportParamsMap);
 
 		//set actual values to be used when running the query
 		setActualParameterValues(reportParamsList);
 
-		return reportParams;
+		ParameterProcessorResult result = new ParameterProcessorResult();
+		result.setReportParamsList(reportParamsList);
+		result.setReportParamsMap(reportParamsMap);
+		result.setReportOptions(processReportOptions(passedValuesMap));
+
+		return result;
 	}
 
 	private void setPassedParameterValues(Map<String, String[]> passedValuesMap, Map<String, ReportParameter> reportParams) {
@@ -160,7 +167,6 @@ public class ParameterProcessor {
 			logger.debug("param={}", param);
 
 			String[] passedValues = reportParam.getPassedParameterValues();
-			List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
 
 			if (param.getParameterType() == ParameterType.SingleValue) {
 				String actualValueString;
@@ -173,8 +179,7 @@ public class ParameterProcessor {
 
 				//convert string value to appropriate object
 				Object actualValue = convertParameterValue(actualValueString, param.getDataType());
-				actualValues.add(actualValue);
-				reportParam.setActualParameterValues(actualValues);
+				reportParam.setActualParameterValues(actualValue);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
 				List<String> actualValueStrings = new ArrayList<>();
 				if (passedValues == null) {
@@ -188,8 +193,9 @@ public class ParameterProcessor {
 					actualValueStrings.addAll(Arrays.asList(passedValues));
 				}
 
+				List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
 				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
-					//use all values
+					//TODO use all values
 				} else {
 					for (String actualValueString : actualValueStrings) {
 						//convert string value to appropriate object
@@ -212,6 +218,27 @@ public class ParameterProcessor {
 		} else {
 			//parameter data types that are treated as strings
 			return value;
+		}
+	}
+
+	private Object convertParameterValueToNumber(String value, ParameterDataType paramDataType) {
+		String usedValue;
+		if (StringUtils.isBlank(value)) {
+			usedValue = "0";
+		} else {
+			usedValue = value;
+		}
+
+		switch (paramDataType) {
+			case Integer:
+				return Integer.valueOf(usedValue);
+			case Number:
+				return Double.valueOf(usedValue);
+			case Datasource:
+				return Integer.valueOf(usedValue);
+			default:
+				logger.warn("Unknown numeric parameter data type - {}. Defaulting to integer.", paramDataType);
+				return Integer.valueOf(usedValue);
 		}
 	}
 
@@ -271,25 +298,26 @@ public class ParameterProcessor {
 
 	}
 
-	private Object convertParameterValueToNumber(String value, ParameterDataType paramDataType) {
-		String usedValue;
-		if (StringUtils.isBlank(value)) {
-			usedValue = "0";
-		} else {
-			usedValue = value;
+	private ReportOptions processReportOptions(Map<String, String[]> passedValuesMap) {
+		ReportOptions reportOptions = new ReportOptions();
+
+		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
+			String htmlParamName = entry.getKey();
+			String[] paramValues = entry.getValue();
+			logger.debug("htmlParamName='{}'", htmlParamName);
+
+			if (paramValues != null) {
+				String paramValue = paramValues[0];
+				
+				if (StringUtils.equalsIgnoreCase(htmlParamName, "showParams")) {
+					reportOptions.setShowParameters(Boolean.valueOf(paramValue));
+				}
+				
+				//TODO process other params
+			}
 		}
 
-		switch (paramDataType) {
-			case Integer:
-				return Integer.valueOf(usedValue);
-			case Number:
-				return Double.valueOf(usedValue);
-			case Datasource:
-				return Integer.valueOf(usedValue);
-			default:
-				logger.warn("Unknown numeric parameter data type - {}. Defaulting to integer.", paramDataType);
-				return Integer.valueOf(usedValue);
-		}
+		return reportOptions;
 	}
 
 }

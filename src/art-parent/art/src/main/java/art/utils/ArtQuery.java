@@ -1137,15 +1137,15 @@ public class ArtQuery {
 				currentRule = rs.getString("RULE_NAME");
 				columnDataType = rs.getString("FIELD_DATA_TYPE");
 				ReportRunner pq = new ReportRunner();
-				tmpSb = pq.getRuleValues(conn, username, currentRule, 1, columnDataType);
-				if (tmpSb != null) {
-					String s = tmpSb.toString();
-					if (StringUtils.length(s) > 1) {
-						//user has some rule values
-						//actual values start from second character. first character is a comma (,)
-						roles = s.substring(1); 
-					}
-				}
+//				tmpSb = pq.getRuleValues(conn, username, currentRule, 1, columnDataType);
+//				if (tmpSb != null) {
+//					String s = tmpSb.toString();
+//					if (StringUtils.length(s) > 1) {
+//						//user has some rule values
+//						//actual values start from second character. first character is a comma (,)
+//						roles = s.substring(1); 
+//					}
+//				}
 			}
 			rs.close();
 		} catch (Exception e) {

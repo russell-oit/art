@@ -30,9 +30,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class DbUtils {
+public class ArtDbUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(DbUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(ArtDbUtils.class);
 
 	/**
 	 * Close resultset
@@ -149,9 +149,9 @@ public class DbUtils {
 	public static java.sql.Date toSqlDate(java.util.Date date) {
 		if (date == null) {
 			return null;
+		} else {
+			return new java.sql.Date(date.getTime());
 		}
-
-		return new java.sql.Date(date.getTime());
 	}
 
 	/**
@@ -163,9 +163,9 @@ public class DbUtils {
 	public static java.sql.Timestamp toSqlTimestamp(java.util.Date date) {
 		if (date == null) {
 			return null;
+		} else {
+			return new java.sql.Timestamp(date.getTime());
 		}
-
-		return new java.sql.Timestamp(date.getTime());
 	}
 
 	/**

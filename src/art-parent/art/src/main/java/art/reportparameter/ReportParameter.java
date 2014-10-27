@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
@@ -38,14 +38,14 @@ public class ReportParameter implements Serializable {
 	private int position;
 	private String[] passedParameterValues; //used for run report logic
 	private Map<String, String> lovValues; //store value and label for lov parameters
-	private List<Object> actualParameterValues;
+	private Object actualParameterValues;
 
 	/**
 	 * Get the value of actualParameterValues
 	 *
 	 * @return the value of actualParameterValues
 	 */
-	public List<Object> getActualParameterValues() {
+	public Object getActualParameterValues() {
 		return actualParameterValues;
 	}
 
@@ -54,7 +54,7 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @param actualParameterValues new value of actualParameterValues
 	 */
-	public void setActualParameterValues(List<Object> actualParameterValues) {
+	public void setActualParameterValues(Object actualParameterValues) {
 		this.actualParameterValues = actualParameterValues;
 	}
 

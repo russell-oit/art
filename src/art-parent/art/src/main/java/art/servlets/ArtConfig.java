@@ -285,9 +285,6 @@ public class ArtConfig extends HttpServlet {
 			return;
 		}
 
-		//create quartz scheduler
-		createQuartzScheduler();
-
 		try {
 			//create connection pools
 			DbConnections.createConnectionPools(artDbConfig);
@@ -299,6 +296,9 @@ public class ArtConfig extends HttpServlet {
 		} catch (NamingException | SQLException ex) {
 			logger.error("Error", ex);
 		}
+		
+		//create quartz scheduler
+		createQuartzScheduler();
 
 	}
 
