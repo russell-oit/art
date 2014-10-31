@@ -18,7 +18,6 @@
 package art.output;
 
 import art.dbutils.ArtDbUtils;
-import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
@@ -64,19 +63,17 @@ public class JxlsOutput {
 	 * @param report
 	 * @param reportParams
 	 * @param reportType
-	 * @param reportFormat
 	 * @param outputFileName
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 * @throws org.apache.poi.openxml4j.exceptions.InvalidFormatException
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ReportType reportType, ReportFormat reportFormat, String outputFileName)
+			ReportType reportType, String outputFileName)
 			throws SQLException, ParsePropertyException, IOException, InvalidFormatException {
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(reportParams, "reportParams must not be null");
-		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
 
 		Connection conn = null;
@@ -115,7 +112,7 @@ public class JxlsOutput {
 			XLSTransformer transformer = new XLSTransformer();
 			transformer.transformXLS(fullTemplateFileName, jxlsParams, outputFileName);
 		} finally {
-ArtDbUtils.close(conn);
+			ArtDbUtils.close(conn);
 		}
 	}
 }

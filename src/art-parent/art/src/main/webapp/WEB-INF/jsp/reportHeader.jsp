@@ -3,7 +3,7 @@
     Created on : 29-May-2014, 17:39:27
     Author     : Timothy Anyona
 
-Header section of report output for html output reports
+Display report info and report generation progress
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

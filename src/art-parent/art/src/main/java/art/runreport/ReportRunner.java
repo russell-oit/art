@@ -23,7 +23,6 @@ import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.ArtConfig;
 import art.utils.ArtException;
-import art.utils.ArtQueryParam;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
 import java.sql.Connection;
@@ -229,7 +228,7 @@ public class ReportRunner {
 	 * Process the report source and apply tags, dynamic sql and parameters
 	 */
 	private void processReportSource() {
-		
+
 		//update querySb with report sql
 		querySb.replace(0, querySb.length(), report.getReportSource());
 
@@ -269,6 +268,7 @@ public class ReportRunner {
 				ParameterDataType paramDataType = reportParam.getParameter().getDataType();
 
 				if (paramValue instanceof List) {
+					@SuppressWarnings("rawtypes")
 					List paramValues = (List) paramValue;
 					for (Object value : paramValues) {
 						addJdbcParam(value, paramDataType);
@@ -304,6 +304,7 @@ public class ReportRunner {
 
 			Object paramValue = reportParam.getActualParameterValues();
 			if (paramValue instanceof List) {
+				@SuppressWarnings("rawtypes")
 				List paramValues = (List) paramValue;
 				replaceString = Matcher.quoteReplacement(StringUtils.repeat("?", ",", paramValues.size())); //quote in case it contains special regex characters
 			} else {
@@ -365,7 +366,7 @@ public class ReportRunner {
 	 * execute overload with a default resultset type
 	 *
 	 */
-	public void execute() {
+	public void execute() throws SQLException {
 		execute(ResultSet.TYPE_FORWARD_ONLY);
 	}
 
@@ -373,7 +374,7 @@ public class ReportRunner {
 	 * execute overload with a given resultset type
 	 *
 	 */
-	public void execute(int resultSetType) {
+	public void execute(int resultSetType) throws SQLException {
 		execute(resultSetType, false, false);
 	}
 
@@ -381,7 +382,7 @@ public class ReportRunner {
 	 * execute overload with use rules setting
 	 *
 	 */
-	public void execute(boolean newUseRules) {
+	public void execute(boolean newUseRules) throws SQLException {
 		execute(ResultSet.TYPE_FORWARD_ONLY, true, newUseRules);
 	}
 
@@ -390,7 +391,7 @@ public class ReportRunner {
 	 *
 	 * @param resultSetType
 	 */
-	public void execute(int resultSetType, boolean overrideUseRules, boolean newUseRules) {
+	public void execute(int resultSetType, boolean overrideUseRules, boolean newUseRules) throws SQLException {
 
 		reportTypeId = report.getReportTypeId();
 		displayResultset = report.getDisplayResultset();
@@ -412,25 +413,20 @@ public class ReportRunner {
 			return;
 		}
 
-		try {
-			//use dynamic datasource if so configured
-			RunReportHelper runReportHelper = new RunReportHelper();
-			connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
+		//use dynamic datasource if so configured
+		RunReportHelper runReportHelper = new RunReportHelper();
+		connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
 
-			String querySql = querySb.toString();
+		String querySql = querySb.toString();
 
-			Object[] paramValues = jdbcParams.toArray(new Object[0]);
-			finalSql = generateFinalSql(querySql, paramValues);
+		Object[] paramValues = jdbcParams.toArray(new Object[0]);
+		finalSql = generateFinalSql(querySql, paramValues);
 
-			psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
+		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
-			ArtDbUtils.setValues(psQuery, paramValues);
+		ArtDbUtils.setValues(psQuery, paramValues);
 
-			psQuery.execute();
-
-		} catch (SQLException ex) {
-			throw new RuntimeException("Error while running report", ex);
-		}
+		psQuery.execute();
 	}
 
 	/**

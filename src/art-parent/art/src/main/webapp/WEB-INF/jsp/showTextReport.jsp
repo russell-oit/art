@@ -1,9 +1,9 @@
 <%-- 
-    Document   : reportError
-    Created on : 22-May-2014, 10:16:08
+    Document   : showTextReport
+    Created on : 28-Oct-2014, 11:23:49
     Author     : Timothy Anyona
 
-Page to display if error occurs in run report controller
+display text report output
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -16,10 +16,12 @@ Page to display if error occurs in run report controller
 <t:mainPage title="${reportName}">
 	<jsp:body>
 		<c:if test="${not empty reportName}">
-		<div class="reportBanner">
-			<encode:forHtmlContent value="${reportName}"/>
-		</div>
+			<div class="reportBanner">
+				<encode:forHtmlContent value="${reportName}"/>
+			</div>
 		</c:if>
-		<jsp:include page="/WEB-INF/jsp/reportErrorInline.jsp"/>
+		<div id="reportOutput" class="col-md-10 col-md-offset-1">
+			<jsp:include page="/WEB-INF/jsp/showTextInline.jsp"/>
+		</div>
 	</jsp:body>
 </t:mainPage>

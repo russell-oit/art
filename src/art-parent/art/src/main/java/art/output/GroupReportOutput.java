@@ -20,25 +20,23 @@ package art.output;
 import java.io.PrintWriter;
 
 /**
- * Generate "Group: n columns" (grouped) reports
+ * Generate "Group: n columns" reports
  * 
  * @author Enrico Liboni
  */
-public class htmlReportOutWriter {
+public class GroupReportOutput {
 
     PrintWriter out;
-    StringBuffer mainHeader; // temporary string used to store Main Header Values     
-    StringBuffer subHeader;  // temporary string used to store Sub  Header Values
+    StringBuilder mainHeader=new StringBuilder();; // temporary string used to store Main Header Values     
+    StringBuilder subHeader=new StringBuilder();;  // temporary string used to store Sub  Header Values
 
     /**
      * Constructor. Set the output object
      * 
-     * @param o output object
+     * @param htmlWriter output object
      */
-    public htmlReportOutWriter(PrintWriter o) {
-        out = o;
-        mainHeader = new StringBuffer();
-        subHeader = new StringBuffer();
+    public GroupReportOutput(PrintWriter htmlWriter) {
+        out = htmlWriter;
     }
 
     /**

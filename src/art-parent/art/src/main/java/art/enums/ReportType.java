@@ -27,8 +27,8 @@ import java.util.List;
  */
 public enum ReportType {
 
-	//group reports (1-99) are too many to list
-	Tabular(0), TabularHtml(103),
+	//group reports (1-99) are too many to list. just have one as a placeholder
+	Tabular(0), Group(1), TabularHtml(103),
 	Update(100), Crosstab(101), CrosstabHtml(102),
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
@@ -42,7 +42,35 @@ public enum ReportType {
 	private ReportType(int value) {
 		this.value = value;
 	}
-	
+
+	/**
+	 * Determine if this report type uses sql queries
+	 *
+	 * @return
+	 */
+	public boolean usesSqlQuery() {
+		if (this == Dashboard || this == Text || this.isOlap()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Determine if this is an lov report type
+	 *
+	 * @return
+	 */
+	public boolean isLov() {
+		switch (this) {
+			case LovDynamic:
+			case LovStatic:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	/**
 	 * Determine if this is a jasper reports type
 	 *
@@ -68,20 +96,23 @@ public enum ReportType {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Returns true if this is an olap report type
 	 *
 	 * @return
 	 */
 	public boolean isOlap() {
-		if (this == Mondrian || this == MondrianXmla || this==SqlServerXmla) {
-			return true;
-		} else {
-			return false;
+		switch (this) {
+			case Mondrian:
+			case MondrianXmla:
+			case SqlServerXmla:
+				return true;
+			default:
+				return false;
 		}
 	}
-	
+
 	/**
 	 * Determine if this is a crosstab type
 	 *
@@ -89,19 +120,6 @@ public enum ReportType {
 	 */
 	public boolean isCrosstab() {
 		if (this == Crosstab || this == CrosstabHtml) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Determine if this is a group report
-	 *
-	 * @return
-	 */
-	public boolean isGroupReport() {
-		if (value >= 1 && value <= 99) {
 			return true;
 		} else {
 			return false;
@@ -118,6 +136,25 @@ public enum ReportType {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	/**
+	 * Determine if this is a direct output report
+	 *
+	 * @return
+	 */
+	public boolean isDirectOutput() {
+		switch (this) {
+			case Tabular:
+			case TabularHtml:
+			case Crosstab:
+			case CrosstabHtml:
+			case LovDynamic:
+			case LovStatic:
+				return true;
+			default:
+				return false;
 		}
 	}
 
@@ -166,6 +203,11 @@ public enum ReportType {
 				return v;
 			}
 		}
+
+		if (value >= 1 && value <= 99) {
+			return Group;
+		}
+
 		return defaultEnum;
 	}
 

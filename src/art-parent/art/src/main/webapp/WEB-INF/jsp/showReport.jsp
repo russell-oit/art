@@ -46,7 +46,7 @@ Display report parameters and initiate running of report
 								//callback funtion for when jquery load has finished
 
 								if (statusText === "success") {
-									//make htmlgrid output sortable
+									//TODO make htmlgrid output sortable
 
 								} else if (statusText === "error") {
 									bootbox.alert("<b>${errorOccurredText}</b><br>"
@@ -60,6 +60,7 @@ Display report parameters and initiate running of report
 
 				});
 				
+				//immediately run query inline
 //				$("#runInline").click();
 
 

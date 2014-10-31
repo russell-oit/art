@@ -45,6 +45,19 @@ public enum ReportFormat {
 	public String getValue() {
 		return value;
 	}
+	
+	public boolean isHtml(){
+		switch(this){
+			case html:
+			case htmlDataTable:
+			case htmlFancy:
+			case htmlGrid:
+			case htmlPlain:
+				return true;
+			default:
+				return false;
+		}
+	}
 
 	public String getFilenameExtension() {
 		switch (this) {
