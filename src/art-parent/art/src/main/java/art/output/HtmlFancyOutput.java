@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class HtmlFancyOutput implements ReportOutputInterface {
+public class HtmlFancyOutput implements ReportOutputInterface,DirectReportOutput {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -39,6 +39,7 @@ public class HtmlFancyOutput implements ReportOutputInterface {
 	NumberFormat nfPlain;
 	boolean oddline = true;
 	Map<Integer, ArtQueryParam> displayParams;
+	private String contextPath;
 
 	/**
 	 * Constructor
@@ -105,7 +106,7 @@ public class HtmlFancyOutput implements ReportOutputInterface {
 		//display parameters
 //		ReportOutputHandler.displayParameters(out, displayParams);
 		
-		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlFancyOutput.css\">");
+		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\""+contextPath +"/css/htmlFancyOutput.css\">");
 
 		//start results table
 		out.println("<div style=\"border: 3px solid white\"><table class=\"qe\" width=\"80%\"><tr>"); // cellspacing=\"1\" cellpadding=\"0\"
@@ -187,5 +188,10 @@ public class HtmlFancyOutput implements ReportOutputInterface {
 	@Override
 	public boolean isShowQueryHeaderAndFooter() {
 		return true;
+	}
+
+	@Override
+	public void setContextPath(String contextPath) {
+		this.contextPath=contextPath;
 	}
 }

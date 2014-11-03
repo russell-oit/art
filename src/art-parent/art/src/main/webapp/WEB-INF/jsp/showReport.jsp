@@ -34,6 +34,8 @@ Display report parameters and initiate running of report
 
 				$("#runInline").click(function(e) {
 					e.preventDefault();
+					
+					$("#showInline").val("true");
 
 					var $form = $(this).closest('form');
 

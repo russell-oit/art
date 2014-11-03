@@ -3,7 +3,8 @@
     Created on : 30-May-2014, 16:32:13
     Author     : Timothy Anyona
 
-Footer section of report output for html output reports
+Display info about a report that has been run
+e.g number of records retrieved and time taken to run the report
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

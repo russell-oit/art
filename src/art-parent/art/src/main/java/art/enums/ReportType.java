@@ -48,8 +48,9 @@ public enum ReportType {
 	 *
 	 * @return
 	 */
-	public boolean usesSqlQuery() {
-		if (this == Dashboard || this == Text || this.isOlap()) {
+	public boolean usesSql() {
+		if (this == Dashboard || this == Text || this.isOlap()
+				|| this == LovStatic) {
 			return false;
 		} else {
 			return true;

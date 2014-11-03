@@ -28,6 +28,7 @@ import art.graph.ArtSpeedometer;
 import art.graph.ArtTimeSeries;
 import art.graph.ArtXY;
 import art.graph.ArtXYZChart;
+import art.output.DirectReportOutput;
 import art.output.DirectReportOutputHandler;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlPlainOutput;
@@ -174,19 +175,6 @@ public class RunReportController {
 				response.setHeader("Cache-control", "no-cache");
 			}
 
-			//deal with report types that generate output elsewhere
-			if (reportType == ReportType.Dashboard) {
-				// forward to the showDashboard page
-//			ctx.getRequestDispatcher("/user/showDashboard.jsp").forward(request, response);
-//			return; // a return is needed otherwise the flow would proceed!
-				return "showDashboard";
-			} else if (reportType.isOlap()) {
-				// forward to the showAnalysis page
-//			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
-//			return; // a return is needed otherwise the flow would proceed!
-				return "showAnalysis";
-			}
-
 			//get report format to use
 			String reportFormatString = request.getParameter("reportFormat");
 			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
@@ -240,6 +228,7 @@ public class RunReportController {
 			//output page header. if showInline, page header and footer already exist. 
 			if (!showInline) {
 				request.setAttribute("title", reportName);
+				request.setAttribute("reportFormat", reportFormat.getValue());
 				ctx.getRequestDispatcher("/WEB-INF/jsp/headerFragment.jsp").include(request, response);
 				out.flush();
 			}
@@ -247,7 +236,23 @@ public class RunReportController {
 			long totalTime = 0;
 			long fetchTime = 0;
 
-			if (reportType.usesSqlQuery()) {
+			if (reportType == ReportType.Text) {
+				//http://jsoup.org/apidocs/org/jsoup/safety/Whitelist.html
+				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
+				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
+				request.setAttribute("reportSource", cleanSource);
+				ctx.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
+			} else if (reportType == ReportType.Dashboard) {
+				// forward to the showDashboard page
+//			ctx.getRequestDispatcher("/user/showDashboard.jsp").forward(request, response);
+//			return; // a return is needed otherwise the flow would proceed!
+				return "showDashboard";
+			} else if (reportType.isOlap()) {
+				// forward to the showAnalysis page
+//			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
+//			return; // a return is needed otherwise the flow would proceed!
+				return "showAnalysis";
+			} else {
 				//output report header
 				if (showReportHeaderAndFooter) {
 					request.setAttribute("reportName", reportName);
@@ -370,8 +375,10 @@ public class RunReportController {
 
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
+					
+					String reportInfo="<b>" + reportName + "</b>" + description + " :: " + startTimeString;
 
-					out.println("<script type=\"text/javascript\">displayReportInfo(\"<b>" + reportName + "</b>" + description + " :: " + startTimeString + "\");</script>");
+					displayReportInfo(out, reportInfo);
 
 					displayReportProgress(out, messageSource.getMessage("reports.message.fetchingData", null, locale));
 
@@ -441,21 +448,16 @@ public class RunReportController {
 
 					rowsRetrieved = DirectReportOutputHandler.generateGroupReport(out, rs, splitCol);
 				} else if (reportType.isChart()) {
-					ResultSetMetaData rsmd = rs.getMetaData();
-					String shortDescription = report.getShortDescription();
-					String xAxisLabel = report.getxAxisLabel();
-					String yAxisLabel = report.getyAxisLabel();
-					String graphOptions = report.getChartOptionsSetting();
+					rs = reportRunner.getResultSet();
 
 					//do initial preparation of graph object
-					ArtGraph ag = prepareChartDetails(rsmd, request, graphOptions, shortDescription, reportTypeId);
+					ArtGraph ag = prepareChartDetails(rs, request, report);
 
-					//set some graph properties
-					ag.setXAxisLabel(xAxisLabel);
-					if (yAxisLabel == null) {
-						yAxisLabel = rsmd.getColumnLabel(1);
+					//set other properties relevant for the graph display
+					if (showSql) {
+						request.setAttribute("showSQL", "true");
+						request.setAttribute("finalSQL", finalSql);
 					}
-					ag.setYAxisLabel(yAxisLabel);
 
 					if (showParams) {
 						request.setAttribute("showParams", "true");
@@ -466,12 +468,7 @@ public class RunReportController {
 					Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(reportId);
 
 					//build graph dataset
-//							ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
-					//set other properties relevant for the graph display
-					if (showSql) {
-						request.setAttribute("showSQL", "true");
-						request.setAttribute("finalSQL", finalSql);
-					}
+					ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
 
 					//enable file names to contain query name
 					//set base file name
@@ -488,7 +485,7 @@ public class RunReportController {
 					request.setAttribute("queryId", Integer.valueOf(reportId));
 
 					//pass graph object
-					request.setAttribute("artGraph", ag);
+					request.setAttribute("artGraph", o);
 
 					//graph. set output format and forward to the rendering page
 					if (StringUtils.equalsIgnoreCase(reportFormatString, "graph")) {
@@ -537,6 +534,11 @@ public class RunReportController {
 							HtmlDataTableOutput dt = (HtmlDataTableOutput) o;
 							dt.setLocale(request.getLocale());
 						}
+						
+						if(o instanceof DirectReportOutput){
+							DirectReportOutput dro=(DirectReportOutput)o;
+							dro.setContextPath(request.getContextPath());
+						}
 
 					}
 
@@ -561,7 +563,7 @@ public class RunReportController {
 						return errorPage;
 					}
 				} else {
-					throw new RuntimeException("Unknown report type: " + reportType.getValue());
+					throw new RuntimeException("Unexpected report type: " + reportType);
 				}
 
 				// Print the "working" time elapsed
@@ -596,15 +598,10 @@ public class RunReportController {
 					//clear report progress
 					displayReportProgress(out, "");
 				}
-			} else if (reportType == ReportType.Text) {
-				//http://jsoup.org/apidocs/org/jsoup/safety/Whitelist.html
-				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
-				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
-				request.setAttribute("reportSource", cleanSource);
-				ctx.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
 			}
 
 			if (!showInline) {
+				request.setAttribute("reportFormat", reportFormat.getValue());
 				ctx.getRequestDispatcher("/WEB-INF/jsp/footerFragment.jsp").include(request, response);
 			}
 
@@ -629,30 +626,41 @@ public class RunReportController {
 	}
 
 	//prepare chart object and options for generation and display
-	private ArtGraph prepareChartDetails(ResultSetMetaData rsmd, HttpServletRequest request,
-			String graphOptions, String shortDescr, int queryType) throws SQLException {
+	private ArtGraph prepareChartDetails(ResultSet rs, HttpServletRequest request,
+			Report report) throws SQLException {
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+
+		String shortDescription = report.getShortDescription();
+		String xAxisLabel = report.getxAxisLabel();
+		String yAxisLabel = report.getyAxisLabel();
+		String graphOptions = report.getChartOptionsSetting();
+
+		ReportType chartType = ReportType.toEnum(report.getReportTypeId());
+
+		int queryType = report.getReportTypeId();
 
 		ArtGraph o;
 
-		switch (queryType) {
-			case -1:
+		switch (chartType) {
+			case XY:
 				o = new ArtXY();
 				break;
-			case -2:
-			case -13:
+			case Pie2D:
+			case Pie3D:
 				o = new ArtPie();
 				break;
-			case -6:
+			case TimeSeries:
 				o = new ArtTimeSeries();
 				break;
-			case -7:
+			case DateSeries:
 				o = new ArtDateSeries();
 				break; //  this line was missing... added thanks to anonymous post in sf
-			case -10:
+			case Speedometer:
 				o = new ArtSpeedometer();
 				break;
-			case -11:
-			case -12:
+			case Bubble:
+			case Heatmap:
 				o = new ArtXYZChart();
 				o.setQueryType(queryType);
 				break;
@@ -684,10 +692,10 @@ public class RunReportController {
 		String options = "";
 		boolean usingShortDescription = true; //to accomodate graph options in short description string for art pre-2.0
 
-		int indexOf = shortDescr.lastIndexOf("@");
+		int indexOf = shortDescription.lastIndexOf("@");
 		if (indexOf > -1) {
-			options = shortDescr;
-			shortDescr = shortDescr.substring(0, indexOf);
+			options = shortDescription;
+			shortDescription = shortDescription.substring(0, indexOf);
 		}
 
 		if (graphOptions != null) {
@@ -766,14 +774,22 @@ public class RunReportController {
 			}
 		}
 
-		o.setTitle(shortDescr);
+		o.setTitle(shortDescription);
 		o.setWidth(width);
 		o.setHeight(height);
 		o.setSeriesName(rsmd.getColumnLabel(2));
 		o.setBgColor(bgColor);
 		o.setShowGraphData(showGraphData);
 
+		//set some graph properties
+		o.setXAxisLabel(xAxisLabel);
+		if (yAxisLabel == null) {
+			yAxisLabel = rsmd.getColumnLabel(1);
+		}
+		o.setYAxisLabel(yAxisLabel);
+
 		return o;
+
 	}
 
 	//get number of rows in a resultset.
@@ -800,10 +816,14 @@ public class RunReportController {
 	}
 
 	private void displayReportProgress(PrintWriter out, String message) {
-		out.println("<script type='text/javascript'>displayReportProgress('"
-				+ message
-				+ "');</script>");
+		out.println("<script type='text/javascript'>$('reportProgress').html('"
+				+ message + "');</script>");
 		out.flush();
+	}
+	
+	private void displayReportInfo(PrintWriter out, String message) {
+		out.println("<script type='text/javascript'>$('reportInfo').html('"
+				+ message + "');</script>");
 	}
 
 }

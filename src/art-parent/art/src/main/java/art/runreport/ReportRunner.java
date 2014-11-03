@@ -18,7 +18,9 @@ package art.runreport;
 
 import art.dbutils.ArtDbUtils;
 import art.enums.ParameterDataType;
+import art.enums.ParameterType;
 import art.enums.ReportType;
+import art.parameter.Parameter;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.ArtConfig;
@@ -265,8 +267,18 @@ public class ReportRunner {
 			jdbcParams.clear();
 			for (ReportParameter reportParam : jdbcParamOrder.values()) {
 				Object paramValue = reportParam.getActualParameterValues();
-				ParameterDataType paramDataType = reportParam.getParameter().getDataType();
+				Parameter param=reportParam.getParameter();
+				ParameterDataType paramDataType = param.getDataType();
 
+//				if(param.getParameterType()==ParameterType.SingleValue){
+//					addJdbcParam(paramValue, paramDataType);
+//				} else {
+//					List<Object> paramValues = (List<Object>) paramValue;
+//					for (Object value : paramValues) {
+//						addJdbcParam(value, paramDataType);
+//					}
+//				}
+				
 				if (paramValue instanceof List) {
 					@SuppressWarnings("rawtypes")
 					List paramValues = (List) paramValue;

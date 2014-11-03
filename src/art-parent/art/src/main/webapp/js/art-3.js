@@ -536,19 +536,3 @@ function addSelectDeselectAllHandler() {
 		$(item).multiSelect('deselect_all');
 	});
 }
-
-/**
- * Display report progress. used in reportHeader.jsp. called by runReportController
- * @param {string} message
- */
-function displayReportProgress(message) {
-	$("#reportProgress").html(message);
-}
-
-/**
- * Display report info. used in reportHeader.jsp. called by runReportController
- * @param {string} message
- */
-function displayReportInfo(message) {
-	$("#reportInfo").html(message);
-}

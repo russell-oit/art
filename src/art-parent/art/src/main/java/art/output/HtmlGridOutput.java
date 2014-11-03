@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class HtmlGridOutput implements ReportOutputInterface {
+public class HtmlGridOutput implements ReportOutputInterface, DirectReportOutput {
 
 	PrintWriter out;
 	int numberOfLines;
@@ -40,6 +40,7 @@ public class HtmlGridOutput implements ReportOutputInterface {
 	NumberFormat nfPlain;
 	Map<Integer, ArtQueryParam> displayParams;
 	DecimalFormat nfSort;
+	private String contextPath;
 
 	/**
 	 * Constructor
@@ -111,12 +112,13 @@ public class HtmlGridOutput implements ReportOutputInterface {
 
 	@Override
 	public void beginHeader() {
-		
-		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/htmlGridOutput.css\">");
+
+		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + contextPath + "/css/htmlGridOutput.css\">");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/sorttable.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/htmlGridOutput.js'></script>");
 
 		//display parameters
 //		ReportOutputHandler.displayParameters(out, displayParams);
-
 		//start results table
 		out.println("<div style=\"border: 3px solid white\"><table class=\"sortable\" name=\"maintable\" id=\"maintable\" cellpadding=\"2\" cellspacing=\"0\" width=\"80%\">");
 		out.println(" <thead><tr>");
@@ -209,5 +211,10 @@ public class HtmlGridOutput implements ReportOutputInterface {
 	@Override
 	public boolean isShowQueryHeaderAndFooter() {
 		return true;
+	}
+
+	@Override
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
 	}
 }

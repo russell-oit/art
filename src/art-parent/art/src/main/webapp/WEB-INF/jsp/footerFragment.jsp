@@ -12,6 +12,6 @@ footer fragment for displaying report output in a new page
 		</div>
 		
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
-
+		
 	</body>
 </html>
