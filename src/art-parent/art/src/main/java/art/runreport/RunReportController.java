@@ -16,6 +16,9 @@
  */
 package art.runreport;
 
+import art.chart.AbstractChart;
+import art.chart.ChartUtils;
+import art.chart.SpeedometerChart;
 import art.dbutils.ArtDbUtils;
 import art.enums.ReportFormat;
 import art.enums.ReportStatus;
@@ -50,6 +53,8 @@ import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import art.utils.DrilldownQuery;
 import art.utils.ParameterProcessor;
+import java.awt.Color;
+import java.awt.Font;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
@@ -70,6 +75,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
@@ -229,7 +237,7 @@ public class RunReportController {
 			if (!showInline) {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
-				ctx.getRequestDispatcher("/WEB-INF/jsp/headerFragment.jsp").include(request, response);
+				ctx.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
 				out.flush();
 			}
 
@@ -256,7 +264,7 @@ public class RunReportController {
 				//output report header
 				if (showReportHeaderAndFooter) {
 					request.setAttribute("reportName", reportName);
-					ctx.getRequestDispatcher("/WEB-INF/jsp/reportHeader.jsp").include(request, response);
+					ctx.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
 					out.flush();
 
 					//display initial report progress
@@ -361,8 +369,6 @@ public class RunReportController {
 					showSql = false;
 				}
 
-				String exportPath = ArtConfig.getExportPath();
-
 				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
 					String shortDescription = report.getShortDescription();
@@ -375,8 +381,8 @@ public class RunReportController {
 
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
-					
-					String reportInfo="<b>" + reportName + "</b>" + description + " :: " + startTimeString;
+
+					String reportInfo = "<b>" + reportName + "</b>" + description + " :: " + startTimeString;
 
 					displayReportInfo(out, reportInfo);
 
@@ -396,11 +402,12 @@ public class RunReportController {
 					out.flush();
 				}
 
+				//generate file name if required
+				String fileName = ArtUtils.getUniqueFileName(report.getReportId(), reportFormat.getFilenameExtension());
+				String outputFileName = ArtConfig.getReportsExportPath() + fileName;
+
 				//generate report output
 				if (reportType.isJasperReports() || reportType.isJxls()) {
-					String fileName = ArtUtils.getUniqueFileName(report.getReportId(), reportFormat.getFilenameExtension());
-					String outputFileName = exportPath + fileName;
-
 					if (reportType.isJasperReports()) {
 						JasperReportsOutput jrOutput = new JasperReportsOutput();
 						if (reportType == ReportType.JasperReportsTemplate) {
@@ -428,7 +435,7 @@ public class RunReportController {
 						}
 					}
 
-					//display link to access report if run interactively
+					//display link to access report
 					request.setAttribute("fileName", fileName);
 					ctx.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
 				} else if (reportType == ReportType.Update) {
@@ -450,57 +457,74 @@ public class RunReportController {
 				} else if (reportType.isChart()) {
 					rs = reportRunner.getResultSet();
 
-					//do initial preparation of graph object
-					ArtGraph ag = prepareChartDetails(rs, request, report);
+//					//do initial preparation of graph object
+//					ArtGraph ag = prepareChartDetails(rs, request, report);
+//
+//					//set other properties relevant for the graph display
+//					if (showSql) {
+//						request.setAttribute("showSQL", "true");
+//						request.setAttribute("finalSQL", finalSql);
+//					}
+//
+//					if (showParams) {
+//						request.setAttribute("showParams", "true");
+//						ag.setDisplayParameters(displayParams);
+//					}
+//
+//					//add drill down queries
+//					Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(reportId);
+//
+//					//build graph dataset
+//					ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
+//
+//					//enable file names to contain query name
+//					//set base file name
+//					Date today = new Date();
+//					SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
+//					String filename = username + "-" + reportName + "-" + dateFormatter.format(today) + ArtUtils.getRandomFileNameString();
+//					filename = ArtUtils.cleanFileName(filename);
+//					request.setAttribute("baseFileName", filename);
+//
+//					//allow direct url not to need _query_id
+//					request.setAttribute("queryType", Integer.valueOf(reportTypeId));
+//
+//					//allow use of both QUERY_ID and queryId in direct url
+//					request.setAttribute("queryId", Integer.valueOf(reportId));
+//
+//					//pass graph object
+//					request.setAttribute("artGraph", o);
+//
+//					//graph. set output format and forward to the rendering page
+//					if (StringUtils.equalsIgnoreCase(reportFormatString, "graph")) {
+//						//only display graph on the browser
+//						request.setAttribute("outputToFile", "nofile");
+//					} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pdfgraph")) {
+//						//additionally generate graph in a pdf file
+//						request.setAttribute("outputToFile", "pdf");
+//					} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pnggraph")) {
+//						//additionally generate graph as a png file
+//						request.setAttribute("outputToFile", "png");
+//					}
+					AbstractChart chart = new SpeedometerChart();
+					chart.fillDataset(rs);
 
-					//set other properties relevant for the graph display
-					if (showSql) {
-						request.setAttribute("showSQL", "true");
-						request.setAttribute("finalSQL", finalSql);
+					ChartUtils.prepareTheme(ArtConfig.getSettings().getPdfFontName());
+
+					if (reportFormat == ReportFormat.html) {
+						request.setAttribute("chart", chart);
+
+						String htmlElementId = "chart-" + reportId;
+						request.setAttribute("htmlElementId", htmlElementId);
+
+						ctx.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
+					} else {
+						ChartUtils.generateFile(chart, reportFormat, outputFileName);
+						//display link to access report
+						request.setAttribute("fileName", fileName);
+						ctx.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
 					}
-
-					if (showParams) {
-						request.setAttribute("showParams", "true");
-						ag.setDisplayParameters(displayParams);
-					}
-
-					//add drill down queries
-					Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(reportId);
-
-					//build graph dataset
-					ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
-
-					//enable file names to contain query name
-					//set base file name
-					Date today = new Date();
-					SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-					String filename = username + "-" + reportName + "-" + dateFormatter.format(today) + ArtUtils.getRandomFileNameString();
-					filename = ArtUtils.cleanFileName(filename);
-					request.setAttribute("baseFileName", filename);
-
-					//allow direct url not to need _query_id
-					request.setAttribute("queryType", Integer.valueOf(reportTypeId));
-
-					//allow use of both QUERY_ID and queryId in direct url
-					request.setAttribute("queryId", Integer.valueOf(reportId));
-
-					//pass graph object
-					request.setAttribute("artGraph", o);
-
-					//graph. set output format and forward to the rendering page
-					if (StringUtils.equalsIgnoreCase(reportFormatString, "graph")) {
-						//only display graph on the browser
-						request.setAttribute("outputToFile", "nofile");
-					} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pdfgraph")) {
-						//additionally generate graph in a pdf file
-						request.setAttribute("outputToFile", "pdf");
-					} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pnggraph")) {
-						//additionally generate graph as a png file
-						request.setAttribute("outputToFile", "png");
-					}
-
-					ctx.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
-				} else if (reportType.isDirectOutput()) {
+				} else {
+					//direct output report. "standard/tabular" or crosstab reports
 					//get query results
 					// it is a "select" query or a procedure ending with a select statement
 					rs = reportRunner.getResultSet();
@@ -513,7 +537,7 @@ public class RunReportController {
 						o.setWriter(out);
 						o.setQueryName(reportName);
 						o.setFileUserName(username);
-						o.setExportPath(exportPath);
+//						o.setExportPath(exportPath);
 
 						//don't set displayparams for html view modes. parameters will be displayed by this servlet
 						if (!StringUtils.containsIgnoreCase(reportFormatString, "html")) {
@@ -534,36 +558,34 @@ public class RunReportController {
 							HtmlDataTableOutput dt = (HtmlDataTableOutput) o;
 							dt.setLocale(request.getLocale());
 						}
-						
-						if(o instanceof DirectReportOutput){
-							DirectReportOutput dro=(DirectReportOutput)o;
+
+						if (o instanceof DirectReportOutput) {
+							DirectReportOutput dro = (DirectReportOutput) o;
 							dro.setContextPath(request.getContextPath());
 						}
 
-					}
+						if (reportType.isCrosstab()) {
+							outputResult = DirectReportOutputHandler.flushXOutput(o, rs);
+						} else {
 
-					if (reportType.isCrosstab()) {
-						outputResult = DirectReportOutputHandler.flushXOutput(o, rs);
-					} else {
+							//add support for drill down queries
+							Map<Integer, DrilldownQuery> drilldownQueries = null;
+							if (reportFormat.isHtml()) {
+								//only drill down for html output. drill down query launched from hyperlink                                            
+								drilldownQueries = aq.getDrilldownQueries(reportId);
+							}
+							outputResult = DirectReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
 
-						//add support for drill down queries
-						Map<Integer, DrilldownQuery> drilldownQueries = null;
-						if (reportFormat.isHtml()) {
-							//only drill down for html output. drill down query launched from hyperlink                                            
-							drilldownQueries = aq.getDrilldownQueries(reportId);
 						}
-						outputResult = DirectReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
 
+						if (outputResult.isSuccess()) {
+							rowsRetrieved = (Integer) outputResult.getData();
+						} else {
+							model.addAttribute("message", outputResult.getMessage());
+							return errorPage;
+						}
 					}
 
-					if (outputResult.isSuccess()) {
-						rowsRetrieved = (Integer) outputResult.getData();
-					} else {
-						model.addAttribute("message", outputResult.getMessage());
-						return errorPage;
-					}
-				} else {
-					throw new RuntimeException("Unexpected report type: " + reportType);
 				}
 
 				// Print the "working" time elapsed
@@ -593,7 +615,7 @@ public class RunReportController {
 						request.setAttribute("rowsRetrieved", df.format(rowsRetrieved));
 					}
 
-					ctx.getRequestDispatcher("/WEB-INF/jsp/reportFooter.jsp").include(request, response);
+					ctx.getRequestDispatcher("/WEB-INF/jsp/runReportInfoFooter.jsp").include(request, response);
 
 					//clear report progress
 					displayReportProgress(out, "");
@@ -602,7 +624,7 @@ public class RunReportController {
 
 			if (!showInline) {
 				request.setAttribute("reportFormat", reportFormat.getValue());
-				ctx.getRequestDispatcher("/WEB-INF/jsp/footerFragment.jsp").include(request, response);
+				ctx.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 
 			ArtHelper.log(username, "query", request.getRemoteAddr(), reportId, totalTime, fetchTime, "query, " + reportFormatString);
@@ -820,7 +842,7 @@ public class RunReportController {
 				+ message + "');</script>");
 		out.flush();
 	}
-	
+
 	private void displayReportInfo(PrintWriter out, String message) {
 		out.println("<script type='text/javascript'>$('reportInfo').html('"
 				+ message + "');</script>");

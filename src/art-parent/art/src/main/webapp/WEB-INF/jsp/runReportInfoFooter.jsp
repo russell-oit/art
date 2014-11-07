@@ -1,5 +1,5 @@
 <%-- 
-    Document   : reportFooter
+    Document   : runReportInfoFooter
     Created on : 30-May-2014, 16:32:13
     Author     : Timothy Anyona
 

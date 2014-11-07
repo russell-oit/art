@@ -1,9 +1,9 @@
 <%-- 
-    Document   : headerFragment
+    Document   : runReportPageHeader
     Created on : 30-May-2014, 11:02:46
     Author     : Timothy Anyona
 
-header fragment for displaying report output in a new page
+Html page header fragment when displaying report output in a new page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
