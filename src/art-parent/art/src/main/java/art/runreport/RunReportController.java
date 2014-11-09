@@ -18,6 +18,7 @@ package art.runreport;
 
 import art.chart.AbstractChart;
 import art.chart.ChartUtils;
+import art.chart.PostProcessorDefinition;
 import art.chart.SpeedometerChart;
 import art.dbutils.ArtDbUtils;
 import art.enums.ReportFormat;
@@ -64,6 +65,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -402,12 +404,15 @@ public class RunReportController {
 					out.flush();
 				}
 
-				//generate file name if required
-				String fileName = ArtUtils.getUniqueFileName(report.getReportId(), reportFormat.getFilenameExtension());
-				String outputFileName = ArtConfig.getReportsExportPath() + fileName;
+				//generate base components of file name to use for report types and formats that generate files
+				String baseFileName = ArtUtils.getUniqueFileName(report.getReportId());
+				String exportPath = ArtConfig.getReportsExportPath();
 
 				//generate report output
 				if (reportType.isJasperReports() || reportType.isJxls()) {
+					String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
+					String outputFileName = exportPath + fileName;
+
 					if (reportType.isJasperReports()) {
 						JasperReportsOutput jrOutput = new JasperReportsOutput();
 						if (reportType == ReportType.JasperReportsTemplate) {
@@ -508,6 +513,19 @@ public class RunReportController {
 					AbstractChart chart = new SpeedometerChart();
 					chart.fillDataset(rs);
 
+					List<PostProcessorDefinition> externalPostProcessors = new ArrayList<>();
+
+					PostProcessorDefinition pp = new PostProcessorDefinition();
+					pp.setId("chart");
+
+					Map<String, String> internalPostProcessorParams = new HashMap<>();
+					internalPostProcessorParams.put("showLegend", request.getParameter("showLegend"));
+
+					pp.setParams(internalPostProcessorParams);
+
+//					postProcessors.add(pp);
+					chart.setInternalPostProcessorParams(internalPostProcessorParams);
+
 					ChartUtils.prepareTheme(ArtConfig.getSettings().getPdfFontName());
 
 					if (reportFormat == ReportFormat.html) {
@@ -516,13 +534,19 @@ public class RunReportController {
 						String htmlElementId = "chart-" + reportId;
 						request.setAttribute("htmlElementId", htmlElementId);
 
+						request.setAttribute("externalPostProcessors", externalPostProcessors);
+
 						ctx.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
 					} else {
-						ChartUtils.generateFile(chart, reportFormat, outputFileName);
+						String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
+						String outputFileName = exportPath + fileName;
+
+						chart.generateFile(reportFormat, outputFileName);
 						//display link to access report
 						request.setAttribute("fileName", fileName);
 						ctx.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
 					}
+					rowsRetrieved = getNumberOfRows(rs);
 				} else {
 					//direct output report. "standard/tabular" or crosstab reports
 					//get query results

@@ -16,6 +16,7 @@
  */
 package art.utils;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -137,18 +138,31 @@ public class ArtUtils {
 		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(10);
 	}
 
+//	/**
+//	 * Get random string that can be used as a unique file name
+//	 *
+//	 * @param objectId report id or job id
+//	 * @param extension file extension to use e.g. pdf, xls etc
+//	 * @return
+//	 */
+//	public static String getUniqueFileName(int objectId, String extension) {
+//		//can potentially use randomUUID but it may block if the server lacks sufficient entropy?
+//		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
+//		return objectId + "-" + System.currentTimeMillis() + "-"
+//				+ RandomStringUtils.randomAlphanumeric(20) + "." + extension;
+//	}
+	
 	/**
 	 * Get random string that can be used as a unique file name
 	 *
 	 * @param objectId report id or job id
-	 * @param extension file extension to use e.g. pdf, xls etc
 	 * @return
 	 */
-	public static String getUniqueFileName(int objectId, String extension) {
+	public static String getUniqueFileName(int objectId) {
 		//can potentially use randomUUID but it may block if the server lacks sufficient entropy?
 		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
 		return objectId + "-" + System.currentTimeMillis() + "-"
-				+ RandomStringUtils.randomAlphanumeric(20) + "." + extension;
+				+ RandomStringUtils.randomAlphanumeric(20);
 	}
 
 	/**
@@ -168,7 +182,7 @@ public class ArtUtils {
 		}
 		return sortKey;
 	}
-	
+
 	public static DataSource getJndiDataSource(String jndiName) throws NamingException {
 		logger.debug("Entering getJndiDataSource: jndiName='{}'", jndiName);
 
@@ -179,11 +193,10 @@ public class ArtUtils {
 		logger.debug("jndiName='{}'", jndiName);
 		return (DataSource) ic.lookup(jndiName);
 	}
-	
+
 	public static Connection getJndiConnection(String jndiName) throws NamingException, SQLException {
 		return getJndiDataSource(jndiName).getConnection();
 	}
-
 
 	/**
 	 * Get database types to be displayed when defining a database connection
@@ -256,7 +269,7 @@ public class ArtUtils {
 	public static Date getDate(long timestamp) {
 		return new Date(timestamp);
 	}
-	
+
 //	// escape the ' char in a parameter value
 //	public static String escapeSql(String s) {
 //		if (s == null) {
@@ -265,5 +278,18 @@ public class ArtUtils {
 //			return StringUtils.replace(s, "'", "''");
 //		}
 //	}
+	public static String ColorToHexString(Color color) {
+		http://www.javacreed.com/how-to-get-the-hex-value-from-color/
+		
+		if(color==null){
+			return null;
+		}
+		
+		String hexColor = Integer.toHexString(color.getRGB() & 0xffffff);
+		if (hexColor.length() < 6) {
+			hexColor = "000000".substring(0, 6 - hexColor.length()) + hexColor;
+		}
+		return "#" + hexColor;
+	}
 
 }

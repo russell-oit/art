@@ -17,11 +17,8 @@
  */
 package art.chart;
 
-import art.graph.PdfGraph;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -29,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.MeterInterval;
 import org.jfree.chart.plot.MeterPlot;
@@ -56,17 +52,17 @@ public class SpeedometerChart extends AbstractChart {
 	private int rangeCount;
 
 	public SpeedometerChart() {
-		setType("meter");
+		setType("meter"); //cewolf chart type as per <cewolf:chart type attribute. also listed in de.laures.cewolf.taglib.ChartTypes class code
 	}
 
 	//prepare graph data structures with query results
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
 		Objects.requireNonNull(rs, "resultset must not be null");
-		
+
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-		
+
 		DefaultValueDataset dataset = new DefaultValueDataset();
 
 		if (rs.next()) {
@@ -115,39 +111,35 @@ public class SpeedometerChart extends AbstractChart {
 				}
 			}
 		}
-		
-		setDataset(dataset);
-	}
 
-	@Override
-	public String getProducerId() {
-		return "SpeedometerDataProducer";
+		setDataset(dataset);
 	}
 
 	@Override
 	public void processChart(JFreeChart chart, Map<String, String> params) {
 		MeterPlot plot = (MeterPlot) chart.getPlot();
 
-		finalizePlot(plot);
+		plot.setRange(new Range(minValue, maxValue));
+		plot.setUnits(unitsDescription);
 
-		boolean showLegend = Boolean.valueOf(params.get("showLegend"));
-		if (!showLegend) {
-			chart.removeLegend();
+		plot.setBackgroundPaint(Color.lightGray);
+		plot.setNeedlePaint(Color.darkGray);
+
+		//add color ranges
+		int i;
+		String description;
+		Color rangeColor;
+		for (i = 1; i <= rangeCount; i++) {
+			description = rangeDescriptions.get(i);
+			rangeColor = Color.decode(rangeColors.get(i));
+			MeterInterval interval = new MeterInterval(description, rangeRanges.get(i), rangeColor, new BasicStroke(2.0F), null);
+			plot.addInterval(interval);
 		}
 
-		// Output to file if required
-		String outputToFile = params.get("outputToFile");
-		String fileName = params.get("fullFileName");
-		if (StringUtils.equals(outputToFile, "pdf")) {
-			PdfGraph.createPdf(chart, fileName, getTitle(), null, getDisplayParameters());
-		} else if (StringUtils.equals(outputToFile, "png")) {
-			// save chart as png file
-			try {
-				ChartUtilities.saveChartAsPNG(new File(fileName), chart, getWidth(), getHeight());
-			} catch (IOException e) {
-				logger.error("Error", e);
-			}
-		}
+		//set tick interval. display interval every 10 percent
+		//by default ticks are displayed every 10 units. can be too many with large values
+		double tickInterval = (maxValue - minValue) / 10.0;
+		plot.setTickSize(tickInterval);
 	}
 
 	// finalize the plot including adding ranges, units description and custom formatting

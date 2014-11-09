@@ -17,121 +17,50 @@
  */
 package art.chart;
 
+import art.enums.ReportFormat;
 import art.utils.ArtQueryParam;
 import de.laures.cewolf.ChartPostProcessor;
+import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.DatasetProducer;
-import java.io.Serializable;
+import de.laures.cewolf.PostProcessingException;
+import de.laures.cewolf.taglib.AbstractChartDefinition;
+import de.laures.cewolf.taglib.CewolfChartFactory;
+import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.Dataset;
 
 /**
  *
  * @author Timothy Anyona
  */
-public abstract class AbstractChart implements Serializable, DatasetProducer, ChartPostProcessor {
+public abstract class AbstractChart extends AbstractChartDefinition implements DatasetProducer, ChartPostProcessor {
 
 	private static final long serialVersionUID = 1L;
-	private String title;
-	private String xAxisLabel;
-	private String yAxisLabel;
+	private final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
+
 	private String seriesName;
 	private int height = 300;
 	private int width = 500;
-	private String bgColor = "#FFFFFF";
-	private boolean useHyperLinks;
-	private boolean hasDrilldown;
+	private String backgroundColor = WHITE_HEX_COLOR_CODE;
+	private boolean hasLinks; //if true class must implement a de.laures.cewolf.links.LinkGenerator and a de.laures.cewolf.tooltips.ToolTipGenerator
+	private boolean hasDrilldown; //if true class must implement a LinkGenerator and a ToolTipGenerator
 	private Map<Integer, ArtQueryParam> displayParameters;
 	private Dataset dataset;
-	private String type;
-
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
-
-	/**
-	 * @param type the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	/**
-	 * @param dataset the dataset to set
-	 */
-	public void setDataset(Dataset dataset) {
-		this.dataset = dataset;
-	}
-
-	/**
-	 * @return the dataset
-	 */
-	public Dataset getDataset() {
-		return dataset;
-	}
-
-	/**
-	 * @return the displayParameters
-	 */
-	public Map<Integer, ArtQueryParam> getDisplayParameters() {
-		return displayParameters;
-	}
-
-	/**
-	 * @param displayParameters the displayParameters to set
-	 */
-	public void setDisplayParameters(Map<Integer, ArtQueryParam> displayParameters) {
-		this.displayParameters = displayParameters;
-	}
-
-	/**
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * @param title the title to set
-	 */
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	/**
-	 * @return the xAxisLabel
-	 */
-	public String getxAxisLabel() {
-		return xAxisLabel;
-	}
-
-	/**
-	 * @param xAxisLabel the xAxisLabel to set
-	 */
-	public void setxAxisLabel(String xAxisLabel) {
-		this.xAxisLabel = xAxisLabel;
-	}
-
-	/**
-	 * @return the yAxisLabel
-	 */
-	public String getyAxisLabel() {
-		return yAxisLabel;
-	}
-
-	/**
-	 * @param yAxisLabel the yAxisLabel to set
-	 */
-	public void setyAxisLabel(String yAxisLabel) {
-		this.yAxisLabel = yAxisLabel;
-	}
+	private Map<String, String> internalPostProcessorParams;
+	private boolean hasTooltips; //if true class must implement a ToolTipGenerator (otherwise showChart.jsp will fail on the <cewolf:map> tag)
+	private boolean openDrilldownInNewWindow = true;
 
 	/**
 	 * @return the seriesName
@@ -176,31 +105,31 @@ public abstract class AbstractChart implements Serializable, DatasetProducer, Ch
 	}
 
 	/**
-	 * @return the bgColor
+	 * @return the backgroundColor
 	 */
-	public String getBgColor() {
-		return bgColor;
+	public String getBackgroundColor() {
+		return backgroundColor;
 	}
 
 	/**
-	 * @param bgColor the bgColor to set
+	 * @param backgroundColor the backgroundColor to set
 	 */
-	public void setBgColor(String bgColor) {
-		this.bgColor = bgColor;
+	public void setBackgroundColor(String backgroundColor) {
+		this.backgroundColor = backgroundColor;
 	}
 
 	/**
-	 * @return the useHyperLinks
+	 * @return the hasLinks
 	 */
-	public boolean isUseHyperLinks() {
-		return useHyperLinks;
+	public boolean isHasLinks() {
+		return hasLinks;
 	}
 
 	/**
-	 * @param useHyperLinks the useHyperLinks to set
+	 * @param hasLinks the hasLinks to set
 	 */
-	public void setUseHyperLinks(boolean useHyperLinks) {
-		this.useHyperLinks = useHyperLinks;
+	public void setHasLinks(boolean hasLinks) {
+		this.hasLinks = hasLinks;
 	}
 
 	/**
@@ -217,9 +146,142 @@ public abstract class AbstractChart implements Serializable, DatasetProducer, Ch
 		this.hasDrilldown = hasDrilldown;
 	}
 
-	public abstract void fillDataset(ResultSet rs) throws SQLException;
+	/**
+	 * @return the openDrilldownInNewWindow
+	 */
+	public boolean isOpenDrilldownInNewWindow() {
+		return openDrilldownInNewWindow;
+	}
+
+	/**
+	 * @param openDrilldownInNewWindow the openDrilldownInNewWindow to set
+	 */
+	public void setOpenDrilldownInNewWindow(boolean openDrilldownInNewWindow) {
+		this.openDrilldownInNewWindow = openDrilldownInNewWindow;
+	}
+
+	/**
+	 * @return the hasTooltips
+	 */
+	public boolean isHasTooltips() {
+		return hasTooltips;
+	}
+
+	/**
+	 * @param hasTooltips the hasTooltips to set
+	 */
+	public void setHasTooltips(boolean hasTooltips) {
+		this.hasTooltips = hasTooltips;
+	}
+
+	/**
+	 * @return the internalPostProcessorParams
+	 */
+	public Map<String, String> getInternalPostProcessorParams() {
+		return internalPostProcessorParams;
+	}
+
+	/**
+	 * @param internalPostProcessorParams the internalPostProcessorParams to set
+	 */
+	public void setInternalPostProcessorParams(Map<String, String> internalPostProcessorParams) {
+		this.internalPostProcessorParams = internalPostProcessorParams;
+	}
+
+	/**
+	 * @param dataset the dataset to set
+	 */
+	public void setDataset(Dataset dataset) {
+		this.dataset = dataset;
+	}
+
+	@Override
+	public Dataset getDataset() throws DatasetProduceException {
+		return dataset;
+	}
+
+	/**
+	 * @return the displayParameters
+	 */
+	public Map<Integer, ArtQueryParam> getDisplayParameters() {
+		return displayParameters;
+	}
+
+	/**
+	 * @param displayParameters the displayParameters to set
+	 */
+	public void setDisplayParameters(Map<Integer, ArtQueryParam> displayParameters) {
+		this.displayParameters = displayParameters;
+	}
+
+	//missing getters/setters for fields defined in AbstractChartDefinition
+	/**
+	 * @return the type
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @return the title
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @return the showLegend
+	 */
+	public boolean isShowLegend() {
+		return showLegend;
+	}
+
+	/**
+	 * @return the xAxisLabel
+	 */
+	public String getxAxisLabel() {
+		return xAxisLabel;
+	}
+
+	/**
+	 * @param xAxisLabel the xAxisLabel to set
+	 */
+	public void setxAxisLabel(String xAxisLabel) {
+		setXAxisLabel(xAxisLabel);
+	}
+
+	/**
+	 * @return the yAxisLabel
+	 */
+	public String getyAxisLabel() {
+		return yAxisLabel;
+	}
+
+	/**
+	 * @param yAxisLabel the yAxisLabel to set
+	 */
+	public void setyAxisLabel(String yAxisLabel) {
+		setYAxisLabel(yAxisLabel);
+	}
+
+	/**
+	 * Produces the chart dataset based on the given resultset
+	 *
+	 * @param rs
+	 * @throws SQLException
+	 */
+	public void fillDataset(ResultSet rs) throws SQLException {
+		//provide default implementation in case dataset is created in another way
+		//do nothing by default. 
+	}
 
 	//returns the dataset to be used for rendering the chart
+	//required for use with <cewolf:data> tag (implementing DatasetProducer interface)
+	//the fillDataset() method is used to generate the dataset so this method and it's
+	//parameters are not really relevant
+	//separate method needed because dataset is produced from an sql resultset,
+	//which can't be used as a parameter to this method because resultset isn't serializable
+	//alternative is to generate a rowsetdynaclass from the resultset and pass that? what of resultset metadata?
 	@Override
 	public Object produceDataset(Map<String, Object> params) throws DatasetProduceException {
 		//not currently using producer parameters - equivalent to the <cewolf:producer> tag
@@ -234,11 +296,69 @@ public abstract class AbstractChart implements Serializable, DatasetProducer, Ch
 	}
 
 	//returns a unique identifier for the class
+	//producers with the same ID are supposed to produce the same data when called with the same parameters.
+	//provide default implementation as implementations currently doesn't use any parameters with the produceDataset() method
 	@Override
-	public abstract String getProducerId();
+	public String getProducerId() {
+		return "AbstractDataProducer";
+	}
 
-	//performs post processing on the generated chart using the given parameters
+	//performs internal post processing on the generated chart using the given parameters
+	//need internal post processor in order to make changes to the chart based on
+	//object state e.g. speedometer post processing needs maps that contain range information
+	//<cewolf:chartpostprocessor> tag only allows passing of string parameters
 	@Override
-	public abstract void processChart(JFreeChart chart, Map<String, String> params);
+	public void processChart(JFreeChart chart, Map<String, String> params) {
+		Plot plot = chart.getPlot();
+
+		if (plot instanceof XYPlot) {
+			XYPlot xyPlot = (XYPlot) plot;
+
+			//set y axis range if required
+			if (StringUtils.isNotBlank(params.get("from")) && StringUtils.isNotBlank(params.get("to"))) {
+				Double from = Double.valueOf(params.get("from"));
+				Double to = Double.valueOf(params.get("to"));
+				NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
+				rangeAxis.setRange(from, to);
+			}
+
+			//set grid lines to light grey so that they are visible with a default plot background colour of white
+			xyPlot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+			xyPlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
+		}
+	}
+
+	//produces the basic jfree chart. called by getChart()
+	@Override
+	protected JFreeChart produceChart() throws DatasetProduceException, ChartValidationException {
+		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, showLegend);
+	}
+
+	public void generateFile(ReportFormat reportFormat, String outputFileName)
+			throws IOException, DatasetProduceException, ChartValidationException, PostProcessingException {
+
+		//use cewolf to generate chart in order to achieve similar look as with interactive/browser display
+		//<cewolf:chart tag doesn't allow expressions for the plotbackgroundcolor attribute
+		//so use the same color/constant here as in the showChart.jsp page
+		setPlotBackgroundPaint(Color.WHITE);
+		setBackgroundPaint(Color.decode(backgroundColor));
+
+		//use cewolf AbstractChartDefinition.getChart() to generate chart
+		//with additional processing like antialising and running external post processors
+		//in order to achieve similar look as with interactive/browser display using <cewolf> tags
+		//alternative is to duplicate the code
+		JFreeChart chart = getChart();
+
+		//run internal post processor
+		processChart(chart, internalPostProcessorParams);
+
+		if (reportFormat == ReportFormat.png) {
+			ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, width, height);
+		} else if (reportFormat == ReportFormat.pdf) {
+
+		} else {
+			throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
+		}
+	}
 
 }

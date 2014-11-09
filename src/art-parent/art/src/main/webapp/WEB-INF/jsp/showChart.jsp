@@ -19,13 +19,31 @@ Display a chart report
 	title="${chart.title}" 
 	type="${chart.type}" 
 	xaxislabel="${chart.xAxisLabel}" 
-	yaxislabel="${chart.yAxisLabel}">
+	yaxislabel="${chart.yAxisLabel}"
+	showlegend="${chart.showLegend}"
+	>
 
-	<cewolf:colorpaint color="${chart.bgColor}"/>
+	<cewolf:colorpaint color="${chart.backgroundColor}"/>
 
 	<cewolf:data>
 		<cewolf:producer id="chart"/>
 	</cewolf:data>
+
+	<%-- run external post processors --%>
+	<c:forEach var="pp" items="${externalPostProcessors}">
+		<cewolf:chartpostprocessor id="${pp.id}">
+			<c:forEach var="ppParam" items="${pp.params}">
+				<cewolf:param name="${ppParam.key}" value="${ppParam.value}"/>
+			</c:forEach>
+		</cewolf:chartpostprocessor>
+	</c:forEach>
+
+	<%-- run internal post processor --%>
+	<cewolf:chartpostprocessor id="chart">
+		<c:forEach var="ppParam" items="${chart.internalPostProcessorParams}">
+			<cewolf:param name="${ppParam.key}" value="${ppParam.value}"/>
+		</c:forEach>
+	</cewolf:chartpostprocessor>
 </cewolf:chart>
 
 <cewolf:img 
@@ -35,4 +53,14 @@ Display a chart report
 	height="${chart.height}"
 	removeAfterRender="true"
 	>
+
+	<c:choose>
+		<c:when test="${chart.hasLinks || chart.hasDrilldown}">
+			<cewolf:map tooltipgeneratorid="chart" linkgeneratorid="chart"
+						target="${chart.openDrilldownInNewWindow ? '_blank' : '_self'}"/> 
+		</c:when>
+		<c:when test="${chart.hasTooltips}">
+			<cewolf:map tooltipgeneratorid="chart"/> 
+		</c:when>
+	</c:choose>
 </cewolf:img>

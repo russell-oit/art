@@ -9,6 +9,7 @@ Display error when running a report inline (using ajax)
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
+<%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
@@ -21,9 +22,14 @@ Display error when running a report inline (using ajax)
 
 <c:if test="${error != null}">
 	<div class="alert alert-danger">
-		<p><spring:message code="page.message.errorOccurred"/></p>
+		<p>
+			<spring:message code="page.message.errorOccurred"/>
+		</p>
 		<c:if test="${showErrors}">
-			<p><encode:forHtmlContent value="${error}"/></p>
+			<pre>
+				<encode:forHtmlContent value="${error}"/>
+				<t:displayStackTrace error="${error}"/>
+			</pre>
 		</c:if>
 	</div>
 </c:if>

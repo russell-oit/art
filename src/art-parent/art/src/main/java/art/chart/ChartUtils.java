@@ -17,21 +17,9 @@
  */
 package art.chart;
 
-import art.enums.ReportFormat;
-import de.laures.cewolf.ChartValidationException;
-import de.laures.cewolf.DatasetProduceException;
-import de.laures.cewolf.PostProcessingException;
-import de.laures.cewolf.taglib.SimpleChartDefinition;
-import java.awt.Color;
 import java.awt.Font;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 
@@ -68,33 +56,4 @@ public class ChartUtils {
 		}
 		ChartFactory.setChartTheme(chartTheme);
 	}
-
-	public static void generateFile(AbstractChart artChart, ReportFormat reportFormat, String outputFileName)
-			throws IOException, DatasetProduceException, ChartValidationException, PostProcessingException {
-
-		SimpleChartDefinition chartDefinition = new SimpleChartDefinition();
-		chartDefinition.setPlotBackgroundPaint(Color.decode("#FFFFFF"));
-		chartDefinition.setTitle(artChart.getTitle());
-		chartDefinition.setType(artChart.getType());
-		chartDefinition.setXAxisLabel(artChart.getxAxisLabel());
-		chartDefinition.setYAxisLabel(artChart.getyAxisLabel());
-		chartDefinition.setBackgroundPaint(Color.decode(artChart.getBgColor()));
-
-		final boolean useCache = false;
-		//not currently using producer parameters - equivalent to the <cewolf:producer> tag
-		//must never be null otherwise setDataProductionConfig() will throw an exception
-		chartDefinition.setDataProductionConfig(artChart, new HashMap<String, Object>(), useCache);
-
-		JFreeChart jfreeChart = chartDefinition.getChart();
-		switch (reportFormat) {
-			case png:
-				ChartUtilities.saveChartAsPNG(new File(outputFileName), jfreeChart, artChart.getWidth(), artChart.getHeight());
-				break;
-			case pdf:
-
-			default:
-				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
-		}
-	}
-
 }
