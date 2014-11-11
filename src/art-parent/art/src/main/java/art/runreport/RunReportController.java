@@ -18,9 +18,12 @@ package art.runreport;
 
 import art.chart.AbstractChart;
 import art.chart.ChartUtils;
+import art.chart.PieChart;
 import art.chart.PostProcessorDefinition;
 import art.chart.SpeedometerChart;
 import art.dbutils.ArtDbUtils;
+import art.drilldown.Drilldown;
+import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
@@ -41,10 +44,10 @@ import art.output.JxlsOutput;
 import art.output.ReportOutputInterface;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
+import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
-import art.reportparameter.ReportParameterService;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.utils.ActionResult;
@@ -53,9 +56,6 @@ import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import art.utils.DrilldownQuery;
-import art.utils.ParameterProcessor;
-import java.awt.Color;
-import java.awt.Font;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
@@ -64,7 +64,6 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -76,10 +75,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.StandardChartTheme;
-import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
@@ -114,7 +111,7 @@ public class RunReportController {
 	private MessageSource messageSource;
 
 	@Autowired
-	private ReportParameterService reportParameterService;
+	private DrilldownService drilldownService;
 
 	//use post to allow for large parameter input and get to allow for direct url execution
 	@RequestMapping(value = "/app/runReport", method = {RequestMethod.GET, RequestMethod.POST})
@@ -291,8 +288,11 @@ public class RunReportController {
 
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
+
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+				ChartOptions chartOptions = paramProcessorResult.getChartOptions();
 
 				//display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
 				Map<Integer, ArtQueryParam> displayParams = new TreeMap<>();
@@ -510,8 +510,36 @@ public class RunReportController {
 //						//additionally generate graph as a png file
 //						request.setAttribute("outputToFile", "png");
 //					}
-					AbstractChart chart = new SpeedometerChart();
-					chart.fillDataset(rs);
+					AbstractChart chart;
+					switch (reportType) {
+						case Pie2D:
+						case Pie3D:
+							chart = new PieChart(reportType);
+							break;
+						case Speedometer:
+							chart = new SpeedometerChart();
+							break;
+						default:
+							throw new IllegalArgumentException("Unexpected chart report type" + reportType);
+					}
+
+					chart.setLocale(request.getLocale());
+					chart.setChartOptions(chartOptions);
+
+					//TODO set effective chart options. default to report options but override with html parameters
+					//TODO set default label format. {2} for category based charts
+					//{0} ({2}) for pie chart html output
+					//{0} = {1} ({2}) for pie chart png and pdf output
+					List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+					Drilldown drilldown;
+					if (drilldowns.isEmpty()) {
+						drilldown = null;
+					} else {
+						drilldown = drilldowns.get(0);
+					}
+					chart.setDrilldown(drilldown);
+					
+					chart.prepareDataset(rs);
 
 					List<PostProcessorDefinition> externalPostProcessors = new ArrayList<>();
 
@@ -528,6 +556,19 @@ public class RunReportController {
 
 					ChartUtils.prepareTheme(ArtConfig.getSettings().getPdfFontName());
 
+					//store data for potential use in pdf output
+					RowSetDynaClass data = null;
+					if (chartOptions.isShowData()) {
+						int rsType = rs.getType();
+						if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
+							rs.beforeFirst();
+							boolean lowercaseColumnNames = false;
+							boolean useColumnAlias = true;
+							data = new RowSetDynaClass(rs, lowercaseColumnNames, useColumnAlias);
+						}
+
+					}
+
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
 
@@ -541,7 +582,7 @@ public class RunReportController {
 						String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
 						String outputFileName = exportPath + fileName;
 
-						chart.generateFile(reportFormat, outputFileName);
+						chart.generateFile(reportFormat, outputFileName, data);
 						//display link to access report
 						request.setAttribute("fileName", fileName);
 						ctx.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
@@ -844,8 +885,8 @@ public class RunReportController {
 
 		try {
 			if (rs != null) {
-				int type = rs.getType();
-				if (type == ResultSet.TYPE_SCROLL_INSENSITIVE || type == ResultSet.TYPE_SCROLL_SENSITIVE) {
+				int rsType = rs.getType();
+				if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
 					//resultset is scrollable
 					rs.last();
 					rowsRetrieved = rs.getRow();
@@ -853,7 +894,7 @@ public class RunReportController {
 				}
 			}
 		} catch (SQLException ex) {
-			//not all drivers support this technique? If not supported, set number of rows to unknown (-1)
+			//not all drivers support this technique? If not supported, set number of rows to unknown
 			rowsRetrieved = null;
 			logger.error("Error", ex);
 		}

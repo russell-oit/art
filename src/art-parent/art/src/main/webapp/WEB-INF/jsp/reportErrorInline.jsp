@@ -22,14 +22,6 @@ Display error when running a report inline (using ajax)
 
 <c:if test="${error != null}">
 	<div class="alert alert-danger">
-		<p>
-			<spring:message code="page.message.errorOccurred"/>
-		</p>
-		<c:if test="${showErrors}">
-			<pre>
-				<encode:forHtmlContent value="${error}"/>
-				<t:displayStackTrace error="${error}"/>
-			</pre>
-		</c:if>
+		<t:displayError error="${error}" showErrors="${showErrors}"/>
 	</div>
 </c:if>

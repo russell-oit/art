@@ -54,13 +54,8 @@ Display a chart report
 	removeAfterRender="true"
 	>
 
-	<c:choose>
-		<c:when test="${chart.hasLinks || chart.hasDrilldown}">
-			<cewolf:map tooltipgeneratorid="chart" linkgeneratorid="chart"
-						target="${chart.openDrilldownInNewWindow ? '_blank' : '_self'}"/> 
-		</c:when>
-		<c:when test="${chart.hasTooltips}">
-			<cewolf:map tooltipgeneratorid="chart"/> 
-		</c:when>
-	</c:choose>
+	<c:if test="${chart.hasHyperLinks || chart.hasDrilldown}">
+		<cewolf:map tooltipgeneratorid="chart" linkgeneratorid="chart"
+					target="${chart.drilldown.openInNewWindow ? '_blank' : '_self'}"/> 
+	</c:if>
 </cewolf:img>

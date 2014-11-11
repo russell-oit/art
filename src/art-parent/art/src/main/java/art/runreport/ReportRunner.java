@@ -266,7 +266,7 @@ public class ReportRunner {
 
 			jdbcParams.clear();
 			for (ReportParameter reportParam : jdbcParamOrder.values()) {
-				Object paramValue = reportParam.getActualParameterValues();
+				Object paramValues = reportParam.getActualParameterValues();
 				Parameter param=reportParam.getParameter();
 				ParameterDataType paramDataType = param.getDataType();
 
@@ -279,14 +279,14 @@ public class ReportRunner {
 //					}
 //				}
 				
-				if (paramValue instanceof List) {
+				if (paramValues instanceof List) {
 					@SuppressWarnings("rawtypes")
-					List paramValues = (List) paramValue;
-					for (Object value : paramValues) {
+					List paramValuesList = (List) paramValues;
+					for (Object value : paramValuesList) {
 						addJdbcParam(value, paramDataType);
 					}
 				} else {
-					addJdbcParam(paramValue, paramDataType);
+					addJdbcParam(paramValues, paramDataType);
 				}
 			}
 		}
@@ -314,11 +314,11 @@ public class ReportRunner {
 			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
 			String replaceString;
 
-			Object paramValue = reportParam.getActualParameterValues();
-			if (paramValue instanceof List) {
+			Object paramValues = reportParam.getActualParameterValues();
+			if (paramValues instanceof List) {
 				@SuppressWarnings("rawtypes")
-				List paramValues = (List) paramValue;
-				replaceString = Matcher.quoteReplacement(StringUtils.repeat("?", ",", paramValues.size())); //quote in case it contains special regex characters
+				List paramValuesList = (List) paramValues;
+				replaceString = Matcher.quoteReplacement(StringUtils.repeat("?", ",", paramValuesList.size())); //quote in case it contains special regex characters
 			} else {
 				replaceString = Matcher.quoteReplacement("?"); //quote in case it contains special regex characters
 			}

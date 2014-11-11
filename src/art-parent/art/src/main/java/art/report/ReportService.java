@@ -238,7 +238,7 @@ public class ReportService {
 					chartOptions.setyAxisMin(NumberUtils.toDouble(yMin));
 					chartOptions.setyAxisMax(NumberUtils.toDouble(yMax));
 				} else if (token.startsWith("#")) {
-					chartOptions.setBgColor(token);
+					chartOptions.setBackgroundColor(token);
 				}
 			}
 

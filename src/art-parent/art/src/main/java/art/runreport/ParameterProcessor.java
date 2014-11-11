@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.utils;
+package art.runreport;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.parameter.Parameter;
+import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.runreport.ParameterProcessorResult;
@@ -116,9 +117,15 @@ public class ParameterProcessor {
 		setActualParameterValues(reportParamsList);
 
 		ParameterProcessorResult result = new ParameterProcessorResult();
+
 		result.setReportParamsList(reportParamsList);
 		result.setReportParamsMap(reportParamsMap);
-		result.setReportOptions(processReportOptions(passedValuesMap));
+
+		ReportOptions reportOptions = processReportOptions(passedValuesMap);
+		result.setReportOptions(reportOptions);
+
+		ChartOptions chartOptions = processChartOptions(passedValuesMap);
+		result.setChartOptions(chartOptions);
 
 		return result;
 	}
@@ -195,7 +202,7 @@ public class ParameterProcessor {
 
 				List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
 				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
-					//TODO use all values
+					//TODO get all values
 				} else {
 					for (String actualValueString : actualValueStrings) {
 						//convert string value to appropriate object
@@ -231,14 +238,16 @@ public class ParameterProcessor {
 
 		switch (paramDataType) {
 			case Integer:
-				return Integer.valueOf(usedValue);
+			case Datasource:
+				//use Double.valueOf() for cases where something like 15.0 is passed
+				//Integer.valueOf() would throw an exception is such a case
+				//intValue() merely returns the integer part; it does not do any rounding
+				//https://stackoverflow.com/questions/9102318/cast-double-to-integer-in-java
+				return Double.valueOf(usedValue).intValue();
 			case Number:
 				return Double.valueOf(usedValue);
-			case Datasource:
-				return Integer.valueOf(usedValue);
 			default:
-				logger.warn("Unknown numeric parameter data type - {}. Defaulting to integer.", paramDataType);
-				return Integer.valueOf(usedValue);
+				throw new IllegalArgumentException("Unknown numeric parameter data type: " + paramDataType);
 		}
 	}
 
@@ -308,16 +317,40 @@ public class ParameterProcessor {
 
 			if (paramValues != null) {
 				String paramValue = paramValues[0];
-				
+
 				if (StringUtils.equalsIgnoreCase(htmlParamName, "showParams")) {
 					reportOptions.setShowParameters(Boolean.valueOf(paramValue));
 				}
-				
+
 				//TODO process other params
 			}
 		}
 
 		return reportOptions;
+	}
+
+	private ChartOptions processChartOptions(Map<String, String[]> passedValuesMap) {
+		ChartOptions chartOptions = new ChartOptions();
+
+		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
+			String htmlParamName = entry.getKey();
+			String[] paramValues = entry.getValue();
+			logger.debug("htmlParamName='{}'", htmlParamName);
+
+			if (paramValues != null) {
+				String paramValue = paramValues[0];
+
+				if (StringUtils.equalsIgnoreCase(htmlParamName, "showLegend")) {
+					chartOptions.setShowLegend(Boolean.valueOf(paramValue));
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showData")) {
+					chartOptions.setShowData(Boolean.valueOf(paramValue));
+				}
+
+				//TODO process other params
+			}
+		}
+
+		return chartOptions;
 	}
 
 }

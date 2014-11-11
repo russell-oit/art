@@ -506,12 +506,12 @@ Edit report page
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-4" for="chartOptions.bgColor">
-							<spring:message code="reports.label.bgColor"/>
+						<label class="control-label col-md-4" for="chartOptions.backgroundColor">
+							<spring:message code="reports.label.backgroundColor"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="chartOptions.bgColor" maxlength="7" class="form-control"/>
-							<form:errors path="chartOptions.bgColor" cssClass="error"/>
+							<form:input path="chartOptions.backgroundColor" maxlength="7" class="form-control"/>
+							<form:errors path="chartOptions.backgroundColor" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">

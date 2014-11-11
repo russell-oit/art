@@ -18,6 +18,7 @@
 
 package art.runreport;
 
+import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,21 @@ public class ParameterProcessorResult {
 	private List<ReportParameter> reportParamsList;
 	private Map<String, ReportParameter> reportParamsMap;
 	private ReportOptions reportOptions;
+	private ChartOptions chartOptions;
+
+	/**
+	 * @return the chartOptions
+	 */
+	public ChartOptions getChartOptions() {
+		return chartOptions;
+	}
+
+	/**
+	 * @param chartOptions the chartOptions to set
+	 */
+	public void setChartOptions(ChartOptions chartOptions) {
+		this.chartOptions = chartOptions;
+	}
 
 	/**
 	 * @return the reportParamsList

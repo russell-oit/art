@@ -430,7 +430,7 @@ public class ExportGraph {
 					chartTheme.apply(chart);
 
 					//add ranges and any custom formatting
-					speedometerChart.finalizePlot(speedometerPlot);
+//					speedometerChart.finalizePlot(speedometerPlot);
 
 					break;
 				case -11: //bubble chart

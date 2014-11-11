@@ -42,9 +42,17 @@ import org.springframework.stereotype.Service;
 public class DrilldownService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DrilldownService.class);
+	
+	private final DbService dbService;
 
 	@Autowired
-	private DbService dbService;
+	public DrilldownService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public DrilldownService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT ADQ.*,"
 			+ " AQ.NAME AS DRILLDOWN_REPORT_NAME"

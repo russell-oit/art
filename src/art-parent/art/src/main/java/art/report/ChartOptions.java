@@ -36,7 +36,22 @@ public class ChartOptions implements Serializable {
 	private int height;
 	private double yAxisMin;
 	private double yAxisMax;
-	private String bgColor;
+	private String backgroundColor;
+	private String labelFormat;
+
+	/**
+	 * @return the labelFormat
+	 */
+	public String getLabelFormat() {
+		return labelFormat;
+	}
+
+	/**
+	 * @param labelFormat the labelFormat to set
+	 */
+	public void setLabelFormat(String labelFormat) {
+		this.labelFormat = labelFormat;
+	}
 
 	/**
 	 * @return the showLegend
@@ -179,16 +194,16 @@ public class ChartOptions implements Serializable {
 	}
 
 	/**
-	 * @return the bgColor
+	 * @return the backgroundColor
 	 */
-	public String getBgColor() {
-		return bgColor;
+	public String getBackgroundColor() {
+		return backgroundColor;
 	}
 
 	/**
-	 * @param bgColor the bgColor to set
+	 * @param backgroundColor the backgroundColor to set
 	 */
-	public void setBgColor(String bgColor) {
-		this.bgColor = bgColor;
+	public void setBackgroundColor(String backgroundColor) {
+		this.backgroundColor = backgroundColor;
 	}
 }

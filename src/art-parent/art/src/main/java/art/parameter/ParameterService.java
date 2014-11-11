@@ -156,6 +156,27 @@ public class ParameterService {
 	}
 
 	/**
+	 * Get all drilldown parameters for a report
+	 *
+	 * @param reportId
+	 * @return list of all drilldown parameters, empty list otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<Parameter> getDrilldownParameters(int reportId) throws SQLException {
+		logger.debug("Entering getDrilldownParameters");
+
+		String sql = SQL_SELECT_ALL
+				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
+				+ " ON AP.PARAMETER_ID=ARP.PARAMETER_ID"
+				+ " WHERE ARP.REPORT_ID=?"
+				+ " AND AP.DRILLDOWN_COLUMN_INDEX > 0"
+				+ " AND AP.PARAMETER_TYPE=?";
+		ResultSetHandler<List<Parameter>> h = new BeanListHandler<>(Parameter.class, new ParameterMapper());
+		return dbService.query(sql, h, reportId, ParameterType.SingleValue.getValue());
+	}
+
+	/**
 	 * Delete a parameter
 	 *
 	 * @param id

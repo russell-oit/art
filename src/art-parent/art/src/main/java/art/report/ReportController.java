@@ -430,7 +430,7 @@ public class ReportController {
 			Object[] options = {
 				size,
 				yRange,
-				report.getChartOptions().getBgColor(),
+				report.getChartOptions().getBackgroundColor(),
 				showLegend,
 				showLabels,
 				showPoints,

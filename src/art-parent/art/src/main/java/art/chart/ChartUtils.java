@@ -17,6 +17,7 @@
  */
 package art.chart;
 
+import java.awt.Color;
 import java.awt.Font;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.chart.ChartFactory;
@@ -37,10 +38,13 @@ public class ChartUtils {
 		chartTheme.setBarPainter(new StandardBarPainter()); //remove white line/glossy effect on 2D bar graphs with the jfree theme
 
 		//change default colours. default "jfree" theme has plot background colour of light grey
-//			chartTheme.setPlotBackgroundPaint(Color.white); //default is grey
-//			chartTheme.setDomainGridlinePaint(Color.lightGray); //default is white
-//			chartTheme.setRangeGridlinePaint(Color.lightGray); //default is white
-//also allow use of custom font to enable display of non-ascii characters
+		chartTheme.setPlotBackgroundPaint(Color.WHITE); //default is grey
+
+		//set grid lines to light grey so that they are visible with a default plot background colour of white
+		chartTheme.setDomainGridlinePaint(Color.LIGHT_GRAY); //default is white
+		chartTheme.setRangeGridlinePaint(Color.LIGHT_GRAY); //default is white
+
+		//also allow use of custom font to enable display of non-ascii characters
 		if (StringUtils.isNotBlank(pdfFontName)) {
 			Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
 			Font oldLargeFont = chartTheme.getLargeFont();
@@ -54,6 +58,7 @@ public class ChartUtils {
 			chartTheme.setLargeFont(largeFont);
 			chartTheme.setRegularFont(regularFont);
 		}
+		
 		ChartFactory.setChartTheme(chartTheme);
 	}
 }

@@ -4,7 +4,7 @@
     Author     : Timothy Anyona
 --%>
 
-<%@tag description="Display error information" pageEncoding="UTF-8"%>
+<%@tag description="Display error stacktrace" pageEncoding="UTF-8"%>
 <%@tag trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -15,29 +15,31 @@
 <%@attribute name="error" type="Throwable" required="true" %>
 
 <%-- any content can be specified here e.g.: --%>
-<%
-	java.io.PrintWriter pOut = new java.io.PrintWriter(out);
-	try {
-		Throwable err = (Throwable) request.getAttribute("error");
+<pre>
+	<%
+		java.io.PrintWriter pOut = new java.io.PrintWriter(out);
+		try {
+			Throwable err = (Throwable) request.getAttribute("error");
 
-		if (err != null) {
-			if (err instanceof ServletException) {
-				// It's a ServletException: we should extract the root cause
-				ServletException se = (ServletException) err;
-				Throwable rootCause = se.getRootCause();
-				if (rootCause == null) {
-					rootCause = se;
+			if (err != null) {
+				if (err instanceof ServletException) {
+					// It's a ServletException: we should extract the root cause
+					ServletException se = (ServletException) err;
+					Throwable rootCause = se.getRootCause();
+					if (rootCause == null) {
+						rootCause = se;
+					}
+					out.println("<b>** Root cause is:</b> " + rootCause.getMessage() + "<br>");
+					rootCause.printStackTrace(pOut);
+				} else {
+					// It's not a ServletException, so we'll just show it
+					err.printStackTrace(pOut);
 				}
-				out.println("<b>** Root cause is:</b> " + rootCause.getMessage() + "<br>");
-				rootCause.printStackTrace(pOut);
 			} else {
-				// It's not a ServletException, so we'll just show it
-				err.printStackTrace(pOut);
+				out.println("No error information available");
 			}
-		} else {
-			out.println("No error information available");
+		} catch (Exception ex) {
+			ex.printStackTrace(pOut);
 		}
-	} catch (Exception ex) {
-		ex.printStackTrace(pOut);
-	}
-%>
+	%>
+</pre>

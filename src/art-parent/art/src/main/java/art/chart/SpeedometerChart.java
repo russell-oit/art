@@ -142,33 +142,4 @@ public class SpeedometerChart extends AbstractChart {
 		plot.setTickSize(tickInterval);
 	}
 
-	// finalize the plot including adding ranges, units description and custom formatting
-	// put code in a method so that it can be used from exportgraph
-	/**
-	 *
-	 * @param plot
-	 */
-	public void finalizePlot(MeterPlot plot) {
-		plot.setRange(new Range(minValue, maxValue));
-		plot.setUnits(unitsDescription);
-
-		plot.setBackgroundPaint(Color.lightGray);
-		plot.setNeedlePaint(Color.darkGray);
-
-		// set ranges
-		int i;
-		String description;
-		Color rangeColor;
-		for (i = 1; i <= rangeCount; i++) {
-			description = rangeDescriptions.get(i);
-			rangeColor = Color.decode(rangeColors.get(i));
-			MeterInterval interval = new MeterInterval(description, rangeRanges.get(i), rangeColor, new BasicStroke(2.0F), null);
-			plot.addInterval(interval);
-		}
-
-		// set tick interval. display interval every 10 percent. by default ticks are displayed every 10 units. can be too many with large values
-		double tickInterval = (maxValue - minValue) / 10.0;
-		plot.setTickSize(tickInterval);
-	}
-
 }
