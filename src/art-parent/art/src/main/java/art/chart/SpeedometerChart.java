@@ -84,14 +84,14 @@ public class SpeedometerChart extends AbstractChart {
 						double rangeValue;
 						if (valuePart.contains("%")) {
 							rangeValue = Double.parseDouble(valuePart.replace("%", ""));
-							rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0D;
+							rangeValue = minValue + (maxValue - minValue) * rangeValue / 100.0;
 						} else {
 							rangeValue = Double.parseDouble(valuePart);
 						}
 
 						rangeValues.put(rangeCount, rangeValue);
-						rangeColors.put(rangeCount, rangeDetails[1]);
-						rangeDescriptions.put(rangeCount, rangeDetails[2]);
+						rangeColors.put(rangeCount, StringUtils.trim(rangeDetails[1]));
+						rangeDescriptions.put(rangeCount, StringUtils.trim(rangeDetails[2]));
 					}
 				}
 

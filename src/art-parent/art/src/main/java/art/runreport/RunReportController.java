@@ -21,6 +21,7 @@ import art.chart.ChartUtils;
 import art.chart.PieChart;
 import art.chart.PostProcessorDefinition;
 import art.chart.SpeedometerChart;
+import art.chart.XYChart;
 import art.dbutils.ArtDbUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
@@ -512,12 +513,15 @@ public class RunReportController {
 //					}
 					AbstractChart chart;
 					switch (reportType) {
-						case Pie2D:
-						case Pie3D:
+						case Pie2DChart:
+						case Pie3DChart:
 							chart = new PieChart(reportType);
 							break;
-						case Speedometer:
+						case SpeedometerChart:
 							chart = new SpeedometerChart();
+							break;
+						case XYChart:
+							chart=new XYChart();
 							break;
 						default:
 							throw new IllegalArgumentException("Unexpected chart report type" + reportType);
@@ -730,24 +734,24 @@ public class RunReportController {
 		ArtGraph o;
 
 		switch (chartType) {
-			case XY:
+			case XYChart:
 				o = new ArtXY();
 				break;
-			case Pie2D:
-			case Pie3D:
+			case Pie2DChart:
+			case Pie3DChart:
 				o = new ArtPie();
 				break;
-			case TimeSeries:
+			case TimeSeriesChart:
 				o = new ArtTimeSeries();
 				break;
-			case DateSeries:
+			case DateSeriesChart:
 				o = new ArtDateSeries();
 				break; //  this line was missing... added thanks to anonymous post in sf
-			case Speedometer:
+			case SpeedometerChart:
 				o = new ArtSpeedometer();
 				break;
-			case Bubble:
-			case Heatmap:
+			case BubbleChart:
+			case HeatmapChart:
 				o = new ArtXYZChart();
 				o.setQueryType(queryType);
 				break;

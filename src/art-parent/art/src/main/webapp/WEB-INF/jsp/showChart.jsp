@@ -54,8 +54,8 @@ Display a chart report
 	removeAfterRender="true"
 	>
 
-	<c:if test="${chart.hasHyperLinks || chart.hasDrilldown}">
+	<c:if test="${(not empty chart.hyperLinks) || (not empty chart.drilldownLinks)}">
 		<cewolf:map tooltipgeneratorid="chart" linkgeneratorid="chart"
-					target="${chart.drilldown.openInNewWindow ? '_blank' : '_self'}"/> 
+					target="${chart.openLinksInNewWindow ? '_blank' : '_self'}"/> 
 	</c:if>
 </cewolf:img>

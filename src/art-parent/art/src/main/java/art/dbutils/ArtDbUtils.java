@@ -19,9 +19,11 @@ package art.dbutils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,4 +218,28 @@ public class ArtDbUtils {
 //
 //		return ps.executeUpdate();
 //	}
+	/**
+	 * 
+	 * @param rs
+	 * @param columnName
+	 * @return
+	 * @throws SQLException 
+	 */
+	public static boolean ResultSetHasColumn(ResultSet rs, String columnName) throws SQLException {
+		//https://stackoverflow.com/questions/3599861/how-can-i-determine-if-the-column-name-exist-in-the-resultset
+		//http://pure-essence.net/2011/05/12/spring-check-if-a-column-exist-using-resultset/
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		for (int i = 1; i <= columnCount; i++) { //rsmd column indices start from 1, not 0
+			//use getColumnLabel() to compare with column alias
+			//use getColumnName() to compare with column name
+			//don't use equalsIgnoreCase because rs.getXXX("columnName") methods
+			//may be case sensitive depending on the database and server
+			if (StringUtils.equals(rsmd.getColumnLabel(i), columnName)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -175,13 +175,13 @@ public class ReportService {
 			if (usingShortDescription || index > -1) {
 				//set default for showlegend. false for heat maps. true for all other graphs
 				ReportType reportType = ReportType.toEnum(report.getReportTypeId());
-				if (reportType == ReportType.Heatmap) {
+				if (reportType == ReportType.HeatmapChart) {
 					chartOptions.setShowLegend(false);
 				} else {
 					chartOptions.setShowLegend(true);
 				}
 				//set default for showlabels. true for pie charts. false for all other graphs
-				if (reportType == ReportType.Pie2D || reportType == ReportType.Pie3D) {
+				if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
 					chartOptions.setShowLabels(true);
 				} else {
 					chartOptions.setShowLabels(false);

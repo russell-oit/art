@@ -27,17 +27,18 @@ import java.util.List;
  */
 public enum ReportType {
 
-	//group reports (1-99) are too many to list. just have one as a placeholder
 	Tabular(0), Group(1), TabularHtml(103),
 	Update(100), Crosstab(101), CrosstabHtml(102),
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121),
-	XY(-1), Pie3D(-2), HorizontalBar3D(-3), VerticalBar3D(-4), Line(-5),
-	TimeSeries(-6), DateSeries(-7), StackedVerticalBar3D(-8), StackedHorizontalBar3D(-9),
-	Speedometer(-10), Bubble(-11), Heatmap(-12), Pie2D(-13), VerticalBar2D(-14),
-	StackedVerticalBar2D(-15), HorizontalBar2D(-16), StackedHorizontalBar2D(-17);
-	private int value;
+	XYChart(-1), Pie3DChart(-2), HorizontalBar3DChart(-3), VerticalBar3DChart(-4),
+	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
+	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
+	HeatmapChart(-12), Pie2DChart(-13), VerticalBar2DChart(-14), StackedVerticalBar2DChart(-15),
+	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17);
+	//group reports (1-99) are too many to list. just have one as a placeholder
+	private final int value;
 
 	private ReportType(int value) {
 		this.value = value;
@@ -254,39 +255,39 @@ public enum ReportType {
 				return "LOV: Static";
 			case JobRecipients:
 				return "Dynamic Job Recipients";
-			case XY:
+			case XYChart:
 				return "Chart: XY";
-			case Pie3D:
+			case Pie3DChart:
 				return "Chart: Pie 3D";
-			case HorizontalBar3D:
+			case HorizontalBar3DChart:
 				return "Chart: Horizontal Bar 3D";
-			case VerticalBar3D:
+			case VerticalBar3DChart:
 				return "Chart: Vertical Bar 3D";
-			case Line:
+			case LineChart:
 				return "Chart: Line";
-			case TimeSeries:
+			case TimeSeriesChart:
 				return "Chart: Time Series";
-			case DateSeries:
+			case DateSeriesChart:
 				return "Chart: Date Series";
-			case StackedVerticalBar3D:
+			case StackedVerticalBar3DChart:
 				return "Chart: Stacked Vertical Bar 3D";
-			case StackedHorizontalBar3D:
+			case StackedHorizontalBar3DChart:
 				return "Chart: Stacked Horizontal Bar 3D";
-			case Speedometer:
+			case SpeedometerChart:
 				return "Chart: Speedometer";
-			case Bubble:
+			case BubbleChart:
 				return "Chart: Bubble Chart";
-			case Heatmap:
+			case HeatmapChart:
 				return "Chart: Heat Map";
-			case Pie2D:
+			case Pie2DChart:
 				return "Chart: Pie 2D";
-			case VerticalBar2D:
+			case VerticalBar2DChart:
 				return "Chart: Vertical Bar 2D";
-			case StackedVerticalBar2D:
+			case StackedVerticalBar2DChart:
 				return "Chart: Stacked Vertical Bar 2D";
-			case HorizontalBar2D:
+			case HorizontalBar2DChart:
 				return "Chart: Horizontal Bar 2D";
-			case StackedHorizontalBar2D:
+			case StackedHorizontalBar2DChart:
 				return "Chart: Stacked Horizontal Bar 2D";
 			default:
 				return this.name();

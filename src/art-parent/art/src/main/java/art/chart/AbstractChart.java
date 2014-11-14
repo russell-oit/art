@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Date;
@@ -71,23 +72,58 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 
 	private static final long serialVersionUID = 1L;
 	private final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
+	private final String HYPERLINKS_COLUMN_NAME = "LINK";
 
-	private String seriesName;
 	private int height = 300;
 	private int width = 500;
 	private String backgroundColor = WHITE_HEX_COLOR_CODE;
-	private boolean hasHyperLinks; //if true class must implement a de.laures.cewolf.links.LinkGenerator and a de.laures.cewolf.tooltips.ToolTipGenerator
-	private boolean hasDrilldown; //if true class must implement a LinkGenerator and a ToolTipGenerator (otherwise showChart.jsp will fail on the <cewolf:map> tag)
 	private Dataset dataset;
 	private Map<String, String> internalPostProcessorParams;
-	protected ChartOptions chartOptions;
+	private ChartOptions chartOptions;
 	private Locale locale;
-	protected Map<String, String> hyperLinks;
-	protected Map<String, String> drilldownLinks;
+	private Map<String, String> hyperLinks;
+	private Map<String, String> drilldownLinks;
 	private Map<String, ReportParameter> reportParams;
-	protected Drilldown drilldown;
-	protected List<Parameter> drilldownParams;
-	protected Set<String> drilldownParamNames;
+	private Drilldown drilldown;
+	private List<Parameter> drilldownParams;
+	private Set<String> drilldownParamNames;
+	private boolean openLinksInNewWindow;
+	private boolean hasHyperLinks;
+
+	/**
+	 * @return the hasHyperLinks
+	 */
+	public boolean isHasHyperLinks() {
+		return hasHyperLinks;
+	}
+
+	/**
+	 * @return the drilldownParams
+	 */
+	public List<Parameter> getDrilldownParams() {
+		return drilldownParams;
+	}
+
+	/**
+	 * @param drilldownParams the drilldownParams to set
+	 */
+	public void setDrilldownParams(List<Parameter> drilldownParams) {
+		this.drilldownParams = drilldownParams;
+	}
+
+	/**
+	 * @return the openLinksInNewWindow
+	 */
+	public boolean isOpenLinksInNewWindow() {
+		return openLinksInNewWindow;
+	}
+
+	/**
+	 * @param openLinksInNewWindow the openLinksInNewWindow to set
+	 */
+	public void setOpenLinksInNewWindow(boolean openLinksInNewWindow) {
+		this.openLinksInNewWindow = openLinksInNewWindow;
+	}
 
 	/**
 	 * @return the drilldown
@@ -174,20 +210,6 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	}
 
 	/**
-	 * @return the seriesName
-	 */
-	public String getSeriesName() {
-		return seriesName;
-	}
-
-	/**
-	 * @param seriesName the seriesName to set
-	 */
-	public void setSeriesName(String seriesName) {
-		this.seriesName = seriesName;
-	}
-
-	/**
 	 * @return the height
 	 */
 	public int getHeight() {
@@ -227,34 +249,6 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	 */
 	public void setBackgroundColor(String backgroundColor) {
 		this.backgroundColor = backgroundColor;
-	}
-
-	/**
-	 * @return the hasHyperLinks
-	 */
-	public boolean isHasHyperLinks() {
-		return hasHyperLinks;
-	}
-
-	/**
-	 * @param hasHyperLinks the hasHyperLinks to set
-	 */
-	public void setHasHyperLinks(boolean hasHyperLinks) {
-		this.hasHyperLinks = hasHyperLinks;
-	}
-
-	/**
-	 * @return the hasDrilldown
-	 */
-	public boolean isHasDrilldown() {
-		return hasDrilldown;
-	}
-
-	/**
-	 * @param hasDrilldown the hasDrilldown to set
-	 */
-	public void setHasDrilldown(boolean hasDrilldown) {
-		this.hasDrilldown = hasDrilldown;
 	}
 
 	/**
@@ -345,26 +339,44 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	}
 
 	public void prepareDataset(ResultSet rs) throws SQLException {
+		prepareDrilldown();
+		prepareHyperLinks(rs);
+
+		fillDataset(rs);
+	}
+
+	private void prepareDrilldown() throws SQLException {
 		if (drilldown != null) {
-			hasDrilldown = true;
 			drilldownLinks = new HashMap<>();
+
+			openLinksInNewWindow = drilldown.isOpenInNewWindow();
 
 			ParameterService parameterService = new ParameterService();
 			int drilldownReportId = drilldown.getDrilldownReport().getReportId();
-			drilldownParams = parameterService.getDrilldownParameters(drilldownReportId);
+			setDrilldownParams(parameterService.getDrilldownParameters(drilldownReportId));
 
 			//store parameter names so that parent parameters with the same name
 			//as in the drilldown report are omitted
 			//use hashset for fast searching using contains
 			//https://stackoverflow.com/questions/3307549/fastest-way-to-check-if-a-liststring-contains-a-unique-string
 			drilldownParamNames = new HashSet<>();
-			for (Parameter drilldownParam : drilldownParams) {
+			for (Parameter drilldownParam : getDrilldownParams()) {
 				String paramName = drilldownParam.getName();
 				drilldownParamNames.add(paramName);
 			}
 		}
+	}
 
-		fillDataset(rs);
+	private void prepareHyperLinks(ResultSet rs) throws SQLException {
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int columnCount = rsmd.getColumnCount();
+		String lastColumnName = rsmd.getColumnLabel(columnCount);
+
+		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)) {
+			hasHyperLinks = true;
+			setHyperLinks(new HashMap<String, String>());
+		}
+
 	}
 
 	//returns the dataset to be used for rendering the chart
@@ -406,10 +418,10 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	}
 
 	private void prepareYAxisRange(JFreeChart chart) {
-		if(chartOptions==null){
+		if (chartOptions == null) {
 			return;
 		}
-		
+
 		Plot plot = chart.getPlot();
 
 		//set y axis range if required
@@ -436,10 +448,10 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	}
 
 	private void prepareLabels(JFreeChart chart) {
-		if(chartOptions==null){
+		if (chartOptions == null) {
 			return;
 		}
-		
+
 		Plot plot = chart.getPlot();
 
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
@@ -562,6 +574,13 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 				sb.append("runReport.do?reportId=").append(drilldownReportId)
 						.append("&reportFormat=").append(drilldownReportFormat);
 			}
+		}
+	}
+
+	protected void addHyperLink(ResultSet rs, String key) throws SQLException {
+		if (isHasHyperLinks()) {
+			String hyperLink = rs.getString(HYPERLINKS_COLUMN_NAME);
+			getHyperLinks().put(key, hyperLink);
 		}
 	}
 

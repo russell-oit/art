@@ -26,12 +26,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 import org.slf4j.Logger;
@@ -47,9 +42,9 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 	private static final long serialVersionUID = 1L;
 
 	public PieChart(ReportType reportType) {
-		if (reportType == ReportType.Pie2D) {
+		if (reportType == ReportType.Pie2DChart) {
 			setType("pie");
-		} else if (reportType == ReportType.Pie3D) {
+		} else if (reportType == ReportType.Pie3DChart) {
 			setType("pie3d");
 		} else {
 			throw new IllegalArgumentException("Unsupported report type: " + reportType);
@@ -62,14 +57,6 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
 
-		ResultSetMetaData rsmd = rs.getMetaData();
-		if (rsmd.getColumnCount() == 3) {
-			setHasHyperLinks(true);
-			hyperLinks = new HashMap<>();
-		} else {
-			setHasHyperLinks(false);
-		}
-
 		while (rs.next()) {
 			String category = rs.getString(1);
 			double value = rs.getDouble(2);
@@ -77,31 +64,29 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 			//add dataset value
 			dataset.setValue(category, value);
 
-			//add hyperlink
-			if (isHasHyperLinks()) {
-				String hyperLink = rs.getString(3);
-				hyperLinks.put(category, hyperLink);
-			}
+			//add hyperlink if required
+			addHyperLink(rs, category);
 
-			//add drilldown link
-			addDrilldownLink(category, value);
+			//add drilldown link if required
+			addDrilldownLink(value, category);
 		}
 
 		setDataset(dataset);
 	}
 
-	private void addDrilldownLink(String category, double value) {
+	private void addDrilldownLink(double value, String category) {
 		//set drill down links
-		if (drilldown != null) {
+		if (getDrilldown() != null) {
 			StringBuilder sb = new StringBuilder(200);
 
 			//add base url
 			addDrilldownBaseUrl(sb);
 
 			//add drilldown parameters
-			if (drilldownParams != null) {
-				for (Parameter drilldownParam : drilldownParams) {
-					//drill down on col 1 = drill on data value. drill down on col 2 = category name
+			if (getDrilldownParams() != null) {
+				for (Parameter drilldownParam : getDrilldownParams()) {
+					//drill down on col 1 = data value
+					//drill down on col 2 = category
 					String paramName = drilldownParam.getName();
 					String paramValue;
 					if (drilldownParam.getDrilldownColumnIndex() == 1) {
@@ -117,7 +102,7 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 			addParentParameters(sb);
 
 			String drilldownUrl = sb.toString();
-			drilldownLinks.put(category, drilldownUrl);
+			getDrilldownLinks().put(category, drilldownUrl);
 		}
 	}
 
@@ -140,10 +125,10 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 		String link = "";
 
 		String key = String.valueOf(category);
-		if (hyperLinks != null) {
-			link = hyperLinks.get(key);
-		} else if (drilldownLinks != null) {
-			link = drilldownLinks.get(key);
+		if (getHyperLinks() != null) {
+			link = getHyperLinks().get(key);
+		} else if (getDrilldownLinks() != null) {
+			link = getDrilldownLinks().get(key);
 		}
 
 		return link;
