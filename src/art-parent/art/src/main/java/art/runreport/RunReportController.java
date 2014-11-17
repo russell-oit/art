@@ -21,6 +21,7 @@ import art.chart.ChartUtils;
 import art.chart.PieChart;
 import art.chart.PostProcessorDefinition;
 import art.chart.SpeedometerChart;
+import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
 import art.dbutils.ArtDbUtils;
 import art.drilldown.Drilldown;
@@ -57,6 +58,7 @@ import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import art.utils.DrilldownQuery;
+import art.utils.NullAwareBeanUtilsBean;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
@@ -76,6 +78,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -293,7 +296,7 @@ public class RunReportController {
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-				ChartOptions chartOptions = paramProcessorResult.getChartOptions();
+				ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
 				//display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
 				Map<Integer, ArtQueryParam> displayParams = new TreeMap<>();
@@ -521,19 +524,31 @@ public class RunReportController {
 							chart = new SpeedometerChart();
 							break;
 						case XYChart:
-							chart=new XYChart();
+							chart = new XYChart();
+							break;
+						case TimeSeriesChart:
+						case DateSeriesChart:
+							chart = new TimeSeriesBasedChart(reportType);
 							break;
 						default:
 							throw new IllegalArgumentException("Unexpected chart report type" + reportType);
 					}
 
-					chart.setLocale(request.getLocale());
-					chart.setChartOptions(chartOptions);
-
 					//TODO set effective chart options. default to report options but override with html parameters
+					//using object wrappers will require extra null checks e.g. if boolean property is true
+					//alternatively use helper libraries e.g. commons-lang, BooleanUtils.isTrue( bool )
+//					ChartOptions reportChartOptions = report.getChartOptions();
+//					ChartOptions effectiveChartOptions = reportChartOptions;
+//					BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
+//					notNull.copyProperties(effectiveChartOptions, parameterChartOptions);
+					
 					//TODO set default label format. {2} for category based charts
 					//{0} ({2}) for pie chart html output
 					//{0} = {1} ({2}) for pie chart png and pdf output
+					
+					chart.setLocale(request.getLocale());
+					chart.setChartOptions(parameterChartOptions);
+					
 					List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
 					Drilldown drilldown;
 					if (drilldowns.isEmpty()) {
@@ -542,7 +557,7 @@ public class RunReportController {
 						drilldown = drilldowns.get(0);
 					}
 					chart.setDrilldown(drilldown);
-					
+
 					chart.prepareDataset(rs);
 
 					List<PostProcessorDefinition> externalPostProcessors = new ArrayList<>();
@@ -562,7 +577,7 @@ public class RunReportController {
 
 					//store data for potential use in pdf output
 					RowSetDynaClass data = null;
-					if (chartOptions.isShowData()) {
+					if (parameterChartOptions.isShowData()) {
 						int rsType = rs.getType();
 						if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
 							rs.beforeFirst();

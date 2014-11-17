@@ -15,7 +15,6 @@ Display a chart report
 
 <cewolf:chart 
 	id="${htmlElementId}" 
-	plotbackgroundcolor="#FFFFFF"
 	title="${chart.title}" 
 	type="${chart.type}" 
 	xaxislabel="${chart.xAxisLabel}" 
@@ -54,8 +53,13 @@ Display a chart report
 	removeAfterRender="true"
 	>
 
-	<c:if test="${(not empty chart.hyperLinks) || (not empty chart.drilldownLinks)}">
-		<cewolf:map tooltipgeneratorid="chart" linkgeneratorid="chart"
-					target="${chart.openLinksInNewWindow ? '_blank' : '_self'}"/> 
-	</c:if>
+	<c:choose>
+		<c:when test="${(not empty chart.hyperLinks) || (not empty chart.drilldownLinks)}">
+			<cewolf:map tooltipgeneratorid="chart" linkgeneratorid="chart"
+						target="${chart.openLinksInNewWindow ? '_blank' : '_self'}"/> 
+		</c:when>
+		<c:when test="${chart.hasTooltips}">
+			<cewolf:map tooltipgeneratorid="chart"/> 
+		</c:when>
+	</c:choose>
 </cewolf:img>

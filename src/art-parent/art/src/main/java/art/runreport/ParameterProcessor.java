@@ -239,7 +239,7 @@ public class ParameterProcessor {
 		switch (paramDataType) {
 			case Integer:
 			case Datasource:
-				//use Double.valueOf() for cases where something like 15.0 is passed
+				//use Double.valueOf() for cases where something like 15.0 is passed (e.g. with drilldown from chart)
 				//Integer.valueOf() would throw an exception is such a case
 				//intValue() merely returns the integer part; it does not do any rounding
 				//https://stackoverflow.com/questions/9102318/cast-double-to-integer-in-java
@@ -344,6 +344,12 @@ public class ParameterProcessor {
 					chartOptions.setShowLegend(Boolean.valueOf(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showData")) {
 					chartOptions.setShowData(Boolean.valueOf(paramValue));
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showPoints")) {
+					chartOptions.setShowPoints(Boolean.valueOf(paramValue));
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "rotateAt")) {
+					chartOptions.setRotateAt(Integer.valueOf(paramValue));
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "removeAt")) {
+					chartOptions.setRemoveAt(Integer.valueOf(paramValue));
 				}
 
 				//TODO process other params

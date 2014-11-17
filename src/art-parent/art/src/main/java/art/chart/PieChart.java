@@ -22,10 +22,8 @@ import art.parameter.Parameter;
 import de.laures.cewolf.links.PieSectionLinkGenerator;
 import de.laures.cewolf.tooltips.PieToolTipGenerator;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
-import java.util.HashMap;
 import java.util.Objects;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
@@ -49,6 +47,8 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 		} else {
 			throw new IllegalArgumentException("Unsupported report type: " + reportType);
 		}
+		
+		setHasTooltips(true);
 	}
 
 	@Override
@@ -56,6 +56,9 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 		Objects.requireNonNull(rs, "resultset must not be null");
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
+		
+		//resultset structure
+		//category, value [,link]
 
 		while (rs.next()) {
 			String category = rs.getString(1);

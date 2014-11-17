@@ -28,6 +28,8 @@ import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.DatasetProducer;
 import de.laures.cewolf.PostProcessingException;
+import de.laures.cewolf.cpp.LineRendererProcessor;
+import de.laures.cewolf.cpp.RotatedAxisLabels;
 import de.laures.cewolf.taglib.AbstractChartDefinition;
 import de.laures.cewolf.taglib.CewolfChartFactory;
 import java.awt.Color;
@@ -72,7 +74,7 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 
 	private static final long serialVersionUID = 1L;
 	private final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
-	private final String HYPERLINKS_COLUMN_NAME = "LINK";
+	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 
 	private int height = 300;
 	private int width = 500;
@@ -89,6 +91,28 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	private Set<String> drilldownParamNames;
 	private boolean openLinksInNewWindow;
 	private boolean hasHyperLinks;
+	private boolean hasTooltips; //if true class must implement a ToolTipGenerator (otherwise showChart.jsp will fail on the <cewolf:map> tag)
+
+	/**
+	 * @return the hasTooltips
+	 */
+	public boolean isHasTooltips() {
+		return hasTooltips;
+	}
+
+	/**
+	 * @param hasTooltips the hasTooltips to set
+	 */
+	public void setHasTooltips(boolean hasTooltips) {
+		this.hasTooltips = hasTooltips;
+	}
+
+	/**
+	 * @param hasHyperLinks the hasHyperLinks to set
+	 */
+	public void setHasHyperLinks(boolean hasHyperLinks) {
+		this.hasHyperLinks = hasHyperLinks;
+	}
 
 	/**
 	 * @return the hasHyperLinks
@@ -333,19 +357,16 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	 * @param rs
 	 * @throws SQLException
 	 */
-	protected void fillDataset(ResultSet rs) throws SQLException {
-		//provide default implementation in case dataset is created in another way
-		//do nothing by default. 
-	}
+	protected abstract void fillDataset(ResultSet rs) throws SQLException;
 
 	public void prepareDataset(ResultSet rs) throws SQLException {
-		prepareDrilldown();
-		prepareHyperLinks(rs);
+		prepareDrilldownDetails();
+		prepareHyperLinkDetails(rs);
 
 		fillDataset(rs);
 	}
 
-	private void prepareDrilldown() throws SQLException {
+	private void prepareDrilldownDetails() throws SQLException {
 		if (drilldown != null) {
 			drilldownLinks = new HashMap<>();
 
@@ -367,13 +388,13 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 		}
 	}
 
-	private void prepareHyperLinks(ResultSet rs) throws SQLException {
+	private void prepareHyperLinkDetails(ResultSet rs) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 		String lastColumnName = rsmd.getColumnLabel(columnCount);
 
 		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)) {
-			hasHyperLinks = true;
+			setHasHyperLinks(true);
 			setHyperLinks(new HashMap<String, String>());
 		}
 
@@ -415,6 +436,8 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 		//perform default processing
 		prepareYAxisRange(chart);
 		prepareLabels(chart);
+		showPoints(chart);
+		rotateLabels(chart);
 	}
 
 	private void prepareYAxisRange(JFreeChart chart) {
@@ -430,19 +453,10 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 				XYPlot xyPlot = (XYPlot) plot;
 				NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
 				rangeAxis.setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
-
-				//TODO test if needed
-				//set grid lines to light grey so that they are visible with a default plot background colour of white
-//			xyPlot.setRangeGridlinePaint(Color.LIGHT_GRAY);
-//			xyPlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 			} else if (plot instanceof CategoryPlot) {
 				CategoryPlot categoryPlot = (CategoryPlot) plot;
 				NumberAxis rangeAxis = (NumberAxis) categoryPlot.getRangeAxis();
 				rangeAxis.setRange(chartOptions.getyAxisMin(), chartOptions.getyAxisMax());
-
-				//set grid lines to light grey so that they are visible with a default plot background colour of white
-//			xyPlot.setRangeGridlinePaint(Color.LIGHT_GRAY);
-//			xyPlot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 			}
 		}
 	}
@@ -510,9 +524,6 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 
 	public JFreeChart getFinalChart() throws DatasetProduceException, ChartValidationException, PostProcessingException {
 		//use cewolf to generate chart in order to achieve similar look as with interactive/browser display
-		//<cewolf:chart tag doesn't allow expressions for the plotbackgroundcolor attribute
-		//so use the same color/constant here as in the showChart.jsp page
-//		setPlotBackgroundPaint(Color.WHITE);
 		setBackgroundPaint(Color.decode(backgroundColor));
 
 		//use cewolf AbstractChartDefinition.getChart() to generate chart
@@ -582,6 +593,30 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 			String hyperLink = rs.getString(HYPERLINKS_COLUMN_NAME);
 			getHyperLinks().put(key, hyperLink);
 		}
+	}
+
+	private void showPoints(JFreeChart chart) {
+		if (chartOptions == null) {
+			return;
+		}
+
+		LineRendererProcessor pointsProcessor = new LineRendererProcessor();
+		Map<String, String> lineOptions = new HashMap<>();
+		lineOptions.put("shapes", String.valueOf(chartOptions.isShowPoints()));
+		pointsProcessor.processChart(chart, lineOptions);
+	}
+
+	private void rotateLabels(JFreeChart chart) {
+		if (chartOptions == null) {
+			return;
+		}
+
+		//display x-axis labels vertically if too many categories present
+		RotatedAxisLabels rotateProcessor = new RotatedAxisLabels();
+		Map<String, String> rotateOptions = new HashMap<>();
+		rotateOptions.put("rotate_at", String.valueOf(chartOptions.getRotateAt()));
+		rotateOptions.put("remove_at", String.valueOf(chartOptions.getRemoveAt()));
+		rotateProcessor.processChart(chart, rotateOptions);
 	}
 
 }
