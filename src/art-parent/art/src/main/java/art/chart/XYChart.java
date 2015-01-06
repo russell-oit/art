@@ -49,11 +49,10 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 		Objects.requireNonNull(rs, "resultset must not be null");
 
 		XYSeriesCollection dataset = new XYSeriesCollection();
-		
-		//resultset structure
-		//static series: xValue, yValue [,link]
-		//dynamic series: xValue, yValue, seriesName [,link]
 
+		//resultset structure
+		//static series: xValue, yValue [, link]
+		//dynamic series: xValue, yValue, seriesName [, link]
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 
@@ -70,10 +69,15 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 		}
 
 		int seriesCount = 0; //start series index at 0 as generateLink() uses zero-based indices to idenfity series
-		Map<Integer,XYSeries> finalSeries = new HashMap<>(); //<series index, series>
-		Map<String, Integer> existingSeries = new HashMap<>(); //<series name, series index>
+		Map<Integer, XYSeries> finalSeries = new HashMap<>(); //<series index, series>
+		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
+		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
+
+		int rowCount = 0;
 
 		while (rs.next()) {
+			rowCount++;
+
 			double xValue = rs.getDouble(1);
 			double yValue = rs.getDouble(2);
 
@@ -88,24 +92,35 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 				seriesName = rsmd.getColumnLabel(2);
 			}
 
-			//has this series already appeared?
+			//set series index
 			int seriesIndex;
-			if (existingSeries.containsKey(seriesName)) {
-				seriesIndex = existingSeries.get(seriesName);
+			if (seriesIndices.containsKey(seriesName)) {
+				seriesIndex = seriesIndices.get(seriesName);
 			} else {
 				seriesIndex = seriesCount;
-				existingSeries.put(seriesName, seriesIndex);
-				finalSeries.put(seriesIndex,new XYSeries(seriesName));
+				seriesIndices.put(seriesName, seriesIndex);
+				finalSeries.put(seriesIndex, new XYSeries(seriesName));
 				seriesCount++;
 			}
+
+			//set item index
+			int itemIndex;
+			if (itemIndices.containsKey(seriesName)) {
+				int maxItemIndex = itemIndices.get(seriesName);
+				itemIndex = maxItemIndex + 1;
+			} else {
+				//first item in this series. use zero-based indices
+				itemIndex = 0;
+			}
+			itemIndices.put(seriesName, itemIndex);
 
 			//add dataset value
 			finalSeries.get(seriesIndex).add(xValue, yValue);
 
-			//use series index, y data value and x data value to identify url in hashmap
-			//to ensure correct link will be returned in generatelink. 
+			//use series index and item index to identify url in hashmap
+			//to ensure correct link will be returned by the generatelink() method. 
 			//use series index instead of name because the generateLink() method uses series indices
-			String linkId = seriesIndex + String.valueOf(yValue) + String.valueOf(xValue);
+			String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
 
 			//add hyperlink if required
 			addHyperLink(rs, linkId);
@@ -122,7 +137,7 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 		setDataset(dataset);
 	}
 
-	private void addDrilldownLink(double yValue, double xValue, String seriesName, String key) {
+	private void addDrilldownLink(double yValue, double xValue, String seriesName, String linkId) {
 		//set drill down links
 		if (getDrilldown() != null) {
 			StringBuilder sb = new StringBuilder(200);
@@ -133,11 +148,12 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 			//add drilldown parameters
 			if (getDrilldownParams() != null) {
 				for (Parameter drilldownParam : getDrilldownParams()) {
-					//drill down on col 1 = y value (data value)
-					//drill down on col 2 = x value (category)
+					//drill down on col 1 = y value
+					//drill down on col 2 = x value
 					//drill down on col 3 = series name
 					String paramName = drilldownParam.getName();
 					String paramValue;
+
 					if (drilldownParam.getDrilldownColumnIndex() == 1) {
 						paramValue = String.valueOf(yValue);
 					} else if (drilldownParam.getDrilldownColumnIndex() == 2) {
@@ -145,6 +161,7 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 					} else {
 						paramValue = seriesName;
 					}
+
 					addUrlParameter(paramName, paramValue, sb);
 				}
 			}
@@ -153,16 +170,15 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 			addParentParameters(sb);
 
 			String drilldownUrl = sb.toString();
-			getDrilldownLinks().put(key, drilldownUrl);
+			getDrilldownLinks().put(linkId, drilldownUrl);
 		}
 	}
 
 	@Override
 	public String generateToolTip(XYDataset data, int series, int item) {
 		//display formatted values
-
 		NumberFormat nf = NumberFormat.getInstance(getLocale());
-		
+
 		//format y value
 		double yValue = data.getYValue(series, item);
 		String formattedYValue = nf.format(yValue);
@@ -179,12 +195,7 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 	public String generateLink(Object data, int series, int item) {
 		String link = "";
 
-		XYDataset xyDataset = (XYDataset) data;
-
-		double yValue = xyDataset.getYValue(series, item);
-		double xValue = xyDataset.getXValue(series, item);
-
-		String key = String.valueOf(series) + String.valueOf(yValue) + String.valueOf(xValue);
+		String key = String.valueOf(series) + String.valueOf(item);
 
 		if (getHyperLinks() != null) {
 			link = getHyperLinks().get(key);

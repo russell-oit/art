@@ -1,4 +1,4 @@
-Copyright 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+Copyright 2015 Enrico Liboni <eliboni@users.sourceforge.net>
 
 This file is part of art-dbcp.
 

@@ -47,7 +47,7 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 		} else {
 			throw new IllegalArgumentException("Unsupported report type: " + reportType);
 		}
-		
+
 		setHasTooltips(true);
 	}
 
@@ -56,10 +56,9 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 		Objects.requireNonNull(rs, "resultset must not be null");
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
-		
-		//resultset structure
-		//category, value [,link]
 
+		//resultset structure
+		//category, value [, link]
 		while (rs.next()) {
 			String category = rs.getString(1);
 			double value = rs.getDouble(2);
@@ -118,8 +117,8 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 		NumberFormat nf = NumberFormat.getInstance(getLocale());
 		String formattedValue = nf.format(dataValue);
 
-		//category name and value
-		//return String.valueOf(key) + "=" + formattedValue;
+		//in case one wishes to show category names
+		//String categoryName = String.valueOf(key);
 		return formattedValue;
 	}
 

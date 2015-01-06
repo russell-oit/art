@@ -17,12 +17,14 @@
 package art.runreport;
 
 import art.chart.AbstractChart;
+import art.chart.CategoryBasedChart;
 import art.chart.ChartUtils;
 import art.chart.PieChart;
 import art.chart.PostProcessorDefinition;
 import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
+import art.chart.XYZBasedChart;
 import art.dbutils.ArtDbUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
@@ -530,8 +532,23 @@ public class RunReportController {
 						case DateSeriesChart:
 							chart = new TimeSeriesBasedChart(reportType);
 							break;
+						case LineChart:
+						case HorizontalBar2DChart:
+						case HorizontalBar3DChart:
+						case VerticalBar2DChart:
+						case VerticalBar3DChart:
+						case StackedHorizontalBar2DChart:
+						case StackedHorizontalBar3DChart:
+						case StackedVerticalBar2DChart:
+						case StackedVerticalBar3DChart:
+							chart = new CategoryBasedChart(reportType);
+							break;
+						case BubbleChart:
+						case HeatmapChart:
+							chart=new XYZBasedChart(reportType);
+							break;
 						default:
-							throw new IllegalArgumentException("Unexpected chart report type" + reportType);
+							throw new IllegalArgumentException("Unexpected chart report type: " + reportType);
 					}
 
 					//TODO set effective chart options. default to report options but override with html parameters

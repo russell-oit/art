@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
@@ -67,8 +67,8 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 
 		//resultset structure
-		//static series: xValue (date), [,link], series 1 yValue [,series 2 yValue, ...]
-		//dynamic series: xValue (date) [,link], seriesName, yValue
+		//static series: date [, link], series 1 value [, series 2 value, ...]
+		//dynamic series: date [, link], seriesName, value
 		int hop = 0;
 		if (isHasHyperLinks()) {
 			hop = 1;
@@ -85,7 +85,8 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 
 		int seriesCount; //start series index at 0 as generateLink() uses zero-based indices to idenfity series
 		Map<Integer, TimeSeries> finalSeries = new HashMap<>(); //<series index, series>
-		Map<String, Integer> existingSeries = new HashMap<>(); //<series name, series index>
+		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
+		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
 
 		if (dynamicSeries) {
 			seriesCount = 0;
@@ -100,7 +101,11 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 			}
 		}
 
+		int rowCount = 0;
+
 		while (rs.next()) {
+			rowCount++;
+
 			Date date;
 			if (reportType == ReportType.TimeSeriesChart) {
 				date = rs.getTimestamp(1);
@@ -113,24 +118,37 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 				String seriesName = rs.getString(2 + hop);
 				double yValue = rs.getDouble(3 + hop);
 
-				//has this series already appeared?
+				//set series name
 				int seriesIndex;
-				if (existingSeries.containsKey(seriesName)) {
-					seriesIndex = existingSeries.get(seriesName);
+				if (seriesIndices.containsKey(seriesName)) {
+					seriesIndex = seriesIndices.get(seriesName);
 				} else {
 					seriesIndex = seriesCount;
-					existingSeries.put(seriesName, seriesIndex);
+					seriesIndices.put(seriesName, seriesIndex);
 					finalSeries.put(seriesIndex, new TimeSeries(seriesName));
 					seriesCount++;
 				}
 
-				prepareSeries(rs, finalSeries, seriesIndex, yValue, date, seriesName);
+				//set item index
+				int itemIndex;
+				if (itemIndices.containsKey(seriesName)) {
+					int maxItemIndex = itemIndices.get(seriesName);
+					itemIndex = maxItemIndex + 1;
+				} else {
+					//first item in this series. use zero-based indices
+					itemIndex = 0;
+				}
+				itemIndices.put(seriesName, itemIndex);
+
+				addData(rs, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 			} else {
+				int itemIndex = rowCount - 1; //-1 to get zero-based index
+
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = rsmd.getColumnLabel(columnIndex);
 					double yValue = rs.getDouble(columnIndex);
-					prepareSeries(rs, finalSeries, seriesIndex, yValue, date, seriesName);
+					addData(rs, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 				}
 			}
 		}
@@ -143,8 +161,8 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 		setDataset(dataset);
 	}
 
-	private void prepareSeries(ResultSet rs, Map<Integer, TimeSeries> finalSeries,
-			int seriesIndex, double yValue, Date date, String seriesName) throws SQLException {
+	private void addData(ResultSet rs, Map<Integer, TimeSeries> finalSeries,
+			int seriesIndex, int itemIndex, double yValue, Date date, String seriesName) throws SQLException {
 
 		//add dataset value
 		if (reportType == ReportType.TimeSeriesChart) {
@@ -153,20 +171,20 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 			finalSeries.get(seriesIndex).add(new Day(date), yValue);
 		}
 
-		//use series index, y data value and x data value to identify url in hashmap
-		//to ensure correct link will be returned in generatelink. 
+		//use series index and item index to identify url in hashmap
+		//to ensure correct link will be returned by the generatelink() method. 
 		//use series index instead of name because the generateLink() method uses series indices
-		long timestamp = date.getTime();
-		String linkId = seriesIndex + String.valueOf(yValue) + String.valueOf(timestamp);
+		String linkId = String.valueOf(seriesIndex) + String.valueOf(itemIndex);
 
 		//add hyperlink if required
 		addHyperLink(rs, linkId);
 
 		//add drilldown link if required
+		long timestamp = date.getTime();
 		addDrilldownLink(yValue, timestamp, seriesName, linkId);
 	}
 
-	private void addDrilldownLink(double yValue, long timestamp, String seriesName, String key) {
+	private void addDrilldownLink(double yValue, long timestamp, String seriesName, String linkId) {
 		//set drill down links
 		if (getDrilldown() != null) {
 			StringBuilder sb = new StringBuilder(200);
@@ -178,10 +196,11 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 			if (getDrilldownParams() != null) {
 				for (Parameter drilldownParam : getDrilldownParams()) {
 					//drill down on col 1 = y value (data value)
-					//drill down on col 2 = x value (category/date)
+					//drill down on col 2 = x value (date)
 					//drill down on col 3 = series name
 					String paramName = drilldownParam.getName();
 					String paramValue;
+					
 					if (drilldownParam.getDrilldownColumnIndex() == 1) {
 						paramValue = String.valueOf(yValue);
 					} else if (drilldownParam.getDrilldownColumnIndex() == 2) {
@@ -189,6 +208,7 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 					} else {
 						paramValue = seriesName;
 					}
+					
 					addUrlParameter(paramName, paramValue, sb);
 				}
 			}
@@ -197,18 +217,16 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 			addParentParameters(sb);
 
 			String drilldownUrl = sb.toString();
-			getDrilldownLinks().put(key, drilldownUrl);
+			getDrilldownLinks().put(linkId, drilldownUrl);
 		}
 	}
 
 	@Override
 	public String generateToolTip(XYDataset data, int series, int item) {
-		//display formatted values
-
-		NumberFormat nf = NumberFormat.getInstance(getLocale());
-
 		//format y value
 		double yValue = data.getYValue(series, item);
+
+		NumberFormat nf = NumberFormat.getInstance(getLocale());
 		String formattedYValue = nf.format(yValue);
 
 		//format x value (date)
@@ -226,12 +244,7 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 	public String generateLink(Object data, int series, int item) {
 		String link = "";
 
-		XYDataset xyDataset = (XYDataset) data;
-
-		double yValue = xyDataset.getYValue(series, item);
-		long xValue = (long) xyDataset.getXValue(series, item);
-
-		String key = String.valueOf(series) + String.valueOf(yValue) + String.valueOf(xValue);
+		String key = String.valueOf(series) + String.valueOf(item);
 
 		if (getHyperLinks() != null) {
 			link = getHyperLinks().get(key);

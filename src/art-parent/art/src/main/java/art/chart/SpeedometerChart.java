@@ -52,7 +52,7 @@ public class SpeedometerChart extends AbstractChart {
 	private int rangeCount;
 
 	public SpeedometerChart() {
-		setType("meter"); //cewolf chart type as per <cewolf:chart type attribute. also listed in de.laures.cewolf.taglib.ChartTypes class code
+		setType("meter"); //cewolf chart type as per <cewolf:chart type attribute. not case sensitive. also listed in de.laures.cewolf.taglib.ChartTypes class code
 	}
 
 	//prepare graph data structures with query results
@@ -60,10 +60,13 @@ public class SpeedometerChart extends AbstractChart {
 	public void fillDataset(ResultSet rs) throws SQLException {
 		Objects.requireNonNull(rs, "resultset must not be null");
 
+		DefaultValueDataset dataset = new DefaultValueDataset();
+		
+		//resultset structure
+		//dataValue, minValue, maxValue, unitsDescription [, ranges]
+		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
-
-		DefaultValueDataset dataset = new DefaultValueDataset();
 
 		if (rs.next()) {
 			dataset.setValue(rs.getDouble(1));

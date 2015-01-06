@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
@@ -73,7 +74,7 @@ import org.jfree.ui.TextAnchor;
 public abstract class AbstractChart extends AbstractChartDefinition implements DatasetProducer, ChartPostProcessor {
 
 	private static final long serialVersionUID = 1L;
-	private final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
+	protected final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 
 	private int height = 300;
@@ -433,19 +434,22 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	//<cewolf:chartpostprocessor> tag only allows passing of string parameters
 	@Override
 	public void processChart(JFreeChart chart, Map<String, String> params) {
-		//perform default processing
+		Objects.requireNonNull(chart, "chart must not be null");
+		
+		//perform chart post processing
 		prepareYAxisRange(chart);
 		prepareLabels(chart);
+		prepareXAxisLabelLines(chart);
 		showPoints(chart);
 		rotateLabels(chart);
 	}
 
-	private void prepareYAxisRange(JFreeChart chart) {
+	protected void prepareYAxisRange(JFreeChart chart) {
 		if (chartOptions == null) {
 			return;
 		}
-
-		Plot plot = chart.getPlot();
+		
+		Plot plot=chart.getPlot();
 
 		//set y axis range if required
 		if (chartOptions.getyAxisMin() != 0 && chartOptions.getyAxisMax() != 0) {
@@ -461,12 +465,23 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 		}
 	}
 
+	private void prepareXAxisLabelLines(JFreeChart chart) {
+		Plot plot=chart.getPlot();
+		
+		if (plot instanceof CategoryPlot) {
+			CategoryPlot categoryPlot = (CategoryPlot) plot;
+			//for category based charts, make long x axis labels more readable by breaking them into separate lines
+			final int MAX_LABEL_LINES = 5;
+			categoryPlot.getDomainAxis().setMaximumCategoryLabelLines(MAX_LABEL_LINES);
+		}
+	}
+
 	private void prepareLabels(JFreeChart chart) {
 		if (chartOptions == null) {
 			return;
 		}
-
-		Plot plot = chart.getPlot();
+		
+		Plot plot=chart.getPlot();
 
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
 		if (chartOptions.isShowLabels() && labelFormat != null) {
