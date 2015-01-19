@@ -17,8 +17,10 @@
 package art.output;
 
 import art.dbutils.ArtDbUtils;
+import art.enums.ParameterType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.parameter.Parameter;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
@@ -119,7 +121,7 @@ public class JasperReportsOutput {
 
 			//pass query parameters
 			for (ReportParameter reportParam : reportParams) {
-				jasperReportsParams.put(reportParam.getParameter().getName(), reportParam.getActualParameterValues());
+				jasperReportsParams.put(reportParam.getParameter().getName(), reportParam.getEffectiveActualParameterValue());
 			}
 
 			//pass virtualizer if it's to be used

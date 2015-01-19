@@ -20,7 +20,6 @@ import art.chart.AbstractChart;
 import art.chart.CategoryBasedChart;
 import art.chart.ChartUtils;
 import art.chart.PieChart;
-import art.chart.PostProcessorDefinition;
 import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
@@ -28,6 +27,7 @@ import art.chart.XYZBasedChart;
 import art.dbutils.ArtDbUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
+import art.enums.ParameterDataType;
 import art.enums.ReportFormat;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
@@ -39,7 +39,7 @@ import art.graph.ArtSpeedometer;
 import art.graph.ArtTimeSeries;
 import art.graph.ArtXY;
 import art.graph.ArtXYZChart;
-import art.output.DirectReportOutput;
+import art.output.TabularOutput;
 import art.output.DirectReportOutputHandler;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlPlainOutput;
@@ -61,7 +61,12 @@ import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import art.utils.DrilldownQuery;
 import art.utils.NullAwareBeanUtilsBean;
+import de.laures.cewolf.ChartValidationException;
+import de.laures.cewolf.DatasetProduceException;
+import de.laures.cewolf.PostProcessingException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -75,14 +80,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jxls.exception.ParsePropertyException;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
@@ -111,7 +122,7 @@ public class RunReportController {
 	private ReportService reportService;
 
 	@Autowired
-	private ServletContext ctx;
+	private ServletContext servletContext;
 
 	@Autowired
 	private MessageSource messageSource;
@@ -127,7 +138,6 @@ public class RunReportController {
 
 		Report report = null;
 		User sessionUser = null;
-		ResultSet rs = null;
 		ReportRunner reportRunner = null;
 
 		runningReportsCount++;
@@ -189,22 +199,23 @@ public class RunReportController {
 			}
 
 			//get report format to use
+			ReportFormat reportFormat;
 			String reportFormatString = request.getParameter("reportFormat");
 			if (reportFormatString == null || StringUtils.equalsIgnoreCase(reportFormatString, "default")) {
 				if (reportType.isJasperReports()) {
-					reportFormatString = ReportFormat.pdf.getValue();
+					reportFormat = ReportFormat.pdf;
 				} else if (reportType.isChart()) {
-					reportFormatString = ReportFormat.html.getValue();
+					reportFormat = ReportFormat.html;
 				} else {
-					reportFormatString = ReportFormat.htmlDataTable.getValue();
+					reportFormat = ReportFormat.htmlDataTable;
 				}
+			} else {
+				reportFormat = ReportFormat.toEnum(reportFormatString);
 			}
-
-			ReportFormat reportFormat = ReportFormat.toEnum(reportFormatString);
 
 			//this will be initialized according to the content type of the report output
 			//setContentType() must be called before getWriter()
-			PrintWriter out = null;
+			PrintWriter writer = null;
 
 			boolean showReportHeaderAndFooter = true;
 			ReportOutputInterface o = null;
@@ -223,7 +234,7 @@ public class RunReportController {
 
 				//set the content type according to the report output class
 				response.setContentType(o.getContentType());
-				out = response.getWriter();
+				writer = response.getWriter();
 
 				if (isFragment) {
 					//report header and footer not shown for fragments
@@ -235,15 +246,15 @@ public class RunReportController {
 				}
 			} else {
 				response.setContentType("text/html; charset=UTF-8");
-				out = response.getWriter();
+				writer = response.getWriter();
 			}
 
 			//output page header. if showInline, page header and footer already exist. 
 			if (!showInline) {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
-				ctx.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
-				out.flush();
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
+				writer.flush();
 			}
 
 			long totalTime = 0;
@@ -254,7 +265,7 @@ public class RunReportController {
 				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
 				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
 				request.setAttribute("reportSource", cleanSource);
-				ctx.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
 			} else if (reportType == ReportType.Dashboard) {
 				// forward to the showDashboard page
 //			ctx.getRequestDispatcher("/user/showDashboard.jsp").forward(request, response);
@@ -269,14 +280,14 @@ public class RunReportController {
 				//output report header
 				if (showReportHeaderAndFooter) {
 					request.setAttribute("reportName", reportName);
-					ctx.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
-					out.flush();
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoHeader.jsp").include(request, response);
+					writer.flush();
 
 					//display initial report progress
-					displayReportProgress(out, messageSource.getMessage("reports.message.configuring", null, locale));
+					displayReportProgress(writer, messageSource.getMessage("reports.message.configuring", null, locale));
 				}
 
-				//run query
+				//run report
 				Integer rowsRetrieved = null; //use Integer in order to have unknown status e.g. for template reports for which you can't know the number of rows in the report
 
 				long overallStartTime = System.currentTimeMillis(); //overall start time
@@ -287,11 +298,6 @@ public class RunReportController {
 				reportRunner.setAdminSession(sessionUser.isAdminUser());
 
 				//prepare report parameters
-				ArtQuery aq = new ArtQuery();
-
-				Map<String, String> inlineParams = new HashMap<>();
-				Map<String, String[]> multiParams = new HashMap<>();
-
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
 
@@ -300,23 +306,18 @@ public class RunReportController {
 				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 				ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
-				//display parameters. contains param position and param object. use treemap so that params can be displayed in field position order
-				Map<Integer, ArtQueryParam> displayParams = new TreeMap<>();
+				//get parameter display values if parameters need to be shown in html or file output
+				//especially for lov values where display value may be different from data value
+				//use treemap so that params can be displayed in param position order
+				Map<Integer, String> parameterDisplayValues = new TreeMap<>();
 
-				//see if we should show parameter values in report output
-				boolean showParams = Boolean.valueOf(request.getParameter("showParams"));
-				if (report.isParametersInOutput()) {
-					//always show params. especially for drill down reports
+				boolean showParams = false;
+				if (reportOptions.isShowParameters() || report.isParametersInOutput()) {
 					showParams = true;
-				}
-
-				if (showParams) {
 					//get display values for selections from lov parameters
 					ParameterService parameterService = new ParameterService();
 
-					for (Map.Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
-						ReportParameter reportParam = entry.getValue();
-
+					for (ReportParameter reportParam : reportParamsList) {
 						Parameter param = reportParam.getParameter();
 						if (param.isUseLov()) {
 							//get all possible lov values.							
@@ -335,17 +336,38 @@ public class RunReportController {
 									}
 								}
 							}
-							reportParam.setLovValues(lovReportRunner.getLovValues(false)); //false=don't apply rules
+							boolean applyFilters = false; //don't apply filters so as to get all values
+							Map<Object, String> lovValues = lovReportRunner.getLovValues(applyFilters);
+
+							//convert strings to appropriate objects e.g. when values come from a static lov
+							for (Entry<Object, String> entry : lovValues.entrySet()) {
+								Object objectValue = entry.getKey();
+								if (objectValue instanceof String) {
+									String stringValue = (String) objectValue;
+									Object newObjectValue = paramProcessor.convertParameterValue(stringValue, param.getDataType());
+									lovValues.put(newObjectValue, entry.getValue());
+								}
+							}
+
+							reportParam.setLovValues(lovValues);
+
+							parameterDisplayValues.put(reportParam.getPosition(), reportParam.getDisplayValues());
 						}
 					}
 				}
 
 				reportRunner.setReportParamsMap(reportParamsMap);
 
+				// JavaScript code to write status
+				if (showReportHeaderAndFooter) {
+					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
+				}
+
 				//is scroll insensitive much slower than forward only?
 				int resultSetType;
 				if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
-						|| reportType == ReportType.Group || reportType.isChart()) {
+						|| reportType == ReportType.Group
+						|| (reportType.isChart() && parameterChartOptions.isShowData())) {
 					//need scrollable resultset for jasper and jxls art report in order to display record count
 					//need scrollable resultset in order to generate group report
 					//need scrollable resultset for charts for show data option
@@ -356,26 +378,10 @@ public class RunReportController {
 					resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 				}
 
-				// JavaScript code to write status
-				if (showReportHeaderAndFooter) {
-					displayReportProgress(out, messageSource.getMessage("reports.message.running", null, locale));
-				}
-
 				//run query
 				long queryStartTime = System.currentTimeMillis();
 				reportRunner.execute(resultSetType);
 				long queryEndTime = System.currentTimeMillis();
-
-				//get final sql with parameter placeholders replaced with parameter values
-				String finalSql = reportRunner.getFinalSql();
-
-				//determine if final sql should be shown. only admins can see sql
-				boolean showSql;
-				if (Boolean.valueOf(request.getParameter("showSql")) && sessionUser.isAdminUser()) {
-					showSql = true;
-				} else {
-					showSql = false;
-				}
 
 				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
@@ -392,311 +398,61 @@ public class RunReportController {
 
 					String reportInfo = "<b>" + reportName + "</b>" + description + " :: " + startTimeString;
 
-					displayReportInfo(out, reportInfo);
+					displayReportInfo(writer, reportInfo);
 
-					displayReportProgress(out, messageSource.getMessage("reports.message.fetchingData", null, locale));
+					displayReportProgress(writer, messageSource.getMessage("reports.message.fetchingData", null, locale));
 
 					//display parameters
 					if (showParams) {
-						DirectReportOutputHandler.displayParameters(out, displayParams,
-								messageSource.getMessage("reports.text.allItems", null, locale));
+						request.setAttribute("parameterDisplayValues", parameterDisplayValues);
+						servletContext.getRequestDispatcher("/WEB-INF/jsp/showReportParameters.jsp").include(request, response);
 					}
 
-					//display final sql
-					if (showSql) {
-						DirectReportOutputHandler.displayFinalSQL(out, finalSql);
+					//display final sql. only admins can see sql
+					//determine if final sql should be shown. only admins can see sql
+					if (reportOptions.isShowSql() && sessionUser.isAdminUser()) {
+						//get estimate final sql with parameter placeholders replaced with parameter values
+						String finalSql = reportRunner.getFinalSql();
+						request.setAttribute("finalSql", finalSql);
+						servletContext.getRequestDispatcher("/WEB-INF/jsp/showFinalSql.jsp").include(request, response);
 					}
 
-					out.flush();
+					//TODO omit. limit flushing?
+					writer.flush();
 				}
 
-				//generate base components of file name to use for report types and formats that generate files
-				String baseFileName = ArtUtils.getUniqueFileName(report.getReportId());
-				String exportPath = ArtConfig.getReportsExportPath();
-
-				//generate report output
-				if (reportType.isJasperReports() || reportType.isJxls()) {
-					String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
-					String outputFileName = exportPath + fileName;
-
-					if (reportType.isJasperReports()) {
-						JasperReportsOutput jrOutput = new JasperReportsOutput();
-						if (reportType == ReportType.JasperReportsTemplate) {
-							//report will use query in the report template
-							jrOutput.generateReport(report, reportParamsList, reportType, reportFormat, outputFileName);
-						} else {
-							//report will use data from art query
-							rs = reportRunner.getResultSet();
-							jrOutput.setResultSet(rs);
-							jrOutput.generateReport(report, reportParamsList, reportType, reportFormat, outputFileName);
-							rowsRetrieved = getNumberOfRows(rs);
-						}
-					} else {
-						//jxls output
-						JxlsOutput jxlsOutput = new JxlsOutput();
-						if (reportType == ReportType.JxlsTemplate) {
-							//report will use query in the jxls template
-							jxlsOutput.generateReport(report, reportParamsList, reportType, outputFileName);
-						} else {
-							//report will use data from art query
-							rs = reportRunner.getResultSet();
-							jxlsOutput.setResultSet(rs);
-							jxlsOutput.generateReport(report, reportParamsList, reportType, outputFileName);
-							rowsRetrieved = getNumberOfRows(rs);
-						}
-					}
-
-					//display link to access report
-					request.setAttribute("fileName", fileName);
-					ctx.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
-				} else if (reportType == ReportType.Update) {
+				if (reportType == ReportType.Update) {
 					int rowsUpdated = reportRunner.getUpdateCount(); // will be -1 if query has multiple statements
 					request.setAttribute("rowsUpdated", "" + rowsUpdated);
 //						ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
-				} else if (reportType == ReportType.Group) {
-					rs = reportRunner.getResultSet();
-
-					String splitColParameter = request.getParameter("splitColumn");
-					int splitCol;
-					if (splitColParameter == null) {
-						splitCol = reportTypeId;
-					} else {
-						splitCol = Integer.parseInt(splitColParameter);
-					}
-
-					rowsRetrieved = DirectReportOutputHandler.generateGroupReport(out, rs, splitCol);
-				} else if (reportType.isChart()) {
-					rs = reportRunner.getResultSet();
-
-//					//do initial preparation of graph object
-//					ArtGraph ag = prepareChartDetails(rs, request, report);
-//
-//					//set other properties relevant for the graph display
-//					if (showSql) {
-//						request.setAttribute("showSQL", "true");
-//						request.setAttribute("finalSQL", finalSql);
-//					}
-//
-//					if (showParams) {
-//						request.setAttribute("showParams", "true");
-//						ag.setDisplayParameters(displayParams);
-//					}
-//
-//					//add drill down queries
-//					Map<Integer, DrilldownQuery> drilldownQueries = aq.getDrilldownQueries(reportId);
-//
-//					//build graph dataset
-//					ag.prepareDataset(rs, drilldownQueries, inlineParams, multiParams);
-//
-//					//enable file names to contain query name
-//					//set base file name
-//					Date today = new Date();
-//					SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
-//					String filename = username + "-" + reportName + "-" + dateFormatter.format(today) + ArtUtils.getRandomFileNameString();
-//					filename = ArtUtils.cleanFileName(filename);
-//					request.setAttribute("baseFileName", filename);
-//
-//					//allow direct url not to need _query_id
-//					request.setAttribute("queryType", Integer.valueOf(reportTypeId));
-//
-//					//allow use of both QUERY_ID and queryId in direct url
-//					request.setAttribute("queryId", Integer.valueOf(reportId));
-//
-//					//pass graph object
-//					request.setAttribute("artGraph", o);
-//
-//					//graph. set output format and forward to the rendering page
-//					if (StringUtils.equalsIgnoreCase(reportFormatString, "graph")) {
-//						//only display graph on the browser
-//						request.setAttribute("outputToFile", "nofile");
-//					} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pdfgraph")) {
-//						//additionally generate graph in a pdf file
-//						request.setAttribute("outputToFile", "pdf");
-//					} else if (StringUtils.equalsIgnoreCase(reportFormatString, "pnggraph")) {
-//						//additionally generate graph as a png file
-//						request.setAttribute("outputToFile", "png");
-//					}
-					AbstractChart chart;
-					switch (reportType) {
-						case Pie2DChart:
-						case Pie3DChart:
-							chart = new PieChart(reportType);
-							break;
-						case SpeedometerChart:
-							chart = new SpeedometerChart();
-							break;
-						case XYChart:
-							chart = new XYChart();
-							break;
-						case TimeSeriesChart:
-						case DateSeriesChart:
-							chart = new TimeSeriesBasedChart(reportType);
-							break;
-						case LineChart:
-						case HorizontalBar2DChart:
-						case HorizontalBar3DChart:
-						case VerticalBar2DChart:
-						case VerticalBar3DChart:
-						case StackedHorizontalBar2DChart:
-						case StackedHorizontalBar3DChart:
-						case StackedVerticalBar2DChart:
-						case StackedVerticalBar3DChart:
-							chart = new CategoryBasedChart(reportType);
-							break;
-						case BubbleChart:
-						case HeatmapChart:
-							chart=new XYZBasedChart(reportType);
-							break;
-						default:
-							throw new IllegalArgumentException("Unexpected chart report type: " + reportType);
-					}
-
-					//TODO set effective chart options. default to report options but override with html parameters
-					//using object wrappers will require extra null checks e.g. if boolean property is true
-					//alternatively use helper libraries e.g. commons-lang, BooleanUtils.isTrue( bool )
-//					ChartOptions reportChartOptions = report.getChartOptions();
-//					ChartOptions effectiveChartOptions = reportChartOptions;
-//					BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
-//					notNull.copyProperties(effectiveChartOptions, parameterChartOptions);
-					
-					//TODO set default label format. {2} for category based charts
-					//{0} ({2}) for pie chart html output
-					//{0} = {1} ({2}) for pie chart png and pdf output
-					
-					chart.setLocale(request.getLocale());
-					chart.setChartOptions(parameterChartOptions);
-					
-					List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
-					Drilldown drilldown;
-					if (drilldowns.isEmpty()) {
-						drilldown = null;
-					} else {
-						drilldown = drilldowns.get(0);
-					}
-					chart.setDrilldown(drilldown);
-
-					chart.prepareDataset(rs);
-
-					List<PostProcessorDefinition> externalPostProcessors = new ArrayList<>();
-
-					PostProcessorDefinition pp = new PostProcessorDefinition();
-					pp.setId("chart");
-
-					Map<String, String> internalPostProcessorParams = new HashMap<>();
-					internalPostProcessorParams.put("showLegend", request.getParameter("showLegend"));
-
-					pp.setParams(internalPostProcessorParams);
-
-//					postProcessors.add(pp);
-					chart.setInternalPostProcessorParams(internalPostProcessorParams);
-
-					ChartUtils.prepareTheme(ArtConfig.getSettings().getPdfFontName());
-
-					//store data for potential use in pdf output
-					RowSetDynaClass data = null;
-					if (parameterChartOptions.isShowData()) {
-						int rsType = rs.getType();
-						if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-							rs.beforeFirst();
-							boolean lowercaseColumnNames = false;
-							boolean useColumnAlias = true;
-							data = new RowSetDynaClass(rs, lowercaseColumnNames, useColumnAlias);
-						}
-
-					}
-
-					if (reportFormat == ReportFormat.html) {
-						request.setAttribute("chart", chart);
-
-						String htmlElementId = "chart-" + reportId;
-						request.setAttribute("htmlElementId", htmlElementId);
-
-						request.setAttribute("externalPostProcessors", externalPostProcessors);
-
-						ctx.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
-					} else {
-						String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
-						String outputFileName = exportPath + fileName;
-
-						chart.generateFile(reportFormat, outputFileName, data);
-						//display link to access report
-						request.setAttribute("fileName", fileName);
-						ctx.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
-					}
-					rowsRetrieved = getNumberOfRows(rs);
 				} else {
-					//direct output report. "standard/tabular" or crosstab reports
-					//get query results
-					// it is a "select" query or a procedure ending with a select statement
-					rs = reportRunner.getResultSet();
+					//generate output
+					//generate file name to use for report types and formats that generate files
+					String baseFileName = ArtUtils.getUniqueFileName(reportId);
+					String exportPath = ArtConfig.getReportsExportPath();
 
-					ActionResult outputResult;
+					String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
+					String outputFileName = exportPath + fileName;
 
-					//set output object properties if required
-					if (o != null) {
-						o.setMaxRows(ArtConfig.getMaxRows(reportFormatString));
-						o.setWriter(out);
-						o.setQueryName(reportName);
-						o.setFileUserName(username);
-//						o.setExportPath(exportPath);
+					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 
-						//don't set displayparams for html view modes. parameters will be displayed by this servlet
-						if (!StringUtils.containsIgnoreCase(reportFormatString, "html")) {
-							o.setDisplayParameters(displayParams);
-						}
+					reportOutputGenerator.setDrilldownService(drilldownService);
+					reportOutputGenerator.setRequest(request);
+					reportOutputGenerator.setResponse(response);
+					reportOutputGenerator.setServletContext(servletContext);
 
-						//ensure htmlplain output doesn't display parameters if inline
-						if (o instanceof HtmlPlainOutput) {
-							HtmlPlainOutput hpo = (HtmlPlainOutput) o;
-							hpo.setDisplayInline(showInline);
-
-							//ensure parameters are displayed if not in inline mode
-							hpo.setDisplayParameters(displayParams);
-						}
-
-						//enable localization for datatable output
-						if (o instanceof HtmlDataTableOutput) {
-							HtmlDataTableOutput dt = (HtmlDataTableOutput) o;
-							dt.setLocale(request.getLocale());
-						}
-
-						if (o instanceof DirectReportOutput) {
-							DirectReportOutput dro = (DirectReportOutput) o;
-							dro.setContextPath(request.getContextPath());
-						}
-
-						if (reportType.isCrosstab()) {
-							outputResult = DirectReportOutputHandler.flushXOutput(o, rs);
-						} else {
-
-							//add support for drill down queries
-							Map<Integer, DrilldownQuery> drilldownQueries = null;
-							if (reportFormat.isHtml()) {
-								//only drill down for html output. drill down query launched from hyperlink                                            
-								drilldownQueries = aq.getDrilldownQueries(reportId);
-							}
-							outputResult = DirectReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
-
-						}
-
-						if (outputResult.isSuccess()) {
-							rowsRetrieved = (Integer) outputResult.getData();
-						} else {
-							model.addAttribute("message", outputResult.getMessage());
-							return errorPage;
-						}
-					}
-
+					reportOutputGenerator.generateOutput(report, reportRunner, reportType,
+							reportFormat, locale, paramProcessorResult, o, writer, fileName, outputFileName);
 				}
 
 				// Print the "working" time elapsed
 				// The time elapsed from a user perspective can be bigger because the servlet output
 				// is "cached and transmitted" over the network by the servlet engine.
-				long endTime = System.currentTimeMillis();
+				long overallEndTime = System.currentTimeMillis();
 
-				totalTime = (endTime - overallStartTime) / (1000);
+				totalTime = (overallEndTime - overallStartTime) / (1000);
 				fetchTime = (queryEndTime - queryStartTime) / (1000);
-				double preciseTotalTime = (endTime - overallStartTime) / (double) 1000;
+				double preciseTotalTime = (overallEndTime - overallStartTime) / (double) 1000;
 				NumberFormat nf = NumberFormat.getInstance(request.getLocale());
 				DecimalFormat df = (DecimalFormat) nf;
 				df.applyPattern("#,##0.0##");
@@ -716,16 +472,16 @@ public class RunReportController {
 						request.setAttribute("rowsRetrieved", df.format(rowsRetrieved));
 					}
 
-					ctx.getRequestDispatcher("/WEB-INF/jsp/runReportInfoFooter.jsp").include(request, response);
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoFooter.jsp").include(request, response);
 
 					//clear report progress
-					displayReportProgress(out, "");
+					displayReportProgress(writer, "");
 				}
 			}
 
 			if (!showInline) {
 				request.setAttribute("reportFormat", reportFormat.getValue());
-				ctx.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 
 			ArtHelper.log(username, "query", request.getRemoteAddr(), reportId, totalTime, fetchTime, "query, " + reportFormatString);
@@ -739,7 +495,6 @@ public class RunReportController {
 			return errorPage;
 		} finally {
 			runningReportsCount--;
-			ArtDbUtils.close(rs);
 			if (reportRunner != null) {
 				reportRunner.close();
 			}
@@ -748,205 +503,21 @@ public class RunReportController {
 		return null;
 	}
 
-	//prepare chart object and options for generation and display
-	private ArtGraph prepareChartDetails(ResultSet rs, HttpServletRequest request,
-			Report report) throws SQLException {
-
-		ResultSetMetaData rsmd = rs.getMetaData();
-
-		String shortDescription = report.getShortDescription();
-		String xAxisLabel = report.getxAxisLabel();
-		String yAxisLabel = report.getyAxisLabel();
-		String graphOptions = report.getChartOptionsSetting();
-
-		ReportType chartType = ReportType.toEnum(report.getReportTypeId());
-
-		int queryType = report.getReportTypeId();
-
-		ArtGraph o;
-
-		switch (chartType) {
-			case XYChart:
-				o = new ArtXY();
-				break;
-			case Pie2DChart:
-			case Pie3DChart:
-				o = new ArtPie();
-				break;
-			case TimeSeriesChart:
-				o = new ArtTimeSeries();
-				break;
-			case DateSeriesChart:
-				o = new ArtDateSeries();
-				break; //  this line was missing... added thanks to anonymous post in sf
-			case SpeedometerChart:
-				o = new ArtSpeedometer();
-				break;
-			case BubbleChart:
-			case HeatmapChart:
-				o = new ArtXYZChart();
-				o.setQueryType(queryType);
-				break;
-			default: //-3,-4,-5,-8,-9,-14,-15,-16,-17
-				o = new ArtCategorySeries();
-		}
-
-		String link = rsmd.getColumnLabel(2);
-		if (link.equals("LINK")) {
-			o.setUseHyperLinks(true);
-		} else {
-			o.setUseHyperLinks(false);
-		}
-
-		int width;
-		int height;
-		String bgColor;
-
-		// @200x100 -10:100 #FFFFFF nolegend nolabels
-		// = make a chart 200px width 100px height focused
-		//  on Y range from -10 to 100  with a white backround, without legend and labels
-		String params = request.getParameter("_GRAPH_SIZE");
-		boolean customParam = false;
-		if (StringUtils.isNotBlank(params) && !params.equalsIgnoreCase("DEFAULT")) {
-			customParam = true;
-		}
-
-		String tmp;
-		String options = "";
-		boolean usingShortDescription = true; //to accomodate graph options in short description string for art pre-2.0
-
-		int indexOf = shortDescription.lastIndexOf("@");
-		if (indexOf > -1) {
-			options = shortDescription;
-			shortDescription = shortDescription.substring(0, indexOf);
-		}
-
-		if (graphOptions != null) {
-			options = graphOptions;
-			usingShortDescription = false;
-		}
-
-		if (customParam) {
-			tmp = params;
-			usingShortDescription = false;
-		} else {
-			tmp = options;
-		}
-
-		//process graph options string
-		ArtQuery aq = new ArtQuery();
-		aq.setQueryType(queryType);
-		aq.setGraphDisplayOptions(tmp, usingShortDescription);
-
-		double yMin = aq.getGraphYMin();
-		double yMax = aq.getGraphYMax();
-		width = aq.getGraphWidth();
-		height = aq.getGraphHeight();
-		bgColor = aq.getGraphBgColor();
-		boolean showLegend = aq.isShowLegend();
-		boolean showLabels = aq.isShowLabels();
-		boolean showPoints = aq.isShowPoints();
-		boolean showGraphData = aq.isShowGraphData();
-		int rotateAt = aq.getGraphRotateAt();
-		int removeAt = aq.getGraphRemoveAt();
-
-		request.setAttribute("_rotate_at", String.valueOf(rotateAt));
-		request.setAttribute("_remove_at", String.valueOf(removeAt));
-
-		if (yMin < yMax) {
-			request.setAttribute("_from", String.valueOf(yMin)); //cewolf expects strings
-			request.setAttribute("_to", String.valueOf(yMax));
-		}
-
-		if (!showLegend) {
-			request.setAttribute("_nolegend", "true");
-		}
-
-		if (showLabels) {
-			request.setAttribute("_showlabels", "true");
-		} else {
-			request.setAttribute("_nolabels", "true");
-		}
-
-		if (showPoints) {
-			request.setAttribute("_showpoints", "true");
-		}
-
-		//override show legend, labels, data points with values selected using checkboxes.
-		//only override if from showparams.jsp. if displayed from direct url or dashboard, no chance to change settings using check boxes
-		if (request.getParameter("_GRAPH_SIZE") != null) {
-			if (request.getParameter("_showLegend") == null) {
-				request.setAttribute("_nolegend", "true");
-			} else {
-				request.removeAttribute("_nolegend");
-			}
-			if (request.getParameter("_showLabels") == null) {
-				request.removeAttribute("_showlabels");
-			} else {
-				request.setAttribute("_showlabels", "true");
-			}
-			if (request.getParameter("_showDataPoints") == null) {
-				request.removeAttribute("_showpoints");
-			} else {
-				request.setAttribute("_showpoints", "true");
-			}
-			if (request.getParameter("_showGraphData") == null) {
-				showGraphData = false;
-			} else {
-				showGraphData = true;
-			}
-		}
-
-		o.setTitle(shortDescription);
-		o.setWidth(width);
-		o.setHeight(height);
-		o.setSeriesName(rsmd.getColumnLabel(2));
-		o.setBgColor(bgColor);
-		o.setShowGraphData(showGraphData);
-
-		//set some graph properties
-		o.setXAxisLabel(xAxisLabel);
-		if (yAxisLabel == null) {
-			yAxisLabel = rsmd.getColumnLabel(1);
-		}
-		o.setYAxisLabel(yAxisLabel);
-
-		return o;
-
-	}
-
-	//get number of rows in a resultset.
-	private Integer getNumberOfRows(ResultSet rs) {
-		Integer rowsRetrieved = null;
-
-		try {
-			if (rs != null) {
-				int rsType = rs.getType();
-				if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
-					//resultset is scrollable
-					rs.last();
-					rowsRetrieved = rs.getRow();
-					rs.beforeFirst();
-				}
-			}
-		} catch (SQLException ex) {
-			//not all drivers support this technique? If not supported, set number of rows to unknown
-			rowsRetrieved = null;
-			logger.error("Error", ex);
-		}
-
-		return rowsRetrieved;
-	}
-
 	private void displayReportProgress(PrintWriter out, String message) {
-		out.println("<script type='text/javascript'>$('reportProgress').html('"
-				+ message + "');</script>");
+		displayInfo(out, message, "reportProgress");
 		out.flush();
 	}
 
 	private void displayReportInfo(PrintWriter out, String message) {
-		out.println("<script type='text/javascript'>$('reportInfo').html('"
-				+ message + "');</script>");
+		displayInfo(out, message, "reportInfo");
+	}
+
+	private void displayInfo(PrintWriter out, String message, String elementId) {
+		//can use jquery, e.g. $('reportProgress').html(), but need to ensure jquery library 
+		//has been included in the page before calling this method
+		out.println("<script type='text/javascript'>"
+				+ "document.getElementById('" + elementId + "').innerHTML=" + message + ";"
+				+ "</script>");
 	}
 
 }

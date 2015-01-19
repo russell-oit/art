@@ -22,8 +22,6 @@ import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
-import art.runreport.ParameterProcessorResult;
-import art.runreport.ReportOptions;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -65,7 +63,7 @@ public class ParameterProcessor {
 	 * @throws java.sql.SQLException
 	 */
 	public ParameterProcessorResult processHttpParameters(
-			HttpServletRequest request, int reportId) throws SQLException {
+			HttpServletRequest request, int reportId) throws SQLException, ParseException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
@@ -94,7 +92,7 @@ public class ParameterProcessor {
 	 * @throws java.sql.SQLException
 	 */
 	public ParameterProcessorResult process(Map<String, String[]> passedValuesMap,
-			int reportId) throws SQLException {
+			int reportId) throws SQLException, ParseException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
@@ -105,10 +103,8 @@ public class ParameterProcessor {
 		List<ReportParameter> reportParamsList = reportParameterService.getReportParameters(reportId);
 
 		for (ReportParameter reportParam : reportParamsList) {
-			Parameter param = reportParam.getParameter();
-
 			//build map for easier lookup
-			reportParamsMap.put(param.getName(), reportParam);
+			reportParamsMap.put(reportParam.getParameter().getName(), reportParam);
 		}
 
 		setPassedParameterValues(passedValuesMap, reportParamsMap);
@@ -168,12 +164,14 @@ public class ParameterProcessor {
 		}
 	}
 
-	private void setActualParameterValues(List<ReportParameter> reportParamsList) throws NumberFormatException {
+	private void setActualParameterValues(List<ReportParameter> reportParamsList) throws NumberFormatException, ParseException {
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
 			logger.debug("param={}", param);
 
 			String[] passedValues = reportParam.getPassedParameterValues();
+
+			List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
 
 			if (param.getParameterType() == ParameterType.SingleValue) {
 				String actualValueString;
@@ -186,7 +184,8 @@ public class ParameterProcessor {
 
 				//convert string value to appropriate object
 				Object actualValue = convertParameterValue(actualValueString, param.getDataType());
-				reportParam.setActualParameterValues(actualValue);
+				actualValues.add(actualValue);
+				reportParam.setActualParameterValues(actualValues);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
 				List<String> actualValueStrings = new ArrayList<>();
 				if (passedValues == null) {
@@ -200,7 +199,6 @@ public class ParameterProcessor {
 					actualValueStrings.addAll(Arrays.asList(passedValues));
 				}
 
-				List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
 				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
 					//TODO get all values
 				} else {
@@ -216,8 +214,8 @@ public class ParameterProcessor {
 
 		}
 	}
-
-	private Object convertParameterValue(String value, ParameterDataType paramDataType) {
+	
+	public Object convertParameterValue(String value, ParameterDataType paramDataType) throws ParseException {
 		if (paramDataType.isNumeric()) {
 			return convertParameterValueToNumber(value, paramDataType);
 		} else if (paramDataType.isDate()) {
@@ -251,60 +249,52 @@ public class ParameterProcessor {
 		}
 	}
 
-	private Date convertParameterValueToDate(String value) {
+	private Date convertParameterValueToDate(String value) throws ParseException {
+		Date dateValue;
+
 		if (StringUtils.startsWithIgnoreCase(value, "add")) {
+			//e.g. add days 1
 			Calendar calendar = new GregorianCalendar();
-			try {
-				StringTokenizer st = new StringTokenizer(value, " ");
-				if (st.hasMoreTokens()) {
-					st.nextToken(); // skip 1st token
-					String token = st.nextToken().trim(); // get 2nd token, i.e. one of DAYS, MONTHS or YEARS
-					int field;
-					if (StringUtils.startsWithIgnoreCase(token, "year")) {
-						field = GregorianCalendar.YEAR;
-					} else if (StringUtils.startsWithIgnoreCase(token, "month")) {
-						field = GregorianCalendar.MONTH;
-					} else {
-						field = GregorianCalendar.DAY_OF_MONTH;
-					}
-					token = st.nextToken().trim(); // get last token, i.e. the offset (integer)
-					int offset = Integer.parseInt(token);
-					calendar.add(field, offset);
+			StringTokenizer st = new StringTokenizer(value, " ");
+			if (st.hasMoreTokens()) {
+				st.nextToken(); // skip 1st token, "add"
+				String token = st.nextToken().trim(); // get 2nd token, i.e. one of DAYS, MONTHS or YEARS
+				int field;
+				if (StringUtils.startsWithIgnoreCase(token, "year")) {
+					field = GregorianCalendar.YEAR;
+				} else if (StringUtils.startsWithIgnoreCase(token, "month")) {
+					field = GregorianCalendar.MONTH;
+				} else {
+					//days
+					field = GregorianCalendar.DAY_OF_MONTH;
 				}
-
-				return calendar.getTime();
-
-			} catch (NumberFormatException e) {
-				logger.error("Error", e);
+				token = st.nextToken().trim(); // get last token, i.e. the offset (integer)
+				int offset = Integer.parseInt(token);
+				calendar.add(field, offset);
 			}
-		}
 
-		//convert default date string as it is to a date
-		String dateFormat;
-		if (value == null || value.length() < 10) {
-			dateFormat = "yyyy-M-d";
-		} else if (value.length() == 10) {
-			dateFormat = "yyyy-MM-dd";
-		} else if (value.length() == 16) {
-			dateFormat = "yyyy-MM-dd HH:mm";
+			dateValue = calendar.getTime();
+		} else if (StringUtils.equalsIgnoreCase(value, "now")) {
+			dateValue = new Date();
 		} else {
-			dateFormat = "yyyy-MM-dd HH:mm:ss";
-		}
-		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-		dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
+			//convert date string as it is to a date
+			String dateFormat;
+			if (value == null || value.length() < 10) {
+				dateFormat = "yyyy-M-d";
+			} else if (value.length() == 10) {
+				dateFormat = "yyyy-MM-dd";
+			} else if (value.length() == 16) {
+				dateFormat = "yyyy-MM-dd HH:mm";
+			} else {
+				dateFormat = "yyyy-MM-dd HH:mm:ss";
+			}
 
-		java.util.Date dateValue;
-		try {
+			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+			dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
 			dateValue = dateFormatter.parse(value);
-		} catch (ParseException e) {
-			logger.debug("Defaulting {} to now", value, e);
-			//string could not be converted to a valid date. default to now
-			dateValue = new java.util.Date();
 		}
 
-		//return date
 		return dateValue;
-
 	}
 
 	private ReportOptions processReportOptions(Map<String, String[]> passedValuesMap) {
@@ -318,8 +308,12 @@ public class ParameterProcessor {
 			if (paramValues != null) {
 				String paramValue = paramValues[0];
 
-				if (StringUtils.equalsIgnoreCase(htmlParamName, "showParams")) {
+				if (StringUtils.equalsIgnoreCase(htmlParamName, "showParameters")) {
 					reportOptions.setShowParameters(Boolean.valueOf(paramValue));
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "splitColumn")) {
+					reportOptions.setSplitColumn(Integer.parseInt(paramValue));
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showSql")) {
+					reportOptions.setShowSql(Boolean.valueOf(paramValue));
 				}
 
 				//TODO process other params
@@ -347,9 +341,9 @@ public class ParameterProcessor {
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showPoints")) {
 					chartOptions.setShowPoints(Boolean.valueOf(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "rotateAt")) {
-					chartOptions.setRotateAt(Integer.valueOf(paramValue));
+					chartOptions.setRotateAt(Integer.parseInt(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "removeAt")) {
-					chartOptions.setRemoveAt(Integer.valueOf(paramValue));
+					chartOptions.setRemoveAt(Integer.parseInt(paramValue));
 				}
 
 				//TODO process other params

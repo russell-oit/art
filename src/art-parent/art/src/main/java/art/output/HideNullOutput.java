@@ -101,7 +101,7 @@ public class HideNullOutput implements ReportOutputInterface {
 	@Override
 	public void addCellString(String s) {
 		if (s == null) {
-			artOutputInterface.addCellString(" ");
+			artOutputInterface.addCellString("");
 		} else {
 			artOutputInterface.addCellString(s);
 		}
@@ -111,7 +111,7 @@ public class HideNullOutput implements ReportOutputInterface {
 	public void addCellDouble(Double d) {
 		if (d == null) {
 			if (ArtConfig.getSettings().getDisplayNull()== DisplayNull.NoNumbersAsBlank) {
-				artOutputInterface.addCellString(" "); //display nulls as blank space
+				artOutputInterface.addCellString(""); //display nulls as empty string
 			} else {
 				artOutputInterface.addCellDouble(0.0D); //display nulls as 0
 			}
@@ -124,7 +124,7 @@ public class HideNullOutput implements ReportOutputInterface {
 	public void addCellLong(Long i) {
 		if (i == null) {
 			if (ArtConfig.getSettings().getDisplayNull()== DisplayNull.NoNumbersAsBlank) {
-				artOutputInterface.addCellString(" "); //display nulls as blank space
+				artOutputInterface.addCellString(""); //display nulls as empty string
 			} else {
 				artOutputInterface.addCellLong(0L); //display nulls as 0
 			}

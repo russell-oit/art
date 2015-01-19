@@ -28,21 +28,8 @@ Display a chart report
 		<cewolf:producer id="chart"/>
 	</cewolf:data>
 
-	<%-- run external post processors --%>
-	<c:forEach var="pp" items="${externalPostProcessors}">
-		<cewolf:chartpostprocessor id="${pp.id}">
-			<c:forEach var="ppParam" items="${pp.params}">
-				<cewolf:param name="${ppParam.key}" value="${ppParam.value}"/>
-			</c:forEach>
-		</cewolf:chartpostprocessor>
-	</c:forEach>
-
-	<%-- run internal post processor --%>
-	<cewolf:chartpostprocessor id="chart">
-		<c:forEach var="ppParam" items="${chart.internalPostProcessorParams}">
-			<cewolf:param name="${ppParam.key}" value="${ppParam.value}"/>
-		</c:forEach>
-	</cewolf:chartpostprocessor>
+	<%-- run internal post processor. parameters are already set in the chart object, chartOptions property --%>
+	<cewolf:chartpostprocessor id="chart"/>
 </cewolf:chart>
 
 <cewolf:img 

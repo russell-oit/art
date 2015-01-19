@@ -24,6 +24,7 @@ import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
@@ -32,189 +33,106 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class HtmlGridOutput implements ReportOutputInterface, DirectReportOutput {
+public class HtmlGridOutput extends TabularOutput {
 
-	PrintWriter out;
-	int numberOfLines;
-	int maxRows;
-	NumberFormat nfPlain;
-	Map<Integer, ArtQueryParam> displayParams;
-	DecimalFormat nfSort;
-	private String contextPath;
-
-	/**
-	 * Constructor
-	 */
-	public HtmlGridOutput() {
-		numberOfLines = 0;
-		nfPlain = NumberFormat.getInstance();
-		nfPlain.setMinimumFractionDigits(0);
-		nfPlain.setGroupingUsed(true);
-		nfPlain.setMaximumFractionDigits(99);
-
-		//specifically use english locale for sorting e.g.
-		//in case default locale uses . as thousands separator
-		nfSort = (DecimalFormat) NumberFormat.getNumberInstance(Locale.ENGLISH);
-		nfSort.applyPattern("#.#");
-		//ensure all numbers are pre-padded with zeros so that sorting works correctly
-		nfSort.setMinimumIntegerDigits(20);
-		nfSort.setMaximumFractionDigits(99);
-	}
-
-	@Override
-	public String getFileName() {
-		return null; // this output mode does not generate external files
-	}
-
-	@Override
-	public String getName() {
-		return "Browser (Grid)";
-	}
-
-	@Override
-	public String getContentType() {
-		return "text/html;charset=utf-8";
-	}
-
-	@Override
-	public void setWriter(PrintWriter o) {
-		out = o;
-	}
-
-	@Override
-	public void setQueryName(String s) {
-		//not used
-	}
-
-	@Override
-	public void setFileUserName(String s) {
-		//not used. this output mode doesn't produce files
-	}
-
-	@Override
-	public void setMaxRows(int i) {
-		maxRows = i;
-	}
-
-	@Override
-	public void setColumnsNumber(int i) {
-		//not used
-	}
-
-	@Override
-	public void setExportPath(String s) {
-	}
-
-	@Override
-	public void setDisplayParameters(Map<Integer, ArtQueryParam> t) {
-		displayParams = t;
-	}
+	private final String CLOSE_RESULTS_TABLE_HTML="</tr></tbody></table></div>";
 
 	@Override
 	public void beginHeader() {
-
-		out.println("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + contextPath + "/css/htmlGridOutput.css\">");
+		//include required css and javascript files
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlGridOutput.css'>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/sorttable.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/htmlGridOutput.js'></script>");
 
-		//display parameters
-//		ReportOutputHandler.displayParameters(out, displayParams);
 		//start results table
-		out.println("<div style=\"border: 3px solid white\"><table class=\"sortable\" name=\"maintable\" id=\"maintable\" cellpadding=\"2\" cellspacing=\"0\" width=\"80%\">");
-		out.println(" <thead><tr>");
+		out.println("<div style='border: 3px solid white'>");
+		out.println("<table class='sortable' name='maintable' id='maintable'"
+				+ " cellpadding='2' cellspacing='0' width='80%'>");
+		out.println("<thead><tr>");
 	}
 
 	@Override
-	public void addHeaderCell(String s) {
-		out.println(" <th class=\"header\">" + s + "</th>");
+	public void addHeaderCell(String value) {
+		out.println("<th>" + value + "</th>");
 	}
 
 	@Override
-	public void addHeaderCellLeft(String s) {
-		out.println(" <th style=\"text-align: left\">" + s + "</th>");
+	public void addHeaderCellLeftAligned(String value) {
+		out.println("<th style='text-align: left'>" + value + "</th>");
 	}
 
 	@Override
 	public void endHeader() {
-		out.println(" </tr></thead>");
+		out.println("</tr></thead>");
 
 	}
 
 	@Override
-	public void beginLines() {
+	public void beginRows() {
 		out.println("<tbody>");
 	}
 
 	@Override
-	public void addCellString(String s) {
-		out.println("  <td style=\"text-align: left\">" + s + "</td>");
+	public void addCellString(String value) {
+		out.println("<td style='text-align: left'>" + value + "</td>");
 	}
 
 	@Override
-	public void addCellDouble(Double d) {
+	public void addCellNumeric(Double value) {
 		String formattedValue = null;
 		String sortValue = null;
-		if (d != null) {
-			formattedValue = nfPlain.format(d.doubleValue());
-			sortValue = nfSort.format(d.doubleValue());
+		if (value != null) {
+			formattedValue = actualNumberFormatter.format(value);
+			sortValue = sortNumberFormatter.format(value);
 		}
-		out.println("  <td align=\"right\" sorttable_customkey=\"" + sortValue + "\" >" + formattedValue + "</td>");
+		out.println("<td style='text-align: right' sorttable_customkey='"
+				+ sortValue + "' >" + formattedValue + "</td>");
 	}
 
 	@Override
-	public void addCellLong(Long i) {  // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		String formattedValue = null;
-		String sortValue = null;
-		if (i != null) {
-			formattedValue = nfPlain.format(i.longValue());
-			sortValue = nfSort.format(i.longValue());
+	public void addCellDate(Date value) {
+		String formattedValue = "";
+		long sortValue = 0;
+		if (value != null) {
+			sortValue = value.getTime();
+			formattedValue = ArtConfig.getDateDisplayString(value);
 		}
-		out.println("  <td align=\"right\" sorttable_customkey=\"" + sortValue + "\" >" + formattedValue + "</td>");
+		out.println("<td style='text-align: left' sorttable_customkey='"
+				+ sortValue + "' >" + formattedValue + "</td>");
 	}
 
 	@Override
-	public void addCellDate(java.util.Date d) {
-		String formattedValue;
-		long sortValue;
-		if (d == null) {
-			sortValue = 0;
-			formattedValue = "";
+	public boolean newRow() {
+		boolean canProceed;
+
+		rowCount++;
+
+		if (rowCount > maxRows) {
+			canProceed = false;
+
+			//close table
+			out.println(CLOSE_RESULTS_TABLE_HTML);
 		} else {
-			sortValue = d.getTime();
-			formattedValue = ArtConfig.getDateDisplayString(d);
-		}
-		out.println("  <td style=\"text-align: left\" sorttable_customkey=\"" + sortValue + "\" >" + formattedValue + "</td>");
-	}
+			canProceed = true;
 
-	@Override
-	public boolean newLine() {
-		numberOfLines++;
+			if (rowCount > 1) {
+				//close previous row
+				out.println("</tr>");
+			}
 
-		if (numberOfLines == 1) { // first row
-			out.println(" <tr class=\"rows\" onclick=\"javascript:selectRow(this)\" ondblclick=\"javascript:selectRow2(this)\" onmouseover=\"javascript:highLight(this,'hiliterows')\" onmouseout=\"javascript:highLight(this,'rows')\">");
-		} else if (numberOfLines < maxRows) {
-			out.println(" </tr>");
-			out.println(" <tr class=\"rows\" onclick=\"javascript:selectRow(this)\" ondblclick=\"javascript:selectRow2(this)\" onmouseover=\"javascript:highLight(this,'hiliterows')\" onmouseout=\"javascript:highLight(this,'rows')\">");
-		} else {
-			out.println("</tr></table></div>");
-			return false;
+			//open new row
+			out.println("<tr class='rows' onclick='javascript:selectRow(this)'"
+					+ " ondblclick='javascript:selectRow2(this)'"
+					+ " onmouseover='javascript:highLight(this,'hiliterows')'"
+					+ " onmouseout='javascript:highLight(this,'rows')'>");
 		}
 
-		return true;
+		return canProceed;
 	}
 
 	@Override
-	public void endLines() {
-		out.println(" </tr></tbody></table></div>");
+	public void endRows() {
+		out.println(CLOSE_RESULTS_TABLE_HTML);
 	}
 
-	@Override
-	public boolean isShowQueryHeaderAndFooter() {
-		return true;
-	}
-
-	@Override
-	public void setContextPath(String contextPath) {
-		this.contextPath = contextPath;
-	}
 }

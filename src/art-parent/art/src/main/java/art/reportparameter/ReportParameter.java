@@ -15,37 +15,39 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package art.reportparameter;
 
+import art.enums.ParameterType;
 import art.parameter.Parameter;
 import art.report.Report;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Class to represent report parameter
- * 
+ *
  * @author Timothy Anyona
  */
 public class ReportParameter implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private int reportParameterId;
 	private Report report;
 	private Parameter parameter;
 	private int position;
 	private String[] passedParameterValues; //used for run report logic
-	private Map<String, String> lovValues; //store value and label for lov parameters
-	private Object actualParameterValues;
+	private Map<Object, String> lovValues; //store value and label for lov parameters
+	private List<Object> actualParameterValues;
 
 	/**
 	 * Get the value of actualParameterValues
 	 *
 	 * @return the value of actualParameterValues
 	 */
-	public Object getActualParameterValues() {
+	public List<Object> getActualParameterValues() {
 		return actualParameterValues;
 	}
 
@@ -54,17 +56,16 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @param actualParameterValues new value of actualParameterValues
 	 */
-	public void setActualParameterValues(Object actualParameterValues) {
+	public void setActualParameterValues(List<Object> actualParameterValues) {
 		this.actualParameterValues = actualParameterValues;
 	}
-
 
 	/**
 	 * Get the value of lovValues
 	 *
 	 * @return the value of lovValues
 	 */
-	public Map<String, String> getLovValues() {
+	public Map<Object, String> getLovValues() {
 		return lovValues;
 	}
 
@@ -73,10 +74,9 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @param lovValues new value of lovValues
 	 */
-	public void setLovValues(Map<String, String> lovValues) {
+	public void setLovValues(Map<Object, String> lovValues) {
 		this.lovValues = lovValues;
 	}
-
 
 	/**
 	 * @return the reportParameterId
@@ -174,5 +174,37 @@ public class ReportParameter implements Serializable {
 	public String toString() {
 		return "ReportParameter{" + "reportParameterId=" + reportParameterId + '}';
 	}
-	
+
+	public String getDisplayValues() {
+		List<String> paramDisplayStrings = new ArrayList<>();
+
+		for (Object paramValue : actualParameterValues) {
+			String displayValue = null;
+			if (parameter.isUseLov() && lovValues != null) {
+				//for lov parameters, show both parameter value and display string if any
+				displayValue = lovValues.get(paramValue);
+			}
+			
+			String paramDisplayString;
+			String paramValueString = String.valueOf(paramValue);
+			if (displayValue == null) {
+				paramDisplayString = paramValueString;
+			} else {
+				paramDisplayString = displayValue + " (" + paramValueString + ")";
+			}
+			
+			paramDisplayStrings.add(paramDisplayString);
+		}
+
+		return parameter.getName() + ": " + StringUtils.join(paramDisplayStrings, ", ");
+	}
+
+	public Object getEffectiveActualParameterValue() {
+		if (parameter.getParameterType() == ParameterType.SingleValue) {
+			return actualParameterValues.get(0);
+		} else {
+			return actualParameterValues;
+		}
+	}
+
 }

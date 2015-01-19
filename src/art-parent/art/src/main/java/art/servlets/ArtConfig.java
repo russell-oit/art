@@ -57,7 +57,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +83,6 @@ public class ArtConfig extends HttpServlet {
 	private static ArtDatabase artDbConfig;
 	private static String settingsFilePath;
 	private static Settings settings;
-	private static final String sep = File.separator;
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
 	private static String artVersion;
@@ -158,7 +156,7 @@ public class ArtConfig extends HttpServlet {
 		appPath = ctx.getRealPath("");
 
 		//set web-inf path
-		webinfPath = appPath + sep + "WEB-INF" + sep;
+		webinfPath = appPath + File.separator + "WEB-INF" + File.separator;
 
 		//load custom settings
 		loadCustomSettings();
@@ -167,29 +165,29 @@ public class ArtConfig extends HttpServlet {
 		ctx.setAttribute("showErrors", customSettings.isShowErrors());
 
 		//set work directory base path
-		workDirectoryPath = webinfPath + sep + "work" + sep; //default work directory
+		workDirectoryPath = webinfPath + File.separator + "work" + File.separator; //default work directory
 
 		String customWorkDirectory = customSettings.getWorkDirectory();
 		if (StringUtils.isNotBlank(customWorkDirectory)) {
 			//custom work directory defined
 			workDirectoryPath = customWorkDirectory;
-			if (!StringUtils.right(workDirectoryPath, 1).equals(sep)) {
-				workDirectoryPath = workDirectoryPath + sep;
+			if (!StringUtils.right(workDirectoryPath, 1).equals(File.separator)) {
+				workDirectoryPath = workDirectoryPath + File.separator;
 			}
 
 			logger.info("Using custom work directory: '{}'", workDirectoryPath);
 		}
 
 		//set export path
-		exportPath = workDirectoryPath + "export" + sep; //default
+		exportPath = workDirectoryPath + "export" + File.separator; //default
 
 		//set custom export path
 		String customExportDirectory = customSettings.getExportDirectory();
 		if (StringUtils.isNotBlank(customExportDirectory)) {
 			//custom export directory defined
 			exportPath = customExportDirectory;
-			if (!StringUtils.right(exportPath, 1).equals(sep)) {
-				exportPath = exportPath + sep;
+			if (!StringUtils.right(exportPath, 1).equals(File.separator)) {
+				exportPath = exportPath + File.separator;
 			}
 
 			logger.info("Using custom export directory: '{}'", exportPath);
@@ -296,7 +294,7 @@ public class ArtConfig extends HttpServlet {
 		} catch (NamingException | SQLException ex) {
 			logger.error("Error", ex);
 		}
-		
+
 		//create quartz scheduler
 		createQuartzScheduler();
 
@@ -470,7 +468,7 @@ public class ArtConfig extends HttpServlet {
 			return;
 		}
 
-		String quartzFilePath = webinfPath + sep + "classes" + sep + "quartz.properties";
+		String quartzFilePath = webinfPath + File.separator + "classes" + File.separator + "quartz.properties";
 		SchedulerUtils.createScheduler(artDbConfig, quartzFilePath);
 	}
 
@@ -692,7 +690,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the hsqldb directory
 	 */
 	public static String getHsqldbPath() {
-		return webinfPath + "hsqldb" + sep;
+		return webinfPath + "hsqldb" + File.separator;
 	}
 
 	/**
@@ -701,7 +699,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the classes directory
 	 */
 	public static String getClassesPath() {
-		return webinfPath + "classes" + sep;
+		return webinfPath + "classes" + File.separator;
 	}
 
 	/**
@@ -719,7 +717,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the jobs export directory
 	 */
 	public static String getJobsExportPath() {
-		return exportPath + "jobs" + sep;
+		return exportPath + "jobs" + File.separator;
 	}
 
 	/**
@@ -728,7 +726,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the reports export directory
 	 */
 	public static String getReportsExportPath() {
-		return exportPath + "reports" + sep;
+		return exportPath + "reports" + File.separator;
 	}
 
 	/**
@@ -737,7 +735,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the templates directory
 	 */
 	public static String getTemplatesPath() {
-		return workDirectoryPath + "templates" + sep;
+		return workDirectoryPath + "templates" + File.separator;
 	}
 
 	/**
@@ -746,7 +744,7 @@ public class ArtConfig extends HttpServlet {
 	 * @return full path to the templates directory
 	 */
 	public static String getArtTempPath() {
-		return workDirectoryPath + "tmp" + sep;
+		return workDirectoryPath + "tmp" + File.separator;
 	}
 
 	/**
@@ -802,19 +800,19 @@ public class ArtConfig extends HttpServlet {
 	/**
 	 * Get the max rows for the given report format
 	 *
-	 * @param reportFormat
+	 * @param reportFormatString
 	 * @return the max rows for the given report format
 	 */
-	public static int getMaxRows(String reportFormat) {
+	public static int getMaxRows(String reportFormatString) {
 		int max = settings.getMaxRowsDefault();
 
 		String setting = settings.getMaxRowsSpecific();
 		String[] maxRows = StringUtils.split(setting, ",");
 		if (maxRows != null) {
 			for (String maxSetting : maxRows) {
-				if (StringUtils.containsIgnoreCase(maxSetting, reportFormat)) {
+				if (StringUtils.containsIgnoreCase(maxSetting, reportFormatString)) {
 					String value = StringUtils.substringAfter(maxSetting, ":");
-					max = NumberUtils.toInt(value, max);
+					max = Integer.parseInt(value);
 					break;
 				}
 			}
@@ -835,8 +833,10 @@ public class ArtConfig extends HttpServlet {
 		if (date == null) {
 			dateString = "";
 		} else if (timeFormatter.format(date).equals("00:00:00.000")) {
+			//time portion is 0. display date only
 			dateString = dateFormatter.format(date);
 		} else {
+			//display date and time
 			dateString = dateTimeFormatter.format(date);
 		}
 		return dateString;

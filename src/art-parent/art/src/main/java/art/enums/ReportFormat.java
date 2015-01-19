@@ -82,7 +82,7 @@ public enum ReportFormat {
 			case png:
 				return "png";
 			default:
-				throw new IllegalStateException("Report format does not generate files: " + value);
+				return value;
 		}
 	}
 

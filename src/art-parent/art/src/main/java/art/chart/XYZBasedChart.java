@@ -141,7 +141,11 @@ public class XYZBasedChart extends AbstractChart implements XYToolTipGenerator, 
 			addHyperLink(rs, linkId);
 
 			//add drilldown link if required
-			addDrilldownLink(yValue, xValue, seriesName, actualZValue, linkId);
+			//drill down on col 1 = y value
+			//drill down on col 2 = x value
+			//drill down on col 3 = series name
+			//drill down on col 4 = actual z/bubble value
+			addDrilldownLink(linkId, yValue, xValue, seriesName, actualZValue);
 
 			itemIndex++;
 		}
@@ -155,48 +159,6 @@ public class XYZBasedChart extends AbstractChart implements XYToolTipGenerator, 
 		dataset.addSeries(seriesName, data);
 
 		setDataset(dataset);
-	}
-
-	private void addDrilldownLink(double yValue, double xValue, String seriesName,
-			double actualZValue, String linkId) {
-
-		//set drill down links
-		if (getDrilldown() != null) {
-			StringBuilder sb = new StringBuilder(200);
-
-			//add base url
-			addDrilldownBaseUrl(sb);
-
-			//add drilldown parameters
-			if (getDrilldownParams() != null) {
-				for (Parameter drilldownParam : getDrilldownParams()) {
-					//drill down on col 1 = y value
-					//drill down on col 2 = x value
-					//drill down on col 3 = series name
-					//drill down on col 4 = actual z/bubble value
-					String paramName = drilldownParam.getName();
-					String paramValue;
-
-					if (drilldownParam.getDrilldownColumnIndex() == 1) {
-						paramValue = String.valueOf(yValue);
-					} else if (drilldownParam.getDrilldownColumnIndex() == 2) {
-						paramValue = String.valueOf(xValue);
-					} else if (drilldownParam.getDrilldownColumnIndex() == 3) {
-						paramValue = seriesName;
-					} else {
-						paramValue = String.valueOf(actualZValue);
-					}
-
-					addUrlParameter(paramName, paramValue, sb);
-				}
-			}
-
-			//add parameters from parent report
-			addParentParameters(sb);
-
-			String drilldownUrl = sb.toString();
-			getDrilldownLinks().put(linkId, drilldownUrl);
-		}
 	}
 
 	@Override
@@ -245,8 +207,8 @@ public class XYZBasedChart extends AbstractChart implements XYToolTipGenerator, 
 	public void processChart(JFreeChart chart, Map<String, String> params) {
 		Objects.requireNonNull(chart, "chart must not be null");
 
-		prepareYAxisRange(chart);
-		
+		processYAxisRange(chart);
+
 		HeatmapEnhancer heatmapPP = new HeatmapEnhancer();
 		heatmapPP.processChart(chart, heatmapOptions);
 	}

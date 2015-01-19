@@ -15,19 +15,49 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package art.runreport;
 
 import java.io.Serializable;
 
 /**
  * Represents report options used when running a report
- * 
+ *
  * @author Timothy Anyona
  */
 public class ReportOptions implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 	private boolean showParameters;
+	private int splitColumn;
+	private boolean showSql;
+
+	/**
+	 * @return the showSql
+	 */
+	public boolean isShowSql() {
+		return showSql;
+	}
+
+	/**
+	 * @param showSql the showSql to set
+	 */
+	public void setShowSql(boolean showSql) {
+		this.showSql = showSql;
+	}
+
+	/**
+	 * @return the splitColumn
+	 */
+	public int getSplitColumn() {
+		return splitColumn;
+	}
+
+	/**
+	 * @param splitColumn the splitColumn to set
+	 */
+	public void setSplitColumn(int splitColumn) {
+		this.splitColumn = splitColumn;
+	}
 
 	/**
 	 * @return the showParameters

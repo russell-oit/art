@@ -66,46 +66,18 @@ public class PieChart extends AbstractChart implements PieToolTipGenerator, PieS
 			//add dataset value
 			dataset.setValue(category, value);
 
+			String linkId = category;
+
 			//add hyperlink if required
-			addHyperLink(rs, category);
+			addHyperLink(rs, linkId);
 
 			//add drilldown link if required
-			addDrilldownLink(value, category);
+			//drill down on col 1 = data value
+			//drill down on col 2 = category
+			addDrilldownLink(linkId, value, category);
 		}
 
 		setDataset(dataset);
-	}
-
-	private void addDrilldownLink(double value, String category) {
-		//set drill down links
-		if (getDrilldown() != null) {
-			StringBuilder sb = new StringBuilder(200);
-
-			//add base url
-			addDrilldownBaseUrl(sb);
-
-			//add drilldown parameters
-			if (getDrilldownParams() != null) {
-				for (Parameter drilldownParam : getDrilldownParams()) {
-					//drill down on col 1 = data value
-					//drill down on col 2 = category
-					String paramName = drilldownParam.getName();
-					String paramValue;
-					if (drilldownParam.getDrilldownColumnIndex() == 1) {
-						paramValue = String.valueOf(value);
-					} else {
-						paramValue = category;
-					}
-					addUrlParameter(paramName, paramValue, sb);
-				}
-			}
-
-			//add parameters from parent report
-			addParentParameters(sb);
-
-			String drilldownUrl = sb.toString();
-			getDrilldownLinks().put(category, drilldownUrl);
-		}
 	}
 
 	@Override

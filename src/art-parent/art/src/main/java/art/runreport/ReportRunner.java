@@ -36,6 +36,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -58,7 +59,7 @@ import org.slf4j.LoggerFactory;
 public class ReportRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportRunner.class);
-	String username; //used to check query access rights, in applying rule values and replacing :username tag
+	String username; //used in replacing :username tag
 	int reportId;
 	StringBuilder querySb;
 	boolean adminSession = false;
@@ -266,27 +267,8 @@ public class ReportRunner {
 
 			jdbcParams.clear();
 			for (ReportParameter reportParam : jdbcParamOrder.values()) {
-				Object paramValues = reportParam.getActualParameterValues();
-				Parameter param=reportParam.getParameter();
-				ParameterDataType paramDataType = param.getDataType();
-
-//				if(param.getParameterType()==ParameterType.SingleValue){
-//					addJdbcParam(paramValue, paramDataType);
-//				} else {
-//					List<Object> paramValues = (List<Object>) paramValue;
-//					for (Object value : paramValues) {
-//						addJdbcParam(value, paramDataType);
-//					}
-//				}
-				
-				if (paramValues instanceof List) {
-					@SuppressWarnings("rawtypes")
-					List paramValuesList = (List) paramValues;
-					for (Object value : paramValuesList) {
-						addJdbcParam(value, paramDataType);
-					}
-				} else {
-					addJdbcParam(paramValues, paramDataType);
+				for (Object paramValue : reportParam.getActualParameterValues()) {
+					addJdbcParam(paramValue, reportParam.getParameter().getDataType());
 				}
 			}
 		}
@@ -312,16 +294,7 @@ public class ReportRunner {
 
 			String paramIdentifier = "#" + paramName + "#";
 			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
-			String replaceString;
-
-			Object paramValues = reportParam.getActualParameterValues();
-			if (paramValues instanceof List) {
-				@SuppressWarnings("rawtypes")
-				List paramValuesList = (List) paramValues;
-				replaceString = Matcher.quoteReplacement(StringUtils.repeat("?", ",", paramValuesList.size())); //quote in case it contains special regex characters
-			} else {
-				replaceString = Matcher.quoteReplacement("?"); //quote in case it contains special regex characters
-			}
+			String replaceString = Matcher.quoteReplacement(StringUtils.repeat("?", ",", reportParam.getActualParameterValues().size())); //quote in case it contains special regex characters
 
 			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
@@ -550,7 +523,7 @@ public class ReportRunner {
 	 * @return values for an lov
 	 * @throws SQLException
 	 */
-	public Map<String, String> getLovValues() throws SQLException {
+	public Map<Object, String> getLovValues() throws SQLException {
 		return getLovValues(false, false);
 	}
 
@@ -561,7 +534,7 @@ public class ReportRunner {
 	 * @return values for an lov
 	 * @throws SQLException
 	 */
-	public Map<String, String> getLovValues(boolean newUseRules) throws SQLException {
+	public Map<Object, String> getLovValues(boolean newUseRules) throws SQLException {
 		return getLovValues(true, newUseRules);
 	}
 
@@ -573,38 +546,43 @@ public class ReportRunner {
 	 * @return values for an lov
 	 * @throws SQLException
 	 */
-	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
-		Map<String, String> lov = new LinkedHashMap<>();
+	public Map<Object, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
+		Map<Object, String> lovValues = new HashMap<>();
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 
 		if (reportTypeId == 120) {
 			//static lov. values coming from static values defined in sql source
 			String items = querySb.toString();
-			String lines[] = items.split("\\r?\\n");
+			String lines[] = items.split("\\r?\\n"); //split by newline
 			for (String line : lines) {
-				String[] values = line.trim().split("\\|");
-				if (values.length == 1) {
-					lov.put(values[0], values[0]);
-				} else if (values.length == 2) {
-					lov.put(values[0], values[1]);
+				String[] values = line.trim().split("\\|"); //split by |
+				String dataValue=values[0];
+				String displayValue = null;
+				if (values.length > 1) {
+					displayValue = values[1];
 				}
+				lovValues.put(dataValue, displayValue);
 			}
 		} else {
 			//dynamic lov. values coming from sql query
 			ResultSet rs = getResultSet();
 			int columnCount = rs.getMetaData().getColumnCount();
 			while (rs.next()) {
-				if (columnCount == 1) {
-					String dataValue = rs.getString(1);
-					lov.put(dataValue, dataValue);
-				} else if (columnCount == 2) {
-					lov.put(rs.getString(1), rs.getString(2));
+				//use getObject(). for dates, using getString() will return
+				//different strings for different databases and drivers
+				//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
+				//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
+				Object dataValue = rs.getObject(1);
+				String displayValue = null;
+				if (columnCount > 1) {
+					displayValue = rs.getString(2);
 				}
+				lovValues.put(dataValue, displayValue);
 			}
 		}
 
-		return lov;
+		return lovValues;
 	}
 
 	/**

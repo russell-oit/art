@@ -19,10 +19,9 @@ package art.chart;
 
 import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
-import art.parameter.Parameter;
-import art.parameter.ParameterService;
 import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
+import art.utils.DrilldownLinkHelper;
 import de.laures.cewolf.ChartPostProcessor;
 import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
@@ -35,20 +34,16 @@ import de.laures.cewolf.taglib.CewolfChartFactory;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
@@ -81,18 +76,14 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	private int width = 500;
 	private String backgroundColor = WHITE_HEX_COLOR_CODE;
 	private Dataset dataset;
-	private Map<String, String> internalPostProcessorParams;
 	private ChartOptions chartOptions;
 	private Locale locale;
 	private Map<String, String> hyperLinks;
 	private Map<String, String> drilldownLinks;
-	private Map<String, ReportParameter> reportParams;
-	private Drilldown drilldown;
-	private List<Parameter> drilldownParams;
-	private Set<String> drilldownParamNames;
 	private boolean openLinksInNewWindow;
 	private boolean hasHyperLinks;
 	private boolean hasTooltips; //if true class must implement a ToolTipGenerator (otherwise showChart.jsp will fail on the <cewolf:map> tag)
+	private DrilldownLinkHelper drilldownLinkHelper;
 
 	/**
 	 * @return the hasTooltips
@@ -123,20 +114,6 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	}
 
 	/**
-	 * @return the drilldownParams
-	 */
-	public List<Parameter> getDrilldownParams() {
-		return drilldownParams;
-	}
-
-	/**
-	 * @param drilldownParams the drilldownParams to set
-	 */
-	public void setDrilldownParams(List<Parameter> drilldownParams) {
-		this.drilldownParams = drilldownParams;
-	}
-
-	/**
 	 * @return the openLinksInNewWindow
 	 */
 	public boolean isOpenLinksInNewWindow() {
@@ -148,34 +125,6 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	 */
 	public void setOpenLinksInNewWindow(boolean openLinksInNewWindow) {
 		this.openLinksInNewWindow = openLinksInNewWindow;
-	}
-
-	/**
-	 * @return the drilldown
-	 */
-	public Drilldown getDrilldown() {
-		return drilldown;
-	}
-
-	/**
-	 * @param drilldown the drilldown to set
-	 */
-	public void setDrilldown(Drilldown drilldown) {
-		this.drilldown = drilldown;
-	}
-
-	/**
-	 * @return the reportParams
-	 */
-	public Map<String, ReportParameter> getReportParams() {
-		return reportParams;
-	}
-
-	/**
-	 * @param reportParams the reportParams to set
-	 */
-	public void setReportParams(Map<String, ReportParameter> reportParams) {
-		this.reportParams = reportParams;
 	}
 
 	/**
@@ -277,20 +226,6 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	}
 
 	/**
-	 * @return the internalPostProcessorParams
-	 */
-	public Map<String, String> getInternalPostProcessorParams() {
-		return internalPostProcessorParams;
-	}
-
-	/**
-	 * @param internalPostProcessorParams the internalPostProcessorParams to set
-	 */
-	public void setInternalPostProcessorParams(Map<String, String> internalPostProcessorParams) {
-		this.internalPostProcessorParams = internalPostProcessorParams;
-	}
-
-	/**
 	 * @param dataset the dataset to set
 	 */
 	public void setDataset(Dataset dataset) {
@@ -360,41 +295,35 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	 */
 	protected abstract void fillDataset(ResultSet rs) throws SQLException;
 
-	public void prepareDataset(ResultSet rs) throws SQLException {
-		prepareDrilldownDetails();
+	public void prepareDataset(ResultSet rs, Drilldown drilldown,
+			List<ReportParameter> reportParamsList) throws SQLException {
+
+		prepareDrilldownDetails(drilldown, reportParamsList);
 		prepareHyperLinkDetails(rs);
 
 		fillDataset(rs);
 	}
 
-	private void prepareDrilldownDetails() throws SQLException {
-		if (drilldown != null) {
-			drilldownLinks = new HashMap<>();
+	private void prepareDrilldownDetails(Drilldown drilldown,
+			List<ReportParameter> reportParamsList) throws SQLException {
 
-			openLinksInNewWindow = drilldown.isOpenInNewWindow();
-
-			ParameterService parameterService = new ParameterService();
-			int drilldownReportId = drilldown.getDrilldownReport().getReportId();
-			setDrilldownParams(parameterService.getDrilldownParameters(drilldownReportId));
-
-			//store parameter names so that parent parameters with the same name
-			//as in the drilldown report are omitted
-			//use hashset for fast searching using contains
-			//https://stackoverflow.com/questions/3307549/fastest-way-to-check-if-a-liststring-contains-a-unique-string
-			drilldownParamNames = new HashSet<>();
-			for (Parameter drilldownParam : getDrilldownParams()) {
-				String paramName = drilldownParam.getName();
-				drilldownParamNames.add(paramName);
-			}
+		if (drilldown == null) {
+			return;
 		}
+
+		drilldownLinks = new HashMap<>();
+		openLinksInNewWindow = drilldown.isOpenInNewWindow();
+		drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
 	}
 
 	private void prepareHyperLinkDetails(ResultSet rs) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 		String lastColumnName = rsmd.getColumnLabel(columnCount);
+		String secondColumnName = rsmd.getColumnLabel(2);
 
-		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)) {
+		if (StringUtils.equals(lastColumnName, HYPERLINKS_COLUMN_NAME)
+				|| StringUtils.equals(secondColumnName, HYPERLINKS_COLUMN_NAME)) {
 			setHasHyperLinks(true);
 			setHyperLinks(new HashMap<String, String>());
 		}
@@ -435,21 +364,21 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 	@Override
 	public void processChart(JFreeChart chart, Map<String, String> params) {
 		Objects.requireNonNull(chart, "chart must not be null");
-		
+
 		//perform chart post processing
-		prepareYAxisRange(chart);
-		prepareLabels(chart);
-		prepareXAxisLabelLines(chart);
+		processYAxisRange(chart);
+		processLabels(chart);
+		processXAxisLabelLines(chart);
 		showPoints(chart);
 		rotateLabels(chart);
 	}
 
-	protected void prepareYAxisRange(JFreeChart chart) {
+	protected void processYAxisRange(JFreeChart chart) {
 		if (chartOptions == null) {
 			return;
 		}
-		
-		Plot plot=chart.getPlot();
+
+		Plot plot = chart.getPlot();
 
 		//set y axis range if required
 		if (chartOptions.getyAxisMin() != 0 && chartOptions.getyAxisMax() != 0) {
@@ -465,9 +394,9 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 		}
 	}
 
-	private void prepareXAxisLabelLines(JFreeChart chart) {
-		Plot plot=chart.getPlot();
-		
+	private void processXAxisLabelLines(JFreeChart chart) {
+		Plot plot = chart.getPlot();
+
 		if (plot instanceof CategoryPlot) {
 			CategoryPlot categoryPlot = (CategoryPlot) plot;
 			//for category based charts, make long x axis labels more readable by breaking them into separate lines
@@ -476,12 +405,12 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 		}
 	}
 
-	private void prepareLabels(JFreeChart chart) {
+	private void processLabels(JFreeChart chart) {
 		if (chartOptions == null) {
 			return;
 		}
-		
-		Plot plot=chart.getPlot();
+
+		Plot plot = chart.getPlot();
 
 		String labelFormat = chartOptions.getLabelFormat(); //either "off" or a format string e.g. {2}
 		if (chartOptions.isShowLabels() && labelFormat != null) {
@@ -548,59 +477,9 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 		JFreeChart chart = getChart();
 
 		//run internal post processor
-		processChart(chart, internalPostProcessorParams);
+		processChart(chart, null);
 
 		return chart;
-	}
-
-	//add parameters from parent query										
-	protected void addParentParameters(StringBuilder sb) {
-		if (reportParams == null) {
-			return;
-		}
-
-		for (Map.Entry<String, ReportParameter> entry : reportParams.entrySet()) {
-			String paramName = entry.getKey();
-			ReportParameter reportParam = entry.getValue();
-			String[] paramValues = reportParam.getPassedParameterValues();
-
-			//add parameter only if one with a similar name doesn't already
-			//exist in the drill down parameters
-			if (drilldownParamNames == null || !drilldownParamNames.contains(paramName)) {
-				if (paramValues != null) {
-					for (String paramValue : paramValues) {
-						addUrlParameter(paramName, paramValue, sb);
-					}
-				}
-			}
-		}
-
-	}
-
-	protected void addUrlParameter(String paramName, String paramValue, StringBuilder sb) {
-		if (paramName == null || paramValue == null || sb == null) {
-			return;
-		}
-
-		try {
-			String encodedParamValue = URLEncoder.encode(paramValue, "UTF-8");
-			sb.append("&p-").append(paramName).append("=").append(encodedParamValue);
-		} catch (UnsupportedEncodingException ex) {
-			throw new RuntimeException(ex);
-		}
-	}
-
-	protected void addDrilldownBaseUrl(StringBuilder sb) {
-		if (drilldown != null) {
-			int drilldownReportId = drilldown.getDrilldownReport().getReportId();
-			String drilldownReportFormat = drilldown.getReportFormat();
-			if (drilldownReportFormat == null || drilldownReportFormat.equalsIgnoreCase("all")) {
-				sb.append("showReport.do?reportId=").append(drilldownReportId);
-			} else {
-				sb.append("runReport.do?reportId=").append(drilldownReportId)
-						.append("&reportFormat=").append(drilldownReportFormat);
-			}
-		}
 	}
 
 	protected void addHyperLink(ResultSet rs, String key) throws SQLException {
@@ -632,6 +511,14 @@ public abstract class AbstractChart extends AbstractChartDefinition implements D
 		rotateOptions.put("rotate_at", String.valueOf(chartOptions.getRotateAt()));
 		rotateOptions.put("remove_at", String.valueOf(chartOptions.getRemoveAt()));
 		rotateProcessor.processChart(chart, rotateOptions);
+	}
+
+	protected void addDrilldownLink(String linkId, Object... paramValues) {
+		//set drill down links
+		if (drilldownLinkHelper != null) {
+			String drilldownUrl = drilldownLinkHelper.getDrilldownLink(paramValues);
+			getDrilldownLinks().put(linkId, drilldownUrl);
+		}
 	}
 
 }

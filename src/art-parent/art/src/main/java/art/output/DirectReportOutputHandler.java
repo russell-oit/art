@@ -632,26 +632,6 @@ public class DirectReportOutputHandler {
 		}
 	}
 
-	/**
-	 * Display final sql generated for a query
-	 *
-	 * @param out
-	 * @param finalSQL
-	 */
-	public static void displayFinalSQL(PrintWriter out, String finalSQL) {
-		if (out != null) {
-			out.println("<div align=\"center\">");
-			out.println("<table border=\"0\" width=\"90%\"><tr><td>");
-			out.println("<div id=\"finalsql_div\" width=\"90%\" align=\"center\" class=\"qeparams\">");
-
-			out.println(finalSQL);
-
-			out.println("</div>");
-			out.println("</td></tr></table>");
-			out.println("</div>");
-		}
-	}
-	
 		/**
 	 * Generate a group report
 	 *

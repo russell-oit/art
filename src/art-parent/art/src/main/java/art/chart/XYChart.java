@@ -126,7 +126,10 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 			addHyperLink(rs, linkId);
 
 			//add drilldown link if required
-			addDrilldownLink(yValue, xValue, seriesName, linkId);
+			//drill down on col 1 = y value
+			//drill down on col 2 = x value
+			//drill down on col 3 = series name
+			addDrilldownLink(linkId, yValue, xValue, seriesName);
 		}
 
 		//add series to dataset
@@ -135,43 +138,6 @@ public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItem
 		}
 
 		setDataset(dataset);
-	}
-
-	private void addDrilldownLink(double yValue, double xValue, String seriesName, String linkId) {
-		//set drill down links
-		if (getDrilldown() != null) {
-			StringBuilder sb = new StringBuilder(200);
-
-			//add base url
-			addDrilldownBaseUrl(sb);
-
-			//add drilldown parameters
-			if (getDrilldownParams() != null) {
-				for (Parameter drilldownParam : getDrilldownParams()) {
-					//drill down on col 1 = y value
-					//drill down on col 2 = x value
-					//drill down on col 3 = series name
-					String paramName = drilldownParam.getName();
-					String paramValue;
-
-					if (drilldownParam.getDrilldownColumnIndex() == 1) {
-						paramValue = String.valueOf(yValue);
-					} else if (drilldownParam.getDrilldownColumnIndex() == 2) {
-						paramValue = String.valueOf(xValue);
-					} else {
-						paramValue = seriesName;
-					}
-
-					addUrlParameter(paramName, paramValue, sb);
-				}
-			}
-
-			//add parameters from parent report
-			addParentParameters(sb);
-
-			String drilldownUrl = sb.toString();
-			getDrilldownLinks().put(linkId, drilldownUrl);
-		}
 	}
 
 	@Override

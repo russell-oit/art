@@ -42,7 +42,7 @@ public class RunReportHelper {
 		if (reportParams != null) {
 			for (ReportParameter reportParam : reportParams) {
 				if (reportParam.getParameter().getDataType() == ParameterDataType.Datasource) {
-					dynamicDatasourceId = (Integer) reportParam.getActualParameterValues();
+					dynamicDatasourceId = (Integer) reportParam.getEffectiveActualParameterValue();
 					break;
 				}
 			}

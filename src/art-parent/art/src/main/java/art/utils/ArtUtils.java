@@ -54,6 +54,8 @@ public class ArtUtils {
 	public static final String ART_USER_INVALID = "user not created in ART"; //log message on login failure
 	public static final String ART_USER_DISABLED = "user disabled in ART"; //log message on login failure
 	public static final int DEFAULT_CONNECTION_POOL_TIMEOUT = 20;
+	private static final String DEFAULT_DATE_FORMAT="yyyy-MM-dd HH:mm:ss";
+	public static final SimpleDateFormat defaultDateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<>();

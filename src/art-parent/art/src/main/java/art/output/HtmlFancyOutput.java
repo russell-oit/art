@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class HtmlFancyOutput implements ReportOutputInterface,DirectReportOutput {
+public class HtmlFancyOutput implements ReportOutputInterface {
 
 	PrintWriter out;
 	int numberOfLines;

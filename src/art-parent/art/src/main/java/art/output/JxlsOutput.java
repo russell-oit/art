@@ -94,7 +94,7 @@ public class JxlsOutput {
 
 			//pass query parameters
 			for (ReportParameter reportParam : reportParams) {
-				jxlsParams.put(reportParam.getParameter().getName(), reportParam.getActualParameterValues());
+				jxlsParams.put(reportParam.getParameter().getName(), reportParam.getEffectiveActualParameterValue());
 			}
 
 			if (reportType == ReportType.JxlsTemplate) {

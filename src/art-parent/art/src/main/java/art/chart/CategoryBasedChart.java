@@ -157,44 +157,10 @@ public class CategoryBasedChart extends AbstractChart implements CategoryToolTip
 		addHyperLink(rs, linkId);
 
 		//add drilldown link if required
-		addDrilldownLink(yValue, categoryName, seriesName, linkId);
-	}
-
-	private void addDrilldownLink(double yValue, String categoryName, String seriesName, String linkId) {
-		//set drill down links
-		if (getDrilldown() != null) {
-			StringBuilder sb = new StringBuilder(200);
-
-			//add base url
-			addDrilldownBaseUrl(sb);
-
-			//add drilldown parameters
-			if (getDrilldownParams() != null) {
-				for (Parameter drilldownParam : getDrilldownParams()) {
-					//drill down on col 1 = y value (data value)
-					//drill down on col 2 = x value (category name)
-					//drill down on col 3 = series name
-					String paramName = drilldownParam.getName();
-					String paramValue;
-					
-					if (drilldownParam.getDrilldownColumnIndex() == 1) {
-						paramValue = String.valueOf(yValue);
-					} else if (drilldownParam.getDrilldownColumnIndex() == 2) {
-						paramValue = categoryName;
-					} else {
-						paramValue = seriesName;
-					}
-					
-					addUrlParameter(paramName, paramValue, sb);
-				}
-			}
-
-			//add parameters from parent report
-			addParentParameters(sb);
-
-			String drilldownUrl = sb.toString();
-			getDrilldownLinks().put(linkId, drilldownUrl);
-		}
+		//drill down on col 1 = y value (data value)
+		//drill down on col 2 = x value (category name)
+		//drill down on col 3 = series name
+		addDrilldownLink(linkId, yValue, categoryName, seriesName);
 	}
 
 	@Override

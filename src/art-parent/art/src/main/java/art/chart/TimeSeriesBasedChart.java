@@ -19,6 +19,7 @@ package art.chart;
 
 import art.enums.ReportType;
 import art.parameter.Parameter;
+import art.utils.ArtUtils;
 import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;
 import java.sql.ResultSet;
@@ -180,45 +181,10 @@ public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGene
 		addHyperLink(rs, linkId);
 
 		//add drilldown link if required
-		long timestamp = date.getTime();
-		addDrilldownLink(yValue, timestamp, seriesName, linkId);
-	}
-
-	private void addDrilldownLink(double yValue, long timestamp, String seriesName, String linkId) {
-		//set drill down links
-		if (getDrilldown() != null) {
-			StringBuilder sb = new StringBuilder(200);
-
-			//add base url
-			addDrilldownBaseUrl(sb);
-
-			//add drilldown parameters
-			if (getDrilldownParams() != null) {
-				for (Parameter drilldownParam : getDrilldownParams()) {
-					//drill down on col 1 = y value (data value)
-					//drill down on col 2 = x value (date)
-					//drill down on col 3 = series name
-					String paramName = drilldownParam.getName();
-					String paramValue;
-					
-					if (drilldownParam.getDrilldownColumnIndex() == 1) {
-						paramValue = String.valueOf(yValue);
-					} else if (drilldownParam.getDrilldownColumnIndex() == 2) {
-						paramValue = String.valueOf(timestamp);
-					} else {
-						paramValue = seriesName;
-					}
-					
-					addUrlParameter(paramName, paramValue, sb);
-				}
-			}
-
-			//add parameters from parent report
-			addParentParameters(sb);
-
-			String drilldownUrl = sb.toString();
-			getDrilldownLinks().put(linkId, drilldownUrl);
-		}
+		//drill down on col 1 = y value (data value)
+		//drill down on col 2 = x value (date)
+		//drill down on col 3 = series name
+		addDrilldownLink(linkId, yValue, date, seriesName);
 	}
 
 	@Override
