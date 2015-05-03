@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.dbutils;
+package art.connectionpool;
 
 import java.io.Serializable;
 
@@ -37,6 +37,21 @@ public class ConnectionPoolDetails implements Serializable {
 	private Integer highestReachedPoolSize;
 	private Integer inUseCount;
 	private Long totalConnectionRequests;
+	private boolean usingArtDBCPConnectionPoolLibrary;
+
+	/**
+	 * @return the usingArtDBCPConnectionPoolLibrary
+	 */
+	public boolean isUsingArtDBCPConnectionPoolLibrary() {
+		return usingArtDBCPConnectionPoolLibrary;
+	}
+
+	/**
+	 * @param usingArtDBCPConnectionPoolLibrary the usingArtDBCPConnectionPoolLibrary to set
+	 */
+	public void setUsingArtDBCPConnectionPoolLibrary(boolean usingArtDBCPConnectionPoolLibrary) {
+		this.usingArtDBCPConnectionPoolLibrary = usingArtDBCPConnectionPoolLibrary;
+	}
 
 	/**
 	 * @return the poolId

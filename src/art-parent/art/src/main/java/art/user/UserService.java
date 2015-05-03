@@ -18,7 +18,7 @@ package art.user;
 
 import art.dbutils.DbService;
 import art.enums.AccessLevel;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.utils.ActionResult;
@@ -278,7 +278,7 @@ public class UserService {
 		Object[] values = {
 			newPassword,
 			passwordAlgorithm,
-			ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 			actionUser.getUsername(),
 			userId
 		};
@@ -375,7 +375,7 @@ public class UserService {
 				user.getStartReport(),
 				user.isCanChangePassword(),
 				user.isActive(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -398,7 +398,7 @@ public class UserService {
 				user.getStartReport(),
 				user.isCanChangePassword(),
 				user.isActive(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				user.getUserId()
 			};

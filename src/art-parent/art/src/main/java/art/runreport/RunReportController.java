@@ -24,7 +24,7 @@ import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
 import art.chart.XYZBasedChart;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.enums.ParameterDataType;

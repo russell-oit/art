@@ -16,7 +16,7 @@
  */
 package art.runreport;
 
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.enums.ReportType;
@@ -307,9 +307,9 @@ public class ReportRunner {
 		if (paramValue instanceof Date) {
 			Date dateValue = (Date) paramValue;
 			if (paramDataType == ParameterDataType.Date) {
-				jdbcParams.add(ArtDbUtils.toSqlDate(dateValue));
+				jdbcParams.add(DatabaseUtils.toSqlDate(dateValue));
 			} else {
-				jdbcParams.add(ArtDbUtils.toSqlTimestamp(dateValue));
+				jdbcParams.add(DatabaseUtils.toSqlTimestamp(dateValue));
 			}
 		} else {
 			jdbcParams.add(paramValue);
@@ -409,7 +409,7 @@ public class ReportRunner {
 
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
-		ArtDbUtils.setValues(psQuery, paramValues);
+		DatabaseUtils.setValues(psQuery, paramValues);
 
 		psQuery.execute();
 	}
@@ -591,7 +591,7 @@ public class ReportRunner {
 	 * TO RETURN THE CONNECTION TO THE POOL
 	 */
 	public void close() {
-		ArtDbUtils.close(psQuery, connQuery);
+		DatabaseUtils.close(psQuery, connQuery);
 	}
 
 	// escape the ' char in a parameter value (used in multi params)

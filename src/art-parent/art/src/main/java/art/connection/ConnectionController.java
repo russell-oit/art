@@ -16,7 +16,7 @@
  */
 package art.connection;
 
-import art.dbutils.DbConnections;
+import art.connectionpool.DbConnections;
 import art.utils.AjaxResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

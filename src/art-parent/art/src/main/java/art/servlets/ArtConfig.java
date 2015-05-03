@@ -18,7 +18,7 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabase;
 import art.dbcp.ArtDBCPDataSource;
-import art.dbutils.DbConnections;
+import art.connectionpool.DbConnections;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
 import art.enums.DisplayNull;
@@ -148,9 +148,8 @@ public class ArtConfig extends HttpServlet {
 		//save variables in application scope for access from jsp pages
 		artVersion = ctx.getInitParameter("versionNumber");
 		ctx.setAttribute("artVersion", artVersion);
-		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
-		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 		ctx.setAttribute("dateDisplayPattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
+		setJspEnumValues(ctx);
 
 		//set application path
 		appPath = ctx.getRealPath("");
@@ -225,6 +224,11 @@ public class ArtConfig extends HttpServlet {
 		initializeArtDatabase();
 	}
 
+	private void setJspEnumValues(ServletContext ctx) {
+		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
+		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
+	}
+
 	/**
 	 * Register custom fonts to be used in pdf output
 	 */
@@ -291,7 +295,7 @@ public class ArtConfig extends HttpServlet {
 			String upgradeFilePath = ArtConfig.getArtTempPath() + "upgrade.txt";
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(artVersion, upgradeFilePath);
-		} catch (NamingException | SQLException ex) {
+		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
 

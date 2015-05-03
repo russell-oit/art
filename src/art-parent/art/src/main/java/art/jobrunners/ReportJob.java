@@ -17,7 +17,7 @@
  */
 package art.jobrunners;
 
-import art.dbutils.DbConnections;
+import art.connectionpool.DbConnections;
 import art.enums.ReportType;
 import art.graph.ExportGraph;
 import art.mail.Mailer;

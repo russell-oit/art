@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class ArtDbUtils {
+public class DatabaseUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(ArtDbUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(DatabaseUtils.class);
 
 	/**
 	 * Close resultset

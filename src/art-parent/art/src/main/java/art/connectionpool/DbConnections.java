@@ -15,13 +15,14 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.dbutils;
+package art.connectionpool;
 
 import art.artdatabase.ArtDatabase;
 import art.datasource.Datasource;
 import art.datasource.DatasourceInfo;
 import art.datasource.DatasourceMapper;
 import art.enums.ConnectionPoolLibrary;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class DbConnections {
 
-	private static Map<Integer, ConnectionPoolWrapper> connectionPoolMap;
+	private static Map<Integer, ConnectionPool> connectionPoolMap;
 
 	/**
 	 * Create connections to all report databases. Connections are pooled
@@ -54,7 +55,7 @@ public class DbConnections {
 	 * @throws NamingException
 	 * @throws SQLException
 	 */
-	public static void createConnectionPools(ArtDatabase artDbConfig) throws NamingException, SQLException {
+	public static void createConnectionPools(ArtDatabase artDbConfig) throws SQLException {
 		Objects.requireNonNull(artDbConfig, "artDbConfig must not be null");
 
 		//reset pools map
@@ -83,35 +84,42 @@ public class DbConnections {
 	}
 
 	public static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
-			ConnectionPoolLibrary library) throws NamingException {
+			ConnectionPoolLibrary connectionPoolLibrary) {
 
 		//remove any existing connection pool for this datasource
 		removeConnectionPool(datasourceInfo.getDatasourceId());
 
-		ConnectionPoolWrapper wrapper = new ConnectionPoolWrapper(datasourceInfo, maxPoolSize, library);
-		connectionPoolMap.put(wrapper.getPoolId(), wrapper);
+		ConnectionPool pool;
+		if (datasourceInfo.isJndi()) {
+			//for jndi datasources, the url contains the jndi name/resource reference
+			pool = new JndiConnectionPool();
+		} else if (connectionPoolLibrary == ConnectionPoolLibrary.HikariCP) {
+			pool = new HikariCPConnectionPool();
+		} else if (connectionPoolLibrary == ConnectionPoolLibrary.ArtDBCP) {
+			pool = new ArtDBCPConnectionPool();
+		} else {
+			throw new IllegalArgumentException("Unexpected connection pool library " + connectionPoolLibrary);
+		}
+
+		pool.create(datasourceInfo, maxPoolSize);
+		connectionPoolMap.put(pool.getPoolId(), pool);
 	}
 
-	/**
-	 * Get a database connection from the connection pool for the datasource
-	 * with the given ID
-	 *
-	 * @param datasourceId datasource id. 0 = ART database.
-	 * @return database connection for the given datasource
-	 * @throws java.sql.SQLException if connection doesn't exist or there was a
-	 * database error
-	 */
-	private static DataSource getConnectionPool(int datasourceId) throws SQLException {
+	private static ConnectionPool getConnectionPool(int datasourceId) {
 		if (connectionPoolMap == null) {
 			throw new IllegalStateException("connectionPoolMap is null");
 		}
 
-		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
-		if (wrapper == null) {
-			throw new SQLException("Connection pool doesn't exist for datasource id " + datasourceId);
+		ConnectionPool pool = connectionPoolMap.get(datasourceId);
+		if (pool == null) {
+			throw new RuntimeException("Connection pool doesn't exist for datasource id " + datasourceId);
 		} else {
-			return wrapper.getPool();
+			return pool;
 		}
+	}
+
+	private static DataSource getDataSource(int datasourceId) {
+		return getConnectionPool(datasourceId).getPool();
 	}
 
 	/**
@@ -119,10 +127,9 @@ public class DbConnections {
 	 *
 	 * @return connection to the ART database or null if connection doesn't
 	 * exist
-	 * @throws java.sql.SQLException
 	 */
-	public static DataSource getArtDbConnectionPool() throws SQLException {
-		return getConnectionPool(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
+	public static DataSource getArtDbConnectionPool() {
+		return getDataSource(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 	}
 
 	/**
@@ -135,7 +142,7 @@ public class DbConnections {
 	 * database error
 	 */
 	public static Connection getConnection(int datasourceId) throws SQLException {
-		return getConnectionPool(datasourceId).getConnection();
+		return getDataSource(datasourceId).getConnection();
 
 	}
 
@@ -162,10 +169,9 @@ public class DbConnections {
 	public static Connection getConnection(String datasourceName) throws SQLException {
 		Connection conn = null;
 
-		for (Entry<Integer, ConnectionPoolWrapper> entry : connectionPoolMap.entrySet()) {
-			ConnectionPoolWrapper wrapper = entry.getValue();
-			if (StringUtils.equalsIgnoreCase(wrapper.getPoolName(), datasourceName)) {
-				conn = wrapper.getConnection();
+		for (ConnectionPool pool : connectionPoolMap.values()) {
+			if (StringUtils.equalsIgnoreCase(pool.getName(), datasourceName)) {
+				conn = pool.getConnection();
 			}
 		}
 
@@ -181,9 +187,8 @@ public class DbConnections {
 			return;
 		}
 
-		for (Entry<Integer, ConnectionPoolWrapper> entry : connectionPoolMap.entrySet()) {
-			ConnectionPoolWrapper wrapper = entry.getValue();
-			wrapper.closePool();
+		for (ConnectionPool pool : connectionPoolMap.values()) {
+			pool.close();
 		}
 
 		connectionPoolMap.clear();
@@ -193,38 +198,25 @@ public class DbConnections {
 	public static List<ConnectionPoolDetails> getAllConnectionPoolDetails() {
 		List<ConnectionPoolDetails> details = new ArrayList<>(connectionPoolMap.size());
 
-		for (Entry<Integer, ConnectionPoolWrapper> entry : connectionPoolMap.entrySet()) {
-			ConnectionPoolWrapper wrapper = entry.getValue();
-			details.add(wrapper.getPoolDetails());
+		for (ConnectionPool pool : connectionPoolMap.values()) {
+			details.add(pool.getPoolDetails());
 		}
 
 		return details;
 	}
 
 	public static ConnectionPoolDetails getConnectionPoolDetails(int datasourceId) {
-		ConnectionPoolDetails details = null;
-
-		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
-		if (wrapper != null) {
-			details = wrapper.getPoolDetails();
-		}
-
-		return details;
+		return getConnectionPool(datasourceId).getPoolDetails();
 	}
 
 	public static void refreshConnectionPool(int datasourceId) {
-		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
-		if (wrapper != null) {
-			wrapper.refreshPool();
-		}
+		getConnectionPool(datasourceId).refresh();
 	}
 
 	public static void removeConnectionPool(int datasourceId) {
-		ConnectionPoolWrapper wrapper = connectionPoolMap.get(datasourceId);
-		if (wrapper != null) {
-			wrapper.closePool();
-			connectionPoolMap.remove(datasourceId);
-		}
+		ConnectionPool pool = getConnectionPool(datasourceId);
+		pool.closePool();
+		connectionPoolMap.remove(datasourceId);
 	}
 
 }

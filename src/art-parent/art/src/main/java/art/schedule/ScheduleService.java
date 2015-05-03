@@ -17,7 +17,7 @@
 package art.schedule;
 
 import art.dbutils.DbService;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -208,7 +208,7 @@ public class ScheduleService {
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -227,7 +227,7 @@ public class ScheduleService {
 				schedule.getDay(),
 				schedule.getMonth(),
 				schedule.getWeekday(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				schedule.getScheduleId()
 			};

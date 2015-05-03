@@ -17,7 +17,7 @@
 package art.datasource;
 
 import art.dbutils.DbService;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.enums.AccessLevel;
 import art.user.User;
 import art.utils.ActionResult;
@@ -188,7 +188,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeout(),
 				datasource.getTestSql(),
 				datasource.isActive(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -210,7 +210,7 @@ public class DatasourceService {
 				datasource.getConnectionPoolTimeout(),
 				datasource.getTestSql(),
 				datasource.isActive(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				datasource.getDatasourceId()
 			};

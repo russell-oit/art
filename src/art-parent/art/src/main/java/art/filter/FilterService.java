@@ -17,7 +17,7 @@
 package art.filter;
 
 import art.dbutils.DbService;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.user.User;
 import art.utils.ActionResult;
@@ -253,7 +253,7 @@ public class FilterService {
 				filter.getName(),
 				filter.getDescription(),
 				dataType,
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -267,7 +267,7 @@ public class FilterService {
 				filter.getName(),
 				filter.getDescription(),
 				dataType,
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				filter.getFilterId()
 			};

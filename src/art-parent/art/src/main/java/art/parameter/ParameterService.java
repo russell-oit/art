@@ -17,7 +17,7 @@
 package art.parameter;
 
 import art.dbutils.DbService;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.user.User;
@@ -311,7 +311,7 @@ public class ParameterService {
 				parameter.getChainedValuePosition(),
 				parameter.getDrilldownColumnIndex(),
 				parameter.isUseDirectSubstitution(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -341,7 +341,7 @@ public class ParameterService {
 				parameter.getChainedValuePosition(),
 				parameter.getDrilldownColumnIndex(),
 				parameter.isUseDirectSubstitution(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()
 			};

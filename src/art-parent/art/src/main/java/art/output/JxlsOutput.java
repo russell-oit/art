@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
@@ -112,7 +112,7 @@ public class JxlsOutput {
 			XLSTransformer transformer = new XLSTransformer();
 			transformer.transformXLS(fullTemplateFileName, jxlsParams, outputFileName);
 		} finally {
-			ArtDbUtils.close(conn);
+			DatabaseUtils.close(conn);
 		}
 	}
 }

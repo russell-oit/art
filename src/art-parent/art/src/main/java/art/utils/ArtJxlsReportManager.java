@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.dbutils.DbConnections;
+import art.connectionpool.DbConnections;
 import java.sql.*;
 import java.util.*;
 import net.sf.jxls.report.ReportManager;

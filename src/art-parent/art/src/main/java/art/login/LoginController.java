@@ -1,13 +1,13 @@
 package art.login;
 
-import art.dbutils.DbConnections;
+import art.connectionpool.DbConnections;
 import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
 import art.servlets.ArtConfig;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.language.LanguageUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -78,7 +78,7 @@ public class LoginController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		} finally {
-			ArtDbUtils.close(conn);
+			DatabaseUtils.close(conn);
 		}
 
 		if (!artDbConnectionOk) {

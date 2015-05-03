@@ -17,7 +17,7 @@
  */
 package art.runreport;
 
-import art.dbutils.DbConnections;
+import art.connectionpool.DbConnections;
 import art.enums.ParameterDataType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;

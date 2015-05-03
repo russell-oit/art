@@ -28,7 +28,7 @@ import java.util.List;
  */
 public enum ConnectionPoolLibrary {
 
-	ArtDBCP("ArtDBCP"), HikariCP("HikariCP");
+	HikariCP("HikariCP"),ArtDBCP("ArtDBCP");
 	private final String value;
 
 	private ConnectionPoolLibrary(String value) {

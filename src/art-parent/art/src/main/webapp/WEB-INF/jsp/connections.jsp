@@ -25,8 +25,8 @@ Page to display connections status
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="connections.do"]').parent().addClass('active');
 				});
@@ -44,7 +44,7 @@ Page to display connections status
 				//get datatables api instance
 				var table = oTable.api();
 
-				tbl.find('tbody').on('click', '.reset', function() {
+				tbl.find('tbody').on('click', '.reset', function () {
 					var row = $(this).closest("tr"); //jquery object
 					var recordName = escapeHtmlContent(row.data("name"));
 					var recordId = row.data("id");
@@ -54,7 +54,7 @@ Page to display connections status
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/app/refreshConnectionPool.do",
 						data: {id: recordId},
-						success: function(response) {
+						success: function (response) {
 							var pool = response.data;
 
 							table.cell(row, 3).data(pool.highestReachedPoolSize);
@@ -96,11 +96,14 @@ Page to display connections status
 					<th><spring:message code="connections.text.datasourceId"/></th>
 					<th><spring:message code="connections.text.datasourceName"/></th>
 					<th><spring:message code="connections.text.maxConnectionCount"/></th>
-					<th><spring:message code="connections.text.highestReachedConnectionCount"/></th>
-					<th><spring:message code="connections.text.currentConnectionCount"/></th>
-					<th><spring:message code="connections.text.inUseCount"/></th>
-					<th><spring:message code="connections.text.totalConnectionRequests"/></th>
-					<th class="noFilter"><spring:message code="page.text.action"/></th>
+
+					<c:if test="${pool.usingArtDBCPConnectionPoolLibrary}">
+						<th><spring:message code="connections.text.highestReachedConnectionCount"/></th>
+						<th><spring:message code="connections.text.currentConnectionCount"/></th>
+						<th><spring:message code="connections.text.inUseCount"/></th>
+						<th><spring:message code="connections.text.totalConnectionRequests"/></th>
+						<th class="noFilter"><spring:message code="page.text.action"/></th>
+					</c:if>
 				</tr>
 			</thead>
 			<tbody>
@@ -111,16 +114,19 @@ Page to display connections status
 						<td>${pool.poolId}</td>
 						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>${pool.maxPoolSize}</td>
-						<td>${pool.highestReachedPoolSize}</td>
-						<td>${pool.currentPoolSize}</td>
-						<td>${pool.inUseCount}</td>
-						<td>${pool.totalConnectionRequests}</td>
-						<td>
-							<button type="button" class="btn btn-default reset">
-								<i class="fa fa-bolt"></i>
-								<spring:message code="connections.action.reset"/>
-							</button>
-						</td>
+
+						<c:if test="${pool.usingArtDBCPConnectionPoolLibrary}">
+							<td>${pool.highestReachedPoolSize}</td>
+							<td>${pool.currentPoolSize}</td>
+							<td>${pool.inUseCount}</td>
+							<td>${pool.totalConnectionRequests}</td>
+							<td>
+								<button type="button" class="btn btn-default reset">
+									<i class="fa fa-bolt"></i>
+									<spring:message code="connections.action.reset"/>
+								</button>
+							</td>
+						</c:if>
 					</tr>
 				</c:forEach>
 			</tbody>

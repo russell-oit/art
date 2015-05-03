@@ -17,7 +17,7 @@
 package art.usergroup;
 
 import art.dbutils.DbService;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.user.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -250,7 +250,7 @@ public class UserGroupService {
 				group.getDescription(),
 				group.getDefaultReportGroup(),
 				group.getStartReport(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
 
@@ -265,7 +265,7 @@ public class UserGroupService {
 				group.getDescription(),
 				group.getDefaultReportGroup(),
 				group.getStartReport(),
-				ArtDbUtils.getCurrentTimeAsSqlTimestamp(),
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				group.getUserGroupId()
 			};

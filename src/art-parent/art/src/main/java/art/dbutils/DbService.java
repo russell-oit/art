@@ -16,6 +16,7 @@
  */
 package art.dbutils;
 
+import art.connectionpool.DbConnections;
 import java.sql.SQLException;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;

@@ -27,17 +27,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,7 +212,7 @@ public class ParameterProcessor {
 
 		}
 	}
-	
+
 	public Object convertParameterValue(String value, ParameterDataType paramDataType) throws ParseException {
 		if (paramDataType.isNumeric()) {
 			return convertParameterValueToNumber(value, paramDataType);
@@ -254,39 +252,40 @@ public class ParameterProcessor {
 
 		if (StringUtils.startsWithIgnoreCase(value, "add")) {
 			//e.g. add days 1
-			Calendar calendar = new GregorianCalendar();
-			StringTokenizer st = new StringTokenizer(value, " ");
-			if (st.hasMoreTokens()) {
-				st.nextToken(); // skip 1st token, "add"
-				String token = st.nextToken().trim(); // get 2nd token, i.e. one of DAYS, MONTHS or YEARS
-				int field;
-				if (StringUtils.startsWithIgnoreCase(token, "year")) {
-					field = GregorianCalendar.YEAR;
-				} else if (StringUtils.startsWithIgnoreCase(token, "month")) {
-					field = GregorianCalendar.MONTH;
-				} else {
-					//days
-					field = GregorianCalendar.DAY_OF_MONTH;
-				}
-				token = st.nextToken().trim(); // get last token, i.e. the offset (integer)
-				int offset = Integer.parseInt(token);
-				calendar.add(field, offset);
+			String[] tokens = StringUtils.split(value);
+			if (tokens.length != 3) {
+				throw new IllegalArgumentException("Invalid interval: " + value);
 			}
 
-			dateValue = calendar.getTime();
+			String period = tokens[1];
+			int offset = Integer.parseInt(tokens[2]);
+			Date now = new Date();
+
+			if (StringUtils.startsWithIgnoreCase(period, "day")) {
+				dateValue = DateUtils.addDays(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "month")) {
+				dateValue = DateUtils.addMonths(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "year")) {
+				dateValue = DateUtils.addYears(now, offset);
+			} else {
+				throw new IllegalArgumentException("Invalid period: " + period);
+			}
 		} else if (StringUtils.equalsIgnoreCase(value, "now")) {
 			dateValue = new Date();
 		} else {
 			//convert date string as it is to a date
+			String DATE_STRING = "yyyy-MM-dd";
+			String DATE_TIME_STRING = "yyyy-MM-dd HH:mm";
+			String DATE_TIME_SECONDS_STRING = "yyyy-MM-dd HH:mm";
 			String dateFormat;
-			if (value == null || value.length() < 10) {
-				dateFormat = "yyyy-M-d";
-			} else if (value.length() == 10) {
-				dateFormat = "yyyy-MM-dd";
-			} else if (value.length() == 16) {
-				dateFormat = "yyyy-MM-dd HH:mm";
+			if (value.length() == DATE_STRING.length()) {
+				dateFormat = DATE_STRING;
+			} else if (value.length() == DATE_TIME_STRING.length()) {
+				dateFormat = DATE_TIME_STRING;
+			} else if (value.length() == DATE_TIME_SECONDS_STRING.length()) {
+				dateFormat = DATE_TIME_SECONDS_STRING;
 			} else {
-				dateFormat = "yyyy-MM-dd HH:mm:ss";
+				throw new IllegalArgumentException("Invalid date format: " + value);
 			}
 
 			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);

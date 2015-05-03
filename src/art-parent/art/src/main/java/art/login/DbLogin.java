@@ -1,7 +1,7 @@
 package art.login;
 
 import art.servlets.ArtConfig;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -45,7 +45,7 @@ public class DbLogin {
 
 			//if we are here, authentication is successful
 			result.setAuthenticated(true);
-			ArtDbUtils.close(conn);
+			DatabaseUtils.close(conn);
 		} catch (SQLException ex) {
 			logger.error("Error. username='{}'", username, ex);
 

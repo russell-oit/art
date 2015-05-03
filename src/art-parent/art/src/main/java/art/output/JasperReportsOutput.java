@@ -16,7 +16,7 @@
  */
 package art.output;
 
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.enums.ParameterType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
@@ -139,7 +139,7 @@ public class JasperReportsOutput {
 					conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
 					jasperPrint = JasperFillManager.fillReport(jasperFilePath, jasperReportsParams, conn);
 				} finally {
-					ArtDbUtils.close(conn);
+					DatabaseUtils.close(conn);
 				}
 			} else {
 				//use recordset from art query

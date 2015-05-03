@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,11 +49,11 @@ public class JxlsReportManager {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
-			rs = ArtDbUtils.query(conn, ps, sql, params);
+			rs = DatabaseUtils.query(conn, ps, sql, params);
 			RowSetDynaClass rsdc = new RowSetDynaClass(rs, false, true); //use lowercase properties = false, use column labels =true
 			rows = rsdc.getRows();
 		} finally {
-			ArtDbUtils.close(rs, ps);
+			DatabaseUtils.close(rs, ps);
 		}
 
 		return rows;

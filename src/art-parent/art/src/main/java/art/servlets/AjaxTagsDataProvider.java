@@ -18,7 +18,7 @@ package art.servlets;
 
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.runreport.ReportRunner;
 import art.utils.UserEntity;
 import java.io.IOException;
@@ -294,7 +294,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			} catch (Exception e) {
 				logger.error("Error", e);
 			} finally {
-				ArtDbUtils.close(rs, ps, conn);
+				DatabaseUtils.close(rs, ps, conn);
 			}
 		}
 
@@ -418,7 +418,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			ArtDbUtils.close(rs, ps, conn);
+			DatabaseUtils.close(rs, ps, conn);
 		}
 
 		return builder.toString();
@@ -464,7 +464,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			} catch (Exception e) {
 				logger.error("Error", e);
 			} finally {
-				ArtDbUtils.close(rs, ps, conn);
+				DatabaseUtils.close(rs, ps, conn);
 			}
 		}
 

@@ -16,8 +16,8 @@
  */
 package art.utils;
 
-import art.dbutils.DbConnections;
-import art.dbutils.ArtDbUtils;
+import art.connectionpool.DbConnections;
+import art.dbutils.DatabaseUtils;
 import art.servlets.ArtConfig;
 import java.io.File;
 import java.sql.Connection;
@@ -96,7 +96,7 @@ public class ArtHelper {
 						}
 					}
 				} finally {
-					ArtDbUtils.close(rs, ps, conn);
+					DatabaseUtils.close(rs, ps, conn);
 				}
 			}
 		} else if (session.getAttribute("username") != null) {
@@ -124,7 +124,7 @@ public class ArtHelper {
 					}
 				}
 			} finally {
-				ArtDbUtils.close(rs, ps, conn);
+				DatabaseUtils.close(rs, ps, conn);
 			}
 		} else {
 			if (request.getParameter("_public_user") != null) {
@@ -209,7 +209,7 @@ public class ArtHelper {
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		} finally {
-			ArtDbUtils.close(ps, conn);
+			DatabaseUtils.close(ps, conn);
 		}
 	}
 
@@ -246,7 +246,7 @@ public class ArtHelper {
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		} finally {
-			ArtDbUtils.close(ps, conn);
+			DatabaseUtils.close(ps, conn);
 		}
 	}
 

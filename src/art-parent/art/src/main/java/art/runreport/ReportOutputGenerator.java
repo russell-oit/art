@@ -25,7 +25,7 @@ import art.chart.SpeedometerChart;
 import art.chart.TimeSeriesBasedChart;
 import art.chart.XYChart;
 import art.chart.XYZBasedChart;
-import art.dbutils.ArtDbUtils;
+import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.enums.DisplayNull;
@@ -387,7 +387,7 @@ public class ReportOutputGenerator {
 			}
 
 		} finally {
-			ArtDbUtils.close(rs);
+			DatabaseUtils.close(rs);
 		}
 
 	}
