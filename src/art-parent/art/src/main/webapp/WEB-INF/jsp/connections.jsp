@@ -97,7 +97,7 @@ Page to display connections status
 					<th><spring:message code="connections.text.datasourceName"/></th>
 					<th><spring:message code="connections.text.maxConnectionCount"/></th>
 
-					<c:if test="${pool.usingArtDBCPConnectionPoolLibrary}">
+					<c:if test="${usingArtDBCPConnectionPoolLibrary}">
 						<th><spring:message code="connections.text.highestReachedConnectionCount"/></th>
 						<th><spring:message code="connections.text.currentConnectionCount"/></th>
 						<th><spring:message code="connections.text.inUseCount"/></th>
@@ -115,7 +115,7 @@ Page to display connections status
 						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>${pool.maxPoolSize}</td>
 
-						<c:if test="${pool.usingArtDBCPConnectionPoolLibrary}">
+						<c:if test="${usingArtDBCPConnectionPoolLibrary}">
 							<td>${pool.highestReachedPoolSize}</td>
 							<td>${pool.currentPoolSize}</td>
 							<td>${pool.inUseCount}</td>

@@ -2763,8 +2763,8 @@ public class ArtJob implements Job, Serializable {
 							try {
 								ReportRunner pq = new ReportRunner();
 								pq.setReportId(param.getLovQueryId());
-								Map<String, String> lov = pq.getLovValues(false); //don't apply rules
-								param.setLovValues(lov);
+//								Map<String, String> lov = pq.getLovValues(false); //don't apply rules
+//								param.setLovValues(lov);
 							} catch (Exception e) {
 								logger.error("Error", e);
 							}
@@ -2791,8 +2791,8 @@ public class ArtJob implements Job, Serializable {
 							try {
 								ReportRunner pq = new ReportRunner();
 								pq.setReportId(param.getLovQueryId());
-								Map<String, String> lov = pq.getLovValues(false); //don't apply rules
-								param.setLovValues(lov);
+//								Map<String, String> lov = pq.getLovValues(false); //don't apply rules
+//								param.setLovValues(lov);
 							} catch (Exception e) {
 								logger.error("Error", e);
 							}

@@ -37,21 +37,6 @@ public class ConnectionPoolDetails implements Serializable {
 	private Integer highestReachedPoolSize;
 	private Integer inUseCount;
 	private Long totalConnectionRequests;
-	private boolean usingArtDBCPConnectionPoolLibrary;
-
-	/**
-	 * @return the usingArtDBCPConnectionPoolLibrary
-	 */
-	public boolean isUsingArtDBCPConnectionPoolLibrary() {
-		return usingArtDBCPConnectionPoolLibrary;
-	}
-
-	/**
-	 * @param usingArtDBCPConnectionPoolLibrary the usingArtDBCPConnectionPoolLibrary to set
-	 */
-	public void setUsingArtDBCPConnectionPoolLibrary(boolean usingArtDBCPConnectionPoolLibrary) {
-		this.usingArtDBCPConnectionPoolLibrary = usingArtDBCPConnectionPoolLibrary;
-	}
 
 	/**
 	 * @return the poolId

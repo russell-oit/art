@@ -190,8 +190,8 @@ public class HtmlFancyOutput implements ReportOutputInterface {
 		return true;
 	}
 
-	@Override
-	public void setContextPath(String contextPath) {
-		this.contextPath=contextPath;
-	}
+//	@Override
+//	public void setContextPath(String contextPath) {
+//		this.contextPath=contextPath;
+//	}
 }

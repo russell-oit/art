@@ -192,8 +192,6 @@ public class HtmlLovParam implements ParamInterface {
 			pq.setReportId(lovQueryId);
 
 			String selected;
-			String value;
-			String viewColumnValue;
 
 			StringBuilder sb = new StringBuilder(1024);
 			sb.append("\n<select " + " id=\"").append(paramHtmlId).append("\"" + " name=\"");
@@ -211,19 +209,20 @@ public class HtmlLovParam implements ParamInterface {
 				sb.append("<option value=\"ALL_ITEMS\" ").append(selected).append(">").append(allString).append("</option>");
 			}
 
-			Map<String, String> lov = pq.getLovValues(useRules); //override lov use rules setting with setting defined in the parameter definition
-			for (Map.Entry<String, String> entry : lov.entrySet()) {
+			Map<Object, String> lov = pq.getLovValues(useRules); //override lov use rules setting with setting defined in the parameter definition
+			for (Map.Entry<Object, String> entry : lov.entrySet()) {
 				// build html option list
-				value = entry.getKey();
-				viewColumnValue = entry.getValue();
+				Object value = entry.getKey();
+				String valueString=String.valueOf(value);
+				String viewColumnValue = entry.getValue();
 
-				if (StringUtils.equals(initialValue, viewColumnValue) || StringUtils.equals(initialValue, value)) {
+				if (StringUtils.equals(initialValue, viewColumnValue) || StringUtils.equals(initialValue, valueString)) {
 					selected = "selected";
 				} else {
 					selected = "";
 				}
 				sb.append("<option value=\"");
-				sb.append(Encode.forHtmlAttribute(value));
+				sb.append(Encode.forHtmlAttribute(valueString));
 				sb.append("\" ");
 				sb.append(selected);
 				sb.append(">");

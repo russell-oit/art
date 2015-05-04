@@ -116,13 +116,10 @@ public abstract class ConnectionPool {
 		details.setName(name);
 		details.setMaxPoolSize(maxSize);
 
-		if (pool instanceof ArtDBCPConnectionPool) {
-			details.setHighestReachedPoolSize(getHighestReachedSize());
-			details.setCurrentPoolSize(getCurrentSize());
-			details.setInUseCount(getInUseCount());
-			details.setTotalConnectionRequests(getTotalConnectionRequests());
-			details.setUsingArtDBCPConnectionPoolLibrary(true);
-		}
+		details.setHighestReachedPoolSize(getHighestReachedSize());
+		details.setCurrentPoolSize(getCurrentSize());
+		details.setInUseCount(getInUseCount());
+		details.setTotalConnectionRequests(getTotalConnectionRequests());
 
 		return details;
 	}

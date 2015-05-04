@@ -176,7 +176,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 //
 //				pq.setHtmlParams(htmlParams);
 
-				Map<String, String> lov = pq.getLovValues(false); //don't apply rules
+				Map<Object, String> lov = pq.getLovValues(false); //don't apply rules
 
 				if (isMulti) {
 					//add All as the first item displayed
@@ -185,10 +185,10 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 				}
 
 				//add other items
-				for (Map.Entry<String, String> entry : lov.entrySet()) {
-					String value = entry.getKey();
+				for (Map.Entry<Object, String> entry : lov.entrySet()) {
+					Object value = entry.getKey();
 					String viewColumnValue = entry.getValue();
-					builder.addItem(StringEscapeUtils.escapeXml(viewColumnValue), StringEscapeUtils.escapeXml(value));
+					builder.addItem(StringEscapeUtils.escapeXml(viewColumnValue), StringEscapeUtils.escapeXml(value.toString()));
 				}
 				pq.close();
 			}

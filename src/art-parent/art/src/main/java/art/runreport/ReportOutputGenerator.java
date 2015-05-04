@@ -284,7 +284,7 @@ public class ReportOutputGenerator {
 					}
 				}
 
-				chart.prepareDataset(rs, drilldown);
+				chart.prepareDataset(rs, drilldown,reportParamsList);
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
@@ -325,23 +325,23 @@ public class ReportOutputGenerator {
 				o.setMaxRows(ArtConfig.getMaxRows(reportFormat.getValue()));
 				o.setWriter(writer);
 
-				o.setQueryName(reportName);
-				o.setFileUserName(username);
-				o.setExportPath(exportPath);
-
-				//don't set displayparams for html view modes. parameters will be displayed by this servlet
-				if (!reportFormat.isHtml()) {
-					o.setDisplayParameters(displayParams);
-				}
-
-				//ensure htmlplain output doesn't display parameters if inline
-				if (o instanceof HtmlPlainOutput) {
-					HtmlPlainOutput hpo = (HtmlPlainOutput) o;
-					hpo.setDisplayInline(showInline);
-
-					//ensure parameters are displayed if not in inline mode
-					hpo.setDisplayParameters(displayParams);
-				}
+//				o.setQueryName(reportName);
+//				o.setFileUserName(username);
+//				o.setExportPath(exportPath);
+//
+//				//don't set displayparams for html view modes. parameters will be displayed by this servlet
+//				if (!reportFormat.isHtml()) {
+//					o.setDisplayParameters(displayParams);
+//				}
+//
+//				//ensure htmlplain output doesn't display parameters if inline
+//				if (o instanceof HtmlPlainOutput) {
+//					HtmlPlainOutput hpo = (HtmlPlainOutput) o;
+//					hpo.setDisplayInline(showInline);
+//
+//					//ensure parameters are displayed if not in inline mode
+//					hpo.setDisplayParameters(displayParams);
+//				}
 
 				//enable localization for datatable output
 				if (o instanceof HtmlDataTableOutput) {
@@ -375,15 +375,15 @@ public class ReportOutputGenerator {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						drilldowns = drilldownService.getDrilldowns(reportId);
 					}
-					outputResult = DirectReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+//					outputResult = DirectReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
 				}
 
-				if (outputResult.isSuccess()) {
-					rowsRetrieved = (Integer) outputResult.getData();
-				} else {
-					model.addAttribute("message", outputResult.getMessage());
-					return errorPage;
-				}
+//				if (outputResult.isSuccess()) {
+//					rowsRetrieved = (Integer) outputResult.getData();
+//				} else {
+//					model.addAttribute("message", outputResult.getMessage());
+//					return errorPage;
+//				}
 			}
 
 		} finally {
