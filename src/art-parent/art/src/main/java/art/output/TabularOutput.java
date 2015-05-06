@@ -151,17 +151,23 @@ public abstract class TabularOutput {
 	 *
 	 * @param value
 	 */
-	public abstract void addHeaderCellLeftAligned(String value);
+	public void addHeaderCellLeftAligned(String value){
+		addHeaderCell(value);
+	}
 
 	/**
 	 * Method invoked to state that the header finishes.
 	 */
-	public abstract void endHeader();
+	public void endHeader(){
+		
+	}
 
 	/**
 	 * Method invoked to state that the result set rows begin.
 	 */
-	public abstract void beginRows();
+	public void beginRows(){
+		
+	}
 
 	/**
 	 * Method invoked to add a String value in the current row.
@@ -205,15 +211,15 @@ public abstract class TabularOutput {
 	/**
 	 * Output query results
 	 *
-	 * @return ActionResult. if successful, data contains the number of rows in
+	 * @return TabularOutputResult. if successful, rowCount contains the number of rows in
 	 * the resultset. if not, message contains the i18n message indicating the
 	 * problem
 	 * @throws SQLException
 	 */
-	public ActionResult generateTabularOutput(ResultSet rs, List<Drilldown> drilldowns,
+	public TabularOutputResult generateStandardOutput(ResultSet rs, List<Drilldown> drilldowns,
 			List<ReportParameter> reportParamsList) throws SQLException {
 
-		ActionResult result = new ActionResult();
+		TabularOutputResult result = new TabularOutputResult();
 
 		//initialize number formatters
 		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
@@ -269,7 +275,7 @@ public abstract class TabularOutput {
 				//couldn't create new line. row limit exceeded
 				//for xlsx, it's also possible that an error occurred.
 				//just show one message. if error occurred, it will be logged
-				result.setMessage("tooManyRows");
+				result.setMessage("runReport.message.tooManyRows");
 				return result;
 			}
 
@@ -320,13 +326,13 @@ public abstract class TabularOutput {
 					}
 					
 					String drilldownTag;
+					String targetAttribute="";
 					if (drilldown.isOpenInNewWindow()) {
 						//open drill down in new window
+						targetAttribute="target='_blank'";
 						drilldownTag="<a href='" + drilldownUrl + "' target='_blank'>" + drilldownText + "</a>";
-					} else {
-						//open in same window
-						drilldownTag="<a href='" + drilldownUrl + "'>" + drilldownText + "</a>";
-					}
+					} 
+					drilldownTag="<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
 					addCellString(drilldownTag);
 				}
 			}
@@ -336,7 +342,7 @@ public abstract class TabularOutput {
 		endRows();
 
 		result.setSuccess(true);
-		result.setData(rowCount);
+		result.setRowCount(rowCount);
 		return result;
 	}
 

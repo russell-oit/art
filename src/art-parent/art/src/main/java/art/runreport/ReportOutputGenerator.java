@@ -39,6 +39,7 @@ import art.output.HtmlPlainOutput;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
 import art.output.ReportOutputInterface;
+import art.output.TabularOutputResult;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
@@ -156,7 +157,7 @@ public class ReportOutputGenerator {
 
 	public void generateOutput(Report report, ReportRunner reportRunner,
 			ReportType reportType, ReportFormat reportFormat, Locale locale,
-			ParameterProcessorResult paramProcessorResult, ReportOutputInterface o,
+			ParameterProcessorResult paramProcessorResult, TabularOutput tabularOutput,
 			PrintWriter writer, String fileName, String outputFileName)
 			throws IOException, SQLException, JRException, ParsePropertyException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
@@ -320,70 +321,48 @@ public class ReportOutputGenerator {
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
 				}
-			} else if (o != null) {
+			} else if (tabularOutput != null) {
 				//direct output report. "standard/tabular" or crosstab reports
-				o.setMaxRows(ArtConfig.getMaxRows(reportFormat.getValue()));
-				o.setWriter(writer);
+				tabularOutput.setMaxRows(ArtConfig.getMaxRows(reportFormat.getValue()));
+				tabularOutput.setWriter(writer);
 
-//				o.setQueryName(reportName);
-//				o.setFileUserName(username);
-//				o.setExportPath(exportPath);
-//
-//				//don't set displayparams for html view modes. parameters will be displayed by this servlet
-//				if (!reportFormat.isHtml()) {
-//					o.setDisplayParameters(displayParams);
-//				}
-//
-//				//ensure htmlplain output doesn't display parameters if inline
-//				if (o instanceof HtmlPlainOutput) {
-//					HtmlPlainOutput hpo = (HtmlPlainOutput) o;
-//					hpo.setDisplayInline(showInline);
-//
-//					//ensure parameters are displayed if not in inline mode
-//					hpo.setDisplayParameters(displayParams);
-//				}
+				tabularOutput.setQueryName(reportName);
+				tabularOutput.setFileUserName(username);
+				tabularOutput.setExportPath(exportPath);
 
-				//enable localization for datatable output
-				if (o instanceof HtmlDataTableOutput) {
-					HtmlDataTableOutput dt = (HtmlDataTableOutput) o;
-					dt.setLocale(locale);
-				}
 
 				String contextPath = null;
 				if (request != null) {
 					contextPath = request.getContextPath();
-				}
-				if (o instanceof TabularOutput) {
-					TabularOutput dro = (TabularOutput) o;
-					dro.setContextPath(contextPath);
+					tabularOutput.setContextPath(contextPath);
 				}
 				
 				//checking to see if Display Null Value optional setting is set to "No"
 		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
-			o = new HideNullOutput(o);
+			tabularOutput = new HideNullOutput(tabularOutput);
 		}
 
 				//generate output
 				rs = reportRunner.getResultSet();
-				ActionResult outputResult;
+				TabularOutputResult outputResult;
 
 				if (reportType.isCrosstab()) {
-					outputResult = DirectReportOutputHandler.flushXOutput(o, rs);
+					outputResult = DirectReportOutputHandler.flushXOutput(tabularOutput, rs);
 				} else {
 					List<Drilldown> drilldowns = null;
 					if (reportFormat.isHtml()) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						drilldowns = drilldownService.getDrilldowns(reportId);
 					}
-//					outputResult = DirectReportOutputHandler.flushOutput(o, rs, drilldownQueries, request.getContextPath(), inlineParams, multiParams);
+					outputResult = tabularOutput.generateStandardOutput(rs, drilldowns, reportParamsList);
 				}
 
-//				if (outputResult.isSuccess()) {
-//					rowsRetrieved = (Integer) outputResult.getData();
-//				} else {
-//					model.addAttribute("message", outputResult.getMessage());
-//					return errorPage;
-//				}
+				if (outputResult.isSuccess()) {
+					rowsRetrieved = outputResult.getRowCount();
+				} else {
+					model.addAttribute("message", outputResult.getMessage());
+					return errorPage;
+				}
 			}
 
 		} finally {

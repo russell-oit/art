@@ -15,7 +15,7 @@ Display 500 error (internal server error)
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset='utf-8'>
         <title>ART - Internal Server Error</title>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">

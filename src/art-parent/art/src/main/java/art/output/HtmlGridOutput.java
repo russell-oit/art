@@ -20,13 +20,7 @@
 package art.output;
 
 import art.servlets.ArtConfig;
-import art.utils.ArtQueryParam;
-import java.io.PrintWriter;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * Grid html output mode
@@ -35,7 +29,7 @@ import java.util.Map;
  */
 public class HtmlGridOutput extends TabularOutput {
 
-	private final String CLOSE_RESULTS_TABLE_HTML="</tr></tbody></table></div>";
+	private final String CLOSE_RESULTS_TABLE_HTML = "</tr></tbody></table></div>";
 
 	@Override
 	public void beginHeader() {
@@ -79,26 +73,36 @@ public class HtmlGridOutput extends TabularOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = null;
-		String sortValue = null;
-		if (value != null) {
+		String formattedValue;
+		String sortValue;
+
+		if (value == null) {
+			formattedValue = null;
+			sortValue = null;
+		} else {
 			formattedValue = actualNumberFormatter.format(value);
 			sortValue = sortNumberFormatter.format(value);
 		}
+
 		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "' >" + formattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue = "";
-		long sortValue = 0;
-		if (value != null) {
+		String formattedValue;
+		long sortValue;
+
+		if (value == null) {
+			formattedValue = "";
+			sortValue = 0;
+		} else {
 			sortValue = value.getTime();
 			formattedValue = ArtConfig.getDateDisplayString(value);
 		}
+
 		out.println("<td style='text-align: left' sorttable_customkey='"
-				+ sortValue + "' >" + formattedValue + "</td>");
+				+ sortValue + "'>" + formattedValue + "</td>");
 	}
 
 	@Override

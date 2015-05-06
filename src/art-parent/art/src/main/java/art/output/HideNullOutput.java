@@ -24,142 +24,75 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Map;
 
-public class HideNullOutput implements ReportOutputInterface {
+public class HideNullOutput extends TabularOutput {
 
-	private final ReportOutputInterface artOutputInterface;
+	private final TabularOutput tabularOutput;
 
-	@Override
-	public String getName() {
-		return artOutputInterface.getName();
-	}
-
-	@Override
-	public String getContentType() {
-		return artOutputInterface.getContentType();
-	}
-
-	@Override
-	public void setWriter(PrintWriter o) {
-		artOutputInterface.setWriter(o);
-	}
-
-	@Override
-	public void setQueryName(String s) {
-		artOutputInterface.setQueryName(s);
-	}
-
-	@Override
-	public void setFileUserName(String s) {
-		artOutputInterface.setFileUserName(s);
-	}
-
-	@Override
-	public void setMaxRows(int i) {
-		artOutputInterface.setMaxRows(i);
-	}
-
-	@Override
-	public void setColumnsNumber(int i) {
-		artOutputInterface.setColumnsNumber(i);
-	}
-
-	@Override
-	public void setExportPath(String s) {
-		artOutputInterface.setExportPath(s);
-	}
-
-	@Override
-	public void setDisplayParameters(Map<Integer, ArtQueryParam> params) {
-		artOutputInterface.setDisplayParameters(params);
+	public HideNullOutput(TabularOutput tabularOutput) {
+		super();
+		this.tabularOutput = tabularOutput;
 	}
 
 	@Override
 	public void beginHeader() {
-		artOutputInterface.beginHeader();
+		tabularOutput.beginHeader();
 	}
 
 	@Override
-	public void addHeaderCell(String s) {
-		artOutputInterface.addHeaderCell(s);
+	public void addHeaderCell(String value) {
+		tabularOutput.addHeaderCell(value);
 	}
-	
+
 	@Override
-	public void addHeaderCellLeft(String s) {
-		artOutputInterface.addHeaderCellLeft(s);
+	public void addHeaderCellLeftAligned(String value) {
+		tabularOutput.addHeaderCellLeftAligned(value);
 	}
 
 	@Override
 	public void endHeader() {
-		artOutputInterface.endHeader();
+		tabularOutput.endHeader();
 	}
 
 	@Override
-	public void beginLines() {
-		artOutputInterface.beginLines();
+	public void beginRows() {
+		tabularOutput.beginRows();
 	}
 
 	@Override
-	public void addCellString(String s) {
-		if (s == null) {
-			artOutputInterface.addCellString("");
+	public void addCellString(String value) {
+		if (value == null) {
+			tabularOutput.addCellString("");
 		} else {
-			artOutputInterface.addCellString(s);
+			tabularOutput.addCellString(value);
 		}
 	}
 
 	@Override
-	public void addCellDouble(Double d) {
-		if (d == null) {
-			if (ArtConfig.getSettings().getDisplayNull()== DisplayNull.NoNumbersAsBlank) {
-				artOutputInterface.addCellString(""); //display nulls as empty string
+	public void addCellNumeric(Double value) {
+		if (value == null) {
+			if (ArtConfig.getSettings().getDisplayNull() == DisplayNull.NoNumbersAsBlank) {
+				tabularOutput.addCellString(""); //display nulls as empty string
 			} else {
-				artOutputInterface.addCellDouble(0.0D); //display nulls as 0
+				tabularOutput.addCellNumeric(0.0D); //display nulls as 0
 			}
 		} else {
-			artOutputInterface.addCellDouble(d);
+			tabularOutput.addCellNumeric(value);
 		}
 	}
 
 	@Override
-	public void addCellLong(Long i) {
-		if (i == null) {
-			if (ArtConfig.getSettings().getDisplayNull()== DisplayNull.NoNumbersAsBlank) {
-				artOutputInterface.addCellString(""); //display nulls as empty string
-			} else {
-				artOutputInterface.addCellLong(0L); //display nulls as 0
-			}
-		} else {
-			artOutputInterface.addCellLong(i);
-		}
+	public void addCellDate(Date value) {
+		tabularOutput.addCellDate(value);
 	}
 
 	@Override
-	public void addCellDate(Date d) {
-		artOutputInterface.addCellDate(d);
+	public boolean newRow() {
+		return tabularOutput.newRow();
 	}
 
 	@Override
-	public boolean newLine() {
-		return artOutputInterface.newLine();
+	public void endRows() {
+		tabularOutput.endRows();
 	}
 
-	@Override
-	public void endLines() {
-		artOutputInterface.endLines();
-	}
-
-	@Override
-	public String getFileName() {
-		return artOutputInterface.getFileName();
-	}
-
-	@Override
-	public boolean isShowQueryHeaderAndFooter() {
-		return artOutputInterface.isShowQueryHeaderAndFooter();
-	}
-
-	public HideNullOutput(ReportOutputInterface artOutputInterface) {
-		super();
-		this.artOutputInterface = artOutputInterface;
-	}
 }

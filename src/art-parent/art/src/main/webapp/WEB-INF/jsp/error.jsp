@@ -19,7 +19,7 @@ http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset='utf-8'>
         <title>ART - Error</title>
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
