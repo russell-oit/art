@@ -18,7 +18,7 @@ package art.report;
 
 import art.datasource.Datasource;
 import art.dbutils.DbService;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.enums.AccessLevel;
@@ -719,7 +719,7 @@ public class ReportService {
 
 		int count = 0; //number of records copied
 
-		Connection conn = ArtConfig.getConnection();
+		Connection conn = Config.getConnection();
 
 		if (conn == null) {
 			throw new IllegalStateException("Connection to the ART Database not available");
@@ -827,7 +827,7 @@ public class ReportService {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;

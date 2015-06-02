@@ -17,7 +17,7 @@
  */
 package art.graph;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQuery;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
@@ -269,8 +269,8 @@ public class ExportGraph {
 
 			//enable use of custom font in pdf output
 			String fontName = "SansSerif"; //for use in speedometer chart creation
-			if (ArtConfig.isUseCustomPdfFont()) {
-				fontName = ArtConfig.getSettings().getPdfFontName();
+			if (Config.isUseCustomPdfFont()) {
+				fontName = Config.getSettings().getPdfFontName();
 				Font oldExtraLargeFont = chartTheme.getExtraLargeFont();
 				Font oldLargeFont = chartTheme.getLargeFont();
 				Font oldRegularFont = chartTheme.getRegularFont();

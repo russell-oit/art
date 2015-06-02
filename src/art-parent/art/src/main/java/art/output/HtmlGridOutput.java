@@ -19,7 +19,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.util.Date;
 
 /**
@@ -27,9 +27,7 @@ import java.util.Date;
  *
  * @author Enrico Liboni
  */
-public class HtmlGridOutput extends TabularOutput {
-
-	private final String CLOSE_RESULTS_TABLE_HTML = "</tr></tbody></table></div>";
+public class HtmlGridOutput extends StandardOutput {
 
 	@Override
 	public void beginHeader() {
@@ -98,7 +96,7 @@ public class HtmlGridOutput extends TabularOutput {
 			sortValue = 0;
 		} else {
 			sortValue = value.getTime();
-			formattedValue = ArtConfig.getDateDisplayString(value);
+			formattedValue = Config.getDateDisplayString(value);
 		}
 
 		out.println("<td style='text-align: left' sorttable_customkey='"
@@ -106,37 +104,22 @@ public class HtmlGridOutput extends TabularOutput {
 	}
 
 	@Override
-	public boolean newRow() {
-		boolean canProceed;
-
-		rowCount++;
-
-		if (rowCount > maxRows) {
-			canProceed = false;
-
-			//close table
-			out.println(CLOSE_RESULTS_TABLE_HTML);
-		} else {
-			canProceed = true;
-
-			if (rowCount > 1) {
-				//close previous row
-				out.println("</tr>");
-			}
-
-			//open new row
-			out.println("<tr class='rows' onclick='javascript:selectRow(this)'"
-					+ " ondblclick='javascript:selectRow2(this)'"
-					+ " onmouseover='javascript:highLight(this,'hiliterows')'"
-					+ " onmouseout='javascript:highLight(this,'rows')'>");
+	public void newRow() {
+		if (rowCount > 1) {
+			//close previous row
+			out.println("</tr>");
 		}
 
-		return canProceed;
+		//open new row
+		out.println("<tr class='rows' onclick='javascript:selectRow(this)'"
+				+ " ondblclick='javascript:selectRow2(this)'"
+				+ " onmouseover='javascript:highLight(this,'hiliterows')'"
+				+ " onmouseout='javascript:highLight(this,'rows')'>");
 	}
 
 	@Override
 	public void endRows() {
-		out.println(CLOSE_RESULTS_TABLE_HTML);
+		out.println("</tr></tbody></table></div>");
 	}
 
 }

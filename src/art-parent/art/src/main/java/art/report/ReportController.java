@@ -20,7 +20,7 @@ import art.datasource.DatasourceService;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroupService;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -335,7 +335,7 @@ public class ReportController {
 		validExtensions.add("xls");
 		validExtensions.add("xlsx");
 
-		long maxUploadSize = ArtConfig.getSettings().getMaxFileUploadSize(); //size in MB
+		long maxUploadSize = Config.getSettings().getMaxFileUploadSize(); //size in MB
 		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
 
 		//save template file
@@ -354,7 +354,7 @@ public class ReportController {
 		}
 
 		//save file
-		String destinationFilename = ArtConfig.getTemplatesPath() + filename;
+		String destinationFilename = Config.getTemplatesPath() + filename;
 		File destinationFile = new File(destinationFilename);
 		file.transferTo(destinationFile);
 

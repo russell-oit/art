@@ -20,7 +20,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.NumberFormat;
@@ -32,10 +32,7 @@ import java.util.Map;
  *
  * @author Enrico Liboni
  */
-public class HtmlFancyOutput extends TabularOutput {
-
-	private final String CLOSE_RESULTS_TABLE_HTML = "</tr></tbody></table></div>";
-	private boolean evenRow;
+public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void beginHeader() {
@@ -100,7 +97,7 @@ public class HtmlFancyOutput extends TabularOutput {
 		if (value == null) {
 			formattedValue = "";
 		} else {
-			formattedValue = ArtConfig.getDateDisplayString(value);
+			formattedValue = Config.getDateDisplayString(value);
 		}
 
 		String cssClass;
@@ -114,40 +111,19 @@ public class HtmlFancyOutput extends TabularOutput {
 	}
 
 	@Override
-	public boolean newRow() {
-		boolean canProceed;
-
-		rowCount++;
-
-		if (rowCount % 2 == 0) {
-			evenRow = true;
-		} else {
-			evenRow = false;
+	public void newRow() {
+		if (rowCount > 1) {
+			//close previous row
+			out.println("</tr>");
 		}
 
-		if (rowCount > maxRows) {
-			canProceed = false;
-
-			//close table
-			out.println(CLOSE_RESULTS_TABLE_HTML);
-		} else {
-			canProceed = true;
-
-			if (rowCount > 1) {
-				//close previous row
-				out.println("</tr>");
-			}
-
-			//open new row
-			out.println("<tr>");
-		}
-
-		return canProceed;
+		//open new row
+		out.println("<tr>");
 	}
 
 	@Override
 	public void endRows() {
-		out.println(CLOSE_RESULTS_TABLE_HTML);
+		out.println("</tr></tbody></table></div>");
 	}
 
 }

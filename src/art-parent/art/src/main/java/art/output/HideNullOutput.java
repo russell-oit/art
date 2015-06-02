@@ -18,17 +18,17 @@
 package art.output;
 
 import art.enums.DisplayNull;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Map;
 
-public class HideNullOutput extends TabularOutput {
+public class HideNullOutput extends StandardOutput {
 
-	private final TabularOutput tabularOutput;
+	private final StandardOutput tabularOutput;
 
-	public HideNullOutput(TabularOutput tabularOutput) {
+	public HideNullOutput(StandardOutput tabularOutput) {
 		super();
 		this.tabularOutput = tabularOutput;
 	}
@@ -70,7 +70,7 @@ public class HideNullOutput extends TabularOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		if (value == null) {
-			if (ArtConfig.getSettings().getDisplayNull() == DisplayNull.NoNumbersAsBlank) {
+			if (Config.getSettings().getDisplayNull() == DisplayNull.NoNumbersAsBlank) {
 				tabularOutput.addCellString(""); //display nulls as empty string
 			} else {
 				tabularOutput.addCellNumeric(0.0D); //display nulls as 0

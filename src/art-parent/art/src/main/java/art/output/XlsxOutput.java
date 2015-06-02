@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.*;
@@ -288,7 +288,7 @@ public class XlsxOutput implements ReportOutputInterface {
 				//output blank string
 				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
 			} else {
-				sw.createCell(cellNumber++, ArtConfig.getDateDisplayString(d), styles.get("date").getIndex());
+				sw.createCell(cellNumber++, Config.getDateDisplayString(d), styles.get("date").getIndex());
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);

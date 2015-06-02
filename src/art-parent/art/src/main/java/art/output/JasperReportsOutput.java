@@ -24,7 +24,7 @@ import art.parameter.Parameter;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -101,7 +101,7 @@ public class JasperReportsOutput {
 		try {
 			String templateFileName = report.getTemplate();
 			String baseTemplateFileName = FilenameUtils.getBaseName(templateFileName);
-			String templatesPath = ArtConfig.getTemplatesPath();
+			String templatesPath = Config.getTemplatesPath();
 			String jasperFilePath = templatesPath + baseTemplateFileName + ".jasper";
 			String jrxmlFilePath = templatesPath + baseTemplateFileName + ".jrxml";
 
@@ -214,7 +214,7 @@ public class JasperReportsOutput {
 
 		//set virtualizer properties, if virtualizer is to be used
 		Properties properties = new Properties();
-		String propertiesFilePath = ArtConfig.getClassesPath() + "jasperreports.properties";
+		String propertiesFilePath = Config.getClassesPath() + "jasperreports.properties";
 		File propertiesFile = new File(propertiesFilePath);
 		if (propertiesFile.exists()) {
 			try (FileInputStream o = new FileInputStream(propertiesFilePath)) {
@@ -290,7 +290,7 @@ public class JasperReportsOutput {
 	private void compileReport(String baseFileName) throws JRException {
 		logger.debug("Entering compileReport: baseFileName='{}'", baseFileName);
 
-		String templatesPath = ArtConfig.getTemplatesPath();
+		String templatesPath = Config.getTemplatesPath();
 		String jasperFilePath = templatesPath + baseFileName + ".jasper";
 		String jrxmlFilePath = templatesPath + baseFileName + ".jrxml";
 

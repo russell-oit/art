@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -128,7 +128,7 @@ public class Rss20Output implements ReportOutputInterface {
 
         out.println("<channel>");
         out.println("<title>" + queryName + "</title>");
-        out.println("<link>" + ArtConfig.getSettings().getRssLink() + "</link>");
+        out.println("<link>" + Config.getSettings().getRssLink() + "</link>");
         out.println("<description>" + queryName + " ART Feed</description>");
         out.println("<pubDate>" + getDateAsRFC822String(new java.util.Date()) + "</pubDate> ");
         out.println("<generator>http://art.sourceforge.net</generator> ");

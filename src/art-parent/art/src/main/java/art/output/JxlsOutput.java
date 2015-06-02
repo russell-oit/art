@@ -22,7 +22,7 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -80,7 +80,7 @@ public class JxlsOutput {
 
 		try {
 			String templateFileName = report.getTemplate();
-			String templatesPath = ArtConfig.getTemplatesPath();
+			String templatesPath = Config.getTemplatesPath();
 			String fullTemplateFileName = templatesPath + templateFileName;
 
 			//check if template file exists

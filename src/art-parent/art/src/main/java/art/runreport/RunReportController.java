@@ -39,7 +39,7 @@ import art.graph.ArtSpeedometer;
 import art.graph.ArtTimeSeries;
 import art.graph.ArtXY;
 import art.graph.ArtXYZChart;
-import art.output.TabularOutput;
+import art.output.StandardOutput;
 import art.output.DirectReportOutputHandler;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlPlainOutput;
@@ -52,7 +52,7 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.ArtHelper;
@@ -178,7 +178,7 @@ public class RunReportController {
 					return errorPage;
 				}
 
-				if (runningReportsCount > ArtConfig.getSettings().getMaxRunningReports()) {
+				if (runningReportsCount > Config.getSettings().getMaxRunningReports()) {
 					logger.warn("Report not run. Max running reports reached. user={}, report={}", sessionUser, report);
 					model.addAttribute("message", "reports.message.maxRunningReportsReached");
 					return errorPage;
@@ -220,9 +220,9 @@ public class RunReportController {
 			boolean showReportHeaderAndFooter = true;
 			ReportOutputInterface o = null;
 
-			if (reportType.isDirectOutput()) {
+			if (reportType.isStandardOutput()) {
 				//this is a direct output report
-				Map<String, Class<?>> directReportOutputClasses = ArtConfig.getDirectOutputReportClasses();
+				Map<String, Class<?>> directReportOutputClasses = Config.getDirectOutputReportClasses();
 
 				//@SuppressWarnings("rawtypes")
 				Class<?> classx = directReportOutputClasses.get(reportFormat.getValue());
@@ -429,7 +429,7 @@ public class RunReportController {
 					//generate output
 					//generate file name to use for report types and formats that generate files
 					String baseFileName = ArtUtils.getUniqueFileName(reportId);
-					String exportPath = ArtConfig.getReportsExportPath();
+					String exportPath = Config.getReportsExportPath();
 
 					String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
 					String outputFileName = exportPath + fileName;

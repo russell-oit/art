@@ -17,7 +17,7 @@
 package art.drilldown;
 
 import art.report.ReportService;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -180,7 +180,7 @@ public class DrilldownController {
 		}
 
 		Map<String, String> reportFormats = new LinkedHashMap<>();
-		for (String reportFormat : ArtConfig.getReportFormats()) {
+		for (String reportFormat : Config.getReportFormats()) {
 			reportFormats.put(reportFormat, messageSource.getMessage(reportFormat, null, locale));
 		}
 		reportFormats.put("graph", messageSource.getMessage("htmlGraph", null, locale));

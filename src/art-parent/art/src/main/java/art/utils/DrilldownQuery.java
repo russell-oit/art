@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.sql.*;
 import java.util.*;
 import org.slf4j.Logger;
@@ -196,7 +196,7 @@ public class DrilldownQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			success = create(conn, qId, position);
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -461,7 +461,7 @@ public class DrilldownQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;

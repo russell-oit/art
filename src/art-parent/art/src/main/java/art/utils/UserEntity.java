@@ -22,7 +22,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.io.Serializable;
 import java.sql.*;
 import java.text.Collator;
@@ -282,7 +282,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String SqlQuery = "SELECT EMAIL,ACCESS_LEVEL,FULL_NAME,ACTIVE_STATUS,"
 					+ " PASSWORD,DEFAULT_QUERY_GROUP,CAN_CHANGE_PASSWORD, "
@@ -388,7 +388,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			java.util.Date now = new java.util.Date();
 			java.sql.Date sysdate = new java.sql.Date(now.getTime());
@@ -448,7 +448,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -528,7 +528,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -615,7 +615,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -693,7 +693,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			PreparedStatement ps;
 			ResultSet rs;
@@ -772,7 +772,7 @@ public class UserEntity implements Serializable {
 		//add groups where user has right to query but not to group
 		Connection conn = null;
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			PreparedStatement ps;
 			ResultSet rs;
@@ -841,7 +841,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			String sqlQuery;
 			PreparedStatement ps;
 			ResultSet rs;
@@ -951,7 +951,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			String sql;
 			PreparedStatement ps;
 			ResultSet rs;
@@ -1085,7 +1085,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			String sql;
 			ResultSet rs;
 
@@ -1175,7 +1175,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			String sql;
 			ResultSet rs;
 
@@ -1259,7 +1259,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1345,7 +1345,7 @@ public class UserEntity implements Serializable {
 		Statement st = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			st = conn.createStatement();
 			String SqlQuery = "SELECT USERNAME FROM ART_USERS "
 					+ //" WHERE USERNAME <> 'public_user' "+  // 20110503 - eliboni - commented out otherwise it is not possible to assign privs to public_user....
@@ -1395,7 +1395,7 @@ public class UserEntity implements Serializable {
 		Statement st = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			st = conn.createStatement();
 			String SqlQuery = "SELECT USERNAME FROM ART_USERS "
 					+ " WHERE ACCESS_LEVEL BETWEEN 10 AND 30";
@@ -1445,7 +1445,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -1496,7 +1496,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1560,7 +1560,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sqlGroup;
 			String sqlDatasource;
@@ -1637,7 +1637,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1694,7 +1694,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1750,7 +1750,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1811,7 +1811,7 @@ public class UserEntity implements Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1887,7 +1887,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sqlGroup;
 			String sqlObject;
@@ -1967,7 +1967,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sqlGroup;
 			String sqlObject;
@@ -2043,7 +2043,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -2111,7 +2111,7 @@ public class UserEntity implements Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;

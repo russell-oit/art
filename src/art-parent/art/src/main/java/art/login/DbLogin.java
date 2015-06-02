@@ -1,6 +1,6 @@
 package art.login;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.dbutils.DatabaseUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,7 +24,7 @@ public class DbLogin {
 
 		LoginResult result = new LoginResult();
 
-		String url = ArtConfig.getSettings().getDatabaseAuthenticationUrl();
+		String url = Config.getSettings().getDatabaseAuthenticationUrl();
 
 		logger.debug("Url='{}'", url);
 

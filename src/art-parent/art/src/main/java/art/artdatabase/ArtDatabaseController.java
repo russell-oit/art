@@ -2,7 +2,7 @@ package art.artdatabase;
 
 import art.dbutils.DatabaseUtils;
 import art.enums.ConnectionPoolLibrary;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -49,7 +49,7 @@ public class ArtDatabaseController {
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
 	public String showArtDatabaseConfiguration(Model model) {
 
-		ArtDatabase artDatabase = ArtConfig.getArtDbConfig();
+		ArtDatabase artDatabase = Config.getArtDbConfig();
 
 		if (artDatabase == null) {
 			//art database not configured. default to demo
@@ -57,7 +57,7 @@ public class ArtDatabaseController {
 			artDatabase.setUrl("demo");
 
 			//set default values
-			ArtConfig.setArtDatabaseDefaults(artDatabase);
+			Config.setArtDatabaseDefaults(artDatabase);
 		}
 
 		//use blank password should always start as false
@@ -84,8 +84,8 @@ public class ArtDatabaseController {
 		} else {
 			if (StringUtils.isEmpty(newPassword)) {
 				//password field blank. use current password
-				if (ArtConfig.isArtDatabaseConfigured()) {
-					newPassword = ArtConfig.getArtDbConfig().getPassword();
+				if (Config.isArtDatabaseConfigured()) {
+					newPassword = Config.getArtDbConfig().getPassword();
 				}
 			}
 		}
@@ -96,8 +96,8 @@ public class ArtDatabaseController {
 		PreparedStatement ps = null;
 
 		try {
-			String demoDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
-			String sampleDbUrl = "jdbc:hsqldb:file:" + ArtConfig.getHsqldbPath() + "SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
+			String demoDbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "ArtRepositoryDB;shutdown=true;create=false;hsqldb.write_delay=false";
+			String sampleDbUrl = "jdbc:hsqldb:file:" + Config.getHsqldbPath() + "SampleDB;shutdown=true;create=false;hsqldb.write_delay=false";
 
 			boolean usingDemoDatabase = false;
 			if (StringUtils.equalsIgnoreCase(artDatabase.getUrl(), "demo")) {
@@ -145,9 +145,9 @@ public class ArtDatabaseController {
 			}
 
 			//save settings
-			ArtConfig.saveArtDatabaseConfiguration(artDatabase);
+			Config.saveArtDatabaseConfiguration(artDatabase);
 
-			ArtConfig.initializeArtDatabase();
+			Config.initializeArtDatabase();
 
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)

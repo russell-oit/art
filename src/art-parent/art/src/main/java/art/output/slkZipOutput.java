@@ -21,7 +21,7 @@
 // considered as the number 123
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
@@ -281,7 +281,7 @@ public class slkZipOutput implements ReportOutputInterface {
 
 	@Override
 	public void addCellDate(Date d) {
-		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + ArtConfig.getDateDisplayString(d) + "\"\n");
+		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + Config.getDateDisplayString(d) + "\"\n");
 	}
 
 	@Override

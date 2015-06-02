@@ -17,7 +17,7 @@
 package art.output;
 
 import art.enums.DisplayNull;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ActionResult;
 import art.utils.ArtQueryParam;
 import art.utils.DrilldownQuery;
@@ -133,7 +133,7 @@ public class DirectReportOutputHandler {
 		HashMap<String, String> params = new HashMap<String, String>();
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
+		if (Config.getSettings().getDisplayNull() != DisplayNull.Yes) {
 			o = new HideNullOutput(o);
 		}
 
@@ -354,7 +354,7 @@ public class DirectReportOutputHandler {
 		}
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
+		if (Config.getSettings().getDisplayNull() != DisplayNull.Yes) {
 			o = new HideNullOutput(o);
 		}
 
@@ -648,7 +648,7 @@ public class DirectReportOutputHandler {
 		int colCount = rsmd.getColumnCount();
 		int i;
 		int counter = 0;
-		GroupReportOutput o = new GroupReportOutput(out);
+		GroupHtmlOutput o = new GroupHtmlOutput(out);
 		String tmpstr;
 		StringBuffer cmpStr; // temporary string used to compare values
 		StringBuffer tmpCmpStr; // temporary string used to compare values
@@ -681,7 +681,7 @@ public class DirectReportOutputHandler {
 			o.addCellToSubHeader(tmpstr);
 		}
 
-		int maxRows = ArtConfig.getMaxRows("htmlreport");
+		int maxRows = Config.getMaxRows("htmlreport");
 
 		while (rs.next() && counter < maxRows) {
 			// Separators

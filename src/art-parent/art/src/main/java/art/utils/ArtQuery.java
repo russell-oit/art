@@ -23,7 +23,7 @@ package art.utils;
 
 import art.runreport.ReportRunner;
 import art.params.*;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.sql.*;
 import java.text.Collator;
 import java.util.*;
@@ -946,7 +946,7 @@ public class ArtQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			updated = update(conn);
 		} catch (Exception e) {
@@ -995,7 +995,7 @@ public class ArtQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "UPDATE ART_QUERIES SET NAME=? WHERE QUERY_ID=?";
 			PreparedStatement ps = conn.prepareStatement(sql);
@@ -1028,7 +1028,7 @@ public class ArtQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String ids = StringUtils.join(queryIds, ",");
 
@@ -1282,7 +1282,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1342,7 +1342,7 @@ public class ArtQuery {
 		Statement st = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			st = conn.createStatement();
 
 			//candidate drill down query is a query with at least one inline parameter where drill down column > 0
@@ -1401,7 +1401,7 @@ public class ArtQuery {
 		try {
 
 			//get query details
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			success = create(conn, qId);
 
 			//build parameter list
@@ -1588,7 +1588,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1650,7 +1650,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1705,7 +1705,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1763,7 +1763,7 @@ public class ArtQuery {
 		Statement st = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			st = conn.createStatement();
 			String SqlQuery = "SELECT QUERY_ID, NAME FROM ART_QUERIES "
 					+ " WHERE QUERY_GROUP_ID=0 OR QUERY_TYPE=119 OR QUERY_TYPE=120";
@@ -1811,7 +1811,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1881,7 +1881,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -1944,7 +1944,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -2004,7 +2004,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -2058,7 +2058,7 @@ public class ArtQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -2129,7 +2129,7 @@ public class ArtQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -2319,7 +2319,7 @@ public class ArtQuery {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -2394,7 +2394,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -2474,7 +2474,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -2524,7 +2524,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -2574,7 +2574,7 @@ public class ArtQuery {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;

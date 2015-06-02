@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
@@ -227,7 +227,7 @@ public class TsvOutput implements ReportOutputInterface {
 
 	@Override
 	public void addCellDate(Date d) {
-		exportFileStrBuf.append(ArtConfig.getDateDisplayString(d)).append("\t");
+		exportFileStrBuf.append(Config.getDateDisplayString(d)).append("\t");
 	}
 
 	@Override

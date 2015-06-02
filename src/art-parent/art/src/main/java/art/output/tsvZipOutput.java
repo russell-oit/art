@@ -19,7 +19,7 @@
 //adapted from gzipped tsv output class  tsvGzOutput.java
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
@@ -227,7 +227,7 @@ public class tsvZipOutput implements ReportOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		exportFileStrBuf.append(ArtConfig.getDateDisplayString(d)).append("\t");
+		exportFileStrBuf.append(Config.getDateDisplayString(d)).append("\t");
 	}
 
 	@Override

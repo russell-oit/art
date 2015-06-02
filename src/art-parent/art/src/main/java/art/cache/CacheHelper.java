@@ -16,7 +16,7 @@
  */
 package art.cache;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -54,7 +54,7 @@ public class CacheHelper {
 		BufferedWriter out = null;
 		try {
 			//create file that indicates when the cache was last cleared
-			String cacheFilePath = ArtConfig.getArtTempPath() + "mondrian-cache-cleared.txt";
+			String cacheFilePath = Config.getArtTempPath() + "mondrian-cache-cleared.txt";
 			out = new BufferedWriter(new FileWriter(cacheFilePath));
 			Date now = new Date();
 			out.write(now.toString());

@@ -21,7 +21,7 @@
 */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.sql.*;
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
@@ -62,7 +62,7 @@ public class Dashboard {
 		Connection conn = null;
 		try {
 			String dashboardXml = null;
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			ArtQuery aq = new ArtQuery();
 			if (aq.create(conn, dashboardId)) {
@@ -116,7 +116,7 @@ public class Dashboard {
 		Connection conn = null;
 		try {
 			String portletXml = null;
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			ArtQuery aq = new ArtQuery();
 			if (aq.create(conn, dashboardId)) {
 				portletXml = aq.getText();

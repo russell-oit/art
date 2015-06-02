@@ -18,7 +18,7 @@ package art.connection;
 
 import art.connectionpool.DbConnections;
 import art.enums.ConnectionPoolLibrary;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.AjaxResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,7 +39,7 @@ public class ConnectionController {
 	@RequestMapping(value = "/app/connections", method = RequestMethod.GET)
 	public String showConnections(Model model) {
 		model.addAttribute("connectionPoolDetails", DbConnections.getAllConnectionPoolDetails());
-		ConnectionPoolLibrary connectionPoolLibrary = ArtConfig.getArtDbConfig().getConnectionPoolLibrary();
+		ConnectionPoolLibrary connectionPoolLibrary = Config.getArtDbConfig().getConnectionPoolLibrary();
 		if (connectionPoolLibrary == ConnectionPoolLibrary.ArtDBCP) {
 			model.addAttribute("usingArtDBCPConnectionPoolLibrary", true);
 		}

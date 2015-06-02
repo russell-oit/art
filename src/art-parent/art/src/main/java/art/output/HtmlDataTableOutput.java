@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.File;
@@ -34,11 +34,9 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Enrico Liboni
  */
-public class HtmlDataTableOutput extends TabularOutput {
+public class HtmlDataTableOutput extends StandardOutput {
 
 	private final String CLOSE_RESULTS_TABLE_HTML = "</tr></tbody></table></div>";
-
-	private boolean evenRow;
 
 	@Override
 	public void beginHeader() {
@@ -56,7 +54,7 @@ public class HtmlDataTableOutput extends TabularOutput {
 		if (StringUtils.isNotBlank(language)) {
 			String languageFileName = "dataTables." + language + ".txt";
 			String sep = File.separator;
-			String languageFilePath = ArtConfig.getAppPath() + sep + "js" + sep + languageFileName;
+			String languageFilePath = Config.getAppPath() + sep + "js" + sep + languageFileName;
 			File languageFile = new File(languageFilePath);
 			if (languageFile.exists()) {
 				languageSetting = ", \"oLanguage\": {\"sUrl\": " + contextPath + "/js/" + languageFileName + "\"}";
@@ -145,7 +143,7 @@ public class HtmlDataTableOutput extends TabularOutput {
 			sortValue = 0;
 		} else {
 			sortValue = value.getTime();
-			formattedValue = ArtConfig.getDateDisplayString(value);
+			formattedValue = Config.getDateDisplayString(value);
 		}
 
 		out.println("<td style='text-align: left'>"
@@ -155,35 +153,14 @@ public class HtmlDataTableOutput extends TabularOutput {
 	}
 
 	@Override
-	public boolean newRow() {
-		boolean canProceed;
-
-		rowCount++;
-
-		if (rowCount % 2 == 0) {
-			evenRow = true;
-		} else {
-			evenRow = false;
+	public void newRow() {
+		if (rowCount > 1) {
+			//close previous row
+			out.println("</tr>");
 		}
 
-		if (rowCount > maxRows) {
-			canProceed = false;
-
-			//close table
-			out.println(CLOSE_RESULTS_TABLE_HTML);
-		} else {
-			canProceed = true;
-
-			if (rowCount > 1) {
-				//close previous row
-				out.println("</tr>");
-			}
-
-			//open new row
-			out.println("<tr>");
-		}
-
-		return canProceed;
+		//open new row
+		out.println("<tr>");
 	}
 
 	@Override

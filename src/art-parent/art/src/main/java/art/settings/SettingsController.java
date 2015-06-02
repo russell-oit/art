@@ -5,7 +5,7 @@ import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletContext;
@@ -69,7 +69,7 @@ public class SettingsController {
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.GET)
 	public String showSettings(Model model) {
-		Settings settings = ArtConfig.getSettings();
+		Settings settings = Config.getSettings();
 
 		model.addAttribute("settings", settings);
 		return "settings";
@@ -91,7 +91,7 @@ public class SettingsController {
 		} else {
 			if (StringUtils.isEmpty(newSmtpPassword)) {
 				//use current password
-				newSmtpPassword = ArtConfig.getSettings().getSmtpPassword();
+				newSmtpPassword = Config.getSettings().getSmtpPassword();
 			}
 		}
 		settings.setSmtpPassword(newSmtpPassword);
@@ -102,13 +102,13 @@ public class SettingsController {
 		} else {
 			if (StringUtils.isEmpty(newLdapBindPassword)) {
 				//use current password
-				newLdapBindPassword = ArtConfig.getSettings().getLdapBindPassword();
+				newLdapBindPassword = Config.getSettings().getLdapBindPassword();
 			}
 		}
 		settings.setLdapBindPassword(newLdapBindPassword);
 
 		try {
-			ArtConfig.saveSettings(settings);
+			Config.saveSettings(settings);
 
 			//save administrator email in application context. for display in footer
 			ctx.setAttribute("administratorEmail", settings.getAdministratorEmail());

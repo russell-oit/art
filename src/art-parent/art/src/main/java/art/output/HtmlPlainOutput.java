@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.util.Date;
 
 /**
@@ -26,11 +26,16 @@ import java.util.Date;
  *
  * @author Enrico Liboni
  */
-public class HtmlPlainOutput extends TabularOutput {
+public class HtmlPlainOutput extends StandardOutput {
 
 	private final String CLOSE_RESULTS_TABLE_HTML = "</tr></table></div></body></html>";
 
-	private boolean displayInline = false; //whether display is inline in the showparams page. to avoid duplicate display of parameters
+	private boolean displayInline; //whether display is inline in the showparams page. to avoid duplicate display of parameters
+	private boolean standalone;
+
+	public HtmlPlainOutput(boolean standalone) {
+		this.standalone = standalone;
+	}
 
 	/**
 	 * @return the displayInline
@@ -48,16 +53,22 @@ public class HtmlPlainOutput extends TabularOutput {
 
 	@Override
 	public void beginHeader() {
-		out.println("<html>");
-		out.println("<head>");
-		out.println("<meta charset='utf-8'>");
-		out.println("</head>");
-		out.println("<body>");
+		if (standalone) {
+			out.println("<html>");
+			out.println("<head>");
+			out.println("<meta charset='utf-8'>");
+			out.println("</head>");
+			out.println("<body>");
+		}
 
 		//style should be in the head section. put in body for correct display in email inline jobs
 		//TODO test
 		//https://www.campaignmonitor.com/css/
-		out.println("<style>table { border-collapse: collapse; }\n td { background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; }\nbody { font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000; }</style>");
+		out.println("<style>"
+				+ "table { border-collapse: collapse; }"
+				+ "\n td { background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; }"
+				+ "\n body { font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000; }"
+				+ "</style>");
 
 		//start results table
 		out.println("<div align='center'>");
@@ -101,40 +112,30 @@ public class HtmlPlainOutput extends TabularOutput {
 		if (value == null) {
 			formattedValue = "";
 		} else {
-			formattedValue = ArtConfig.getDateDisplayString(value);
+			formattedValue = Config.getDateDisplayString(value);
 		}
 
 		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
 	}
 
 	@Override
-	public boolean newRow() {
-		boolean canProceed;
-
-		rowCount++;
-
-		if (rowCount > maxRows) {
-			canProceed = false;
-
-			//close table
-			out.println(CLOSE_RESULTS_TABLE_HTML);
-		} else {
-			canProceed = true;
-
-			if (rowCount > 1) {
-				//close previous row
-				out.println("</tr>");
-			}
-
-			//open new row
-			out.println("<tr>");
+	public void newRow() {
+		if (rowCount > 1) {
+			//close previous row
+			out.println("</tr>");
 		}
 
-		return canProceed;
+		//open new row
+		out.println("<tr>");
 	}
 
 	@Override
 	public void endRows() {
-		out.println(CLOSE_RESULTS_TABLE_HTML);
+		out.println("</tr></table></div>");
+
+		if (standalone) {
+			out.println("</body></html>");
+		}
 	}
+
 }

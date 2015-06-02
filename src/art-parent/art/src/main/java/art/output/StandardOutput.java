@@ -18,7 +18,11 @@
 package art.output;
 
 import art.drilldown.Drilldown;
+import art.enums.DisplayNull;
+import art.enums.ReportFormat;
+import art.enums.ColumnType;
 import art.reportparameter.ReportParameter;
+import art.servlets.Config;
 import art.utils.ActionResult;
 import art.utils.DrilldownLinkHelper;
 import java.io.PrintWriter;
@@ -41,18 +45,18 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public abstract class TabularOutput {
+public abstract class StandardOutput {
 
-	private static final Logger logger = LoggerFactory.getLogger(TabularOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(StandardOutput.class);
 
 	protected PrintWriter out;
 	protected int rowCount;
 	protected int totalColumnCount; //resultset column count + drilldown column count
-	protected int maxRows;
 	protected DecimalFormat actualNumberFormatter;
 	protected DecimalFormat sortNumberFormatter;
 	protected String contextPath;
 	protected Locale locale;
+	protected boolean evenRow;
 
 	/**
 	 * @return the locale
@@ -151,22 +155,22 @@ public abstract class TabularOutput {
 	 *
 	 * @param value
 	 */
-	public void addHeaderCellLeftAligned(String value){
+	public void addHeaderCellLeftAligned(String value) {
 		addHeaderCell(value);
 	}
 
 	/**
 	 * Method invoked to state that the header finishes.
 	 */
-	public void endHeader(){
-		
+	public void endHeader() {
+
 	}
 
 	/**
 	 * Method invoked to state that the result set rows begin.
 	 */
-	public void beginRows(){
-		
+	public void beginRows() {
+
 	}
 
 	/**
@@ -199,7 +203,7 @@ public abstract class TabularOutput {
 	 *
 	 * @return <code>true</code> if can proceed to next record
 	 */
-	public abstract boolean newRow();
+	public abstract void newRow();
 
 	/**
 	 * This method is invoked when the last row has been flushed.
@@ -211,15 +215,15 @@ public abstract class TabularOutput {
 	/**
 	 * Output query results
 	 *
-	 * @return TabularOutputResult. if successful, rowCount contains the number of rows in
-	 * the resultset. if not, message contains the i18n message indicating the
-	 * problem
+	 * @return StandardOutputResult. if successful, rowCount contains the number
+	 * of rows in the resultset. if not, message contains the i18n message
+	 * indicating the problem
 	 * @throws SQLException
 	 */
-	public TabularOutputResult generateStandardOutput(ResultSet rs, List<Drilldown> drilldowns,
-			List<ReportParameter> reportParamsList) throws SQLException {
+	public StandardOutputResult generateTabularOutput(ResultSet rs, List<Drilldown> drilldowns,
+			List<ReportParameter> reportParamsList, ReportFormat reportFormat) throws SQLException {
 
-		TabularOutputResult result = new TabularOutputResult();
+		StandardOutputResult result = new StandardOutputResult();
 
 		//initialize number formatters
 		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
@@ -268,75 +272,34 @@ public abstract class TabularOutput {
 		//begin data output
 		beginRows();
 
+		int maxRows = Config.getMaxRows(reportFormat.getValue());
+		DisplayNull displayNullSetting = Config.getSettings().getDisplayNull();
+		List<ColumnType> columnTypes = getColumnTypes(rsmd);
+
 		while (rs.next()) {
 			rowCount++;
 
-			if (!newRow()) {
-				//couldn't create new line. row limit exceeded
-				//for xlsx, it's also possible that an error occurred.
-				//just show one message. if error occurred, it will be logged
+			if (rowCount % 2 == 0) {
+				evenRow = true;
+			} else {
+				evenRow = false;
+			}
+
+			if (rowCount > maxRows) {
+				//row limit exceeded
+				for (int i = 0; i < totalColumnCount; i++) {
+					addCellString("...");
+				}
+				
+				endRows();
+				
 				result.setMessage("runReport.message.tooManyRows");
+				result.setTooManyRows(true);
 				return result;
+			} else {
+				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, displayNullSetting);
+				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
 			}
-
-			//save column values for use in drill down columns.
-			//for the jdbc-odbc bridge, you can only read
-			//column values ONCE and in the ORDER they appear in the select
-			List<Object> columnValues = new ArrayList<>();
-			for (int i = 0; i < resultSetColumnCount; i++) {
-				int sqlType = rsmd.getColumnType(i + 1);
-				Object value = null;
-				if (isNumeric(sqlType)) {
-					value = rs.getDouble(i + 1);
-					if (rs.wasNull()) {
-						value = null;
-					}
-					addCellNumeric((Double)value);
-				} else if (isDate(sqlType)) {
-					value = rs.getTimestamp(i + 1);
-					addCellDate((Date)value);
-				} else if (isClob(sqlType)) {
-					Clob clob = rs.getClob(i + 1);
-					if (clob != null) {
-						try {
-							value = clob.getSubString(1, (int) clob.length());
-						} catch (SQLException ex) {
-							logger.error("Error", ex);
-							value = "Error getting CLOB data: " + ex;
-						}
-					}
-					addCellString((String)value);
-				} else {
-					//treat as string
-					value = rs.getString(i + 1);
-					addCellString((String)value);
-				}
-				columnValues.add(value);
-			}
-
-			//output columns for drill down reports			
-			if (drilldowns != null) {
-				for (Drilldown drilldown : drilldowns) {
-					DrilldownLinkHelper drilldownLinkHelper=new DrilldownLinkHelper(drilldown, reportParamsList);
-					String drilldownUrl=drilldownLinkHelper.getDrilldownLink(columnValues.toArray());
-					
-					String drilldownText = drilldown.getLinkText();
-					if (StringUtils.isBlank(drilldownText)) {
-						drilldownText = "Drill Down";
-					}
-					
-					String drilldownTag;
-					String targetAttribute="";
-					if (drilldown.isOpenInNewWindow()) {
-						//open drill down in new window
-						targetAttribute="target='_blank'";
-						drilldownTag="<a href='" + drilldownUrl + "' target='_blank'>" + drilldownText + "</a>";
-					} 
-					drilldownTag="<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
-					addCellString(drilldownTag);
-				}
-			}
-
 		}
 
 		endRows();
@@ -344,6 +307,92 @@ public abstract class TabularOutput {
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
 		return result;
+	}
+
+	private List<ColumnType> getColumnTypes(ResultSetMetaData rsmd) throws SQLException {
+		List<ColumnType> columnTypes = new ArrayList<>();
+		for (int i = 0; i < rsmd.getColumnCount(); i++) {
+			int sqlType = rsmd.getColumnType(i + 1);
+			if (isNumeric(sqlType)) {
+				columnTypes.add(ColumnType.Numeric);
+			} else if (isDate(sqlType)) {
+				columnTypes.add(ColumnType.Date);
+			} else if (isClob(sqlType)) {
+				columnTypes.add(ColumnType.Clob);
+			} else {
+				columnTypes.add(ColumnType.String);
+			}
+		}
+
+		return columnTypes;
+	}
+
+	private List<Object> outputResultSetColumns(List<ColumnType> columnTypes, ResultSet rs, DisplayNull displayNullSetting) throws SQLException {
+		//save column values for use in drill down columns.
+		//for the jdbc-odbc bridge, you can only read
+		//column values ONCE and in the ORDER they appear in the select
+		List<Object> columnValues = new ArrayList<>();
+
+		int columnIndex = 0;
+		for (ColumnType columnType : columnTypes) {
+			columnIndex++;
+			Object value = null;
+
+			switch (columnType) {
+				case Numeric:
+					value = rs.getDouble(columnIndex);
+					if (rs.wasNull()) {
+						value = null;
+					}
+					addNumeric(value, displayNullSetting);
+					break;
+				case Date:
+					value = rs.getTimestamp(columnIndex);
+					addCellDate((Date) value);
+					break;
+				case Clob:
+					Clob clob = rs.getClob(columnIndex);
+					if (clob != null) {
+						value = clob.getSubString(1, (int) clob.length());
+					}
+					addString(value, displayNullSetting);
+					break;
+				default:
+					value = rs.getString(columnIndex);
+					addString(value, displayNullSetting);
+			}
+
+			columnValues.add(value);
+		}
+
+		return columnValues;
+	}
+
+	private void outputDrilldownColumns(List<Drilldown> drilldowns,
+			List<ReportParameter> reportParamsList, List<Object> columnValues)
+			throws SQLException {
+
+		//output columns for drill down reports
+		if (drilldowns != null) {
+			for (Drilldown drilldown : drilldowns) {
+				DrilldownLinkHelper drilldownLinkHelper = new DrilldownLinkHelper(drilldown, reportParamsList);
+				String drilldownUrl = drilldownLinkHelper.getDrilldownLink(columnValues.toArray());
+
+				String drilldownText = drilldown.getLinkText();
+				if (StringUtils.isBlank(drilldownText)) {
+					drilldownText = "Drill Down";
+				}
+
+				String drilldownTag;
+				String targetAttribute = "";
+				if (drilldown.isOpenInNewWindow()) {
+					//open drill down in new window
+					targetAttribute = "target='_blank'";
+				}
+				drilldownTag = "<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
+				addCellString(drilldownTag);
+			}
+		}
 	}
 
 	private boolean isNumeric(int sqlType) {
@@ -397,5 +446,29 @@ public abstract class TabularOutput {
 		}
 
 		return clob;
+	}
+
+	private void addString(Object value, DisplayNull displayNullSetting) {
+		if (value == null) {
+			if (displayNullSetting == DisplayNull.Yes) {
+				addCellString(null); //display nulls as "null"
+			} else {
+				addCellString(""); //display nulls as empty string
+			}
+		} else {
+			addCellString((String) value);
+		}
+	}
+
+	private void addNumeric(Object value, DisplayNull displayNullSetting) {
+		if (value == null) {
+			if (displayNullSetting == DisplayNull.NoNumbersAsBlank) {
+				addCellString(""); //display nulls as empty string
+			} else {
+				addCellNumeric(0.0D); //display nulls as 0
+			}
+		} else {
+			addCellNumeric((Double) value);
+		}
 	}
 }

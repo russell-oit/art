@@ -68,10 +68,10 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class ArtConfig extends HttpServlet {
+public class Config extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static final Logger logger = LoggerFactory.getLogger(ArtConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(Config.class);
 	private static String exportPath;
 	private static final ArrayList<String> reportFormats = new ArrayList<>(); //report formats available to users
 	private static String appPath; //application path. to be used to get/build file paths in non-servlet classes
@@ -92,7 +92,7 @@ public class ArtConfig extends HttpServlet {
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		logger.info("ART is starting up");
-		ArtConfigInit();
+		ConfigInit();
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class ArtConfig extends HttpServlet {
 	 * Initializes database connections, the quartz scheduler, application
 	 * settings
 	 */
-	private void ArtConfigInit() {
+	private void ConfigInit() {
 		logger.debug("Entering ArtConfigInit");
 
 		ServletContext ctx = getServletConfig().getServletContext();
@@ -292,7 +292,7 @@ public class ArtConfig extends HttpServlet {
 			DbConnections.createConnectionPools(artDbConfig);
 
 			//upgrade art database
-			String upgradeFilePath = ArtConfig.getArtTempPath() + "upgrade.txt";
+			String upgradeFilePath = Config.getArtTempPath() + "upgrade.txt";
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
 			upgradeHelper.upgrade(artVersion, upgradeFilePath);
 		} catch (SQLException ex) {

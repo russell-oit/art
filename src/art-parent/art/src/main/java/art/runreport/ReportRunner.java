@@ -23,7 +23,7 @@ import art.enums.ReportType;
 import art.parameter.Parameter;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtException;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
@@ -274,7 +274,7 @@ public class ReportRunner {
 		}
 
 		//replace direct substitution parameters
-		if (ArtConfig.getCustomSettings().isEnableDirectParameterSubstitution()
+		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
 				|| reportType.isOlap()) {
 			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 				String paramName = entry.getKey();

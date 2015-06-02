@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.sql.*;
 import java.text.Collator;
 import java.util.*;
@@ -139,7 +139,7 @@ public class UserGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "SELECT USER_GROUP_ID, NAME, DESCRIPTION,"
 					+ " DEFAULT_QUERY_GROUP, START_QUERY "
@@ -193,7 +193,7 @@ public class UserGroup {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			Statement st;
 
@@ -240,7 +240,7 @@ public class UserGroup {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			// get new query group id
 			String sql = "SELECT MAX(USER_GROUP_ID) FROM ART_USER_GROUPS ";
@@ -295,7 +295,7 @@ public class UserGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "UPDATE ART_USER_GROUPS SET "
 					+ " NAME = ?, DESCRIPTION = ?, DEFAULT_QUERY_GROUP=?, START_QUERY=? "
@@ -342,7 +342,7 @@ public class UserGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "INSERT INTO ART_USER_GROUP_ASSIGNMENT"
 					+ " (USERNAME, USER_GROUP_ID) VALUES (?,?)";
@@ -390,7 +390,7 @@ public class UserGroup {
 		PreparedStatement psSplitJob = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USERNAME = ? AND USER_GROUP_ID = ?";
 			ps = conn.prepareStatement(sql);
@@ -457,7 +457,7 @@ public class UserGroup {
 		Statement st = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			st = conn.createStatement();
 			String sql = "SELECT NAME, USER_GROUP_ID "
@@ -502,7 +502,7 @@ public class UserGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -557,7 +557,7 @@ public class UserGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -613,7 +613,7 @@ public class UserGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -674,7 +674,7 @@ public class UserGroup {
 		PreparedStatement psRemove = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -752,7 +752,7 @@ public class UserGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;

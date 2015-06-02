@@ -30,7 +30,7 @@ import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOptions;
 import art.runreport.ReportRunner;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import java.io.File;
@@ -94,7 +94,7 @@ public class ReportJob implements org.quartz.Job {
 //		Connection conn = null;
 //
 //		try {
-//			conn = ArtConfig.getConnection();
+//			conn = Config.getConnection();
 //
 //			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 //			String tempJob = dataMap.getString("tempjob");
@@ -392,7 +392,7 @@ public class ReportJob implements org.quartz.Job {
 //					//generate output
 //					//generate file name to use for report types and formats that generate files
 //					String baseFileName = ArtUtils.getUniqueFileName(jobId);
-//					String exportPath = ArtConfig.getReportsExportPath();
+//					String exportPath = Config.getReportsExportPath();
 //
 //					String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
 //					String fullFileName = exportPath + fileName;
@@ -457,7 +457,7 @@ public class ReportJob implements org.quartz.Job {
 //
 //						o = (ReportOutputInterface) obj;
 //
-//						o.setMaxRows(ArtConfig.getMaxRows(outputFormat));
+//						o.setMaxRows(Config.getMaxRows(outputFormat));
 //
 //						//printwriter not needed for all output types. Avoid creating extra html file when output is not html, xml or rss
 //						FileOutputStream fos = null;

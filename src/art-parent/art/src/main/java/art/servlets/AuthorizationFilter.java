@@ -118,7 +118,7 @@ public class AuthorizationFilter implements Filter {
 						//valid access
 						session.setAttribute("sessionUser", user);
 						session.setAttribute("authenticationMethod", loginMethod.getValue());
-						session.setAttribute("administratorEmail", ArtConfig.getSettings().getAdministratorEmail());
+						session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
 						//log success
 						loginHelper.logSuccess(loginMethod, username, ip);
 					}
@@ -151,7 +151,7 @@ public class AuthorizationFilter implements Filter {
 			String page = StringUtils.substringBetween(requestUri, path, ".do");
 
 			if (canAccessPage(page, user, session)) {
-				if (!ArtConfig.isArtDatabaseConfigured()) {
+				if (!Config.isArtDatabaseConfigured()) {
 					//if art database not configured, only allow access to artDatabase.do
 					if (!StringUtils.equals(page, "artDatabase")) {
 						request.setAttribute("message", "page.message.artDatabaseNotConfigured");

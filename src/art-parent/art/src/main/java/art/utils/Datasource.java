@@ -16,7 +16,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.sql.*;
 import java.text.Collator;
 import java.util.*;
@@ -207,7 +207,7 @@ public class Datasource {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "SELECT DATABASE_ID, NAME, DRIVER, URL, USERNAME, PASSWORD,"
 					+ " POOL_TIMEOUT, TEST_SQL, ACTIVE_STATUS "
@@ -264,7 +264,7 @@ public class Datasource {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			java.util.Date now = new java.util.Date();
 			java.sql.Date sysdate = new java.sql.Date(now.getTime());
@@ -329,7 +329,7 @@ public class Datasource {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "DELETE FROM ART_DATABASES "
 					+ " WHERE DATABASE_ID = ? ";
@@ -373,7 +373,7 @@ public class Datasource {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -436,7 +436,7 @@ public class Datasource {
 		Statement st = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			st = conn.createStatement();
 			String sql = "SELECT NAME, DATABASE_ID FROM ART_DATABASES";
@@ -482,7 +482,7 @@ public class Datasource {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;

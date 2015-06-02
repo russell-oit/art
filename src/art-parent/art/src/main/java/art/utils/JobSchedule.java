@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -157,7 +157,7 @@ public class JobSchedule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			String sql = "SELECT AJS.JOB_MINUTE "
 					+ " FROM ART_JOB_SCHEDULES AJS "
 					+ " WHERE AJS.SCHEDULE_NAME = ?";
@@ -204,7 +204,7 @@ public class JobSchedule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			String sql = "INSERT INTO ART_JOB_SCHEDULES"
 					+ "(SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_MONTH, JOB_WEEKDAY)"
 					+ " VALUES (?, ?, ?, ?, ?, ?)";
@@ -254,7 +254,7 @@ public class JobSchedule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			String sql = "UPDATE ART_JOB_SCHEDULES SET JOB_MINUTE = ? , JOB_HOUR = ?"
 					+ " , JOB_DAY = ? , JOB_MONTH = ? , JOB_WEEKDAY = ? "
 					+ " WHERE SCHEDULE_NAME = ? ";
@@ -304,7 +304,7 @@ public class JobSchedule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "SELECT SCHEDULE_NAME "
 					+ " FROM ART_JOB_SCHEDULES";
@@ -355,7 +355,7 @@ public class JobSchedule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "DELETE FROM ART_JOB_SCHEDULES "
 					+ " WHERE SCHEDULE_NAME = ?";
@@ -399,7 +399,7 @@ public class JobSchedule {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "SELECT SCHEDULE_NAME, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
 					+ " JOB_MONTH, JOB_WEEKDAY "

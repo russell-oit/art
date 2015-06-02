@@ -31,7 +31,7 @@ import art.drilldown.DrilldownService;
 import art.enums.DisplayNull;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
-import art.output.TabularOutput;
+import art.output.StandardOutput;
 import art.output.DirectReportOutputHandler;
 import art.output.HideNullOutput;
 import art.output.HtmlDataTableOutput;
@@ -39,11 +39,11 @@ import art.output.HtmlPlainOutput;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
 import art.output.ReportOutputInterface;
-import art.output.TabularOutputResult;
+import art.output.StandardOutputResult;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ActionResult;
 import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
@@ -157,7 +157,7 @@ public class ReportOutputGenerator {
 
 	public void generateOutput(Report report, ReportRunner reportRunner,
 			ReportType reportType, ReportFormat reportFormat, Locale locale,
-			ParameterProcessorResult paramProcessorResult, TabularOutput tabularOutput,
+			ParameterProcessorResult paramProcessorResult, StandardOutput standardOutput,
 			PrintWriter writer, String fileName, String outputFileName)
 			throws IOException, SQLException, JRException, ParsePropertyException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
@@ -301,7 +301,7 @@ public class ReportOutputGenerator {
 
 				}
 
-				ChartUtils.prepareTheme(ArtConfig.getSettings().getPdfFontName());
+				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
 				if (isJob) {
 					chart.generateFile(reportFormat, outputFileName, data);
@@ -321,40 +321,27 @@ public class ReportOutputGenerator {
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
 				}
-			} else if (tabularOutput != null) {
-				//direct output report. "standard/tabular" or crosstab reports
-				tabularOutput.setMaxRows(ArtConfig.getMaxRows(reportFormat.getValue()));
-				tabularOutput.setWriter(writer);
+			} else if (standardOutput != null) {
+				standardOutput.setWriter(writer);
 
-				tabularOutput.setQueryName(reportName);
-				tabularOutput.setFileUserName(username);
-				tabularOutput.setExportPath(exportPath);
-
-
-				String contextPath = null;
 				if (request != null) {
-					contextPath = request.getContextPath();
-					tabularOutput.setContextPath(contextPath);
+					String contextPath = request.getContextPath();
+					standardOutput.setContextPath(contextPath);
 				}
 				
-				//checking to see if Display Null Value optional setting is set to "No"
-		if (ArtConfig.getSettings().getDisplayNull() != DisplayNull.Yes) {
-			tabularOutput = new HideNullOutput(tabularOutput);
-		}
-
 				//generate output
 				rs = reportRunner.getResultSet();
-				TabularOutputResult outputResult;
+				StandardOutputResult outputResult;
 
 				if (reportType.isCrosstab()) {
-					outputResult = DirectReportOutputHandler.flushXOutput(tabularOutput, rs);
+					outputResult = DirectReportOutputHandler.flushXOutput(standardOutput, rs);
 				} else {
 					List<Drilldown> drilldowns = null;
 					if (reportFormat.isHtml()) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						drilldowns = drilldownService.getDrilldowns(reportId);
 					}
-					outputResult = tabularOutput.generateStandardOutput(rs, drilldowns, reportParamsList);
+					outputResult = standardOutput.generateTabularOutput(rs, drilldowns, reportParamsList,reportFormat);
 				}
 
 				if (outputResult.isSuccess()) {

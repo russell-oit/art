@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -218,7 +218,7 @@ public class XmlOutput implements ReportOutputInterface {
 
     @Override
     public void addCellDate(Date d) {
-        out.println("<col type=\"date\">" + ArtConfig.getDateDisplayString(d) + "</col>");
+        out.println("<col type=\"date\">" + Config.getDateDisplayString(d) + "</col>");
     }
 
     @Override

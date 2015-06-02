@@ -1,6 +1,6 @@
 package art.login;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.net.UnknownHostException;
 import jcifs.UniAddress;
 import jcifs.smb.NtlmPasswordAuthentication;
@@ -25,7 +25,7 @@ public class WindowsDomainLogin {
 
 		LoginResult result = new LoginResult();
 
-		String domainController = ArtConfig.getSettings().getWindowsDomainController();
+		String domainController = Config.getSettings().getWindowsDomainController();
 
 		logger.debug("domainController='{}'", domainController);
 

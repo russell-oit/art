@@ -24,18 +24,15 @@ import java.io.PrintWriter;
  * 
  * @author Enrico Liboni
  */
-public class GroupReportOutput {
+public class GroupHtmlOutput extends GroupOutput {
 
-    PrintWriter out;
-    StringBuilder mainHeader=new StringBuilder();; // temporary string used to store Main Header Values     
-    StringBuilder subHeader=new StringBuilder();;  // temporary string used to store Sub  Header Values
 
     /**
      * Constructor. Set the output object
      * 
      * @param htmlWriter output object
      */
-    public GroupReportOutput(PrintWriter htmlWriter) {
+    public GroupHtmlOutput(PrintWriter htmlWriter) {
         out = htmlWriter;
     }
 
@@ -94,6 +91,10 @@ public class GroupReportOutput {
         out.println(subHeader.toString());
         endLines();
     }
+	
+	public void separator(){
+		out.println("<br><hr style=\"width:90%;height:1px\"><br>");
+	}
 
     /**
      * 

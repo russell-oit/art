@@ -142,7 +142,7 @@
 			Initialize ART settings and database connection pools
 		</description>
         <servlet-name>ArtConfig</servlet-name>
-        <servlet-class>art.servlets.ArtConfig</servlet-class>
+        <servlet-class>art.servlets.Config</servlet-class>
         <!-- Load this servlet at server startup time -->
         <load-on-startup>3</load-on-startup>
     </servlet>

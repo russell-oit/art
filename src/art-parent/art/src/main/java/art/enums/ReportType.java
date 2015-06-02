@@ -50,7 +50,7 @@ public enum ReportType {
 	 * @return
 	 */
 	public boolean usesSql() {
-		if (this == Dashboard || this == Text || this.isOlap()
+		if (this == Dashboard || this == Text || isOlap()
 				|| this == LovStatic) {
 			return false;
 		} else {
@@ -127,6 +127,14 @@ public enum ReportType {
 			return false;
 		}
 	}
+	
+	public boolean isTemplate(){
+		if(isJasperReports() || isJxls()){
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/**
 	 * Determine if this is a chart report
@@ -146,7 +154,7 @@ public enum ReportType {
 	 *
 	 * @return
 	 */
-	public boolean isDirectOutput() {
+	public boolean isStandardOutput() {
 		switch (this) {
 			case Tabular:
 			case TabularHtml:
@@ -154,6 +162,7 @@ public enum ReportType {
 			case CrosstabHtml:
 			case LovDynamic:
 			case LovStatic:
+			case JobRecipients:
 				return true;
 			default:
 				return false;

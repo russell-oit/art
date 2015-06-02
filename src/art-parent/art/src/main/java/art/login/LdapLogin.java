@@ -2,7 +2,7 @@ package art.login;
 
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import com.unboundid.ldap.sdk.BindRequest;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.DIGESTMD5BindRequest;
@@ -48,7 +48,7 @@ public class LdapLogin {
 	public static LoginResult authenticate(String username, String password) {
 		logger.debug("Entering authenticate: username='{}'", username);
 
-		String ldapUrl = ArtConfig.getSettings().getLdapUrl();
+		String ldapUrl = Config.getSettings().getLdapUrl();
 
 		logger.debug("ldapUrl='{}'", ldapUrl);
 
@@ -71,8 +71,8 @@ public class LdapLogin {
 
 		LoginResult result = new LoginResult();
 
-		String ldapServer = ArtConfig.getSettings().getLdapServer();
-		String baseDn = ArtConfig.getSettings().getLdapBaseDn();
+		String ldapServer = Config.getSettings().getLdapServer();
+		String baseDn = Config.getSettings().getLdapBaseDn();
 
 		logger.debug("ldapServer='{}'", ldapServer);
 		logger.debug("baseDn='{}'", baseDn);
@@ -96,11 +96,11 @@ public class LdapLogin {
 		LDAPConnection ldapConnection = null;
 
 		try {
-			int ldapPort = ArtConfig.getSettings().getLdapPort();
-			String bindDn = ArtConfig.getSettings().getLdapBindDn();
-			String bindPassword = ArtConfig.getSettings().getLdapBindPassword();
-			LdapConnectionEncryptionMethod encryptionMethod = ArtConfig.getSettings().getLdapConnectionEncryptionMethod();
-			boolean useAnonymousBind = ArtConfig.getSettings().isUseLdapAnonymousBind();
+			int ldapPort = Config.getSettings().getLdapPort();
+			String bindDn = Config.getSettings().getLdapBindDn();
+			String bindPassword = Config.getSettings().getLdapBindPassword();
+			LdapConnectionEncryptionMethod encryptionMethod = Config.getSettings().getLdapConnectionEncryptionMethod();
+			boolean useAnonymousBind = Config.getSettings().isUseLdapAnonymousBind();
 
 			logger.debug("ldapPort={}", ldapPort);
 			logger.debug("bindDn='{}'", bindDn);
@@ -157,7 +157,7 @@ public class LdapLogin {
 			if (ldapConnection != null) {
 				try {
 					//search for username under the ldap base dn
-					Filter filter = Filter.createEqualityFilter(ArtConfig.getSettings().getLdapUserIdAttribute(), username);
+					Filter filter = Filter.createEqualityFilter(Config.getSettings().getLdapUserIdAttribute(), username);
 					SearchRequest searchRequest = new SearchRequest(baseDn, SearchScope.SUB, filter);
 					SearchResult searchResult = ldapConnection.search(searchRequest);
 
@@ -179,7 +179,7 @@ public class LdapLogin {
 
 						try {
 							BindRequest bindRequest = null;
-							LdapAuthenticationMethod authenticationMethod = ArtConfig.getSettings().getLdapAuthenticationMethod();
+							LdapAuthenticationMethod authenticationMethod = Config.getSettings().getLdapAuthenticationMethod();
 
 							logger.debug("authenticationMethod={}", authenticationMethod);
 							logger.debug("dn='{}'", dn);
@@ -187,7 +187,7 @@ public class LdapLogin {
 							if (authenticationMethod == LdapAuthenticationMethod.Simple) {
 								bindRequest = new SimpleBindRequest(dn, password);
 							} else if (authenticationMethod == LdapAuthenticationMethod.DigestMD5) {
-								String ldapRealm = ArtConfig.getSettings().getLdapRealm();
+								String ldapRealm = Config.getSettings().getLdapRealm();
 
 								logger.debug("ldapRealm='{}'", ldapRealm);
 
@@ -266,18 +266,18 @@ public class LdapLogin {
 		Hashtable<String, String> env = new Hashtable<String, String>();
 
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-		env.put(Context.PROVIDER_URL, ArtConfig.getSettings().getLdapUrl());
+		env.put(Context.PROVIDER_URL, Config.getSettings().getLdapUrl());
 
 		// To get rid of the PartialResultException when using Active Directory
 		env.put(Context.REFERRAL, "follow");
 
-		LdapAuthenticationMethod authenticationMethod = ArtConfig.getSettings().getLdapAuthenticationMethod();
+		LdapAuthenticationMethod authenticationMethod = Config.getSettings().getLdapAuthenticationMethod();
 		env.put(Context.SECURITY_AUTHENTICATION, authenticationMethod.getValue());
 
 		logger.debug("authenticationMethod={}", authenticationMethod);
 
 		if (authenticationMethod == LdapAuthenticationMethod.DigestMD5) {
-			String ldapRealm = ArtConfig.getSettings().getLdapRealm();
+			String ldapRealm = Config.getSettings().getLdapRealm();
 
 			logger.debug("ldapRealm='{}'", ldapRealm);
 
@@ -286,15 +286,15 @@ public class LdapLogin {
 			}
 		}
 
-		String bindDn = ArtConfig.getSettings().getLdapBindDn();
-		boolean useAnonymousBind = ArtConfig.getSettings().isUseLdapAnonymousBind();
+		String bindDn = Config.getSettings().getLdapBindDn();
+		boolean useAnonymousBind = Config.getSettings().isUseLdapAnonymousBind();
 
 		logger.debug("bindDn='{}'", bindDn);
 		logger.debug("useAnonymousBind={}", useAnonymousBind);
 
 		if (!useAnonymousBind) {
 			env.put(Context.SECURITY_PRINCIPAL, escapeDN(bindDn));
-			env.put(Context.SECURITY_CREDENTIALS, ArtConfig.getSettings().getLdapBindPassword());
+			env.put(Context.SECURITY_CREDENTIALS, Config.getSettings().getLdapBindPassword());
 		}
 
 		DirContext ctx = null;
@@ -308,13 +308,13 @@ public class LdapLogin {
 				controls.setSearchScope(SearchControls.SUBTREE_SCOPE); // Search Entire Subtree
 				controls.setTimeLimit(5000); // Sets the time limit of these SearchControls in milliseconds
 
-				String userIdAttribute = ArtConfig.getSettings().getLdapUserIdAttribute();
+				String userIdAttribute = Config.getSettings().getLdapUserIdAttribute();
 				logger.debug("userIdAttribute='{}'", userIdAttribute);
 				String searchFilter = "(&(objectClass=person)("
 						+ escapeLDAPSearchFilter(userIdAttribute)
 						+ "=" + escapeLDAPSearchFilter(username) + "))";
 
-				String baseDn = ArtConfig.getSettings().getLdapBaseDn();
+				String baseDn = Config.getSettings().getLdapBaseDn();
 				logger.debug("baseDn='{}'", baseDn);
 				results = ctx.search(escapeDN(baseDn), searchFilter, controls);
 

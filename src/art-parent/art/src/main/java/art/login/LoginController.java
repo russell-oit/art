@@ -3,7 +3,7 @@ package art.login;
 import art.connectionpool.DbConnections;
 import art.enums.AccessLevel;
 import art.enums.ArtAuthenticationMethod;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
 import art.utils.ArtUtils;
@@ -53,7 +53,7 @@ public class LoginController {
 
 		HttpSession session = request.getSession();
 
-		if (!ArtConfig.isArtDatabaseConfigured()) {
+		if (!Config.isArtDatabaseConfigured()) {
 			User user = new User();
 
 			user.setUsername("initial setup");
@@ -66,7 +66,7 @@ public class LoginController {
 		}
 
 		//set administrator email
-		session.setAttribute("administratorEmail", ArtConfig.getSettings().getAdministratorEmail());
+		session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
 
 		//ensure art database connection is available
 		Connection conn = null;
@@ -87,7 +87,7 @@ public class LoginController {
 		}
 
 		ArtAuthenticationMethod loginMethod;
-		ArtAuthenticationMethod loginMethodAppSetting = ArtConfig.getSettings().getArtAuthenticationMethod();
+		ArtAuthenticationMethod loginMethodAppSetting = Config.getSettings().getArtAuthenticationMethod();
 		if (authenticationMethod == null) {
 			//authentication method not specified in url. use application setting
 			loginMethod = loginMethodAppSetting;
@@ -150,7 +150,7 @@ public class LoginController {
 		}
 
 		if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {
-			String domains = ArtConfig.getSettings().getAllowedWindowsDomains();
+			String domains = Config.getSettings().getAllowedWindowsDomains();
 			//not allowed to add null attribute to model
 			if (domains != null) {
 				model.addAttribute("domains", domains);
@@ -326,8 +326,8 @@ public class LoginController {
 	public boolean isValidRepositoryUser(String username, String password) {
 		boolean validRepositoryUser = false;
 
-		String artDbUsername = ArtConfig.getArtDbConfig().getUsername();
-		String artDbPassword = ArtConfig.getArtDbConfig().getPassword();
+		String artDbUsername = Config.getArtDbConfig().getUsername();
+		String artDbPassword = Config.getArtDbConfig().getPassword();
 		if (StringUtils.equals(username, artDbUsername)
 				&& StringUtils.equals(password, artDbPassword)
 				&& StringUtils.isNotBlank(username)) {

@@ -95,7 +95,7 @@ public class Cleaner extends HttpServlet {
 		logger.debug("Running clean");
 
 		// Delete old files in the reports export directory
-		cleanDirectory(ArtConfig.getReportsExportPath());
+		cleanDirectory(Config.getReportsExportPath());
 
 		//clear mondrian cache
 		clearMondrianCache();
@@ -145,12 +145,12 @@ public class Cleaner extends HttpServlet {
 
 		long mondrianCacheExpiry; //cache expiry duration in milliseconds
 
-		mondrianCacheExpiry = (long) ArtConfig.getSettings().getMondrianCacheExpiryPeriod();
+		mondrianCacheExpiry = (long) Config.getSettings().getMondrianCacheExpiryPeriod();
 		mondrianCacheExpiry = mondrianCacheExpiry * 60 * 60 * 1000; //convert period defined in hours to milliseconds
 
 		if (mondrianCacheExpiry > 0) {
 			boolean clearCache = false;
-			String cacheFilePath = ArtConfig.getArtTempPath() + "mondrian-cache-cleared.txt";
+			String cacheFilePath = Config.getArtTempPath() + "mondrian-cache-cleared.txt";
 			File cacheFile = new File(cacheFilePath);
 			long limit = System.currentTimeMillis() - mondrianCacheExpiry;
 			if (!cacheFile.exists() || FileUtils.isFileOlder(cacheFile, limit)) {

@@ -50,9 +50,9 @@ public class ExportPathFilter implements Filter {
 
 		String filename = URLDecoder.decode(requestPath.getName(), "UTF-8");
 		if (requestUri.contains("/export/jobs/")) {
-			filename = ArtConfig.getJobsExportPath() + filename;
+			filename = Config.getJobsExportPath() + filename;
 		} else {
-			filename = ArtConfig.getReportsExportPath() + filename;
+			filename = Config.getReportsExportPath() + filename;
 		}
 		File file = new File(filename);
 

@@ -4,7 +4,7 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.JobType;
 import art.report.Report;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.CachedResult;
 import art.utils.SchedulerUtils;
@@ -172,7 +172,7 @@ public class JobService {
 		if (jobType == JobType.CacheAppend || jobType == JobType.CacheInsert) {
 			// Delete
 			int targetDatabaseId = Integer.parseInt(job.getOutputFormat());
-			Connection connCache = ArtConfig.getConnection(targetDatabaseId);
+			Connection connCache = Config.getConnection(targetDatabaseId);
 			try {
 				String cachedTableName = job.getCachedTableName();
 				if (StringUtils.isBlank(cachedTableName)) {

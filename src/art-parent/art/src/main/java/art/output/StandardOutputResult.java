@@ -21,10 +21,25 @@ package art.output;
  *
  * @author Timothy Anyona
  */
-public class TabularOutputResult {
+public class StandardOutputResult {
 	private String message;
 	private boolean success;
 	private int rowCount;
+	private boolean tooManyRows;
+
+	/**
+	 * @return the tooManyRows
+	 */
+	public boolean isTooManyRows() {
+		return tooManyRows;
+	}
+
+	/**
+	 * @param tooManyRows the tooManyRows to set
+	 */
+	public void setTooManyRows(boolean tooManyRows) {
+		this.tooManyRows = tooManyRows;
+	}
 
 	/**
 	 * @return the message

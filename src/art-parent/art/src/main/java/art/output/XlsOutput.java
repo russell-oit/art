@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
@@ -270,7 +270,7 @@ public class XlsOutput implements ReportOutputInterface {
     public void addCellDate(java.util.Date d) {
         cell = row.createCell(cellNumber++);
         if (d != null) {
-            cell.setCellValue(ArtConfig.getDateDisplayString(d));
+            cell.setCellValue(Config.getDateDisplayString(d));
             cell.setCellStyle(dateStyle);
         }
     }

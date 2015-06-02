@@ -18,7 +18,7 @@ package art.utils;
 
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -74,7 +74,7 @@ public class ArtHelper {
 					String SqlQuery = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL"
 							+ " FROM ART_USERS "
 							+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
-					conn = ArtConfig.getConnection();
+					conn = Config.getConnection();
 					if (conn == null) {
 						msg = messages.getString("invalidConnection");
 					} else {
@@ -108,7 +108,7 @@ public class ArtHelper {
 				String SqlQuery = "SELECT ACCESS_LEVEL "
 						+ " FROM ART_USERS "
 						+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
-				conn = ArtConfig.getConnection();
+				conn = Config.getConnection();
 				if (conn == null) {
 					msg = messages.getString("invalidConnection");
 				} else {
@@ -159,7 +159,7 @@ public class ArtHelper {
 		String url = "";
 		String languageFileName = "dataTables." + request.getLocale().toString() + ".txt";
 		String sep = File.separator;
-		String languageFilePath = ArtConfig.getAppPath() + sep + "dataTables" + sep + languageFileName;
+		String languageFilePath = Config.getAppPath() + sep + "dataTables" + sep + languageFileName;
 		File languageFile = new File(languageFilePath);
 		if (languageFile.exists()) {
 			url = request.getContextPath() + "/dataTables/" + languageFileName;
@@ -261,8 +261,8 @@ public class ArtHelper {
 		//TODO remove this method once refactoring is complete
 		boolean validRepositoryUser = false;
 
-		String artDbUsername = ArtConfig.getArtDbConfig().getUsername();
-		String artDbPassword = ArtConfig.getArtDbConfig().getPassword();
+		String artDbUsername = Config.getArtDbConfig().getUsername();
+		String artDbPassword = Config.getArtDbConfig().getPassword();
 		if (StringUtils.equals(username, artDbUsername)
 				&& StringUtils.equals(password, artDbPassword)
 				&& StringUtils.isNotBlank(username)) {

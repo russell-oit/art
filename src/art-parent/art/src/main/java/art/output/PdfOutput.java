@@ -17,7 +17,7 @@
  */
 package art.output;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import com.lowagie.text.*;
@@ -311,7 +311,7 @@ public class PdfOutput implements ReportOutputInterface {
 
 	@Override
 	public void addCellDate(java.util.Date d) {
-		cell = new PdfPCell(new Paragraph(fsBody.process(ArtConfig.getDateDisplayString(d))));
+		cell = new PdfPCell(new Paragraph(fsBody.process(Config.getDateDisplayString(d))));
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
 		cell.setGrayFill((oddline ? evengray : oddgray));
@@ -329,7 +329,7 @@ public class PdfOutput implements ReportOutputInterface {
 		}
 
 		// split table in smaller pieces in order to save memory:
-		// fragment size should come from ArtConfig servlet, from  web.xml or properties		
+		// fragment size should come from Config servlet, from  web.xml or properties		
 		if (counter % 500 == 500 - 1) {
 			try {
 				document.add(table);
@@ -395,10 +395,10 @@ public class PdfOutput implements ReportOutputInterface {
 		//first font added to selector wins
 
 		//use custom font if defined			
-		if (ArtConfig.isUseCustomPdfFont()) {
-			String fontName = ArtConfig.getSettings().getPdfFontName();
-			String encoding = ArtConfig.getSettings().getPdfFontEncoding();
-			boolean embedded = ArtConfig.getSettings().isPdfFontEmbedded();
+		if (Config.isUseCustomPdfFont()) {
+			String fontName = Config.getSettings().getPdfFontName();
+			String encoding = Config.getSettings().getPdfFontEncoding();
+			boolean embedded = Config.getSettings().isPdfFontEmbedded();
 
 			Font bodyFont = FontFactory.getFont(fontName, encoding, embedded);
 			bodyFont.setSize(8);
@@ -443,7 +443,7 @@ public class PdfOutput implements ReportOutputInterface {
 
 		try {
 			Rectangle pageSize;
-			switch (ArtConfig.getSettings().getPdfPageSize()) {
+			switch (Config.getSettings().getPdfPageSize()) {
 				case A4:
 					pageSize = PageSize.A4;
 					break;

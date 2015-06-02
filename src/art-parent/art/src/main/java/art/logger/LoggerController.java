@@ -17,7 +17,7 @@
 package art.logger;
 
 import art.enums.LoggerLevel;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.utils.AjaxResponse;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -53,7 +53,7 @@ public class LoggerController {
 	public String showLoggers(Model model) {
 		logger.debug("Entering showLoggers");
 
-		if (ArtConfig.getCustomSettings().isShowErrors()) {
+		if (Config.getCustomSettings().isShowErrors()) {
 			//get only loggers configured in logback.xml
 			//http://mailman.qos.ch/pipermail/logback-user/2008-November/000751.html
 			LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();

@@ -19,7 +19,7 @@ package art.datasource;
 import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
@@ -288,7 +288,7 @@ public class DatasourceController {
 		if (datasource.isActive()) {
 			testConnection(jndi, driver, url, username, password);
 
-			ArtDatabase artDbConfig = ArtConfig.getArtDbConfig();
+			ArtDatabase artDbConfig = Config.getArtDbConfig();
 			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
 		}
 	}

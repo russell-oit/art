@@ -33,7 +33,7 @@ import art.mail.Mailer;
 import art.output.ReportOutputInterface;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -158,7 +158,7 @@ public class ArtJob implements Job, Serializable {
 	 * the ART repository (Connection c).
 	 */
 	public ArtJob() {
-		exportPath = ArtConfig.getExportPath();
+		exportPath = Config.getExportPath();
 	}
 
 	/**
@@ -1008,7 +1008,7 @@ public class ArtJob implements Job, Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
 			String tempJob = dataMap.getString("tempjob");
@@ -1557,7 +1557,7 @@ public class ArtJob implements Job, Serializable {
 
 						o = (ReportOutputInterface) obj;
 
-						o.setMaxRows(ArtConfig.getMaxRows(outputFormat));
+						o.setMaxRows(Config.getMaxRows(outputFormat));
 
 						//printwriter not needed for all output types. Avoid creating extra html file when output is not html, xml or rss
 						FileOutputStream fos = null;
@@ -2117,7 +2117,7 @@ public class ArtJob implements Job, Serializable {
 						if (archiveFileName != null && !archiveFileName.startsWith("-")) {
 							List<String> details = ArtUtils.getFileDetailsFromResult(archiveFileName);
 							archiveFileName = details.get(0);
-							String filePath = ArtConfig.getJobsExportPath() + archiveFileName;
+							String filePath = Config.getJobsExportPath() + archiveFileName;
 							File previousFile = new File(filePath);
 							if (previousFile.exists()) {
 								previousFile.delete();
@@ -2200,7 +2200,7 @@ public class ArtJob implements Job, Serializable {
 		try {
 			logger.debug("Saving job id {}", jobId);
 
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			// Allocate a new job id if job id is not set
 			if (jobId == -1) {
@@ -2402,7 +2402,7 @@ public class ArtJob implements Job, Serializable {
 			}
 
 			//delete records from art tables
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String SQL = "DELETE FROM ART_JOBS WHERE JOB_ID = ? ";
 			PreparedStatement ps = conn.prepareStatement(SQL);
@@ -2628,7 +2628,7 @@ public class ArtJob implements Job, Serializable {
 			ArtQuery aq = new ArtQuery();
 			htmlParams = aq.getHtmlParams(qId);
 
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "SELECT PARAM_TYPE, PARAM_NAME, PARAM_VALUE"
 					+ " FROM ART_JOBS_PARAMETERS "
@@ -2828,7 +2828,7 @@ public class ArtJob implements Job, Serializable {
 
 		try {
 			//get the parameters from the database
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "SELECT PARAM_NAME, PARAM_VALUE"
 					+ " FROM ART_JOBS_PARAMETERS "
@@ -2962,12 +2962,12 @@ public class ArtJob implements Job, Serializable {
 	private Mailer getMailer() {
 		Mailer mailer = new Mailer();
 		
-		mailer.setHost(ArtConfig.getSettings().getSmtpServer());
-		mailer.setPort(ArtConfig.getSettings().getSmtpPort());
-		mailer.setUseStartTls(ArtConfig.getSettings().isSmtpUseStartTls());
-		mailer.setUseAuthentication(ArtConfig.getSettings().isUseSmtpAuthentication());
-		mailer.setUsername(ArtConfig.getSettings().getSmtpUsername());
-		mailer.setPassword(ArtConfig.getSettings().getSmtpPassword());
+		mailer.setHost(Config.getSettings().getSmtpServer());
+		mailer.setPort(Config.getSettings().getSmtpPort());
+		mailer.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
+		mailer.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
+		mailer.setUsername(Config.getSettings().getSmtpUsername());
+		mailer.setPassword(Config.getSettings().getSmtpPassword());
 
 		return mailer;
 	}
@@ -2978,7 +2978,7 @@ public class ArtJob implements Job, Serializable {
 	 */
 	public void migrateJobsToQuartz() {
 
-		Connection conn = ArtConfig.getConnection();
+		Connection conn = Config.getConnection();
 		org.quartz.Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (conn == null) {
@@ -3169,7 +3169,7 @@ public class ArtJob implements Job, Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -3229,7 +3229,7 @@ public class ArtJob implements Job, Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -3291,7 +3291,7 @@ public class ArtJob implements Job, Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -3351,7 +3351,7 @@ public class ArtJob implements Job, Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 
@@ -3414,7 +3414,7 @@ public class ArtJob implements Job, Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -3479,7 +3479,7 @@ public class ArtJob implements Job, Serializable {
 		StringBuilder sb = new StringBuilder(100);
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -3551,7 +3551,7 @@ public class ArtJob implements Job, Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -3606,7 +3606,7 @@ public class ArtJob implements Job, Serializable {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -3659,7 +3659,7 @@ public class ArtJob implements Job, Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -3727,7 +3727,7 @@ public class ArtJob implements Job, Serializable {
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
 							List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 							oldFileName = details.get(0);
-							String filePath = ArtConfig.getJobsExportPath() + oldFileName;
+							String filePath = Config.getJobsExportPath() + oldFileName;
 							File previousFile = new File(filePath);
 							if (previousFile.exists()) {
 								previousFile.delete();
@@ -3763,7 +3763,7 @@ public class ArtJob implements Job, Serializable {
 						if (oldFileName != null && !oldFileName.startsWith("-")) {
 							List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 							oldFileName = details.get(0);
-							String filePath = ArtConfig.getJobsExportPath() + oldFileName;
+							String filePath = Config.getJobsExportPath() + oldFileName;
 							File previousFile = new File(filePath);
 							if (previousFile.exists()) {
 								previousFile.delete();
@@ -3804,7 +3804,7 @@ public class ArtJob implements Job, Serializable {
 		Connection conn = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -3832,7 +3832,7 @@ public class ArtJob implements Job, Serializable {
 				if (oldFileName != null && !oldFileName.startsWith("-")) {
 					List<String> details = ArtUtils.getFileDetailsFromResult(oldFileName);
 					oldFileName = details.get(0);
-					String filePath = ArtConfig.getJobsExportPath() + oldFileName;
+					String filePath = Config.getJobsExportPath() + oldFileName;
 					File previousFile = new File(filePath);
 					if (previousFile.exists()) {
 						boolean deleted = previousFile.delete();

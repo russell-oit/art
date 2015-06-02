@@ -17,7 +17,7 @@
  */
 package art.utils;
 
-import art.servlets.ArtConfig;
+import art.servlets.Config;
 import java.sql.*;
 import java.text.Collator;
 import java.util.*;
@@ -103,7 +103,7 @@ public class QueryGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "SELECT QUERY_GROUP_ID, NAME, DESCRIPTION "
 					+ " FROM ART_QUERY_GROUPS "
@@ -155,7 +155,7 @@ public class QueryGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "DELETE FROM ART_QUERY_GROUPS "
 					+ " WHERE QUERY_GROUP_ID = ?";
@@ -199,7 +199,7 @@ public class QueryGroup {
 
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			// get new query group id
 			String sql = "SELECT MAX(QUERY_GROUP_ID) FROM ART_QUERY_GROUPS ";
@@ -251,7 +251,7 @@ public class QueryGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql = "UPDATE ART_QUERY_GROUPS SET "
 					+ "  NAME = ?, DESCRIPTION = ?"
@@ -299,7 +299,7 @@ public class QueryGroup {
 		PreparedStatement ps = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 
 			String sql;
 			ResultSet rs;
@@ -359,7 +359,7 @@ public class QueryGroup {
 		Statement st = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			st = conn.createStatement();
 			String sql = "SELECT NAME, QUERY_GROUP_ID "
 					+ "FROM ART_QUERY_GROUPS";

@@ -276,7 +276,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			PreparedStatement ps = null;
 			ResultSet rs = null;
 			try {
-				conn = ArtConfig.getConnection();
+				conn = Config.getConnection();
 				ps = conn.prepareStatement(sql);
 				ps.setInt(1, groupId);
 
@@ -322,7 +322,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 		ResultSet rs = null;
 
 		try {
-			conn = ArtConfig.getConnection();
+			conn = Config.getConnection();
 			//use left outer join as dashboards, text queries etc don't have a datasource
 			String sql = " SELECT aq.QUERY_TYPE, aq.QUERY_ID, aq.NAME, "
 					+ " aq.SHORT_DESCRIPTION, aq.DESCRIPTION, aq.UPDATE_DATE, "
@@ -444,7 +444,7 @@ public class AjaxTagsDataProvider extends BaseAjaxServlet {
 			PreparedStatement ps = null;
 			ResultSet rs = null;
 			try {
-				conn = ArtConfig.getConnection();
+				conn = Config.getConnection();
 				String sql = "SELECT JOB_MINUTE, JOB_HOUR, JOB_DAY,"
 						+ " JOB_MONTH, JOB_WEEKDAY "
 						+ " FROM ART_JOB_SCHEDULES "
