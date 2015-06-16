@@ -33,13 +33,15 @@ import java.util.Map;
  * @author Enrico Liboni
  */
 public class HtmlFancyOutput extends StandardOutput {
+	
+	@Override
+	public void init() {
+		//include required css and javascript files
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlFancyOutput.css'>");
+	}
 
 	@Override
 	public void beginHeader() {
-		//include required css and javascript files
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlFancyOutput.css'>");
-
-		//start results table
 		out.println("<div style='border: 3px solid white'>");
 		out.println("<table class='qe' width='80%'>");
 		out.println("<tr>");

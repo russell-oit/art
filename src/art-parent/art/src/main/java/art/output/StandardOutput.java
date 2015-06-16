@@ -57,6 +57,81 @@ public abstract class StandardOutput {
 	protected String contextPath;
 	protected Locale locale;
 	protected boolean evenRow;
+	private List<Drilldown> drilldowns;
+	protected String reportName;
+	private List<ReportParameter> reportParamsList;
+	protected String fullOutputFilename;
+	private boolean showSelectedParameters;
+
+	/**
+	 * @return the showSelectedParameters
+	 */
+	public boolean isShowSelectedParameters() {
+		return showSelectedParameters;
+	}
+
+	/**
+	 * @param showSelectedParameters the showSelectedParameters to set
+	 */
+	public void setShowSelectedParameters(boolean showSelectedParameters) {
+		this.showSelectedParameters = showSelectedParameters;
+	}
+
+	/**
+	 * @return the fullOutputFilename
+	 */
+	public String getFullOutputFileName() {
+		return fullOutputFilename;
+	}
+
+	/**
+	 * @param fullOutputFileName the fullOutputFilename to set
+	 */
+	public void setFullOutputFileName(String fullOutputFileName) {
+		this.fullOutputFilename = fullOutputFileName;
+	}
+
+	/**
+	 * @return the reportParamsList
+	 */
+	public List<ReportParameter> getReportParamsList() {
+		return reportParamsList;
+	}
+
+	/**
+	 * @param reportParamsList the reportParamsList to set
+	 */
+	public void setReportParamsList(List<ReportParameter> reportParamsList) {
+		this.reportParamsList = reportParamsList;
+	}
+
+	/**
+	 * @return the drilldowns
+	 */
+	public List<Drilldown> getDrilldowns() {
+		return drilldowns;
+	}
+
+	/**
+	 * @param drilldowns the drilldowns to set
+	 */
+	public void setDrilldowns(List<Drilldown> drilldowns) {
+		this.drilldowns = drilldowns;
+	}
+
+	/**
+	 * @return the reportName
+	 */
+	public String getReportName() {
+		return reportName;
+	}
+
+	/**
+	 * @param reportName the reportName to set
+	 */
+	public void setReportName(String reportName) {
+		this.reportName = reportName;
+	}
 
 	/**
 	 * @return the locale
@@ -106,23 +181,6 @@ public abstract class StandardOutput {
 	}
 
 	/**
-	 * @return the maxRows
-	 */
-	public int getMaxRows() {
-		return maxRows;
-	}
-
-	/**
-	 * This method is invoked to set the maximum number of rows allowed to be
-	 * output
-	 *
-	 * @param maxRows maximum number of rows to be output
-	 */
-	public void setMaxRows(int maxRows) {
-		this.maxRows = maxRows;
-	}
-
-	/**
 	 * @return the contextPath
 	 */
 	public String getContextPath() {
@@ -135,12 +193,26 @@ public abstract class StandardOutput {
 	public void setContextPath(String contextPath) {
 		this.contextPath = contextPath;
 	}
+	
+	public void init(){
+		
+	}
+	
+	public void addTitle(){
+		
+	}
+	
+	public void addSelectedParameters(List<ReportParameter> reportParams){
+		
+	}
 
 	/**
 	 * This method is invoked to state that the header begins. Output class
 	 * should do initialization here
 	 */
-	public abstract void beginHeader();
+	public void beginHeader(){
+		
+	}
 
 	/**
 	 * This method is invoked to set a column header name (from the result set
@@ -220,8 +292,8 @@ public abstract class StandardOutput {
 	 * indicating the problem
 	 * @throws SQLException
 	 */
-	public StandardOutputResult generateTabularOutput(ResultSet rs, List<Drilldown> drilldowns,
-			List<ReportParameter> reportParamsList, ReportFormat reportFormat) throws SQLException {
+	public StandardOutputResult generateTabularOutput(ResultSet rs, 
+			 ReportFormat reportFormat) throws SQLException {
 
 		StandardOutputResult result = new StandardOutputResult();
 
@@ -246,6 +318,15 @@ public abstract class StandardOutput {
 		}
 
 		totalColumnCount = resultSetColumnCount + drilldownCount;
+		
+		//perform any required output initialization
+		init();
+		
+		addTitle();
+		
+		if(showSelectedParameters){
+		addSelectedParameters(reportParamsList);
+		}
 
 		//begin header output
 		beginHeader();
@@ -302,6 +383,7 @@ public abstract class StandardOutput {
 			}
 		}
 
+		//end data output
 		endRows();
 
 		result.setSuccess(true);
@@ -450,11 +532,7 @@ public abstract class StandardOutput {
 
 	private void addString(Object value, DisplayNull displayNullSetting) {
 		if (value == null) {
-			if (displayNullSetting == DisplayNull.Yes) {
-				addCellString(null); //display nulls as "null"
-			} else {
-				addCellString(""); //display nulls as empty string
-			}
+			addCellString(""); //display nulls as empty string
 		} else {
 			addCellString((String) value);
 		}
@@ -462,11 +540,10 @@ public abstract class StandardOutput {
 
 	private void addNumeric(Object value, DisplayNull displayNullSetting) {
 		if (value == null) {
-			if (displayNullSetting == DisplayNull.NoNumbersAsBlank) {
-				addCellString(""); //display nulls as empty string
-			} else {
-				addCellNumeric(0.0D); //display nulls as 0
-			}
+			//TODO review null setting. remove entirely or have separate settings for strings and numbers
+			//either way, default to displaying empty string or 0 respectively
+			//http://sourceforge.net/p/art/discussion/352129/thread/85b90969/
+			addCellNumeric(0D); //display nulls as 0
 		} else {
 			addCellNumeric((Double) value);
 		}

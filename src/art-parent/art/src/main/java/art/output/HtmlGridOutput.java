@@ -30,13 +30,15 @@ import java.util.Date;
 public class HtmlGridOutput extends StandardOutput {
 
 	@Override
-	public void beginHeader() {
+	public void init() {
 		//include required css and javascript files
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlGridOutput.css'>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/sorttable.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/htmlGridOutput.js'></script>");
+	}
 
-		//start results table
+	@Override
+	public void beginHeader() {
 		out.println("<div style='border: 3px solid white'>");
 		out.println("<table class='sortable' name='maintable' id='maintable'"
 				+ " cellpadding='2' cellspacing='0' width='80%'>");

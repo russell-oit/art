@@ -307,8 +307,8 @@ public class ParameterProcessor {
 			if (paramValues != null) {
 				String paramValue = paramValues[0];
 
-				if (StringUtils.equalsIgnoreCase(htmlParamName, "showParameters")) {
-					reportOptions.setShowParameters(Boolean.valueOf(paramValue));
+				if (StringUtils.equalsIgnoreCase(htmlParamName, "showSelectedParameters")) {
+					reportOptions.setShowSelectedParameters(Boolean.valueOf(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "splitColumn")) {
 					reportOptions.setSplitColumn(Integer.parseInt(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showSql")) {

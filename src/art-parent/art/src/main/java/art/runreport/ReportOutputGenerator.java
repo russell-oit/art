@@ -28,29 +28,26 @@ import art.chart.XYZBasedChart;
 import art.dbutils.DatabaseUtils;
 import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
-import art.enums.DisplayNull;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.output.StandardOutput;
 import art.output.DirectReportOutputHandler;
-import art.output.HideNullOutput;
 import art.output.HtmlDataTableOutput;
+import art.output.HtmlFancyOutput;
+import art.output.HtmlGridOutput;
 import art.output.HtmlPlainOutput;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
-import art.output.ReportOutputInterface;
+import art.output.PdfOutput;
 import art.output.StandardOutputResult;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ActionResult;
 import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.PostProcessingException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -65,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jxls.exception.ParsePropertyException;
 import org.apache.commons.beanutils.RowSetDynaClass;
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,8 +153,8 @@ public class ReportOutputGenerator {
 
 	public void generateOutput(Report report, ReportRunner reportRunner,
 			ReportType reportType, ReportFormat reportFormat, Locale locale,
-			ParameterProcessorResult paramProcessorResult, StandardOutput standardOutput,
-			PrintWriter writer, String fileName, String outputFileName)
+			ParameterProcessorResult paramProcessorResult,
+			PrintWriter writer, String fileName, String fullOutputFilename)
 			throws IOException, SQLException, JRException, ParsePropertyException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException {
@@ -196,7 +192,7 @@ public class ReportOutputGenerator {
 						jrOutput.setResultSet(rs);
 					}
 
-					jrOutput.generateReport(report, reportParamsList, reportType, reportFormat, outputFileName);
+					jrOutput.generateReport(report, reportParamsList, reportType, reportFormat, fullOutputFilename);
 				} else {
 					//jxls output
 					JxlsOutput jxlsOutput = new JxlsOutput();
@@ -205,7 +201,7 @@ public class ReportOutputGenerator {
 						jxlsOutput.setResultSet(rs);
 					}
 
-					jxlsOutput.generateReport(report, reportParamsList, reportType, outputFileName);
+					jxlsOutput.generateReport(report, reportParamsList, reportType, fullOutputFilename);
 				}
 
 				rowsRetrieved = getResultSetRowCount(rs);
@@ -285,7 +281,7 @@ public class ReportOutputGenerator {
 					}
 				}
 
-				chart.prepareDataset(rs, drilldown,reportParamsList);
+				chart.prepareDataset(rs, drilldown, reportParamsList);
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
@@ -304,7 +300,7 @@ public class ReportOutputGenerator {
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
 				if (isJob) {
-					chart.generateFile(reportFormat, outputFileName, data);
+					chart.generateFile(reportFormat, fullOutputFilename, data);
 				} else {
 					if (reportFormat == ReportFormat.html) {
 						request.setAttribute("chart", chart);
@@ -316,19 +312,59 @@ public class ReportOutputGenerator {
 
 						//TODO show data
 					} else {
-						chart.generateFile(reportFormat, outputFileName, data);
+						chart.generateFile(reportFormat, fullOutputFilename, data);
 						displayFileLink(fileName);
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
 				}
-			} else if (standardOutput != null) {
+			} else if (reportType.isStandardOutput()) {
+				StandardOutput standardOutput;
+				switch (reportFormat) {
+					case htmlPlain:
+						standardOutput = new HtmlPlainOutput(isJob);
+						break;
+					case htmlFancy:
+						standardOutput = new HtmlFancyOutput();
+						break;
+					case htmlGrid:
+						standardOutput = new HtmlGridOutput();
+						break;
+					case htmlDataTable:
+						standardOutput = new HtmlDataTableOutput();
+						break;
+					case xls:
+					case xlsZip:
+						return PACKAGE_NAME + "XlsOutput";
+					case xlsx:
+						return PACKAGE_NAME + "XlsxOutput";
+					case pdf:
+						standardOutput=new PdfOutput();
+						break;
+					case slk:
+					case slkZip:
+						return PACKAGE_NAME + "SlkOutput";
+					case tsv:
+					case tsvZip:
+					case tsvGz:
+						return PACKAGE_NAME + "TsvOutput";
+					case xml:
+						return PACKAGE_NAME + "XmlOutput";
+					case rss20:
+						return PACKAGE_NAME + "Rss20Output";
+					default:
+						throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
+				}
+
 				standardOutput.setWriter(writer);
+				standardOutput.setFullOutputFileName(fullOutputFilename);
+				standardOutput.setReportParamsList(reportParamsList); //used to show selected parameters and drilldowns
+				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
 
 				if (request != null) {
 					String contextPath = request.getContextPath();
 					standardOutput.setContextPath(contextPath);
 				}
-				
+
 				//generate output
 				rs = reportRunner.getResultSet();
 				StandardOutputResult outputResult;
@@ -336,12 +372,11 @@ public class ReportOutputGenerator {
 				if (reportType.isCrosstab()) {
 					outputResult = DirectReportOutputHandler.flushXOutput(standardOutput, rs);
 				} else {
-					List<Drilldown> drilldowns = null;
 					if (reportFormat.isHtml()) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
-						drilldowns = drilldownService.getDrilldowns(reportId);
+						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
 					}
-					outputResult = standardOutput.generateTabularOutput(rs, drilldowns, reportParamsList,reportFormat);
+					outputResult = standardOutput.generateTabularOutput(rs, reportFormat);
 				}
 
 				if (outputResult.isSuccess()) {

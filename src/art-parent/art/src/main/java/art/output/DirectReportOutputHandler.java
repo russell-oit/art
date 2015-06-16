@@ -133,9 +133,9 @@ public class DirectReportOutputHandler {
 		HashMap<String, String> params = new HashMap<String, String>();
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (Config.getSettings().getDisplayNull() != DisplayNull.Yes) {
-			o = new HideNullOutput(o);
-		}
+//		if (Config.getSettings().getDisplayNull() != DisplayNull.Yes) {
+//			o = new HideNullOutput(o);
+//		}
 
 		while (rs.next()) {
 			if (!o.newLine()) {
@@ -354,9 +354,9 @@ public class DirectReportOutputHandler {
 		}
 
 		//checking to see if Display Null Value optional setting is set to "No"
-		if (Config.getSettings().getDisplayNull() != DisplayNull.Yes) {
-			o = new HideNullOutput(o);
-		}
+//		if (Config.getSettings().getDisplayNull() != DisplayNull.Yes) {
+//			o = new HideNullOutput(o);
+//		}
 
 		// Check the data type of the value (last column)
 		int columnType;

@@ -36,13 +36,16 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class HtmlDataTableOutput extends StandardOutput {
 
-	private final String CLOSE_RESULTS_TABLE_HTML = "</tr></tbody></table></div>";
+	private String tableId;
 
 	@Override
-	public void beginHeader() {
+	public void init() {
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/dataTables_demo_table.css'>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.6.2.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.9.4/js/jquery.dataTables.min.js'></script>");
+
 		//set language file to use for localization. language files to be put in the /js directory and to be named dataTables.xx_XX.txt	
 		//language file content examples at http://datatables.net/plug-ins/i18n
-
 		//by default don't set the language file option. (will default to english - in jquery.dataTables.min.js)
 		String languageSetting = "";
 
@@ -53,8 +56,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 		if (StringUtils.isNotBlank(language)) {
 			String languageFileName = "dataTables." + language + ".txt";
-			String sep = File.separator;
-			String languageFilePath = Config.getAppPath() + sep + "js" + sep + languageFileName;
+			String languageFilePath = Config.getAppPath() + File.separator
+					+ "js" + File.separator + languageFileName;
 			File languageFile = new File(languageFilePath);
 			if (languageFile.exists()) {
 				languageSetting = ", \"oLanguage\": {\"sUrl\": " + contextPath + "/js/" + languageFileName + "\"}";
@@ -62,26 +65,25 @@ public class HtmlDataTableOutput extends StandardOutput {
 		}
 
 		//set table options. see http://www.datatables.net/ref
-		String props = "{aaSorting: []"
+		String dataTableOptions = "{aaSorting: []"
 				+ ", \"sPaginationType\":\"full_numbers\""
 				+ languageSetting
 				+ ", \"iDisplayLength\": 50" //default item in show entries e.g. -1
 				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
 				+ "}";
 
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/dataTables_demo_table.css'>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.6.2.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.9.4/js/jquery.dataTables.min.js'></script>");
-
-		String tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
+		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
 		out.println("<script type='text/javascript' charset='utf-8'>");
 		out.println("	var $jQuery = jQuery.noConflict();");
 		out.println("	$jQuery(document).ready(function() {");
-		out.println("		$jQuery('#" + tableId + "').dataTable(" + props + ");");
+		out.println("		$jQuery('#" + tableId + "').dataTable(" + dataTableOptions + ");");
 		out.println("	} );");
 		out.println("</script>");
 
-		//start results table
+	}
+
+	@Override
+	public void beginHeader() {
 		out.println("<div style='border: 1px solid black; width: 80%; margin 0 auto'>");
 		out.println("<table class='display' id='" + tableId + "'>");
 		out.println("<thead><tr>");
@@ -165,7 +167,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void endRows() {
-		out.println(CLOSE_RESULTS_TABLE_HTML);
+		out.println("</tr></tbody></table></div>");
 	}
 
 }

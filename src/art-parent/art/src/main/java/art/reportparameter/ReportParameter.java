@@ -17,11 +17,14 @@
  */
 package art.reportparameter;
 
+import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.parameter.Parameter;
 import art.report.Report;
+import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -179,20 +182,28 @@ public class ReportParameter implements Serializable {
 		List<String> paramDisplayStrings = new ArrayList<>();
 
 		for (Object paramValue : actualParameterValues) {
+			String paramValueString;
+			if (parameter.getDataType() == ParameterDataType.Date) {
+				paramValueString = ArtUtils.defaultDateFormatter.format((Date) paramValue);
+			} else if (parameter.getDataType() == ParameterDataType.DateTime) {
+				paramValueString = ArtUtils.defaultDateTimeFormatter.format((Date) paramValue);
+			} else {
+				paramValueString = String.valueOf(paramValue);
+			}
+
 			String displayValue = null;
 			if (parameter.isUseLov() && lovValues != null) {
 				//for lov parameters, show both parameter value and display string if any
 				displayValue = lovValues.get(paramValue);
 			}
-			
+
 			String paramDisplayString;
-			String paramValueString = String.valueOf(paramValue);
 			if (displayValue == null) {
 				paramDisplayString = paramValueString;
 			} else {
 				paramDisplayString = displayValue + " (" + paramValueString + ")";
 			}
-			
+
 			paramDisplayStrings.add(paramDisplayString);
 		}
 

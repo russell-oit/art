@@ -27,7 +27,7 @@ import java.io.Serializable;
 public class ReportOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private boolean showParameters;
+	private boolean showSelectedParameters;
 	private int splitColumn;
 	private boolean showSql;
 
@@ -60,16 +60,16 @@ public class ReportOptions implements Serializable {
 	}
 
 	/**
-	 * @return the showParameters
+	 * @return the showSelectedParameters
 	 */
-	public boolean isShowParameters() {
-		return showParameters;
+	public boolean isShowSelectedParameters() {
+		return showSelectedParameters;
 	}
 
 	/**
-	 * @param showParameters the showParameters to set
+	 * @param showSelectedParameters the showSelectedParameters to set
 	 */
-	public void setShowParameters(boolean showParameters) {
-		this.showParameters = showParameters;
+	public void setShowSelectedParameters(boolean showSelectedParameters) {
+		this.showSelectedParameters = showSelectedParameters;
 	}
 }

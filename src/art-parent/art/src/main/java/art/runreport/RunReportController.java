@@ -312,7 +312,7 @@ public class RunReportController {
 				Map<Integer, String> parameterDisplayValues = new TreeMap<>();
 
 				boolean showParams = false;
-				if (reportOptions.isShowParameters() || report.isParametersInOutput()) {
+				if (reportOptions.isShowSelectedParameters() || report.isParametersInOutput()) {
 					showParams = true;
 					//get display values for selections from lov parameters
 					ParameterService parameterService = new ParameterService();
@@ -442,7 +442,7 @@ public class RunReportController {
 					reportOutputGenerator.setServletContext(servletContext);
 
 					reportOutputGenerator.generateOutput(report, reportRunner, reportType,
-							reportFormat, locale, paramProcessorResult, o, writer, fileName, outputFileName);
+							reportFormat, locale, paramProcessorResult, writer, fileName, outputFileName);
 				}
 
 				// Print the "working" time elapsed

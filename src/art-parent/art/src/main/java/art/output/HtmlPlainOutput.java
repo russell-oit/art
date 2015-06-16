@@ -28,32 +28,15 @@ import java.util.Date;
  */
 public class HtmlPlainOutput extends StandardOutput {
 
-	private final String CLOSE_RESULTS_TABLE_HTML = "</tr></table></div></body></html>";
+	private boolean fileOutput;
 
-	private boolean displayInline; //whether display is inline in the showparams page. to avoid duplicate display of parameters
-	private boolean standalone;
-
-	public HtmlPlainOutput(boolean standalone) {
-		this.standalone = standalone;
-	}
-
-	/**
-	 * @return the displayInline
-	 */
-	public boolean isDisplayInline() {
-		return displayInline;
-	}
-
-	/**
-	 * @param displayInline the displayInline to set
-	 */
-	public void setDisplayInline(boolean displayInline) {
-		this.displayInline = displayInline;
+	public HtmlPlainOutput(boolean fileOutput) {
+		this.fileOutput = fileOutput;
 	}
 
 	@Override
-	public void beginHeader() {
-		if (standalone) {
+	public void init() {
+		if (fileOutput) {
 			out.println("<html>");
 			out.println("<head>");
 			out.println("<meta charset='utf-8'>");
@@ -69,8 +52,10 @@ public class HtmlPlainOutput extends StandardOutput {
 				+ "\n td { background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; }"
 				+ "\n body { font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000; }"
 				+ "</style>");
+	}
 
-		//start results table
+	@Override
+	public void beginHeader() {
 		out.println("<div align='center'>");
 		out.println("<table border='0' width='90%' cellspacing='1'"
 				+ " cellpadding='1'>");
@@ -133,7 +118,7 @@ public class HtmlPlainOutput extends StandardOutput {
 	public void endRows() {
 		out.println("</tr></table></div>");
 
-		if (standalone) {
+		if (fileOutput) {
 			out.println("</body></html>");
 		}
 	}
