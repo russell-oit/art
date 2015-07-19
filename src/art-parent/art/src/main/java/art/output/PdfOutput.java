@@ -88,7 +88,7 @@ public class PdfOutput extends StandardOutput {
 
 			document.open();
 
-			table = new PdfPTable(totalColumnCount);
+			table = new PdfPTable(resultSetColumnCount);
 			table.getDefaultCell().setBorder(0);
 			table.setWidthPercentage(100F); //default is 80
 			table.setHeaderRows(1);
@@ -124,9 +124,7 @@ public class PdfOutput extends StandardOutput {
 		}
 
 		try {
-			//TODO test. \n needed? creates extra spacing? use addNewline()?
-			doc.add(new Paragraph(fs.process("Parameters\n")));
-
+			//TODO don't use numbered list
 			//show parameters in a numbered list
 			com.lowagie.text.List list = new List(true, 10);
 			//set font to use for the list item numbers
@@ -135,7 +133,7 @@ public class PdfOutput extends StandardOutput {
 
 			//add list items
 			for (ReportParameter reportParam : reportParamsList) {
-				Phrase ph = fs.process(reportParam.getDisplayValues());
+				Phrase ph = fs.process(reportParam.getNameAndDisplayValues());
 				ph.setLeading(12); //set spacing before the phrase
 				ListItem listItem = new ListItem(ph);
 				list.add(listItem);

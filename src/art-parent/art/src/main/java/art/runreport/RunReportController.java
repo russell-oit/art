@@ -351,7 +351,7 @@ public class RunReportController {
 
 							reportParam.setLovValues(lovValues);
 
-							parameterDisplayValues.put(reportParam.getPosition(), reportParam.getDisplayValues());
+							parameterDisplayValues.put(reportParam.getPosition(), reportParam.getNameAndDisplayValues());
 						}
 					}
 				}

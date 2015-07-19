@@ -51,6 +51,7 @@ public abstract class StandardOutput {
 
 	protected PrintWriter out;
 	protected int rowCount;
+	protected int resultSetColumnCount;
 	protected int totalColumnCount; //resultset column count + drilldown column count
 	protected DecimalFormat actualNumberFormatter;
 	protected DecimalFormat sortNumberFormatter;
@@ -202,7 +203,7 @@ public abstract class StandardOutput {
 		
 	}
 	
-	public void addSelectedParameters(List<ReportParameter> reportParams){
+	public void addSelectedParameters(List<ReportParameter> reportParamsList){
 		
 	}
 
@@ -272,8 +273,6 @@ public abstract class StandardOutput {
 	 * if it is not possible to proceed (for example MaxRows reached or an error
 	 * raised). If false is returned, the output generator will stop feeding the
 	 * object, it will call endRows() and close the result set.
-	 *
-	 * @return <code>true</code> if can proceed to next record
 	 */
 	public abstract void newRow();
 
@@ -310,7 +309,7 @@ public abstract class StandardOutput {
 		sortNumberFormatter.setMinimumIntegerDigits(20);
 
 		ResultSetMetaData rsmd = rs.getMetaData();
-		int resultSetColumnCount = rsmd.getColumnCount();
+		resultSetColumnCount = rsmd.getColumnCount();
 
 		int drilldownCount = 0;
 		if (drilldowns != null) {
@@ -337,7 +336,8 @@ public abstract class StandardOutput {
 		}
 
 		//output header columns for drill down reports
-		if (drilldowns != null) {
+		//only output drilldown columns for html reports
+		if (reportFormat.isHtml() && drilldowns != null) {
 			for (Drilldown drilldown : drilldowns) {
 				String drilldownTitle = drilldown.getHeaderText();
 				if (drilldownTitle == null || drilldownTitle.trim().length() == 0) {

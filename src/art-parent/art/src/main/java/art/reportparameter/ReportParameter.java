@@ -177,16 +177,16 @@ public class ReportParameter implements Serializable {
 	public String toString() {
 		return "ReportParameter{" + "reportParameterId=" + reportParameterId + '}';
 	}
-
+	
 	public String getDisplayValues() {
 		List<String> paramDisplayStrings = new ArrayList<>();
 
 		for (Object paramValue : actualParameterValues) {
 			String paramValueString;
 			if (parameter.getDataType() == ParameterDataType.Date) {
-				paramValueString = ArtUtils.defaultDateFormatter.format((Date) paramValue);
+				paramValueString = ArtUtils.isoDateFormatter.format((Date) paramValue);
 			} else if (parameter.getDataType() == ParameterDataType.DateTime) {
-				paramValueString = ArtUtils.defaultDateTimeFormatter.format((Date) paramValue);
+				paramValueString = ArtUtils.isoDateTimeFormatter.format((Date) paramValue);
 			} else {
 				paramValueString = String.valueOf(paramValue);
 			}
@@ -207,7 +207,11 @@ public class ReportParameter implements Serializable {
 			paramDisplayStrings.add(paramDisplayString);
 		}
 
-		return parameter.getName() + ": " + StringUtils.join(paramDisplayStrings, ", ");
+		return StringUtils.join(paramDisplayStrings, ", ");
+	}
+
+	public String getNameAndDisplayValues() {
+		return parameter.getName() + ": " + getDisplayValues();
 	}
 
 	public Object getEffectiveActualParameterValue() {

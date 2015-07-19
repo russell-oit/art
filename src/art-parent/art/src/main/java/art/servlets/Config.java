@@ -28,6 +28,7 @@ import art.enums.PdfPageSize;
 import art.enums.ReportFormat;
 import art.settings.CustomSettings;
 import art.settings.Settings;
+import art.utils.ArtUtils;
 import art.utils.Encrypter;
 import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
@@ -842,6 +843,27 @@ public class Config extends HttpServlet {
 		} else {
 			//display date and time
 			dateString = dateTimeFormatter.format(date);
+		}
+		return dateString;
+	}
+	
+	/**
+	 * Get string to be displayed in query output for a date field
+	 *
+	 * @param date
+	 * @return
+	 */
+	public static String getIsoDateDisplayString(Date date) {
+		String dateString;
+
+		if (date == null) {
+			dateString = "";
+		} else if (timeFormatter.format(date).equals("00:00:00.000")) {
+			//time portion is 0. display date only
+			dateString = ArtUtils.isoDateFormatter.format(date);
+		} else {
+			//display date and time
+			dateString = ArtUtils.isoDateTimeFormatter.format(date);
 		}
 		return dateString;
 	}

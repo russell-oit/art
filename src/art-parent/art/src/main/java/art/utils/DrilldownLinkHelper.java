@@ -129,7 +129,7 @@ public class DrilldownLinkHelper {
 					paramValueString = ""; //use empty string for nulls rather than the string "null"
 				} else if (paramValueObject instanceof Date) {
 					//convert date to string that will be recognised by parameter processor class
-					paramValueString = ArtUtils.defaultDateTimeFormatter.format(paramValueObject);
+					paramValueString = ArtUtils.isoDateTimeFormatter.format(paramValueObject);
 				} else {
 					paramValueString = String.valueOf(paramValues[paramCount - 1]);
 				}
