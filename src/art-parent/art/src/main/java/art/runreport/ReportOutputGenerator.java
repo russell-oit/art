@@ -332,25 +332,25 @@ public class ReportOutputGenerator {
 					case htmlDataTable:
 						standardOutput = new HtmlDataTableOutput();
 						break;
-					case xls:
-					case xlsZip:
-						return PACKAGE_NAME + "XlsOutput";
-					case xlsx:
-						return PACKAGE_NAME + "XlsxOutput";
 					case pdf:
-						standardOutput=new PdfOutput();
+						standardOutput = new PdfOutput();
 						break;
-					case slk:
-					case slkZip:
-						return PACKAGE_NAME + "SlkOutput";
-					case tsv:
-					case tsvZip:
-					case tsvGz:
-						return PACKAGE_NAME + "TsvOutput";
-					case xml:
-						return PACKAGE_NAME + "XmlOutput";
-					case rss20:
-						return PACKAGE_NAME + "Rss20Output";
+//					case xls:
+//					case xlsZip:
+//						return PACKAGE_NAME + "XlsOutput";
+//					case xlsx:
+//						return PACKAGE_NAME + "XlsxOutput";
+//					case slk:
+//					case slkZip:
+//						return PACKAGE_NAME + "SlkOutput";
+//					case tsv:
+//					case tsvZip:
+//					case tsvGz:
+//						return PACKAGE_NAME + "TsvOutput";
+//					case xml:
+//						return PACKAGE_NAME + "XmlOutput";
+//					case rss20:
+//						return PACKAGE_NAME + "Rss20Output";
 					default:
 						throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
 				}
@@ -370,7 +370,7 @@ public class ReportOutputGenerator {
 				StandardOutputResult outputResult;
 
 				if (reportType.isCrosstab()) {
-					outputResult = DirectReportOutputHandler.flushXOutput(standardOutput, rs);
+//					outputResult = DirectReportOutputHandler.flushXOutput(standardOutput, rs);
 				} else {
 					if (reportFormat.isHtml()) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
@@ -379,12 +379,12 @@ public class ReportOutputGenerator {
 					outputResult = standardOutput.generateTabularOutput(rs, reportFormat);
 				}
 
-				if (outputResult.isSuccess()) {
-					rowsRetrieved = outputResult.getRowCount();
-				} else {
-					model.addAttribute("message", outputResult.getMessage());
-					return errorPage;
-				}
+//				if (outputResult.isSuccess()) {
+//					rowsRetrieved = outputResult.getRowCount();
+//				} else {
+//					model.addAttribute("message", outputResult.getMessage());
+//					return errorPage;
+//				}
 			}
 
 		} finally {

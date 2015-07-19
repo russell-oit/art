@@ -124,7 +124,7 @@ public class PdfOutput extends StandardOutput {
 		}
 
 		try {
-			//TODO test. \n needed? creates extra spacing?
+			//TODO test. \n needed? creates extra spacing? use addNewline()?
 			doc.add(new Paragraph(fs.process("Parameters\n")));
 
 			//show parameters in a numbered list

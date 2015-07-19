@@ -30,6 +30,15 @@ ART 3.0
 * Updated datatables to 1.10
 * Updated logback to 1.1.2
 
+ART 2.5.3
+* Fix for incorrect handling of " in parameter value
+* Fix for numbers not sorting correctly in Italian locale
+* Fix for error when using Conditional Email Output (Inline) jobs
+* Fix for null pointer exception when clob field (e.g. varchar(max)) is null
+* Fix for error when running a job that uses a jXLS spreadsheet query
+* Fix for IllegalArgumentException when using Tomcat 7.0.57+ or 8.0.15+
+* Included German translation (thanks to Carsten Pohle)
+
 ART 2.5.2
 * Fix for error when drill down column has a null value
 * Updated French translation (thanks to Eric Lemesre)

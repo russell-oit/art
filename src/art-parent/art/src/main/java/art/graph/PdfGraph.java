@@ -110,7 +110,7 @@ public class PdfGraph {
 			pdfo.setFontSelectors(fsBody, fsHeading);
 
 			//output parameters if any
-			pdfo.outputParameters(document, fsBody, displayParams);
+//			pdfo.outputParameters(document, fsBody, displayParams);
 
 			//create chart in pdf						
 			JFreeChart chart = (JFreeChart) chartObject;
