@@ -39,6 +39,7 @@ import art.output.HtmlPlainOutput;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
 import art.output.PdfOutput;
+import art.output.Rss20Output;
 import art.output.StandardOutputResult;
 import art.output.XmlOutput;
 import art.report.ChartOptions;
@@ -338,6 +339,9 @@ public class ReportOutputGenerator {
 						break;
 					case xml:
 						standardOutput=new XmlOutput();
+						break;
+					case rss20:
+						standardOutput=new Rss20Output();
 						break;
 //					case xls:
 //					case xlsZip:
