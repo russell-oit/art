@@ -18,6 +18,7 @@
 package art.utils;
 
 import art.drilldown.Drilldown;
+import art.enums.ParameterDataType;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.reportparameter.ReportParameter;
@@ -44,7 +45,7 @@ public class DrilldownLinkHelper {
 
 	public DrilldownLinkHelper(Drilldown drilldown, List<ReportParameter> reportParamsList) throws SQLException {
 		Objects.requireNonNull(drilldown, "drilldown must not be null");
-		
+
 		this.drilldown = drilldown;
 		this.reportParamsList = reportParamsList;
 
@@ -127,11 +128,14 @@ public class DrilldownLinkHelper {
 				String paramValueString;
 				if (paramValueObject == null) {
 					paramValueString = ""; //use empty string for nulls rather than the string "null"
-				} else if (paramValueObject instanceof Date) {
+				} else if (drilldownParam.getDataType() == ParameterDataType.Date) {
 					//convert date to string that will be recognised by parameter processor class
-					paramValueString = ArtUtils.isoDateTimeFormatter.format(paramValueObject);
+					paramValueString = ArtUtils.isoDateFormatter.format(paramValueObject);
+				} else if (drilldownParam.getDataType() == ParameterDataType.DateTime) {
+					//convert date to string that will be recognised by parameter processor class
+					paramValueString = ArtUtils.isoDateTimeMillisecondsFormatter.format(paramValueObject);
 				} else {
-					paramValueString = String.valueOf(paramValues[paramCount - 1]);
+					paramValueString = String.valueOf(paramValueObject);
 				}
 				addUrlParameter(paramName, paramValueString, sb);
 			}

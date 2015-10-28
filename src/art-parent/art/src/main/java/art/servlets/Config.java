@@ -863,7 +863,7 @@ public class Config extends HttpServlet {
 			dateString = ArtUtils.isoDateFormatter.format(date);
 		} else {
 			//display date and time
-			dateString = ArtUtils.isoDateTimeFormatter.format(date);
+			dateString = ArtUtils.isoDateTimeMillisecondsFormatter.format(date);
 		}
 		return dateString;
 	}

@@ -22,6 +22,8 @@ import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
+import art.utils.ArtUtils;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -140,7 +142,9 @@ public class ParameterProcessor {
 				ReportParameter reportParam = reportParams.get(paramName);
 				logger.debug("reportParam={}", reportParam);
 
-				if (reportParam != null) {
+				if (reportParam == null) {
+					throw new IllegalArgumentException("Report parameter not found: " + paramName);
+				} else {
 					//check if this is a multi parameter that doesn't use an lov
 					//multi param that doesn't use an lov contains values separated by newlines
 					Parameter param = reportParam.getParameter();
@@ -181,7 +185,7 @@ public class ParameterProcessor {
 				}
 
 				//convert string value to appropriate object
-				Object actualValue = convertParameterValue(actualValueString, param.getDataType());
+				Object actualValue = convertParameterStringValueToObject(actualValueString, param);
 				actualValues.add(actualValue);
 				reportParam.setActualParameterValues(actualValues);
 			} else if (param.getParameterType() == ParameterType.MultiValue) {
@@ -202,7 +206,7 @@ public class ParameterProcessor {
 				} else {
 					for (String actualValueString : actualValueStrings) {
 						//convert string value to appropriate object
-						Object actualValue = convertParameterValue(actualValueString, param.getDataType());
+						Object actualValue = convertParameterStringValueToObject(actualValueString, param);
 						actualValues.add(actualValue);
 					}
 					reportParam.setActualParameterValues(actualValues);
@@ -213,24 +217,28 @@ public class ParameterProcessor {
 		}
 	}
 
-	public Object convertParameterValue(String value, ParameterDataType paramDataType) throws ParseException {
+	public Object convertParameterStringValueToObject(String value, Parameter param) throws ParseException {
+		ParameterDataType paramDataType = param.getDataType();
+
 		if (paramDataType.isNumeric()) {
-			return convertParameterValueToNumber(value, paramDataType);
+			return convertParameterStringValueToNumber(value, param);
 		} else if (paramDataType.isDate()) {
-			return convertParameterValueToDate(value);
+			return convertParameterStringValueToDate(value);
 		} else {
 			//parameter data types that are treated as strings
 			return value;
 		}
 	}
 
-	private Object convertParameterValueToNumber(String value, ParameterDataType paramDataType) {
-		String usedValue;
+	private Object convertParameterStringValueToNumber(String value, Parameter param) {
+		String finalValue;
 		if (StringUtils.isBlank(value)) {
-			usedValue = "0";
+			finalValue = "0";
 		} else {
-			usedValue = value;
+			finalValue = value;
 		}
+
+		ParameterDataType paramDataType = param.getDataType();
 
 		switch (paramDataType) {
 			case Integer:
@@ -239,15 +247,28 @@ public class ParameterProcessor {
 				//Integer.valueOf() would throw an exception is such a case
 				//intValue() merely returns the integer part; it does not do any rounding
 				//https://stackoverflow.com/questions/9102318/cast-double-to-integer-in-java
-				return Double.valueOf(usedValue).intValue();
+				//return Double.valueOf(usedValue).intValue();
+
+				//use BigDecimal to determine if the fraction part is non-zero and raise an exception
+				//instead of silently using the integer part only
+				//https://stackoverflow.com/questions/6063253/what-is-the-best-way-to-separate-double-into-two-parts-integer-fraction-in-j
+				//https://stackoverflow.com/questions/10950914/how-to-check-if-bigdecimal-variable-0-in-java
+				BigDecimal bd = new BigDecimal(finalValue);
+				BigDecimal fractionPart = bd.subtract(new BigDecimal(bd.intValue()));
+				if (fractionPart.compareTo(BigDecimal.ZERO) == 0) {
+					return bd.intValue();
+				} else {
+					String paramName = param.getName();
+					throw new IllegalArgumentException("Invalid integer value for parameter " + paramName + ": " + finalValue);
+				}
 			case Number:
-				return Double.valueOf(usedValue);
+				return Double.valueOf(finalValue);
 			default:
 				throw new IllegalArgumentException("Unknown numeric parameter data type: " + paramDataType);
 		}
 	}
 
-	private Date convertParameterValueToDate(String value) throws ParseException {
+	private Date convertParameterStringValueToDate(String value) throws ParseException {
 		Date dateValue;
 
 		if (StringUtils.startsWithIgnoreCase(value, "add")) {
@@ -274,16 +295,15 @@ public class ParameterProcessor {
 			dateValue = new Date();
 		} else {
 			//convert date string as it is to a date
-			String DATE_STRING = "yyyy-MM-dd";
-			String DATE_TIME_STRING = "yyyy-MM-dd HH:mm";
-			String DATE_TIME_SECONDS_STRING = "yyyy-MM-dd HH:mm";
 			String dateFormat;
-			if (value.length() == DATE_STRING.length()) {
-				dateFormat = DATE_STRING;
-			} else if (value.length() == DATE_TIME_STRING.length()) {
-				dateFormat = DATE_TIME_STRING;
-			} else if (value.length() == DATE_TIME_SECONDS_STRING.length()) {
-				dateFormat = DATE_TIME_SECONDS_STRING;
+			if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
+				dateFormat = ArtUtils.ISO_DATE_FORMAT;
+			} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
+				dateFormat = ArtUtils.ISO_DATE_TIME_FORMAT;
+			} else if (value.length() == ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT.length()) {
+				dateFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
+			} else if (value.length() == ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT.length()) {
+				dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
 			} else {
 				throw new IllegalArgumentException("Invalid date format: " + value);
 			}

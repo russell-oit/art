@@ -186,7 +186,7 @@ public class ReportParameter implements Serializable {
 			if (parameter.getDataType() == ParameterDataType.Date) {
 				paramValueString = ArtUtils.isoDateFormatter.format((Date) paramValue);
 			} else if (parameter.getDataType() == ParameterDataType.DateTime) {
-				paramValueString = ArtUtils.isoDateTimeFormatter.format((Date) paramValue);
+				paramValueString = ArtUtils.isoDateTimeMillisecondsFormatter.format((Date) paramValue);
 			} else {
 				paramValueString = String.valueOf(paramValue);
 			}

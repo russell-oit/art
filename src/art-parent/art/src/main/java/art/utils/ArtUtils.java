@@ -54,10 +54,12 @@ public class ArtUtils {
 	public static final String ART_USER_INVALID = "user not created in ART"; //log message on login failure
 	public static final String ART_USER_DISABLED = "user disabled in ART"; //log message on login failure
 	public static final int DEFAULT_CONNECTION_POOL_TIMEOUT = 20;
-	private static final String ISO_DATE_FORMAT="yyyy-MM-dd";
+	public static final String ISO_DATE_FORMAT = "yyyy-MM-dd";
+	public static final String ISO_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
+	public static final String ISO_DATE_TIME_SECONDS_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	public static final String ISO_DATE_TIME_MILLISECONDS_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 	public static final SimpleDateFormat isoDateFormatter = new SimpleDateFormat(ISO_DATE_FORMAT);
-	private static final String ISO_DATETIME_FORMAT="yyyy-MM-dd HH:mm:ss";
-	public static final SimpleDateFormat isoDateTimeFormatter = new SimpleDateFormat(ISO_DATETIME_FORMAT);
+	public static final SimpleDateFormat isoDateTimeMillisecondsFormatter = new SimpleDateFormat(ISO_DATE_TIME_MILLISECONDS_FORMAT);
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<>();
@@ -155,7 +157,6 @@ public class ArtUtils {
 //		return objectId + "-" + System.currentTimeMillis() + "-"
 //				+ RandomStringUtils.randomAlphanumeric(20) + "." + extension;
 //	}
-	
 	/**
 	 * Get random string that can be used as a unique file name
 	 *
@@ -284,11 +285,11 @@ public class ArtUtils {
 //	}
 	public static String ColorToHexString(Color color) {
 		http://www.javacreed.com/how-to-get-the-hex-value-from-color/
-		
-		if(color==null){
+
+		if (color == null) {
 			return null;
 		}
-		
+
 		String hexColor = Integer.toHexString(color.getRGB() & 0xffffff);
 		if (hexColor.length() < 6) {
 			hexColor = "000000".substring(0, 6 - hexColor.length()) + hexColor;
