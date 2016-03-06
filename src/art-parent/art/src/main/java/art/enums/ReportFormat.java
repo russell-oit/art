@@ -30,7 +30,7 @@ public enum ReportFormat {
 	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"), htmlGrid("htmlGrid"),
 	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
 	pdf("pdf"), slk("slk"), slkZip("slkZip"), tsv("tsv"), tsvZip("tsvZip"),
-	tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png");
+	tsvGzip("tsvGzip"), xml("xml"), rss20("rss20"), png("png");
 	private final String value;
 
 	private ReportFormat(String value) {
@@ -73,7 +73,7 @@ public enum ReportFormat {
 				return "slk";
 			case tsv:
 				return "tsv";
-			case tsvGz:
+			case tsvGzip:
 				return "tsv.gz";
 			case xlsZip:
 			case slkZip:
@@ -110,7 +110,7 @@ public enum ReportFormat {
 				return PACKAGE_NAME + "SlkOutput";
 			case tsv:
 			case tsvZip:
-			case tsvGz:
+			case tsvGzip:
 				return PACKAGE_NAME + "TsvOutput";
 			case xml:
 				return PACKAGE_NAME + "XmlOutput";

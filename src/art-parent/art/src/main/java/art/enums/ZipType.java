@@ -22,5 +22,5 @@ package art.enums;
  * @author Timothy Anyona
  */
 public enum ZipType {
-	None,Zip,GZip;
+	None,Zip,Gzip;
 }

@@ -17,6 +17,8 @@
  */
 package art.output;
 
+import art.enums.ZipType;
+import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
@@ -26,7 +28,11 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +42,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Enrico Liboni
  */
-public class TsvOutput implements ReportOutputInterface {
+public class TsvOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(TsvOutput.class);
 	FileOutputStream fout;
+	ZipOutputStream zout;
+	GZIPOutputStream gzout;
 	byte[] buf;
 	String tmpstr;
 	StringBuffer exportFileStrBuf;
@@ -57,127 +65,56 @@ public class TsvOutput implements ReportOutputInterface {
 	Map<Integer, ArtQueryParam> displayParams;
 	final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
 	String exportPath;
+	ZipType zipType;
 
 	/**
 	 * Constructor
 	 */
 	public TsvOutput() {
+		zipType = ZipType.None;
+
+	}
+
+	public TsvOutput(ZipType zipType) {
+		this.zipType = zipType;
+
+	}
+
+	/**
+	 * Initialise objects required to generate output
+	 */
+	@Override
+	public void init() {
 		exportFileStrBuf = new StringBuffer(8 * 1024);
 		counter = 0;
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);
 		nfPlain.setGroupingUsed(false);
 		nfPlain.setMaximumFractionDigits(99);
-	}
 
-	@Override
-	public String getName() {
-		return "Spreadsheet (tsv - text)";
-	}
+		try {
+			fout = new FileOutputStream(fullFileName);
 
-	@Override
-	public String getContentType() {
-		return "text/html;charset=utf-8";
-	}
-
-	@Override
-	public void setExportPath(String s) {
-		exportPath = s;
-	}
-
-	@Override
-	public String getFileName() {
-		return fullFileName;
-	}
-
-	@Override
-	public void setWriter(PrintWriter o) {
-		htmlout = o;
-	}
-
-	@Override
-	public void setQueryName(String s) {
-		queryName = s;
-	}
-
-	@Override
-	public void setFileUserName(String s) {
-		fileUserName = s;
-	}
-
-	@Override
-	public void setMaxRows(int i) {
-		maxRows = i;
-	}
-
-	@Override
-	public void setColumnsNumber(int i) {
-		columns = i;
-	}
-
-	@Override
-	public void setDisplayParameters(Map<Integer, ArtQueryParam> t) {
-		displayParams = t;
-	}
-
-	@Override
-	public void beginHeader() {
-		//initialize objects required for output
-		initializeOutput();
-
-		if (displayParams != null && !displayParams.isEmpty()) {
-			exportFileStrBuf.append("Params:\t");
-			// decode the parameters handling multi one
-			for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
-				ArtQueryParam param = entry.getValue();
-				String paramName = param.getName();
-				Object pValue = param.getParamValue();
-				String outputString;
-
-				if (pValue instanceof String) {
-					String paramValue = (String) pValue;
-					outputString = paramName + "=" + paramValue + " \t "; //default to displaying parameter value
-
-					if (param.usesLov()) {
-						//for lov parameters, show both parameter value and display string if any
-						Map<String, String> lov = param.getLovValues();
-						if (lov != null) {
-							//get friendly/display string for this value
-							String paramDisplayString = lov.get(paramValue);
-							if (!StringUtils.equals(paramValue, paramDisplayString)) {
-								//parameter value and display string differ. show both
-								outputString = paramName + "=" + paramDisplayString + " (" + paramValue + ") \t ";
-							}
-						}
-					}					
-					exportFileStrBuf.append(outputString);					
-				} else if (pValue instanceof String[]) { // multi
-					String[] paramValues = (String[]) pValue;
-					outputString = paramName + "=" + StringUtils.join(paramValues, ", ") + " \t "; //default to showing parameter values only
-
-					if (param.usesLov()) {
-						//for lov parameters, show both parameter value and display string if any
-						Map<String, String> lov = param.getLovValues();
-						if (lov != null) {
-							//get friendly/display string for all the parameter values
-							String[] paramDisplayStrings = new String[paramValues.length];
-							for (int i = 0; i < paramValues.length; i++) {
-								String value = paramValues[i];
-								String display = lov.get(value);
-								if (!StringUtils.equals(display, value)) {
-									//parameter value and display string differ. show both
-									paramDisplayStrings[i] = display + " (" + value + ")";
-								} else {
-									paramDisplayStrings[i] = value;
-								}
-							}
-							outputString = paramName + "=" + StringUtils.join(paramDisplayStrings, ", ") + " \t ";
-						}
-					}					
-					exportFileStrBuf.append(outputString);					
-				}
+			if (zipType == ZipType.Zip) {
+				ZipEntry ze = new ZipEntry(filename + ".tsv");
+				zout = new ZipOutputStream(fout);
+				zout.putNextEntry(ze);
+			} else if (zipType == ZipType.Gzip) {
+				gzout = new GZIPOutputStream(fout);
 			}
-			exportFileStrBuf.append("\n");
+		} catch (IOException e) {
+			logger.error("Error", e);
+		}
+	}
+
+	@Override
+	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
+		if (reportParamsList == null || reportParamsList.isEmpty()) {
+			return;
+		}
+
+		for (ReportParameter reportParam : reportParamsList) {
+			exportFileStrBuf.append(reportParam.getNameAndDisplayValues());
 		}
 	}
 
@@ -186,33 +123,21 @@ public class TsvOutput implements ReportOutputInterface {
 		exportFileStrBuf.append(s);
 		exportFileStrBuf.append("\t");
 	}
-	
-	@Override
-	public void addHeaderCellLeft(String s) {
-		addHeaderCell(s);
-	}
-
-	@Override
-	public void endHeader() {
-	}
-
-	@Override
-	public void beginLines() {
-	}
 
 	@Override
 	public void addCellString(String s) {
-		if (s != null) {
-			exportFileStrBuf.append(s.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
-			exportFileStrBuf.append("\t");
-		} else {
+		if (s == null) {
 			exportFileStrBuf.append(s);
 			exportFileStrBuf.append("\t");
+		} else {
+			exportFileStrBuf.append(s.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
+			exportFileStrBuf.append("\t");
+
 		}
 	}
 
 	@Override
-	public void addCellDouble(Double d) {
+	public void addCellNumeric(Double d) {
 		String formattedValue = "";
 		if (d != null) {
 			formattedValue = nfPlain.format(d.doubleValue());
@@ -221,17 +146,12 @@ public class TsvOutput implements ReportOutputInterface {
 	}
 
 	@Override
-	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		exportFileStrBuf.append(i).append("\t");
-	}
-
-	@Override
 	public void addCellDate(Date d) {
 		exportFileStrBuf.append(Config.getDateDisplayString(d)).append("\t");
 	}
 
 	@Override
-	public boolean newLine() {
+	public void newRow() {
 		exportFileStrBuf.append("\n");
 		counter++;
 		if ((counter * columns) > FLUSH_SIZE) {
@@ -239,8 +159,15 @@ public class TsvOutput implements ReportOutputInterface {
 				tmpstr = exportFileStrBuf.toString();
 				buf = new byte[tmpstr.length()];
 				buf = tmpstr.getBytes("UTF-8");
-				fout.write(buf);
-				fout.flush();
+
+				if (zout == null) {
+					fout.write(buf);
+					fout.flush();
+				} else {
+					zout.write(buf);
+					zout.flush();
+				}
+
 				exportFileStrBuf = new StringBuffer(32 * 1024);
 			} catch (IOException e) {
 				logger.error("Error. Data not completed. Please narrow your search", e);
@@ -253,17 +180,17 @@ public class TsvOutput implements ReportOutputInterface {
 			}
 		}
 
-		if (counter < maxRows) {
-			return true;
-		} else {
-			addCellString("Maximum number of rows exceeded! Query not completed.");
-			endLines(); // close files
-			return false;
-		}
+//		if (counter < maxRows) {
+//			return true;
+//		} else {
+//			addCellString("Maximum number of rows exceeded! Query not completed.");
+//			endLines(); // close files
+//			return false;
+//		}
 	}
 
 	@Override
-	public void endLines() {
+	public void endRows() {
 		addCellString("\n Total rows retrieved:");
 		addCellString("" + (counter));
 
@@ -271,9 +198,26 @@ public class TsvOutput implements ReportOutputInterface {
 			tmpstr = exportFileStrBuf.toString();
 			buf = new byte[tmpstr.length()];
 			buf = tmpstr.getBytes("UTF-8");
-			fout.write(buf);
-			fout.flush();
-			fout.close();
+
+			switch (zipType) {
+				case None:
+					fout.write(buf);
+					fout.flush();
+					break;
+				case Zip:
+
+					zout.write(buf);
+					zout.flush();
+					zout.close();
+					break;
+				case Gzip:
+					gzout.write(buf);
+					gzout.flush();
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected zip type: " + zipType);
+
+			}
 
 			//htmlout not used for scheduled jobs
 			if (htmlout != null) {
@@ -290,41 +234,4 @@ public class TsvOutput implements ReportOutputInterface {
 		}
 	}
 
-	@Override
-	public boolean isShowQueryHeaderAndFooter() {
-		return true;
-	}
-
-	/**
-	 * Build filename for output file
-	 */
-	private void buildOutputFileName() {
-		// Build filename						
-		Date today = new Date();
-
-		String dateFormat = "yyyy_MM_dd";
-		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
-		y_m_d = dateFormatter.format(today);
-
-		String timeFormat = "HH_mm_ss";
-		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
-		h_m_s = timeFormatter.format(today);
-
-		filename = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString() + ".tsv";
-		filename = ArtUtils.cleanFileName(filename); //replace characters that would make an invalid filename
-		fullFileName = exportPath + filename;
-	}
-
-	/**
-	 * Initialise objects required to generate output
-	 */
-	private void initializeOutput() {
-		buildOutputFileName();
-
-		try {
-			fout = new FileOutputStream(fullFileName);
-		} catch (IOException e) {
-			logger.error("Error", e);
-		}
-	}
 }

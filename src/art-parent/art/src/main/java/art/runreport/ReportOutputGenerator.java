@@ -41,7 +41,9 @@ import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
 import art.output.PdfOutput;
 import art.output.Rss20Output;
+import art.output.SlkOutput;
 import art.output.StandardOutputResult;
+import art.output.TsvOutput;
 import art.output.XlsOutput;
 import art.output.XmlOutput;
 import art.report.ChartOptions;
@@ -351,17 +353,21 @@ public class ReportOutputGenerator {
 					case xlsZip:
 						standardOutput=new XlsOutput(ZipType.Zip);
 						break;
-//					case slk:
-//					case slkZip:
-//						return PACKAGE_NAME + "SlkOutput";
-//					case tsv:
-//					case tsvZip:
-//					case tsvGz:
-//						return PACKAGE_NAME + "TsvOutput";
-//					case xml:
-//						return PACKAGE_NAME + "XmlOutput";
-//					case rss20:
-//						return PACKAGE_NAME + "Rss20Output";
+					case slk:
+						standardOutput=new SlkOutput();
+						break;
+					case slkZip:
+						standardOutput=new SlkOutput(ZipType.Zip);
+						break;
+						case tsv:
+						standardOutput=new TsvOutput();
+						break;
+					case tsvZip:
+						standardOutput=new TsvOutput(ZipType.Zip);
+						break;
+					case tsvGzip:
+						standardOutput=new TsvOutput(ZipType.Gzip);
+						break;
 					default:
 						throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
 				}

@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * Create slk output.
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class SlkOutput extends StandardOutput {
 
@@ -100,8 +101,8 @@ public class SlkOutput extends StandardOutput {
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".slk");
-				zipout = new ZipOutputStream(fout);
-				zipout.putNextEntry(ze);
+				zout = new ZipOutputStream(fout);
+				zout.putNextEntry(ze);
 			}
 		} catch (IOException e) {
 			logger.error("Error", e);
