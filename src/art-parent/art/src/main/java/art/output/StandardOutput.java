@@ -199,6 +199,10 @@ public abstract class StandardOutput {
         return "text/html;charset=utf-8";
     }
 	
+	public boolean outputDataOnly(){
+		return false;
+	}
+	
 	public void init(){
 		
 	}

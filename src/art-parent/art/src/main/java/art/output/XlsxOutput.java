@@ -17,6 +17,8 @@
  */
 package art.output;
 
+import art.parameter.Parameter;
+import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
@@ -41,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class XlsxOutput implements ReportOutputInterface {
+public class XlsxOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
 	Workbook wb;
@@ -74,141 +76,108 @@ public class XlsxOutput implements ReportOutputInterface {
 	String exportPath;
 
 	/**
-	 * Constructor
+	 * Initialise objects required to generate output
 	 */
-	public XlsxOutput() {
-	}
-
 	@Override
-	public String getName() {
-		return "Spreadsheet (xlsx)";
-	}
+	public void init() {
+		try {
+			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.						
+			wb = new XSSFWorkbook();
+			final int MAX_SHEET_NAME = 30; //excel max is 31
+			String sheetName = queryName;
+			if (sheetName.length() > MAX_SHEET_NAME) {
+				sheetName = sheetName.substring(0, MAX_SHEET_NAME);
+			}
+			XSSFSheet xsh = (XSSFSheet) wb.createSheet(sheetName);
+			sheetRef = xsh.getPackagePart().getPartName().getName();
 
-	@Override
-	public String getContentType() {
-		return "text/html;charset=utf-8";
-	}
+			styles = new HashMap<String, CellStyle>();
 
-	@Override
-	public void setExportPath(String s) {
-		exportPath = s;
-	}
+			headerStyle = wb.createCellStyle();
+			headerFont = wb.createFont();
+			headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+			headerFont.setColor(IndexedColors.BLUE.getIndex());
+			headerFont.setFontHeightInPoints((short) 12);
+			headerStyle.setFont(headerFont);
+			headerStyle.setBorderBottom(CellStyle.BORDER_THIN);
+			styles.put("header", headerStyle);
 
-	@Override
-	public String getFileName() {
-		return fullFileName;
-	}
+			bodyStyle = wb.createCellStyle();
+			bodyFont = wb.createFont();
+			bodyFont.setColor(Font.COLOR_NORMAL);
+			bodyFont.setFontHeightInPoints((short) 10);
+			bodyStyle.setFont(bodyFont);
+			styles.put("body", bodyStyle);
 
-	@Override
-	public void setWriter(PrintWriter o) {
-		htmlout = o;
-	}
+			dateStyle = wb.createCellStyle();
+			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			dateStyle.setFont(bodyFont);
+			styles.put("date", dateStyle);
 
-	@Override
-	public void setQueryName(String s) {
-		queryName = s;
-	}
+			//save the template			
+			FileOutputStream fout = new FileOutputStream(templateFileName);
+			try {
+				wb.write(fout);
+			} finally {
+				fout.close();
+			}
 
-	@Override
-	public void setFileUserName(String s) {
-		fileUserName = s;
-	}
-
-	@Override
-	public void setMaxRows(int i) {
-		maxRows = i;
-	}
-
-	@Override
-	public void setColumnsNumber(int i) {
-		columns = i;
-	}
-
-	@Override
-	public void setDisplayParameters(Map<Integer, ArtQueryParam> t) {
-		displayParams = t;
+			//create xml file
+			xmlFile = new File(xmlFileName);
+			boolean created = xmlFile.createNewFile();
+			if (!created) {
+				logger.warn("Couldn't create xmlFile. File already exists: {}", xmlFileName);
+			}
+			fw = new FileWriter(xmlFile);
+			sw = new SpreadsheetWriter(fw);
+		} catch (Exception e) {
+			logger.error("Error", e);
+		}
 	}
 
 	@Override
 	public void beginHeader() {
-		//initialize objects required for output
-		initializeOutput();
-
 		try {
 			sw.beginSheet();
 
 			currentRow = 0;
 
-			newLine();
+			newRow();
 			addCellString(queryName + " - " + y_m_d.replace('_', '-') + " " + h_m_s.replace('_', ':'));
 
-			// Output parameter values list
-			if (displayParams != null && !displayParams.isEmpty()) {
-				// rows with parameter names
-				newLine();
-				for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
-					ArtQueryParam param = entry.getValue();
-					String paramName = param.getName();
-					addHeaderCell(paramName);
-				}
-
-				// rows with parameter values
-				newLine();
-				for (Map.Entry<Integer, ArtQueryParam> entry : displayParams.entrySet()) {
-					ArtQueryParam param = entry.getValue();
-					Object pValue = param.getParamValue();
-					String outputString;
-
-					if (pValue instanceof String) {
-						String paramValue = (String) pValue;
-						outputString = paramValue; //default to displaying parameter value
-
-						if (param.usesLov()) {
-							//for lov parameters, show both parameter value and display string if any
-							Map<String, String> lov = param.getLovValues();
-							if (lov != null) {
-								//get friendly/display string for this value
-								String paramDisplayString = lov.get(paramValue);
-								if (!StringUtils.equals(paramValue, paramDisplayString)) {
-									//parameter value and display string differ. show both
-									outputString = paramDisplayString + " (" + paramValue + ")";
-								}
-							}
-						}
-						addCellString(outputString);
-					} else if (pValue instanceof String[]) { // multi
-						String[] paramValues = (String[]) pValue;
-						outputString = StringUtils.join(paramValues, ", "); //default to showing parameter values only
-
-						if (param.usesLov()) {
-							//for lov parameters, show both parameter value and display string if any
-							Map<String, String> lov = param.getLovValues();
-							if (lov != null) {
-								//get friendly/display string for all the parameter values
-								String[] paramDisplayStrings = new String[paramValues.length];
-								for (int i = 0; i < paramValues.length; i++) {
-									String value = paramValues[i];
-									String display = lov.get(value);
-									if (!StringUtils.equals(display, value)) {
-										//parameter value and display string differ. show both
-										paramDisplayStrings[i] = display + " (" + value + ")";
-									} else {
-										paramDisplayStrings[i] = value;
-									}
-								}
-								outputString = StringUtils.join(paramDisplayStrings, ", ");
-							}
-						}
-						addCellString(outputString);
-					}
-				}
-			}
-			// prepare row for columns header
-			newLine();
 		} catch (Exception e) {
 			logger.error("Error", e);
 			errorOccurred = true; //set flag so that no more rows are processed
 		}
+	}
+
+	@Override
+	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
+		if (reportParamsList == null || reportParamsList.isEmpty()) {
+			return;
+		}
+
+		for (ReportParameter reportParam : reportParamsList) {
+			// rows with parameter names
+			newRow();
+			Parameter param = reportParam.getParameter();
+			String paramDisplayValues = reportParam.getDisplayValues();
+			addCellString(paramDisplayValues);
+		}
+
+		// rows with parameter values
+		newRow();
+
+		for (ReportParameter reportParam : reportParamsList) {
+			// rows with parameter names
+			newRow();
+			Parameter param = reportParam.getParameter();
+			String paramName = param.getName();
+			addHeaderCell(paramName);
+		}
+
+		// prepare row for columns header
+		newRow();
 	}
 
 	@Override
@@ -221,18 +190,9 @@ public class XlsxOutput implements ReportOutputInterface {
 		}
 	}
 
-	@Override
-	public void addHeaderCellLeft(String s) {
-		addHeaderCell(s);
-	}
 
 	@Override
-	public void endHeader() {
-		//nope;
-	}
-
-	@Override
-	public void beginLines() {
+	public void beginRows() {
 		cellNumber = 0;
 	}
 
@@ -252,28 +212,13 @@ public class XlsxOutput implements ReportOutputInterface {
 	}
 
 	@Override
-	public void addCellDouble(Double d) {
+	public void addCellNumeric(Double d) {
 		try {
 			if (d == null) {
 				//output blank string
 				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
 			} else {
 				sw.createCell(cellNumber++, d, styles.get("body").getIndex());
-			}
-		} catch (Exception e) {
-			logger.error("Error", e);
-			errorOccurred = true; //set flag so that no more rows are processed
-		}
-	}
-
-	@Override
-	public void addCellLong(Long i) {       // used for INTEGER, TINYINT, SMALLINT, BIGINT
-		try {
-			if (i == null) {
-				//output blank string
-				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
-			} else {
-				sw.createCell(cellNumber++, i, styles.get("body").getIndex());
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -297,7 +242,7 @@ public class XlsxOutput implements ReportOutputInterface {
 	}
 
 	@Override
-	public boolean newLine() {
+	public void newRow() {
 		boolean lineAdded = false;
 		cellNumber = 0;
 
@@ -307,7 +252,7 @@ public class XlsxOutput implements ReportOutputInterface {
 				if (htmlout != null) {
 					htmlout.println("<span style=\"color:red\">An error occurred while running the query. Query not completed.</span>");
 				}
-				endLines(); // close files						
+				endRows(); // close files						
 			} else {
 				if (currentRow > 0) {
 					sw.endRow(); //need to output end row marker before inserting a new row
@@ -324,7 +269,7 @@ public class XlsxOutput implements ReportOutputInterface {
 								+ ")! Data not completed. Please narrow your search!</span>");
 					}
 					addCellString("Maximum number of rows exceeded! Query not completed.");
-					endLines(); // close files				
+					endRows(); // close files				
 				}
 			}
 		} catch (Exception e) {
@@ -332,11 +277,11 @@ public class XlsxOutput implements ReportOutputInterface {
 			errorOccurred = true; //set flag so that no more rows are processed
 		}
 
-		return lineAdded;
+//		return lineAdded;
 	}
 
 	@Override
-	public void endLines() {
+	public void endRows() {
 		try {
 			sw.endRow();
 			sw.endSheet();
@@ -375,11 +320,6 @@ public class XlsxOutput implements ReportOutputInterface {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
-	}
-
-	@Override
-	public boolean isShowQueryHeaderAndFooter() {
-		return true;
 	}
 
 	/**
@@ -456,64 +396,4 @@ public class XlsxOutput implements ReportOutputInterface {
 		xmlFileName = exportPath + "xml-" + baseName + ".xml";
 	}
 
-	/**
-	 * Initialise objects required to generate output
-	 */
-	private void initializeOutput() {
-		buildOutputFileName();
-
-		try {
-			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.						
-			wb = new XSSFWorkbook();
-			final int MAX_SHEET_NAME = 30; //excel max is 31
-			String sheetName = queryName;
-			if (sheetName.length() > MAX_SHEET_NAME) {
-				sheetName = sheetName.substring(0, MAX_SHEET_NAME);
-			}
-			XSSFSheet xsh = (XSSFSheet) wb.createSheet(sheetName);
-			sheetRef = xsh.getPackagePart().getPartName().getName();
-
-			styles = new HashMap<String, CellStyle>();
-
-			headerStyle = wb.createCellStyle();
-			headerFont = wb.createFont();
-			headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-			headerFont.setColor(IndexedColors.BLUE.getIndex());
-			headerFont.setFontHeightInPoints((short) 12);
-			headerStyle.setFont(headerFont);
-			headerStyle.setBorderBottom(CellStyle.BORDER_THIN);
-			styles.put("header", headerStyle);
-
-			bodyStyle = wb.createCellStyle();
-			bodyFont = wb.createFont();
-			bodyFont.setColor(Font.COLOR_NORMAL);
-			bodyFont.setFontHeightInPoints((short) 10);
-			bodyStyle.setFont(bodyFont);
-			styles.put("body", bodyStyle);
-
-			dateStyle = wb.createCellStyle();
-			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
-			dateStyle.setFont(bodyFont);
-			styles.put("date", dateStyle);
-
-			//save the template			
-			FileOutputStream fout = new FileOutputStream(templateFileName);
-			try {
-				wb.write(fout);
-			} finally {
-				fout.close();
-			}
-
-			//create xml file
-			xmlFile = new File(xmlFileName);
-			boolean created = xmlFile.createNewFile();
-			if (!created) {
-				logger.warn("Couldn't create xmlFile. File already exists: {}", xmlFileName);
-			}
-			fw = new FileWriter(xmlFile);
-			sw = new SpreadsheetWriter(fw);
-		} catch (Exception e) {
-			logger.error("Error", e);
-		}
-	}
 }

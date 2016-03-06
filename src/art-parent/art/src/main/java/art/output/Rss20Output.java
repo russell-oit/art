@@ -70,6 +70,11 @@ public class Rss20Output extends StandardOutput {
     }
 	
 	@Override
+	public boolean outputDataOnly(){
+		return true;
+	}
+	
+	@Override
 	public void init(){
 		columnNames = new String[resultSetColumnCount]; // sotres columns names (i.e. xml tags for items)
         out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

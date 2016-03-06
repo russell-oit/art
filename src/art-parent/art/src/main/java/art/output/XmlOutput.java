@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
  * Generate xml output
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class XmlOutput extends StandardOutput {
 
@@ -38,6 +39,11 @@ public class XmlOutput extends StandardOutput {
     public String getContentType() {
         return "application/xml"; // mime type (use "text/html" for html)
     }
+	
+	@Override
+	public boolean outputDataOnly(){
+		return true;
+	}
 	
 	@Override
 	public void init() {
