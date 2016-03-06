@@ -50,12 +50,6 @@ public class Rss20Output extends StandardOutput {
     String[] columnNames;
     Map<Integer, ArtQueryParam> displayParams;
 
-
-//    @Override
-//    public String getContentType() {
-//        return "application/xml"; // mime type (use "text/html" for html)
-//    }
-
     /**
      * rfc822 (2822) standard date
      */
@@ -68,6 +62,11 @@ public class Rss20Output extends StandardOutput {
      */
     public String getDateAsRFC822String(Date date) {
         return Rfc822DateFormat.format(date);
+    }
+	
+	 @Override
+    public String getContentType() {
+        return "application/xml"; // mime type (use "text/html" for html)
     }
 	
 	@Override

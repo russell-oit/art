@@ -223,7 +223,7 @@ public class ParameterProcessor {
 		if (paramDataType.isNumeric()) {
 			return convertParameterStringValueToNumber(value, param);
 		} else if (paramDataType.isDate()) {
-			return convertParameterStringValueToDate(value);
+			return convertParameterStringValueToDate(value, param);
 		} else {
 			//parameter data types that are treated as strings
 			return value;
@@ -268,7 +268,7 @@ public class ParameterProcessor {
 		}
 	}
 
-	private Date convertParameterStringValueToDate(String value) throws ParseException {
+	private Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
 		Date dateValue;
 
 		if (StringUtils.startsWithIgnoreCase(value, "add")) {
@@ -296,6 +296,17 @@ public class ParameterProcessor {
 		} else {
 			//convert date string as it is to a date
 			String dateFormat;
+			
+//			ParameterDataType paramDataType = param.getDataType();
+//
+//			if (paramDataType == ParameterDataType.Date) {
+//				dateFormat = ArtUtils.ISO_DATE_FORMAT;
+//			} else if (paramDataType == ParameterDataType.DateTime) {
+//				dateFormat = ArtUtils.ISO_DATE_TIME_FORMAT;
+//			} else {
+//				throw new IllegalArgumentException("Unknown date parameter data type: " + paramDataType);
+//			}
+			
 			if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
 				dateFormat = ArtUtils.ISO_DATE_FORMAT;
 			} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
@@ -304,9 +315,9 @@ public class ParameterProcessor {
 				dateFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
 			} else if (value.length() == ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT.length()) {
 				dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
-			} else {
-				throw new IllegalArgumentException("Invalid date format: " + value);
-			}
+ 			} else {
+ 				throw new IllegalArgumentException("Invalid date format: " + value);
+ 			}
 
 			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 			dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates

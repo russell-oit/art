@@ -34,10 +34,11 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class XmlOutput extends StandardOutput {
 
-//    @Override
-//    public String getContentType() {
-//        return "application/xml"; // mime type (use "text/html" for html)
-//    }
+    @Override
+    public String getContentType() {
+        return "application/xml"; // mime type (use "text/html" for html)
+    }
+	
 	@Override
 	public void init() {
 		out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

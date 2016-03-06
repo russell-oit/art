@@ -133,7 +133,7 @@ public class DrilldownLinkHelper {
 					paramValueString = ArtUtils.isoDateFormatter.format(paramValueObject);
 				} else if (drilldownParam.getDataType() == ParameterDataType.DateTime) {
 					//convert date to string that will be recognised by parameter processor class
-					paramValueString = ArtUtils.isoDateTimeMillisecondsFormatter.format(paramValueObject);
+					paramValueString = ArtUtils.isoDateTimeFormatter.format(paramValueObject);
 				} else {
 					paramValueString = String.valueOf(paramValueObject);
 				}

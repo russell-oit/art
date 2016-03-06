@@ -195,6 +195,10 @@ public abstract class StandardOutput {
 		this.contextPath = contextPath;
 	}
 	
+	public String getContentType() {
+        return "text/html;charset=utf-8";
+    }
+	
 	public void init(){
 		
 	}

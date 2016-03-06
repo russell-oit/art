@@ -194,9 +194,10 @@ public class RunReportController {
 			boolean isFragment = Boolean.valueOf(request.getParameter("isFragment"));
 
 			//make sure the browser does not cache the result using Ajax (this happens in IE)
-			if (isFragment) {
-				response.setHeader("Cache-control", "no-cache");
-			}
+//			if (isFragment) {
+//				response.setHeader("Cache-control", "no-cache");
+//			}
+			response.setHeader("Cache-control", "no-cache");
 
 			//get report format to use
 			ReportFormat reportFormat;
@@ -344,7 +345,7 @@ public class RunReportController {
 								Object objectValue = entry.getKey();
 								if (objectValue instanceof String) {
 									String stringValue = (String) objectValue;
-									Object newObjectValue = paramProcessor.convertParameterValue(stringValue, param.getDataType());
+									Object newObjectValue = paramProcessor.convertParameterStringValueToObject(stringValue, param);
 									lovValues.put(newObjectValue, entry.getValue());
 								}
 							}

@@ -30,6 +30,7 @@ import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.enums.ZipType;
 import art.output.StandardOutput;
 import art.output.DirectReportOutputHandler;
 import art.output.HtmlDataTableOutput;
@@ -41,6 +42,7 @@ import art.output.JxlsOutput;
 import art.output.PdfOutput;
 import art.output.Rss20Output;
 import art.output.StandardOutputResult;
+import art.output.XlsOutput;
 import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
@@ -343,11 +345,12 @@ public class ReportOutputGenerator {
 					case rss20:
 						standardOutput=new Rss20Output();
 						break;
-//					case xls:
-//					case xlsZip:
-//						return PACKAGE_NAME + "XlsOutput";
-//					case xlsx:
-//						return PACKAGE_NAME + "XlsxOutput";
+					case xls:
+						standardOutput=new XlsOutput();
+						break;
+					case xlsZip:
+						standardOutput=new XlsOutput(ZipType.Zip);
+						break;
 //					case slk:
 //					case slkZip:
 //						return PACKAGE_NAME + "SlkOutput";
