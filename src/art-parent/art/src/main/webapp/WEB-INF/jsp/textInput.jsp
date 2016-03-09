@@ -15,5 +15,5 @@ Display report parameter that uses text input
 <input type="text" size="20"
 	   id="${reportParam.htmlElementId}"
 	   name="${reportParam.htmlElementName}"
-	   value="${reportParam.effectiveActualParameterValue}">
+	   value="${reportParam.htmlValue}">
 	   

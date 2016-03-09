@@ -20,6 +20,10 @@ import art.datasource.DatasourceService;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroupService;
+import art.reportparameter.ReportParameter;
+import art.runreport.ParameterProcessor;
+import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportOptions;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
@@ -28,8 +32,11 @@ import art.utils.Encrypter;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -100,11 +107,11 @@ public class ReportController {
 		return "reports";
 	}
 
-	@RequestMapping(value = "/app/showReport", method = RequestMethod.GET)
-	public String showReport(@RequestParam("reportId") Integer reportId,
-			Model model) {
+	@RequestMapping(value = "/app/selectReportParameters", method = RequestMethod.GET)
+	public String selectReportParameters(@RequestParam("reportId") Integer reportId,
+			HttpServletRequest request, Model model) {
 
-		logger.debug("Entering showReport: reportId={}", reportId);
+		logger.debug("Entering selectReportParameters: reportId={}", reportId);
 
 		try {
 			Report report = reportService.getReport(reportId);
@@ -113,12 +120,19 @@ public class ReportController {
 				return "reportError";
 			} else {
 				model.addAttribute("report", report);
+				
+				//prepare report parameters
+				ParameterProcessor paramProcessor = new ParameterProcessor();
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
+
+				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+				model.addAttribute("reportParamsList", reportParamsList);
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		return "showReport";
+		return "selectReportParameters";
 	}
 
 	/**

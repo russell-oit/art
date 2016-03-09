@@ -1,5 +1,5 @@
 <%-- 
-    Document   : showReport
+    Document   : selectReportParameters
     Created on : 20-May-2014, 15:01:32
     Author     : Timothy Anyona
 
@@ -17,24 +17,29 @@ Display report parameters and initiate running of report
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPage title="${report.name}">
+	
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eyecon-datepicker/css/datepicker.css">
+		</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eyecon-datepicker/js/bootstrap-datepicker.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$("#schedule").click(function(e) {
+			$(document).ready(function () {
+				$("#schedule").click(function (e) {
 					e.preventDefault();
 					var url = "${pageContext.request.contextPath}/app/scheduleReport.do";
 					$('#parametersForm').attr('action', url).submit();
 				});
 
-				$("#runInNewPage").click(function(e) {
+				$("#runInNewPage").click(function (e) {
 					$("#showInline").val("false");
 					$("#parametersForm").submit();
 				});
 
-				$("#runInline").click(function(e) {
+				$("#runInline").click(function (e) {
 					e.preventDefault();
-					
+
 					$("#showInline").val("true");
 
 					var $form = $(this).closest('form');
@@ -44,7 +49,7 @@ Display report parameters and initiate running of report
 
 					var url = "${pageContext.request.contextPath}/app/runReport.do";
 					$("#reportOutput").load(url, $form.serialize(),
-							function(responseText, statusText, xhr) {
+							function (responseText, statusText, xhr) {
 								//callback funtion for when jquery load has finished
 
 								if (statusText === "success") {
@@ -62,6 +67,10 @@ Display report parameters and initiate running of report
 
 				});
 				
+				$(function () {
+		$('.datepicker').datepicker();
+	});
+
 				//immediately run query inline
 //				$("#runInline").click();
 
@@ -88,6 +97,10 @@ Display report parameters and initiate running of report
 					<fieldset>
 						<input type="hidden" name="reportId" value="${report.reportId}">
 						<input type="hidden" name="showInline" id="showInline" value="true">
+
+						<jsp:include page="reportParameters.jsp">
+							<jsp:param name="reportParamsList" value="${reportParamsList}"/>
+						</jsp:include>
 
 						<div class="form-group">
 							<div class="col-md-12">

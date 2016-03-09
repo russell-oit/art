@@ -142,7 +142,7 @@ Reports page. Also main/home page
 						<td><encode:forHtmlContent value="${report.reportGroup.name}</td>"/>
 						<td><encode:forHtmlContent value="${report.description}</td>"/>
 						<td>
-							<a href="${pageContext.request.contextPath}/app/showReport.do?reportId=${report.reportId}">
+							<a href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
 								<encode:forHtmlContent value="${report.name}"/>
 							</a> &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"

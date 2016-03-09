@@ -173,7 +173,7 @@ Reports configuration page
 									<li class="divider"></li>
 									<li>
 										<a 
-										   href="${pageContext.request.contextPath}/app/showReport.do?reportId=${report.reportId}">
+										   href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
 											<spring:message code="reports.action.preview"/>
 										</a>
 									</li>

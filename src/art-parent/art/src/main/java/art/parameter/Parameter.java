@@ -365,7 +365,7 @@ public class Parameter implements Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		int hash = 3;

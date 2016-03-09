@@ -229,5 +229,18 @@ public class ReportParameter implements Serializable {
 	public String getHtmlElementName(){
 		return "p-" + parameter.getName();
 	}
+	
+	public String getHtmlValue() {
+		Object value=getEffectiveActualParameterValue();
+		
+		switch(parameter.getDataType()){
+			case Date:
+				return ArtUtils.isoDateFormatter.format(value);
+			case DateTime:
+				return ArtUtils.isoDateTimeFormatter.format(value);
+			default:
+				return String.valueOf(value);
+		}
+	}
 
 }

@@ -271,7 +271,10 @@ public class ParameterProcessor {
 	private Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
 		Date dateValue;
 
-		if (StringUtils.startsWithIgnoreCase(value, "add")) {
+		if (value == null || StringUtils.equalsIgnoreCase(value, "now")
+				|| StringUtils.isBlank(value)) {
+			dateValue = new Date();
+		} else if (StringUtils.startsWithIgnoreCase(value, "add")) {
 			//e.g. add days 1
 			String[] tokens = StringUtils.split(value);
 			if (tokens.length != 3) {
@@ -291,12 +294,10 @@ public class ParameterProcessor {
 			} else {
 				throw new IllegalArgumentException("Invalid period: " + period);
 			}
-		} else if (StringUtils.equalsIgnoreCase(value, "now")) {
-			dateValue = new Date();
 		} else {
 			//convert date string as it is to a date
 			String dateFormat;
-			
+
 //			ParameterDataType paramDataType = param.getDataType();
 //
 //			if (paramDataType == ParameterDataType.Date) {
@@ -306,7 +307,6 @@ public class ParameterProcessor {
 //			} else {
 //				throw new IllegalArgumentException("Unknown date parameter data type: " + paramDataType);
 //			}
-			
 			if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
 				dateFormat = ArtUtils.ISO_DATE_FORMAT;
 			} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
@@ -315,9 +315,9 @@ public class ParameterProcessor {
 				dateFormat = ArtUtils.ISO_DATE_TIME_SECONDS_FORMAT;
 			} else if (value.length() == ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT.length()) {
 				dateFormat = ArtUtils.ISO_DATE_TIME_MILLISECONDS_FORMAT;
- 			} else {
- 				throw new IllegalArgumentException("Invalid date format: " + value);
- 			}
+			} else {
+				throw new IllegalArgumentException("Invalid date format: " + value);
+			}
 
 			SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 			dateFormatter.setLenient(false); //don't allow invalid date strings to be coerced into valid dates
