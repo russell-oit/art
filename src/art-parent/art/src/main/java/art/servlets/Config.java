@@ -35,7 +35,9 @@ import art.utils.UpgradeHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import javax.naming.NamingException;
 import javax.servlet.ServletConfig;
@@ -88,6 +91,7 @@ public class Config extends HttpServlet {
 	private static String workDirectoryPath;
 	private static String artVersion;
 	private static HashMap<String, Class<?>> directReportOutputClasses;
+	private static Map<String, String> languages = new TreeMap<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -217,6 +221,8 @@ public class Config extends HttpServlet {
 				}
 			}
 		}
+		
+		loadLanguages();
 
 		//load settings and initialize variables
 		loadSettings();
@@ -224,6 +230,41 @@ public class Config extends HttpServlet {
 		//initialize datasources
 		initializeArtDatabase();
 	}
+	
+	public static Map<String,String> getLanguages(){
+		return languages;
+	}
+
+	private void loadLanguages() {
+		Properties prop = new Properties();
+		InputStream inputStream;
+		
+					String propFileName = "/i18n/languages.properties";
+ 
+			inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+ 
+			try {
+				
+			
+			if (inputStream != null) {
+				prop.load(inputStream);
+//			} else {
+//				throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+			}
+		
+		
+
+			Set<String> propertyNames = prop.stringPropertyNames();
+			for (String key : propertyNames) {
+				String value=prop.getProperty(key);
+				languages.put(value.trim(),key.trim());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	
 
 	private void setJspEnumValues(ServletContext ctx) {
 		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
@@ -544,7 +585,7 @@ public class Config extends HttpServlet {
 			artDatabase.setMaxPoolConnections(20);
 		}
 		if (artDatabase.getConnectionPoolLibrary() == null) {
-			artDatabase.setConnectionPoolLibrary(ConnectionPoolLibrary.HikariCP);
+			artDatabase.setConnectionPoolLibrary(ConnectionPoolLibrary.ArtDBCP);
 		}
 
 	}
@@ -846,7 +887,7 @@ public class Config extends HttpServlet {
 		}
 		return dateString;
 	}
-	
+
 	/**
 	 * Get string to be displayed in query output for a date field
 	 *

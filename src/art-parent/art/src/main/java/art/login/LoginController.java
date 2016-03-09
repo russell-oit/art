@@ -42,7 +42,7 @@ public class LoginController {
 
 	@ModelAttribute("languages")
 	public Map<String, String> addLanguages() {
-		return LanguageUtils.getLanguages();
+		return Config.getLanguages();
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)

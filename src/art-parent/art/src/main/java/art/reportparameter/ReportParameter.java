@@ -221,5 +221,13 @@ public class ReportParameter implements Serializable {
 			return actualParameterValues;
 		}
 	}
+	
+	public String getHtmlElementId(){
+		return "p-" + reportParameterId;
+	}
+	
+	public String getHtmlElementName(){
+		return "p-" + parameter.getName();
+	}
 
 }

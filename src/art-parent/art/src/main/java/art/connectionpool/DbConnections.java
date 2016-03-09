@@ -110,6 +110,7 @@ public class DbConnections {
 			throw new IllegalStateException("connectionPoolMap is null");
 		}
 
+//		return connectionPoolMap.get(datasourceId);
 		ConnectionPool pool = connectionPoolMap.get(datasourceId);
 		if (pool == null) {
 			throw new RuntimeException("Connection pool doesn't exist for datasource id " + datasourceId);
@@ -214,9 +215,11 @@ public class DbConnections {
 	}
 
 	public static void removeConnectionPool(int datasourceId) {
-		ConnectionPool pool = getConnectionPool(datasourceId);
-		pool.closePool();
-		connectionPoolMap.remove(datasourceId);
+		ConnectionPool pool = connectionPoolMap.get(datasourceId);
+		if (pool != null) {
+			pool.closePool();
+			connectionPoolMap.remove(datasourceId);
+		}
 	}
 
 }

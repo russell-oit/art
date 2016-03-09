@@ -22,13 +22,13 @@ Display art database configuration page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="artDatabase.do"]').parent().addClass('active');
 				});
 
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
@@ -208,6 +208,7 @@ Display art database configuration page
 						<form:errors path="testSql" cssClass="error"/>
 					</div>
 				</div>
+				<hr>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="connectionPoolTimeout">
 						<spring:message code="page.label.connectionPoolTimeout"/>
@@ -227,7 +228,6 @@ Display art database configuration page
 						<form:errors path="connectionPoolTimeout" cssClass="error"/>
 					</div>
 				</div>
-				<hr>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="maxPoolConnections">
 						<spring:message code="artDatabase.label.maxPoolConnections"/>

@@ -359,6 +359,24 @@ public class RunReportController {
 
 				reportRunner.setReportParamsMap(reportParamsMap);
 
+				//display report parameters
+				for (ReportParameter reportParam : reportParamsList) {
+					request.setAttribute("reportParam", reportParam);
+					ParameterDataType paramDataType=reportParam.getParameter().getDataType();
+					switch(paramDataType){
+						case Date:
+						case DateTime:
+							servletContext.getRequestDispatcher("/WEB-INF/jsp/dateInput.jsp").include(request, response);
+							break;
+						case Text:
+							servletContext.getRequestDispatcher("/WEB-INF/jsp/dropdownInput.jsp").include(request, response);
+							break;
+						default:
+							servletContext.getRequestDispatcher("/WEB-INF/jsp/textInput.jsp").include(request, response);
+					}
+				}
+				writer.flush();
+
 				// JavaScript code to write status
 				if (showReportHeaderAndFooter) {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));

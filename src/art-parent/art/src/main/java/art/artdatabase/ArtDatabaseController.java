@@ -148,6 +148,8 @@ public class ArtDatabaseController {
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
+			
+			//TODO don't stop if some report datasource creation fails e.g. wishlist-jndi
 
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)

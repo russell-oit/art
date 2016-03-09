@@ -132,7 +132,7 @@ Login page
 									<option value="en">English</option>
 									<option data-divider="true"></option>
 									<c:forEach var="language" items="${languages}">
-										<option value="${language.key}" ${localeCode == language.key ? "selected" : ""}>${language.value}</option>
+										<option value="${language.value}" ${localeCode == language.value ? "selected" : ""}>${language.key}</option>
 									</c:forEach>
 								</select>
 							</div>
