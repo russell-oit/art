@@ -223,7 +223,7 @@ public class ReportParameter implements Serializable {
 	}
 	
 	public String getHtmlElementId(){
-		return "p-" + reportParameterId;
+		return getHtmlElementName();
 	}
 	
 	public String getHtmlElementName(){

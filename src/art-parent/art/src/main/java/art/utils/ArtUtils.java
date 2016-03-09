@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.TreeMap;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -212,7 +213,7 @@ public class ArtUtils {
 	 */
 	public static Map<String, String> getDatabaseTypes() {
 		//use linkedhashmap so that items are displayed in the order listed here
-		Map<String, String> databaseTypes = new LinkedHashMap<>();
+		Map<String, String> databaseTypes = new TreeMap<>();
 
 		databaseTypes.put("demo", "Demo");
 		databaseTypes.put("cubrid", "CUBRID");
