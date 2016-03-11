@@ -19,13 +19,14 @@ Display report parameters and initiate running of report
 <t:mainPage title="${report.name}">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eyecon-datepicker/css/datepicker.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tarruda-bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css">
+
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eyecon-datepicker/js/bootstrap-datepicker.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tarruda-bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
+
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$("#schedule").click(function (e) {
@@ -68,15 +69,15 @@ Display report parameters and initiate running of report
 							});
 
 				});
-
-				$('.datepicker').datepicker({
-					format: 'yyyy-mm-dd'
-				});
+				
+				$('.datepicker').datetimepicker({
+                    format: 'YYYY-MM-DD'
+                });
 				
 				$('.datetimepicker').datetimepicker({
-					format: 'yyyy-MM-dd hh:mm:ss'
-				});
-
+                    format: 'YYYY-MM-DD HH:mm:ss'
+                });
+				
 				//immediately run query inline
 //				$("#runInline").click();
 
@@ -104,16 +105,10 @@ Display report parameters and initiate running of report
 						<input type="hidden" name="reportId" value="${report.reportId}">
 						<input type="hidden" name="showInline" id="showInline" value="true">
 
-						<input type="text" class="datetimepicker"
-							   name="blah"
-							   value="2010-05-13">
-
 						<jsp:include page="reportParameters.jsp">
 							<jsp:param name="reportParamsList" value="${reportParamsList}"/>
 						</jsp:include>
-
-
-
+						
 						<div class="form-group">
 							<div class="col-md-12">
 								<div id="actionsDiv" class="pull-right">
