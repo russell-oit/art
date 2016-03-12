@@ -1,5 +1,5 @@
 <%-- 
-    Document   : textAreaInput
+    Document   : textareaInput
     Created on : 08-Mar-2016, 17:19:51
     Author     : Timothy Anyona
 
@@ -13,7 +13,6 @@ Display report parameter that uses textarea input
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <textarea cols="50" rows="5"
-		  id="${reportParam.htmlElementId}"
 		  name="${reportParam.htmlElementName}">
-	${reportParam.effectiveActualParameterValue}
+	${reportParam.htmlValue}
 </textarea>

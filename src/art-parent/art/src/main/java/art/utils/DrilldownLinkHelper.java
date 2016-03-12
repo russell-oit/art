@@ -125,18 +125,7 @@ public class DrilldownLinkHelper {
 				paramCount++;
 				String paramName = drilldownParam.getName();
 				Object paramValueObject = paramValues[paramCount - 1];
-				String paramValueString;
-				if (paramValueObject == null) {
-					paramValueString = ""; //use empty string for nulls rather than the string "null"
-				} else if (drilldownParam.getDataType() == ParameterDataType.Date) {
-					//convert date to string that will be recognised by parameter processor class
-					paramValueString = ArtUtils.isoDateFormatter.format(paramValueObject);
-				} else if (drilldownParam.getDataType() == ParameterDataType.DateTime) {
-					//convert date to string that will be recognised by parameter processor class
-					paramValueString = ArtUtils.isoDateTimeFormatter.format(paramValueObject);
-				} else {
-					paramValueString = String.valueOf(paramValueObject);
-				}
+				String paramValueString=drilldownParam.getHtmlValue(paramValueObject);
 				addUrlParameter(paramName, paramValueString, sb);
 			}
 		}

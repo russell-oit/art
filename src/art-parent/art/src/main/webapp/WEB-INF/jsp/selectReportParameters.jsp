@@ -106,6 +106,7 @@ Display report parameters and initiate running of report
 						<input type="hidden" name="showInline" id="showInline" value="true">
 
 						<jsp:include page="reportParameters.jsp">
+							<jsp:param name="paramsList" value="${paramsList}"/>
 							<jsp:param name="reportParamsList" value="${reportParamsList}"/>
 						</jsp:include>
 						

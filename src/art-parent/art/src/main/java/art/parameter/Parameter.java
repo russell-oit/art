@@ -18,6 +18,7 @@ package art.parameter;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -391,5 +392,31 @@ public class Parameter implements Serializable {
 	@Override
 	public String toString() {
 		return "Parameter{" + "parameterId=" + parameterId + '}';
+	}
+	
+	public String getHtmlElementName(){
+		return "p-" + name;
+	}
+	
+	public String getHtmlDefaultValue() {
+		String value=defaultValue;
+		
+		if(defaultValue==null){
+			value="";
+		}
+		
+		return getHtmlValue(value);
+	}
+	
+	public String getHtmlValue(Object value) {
+		switch(dataType){
+			case Date:
+				//convert date to string that will be recognised by parameter processor class
+				return ArtUtils.isoDateFormatter.format(value);
+			case DateTime:
+				return ArtUtils.isoDateTimeFormatter.format(value);
+			default:
+				return String.valueOf(value);
+		}
 	}
 }

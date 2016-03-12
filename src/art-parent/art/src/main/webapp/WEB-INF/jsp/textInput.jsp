@@ -12,8 +12,7 @@ Display report parameter that uses text input
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<input type="text" size="20"
-	   id="${reportParam.htmlElementId}"
+<input type='text' class="form-control"
 	   name="${reportParam.htmlElementName}"
 	   value="${reportParam.htmlValue}">
-	   
+

@@ -222,11 +222,8 @@ public class ReportParameter implements Serializable {
 		}
 	}
 	
-	public String getHtmlElementId(){
-		return getHtmlElementName();
-	}
-	
 	public String getHtmlElementName(){
+		//TODO consolidate with same method in Parameter
 		return "p-" + parameter.getName();
 	}
 	
@@ -242,5 +239,6 @@ public class ReportParameter implements Serializable {
 				return String.valueOf(value);
 		}
 	}
-
 }
+	
+	

@@ -1,5 +1,5 @@
 <%-- 
-    Document   : reportParameters
+    Document   : parameters
     Created on : 09-Mar-2016, 11:17:18
     Author     : Timothy Anyona
 --%>
@@ -14,11 +14,13 @@
 	<c:set var="reportParam" value="${reportParam}" scope="request"/>
 	<c:choose>
 		<c:when test="${reportParam.parameter.useLov}">
+			<c:set var="lovValues" value="${reportParam.lovValues}" scope="request"/>
 			<jsp:include page="dropdownInput.jsp" />
 		</c:when>
 		<c:otherwise>
 			<c:choose>
-				<c:when test="${reportParam.parameter.parameterType == 'MultiValue'}">
+				<c:when test="${reportParam.parameter.parameterType == 'MultiValue'
+								|| reportParam.parameter.dataType == 'Text'}">
 					<jsp:include page="textareaInput.jsp" />
 				</c:when>
 				<c:when test="${reportParam.parameter.dataType == 'Date'}">
@@ -26,9 +28,6 @@
 				</c:when>
 				<c:when test="${reportParam.parameter.dataType == 'DateTime'}">
 					<jsp:include page="datetimeInput.jsp" />
-				</c:when>
-				<c:when test="${reportParam.parameter.dataType == 'Text'}">
-					<jsp:include page="textareaInput.jsp" />
 				</c:when>
 				<c:otherwise>
 					<jsp:include page="textInput.jsp"/>

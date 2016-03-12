@@ -12,8 +12,10 @@ Display report parameter that uses dropdown input
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<textarea cols="50" rows="5"
-		  id="${reportParam.htmlElementId}"
-		  name="${reportParam.htmlElementName}">
-	${reportParam.effectiveActualParameterValue}
-</textarea>
+<select class="form-control"
+		name="${reportParam.htmlElementName}"
+		id="${reportParam.htmlElementName}">
+	<c:forEach var="lovValue" items="${lovValues}">
+		<option lovValue="${lovValue.key}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${lovValue.value}</option>
+	</c:forEach>
+</select>

@@ -19,6 +19,8 @@ package art.report;
 import art.datasource.DatasourceService;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
+import art.parameter.Parameter;
+import art.parameter.ParameterService;
 import art.reportgroup.ReportGroupService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
@@ -127,6 +129,10 @@ public class ReportController {
 
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				model.addAttribute("reportParamsList", reportParamsList);
+				
+				ParameterService parameterService=new ParameterService();
+				List<Parameter> paramsList=parameterService.getReportParameters(reportId);
+				model.addAttribute("paramsList", paramsList);
 			}
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);
