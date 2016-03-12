@@ -35,8 +35,12 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,33 +198,33 @@ public abstract class StandardOutput {
 	public void setContextPath(String contextPath) {
 		this.contextPath = contextPath;
 	}
-	
+
 	public String getContentType() {
-        return "text/html;charset=utf-8";
-    }
-	
-	public boolean outputDataOnly(){
+		return "text/html;charset=utf-8";
+	}
+
+	public boolean outputDataOnly() {
 		return false;
 	}
-	
-	public void init(){
-		
+
+	public void init() {
+
 	}
-	
-	public void addTitle(){
-		
+
+	public void addTitle() {
+
 	}
-	
-	public void addSelectedParameters(List<ReportParameter> reportParamsList){
-		
+
+	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
+
 	}
 
 	/**
 	 * This method is invoked to state that the header begins. Output class
 	 * should do initialization here
 	 */
-	public void beginHeader(){
-		
+	public void beginHeader() {
+
 	}
 
 	/**
@@ -299,8 +303,8 @@ public abstract class StandardOutput {
 	 * indicating the problem
 	 * @throws SQLException
 	 */
-	public StandardOutputResult generateTabularOutput(ResultSet rs, 
-			 ReportFormat reportFormat) throws SQLException {
+	public StandardOutputResult generateTabularOutput(ResultSet rs,
+			ReportFormat reportFormat) throws SQLException {
 
 		StandardOutputResult result = new StandardOutputResult();
 
@@ -325,14 +329,14 @@ public abstract class StandardOutput {
 		}
 
 		totalColumnCount = resultSetColumnCount + drilldownCount;
-		
+
 		//perform any required output initialization
 		init();
-		
+
 		addTitle();
-		
-		if(showSelectedParameters){
-		addSelectedParameters(reportParamsList);
+
+		if (showSelectedParameters) {
+			addSelectedParameters(reportParamsList);
 		}
 
 		//begin header output
@@ -379,9 +383,9 @@ public abstract class StandardOutput {
 				for (int i = 0; i < totalColumnCount; i++) {
 					addCellString("...");
 				}
-				
+
 				endRows();
-				
+
 				result.setMessage("runReport.message.tooManyRows");
 				result.setTooManyRows(true);
 				return result;
@@ -417,7 +421,8 @@ public abstract class StandardOutput {
 		return columnTypes;
 	}
 
-	private List<Object> outputResultSetColumns(List<ColumnType> columnTypes, ResultSet rs, DisplayNull displayNullSetting) throws SQLException {
+	private List<Object> outputResultSetColumns(List<ColumnType> columnTypes,
+			ResultSet rs, DisplayNull displayNullSetting) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -555,5 +560,263 @@ public abstract class StandardOutput {
 		} else {
 			addCellNumeric((Double) value);
 		}
+	}
+
+	public StandardOutputResult generateCrosstabOutput(ResultSet rs,
+			ReportFormat reportFormat) throws SQLException {
+
+		/*
+		 * input
+		 */ 		     	 /*
+		 * input
+		 */
+		// A Jan 14			     	  A 1 Jan 1 14
+		// A Feb 24			     	  A 1 Feb 2 24
+		// A Mar 34			     	  A 1 Mar 3 34
+		// B Jan 14			     	  B 2 Jan 1 14
+		// B Feb 24			     	  B 2 Feb 2 24
+		// C Jan 04			     	  C 3 Jan 1 04
+		// C Mar 44			     	  C 3 Mar 3 44
+		//				     	    ^-----^------Used to sort the x/y axis
+
+		/*
+		 * output
+		 */		     	 /*
+		 * output
+		 */
+		//         y-axis		     	 	  y-axis	      
+		//           |		     	 	    |				 
+		//  x-axis - _   Feb Jan Mar     	   x-axis - _  Jan Feb Mar
+		//           A    24  14  34      	 	    A	14  24  34   
+		//           B    24  14  -      	 	    B	14  24   -   
+		//           C    -   04  44      	 	    C	04   -  44   
+		//                   ^--- Jan comes after Feb!			     	 
+
+		StandardOutputResult result = new StandardOutputResult();
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+		int colCount = rsmd.getColumnCount();
+		if (colCount != 3 && colCount != 5) {
+			result.setMessage("reports.message.invalidCrosstab");
+			return result;
+		}
+
+		int maxRows = Config.getMaxRows(reportFormat.getValue());
+		DisplayNull displayNullSetting = Config.getSettings().getDisplayNull();
+		List<ColumnType> columnTypes = getColumnTypes(rsmd);
+
+		boolean alternateSort = (colCount > 3 ? true : false);
+
+		HashMap<String, Object> values = new HashMap<String, Object>();
+		Object[] xa;
+		Object[] ya;
+		if (alternateSort) { // name1, altSort1, name2, altSort2, value
+			TreeMap<Object, Object> x = new TreeMap<Object, Object>(); // allows a sorted toArray (or Iterator())
+			TreeMap<Object, Object> y = new TreeMap<Object, Object>();
+
+			// Scroll resultset and feed data structures
+			// to read it as a crosstab (pivot)
+			while (rs.next()) {
+				rowCount++;
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int i = 0; i < totalColumnCount; i++) {
+						addCellString("...");
+					}
+
+					endRows();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+					Object DyVal = rs.getObject(1);
+					Object Dy = rs.getObject(2);
+					Object DxVal = rs.getObject(3);
+					Object Dx = rs.getObject(4);
+					x.put(Dx, DxVal);
+					y.put(Dy, DyVal);
+					addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 5, ColumnType.String);
+				}
+			}
+
+			xa = x.keySet().toArray();
+			ya = y.keySet().toArray();
+
+			totalColumnCount = xa.length + 1;
+
+			//perform any required output initialization
+			init();
+
+			addTitle();
+
+			if (showSelectedParameters) {
+				addSelectedParameters(reportParamsList);
+			}
+
+			//begin header output
+			beginHeader();
+
+			addHeaderCell(rsmd.getColumnLabel(5) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(3) + ")");
+			int i, j;
+			for (i = 0; i < xa.length; i++) {
+				addHeaderCell(x.get(xa[i]).toString());
+			}
+			endHeader();
+			beginRows();
+
+			//  _ Jan Feb Mar
+			for (j = 0; j < ya.length; j++) {
+				Object Dy = ya[j];
+				addHeaderCellLeftAligned(y.get(Dy).toString()); //column 1 data displayed as a header
+				for (i = 0; i < xa.length; i++) {
+					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+					addString(value, displayNullSetting);
+				}
+			}
+
+		} else {
+			TreeSet<Object> x = new TreeSet<Object>(); // allows a sorted toArray (or Iterator())
+			TreeSet<Object> y = new TreeSet<Object>();
+
+			// Scroll resultset and feed data structures
+			// to read it as a crosstab (pivot)
+			while (rs.next()) {
+				rowCount++;
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int i = 0; i < totalColumnCount; i++) {
+						addCellString("...");
+					}
+
+					endRows();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+
+					Object Dy = rs.getObject(1);
+					Object Dx = rs.getObject(2);
+					x.add(Dx);
+					y.add(Dy);
+					addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 3, ColumnType.String);
+				}
+			}
+
+			xa = x.toArray();
+			ya = y.toArray();
+
+			totalColumnCount = xa.length + 1;
+
+			//perform any required output initialization
+			init();
+
+			addTitle();
+
+			if (showSelectedParameters) {
+				addSelectedParameters(reportParamsList);
+			}
+
+			//begin header output
+			beginHeader();
+			addHeaderCell(rsmd.getColumnLabel(3) + " (" + rsmd.getColumnLabel(1) + " / " + rsmd.getColumnLabel(2) + ")");
+			int i, j;
+			for (i = 0; i < xa.length; i++) {
+				addHeaderCell(xa[i].toString());
+			}
+
+			endHeader();
+			beginRows();
+
+			//  _ Jan Feb Mar
+			for (j = 0; j < ya.length; j++) {
+//				if (!o.newLine()) {
+//					result.setMessage("reports.message.tooManyRows");
+//					return result;
+//				}
+				Object Dy = ya[j];
+				//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
+				addHeaderCellLeftAligned(Dy.toString()); //column 1 data displayed as a header
+				for (i = 0; i < xa.length; i++) {
+					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+					addString(value, displayNullSetting);
+				}
+			}
+		}
+
+		endRows();
+
+		result.setSuccess(true);
+		result.setRowCount(rowCount);
+		return result;
+	}
+
+	/**
+	 * Used to call the right method on ReportOutputInterface when flushing
+	 * values (flushXOutput)
+	 */
+	private void addCell(Object value, ColumnType columnType, DisplayNull displayNullSetting) {
+
+		switch (columnType) {
+			case Numeric:
+				addNumeric(value, displayNullSetting);
+				break;
+			case Date:
+				addCellDate((Date) value);
+				break;
+			case Clob:
+				addString(value, displayNullSetting);
+				break;
+			default:
+				addString(value, displayNullSetting);
+		}
+	}
+
+	/**
+	 * Used to cast and store the right object type in the Hashmap used by
+	 * flushXOutput to cache sorted values
+	 */
+	private static void addValue(String key, Map<String, Object> values,
+			ResultSet rs, DisplayNull displayNullSetting,
+			int columnIndex, ColumnType columnType) throws SQLException {
+		Object value = null;
+
+		switch (columnType) {
+			case Numeric:
+				value = rs.getDouble(columnIndex);
+				if (rs.wasNull()) {
+					value = null;
+				}
+				break;
+			case Date:
+				value = rs.getTimestamp(columnIndex);
+				break;
+			case Clob:
+				Clob clob = rs.getClob(columnIndex);
+				if (clob != null) {
+					value = clob.getSubString(1, (int) clob.length());
+				}
+				break;
+			default:
+				value = rs.getString(columnIndex);
+		}
+
+		values.put(key, value);
+
 	}
 }
