@@ -211,10 +211,13 @@ public class TsvOutput extends StandardOutput {
 				case Gzip:
 					gzout.write(buf);
 					gzout.flush();
+					gzout.close();
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected zip type: " + zipType);
 			}
+			fout.close();
+			fout = null; // these nulls are because it seems to be a memory leak in some JVMs
 		} catch (IOException e) {
 			logger.error("Error", e);
 		}
