@@ -38,6 +38,7 @@ public enum ReportType {
 	HeatmapChart(-12), Pie2DChart(-13), VerticalBar2DChart(-14), StackedVerticalBar2DChart(-15),
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17);
 	//group reports (1-99) are too many to list. just have one as a placeholder
+	//TODO in upgrade script update 1-99 to 1 then add column group_column for group reports
 	private final int value;
 
 	private ReportType(int value) {
@@ -128,14 +129,6 @@ public enum ReportType {
 		}
 	}
 	
-	public boolean isTemplate(){
-		if(isJasperReports() || isJxls()){
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	/**
 	 * Determine if this is a chart report
 	 *

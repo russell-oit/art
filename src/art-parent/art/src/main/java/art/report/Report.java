@@ -60,6 +60,21 @@ public class Report implements Serializable {
 	private String reportSourceHtml; //used with text reports
 	private String createdBy;
 	private String updatedBy;
+	private ReportType reportType;
+
+	/**
+	 * @return the reportType
+	 */
+	public ReportType getReportType() {
+		return reportType;
+	}
+
+	/**
+	 * @param reportType the reportType to set
+	 */
+	public void setReportType(ReportType reportType) {
+		this.reportType = reportType;
+	}
 
 	/**
 	 * Determine whether this is an lov report

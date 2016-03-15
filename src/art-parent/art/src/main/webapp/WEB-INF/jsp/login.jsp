@@ -129,8 +129,6 @@ Login page
 								<%-- select must have name of "lang" as per configuration in dispatcher-servlet.xml --%>
 								<c:set var="localeCode" value="${pageContext.response.locale}"/>
 								<select name="lang" id="lang" class="form-control">
-									<option value="en">English</option>
-									<option data-divider="true"></option>
 									<c:forEach var="language" items="${languages}">
 										<option value="${language.value}" ${localeCode == language.value ? "selected" : ""}>${language.key}</option>
 									</c:forEach>

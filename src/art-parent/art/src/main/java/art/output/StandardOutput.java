@@ -203,8 +203,8 @@ public abstract class StandardOutput {
 		return "text/html;charset=utf-8";
 	}
 
-	public boolean outputDataOnly() {
-		return false;
+	public boolean outputHeaderandFooter() {
+		return true;
 	}
 
 	public void init() {
@@ -371,6 +371,8 @@ public abstract class StandardOutput {
 
 		while (rs.next()) {
 			rowCount++;
+			
+			newRow();
 
 			if (rowCount % 2 == 0) {
 				evenRow = true;

@@ -106,7 +106,8 @@ public class ReportService {
 			report.setName(rs.getString("NAME"));
 			report.setShortDescription(rs.getString("SHORT_DESCRIPTION"));
 			report.setDescription(rs.getString("DESCRIPTION"));
-			report.setReportTypeId(rs.getInt("QUERY_TYPE"));
+			report.setReportTypeId(rs.getInt("QUERY_TYPE")); //TODO remove
+			report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
 
 			ReportGroup reportGroup = new ReportGroup();
 			reportGroup.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));

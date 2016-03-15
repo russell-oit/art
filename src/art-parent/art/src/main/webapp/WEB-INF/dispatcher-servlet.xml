@@ -28,7 +28,8 @@
 		  class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
 		  p:basenames="classpath:i18n/ArtMessages"
 		  p:defaultEncoding="UTF-8"
-		  p:fallbackToSystemLocale="false"/>
+		  p:fallbackToSystemLocale="false"
+		  p:useCodeAsDefaultMessage="true"/>
 		
 	<!-- enable dynamic changing of language -->
 	<mvc:interceptors>    
@@ -38,7 +39,9 @@
 
 	<!-- remember locale using cookies -->
 	<bean id="localeResolver"
-		  class="org.springframework.web.servlet.i18n.CookieLocaleResolver" />
+		  class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+		<property name="defaultLocale" value="en" />
+	</bean>
 	<!-- enable i18n -->
 	
 	<bean id="viewResolver"

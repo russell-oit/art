@@ -12,7 +12,7 @@ Display report parameter that uses textarea input
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<textarea cols="50" rows="5"
+<textarea cols="50" rows="5" class="form-control"
 		  name="${reportParam.htmlElementName}">
 	${reportParam.htmlValue}
 </textarea>

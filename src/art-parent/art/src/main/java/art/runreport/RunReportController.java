@@ -46,6 +46,7 @@ import art.output.HtmlPlainOutput;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
 import art.output.ReportOutputInterface;
+import art.output.StandardOutputResult;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.ChartOptions;
@@ -222,19 +223,13 @@ public class RunReportController {
 			ReportOutputInterface o = null;
 
 			if (reportType.isStandardOutput()) {
-				//this is a direct output report
-				Map<String, Class<?>> directReportOutputClasses = Config.getDirectOutputReportClasses();
+				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+				StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, false);
 
-				//@SuppressWarnings("rawtypes")
-				Class<?> classx = directReportOutputClasses.get(reportFormat.getValue());
-				if (classx == null) {
-					throw new RuntimeException("Invalid report format: " + reportFormat.getValue());
-				}
-
-				o = (ReportOutputInterface) classx.newInstance();
+				String contentType = standardOutput.getContentType();
 
 				//set the content type according to the report output class
-				response.setContentType(o.getContentType());
+				response.setContentType(contentType);
 				writer = response.getWriter();
 
 				if (isFragment) {
@@ -243,7 +238,7 @@ public class RunReportController {
 				} else {
 					//the report output class determines if the report header and footer will be shown
 					//if false the output class needs to take care of all the output
-					showReportHeaderAndFooter = o.isShowQueryHeaderAndFooter();
+					showReportHeaderAndFooter = standardOutput.outputHeaderandFooter();
 				}
 			} else {
 				response.setContentType("text/html; charset=UTF-8");
@@ -359,24 +354,6 @@ public class RunReportController {
 
 				reportRunner.setReportParamsMap(reportParamsMap);
 
-				//display report parameters
-				for (ReportParameter reportParam : reportParamsList) {
-					request.setAttribute("reportParam", reportParam);
-					ParameterDataType paramDataType=reportParam.getParameter().getDataType();
-					switch(paramDataType){
-						case Date:
-						case DateTime:
-							servletContext.getRequestDispatcher("/WEB-INF/jsp/dateInput.jsp").include(request, response);
-							break;
-						case Text:
-							servletContext.getRequestDispatcher("/WEB-INF/jsp/dropdownInput.jsp").include(request, response);
-							break;
-						default:
-							servletContext.getRequestDispatcher("/WEB-INF/jsp/textInput.jsp").include(request, response);
-					}
-				}
-				writer.flush();
-
 				// JavaScript code to write status
 				if (showReportHeaderAndFooter) {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
@@ -460,8 +437,15 @@ public class RunReportController {
 					reportOutputGenerator.setResponse(response);
 					reportOutputGenerator.setServletContext(servletContext);
 
-					reportOutputGenerator.generateOutput(report, reportRunner, reportType,
+					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner, reportType,
 							reportFormat, locale, paramProcessorResult, writer, fileName, outputFileName);
+
+					if (outputResult.isSuccess()) {
+						rowsRetrieved = outputResult.getRowCount();
+					} else {
+						model.addAttribute("message", outputResult.getMessage());
+						return errorPage;
+					}
 				}
 
 				// Print the "working" time elapsed

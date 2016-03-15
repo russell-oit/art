@@ -36,8 +36,10 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -122,23 +124,59 @@ public class ReportController {
 				return "reportError";
 			} else {
 				model.addAttribute("report", report);
-				
+
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
 
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				model.addAttribute("reportParamsList", reportParamsList);
-				
-				ParameterService parameterService=new ParameterService();
-				List<Parameter> paramsList=parameterService.getReportParameters(reportId);
+
+				ParameterService parameterService = new ParameterService();
+				List<Parameter> paramsList = parameterService.getReportParameters(reportId);
 				model.addAttribute("paramsList", paramsList);
+				
+				List<String> reportFormats=getAvailableReportFormats(report.getReportType());
+				
+				model.addAttribute("reportFormats", reportFormats);
 			}
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 		return "selectReportParameters";
+	}
+
+	private List<String> getAvailableReportFormats(ReportType reportType) {
+		List<String> formats = new ArrayList<>();
+
+		if (reportType.isChart()) {
+			formats.add("html");
+			formats.add("pdf");
+			formats.add("png");
+		} else {
+			switch (reportType) {
+				case Tabular:
+				case Crosstab:
+					String formatsString = Config.getSettings().getReportFormats();
+					String[] formatsArray = StringUtils.split(formatsString, ",");
+					formats = Arrays.asList(formatsArray);
+					break;
+				case JasperReportsArt:
+				case JasperReportsTemplate:
+					formats.add("pdf");
+					formats.add("xls");
+					formats.add("xlsx");
+					formats.add("html");
+					break;
+				case JxlsArt:
+				case JxlsTemplate:
+					formats.add("xls");
+					break;
+			}
+		}
+
+		return formats;
 	}
 
 	/**
@@ -191,7 +229,7 @@ public class ReportController {
 
 		try {
 			ActionResult deleteResult = reportService.deleteReport(id);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);

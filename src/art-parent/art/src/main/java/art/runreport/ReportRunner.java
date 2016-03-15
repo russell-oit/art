@@ -67,7 +67,6 @@ public class ReportRunner {
 	PreparedStatement psQuery; // this is the ps object produced by this query
 	Connection connQuery; // this is the connection to the datasource for this query
 	private String finalSql; //final sql statement with parameters substituted
-	int reportTypeId; //to enable special handling of template queries where sql source is not executed
 	private boolean recipientFilterPresent; //dynamic recipient filter label present
 	private final String RECIPIENT_LABEL = "#recipient#"; //for dynamic recipients, label for recipient in data query
 	private String recipientColumn;
@@ -79,6 +78,7 @@ public class ReportRunner {
 	private String[] filterValues; //value of filter used with chained parameters
 	private Map<String, ReportParameter> reportParamsMap;
 	private List<Object> jdbcParams = new ArrayList<>();
+	ReportType reportType;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
@@ -248,8 +248,6 @@ public class ReportRunner {
 	private void applyParameterPlaceholders(StringBuilder sb) {
 		String querySql = sb.toString();
 
-		ReportType reportType = ReportType.toEnum(report.getReportTypeId());
-
 		//get and store param identifier order for use with jdbc preparedstatement
 		if (!reportType.isOlap()) {
 			Map<Integer, ReportParameter> jdbcParamOrder = new TreeMap<>(); //use treemap so that jdbc params are set in correct order
@@ -378,7 +376,7 @@ public class ReportRunner {
 	 */
 	public void execute(int resultSetType, boolean overrideUseRules, boolean newUseRules) throws SQLException {
 
-		reportTypeId = report.getReportTypeId();
+		reportType = report.getReportType();
 		displayResultset = report.getDisplayResultset();
 		useRules = report.isUsesFilters();
 
@@ -389,12 +387,19 @@ public class ReportRunner {
 
 		//Get the SQL String with rules, inline, multi params and tags already applied.
 		//don't process the source for jasper, jxls template, static lov queries
-		if (reportTypeId != 115 && reportTypeId != 117 && reportTypeId != 120) {
+		if (reportType != ReportType.JasperReportsTemplate
+				&& reportType != ReportType.JxlsTemplate
+				&& reportType != ReportType.LovStatic) {
 			processReportSource();
 		}
 
 		//don't execute sql source for jasper report template query, jxls template query, mdx queries, static lov
-		if (reportTypeId == 115 || reportTypeId == 117 || reportTypeId == 112 || reportTypeId == 113 || reportTypeId == 114 || reportTypeId == 120) {
+		if (reportType == ReportType.JasperReportsTemplate
+				|| reportType == ReportType.JxlsTemplate
+				|| reportType == ReportType.Mondrian
+				|| reportType == ReportType.MondrianXmla
+				|| reportType == ReportType.SqlServerXmla
+				|| reportType == ReportType.LovStatic) {
 			return;
 		}
 
@@ -455,6 +460,7 @@ public class ReportRunner {
 				updateCount = psQuery.getUpdateCount();
 
 				if (count > MAX_LOOPS) {
+					logger.warn("MAX_LOOPS reached. Report Id = {}", report.getReportId());
 					break;
 				}
 			}
@@ -551,20 +557,20 @@ public class ReportRunner {
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 
-		if (reportTypeId == 120) {
+		if (reportType == ReportType.LovStatic) {
 			//static lov. values coming from static values defined in sql source
 			String items = querySb.toString();
 			String lines[] = items.split("\\r?\\n"); //split by newline
 			for (String line : lines) {
 				String[] values = line.trim().split("\\|"); //split by |
-				String dataValue=values[0];
+				String dataValue = values[0];
 				String displayValue = null;
 				if (values.length > 1) {
 					displayValue = values[1];
 				}
 				lovValues.put(dataValue, displayValue);
 			}
-		} else {
+		} else if (reportType == ReportType.LovDynamic) {
 			//dynamic lov. values coming from sql query
 			ResultSet rs = getResultSet();
 			int columnCount = rs.getMetaData().getColumnCount();

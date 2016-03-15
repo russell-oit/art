@@ -12,16 +12,12 @@ Display input for date and datetime parameters
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<div class='col-md-6'>
-	<div class="form-group">
-		<div class='input-group date datepicker'>
-			<input type='text' class="form-control"
-				   name="${reportParam.htmlElementName}"
-				   value="${reportParam.htmlValue}">
-			<span class="input-group-addon">
-				<span class="glyphicon glyphicon-calendar"></span>
-			</span>
-		</div>
-	</div>
+<div class='input-group date datepicker'>
+	<input type='text' class="form-control"
+		   name="${reportParam.htmlElementName}"
+		   value="${reportParam.htmlValue}">
+	<span class="input-group-addon">
+		<span class="glyphicon glyphicon-calendar"></span>
+	</span>
 </div>
 

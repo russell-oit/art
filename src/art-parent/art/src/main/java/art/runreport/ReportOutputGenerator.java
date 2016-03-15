@@ -157,13 +157,16 @@ public class ReportOutputGenerator {
 		this.servletContext = servletContext;
 	}
 
-	public void generateOutput(Report report, ReportRunner reportRunner,
+	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportType reportType, ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
 			PrintWriter writer, String fileName, String fullOutputFilename)
 			throws IOException, SQLException, JRException, ParsePropertyException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException {
+		
+		ReportOutputGeneratorResult outputResult = new ReportOutputGeneratorResult();
+		outputResult.setSuccess(true);
 
 		ResultSet rs = null;
 		Integer rowsRetrieved = null;
@@ -324,58 +327,13 @@ public class ReportOutputGenerator {
 					rowsRetrieved = getResultSetRowCount(rs);
 				}
 			} else if (reportType.isStandardOutput()) {
-				StandardOutput standardOutput;
-				switch (reportFormat) {
-					case htmlPlain:
-						standardOutput = new HtmlPlainOutput(isJob);
-						break;
-					case htmlFancy:
-						standardOutput = new HtmlFancyOutput();
-						break;
-					case htmlGrid:
-						standardOutput = new HtmlGridOutput();
-						break;
-					case htmlDataTable:
-						standardOutput = new HtmlDataTableOutput();
-						break;
-					case pdf:
-						standardOutput = new PdfOutput();
-						break;
-					case xml:
-						standardOutput = new XmlOutput();
-						break;
-					case rss20:
-						standardOutput = new Rss20Output();
-						break;
-					case xls:
-						standardOutput = new XlsOutput();
-						break;
-					case xlsZip:
-						standardOutput = new XlsOutput(ZipType.Zip);
-						break;
-					case slk:
-						standardOutput = new SlkOutput();
-						break;
-					case slkZip:
-						standardOutput = new SlkOutput(ZipType.Zip);
-						break;
-					case tsv:
-						standardOutput = new TsvOutput();
-						break;
-					case tsvZip:
-						standardOutput = new TsvOutput(ZipType.Zip);
-						break;
-					case tsvGzip:
-						standardOutput = new TsvOutput(ZipType.Gzip);
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
-				}
+				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob);
 
 				standardOutput.setWriter(writer);
 				standardOutput.setFullOutputFileName(fullOutputFilename);
 				standardOutput.setReportParamsList(reportParamsList); //used to show selected parameters and drilldowns
 				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+				standardOutput.setLocale(locale);
 
 				if (request != null) {
 					String contextPath = request.getContextPath();
@@ -384,30 +342,85 @@ public class ReportOutputGenerator {
 
 				//generate output
 				rs = reportRunner.getResultSet();
-				StandardOutputResult outputResult;
-
+				
+				StandardOutputResult standardOutputResult=null;
 				if (reportType.isCrosstab()) {
-					outputResult = standardOutput.generateCrosstabOutput(rs, reportFormat);
+					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat);
 				} else {
 					if (reportFormat.isHtml()) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
 					}
-					outputResult = standardOutput.generateTabularOutput(rs, reportFormat);
+					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat);
+				}
+				
+				if (standardOutputResult.isSuccess()) {
+					rowsRetrieved = standardOutputResult.getRowCount();
+				} else {
+					outputResult.setSuccess(false);
+					outputResult.setMessage(standardOutputResult.getMessage());
 				}
 
-//				if (outputResult.isSuccess()) {
-//					rowsRetrieved = outputResult.getRowCount();
-//				} else {
-//					model.addAttribute("message", outputResult.getMessage());
-//					return errorPage;
-//				}
 			}
 
 		} finally {
 			DatabaseUtils.close(rs);
 		}
+		
+		outputResult.setRowCount(rowsRetrieved);
+		return outputResult;
 
+	}
+
+	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob) throws IllegalArgumentException {
+		StandardOutput standardOutput;
+		switch (reportFormat) {
+			case htmlPlain:
+				standardOutput = new HtmlPlainOutput(isJob);
+				break;
+			case htmlFancy:
+				standardOutput = new HtmlFancyOutput();
+				break;
+			case htmlGrid:
+				standardOutput = new HtmlGridOutput();
+				break;
+			case htmlDataTable:
+				standardOutput = new HtmlDataTableOutput();
+				break;
+			case pdf:
+				standardOutput = new PdfOutput();
+				break;
+			case xml:
+				standardOutput = new XmlOutput();
+				break;
+			case rss20:
+				standardOutput = new Rss20Output();
+				break;
+			case xls:
+				standardOutput = new XlsOutput();
+				break;
+			case xlsZip:
+				standardOutput = new XlsOutput(ZipType.Zip);
+				break;
+			case slk:
+				standardOutput = new SlkOutput();
+				break;
+			case slkZip:
+				standardOutput = new SlkOutput(ZipType.Zip);
+				break;
+			case tsv:
+				standardOutput = new TsvOutput();
+				break;
+			case tsvZip:
+				standardOutput = new TsvOutput(ZipType.Zip);
+				break;
+			case tsvGzip:
+				standardOutput = new TsvOutput(ZipType.Gzip);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
+		}
+		return standardOutput;
 	}
 
 	private void displayFileLink(String fileName) throws IOException, ServletException {

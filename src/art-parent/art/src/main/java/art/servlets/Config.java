@@ -545,7 +545,7 @@ public class Config extends HttpServlet {
 			pSettings.setTimeFormat("HH:mm:ss");
 		}
 		if (StringUtils.isBlank(pSettings.getReportFormats())) {
-			pSettings.setReportFormats("htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,html,xlsZip,slk,slkZip,tsv,tsvZip");
+			pSettings.setReportFormats("htmlDataTable,htmlGrid,xls,xlsx,pdf,htmlPlain,xlsZip,slk,slkZip,tsv,tsvZip");
 		}
 		if (pSettings.getMaxRunningReports() <= 0) {
 			pSettings.setMaxRunningReports(1000);

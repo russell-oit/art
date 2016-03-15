@@ -111,7 +111,22 @@ Display report parameters and initiate running of report
 						</jsp:include>
 						
 						<div class="form-group">
-							<div class="col-md-12">
+							<label class="control-label col-md-6" for="reportFormat">
+								<spring:message code="reports.label.format"/>
+							</label>
+							<div class="col-md-6">
+								<select name="reportFormat" id="reportFormat" class="form-control">
+									<c:forEach var="reportFormat" items="${reportFormats}">
+										<option value="${reportFormat}">
+											<spring:message code="reports.format.${reportFormat}"/>
+										</option>
+									</c:forEach>
+								</select>
+							</div>
+						</div>
+						
+						<div class="form-group">
+							<div class="col-md-6">
 								<div id="actionsDiv" class="pull-right">
 									<c:if test="${enableSchedule}">
 										<button type="button"id="schedule" class="btn btn-default action">

@@ -16,6 +16,7 @@
  */
 package art.language;
 
+import art.servlets.Config;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,7 @@ public class LanguageController {
 
 	@RequestMapping(value = "/app/language", method = RequestMethod.GET)
 	public String showLanguage(Model model) {
-		model.addAttribute("languages", LanguageUtils.getLanguages());
+		model.addAttribute("languages", Config.getLanguages());
 		return "language";
 	}
 
