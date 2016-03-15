@@ -29,76 +29,74 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *  Generate RSS 2.0 output.
- * The query column names MUST follow the RSS 2.0 naming convention for &lt;item&gt;
- * i.e. at least one of "title" or "description" must exists.
- * for other valid columns names (i.e. item sub-tags) refer to the RSS 2.0 specs.
- * (pubDate and guid should be there) <br>
- * select col1 "title", col2 "description" [, col3 "pubDate", col4 "guid", ...] from ...
- * 
+ * Generate RSS 2.0 output. The query column names MUST follow the RSS 2.0
+ * naming convention for &lt;item&gt; i.e. at least one of "title" or
+ * "description" must exists. for other valid columns names (i.e. item sub-tags)
+ * refer to the RSS 2.0 specs. (pubDate and guid should be there) <br>
+ * select col1 "title", col2 "description" [, col3 "pubDate", col4 "guid", ...]
+ * from ...
+ *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
 public class Rss20Output extends StandardOutput {
 
-    PrintWriter out;
-    int numberOfLines = 0;
-    String queryName;    
-    int maxRows;
-    int columns;
-    int columnIndex = 0; // current column
-    String[] columnNames;
-    Map<Integer, ArtQueryParam> displayParams;
+	int numberOfLines = 0;
+	String queryName;
+	int maxRows;
+	int columns;
+	int columnIndex = 0; // current column
+	String[] columnNames;
+	Map<Integer, ArtQueryParam> displayParams;
 
-    /**
-     * rfc822 (2822) standard date
-     */
-    public final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
+	/**
+	 * rfc822 (2822) standard date
+	 */
+	public final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
 
-    /**
-     * 
-     * @param date
-     * @return rfc822 representation of date
-     */
-    public String getDateAsRFC822String(Date date) {
-        return Rfc822DateFormat.format(date);
-    }
-	
-	 @Override
-    public String getContentType() {
-        return "application/xml"; // mime type (use "text/html" for html)
-    }
-	
+	/**
+	 *
+	 * @param date
+	 * @return rfc822 representation of date
+	 */
+	public String getDateAsRFC822String(Date date) {
+		return Rfc822DateFormat.format(date);
+	}
+
 	@Override
-	public boolean outputHeaderandFooter(){
+	public String getContentType() {
+		return "application/xml"; // mime type (use "text/html" for html)
+	}
+
+	@Override
+	public boolean outputHeaderandFooter() {
 		return false;
 	}
-	
-	@Override
-	public void init(){
-		columnNames = new String[resultSetColumnCount]; // sotres columns names (i.e. xml tags for items)
-        out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
-        // RSS 2.0 Header
-        out.println("<rss version=\"2.0\">");
-        // Channel definition
-        out.println("<channel>");
-        out.println("<title>" + reportName + "</title>");
-        out.println("<link>" + Config.getSettings().getRssLink() + "</link>");
-        out.println("<description>" + reportName + " ART Feed</description>");
-        out.println("<pubDate>" + getDateAsRFC822String(new Date()) + "</pubDate> ");
-        out.println("<generator>http://art.sourceforge.net</generator> ");
+	@Override
+	public void init() {
+		columnNames = new String[resultSetColumnCount]; // sotres columns names (i.e. xml tags for items)
+		out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+
+		// RSS 2.0 Header
+		out.println("<rss version=\"2.0\">");
+		// Channel definition
+		out.println("<channel>");
+		out.println("<title>" + reportName + "</title>");
+		out.println("<link>" + Config.getSettings().getRssLink() + "</link>");
+		out.println("<description>" + reportName + " ART Feed</description>");
+		out.println("<pubDate>" + getDateAsRFC822String(new Date()) + "</pubDate> ");
+		out.println("<generator>http://art.sourceforge.net</generator> ");
 	}
-	
+
 	@Override
 	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
 		if (reportParamsList == null || reportParamsList.isEmpty()) {
 			return;
 		}
-		
-		//TODO needs to be tested, this is not RSS 2.0 compliant
-        // hence, do not check the show params flag if not for debugging
 
+		//TODO needs to be tested, this is not RSS 2.0 compliant
+		// hence, do not check the show params flag if not for debugging
 		out.println("<art:reportparams>");
 		for (ReportParameter reportParam : reportParamsList) {
 			String paramName = reportParam.getParameter().getName();
@@ -114,43 +112,50 @@ public class Rss20Output extends StandardOutput {
 		out.println("</art:reportparams>");
 	}
 
-    @Override
-    public void addHeaderCell(String value) {
-        columnNames[columnIndex] = value;
-        columnIndex++;
-    }
-	
+	@Override
+	public void addHeaderCell(String value) {
+		columnNames[columnIndex] = value;
+		columnIndex++;
+	}
 
-    @Override
-    public void beginRows() {
-        out.println("<item>");
-    }
+	@Override
+	public void beginRows() {
+		out.println("<item>");
+	}
 
-    @Override
-    public void addCellString(String value) {
-        out.println("<" + columnNames[columnIndex] + ">"
+	@Override
+	public void addCellString(String value) {
+		out.println("<" + columnNames[columnIndex] + ">"
 				+ StringEscapeUtils.escapeXml(value)
 				+ "</" + columnNames[columnIndex] + ">");
-        columnIndex++;
-    }
+		columnIndex++;
+	}
 
-    @Override
-    public void addCellNumeric(Double value) {
-        out.println("<" + columnNames[columnIndex] + ">" + value + "</" + columnNames[columnIndex] + ">");
-        columnIndex++;
-    }
+	@Override
+	public void addCellNumeric(Double value) {
+		out.println("<" + columnNames[columnIndex] + ">" + value + "</" + columnNames[columnIndex] + ">");
+		columnIndex++;
+	}
 
-    @Override
-    public void addCellDate(Date value) {
-        out.println("<" + columnNames[columnIndex] + ">"
-				+ getDateAsRFC822String(value) + "</" + columnNames[columnIndex] + ">");
-        columnIndex++;
-    }
+	@Override
+	public void addCellDate(Date value) {
+		String formattedValue;
 
-    @Override
-    public void newRow() {
-        columnIndex = 0; // reset column index
-		
+		if (value == null) {
+			formattedValue = "";
+		} else {
+			formattedValue = getDateAsRFC822String(value);
+		}
+
+		out.println("<" + columnNames[columnIndex] + ">"
+				+ formattedValue + "</" + columnNames[columnIndex] + ">");
+		columnIndex++;
+	}
+
+	@Override
+	public void newRow() {
+		columnIndex = 0; // reset column index
+
 		if (rowCount > 1) {
 			//close previous row
 			out.println("</item>\n");
@@ -158,14 +163,14 @@ public class Rss20Output extends StandardOutput {
 
 		//open new row
 		out.println("<item>");
-    }
+	}
 
-    @Override
-    public void endRows() {
-        out.println("</item>");
-        out.println("</channel>");
-        out.println("</rss>");
-    }
+	@Override
+	public void endRows() {
+		out.println("</item>");
+		out.println("</channel>");
+		out.println("</rss>");
+	}
 
 //    @Override
 //    public boolean isShowQueryHeaderAndFooter() {

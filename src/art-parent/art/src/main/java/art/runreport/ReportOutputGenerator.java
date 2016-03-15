@@ -45,6 +45,7 @@ import art.output.SlkOutput;
 import art.output.StandardOutputResult;
 import art.output.TsvOutput;
 import art.output.XlsOutput;
+import art.output.XlsxOutput;
 import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
@@ -164,7 +165,7 @@ public class ReportOutputGenerator {
 			throws IOException, SQLException, JRException, ParsePropertyException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException {
-		
+
 		ReportOutputGeneratorResult outputResult = new ReportOutputGeneratorResult();
 		outputResult.setSuccess(true);
 
@@ -334,6 +335,7 @@ public class ReportOutputGenerator {
 				standardOutput.setReportParamsList(reportParamsList); //used to show selected parameters and drilldowns
 				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
 				standardOutput.setLocale(locale);
+				standardOutput.setReportName(report.getName());
 
 				if (request != null) {
 					String contextPath = request.getContextPath();
@@ -342,8 +344,8 @@ public class ReportOutputGenerator {
 
 				//generate output
 				rs = reportRunner.getResultSet();
-				
-				StandardOutputResult standardOutputResult=null;
+
+				StandardOutputResult standardOutputResult = null;
 				if (reportType.isCrosstab()) {
 					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat);
 				} else {
@@ -353,8 +355,12 @@ public class ReportOutputGenerator {
 					}
 					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat);
 				}
-				
+
 				if (standardOutputResult.isSuccess()) {
+					if (!reportFormat.isHtml() && standardOutput.outputHeaderandFooter()) {
+						displayFileLink(fileName);
+					}
+
 					rowsRetrieved = standardOutputResult.getRowCount();
 				} else {
 					outputResult.setSuccess(false);
@@ -366,7 +372,7 @@ public class ReportOutputGenerator {
 		} finally {
 			DatabaseUtils.close(rs);
 		}
-		
+
 		outputResult.setRowCount(rowsRetrieved);
 		return outputResult;
 
@@ -402,6 +408,9 @@ public class ReportOutputGenerator {
 			case xlsZip:
 				standardOutput = new XlsOutput(ZipType.Zip);
 				break;
+			case xlsx:
+				standardOutput = new XlsxOutput();
+				break;
 			case slk:
 				standardOutput = new SlkOutput();
 				break;
@@ -414,7 +423,7 @@ public class ReportOutputGenerator {
 			case tsvZip:
 				standardOutput = new TsvOutput(ZipType.Zip);
 				break;
-			case tsvGzip:
+			case tsvGz:
 				standardOutput = new TsvOutput(ZipType.Gzip);
 				break;
 			default:

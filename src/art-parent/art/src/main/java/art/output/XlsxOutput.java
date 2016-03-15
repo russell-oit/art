@@ -57,13 +57,10 @@ public class XlsxOutput extends StandardOutput {
 	String filename;
 	String fullFileName;
 	PrintWriter htmlout;
-	String queryName;
 	String fileUserName;
 	int maxRows;
 	int columns;
 	int cellNumber;
-	String y_m_d;
-	String h_m_s;
 	Map<Integer, ArtQueryParam> displayParams;
 	String templateFileName;
 	String xmlFileName;
@@ -84,7 +81,7 @@ public class XlsxOutput extends StandardOutput {
 			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.						
 			wb = new XSSFWorkbook();
 			final int MAX_SHEET_NAME = 30; //excel max is 31
-			String sheetName = queryName;
+			String sheetName = reportName;
 			if (sheetName.length() > MAX_SHEET_NAME) {
 				sheetName = sheetName.substring(0, MAX_SHEET_NAME);
 			}
@@ -143,7 +140,8 @@ public class XlsxOutput extends StandardOutput {
 			currentRow = 0;
 
 			newRow();
-			addCellString(queryName + " - " + y_m_d.replace('_', '-') + " " + h_m_s.replace('_', ':'));
+			addCellString(reportName + " - " + ArtUtils.isoDateTimeFormatter.format(new Date()));
+		newRow();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -372,28 +370,6 @@ public class XlsxOutput extends StandardOutput {
 		while ((count = in.read(chunk)) >= 0) {
 			out.write(chunk, 0, count);
 		}
-	}
-
-	/**
-	 * Build filename for output file
-	 */
-	private void buildOutputFileName() {
-		// Build filename		
-		Date today = new Date();
-
-		SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy_MM_dd");
-		y_m_d = dateFormatter.format(today);
-
-		SimpleDateFormat timeFormatter = new SimpleDateFormat("HH_mm_ss");
-		h_m_s = timeFormatter.format(today);
-
-		String baseName = fileUserName + "-" + queryName + "-" + y_m_d + "-" + h_m_s + ArtUtils.getRandomFileNameString();
-		baseName = ArtUtils.cleanFileName(baseName);
-
-		filename = baseName + ".xlsx";
-		fullFileName = exportPath + filename;
-		templateFileName = exportPath + "template-" + filename;
-		xmlFileName = exportPath + "xml-" + baseName + ".xml";
 	}
 
 }

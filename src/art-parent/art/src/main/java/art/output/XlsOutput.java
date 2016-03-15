@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
@@ -59,16 +60,11 @@ public class XlsOutput extends StandardOutput {
 	HSSFFont headerFont;
 	HSSFFont bodyFont;
 	int currentRow;
-	String filename;
-	String fullFileName;
 	PrintWriter htmlout;
-	String queryName;
 	String fileUserName;
 	int maxRows;
 	int columns;
 	int cellNumber;
-	String y_m_d;
-	String h_m_s;
 	Map<Integer, ArtQueryParam> displayParams;
 	String exportPath;
 	ZipType zipType;
@@ -87,7 +83,9 @@ public class XlsOutput extends StandardOutput {
 	public void init() {
 
 		try {
-			fout = new FileOutputStream(fullFileName);
+			fout = new FileOutputStream(fullOutputFilename);
+			
+			String filename=FilenameUtils.getBaseName(fullOutputFilename);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".xls");
@@ -128,7 +126,7 @@ public class XlsOutput extends StandardOutput {
 	@Override
 	public void beginHeader() {
 		final int MAX_SHEET_NAME = 30; //excel max is 31
-		String sheetName = queryName;
+		String sheetName = reportName;
 		if (sheetName.length() > MAX_SHEET_NAME) {
 			sheetName = sheetName.substring(0, MAX_SHEET_NAME);
 		}
@@ -136,7 +134,8 @@ public class XlsOutput extends StandardOutput {
 		wb.setSheetName(0, sheetName);
 
 		newRow();
-		addCellString(reportName + " - " + y_m_d.replace('_', '-') + " " + h_m_s.replace('_', ':'));
+		addCellString(reportName + " - " + ArtUtils.isoDateTimeFormatter.format(new Date()));
+		newRow();
 	}
 
 	@Override

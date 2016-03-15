@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,19 +55,14 @@ public class SlkOutput extends StandardOutput {
 	byte[] buf;
 	String tmpstr;
 	StringBuffer exportFileStrBuf;
-	String filename;
-	String fullFileName;
 	NumberFormat nfPlain;
 	PrintWriter htmlout;
-	String queryName;
 	String fileUserName;
 	int maxRows;
 	int row_count;
 	int column_count;
 	int columns;
 	int counter;
-	String y_m_d;
-	String h_m_s;
 	Map<Integer, ArtQueryParam> displayParams;
 	final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;) 
 	String exportPath;
@@ -88,7 +84,8 @@ public class SlkOutput extends StandardOutput {
 	/**
 	 * Initialise objects required to generate output
 	 */
-	private void initializeOutput() {
+	@Override
+	public void init() {
 		exportFileStrBuf = new StringBuffer(8 * 1024);
 		counter = 0;
 		nfPlain = NumberFormat.getInstance();
@@ -97,7 +94,9 @@ public class SlkOutput extends StandardOutput {
 		nfPlain.setMaximumFractionDigits(99);
 
 		try {
-			fout = new FileOutputStream(fullFileName);
+			fout = new FileOutputStream(fullOutputFilename);
+			
+			String filename=FilenameUtils.getBaseName(fullOutputFilename);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".slk");
@@ -118,8 +117,9 @@ public class SlkOutput extends StandardOutput {
 		column_count = 1;
 
 		exportFileStrBuf.append("C;Y").append(row_count++).append(";X1;K\"")
-				.append(queryName).append(" executed on: ").append(y_m_d.replace('_', '-'))
-				.append(" ").append(h_m_s.replace('_', ':')).append("\"\n"); // first row Y1
+				.append(reportName).append(" - ")
+				.append(ArtUtils.isoDateTimeFormatter.format(new Date()))
+				.append("\"\n"); // first row Y1
 
 	}
 
@@ -221,8 +221,9 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void endRows() {
-		addCellString("Total rows retrieved:");
-		addCellNumeric(Double.valueOf(counter));
+//		newRow();
+//		addCellString("Total rows retrieved:");
+//		addCellNumeric(Double.valueOf(counter));
 		exportFileStrBuf.append("E");
 
 		try {

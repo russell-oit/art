@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,6 @@ public class TsvOutput extends StandardOutput {
 	byte[] buf;
 	String tmpstr;
 	StringBuffer exportFileStrBuf;
-	String filename;
-	String fullFileName;
 	NumberFormat nfPlain;
 	PrintWriter htmlout;
 	String queryName;
@@ -60,8 +59,6 @@ public class TsvOutput extends StandardOutput {
 	int maxRows;
 	int counter;
 	int columns;
-	String y_m_d;
-	String h_m_s;
 	Map<Integer, ArtQueryParam> displayParams;
 	final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
 	String exportPath;
@@ -93,7 +90,9 @@ public class TsvOutput extends StandardOutput {
 		nfPlain.setMaximumFractionDigits(99);
 
 		try {
-			fout = new FileOutputStream(fullFileName);
+			fout = new FileOutputStream(fullOutputFilename);
+			
+			String filename=FilenameUtils.getBaseName(fullOutputFilename);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".tsv");
@@ -191,8 +190,8 @@ public class TsvOutput extends StandardOutput {
 
 	@Override
 	public void endRows() {
-		addCellString("\n Total rows retrieved:");
-		addCellString("" + (counter));
+//		addCellString("\n Total rows retrieved:");
+//		addCellString("" + (counter));
 
 		try {
 			tmpstr = exportFileStrBuf.toString();
@@ -205,7 +204,6 @@ public class TsvOutput extends StandardOutput {
 					fout.flush();
 					break;
 				case Zip:
-
 					zout.write(buf);
 					zout.flush();
 					zout.close();
@@ -216,19 +214,7 @@ public class TsvOutput extends StandardOutput {
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected zip type: " + zipType);
-
 			}
-
-			//htmlout not used for scheduled jobs
-			if (htmlout != null) {
-				htmlout.println("<p><div align=\"Center\"><table border=\"0\" width=\"90%\">");
-				htmlout.println("<tr><td colspan=2 class=\"data\" align=\"center\" >"
-						+ "<a  type=\"application/octet-stream\" href=\"../export/" + filename + "\"> "
-						+ filename + "</a>"
-						+ "</td></tr>");
-				htmlout.println("</table></div></p>");
-			}
-
 		} catch (IOException e) {
 			logger.error("Error", e);
 		}

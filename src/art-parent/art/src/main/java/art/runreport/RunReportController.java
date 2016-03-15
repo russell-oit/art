@@ -16,37 +16,12 @@
  */
 package art.runreport;
 
-import art.chart.AbstractChart;
-import art.chart.CategoryBasedChart;
-import art.chart.ChartUtils;
-import art.chart.PieChart;
-import art.chart.SpeedometerChart;
-import art.chart.TimeSeriesBasedChart;
-import art.chart.XYChart;
-import art.chart.XYZBasedChart;
-import art.dbutils.DatabaseUtils;
-import art.drilldown.Drilldown;
 import art.drilldown.DrilldownService;
-import art.enums.ParameterDataType;
 import art.enums.ReportFormat;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
-import art.graph.ArtCategorySeries;
-import art.graph.ArtDateSeries;
-import art.graph.ArtGraph;
-import art.graph.ArtPie;
-import art.graph.ArtSpeedometer;
-import art.graph.ArtTimeSeries;
-import art.graph.ArtXY;
-import art.graph.ArtXYZChart;
 import art.output.StandardOutput;
-import art.output.DirectReportOutputHandler;
-import art.output.HtmlDataTableOutput;
-import art.output.HtmlPlainOutput;
-import art.output.JasperReportsOutput;
-import art.output.JxlsOutput;
 import art.output.ReportOutputInterface;
-import art.output.StandardOutputResult;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.ChartOptions;
@@ -55,29 +30,15 @@ import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
-import art.utils.ActionResult;
 import art.utils.ArtHelper;
-import art.utils.ArtQuery;
-import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
-import art.utils.DrilldownQuery;
-import art.utils.NullAwareBeanUtilsBean;
-import de.laures.cewolf.ChartValidationException;
-import de.laures.cewolf.DatasetProduceException;
-import de.laures.cewolf.PostProcessingException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -87,14 +48,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jxls.exception.ParsePropertyException;
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.RowSetDynaClass;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
@@ -245,6 +199,11 @@ public class RunReportController {
 				writer = response.getWriter();
 			}
 
+			//handle output formats that require data only
+			if (reportFormat == ReportFormat.xml
+					|| reportFormat == ReportFormat.rss20) {
+				showInline = true;
+			}
 			//output page header. if showInline, page header and footer already exist. 
 			if (!showInline) {
 				request.setAttribute("title", reportName);
