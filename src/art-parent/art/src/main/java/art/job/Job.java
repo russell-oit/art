@@ -22,8 +22,6 @@ public class Job implements Serializable {
 	private String lastRunDetails;
 	private Date nextRunDate;
 	private String lastFileName;
-	private String usesRules;
-	private String allowSplitting;
 	private String sharedLastFileName;
 	private String sharedLastRunDetails;
 	private Date sharedLastStartDate;
@@ -44,6 +42,141 @@ public class Job implements Serializable {
 	private User user;
 	private String createdBy;
 	private String updatedBy;
+	private boolean active;
+	private int recipientsQueryId;
+	private boolean allowSharing;
+	private boolean allowSplitting;
+	private boolean enableAudit;
+	private String mailCc;
+	private String mailBcc;
+	private int runsToArchive;
+	private String mailFrom;
+
+	/**
+	 * @return the mailFrom
+	 */
+	public String getMailFrom() {
+		return mailFrom;
+	}
+
+	/**
+	 * @param mailFrom the mailFrom to set
+	 */
+	public void setMailFrom(String mailFrom) {
+		this.mailFrom = mailFrom;
+	}
+
+	/**
+	 * @return the runsToArchive
+	 */
+	public int getRunsToArchive() {
+		return runsToArchive;
+	}
+
+	/**
+	 * @param runsToArchive the runsToArchive to set
+	 */
+	public void setRunsToArchive(int runsToArchive) {
+		this.runsToArchive = runsToArchive;
+	}
+
+	/**
+	 * @return the mailCc
+	 */
+	public String getMailCc() {
+		return mailCc;
+	}
+
+	/**
+	 * @param mailCc the mailCc to set
+	 */
+	public void setMailCc(String mailCc) {
+		this.mailCc = mailCc;
+	}
+
+	/**
+	 * @return the mailBcc
+	 */
+	public String getMailBcc() {
+		return mailBcc;
+	}
+
+	/**
+	 * @param mailBcc the mailBcc to set
+	 */
+	public void setMailBcc(String mailBcc) {
+		this.mailBcc = mailBcc;
+	}
+
+	/**
+	 * @return the enableAudit
+	 */
+	public boolean isEnableAudit() {
+		return enableAudit;
+	}
+
+	/**
+	 * @param enableAudit the enableAudit to set
+	 */
+	public void setEnableAudit(boolean enableAudit) {
+		this.enableAudit = enableAudit;
+	}
+
+	/**
+	 * @return the allowSharing
+	 */
+	public boolean isAllowSharing() {
+		return allowSharing;
+	}
+
+	/**
+	 * @param allowSharing the allowSharing to set
+	 */
+	public void setAllowSharing(boolean allowSharing) {
+		this.allowSharing = allowSharing;
+	}
+
+	/**
+	 * @return the allowSplitting
+	 */
+	public boolean isAllowSplitting() {
+		return allowSplitting;
+	}
+
+	/**
+	 * @param allowSplitting the allowSplitting to set
+	 */
+	public void setAllowSplitting(boolean allowSplitting) {
+		this.allowSplitting = allowSplitting;
+	}
+
+	/**
+	 * @return the recipientsQueryId
+	 */
+	public int getRecipientsQueryId() {
+		return recipientsQueryId;
+	}
+
+	/**
+	 * @param recipientsQueryId the recipientsQueryId to set
+	 */
+	public void setRecipientsQueryId(int recipientsQueryId) {
+		this.recipientsQueryId = recipientsQueryId;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 
 	/**
 	 * @return the createdBy
@@ -90,7 +223,6 @@ public class Job implements Serializable {
 	public void setUser(User user) {
 		this.user = user;
 	}
-
 
 	/**
 	 * Get the value of report
@@ -391,42 +523,6 @@ public class Job implements Serializable {
 	}
 
 	/**
-	 * Get the value of allowSplitting
-	 *
-	 * @return the value of allowSplitting
-	 */
-	public String getAllowSplitting() {
-		return allowSplitting;
-	}
-
-	/**
-	 * Set the value of allowSplitting
-	 *
-	 * @param allowSplitting new value of allowSplitting
-	 */
-	public void setAllowSplitting(String allowSplitting) {
-		this.allowSplitting = allowSplitting;
-	}
-
-	/**
-	 * Get the value of usesRules
-	 *
-	 * @return the value of usesRules
-	 */
-	public String getUsesRules() {
-		return usesRules;
-	}
-
-	/**
-	 * Set the value of usesRules
-	 *
-	 * @param usesRules new value of usesRules
-	 */
-	public void setUsesRules(String usesRules) {
-		this.usesRules = usesRules;
-	}
-
-	/**
 	 * Get the value of lastFileName
 	 *
 	 * @return the value of lastFileName
@@ -591,9 +687,17 @@ public class Job implements Serializable {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Job{" + "name=" + name + '}';
+	}
+
+	public boolean isSplitJob() {
+		if (report != null && report.isUsesFilters() && allowSplitting) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

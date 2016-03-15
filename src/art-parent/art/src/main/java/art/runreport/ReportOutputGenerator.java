@@ -342,31 +342,31 @@ public class ReportOutputGenerator {
 						standardOutput = new PdfOutput();
 						break;
 					case xml:
-						standardOutput=new XmlOutput();
+						standardOutput = new XmlOutput();
 						break;
 					case rss20:
-						standardOutput=new Rss20Output();
+						standardOutput = new Rss20Output();
 						break;
 					case xls:
-						standardOutput=new XlsOutput();
+						standardOutput = new XlsOutput();
 						break;
 					case xlsZip:
-						standardOutput=new XlsOutput(ZipType.Zip);
+						standardOutput = new XlsOutput(ZipType.Zip);
 						break;
 					case slk:
-						standardOutput=new SlkOutput();
+						standardOutput = new SlkOutput();
 						break;
 					case slkZip:
-						standardOutput=new SlkOutput(ZipType.Zip);
+						standardOutput = new SlkOutput(ZipType.Zip);
 						break;
-						case tsv:
-						standardOutput=new TsvOutput();
+					case tsv:
+						standardOutput = new TsvOutput();
 						break;
 					case tsvZip:
-						standardOutput=new TsvOutput(ZipType.Zip);
+						standardOutput = new TsvOutput(ZipType.Zip);
 						break;
 					case tsvGzip:
-						standardOutput=new TsvOutput(ZipType.Gzip);
+						standardOutput = new TsvOutput(ZipType.Gzip);
 						break;
 					default:
 						throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
@@ -387,7 +387,7 @@ public class ReportOutputGenerator {
 				StandardOutputResult outputResult;
 
 				if (reportType.isCrosstab()) {
-//					outputResult = DirectReportOutputHandler.flushXOutput(standardOutput, rs);
+					outputResult = standardOutput.generateCrosstabOutput(rs, reportFormat);
 				} else {
 					if (reportFormat.isHtml()) {
 						//only drill down for html output. drill down query launched from hyperlink                                            

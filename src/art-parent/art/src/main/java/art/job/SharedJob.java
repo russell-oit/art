@@ -54,14 +54,4 @@ public class SharedJob extends Job {
 		return lastRunDetails;
 	}
 	
-	private boolean isSplitJob(){
-		boolean splitJob=false;
-		
-		if (StringUtils.equalsIgnoreCase(this.getUsesRules(), "Y")
-				&& StringUtils.equalsIgnoreCase(this.getAllowSplitting(), "Y")) {
-			splitJob=true;
-		} 
-		
-		return splitJob;
-	}
 }
