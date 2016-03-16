@@ -75,7 +75,7 @@ public enum ReportFormat {
 			case tsv:
 				return "tsv";
 			case tsvGz:
-				return "tsv.gz";
+				return "gz";
 			case xlsZip:
 			case slkZip:
 			case tsvZip:

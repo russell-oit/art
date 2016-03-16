@@ -16,10 +16,20 @@ public class CommonController {
 	public String showAccessDenied() {
 		return "accessDenied";
 	}
-	
+
 	@RequestMapping(value = "/app/success", method = RequestMethod.GET)
 	public String showSuccess() {
 		return "success";
 	}
-	
+
+	@RequestMapping(value = "/app/showDashboard", method = RequestMethod.GET)
+	public String showDashboard() {
+		return "showDashboard";
+	}
+
+	@RequestMapping(value = "/test", method = RequestMethod.GET)
+	public String showTest() {
+		return "test";
+	}
+
 }

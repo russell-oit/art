@@ -222,9 +222,7 @@ public class RunReportController {
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
 			} else if (reportType == ReportType.Dashboard) {
-				// forward to the showDashboard page
-//			ctx.getRequestDispatcher("/user/showDashboard.jsp").forward(request, response);
-//			return; // a return is needed otherwise the flow would proceed!
+//				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDashboard.jsp").include(request, response);
 				return "showDashboard";
 			} else if (reportType.isOlap()) {
 				// forward to the showAnalysis page
@@ -322,7 +320,7 @@ public class RunReportController {
 				int resultSetType;
 				if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
 						|| reportType == ReportType.Group
-						|| (reportType.isChart() && parameterChartOptions.isShowData())) {
+						|| (reportType.isChart() )) {
 					//need scrollable resultset for jasper and jxls art report in order to display record count
 					//need scrollable resultset in order to generate group report
 					//need scrollable resultset for charts for show data option

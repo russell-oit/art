@@ -17,6 +17,7 @@
 package art.report;
 
 import art.datasource.DatasourceService;
+import art.enums.AccessLevel;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.parameter.Parameter;
@@ -112,7 +113,8 @@ public class ReportController {
 	}
 
 	@RequestMapping(value = "/app/selectReportParameters", method = RequestMethod.GET)
-	public String selectReportParameters(@RequestParam("reportId") Integer reportId,
+	public String selectReportParameters(HttpSession session,
+			@RequestParam("reportId") Integer reportId,
 			HttpServletRequest request, Model model) {
 
 		logger.debug("Entering selectReportParameters: reportId={}", reportId);
@@ -129,16 +131,68 @@ public class ReportController {
 				ParameterProcessor paramProcessor = new ParameterProcessor();
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
 
+				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+				ChartOptions chartOptions = paramProcessorResult.getChartOptions();
+
 				model.addAttribute("reportParamsList", reportParamsList);
+				model.addAttribute("reportOptions", reportOptions);
+				model.addAttribute("chartOptions", chartOptions);
 
 				ParameterService parameterService = new ParameterService();
 				List<Parameter> paramsList = parameterService.getReportParameters(reportId);
 				model.addAttribute("paramsList", paramsList);
-				
-				List<String> reportFormats=getAvailableReportFormats(report.getReportType());
-				
-				model.addAttribute("reportFormats", reportFormats);
+
+				ReportType reportType = report.getReportType();
+
+				boolean enableReportFormats = false;
+				switch (reportType) {
+					case Dashboard:
+					case Mondrian:
+					case MondrianXmla:
+					case SqlServerXmla:
+						break;
+					default:
+						enableReportFormats = true;
+						List<String> reportFormats = getAvailableReportFormats(report.getReportType());
+						model.addAttribute("reportFormats", reportFormats);
+				}
+				model.addAttribute("enableReportFormats", enableReportFormats);
+
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				int accessLevel = sessionUser.getAccessLevel().getValue();
+
+				boolean enableSchedule;
+				if (accessLevel >= AccessLevel.ScheduleUser.getValue()
+						&& Config.getSettings().isSchedulingEnabled()) {
+					enableSchedule = true;
+				} else {
+					enableSchedule = false;
+				}
+				model.addAttribute("enableSchedule", enableSchedule);
+
+				boolean enableShowSql = false;
+				boolean enableShowSelectedParameters = false;
+
+				switch (reportType) {
+					case Dashboard:
+					case Mondrian:
+					case MondrianXmla:
+					case SqlServerXmla:
+					case JasperReportsTemplate:
+					case JxlsTemplate:
+						break;
+					default:
+						if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
+							enableShowSql = true;
+						}
+						enableShowSelectedParameters = true;
+				}
+				model.addAttribute("enableShowSql", enableShowSql);
+				model.addAttribute("enableShowSelectedParameters", enableShowSelectedParameters);
+
+				model.addAttribute("isChart", report.getReportType().isChart());
 			}
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);

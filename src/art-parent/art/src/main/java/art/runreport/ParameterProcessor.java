@@ -79,7 +79,7 @@ public class ParameterProcessor {
 
 		return process(passedValues, reportId);
 	}
-	
+
 	/**
 	 * Process parameter value strings and fill objects with parameter values to
 	 * be used when running a report
@@ -339,11 +339,15 @@ public class ParameterProcessor {
 				String paramValue = paramValues[0];
 
 				if (StringUtils.equalsIgnoreCase(htmlParamName, "showSelectedParameters")) {
-					reportOptions.setShowSelectedParameters(Boolean.valueOf(paramValue));
+					if(StringUtils.equalsIgnoreCase(paramValue, "false")){
+						reportOptions.setShowSelectedParameters(false);
+					} else {
+						reportOptions.setShowSelectedParameters(true);
+					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "splitColumn")) {
 					reportOptions.setSplitColumn(Integer.parseInt(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showSql")) {
-					reportOptions.setShowSql(Boolean.valueOf(paramValue));
+					reportOptions.setShowSql(true);
 				}
 
 				//TODO process other params
@@ -366,6 +370,8 @@ public class ParameterProcessor {
 
 				if (StringUtils.equalsIgnoreCase(htmlParamName, "showLegend")) {
 					chartOptions.setShowLegend(Boolean.valueOf(paramValue));
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showLabels")) {
+					chartOptions.setShowLabels(Boolean.valueOf(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showData")) {
 					chartOptions.setShowData(Boolean.valueOf(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showPoints")) {

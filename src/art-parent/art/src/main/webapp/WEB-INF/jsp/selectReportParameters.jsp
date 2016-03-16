@@ -69,15 +69,15 @@ Display report parameters and initiate running of report
 							});
 
 				});
-				
+
 				$('.datepicker').datetimepicker({
-                    format: 'YYYY-MM-DD'
-                });
-				
+					format: 'YYYY-MM-DD'
+				});
+
 				$('.datetimepicker').datetimepicker({
-                    format: 'YYYY-MM-DD HH:mm:ss'
-                });
-				
+					format: 'YYYY-MM-DD HH:mm:ss'
+				});
+
 				//immediately run query inline
 //				$("#runInline").click();
 
@@ -109,22 +109,84 @@ Display report parameters and initiate running of report
 							<jsp:param name="paramsList" value="${paramsList}"/>
 							<jsp:param name="reportParamsList" value="${reportParamsList}"/>
 						</jsp:include>
-						
-						<div class="form-group">
-							<label class="control-label col-md-6" for="reportFormat">
-								<spring:message code="reports.label.format"/>
-							</label>
-							<div class="col-md-6">
-								<select name="reportFormat" id="reportFormat" class="form-control">
-									<c:forEach var="reportFormat" items="${reportFormats}">
-										<option value="${reportFormat}">
-											<spring:message code="reports.format.${reportFormat}"/>
-										</option>
-									</c:forEach>
-								</select>
+
+						<c:if test="${isChart}">
+							<div id="chartOptions">
+								<div class="form-group">
+									<label class="control-label col-md-6">
+										<spring:message code="reports.label.show"/>
+									</label>
+									<div class="col-md-6">
+										<label class="checkbox-inline">
+											<input type="checkbox" name="showLegend" value="">
+											<spring:message code="reports.label.showLegend"/>
+										</label>
+										<label class="checkbox-inline">
+											<input type="checkbox" name="showLabels" value="">
+											<spring:message code="reports.label.showLabels"/>
+										</label>
+										<label class="checkbox-inline">
+											<input type="checkbox" name="showPoints" value="">
+											<spring:message code="reports.label.showPoints"/>
+										</label>
+										<label class="checkbox-inline">
+											<input type="checkbox" name="showData" value="">
+											<spring:message code="reports.label.showData"/>
+										</label>
+									</div>
+								</div>
 							</div>
+						</c:if>
+
+						<div id="reportOptions">
+							<c:if test="${enableReportFormats}">
+								<div class="form-group">
+									<label class="control-label col-md-6" for="reportFormat">
+										<spring:message code="reports.label.format"/>
+									</label>
+									<div class="col-md-6">
+										<select name="reportFormat" id="reportFormat" class="form-control">
+											<c:forEach var="reportFormat" items="${reportFormats}">
+												<option value="${reportFormat}">
+													<spring:message code="reports.format.${reportFormat}"/>
+												</option>
+											</c:forEach>
+										</select>
+									</div>
+								</div>
+							</c:if>
+
+							<c:if test="${enableShowSelectedParameters}">
+								<div class="form-group">
+									<label class="control-label col-md-6" for="showSelectedParameters">
+										<spring:message code="reports.label.showSelectedParameters"/>
+									</label>
+									<div class="col-md-6">
+										<div class="checkbox">
+											<label>
+												<input type="checkbox" name="showSelectedParameters" value="">
+											</label>
+										</div>
+									</div>
+								</div>
+							</c:if>
+
+							<c:if test="${enableShowSql}">
+								<div class="form-group">
+									<label class="control-label col-md-6" for="showSql">
+										<spring:message code="reports.label.showSql"/>
+									</label>
+									<div class="col-md-6">
+										<div class="checkbox">
+											<label>
+												<input type="checkbox" name="showSql" value="">
+											</label>
+										</div>
+									</div>
+								</div>
+							</c:if>
 						</div>
-						
+
 						<div class="form-group">
 							<div class="col-md-6">
 								<div id="actionsDiv" class="pull-right">

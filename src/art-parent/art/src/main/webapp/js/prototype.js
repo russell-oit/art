@@ -1704,7 +1704,7 @@ Ajax.Response = Class.create({
 Ajax.Updater = Class.create(Ajax.Request, {
   initialize: function($super, container, url, options) {
 
-  artAddWork(); //display progress. pre and post functions don't update as desired for portlets with refresh period 
+//  artAddWork(); //display progress. pre and post functions don't update as desired for portlets with refresh period 
   
     this.container = {
       success: (container.success || container),
