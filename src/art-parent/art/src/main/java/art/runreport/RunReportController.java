@@ -303,9 +303,9 @@ public class RunReportController {
 							}
 
 							reportParam.setLovValues(lovValues);
-
-							parameterDisplayValues.put(reportParam.getPosition(), reportParam.getNameAndDisplayValues());
 						}
+						
+						parameterDisplayValues.put(reportParam.getPosition(), reportParam.getNameAndDisplayValues());
 					}
 				}
 
@@ -358,7 +358,7 @@ public class RunReportController {
 					//display parameters
 					if (showParams) {
 						request.setAttribute("parameterDisplayValues", parameterDisplayValues);
-						servletContext.getRequestDispatcher("/WEB-INF/jsp/showReportParameters.jsp").include(request, response);
+						servletContext.getRequestDispatcher("/WEB-INF/jsp/showSelectedParameters.jsp").include(request, response);
 					}
 
 					//display final sql. only admins can see sql
@@ -435,7 +435,7 @@ public class RunReportController {
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoFooter.jsp").include(request, response);
 
 					//clear report progress
-					displayReportProgress(writer, "");
+					clearReportProgress(writer);
 				}
 			}
 
@@ -476,8 +476,12 @@ public class RunReportController {
 		//can use jquery, e.g. $('reportProgress').html(), but need to ensure jquery library 
 		//has been included in the page before calling this method
 		out.println("<script type='text/javascript'>"
-				+ "document.getElementById('" + elementId + "').innerHTML=" + message + ";"
+				+ "document.getElementById('" + elementId + "').innerHTML='" + message + "';"
 				+ "</script>");
+	}
+	
+	private void clearReportProgress(PrintWriter writer) {
+		displayReportProgress(writer, "");
 	}
 
 }

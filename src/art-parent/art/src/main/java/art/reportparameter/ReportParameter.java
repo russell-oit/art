@@ -211,7 +211,7 @@ public class ReportParameter implements Serializable {
 	}
 
 	public String getNameAndDisplayValues() {
-		return parameter.getName() + ": " + getDisplayValues();
+		return parameter.getLabel() + ": " + getDisplayValues();
 	}
 
 	public Object getEffectiveActualParameterValue() {

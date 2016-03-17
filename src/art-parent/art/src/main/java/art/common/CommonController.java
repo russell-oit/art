@@ -27,7 +27,7 @@ public class CommonController {
 		return "showDashboard";
 	}
 
-	@RequestMapping(value = "/test", method = RequestMethod.GET)
+	@RequestMapping(value = "/app/test", method = RequestMethod.GET)
 	public String showTest() {
 		return "test";
 	}

@@ -187,7 +187,9 @@ public class ReportController {
 						if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 							enableShowSql = true;
 						}
-						enableShowSelectedParameters = true;
+						if (!reportParamsList.isEmpty()) {
+							enableShowSelectedParameters = true;
+						}
 				}
 				model.addAttribute("enableShowSql", enableShowSql);
 				model.addAttribute("enableShowSelectedParameters", enableShowSelectedParameters);

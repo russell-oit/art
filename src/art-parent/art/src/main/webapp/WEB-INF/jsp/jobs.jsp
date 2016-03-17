@@ -35,69 +35,33 @@ Display user jobs and jobs configuration
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="jobs.do"]').parent().addClass('active');
 				});
 
-				var oTable = $('#jobs').dataTable({
-					"sPaginationType": "bs_full",
-					"aaSorting": [],
-					"aLengthMenu": [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
-					"iDisplayLength": -1,
-					"oLanguage": {
-						"sUrl": "${pageContext.request.contextPath}/js/dataTables-1.9.4/i18n/dataTables_${pageContext.response.locale}.txt"
-					},
-					"fnInitComplete": function() {
-						$('div.dataTables_filter input').focus();
-					}
-				});
+				var tbl = $('#jobs');
 
-				$('#jobs tbody').on('click', '.delete', function() {
-					var row = $(this).closest("tr"); //jquery object
-					var nRow = row[0]; //dom element/node
-					var name = escapeHtmlContent(row.data("name"));
-					var id = row.data("id");
-					bootbox.confirm({
-						message: "${deleteRecordText}: <b>" + name + "</b>",
-						buttons: {
-							'cancel': {
-								label: "${cancelText}"
-							},
-							'confirm': {
-								label: "${okText}"
-							}
-						},
-						callback: function(result) {
-							if (result) {
-								$.ajax({
-									type: "POST",
-									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteJob.do",
-									data: {id: id},
-									success: function(response) {
-										var msg;
-										if (response.success) {
-											oTable.fnDeleteRow(nRow);
-
-											msg = alertCloseButton + "${recordDeletedText}: " + name;
-											$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
-											$.notify("${recordDeletedText}", "success");
-										} else {
-											msg = alertCloseButton + "<p>${errorOccurredText}</p><p>" + escapeHtmlContent(response.errorMessage) + "</p>";
-											$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
-											$.notify("${errorOccurredText}", "error");
-										}
-									},
-									error: function(xhr, status, error) {
-										bootbox.alert(xhr.responseText);
-									}
-								}); //end ajax
-							} //end if result
-						} //end bootbox callback
-					}); //end bootbox confirm
-				}); //end on click
+				//initialize datatable and process delete action
+				initConfigPage(tbl,
+						undefined, //pageLength. pass undefined to use the default
+						"${showAllRowsText}",
+						"${pageContext.request.contextPath}",
+						"${pageContext.response.locale}",
+						undefined, //addColumnFilters. pass undefined to use default
+						".deleteRecord", //deleteButtonSelector
+						true, //showConfirmDialog
+						"${deleteRecordText}",
+						"${okText}",
+						"${cancelText}",
+						"deleteJob.do", //deleteUrl
+						"${recordDeletedText}",
+						"${errorOccurredText}",
+						true, //deleteRow
+						undefined, //cannotDeleteRecordText
+						undefined //linkedRecordsExistText
+						);
 
 			}); //end document ready
 		</script>
@@ -178,7 +142,7 @@ Display user jobs and jobs configuration
 										<i class="fa fa-pencil-square-o"></i>
 										<spring:message code="page.action.edit"/>
 									</a>
-									<button type="button" class="btn btn-default delete">
+									<button type="button" class="btn btn-default deleteRecord">
 										<i class="fa fa-trash-o"></i>
 										<spring:message code="page.action.delete"/>
 									</button>

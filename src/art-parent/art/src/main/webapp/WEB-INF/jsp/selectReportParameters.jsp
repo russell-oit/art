@@ -15,15 +15,18 @@ Display report parameters and initiate running of report
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
+<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
+<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:mainPage title="${report.name}">
 
 	<jsp:attribute name="css">
-
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
@@ -76,6 +79,18 @@ Display report parameters and initiate running of report
 
 				$('.datetimepicker').datetimepicker({
 					format: 'YYYY-MM-DD HH:mm:ss'
+				});
+
+				//Enable Bootstrap-Select
+				$('.selectpicker').selectpicker({
+					iconBase: 'fa',
+					tickIcon: 'fa-check-square'
+				});
+
+				//activate dropdown-hover. to make bootstrap-select open on hover
+				//must come after bootstrap-select initialization
+				$('button.dropdown-toggle').dropdownHover({
+					delay: 100
 				});
 
 				//immediately run query inline
@@ -145,7 +160,7 @@ Display report parameters and initiate running of report
 										<spring:message code="reports.label.format"/>
 									</label>
 									<div class="col-md-6">
-										<select name="reportFormat" id="reportFormat" class="form-control">
+										<select name="reportFormat" id="reportFormat" class="form-control selectpicker">
 											<c:forEach var="reportFormat" items="${reportFormats}">
 												<option value="${reportFormat}">
 													<spring:message code="reports.format.${reportFormat}"/>
@@ -215,7 +230,6 @@ Display report parameters and initiate running of report
 				</div>
 			</div>
 		</div>
-
 
 	</jsp:body>
 </t:mainPage>

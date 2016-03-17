@@ -1,25 +1,25 @@
 <%-- 
-    Document   : showFinalSql
-    Created on : 08-Jan-2015, 12:46:13
+    Document   : showSelectedParameters
+    Created on : 17-Mar-2016, 07:49:39
     Author     : Timothy Anyona
-
-Display the final sql used to generate a report
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <div align="center">
 	<table border="0" width="90%">
 		<tr>
 			<td>
 				<div align="center" width="90%" class="greyBack">
-					<encode:forHtmlContent value="${finalSql}"/>
+					<c:forEach var="parameterDisplayValue" items="${parameterDisplayValues}">
+						${parameterDisplayValue.value}
+						<br>
+					</c:forEach>
 				</div>
 			</td>
 		</tr>
 	</table>
 </div>
-

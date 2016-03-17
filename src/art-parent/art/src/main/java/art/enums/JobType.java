@@ -96,5 +96,14 @@ public enum JobType {
 	public String getDescription() {
 		return value;
 	}
+	
+		/**
+	 * Get description message string for use in the user interface.
+	 *
+	 * @return
+	 */
+	public String getLocalizedDescription() {
+		return "jobType.option." + value;
+	}
 
 }

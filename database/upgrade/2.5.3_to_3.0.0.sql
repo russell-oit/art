@@ -1,4 +1,4 @@
--- Upgrade script from ART 2.5.2 to ART 3.0
+-- Upgrade script from ART 2.5.3 to ART 3.0
 
 -- CHANGES:
 -- update database version
@@ -286,6 +286,13 @@ CREATE TABLE ART_REPORT_PARAMETERS
 	PARAMETER_POSITION INTEGER NOT NULL,
 	CONSTRAINT arp_pk PRIMARY KEY (REPORT_PARAMETER_ID)	
 );
+
+-- add last run details column
+ALTER TABLE ART_JOBS ADD LAST_RUN_DETAILS VARCHAR(4000);
+UPDATE ART_JOBS SET LAST_RUN_DETAILS=LAST_FILE_NAME;
+
+
+
 
 -- add reference table for report types
 CREATE TABLE ART_REPORT_TYPES

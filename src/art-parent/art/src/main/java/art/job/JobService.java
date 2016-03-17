@@ -78,13 +78,37 @@ public class JobService {
 
 			job.setJobId(rs.getInt("JOB_ID"));
 			job.setName(rs.getString("JOB_NAME"));
-
+			job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
+			job.setJobType(JobType.toEnum(rs.getString("JOB_TYPE")));
+			job.setScheduleMinute(rs.getString("JOB_MINUTE"));
+			job.setScheduleHour(rs.getString("JOB_HOUR"));
+			job.setScheduleDay(rs.getString("JOB_DAY"));
+			job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
+			job.setScheduleMonth(rs.getString("JOB_MONTH"));
+			job.setMailTo(rs.getString("MAIL_TOS"));
+			job.setMailFrom(rs.getString("MAIL_FROM"));
+			job.setMailCc(rs.getString("MAIL_CC"));
+			job.setMailBcc(rs.getString("MAIL_BCC"));
+			job.setMailSubject(rs.getString("SUBJECT"));
+			job.setMailMessage(rs.getString("MESSAGE"));
+			job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
+			job.setStartDate(rs.getTimestamp("START_DATE"));
+			job.setEndDate(rs.getTimestamp("END_DATE"));
+			job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
+			job.setLastFileName(rs.getString("LAST_FILE_NAME"));
+			job.setLastRunDetails(rs.getString("LAST_RUN_DETAILS"));
+			job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
+			job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
+			job.setActive(rs.getBoolean("ACTIVE"));
+			job.setEnableAudit(rs.getBoolean("ENABLE_AUDIT"));
+			job.setAllowSharing(rs.getBoolean("ALLOW_SHARING"));
+			job.setAllowSplitting(rs.getBoolean("ALLOW_SPLITTING"));
+			job.setRecipientsQueryId(rs.getInt("RECIPIENTS_QUERY_ID"));
+			job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
 			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			job.setCreatedBy(rs.getString("CREATED_BY"));
 			job.setUpdatedBy(rs.getString("UPDATED_BY"));
-			job.setActive(rs.getBoolean("ACTIVE"));
-			job.setRecipientsQueryId(rs.getInt("RECIPIENTS_QUERY_ID"));
 
 			Report report = new Report();
 			report.setReportId(rs.getInt("QUERY_ID"));
@@ -335,26 +359,26 @@ public class JobService {
 
 		//get shared jobs user has direct access to, but doesn't own. both split and non-split jobs
 		//stored in the art_user_jobs table
-		sql=SQL_SELECT_ALL + " INNER JOIN ART_USER_JOBS AUJ"
+		sql = SQL_SELECT_ALL + " INNER JOIN ART_USER_JOBS AUJ"
 				+ " ON AJ.JOB_ID=AUJ.JOB_ID"
 				+ " WHERE AJ.USER_ID<>? AND AUJ.USER_ID=?";
 		jobs.addAll(dbService.query(sql, h, userId));
-		
+
 		sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
-						+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
-						+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"
-						+ " aj.CACHED_TABLE_NAME,auj.LAST_FILE_NAME AS SHARED_FILE_NAME, "
-						+ " auj.LAST_START_DATE AS SHARED_START_DATE,aj.LAST_END_DATE, "
-						+ " aj.OUTPUT_FORMAT, aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE "
-						+ " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
-						+ " aj.JOB_MONTH, auj.LAST_END_DATE AS SHARED_END_DATE "
-						+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_JOBS auj "
-						+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID=auj.JOB_ID "
-						+ " AND auj.USERNAME = ? AND aj.USERNAME <> ?";
-		
+				+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
+				+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"
+				+ " aj.CACHED_TABLE_NAME,auj.LAST_FILE_NAME AS SHARED_FILE_NAME, "
+				+ " auj.LAST_START_DATE AS SHARED_START_DATE,aj.LAST_END_DATE, "
+				+ " aj.OUTPUT_FORMAT, aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE "
+				+ " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
+				+ " aj.JOB_MONTH, auj.LAST_END_DATE AS SHARED_END_DATE "
+				+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_JOBS auj "
+				+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID=auj.JOB_ID "
+				+ " AND auj.USERNAME = ? AND aj.USERNAME <> ?";
+
 		return jobs;
 	}
-	
+
 	/**
 	 * Get jobs that have not been migrated to the quartz scheduling system
 	 *
