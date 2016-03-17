@@ -7,36 +7,21 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<%@taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
+<%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/prototype.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/scriptaculous/scriptaculous.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/overlib.js"></script>
-
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxtags.js"></script>
-
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/ajaxtags-art.css" /> 
-
-	</head>
-	<body>
-		<ajax:portlet
-			source="portlet0"
-			baseUrl="/art/test.do"
-			classNamePrefix="portletAUTO"
-			title="iko"
-			imageMaximize="${pageContext.request.contextPath}/images/maximize.png"
-			imageMinimize="${pageContext.request.contextPath}/images/minimize.png"
-			imageRefresh="${pageContext.request.contextPath}/images/refresh.png"             
-			executeOnLoad= "true"
-			/>
+<t:mainPage title="${reportName}">
+	
+	<jsp:attribute name="javascript">
 		
-		<div id="portlet2"><script type="text/javascript">new AjaxJspTag.Portlet({baseUrl: "/art/test.do", classNamePrefix: "portletAUTO", executeOnLoad: true, imageMaximize: "/art/images/maximize.png", imageMinimize: "/art/images/minimize.png", imageRefresh: "/art/images/refresh.png", source: "portlet2", startMinimize: false, title: "iko"});</script></div>
+	</jsp:attribute>
+	<jsp:body>
+		<b>${dashboard.title}</b> <br>
+		&nbsp;&nbsp;&nbsp;${dashboard.description}
 
-	</body>
-</html>
+		<div id="reportOutput" class="col-md-10 col-md-offset-1">
+			<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
+		</div>
+	</jsp:body>
+</t:mainPage>

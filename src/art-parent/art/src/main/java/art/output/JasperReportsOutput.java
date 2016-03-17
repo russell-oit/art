@@ -17,10 +17,8 @@
 package art.output;
 
 import art.dbutils.DatabaseUtils;
-import art.enums.ParameterType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
-import art.parameter.Parameter;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;

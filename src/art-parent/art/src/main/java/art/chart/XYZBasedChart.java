@@ -18,7 +18,6 @@
 package art.chart;
 
 import art.enums.ReportType;
-import art.parameter.Parameter;
 import de.laures.cewolf.cpp.HeatmapEnhancer;
 import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;

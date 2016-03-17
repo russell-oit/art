@@ -20,13 +20,11 @@ package art.output;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtQueryParam;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Generate RSS 2.0 output. The query column names MUST follow the RSS 2.0

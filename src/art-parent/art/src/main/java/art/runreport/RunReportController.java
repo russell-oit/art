@@ -222,8 +222,8 @@ public class RunReportController {
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
 			} else if (reportType == ReportType.Dashboard) {
-//				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDashboard.jsp").include(request, response);
-				return "showDashboard";
+//				servletContext.getRequestDispatcher("/app/showDashboard.do").forward(request, response);
+				return "forward:/app/showDashboard.do";
 			} else if (reportType.isOlap()) {
 				// forward to the showAnalysis page
 //			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
@@ -252,7 +252,7 @@ public class RunReportController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
@@ -304,7 +304,7 @@ public class RunReportController {
 
 							reportParam.setLovValues(lovValues);
 						}
-						
+
 						parameterDisplayValues.put(reportParam.getPosition(), reportParam.getNameAndDisplayValues());
 					}
 				}
@@ -320,7 +320,7 @@ public class RunReportController {
 				int resultSetType;
 				if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
 						|| reportType == ReportType.Group
-						|| (reportType.isChart() )) {
+						|| (reportType.isChart())) {
 					//need scrollable resultset for jasper and jxls art report in order to display record count
 					//need scrollable resultset in order to generate group report
 					//need scrollable resultset for charts for show data option
@@ -479,7 +479,7 @@ public class RunReportController {
 				+ "document.getElementById('" + elementId + "').innerHTML='" + message + "';"
 				+ "</script>");
 	}
-	
+
 	private void clearReportProgress(PrintWriter writer) {
 		displayReportProgress(writer, "");
 	}

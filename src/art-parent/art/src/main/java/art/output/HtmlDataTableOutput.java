@@ -18,15 +18,8 @@
 package art.output;
 
 import art.servlets.Config;
-import art.utils.ArtQueryParam;
-import art.utils.ArtUtils;
 import java.io.File;
-import java.io.PrintWriter;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 /**

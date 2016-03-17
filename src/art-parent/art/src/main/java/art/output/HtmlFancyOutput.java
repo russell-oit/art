@@ -21,11 +21,7 @@
 package art.output;
 
 import art.servlets.Config;
-import art.utils.ArtQueryParam;
-import java.io.PrintWriter;
-import java.text.NumberFormat;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Fancy html output mode

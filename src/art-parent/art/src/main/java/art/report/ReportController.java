@@ -129,7 +129,7 @@ public class ReportController {
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
-				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();

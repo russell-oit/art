@@ -17,7 +17,6 @@
  */
 package art.chart;
 
-import art.parameter.Parameter;
 import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;
 import java.sql.ResultSet;

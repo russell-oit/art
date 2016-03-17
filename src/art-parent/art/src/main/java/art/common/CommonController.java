@@ -22,11 +22,6 @@ public class CommonController {
 		return "success";
 	}
 
-	@RequestMapping(value = "/app/showDashboard", method = RequestMethod.GET)
-	public String showDashboard() {
-		return "showDashboard";
-	}
-
 	@RequestMapping(value = "/app/test", method = RequestMethod.GET)
 	public String showTest() {
 		return "test";

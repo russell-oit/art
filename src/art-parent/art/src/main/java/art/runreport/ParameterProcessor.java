@@ -63,8 +63,10 @@ public class ParameterProcessor {
 	 * @throws java.sql.SQLException
 	 */
 	public ParameterProcessorResult processHttpParameters(
-			HttpServletRequest request, int reportId) throws SQLException, ParseException {
+			HttpServletRequest request) throws SQLException, ParseException {
 
+		int reportId=Integer.parseInt(request.getParameter("reportId"));
+		
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
 		Map<String, String[]> passedValues = new HashMap<>();

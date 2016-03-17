@@ -23,7 +23,6 @@ import art.enums.ReportFormat;
 import art.enums.ColumnType;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ActionResult;
 import art.utils.DrilldownLinkHelper;
 import java.io.PrintWriter;
 import java.sql.Clob;

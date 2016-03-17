@@ -18,8 +18,6 @@
 package art.chart;
 
 import art.enums.ReportType;
-import art.parameter.Parameter;
-import art.utils.ArtUtils;
 import de.laures.cewolf.links.XYItemLinkGenerator;
 import de.laures.cewolf.tooltips.XYToolTipGenerator;
 import java.sql.ResultSet;
