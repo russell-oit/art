@@ -10,32 +10,27 @@
 <%@taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/prototype.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/scriptaculous/scriptaculous.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/overlib.js"></script>
-
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxtags.js"></script>
-
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/ajaxtags-art.css" /> 
-
 <div align="left">
 	<table class="plain">
 		<tr>
-
 			<c:forEach var="column" items="${dashboard.columns}">
 				<td>
 					<c:forEach var="portlet" items="${column}">
-						<ajax:portlet
-							source="${portlet.source}"
-							baseUrl="${portlet.baseUrl}"
-							classNamePrefix="${portlet.classNamePrefix}"
-							title="${portlet.title}"
-							imageMaximize="${pageContext.request.contextPath}/images/maximize.png"
-							imageMinimize="${pageContext.request.contextPath}/images/minimize.png"
-							imageRefresh="${pageContext.request.contextPath}/images/refresh.png"             
-							executeOnLoad= "${portlet.executeOnLoad}"
-							refreshPeriod="${portlet.refreshPeriod}"
-							/>
+						<div id="div_${portlet.source}">
+							<ajax:portlet
+								source="portlet_${portlet.source}"
+								baseUrl="${portlet.baseUrl}"
+								classNamePrefix="${portlet.classNamePrefix}"
+								title="${portlet.title}"
+								imageMaximize="${pageContext.request.contextPath}/images/maximize.png"
+								imageMinimize="${pageContext.request.contextPath}/images/minimize.png"
+								imageRefresh="${pageContext.request.contextPath}/images/refresh.png"             
+								executeOnLoad= "${portlet.executeOnLoad}"
+								refreshPeriod="${portlet.refreshPeriod}"
+								preFunction="artAddWork"
+								postFunction="artRemoveWork"
+								/>
+						</div>
 					</c:forEach>
 				</td>
 

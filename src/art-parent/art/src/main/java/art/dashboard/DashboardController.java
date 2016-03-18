@@ -20,6 +20,7 @@ package art.dashboard;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
+import art.reportparameter.ReportParameterService;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.utils.XmlParser;
@@ -29,11 +30,14 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,9 +56,12 @@ public class DashboardController {
 	@Autowired
 	private ReportService reportService;
 
+	@Autowired
+	private MessageSource messageSource;
+
 	@RequestMapping(value = "/app/showDashboard", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showDashboard(@RequestParam("reportId") Integer reportId,
-			HttpServletRequest request, Model model) {
+			HttpServletRequest request, Model model, Locale locale) {
 
 		try {
 			Report report = reportService.getReport(reportId);
@@ -65,8 +72,10 @@ public class DashboardController {
 				return "showDashboard";
 			}
 
-			Dashboard dashboard = buildDashboard(report, request);
+			Dashboard dashboard = buildDashboard(report, request,locale);
 			model.addAttribute("dashboard", dashboard);
+
+			model.addAttribute("reportName", report.getName());
 
 		} catch (SQLException | UnsupportedEncodingException | ParseException ex) {
 			logger.error("Error", ex);
@@ -76,7 +85,9 @@ public class DashboardController {
 		return "showDashboard";
 	}
 
-	private Dashboard buildDashboard(Report report, HttpServletRequest request) throws UnsupportedEncodingException, SQLException, ParseException {
+	private Dashboard buildDashboard(Report report, HttpServletRequest request,
+			Locale locale) throws UnsupportedEncodingException, SQLException, ParseException {
+		
 		Dashboard dashboard = new Dashboard();
 
 		dashboard.setTitle(report.getShortDescription());
@@ -99,6 +110,9 @@ public class DashboardController {
 			for (String portletXml : portletsXml) {
 				Portlet portlet = new Portlet();
 
+				String source = RandomStringUtils.randomAlphanumeric(5);
+				portlet.setSource(source);
+
 				String refreshPeriod = getPortletRefreshPeriod(portletXml);
 				portlet.setRefreshPeriod(refreshPeriod);
 
@@ -108,7 +122,7 @@ public class DashboardController {
 				boolean executeOnLoad = getPortletExecuteOnLoad(portletXml);
 				portlet.setExecuteOnLoad(executeOnLoad);
 
-				String title = getPortletTitle(portletXml);
+				String title = getPortletTitle(portletXml,request,executeOnLoad,refreshPeriod,locale);
 				portlet.setTitle(title);
 
 				String classNamePrefix = getPortletClassNamePrefix(columnSize);
@@ -161,25 +175,10 @@ public class DashboardController {
 			//no query defined. use url tag
 			link = XmlParser.getXmlElementValue(portletXml, "URL");
 		} else {
-			// context path as suffix + build url + switch off html header&footer and add parameters
-			StringBuilder paramsSb = new StringBuilder(254);
-			ParameterProcessor paramProcessor = new ParameterProcessor();
-			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
-			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-
-			List<String> paramsList = new ArrayList<>();
-			for (ReportParameter reportParam : reportParamsList) {
-				String htmlName = reportParam.getHtmlElementName();
-				String value = reportParam.getHtmlValue();
-				String finalValue = URLEncoder.encode(value, "UTF-8"); //TODO also encode in drilldown link helper?
-				String htmlParam = htmlName + "=" + finalValue;
-				paramsList.add(htmlParam);
-			}
-			String params = StringUtils.join(paramsList, "&");
-
-			int reportId = Integer.parseInt(request.getParameter("reportId"));
-			link = request.getContextPath() + "/app/runReport.do?reportId=1" 
-					+ "&isFragment=true" + params;
+			// context path as suffix + build url + switch off html header&footer 
+			int reportId = Integer.parseInt(link);
+			link = request.getContextPath() + "/app/runReport.do?reportId=" + reportId
+					+ "&isFragment=true";
 		}
 
 		return link;
@@ -196,8 +195,22 @@ public class DashboardController {
 		return executeOnLoad;
 	}
 
-	private String getPortletTitle(String portletXml) {
+	private String getPortletTitle(String portletXml, HttpServletRequest request,
+			boolean executeOnLoad, String refreshPeriod, Locale locale) {
 		String title = XmlParser.getXmlElementValue(portletXml, "TITLE");
+
+		String contextPath = request.getContextPath();
+		if (!executeOnLoad) {
+			title = title + "  <img src='" + contextPath + "/images/onLoadFalse.gif' title='"
+					+ messageSource.getMessage("portlet.text.onLoadFalse", null, locale) + "'/>";
+		}
+		if (StringUtils.isNotEmpty(refreshPeriod)) {
+			title = title + " <img src='" + contextPath + "/images/clock_mini.gif' title='" 
+					+ messageSource.getMessage("portlet.text.autoRefresh", null, locale)
+					+ " " + refreshPeriod + " " 
+					+ messageSource.getMessage("portlet.text.seconds", null, locale) 
+					+ "'/> <small>" + refreshPeriod + "s</small>";
+		}
 		return title;
 	}
 

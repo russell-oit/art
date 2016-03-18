@@ -21,7 +21,6 @@ import art.enums.ReportFormat;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.output.StandardOutput;
-import art.output.ReportOutputInterface;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.report.ChartOptions;
@@ -154,6 +153,11 @@ public class RunReportController {
 //			}
 			response.setHeader("Cache-control", "no-cache");
 
+			if (reportType == ReportType.Dashboard) {
+//				servletContext.getRequestDispatcher("/app/showDashboard.do").forward(request, response);
+				return "forward:/app/showDashboard.do";
+			}
+
 			//get report format to use
 			ReportFormat reportFormat;
 			String reportFormatString = request.getParameter("reportFormat");
@@ -163,7 +167,7 @@ public class RunReportController {
 				} else if (reportType.isChart()) {
 					reportFormat = ReportFormat.html;
 				} else {
-					reportFormat = ReportFormat.htmlDataTable;
+					reportFormat = ReportFormat.htmlFancy;
 				}
 			} else {
 				reportFormat = ReportFormat.toEnum(reportFormatString);
@@ -174,7 +178,6 @@ public class RunReportController {
 			PrintWriter writer = null;
 
 			boolean showReportHeaderAndFooter = true;
-			ReportOutputInterface o = null;
 
 			if (reportType.isStandardOutput()) {
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
@@ -186,17 +189,18 @@ public class RunReportController {
 				response.setContentType(contentType);
 				writer = response.getWriter();
 
-				if (isFragment) {
-					//report header and footer not shown for fragments
-					showReportHeaderAndFooter = false;
-				} else {
 					//the report output class determines if the report header and footer will be shown
-					//if false the output class needs to take care of all the output
-					showReportHeaderAndFooter = standardOutput.outputHeaderandFooter();
-				}
+				//if false the output class needs to take care of all the output
+				showReportHeaderAndFooter = standardOutput.outputHeaderandFooter();
 			} else {
 				response.setContentType("text/html; charset=UTF-8");
 				writer = response.getWriter();
+			}
+
+			if (isFragment) {
+				//report header and footer not shown for fragments
+				showReportHeaderAndFooter = false;
+				showInline = true;
 			}
 
 			//handle output formats that require data only
@@ -221,9 +225,6 @@ public class RunReportController {
 				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
-			} else if (reportType == ReportType.Dashboard) {
-//				servletContext.getRequestDispatcher("/app/showDashboard.do").forward(request, response);
-				return "forward:/app/showDashboard.do";
 			} else if (reportType.isOlap()) {
 				// forward to the showAnalysis page
 //			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);

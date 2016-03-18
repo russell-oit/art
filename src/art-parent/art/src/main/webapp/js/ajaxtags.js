@@ -837,9 +837,6 @@ AjaxJspTag.Portlet = Class.create(AjaxJspTag.Base, {
     execute: function () {
         this.ajaxPeriodicalUpdater = this.options.refreshPeriod ? this.getPeriodicalUpdater() : this.getAjaxUpdater();
 		
-		//postfunction doesn't run as expected for a portlet that has a refresh period. need to decrement work count here
-		artRemoveWork();
-		
     },
     stopAutoRefresh: function () {
         // stop auto-update if present

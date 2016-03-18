@@ -536,3 +536,25 @@ function addSelectDeselectAllHandler() {
 		$(item).multiSelect('deselect_all');
 	});
 }
+
+var workCount = 0;
+function artAddWork() {
+	workCount++;
+
+	if (workCount > 0) {
+//		Element.show('spinner');
+		jQuery('#spinner').show();
+	}
+	
+//	console.log("artAddWork " + workCount);
+}
+function artRemoveWork() {
+	workCount--;
+
+	if (workCount <= 0) {
+//		Element.hide('spinner');
+		jQuery('#spinner').hide();
+	}
+	
+//	console.log("artRemoveWork " + workCount);
+}
