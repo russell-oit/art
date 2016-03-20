@@ -113,7 +113,7 @@
 			$(function () {
 				$('#getSchedule').click(function () {
 					var recordId = $('#schedules option:selected').val();
-					
+
 					$.ajax({
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/app/getSchedule.do',
@@ -258,6 +258,7 @@
 				</c:if>
 
 				<input type="hidden" name="action" value="${action}">
+				<input type="hidden" name="nextPage" value="${param.nextPage}">
 
 				<fieldset>
 					<legend><spring:message code="jobs.text.job"/></legend>
@@ -457,7 +458,7 @@
 							<form:errors path="mailSubject" cssClass="error"/>
 						</div>
 					</div>
-					<label class="col-md-12 control-label" style="text-align: left">
+					<label class="col-md-12 control-label" style="text-align: center">
 						<spring:message code="jobs.label.mailMessage"/>
 					</label>
 					<div class="form-group">
@@ -477,8 +478,8 @@
 						<div class="col-md-8">
 							<select name="schedules" id="schedules" class="form-control selectpicker">
 								<option value="0">-</option>
-								<c:forEach var="scheduleq" items="${schedules}">
-									<option value="${scheduleq.scheduleId}">${scheduleq.name}</option>
+								<c:forEach var="schedule" items="${schedules}">
+									<option value="${schedule.scheduleId}">${schedule.name}</option>
 								</c:forEach>
 							</select>
 							<button type="button" id="getSchedule" class="btn btn-default">
@@ -486,7 +487,7 @@
 							</button>
 						</div>
 					</div>
-							
+
 					<hr>
 					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleMinute">
@@ -507,21 +508,21 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-md-4 control-label " for="scheduleDay">
-							<spring:message code="schedules.label.day"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="scheduleDay" maxlength="100" class="form-control"/>
-							<form:errors path="scheduleDay" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleMonth">
 							<spring:message code="schedules.label.month"/>
 						</label>
 						<div class="col-md-8">
 							<form:input path="scheduleMonth" maxlength="100" class="form-control"/>
 							<form:errors path="scheduleMonth" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="scheduleDay">
+							<spring:message code="schedules.label.day"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="scheduleDay" maxlength="100" class="form-control"/>
+							<form:errors path="scheduleDay" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
@@ -533,7 +534,7 @@
 							<form:errors path="scheduleWeekday" cssClass="error"/>
 						</div>
 					</div>
-						
+
 					<hr>
 					<div class="form-group">
 						<label class="col-md-4 control-label " for="startDateString">

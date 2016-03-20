@@ -339,7 +339,7 @@ public class JobService {
 				+ " ON AJ.JOB_ID=AUGJ.JOB_ID"
 				+ " WHERE AJ.USER_ID <> ? AND EXISTS "
 				+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USER_ID = ? "
-				+ " AND AUGA.JOB_ID=AUGJ.JOB_ID)";
+				+ " AND AUGA.USER_GROUP_ID=AUGJ.USER_GROUP_ID)";
 		ResultSetHandler<List<SharedJob>> h = new BeanListHandler<>(SharedJob.class, new JobMapper());
 		jobs.addAll(dbService.query(sql, h, userId, userId));
 
@@ -348,19 +348,7 @@ public class JobService {
 		sql = SQL_SELECT_ALL + " INNER JOIN ART_USER_JOBS AUJ"
 				+ " ON AJ.JOB_ID=AUJ.JOB_ID"
 				+ " WHERE AJ.USER_ID<>? AND AUJ.USER_ID=?";
-		jobs.addAll(dbService.query(sql, h, userId));
-
-		sql = "SELECT aq.NAME AS QUERY_NAME, aj.JOB_NAME, aj.JOB_ID, aj.JOB_TYPE,"
-				+ " aq.USES_RULES, aj.ALLOW_SPLITTING "
-				+ " , aj.LAST_START_DATE , aj.LAST_FILE_NAME , aj.NEXT_RUN_DATE,"
-				+ " aj.CACHED_TABLE_NAME,auj.LAST_FILE_NAME AS SHARED_FILE_NAME, "
-				+ " auj.LAST_START_DATE AS SHARED_START_DATE,aj.LAST_END_DATE, "
-				+ " aj.OUTPUT_FORMAT, aj.MAIL_TOS, aj.SUBJECT, aj.MESSAGE "
-				+ " ,aj.JOB_MINUTE, aj.JOB_HOUR, aj.JOB_DAY, aj.JOB_WEEKDAY,"
-				+ " aj.JOB_MONTH, auj.LAST_END_DATE AS SHARED_END_DATE "
-				+ " FROM ART_JOBS aj, ART_QUERIES aq, ART_USER_JOBS auj "
-				+ " WHERE aq.QUERY_ID = aj.QUERY_ID AND aj.JOB_ID=auj.JOB_ID "
-				+ " AND auj.USERNAME = ? AND aj.USERNAME <> ?";
+		jobs.addAll(dbService.query(sql, h, userId, userId));
 
 		return jobs;
 	}

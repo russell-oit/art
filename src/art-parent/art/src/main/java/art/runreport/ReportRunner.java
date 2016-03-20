@@ -16,6 +16,7 @@
  */
 package art.runreport;
 
+import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
@@ -227,7 +228,7 @@ public class ReportRunner {
 	/**
 	 * Process the report source and apply tags, dynamic sql and parameters
 	 */
-	private void processReportSource() {
+	private void processReportSource() throws SQLException {
 
 		//update querySb with report sql
 		querySb.replace(0, querySb.length(), report.getReportSource());
@@ -238,8 +239,317 @@ public class ReportRunner {
 
 		//handle dynamic recipient label
 		applyDynamicRecipient(querySb);
+		applyRules(querySb);
 
 		logger.debug("Sql query now is:\n{}", querySb.toString());
+	}
+
+	private void applyRules(StringBuilder sb) throws SQLException {
+
+		logger.debug("applyRules");
+
+		if (!useRules) {
+			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
+			String querySql = sb.toString();
+			querySql = querySql.replaceAll("(?iu)#rules#", "1=1");
+
+			//update sb with new sql
+			sb.replace(0, sb.length(), querySql);
+
+			return; //don't process any further
+		}
+
+		int insertPosLast = 0;
+
+		// Determine if we have a GROUP BY or an ORDER BY
+		int grb = sb.toString().lastIndexOf("GROUP BY");
+		int orb = sb.toString().lastIndexOf("ORDER BY");
+		if ((grb != -1) || (orb != -1)) {
+			// We have a GROUP BY or an ORDER BY clause. This is the "negative" offset
+			// that indicates where to insert the rule in the SQL statement
+			insertPosLast = sb.length() - ((grb > orb) && (orb > 0) ? orb : (grb == -1 ? orb : grb));
+		}
+
+		//check if using labelled rules 
+		int count = 0;
+		StringBuilder labelledValues = new StringBuilder(1024);
+		boolean usingLabelledRules = false;
+		String querySql = sb.toString();
+		int labelPosition = querySql.toLowerCase().indexOf("#rules#"); //use all lowercase to make find case insensitive
+		if (labelPosition != -1) {
+			usingLabelledRules = true;
+		}
+
+		String ruleName;
+		String columnName;
+		String columnDataType;
+		ResultSet rs = null;
+		Connection conn = null;
+		PreparedStatement ps = null;
+
+		int queryId = report.getReportId();
+
+		try {
+
+			conn = DbConnections.getArtDbConnection();
+
+			// Get rules for the current query
+			String sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
+					+ " FROM ART_QUERY_RULES"
+					+ " WHERE QUERY_ID=?";
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, queryId);
+			rs = ps.executeQuery();
+
+			// for each rule build and add the AND column IN (list) string to the query
+			// Note: if we don't have rules for this query, the sb is left untouched
+			while (rs.next()) {
+				count++;
+
+				StringBuilder tmpSb;
+				ruleName = rs.getString("RULE_NAME");
+				columnName = rs.getString("FIELD_NAME");
+				columnDataType = rs.getString("FIELD_DATA_TYPE");
+
+				tmpSb = getRuleValues(conn, username, ruleName, 1, columnDataType);
+				String groupValues = getGroupRuleValues(conn, ruleName, columnName, columnDataType);
+				if (tmpSb == null) { // it is null only if 	ALL_ITEMS
+					//ALL_ITEMS. effectively means the rule doesn't apply
+					if (usingLabelledRules) {
+						//using labelled rules. don't append AND before the first rule value
+						if (count == 1) {
+							labelledValues.append(" 1=1 ");
+						} else {
+							labelledValues.append(" AND 1=1 ");
+						}
+					}
+				} else {
+					// Add the rule to the query 
+					String values = tmpSb.toString();
+					if (org.apache.commons.lang.StringUtils.length(values) == 0 && org.apache.commons.lang.StringUtils.length(groupValues) == 0) {
+						//user doesn't have values set for at least one rule that the query uses. values needed for all rules
+						break;
+					} else {
+						String condition = "";
+						if (org.apache.commons.lang.StringUtils.length(values) > 0) {
+							condition = columnName + " in (" + values.substring(1) + ")";
+						}
+						String groupCondition = "";
+						if (org.apache.commons.lang.StringUtils.length(groupValues) > 0) {
+							groupCondition = groupValues;
+						}
+
+						if (org.apache.commons.lang.StringUtils.length(condition) > 0) {
+							//rule values defined for user
+							if (org.apache.commons.lang.StringUtils.length(groupCondition) > 0) {
+								groupCondition = " OR " + groupCondition;
+							}
+							condition = condition + groupCondition; // ( user values OR (user group values) )
+						} else {
+							//no rule values for user. use user group values
+							condition = groupCondition;
+						}
+
+						condition = " ( " + condition + " ) "; //enclose this rule values in brackets to treat it as a single condition
+
+						if (usingLabelledRules) {
+							//using labelled rules. don't append AND before the first rule value
+							// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
+							if (count == 1) {
+								labelledValues.append(condition);
+							} else {
+								labelledValues.append(" AND ").append(condition);
+							}
+						} else {
+						//append rule values for non-labelled rules
+
+							// Add the rule to the query (handle GROUP_BY and ORDER BY)
+							// NOTE: HAVING is not handled.
+							// tmpSb.toSting().substring(1) is the <list> of allowed values for the current rule,
+							// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
+							if (insertPosLast > 0) {
+								// We have a GROUP BY or an ORDER BY clause
+								// NOTE: sb changes dynamically
+
+								sb.insert(sb.length() - insertPosLast, " AND " + condition);
+							} else { //No group by or order by. We can just append
+								sb.append(" AND ").append(condition);
+							}
+						}
+					}
+				}
+			}
+
+			//replace all occurrences of labelled rule with rule values
+			if (usingLabelledRules) {
+				//replace rule values
+				String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
+				querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
+				//update sb with new sql
+				sb.replace(0, sb.length(), querySql);
+			}
+		} finally {
+			DatabaseUtils.close(rs, ps, conn);
+		}
+
+	}
+
+	public StringBuilder getRuleValues(Connection conn, String ruleUsername, String currentRule, int counter, String columnDataType)
+			throws SQLException {
+
+		StringBuilder tmpSb = new StringBuilder(64);
+		boolean isAllItemsForThisRule = false;
+		final int MAX_RECURSIVE_LOOKUP = 20;
+
+		// Exit after MAX_RECURSIVE_LOOKUP calls
+		// this is to avoid a situation when user A lookups user B
+		// and viceversa
+		if (counter > MAX_RECURSIVE_LOOKUP) {
+			logger.warn("TOO MANY LOOPS - exiting");
+			return new StringBuilder("TOO MANY LOOPS");
+		}
+
+		// Retrieve user's rule value for this rule
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String sql;
+
+		try {
+
+			if (org.apache.commons.lang.math.NumberUtils.isNumber(ruleUsername)) {
+				//get values from user group
+				sql = "SELECT RULE_VALUE, RULE_TYPE "
+						+ " FROM ART_USER_GROUP_RULES "
+						+ " WHERE USER_GROUP_ID = ? AND RULE_NAME = ?";
+
+				ps = conn.prepareStatement(sql);
+				ps.setInt(1, Integer.parseInt(ruleUsername));
+				ps.setString(2, currentRule);
+			} else {
+				//get values from user
+				sql = "SELECT RULE_VALUE, RULE_TYPE "
+						+ " FROM ART_USER_RULES "
+						+ " WHERE USERNAME = ? AND RULE_NAME = ?";
+
+				ps = conn.prepareStatement(sql);
+				ps.setString(1, ruleUsername);
+				ps.setString(2, currentRule);
+			}
+
+			rs = ps.executeQuery();
+
+			// Build the tmp string, handle ALL_ITEMS and
+			// Recursively call applyRule() for LOOKUP
+			//  Note: null TYPE is handled as EXACT
+			while (rs.next() && !isAllItemsForThisRule) {
+				String ruleValue = rs.getString("RULE_VALUE");
+				if (!org.apache.commons.lang.StringUtils.equals(ruleValue, "ALL_ITEMS")) {
+					if (org.apache.commons.lang.StringUtils.equals(rs.getString("RULE_TYPE"), "LOOKUP")) {
+						// if type is lookup the VALUE is the name
+						// to look up. Recursively call getRuleValues
+						StringBuilder lookupSb = getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType);
+						if (lookupSb == null) {
+							//all values
+							isAllItemsForThisRule = true;
+							break;
+						} else {
+							String values = lookupSb.toString();
+							if (org.apache.commons.lang.StringUtils.equals(values, "TOO MANY LOOPS")) {
+								values = "";
+							}
+							tmpSb.append(values);
+						}
+					} else { // Normal EXACT type
+						if (org.apache.commons.lang.StringUtils.equals(columnDataType, "NUMBER") && org.apache.commons.lang.math.NumberUtils.isNumber(ruleValue)) {
+							//don't quote numbers
+							tmpSb.append(",").append(ruleValue);
+						} else {
+							//escape and quote non-numbers
+							tmpSb.append(",'").append(escapeSql(ruleValue)).append("'");
+						}
+					}
+				} else {
+					isAllItemsForThisRule = true;
+					break;
+				}
+			}
+		} finally {
+			DatabaseUtils.close(rs, ps);
+		}
+
+		if (!isAllItemsForThisRule) {
+			// return the <list> for the current rule and user
+			return tmpSb;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get rule values for the user's user groups
+	 *
+	 * @param columnName
+	 * @param columnDataType
+	 * @return
+	 */
+	private String getGroupRuleValues(Connection conn, String ruleName, String columnName, String columnDataType) throws SQLException {
+
+		//get user's user groups
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String sql;
+		StringBuilder valuesSb = new StringBuilder(512);
+
+		try {
+
+			sql = "SELECT USER_GROUP_ID "
+					+ " FROM ART_USER_GROUP_ASSIGNMENT "
+					+ " WHERE USERNAME=? ";
+
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, username);
+
+			rs = ps.executeQuery();
+
+			int count = 0;
+
+			while (rs.next()) {
+				//for each group, get the group's rule values
+				String userGroupId = rs.getString("USER_GROUP_ID");
+				StringBuilder tmpSb = getRuleValues(conn, userGroupId, ruleName, 1, columnDataType);
+
+				String condition;
+				if (tmpSb == null) {
+					//rule value defined for this group as ALL_ITEMS
+					condition = " 1=1 ";
+				} else {
+					if (tmpSb.length() == 0) {
+						//no values defined for this rule for this group
+						condition = "";
+					} else {
+						//some values defined for this rule for this group
+						String groupValues = tmpSb.toString().substring(1); //first character returned from getRuleValues is ,
+						condition = columnName + " in(" + groupValues + ") ";
+					}
+				}
+
+				//build group values string
+				if (org.apache.commons.lang.StringUtils.length(condition) > 0) {
+					//some rule value defined for this group
+					count++;
+
+					if (count == 1) {
+						valuesSb.append(condition);
+					} else {
+						valuesSb.append(" OR ").append(condition);
+					}
+				}
+			}
+		} finally {
+			DatabaseUtils.close(rs, ps);
+		}
+
+		return valuesSb.toString();
 	}
 
 	private void applyParameterPlaceholders(StringBuilder sb) {

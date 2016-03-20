@@ -37,8 +37,13 @@ Display user jobs and jobs configuration
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function () {
 				$(function () {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="jobs.do"]').parent().addClass('active');
+					var actionValue = '${action}';
+					if (actionValue === 'config') {
+						$('a[id="jobsConfigLink"]').parent().addClass('active');
+//						$('a[href*="jobsConfig.do"]').parent().addClass('active');
+					} else {
+						$('a[id="jobsLink"]').parent().addClass('active');
+					}
 				});
 
 				var tbl = $('#jobs');
@@ -138,7 +143,7 @@ Display user jobs and jobs configuration
 							<c:if test="${sessionUser.userId == job.user.userId || action == 'config'}">
 								<div class="btn-group">
 									<a class="btn btn-default" 
-									   href="${pageContext.request.contextPath}/app/editJob.do?id=${job.jobId}">
+									   href="${pageContext.request.contextPath}/app/editJob.do?id=${job.jobId}&nextPage=${nextPage}">
 										<i class="fa fa-pencil-square-o"></i>
 										<spring:message code="page.action.edit"/>
 									</a>

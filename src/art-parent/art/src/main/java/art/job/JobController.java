@@ -71,6 +71,7 @@ public class JobController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			model.addAttribute("jobs", jobService.getJobs(sessionUser.getUserId()));
+			model.addAttribute("nextPage", "jobs.do");
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -85,6 +86,7 @@ public class JobController {
 
 		try {
 			model.addAttribute("jobs", jobService.getAllJobs());
+			model.addAttribute("nextPage", "jobsConfig.do");
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -122,7 +124,7 @@ public class JobController {
 
 	@RequestMapping(value = "/app/saveJob", method = RequestMethod.POST)
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
-			@RequestParam("action") String action,
+			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
@@ -147,7 +149,7 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", job.getName());
-			return "redirect:/app/jobsConfig.do";
+			return "redirect:/app/" + nextPage;
 		} catch (SQLException | SchedulerException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

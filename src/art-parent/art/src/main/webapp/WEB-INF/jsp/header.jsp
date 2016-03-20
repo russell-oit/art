@@ -36,7 +36,7 @@ Header that appears at the top of all pages, except the login and logs pages
 						</a>
 					</li>
 					<li>
-						<a href="${pageContext.request.contextPath}/app/jobs.do">
+						<a id="jobsLink" href="${pageContext.request.contextPath}/app/jobs.do">
 							<i class="fa fa-clock-o"></i> 
 							<spring:message code="header.link.jobs"/>
 						</a>
@@ -114,7 +114,7 @@ Header that appears at the top of all pages, except the login and logs pages
 								</a>
 							</li>
 							<li>
-								<a href="${pageContext.request.contextPath}/app/jobsConfig.do">
+								<a id="jobsConfigLink" href="${pageContext.request.contextPath}/app/jobsConfig.do">
 									<spring:message code="header.link.jobsConfiguration"/>
 								</a>
 							</li>
