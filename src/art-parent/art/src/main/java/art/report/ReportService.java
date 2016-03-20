@@ -814,6 +814,17 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
+	
+	@Cacheable(value = "reports")
+	public List<Report> getDynamicRecipientReports() throws SQLException {
+		logger.debug("Entering getLovReports");
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE QUERY_TYPE=121";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Get all parameters for a query, with the parameter's html name as the key

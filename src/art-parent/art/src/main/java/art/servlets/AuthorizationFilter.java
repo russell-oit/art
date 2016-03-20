@@ -214,7 +214,8 @@ public class AuthorizationFilter implements Filter {
 		//TODO use permissions instead of access level
 		if (StringUtils.equals(page, "reports")
 				|| StringUtils.equals(page, "selectReportParameters")
-				|| StringUtils.equals(page, "showDashboard") //TODO remove
+				|| StringUtils.equals(page, "showDashboard")
+				|| StringUtils.equals(page, "getSchedule")
 				|| StringUtils.equals(page, "runReport")) {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art repository user

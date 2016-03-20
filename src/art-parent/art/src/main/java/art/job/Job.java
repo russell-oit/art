@@ -53,6 +53,36 @@ public class Job implements Serializable {
 	private String mailFrom;
 	private Date startDate;
 	private Date endDate;
+	private String startDateString;
+	private String endDateString;
+
+	/**
+	 * @return the startDateString
+	 */
+	public String getStartDateString() {
+		return startDateString;
+	}
+
+	/**
+	 * @param startDateString the startDateString to set
+	 */
+	public void setStartDateString(String startDateString) {
+		this.startDateString = startDateString;
+	}
+
+	/**
+	 * @return the endDateString
+	 */
+	public String getEndDateString() {
+		return endDateString;
+	}
+
+	/**
+	 * @param endDateString the endDateString to set
+	 */
+	public void setEndDateString(String endDateString) {
+		this.endDateString = endDateString;
+	}
 
 	/**
 	 * @return the startDate

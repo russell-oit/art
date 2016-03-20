@@ -269,6 +269,10 @@ public class ParameterProcessor {
 				throw new IllegalArgumentException("Unknown numeric parameter data type: " + paramDataType);
 		}
 	}
+	
+	public Date convertParameterStringValueToDate(String value) throws ParseException {
+		return convertParameterStringValueToDate(value, null);
+	}
 
 	private Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
 		Date dateValue;

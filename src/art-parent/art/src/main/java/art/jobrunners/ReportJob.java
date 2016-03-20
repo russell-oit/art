@@ -85,7 +85,6 @@ public class ReportJob implements org.quartz.Job {
 	private String jobAuditKey;
 	art.job.Job job;
 	Timestamp jobStartDate;
-	private final String RESULT_SEPARATOR = "\n"; //newline character to use to separate result filename and result message where a message exists
 	String subject;
 	String from;
 	JobType jobType;

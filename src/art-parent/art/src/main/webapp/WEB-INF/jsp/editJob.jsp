@@ -32,9 +32,16 @@
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.0.19/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
+
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -63,6 +70,20 @@
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
+				$('#startDatePicker').datetimepicker({
+					format: 'YYYY-MM-DD HH:mm:ss'
+				});
+				$('#endDatePicker').datetimepicker({
+					format: 'YYYY-MM-DD HH:mm:ss',
+					useCurrent: false //Important! See issue #1075
+				});
+				$("#startDatePicker").on("dp.change", function (e) {
+					$('#endDatePicker').data("DateTimePicker").minDate(e.date);
+				});
+				$("#endDatePicker").on("dp.change", function (e) {
+					$('#startDatePicker').data("DateTimePicker").maxDate(e.date);
+				});
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					iconBase: 'fa',
@@ -89,12 +110,36 @@
 		</script>
 
 		<script type="text/javascript">
+			$(function () {
+				$('#getSchedule').click(function () {
+					var recordId = $('#schedules option:selected').val();
+					
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/app/getSchedule.do',
+						dataType: 'json',
+						data: {id: recordId},
+						success: function (response) //on recieve of reply
+						{
+							var schedule = response.data;
+
+							$('#scheduleMinute').val(schedule.minute);
+							$('#scheduleHour').val(schedule.hour);
+							$('#scheduleDay').val(schedule.day);
+							$('#scheduleMonth').val(schedule.month);
+							$('#scheduleWeekday').val(schedule.weekday);
+						},
+						error: ajaxErrorHandler
+					});
+				});
+			});
+
 			function populateOutputFormatField() {
 				var list = $("#outputFormat");
 				var jobType = $('#jobType option:selected').val();
 				//https://stackoverflow.com/questions/11445970/accessing-hidden-field-value-in-jquery
-				var reportTypeId = parseInt($('input[name="report.reportTypeId"]').val(),10);
-				
+				var reportTypeId = parseInt($('input[name="report.reportTypeId"]').val(), 10);
+
 				list.empty();
 
 				if (reportTypeId < 0) {
@@ -333,6 +378,7 @@
 						</div>
 					</div>
 					<form:hidden path="user.userId" />
+					<form:hidden path="user.username" />
 					<div class="form-group">
 						<label class="col-sm-4 control-label">
 							<spring:message code="page.text.report"/>
@@ -343,6 +389,7 @@
 					</div>
 					<form:hidden path="report.reportId" />
 					<form:hidden path="report.reportTypeId" />
+					<form:hidden path="report.name" />
 
 				</fieldset>
 
@@ -364,6 +411,23 @@
 						<div class="col-md-8">
 							<form:input path="mailTo" class="form-control"/>
 							<form:errors path="mailTo" cssClass="error"/>
+						</div>
+					</div>
+					<div id="datasourceDiv" class="form-group">
+						<label class="col-md-4 control-label " for="recipientsQueryId">
+							<spring:message code="jobs.label.mailRecipients"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="recipientsQueryId" class="form-control selectpicker">
+								<form:option value="0"><spring:message code="select.text.none"/></form:option>
+									<option data-divider="true"></option>
+								<c:forEach var="dynamicRecipientReport" items="${dynamicRecipientReports}">
+									<form:option value="${dynamicRecipientReport.reportId}">
+										${dynamicRecipientReport.name} 
+									</form:option>
+								</c:forEach>
+							</form:select>
+							<form:errors path="recipientsQueryId" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
@@ -407,6 +471,24 @@
 				<fieldset>
 					<legend><spring:message code="jobs.text.schedule"/></legend>
 					<div class="form-group">
+						<label class="control-label col-md-4" for="schedules">
+							<spring:message code="jobs.label.schedules"/>
+						</label>
+						<div class="col-md-8">
+							<select name="schedules" id="schedules" class="form-control selectpicker">
+								<option value="0">-</option>
+								<c:forEach var="scheduleq" items="${schedules}">
+									<option value="${scheduleq.scheduleId}">${scheduleq.name}</option>
+								</c:forEach>
+							</select>
+							<button type="button" id="getSchedule" class="btn btn-default">
+								<spring:message code="jobs.button.getSchedule"/>
+							</button>
+						</div>
+					</div>
+							
+					<hr>
+					<div class="form-group">
 						<label class="col-md-4 control-label " for="scheduleMinute">
 							<spring:message code="schedules.label.minute"/>
 						</label>
@@ -449,6 +531,36 @@
 						<div class="col-md-8">
 							<form:input path="scheduleWeekday" maxlength="100" class="form-control"/>
 							<form:errors path="scheduleWeekday" cssClass="error"/>
+						</div>
+					</div>
+						
+					<hr>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="startDateString">
+							<spring:message code="jobs.label.startDate"/>
+						</label>
+						<div class="col-md-8">
+							<div id="startDatePicker" class='input-group date datetimepicker'>
+								<form:input path="startDateString" class="form-control"/>
+								<span class="input-group-addon">
+									<span class="glyphicon glyphicon-calendar"></span>
+								</span>
+							</div>
+							<form:errors path="startDateString" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="endDate">
+							<spring:message code="jobs.label.endDate"/>
+						</label>
+						<div class="col-md-8">
+							<div id="endDatePicker" class='input-group date datetimepicker'>
+								<form:input path="endDateString" class="form-control"/>
+								<span class="input-group-addon">
+									<span class="glyphicon glyphicon-calendar"></span>
+								</span>
+							</div>
+							<form:errors path="endDateString" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

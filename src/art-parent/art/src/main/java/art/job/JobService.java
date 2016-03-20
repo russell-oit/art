@@ -246,7 +246,7 @@ public class JobService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
-	public synchronized int addJob(Job job) throws SQLException {
+	public synchronized int addJob(Job job, User actionUser) throws SQLException {
 		logger.debug("Entering addJob: job={}", job);
 
 		//generate new id
@@ -264,21 +264,10 @@ public class JobService {
 		}
 		logger.debug("newId={}", newId);
 
-		sql = "INSERT INTO ART_JOBS"
-				+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME, OUTPUT_FORMAT,"
-				+ " JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY, JOB_WEEKDAY, JOB_MONTH,"
-				+ " MAIL_TOS, MAIL_FROM, MAIL_CC, MAIL_BCC, SUBJECT, MESSAGE,"
-				+ " CACHED_TABLE_NAME, START_DATE, END_DATE, NEXT_RUN_DATE,"
-				+ " CREATION_DATE)"
-				+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
-
-		Object[] values = {
-			newId,
-			job.getName(),
-			DatabaseUtils.getCurrentTimeAsSqlTimestamp()
-		};
-
-		dbService.update(sql, values);
+		job.setJobId(newId);
+		boolean newRecord=true;
+		
+		saveJob(job, newRecord, actionUser);
 
 		return newId;
 	}
@@ -290,20 +279,12 @@ public class JobService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
-	public void updateJob(Job job) throws SQLException {
+	public void updateJob(Job job, User actionUser) throws SQLException {
 		logger.debug("Entering updateJob: job={}", job);
 
-		String sql = "UPDATE ART_JOBS SET NAME=?, DESCRIPTION=?,"
-				+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?"
-				+ " WHERE JOB_ID=?";
-
-		Object[] values = {
-			job.getName(),
-			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
-			job.getJobId()
-		};
-
-		dbService.update(sql, values);
+		boolean newRecord=false;
+		
+		saveJob(job, newRecord, actionUser);
 	}
 
 	/**
@@ -420,6 +401,8 @@ public class JobService {
 			userId = job.getUser().getUserId();
 			username = job.getUser().getUsername();
 		}
+		
+		String migratedToQuartz="X";
 
 		int affectedRows;
 		if (newRecord) {
@@ -447,12 +430,47 @@ public class JobService {
 
 			affectedRows = dbService.update(sql, values);
 		} else {
-			String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
-					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
-					+ " JOB_WEEKDAY=?, UPDATE_DATE=?, UPDATED_BY=?"
-					+ " WHERE SCHEDULE_ID=?";
+			String sql = "UPDATE ART_JOBS SET JOB_NAME=?, QUERY_ID=?,"
+					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
+					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
+					+ " JOB_MONTH=?, MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
+					+ " SUBJECT=?, MESSAGE=?, CACHED_TABLE_NAME=?, START_DATE=?,"
+					+ " END_DATE=?, NEXT_RUN_DATE=?,"
+					+ " ACTIVE=?, ENABLE_AUDIT=?,"
+					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
+					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?, "
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE JOB_ID=?";
 
 			Object[] values = {
+				job.getName(),
+				reportId,
+				userId,
+				username,
+				job.getOutputFormat(),
+				job.getJobType().getValue(),
+				job.getScheduleMinute(),
+				job.getScheduleHour(),
+				job.getScheduleDay(),
+				job.getScheduleWeekday(),
+				job.getScheduleMonth(),
+				job.getMailTo(),
+				job.getMailFrom(),
+				job.getMailCc(),
+				job.getMailBcc(),
+				job.getMailSubject(),
+				job.getMailMessage(),
+				job.getCachedTableName(),
+				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
+				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
+				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
+				job.isActive(),
+				job.isEnableAudit(),
+				job.isAllowSharing(),
+				job.isAllowSplitting(),
+				job.getRecipientsQueryId(),
+				job.getRunsToArchive(),
+				migratedToQuartz,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()

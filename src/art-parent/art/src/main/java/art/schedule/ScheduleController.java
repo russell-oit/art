@@ -19,6 +19,8 @@ package art.schedule;
 import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -72,6 +74,24 @@ public class ScheduleController {
 		try {
 			scheduleService.deleteSchedule(id);
 			response.setSuccess(true);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@RequestMapping(value = "/app/getSchedule", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse getSchedule(@RequestParam("id") Integer id) {
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Schedule schedule = scheduleService.getSchedule(id);
+			response.setSuccess(true);
+			response.setData(schedule);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());

@@ -206,7 +206,7 @@ Display report parameters and initiate running of report
 							<div class="col-md-6">
 								<div id="actionsDiv" class="pull-right">
 									<c:if test="${enableSchedule}">
-										<button type="button"id="schedule" class="btn btn-default action">
+										<button type="button" id="schedule" class="btn btn-default action">
 											<spring:message code="reports.action.schedule"/>
 										</button>
 									</c:if>
