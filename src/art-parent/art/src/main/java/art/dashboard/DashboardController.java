@@ -19,13 +19,8 @@ package art.dashboard;
 
 import art.report.Report;
 import art.report.ReportService;
-import art.reportparameter.ReportParameter;
-import art.reportparameter.ReportParameterService;
-import art.runreport.ParameterProcessor;
-import art.runreport.ParameterProcessorResult;
 import art.utils.XmlParser;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -202,13 +197,13 @@ public class DashboardController {
 		String contextPath = request.getContextPath();
 		if (!executeOnLoad) {
 			title = title + "  <img src='" + contextPath + "/images/onLoadFalse.gif' title='"
-					+ messageSource.getMessage("portlet.text.onLoadFalse", null, locale) + "'/>";
+					+ messageSource.getMessage("portlets.text.onLoadFalse", null, locale) + "'/>";
 		}
 		if (StringUtils.isNotEmpty(refreshPeriod)) {
 			title = title + " <img src='" + contextPath + "/images/clock_mini.gif' title='" 
-					+ messageSource.getMessage("portlet.text.autoRefresh", null, locale)
+					+ messageSource.getMessage("portlets.text.autoRefresh", null, locale)
 					+ " " + refreshPeriod + " " 
-					+ messageSource.getMessage("portlet.text.seconds", null, locale) 
+					+ messageSource.getMessage("portlets.text.seconds", null, locale) 
 					+ "'/> <small>" + refreshPeriod + "s</small>";
 		}
 		return title;

@@ -21,7 +21,6 @@ import art.enums.ParameterType;
 import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Class to represent a parameter

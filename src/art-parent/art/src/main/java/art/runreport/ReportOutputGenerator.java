@@ -69,6 +69,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jxls.exception.ParsePropertyException;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -161,7 +162,7 @@ public class ReportOutputGenerator {
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportType reportType, ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
-			PrintWriter writer, String fileName, String fullOutputFilename)
+			PrintWriter writer, String fullOutputFilename)
 			throws IOException, SQLException, JRException, ParsePropertyException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException {
@@ -185,6 +186,8 @@ public class ReportOutputGenerator {
 			Objects.requireNonNull(servletContext, "servletContext must not be null");
 			Objects.requireNonNull(drilldownService, "drilldownService must not be null");
 		}
+		
+		String fileName=FilenameUtils.getName(fullOutputFilename);
 
 		try {
 

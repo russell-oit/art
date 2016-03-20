@@ -18,17 +18,14 @@
 package art.utils;
 
 import art.drilldown.Drilldown;
-import art.enums.ParameterDataType;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.reportparameter.ReportParameter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 

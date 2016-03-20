@@ -82,6 +82,10 @@ public enum ReportFormat {
 				return "zip";
 			case png:
 				return "png";
+			case xml:
+				return "xml";
+			case rss20:
+				return "html";
 			default:
 				return value;
 		}

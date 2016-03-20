@@ -40,8 +40,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -229,6 +227,8 @@ public class ReportController {
 				case JxlsTemplate:
 					formats.add("xls");
 					break;
+				default:
+					throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
 		}
 

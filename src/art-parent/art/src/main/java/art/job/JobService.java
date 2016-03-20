@@ -4,8 +4,11 @@ import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.JobType;
 import art.report.Report;
+import art.report.ReportService;
+import art.schedule.Schedule;
 import art.servlets.Config;
 import art.user.User;
+import art.user.UserService;
 import art.utils.CachedResult;
 import art.utils.SchedulerUtils;
 import java.sql.Connection;
@@ -40,14 +43,20 @@ public class JobService {
 	private static final Logger logger = LoggerFactory.getLogger(JobService.class);
 
 	private final DbService dbService;
+	private final ReportService reportService;
+	private final UserService userService;
 
 	@Autowired
-	public JobService(DbService dbService) {
+	public JobService(DbService dbService, ReportService reportService, UserService userService) {
 		this.dbService = dbService;
+		this.reportService = reportService;
+		this.userService = userService;
 	}
 
 	public JobService() {
 		dbService = new DbService();
+		reportService = new ReportService();
+		userService = new UserService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT AJ.*,"
@@ -110,14 +119,10 @@ public class JobService {
 			job.setCreatedBy(rs.getString("CREATED_BY"));
 			job.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-			Report report = new Report();
-			report.setReportId(rs.getInt("QUERY_ID"));
-			report.setName(rs.getString("REPORT_NAME"));
+			Report report = reportService.getReport(rs.getInt("QUERY_ID"));
 			job.setReport(report);
 
-			User user = new User();
-			user.setUserId(rs.getInt("USER_ID"));
-			user.setUsername(rs.getString("USERNAME"));
+			User user = userService.getUser(rs.getInt("USER_ID"));
 			job.setUser(user);
 
 			return type.cast(job);
@@ -197,7 +202,7 @@ public class JobService {
 		JobType jobType = job.getJobType();
 		if (jobType == JobType.CacheAppend || jobType == JobType.CacheInsert) {
 			// Delete
-			int targetDatabaseId = Integer.parseInt(job.getOutputFormat());
+			int targetDatabaseId = Integer.parseInt(job.getOutputFormat()); //TODO use separate - new db field, not output format
 			Connection connCache = Config.getConnection(targetDatabaseId);
 			try {
 				String cachedTableName = job.getCachedTableName();
@@ -331,7 +336,7 @@ public class JobService {
 
 		String sql = SQL_SELECT_ALL + " WHERE AJ.USER_ID=?";
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
-		return dbService.query(sql, h);
+		return dbService.query(sql, h, userId);
 	}
 
 	/**
@@ -391,6 +396,77 @@ public class JobService {
 		String sql = SQL_SELECT_ALL + " WHERE AJ.MIGRATED_TO_QUARTZ='N'";
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h);
+	}
+
+	private void saveJob(Job job, boolean newRecord, User actionUser) throws SQLException {
+//		logger.debug("Entering saveSchedule: schedule={}, newRecord={}, actionUser={}",
+//				schedule, newRecord, actionUser);
+
+		Integer reportId; //database column doesn't allow null
+		if (job.getReport() == null) {
+			logger.warn("Report not defined. Defaulting to 0");
+			reportId = 0;
+		} else {
+			reportId = job.getReport().getReportId();
+		}
+
+		Integer userId; //database column doesn't allow null
+		String username;
+		if (job.getUser() == null) {
+			logger.warn("User not defined. Defaulting to 0");
+			userId = 0;
+			username = "";
+		} else {
+			userId = job.getUser().getUserId();
+			username = job.getUser().getUsername();
+		}
+
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_JOB_SCHEDULES"
+					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
+					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
+					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
+					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_TABLE_NAME,"
+					+ " START_DATE, END_DATE, NEXT_RUN_DATE, LAST_FILE_NAME,"
+					+ " LAST_RUN_DETAILS, LAST_START_DATE, LAST_END_DATE,"
+					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
+					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
+					+ " CREATION_DATE, CREATED_BY, UPDATE_DATE, UPDATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 37) + ")";
+
+			Object[] values = {
+				job.getJobId(),
+				job.getName(),
+				reportId,
+				userId,
+				username,
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+				actionUser.getUsername()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_JOB_SCHEDULES SET SCHEDULE_NAME=?, DESCRIPTION=?,"
+					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_MONTH=?,"
+					+ " JOB_WEEKDAY=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " WHERE SCHEDULE_ID=?";
+
+			Object[] values = {
+				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+				actionUser.getUsername(),
+				job.getJobId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+//			logger.warn("Problem with save. affectedRows={}, newRecord={}, schedule={}",
+//					affectedRows, newRecord, schedule);
+		}
 	}
 
 }

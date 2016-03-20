@@ -18,17 +18,13 @@
 package art.jobparameter;
 
 import art.dbutils.DbService;
-import art.enums.ParameterDataType;
 import art.enums.ParameterType;
-import art.filter.Filter;
-import art.filter.FilterService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -20,7 +20,7 @@
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.3/css/font-awesome.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
-		
+
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/prototype.js"></script>
@@ -30,16 +30,8 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxtags.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/ajaxtags-art.css" /> 
-		
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
 
-		<script type="text/javascript">
-			jQuery(document).ajaxStart(function ($) {
-				$('#spinner').show();
-			}).ajaxStop(function () {
-				$('#spinner').hide();
-			});
-		</script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
 
 	</head>
 	<body>

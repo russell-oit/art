@@ -1,5 +1,6 @@
 package art.job;
 
+import art.enums.JobType;
 import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
@@ -111,7 +112,7 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", job.getName());
-			return "redirect:/app/jobs.do";
+			return "redirect:/app/jobsConfig.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -145,6 +146,8 @@ public class JobController {
 		logger.debug("Entering showJob: action='{}'", action);
 
 		model.addAttribute("action", action);
+		
+		model.addAttribute("jobTypes", JobType.list());
 		return "editJob";
 	}
 
