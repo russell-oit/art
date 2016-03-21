@@ -29,6 +29,8 @@ Display user jobs and jobs configuration
 <spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
+<spring:message code="jobs.message.running" var="runningText"/>
+<spring:message code="jobs.message.jobRefreshed" var="refreshedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -49,7 +51,7 @@ Display user jobs and jobs configuration
 				var tbl = $('#jobs');
 
 				//initialize datatable and process delete action
-				initConfigPage(tbl,
+				var oTable = initConfigPage(tbl,
 						undefined, //pageLength. pass undefined to use the default
 						"${showAllRowsText}",
 						"${pageContext.request.contextPath}",
@@ -68,8 +70,69 @@ Display user jobs and jobs configuration
 						undefined //linkedRecordsExistText
 						);
 
+				var table = oTable.api();
+
+				tbl.find('tbody').on('click', '.run', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/app/runJob.do',
+						dataType: 'json',
+						data: {id: recordId},
+						success: function (response) //on recieve of reply
+						{
+							var runningText = '${runningText}';
+							$.notify(runningText, "success");
+						},
+						error: ajaxErrorHandler
+					});
+				});
+
+				tbl.find('tbody').on('click', '.refresh', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/app/refreshJob.do',
+						dataType: 'json',
+						data: {id: recordId},
+						success: function (response) //on recieve of reply
+						{
+							var job = response.data;
+
+							var result = '';
+							if (job.lastFileName) {
+								result = '<a type="application/octet-stream" ';
+								result = result + 'href="${pageContext.request.contextPath}/export/jobs/' + job.lastFileName + '">';
+								result = result + job.lastFileName + '</a>';
+								result = result + '<br>';
+							}
+							if (job.lastRunMessage) {
+								result = result + job.lastRunMessage;
+								result = result + '<br>';
+							}
+							if (job.lastRunDetails) {
+								result = result + job.lastRunDetails;
+							}
+
+							table.cell(row, 2).data(job.lastEndDateString);
+							table.cell(row, 3).data(result);
+							table.cell(row, 4).data(job.nextRunDateString);
+
+							notifyActionSuccess("${refreshedText}", recordName);
+						},
+						error: ajaxErrorHandler
+					});
+				});
+
 			}); //end document ready
 		</script>
+
 	</jsp:attribute>
 
 	<jsp:body>
@@ -129,12 +192,20 @@ Display user jobs and jobs configuration
 							<fmt:formatDate value="${job.lastEndDate}" pattern="${dateDisplayPattern}"/>
 						</td>
 						<td>
-							<a type="application/octet-stream" 
-							   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
-								${job.lastFileName}
-							</a>
-							<br>
-							${job.lastRunDetails}
+							<c:if test="${not empty job.lastFileName}">
+								<a type="application/octet-stream" 
+								   href="${pageContext.request.contextPath}/export/jobs/${job.lastFileName}">
+									${job.lastFileName}
+								</a>
+								<br>
+							</c:if>
+							<c:if test="${not empty job.lastRunMessage}">
+								<spring:message code="${job.lastRunMessage}"/>
+								<br>
+							</c:if>
+							<c:if test="${not empty job.lastRunDetails}">
+								${job.lastRunDetails}
+							</c:if>
 						</td>
 						<td data-sort="${job.nextRunDate.time}">
 							<fmt:formatDate value="${job.nextRunDate}" pattern="${dateDisplayPattern}"/>
@@ -154,6 +225,10 @@ Display user jobs and jobs configuration
 									<button type="button" class="btn btn-default run">
 										<i class="fa fa-bolt"></i>
 										<spring:message code="jobs.action.run"/>
+									</button>
+									<button type="button" class="btn btn-default refresh">
+										<i class="fa fa-refresh"></i>
+										<spring:message code="page.action.refresh"/>
 									</button>
 								</div>
 							</c:if>

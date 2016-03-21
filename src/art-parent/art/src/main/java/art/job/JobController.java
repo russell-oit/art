@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import javax.servlet.http.HttpSession;
@@ -30,11 +31,14 @@ import org.quartz.JobDetail;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
 import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -60,9 +64,12 @@ public class JobController {
 
 	@Autowired
 	private ReportService reportService;
-	
+
 	@Autowired
 	private ScheduleService scheduleService;
+	
+	@Autowired
+	private MessageSource messageSource;
 
 	@RequestMapping(value = "/app/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -107,6 +114,72 @@ public class JobController {
 			jobService.deleteJob(id);
 			response.setSuccess(true);
 		} catch (SQLException | SchedulerException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@CacheEvict(value = "jobs", allEntries = true)
+	@RequestMapping(value = "/app/refreshJob", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse refreshJob(@RequestParam("id") Integer id, Locale locale) {
+		logger.debug("Entering deleteJob: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			Job job = jobService.getJob(id);
+			
+			String lastRunMessage=job.getLastRunMessage();
+			if(StringUtils.isNotBlank(lastRunMessage)){
+				lastRunMessage=messageSource.getMessage(lastRunMessage, null, locale);
+				job.setLastRunMessage(lastRunMessage);
+			}
+			String lastEndDateString=Config.getDateDisplayString(job.getLastEndDate());
+			job.setLastEndDateString(lastEndDateString);
+			String nextRunDateString=Config.getDateDisplayString(job.getNextRunDate());
+			job.setNextRunDateString(nextRunDateString);
+			
+			response.setData(job);
+			
+			response.setSuccess(true);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@CacheEvict(value = "jobs", allEntries = true)
+	@RequestMapping(value = "/app/runJob", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse runJob(@RequestParam("id") Integer id) {
+		logger.debug("Entering deleteJob: id={}", id);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			String runId = id + "-" + ArtUtils.getUniqueId();
+
+			JobDetail tempJob = newJob(ReportJob.class)
+					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
+					.usingJobData("jobId", id)
+					.usingJobData("tempJob", Boolean.TRUE)
+					.build();
+
+			// create SimpleTrigger that will fire once, immediately		        
+			SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
+					.withIdentity(triggerKey("tempTrigger-" + runId, "tempTriggerGroup"))
+					.startNow()
+					.build();
+
+			Scheduler scheduler = SchedulerUtils.getScheduler();
+			scheduler.scheduleJob(tempJob, tempTrigger);
+			response.setSuccess(true);
+		} catch (SchedulerException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

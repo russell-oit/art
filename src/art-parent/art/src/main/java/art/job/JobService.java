@@ -105,6 +105,7 @@ public class JobService {
 			job.setEndDate(rs.getTimestamp("END_DATE"));
 			job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
 			job.setLastFileName(rs.getString("LAST_FILE_NAME"));
+			job.setLastRunMessage(rs.getString("LAST_RUN_MESSAGE"));
 			job.setLastRunDetails(rs.getString("LAST_RUN_DETAILS"));
 			job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
 			job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));

@@ -142,7 +142,7 @@ public class ArtUtils {
 	public static String getUniqueId() {
 		//can potentially use randomUUID but it may block if the server lacks sufficient entropy?
 		//https://stackoverflow.com/questions/14532976/performance-of-random-uuid-generation-with-java-7-or-java-6
-		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(10);
+		return System.currentTimeMillis() + "-" + RandomStringUtils.randomAlphanumeric(5);
 	}
 
 //	/**

@@ -55,6 +55,51 @@ public class Job implements Serializable {
 	private Date endDate;
 	private String startDateString;
 	private String endDateString;
+	private String lastRunMessage;
+	private String lastEndDateString;
+	private String nextRunDateString;
+
+	/**
+	 * @return the lastEndDateString
+	 */
+	public String getLastEndDateString() {
+		return lastEndDateString;
+	}
+
+	/**
+	 * @param lastEndDateString the lastEndDateString to set
+	 */
+	public void setLastEndDateString(String lastEndDateString) {
+		this.lastEndDateString = lastEndDateString;
+	}
+
+	/**
+	 * @return the nextRunDateString
+	 */
+	public String getNextRunDateString() {
+		return nextRunDateString;
+	}
+
+	/**
+	 * @param nextRunDateString the nextRunDateString to set
+	 */
+	public void setNextRunDateString(String nextRunDateString) {
+		this.nextRunDateString = nextRunDateString;
+	}
+
+	/**
+	 * @return the lastRunMessage
+	 */
+	public String getLastRunMessage() {
+		return lastRunMessage;
+	}
+
+	/**
+	 * @param lastRunMessage the lastRunMessage to set
+	 */
+	public void setLastRunMessage(String lastRunMessage) {
+		this.lastRunMessage = lastRunMessage;
+	}
 
 	/**
 	 * @return the startDateString

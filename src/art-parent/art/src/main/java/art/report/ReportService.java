@@ -720,7 +720,7 @@ public class ReportService {
 
 		int count = 0; //number of records copied
 
-		Connection conn = Config.getConnection();
+		Connection conn = DbConnections.getArtDbConnection();
 
 		if (conn == null) {
 			throw new IllegalStateException("Connection to the ART Database not available");
@@ -839,7 +839,7 @@ public class ReportService {
 		PreparedStatement ps = null;
 
 		try {
-			conn = Config.getConnection();
+			conn = DbConnections.getArtDbConnection();
 
 			String sql;
 			ResultSet rs;

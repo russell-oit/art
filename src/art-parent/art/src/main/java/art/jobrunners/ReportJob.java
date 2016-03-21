@@ -65,12 +65,14 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 
 /**
  * Class to run report jobs
@@ -81,15 +83,16 @@ public class ReportJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportJob.class);
 	private DbService dbService;
-	private String fileName = "";
+	private String fileName;
 	private String jobAuditKey;
-	art.job.Job job;
-	Timestamp jobStartDate;
-	String subject;
-	String from;
-	JobType jobType;
-	int jobId;
-	String runDetails = "";
+	private art.job.Job job;
+	private Timestamp jobStartDate;
+	private String subject;
+	private String from;
+	private JobType jobType;
+	private int jobId;
+	private String runDetails;
+	private String runMessage;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -112,17 +115,23 @@ public class ReportJob implements org.quartz.Job {
 		jobType = job.getJobType();
 		jobId = job.getJobId();
 
+		fileName = "";
+		runDetails = "";
+		runMessage = "";
+
 		dbService = new DbService();
 
 		Connection conn = null;
 
 		try {
-			conn = Config.getConnection();
+			conn = DbConnections.getArtDbConnection();
 
 			//get next run date	for the job for updating the jobs table. only update if it's a scheduled run and not an interactive, temporary job
-			String tempJob = dataMap.getString("tempjob");
-			Date nextRunDate = null;
-			if (tempJob == null) {
+			boolean tempJob = dataMap.getBooleanValue("tempJob");
+			Date nextRunDate;
+			if (tempJob) {
+				nextRunDate = job.getNextRunDate();
+			} else {
 				//not a temp job. set next run date
 				nextRunDate = context.getTrigger().getFireTimeAfter(new Date());
 			}
@@ -131,11 +140,11 @@ public class ReportJob implements org.quartz.Job {
 			beforeExecution(nextRunDate);
 
 			if (!job.isActive()) {
-				runDetails = "Job Disabled";
+				runMessage = "jobs.message.jobDisabled";
 			} else if (job.getReport().getReportStatus() != ReportStatus.Active) {
-				runDetails = "Query Disabled";
+				runMessage = "jobs.message.reportDisabled";
 			} else if (!job.getUser().isActive()) {
-				runDetails = "Job Owner Disabled";
+				runMessage = "jobs.message.ownerDisabled";
 			} else {
 				if (job.getRecipientsQueryId() > 0) {
 					//job has dynamic recipients
@@ -146,7 +155,7 @@ public class ReportJob implements org.quartz.Job {
 				}
 			}
 
-			afterCompletion(fileName, runDetails);
+			afterCompletion();
 
 		} catch (Exception e) {
 			logger.error("Error", e);
@@ -216,10 +225,15 @@ public class ReportJob implements org.quartz.Job {
 
 	private void beforeExecution(Date nextRunDate) throws SQLException {
 		// Update LAST_START_DATE and next run date on ART_JOBS table
-		String sql = "UPDATE ART_JOBS SET LAST_START_DATE = ?, NEXT_RUN_DATE = ? WHERE JOB_ID = ?";
+		String sql = "UPDATE ART_JOBS SET LAST_START_DATE = ?,"
+				+ " LAST_FILE_NAME=?, LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=?,"
+				+ " NEXT_RUN_DATE = ? WHERE JOB_ID = ?";
 
 		Object[] values = {
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
+			fileName,
+			runMessage,
+			runDetails,
 			DatabaseUtils.toSqlTimestamp(nextRunDate),
 			jobId
 		};
@@ -228,15 +242,16 @@ public class ReportJob implements org.quartz.Job {
 
 	}
 
-	private void afterCompletion(String fileName, String runDetails) throws SQLException {
+	private void afterCompletion() throws SQLException {
 
 		//update job details
-		String sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ?"
-				+ " LAST_RUN_DETAILS=? WHERE JOB_ID = ?";
+		String sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ?,"
+				+ " LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=? WHERE JOB_ID = ?";
 
 		Object[] values = {
 			DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 			fileName,
+			runMessage,
 			runDetails,
 			jobId
 		};
@@ -451,7 +466,7 @@ public class ReportJob implements org.quartz.Job {
 	public void addSharedJobUsers(Connection conn, art.job.Job job) throws SQLException {
 		String sql;
 		PreparedStatement ps = null;
-		ResultSet rs;
+		ResultSet rs = null;
 
 		int jobId = job.getJobId();
 
@@ -483,16 +498,8 @@ public class ReportJob implements org.quartz.Job {
 				dbService.update(sql, values);
 
 			}
-			rs.close();
-
 		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error. Job id {}", e);
-			}
+			DatabaseUtils.close(rs, ps);
 		}
 	}
 
@@ -547,7 +554,7 @@ public class ReportJob implements org.quartz.Job {
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
-			ReportType reportType = null;
+			ReportType reportType = job.getReport().getReportType();
 
 			//jobs don't show record count so generally no need for scrollable resultsets
 			int resultSetType;
@@ -967,75 +974,6 @@ public class ReportJob implements org.quartz.Job {
 		}
 	}
 
-	private String getSharedJobEmails(art.job.Job job) {
-		String emails;
-
-		Connection conn = null;
-		StringBuilder sb = new StringBuilder(100);
-
-		try {
-			conn = Config.getConnection();
-
-			String sql;
-			PreparedStatement ps;
-			ResultSet rs;
-			String tmp;
-
-			int jobId = job.getJobId();
-
-			//get emails from shared job groups
-			sql = "SELECT DISTINCT AU.EMAIL "
-					+ " FROM ART_USER_GROUP_JOBS AUGJ, ART_USER_GROUP_ASSIGNMENT AUGA, ART_USERS AU "
-					+ " WHERE AUGJ.USER_GROUP_ID=AUGA.USER_GROUP_ID AND AUGA.USERNAME=AU.USERNAME "
-					+ " AND AUGJ.JOB_ID=?";
-
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, jobId);
-
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				tmp = rs.getString("EMAIL");
-				if (org.apache.commons.lang.StringUtils.length(tmp) > 4) {
-					sb.append(tmp).append(";");
-				}
-			}
-			rs.close();
-			ps.close();
-
-			//get emails from shared users
-			sql = " SELECT DISTINCT AU.EMAIL "
-					+ " FROM ART_USER_JOBS auj, ART_USERS AU "
-					+ " WHERE auj.USERNAME=AU.USERNAME "
-					+ " AND auj.JOB_ID=?";
-
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, jobId);
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				tmp = rs.getString("EMAIL");
-				if (org.apache.commons.lang.StringUtils.length(tmp) > 4) {
-					sb.append(tmp).append(";");
-				}
-			}
-			rs.close();
-			ps.close();
-		} catch (Exception e) {
-			logger.error("Error", e);
-		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				logger.error("Error", e);
-			}
-		}
-
-		emails = sb.toString() + job.getMailTo();
-
-		return emails;
-	}
-
 	private ReportRunner prepareQuery(String user) throws SQLException {
 		int queryId = job.getReport().getReportId();
 		return prepareQuery(user, queryId, true);
@@ -1122,7 +1060,7 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	private String generateKey() {
-		return UUID.randomUUID().toString();
+		return ArtUtils.getUniqueId();
 	}
 
 	private Mailer getMailer() {
@@ -1210,7 +1148,7 @@ public class ReportJob implements org.quartz.Job {
 
 		}
 
-			//update job details
+		//update job details
 		//no need to update jobs table if non-split job. aftercompletion will do the final update to the jobs table
 		if (splitJob) {
 			sql = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?"
@@ -1253,7 +1191,7 @@ public class ReportJob implements org.quartz.Job {
 		Connection conn = null;
 
 		try {
-			conn = Config.getConnection();
+			conn = DbConnections.getArtDbConnection();
 
 			String sql;
 			PreparedStatement ps;
@@ -1294,7 +1232,7 @@ public class ReportJob implements org.quartz.Job {
 
 			ps.executeUpdate();
 			ps.close();
-			
+
 			//delete previous run's records
 			List<String> oldRecords = new ArrayList<String>();
 			if (jobSharedFlag.equals("S")) {
@@ -1399,7 +1337,7 @@ public class ReportJob implements org.quartz.Job {
 		Connection conn = null;
 
 		try {
-			conn = Config.getConnection();
+			conn = DbConnections.getArtDbConnection();
 
 			String sql;
 			PreparedStatement ps;
