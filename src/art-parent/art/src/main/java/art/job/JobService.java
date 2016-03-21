@@ -266,8 +266,8 @@ public class JobService {
 		logger.debug("newId={}", newId);
 
 		job.setJobId(newId);
-		boolean newRecord=true;
-		
+		boolean newRecord = true;
+
 		saveJob(job, newRecord, actionUser);
 
 		return newId;
@@ -283,8 +283,8 @@ public class JobService {
 	public void updateJob(Job job, User actionUser) throws SQLException {
 		logger.debug("Entering updateJob: job={}", job);
 
-		boolean newRecord=false;
-		
+		boolean newRecord = false;
+
 		saveJob(job, newRecord, actionUser);
 	}
 
@@ -390,22 +390,21 @@ public class JobService {
 			userId = job.getUser().getUserId();
 			username = job.getUser().getUsername();
 		}
-		
-		String migratedToQuartz="X";
+
+		String migratedToQuartz = "X";
 
 		int affectedRows;
 		if (newRecord) {
-			String sql = "INSERT INTO ART_JOB_SCHEDULES"
+			String sql = "INSERT INTO ART_JOBS"
 					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
 					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
 					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
 					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_TABLE_NAME,"
-					+ " START_DATE, END_DATE, NEXT_RUN_DATE, LAST_FILE_NAME,"
-					+ " LAST_RUN_DETAILS, LAST_START_DATE, LAST_END_DATE,"
+					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
-					+ " CREATION_DATE, CREATED_BY, UPDATE_DATE, UPDATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 37) + ")";
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 31) + ")";
 
 			Object[] values = {
 				job.getJobId(),
@@ -413,6 +412,30 @@ public class JobService {
 				reportId,
 				userId,
 				username,
+				job.getOutputFormat(),
+				job.getJobType().getValue(),
+				job.getScheduleMinute(),
+				job.getScheduleHour(),
+				job.getScheduleDay(),
+				job.getScheduleWeekday(),
+				job.getScheduleMonth(),
+				job.getMailTo(),
+				job.getMailFrom(),
+				job.getMailCc(),
+				job.getMailBcc(),
+				job.getMailSubject(),
+				job.getMailMessage(),
+				job.getCachedTableName(),
+				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
+				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
+				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
+				job.isActive(),
+				job.isEnableAudit(),
+				job.isAllowSharing(),
+				job.isAllowSplitting(),
+				job.getRecipientsQueryId(),
+				job.getRunsToArchive(),
+				migratedToQuartz,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};

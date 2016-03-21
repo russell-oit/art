@@ -34,7 +34,7 @@ Display report parameters and initiate running of report
 			$(document).ready(function () {
 				$("#schedule").click(function (e) {
 					e.preventDefault();
-					var url = "${pageContext.request.contextPath}/app/scheduleReport.do";
+					var url = "${pageContext.request.contextPath}/app/addJob.do";
 					$('#parametersForm').attr('action', url).submit();
 				});
 
@@ -119,6 +119,7 @@ Display report parameters and initiate running of report
 					<fieldset>
 						<input type="hidden" name="reportId" value="${report.reportId}">
 						<input type="hidden" name="showInline" id="showInline" value="true">
+						<input type="hidden" name="nextPage" id="nextPage" value="jobs.do">
 
 						<jsp:include page="reportParameters.jsp">
 							<jsp:param name="reportParamsList" value="${reportParamsList}"/>

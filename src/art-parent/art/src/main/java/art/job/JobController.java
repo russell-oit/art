@@ -2,6 +2,7 @@ package art.job;
 
 import art.enums.JobType;
 import art.jobrunners.ReportJob;
+import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
@@ -9,6 +10,7 @@ import art.runreport.ParameterProcessorResult;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.user.User;
+import art.user.UserService;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -71,6 +74,9 @@ public class JobController {
 
 	@Autowired
 	private MessageSource messageSource;
+
+	@Autowired
+	private UserService userService;
 
 	@RequestMapping(value = "/app/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -188,11 +194,36 @@ public class JobController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addJob", method = RequestMethod.GET)
-	public String addJob(Model model) {
-		logger.debug("Entering addJob");
+	@RequestMapping(value = "/app/addJob", method = {RequestMethod.GET, RequestMethod.POST})
+	public String addJob(Model model, HttpServletRequest request,
+			HttpSession session) {
+		try {
+			logger.debug("Entering addJob");
 
-		model.addAttribute("job", new Job());
+			Job job = new Job();
+			model.addAttribute("job", job);
+
+			String reportIdString = request.getParameter("reportId");
+			if (reportIdString != null) {
+				Report report = reportService.getReport(Integer.parseInt(reportIdString));
+				job.setReport(report);
+			}
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			job.setUser(sessionUser);
+
+			ParameterProcessor parameterProcessor = new ParameterProcessor();
+			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
+			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+			model.addAttribute("reportParamsList", reportParamsList);
+
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		} catch (ParseException ex) {
+			java.util.logging.Logger.getLogger(JobController.class.getName()).log(Level.SEVERE, null, ex);
+		}
+
 		return showJob("add", model);
 	}
 
@@ -241,16 +272,16 @@ public class JobController {
 		while (htmlParamNames.hasMoreElements()) {
 			String htmlParamName = htmlParamNames.nextElement();
 			logger.debug("htmlParamName='{}'", htmlParamName);
-			
+
 			if (htmlParamName.startsWith("p-")) {
 				String paramName = htmlParamName.substring(2);
 				passedValues.put(htmlParamName, request.getParameterValues(htmlParamName));
 			}
 		}
-		
+
 		for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
 			String name = entry.getKey();
-			String[] values =entry.getValue();
+			String[] values = entry.getValue();
 		}
 	}
 
