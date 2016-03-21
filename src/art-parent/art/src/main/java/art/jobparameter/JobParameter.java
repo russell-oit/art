@@ -28,6 +28,21 @@ public class JobParameter {
 	private String name;
 	private String Value;
 	private ParameterType parameterType;
+	private String paramTypeString;
+
+	/**
+	 * @return the paramTypeString
+	 */
+	public String getParamTypeString() {
+		return paramTypeString;
+	}
+
+	/**
+	 * @param paramTypeString the paramTypeString to set
+	 */
+	public void setParamTypeString(String paramTypeString) {
+		this.paramTypeString = paramTypeString;
+	}
 
 	/**
 	 * @return the jobId

@@ -543,7 +543,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			//prepare report parameters
-			ParameterProcessorResult paramProcessorResult = buildParameters(job.getReport().getReportId());
+			ParameterProcessorResult paramProcessorResult = buildParameters(job.getReport().getReportId(), jobId);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportRunner.setReportParamsMap(reportParamsMap);
 
@@ -986,14 +986,20 @@ public class ReportJob implements org.quartz.Job {
 
 	}
 
-	private ParameterProcessorResult buildParameters(int reportId) throws SQLException {
+	public ParameterProcessorResult buildParameters(int reportId, int jId) throws SQLException {
 		ParameterProcessorResult paramProcessorResult = null;
 
 		JobParameterService jobParameterService = new JobParameterService();
-		List<JobParameter> jobParams = jobParameterService.getJobParameters(jobId);
+		List<JobParameter> jobParams = jobParameterService.getJobParameters(jId);
 		Map<String, List<String>> paramValues = new HashMap<>();
 		for (JobParameter jobParam : jobParams) {
 			String name = jobParam.getName();
+			String paramTypeString = jobParam.getParamTypeString();
+			if (StringUtils.equalsIgnoreCase(paramTypeString, "I")
+					|| StringUtils.equalsIgnoreCase(paramTypeString, "M")) {
+				name = "p-" + name;
+				jobParam.setName(name);
+			}
 			List<String> values = paramValues.get(name);
 			if (values == null) {
 				paramValues.put(name, new ArrayList<String>());

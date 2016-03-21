@@ -3,24 +3,25 @@ package art.job;
 import art.enums.JobType;
 import art.jobrunners.ReportJob;
 import art.report.ReportService;
+import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
-import art.schedule.Schedule;
+import art.runreport.ParameterProcessorResult;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.AjaxResponse;
-import art.utils.ArtJob;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Level;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -67,7 +68,7 @@ public class JobController {
 
 	@Autowired
 	private ScheduleService scheduleService;
-	
+
 	@Autowired
 	private MessageSource messageSource;
 
@@ -131,19 +132,19 @@ public class JobController {
 
 		try {
 			Job job = jobService.getJob(id);
-			
-			String lastRunMessage=job.getLastRunMessage();
-			if(StringUtils.isNotBlank(lastRunMessage)){
-				lastRunMessage=messageSource.getMessage(lastRunMessage, null, locale);
+
+			String lastRunMessage = job.getLastRunMessage();
+			if (StringUtils.isNotBlank(lastRunMessage)) {
+				lastRunMessage = messageSource.getMessage(lastRunMessage, null, locale);
 				job.setLastRunMessage(lastRunMessage);
 			}
-			String lastEndDateString=Config.getDateDisplayString(job.getLastEndDate());
+			String lastEndDateString = Config.getDateDisplayString(job.getLastEndDate());
 			job.setLastEndDateString(lastEndDateString);
-			String nextRunDateString=Config.getDateDisplayString(job.getNextRunDate());
+			String nextRunDateString = Config.getDateDisplayString(job.getNextRunDate());
 			job.setNextRunDateString(nextRunDateString);
-			
+
 			response.setData(job);
-			
+
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -199,7 +200,7 @@ public class JobController {
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
 			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			HttpSession session) {
+			HttpSession session, HttpServletRequest request) {
 
 		logger.debug("Entering saveJob: job={}, action='{}'", job, action);
 
@@ -213,6 +214,8 @@ public class JobController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			finalizeSchedule(job);
+
+			saveJobParameters(request);
 
 			if (StringUtils.equals(action, "add")) {
 				jobService.addJob(job, sessionUser);
@@ -231,12 +234,39 @@ public class JobController {
 		return showJob(action, model);
 	}
 
+	private void saveJobParameters(HttpServletRequest request) throws NumberFormatException {
+		Integer reportId = Integer.parseInt(request.getParameter("report.reportId"));
+		Map<String, String[]> passedValues = new HashMap<>();
+		Enumeration<String> htmlParamNames = request.getParameterNames();
+		while (htmlParamNames.hasMoreElements()) {
+			String htmlParamName = htmlParamNames.nextElement();
+			logger.debug("htmlParamName='{}'", htmlParamName);
+			
+			if (htmlParamName.startsWith("p-")) {
+				String paramName = htmlParamName.substring(2);
+				passedValues.put(htmlParamName, request.getParameterValues(htmlParamName));
+			}
+		}
+		
+		for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
+			String name = entry.getKey();
+			String[] values =entry.getValue();
+		}
+	}
+
 	@RequestMapping(value = "/app/editJob", method = RequestMethod.GET)
 	public String editJob(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editJob: id={}", id);
 
 		try {
-			model.addAttribute("job", jobService.getJob(id));
+			Job job = jobService.getJob(id);
+			model.addAttribute("job", job);
+
+			ReportJob reportJob = new ReportJob();
+			int reportId = job.getReport().getReportId();
+			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id);
+			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+			model.addAttribute("reportParamsList", reportParamsList);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

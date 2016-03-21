@@ -17,6 +17,7 @@
  */
 package art.jobparameter;
 
+import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.enums.ParameterType;
 import java.sql.ResultSet;
@@ -68,14 +69,15 @@ public class JobParameterService {
 
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-			JobParameter filter = new JobParameter();
+			JobParameter jobParam = new JobParameter();
 
-			filter.setJobId(rs.getInt("JOB_ID"));
-			filter.setName(rs.getString("PARAM_NAME"));
-			filter.setValue(rs.getString("PARAM_VALUE"));
-			filter.setParameterType(ParameterType.toEnum(rs.getString("PARAM_TYPE")));
+			jobParam.setJobId(rs.getInt("JOB_ID"));
+			jobParam.setName(rs.getString("PARAM_NAME"));
+			jobParam.setValue(rs.getString("PARAM_VALUE"));
+//			jobParam.setParameterType(ParameterType.toEnum(rs.getString("PARAM_TYPE")));
+			jobParam.setParamTypeString(rs.getString("PARAM_TYPE"));
 
-			return type.cast(filter);
+			return type.cast(jobParam);
 		}
 	}
 
@@ -86,12 +88,24 @@ public class JobParameterService {
 	 * @return populated object if found, null otherwise
 	 * @throws SQLException
 	 */
-	@Cacheable("filters")
 	public List<JobParameter> getJobParameters(int id) throws SQLException {
 		logger.debug("Entering getJobParameter: id={}", id);
 
 		String sql = SQL_SELECT_ALL + " WHERE JOB_ID=?";
 		ResultSetHandler<List<JobParameter>> h = new BeanListHandler<>(JobParameter.class, new JobParameterMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	public void updateJobParameter(JobParameter jobParam) throws SQLException {
+		String sql = "UPDATE ART_JOBS_PARAMETERS SET PARAM_VALUE=?"
+				+ " WHERE JOB_ID=? AND PARAM_NAME=?";
+
+		Object[] values = {
+			jobParam.getValue(),
+			jobParam.getJobId(),
+			jobParam.getName()
+		};
+
+		dbService.update(sql, values);
 	}
 }

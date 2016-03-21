@@ -138,9 +138,9 @@ public class ReportController {
 				model.addAttribute("reportOptions", reportOptions);
 				model.addAttribute("chartOptions", chartOptions);
 
-				ParameterService parameterService = new ParameterService();
-				List<Parameter> paramsList = parameterService.getReportParameters(reportId);
-				model.addAttribute("paramsList", paramsList);
+//				ParameterService parameterService = new ParameterService();
+//				List<Parameter> paramsList = parameterService.getReportParameters(reportId);
+//				model.addAttribute("paramsList", paramsList);
 
 				ReportType reportType = report.getReportType();
 

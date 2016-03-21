@@ -83,6 +83,14 @@
 				$("#endDatePicker").on("dp.change", function (e) {
 					$('#startDatePicker').data("DateTimePicker").maxDate(e.date);
 				});
+				
+				$('.datepicker').datetimepicker({
+					format: 'YYYY-MM-DD'
+				});
+
+				$('.datetimepicker').datetimepicker({
+					format: 'YYYY-MM-DD HH:mm:ss'
+				});
 
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
@@ -259,6 +267,13 @@
 
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
+
+				<fieldset>
+					<legend><spring:message code="jobs.text.parameters"/></legend>
+					<jsp:include page="reportParameters.jsp">
+						<jsp:param name="reportParamsList" value="${reportParamsList}"/>
+					</jsp:include>
+				</fieldset>
 
 				<fieldset>
 					<legend><spring:message code="jobs.text.job"/></legend>
