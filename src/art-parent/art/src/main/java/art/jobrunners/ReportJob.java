@@ -60,19 +60,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
 
 /**
  * Class to run report jobs
@@ -164,6 +161,14 @@ public class ReportJob implements org.quartz.Job {
 		}
 	}
 
+	private void sendEmail(Mailer mailer) throws MessagingException, IOException {
+		if (Config.isEmailServerConfigured()) {
+			mailer.send();
+		} else {
+			logger.warn("Email server not configured");
+		}
+	}
+
 	/**
 	 * Prepare mailer object for sending alert job. Used for normal jobs, and
 	 * dynamic recipient jobs
@@ -183,7 +188,7 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param mailer
 	 */
-	private void prepareEmailJob(Mailer mailer, String msg) throws FileNotFoundException, IOException {
+	private void prepareEmailJob(Mailer mailer, String msg, String outputFileName) throws FileNotFoundException, IOException {
 
 		mailer.setSubject(subject);
 		mailer.setFrom(from);
@@ -192,30 +197,25 @@ public class ReportJob implements org.quartz.Job {
 			msg = "&nbsp;"; //if message is blank, ensure there's a space before the hr
 		}
 
-		if (jobType == JobType.EmailAttachment
-				|| jobType == JobType.CondEmailAttachment) {
+		if (jobType.isEmailAttachment()) {
 			// e-mail output as attachment
 			List<File> l = new ArrayList<File>();
-			l.add(new File(fileName));
+			l.add(new File(outputFileName));
 			mailer.setAttachments(l);
-		} else if (jobType == JobType.EmailInline
-				|| jobType == JobType.CondEmailInline) {
+		} else if (jobType.isEmailInline()) {
 			// inline html within email
 			// read the file and include it in the HTML message
-			FileInputStream fis = new FileInputStream(fileName);
-			try {
+			try (FileInputStream fis = new FileInputStream(outputFileName)) {
 				byte fileBytes[] = new byte[fis.available()];
 				int result = fis.read(fileBytes);
 				if (result == -1) {
-					logger.warn("EOF reached for inline email file: {}", fileName);
+					logger.warn("EOF reached for inline email file: {}", outputFileName);
 				}
 				// convert the file to a string and get only the html table
 				String htmlTable = new String(fileBytes, "UTF-8");
 				//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
 				htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
 				msg = msg + "<hr>" + htmlTable;
-			} finally {
-				fis.close();
 			}
 		}
 
@@ -399,7 +399,7 @@ public class ReportJob implements org.quartz.Job {
 					//generate individualized output for all shared users
 
 					//update art_user_jobs table with users who have access through group membership. so that users newly added to a group can get their own output
-					addSharedJobUsers(conn, job);
+					addSharedJobUsers(conn);
 
 					//get users to generate output for
 					String usersSQL = "SELECT auj.USERNAME, AU.EMAIL "
@@ -456,19 +456,17 @@ public class ReportJob implements org.quartz.Job {
 				fileName = ownerFileName;
 			} else if (splitJob && userCount > 0) {
 				//job is shared with other users but the owner doesn't have a copy. save note in the jobs table
-				runDetails = "Job Shared";
+				runMessage = "jobs.message.jobShared";
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}
 	}
 
-	public void addSharedJobUsers(Connection conn, art.job.Job job) throws SQLException {
+	public void addSharedJobUsers(Connection conn) throws SQLException {
 		String sql;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-
-		int jobId = job.getJobId();
 
 		try {
 			//get users who should have access to the job through group membership but don't already have it
@@ -545,20 +543,15 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			//prepare report parameters
-			ParameterProcessor paramProcessor = new ParameterProcessor();
-			ParameterProcessorResult paramProcessorResult = null;
-//			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request, reportId);
-
+			ParameterProcessorResult paramProcessorResult = buildParameters(job.getReport().getReportId());
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
-			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
+			reportRunner.setReportParamsMap(reportParamsMap);
 
 			ReportType reportType = job.getReport().getReportType();
 
 			//jobs don't show record count so generally no need for scrollable resultsets
 			int resultSetType;
-			if ((reportType.isChart() && parameterChartOptions.isShowData())) {
+			if (reportType.isChart()) {
 				//need scrollable resultset for charts for show data option
 				resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 			} else {
@@ -601,7 +594,7 @@ public class ReportJob implements org.quartz.Job {
 
 			//determine if emailing is required and emails are configured
 			boolean generateEmail = false;
-			if (jobType == JobType.Publish || jobType == JobType.CondPublish) {
+			if (jobType.isPublish()) {
 				//for split published jobs, tos should have a value to enable confirmation email for individual users
 				if (!StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4
 						|| StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)
@@ -641,12 +634,14 @@ public class ReportJob implements org.quartz.Job {
 
 				//only run alert query if we have some emails configured
 				if (generateEmail || recipientDetails != null) {
-					runDetails = "No Alert";
+					runMessage = "jobs.message.noAlert";
 
 					ResultSet rs = reportRunner.getResultSet();
 					if (rs.next()) {
 						int value = rs.getInt(1);
 						if (value > 0) {
+							runMessage = "jobs.message.alertExists";
+
 							logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
 
 							// compatibility with Art pre 1.8 where subject was not editable
@@ -685,11 +680,12 @@ public class ReportJob implements org.quartz.Job {
 
 									//send email for this recipient
 									try {
-										mailer.send();
-										runDetails = "Alert Sent";
+										sendEmail(mailer);
+										runMessage = "jobs.message.alertSent";
 									} catch (MessagingException ex) {
 										logger.debug("Error", ex);
-										runDetails = "Error when sending alert <p>" + ex.toString() + "</p>";
+										runMessage = "jobs.message.errorSendingAlert";
+										runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
 
 									}
 								}
@@ -712,11 +708,12 @@ public class ReportJob implements org.quartz.Job {
 								mailer.setBcc(bccs);
 
 								try {
-									mailer.send();
-									runDetails = "Alert Sent";
+									sendEmail(mailer);
+									runMessage = "jobs.message.alertSent";
 								} catch (MessagingException ex) {
 									logger.debug("Error", ex);
-									runDetails = "Error when sending alert <p>" + ex.toString() + "</p>";
+									runMessage = "jobs.message.errorSendingAlert";
+									runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
 
 								}
 
@@ -729,15 +726,9 @@ public class ReportJob implements org.quartz.Job {
 					}
 				} else {
 					//no emails configured
-					runDetails = "No emails configured";
+					runMessage = "jobs.message.noEmailsConfigured";
 				}
-			} else if (jobType == JobType.EmailAttachment
-					|| jobType == JobType.Publish
-					|| jobType == JobType.EmailInline
-					|| jobType == JobType.CondEmailAttachment
-					|| jobType == JobType.CondEmailInline
-					|| jobType == JobType.CondPublish) {
-
+			} else if (jobType.isPublish() || jobType.isEmail()) {
 				/*
 				 * MAILwithAttachment or PUBLISH or MAILinLine
 				 */
@@ -753,32 +744,30 @@ public class ReportJob implements org.quartz.Job {
 				//determine if the query returns records. to know if to generate output for conditional jobs
 				boolean generateOutput = true;
 
-				if (jobType == JobType.CondEmailAttachment
-						|| jobType == JobType.CondEmailInline
-						|| jobType == JobType.CondPublish) {
+				if (jobType.isConditional()) {
 					//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
 					ReportRunner pqCount = prepareQuery(user);
 					pqCount.setAdminSession(true);
+					pqCount.setReportParamsMap(reportParamsMap);
+
 					pqCount.execute();
+
 					ResultSet rsCount = pqCount.getResultSet();
 					if (!rsCount.next()) {
 						//no records
 						generateOutput = false;
-						runDetails = "No Records";
+						runMessage = "jobs.message.noRecords";
 					}
 					rsCount.close();
 					pqCount.close();
 				}
 
 				//for emailing jobs, only run query if some emails are configured
-				if (jobType == JobType.EmailAttachment
-						|| jobType == JobType.EmailInline
-						|| jobType == JobType.CondEmailAttachment
-						|| jobType == JobType.CondEmailInline) {
+				if (jobType.isEmail()) {
 					//email attachment, email inline, conditional email attachment, conditional email inline
 					if (!generateEmail && recipientDetails == null) {
 						generateOutput = false;
-						runDetails = "No emails configured";
+						runMessage = "jobs.message.noEmailsConfigured";
 					}
 				}
 
@@ -807,6 +796,7 @@ public class ReportJob implements org.quartz.Job {
 					}
 
 					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+					reportOutputGenerator.setJobId(jobId);
 
 					Locale locale = Locale.getDefault();
 					reportOutputGenerator.generateOutput(report, reportRunner, reportType,
@@ -853,17 +843,18 @@ public class ReportJob implements org.quartz.Job {
 									}
 								}
 
-								prepareEmailJob(mailer, customMessage);
+								prepareEmailJob(mailer, customMessage, outputFileName);
 
 								mailer.setTo(email);
 
 								//send email for this recipient
 								try {
-									mailer.send();
-									runDetails = "File has been emailed";
+									sendEmail(mailer);
+									runMessage = "jobs.message.fileEmailed";
 								} catch (MessagingException ex) {
 									logger.debug("Error", ex);
-									runDetails = "Error when sending some emails."
+									runMessage = "jobs.message.errorSendingSomeEmails";
+									runDetails = "<b>Error: </b>"
 											+ " <p>" + ex.toString() + "</p>";
 
 									String msg = "Error when sending some emails."
@@ -891,7 +882,7 @@ public class ReportJob implements org.quartz.Job {
 						if (generateEmail) {
 							Mailer mailer = getMailer();
 
-							prepareEmailJob(mailer, message);
+							prepareEmailJob(mailer, message, outputFileName);
 
 							//set recipients						
 							mailer.setTo(tosEmail);
@@ -900,23 +891,22 @@ public class ReportJob implements org.quartz.Job {
 
 							//check if mail was successfully sent
 							try {
-								mailer.send();
-								runDetails = "File has been emailed";
+								sendEmail(mailer);
+								runMessage = "jobs.message.fileEmailed";
 
-								if (jobType == JobType.EmailAttachment
-										|| jobType == JobType.EmailInline
-										|| jobType == JobType.CondEmailAttachment
-										|| jobType == JobType.CondEmailInline) {
+								if (jobType.isEmail()) {
 									// delete the file since it has
 									// been sent via email (for publish jobs it is deleted by the scheduler)
 									File f = new File(outputFileName);
 									f.delete();
+									fileName = "";
 								} else {
-									runDetails = "<p>Reminder email sent</p>";
+									runMessage = "jobs.message.reminderSent";
 								}
 							} catch (MessagingException ex) {
 								logger.debug("Error", ex);
-								runDetails = "Error when sending some emails."
+								runMessage = "jobs.message.errorSendingSomeEmails";
+								runDetails = "<b>Error: </b>"
 										+ " <p>" + ex.toString() + "</p>";
 
 								String msg = "Error when sending some emails."
@@ -930,8 +920,7 @@ public class ReportJob implements org.quartz.Job {
 					}
 				}
 
-			} else if (jobType == JobType.CacheAppend
-					|| jobType == JobType.CacheInsert) {
+			} else if (jobType.isCache()) {
 				// Cache the result in the cache database
 				int targetDatabaseId = Integer.parseInt(outputFormat);
 
@@ -963,8 +952,9 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			logger.debug("Job Id {} ...finished", jobId);
-		} catch (Exception e) {
-			runDetails = "<b>Error:</b> " + e;
+		} catch (Exception ex) {
+			runDetails = "<b>Error:</b> " + ex.toString();
+			logger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {
 				reportRunner.close();
@@ -986,6 +976,18 @@ public class ReportJob implements org.quartz.Job {
 	private ReportRunner prepareQuery(String user, int reportId, boolean buildParams) throws SQLException {
 
 		Report report = job.getReport();
+
+		ReportRunner reportRunner = new ReportRunner();
+		reportRunner.setUsername(user);
+		reportRunner.setReport(report);
+		reportRunner.setAdminSession(false);
+
+		return reportRunner;
+
+	}
+
+	private ParameterProcessorResult buildParameters(int reportId) throws SQLException {
+		ParameterProcessorResult paramProcessorResult = null;
 
 		JobParameterService jobParameterService = new JobParameterService();
 		List<JobParameter> jobParams = jobParameterService.getJobParameters(jobId);
@@ -1014,25 +1016,14 @@ public class ReportJob implements org.quartz.Job {
 			finalValues.put(name, valuesArray);
 		}
 
-		ParameterProcessor paramProcessor = new ParameterProcessor();
-		ParameterProcessorResult paramProcessorResult = null;
-		Map<String, ReportParameter> reportParamsMap = null;
 		try {
+			ParameterProcessor paramProcessor = new ParameterProcessor();
 			paramProcessorResult = paramProcessor.process(finalValues, reportId);
-			reportParamsMap = paramProcessorResult.getReportParamsMap();
 		} catch (ParseException ex) {
 			java.util.logging.Logger.getLogger(ReportJob.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		ReportRunner reportRunner = new ReportRunner();
-		reportRunner.setUsername(user);
-		reportRunner.setReport(report);
-		reportRunner.setAdminSession(false);
-
-		reportRunner.setReportParamsMap(reportParamsMap);
-
-		return reportRunner;
-
+		return paramProcessorResult;
 	}
 
 	//create job audit record
@@ -1072,12 +1063,12 @@ public class ReportJob implements org.quartz.Job {
 		m.setHost(smtpServer);
 		if (org.apache.commons.lang.StringUtils.length(smtpUsername) > 3 && smtpPassword != null) {
 			m.setUsername(smtpUsername);
-			smtpPassword = Encrypter.decrypt(smtpPassword);
 			m.setPassword(smtpPassword);
 		}
 
 		//pass secure smtp mechanism and smtp port, in case they are required
 		m.setPort(Config.getSettings().getSmtpPort());
+		m.setUseAuthentication(Config.getSettings().isUseSmtpAuthentication());
 		m.setUseStartTls(Config.getSettings().isSmtpUseStartTls());
 
 		return m;

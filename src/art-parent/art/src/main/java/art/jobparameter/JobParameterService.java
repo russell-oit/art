@@ -36,12 +36,21 @@ import org.springframework.cache.annotation.Cacheable;
  * @author Timothy Anyona
  */
 public class JobParameterService {
+
 	private static final Logger logger = LoggerFactory.getLogger(JobParameterService.class);
 
-	@Autowired
-	private DbService dbService;
+	private final DbService dbService;
 
-	private final String SQL_SELECT_ALL = "SELECT * FROM ART_RULES";
+	@Autowired
+	public JobParameterService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public JobParameterService() {
+		dbService = new DbService();
+	}
+
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS_PARAMETERS";
 
 	/**
 	 * Class to map resultset to an object
@@ -83,6 +92,6 @@ public class JobParameterService {
 
 		String sql = SQL_SELECT_ALL + " WHERE JOB_ID=?";
 		ResultSetHandler<List<JobParameter>> h = new BeanListHandler<>(JobParameter.class, new JobParameterMapper());
-		return dbService.query(SQL_SELECT_ALL, h,id);
+		return dbService.query(sql, h, id);
 	}
 }

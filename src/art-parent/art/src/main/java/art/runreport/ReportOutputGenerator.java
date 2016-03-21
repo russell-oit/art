@@ -186,8 +186,8 @@ public class ReportOutputGenerator {
 			Objects.requireNonNull(servletContext, "servletContext must not be null");
 			Objects.requireNonNull(drilldownService, "drilldownService must not be null");
 		}
-		
-		String fileName=FilenameUtils.getName(fullOutputFilename);
+
+		String fileName = FilenameUtils.getName(fullOutputFilename);
 
 		try {
 
@@ -352,7 +352,7 @@ public class ReportOutputGenerator {
 				if (reportType.isCrosstab()) {
 					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat);
 				} else {
-					if (reportFormat.isHtml()) {
+					if (reportFormat.isHtml() && !isJob) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
 					}
@@ -360,7 +360,7 @@ public class ReportOutputGenerator {
 				}
 
 				if (standardOutputResult.isSuccess()) {
-					if (!reportFormat.isHtml() && standardOutput.outputHeaderandFooter()) {
+					if (!reportFormat.isHtml() && standardOutput.outputHeaderandFooter() && !isJob) {
 						displayFileLink(fileName);
 					}
 

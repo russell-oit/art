@@ -47,6 +47,69 @@ public enum JobType {
 	public String getValue() {
 		return value;
 	}
+	
+	public boolean isEmailInline(){
+		switch(this){
+			case EmailInline:
+			case CondEmailInline:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isEmailAttachment() {
+		switch (this) {
+			case EmailAttachment:
+			case CondEmailAttachment:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isCache() {
+		switch (this) {
+			case CacheAppend:
+			case CacheInsert:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isConditional() {
+		switch (this) {
+			case CondEmailAttachment:
+			case CondEmailInline:
+			case CondPublish:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isEmail() {
+		switch (this) {
+			case EmailAttachment:
+			case EmailInline:
+			case CondEmailAttachment:
+			case CondEmailInline:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isPublish() {
+		switch (this) {
+			case Publish:
+			case CondPublish:
+				return true;
+			default:
+				return false;
+		}
+	}
 
 	/**
 	 * Get a list of all enum values
@@ -96,8 +159,8 @@ public enum JobType {
 	public String getDescription() {
 		return value;
 	}
-	
-		/**
+
+	/**
 	 * Get description message string for use in the user interface.
 	 *
 	 * @return

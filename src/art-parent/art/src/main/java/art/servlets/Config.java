@@ -218,7 +218,7 @@ public class Config extends HttpServlet {
 				}
 			}
 		}
-		
+
 		loadLanguages();
 
 		//load settings and initialize variables
@@ -227,41 +227,36 @@ public class Config extends HttpServlet {
 		//initialize datasources
 		initializeArtDatabase();
 	}
-	
-	public static Map<String,String> getLanguages(){
+
+	public static Map<String, String> getLanguages() {
 		return languages;
 	}
 
 	private void loadLanguages() {
 		Properties prop = new Properties();
 		InputStream inputStream;
-		
-					String propFileName = "/i18n/languages.properties";
- 
-			inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
- 
-			try {
-				
-			
+
+		String propFileName = "/i18n/languages.properties";
+
+		inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+
+		try {
+
 			if (inputStream != null) {
 				prop.load(inputStream);
 //			} else {
 //				throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
 			}
-		
-		
 
 			Set<String> propertyNames = prop.stringPropertyNames();
 			for (String key : propertyNames) {
-				String value=prop.getProperty(key);
-				languages.put(value.trim(),key.trim());
+				String value = prop.getProperty(key);
+				languages.put(value.trim(), key.trim());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
-	
 
 	private void setJspEnumValues(ServletContext ctx) {
 		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
@@ -825,6 +820,14 @@ public class Config extends HttpServlet {
 	 */
 	public static boolean isUseCustomPdfFont() {
 		if (StringUtils.isBlank(settings.getPdfFontName())) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	public static boolean isEmailServerConfigured() {
+		if (StringUtils.isBlank(settings.getSmtpServer())) {
 			return false;
 		} else {
 			return true;
