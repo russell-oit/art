@@ -1,6 +1,8 @@
 package art.job;
 
 import art.enums.JobType;
+import art.jobparameter.JobParameter;
+import art.jobparameter.JobParameterService;
 import art.jobrunners.ReportJob;
 import art.report.Report;
 import art.report.ReportService;
@@ -77,6 +79,9 @@ public class JobController {
 
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private JobParameterService jobParameterService;
 
 	@RequestMapping(value = "/app/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -246,8 +251,6 @@ public class JobController {
 
 			finalizeSchedule(job);
 
-			saveJobParameters(request);
-
 			if (StringUtils.equals(action, "add")) {
 				jobService.addJob(job, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordAdded");
@@ -255,6 +258,9 @@ public class JobController {
 				jobService.updateJob(job, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
+			
+			saveJobParameters(request,job.getJobId());
+			
 			redirectAttributes.addFlashAttribute("recordName", job.getName());
 			return "redirect:/app/" + nextPage;
 		} catch (SQLException | SchedulerException | ParseException ex) {
@@ -265,7 +271,7 @@ public class JobController {
 		return showJob(action, model);
 	}
 
-	private void saveJobParameters(HttpServletRequest request) throws NumberFormatException {
+	private void saveJobParameters(HttpServletRequest request,int jobId) throws NumberFormatException, SQLException {
 		Integer reportId = Integer.parseInt(request.getParameter("report.reportId"));
 		Map<String, String[]> passedValues = new HashMap<>();
 		Enumeration<String> htmlParamNames = request.getParameterNames();
@@ -279,9 +285,18 @@ public class JobController {
 			}
 		}
 
+		jobParameterService.deleteJobParameters(jobId);
 		for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
 			String name = entry.getKey();
 			String[] values = entry.getValue();
+			for(String value:values){
+				JobParameter jobParam=new JobParameter();
+				jobParam.setJobId(jobId);
+				jobParam.setName(name);
+				jobParam.setValue(value);
+				jobParam.setParamTypeString("X");
+				jobParameterService.addJobParameter(jobParam);
+			}
 		}
 	}
 

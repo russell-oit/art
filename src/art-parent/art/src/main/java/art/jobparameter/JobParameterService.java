@@ -27,15 +27,18 @@ import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Timothy Anyona
  */
+@Service
 public class JobParameterService {
 
 	private static final Logger logger = LoggerFactory.getLogger(JobParameterService.class);
@@ -104,6 +107,32 @@ public class JobParameterService {
 			jobParam.getValue(),
 			jobParam.getJobId(),
 			jobParam.getName()
+		};
+
+		dbService.update(sql, values);
+	}
+	
+	public void deleteJobParameters(int jobId) throws SQLException{
+		String sql = "DELETE FROM ART_JOBS_PARAMETERS"
+				+ " WHERE JOB_ID=?";
+
+		Object[] values = {
+			jobId
+		};
+
+		dbService.update(sql, values);
+	}
+	
+	public void addJobParameter(JobParameter jobParam) throws SQLException {
+		String sql = "INSERT INTO ART_JOBS_PARAMETERS"
+				+ " (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+
+		Object[] values = {
+			jobParam.getJobId(),
+			"X",
+			jobParam.getName(),
+			jobParam.getValue()
 		};
 
 		dbService.update(sql, values);

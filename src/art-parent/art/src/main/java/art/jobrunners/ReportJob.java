@@ -781,7 +781,7 @@ public class ReportJob implements org.quartz.Job {
 
 					//generate output
 					//generate file name to use for report types and formats that generate files
-					FilenameHelper filenameHelper=new FilenameHelper();
+					FilenameHelper filenameHelper = new FilenameHelper();
 					String baseFileName = filenameHelper.getFileName(job);
 					String exportPath = Config.getJobsExportPath();
 
@@ -999,11 +999,11 @@ public class ReportJob implements org.quartz.Job {
 		for (JobParameter jobParam : jobParams) {
 			String name = jobParam.getName();
 			String paramTypeString = jobParam.getParamTypeString();
-			if (StringUtils.equalsIgnoreCase(paramTypeString, "I")
-					|| StringUtils.equalsIgnoreCase(paramTypeString, "M")) {
+			if (!StringUtils.equalsIgnoreCase(paramTypeString, "O")
+					&& !StringUtils.startsWith(name, "p-")) {
 				name = "p-" + name;
-				jobParam.setName(name);
 			}
+			jobParam.setName(name);
 			List<String> values = paramValues.get(name);
 			if (values == null) {
 				paramValues.put(name, new ArrayList<String>());
