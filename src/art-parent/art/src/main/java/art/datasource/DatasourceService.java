@@ -47,8 +47,16 @@ public class DatasourceService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatasourceService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public DatasourceService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public DatasourceService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_DATABASES";
 

@@ -93,7 +93,7 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>JPivotController</filter-name>
-        <url-pattern>/analysis/showAnalysis2.jsp</url-pattern>
+        <url-pattern>/analysis/showAnalysis.jsp</url-pattern>
     </filter-mapping>
     <!-- Servlets -->
     <servlet>

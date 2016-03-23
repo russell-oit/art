@@ -11,6 +11,15 @@
 <%@page import="com.tonbeller.jpivot.table.TableComponent"%>
 <%@ page import="java.util.*,java.sql.*,art.utils.*,java.io.*,java.net.*" %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="art.report.ReportService" %>
+<%@ page import="art.report.Report" %>
+<%@ page import="art.servlets.Config" %>
+<%@ page import="art.datasource.Datasource" %>
+<%@ page import="art.runreport.ReportRunner" %>
+<%@ page import="art.runreport.ParameterProcessor" %>
+<%@ page import="art.runreport.ParameterProcessorResult" %>
+<%@ page import="art.reportparameter.ReportParameter" %>
+<%@ page import="art.user.User" %>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
@@ -21,6 +30,15 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>ART</title>
+
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/table/mdxtable.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/navi/mdxnavi.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/form/xform.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/table/xtable.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/tree/xtree.css" />
+		<script type="text/javascript" src="<%=request.getContextPath()%>/wcf/scroller.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/art-3.css" />
     </head>
     <body>
         <%
@@ -57,8 +75,6 @@ java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.Art
 		//first time we are displaying the pivot table.
 		//parameter ?null=null&... used to display the page when settings are changed from the olap navigator toolbar button
 
-		Connection conn = DbConnections.getConnection();
-
 
 	//check if user has access
 	boolean adminSession = false;
@@ -74,10 +90,9 @@ Report report=reportService.getReport(queryId);
 	String template = report.getTemplate();
 	File templateFile = new File(Config.getTemplatesPath() + template);
 	if (queryType == 112 && !templateFile.exists()) {
-		conn.close();
 		%>
 		<jsp:forward page="error.jsp">
-			<jsp:param name="MSG" value="Template file not found. Please contact the ART administrator."/>
+			<jsp:param name="MSG" value="Template file not found"/>
 		</jsp:forward>
 		<%
 	}
@@ -94,6 +109,9 @@ Report report=reportService.getReport(queryId);
 	databaseUser = ds.getUsername().trim();
 	databasePassword = ds.getPassword();
 	databaseDriver = ds.getDriver().trim();
+
+User sessionUser = (User) session.getAttribute("sessionUser");
+String username=sessionUser.getUsername();
 
 	//get mdx to use, with parameter values substituted
 				ReportRunner reportRunner = new ReportRunner();
@@ -153,8 +171,6 @@ reportRunner.setReportParamsMap(reportParamsMap);
 	}
 
 	String roles="";
-
-	conn.close();
 
 	if (queryType == 112) {
 		//mondrian query

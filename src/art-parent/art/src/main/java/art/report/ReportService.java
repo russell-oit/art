@@ -21,6 +21,7 @@ import art.dbutils.DbService;
 import art.servlets.Config;
 import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
+import art.datasource.DatasourceService;
 import art.enums.AccessLevel;
 import art.enums.ParameterType;
 import art.enums.ReportStatus;
@@ -66,14 +67,18 @@ public class ReportService {
 	private static final Logger logger = LoggerFactory.getLogger(ReportService.class);
 
 	private final DbService dbService;
+	
+	private final DatasourceService datasourceService;
 
 	@Autowired
-	public ReportService(DbService dbService) {
+	public ReportService(DbService dbService,DatasourceService datasourceService) {
 		this.dbService = dbService;
+		this.datasourceService=datasourceService;
 	}
 
 	public ReportService() {
 		dbService = new DbService();
+		datasourceService=new DatasourceService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT AQ.*, "
@@ -114,9 +119,7 @@ public class ReportService {
 			reportGroup.setName(rs.getString("GROUP_NAME"));
 			report.setReportGroup(reportGroup);
 
-			Datasource datasource = new Datasource();
-			datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
-			datasource.setName(rs.getString("DATASOURCE_NAME"));
+			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
 			report.setDatasource(datasource);
 
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));

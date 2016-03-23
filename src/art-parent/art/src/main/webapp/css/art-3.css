@@ -148,4 +148,38 @@ div.greyBack {
 	border-color: #000000;
 }
 
+table.pivot {
+	border: 1px solid #000000;
+	margin-left: auto;
+	margin-right: auto;
+	border-collapse: collapse;
+}
+
+table.pivot td {
+	margin-left: auto;
+	margin-right: auto;
+	font-size: 10pt;
+}
+
+td.title {
+	vertical-align: middle;
+	text-align: center;
+	/*font-weight: bold; */
+	background-image: URL('../images/bg-gray-dark.png');
+	background-repeat: repeat-x;
+	background-color: #FFFFFF;
+	color: #003366;
+	border: 1px solid #000000;
+	font-size: 120%;
+}
+
+td.info {
+	background-color: #CCCCCC;
+	vertical-align: middle;
+	background-image: URL('../images/bg-gray.png');
+	background-repeat: repeat-x;
+	background-color: #FFFFFF;
+	color: #003366;
+}
+
 
