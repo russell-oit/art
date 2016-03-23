@@ -213,9 +213,11 @@ Display report parameters and initiate running of report
 									<button type="button" id="runInNewPage" class="btn btn-default action">
 										<spring:message code="reports.action.runInNewPage"/>
 									</button>
-									<button type="submit" id="runInline" class="btn btn-primary action">
-										<spring:message code="page.action.run"/>
-									</button>
+									<c:if test="${enableRunInline}">
+										<button type="submit" id="runInline" class="btn btn-primary action">
+											<spring:message code="page.action.run"/>
+										</button>
+									</c:if>
 								</div>
 							</div>
 						</div>

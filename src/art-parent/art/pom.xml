@@ -277,7 +277,7 @@
 			<artifactId>mondrian-pom</artifactId>
 			<version>1.0</version>
 			<type>pom</type>
-			<scope>runtime</scope>
+			<!--<scope>runtime</scope>-->
 		</dependency>
 		<!-- jpivot specific dependencies -->
 		<dependency>
@@ -285,7 +285,7 @@
 			<artifactId>jpivot-pom</artifactId>
 			<version>1.0</version>
 			<type>pom</type>
-			<scope>runtime</scope>
+			<!--<scope>runtime</scope>-->
 		</dependency>
 		<!-- art needs/uses commons-beanutils-1.8.3+ -->
 		<dependency>
@@ -297,7 +297,7 @@
 			<groupId>com.tonbeller</groupId>
 			<artifactId>jpivot</artifactId>
 			<version>1.8.0-art</version>
-			<scope>runtime</scope>
+			<!--<scope>runtime</scope>-->
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

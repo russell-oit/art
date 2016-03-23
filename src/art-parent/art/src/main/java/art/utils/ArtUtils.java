@@ -61,6 +61,8 @@ public class ArtUtils {
 	public static final SimpleDateFormat isoDateFormatter = new SimpleDateFormat(ISO_DATE_FORMAT);
 	public static final SimpleDateFormat isoDateTimeFormatter = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
 	public static final SimpleDateFormat isoDateTimeMillisecondsFormatter = new SimpleDateFormat(ISO_DATE_TIME_MILLISECONDS_FORMAT);
+	public static final String FILE_NAME_DATE_FORMAT="yyyy_MM_dd-HH_mm_ss_SSS";
+	public static final SimpleDateFormat fileNameDateFormatter=new SimpleDateFormat(FILE_NAME_DATE_FORMAT);
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<>();
@@ -112,17 +114,18 @@ public class ArtUtils {
 	 * @return modified query name to be used in file names
 	 */
 	public static String cleanFileName(String fileName) {
-		//or only allow english alphabets, numbers, dot and underscore
-		//String sane = filename.replaceAll("[^a-zA-Z0-9\\._]+", "_");
+		//only allow english alphabets, numbers, dot, underscore, dash
+		String sane = fileName.replaceAll("[^a-zA-Z0-9\\._\\-\\s]+", "_");
+		return sane;
 
-		String cleanName = fileName.replace('/', '_').replace('*', '_').replace('&', '_')
-				.replace('?', '_').replace('!', '_').replace('\\', '_')
-				.replace('[', '_').replace(']', '_').replace(':', '_')
-				.replace('|', '_').replace('<', '_').replace('>', '_')
-				.replace('"', '_');
-
-		//replace accents
-		return cleanName.replaceAll("[^\\p{ASCII}]", "_");
+//		String cleanName = fileName.replace('/', '_').replace('*', '_').replace('&', '_')
+//				.replace('?', '_').replace('!', '_').replace('\\', '_')
+//				.replace('[', '_').replace(']', '_').replace(':', '_')
+//				.replace('|', '_').replace('<', '_').replace('>', '_')
+//				.replace('"', '_');
+//
+//		//replace accents
+//		return cleanName.replaceAll("[^\\p{ASCII}]", "_");
 	}
 
 	/**

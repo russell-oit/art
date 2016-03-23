@@ -725,6 +725,10 @@ public class ReportRunner {
 
 		psQuery.execute();
 	}
+	
+	public String getQuerySql(){
+		return querySb.toString();
+	}
 
 	/**
 	 * Get the result set to use for this query. query sql may have several

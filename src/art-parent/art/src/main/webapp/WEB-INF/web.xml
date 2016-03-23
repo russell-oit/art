@@ -69,14 +69,14 @@
         <init-param>
             <description>URI of error page</description>
             <param-name>errorJSP</param-name>
-            <param-value>/user/jpivotError.jsp</param-value>
+            <param-value>/app/jpivotError.do</param-value>
         </init-param>
         <init-param>
             <description>This page is displayed if a user clicks
 				on a query before the previous query has finished
 			</description>
             <param-name>busyJSP</param-name>
-            <param-value>/user/jpivotBusy.jsp</param-value>
+            <param-value>/app/jpivotBusy.do</param-value>
         </init-param>
     </filter>
     <filter-mapping>
@@ -93,7 +93,7 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>JPivotController</filter-name>
-        <url-pattern>/user/showAnalysis.jsp</url-pattern>
+        <url-pattern>/analysis/showAnalysis2.jsp</url-pattern>
     </filter-mapping>
     <!-- Servlets -->
     <servlet>

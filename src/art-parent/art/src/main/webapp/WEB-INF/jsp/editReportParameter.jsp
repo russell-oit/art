@@ -1,9 +1,7 @@
 <%-- 
-    Document   : editReportFilter
-    Created on : 27-Apr-2014, 14:37:13
+    Document   : editReportParameter
+    Created on : 23-Mar-2016, 09:51:38
     Author     : Timothy Anyona
-
-Edit report filter page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -17,10 +15,10 @@ Edit report filter page
 
 <c:choose>
 	<c:when test="${action == 'add'}">
-		<spring:message code="page.title.addReportFilter" var="pageTitle"/>
+		<spring:message code="page.title.addReportParameter" var="pageTitle"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editReportFilter" var="pageTitle"/>
+		<spring:message code="page.title.editReportParameter" var="pageTitle"/>
 	</c:when>
 </c:choose>
 
@@ -73,8 +71,8 @@ Edit report filter page
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveReportFilter.do"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="reportFilter">
+		<spring:url var="formUrl" value="/app/saveReportParameter.do"/>
+		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="reportParameter">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -94,6 +92,8 @@ Edit report filter page
 
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="reportId" value="${reportId}">
+				<input type="hidden" name="report.reportId" value="${reportId}">
+				<form:hidden path="position"/>
 
 				<div class="form-group">
 					<div class="col-md-12 text-center">
@@ -107,39 +107,21 @@ Edit report filter page
 					</label>
 					<div class="col-md-8">
 						<c:if test="${action == 'edit'}">
-							<form:input path="reportFilterId" readonly="true" class="form-control"/>
+							<form:input path="reportParameterId" readonly="true" class="form-control"/>
 						</c:if>
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="filter.filterId">
-						<spring:message code="page.text.filter"/>
+					<label class="col-md-4 control-label " for="parameter.parameterId">
+						<spring:message code="page.text.parameter"/>
 					</label>
 					<div class="col-md-8">
-						<form:select path="filter.filterId" class="form-control selectpicker">
-							<c:forEach var="filter" items="${filters}">
-								<form:option value="${filter.filterId}">${filter.name}</form:option>
+						<form:select path="parameter.parameterId" class="form-control selectpicker">
+							<c:forEach var="parameter" items="${parameters}">
+								<form:option value="${parameter.parameterId}">${parameter.name} (${parameter.parameterId})</form:option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="filter.filterId" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="reportColumn">
-						<spring:message code="page.text.reportColumn"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="reportColumn" maxlength="40" class="form-control"/>
-							<spring:message code="filters.help.reportColumn" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="reportColumn" cssClass="error"/>
+						<form:errors path="parameter.parameterId" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -153,3 +135,4 @@ Edit report filter page
 		</form:form>
 	</jsp:body>
 </t:mainPageWithPanel>
+

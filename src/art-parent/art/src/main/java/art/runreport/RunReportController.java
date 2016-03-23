@@ -31,6 +31,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
 import art.utils.ArtUtils;
+import art.utils.FilenameHelper;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
@@ -382,7 +383,8 @@ public class RunReportController {
 				} else {
 					//generate output
 					//generate file name to use for report types and formats that generate files
-					String baseFileName = ArtUtils.getUniqueFileName(reportId);
+					FilenameHelper filenameHelper=new FilenameHelper();
+					String baseFileName = filenameHelper.getFileName(report);
 					String exportPath = Config.getReportsExportPath();
 
 					String fileName = baseFileName + "." + reportFormat.getFilenameExtension();

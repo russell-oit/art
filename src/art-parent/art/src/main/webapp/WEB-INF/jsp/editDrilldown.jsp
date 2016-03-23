@@ -99,7 +99,7 @@ Edit a drilldown
 
 				<div class="form-group">
 					<div class="col-md-12 text-center">
-						<spring:message code="drilldowns.text.parentReport"/>: ${parentReportName}
+						<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
 					</div>
 				</div>
 

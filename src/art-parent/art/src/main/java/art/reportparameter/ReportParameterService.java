@@ -29,9 +29,12 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -154,161 +157,257 @@ public class ReportParameterService {
 
 		return paramsMap;
 	}
-//
-//	/**
-//	 * Get a report parameter
-//	 *
-//	 * @param id
-//	 * @return populated object if found, null otherwise
-//	 * @throws SQLException
-//	 */
-//	@Cacheable("parameters")
-//	public ReportParameter getReportParameter(int id) throws SQLException {
-//		logger.debug("Entering getReportParameter: id={}", id);
-//
-//		String sql = SQL_SELECT_ALL + " WHERE REPORT_PARAMETER_ID=?";
-//		ResultSetHandler<ReportParameter> h = new BeanHandler<>(ReportParameter.class, new ReportParameterMapper());
-//		return dbService.query(sql, h, id);
-//	}
-//
-//	/**
-//	 * Delete a report parameter
-//	 *
-//	 * @param id
-//	 * @throws SQLException
-//	 */
-//	@CacheEvict(value = "parameters", allEntries = true)
-//	public void deleteReportParameter(int id) throws SQLException {
-//		logger.debug("Entering deleteReportParameter: id={}", id);
-//
-//		String sql;
-//
-//		//delete foreign key records
-//		sql = "DELETE FROM ART_REPORT_PARAMETER_RULES WHERE REPORT_PARAMETER_ID=?";
-//		dbService.update(sql, id);
-//
-//		sql = "DELETE FROM ART_USER_JOBS WHERE REPORT_PARAMETER_ID=?";
-//		dbService.update(sql, id);
-//
-//		sql = "DELETE FROM ART_REPORT_PARAMETER_ASSIGNMENT WHERE REPORT_PARAMETER_ID=?";
-//		dbService.update(sql, id);
-//
-//		sql = "DELETE FROM ART_REPORT_PARAMETER_QUERIES WHERE REPORT_PARAMETER_ID=?";
-//		dbService.update(sql, id);
-//
-//		sql = "DELETE FROM ART_REPORT_PARAMETER_GROUPS WHERE REPORT_PARAMETER_ID=?";
-//		dbService.update(sql, id);
-//
-//		sql = "DELETE FROM ART_REPORT_PARAMETER_JOBS WHERE REPORT_PARAMETER_ID=?";
-//		dbService.update(sql, id);
-//
-//		//finally delete report parameter
-//		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_PARAMETER_ID=?";
-//		dbService.update(sql, id);
-//	}
-//
-//	/**
-//	 * Add a new report parameter to the database
-//	 *
-//	 * @param param
-//	 * @param actionUser
-//	 * @return new record id
-//	 * @throws SQLException
-//	 */
-//	@CacheEvict(value = "parameters", allEntries = true)
-//	public synchronized int addReportParameter(ReportParameter param, User actionUser) throws SQLException {
-//		logger.debug("Entering addReportParameter: param={}, actionUser={}", param, actionUser);
-//
-//		//generate new id
-//		String sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
-//		ResultSetHandler<Integer> h = new ScalarHandler<>();
-//		Integer maxId = dbService.query(sql, h);
-//		logger.debug("maxId={}", maxId);
-//
-//		int newId;
-//		if (maxId == null || maxId < 0) {
-//			//no records in the table, or only hardcoded records
-//			newId = 1;
+
+	/**
+	 * Get a report parameter
+	 *
+	 * @param id
+	 * @return populated object if found, null otherwise
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public ReportParameter getReportParameter(int id) throws SQLException {
+		logger.debug("Entering getReportParameter: id={}", id);
+
+		String sql = SQL_SELECT_ALL + " WHERE REPORT_PARAMETER_ID=?";
+		ResultSetHandler<ReportParameter> h = new BeanHandler<>(ReportParameter.class, new ReportParameterMapper());
+		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Delete a report parameter
+	 *
+	 * @param id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void deleteReportParameter(int id) throws SQLException {
+		logger.debug("Entering deleteReportParameter: id={}", id);
+
+		String sql;
+
+		//finally delete report parameter
+		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_PARAMETER_ID=?";
+		dbService.update(sql, id);
+	}
+
+	/**
+	 * Add a new report parameter to the database
+	 *
+	 * @param param
+	 * @param actionUser
+	 * @return new record id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public synchronized int addReportParameter(ReportParameter param, int reportId) throws SQLException {
+		logger.debug("Entering addReportParameter: param={}", param);
+
+		//generate new id
+		String sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer maxId = dbService.query(sql, h);
+		logger.debug("maxId={}", maxId);
+
+		int newId;
+		if (maxId == null || maxId < 0) {
+			//no records in the table, or only hardcoded records
+			newId = 1;
+		} else {
+			newId = maxId + 1;
+		}
+		logger.debug("newId={}", newId);
+		
+		//generate new position
+		sql = "SELECT MAX(PARAMETER_POSITION)"
+				+ " FROM ART_REPORT_PARAMETERS"
+				+ " WHERE REPORT_ID=?";
+		ResultSetHandler<Integer> h2 = new ScalarHandler<>();
+		Integer maxPosition = dbService.query(sql, h2, reportId);
+		logger.debug("maxPosition={}", maxPosition);
+
+		int newPosition;
+		if (maxPosition == null || maxPosition < 0) {
+			//no records in the table, or only hardcoded records
+			newPosition = 1;
+		} else {
+			newPosition = maxPosition + 1;
+		}
+		logger.debug("newPosition={}", newPosition);
+
+		param.setReportParameterId(newId);
+		param.setPosition(newPosition);
+		param.getReport().setReportId(reportId);
+
+		saveReportParameter(param, true);
+
+		return newId;
+	}
+
+	/**
+	 * Update an existing report parameter
+	 *
+	 * @param param
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void updateReportParameter(ReportParameter param) throws SQLException {
+		logger.debug("Entering updateReportParameter: param={}", param);
+
+		saveReportParameter(param, false);
+	}
+
+	/**
+	 * Save a report parameter
+	 *
+	 * @param param
+	 * @param newRecord
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	private void saveReportParameter(ReportParameter param, boolean newRecord) throws SQLException {
+		logger.debug("Entering saveReportParameter: param={}, newRecord={}",
+				param, newRecord);
+
+		int affectedRows;
+		if (newRecord) {
+			String sql = "INSERT INTO ART_REPORT_PARAMETERS"
+					+ " (REPORT_PARAMETER_ID, REPORT_ID, PARAMETER_ID, PARAMETER_POSITION)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+
+			Object[] values = {
+				param.getReportParameterId(),
+				param.getReport().getReportId(),
+				param.getParameter().getParameterId(),
+				param.getPosition()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		} else {
+			String sql = "UPDATE ART_REPORT_PARAMETERS SET PARAMETER_ID=?"
+					+ " PARAMETER_POSITION=?"
+					+ " WHERE REPORT_PARAMETER_ID=?";
+
+			Object[] values = {
+				param.getParameter().getParameterId(),
+				param.getPosition(),
+				param.getReportParameterId()
+			};
+
+			affectedRows = dbService.update(sql, values);
+		}
+
+		logger.debug("affectedRows={}", affectedRows);
+
+		if (affectedRows != 1) {
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, param={}",
+					affectedRows, newRecord, param);
+		}
+	}
+	
+		/**
+	 * Move a drilldown to a different position
+	 *
+	 * @param id
+	 * @param fromPosition
+	 * @param toPosition
+	 * @param direction
+	 * @param parentReportId
+	 * @throws SQLException
+	 */
+	public void moveReportParameter(int id, int fromPosition, int toPosition, String direction,
+			int parentReportId) throws SQLException {
+
+		String sql;
+
+		//https://datatables.net/forums/discussion/comment/55311#Comment_55311
+		if (StringUtils.equals(direction, "back")) {
+			//toPosition < fromPosition
+			int finalPosition = toPosition + 1;
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=0"
+					+ " WHERE PARAMETER_POSITION=?"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, toPosition, parentReportId);
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=?"
+					+ " WHERE REPORT_PARAMETER_ID=?"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, toPosition, id, parentReportId);
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=PARAMETER_POSITION + 1"
+					+ " WHERE (?<=PARAMETER_POSITION"
+					+ " AND PARAMETER_POSITION<=?)"
+					+ " AND REPORT_PARAMETER_ID<>? AND PARAMETER_POSITION<>0"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, toPosition, fromPosition, id, parentReportId);
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=?"
+					+ " WHERE PARAMETER_POSITION=0"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, finalPosition, parentReportId);
+		} else {
+			//"forward". toPosition > fromPosition
+			int finalPosition = toPosition - 1;
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=0"
+					+ " WHERE PARAMETER_POSITION=?"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, toPosition, parentReportId);
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=?"
+					+ " WHERE REPORT_PARAMETER_ID=?"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, toPosition, id, parentReportId);
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=PARAMETER_POSITION - 1"
+					+ " WHERE (?<=PARAMETER_POSITION"
+					+ " AND PARAMETER_POSITION<=?)"
+					+ " AND REPORT_PARAMETER_ID<>? AND PARAMETER_POSITION<>0"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, fromPosition, toPosition, id, parentReportId);
+
+			sql = "UPDATE ART_REPORT_PARAMETERS"
+					+ " SET PARAMETER_POSITION=?"
+					+ " WHERE PARAMETER_POSITION=0"
+					+ " AND REPORT_ID=?";
+			dbService.update(sql, finalPosition, parentReportId);
+		}
+
+		//http://www.codeproject.com/Articles/331986/Table-Row-Drag-and-Drop-in-ASP-NET-MVC-JQuery-Data
+		//logic doesn't work here because position is part of primary key and updates fail because of duplicate primary keys
+//		//move other drilldowns
+//		if (StringUtils.equals(direction, "back")) {
+//			//toPosition < fromPosition
+//			sql = "UPDATE ART_REPORT_PARAMETERS"
+//					+ " SET PARAMETER_POSITION=PARAMETER_POSITION + 1"
+//					+ " WHERE ?<=PARAMETER_POSITION"
+//					+ " AND PARAMETER_POSITION<=?"
+//					+ " AND REPORT_ID=?";
+//			dbService.update(sql, toPosition, fromPosition, parentReportId);
 //		} else {
-//			newId = maxId + 1;
-//		}
-//		logger.debug("newId={}", newId);
-//
-//		param.setReportParameterId(newId);
-//
-//		saveReportParameter(param, true, actionUser);
-//
-//		return newId;
-//	}
-//
-//	/**
-//	 * Update an existing report parameter
-//	 *
-//	 * @param param
-//	 * @param actionUser
-//	 * @throws SQLException
-//	 */
-//	@CacheEvict(value = "parameters", allEntries = true)
-//	public void updateReportParameter(ReportParameter param, User actionUser) throws SQLException {
-//		logger.debug("Entering updateReportParameter: param={}, actionUser={}", param, actionUser);
-//
-//		saveReportParameter(param, false, actionUser);
-//	}
-//
-//	/**
-//	 * Save a report parameter
-//	 *
-//	 * @param param
-//	 * @param newRecord
-//	 * @param actionUser
-//	 * @throws SQLException
-//	 */
-//	private void saveReportParameter(ReportParameter param, boolean newRecord, User actionUser) throws SQLException {
-//		logger.debug("Entering saveReportParameter: param={}, newRecord={}, actionUser={}",
-//				param, newRecord, actionUser);
-//
-//		int affectedRows;
-//		if (newRecord) {
-//			String sql = "INSERT INTO ART_REPORT_PARAMETERS"
-//					+ " (REPORT_PARAMETER_ID, NAME, DESCRIPTION, DEFAULT_QUERY_GROUP,"
-//					+ " START_QUERY, CREATION_DATE, CREATED_BY)"
-//					+ " VALUES(" + StringUtils.repeat("?", ",", 7) + ")";
-//
-//			Object[] values = {
-//				param.getReportParameterId(),
-//				param.getName(),
-//				param.getDescription(),
-//				param.getDefaultReportGroup(),
-//				param.getStartReport(),
-//				DbUtils.getCurrentTimeStamp(),
-//				actionUser.getUsername()
-//			};
-//
-//			affectedRows = dbService.update(sql, values);
-//		} else {
-//			String sql = "UPDATE ART_REPORT_PARAMETERS SET NAME=?, DESCRIPTION=?,"
-//					+ " DEFAULT_QUERY_GROUP=?, START_QUERY=?, UPDATE_DATE=?, UPDATED_BY=?"
-//					+ " WHERE REPORT_PARAMETER_ID=?";
-//
-//			Object[] values = {
-//				param.getName(),
-//				param.getDescription(),
-//				param.getDefaultReportGroup(),
-//				param.getStartReport(),
-//				DbUtils.getCurrentTimeStamp(),
-//				actionUser.getUsername(),
-//				param.getReportParameterId()
-//			};
-//
-//			affectedRows = dbService.update(sql, values);
+//			//"forward". toPosition > fromPosition
+//			sql = "UPDATE ART_REPORT_PARAMETERS"
+//					+ " SET PARAMETER_POSITION=PARAMETER_POSITION + 1"
+//					+ " WHERE ?<=PARAMETER_POSITION"
+//					+ " AND PARAMETER_POSITION<=?"
+//					+ " AND REPORT_ID=?";
+//			dbService.update(sql, fromPosition, toPosition, parentReportId);
 //		}
 //
-//		logger.debug("affectedRows={}", affectedRows);
-//
-//		if (affectedRows != 1) {
-//			logger.warn("Problem with save. affectedRows={}, newRecord={}, param={}",
-//					affectedRows, newRecord, param);
-//		}
-//	}
+//		//move this drilldown
+//		sql = "UPDATE ART_REPORT_PARAMETERS"
+//				+ " SET PARAMETER_POSITION=?"
+//				+ " WHERE REPORT_PARAMETER_ID=?";
+//		dbService.update(sql, toPosition);
+	}
 
 }

@@ -135,6 +135,15 @@ public class ParameterService {
 		ResultSetHandler<Parameter> h = new BeanHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(sql, h, id);
 	}
+	
+	@Cacheable("parameters")
+	public String getParameterName(int id) throws SQLException {
+		logger.debug("Entering getParameterName: id={}", id);
+
+		String sql = "SELECT NAME FROM ART_PARAMETERS WHERE PARAMETER_ID=?";
+		ResultSetHandler<String> h = new ScalarHandler<>(1);
+		return dbService.query(sql, h, id);
+	}
 
 	/**
 	 * Get all parameters for a report

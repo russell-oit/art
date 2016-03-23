@@ -40,6 +40,7 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.Encrypter;
+import art.utils.FilenameHelper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -70,6 +71,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 
 /**
  * Class to run report jobs
@@ -92,6 +94,7 @@ public class ReportJob implements org.quartz.Job {
 	private String runMessage;
 
 	@Override
+	@CacheEvict(value = "jobs", allEntries = true)
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		JobDataMap dataMap = null;
 
@@ -778,8 +781,9 @@ public class ReportJob implements org.quartz.Job {
 
 					//generate output
 					//generate file name to use for report types and formats that generate files
-					String baseFileName = ArtUtils.getUniqueFileName(reportId);
-					String exportPath = Config.getReportsExportPath();
+					FilenameHelper filenameHelper=new FilenameHelper();
+					String baseFileName = filenameHelper.getFileName(job);
+					String exportPath = Config.getJobsExportPath();
 
 					fileName = baseFileName + "." + reportFormat.getFilenameExtension();
 					String outputFileName = exportPath + fileName;

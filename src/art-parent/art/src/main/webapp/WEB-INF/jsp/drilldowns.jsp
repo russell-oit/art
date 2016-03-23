@@ -112,7 +112,7 @@ Display report drilldowns
 		</div>
 
 		<div class="text-center">
-			<spring:message code="drilldowns.text.parentReport"/>: ${parentReportName}
+			<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
 		</div>
 		<div style="margin-bottom: 10px;">
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addDrilldown.do?parent=${parentReportId}">

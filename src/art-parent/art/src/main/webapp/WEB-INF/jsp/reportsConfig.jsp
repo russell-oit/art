@@ -148,13 +148,13 @@ Reports configuration page
 								<button type="button" class="btn btn-default dropdown-toggle"
 										data-toggle="dropdown" data-hover="dropdown"
 										data-delay="100">
-									<spring:message code="reports.action.extras"/>
+									<spring:message code="reports.action.more"/>
 									<span class="caret"></span>
 								</button>
 								<ul class="dropdown-menu">
 									<li>
 										<a 
-										   href="${pageContext.request.contextPath}/app/reportParameters.do?reportId=${report.reportId}">
+										   href="${pageContext.request.contextPath}/app/reportParameterConfig.do?reportId=${report.reportId}">
 											<spring:message code="reports.action.parameters"/>
 										</a>
 									</li>

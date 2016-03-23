@@ -167,7 +167,7 @@
 					switch (jobType) {
 						case 'Alert':
 						case 'JustRun':
-							list.append(new Option('-', '-'));
+							list.append(new Option('', '--'));
 							break;
 						case 'EmailInline':
 						case 'CondEmailInline':
@@ -185,7 +185,7 @@
 							list.append(new Option('${tsvZipText}', 'tsvZip'));
 							break;
 						default:
-							list.append(new Option('-', '-'));
+							list.append(new Option('', '--'));
 					}
 				}
 			}
@@ -492,7 +492,7 @@
 						</label>
 						<div class="col-md-8">
 							<select name="schedules" id="schedules" class="form-control selectpicker">
-								<option value="0">-</option>
+								<option value="0">--</option>
 								<c:forEach var="schedule" items="${schedules}">
 									<option value="${schedule.scheduleId}">${schedule.name}</option>
 								</c:forEach>

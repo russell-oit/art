@@ -141,7 +141,6 @@ public class ReportController {
 //				ParameterService parameterService = new ParameterService();
 //				List<Parameter> paramsList = parameterService.getReportParameters(reportId);
 //				model.addAttribute("paramsList", paramsList);
-
 				ReportType reportType = report.getReportType();
 
 				boolean enableReportFormats = false;
@@ -164,7 +163,11 @@ public class ReportController {
 				boolean enableSchedule;
 				if (accessLevel >= AccessLevel.ScheduleUser.getValue()
 						&& Config.getSettings().isSchedulingEnabled()) {
-					enableSchedule = true;
+					if (reportType == ReportType.Dashboard || reportType.isOlap()) {
+						enableSchedule = false;
+					} else {
+						enableSchedule = true;
+					}
 				} else {
 					enableSchedule = false;
 				}
@@ -192,7 +195,15 @@ public class ReportController {
 				model.addAttribute("enableShowSql", enableShowSql);
 				model.addAttribute("enableShowSelectedParameters", enableShowSelectedParameters);
 
-				model.addAttribute("isChart", report.getReportType().isChart());
+				model.addAttribute("isChart", reportType.isChart());
+
+				boolean enableRunInline;
+				if (reportType == ReportType.Dashboard || reportType.isOlap()) {
+					enableRunInline = false;
+				} else {
+					enableRunInline = true;
+				}
+				model.addAttribute("enableRunInline", enableRunInline);
 			}
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);

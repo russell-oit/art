@@ -215,6 +215,9 @@ public class AuthorizationFilter implements Filter {
 		if (StringUtils.equals(page, "reports")
 				|| StringUtils.equals(page, "selectReportParameters")
 				|| StringUtils.equals(page, "showDashboard")
+				|| StringUtils.equals(page, "showAnalysis")
+				|| StringUtils.equals(page, "jpivotError")
+				|| StringUtils.equals(page, "jpivotBusy")
 				|| StringUtils.equals(page, "getSchedule")
 				|| StringUtils.equals(page, "runReport")) {
 			//everyone can access
@@ -355,6 +358,11 @@ public class AuthorizationFilter implements Filter {
 				|| StringUtils.equals(page, "filterValuesConfig") || StringUtils.endsWith(page, "FilterValues")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "reportParameterConfig") || StringUtils.endsWith(page, "ReportParameter")) {
+			//junior admins and above
+			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;
 			}
 		}
