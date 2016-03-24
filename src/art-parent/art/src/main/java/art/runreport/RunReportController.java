@@ -157,6 +157,11 @@ public class RunReportController {
 			if (reportType == ReportType.Dashboard) {
 //				servletContext.getRequestDispatcher("/app/showDashboard.do").forward(request, response);
 				return "forward:/app/showDashboard.do";
+			} else if (reportType.isOlap()) {
+//				servletContext.getRequestDispatcher("/analysis/showAnalysis.jsp").forward(request, response);
+//				return null;
+				return "forward:/app/showAnalysis.do";
+//				return "forward:/analysis/showAnalysis.jsp";
 			}
 
 			//get report format to use
@@ -226,11 +231,11 @@ public class RunReportController {
 				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
-			} else if (reportType.isOlap()) {
-				// forward to the showAnalysis page
-//			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
-//			return; // a return is needed otherwise the flow would proceed!
-				return "showAnalysis";
+//			} else if (reportType.isOlap()) {
+//				// forward to the showAnalysis page
+////			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
+////			return; // a return is needed otherwise the flow would proceed!
+//				return "showAnalysis";
 			} else {
 				//output report header
 				if (showReportHeaderAndFooter) {
