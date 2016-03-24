@@ -41,7 +41,7 @@ import org.jfree.data.xy.XYZDataset;
  *
  * @author Timothy Anyona
  */
-public class XYZBasedChart extends AbstractChart implements XYToolTipGenerator, XYItemLinkGenerator {
+public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLinkGenerator {
 
 	private static final long serialVersionUID = 1L;
 

@@ -11,10 +11,10 @@
     "sSearch":         "Tafuta:",
     "sZeroRecords":    "Hakuna vifano",
     "oPaginate": {
-        "sFirst":    "Kwanza",
+        "sFirst":    "Mwanzo",
         "sLast":     "Mwisho",
-        "sNext":     "Inayofuata",
-        "sPrevious": "Iliyopita"
+        "sNext":     "Mbele",
+        "sPrevious": "Nyuma"
     },
     "oAria": {
         "sSortAscending": ": amilisha kupanga safuwima ikipanda",

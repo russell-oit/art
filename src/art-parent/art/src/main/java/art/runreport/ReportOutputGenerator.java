@@ -17,7 +17,7 @@
  */
 package art.runreport;
 
-import art.chart.AbstractChart;
+import art.chart.Chart;
 import art.chart.CategoryBasedChart;
 import art.chart.ChartUtils;
 import art.chart.PieChart;
@@ -238,7 +238,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 
-				AbstractChart chart;
+				Chart chart;
 				switch (reportType) {
 					case Pie2DChart:
 					case Pie3DChart:

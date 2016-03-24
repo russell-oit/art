@@ -39,7 +39,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void beginHeader() {
 		out.println("<div style='border: 3px solid white'>");
-		out.println("<table class='qe' width='80%'>");
+		out.println("<table class='qe' style='margin: 0 auto; width: 95%'>");
 		out.println("<tr>");
 	}
 

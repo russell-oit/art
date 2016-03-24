@@ -34,7 +34,7 @@ import org.jfree.data.xy.XYSeriesCollection;
  *
  * @author Timothy Anyona
  */
-public class XYChart extends AbstractChart implements XYToolTipGenerator, XYItemLinkGenerator {
+public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGenerator {
 
 	private static final long serialVersionUID = 1L;
 

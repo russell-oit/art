@@ -66,7 +66,7 @@ import org.jfree.ui.TextAnchor;
  *
  * @author Timothy Anyona
  */
-public abstract class AbstractChart extends AbstractChartDefinition implements DatasetProducer, ChartPostProcessor {
+public abstract class Chart extends AbstractChartDefinition implements DatasetProducer, ChartPostProcessor {
 
 	private static final long serialVersionUID = 1L;
 	protected final String WHITE_HEX_COLOR_CODE = "#FFFFFF";

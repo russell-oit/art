@@ -206,7 +206,7 @@ public class JobController {
 			logger.debug("Entering addJob");
 
 			Job job = new Job();
-			model.addAttribute("job", job);
+			job.setActive(true);
 
 			String reportIdString = request.getParameter("reportId");
 			if (reportIdString != null) {
@@ -216,6 +216,8 @@ public class JobController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			job.setUser(sessionUser);
+			
+			model.addAttribute("job", job);
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);

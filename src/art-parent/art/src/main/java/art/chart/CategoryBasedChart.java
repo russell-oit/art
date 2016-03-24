@@ -35,7 +35,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
  *
  * @author Timothy Anyona
  */
-public class CategoryBasedChart extends AbstractChart implements CategoryToolTipGenerator, CategoryItemLinkGenerator {
+public class CategoryBasedChart extends Chart implements CategoryToolTipGenerator, CategoryItemLinkGenerator {
 
 	private static final long serialVersionUID = 1L;
 

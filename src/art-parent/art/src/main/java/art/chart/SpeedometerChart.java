@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class SpeedometerChart extends AbstractChart {
+public class SpeedometerChart extends Chart {
 
 	private static final Logger logger = LoggerFactory.getLogger(SpeedometerChart.class);
 	private static final long serialVersionUID = 1L;

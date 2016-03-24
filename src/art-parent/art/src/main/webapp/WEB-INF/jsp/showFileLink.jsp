@@ -11,6 +11,8 @@ Display result (link to file) e.g. with jasper report, jxls report, chart pdf or
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<a type="application/octet-stream" href="${pageContext.request.contextPath}/export/reports/${fileName}">
-	<spring:message code="page.link.download"/>
-</a>
+<div style="text-align: center">
+	<a type="application/octet-stream" href="${pageContext.request.contextPath}/export/reports/${fileName}">
+		<spring:message code="page.link.download"/>
+	</a>
+</div>

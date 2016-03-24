@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class PieChart extends AbstractChart implements PieToolTipGenerator, PieSectionLinkGenerator {
+public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLinkGenerator {
 
 	private static final Logger logger = LoggerFactory.getLogger(PieChart.class);
 	private static final long serialVersionUID = 1L;

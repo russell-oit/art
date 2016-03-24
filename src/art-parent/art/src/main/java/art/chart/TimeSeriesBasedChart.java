@@ -40,7 +40,7 @@ import org.jfree.data.xy.XYDataset;
  *
  * @author Timothy Anyona
  */
-public class TimeSeriesBasedChart extends AbstractChart implements XYToolTipGenerator, XYItemLinkGenerator {
+public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, XYItemLinkGenerator {
 
 	//similar to xychart except for the type of dataset
 	//use separate class because there's no generic addSeries() method for xyseriescolletion and timeseriescollection
