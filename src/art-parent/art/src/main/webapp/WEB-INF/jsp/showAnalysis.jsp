@@ -38,7 +38,7 @@
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/tree/xtree.css" />
 		<script type="text/javascript" src="<%=request.getContextPath()%>/wcf/scroller.js"></script>
 
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/art-3.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/art.css" />
     </head>
     <body>
         <%

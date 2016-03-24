@@ -18,7 +18,7 @@
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.3/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">

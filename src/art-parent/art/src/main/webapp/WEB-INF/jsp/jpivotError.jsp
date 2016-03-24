@@ -10,9 +10,9 @@
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.3/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art-3.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>

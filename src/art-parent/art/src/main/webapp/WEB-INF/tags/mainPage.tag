@@ -28,7 +28,7 @@ bootstrap js, jquery js, datatables css, datatables js
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art-3.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>
