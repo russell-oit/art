@@ -32,6 +32,14 @@
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="belowMainPanel">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="alert alert-info">
+				<jsp:include page="/WEB-INF/html/scheduleNotes.html" />
+			</div>
+		</div>
+	</jsp:attribute>
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
@@ -83,7 +91,7 @@
 				$("#endDatePicker").on("dp.change", function (e) {
 					$('#startDatePicker').data("DateTimePicker").maxDate(e.date);
 				});
-				
+
 				$('.datepicker').datetimepicker({
 					format: 'YYYY-MM-DD'
 				});
@@ -589,9 +597,8 @@
 					</div>
 				</div>
 			</fieldset>
-
-
 		</form:form>
 	</jsp:body>
+
 </t:mainPageWithPanel>
 
