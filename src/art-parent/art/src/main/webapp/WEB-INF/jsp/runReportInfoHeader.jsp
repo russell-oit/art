@@ -12,6 +12,7 @@ e.g. report name and report generation progress
 
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
+<br>
 <div class="reportBanner">
 	<span id="reportInfo">
 		<encode:forHtmlContent value="${reportName}"/>

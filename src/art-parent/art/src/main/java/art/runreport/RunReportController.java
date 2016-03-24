@@ -231,11 +231,6 @@ public class RunReportController {
 				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
-//			} else if (reportType.isOlap()) {
-//				// forward to the showAnalysis page
-////			ctx.getRequestDispatcher("/user/showAnalysis.jsp").forward(request, response);
-////			return; // a return is needed otherwise the flow would proceed!
-//				return "showAnalysis";
 			} else {
 				//output report header
 				if (showReportHeaderAndFooter) {
@@ -356,7 +351,8 @@ public class RunReportController {
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
 
-					String reportInfo = "<b>" + reportName + "</b>" + description + " :: " + startTimeString;
+					String reportInfo = "<b>" + reportName + "</b>"
+							+ description + " :: " + startTimeString;
 
 					displayReportInfo(writer, reportInfo);
 

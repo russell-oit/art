@@ -41,7 +41,8 @@ public class HtmlGridOutput extends StandardOutput {
 	public void beginHeader() {
 		out.println("<div style='border: 3px solid white'>");
 		out.println("<table class='sortable' name='maintable' id='maintable'"
-				+ " cellpadding='2' cellspacing='0' width='80%'>");
+				+ " cellpadding='2' cellspacing='0'"
+				+ " style='margin: 0 auto; width: 95%'>");
 		out.println("<thead><tr>");
 	}
 
