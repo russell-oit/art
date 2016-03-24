@@ -20,7 +20,6 @@ package art.output;
 import art.parameter.Parameter;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.*;
 import java.util.*;
@@ -59,7 +58,6 @@ public class XlsxOutput extends StandardOutput {
 	int maxRows;
 	int columns;
 	int cellNumber;
-	Map<Integer, ArtQueryParam> displayParams;
 	String templateFileName;
 	String xmlFileName;
 	Map<String, CellStyle> styles;

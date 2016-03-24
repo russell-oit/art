@@ -19,7 +19,6 @@ package art.output;
 
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ArtQueryParam;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -45,7 +44,6 @@ public class Rss20Output extends StandardOutput {
 	int columns;
 	int columnIndex = 0; // current column
 	String[] columnNames;
-	Map<Integer, ArtQueryParam> displayParams;
 
 	/**
 	 * rfc822 (2822) standard date

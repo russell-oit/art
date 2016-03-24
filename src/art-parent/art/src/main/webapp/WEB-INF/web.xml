@@ -93,9 +93,9 @@
     </filter-mapping>
     <filter-mapping>
         <filter-name>JPivotController</filter-name>
+        <url-pattern>/app/runReport.do</url-pattern>
         <url-pattern>/analysis/showAnalysis.jsp</url-pattern>
-		<url-pattern>/app/runReport.do</url-pattern>
-		<url-pattern>/app/showAnalysis.do</url-pattern>
+        <url-pattern>/app/showAnalysis.do</url-pattern>
     </filter-mapping>
     <!-- Servlets -->
     <servlet>
@@ -150,15 +150,6 @@
     </servlet>
     <servlet>
         <description>
-			Get data for AjaxTags components
-		</description>
-        <servlet-name>AjaxTagsDataProvider</servlet-name>
-        <servlet-class>art.servlets.AjaxTagsDataProvider</servlet-class>
-        <!-- load after ArtConfig -->
-        <load-on-startup>4</load-on-startup>
-    </servlet>
-    <servlet>
-        <description>
 			Periodically perform some actions e.g. clean export files 	   
 		</description>
         <servlet-name>Scheduler</servlet-name>
@@ -166,10 +157,6 @@
         <!-- load after ArtConfig -->
         <load-on-startup>5</load-on-startup>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>AjaxTagsDataProvider</servlet-name>
-        <url-pattern>/AjaxTagsDataProvider</url-pattern>
-    </servlet-mapping>
     <session-config>
         <!-- timeout in minutes -->
         <session-timeout>120</session-timeout>

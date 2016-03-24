@@ -23,7 +23,6 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ArtException;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
 import java.sql.Connection;

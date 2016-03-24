@@ -29,7 +29,6 @@ import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.user.User;
 import art.utils.ActionResult;
-import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -827,85 +826,6 @@ public class ReportService {
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
-	}
-
-	/**
-	 * Get all parameters for a query, with the parameter's html name as the key
-	 *
-	 * @param qId query id for the relevant query
-	 * @return all parameters for a query
-	 */
-	public Map<String, ArtQueryParam> getHtmlParams(int qId) {
-		Map<String, ArtQueryParam> params = new HashMap<String, ArtQueryParam>();
-
-		Connection conn = null;
-		PreparedStatement ps = null;
-
-		try {
-			conn = DbConnections.getArtDbConnection();
-
-			String sql;
-			ResultSet rs;
-
-			sql = "SELECT FIELD_POSITION, PARAM_LABEL, PARAM_TYPE, DEFAULT_VALUE "
-					+ " FROM ART_QUERY_FIELDS"
-					+ " WHERE QUERY_ID =?";
-
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, qId);
-			rs = ps.executeQuery();
-
-			String htmlName;
-			String label;
-			int position;
-			String paramType;
-			while (rs.next()) {
-				position = rs.getInt("FIELD_POSITION");
-				label = rs.getString("PARAM_LABEL");
-				paramType = rs.getString("PARAM_TYPE");
-				String paramValue = rs.getString("DEFAULT_VALUE");
-
-				if (StringUtils.equals(paramType, "I")) {
-					//inline param                    
-					htmlName = "P_" + label;
-					ArtQueryParam param = new ArtQueryParam();
-					param.create(conn, qId, position);
-					param.setParamValue(paramValue); //set default value for inline params
-					params.put(htmlName, param);
-				} else if (StringUtils.equals(paramType, "M")) {
-					//multi param. can be either labelled (M_label) or non-labelled (M_1)
-					//add entry for labelled param
-					htmlName = "M_" + label;
-					ArtQueryParam param = new ArtQueryParam();
-					param.create(conn, qId, position);
-					params.put(htmlName, param);
-
-					//add entry for non-labelled param
-					htmlName = "M_" + position;
-					params.put(htmlName, param);
-				}
-			}
-			rs.close();
-		} catch (Exception e) {
-			logger.error("Error", e);
-		} finally {
-			try {
-				if (ps != null) {
-					ps.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (SQLException e) {
-				logger.error("Error", e);
-			}
-		}
-
-		return params;
 	}
 
 	/**

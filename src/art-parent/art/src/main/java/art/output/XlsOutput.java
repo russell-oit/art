@@ -20,7 +20,6 @@ package art.output;
 import art.enums.ZipType;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ArtQueryParam;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,7 +61,6 @@ public class XlsOutput extends StandardOutput {
 	int maxRows;
 	int columns;
 	int cellNumber;
-	Map<Integer, ArtQueryParam> displayParams;
 	String exportPath;
 	ZipType zipType;
 	

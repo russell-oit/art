@@ -22,13 +22,10 @@ import art.servlets.Config;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,112 +39,7 @@ public class ArtHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
 	private static final int MAX_LOG_MESSAGE_LENGTH = 500;
-
-	/**
-	 * Authenticate the session.
-	 *
-	 * @param request
-	 * @return
-	 * @throws ArtException if couldn't authenticate
-	 * @throws Exception
-	 */
-	public static String authenticateSession(HttpServletRequest request) throws Exception {
-		//TODO remove this method once refactoring is complete
-
-		String msg = null;
-		HttpSession session = request.getSession();
-		ResourceBundle messages = ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
-		int accessLevel = -1;
-		String username = request.getParameter("username");
-		String password = request.getParameter("password");
-		if (username != null && password != null) {
-			ArtHelper artHelper = new ArtHelper();
-			boolean isArtRepositoryUser = artHelper.isValidRepositoryUser(username, password);
-			if (isArtRepositoryUser) {
-				accessLevel = 100;
-				log(username, "login", request.getRemoteAddr(), "internal-superadmin, level: " + accessLevel);
-			} else {
-				Connection conn = null;
-				PreparedStatement ps = null;
-				ResultSet rs = null;
-				try {
-					String SqlQuery = "SELECT PASSWORD, HASHING_ALGORITHM, ACCESS_LEVEL"
-							+ " FROM ART_USERS "
-							+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
-					conn = Config.getConnection();
-					if (conn == null) {
-						msg = messages.getString("invalidConnection");
-					} else {
-						ps = conn.prepareStatement(SqlQuery);
-						ps.setString(1, username);
-						rs = ps.executeQuery();
-						if (rs.next()) {
-							if (Encrypter.VerifyPassword(password, rs.getString("PASSWORD"), rs.getString("HASHING_ALGORITHM"))) {
-								accessLevel = rs.getInt("ACCESS_LEVEL");
-								session.setAttribute("username", username);
-								log(username, "login", request.getRemoteAddr(), "internal, level: " + accessLevel);
-							} else {
-								log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
-								msg = messages.getString("invalidAccount");
-							}
-						} else {
-							log(username, "loginerr", request.getRemoteAddr(), "internal, failed");
-							msg = messages.getString("invalidAccount");
-						}
-					}
-				} finally {
-					DatabaseUtils.close(rs, ps, conn);
-				}
-			}
-		} else if (session.getAttribute("username") != null) {
-			Connection conn = null;
-			PreparedStatement ps = null;
-			ResultSet rs = null;
-			try {
-				username = (String) session.getAttribute("username");
-				String SqlQuery = "SELECT ACCESS_LEVEL "
-						+ " FROM ART_USERS "
-						+ " WHERE USERNAME = ? AND ACTIVE_STATUS = 'A'";
-				conn = Config.getConnection();
-				if (conn == null) {
-					msg = messages.getString("invalidConnection");
-				} else {
-					ps = conn.prepareStatement(SqlQuery);
-					ps.setString(1, username);
-					rs = ps.executeQuery();
-					if (rs.next()) {
-						accessLevel = rs.getInt("ACCESS_LEVEL");
-						log(username, "login", request.getRemoteAddr(), "external, level: " + accessLevel);
-					} else {
-						log(username, "loginerr", request.getRemoteAddr(), "external, failed");
-						msg = messages.getString("invalidUser");
-					}
-				}
-			} finally {
-				DatabaseUtils.close(rs, ps, conn);
-			}
-		} else {
-			if (request.getParameter("_public_user") != null) {
-				username = "public_user";
-				accessLevel = 0;
-			} else {
-				msg = messages.getString("sessionExpired");
-			}
-		}
-		if (msg == null) {
-			UserEntity ue = new UserEntity(username);
-			ue.setAccessLevel(accessLevel);
-			session.setAttribute("ue", ue);
-			session.setAttribute("username", username);
-			if (accessLevel >= 10) {
-				session.setAttribute("AdminSession", "Y");
-				session.setAttribute("AdminLevel", Integer.valueOf(accessLevel));
-				session.setAttribute("AdminUsername", username);
-			}
-		}
-		return msg;
-	}
-
+	
 	/**
 	 * Get language file to use for datatables, depending on the locale
 	 *

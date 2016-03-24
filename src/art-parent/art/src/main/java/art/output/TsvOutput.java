@@ -20,7 +20,6 @@ package art.output;
 import art.enums.ZipType;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
-import art.utils.ArtQueryParam;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -56,7 +55,6 @@ public class TsvOutput extends StandardOutput {
 	int maxRows;
 	int counter;
 	int columns;
-	Map<Integer, ArtQueryParam> displayParams;
 	final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
 	String exportPath;
 	ZipType zipType;
