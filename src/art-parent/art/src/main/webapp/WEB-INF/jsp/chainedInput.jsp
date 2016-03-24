@@ -11,11 +11,19 @@ Display report parameter that uses dropdown input
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <select class="form-control"
 		name="${reportParam.htmlElementName}"
 		id="${reportParam.htmlElementName}">
-	<c:forEach var="lovValue" items="${lovValues}">
-		<option lovValue="${lovValue.key}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${lovValue.value}</option>
-	</c:forEach>
+	<option value="">--</option>
 </select>
+
+<spring:message code="chained.text.loading" var="loadingText"/>
+<script type="text/javascript">
+	$("#p-country").remoteChained({
+		parents: "#test",
+		url: "/app/getLovValues.do",
+		loading: "${loadingText}"
+	});
+</script>

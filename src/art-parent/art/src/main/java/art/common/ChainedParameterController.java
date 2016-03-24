@@ -22,6 +22,7 @@ import art.report.ReportService;
 import art.runreport.ReportRunner;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,17 +41,19 @@ public class ChainedParameterController {
 
 	@RequestMapping(value = "/app/getLovValues", method = RequestMethod.GET)
 	public @ResponseBody
-	Map<Object, String> getLovValues(@RequestParam("reportId") Integer reportId) {
-		Map<Object, String> values = null;
-		try {
-			ReportService reportService = new ReportService();
-			ReportRunner reportRunner = new ReportRunner();
-			Report report = reportService.getReport(reportId);
-			reportRunner.setReport(report);
-			values = reportRunner.getLovValues();
-		} catch (SQLException ex) {
-			Logger.getLogger(ChainedParameterController.class.getName()).log(Level.SEVERE, null, ex);
-		}
+	Map<String, String> getLovValues(@RequestParam("reportId") Integer reportId) {
+		Map<String, String> values = new HashMap<>();
+		values.put("value1", "test 1");
+		values.put("test2", "test 2");
+//		try {
+//			ReportService reportService = new ReportService();
+//			ReportRunner reportRunner = new ReportRunner();
+//			Report report = reportService.getReport(reportId);
+//			reportRunner.setReport(report);
+//			values = reportRunner.getLovValues();
+//		} catch (SQLException ex) {
+//			Logger.getLogger(ChainedParameterController.class.getName()).log(Level.SEVERE, null, ex);
+//		}
 
 		return values;
 

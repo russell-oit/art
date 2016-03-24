@@ -30,6 +30,8 @@ Display report parameters and initiate running of report
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects/jquery.chained.remote.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$("#schedule").click(function (e) {
