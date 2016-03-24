@@ -16,10 +16,10 @@
 	<c:set var="reportParam" value="${reportParam}" scope="request"/>
 
 	<div class="form-group">
-		<label class="control-label col-md-6" for="${reportParam.htmlElementName}">
+		<label class="control-label col-md-5" for="${reportParam.htmlElementName}">
 			${reportParam.parameter.label}
 		</label>
-		<div class="col-md-6">
+		<div class="col-md-7">
 			<div class="input-group">
 				<c:choose>
 					<c:when test="${reportParam.parameter.useLov}">
