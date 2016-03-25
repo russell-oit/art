@@ -21,7 +21,7 @@ Html page header fragment when displaying report output in a new page
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.css">
 
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
-
+		
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>
 		  <script type='text/javascript' src="${pageContext.request.contextPath}/js/html5shiv-3.7.0.js"></script>

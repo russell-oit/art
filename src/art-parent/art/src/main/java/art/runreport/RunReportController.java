@@ -195,7 +195,7 @@ public class RunReportController {
 				response.setContentType(contentType);
 				writer = response.getWriter();
 
-					//the report output class determines if the report header and footer will be shown
+				//the report output class determines if the report header and footer will be shown
 				//if false the output class needs to take care of all the output
 				showReportHeaderAndFooter = standardOutput.outputHeaderandFooter();
 			} else {
@@ -378,13 +378,14 @@ public class RunReportController {
 				}
 
 				if (reportType == ReportType.Update) {
-					int rowsUpdated = reportRunner.getUpdateCount(); // will be -1 if query has multiple statements
-					request.setAttribute("rowsUpdated", "" + rowsUpdated);
-//						ctx.getRequestDispatcher("/user/updateExecuted.jsp").include(request, response);
+					reportRunner.getResultSet();
+					Integer rowsUpdated = reportRunner.getUpdateCount(); // will be -1 if query has multiple statements
+					request.setAttribute("rowsUpdated", rowsUpdated);
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/showUpdateReport.jsp").include(request, response);
 				} else {
 					//generate output
 					//generate file name to use for report types and formats that generate files
-					FilenameHelper filenameHelper=new FilenameHelper();
+					FilenameHelper filenameHelper = new FilenameHelper();
 					String baseFileName = filenameHelper.getFileName(report);
 					String exportPath = Config.getReportsExportPath();
 

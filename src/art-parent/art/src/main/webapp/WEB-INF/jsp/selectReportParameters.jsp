@@ -26,6 +26,8 @@ Display report parameters and initiate running of report
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/sorttable.js"></script>
+		
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>

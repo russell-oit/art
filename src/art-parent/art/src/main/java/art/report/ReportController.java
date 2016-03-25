@@ -143,12 +143,14 @@ public class ReportController {
 //				model.addAttribute("paramsList", paramsList);
 				ReportType reportType = report.getReportType();
 
-				boolean enableReportFormats = false;
+				boolean enableReportFormats;
 				switch (reportType) {
 					case Dashboard:
 					case Mondrian:
 					case MondrianXmla:
 					case SqlServerXmla:
+					case Update:
+						enableReportFormats = false;
 						break;
 					default:
 						enableReportFormats = true;

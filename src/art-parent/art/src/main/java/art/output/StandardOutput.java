@@ -370,7 +370,7 @@ public abstract class StandardOutput {
 
 		while (rs.next()) {
 			rowCount++;
-			
+
 			newRow();
 
 			if (rowCount % 2 == 0) {
@@ -618,34 +618,13 @@ public abstract class StandardOutput {
 			// Scroll resultset and feed data structures
 			// to read it as a crosstab (pivot)
 			while (rs.next()) {
-				rowCount++;
-
-				if (rowCount % 2 == 0) {
-					evenRow = true;
-				} else {
-					evenRow = false;
-				}
-
-				if (rowCount > maxRows) {
-					//row limit exceeded
-					for (int i = 0; i < totalColumnCount; i++) {
-						addCellString("...");
-					}
-
-					endRows();
-
-					result.setMessage("runReport.message.tooManyRows");
-					result.setTooManyRows(true);
-					return result;
-				} else {
-					Object DyVal = rs.getObject(1);
-					Object Dy = rs.getObject(2);
-					Object DxVal = rs.getObject(3);
-					Object Dx = rs.getObject(4);
-					x.put(Dx, DxVal);
-					y.put(Dy, DyVal);
-					addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 5, ColumnType.String);
-				}
+				Object DyVal = rs.getObject(1);
+				Object Dy = rs.getObject(2);
+				Object DxVal = rs.getObject(3);
+				Object Dx = rs.getObject(4);
+				x.put(Dx, DxVal);
+				y.put(Dy, DyVal);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 5, ColumnType.String);
 			}
 
 			xa = x.keySet().toArray();
@@ -675,11 +654,34 @@ public abstract class StandardOutput {
 
 			//  _ Jan Feb Mar
 			for (j = 0; j < ya.length; j++) {
-				Object Dy = ya[j];
-				addHeaderCellLeftAligned(y.get(Dy).toString()); //column 1 data displayed as a header
-				for (i = 0; i < xa.length; i++) {
-					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-					addString(value, displayNullSetting);
+				rowCount++;
+
+				newRow();
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int k = 0; k < totalColumnCount; k++) {
+						addCellString("...");
+					}
+
+					endRows();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+					Object Dy = ya[j];
+					addHeaderCellLeftAligned(y.get(Dy).toString()); //column 1 data displayed as a header
+					for (i = 0; i < xa.length; i++) {
+						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+						addString(value, displayNullSetting);
+					}
 				}
 			}
 
@@ -690,33 +692,11 @@ public abstract class StandardOutput {
 			// Scroll resultset and feed data structures
 			// to read it as a crosstab (pivot)
 			while (rs.next()) {
-				rowCount++;
-
-				if (rowCount % 2 == 0) {
-					evenRow = true;
-				} else {
-					evenRow = false;
-				}
-
-				if (rowCount > maxRows) {
-					//row limit exceeded
-					for (int i = 0; i < totalColumnCount; i++) {
-						addCellString("...");
-					}
-
-					endRows();
-
-					result.setMessage("runReport.message.tooManyRows");
-					result.setTooManyRows(true);
-					return result;
-				} else {
-
-					Object Dy = rs.getObject(1);
-					Object Dx = rs.getObject(2);
-					x.add(Dx);
-					y.add(Dy);
-					addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 3, ColumnType.String);
-				}
+				Object Dy = rs.getObject(1);
+				Object Dx = rs.getObject(2);
+				x.add(Dx);
+				y.add(Dy);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 3, ColumnType.String);
 			}
 
 			xa = x.toArray();
@@ -746,16 +726,35 @@ public abstract class StandardOutput {
 
 			//  _ Jan Feb Mar
 			for (j = 0; j < ya.length; j++) {
-//				if (!o.newLine()) {
-//					result.setMessage("reports.message.tooManyRows");
-//					return result;
-//				}
-				Object Dy = ya[j];
-				//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
-				addHeaderCellLeftAligned(Dy.toString()); //column 1 data displayed as a header
-				for (i = 0; i < xa.length; i++) {
-					Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-					addString(value, displayNullSetting);
+				rowCount++;
+
+				newRow();
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int k = 0; k < totalColumnCount; k++) {
+						addCellString("...");
+					}
+
+					endRows();
+
+					result.setMessage("runReport.message.tooManyRows");
+					result.setTooManyRows(true);
+					return result;
+				} else {
+					Object Dy = ya[j];
+					//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
+					addHeaderCellLeftAligned(Dy.toString()); //column 1 data displayed as a header
+					for (i = 0; i < xa.length; i++) {
+						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
+						addString(value, displayNullSetting);
+					}
 				}
 			}
 		}
