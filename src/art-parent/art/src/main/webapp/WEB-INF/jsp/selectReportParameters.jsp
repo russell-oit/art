@@ -26,8 +26,6 @@ Display report parameters and initiate running of report
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/sorttable.js"></script>
-		
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
@@ -64,7 +62,11 @@ Display report parameters and initiate running of report
 
 								if (statusText === "success") {
 									//TODO make htmlgrid output sortable
-
+									forEach(document.getElementsByTagName('table'), function (table) {
+										if (table.className.search(/\bsortable\b/) != -1) {
+											sorttable.makeSortable(table);
+										}
+									});
 								} else if (statusText === "error") {
 									bootbox.alert("<b>${errorOccurredText}</b><br>"
 											+ xhr.status + "<br>" + responseText);
