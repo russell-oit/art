@@ -17,8 +17,11 @@
  */
 package art.dashboard;
 
+import art.enums.ReportStatus;
 import art.report.Report;
 import art.report.ReportService;
+import art.servlets.Config;
+import art.user.User;
 import art.utils.XmlParser;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -56,18 +60,36 @@ public class DashboardController {
 
 	@RequestMapping(value = "/app/showDashboard", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showDashboard(@RequestParam("reportId") Integer reportId,
-			HttpServletRequest request, Model model, Locale locale) {
+			HttpServletRequest request, Model model, Locale locale,
+			HttpSession session) {
 
 		try {
 			Report report = reportService.getReport(reportId);
 
-			//TODO add/consolidate report exists and user has access code with run report controller
+			String errorPage = "reportError";
+
 			if (report == null) {
 				model.addAttribute("message", "reports.message.reportNotFound");
-				return "showDashboard";
+				return errorPage;
 			}
 
-			Dashboard dashboard = buildDashboard(report, request,locale);
+			//check if user has permission to run report
+			//admins can run all reports, even disabled ones. only check for non admin users
+			User sessionUser = (User) session.getAttribute("sessionUser");
+
+			if (!sessionUser.isAdminUser()) {
+				if (report.getReportStatus() == ReportStatus.Disabled) {
+					model.addAttribute("message", "reports.message.reportDisabled");
+					return errorPage;
+				}
+
+				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+					model.addAttribute("message", "reports.message.noPermission");
+					return errorPage;
+				}
+			}
+
+			Dashboard dashboard = buildDashboard(report, request, locale);
 			model.addAttribute("dashboard", dashboard);
 
 			model.addAttribute("reportName", report.getName());
@@ -82,7 +104,7 @@ public class DashboardController {
 
 	private Dashboard buildDashboard(Report report, HttpServletRequest request,
 			Locale locale) throws UnsupportedEncodingException, SQLException, ParseException {
-		
+
 		Dashboard dashboard = new Dashboard();
 
 		dashboard.setTitle(report.getShortDescription());
@@ -117,7 +139,7 @@ public class DashboardController {
 				boolean executeOnLoad = getPortletExecuteOnLoad(portletXml);
 				portlet.setExecuteOnLoad(executeOnLoad);
 
-				String title = getPortletTitle(portletXml,request,executeOnLoad,refreshPeriod,locale);
+				String title = getPortletTitle(portletXml, request, executeOnLoad, refreshPeriod, locale);
 				portlet.setTitle(title);
 
 				String classNamePrefix = getPortletClassNamePrefix(columnSize);
@@ -200,10 +222,10 @@ public class DashboardController {
 					+ messageSource.getMessage("portlets.text.onLoadFalse", null, locale) + "'/>";
 		}
 		if (StringUtils.isNotEmpty(refreshPeriod)) {
-			title = title + " <img src='" + contextPath + "/images/clock_mini.gif' title='" 
+			title = title + " <img src='" + contextPath + "/images/clock_mini.gif' title='"
 					+ messageSource.getMessage("portlets.text.autoRefresh", null, locale)
-					+ " " + refreshPeriod + " " 
-					+ messageSource.getMessage("portlets.text.seconds", null, locale) 
+					+ " " + refreshPeriod + " "
+					+ messageSource.getMessage("portlets.text.seconds", null, locale)
 					+ "'/> <small>" + refreshPeriod + "s</small>";
 		}
 		return title;

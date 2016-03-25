@@ -17,9 +17,14 @@ bootstrap js, jquery js, datatables css, datatables js
 <%@attribute name="title" %>
 <%@attribute name="css" fragment="true" %>
 <%@attribute name="javascript" fragment="true" %>
+<%@attribute name="headContent" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
+	<jsp:attribute name="headContent">
+		<jsp:invoke fragment="headContent"/>
+	</jsp:attribute>
+	
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">

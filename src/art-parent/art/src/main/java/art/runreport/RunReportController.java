@@ -155,7 +155,6 @@ public class RunReportController {
 			response.setHeader("Cache-control", "no-cache");
 
 			if (reportType == ReportType.Dashboard) {
-//				servletContext.getRequestDispatcher("/app/showDashboard.do").forward(request, response);
 				return "forward:/app/showDashboard.do";
 			} else if (reportType.isOlap()) {
 //				servletContext.getRequestDispatcher("/analysis/showAnalysis.jsp").forward(request, response);

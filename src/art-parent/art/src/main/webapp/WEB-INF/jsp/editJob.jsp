@@ -276,12 +276,14 @@
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
 
-				<fieldset>
-					<legend><spring:message code="jobs.text.parameters"/></legend>
-					<jsp:include page="reportParameters.jsp">
-						<jsp:param name="reportParamsList" value="${reportParamsList}"/>
-					</jsp:include>
-				</fieldset>
+				<c:if test="${not empty reportParamsList}">
+					<fieldset>
+						<legend><spring:message code="jobs.text.parameters"/></legend>
+						<jsp:include page="reportParameters.jsp">
+							<jsp:param name="reportParamsList" value="${reportParamsList}"/>
+						</jsp:include>
+					</fieldset>
+				</c:if>
 
 				<fieldset>
 					<legend><spring:message code="jobs.text.job"/></legend>

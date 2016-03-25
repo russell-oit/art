@@ -26,15 +26,23 @@ Edit schedule page
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="belowMainPanel">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="alert alert-info">
+				<jsp:include page="/WEB-INF/html/scheduleNotes.html" />
+			</div>
+		</div>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="schedules.do"]').parent().addClass('active');
 				});
 
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
@@ -102,6 +110,8 @@ Edit schedule page
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
+
+				<hr>
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="minute">
 						<spring:message code="schedules.label.minute"/>

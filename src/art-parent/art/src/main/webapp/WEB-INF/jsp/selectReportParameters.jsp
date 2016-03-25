@@ -61,11 +61,9 @@ Display report parameters and initiate running of report
 								//callback funtion for when jquery load has finished
 
 								if (statusText === "success") {
-									//TODO make htmlgrid output sortable
-									forEach(document.getElementsByTagName('table'), function (table) {
-										if (table.className.search(/\bsortable\b/) != -1) {
-											sorttable.makeSortable(table);
-										}
+									//make htmlgrid output sortable
+									$('.sortable').each(function (i, obj) {
+										sorttable.makeSortable(obj);
 									});
 								} else if (statusText === "error") {
 									bootbox.alert("<b>${errorOccurredText}</b><br>"
@@ -104,6 +102,33 @@ Display report parameters and initiate running of report
 
 
 			}); //end document ready
+		</script>
+
+		<script type="text/javascript">
+			//https://stackoverflow.com/questions/2255291/print-the-contents-of-a-div
+			function PrintElem(elem)
+			{
+				Popup($(elem).html());
+			}
+
+			function Popup(data)
+			{
+				var mywindow = window.open('', '${report.name}', 'height=400,width=600');
+				mywindow.document.write('<html><head><title>${report.name}</title>');
+				/*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
+				mywindow.document.write('</head><body >');
+				mywindow.document.write(data);
+				mywindow.document.write('</body></html>');
+
+				mywindow.document.close(); // necessary for IE >= 10
+				mywindow.focus(); // necessary for IE >= 10
+
+				mywindow.print();
+				mywindow.close();
+
+				return true;
+			}
+
 		</script>
 	</jsp:attribute>
 
@@ -185,7 +210,7 @@ Display report parameters and initiate running of report
 															<spring:message code="reports.label.format"/>
 														</label>
 														<div class="col-md-7">
-															<select name="reportFormat" id="reportFormat" class="form-control">
+															<select name="reportFormat" id="reportFormat" class="form-control selectpicker">
 																<c:forEach var="reportFormat" items="${reportFormats}">
 																	<option value="${reportFormat}">
 																		<spring:message code="reports.format.${reportFormat}"/>
@@ -229,7 +254,7 @@ Display report parameters and initiate running of report
 
 											<div class="form-group">
 												<div class="col-md-6 col-md-offset-3">
-													<div id="actionsDiv" class="pull-right">
+													<div id="actionsDiv">
 														<c:if test="${enableSchedule}">
 															<button type="button" id="schedule" class="btn btn-default action">
 																<spring:message code="reports.action.schedule"/>
@@ -241,6 +266,9 @@ Display report parameters and initiate running of report
 														<c:if test="${enableRunInline}">
 															<button type="submit" id="runInline" class="btn btn-primary action">
 																<spring:message code="page.action.run"/>
+															</button>
+															<button type="button" class="btn btn-default action" onclick="PrintElem('#reportOutput')" >
+																<spring:message code="reports.action.print"/>
 															</button>
 														</c:if>
 													</div>

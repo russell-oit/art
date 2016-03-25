@@ -1,6 +1,8 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -23,40 +25,26 @@
 
 		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
-
-		<%
-			java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
-			String msg;
-
-			msg = messages.getString("jpivotError");
-
-			Throwable e = (Throwable) request.getAttribute("javax.servlet.jsp.jspException");
-			while (e != null) {
-				msg = msg + e.toString() + "<br><br>";
-
-				Throwable prev = e;
-				e = e.getCause();
-				if (e == prev) {
-					break;
-				}
-			}
-		%>
-
 		<table class="centerTableAuto">
 			<tr>
-				<td colspan="2" class="data" align="center"> <b><span style="color:red"> <%=messages.getString("error")%> </span></b> 
+				<td colspan="2" class="data" align="center">
+					<b><span style="color:red"> 
+							<spring:message code="page.message.errorOccurred"/>
+						</span>
+					</b> 
 				</td>
 			</tr>
 			<tr>
-				<td class=attr> <%=messages.getString("message")%>
-				</td>
-				<td class=data> <%=msg%>
-				</td>
-			</tr>
-		</table>
+				<td class=attr>
+			<spring:message code="analysis.text.message"/>:
+		</td>
+		<td class=data>
+			${msg}
+		</td>
+	</tr>
+</table>
 
+<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 
-		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
-
-	</body>
+</body>
 </html>

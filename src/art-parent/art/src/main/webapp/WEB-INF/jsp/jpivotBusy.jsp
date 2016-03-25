@@ -23,26 +23,27 @@
 
 		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
-		<%
-			java.util.ResourceBundle messages = java.util.ResourceBundle.getBundle("i18n.ArtMessages", request.getLocale());
-		%>
-
 		<table class="centerTableAuto">
 			<tr>
-				<td colspan="2" class="data" align="center"> <b><span style="color:red"><%=messages.getString("jpivotQueryWait")%></span></b>
-					<img src="<%= request.getContextPath()%>/images/spinner.gif">
+				<td colspan="2" class="data" align="center">
+					<b><span style="color:red">
+							<spring:message code="analysis.message.jpivotQueryWait"/>
+						</span></b>
+					<img src="${pageContext.request.contextPath}/images/spinner.gif">
 				</td>
 			</tr>
 			<tr>
-				<td class=attr> <%=messages.getString("message")%>
-				</td>
-				<td class=data><%=messages.getString("jpivotResultsWait")%>
-				</td>
-			</tr>
-		</table>
+				<td class=attr>
+			<spring:message code="analysis.text.message"/>:
+		</td>
+		<td class=data>
+		<spring:message code="analysis.message.jpivotResultsWait"/>
+	</td>
+</tr>
+</table>
 
 
-		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 
-	</body>
+</body>
 </html>
