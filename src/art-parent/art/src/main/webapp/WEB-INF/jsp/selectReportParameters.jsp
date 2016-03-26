@@ -254,7 +254,12 @@ Display report parameters and initiate running of report
 
 											<div class="form-group">
 												<div class="col-md-6 col-md-offset-3">
-													<div id="actionsDiv">
+													<div id="actionsDiv" style="text-align: center">
+														<c:if test="${enableRunInline}">
+															<button type="button" class="btn btn-default action" onclick="PrintElem('#reportOutput')" >
+																<spring:message code="reports.action.print"/>
+															</button>
+														</c:if>
 														<c:if test="${enableSchedule}">
 															<button type="button" id="schedule" class="btn btn-default action">
 																<spring:message code="reports.action.schedule"/>
@@ -266,9 +271,6 @@ Display report parameters and initiate running of report
 														<c:if test="${enableRunInline}">
 															<button type="submit" id="runInline" class="btn btn-primary action">
 																<spring:message code="page.action.run"/>
-															</button>
-															<button type="button" class="btn btn-default action" onclick="PrintElem('#reportOutput')" >
-																<spring:message code="reports.action.print"/>
 															</button>
 														</c:if>
 													</div>

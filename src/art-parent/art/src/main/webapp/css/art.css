@@ -182,4 +182,16 @@ td.info {
 	color: #003366;
 }
 
+td.data {
+ font-size: 10pt;
+ background-image: URL('../images/bg-gray.png');
+ background-repeat: repeat-x;
+ background-color:#FFFFFF;
+ vertical-align: middle;
+ color:#003366;
+ padding-left: 2pt;
+ padding-right: 2pt;
+ /* border: 1px solid #000000; */
+}
+
 

@@ -19,18 +19,28 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>ART - ${reportName}</title>
 
-				<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/table/mdxtable.css" />
+		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/table/mdxtable.css" />
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/navi/mdxnavi.css" />
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/form/xform.css" />
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/table/xtable.css" />
 		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/tree/xtree.css" />
 		<script type="text/javascript" src="<%=request.getContextPath()%>/wcf/scroller.js"></script>
 
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/art.css" />
+		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.0.3/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
+
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>
+
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
 	</head>
 	<body>
+		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
+		<% if (request.getParameter("action") == null && request.getParameter("null") == null) { %>
 		<c:choose>
 			<c:when test="${reportType == 'Mondrian'}">
 			<jp:mondrianQuery id="${jpivotQueryId}" jdbcDriver="${databaseDriver}"
@@ -46,6 +56,7 @@
 			</jp:xmlaQuery>
 		</c:otherwise>
 	</c:choose>
+	<% }%>
 
 
 	<table class="pivot centerTable" style="margin: 0 auto; width: 50%">
@@ -56,7 +67,7 @@
 		<tr><td>
 				<br />
 
-				<form action="showAnalysis.do" method="get">
+				<form action="showAnalysis.do" method="post">
 					<input type="hidden" name="action" value="edit">
 					<input type="hidden" name="reportId" value="${reportId}">
 
@@ -187,5 +198,7 @@
 			</td>
 		</tr>
 	</table>
+
+	<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 </body>
 </html>
