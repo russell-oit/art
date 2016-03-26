@@ -21,10 +21,10 @@ public class CommonController {
 	public String showSuccess() {
 		return "success";
 	}
-
-	@RequestMapping(value = "/app/test", method = RequestMethod.GET)
-	public String showTest() {
-		return "test";
+	
+	@RequestMapping(value = "/app/reportError", method = RequestMethod.GET)
+	public String showReportError() {
+		return "reportError";
 	}
 
 }

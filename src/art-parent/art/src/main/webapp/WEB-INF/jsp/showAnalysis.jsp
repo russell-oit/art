@@ -146,7 +146,7 @@
 					</p>
 
 					<p>
-						Filter:
+						<spring:message code="analysis.text.saveCurrentView"/>:
 					<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true"/>
 					</p>
 
@@ -168,14 +168,14 @@
 				<i><spring:message code="analysis.text.saveCurrentView"/></i>
 				<br>
 
-				<form method="post" action="saveAnalysis.jsp">
-					<input type="hidden" name="pivotQueryId" value="${reportId}" />
+				<form method="post" action="saveAnalysis.do">
+					<input type="hidden" name="pivotReportId" value="${reportId}" />
 					<table>
 						<tr><td>
 						<spring:message code="page.text.name"/>
 						</td>
 						<td>
-							<input type="text" name="newPivotName" value="" size="20" maxlength="25" />
+							<input type="text" name="newPivotName" value="" size="20" maxlength="40" />
 							<c:if test="${exclusiveAccess}">
 							<input type="checkbox" name="overwrite" /><spring:message code="analysis.text.overwrite"/> &nbsp;
 							<input type="checkbox" name="delete" /><spring:message code="page.action.delete"/> &nbsp;

@@ -263,10 +263,9 @@ public class AuthorizationFilter implements Filter {
 					&& StringUtils.equals(authenticationMethod, ArtAuthenticationMethod.Internal.getValue())) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "success")) {
-			//all can access
-			authorised = true;
-		} else if (StringUtils.equals(page, "accessDenied")) {
+		} else if (StringUtils.equals(page, "success")
+				|| StringUtils.equals(page, "accessDenied")
+				|| StringUtils.equals(page, "reportError")) {
 			//all can access
 			authorised = true;
 		} else if (StringUtils.equals(page, "userGroups") || StringUtils.endsWith(page, "UserGroup")) {

@@ -94,7 +94,6 @@
     <filter-mapping>
         <filter-name>JPivotController</filter-name>
         <url-pattern>/app/runReport.do</url-pattern>
-        <url-pattern>/analysis/showAnalysis.jsp</url-pattern>
         <url-pattern>/app/showAnalysis.do</url-pattern>
     </filter-mapping>
     <!-- Servlets -->

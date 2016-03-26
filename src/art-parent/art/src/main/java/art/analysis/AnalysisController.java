@@ -54,7 +54,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  *
@@ -72,7 +72,7 @@ public class AnalysisController {
 	private MessageSource messageSource;
 
 	@RequestMapping(value = "/app/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showDashboard(HttpServletRequest request, Model model,
+	public String showAnalysis(HttpServletRequest request, Model model,
 			HttpSession session) {
 
 		try {
@@ -383,5 +383,109 @@ public class AnalysisController {
 	@RequestMapping(value = "/app/jpivotBusy", method = {RequestMethod.GET, RequestMethod.POST})
 	public String jpivotBusy() {
 		return "jpivotBusy";
+	}
+
+	@RequestMapping(value = "/app/saveAnalysis", method = RequestMethod.POST)
+	public String saveAnalysis(HttpServletRequest request,
+			HttpSession session, RedirectAttributes redirectAttributes) {
+
+		try {
+			int reportId;
+			String queryName;
+			String mdx;
+			String queryDescription;
+
+			reportId = Integer.parseInt(request.getParameter("pivotReportId"));
+			queryName = request.getParameter("newPivotName");
+			queryDescription = request.getParameter("newPivotDescription");
+			mdx = (String) session.getAttribute("mdx" + reportId);
+
+			boolean overwriting;
+			if (request.getParameter("overwrite") != null) {
+				overwriting = true;
+			} else {
+				overwriting = false;
+			}
+
+			boolean deleting;
+			if (request.getParameter("delete") != null && !overwriting) {
+				deleting = true;
+			} else {
+				deleting = false;
+			}
+
+			//check if any modification made
+			if ((mdx == null || mdx.length() == 0) && !deleting) {
+				redirectAttributes.addFlashAttribute("message", "analysis.message.nothingToSave");
+				return "redirect:/app/reportError.do";
+			}
+
+			Report report = reportService.getReport(reportId);
+
+			if (report == null) {
+				redirectAttributes.addFlashAttribute("message", "reports.message.reportNotFound");
+				return "redirect:/app/reportError.do";
+			}
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			if (overwriting) {
+				//overwrite query source with current mdx
+				//query details loaded. update query
+				report.setReportSource(mdx);
+				if (StringUtils.length(queryDescription) > 0) {
+					//update description
+					report.setDescription(queryDescription);
+				}
+				reportService.updateReport(report, sessionUser);
+				redirectAttributes.addFlashAttribute("message", "analysis.message.reportSaved");
+				return "redirect:/app/success.do";
+			} else if (deleting) {
+				//delete query
+				reportService.deleteReport(reportId);
+				redirectAttributes.addFlashAttribute("message", "analysis.message.reportDeleted");
+				return "redirect:/app/success.do";
+			} else {
+				//create new query based on current query
+				Report newReport = new Report();
+
+				newReport.setReportType(report.getReportType());
+				newReport.setShortDescription("");
+				newReport.setContactPerson(sessionUser.getUsername());
+				newReport.setUsesFilters(report.isUsesFilters());
+				newReport.setReportStatus(report.getReportStatus());
+				newReport.setTemplate(report.getTemplate());
+
+				if (queryDescription == null || queryDescription.length() == 0) {
+					//no description provided. use original query description
+					queryDescription = report.getDescription();
+				}
+				newReport.setDescription(queryDescription);
+
+				if (queryName == null || queryName.trim().length() == 0) {
+					//no name provided for the new query. create a default name
+					queryName = report.getName() + "-2";
+				}
+				newReport.setName(queryName);
+
+				newReport.setReportGroup(report.getReportGroup());
+				newReport.setDatasource(report.getDatasource());
+
+				//save current view's mdx
+				newReport.setReportSource(mdx);
+
+				//insert query
+				reportService.addReport(newReport, sessionUser);
+
+				//give this user direct access to the view he has just created. so that he can update and overwrite it if desired
+				//TODO implement
+//				newReport.grantAccess(conn, ue.getUsername());
+				redirectAttributes.addFlashAttribute("message", "analysis.message.reportAdded");
+				return "redirect:/app/success.do";
+			}
+		} catch (SQLException ex) {
+			redirectAttributes.addFlashAttribute("error", ex);
+			return "redirect:/app/reportError.do";
+		}
+
 	}
 }
