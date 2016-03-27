@@ -210,7 +210,7 @@ Display report parameters and initiate running of report
 															<spring:message code="reports.label.format"/>
 														</label>
 														<div class="col-md-7">
-															<select name="reportFormat" id="reportFormat" class="form-control selectpicker">
+															<select name="reportFormat" id="reportFormat" class="form-control">
 																<c:forEach var="reportFormat" items="${reportFormats}">
 																	<option value="${reportFormat}">
 																		<spring:message code="reports.format.${reportFormat}"/>

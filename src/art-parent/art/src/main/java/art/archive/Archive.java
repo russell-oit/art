@@ -1,0 +1,134 @@
+/*
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ART. If not, see <http://www.gnu.org/licenses/>.
+ */
+package art.archive;
+
+import art.job.Job;
+import art.user.User;
+import java.util.Date;
+
+/**
+ *
+ * @author Timothy Anyona
+ */
+public class Archive {
+	private String archiveId;
+	private Job job;
+	private User user;
+	private String fileName;
+	private Date startDate;
+	private Date endDate;
+	private String jobSharedStatus;
+
+	/**
+	 * @return the archiveId
+	 */
+	public String getArchiveId() {
+		return archiveId;
+	}
+
+	/**
+	 * @param archiveId the archiveId to set
+	 */
+	public void setArchiveId(String archiveId) {
+		this.archiveId = archiveId;
+	}
+
+	/**
+	 * @return the job
+	 */
+	public Job getJob() {
+		return job;
+	}
+
+	/**
+	 * @param job the job to set
+	 */
+	public void setJob(Job job) {
+		this.job = job;
+	}
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user the user to set
+	 */
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	/**
+	 * @return the fileName
+	 */
+	public String getFileName() {
+		return fileName;
+	}
+
+	/**
+	 * @param fileName the fileName to set
+	 */
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	/**
+	 * @return the startDate
+	 */
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	/**
+	 * @param startDate the startDate to set
+	 */
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	/**
+	 * @return the endDate
+	 */
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	/**
+	 * @param endDate the endDate to set
+	 */
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	/**
+	 * @return the jobSharedStatus
+	 */
+	public String getJobSharedStatus() {
+		return jobSharedStatus;
+	}
+
+	/**
+	 * @param jobSharedStatus the jobSharedStatus to set
+	 */
+	public void setJobSharedStatus(String jobSharedStatus) {
+		this.jobSharedStatus = jobSharedStatus;
+	}
+}

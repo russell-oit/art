@@ -229,7 +229,7 @@ public class RunReportController {
 				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
 				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
 				request.setAttribute("reportSource", cleanSource);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showText.jsp").include(request, response);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showTextReport.jsp").include(request, response);
 			} else {
 				//output report header
 				if (showReportHeaderAndFooter) {

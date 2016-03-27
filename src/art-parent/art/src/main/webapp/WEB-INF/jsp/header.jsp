@@ -41,6 +41,12 @@ Header that appears at the top of all pages, except the login and logs pages
 							<spring:message code="header.link.jobs"/>
 						</a>
 					</li>
+					<li>
+						<a id="jobsLink" href="${pageContext.request.contextPath}/app/archives.do">
+							<i class="fa fa-archive"></i> 
+							<spring:message code="header.link.archives"/>
+						</a>
+					</li>
 					<li class="dropdown">
 						<a id="configure" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
 							<i class="fa fa-wrench"></i> 
