@@ -36,18 +36,18 @@ Edit datasource page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="datasources.do"]').parent().addClass('active');
 				});
 
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
-				$('#testConnection').on('click', function() {
+				$('#testConnection').on('click', function () {
 					var id = $("#datasourceId").val();
 					var jndi = $("#jndi").is(":checked");
 					var driver = $("#driver").val();
@@ -62,7 +62,7 @@ Edit datasource page
 						url: "${pageContext.request.contextPath}/app/testDatasource.do",
 						data: {id: id, jndi: jndi, driver: driver, url: url, username: username,
 							password: password, useBlankPassword: useBlankPassword},
-						success: function(response) {
+						success: function (response) {
 							if (response.success) {
 								msg = alertCloseButton + "${connectionSuccessfulText}";
 								$("#ajaxResponse").attr("class", "alert alert-success alert-dismissable").html(msg);
@@ -73,7 +73,7 @@ Edit datasource page
 								$.notify("${errorOccurredText}", "error");
 							}
 						},
-						error: function(xhr, status, error) {
+						error: function (xhr, status, error) {
 							bootbox.alert(xhr.responseText);
 						}
 					});
@@ -104,6 +104,14 @@ Edit datasource page
 			<a href="${pageContext.request.contextPath}/docs/manual.htm#datasources">
 				<spring:message code="page.link.help"/>
 			</a>
+		</div>
+	</jsp:attribute>
+
+	<jsp:attribute name="belowMainPanel">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="alert alert-info">
+				<jsp:include page="/WEB-INF/html/oracleNote.html"/>
+			</div>
 		</div>
 	</jsp:attribute>
 

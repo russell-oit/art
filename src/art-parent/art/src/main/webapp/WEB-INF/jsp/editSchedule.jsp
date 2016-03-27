@@ -26,14 +26,6 @@ Edit schedule page
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
-	<jsp:attribute name="belowMainPanel">
-		<div class="col-md-6 col-md-offset-3">
-			<div class="alert alert-info">
-				<jsp:include page="/WEB-INF/html/scheduleNotes.html" />
-			</div>
-		</div>
-	</jsp:attribute>
-
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -58,6 +50,14 @@ Edit schedule page
 			<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
 				<spring:message code="page.link.help"/>
 			</a>
+		</div>
+	</jsp:attribute>
+
+	<jsp:attribute name="belowMainPanel">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="alert alert-info">
+				<jsp:include page="/WEB-INF/html/scheduleNotes.html" />
+			</div>
 		</div>
 	</jsp:attribute>
 

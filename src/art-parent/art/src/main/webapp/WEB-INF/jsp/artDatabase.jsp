@@ -59,6 +59,14 @@ Display art database configuration page
 		</c:if>
 	</jsp:attribute>
 
+	<jsp:attribute name="belowMainPanel">
+		<div class="col-md-6 col-md-offset-3">
+			<div class="alert alert-info">
+				<jsp:include page="/WEB-INF/html/oracleNote.html"/>
+			</div>
+		</div>
+	</jsp:attribute>
+
 	<jsp:body>
 		<form:form class="form-horizontal" method="POST" action="" modelAttribute="artDatabase">
 			<fieldset>
