@@ -26,6 +26,7 @@ import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.enums.ReportFormat;
+import art.jobrunners.ReportJob;
 import art.settings.CustomSettings;
 import art.settings.Settings;
 import art.utils.ArtUtils;
@@ -58,6 +59,15 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import org.apache.commons.lang3.StringUtils;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import org.quartz.CronTrigger;
+import static org.quartz.JobBuilder.newJob;
+import org.quartz.JobDetail;
+import static org.quartz.JobKey.jobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import static org.quartz.TriggerBuilder.newTrigger;
+import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -507,7 +517,58 @@ public class Config extends HttpServlet {
 		}
 
 		String quartzFilePath = webinfPath + File.separator + "classes" + File.separator + "quartz.properties";
-		SchedulerUtils.createScheduler(artDbConfig, quartzFilePath);
+		Scheduler scheduler = SchedulerUtils.createScheduler(artDbConfig, quartzFilePath);
+		createCleanJob(scheduler);
+	}
+
+	private static void createCleanJob(Scheduler scheduler) {
+		try {
+			if (scheduler == null) {
+				return;
+			}
+
+			String jobName = "clean";
+			String jobGroup = "clean";
+			String triggerName = "clean";
+			String triggerGroup = "clean";
+
+			JobDetail quartzJob = newJob(ReportJob.class)
+					.withIdentity(jobKey(jobName, jobGroup))
+					.build();
+
+			//build cron expression for the schedule
+			String minute = "0/10";
+			String hour = "*";
+			String day = "*";
+			String weekday = "?";
+			String month = "*";
+			String second = "0"; //seconds always 0
+
+			//build cron expression.
+			//cron format is sec min hr dayofmonth month dayofweek (optionally year)
+			String cronString;
+			cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
+
+			Date startDate = new Date();
+			Date endDate = null; //no end
+
+			//create trigger that defines the schedule for the job
+			CronTrigger trigger = newTrigger()
+					.withIdentity(triggerKey(triggerName, triggerGroup))
+					.withSchedule(cronSchedule(cronString))
+					.startAt(startDate)
+					.endAt(endDate)
+					.build();
+
+			//delete any existing jobs or triggers with the same id before adding them to the scheduler
+			scheduler.deleteJob(jobKey(jobName, jobGroup));
+			scheduler.unscheduleJob(triggerKey(triggerName, triggerGroup));
+
+			//add job and trigger to scheduler
+			scheduler.scheduleJob(quartzJob, trigger);
+		} catch (SchedulerException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**
