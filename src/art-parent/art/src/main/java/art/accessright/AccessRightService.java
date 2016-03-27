@@ -345,7 +345,7 @@ public class AccessRightService {
 	 */
 	@CacheEvict(value = "reports", allEntries = true) //clear reports cache so that reports available to users are updated
 	public void updateAccessRights(String action, String[] users, Integer[] userGroups,
-			Integer[] reports, Integer[] reportGroups) throws SQLException {
+			Integer[] reports, Integer[] reportGroups, Integer[] jobs) throws SQLException {
 
 		logger.debug("Entering updateAccessRights: action='{}'", action);
 
@@ -425,17 +425,21 @@ public class AccessRightService {
 		if (userGroups != null) {
 			String sqlUserGroupReport;
 			String sqlUserGroupReportGroup;
+			String sqlUserGroupJob;
 
 			if (grant) {
 				sqlUserGroupReport = "INSERT INTO ART_USER_GROUP_QUERIES (USER_GROUP_ID, QUERY_ID) VALUES (?, ?)";
 				sqlUserGroupReportGroup = "INSERT INTO ART_USER_GROUP_GROUPS (USER_GROUP_ID, QUERY_GROUP_ID) VALUES (?, ?)";
+				sqlUserGroupJob = "INSERT INTO ART_USER_GROUP_JOBS (USER_GROUP_ID, JOB_ID) VALUES (?, ?)";
 			} else {
 				sqlUserGroupReport = "DELETE FROM ART_USER_GROUP_QUERIES WHERE USER_GROUP_ID=? AND QUERY_ID=?";
 				sqlUserGroupReportGroup = "DELETE FROM ART_USER_GROUP_GROUPS WHERE USER_GROUP_ID=? AND QUERY_GROUP_ID=?";
+				sqlUserGroupJob = "DELETE FROM ART_USER_GROUP_JOBS WHERE USER_GROUP_ID=? AND JOB_ID=?";
 			}
 
 			String sqlTestUserGroupReport = "UPDATE ART_USER_GROUP_QUERIES SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND QUERY_ID=?";
 			String sqlTestUserGroupReportGroup = "UPDATE ART_USER_GROUP_GROUPS SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND QUERY_GROUP_ID=?";
+			String sqlTestUserGroupJob = "UPDATE ART_USER_GROUP_JOBS SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND JOB_ID=?";
 			int affectedRows;
 			boolean updateRight;
 
@@ -475,6 +479,24 @@ public class AccessRightService {
 						}
 						if (updateRight) {
 							dbService.update(sqlUserGroupReportGroup, userGroupId, reportGroupId);
+						}
+					}
+				}
+				
+				//update job privileges
+				if (jobs != null) {
+					for (Integer jobId : jobs) {
+						updateRight = true;
+						if (grant) {
+							//test if right exists. to avoid integrity constraint error
+							affectedRows = dbService.update(sqlTestUserGroupJob, userGroupId, userGroupId, jobId);
+							if (affectedRows > 0) {
+								//right exists. don't attempt a reinsert.
+								updateRight = false;
+							}
+						}
+						if (updateRight) {
+							dbService.update(sqlUserGroupJob, userGroupId, jobId);
 						}
 					}
 				}

@@ -25,7 +25,7 @@
 					<c:when test="${reportParam.parameter.useLov}">
 						<c:set var="lovValues" value="${reportParam.lovValues}" scope="request"/>
 						<c:choose>
-							<c:when test="${reportParam.parameter.chainedPosition > 0}">
+							<c:when test="${not empty reportParam.chainedParents}">
 								<jsp:include page="chainedInput.jsp" />
 							</c:when>
 							<c:otherwise>

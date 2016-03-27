@@ -21,9 +21,10 @@ Display report parameter that uses dropdown input
 
 <spring:message code="chained.text.loading" var="loadingText"/>
 <script type="text/javascript">
-	$("#p-country").remoteChained({
-		parents: "#test",
+	$("#${reportParam.htmlElementName}").remoteChained({
+		parents: "${reportParam.chainedParentsHtmlIds}",
 		url: "/app/getLovValues.do",
-		loading: "${loadingText}"
+		loading: "${loadingText}",
+		depends: "${reportParam.chainedDependsHtmlIds}"
 	});
 </script>

@@ -85,15 +85,17 @@ public class ReportParameterService {
 
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
-			ReportParameter param = new ReportParameter();
+			ReportParameter reportParam = new ReportParameter();
 
-			param.setReportParameterId(rs.getInt("REPORT_PARAMETER_ID"));
-			param.setPosition(rs.getInt("PARAMETER_POSITION"));
+			reportParam.setReportParameterId(rs.getInt("REPORT_PARAMETER_ID"));
+			reportParam.setPosition(rs.getInt("PARAMETER_POSITION"));
+			reportParam.setChainedParents(rs.getString("CHAINED_PARENTS"));
+			reportParam.setChainedDepends(rs.getString("CHAINED_DEPENDS"));
 
-			param.setReport(reportService.getReport(rs.getInt("REPORT_ID")));
-			param.setParameter(parameterService.getParameter(rs.getInt("PARAMETER_ID")));
+			reportParam.setReport(reportService.getReport(rs.getInt("REPORT_ID")));
+			reportParam.setParameter(parameterService.getParameter(rs.getInt("PARAMETER_ID")));
 
-			return type.cast(param);
+			return type.cast(reportParam);
 		}
 	}
 
@@ -261,38 +263,43 @@ public class ReportParameterService {
 	/**
 	 * Save a report parameter
 	 *
-	 * @param param
+	 * @param reportParam
 	 * @param newRecord
 	 * @param actionUser
 	 * @throws SQLException
 	 */
-	private void saveReportParameter(ReportParameter param, boolean newRecord) throws SQLException {
+	private void saveReportParameter(ReportParameter reportParam, boolean newRecord) throws SQLException {
 		logger.debug("Entering saveReportParameter: param={}, newRecord={}",
-				param, newRecord);
+				reportParam, newRecord);
 
 		int affectedRows;
 		if (newRecord) {
 			String sql = "INSERT INTO ART_REPORT_PARAMETERS"
-					+ " (REPORT_PARAMETER_ID, REPORT_ID, PARAMETER_ID, PARAMETER_POSITION)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+					+ " (REPORT_PARAMETER_ID, REPORT_ID, PARAMETER_ID,"
+					+ " PARAMETER_POSITION, CHAINED_PARENTS, CHAINED_DEPENDS)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 6) + ")";
 
 			Object[] values = {
-				param.getReportParameterId(),
-				param.getReport().getReportId(),
-				param.getParameter().getParameterId(),
-				param.getPosition()
+				reportParam.getReportParameterId(),
+				reportParam.getReport().getReportId(),
+				reportParam.getParameter().getParameterId(),
+				reportParam.getPosition(),
+				reportParam.getChainedParents(),
+				reportParam.getChainedDepends()
 			};
 
 			affectedRows = dbService.update(sql, values);
 		} else {
 			String sql = "UPDATE ART_REPORT_PARAMETERS SET PARAMETER_ID=?"
-					+ " PARAMETER_POSITION=?"
+					+ " PARAMETER_POSITION=?, CHAINED_PARENTS=?, CHAINED_DEPENDS=?"
 					+ " WHERE REPORT_PARAMETER_ID=?";
 
 			Object[] values = {
-				param.getParameter().getParameterId(),
-				param.getPosition(),
-				param.getReportParameterId()
+				reportParam.getParameter().getParameterId(),
+				reportParam.getPosition(),
+				reportParam.getChainedParents(),
+				reportParam.getChainedDepends(),
+				reportParam.getReportParameterId()
 			};
 
 			affectedRows = dbService.update(sql, values);
@@ -302,7 +309,7 @@ public class ReportParameterService {
 
 		if (affectedRows != 1) {
 			logger.warn("Problem with save. affectedRows={}, newRecord={}, param={}",
-					affectedRows, newRecord, param);
+					affectedRows, newRecord, reportParam);
 		}
 	}
 	

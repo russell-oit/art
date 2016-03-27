@@ -31,13 +31,13 @@
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="reportsConfig.do"]').parent().addClass('active');
 				});
 
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
@@ -101,7 +101,7 @@
 					</div>
 				</div>
 
-					<div class="form-group">
+				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
 					</label>
@@ -122,6 +122,42 @@
 							</c:forEach>
 						</form:select>
 						<form:errors path="parameter.parameterId" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="chainedParents">
+						<spring:message code="parameters.label.chainedParents"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="chainedParents" class="form-control"/>
+							<spring:message code="parameters.help.chainedParents" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="chainedParents" cssClass="error"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-md-4 control-label " for="chainedDepends">
+						<spring:message code="parameters.label.chainedDepends"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="chainedDepends" maxlength="2" class="form-control"/>
+							<spring:message code="parameters.help.chainedDepends" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="chainedDepends" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

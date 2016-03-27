@@ -44,6 +44,36 @@ public class ReportParameter implements Serializable {
 	private String[] passedParameterValues; //used for run report logic
 	private Map<Object, String> lovValues; //store value and label for lov parameters
 	private List<Object> actualParameterValues;
+	private String chainedParents;
+	private String chainedDepends;
+
+	/**
+	 * @return the chainedParents
+	 */
+	public String getChainedParents() {
+		return chainedParents;
+	}
+
+	/**
+	 * @param chainedParents the chainedParents to set
+	 */
+	public void setChainedParents(String chainedParents) {
+		this.chainedParents = chainedParents;
+	}
+
+	/**
+	 * @return the chainedDepends
+	 */
+	public String getChainedDepends() {
+		return chainedDepends;
+	}
+
+	/**
+	 * @param chainedDepends the chainedDepends to set
+	 */
+	public void setChainedDepends(String chainedDepends) {
+		this.chainedDepends = chainedDepends;
+	}
 
 	/**
 	 * Get the value of actualParameterValues
@@ -238,6 +268,30 @@ public class ReportParameter implements Serializable {
 			default:
 				return String.valueOf(value);
 		}
+	}
+	
+	public String getChainedParentsHtmlIds(){
+		return getHtmlIds(chainedParents);
+	}
+	
+	public String getChainedDependsHtmlIds(){
+		return getHtmlIds(chainedDepends);
+	}
+	
+	private String getHtmlIds(String ids){
+		if(StringUtils.isBlank(ids)){
+			return "";
+		}
+		
+		String[] idsArray=StringUtils.split(ids, ",");
+		List<String> idsList=new ArrayList<>();
+		for(String id : idsArray){
+			String finalId="#" + id;
+			idsList.add(finalId);
+		}
+		
+		String finalIds=StringUtils.join(idsList, ",");
+		return finalIds;
 	}
 }
 	

@@ -20,7 +20,7 @@ Access rights configuration
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="page.message.rightsGranted" var="rightsGrantedText"/>
 <spring:message code="page.message.selectUserOrUserGroup" var="selectUserOrUserGroupText"/>
-<spring:message code="accessRights.message.selectReportOrReportGroup" var="selectReportOrReportGroupText"/>
+<spring:message code="accessRights.message.selectReportOrReportGroupOrJob" var="selectReportOrReportGroupOrJobText"/>
 <spring:message code="page.text.available" var="availableText"/>
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
@@ -36,8 +36,8 @@ Access rights configuration
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="accessRightsConfig.do"]').parent().addClass('active');
 				});
@@ -46,51 +46,52 @@ Access rights configuration
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
 					selectionHeader: "<div>${selectedText}</div>\n\
 					<input type='text' class='form-control input-sm' autocomplete='off' placeholder='${searchText}'>",
-					afterInit: function(ms) {
+					afterInit: function (ms) {
 						var that = this,
 								$selectableSearch = that.$selectableUl.prev(),
 								$selectionSearch = that.$selectionUl.prev(),
 								selectableSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selectable:not(.ms-selected)',
 								selectionSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selection.ms-selected';
 						that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-								.on('keydown', function(e) {
+								.on('keydown', function (e) {
 									if (e.which === 40) {
 										that.$selectableUl.focus();
 										return false;
 									}
 								});
 						that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
-								.on('keydown', function(e) {
+								.on('keydown', function (e) {
 									if (e.which === 40) {
 										that.$selectionUl.focus();
 										return false;
 									}
 								});
 					},
-					afterSelect: function() {
+					afterSelect: function () {
 						this.qs1.cache();
 						this.qs2.cache();
 					},
-					afterDeselect: function() {
+					afterDeselect: function () {
 						this.qs1.cache();
 						this.qs2.cache();
 					}
 				}); //end multiselect
 
-				$('#actionsDiv').on('click', '.updateRights', function() {
+				$('#actionsDiv').on('click', '.updateRights', function () {
 					var action = $(this).data('action');
 
 					var users = $('#users').val();
 					var userGroups = $('#userGroups').val();
 					var reports = $('#reports').val();
 					var reportGroups = $('#reportGroups').val();
-					
+					var jobs = $('#jobs').val();
+
 					if (users === null && userGroups === null) {
 						bootbox.alert("${selectUserOrUserGroupText}");
 						return;
 					}
-					if (reports === null && reportGroups === null) {
-						bootbox.alert("${selectReportOrReportGroupText}");
+					if (reports === null && reportGroups === null && jobs === null) {
+						bootbox.alert("${selectReportOrReportGroupOrJobText}");
 						return;
 					}
 
@@ -106,8 +107,9 @@ Access rights configuration
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/app/updateAccessRight.do",
 						data: {action: action, users: users, userGroups: userGroups,
-							reports: reports, reportGroups: reportGroups},
-						success: function(response) {
+							reports: reports, reportGroups: reportGroups,
+							jobs: jobs},
+						success: function (response) {
 							if (response.success) {
 								notifyActionSuccess(rightsUpdatedMessage);
 							} else {
@@ -198,6 +200,22 @@ Access rights configuration
 							<c:forEach var="reportGroup" items="${reportGroups}">
 								<option value="${reportGroup.reportGroupId}">
 									<encode:forHtmlContent value="${reportGroup.name}"/>
+								</option>
+							</c:forEach>
+						</select>
+						<a href="#" class="select-all" data-item="#reportGroups"><spring:message code="page.text.selectAll"/></a> / 
+						<a href="#" class="deselect-all" data-item="#reportGroups"><spring:message code="page.text.deselectAll"/></a>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-3" for="jobs">
+						<spring:message code="accessRights.text.jobs"/>
+					</label>
+					<div class="col-md-9">
+						<select name="jobs" id="jobs" multiple="multiple" class="form-control multi-select">
+							<c:forEach var="job" items="${jobs}">
+								<option value="${job.jobId}">
+									<encode:forHtmlContent value="${job.name}"/>
 								</option>
 							</c:forEach>
 						</select>

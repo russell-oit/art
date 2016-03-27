@@ -16,6 +16,7 @@
  */
 package art.accessright;
 
+import art.job.JobService;
 import art.report.ReportService;
 import art.reportgroup.ReportGroupService;
 import art.user.User;
@@ -60,6 +61,9 @@ public class AccessRightController {
 
 	@Autowired
 	private ReportService reportService;
+	
+	@Autowired
+	private JobService jobService;
 
 	@RequestMapping(value = "/app/accessRights", method = RequestMethod.GET)
 	public String showAccessRights(Model model) {
@@ -89,6 +93,7 @@ public class AccessRightController {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reports", reportService.getAllReports());
 			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
+			model.addAttribute("jobs", jobService.getAllJobs());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -133,7 +138,8 @@ public class AccessRightController {
 			@RequestParam(value = "users[]", required = false) String[] users,
 			@RequestParam(value = "userGroups[]", required = false) Integer[] userGroups,
 			@RequestParam(value = "reports[]", required = false) Integer[] reports,
-			@RequestParam(value = "reportGroups[]", required = false) Integer[] reportGroups) {
+			@RequestParam(value = "reportGroups[]", required = false) Integer[] reportGroups,
+			@RequestParam(value = "jobs[]", required = false) Integer[] jobs) {
 
 		//jquery ajax post appends [] to parameter name where data is an array
 		//https://stackoverflow.com/questions/17627056/how-to-pass-multiple-request-parameters-in-spring
@@ -142,7 +148,7 @@ public class AccessRightController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			accessRightService.updateAccessRights(action, users, userGroups, reports, reportGroups);
+			accessRightService.updateAccessRights(action, users, userGroups, reports, reportGroups, jobs);
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

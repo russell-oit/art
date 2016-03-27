@@ -243,42 +243,7 @@ Edit parameter definition
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="chainedPosition">
-						<spring:message code="parameters.label.chainedPosition"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="chainedPosition" maxlength="2" class="form-control"/>
-							<spring:message code="parameters.help.chainedPosition" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="chainedPosition" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="chainedValuePosition">
-						<spring:message code="parameters.label.chainedValuePosition"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="chainedValuePosition" maxlength="2" class="form-control"/>
-							<spring:message code="parameters.help.chainedValuePosition" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="chainedValuePosition" cssClass="error"/>
-					</div>
-				</div>
+				
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="drilldownColumnIndex">
 						<spring:message code="parameters.label.drilldownColumnIndex"/>
