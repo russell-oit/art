@@ -290,7 +290,7 @@ public class ReportParameterService {
 
 			affectedRows = dbService.update(sql, values);
 		} else {
-			String sql = "UPDATE ART_REPORT_PARAMETERS SET PARAMETER_ID=?"
+			String sql = "UPDATE ART_REPORT_PARAMETERS SET PARAMETER_ID=?,"
 					+ " PARAMETER_POSITION=?, CHAINED_PARENTS=?, CHAINED_DEPENDS=?"
 					+ " WHERE REPORT_PARAMETER_ID=?";
 

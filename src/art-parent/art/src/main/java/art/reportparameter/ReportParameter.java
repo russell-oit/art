@@ -42,7 +42,7 @@ public class ReportParameter implements Serializable {
 	private Parameter parameter;
 	private int position;
 	private String[] passedParameterValues; //used for run report logic
-	private Map<Object, String> lovValues; //store value and label for lov parameters
+	private Map<String, String> lovValues; //store value and label for lov parameters
 	private List<Object> actualParameterValues;
 	private String chainedParents;
 	private String chainedDepends;
@@ -98,7 +98,7 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return the value of lovValues
 	 */
-	public Map<Object, String> getLovValues() {
+	public Map<String, String> getLovValues() {
 		return lovValues;
 	}
 
@@ -107,7 +107,7 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @param lovValues new value of lovValues
 	 */
-	public void setLovValues(Map<Object, String> lovValues) {
+	public void setLovValues(Map<String, String> lovValues) {
 		this.lovValues = lovValues;
 	}
 
@@ -207,7 +207,7 @@ public class ReportParameter implements Serializable {
 	public String toString() {
 		return "ReportParameter{" + "reportParameterId=" + reportParameterId + '}';
 	}
-	
+
 	public String getDisplayValues() {
 		List<String> paramDisplayStrings = new ArrayList<>();
 
@@ -251,16 +251,16 @@ public class ReportParameter implements Serializable {
 			return actualParameterValues;
 		}
 	}
-	
-	public String getHtmlElementName(){
+
+	public String getHtmlElementName() {
 		//TODO consolidate with same method in Parameter
 		return "p-" + parameter.getName();
 	}
-	
+
 	public String getHtmlValue() {
-		Object value=getEffectiveActualParameterValue();
-		
-		switch(parameter.getDataType()){
+		Object value = getEffectiveActualParameterValue();
+
+		switch (parameter.getDataType()) {
 			case Date:
 				return ArtUtils.isoDateFormatter.format(value);
 			case DateTime:
@@ -269,30 +269,36 @@ public class ReportParameter implements Serializable {
 				return String.valueOf(value);
 		}
 	}
-	
-	public String getChainedParentsHtmlIds(){
+
+	public String getChainedParentsHtmlIds() {
 		return getHtmlIds(chainedParents);
 	}
-	
-	public String getChainedDependsHtmlIds(){
+
+	public String getChainedDependsHtmlIds() {
 		return getHtmlIds(chainedDepends);
 	}
-	
-	private String getHtmlIds(String ids){
-		if(StringUtils.isBlank(ids)){
+
+	private String getHtmlIds(String ids) {
+		if (StringUtils.isBlank(ids)) {
 			return "";
 		}
-		
-		String[] idsArray=StringUtils.split(ids, ",");
-		List<String> idsList=new ArrayList<>();
-		for(String id : idsArray){
-			String finalId="#" + id;
+
+		String[] idsArray = StringUtils.split(ids, ",");
+		List<String> idsList = new ArrayList<>();
+		for (String id : idsArray) {
+			String finalId = "#p-" + id;
 			idsList.add(finalId);
 		}
-		
-		String finalIds=StringUtils.join(idsList, ",");
+
+		String finalIds = StringUtils.join(idsList, ",");
 		return finalIds;
 	}
+	
+	public boolean isChained(){
+		if(StringUtils.isBlank(chainedParents)){
+			return false;
+		} else {
+			return true;
+		}
+	}
 }
-	
-	

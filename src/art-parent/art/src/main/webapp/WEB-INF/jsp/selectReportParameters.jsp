@@ -25,13 +25,16 @@ Display report parameters and initiate running of report
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
+	<jsp:attribute name="headContent">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects/jquery.chained.remote.min.js"></script>
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects/jquery.chained.remote.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$("#schedule").click(function (e) {
@@ -253,7 +256,7 @@ Display report parameters and initiate running of report
 											</div>
 
 											<div class="form-group">
-												<div class="col-md-6 col-md-offset-3">
+												<div class="col-md-8 col-md-offset-2">
 													<div id="actionsDiv" style="text-align: center">
 														<c:if test="${enableRunInline}">
 															<button type="button" class="btn btn-default action" onclick="PrintElem('#reportOutput')" >

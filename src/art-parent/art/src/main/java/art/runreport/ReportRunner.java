@@ -23,6 +23,7 @@ import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
 import java.sql.Connection;
@@ -552,6 +553,10 @@ public class ReportRunner {
 	}
 
 	private void applyParameterPlaceholders(StringBuilder sb) {
+		if (reportParamsMap == null || reportParamsMap.isEmpty()) {
+			return;
+		}
+
 		String querySql = sb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
@@ -724,8 +729,8 @@ public class ReportRunner {
 
 		psQuery.execute();
 	}
-	
-	public String getQuerySql(){
+
+	public String getQuerySql() {
 		return querySb.toString();
 	}
 
@@ -839,7 +844,7 @@ public class ReportRunner {
 	 * @return values for an lov
 	 * @throws SQLException
 	 */
-	public Map<Object, String> getLovValues() throws SQLException {
+	public Map<String, String> getLovValues() throws SQLException {
 		return getLovValues(false, false);
 	}
 
@@ -850,7 +855,7 @@ public class ReportRunner {
 	 * @return values for an lov
 	 * @throws SQLException
 	 */
-	public Map<Object, String> getLovValues(boolean newUseRules) throws SQLException {
+	public Map<String, String> getLovValues(boolean newUseRules) throws SQLException {
 		return getLovValues(true, newUseRules);
 	}
 
@@ -862,8 +867,8 @@ public class ReportRunner {
 	 * @return values for an lov
 	 * @throws SQLException
 	 */
-	public Map<Object, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
-		Map<Object, String> lovValues = new HashMap<>();
+	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
+		Map<String, String> lovValues = new HashMap<>();
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 
@@ -890,11 +895,20 @@ public class ReportRunner {
 				//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
 				//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
 				Object dataValue = rs.getObject(1);
+				String stringValue;
+				if (dataValue instanceof Date) {
+					Date dateValue = (Date) dataValue;
+					stringValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
+				} else {
+					stringValue = String.valueOf(dataValue);
+				}
+
 				String displayValue = null;
 				if (columnCount > 1) {
 					displayValue = rs.getString(2);
 				}
-				lovValues.put(dataValue, displayValue);
+
+				lovValues.put(stringValue, displayValue);
 			}
 		}
 

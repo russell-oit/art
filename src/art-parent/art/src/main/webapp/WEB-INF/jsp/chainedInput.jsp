@@ -23,7 +23,7 @@ Display report parameter that uses dropdown input
 <script type="text/javascript">
 	$("#${reportParam.htmlElementName}").remoteChained({
 		parents: "${reportParam.chainedParentsHtmlIds}",
-		url: "/app/getLovValues.do",
+		url: "${pageContext.request.contextPath}/app/getLovValues.do?reportId=${reportParam.parameter.lovReportId}",
 		loading: "${loadingText}",
 		depends: "${reportParam.chainedDependsHtmlIds}"
 	});

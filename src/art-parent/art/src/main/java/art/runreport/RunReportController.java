@@ -291,17 +291,7 @@ public class RunReportController {
 								}
 							}
 							boolean applyFilters = false; //don't apply filters so as to get all values
-							Map<Object, String> lovValues = lovReportRunner.getLovValues(applyFilters);
-
-							//convert strings to appropriate objects e.g. when values come from a static lov
-							for (Entry<Object, String> entry : lovValues.entrySet()) {
-								Object objectValue = entry.getKey();
-								if (objectValue instanceof String) {
-									String stringValue = (String) objectValue;
-									Object newObjectValue = paramProcessor.convertParameterStringValueToObject(stringValue, param);
-									lovValues.put(newObjectValue, entry.getValue());
-								}
-							}
+							Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
 
 							reportParam.setLovValues(lovValues);
 						}

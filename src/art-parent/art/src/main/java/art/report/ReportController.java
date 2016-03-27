@@ -27,6 +27,7 @@ import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportOptions;
+import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
@@ -38,6 +39,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -133,6 +135,27 @@ public class ReportController {
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 				ChartOptions chartOptions = paramProcessorResult.getChartOptions();
+
+				ParameterService parameterService = new ParameterService();
+
+				for (ReportParameter reportParam : reportParamsList) {
+					Parameter param = reportParam.getParameter();
+					if (param.isUseLov()) {
+						//get all possible lov values.
+						//don't run chained parameters. their values will be
+						//loaded dynamically depending on parent and depends paremeter values
+						if (!reportParam.isChained()) {
+							ReportRunner lovReportRunner = new ReportRunner();
+							int lovReportId = param.getLovReportId();
+							Report lovReport = reportService.getReport(lovReportId);
+							lovReportRunner.setReport(lovReport);
+							lovReportRunner.setReportParamsMap(reportParamsMap);
+							boolean applyFilters = false; //don't apply filters so as to get all values
+							Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
+							reportParam.setLovValues(lovValues);
+						}
+					}
+				}
 
 				model.addAttribute("reportParamsList", reportParamsList);
 				model.addAttribute("reportOptions", reportOptions);

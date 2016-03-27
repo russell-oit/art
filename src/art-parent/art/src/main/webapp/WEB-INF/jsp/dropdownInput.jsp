@@ -16,6 +16,6 @@ Display report parameter that uses dropdown input
 		name="${reportParam.htmlElementName}"
 		id="${reportParam.htmlElementName}">
 	<c:forEach var="lovValue" items="${lovValues}">
-		<option lovValue="${lovValue.key}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${lovValue.value}</option>
+		<option value="${lovValue.key}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${lovValue.value}</option>
 	</c:forEach>
 </select>

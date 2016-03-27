@@ -578,6 +578,8 @@ public class ReportService {
 
 			affectedRows = dbService.update(sql, values);
 		}
+		
+		updateReportSource(report.getReportId(), report.getReportSource());
 
 		logger.debug("affectedRows={}", affectedRows);
 

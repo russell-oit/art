@@ -26,7 +26,7 @@ import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import art.enums.ReportFormat;
-import art.jobrunners.ReportJob;
+import art.jobrunners.CleanJob;
 import art.settings.CustomSettings;
 import art.settings.Settings;
 import art.utils.ArtUtils;
@@ -532,7 +532,7 @@ public class Config extends HttpServlet {
 			String triggerName = "clean";
 			String triggerGroup = "clean";
 
-			JobDetail quartzJob = newJob(ReportJob.class)
+			JobDetail quartzJob = newJob(CleanJob.class)
 					.withIdentity(jobKey(jobName, jobGroup))
 					.build();
 

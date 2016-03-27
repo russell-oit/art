@@ -161,15 +161,6 @@ Display user jobs and jobs configuration
 		<div id="ajaxResponse">
 		</div>
 
-		<c:if test="${action == 'config'}">
-			<div style="margin-bottom: 10px;">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addJob.do">
-					<i class="fa fa-plus"></i>
-					<spring:message code="page.action.add"/>
-				</a>
-			</div>
-		</c:if>
-
 		<table id="jobs" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>

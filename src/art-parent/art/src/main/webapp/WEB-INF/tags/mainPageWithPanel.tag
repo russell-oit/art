@@ -24,6 +24,7 @@ Includes main page, plus a bootstrap panel where the contents go
 <%@attribute name="belowMainPanel" fragment="true" %>
 <%@attribute name="leftMainPanel" fragment="true" %>
 <%@attribute name="rightMainPanel" fragment="true" %>
+<%@attribute name="headContent" fragment="true" %>
 
 <%-- any content can be specified here e.g.: --%>
 <t:mainPage title="${title}">
@@ -33,6 +34,10 @@ Includes main page, plus a bootstrap panel where the contents go
 
 	<jsp:attribute name="javascript">
 		<jsp:invoke fragment="javascript"/>
+	</jsp:attribute>
+	
+	<jsp:attribute name="headContent">
+		<jsp:invoke fragment="headContent"/>
 	</jsp:attribute>
 
 	<jsp:body>

@@ -19,13 +19,19 @@ package art.common;
 
 import art.report.Report;
 import art.report.ReportService;
+import art.reportparameter.ReportParameter;
+import art.runreport.ParameterProcessor;
+import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportRunner;
-import art.utils.AjaxResponse;
+import art.user.User;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,21 +45,40 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class ChainedParameterController {
 
+	private static final Logger logger = LoggerFactory.getLogger(ChainedParameterController.class);
+
 	@RequestMapping(value = "/app/getLovValues", method = RequestMethod.GET)
 	public @ResponseBody
-	Map<String, String> getLovValues(@RequestParam("reportId") Integer reportId) {
+	Map<String, String> getLovValues(@RequestParam("reportId") Integer reportId,
+			HttpSession session, HttpServletRequest request) {
+
 		Map<String, String> values = new HashMap<>();
-		values.put("value1", "test 1");
-		values.put("test2", "test 2");
-//		try {
-//			ReportService reportService = new ReportService();
-//			ReportRunner reportRunner = new ReportRunner();
-//			Report report = reportService.getReport(reportId);
-//			reportRunner.setReport(report);
-//			values = reportRunner.getLovValues();
-//		} catch (SQLException ex) {
-//			Logger.getLogger(ChainedParameterController.class.getName()).log(Level.SEVERE, null, ex);
-//		}
+
+		try {
+			ReportService reportService = new ReportService();
+			ReportRunner reportRunner = new ReportRunner();
+			Report report = reportService.getReport(reportId);
+			reportRunner.setReport(report);
+
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			String username = sessionUser.getUsername();
+			boolean adminSession = sessionUser.isAdminUser();
+
+			reportRunner.setUsername(username);
+			reportRunner.setAdminSession(adminSession);
+
+			//prepare report parameters
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+
+			reportRunner.setReportParamsMap(reportParamsMap);
+			boolean useRules = false;
+			values = reportRunner.getLovValues(useRules);
+		} catch (SQLException | ParseException ex) {
+			logger.error("Error", ex);
+		}
 
 		return values;
 

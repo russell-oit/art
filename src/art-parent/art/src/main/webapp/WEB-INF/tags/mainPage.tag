@@ -22,6 +22,7 @@ bootstrap js, jquery js, datatables css, datatables js
 <%-- any content can be specified here e.g.: --%>
 <t:genericPage title="ART - ${title}">
 	<jsp:attribute name="headContent">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<jsp:invoke fragment="headContent"/>
 	</jsp:attribute>
 	
@@ -35,7 +36,6 @@ bootstrap js, jquery js, datatables css, datatables js
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>

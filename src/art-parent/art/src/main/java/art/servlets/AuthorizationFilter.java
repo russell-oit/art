@@ -220,7 +220,8 @@ public class AuthorizationFilter implements Filter {
 				|| StringUtils.equals(page, "jpivotBusy")
 				|| StringUtils.equals(page, "getSchedule")
 				|| StringUtils.equals(page, "runReport")
-				|| StringUtils.equals(page, "archives")) {
+				|| StringUtils.equals(page, "archives")
+				|| StringUtils.equals(page, "getLovValues")) {
 			//everyone can access
 			//NOTE: "everyone" doesn't include when accessing as the art repository user
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
