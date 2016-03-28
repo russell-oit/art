@@ -304,6 +304,8 @@ public abstract class StandardOutput {
 	 */
 	public StandardOutputResult generateTabularOutput(ResultSet rs,
 			ReportFormat reportFormat) throws SQLException {
+		
+		logger.debug("Entering generateTabularOutput");
 
 		StandardOutputResult result = new StandardOutputResult();
 

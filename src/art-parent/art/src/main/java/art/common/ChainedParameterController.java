@@ -62,10 +62,8 @@ public class ChainedParameterController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			String username = sessionUser.getUsername();
-			boolean adminSession = sessionUser.isAdminUser();
 
 			reportRunner.setUsername(username);
-			reportRunner.setAdminSession(adminSession);
 
 			//prepare report parameters
 			ParameterProcessor paramProcessor = new ParameterProcessor();

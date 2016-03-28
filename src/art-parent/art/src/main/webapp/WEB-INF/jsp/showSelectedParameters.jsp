@@ -10,10 +10,10 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <div align="center">
-	<table border="0" width="90%">
+	<table style="width: 90%; border: 0;">
 		<tr>
 			<td>
-				<div align="center" width="90%" class="greyBack">
+				<div align="center" style="width: 90%;" class="greyBack">
 					<c:forEach var="parameterDisplayValue" items="${parameterDisplayValues}">
 						${parameterDisplayValue.value}
 						<br>

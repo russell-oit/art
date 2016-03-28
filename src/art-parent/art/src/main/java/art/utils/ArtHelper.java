@@ -19,13 +19,11 @@ package art.utils;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.servlets.Config;
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,25 +38,6 @@ public class ArtHelper {
 	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
 	private static final int MAX_LOG_MESSAGE_LENGTH = 500;
 	
-	/**
-	 * Get language file to use for datatables, depending on the locale
-	 *
-	 * @param request
-	 * @return
-	 */
-	public static String getDataTablesLanguageUrl(HttpServletRequest request) {
-		//TODO remove this method once refactoring is complete
-		String url = "";
-		String languageFileName = "dataTables." + request.getLocale().toString() + ".txt";
-		String sep = File.separator;
-		String languageFilePath = Config.getAppPath() + sep + "dataTables" + sep + languageFileName;
-		File languageFile = new File(languageFilePath);
-		if (languageFile.exists()) {
-			url = request.getContextPath() + "/dataTables/" + languageFileName;
-		}
-		return url;
-	}
-
 	/**
 	 * Log some action to the ART_LOGS table.
 	 *

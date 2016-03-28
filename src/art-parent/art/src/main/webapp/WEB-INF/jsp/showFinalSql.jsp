@@ -12,10 +12,10 @@ Display the final sql used to generate a report
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div align="center">
-	<table border="0" width="90%">
+	<table style="width: 90%; border: 0;">
 		<tr>
 			<td>
-				<div align="center" width="90%" class="greyBack">
+				<div align="center" style="width: 90%;" class="greyBack">
 					<encode:forHtmlContent value="${finalSql}"/>
 				</div>
 			</td>

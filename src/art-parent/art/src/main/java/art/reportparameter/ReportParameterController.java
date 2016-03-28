@@ -17,7 +17,6 @@
  */
 package art.reportparameter;
 
-import art.filter.FilterService;
 import art.parameter.ParameterService;
 import art.report.ReportService;
 import art.utils.AjaxResponse;

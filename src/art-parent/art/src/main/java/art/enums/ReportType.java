@@ -37,8 +37,7 @@ public enum ReportType {
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
 	HeatmapChart(-12), Pie2DChart(-13), VerticalBar2DChart(-14), StackedVerticalBar2DChart(-15),
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17);
-	//group reports (1-99) are too many to list. just have one as a placeholder
-	//TODO in upgrade script update 1-99 to 1 then add column group_column for group reports
+
 	private final int value;
 
 	private ReportType(int value) {
@@ -128,7 +127,7 @@ public enum ReportType {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Determine if this is a chart report
 	 *
@@ -206,10 +205,6 @@ public enum ReportType {
 			if (v.value == value) {
 				return v;
 			}
-		}
-
-		if (value >= 1 && value <= 99) {
-			return Group;
 		}
 
 		return defaultEnum;
@@ -291,6 +286,8 @@ public enum ReportType {
 				return "Chart: Horizontal Bar 2D";
 			case StackedHorizontalBar2DChart:
 				return "Chart: Stacked Horizontal Bar 2D";
+			case Group:
+				return "Group";
 			default:
 				return this.name();
 		}

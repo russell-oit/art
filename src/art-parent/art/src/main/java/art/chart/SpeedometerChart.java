@@ -58,6 +58,8 @@ public class SpeedometerChart extends Chart {
 	//prepare graph data structures with query results
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
+		logger.debug("Entering fillDataset");
+		
 		Objects.requireNonNull(rs, "resultset must not be null");
 
 		DefaultValueDataset dataset = new DefaultValueDataset();

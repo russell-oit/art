@@ -22,7 +22,6 @@ import art.servlets.Config;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
@@ -38,10 +37,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
  */
 public class Rss20Output extends StandardOutput {
 
-	int numberOfLines = 0;
-	String queryName;
-	int maxRows;
-	int columns;
 	int columnIndex = 0; // current column
 	String[] columnNames;
 

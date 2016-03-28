@@ -111,6 +111,8 @@ public abstract class ConnectionPool {
 	}
 
 	public ConnectionPoolDetails getPoolDetails() {
+		logger.debug("Entering getPoolDetails");
+		
 		ConnectionPoolDetails details = new ConnectionPoolDetails();
 		details.setPoolId(poolId);
 		details.setName(name);

@@ -37,7 +37,6 @@ public class ApplicationConversionService extends DefaultFormattingConversionSer
 		addConverter(new StringToUserGroup());
 		addConverter(new StringToDouble());
 
-		//TODO reinstate
 //		addConverter(new StringToInteger()); //override default StringToInteger converter
 	}
 

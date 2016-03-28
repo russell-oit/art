@@ -43,30 +43,23 @@ import org.slf4j.LoggerFactory;
 public class XlsxOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
-	Workbook wb;
-	Sheet sh;
-	CellStyle headerStyle;
-	CellStyle bodyStyle;
-	CellStyle dateStyle;
-	Font headerFont;
-	Font bodyFont;
-	int currentRow;
-	String filename;
-	String fullFileName;
-	PrintWriter htmlout;
-	String fileUserName;
-	int maxRows;
-	int columns;
-	int cellNumber;
-	String templateFileName;
-	String xmlFileName;
-	Map<String, CellStyle> styles;
-	String sheetRef; //name of the zip entry holding sheet data, e.g. /xl/worksheets/sheet1.xml
-	SpreadsheetWriter sw; //class that outputs temporary xlsx file
-	Writer fw; //writer for temporary xml file
-	File xmlFile; //file object for temporary xml file
+	private Workbook wb;
+	private Sheet sh;
+	private CellStyle headerStyle;
+	private CellStyle bodyStyle;
+	private CellStyle dateStyle;
+	private Font headerFont;
+	private Font bodyFont;
+	private int currentRow;
+	private int cellNumber;
+	private String templateFileName;
+	private String xmlFileName;
+	private Map<String, CellStyle> styles;
+	private String sheetRef; //name of the zip entry holding sheet data, e.g. /xl/worksheets/sheet1.xml
+	private SpreadsheetWriter sw; //class that outputs temporary xlsx file
+	private Writer fw; //writer for temporary xml file
+	private File xmlFile; //file object for temporary xml file
 	boolean errorOccurred = false; //flag that is set if an error occurs while creating the data file. so that processing can be stopped
-	String exportPath;
 
 	/**
 	 * Initialise objects required to generate output
@@ -237,41 +230,23 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		boolean lineAdded = false;
 		cellNumber = 0;
 
 		try {
 			if (errorOccurred) {
 				//an error occurred. don't continue			
-				if (htmlout != null) {
-					htmlout.println("<span style=\"color:red\">An error occurred while running the query. Query not completed.</span>");
-				}
 				endRows(); // close files						
 			} else {
-				if (currentRow > 0) {
+				if (rowCount > 0) {
 					sw.endRow(); //need to output end row marker before inserting a new row
 				}
 
 				sw.insertRow(currentRow++);
-				if (currentRow <= maxRows + 2) { //+2 because of query title and column header rows					
-					lineAdded = true;
-				} else {
-					//htmlout not used for scheduled jobs
-					if (htmlout != null) {
-						htmlout.println("<span style=\"color:red\">Too many rows (>"
-								+ maxRows
-								+ ")! Data not completed. Please narrow your search!</span>");
-					}
-					addCellString("Maximum number of rows exceeded! Query not completed.");
-					endRows(); // close files				
-				}
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 			errorOccurred = true; //set flag so that no more rows are processed
 		}
-
-//		return lineAdded;
 	}
 
 	@Override
@@ -282,7 +257,7 @@ public class XlsxOutput extends StandardOutput {
 			fw.close();
 
 			//Substitute the template with the generated data
-			FileOutputStream out = new FileOutputStream(fullFileName);
+			FileOutputStream out = new FileOutputStream(fullOutputFilename);
 			File templateFile = new File(templateFileName);
 			try {
 				substitute(templateFile, xmlFile, sheetRef.substring(1), out);
@@ -300,17 +275,6 @@ public class XlsxOutput extends StandardOutput {
 			if (!deleted) {
 				logger.warn("templateFile not deleted: {}", templateFileName);
 			}
-
-			//htmlout not used for scheduled jobs
-			if (htmlout != null) {
-				htmlout.println("<p><div align=\"center\"><table border=\"0\" width=\"90%\">");
-				htmlout.println("<tr><td colspan=\"2\" class=\"data\" align=\"center\" >"
-						+ "<a type=\"application/octet-stream\" href=\"../export/" + filename + "\" target=\"_blank\"> "
-						+ filename + "</a>"
-						+ "</td></tr>");
-				htmlout.println("</table></div></p>");
-			}
-
 		} catch (Exception e) {
 			logger.error("Error", e);
 		}

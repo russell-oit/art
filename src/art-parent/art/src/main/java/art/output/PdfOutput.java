@@ -41,8 +41,6 @@ public class PdfOutput extends StandardOutput {
 	private Document document;
 	private PdfPTable table;
 	private PdfPCell cell;
-	private final float evengray = 1.0F;
-	private final float oddgray = 0.75F;
 	private float headergray = 0.9F;
 	private FontSelector fsBody; //fonts to use for document body
 	private FontSelector fsHeading; //fonts to use for document title and column headings
@@ -53,6 +51,8 @@ public class PdfOutput extends StandardOutput {
 	 */
 	@Override
 	public void init() {
+		logger.debug("Entering init");
+		
 		try {
 			Rectangle pageSize;
 			PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();

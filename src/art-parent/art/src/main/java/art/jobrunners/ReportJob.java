@@ -275,7 +275,6 @@ public class ReportJob implements org.quartz.Job {
 			//get recipient data
 			recipientsQuery = prepareQuery(username, recipientsQueryId, false);
 
-			recipientsQuery.setAdminSession(true); //don't check security
 			recipientsQuery.execute();
 
 			ResultSet rs = recipientsQuery.getResultSet();
@@ -528,11 +527,6 @@ public class ReportJob implements org.quartz.Job {
 		try {
 			reportRunner = prepareQuery(user);
 
-			//for split jobs, don't check security. shared users have been allowed access to the output
-			if (splitJob) {
-				reportRunner.setAdminSession(true);
-			}
-
 			if (recipientFilterPresent) {
 				//enable report data to be filtered/different for each recipient
 				reportRunner.setRecipientFilterPresent(recipientFilterPresent);
@@ -750,7 +744,6 @@ public class ReportJob implements org.quartz.Job {
 				if (jobType.isConditional()) {
 					//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
 					ReportRunner pqCount = prepareQuery(user);
-					pqCount.setAdminSession(true);
 					pqCount.setReportParamsMap(reportParamsMap);
 
 					pqCount.execute();
@@ -984,7 +977,6 @@ public class ReportJob implements org.quartz.Job {
 		ReportRunner reportRunner = new ReportRunner();
 		reportRunner.setUsername(user);
 		reportRunner.setReport(report);
-		reportRunner.setAdminSession(false);
 
 		return reportRunner;
 

@@ -18,8 +18,6 @@
 package art.archive;
 
 import art.dbutils.DbService;
-import art.filter.Filter;
-import art.filter.FilterService;
 import art.job.Job;
 import art.job.JobService;
 import art.user.User;

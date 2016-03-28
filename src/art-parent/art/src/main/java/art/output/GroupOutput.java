@@ -28,13 +28,6 @@ import java.sql.SQLException;
  * @author Timothy Anyona
  */
 public abstract class GroupOutput {
-	PrintWriter out;
-	StringBuilder mainHeader = new StringBuilder();
-	// temporary string used to store Main Header Values
-	StringBuilder subHeader = new StringBuilder();
-
-	public GroupOutput() {
-	}
 
 	/**
 	 * Output report header. Report width is 80% of the page

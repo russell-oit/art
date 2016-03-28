@@ -18,7 +18,6 @@ package art.report;
 
 import art.datasource.Datasource;
 import art.dbutils.DbService;
-import art.servlets.Config;
 import art.dbutils.DatabaseUtils;
 import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
@@ -27,6 +26,7 @@ import art.enums.ParameterType;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
+import art.reportgroup.ReportGroupService;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.ArtUtils;
@@ -36,9 +36,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -66,18 +64,22 @@ public class ReportService {
 	private static final Logger logger = LoggerFactory.getLogger(ReportService.class);
 
 	private final DbService dbService;
-	
 	private final DatasourceService datasourceService;
+	private final ReportGroupService reportGroupService;
 
 	@Autowired
-	public ReportService(DbService dbService,DatasourceService datasourceService) {
+	public ReportService(DbService dbService, DatasourceService datasourceService,
+			ReportGroupService reportGroupService) {
+
 		this.dbService = dbService;
-		this.datasourceService=datasourceService;
+		this.datasourceService = datasourceService;
+		this.reportGroupService = reportGroupService;
 	}
 
 	public ReportService() {
 		dbService = new DbService();
-		datasourceService=new DatasourceService();
+		datasourceService = new DatasourceService();
+		reportGroupService = new ReportGroupService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT AQ.*, "
@@ -112,15 +114,7 @@ public class ReportService {
 			report.setDescription(rs.getString("DESCRIPTION"));
 			report.setReportTypeId(rs.getInt("QUERY_TYPE"));
 			report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
-
-			ReportGroup reportGroup = new ReportGroup();
-			reportGroup.setReportGroupId(rs.getInt("QUERY_GROUP_ID"));
-			reportGroup.setName(rs.getString("GROUP_NAME"));
-			report.setReportGroup(reportGroup);
-
-			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
-			report.setDatasource(datasource);
-
+			report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
 			report.setUsesFilters(rs.getBoolean("USES_FILTERS"));
 			report.setReportStatus(ReportStatus.toEnum(rs.getString("REPORT_STATUS")));
@@ -135,11 +129,16 @@ public class ReportService {
 			report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
 			report.setXmlaUsername(rs.getString("XMLA_USERNAME"));
 			report.setXmlaPassword(rs.getString("XMLA_PASSWORD"));
-
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
 			report.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			ReportGroup reportGroup = reportGroupService.getReportGroup(rs.getInt("QUERY_GROUP_ID"));
+			report.setReportGroup(reportGroup);
+
+			Datasource datasource = datasourceService.getDatasource(rs.getInt("DATABASE_ID"));
+			report.setDatasource(datasource);
 
 			setChartOptions(report);
 
@@ -177,7 +176,7 @@ public class ReportService {
 
 			if (usingShortDescription || index > -1) {
 				//set default for showlegend. false for heat maps. true for all other graphs
-				ReportType reportType = ReportType.toEnum(report.getReportTypeId());
+				ReportType reportType = report.getReportType();
 				if (reportType == ReportType.HeatmapChart) {
 					chartOptions.setShowLegend(false);
 				} else {
@@ -502,6 +501,14 @@ public class ReportService {
 			reportStatus = report.getReportStatus().getValue();
 		}
 
+		Integer reportTypeId;
+		if (report.getReportType() == null) {
+			logger.warn("Report type not defined. Defaulting to 0");
+			reportTypeId = 0;
+		} else {
+			reportTypeId = report.getReportType().getValue();
+		}
+
 		int affectedRows;
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
@@ -518,7 +525,7 @@ public class ReportService {
 				report.getName(),
 				report.getShortDescription(),
 				report.getDescription(),
-				report.getReportTypeId(),
+				reportTypeId,
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
@@ -578,7 +585,7 @@ public class ReportService {
 
 			affectedRows = dbService.update(sql, values);
 		}
-		
+
 		updateReportSource(report.getReportId(), report.getReportSource());
 
 		logger.debug("affectedRows={}", affectedRows);
@@ -669,7 +676,7 @@ public class ReportService {
 			}
 			report.setReportSource(sb.toString());
 			//set html source for use with text reports
-			ReportType reportType = ReportType.toEnum(report.getReportTypeId());
+			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.Text) {
 				report.setReportSourceHtml(report.getReportSource());
 			}
@@ -818,7 +825,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	@Cacheable(value = "reports")
 	public List<Report> getDynamicRecipientReports() throws SQLException {
 		logger.debug("Entering getLovReports");
@@ -917,6 +924,19 @@ public class ReportService {
 		} else {
 			return true;
 		}
+	}
+
+	public void grantAccess(Report report, User user) throws SQLException {
+		String sql = "INSERT INTO ART_USER_QUERIES (USERNAME, USER_ID, QUERY_ID)"
+				+ " VALUES(" + StringUtils.repeat("?", ",", 3) + ")";
+
+		Object[] values = {
+			user.getUsername(),
+			user.getUserId(),
+			report.getReportId()
+		};
+
+		dbService.update(sql, values);
 	}
 
 }

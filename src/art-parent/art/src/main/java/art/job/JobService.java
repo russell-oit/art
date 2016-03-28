@@ -5,7 +5,6 @@ import art.dbutils.DatabaseUtils;
 import art.enums.JobType;
 import art.report.Report;
 import art.report.ReportService;
-import art.schedule.Schedule;
 import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;

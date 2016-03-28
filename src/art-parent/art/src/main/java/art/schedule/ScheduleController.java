@@ -19,8 +19,6 @@ package art.schedule;
 import art.user.User;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;

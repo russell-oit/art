@@ -45,7 +45,6 @@ public class HtmlPlainOutput extends StandardOutput {
 		}
 
 		//style should be in the head section. put in body for correct display in email inline jobs
-		//TODO test
 		//https://www.campaignmonitor.com/css/
 		out.println("<style>"
 				+ "table { border-collapse: collapse; }"

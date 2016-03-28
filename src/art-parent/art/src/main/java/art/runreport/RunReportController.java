@@ -30,7 +30,6 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ArtHelper;
-import art.utils.ArtUtils;
 import art.utils.FilenameHelper;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -42,7 +41,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -142,8 +140,7 @@ public class RunReportController {
 			}
 
 			String reportName = report.getName();
-			int reportTypeId = report.getReportTypeId();
-			ReportType reportType = ReportType.toEnum(reportTypeId);
+			ReportType reportType = report.getReportType();
 
 			//check if the html code should be rendered as an html fragment (without <html> and </html> tags) e.g. in a dashboard section
 			boolean isFragment = Boolean.valueOf(request.getParameter("isFragment"));
@@ -249,7 +246,6 @@ public class RunReportController {
 				reportRunner = new ReportRunner();
 				reportRunner.setUsername(username);
 				reportRunner.setReport(report);
-				reportRunner.setAdminSession(sessionUser.isAdminUser());
 
 				//prepare report parameters
 				ParameterProcessor paramProcessor = new ParameterProcessor();
@@ -362,7 +358,6 @@ public class RunReportController {
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showFinalSql.jsp").include(request, response);
 					}
 
-					//TODO omit. limit flushing?
 					writer.flush();
 				}
 

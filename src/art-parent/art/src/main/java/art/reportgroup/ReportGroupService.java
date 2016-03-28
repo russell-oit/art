@@ -50,8 +50,16 @@ public class ReportGroupService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportGroupService.class);
 
+	private final DbService dbService;
+
 	@Autowired
-	private DbService dbService;
+	public ReportGroupService(DbService dbService) {
+		this.dbService = dbService;
+	}
+
+	public ReportGroupService() {
+		dbService = new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERY_GROUPS";
 

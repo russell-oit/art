@@ -24,7 +24,7 @@ CREATE TABLE ART_DATABASE_VERSION
 	DATABASE_VERSION VARCHAR(50)
 );
 -- insert database version
-INSERT INTO ART_DATABASE_VERSION VALUES('3.0-alpha6');
+INSERT INTO ART_DATABASE_VERSION VALUES('3.0-alpha7');
 
 
 -- ART_USERS 
@@ -125,7 +125,7 @@ CREATE TABLE ART_QUERY_GROUPS
 -- Stores query definitions 
 
 -- Query types:
--- 0 = normal query, 1-99 = group, 100 = update, 101 = crosstab
+-- 0 = normal query, 1 = group, 100 = update, 101 = crosstab
 -- 102 = crosstab html only, 103 = normal query html only, 110 = dashboard
 -- 111 = text, 112 = mondrian cube, 113 = mondrian cube via xmla
 -- 114 = sql server analysis services cube via xmla
@@ -152,6 +152,7 @@ CREATE TABLE ART_QUERIES
 	SHORT_DESCRIPTION VARCHAR(254) NOT NULL,
 	DESCRIPTION       VARCHAR(2000) NOT NULL,
 	QUERY_TYPE        INTEGER,
+	GROUP_COLUMN INTEGER,
 	QUERY_GROUP_ID  INTEGER NOT NULL,	
 	DATABASE_ID	    INTEGER NOT NULL,
 	CONTACT_PERSON        VARCHAR(20), 

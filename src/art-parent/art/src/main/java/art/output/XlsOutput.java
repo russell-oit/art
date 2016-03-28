@@ -23,10 +23,8 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FilenameUtils;
@@ -44,25 +42,20 @@ public class XlsOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XlsOutput.class);
 
-	FileOutputStream fout;
-	ZipOutputStream zipout;
-	HSSFWorkbook wb;
-	HSSFSheet sheet;
-	HSSFRow row;
-	HSSFCell cell;
-	HSSFCellStyle headerStyle;
-	HSSFCellStyle bodyStyle;
-	HSSFCellStyle dateStyle;
-	HSSFFont headerFont;
-	HSSFFont bodyFont;
-	int currentRow;
-	PrintWriter htmlout;
-	String fileUserName;
-	int maxRows;
-	int columns;
-	int cellNumber;
-	String exportPath;
-	ZipType zipType;
+	private FileOutputStream fout;
+	private ZipOutputStream zout;
+	private HSSFWorkbook wb;
+	private HSSFSheet sheet;
+	private HSSFRow row;
+	private HSSFCell cell;
+	private HSSFCellStyle headerStyle;
+	private HSSFCellStyle bodyStyle;
+	private HSSFCellStyle dateStyle;
+	private HSSFFont headerFont;
+	private HSSFFont bodyFont;
+	private int currentRow;
+	private int cellNumber;
+	private ZipType zipType;
 	
 	public XlsOutput(){
 		zipType=ZipType.None;
@@ -84,8 +77,8 @@ public class XlsOutput extends StandardOutput {
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".xls");
-				zipout = new ZipOutputStream(fout);
-				zipout.putNextEntry(ze);
+				zout = new ZipOutputStream(fout);
+				zout.putNextEntry(ze);
 			}
 
 			wb = new HSSFWorkbook();
@@ -206,11 +199,11 @@ public class XlsOutput extends StandardOutput {
 	@Override
 	public void endRows() {
 		try {
-			if (zipout == null) {
+			if (zout == null) {
 				wb.write(fout);
 			} else {
-				wb.write(zipout);
-				zipout.close();
+				wb.write(zout);
+				zout.close();
 			}
 			fout.close();
 		} catch (IOException e) {

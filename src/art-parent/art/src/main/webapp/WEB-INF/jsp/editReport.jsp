@@ -62,13 +62,13 @@ Edit report page
 		</script>
 
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="reportsConfig.do"]').parent().addClass('active');
 				});
 
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
@@ -89,7 +89,7 @@ Edit report page
 					delay: 100
 				});
 
-				$("#reportTypeId").change(function() {
+				$("#reportTypeId").change(function () {
 					toggleVisibleFields();
 				});
 
@@ -232,6 +232,15 @@ Edit report page
 				} else {
 					$("#chartFields").hide();
 				}
+				
+				//show/hide display resultset
+				switch (reportTypeId) {
+					case 1: //group
+						$("#groupColumntDiv").show();
+						break;
+					default:
+						$("#groupColumntDiv").hide();
+				}
 			}
 		</script>
 	</jsp:attribute>
@@ -367,10 +376,6 @@ Edit report page
 						<form:select path="reportTypeId" class="form-control selectpicker">
 							<form:options items="${reportTypes}"
 										  itemLabel="description" itemValue="value"/>
-							<%-- add group reports --%>
-							<c:forEach begin="1" end="5" varStatus="loop">
-								<form:option value="${loop.index}">Group: ${loop.index} columns</form:option>
-							</c:forEach>
 						</form:select>
 						<div class="text-right">
 							<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
@@ -378,6 +383,24 @@ Edit report page
 							</a>
 						</div>
 						<form:errors path="reportTypeId" cssClass="error"/>
+					</div>
+				</div>
+				<div id="groupColumnDiv" class="form-group">
+					<label class="col-md-4 control-label " for="groupColumn">
+						<spring:message code="reports.label.groupColumn"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="groupColumn" maxlength="2" class="form-control"/>
+							<spring:message code="reports.help.groupColumn" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="groupColumn" cssClass="error"/>
 					</div>
 				</div>
 				<div id="datasourceDiv" class="form-group">

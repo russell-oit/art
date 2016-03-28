@@ -71,6 +71,8 @@ public class JxlsOutput {
 	public void generateReport(Report report, List<ReportParameter> reportParams,
 			ReportType reportType, String outputFileName)
 			throws SQLException, ParsePropertyException, IOException, InvalidFormatException {
+		
+		logger.debug("Entering generateReport");
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(reportParams, "reportParams must not be null");

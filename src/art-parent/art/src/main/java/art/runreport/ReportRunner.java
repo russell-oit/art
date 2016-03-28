@@ -35,7 +35,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -60,7 +60,6 @@ public class ReportRunner {
 	String username; //used in replacing :username tag
 	int reportId;
 	StringBuilder querySb;
-	boolean adminSession = false;
 	boolean useRules = false;
 	PreparedStatement psQuery; // this is the ps object produced by this query
 	Connection connQuery; // this is the connection to the datasource for this query
@@ -213,16 +212,6 @@ public class ReportRunner {
 	 */
 	public void setReportId(int i) {
 		reportId = i;
-	}
-
-	/**
-	 * Set this flag to true to skip privileges checks when getting the SQL
-	 * Default is false.
-	 *
-	 * @param b
-	 */
-	public void setAdminSession(boolean b) {
-		adminSession = b;
 	}
 
 	/**
@@ -868,7 +857,7 @@ public class ReportRunner {
 	 * @throws SQLException
 	 */
 	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
-		Map<String, String> lovValues = new HashMap<>();
+		Map<String, String> lovValues = new LinkedHashMap<>();
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 

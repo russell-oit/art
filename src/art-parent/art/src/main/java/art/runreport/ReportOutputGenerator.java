@@ -231,7 +231,7 @@ public class ReportOutputGenerator {
 					//option has been specified. override report setting
 					splitColumn = splitColumnOption;
 				} else {
-					splitColumn = report.getReportTypeId();
+					splitColumn = report.getGroupColumn();
 				}
 
 				rowsRetrieved = DirectReportOutputHandler.generateGroupReport(writer, rs, splitColumn);

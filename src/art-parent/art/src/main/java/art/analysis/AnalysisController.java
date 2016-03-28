@@ -212,12 +212,10 @@ public class AnalysisController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			String username = sessionUser.getUsername();
-			boolean adminSession = sessionUser.isAdminUser();
 
 			ReportRunner reportRunner = new ReportRunner();
 			reportRunner.setUsername(username);
 			reportRunner.setReport(report);
-			reportRunner.setAdminSession(adminSession);
 
 			//prepare report parameters
 			ParameterProcessor paramProcessor = new ParameterProcessor();
@@ -475,8 +473,7 @@ public class AnalysisController {
 				reportService.addReport(newReport, sessionUser);
 
 				//give this user direct access to the view he has just created. so that he can update and overwrite it if desired
-				//TODO implement
-//				newReport.grantAccess(conn, ue.getUsername());
+				reportService.grantAccess(report, sessionUser);
 				redirectAttributes.addFlashAttribute("message", "analysis.message.reportAdded");
 				return "redirect:/app/success.do";
 			}

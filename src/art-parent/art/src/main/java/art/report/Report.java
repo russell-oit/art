@@ -61,6 +61,21 @@ public class Report implements Serializable {
 	private String createdBy;
 	private String updatedBy;
 	private ReportType reportType;
+	private int groupColumn;
+
+	/**
+	 * @return the groupColumn
+	 */
+	public int getGroupColumn() {
+		return groupColumn;
+	}
+
+	/**
+	 * @param groupColumn the groupColumn to set
+	 */
+	public void setGroupColumn(int groupColumn) {
+		this.groupColumn = groupColumn;
+	}
 
 	/**
 	 * @return the reportType

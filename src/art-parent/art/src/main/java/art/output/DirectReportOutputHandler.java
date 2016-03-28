@@ -45,6 +45,7 @@ public class DirectReportOutputHandler {
 	 * @throws SQLException
 	 */
 	public static int generateGroupReport(PrintWriter out, ResultSet rs, int splitCol) throws SQLException {
+		logger.debug("Entering generateGroupReport");
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		

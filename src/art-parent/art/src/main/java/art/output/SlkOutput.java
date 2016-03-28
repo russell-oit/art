@@ -15,10 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
-// This is an attempt to create a decent streamable file
-// that is loaded both by Ooo and MS Excel
-// "decent" means that a string like "00123" is not
-// considered as the number 123
 package art.output;
 
 import art.enums.ZipType;
@@ -27,17 +23,19 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// This is an attempt to create a decent streamable file
+// that is loaded both by Ooo and MS Excel
+// "decent" means that a string like "00123" is not
+// considered as the number 123
 /**
  * Create slk output.
  *
@@ -47,22 +45,16 @@ import org.slf4j.LoggerFactory;
 public class SlkOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(SlkOutput.class);
-	FileOutputStream fout;
-	ZipOutputStream zout;
-	byte[] buf;
-	String tmpstr;
-	StringBuffer exportFileStrBuf;
-	NumberFormat nfPlain;
-	PrintWriter htmlout;
-	String fileUserName;
-	int maxRows;
-	int row_count;
-	int column_count;
-	int columns;
-	int counter;
-	final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;) 
-	String exportPath;
-	ZipType zipType;
+	private FileOutputStream fout;
+	private ZipOutputStream zout;
+	private StringBuffer exportFileStrBuf;
+	private NumberFormat nfPlain;
+	private int localRowCount;
+	private int columnCount;
+	private int columns;
+	private int counter;
+	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;) 
+	private ZipType zipType;
 
 	/**
 	 * Constructor
@@ -91,8 +83,8 @@ public class SlkOutput extends StandardOutput {
 
 		try {
 			fout = new FileOutputStream(fullOutputFilename);
-			
-			String filename=FilenameUtils.getBaseName(fullOutputFilename);
+
+			String filename = FilenameUtils.getBaseName(fullOutputFilename);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".slk");
@@ -109,10 +101,10 @@ public class SlkOutput extends StandardOutput {
 		// insert slk header
 		// This is the Ooo header:
 		exportFileStrBuf.append("ID;PSCALC3\n");
-		row_count = 1;
-		column_count = 1;
+		localRowCount = 1;
+		columnCount = 1;
 
-		exportFileStrBuf.append("C;Y").append(row_count++).append(";X1;K\"")
+		exportFileStrBuf.append("C;Y").append(localRowCount++).append(";X1;K\"")
 				.append(reportName).append(" - ")
 				.append(ArtUtils.isoDateTimeFormatter.format(new Date()))
 				.append("\"\n"); // first row Y1
@@ -128,19 +120,19 @@ public class SlkOutput extends StandardOutput {
 		for (ReportParameter reportParam : reportParamsList) {
 			String paramName = reportParam.getParameter().getName();
 			addHeaderCell(paramName);
-			row_count++;
+			localRowCount++;
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
 			addCellString(reportParam.getDisplayValues());
 		}
 
-		row_count++;
+		localRowCount++;
 	}
 
 	@Override
 	public void addHeaderCell(String s) {
-		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + s + "\"\n");
+		exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\"" + s + "\"\n");
 	}
 
 	@Override
@@ -149,18 +141,18 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void beginRows() {
-		column_count = 1;
+		columnCount = 1;
 	}
 
 	@Override
 	public void addCellString(String value) {
 		if (value == null) {
-			exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + value + "\"\n");
+			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\"" + value + "\"\n");
 		} else {
 			if (value.trim().length() > 250) {
 				value = value.substring(0, 250) + "[...]";
 			}
-			exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\""
+			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\""
 					+ value.replace('\n', ' ').replace('\r', ' ').replace(';', '-').trim() + "\"\n");
 		}
 	}
@@ -168,51 +160,37 @@ public class SlkOutput extends StandardOutput {
 	@Override
 	public void addCellNumeric(Double value) {
 		if (value == null) {
-			exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++ + ";K\"" + value + "\"\n");
+			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\"" + value + "\"\n");
 		} else {
-			exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++
+			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++
 					+ ";K" + nfPlain.format(value.doubleValue()) + "\n");
 		}
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		exportFileStrBuf.append("C;Y" + row_count + ";X" + column_count++
+		exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++
 				+ ";K\"" + Config.getDateDisplayString(value) + "\"\n");
 	}
 
 	@Override
 	public void newRow() {
-		column_count = 1;
-		row_count++;
+		columnCount = 1;
+		localRowCount++;
 
 		counter++;
 		if ((counter * columns) > FLUSH_SIZE) {
 			try {
-				tmpstr = exportFileStrBuf.toString();
-				buf = new byte[tmpstr.length()];
+				String tmpstr = exportFileStrBuf.toString();
+				byte[] buf = new byte[tmpstr.length()];
 				buf = tmpstr.getBytes("UTF-8");
 				fout.write(buf);
 				fout.flush();
 				exportFileStrBuf = new StringBuffer(32 * 1024);
 			} catch (IOException e) {
 				logger.error("Error. Data not completed. Please narrow your search", e);
-
-				//htmlout not used for scheduled jobs
-				if (htmlout != null) {
-					htmlout.println("<span style=\"color:red\">Error: " + e
-							+ ")! Data not completed. Please narrow your search!</span>");
-				}
 			}
 		}
-
-//		if (counter < maxRows) {
-//			return true;
-//		} else {
-//			addCellString("Maximum number of rows exceeded! Query not completed.");
-//			endLines(); // close files
-//			return false;
-//		}
 	}
 
 	@Override
@@ -223,8 +201,8 @@ public class SlkOutput extends StandardOutput {
 		exportFileStrBuf.append("E");
 
 		try {
-			tmpstr = exportFileStrBuf.toString();
-			buf = new byte[tmpstr.length()];
+			String tmpstr = exportFileStrBuf.toString();
+			byte[] buf = new byte[tmpstr.length()];
 			buf = tmpstr.getBytes("UTF-8");
 			exportFileStrBuf = null;
 

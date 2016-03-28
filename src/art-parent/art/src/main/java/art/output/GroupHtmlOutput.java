@@ -25,6 +25,11 @@ import java.io.PrintWriter;
  * @author Enrico Liboni
  */
 public class GroupHtmlOutput extends GroupOutput {
+	
+	private PrintWriter out;
+	private StringBuilder mainHeader = new StringBuilder();
+	// temporary string used to store Main Header Values
+	private StringBuilder subHeader = new StringBuilder();
 
 
     /**

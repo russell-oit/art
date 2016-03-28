@@ -39,7 +39,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -534,15 +533,15 @@ public class ReportController {
 		}
 
 		//set report source for text reports
-		logger.debug("report.getReportType()={}", report.getReportTypeId());
-		ReportType reportType = ReportType.toEnum(report.getReportTypeId());
+		logger.debug("report.getReportType()={}", report.getReportType());
+		ReportType reportType = report.getReportType();
 		if (reportType == ReportType.Text) {
 			report.setReportSource(report.getReportSourceHtml());
 		}
 
 		//build chart options setting string
 		logger.debug("(report.getChartOptions() != null) = {}", report.getChartOptions() != null);
-		if (report.getReportTypeId() < 0 && report.getChartOptions() != null) {
+		if (reportType.isChart() && report.getChartOptions() != null) {
 			String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
 			String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
 
@@ -679,5 +678,5 @@ public class ReportController {
 
 		return null;
 	}
-
+	
 }

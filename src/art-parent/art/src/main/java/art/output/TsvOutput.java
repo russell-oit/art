@@ -26,7 +26,6 @@ import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -42,22 +41,15 @@ import org.slf4j.LoggerFactory;
 public class TsvOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(TsvOutput.class);
-	FileOutputStream fout;
-	ZipOutputStream zout;
-	GZIPOutputStream gzout;
-	byte[] buf;
-	String tmpstr;
-	StringBuffer exportFileStrBuf;
-	NumberFormat nfPlain;
-	PrintWriter htmlout;
-	String queryName;
-	String fileUserName;
-	int maxRows;
-	int counter;
-	int columns;
-	final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
-	String exportPath;
-	ZipType zipType;
+	private FileOutputStream fout;
+	private ZipOutputStream zout;
+	private GZIPOutputStream gzout;
+	private StringBuffer exportFileStrBuf;
+	private NumberFormat nfPlain;
+	private int counter;
+	private int columns;
+	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
+	private ZipType zipType;
 
 	/**
 	 * Constructor
@@ -150,8 +142,8 @@ public class TsvOutput extends StandardOutput {
 		counter++;
 		if ((counter * columns) > FLUSH_SIZE) {
 			try {
-				tmpstr = exportFileStrBuf.toString();
-				buf = new byte[tmpstr.length()];
+				String tmpstr = exportFileStrBuf.toString();
+				byte[] buf = new byte[tmpstr.length()];
 				buf = tmpstr.getBytes("UTF-8");
 
 				if (zout == null) {
@@ -165,22 +157,8 @@ public class TsvOutput extends StandardOutput {
 				exportFileStrBuf = new StringBuffer(32 * 1024);
 			} catch (IOException e) {
 				logger.error("Error. Data not completed. Please narrow your search", e);
-
-				//htmlout not used for scheduled jobs
-				if (htmlout != null) {
-					htmlout.println("<span style=\"color:red\">Error: " + e
-							+ ")! Data not completed. Please narrow your search!</span>");
-				}
 			}
 		}
-
-//		if (counter < maxRows) {
-//			return true;
-//		} else {
-//			addCellString("Maximum number of rows exceeded! Query not completed.");
-//			endLines(); // close files
-//			return false;
-//		}
 	}
 
 	@Override
@@ -189,8 +167,8 @@ public class TsvOutput extends StandardOutput {
 //		addCellString("" + (counter));
 
 		try {
-			tmpstr = exportFileStrBuf.toString();
-			buf = new byte[tmpstr.length()];
+			String tmpstr = exportFileStrBuf.toString();
+			byte[] buf = new byte[tmpstr.length()];
 			buf = tmpstr.getBytes("UTF-8");
 
 			switch (zipType) {
