@@ -121,26 +121,4 @@ public class ArtHelper {
 		}
 	}
 
-	/**
-	 * Determine if given credentils match those of the art database
-	 *
-	 * @param username
-	 * @param password
-	 * @return
-	 */
-	public boolean isValidRepositoryUser(String username, String password) {
-		//TODO remove this method once refactoring is complete
-		boolean validRepositoryUser = false;
-
-		String artDbUsername = Config.getArtDbConfig().getUsername();
-		String artDbPassword = Config.getArtDbConfig().getPassword();
-		if (StringUtils.equals(username, artDbUsername)
-				&& StringUtils.equals(password, artDbPassword)
-				&& StringUtils.isNotBlank(username)) {
-			//repository user
-			validRepositoryUser = true;
-		}
-
-		return validRepositoryUser;
-	}
 }

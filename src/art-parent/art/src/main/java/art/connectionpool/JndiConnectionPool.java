@@ -21,6 +21,8 @@ import art.datasource.DatasourceInfo;
 import art.utils.ArtUtils;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,14 +30,20 @@ import javax.sql.DataSource;
  */
 public class JndiConnectionPool extends ConnectionPool {
 
+	private static final Logger logger = LoggerFactory.getLogger(JndiConnectionPool.class);
+
 	@Override
 	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
+		DataSource dataSource = null;
+		
 		try {
 			//for jndi datasources, the url contains the jndi name/resource reference
-			return ArtUtils.getJndiDataSource(datasourceInfo.getUrl());
+			dataSource = ArtUtils.getJndiDataSource(datasourceInfo.getUrl());
 		} catch (NamingException ex) {
-			throw new RuntimeException(ex);
+			logger.error("Error", ex);
 		}
+
+		return dataSource;
 	}
-	
+
 }

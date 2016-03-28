@@ -1,11 +1,11 @@
 package art.job;
 
+import art.connectionpool.DbConnections;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.JobType;
 import art.report.Report;
 import art.report.ReportService;
-import art.servlets.Config;
 import art.user.User;
 import art.user.UserService;
 import art.utils.CachedResult;
@@ -203,7 +203,7 @@ public class JobService {
 		if (jobType == JobType.CacheAppend || jobType == JobType.CacheInsert) {
 			// Delete
 			int targetDatabaseId = Integer.parseInt(job.getOutputFormat()); //TODO use separate - new db field, not output format
-			Connection connCache = Config.getConnection(targetDatabaseId);
+			Connection connCache=DbConnections.getConnection(targetDatabaseId);
 			try {
 				String cachedTableName = job.getCachedTableName();
 				if (StringUtils.isBlank(cachedTableName)) {

@@ -192,12 +192,6 @@ public class PdfOutput extends StandardOutput {
 		cell.setPaddingLeft(5f);
 		cell.setPaddingRight(5f);
 
-		//TODO review formatting. see openreports
-//		if(evenRow){
-//			cell.setGrayFill(evengray);
-//		} else {
-//			cell.setGrayFill(oddgray);
-//		}
 		table.addCell(cell);
 	}
 

@@ -65,8 +65,8 @@ public class ParameterProcessor {
 	public ParameterProcessorResult processHttpParameters(
 			HttpServletRequest request) throws SQLException, ParseException {
 
-		int reportId=Integer.parseInt(request.getParameter("reportId"));
-		
+		int reportId = Integer.parseInt(request.getParameter("reportId"));
+
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
 		Map<String, String[]> passedValues = new HashMap<>();
@@ -269,7 +269,7 @@ public class ParameterProcessor {
 				throw new IllegalArgumentException("Unknown numeric parameter data type: " + paramDataType);
 		}
 	}
-	
+
 	public Date convertParameterStringValueToDate(String value) throws ParseException {
 		return convertParameterStringValueToDate(value, null);
 	}
@@ -345,7 +345,7 @@ public class ParameterProcessor {
 				String paramValue = paramValues[0];
 
 				if (StringUtils.equalsIgnoreCase(htmlParamName, "showSelectedParameters")) {
-					if(StringUtils.equalsIgnoreCase(paramValue, "false")){
+					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
 						reportOptions.setShowSelectedParameters(false);
 					} else {
 						reportOptions.setShowSelectedParameters(true);
@@ -353,10 +353,13 @@ public class ParameterProcessor {
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "splitColumn")) {
 					reportOptions.setSplitColumn(Integer.parseInt(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showSql")) {
-					reportOptions.setShowSql(true);
+					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
+						reportOptions.setShowSql(false);
+					} else {
+						reportOptions.setShowSql(true);
+					}
 				}
 
-				//TODO process other params
 			}
 		}
 
@@ -375,13 +378,29 @@ public class ParameterProcessor {
 				String paramValue = paramValues[0];
 
 				if (StringUtils.equalsIgnoreCase(htmlParamName, "showLegend")) {
-					chartOptions.setShowLegend(Boolean.valueOf(paramValue));
+					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
+						chartOptions.setShowLegend(false);
+					} else {
+						chartOptions.setShowLegend(true);
+					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showLabels")) {
-					chartOptions.setShowLabels(Boolean.valueOf(paramValue));
+					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
+						chartOptions.setShowLabels(false);
+					} else {
+						chartOptions.setShowLabels(true);
+					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showData")) {
-					chartOptions.setShowData(Boolean.valueOf(paramValue));
+					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
+						chartOptions.setShowData(false);
+					} else {
+						chartOptions.setShowData(true);
+					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showPoints")) {
-					chartOptions.setShowPoints(Boolean.valueOf(paramValue));
+					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
+						chartOptions.setShowPoints(false);
+					} else {
+						chartOptions.setShowPoints(true);
+					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "rotateAt")) {
 					chartOptions.setRotateAt(Integer.parseInt(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "removeAt")) {

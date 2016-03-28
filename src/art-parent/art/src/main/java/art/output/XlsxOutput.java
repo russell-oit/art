@@ -23,12 +23,13 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.io.*;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +44,8 @@ import org.slf4j.LoggerFactory;
 public class XlsxOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
-	private Workbook wb;
-	private Sheet sh;
+	private SXSSFWorkbook wb;
+	private SXSSFSheet sh;
 	private CellStyle headerStyle;
 	private CellStyle bodyStyle;
 	private CellStyle dateStyle;
@@ -53,13 +54,10 @@ public class XlsxOutput extends StandardOutput {
 	private int currentRow;
 	private int cellNumber;
 	private String templateFileName;
-	private String xmlFileName;
 	private Map<String, CellStyle> styles;
-	private String sheetRef; //name of the zip entry holding sheet data, e.g. /xl/worksheets/sheet1.xml
-	private SpreadsheetWriter sw; //class that outputs temporary xlsx file
-	private Writer fw; //writer for temporary xml file
-	private File xmlFile; //file object for temporary xml file
-	boolean errorOccurred = false; //flag that is set if an error occurs while creating the data file. so that processing can be stopped
+	private boolean errorOccurred = false; //flag that is set if an error occurs while creating the data file. so that processing can be stopped
+	private Row row;
+	private Cell cell;
 
 	/**
 	 * Initialise objects required to generate output
@@ -67,17 +65,35 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void init() {
 		try {
-			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.						
-			wb = new XSSFWorkbook();
+			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.
 			final int MAX_SHEET_NAME = 30; //excel max is 31
 			String sheetName = reportName;
 			if (sheetName.length() > MAX_SHEET_NAME) {
 				sheetName = sheetName.substring(0, MAX_SHEET_NAME);
 			}
-			XSSFSheet xsh = (XSSFSheet) wb.createSheet(sheetName);
-			sheetRef = xsh.getPackagePart().getPartName().getName();
 
-			styles = new HashMap<String, CellStyle>();
+			String fullPath = FilenameUtils.getFullPath(fullOutputFilename);
+			String baseName = FilenameUtils.getBaseName(fullOutputFilename);
+			templateFileName = fullPath + "template-" + baseName + ".xlsx";
+
+			//save the template
+			try (FileOutputStream fout = new FileOutputStream(templateFileName)) {
+				XSSFWorkbook tmpwb = new XSSFWorkbook();
+				tmpwb.createSheet(sheetName);
+				tmpwb.write(fout);
+			}
+
+			FileInputStream inputStream = new FileInputStream(templateFileName);
+			XSSFWorkbook wb_template = new XSSFWorkbook(inputStream);
+			inputStream.close();
+
+			wb = new SXSSFWorkbook(wb_template);
+			wb.setCompressTempFiles(true);
+
+			sh = (SXSSFSheet) wb.getSheetAt(0);
+			sh.setRandomAccessWindowSize(100);// keep 100 rows in memory, exceeding rows will be flushed to disk
+
+			styles = new HashMap<>();
 
 			headerStyle = wb.createCellStyle();
 			headerFont = wb.createFont();
@@ -100,42 +116,17 @@ public class XlsxOutput extends StandardOutput {
 			dateStyle.setFont(bodyFont);
 			styles.put("date", dateStyle);
 
-			//save the template			
-			FileOutputStream fout = new FileOutputStream(templateFileName);
-			try {
-				wb.write(fout);
-			} finally {
-				fout.close();
-			}
-
-			//create xml file
-			xmlFile = new File(xmlFileName);
-			boolean created = xmlFile.createNewFile();
-			if (!created) {
-				logger.warn("Couldn't create xmlFile. File already exists: {}", xmlFileName);
-			}
-			fw = new FileWriter(xmlFile);
-			sw = new SpreadsheetWriter(fw);
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+			throw new RuntimeException(ex);
 		}
 	}
 
 	@Override
 	public void beginHeader() {
-		try {
-			sw.beginSheet();
-
-			currentRow = 0;
-
-			newRow();
-			addCellString(reportName + " - " + ArtUtils.isoDateTimeFormatter.format(new Date()));
 		newRow();
-
-		} catch (Exception e) {
-			logger.error("Error", e);
-			errorOccurred = true; //set flag so that no more rows are processed
-		}
+		addCellString(reportName + " - " + ArtUtils.isoDateTimeFormatter.format(new Date()));
+		newRow();
 	}
 
 	@Override
@@ -147,7 +138,6 @@ public class XlsxOutput extends StandardOutput {
 		for (ReportParameter reportParam : reportParamsList) {
 			// rows with parameter names
 			newRow();
-			Parameter param = reportParam.getParameter();
 			String paramDisplayValues = reportParam.getDisplayValues();
 			addCellString(paramDisplayValues);
 		}
@@ -169,14 +159,11 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String s) {
-		try {
-			sw.createCell(cellNumber++, s, styles.get("header").getIndex());
-		} catch (Exception e) {
-			logger.error("Error", e);
-			errorOccurred = true; //set flag so that no more rows are processed
-		}
+		cell = row.createCell(cellNumber++);
+		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+		cell.setCellValue(new XSSFRichTextString(s));
+		cell.setCellStyle(headerStyle);
 	}
-
 
 	@Override
 	public void beginRows() {
@@ -185,150 +172,55 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String s) {
-		try {
-			if (s == null) {
-				//output blank string
-				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
-			} else {
-				sw.createCell(cellNumber++, s, styles.get("body").getIndex());
-			}
-		} catch (Exception e) {
-			logger.error("Error", e);
-			errorOccurred = true; //set flag so that no more rows are processed
-		}
+		cell = row.createCell(cellNumber++);
+		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
+		cell.setCellValue(new XSSFRichTextString(s));
+		cell.setCellStyle(bodyStyle);
 	}
 
 	@Override
 	public void addCellNumeric(Double d) {
-		try {
-			if (d == null) {
-				//output blank string
-				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
-			} else {
-				sw.createCell(cellNumber++, d, styles.get("body").getIndex());
-			}
-		} catch (Exception e) {
-			logger.error("Error", e);
-			errorOccurred = true; //set flag so that no more rows are processed
+		cell = row.createCell(cellNumber++);
+
+		if (d == null) {
+			return;
+		} else {
+			cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+			cell.setCellValue(d);
+			cell.setCellStyle(bodyStyle);
 		}
 	}
 
 	@Override
 	public void addCellDate(Date d) {
-		try {
-			if (d == null) {
-				//output blank string
-				sw.createCell(cellNumber++, "", styles.get("body").getIndex());
-			} else {
-				sw.createCell(cellNumber++, Config.getDateDisplayString(d), styles.get("date").getIndex());
-			}
-		} catch (Exception e) {
-			logger.error("Error", e);
-			errorOccurred = true; //set flag so that no more rows are processed
+		cell = row.createCell(cellNumber++);
+
+		if (d == null) {
+			return;
+		} else {
+			cell.setCellValue(Config.getDateDisplayString(d));
+			cell.setCellStyle(dateStyle);
 		}
 	}
 
 	@Override
 	public void newRow() {
+		//open new row
+		row = sh.createRow(currentRow++);
 		cellNumber = 0;
-
-		try {
-			if (errorOccurred) {
-				//an error occurred. don't continue			
-				endRows(); // close files						
-			} else {
-				if (rowCount > 0) {
-					sw.endRow(); //need to output end row marker before inserting a new row
-				}
-
-				sw.insertRow(currentRow++);
-			}
-		} catch (Exception e) {
-			logger.error("Error", e);
-			errorOccurred = true; //set flag so that no more rows are processed
-		}
 	}
 
 	@Override
 	public void endRows() {
 		try {
-			sw.endRow();
-			sw.endSheet();
-			fw.close();
+			FileOutputStream fout = new FileOutputStream(fullOutputFilename);
+			wb.write(fout);
+			fout.close();
 
-			//Substitute the template with the generated data
-			FileOutputStream out = new FileOutputStream(fullOutputFilename);
-			File templateFile = new File(templateFileName);
-			try {
-				substitute(templateFile, xmlFile, sheetRef.substring(1), out);
-			} finally {
-				out.close();
-			}
-
-			//delete template and xml file	
-			boolean deleted;
-			deleted = xmlFile.delete();
-			if (!deleted) {
-				logger.warn("xmlFile not deleted: {}", xmlFileName);
-			}
-			deleted = templateFile.delete();
-			if (!deleted) {
-				logger.warn("templateFile not deleted: {}", templateFileName);
-			}
-		} catch (Exception e) {
+			// dispose of temporary files backing this workbook on disk
+			wb.dispose();
+		} catch (IOException e) {
 			logger.error("Error", e);
-		}
-	}
-
-	/**
-	 * substitute temporary xlsx template file with data from temporary xml file
-	 * containing final output
-	 *
-	 * @param zipfile the template file
-	 * @param tmpfile the XML file with the sheet data
-	 * @param entry the name of the sheet entry to substitute, e.g.
-	 * xl/worksheets/sheet1.xml
-	 * @param out the stream to write the result to
-	 */
-	private void substitute(File zipfile, File tmpfile, String entry, OutputStream out) throws IOException {
-		ZipFile zip = new ZipFile(zipfile);
-
-		ZipOutputStream zos = new ZipOutputStream(out);
-
-		try {
-			@SuppressWarnings("unchecked")
-			Enumeration<ZipEntry> en = (Enumeration<ZipEntry>) zip.entries();
-			while (en.hasMoreElements()) {
-				ZipEntry ze = en.nextElement();
-				if (!ze.getName().equals(entry)) {
-					zos.putNextEntry(new ZipEntry(ze.getName()));
-					InputStream is = zip.getInputStream(ze);
-					try {
-						copyStream(is, zos);
-					} finally {
-						is.close();
-					}
-				}
-			}
-			zos.putNextEntry(new ZipEntry(entry));
-			InputStream is = new FileInputStream(tmpfile);
-			try {
-				copyStream(is, zos);
-			} finally {
-				is.close();
-			}
-
-		} finally {
-			zos.close();
-			zip.close();
-		}
-	}
-
-	private void copyStream(InputStream in, OutputStream out) throws IOException {
-		byte[] chunk = new byte[1024];
-		int count;
-		while ((count = in.read(chunk)) >= 0) {
-			out.write(chunk, 0, count);
 		}
 	}
 

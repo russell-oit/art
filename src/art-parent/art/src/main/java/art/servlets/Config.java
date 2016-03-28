@@ -25,7 +25,6 @@ import art.enums.DisplayNull;
 import art.enums.LdapAuthenticationMethod;
 import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
-import art.enums.ReportFormat;
 import art.jobrunners.CleanJob;
 import art.settings.CustomSettings;
 import art.settings.Settings;
@@ -38,7 +37,6 @@ import com.lowagie.text.FontFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -47,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -97,7 +94,6 @@ public class Config extends HttpServlet {
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
 	private static String artVersion;
-	private static HashMap<String, Class<?>> directReportOutputClasses;
 	private static Map<String, String> languages = new TreeMap<>();
 
 	@Override
@@ -120,7 +116,6 @@ public class Config extends HttpServlet {
 		try {
 			//have delay to avoid tomcat reporting that threads weren't stopped. 
 			//(http://forums.terracotta.org/forums/posts/list/3479.page)
-			//TODO retest
 			TimeUnit.SECONDS.sleep(1);
 		} catch (InterruptedException ex) {
 			logger.error("Error", ex);
@@ -212,22 +207,6 @@ public class Config extends HttpServlet {
 
 		//ensure work directories exist
 		createWorkDirectories();
-
-		//TODO test load classes in @postconstruct in runreportcontroller
-		//load classes for report output classes that do direct output
-		//(they create output themselves and don't delegate to another entity like jasperreports)
-		directReportOutputClasses = new HashMap<>();
-		ClassLoader cl = this.getClass().getClassLoader();
-		for (ReportFormat reportFormat : ReportFormat.list()) {
-			String reportOutputClass = reportFormat.getDirectOutputClassName();
-			if (reportOutputClass != null) {
-				try {
-					directReportOutputClasses.put(reportFormat.getValue(), cl.loadClass(reportOutputClass));
-				} catch (ClassNotFoundException ex) {
-					logger.error("Error while loading report output class: '{}'", reportOutputClass, ex);
-				}
-			}
-		}
 
 		loadLanguages();
 
@@ -346,30 +325,6 @@ public class Config extends HttpServlet {
 		//create quartz scheduler
 		createQuartzScheduler();
 
-	}
-
-	//TODO remove after refactoring
-	/**
-	 * Return a connection to the datasource with a given ID from the connection
-	 * pool.
-	 *
-	 * @param i id of datasource. 0 = ART repository.
-	 * @return connection to datasource or null if connection doesn't exist
-	 */
-	public static Connection getConnection(int i) {
-		return null;
-	}
-
-	//TODO remove after refactoring
-	/**
-	 * Return a connection to ART repository from the pool (same as
-	 * getConnection(0))
-	 *
-	 * @return connection to the ART repository or null if connection doesn't
-	 * exist
-	 */
-	public static Connection getConnection() {
-		return null;
 	}
 
 	/**
@@ -746,10 +701,6 @@ public class Config extends HttpServlet {
 			}
 		}
 
-	}
-
-	public static Map<String, Class<?>> getDirectOutputReportClasses() {
-		return directReportOutputClasses;
 	}
 
 	/**
