@@ -68,6 +68,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jxls.exception.ParsePropertyException;
+import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -324,7 +325,11 @@ public class ReportOutputGenerator {
 
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showChart.jsp").include(request, response);
 
-						//TODO show data
+						if (data != null) {
+							List<DynaBean> dataRows = data.getRows();
+							request.setAttribute("dataRows", dataRows);
+							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
+						}
 					} else {
 						chart.generateFile(reportFormat, fullOutputFilename, data);
 						displayFileLink(fileName);
