@@ -60,7 +60,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -169,6 +168,8 @@ public class ReportOutputGenerator {
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException {
 
+		logger.debug("Entering generateOutput");
+
 		ReportOutputGeneratorResult outputResult = new ReportOutputGeneratorResult();
 		outputResult.setSuccess(true);
 
@@ -193,7 +194,6 @@ public class ReportOutputGenerator {
 
 		try {
 
-			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 			ChartOptions chartOptions = paramProcessorResult.getChartOptions();
@@ -397,7 +397,10 @@ public class ReportOutputGenerator {
 	}
 
 	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob) throws IllegalArgumentException {
+		logger.debug("Entering getStandardOutputInstance: reportFormat={}, isJob={}", reportFormat, isJob);
+
 		StandardOutput standardOutput;
+
 		switch (reportFormat) {
 			case htmlPlain:
 				standardOutput = new HtmlPlainOutput(isJob);
@@ -447,6 +450,7 @@ public class ReportOutputGenerator {
 			default:
 				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
 		}
+
 		return standardOutput;
 	}
 

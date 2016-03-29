@@ -23,7 +23,6 @@ import art.enums.ReportType;
 import art.output.StandardOutput;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
-import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
@@ -107,7 +106,6 @@ public class RunReportController {
 		}
 
 		try {
-			//get report
 			report = reportService.getReport(reportId);
 
 			if (report == null) {
@@ -154,10 +152,7 @@ public class RunReportController {
 			if (reportType == ReportType.Dashboard) {
 				return "forward:/app/showDashboard.do";
 			} else if (reportType.isOlap()) {
-//				servletContext.getRequestDispatcher("/analysis/showAnalysis.jsp").forward(request, response);
-//				return null;
 				return "forward:/app/showAnalysis.do";
-//				return "forward:/analysis/showAnalysis.jsp";
 			}
 
 			//get report format to use
@@ -177,7 +172,7 @@ public class RunReportController {
 
 			//this will be initialized according to the content type of the report output
 			//setContentType() must be called before getWriter()
-			PrintWriter writer = null;
+			PrintWriter writer;
 
 			boolean showReportHeaderAndFooter = true;
 
@@ -254,7 +249,6 @@ public class RunReportController {
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-				ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
 				//get parameter display values if parameters need to be shown in html or file output
 				//especially for lov values where display value may be different from data value
@@ -423,7 +417,6 @@ public class RunReportController {
 
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportInfoFooter.jsp").include(request, response);
 
-					//clear report progress
 					clearReportProgress(writer);
 				}
 			}

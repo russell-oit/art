@@ -26,8 +26,6 @@ import java.text.NumberFormat;
 import java.util.Objects;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLinkGenerator {
 
-	private static final Logger logger = LoggerFactory.getLogger(PieChart.class);
 	private static final long serialVersionUID = 1L;
 
 	public PieChart(ReportType reportType) {

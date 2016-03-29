@@ -20,7 +20,6 @@ package art.dashboard;
 import art.enums.ReportStatus;
 import art.report.Report;
 import art.report.ReportService;
-import art.servlets.Config;
 import art.user.User;
 import art.utils.XmlParser;
 import java.io.UnsupportedEncodingException;
@@ -34,6 +33,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class DashboardController {
 
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(DashboardController.class);
+	private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
 	@Autowired
 	private ReportService reportService;
@@ -62,6 +62,8 @@ public class DashboardController {
 	public String showDashboard(@RequestParam("reportId") Integer reportId,
 			HttpServletRequest request, Model model, Locale locale,
 			HttpSession session) {
+		
+		logger.debug("Entering showDashboard: reportId={}", reportId);
 
 		try {
 			Report report = reportService.getReport(reportId);
@@ -104,6 +106,8 @@ public class DashboardController {
 
 	private Dashboard buildDashboard(Report report, HttpServletRequest request,
 			Locale locale) throws UnsupportedEncodingException, SQLException, ParseException {
+		
+		logger.debug("Entering buildDashboard");
 
 		Dashboard dashboard = new Dashboard();
 
@@ -111,12 +115,13 @@ public class DashboardController {
 		dashboard.setDescription(report.getDescription());
 
 		String dashboardXml = report.getReportSource();
+		logger.debug("dashboardXml", dashboardXml);
 
 		List<String> columnsXml = XmlParser.getXmlElementValues(dashboardXml, "COLUMN");
 
 		List<List<Portlet>> dashboardColumns = new ArrayList<>();
 
-		for (String columnXml : columnsXml) { // for each column
+		for (String columnXml : columnsXml) {
 			List<Portlet> columnPortlets = new ArrayList<>();
 			String columnSize = XmlParser.getXmlElementValue(columnXml, "SIZE");
 			if (columnSize == null) {

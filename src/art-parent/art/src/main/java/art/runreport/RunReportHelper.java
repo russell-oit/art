@@ -36,7 +36,7 @@ public class RunReportHelper {
 	public Connection getEffectiveReportDatasource(Report report,
 			Collection<ReportParameter> reportParams) throws SQLException {
 
-		Connection conn = null;
+		Connection conn;
 
 		Integer dynamicDatasourceId = null;
 		if (reportParams != null) {

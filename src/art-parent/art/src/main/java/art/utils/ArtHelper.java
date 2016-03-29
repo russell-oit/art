@@ -18,7 +18,6 @@ package art.utils;
 
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
-import art.servlets.Config;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

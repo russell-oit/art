@@ -17,7 +17,6 @@
 package art.servlets;
 
 import art.artdatabase.ArtDatabase;
-import art.dbcp.ArtDBCPDataSource;
 import art.connectionpool.DbConnections;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
@@ -233,8 +232,8 @@ public class Config extends HttpServlet {
 
 			if (inputStream != null) {
 				prop.load(inputStream);
-//			} else {
-//				throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+			} else {
+				logger.warn("property file not found in the classpath: '{}'", propFileName);
 			}
 
 			Set<String> propertyNames = prop.stringPropertyNames();
@@ -242,8 +241,8 @@ public class Config extends HttpServlet {
 				String value = prop.getProperty(key);
 				languages.put(value.trim(), key.trim());
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException ex) {
+			logger.error("Error", ex);
 		}
 	}
 
@@ -436,7 +435,7 @@ public class Config extends HttpServlet {
 			try {
 				Class.forName(driver).newInstance();
 				logger.info("Database Authentication JDBC Driver Registered: {}", driver);
-			} catch (Exception e) {
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				logger.error("Error while registering Database Authentication JDBC Driver: {}", driver, e);
 			}
 		}
@@ -547,7 +546,7 @@ public class Config extends HttpServlet {
 			pSettings.setLdapUserIdAttribute("uid");
 		}
 		if (StringUtils.isBlank(pSettings.getDateFormat())) {
-			pSettings.setDateFormat("dd-MMM-yyyy");
+			pSettings.setDateFormat("yyyy-MM-dd");
 		}
 		if (StringUtils.isBlank(pSettings.getTimeFormat())) {
 			pSettings.setTimeFormat("HH:mm:ss");
@@ -596,43 +595,6 @@ public class Config extends HttpServlet {
 			artDatabase.setConnectionPoolLibrary(ConnectionPoolLibrary.ArtDBCP);
 		}
 
-	}
-
-	/**
-	 * Set application name connection property to identify ART connections
-	 *
-	 * @param ds
-	 */
-	private static void setConnectionProperties(ArtDBCPDataSource ds) {
-		String connectionName = "ART - " + ds.getPoolName();
-		//ApplicationName property
-		//see http://docs.oracle.com/javase/7/docs/api/java/sql/Connection.html#setClientInfo%28java.lang.String,%20java.lang.String%29
-		//has different name and maxlength for different drivers
-		//maxlength mostly in the 254 range. Some exceptions include postgresql maxlength=64
-		//some drivers don't seem to define it explicitly so may not support it and throw exception?
-		//e.g. mysql, hsqldb
-
-		String dbUrl = ds.getUrl();
-		Properties properties = new Properties();
-		if (StringUtils.startsWith(dbUrl, "jdbc:oracle")) {
-			properties.put("v$session.program", connectionName);
-		} else if (StringUtils.startsWith(dbUrl, "jdbc:sqlserver")) {
-			properties.put("applicationName", connectionName);
-		} else if (StringUtils.startsWith(dbUrl, "jdbc:jtds")) {
-			properties.put("appName", connectionName);
-		} else if (StringUtils.startsWith(dbUrl, "jdbc:db2") || StringUtils.startsWith(dbUrl, "jdbc:as400")) {
-			//see http://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic=%2Fcom.ibm.db2.luw.apdv.java.doc%2Fsrc%2Ftpc%2Fimjcc_r0052001.html
-			properties.put("ApplicationName", StringUtils.left(connectionName, 32));
-		} else if (StringUtils.startsWith(dbUrl, "jdbc:ids") || StringUtils.startsWith(dbUrl, "jdbc:informix-sqli")) {
-			//see http://publib.boulder.ibm.com/infocenter/db2luw/v9r5/index.jsp?topic=%2Fcom.ibm.db2.luw.apdv.java.doc%2Fsrc%2Ftpc%2Fimjcc_r0052001.html
-			properties.put("ApplicationName", StringUtils.left(connectionName, 20));
-		} else if (StringUtils.startsWith(dbUrl, "jdbc:postgresql")) {
-			//see https://stackoverflow.com/questions/19224934/postgresql-how-to-set-application-name-from-jdbc-url
-			properties.put("ApplicationName", connectionName);
-		}
-
-		//some drivers don't seem to define
-		ds.setConnectionProperties(properties);
 	}
 
 	/**

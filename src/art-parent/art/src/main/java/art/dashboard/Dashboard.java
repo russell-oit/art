@@ -17,13 +17,16 @@
  */
 package art.dashboard;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author Timothy Anyona
  */
-public class Dashboard {
+public class Dashboard implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private String title;
 	private String description;
 	private List<List<Portlet>> columns;

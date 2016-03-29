@@ -218,6 +218,7 @@ public class ReportRunner {
 	 * Process the report source and apply tags, dynamic sql and parameters
 	 */
 	private void processReportSource() throws SQLException {
+		logger.debug("Entering processReportSource");
 
 		//update querySb with report sql
 		querySb.replace(0, querySb.length(), report.getReportSource());
@@ -234,8 +235,7 @@ public class ReportRunner {
 	}
 
 	private void applyRules(StringBuilder sb) throws SQLException {
-
-		logger.debug("applyRules");
+		logger.debug("Entering applyRules");
 
 		if (!useRules) {
 			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
@@ -245,7 +245,7 @@ public class ReportRunner {
 			//update sb with new sql
 			sb.replace(0, sb.length(), querySql);
 
-			return; //don't process any further
+			return;
 		}
 
 		int insertPosLast = 0;
@@ -315,22 +315,22 @@ public class ReportRunner {
 				} else {
 					// Add the rule to the query 
 					String values = tmpSb.toString();
-					if (org.apache.commons.lang.StringUtils.length(values) == 0 && org.apache.commons.lang.StringUtils.length(groupValues) == 0) {
+					if (StringUtils.length(values) == 0 && StringUtils.length(groupValues) == 0) {
 						//user doesn't have values set for at least one rule that the query uses. values needed for all rules
 						break;
 					} else {
 						String condition = "";
-						if (org.apache.commons.lang.StringUtils.length(values) > 0) {
+						if (StringUtils.length(values) > 0) {
 							condition = columnName + " in (" + values.substring(1) + ")";
 						}
 						String groupCondition = "";
-						if (org.apache.commons.lang.StringUtils.length(groupValues) > 0) {
+						if (StringUtils.length(groupValues) > 0) {
 							groupCondition = groupValues;
 						}
 
-						if (org.apache.commons.lang.StringUtils.length(condition) > 0) {
+						if (StringUtils.length(condition) > 0) {
 							//rule values defined for user
-							if (org.apache.commons.lang.StringUtils.length(groupCondition) > 0) {
+							if (StringUtils.length(groupCondition) > 0) {
 								groupCondition = " OR " + groupCondition;
 							}
 							condition = condition + groupCondition; // ( user values OR (user group values) )
@@ -405,7 +405,7 @@ public class ReportRunner {
 
 		try {
 
-			if (org.apache.commons.lang.math.NumberUtils.isNumber(ruleUsername)) {
+			if (NumberUtils.isNumber(ruleUsername)) {
 				//get values from user group
 				sql = "SELECT RULE_VALUE, RULE_TYPE "
 						+ " FROM ART_USER_GROUP_RULES "
@@ -432,8 +432,8 @@ public class ReportRunner {
 			//  Note: null TYPE is handled as EXACT
 			while (rs.next() && !isAllItemsForThisRule) {
 				String ruleValue = rs.getString("RULE_VALUE");
-				if (!org.apache.commons.lang.StringUtils.equals(ruleValue, "ALL_ITEMS")) {
-					if (org.apache.commons.lang.StringUtils.equals(rs.getString("RULE_TYPE"), "LOOKUP")) {
+				if (!StringUtils.equals(ruleValue, "ALL_ITEMS")) {
+					if (StringUtils.equals(rs.getString("RULE_TYPE"), "LOOKUP")) {
 						// if type is lookup the VALUE is the name
 						// to look up. Recursively call getRuleValues
 						StringBuilder lookupSb = getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType);
@@ -443,13 +443,13 @@ public class ReportRunner {
 							break;
 						} else {
 							String values = lookupSb.toString();
-							if (org.apache.commons.lang.StringUtils.equals(values, "TOO MANY LOOPS")) {
+							if (StringUtils.equals(values, "TOO MANY LOOPS")) {
 								values = "";
 							}
 							tmpSb.append(values);
 						}
 					} else { // Normal EXACT type
-						if (org.apache.commons.lang.StringUtils.equals(columnDataType, "NUMBER") && org.apache.commons.lang.math.NumberUtils.isNumber(ruleValue)) {
+						if (StringUtils.equals(columnDataType, "NUMBER") && org.apache.commons.lang.math.NumberUtils.isNumber(ruleValue)) {
 							//don't quote numbers
 							tmpSb.append(",").append(ruleValue);
 						} else {
@@ -523,7 +523,7 @@ public class ReportRunner {
 				}
 
 				//build group values string
-				if (org.apache.commons.lang.StringUtils.length(condition) > 0) {
+				if (StringUtils.length(condition) > 0) {
 					//some rule value defined for this group
 					count++;
 
@@ -542,6 +542,8 @@ public class ReportRunner {
 	}
 
 	private void applyParameterPlaceholders(StringBuilder sb) {
+		logger.debug("Entering applyParameterPlaceholders");
+
 		if (reportParamsMap == null || reportParamsMap.isEmpty()) {
 			return;
 		}
@@ -615,6 +617,7 @@ public class ReportRunner {
 	}
 
 	private void applyDynamicRecipient(StringBuilder sb) {
+		logger.debug("Entering applyDynamicRecipient");
 
 		String querySql = sb.toString();
 
@@ -933,6 +936,8 @@ public class ReportRunner {
 	 * Dynamic SQL is parsed, evaluated and the querySb is modified according
 	 */
 	private void applyDynamicSql(StringBuilder sb, boolean usingFilter) {
+		logger.debug("Entering applyDynamicSql");
+
 		String element = "IF";
 
 		// XmlInfo stores the text between a tag as well as
@@ -1003,8 +1008,12 @@ public class ReportRunner {
 				throw new IllegalStateException("Parameter not found: " + paramName);
 			}
 
-			//TODO use explicit format for dates instead of String.valueOf() or use passed parameter value?
-			expValue = String.valueOf(reportParam.getActualParameterValues());
+			if (reportParam.getEffectiveActualParameterValue() instanceof Date) {
+				Date dateValue = (Date) reportParam.getEffectiveActualParameterValue();
+				expValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
+			} else {
+				expValue = String.valueOf(reportParam.getActualParameterValues());
+			}
 		} else {
 			//expression isn't a report parameter. use as is
 			expValue = exp;
@@ -1017,10 +1026,10 @@ public class ReportRunner {
 	 * Evaluate the IF element in Dynamic SQL
 	 */
 	private boolean evaluateIF(String exp1, String op, String exp2) {
-
 		if (exp1 == null) {
 			exp1 = "";
 		}
+
 		if (exp2 == null) {
 			exp2 = "";
 		}
@@ -1102,7 +1111,7 @@ public class ReportRunner {
 	 * Replace :TAGS
 	 */
 	private void applyTags(StringBuilder sb) {
-		logger.debug("applyTags");
+		logger.debug("Entering applyTags");
 
 		String querySql = sb.toString();
 
@@ -1132,6 +1141,8 @@ public class ReportRunner {
 
 	private String generateFinalSql(String sqlQuery, Object... parameters) {
 		//https://stackoverflow.com/questions/2683214/get-query-from-java-sql-preparedstatement
+
+		logger.debug("Entering generateFinalSql");
 
 		String[] parts = sqlQuery.split("\\?");
 		StringBuilder sb = new StringBuilder();

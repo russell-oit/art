@@ -16,13 +16,11 @@
  */
 package art.drilldown;
 
+import art.enums.ReportFormat;
 import art.report.ReportService;
-import art.servlets.Config;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Map;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -62,7 +60,7 @@ public class DrilldownController {
 	public String showDrilldowns(Model model,
 			@RequestParam("reportId") Integer reportId) {
 
-		logger.debug("Entering showDrilldowns");
+		logger.debug("Entering showDrilldowns: reportId={}");
 
 		try {
 			model.addAttribute("parentReportId", reportId);
@@ -179,15 +177,7 @@ public class DrilldownController {
 			model.addAttribute("error", ex);
 		}
 
-		Map<String, String> reportFormats = new LinkedHashMap<>();
-		for (String reportFormat : Config.getReportFormats()) {
-			reportFormats.put(reportFormat, messageSource.getMessage(reportFormat, null, locale));
-		}
-		reportFormats.put("graph", messageSource.getMessage("htmlGraph", null, locale));
-		reportFormats.put("pdfGraph", messageSource.getMessage("pdfGraph", null, locale));
-		reportFormats.put("pngGraph", messageSource.getMessage("pdfGraph", null, locale));
-
-		model.addAttribute("reportFormats", reportFormats);
+		model.addAttribute("reportFormats", ReportFormat.list());
 
 		model.addAttribute("parent", parent);
 		model.addAttribute("action", action);

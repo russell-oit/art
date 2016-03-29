@@ -21,12 +21,10 @@ import art.enums.AccessLevel;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.parameter.Parameter;
-import art.parameter.ParameterService;
 import art.reportgroup.ReportGroupService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
-import art.runreport.ReportOptions;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
@@ -132,10 +130,6 @@ public class ReportController {
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-				ChartOptions chartOptions = report.getChartOptions();
-
-				ParameterService parameterService = new ParameterService();
 
 				for (ReportParameter reportParam : reportParamsList) {
 					Parameter param = reportParam.getParameter();
@@ -157,12 +151,7 @@ public class ReportController {
 				}
 
 				model.addAttribute("reportParamsList", reportParamsList);
-				model.addAttribute("reportOptions", reportOptions);
-				model.addAttribute("chartOptions", chartOptions);
 
-//				ParameterService parameterService = new ParameterService();
-//				List<Parameter> paramsList = parameterService.getReportParameters(reportId);
-//				model.addAttribute("paramsList", paramsList);
 				ReportType reportType = report.getReportType();
 
 				boolean enableReportFormats;
@@ -233,10 +222,13 @@ public class ReportController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
+		
 		return "selectReportParameters";
 	}
 
 	private List<String> getAvailableReportFormats(ReportType reportType) {
+		logger.debug("Entering getAvailableReportFormats: reportType={}", reportType);
+		
 		List<String> formats = new ArrayList<>();
 
 		if (reportType.isChart()) {
@@ -282,6 +274,9 @@ public class ReportController {
 	List<Report> getReports(HttpSession session, HttpServletRequest request) {
 		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
+		
+		logger.debug("Entering getReports");
+		
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		List<Report> reports = null;
@@ -447,6 +442,7 @@ public class ReportController {
 		}
 
 		model.addAttribute("action", action);
+		
 		return "editReport";
 	}
 
@@ -483,6 +479,8 @@ public class ReportController {
 		validExtensions.add("jrxml");
 		validExtensions.add("xls");
 		validExtensions.add("xlsx");
+		validExtensions.add("png");
+		validExtensions.add("jpeg");
 
 		long maxUploadSize = Config.getSettings().getMaxFileUploadSize(); //size in MB
 		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
@@ -657,7 +655,7 @@ public class ReportController {
 	private String prepareReport(Report report, MultipartFile templateFile,
 			MultipartFile subreportFile, String action) throws IOException, SQLException {
 
-		logger.debug("Entering prepareReport: report={}, action='{}", report, action);
+		logger.debug("Entering prepareReport: report={}, action='{}'", report, action);
 
 		String message;
 

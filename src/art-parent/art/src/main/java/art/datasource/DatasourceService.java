@@ -68,6 +68,8 @@ public class DatasourceService {
 	 */
 	@Cacheable("datasources")
 	public List<Datasource> getAllDatasources() throws SQLException {
+		logger.debug("Entering getAllDatasources");
+		
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
@@ -81,6 +83,8 @@ public class DatasourceService {
 	 */
 	@Cacheable("datasources")
 	public Datasource getDatasource(int id) throws SQLException {
+		logger.debug("Entering getDatasource: id={}", id);
+		
 		String sql = SQL_SELECT_ALL + " WHERE DATABASE_ID=?";
 		ResultSetHandler<Datasource> h = new BeanHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h, id);

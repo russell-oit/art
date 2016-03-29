@@ -19,13 +19,16 @@ package art.archive;
 
 import art.job.Job;
 import art.user.User;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author Timothy Anyona
  */
-public class Archive {
+public class Archive implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private String archiveId;
 	private Job job;
 	private User user;

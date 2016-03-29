@@ -29,16 +29,12 @@ public class DbLogin {
 		logger.debug("Url='{}'", url);
 
 		if (StringUtils.isBlank(url)) {
-			logger.info("Database authentication not configured. username={}", username);
+			logger.info("Database authentication not configured. username='{}'", username);
 
 			result.setMessage("login.message.databaseAuthenticationNotConfigured");
 			result.setDetails("database authentication not configured");
-
-			logger.debug("Leaving authenticate: {}", result);
 			return result;
 		}
-		
-		logger.debug("Starting main block");
 		
 		try {
 			Connection conn = DriverManager.getConnection(url, username, password);
@@ -54,8 +50,6 @@ public class DbLogin {
 			result.setError(ex.toString());
 		}
 
-		logger.debug("Leaving authenticate: {}", result);
-		
 		return result;
 	}
 }

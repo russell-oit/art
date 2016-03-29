@@ -271,6 +271,10 @@ public class UserService {
 	@CacheEvict(value = "users", allEntries = true)
 	public void updatePassword(int userId, String newPassword, String passwordAlgorithm,
 			User actionUser) throws SQLException {
+
+		logger.debug("Entering updatePassword: userId={}, passwordAlgorithm='{}', actionUser={}",
+				userId, passwordAlgorithm, actionUser);
+
 		String sql = "UPDATE ART_USERS SET PASSWORD=?, PASSWORD_ALGORITHM=?,"
 				+ " UPDATE_DATE=?, UPDATED_BY=?"
 				+ " WHERE USER_ID=?";

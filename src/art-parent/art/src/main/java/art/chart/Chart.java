@@ -431,14 +431,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 				CategoryItemRenderer renderer = categoryPlot.getRenderer(); //could be a version of BarRenderer or LineAndShapeRenderer for line graphs
 				if (StringUtils.equalsIgnoreCase(labelFormat, "off")) {
 					renderer.setBaseItemLabelGenerator(null);
-					renderer.setBaseItemLabelsVisible(false); //TODO need both null and false?
+					renderer.setBaseItemLabelsVisible(false);
 				} else {
 					//display data values in the labels
 					NumberFormat nf = NumberFormat.getInstance(locale);
 
 					CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelFormat, nf);
 					renderer.setBaseItemLabelGenerator(generator);
-					renderer.setBaseItemLabelsVisible(true); //TODO test if needed
+					renderer.setBaseItemLabelsVisible(true);
 
 					renderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
 					renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));

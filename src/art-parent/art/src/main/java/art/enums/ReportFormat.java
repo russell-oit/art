@@ -31,7 +31,6 @@ public enum ReportFormat {
 	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
 	pdf("pdf"), slk("slk"), slkZip("slkZip"), tsv("tsv"), tsvZip("tsvZip"),
 	tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png");
-	//TODO rename tsvGz to tsvGzip. also in upgrade script and messages file
 	private final String value;
 
 	private ReportFormat(String value) {
@@ -169,7 +168,7 @@ public enum ReportFormat {
 	 * @return
 	 */
 	public String getLocalizedDescription() {
-		return "reportFormat.option." + value;
+		return "reports.format." + value;
 	}
 
 }

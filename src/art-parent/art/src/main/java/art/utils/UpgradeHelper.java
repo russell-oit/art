@@ -218,7 +218,7 @@ public class UpgradeHelper {
 		} catch (SQLException | SchedulerException ex) {
 			logger.error("Error", ex);
 		} finally {
-DatabaseUtils.close(psUpdate, conn);
+			DatabaseUtils.close(psUpdate, conn);
 		}
 	}
 
@@ -263,12 +263,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate user_id columns. Columns added in 3.0
 	 */
-	private static void addUserIds() throws SQLException {
+	private void addUserIds() throws SQLException {
 		logger.debug("Entering addUserIds");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT USERNAME FROM ART_USERS WHERE USER_ID IS NULL";
 		ResultSetHandler<List<String>> h2 = new ColumnListHandler<>("USERNAME");
@@ -325,12 +323,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate schedule_id column. Column added in 3.0
 	 */
-	private static void addScheduleIds() throws SQLException {
+	private void addScheduleIds() throws SQLException {
 		logger.debug("Entering addScheduleIds");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT SCHEDULE_NAME FROM ART_JOB_SCHEDULES WHERE SCHEDULE_ID IS NULL";
 		ResultSetHandler<List<String>> h2 = new ColumnListHandler<>("SCHEDULE_NAME");
@@ -361,12 +357,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate drilldown_id column. Column added in 3.0
 	 */
-	private static void addDrilldownIds() throws SQLException {
+	private void addDrilldownIds() throws SQLException {
 		logger.debug("Entering addDrilldownIds");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT QUERY_ID, DRILLDOWN_QUERY_POSITION"
 				+ " FROM ART_DRILLDOWN_QUERIES"
@@ -403,12 +397,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate rule_id column. Column added in 3.0
 	 */
-	private static void addRuleIds() throws SQLException {
+	private void addRuleIds() throws SQLException {
 		logger.debug("Entering addRuleIds");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT RULE_NAME FROM ART_RULES WHERE RULE_ID IS NULL";
 		ResultSetHandler<List<String>> h2 = new ColumnListHandler<>(1);
@@ -449,12 +441,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate query rule id column. Column added in 3.0
 	 */
-	private static void addQueryRuleIds() throws SQLException {
+	private void addQueryRuleIds() throws SQLException {
 		logger.debug("Entering addQueryRuleIds");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT QUERY_ID, RULE_NAME"
 				+ " FROM ART_QUERY_RULES"
@@ -491,12 +481,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate art_parameters table. Added in 3.0
 	 */
-	private static void addParameters() throws SQLException {
+	private void addParameters() throws SQLException {
 		logger.debug("Entering addParameters");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT *"
 				+ " FROM ART_QUERY_FIELDS"
@@ -600,12 +588,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate user rule value key column. Column added in 3.0
 	 */
-	private static void addUserRuleValueKeys() throws SQLException {
+	private void addUserRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserRuleValueKeys");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT *"
 				+ " FROM ART_USER_RULES"
@@ -633,12 +619,10 @@ DatabaseUtils.close(psUpdate, conn);
 	/**
 	 * Populate user group rule value key column. Column added in 3.0
 	 */
-	private static void addUserGroupRuleValueKeys() throws SQLException {
+	private void addUserGroupRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserGroupRuleValueKeys");
 
 		String sql;
-
-		DbService dbService = new DbService();
 
 		sql = "SELECT *"
 				+ " FROM ART_USER_GROUP_RULES"

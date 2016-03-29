@@ -171,7 +171,11 @@ Edit a drilldown
 							<form:option value="default"><spring:message code="drilldowns.option.default"/></form:option>
 							<form:option value="ALL"><spring:message code="drilldowns.option.all"/></form:option>
 								<option data-divider="true"></option>
-							<form:options items="${reportFormats}"/>
+							<c:forEach var="reportFormat" items="${reportFormats}">
+								<form:option value="${reportFormat.value}">
+									<spring:message code="${reportFormat.localizedDescription}"/>
+								</form:option>
+							</c:forEach>
 						</form:select>
 						<form:errors path="reportFormat" cssClass="error"/>
 					</div>

@@ -79,7 +79,7 @@ public class JobController {
 
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private JobParameterService jobParameterService;
 
@@ -137,7 +137,7 @@ public class JobController {
 	@RequestMapping(value = "/app/refreshJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse refreshJob(@RequestParam("id") Integer id, Locale locale) {
-		logger.debug("Entering deleteJob: id={}", id);
+		logger.debug("Entering refreshJob: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -169,7 +169,7 @@ public class JobController {
 	@RequestMapping(value = "/app/runJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse runJob(@RequestParam("id") Integer id) {
-		logger.debug("Entering deleteJob: id={}", id);
+		logger.debug("Entering runJob: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -202,9 +202,10 @@ public class JobController {
 	@RequestMapping(value = "/app/addJob", method = {RequestMethod.GET, RequestMethod.POST})
 	public String addJob(Model model, HttpServletRequest request,
 			HttpSession session) {
-		try {
-			logger.debug("Entering addJob");
 
+		logger.debug("Entering addJob");
+
+		try {
 			Job job = new Job();
 			job.setActive(true);
 
@@ -216,7 +217,7 @@ public class JobController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			job.setUser(sessionUser);
-			
+
 			model.addAttribute("job", job);
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
@@ -240,7 +241,7 @@ public class JobController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session, HttpServletRequest request) {
 
-		logger.debug("Entering saveJob: job={}, action='{}'", job, action);
+		logger.debug("Entering saveJob: job={}, action='{}', nextPage='{}'", job, action, nextPage);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -260,9 +261,9 @@ public class JobController {
 				jobService.updateJob(job, sessionUser);
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
-			
-			saveJobParameters(request,job.getJobId());
-			
+
+			saveJobParameters(request, job.getJobId());
+
 			redirectAttributes.addFlashAttribute("recordName", job.getName());
 			return "redirect:/app/" + nextPage;
 		} catch (SQLException | SchedulerException | ParseException ex) {
@@ -273,8 +274,11 @@ public class JobController {
 		return showJob(action, model);
 	}
 
-	private void saveJobParameters(HttpServletRequest request,int jobId) throws NumberFormatException, SQLException {
-		Integer reportId = Integer.parseInt(request.getParameter("report.reportId"));
+	private void saveJobParameters(HttpServletRequest request, int jobId)
+			throws NumberFormatException, SQLException {
+		
+		logger.debug("Entering saveJobParameters: jobId={}", jobId);
+		
 		Map<String, String[]> passedValues = new HashMap<>();
 		Enumeration<String> htmlParamNames = request.getParameterNames();
 		while (htmlParamNames.hasMoreElements()) {
@@ -282,7 +286,6 @@ public class JobController {
 			logger.debug("htmlParamName='{}'", htmlParamName);
 
 			if (htmlParamName.startsWith("p-")) {
-				String paramName = htmlParamName.substring(2);
 				passedValues.put(htmlParamName, request.getParameterValues(htmlParamName));
 			}
 		}
@@ -291,8 +294,8 @@ public class JobController {
 		for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
 			String name = entry.getKey();
 			String[] values = entry.getValue();
-			for(String value:values){
-				JobParameter jobParam=new JobParameter();
+			for (String value : values) {
+				JobParameter jobParam = new JobParameter();
 				jobParam.setJobId(jobId);
 				jobParam.setName(name);
 				jobParam.setValue(value);
@@ -348,6 +351,8 @@ public class JobController {
 	}
 
 	private void finalizeSchedule(Job job) throws SchedulerException, ParseException {
+		logger.debug("Entering finalizeSchedule: job={}", job);
+		
 		//create quartz job to be running this job
 
 		//build cron expression for the schedule
@@ -452,8 +457,9 @@ public class JobController {
 
 		//build cron expression.
 		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-		String cronString;
-		cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
+		String cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
+		
+		logger.debug("cronString='{}'", cronString);
 
 		//determine if start date and end date are valid dates
 		String startDateString = job.getStartDateString();

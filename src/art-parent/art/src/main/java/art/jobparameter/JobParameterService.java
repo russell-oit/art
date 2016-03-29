@@ -89,7 +89,7 @@ public class JobParameterService {
 	 * @throws SQLException
 	 */
 	public List<JobParameter> getJobParameters(int id) throws SQLException {
-		logger.debug("Entering getJobParameter: id={}", id);
+		logger.debug("Entering getJobParameters: id={}", id);
 
 		String sql = SQL_SELECT_ALL + " WHERE JOB_ID=?";
 		ResultSetHandler<List<JobParameter>> h = new BeanListHandler<>(JobParameter.class, new JobParameterMapper());
@@ -97,6 +97,8 @@ public class JobParameterService {
 	}
 
 	public void updateJobParameter(JobParameter jobParam) throws SQLException {
+		logger.debug("Entering updateJobParameter");
+		
 		String sql = "UPDATE ART_JOBS_PARAMETERS SET PARAM_VALUE=?"
 				+ " WHERE JOB_ID=? AND PARAM_NAME=?";
 
@@ -110,6 +112,8 @@ public class JobParameterService {
 	}
 	
 	public void deleteJobParameters(int jobId) throws SQLException{
+		logger.debug("Entering deleteJobParameters: jobId={}", jobId);
+		
 		String sql = "DELETE FROM ART_JOBS_PARAMETERS"
 				+ " WHERE JOB_ID=?";
 
@@ -121,6 +125,8 @@ public class JobParameterService {
 	}
 	
 	public void addJobParameter(JobParameter jobParam) throws SQLException {
+		logger.debug("Entering addJobParameter");
+		
 		String sql = "INSERT INTO ART_JOBS_PARAMETERS"
 				+ " (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";

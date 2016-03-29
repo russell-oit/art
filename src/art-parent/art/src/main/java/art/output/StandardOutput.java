@@ -304,7 +304,7 @@ public abstract class StandardOutput {
 	 */
 	public StandardOutputResult generateTabularOutput(ResultSet rs,
 			ReportFormat reportFormat) throws SQLException {
-		
+
 		logger.debug("Entering generateTabularOutput");
 
 		StandardOutputResult result = new StandardOutputResult();
@@ -442,7 +442,7 @@ public abstract class StandardOutput {
 					if (rs.wasNull()) {
 						value = null;
 					}
-					addNumeric(value, displayNullSetting);
+					addNumeric(value);
 					break;
 				case Date:
 					value = rs.getTimestamp(columnIndex);
@@ -554,9 +554,8 @@ public abstract class StandardOutput {
 		}
 	}
 
-	private void addNumeric(Object value, DisplayNull displayNullSetting) {
+	private void addNumeric(Object value) {
 		if (value == null) {
-			//TODO review null setting. remove entirely or have separate settings for strings and numbers
 			//either way, default to displaying empty string or 0 respectively
 			//http://sourceforge.net/p/art/discussion/352129/thread/85b90969/
 			addCellNumeric(0D); //display nulls as 0
@@ -606,7 +605,6 @@ public abstract class StandardOutput {
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
 		DisplayNull displayNullSetting = Config.getSettings().getDisplayNull();
-		List<ColumnType> columnTypes = getColumnTypes(rsmd);
 
 		boolean alternateSort = (colCount > 3 ? true : false);
 
@@ -626,7 +624,7 @@ public abstract class StandardOutput {
 				Object Dx = rs.getObject(4);
 				x.put(Dx, DxVal);
 				y.put(Dy, DyVal);
-				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 5, ColumnType.String);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, 5, ColumnType.String);
 			}
 
 			xa = x.keySet().toArray();
@@ -698,7 +696,7 @@ public abstract class StandardOutput {
 				Object Dx = rs.getObject(2);
 				x.add(Dx);
 				y.add(Dy);
-				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, displayNullSetting, 3, ColumnType.String);
+				addValue(Dy.toString() + "-" + Dx.toString(), values, rs, 3, ColumnType.String);
 			}
 
 			xa = x.toArray();
@@ -769,33 +767,12 @@ public abstract class StandardOutput {
 	}
 
 	/**
-	 * Used to call the right method on ReportOutputInterface when flushing
-	 * values (flushXOutput)
-	 */
-	private void addCell(Object value, ColumnType columnType, DisplayNull displayNullSetting) {
-
-		switch (columnType) {
-			case Numeric:
-				addNumeric(value, displayNullSetting);
-				break;
-			case Date:
-				addCellDate((Date) value);
-				break;
-			case Clob:
-				addString(value, displayNullSetting);
-				break;
-			default:
-				addString(value, displayNullSetting);
-		}
-	}
-
-	/**
 	 * Used to cast and store the right object type in the Hashmap used by
 	 * flushXOutput to cache sorted values
 	 */
 	private static void addValue(String key, Map<String, Object> values,
-			ResultSet rs, DisplayNull displayNullSetting,
-			int columnIndex, ColumnType columnType) throws SQLException {
+			ResultSet rs, int columnIndex, ColumnType columnType) throws SQLException {
+
 		Object value = null;
 
 		switch (columnType) {
@@ -819,6 +796,5 @@ public abstract class StandardOutput {
 		}
 
 		values.put(key, value);
-
 	}
 }

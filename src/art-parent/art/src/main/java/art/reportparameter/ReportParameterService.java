@@ -203,7 +203,7 @@ public class ReportParameterService {
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public synchronized int addReportParameter(ReportParameter param, int reportId) throws SQLException {
-		logger.debug("Entering addReportParameter: param={}", param);
+		logger.debug("Entering addReportParameter: param={}, reportId={}", param, reportId);
 
 		//generate new id
 		String sql = "SELECT MAX(REPORT_PARAMETER_ID) FROM ART_REPORT_PARAMETERS";
@@ -219,7 +219,7 @@ public class ReportParameterService {
 			newId = maxId + 1;
 		}
 		logger.debug("newId={}", newId);
-		
+
 		//generate new position
 		sql = "SELECT MAX(PARAMETER_POSITION)"
 				+ " FROM ART_REPORT_PARAMETERS"
@@ -269,7 +269,7 @@ public class ReportParameterService {
 	 * @throws SQLException
 	 */
 	private void saveReportParameter(ReportParameter reportParam, boolean newRecord) throws SQLException {
-		logger.debug("Entering saveReportParameter: param={}, newRecord={}",
+		logger.debug("Entering saveReportParameter: reportParam={}, newRecord={}",
 				reportParam, newRecord);
 
 		int affectedRows;
@@ -308,12 +308,12 @@ public class ReportParameterService {
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-			logger.warn("Problem with save. affectedRows={}, newRecord={}, param={}",
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, reportParam={}",
 					affectedRows, newRecord, reportParam);
 		}
 	}
-	
-		/**
+
+	/**
 	 * Move a drilldown to a different position
 	 *
 	 * @param id
@@ -325,6 +325,10 @@ public class ReportParameterService {
 	 */
 	public void moveReportParameter(int id, int fromPosition, int toPosition, String direction,
 			int parentReportId) throws SQLException {
+
+		logger.debug("Entering moveReportParameter: id={}, fromPosition={},"
+				+ " toPosition={}, direction='{}', parentReportId={}",
+				id, fromPosition, toPosition, direction, parentReportId);
 
 		String sql;
 

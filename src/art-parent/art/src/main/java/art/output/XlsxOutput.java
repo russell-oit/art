@@ -55,7 +55,6 @@ public class XlsxOutput extends StandardOutput {
 	private int cellNumber;
 	private String templateFileName;
 	private Map<String, CellStyle> styles;
-	private boolean errorOccurred = false; //flag that is set if an error occurs while creating the data file. so that processing can be stopped
 	private Row row;
 	private Cell cell;
 
@@ -81,6 +80,7 @@ public class XlsxOutput extends StandardOutput {
 				XSSFWorkbook tmpwb = new XSSFWorkbook();
 				tmpwb.createSheet(sheetName);
 				tmpwb.write(fout);
+				tmpwb.close();
 			}
 
 			FileInputStream inputStream = new FileInputStream(templateFileName);

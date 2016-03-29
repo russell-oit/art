@@ -73,8 +73,8 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			hop = 1;
 		}
 
-		//TODO use single report type for date and time series?
-		//TODO use different report type or a report option or first column name to indicate static/dynamic series?
+		//use single report type for date and time series?
+		//use different report type or a report option or first column name to indicate static/dynamic series?
 		ResultSetMetaData rsmd = rs.getMetaData();
 		boolean dynamicSeries = false;
 		String secondColumnClassName = rsmd.getColumnClassName(2 + hop);

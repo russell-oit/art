@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ArchiveService {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ArchiveService.class);
 
 	private final DbService dbService;
@@ -95,7 +95,7 @@ public class ArchiveService {
 	}
 
 	public List<Archive> getArchives(int userId) throws SQLException {
-		logger.debug("Entering getAllFilters");
+		logger.debug("Entering getArchives: userId={}", userId);
 
 		//get job archives that user has access to
 		String sql = "SELECT AJA.*"

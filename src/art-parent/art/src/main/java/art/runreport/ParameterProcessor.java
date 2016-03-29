@@ -129,6 +129,8 @@ public class ParameterProcessor {
 	}
 
 	private void setPassedParameterValues(Map<String, String[]> passedValuesMap, Map<String, ReportParameter> reportParams) {
+		logger.debug("Entering setPassedParameterValues");
+		
 		//process report parameters
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
 			String htmlParamName = entry.getKey();
@@ -169,6 +171,8 @@ public class ParameterProcessor {
 	}
 
 	private void setActualParameterValues(List<ReportParameter> reportParamsList) throws NumberFormatException, ParseException {
+		logger.debug("Entering setActualParameterValues");
+		
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
 			logger.debug("param={}", param);
@@ -220,12 +224,14 @@ public class ParameterProcessor {
 	}
 
 	public Object convertParameterStringValueToObject(String value, Parameter param) throws ParseException {
+		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
+		
 		ParameterDataType paramDataType = param.getDataType();
 
 		if (paramDataType.isNumeric()) {
 			return convertParameterStringValueToNumber(value, param);
 		} else if (paramDataType.isDate()) {
-			return convertParameterStringValueToDate(value, param);
+			return convertParameterStringValueToDate(value);
 		} else {
 			//parameter data types that are treated as strings
 			return value;
@@ -233,6 +239,8 @@ public class ParameterProcessor {
 	}
 
 	private Object convertParameterStringValueToNumber(String value, Parameter param) {
+		logger.debug("Entering convertParameterStringValueToNumber: value='{}'", value);
+		
 		String finalValue;
 		if (StringUtils.isBlank(value)) {
 			finalValue = "0";
@@ -271,10 +279,8 @@ public class ParameterProcessor {
 	}
 
 	public Date convertParameterStringValueToDate(String value) throws ParseException {
-		return convertParameterStringValueToDate(value, null);
-	}
-
-	private Date convertParameterStringValueToDate(String value, Parameter param) throws ParseException {
+		logger.debug("Entering convertParameterStringValueToDate: value='{}'", value);
+		
 		Date dateValue;
 
 		if (value == null || StringUtils.equalsIgnoreCase(value, "now")
@@ -304,15 +310,6 @@ public class ParameterProcessor {
 			//convert date string as it is to a date
 			String dateFormat;
 
-//			ParameterDataType paramDataType = param.getDataType();
-//
-//			if (paramDataType == ParameterDataType.Date) {
-//				dateFormat = ArtUtils.ISO_DATE_FORMAT;
-//			} else if (paramDataType == ParameterDataType.DateTime) {
-//				dateFormat = ArtUtils.ISO_DATE_TIME_FORMAT;
-//			} else {
-//				throw new IllegalArgumentException("Unknown date parameter data type: " + paramDataType);
-//			}
 			if (value.length() == ArtUtils.ISO_DATE_FORMAT.length()) {
 				dateFormat = ArtUtils.ISO_DATE_FORMAT;
 			} else if (value.length() == ArtUtils.ISO_DATE_TIME_FORMAT.length()) {
@@ -334,6 +331,8 @@ public class ParameterProcessor {
 	}
 
 	private ReportOptions processReportOptions(Map<String, String[]> passedValuesMap) {
+		logger.debug("Entering processReportOptions");
+		
 		ReportOptions reportOptions = new ReportOptions();
 
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
@@ -345,19 +344,11 @@ public class ParameterProcessor {
 				String paramValue = paramValues[0];
 
 				if (StringUtils.equalsIgnoreCase(htmlParamName, "showSelectedParameters")) {
-					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
-						reportOptions.setShowSelectedParameters(false);
-					} else {
-						reportOptions.setShowSelectedParameters(true);
-					}
+					reportOptions.setShowSelectedParameters(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "splitColumn")) {
 					reportOptions.setSplitColumn(Integer.parseInt(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showSql")) {
-					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
-						reportOptions.setShowSql(false);
-					} else {
-						reportOptions.setShowSql(true);
-					}
+					reportOptions.setShowSql(true);
 				}
 
 			}
@@ -367,6 +358,8 @@ public class ParameterProcessor {
 	}
 
 	private ChartOptions processChartOptions(Map<String, String[]> passedValuesMap) {
+		logger.debug("Entering processChartOptions");
+		
 		ChartOptions chartOptions = new ChartOptions();
 
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {

@@ -90,9 +90,14 @@ public class UserGroupMembershipController {
 
 		//id format = <user id>-<user group id>
 		String[] values = StringUtils.split(id, "-");
+		int userId = NumberUtils.toInt(values[0]);
+		int userGroupId = NumberUtils.toInt(values[1]);
+
+		logger.debug("userId={}", userId);
+		logger.debug("userGroupId={}", userGroupId);
 
 		try {
-			userGroupMembershipService.deleteUserGroupMembership(NumberUtils.toInt(values[0]), NumberUtils.toInt(values[1]));
+			userGroupMembershipService.deleteUserGroupMembership(userId, userGroupId);
 			response.setSuccess(true);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

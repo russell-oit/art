@@ -317,7 +317,7 @@ public class DatasourceController {
 				conn = DriverManager.getConnection(url, username, password);
 			}
 		} finally {
-DatabaseUtils.close(conn);
+			DatabaseUtils.close(conn);
 		}
 	}
 

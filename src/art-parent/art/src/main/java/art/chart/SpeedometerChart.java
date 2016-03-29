@@ -31,8 +31,6 @@ import org.jfree.chart.plot.MeterInterval;
 import org.jfree.chart.plot.MeterPlot;
 import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -40,7 +38,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SpeedometerChart extends Chart {
 
-	private static final Logger logger = LoggerFactory.getLogger(SpeedometerChart.class);
 	private static final long serialVersionUID = 1L;
 	private double minValue;
 	private double maxValue;
@@ -58,8 +55,6 @@ public class SpeedometerChart extends Chart {
 	//prepare graph data structures with query results
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
-		logger.debug("Entering fillDataset");
-		
 		Objects.requireNonNull(rs, "resultset must not be null");
 
 		DefaultValueDataset dataset = new DefaultValueDataset();

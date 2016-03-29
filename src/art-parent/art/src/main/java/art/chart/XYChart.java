@@ -72,11 +72,7 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 		Map<String, Integer> seriesIndices = new HashMap<>(); //<series name, series index>
 		Map<String, Integer> itemIndices = new HashMap<>(); //<series name, max item index>
 
-		int rowCount = 0;
-
 		while (rs.next()) {
-			rowCount++;
-
 			double xValue = rs.getDouble(1);
 			double yValue = rs.getDouble(2);
 

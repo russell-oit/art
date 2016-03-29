@@ -69,6 +69,8 @@ public class SettingsController {
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.GET)
 	public String showSettings(Model model) {
+		logger.debug("Entering showSettings");
+		
 		Settings settings = Config.getSettings();
 
 		model.addAttribute("settings", settings);
@@ -78,6 +80,8 @@ public class SettingsController {
 	@RequestMapping(value = "app/settings", method = RequestMethod.POST)
 	public String processSettings(@ModelAttribute("settings") @Valid Settings settings,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+		
+		logger.debug("Entering processSettings: settings={}", settings);
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");

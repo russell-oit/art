@@ -358,9 +358,6 @@ public class Mailer {
 		logger.debug("useStartTls={}", useStartTls);
 		props.put("mail.smtp.starttls.enable", useStartTls);
 
-		//TODO needed if using transport overload with user and password?
-//		logger.debug("useAuthentication={}", useAuthentication);
-//		props.put("mail.smtp.auth", useAuthentication);
 		//If you're sending to multiple recipients, if one recipient address fails,
 		//by default no email is sent to the other recipients
 		//set the sendpartial property to true to have emails sent to the valid addresses,

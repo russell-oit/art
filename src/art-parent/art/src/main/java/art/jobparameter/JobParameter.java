@@ -18,12 +18,15 @@
 package art.jobparameter;
 
 import art.enums.ParameterType;
+import java.io.Serializable;
 
 /**
  *
  * @author Timothy Anyona
  */
-public class JobParameter {
+public class JobParameter implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private int jobId;
 	private String name;
 	private String Value;

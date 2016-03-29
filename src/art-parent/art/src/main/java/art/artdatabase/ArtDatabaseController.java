@@ -4,11 +4,14 @@ import art.dbutils.DatabaseUtils;
 import art.enums.ConnectionPoolLibrary;
 import art.servlets.Config;
 import art.utils.ArtUtils;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import javax.naming.NamingException;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -48,6 +51,7 @@ public class ArtDatabaseController {
 
 	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
 	public String showArtDatabaseConfiguration(Model model) {
+		logger.debug("Entering showArtDatabaseConfiguration");
 
 		ArtDatabase artDatabase = Config.getArtDbConfig();
 
@@ -148,18 +152,16 @@ public class ArtDatabaseController {
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
-			
-			//TODO don't stop if some report datasource creation fails e.g. wishlist-jndi
 
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)
 			redirectAttributes.addFlashAttribute("message", "artDatabase.message.configurationSaved");
 			return "redirect:/app/success.do";
-		} catch (Exception ex) {
+		} catch (NamingException | SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		} finally {
-DatabaseUtils.close(ps, conn);
+			DatabaseUtils.close(ps, conn);
 		}
 
 		return "artDatabase";

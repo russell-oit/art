@@ -78,6 +78,8 @@ public abstract class ConnectionPool {
 	protected abstract DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize);
 
 	public void close() {
+		logger.debug("Entering close");
+		
 		closePool();
 		pool = null;
 	}
@@ -112,7 +114,7 @@ public abstract class ConnectionPool {
 
 	public ConnectionPoolDetails getPoolDetails() {
 		logger.debug("Entering getPoolDetails");
-		
+
 		ConnectionPoolDetails details = new ConnectionPoolDetails();
 		details.setPoolId(poolId);
 		details.setName(name);
@@ -135,6 +137,8 @@ public abstract class ConnectionPool {
 	 * @param pool
 	 */
 	protected Properties getAppNameProperty(String dbUrl, String poolName) {
+		logger.debug("Entering getAppNameProperty: dbUrl='{}', poolName='{}'", dbUrl, poolName);
+		
 		//ApplicationName property
 		//see http://docs.oracle.com/javase/7/docs/api/java/sql/Connection.html#setClientInfo%28java.lang.String,%20java.lang.String%29
 		//has different name and maxlength for different drivers

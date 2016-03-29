@@ -43,6 +43,8 @@ public class ArchiveController {
 
 	@RequestMapping(value = "/app/archives", method = RequestMethod.GET)
 	public String showArchives(HttpSession session, Model model) {
+		logger.debug("Entering showArchives");
+		
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		
 		try {

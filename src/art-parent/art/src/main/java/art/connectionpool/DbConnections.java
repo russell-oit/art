@@ -35,6 +35,8 @@ import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides connections to databases. All connections are held and managed in
@@ -43,6 +45,8 @@ import org.apache.commons.lang3.StringUtils;
  * @author Timothy Anyona
  */
 public class DbConnections {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DbConnections.class);
 
 	private static Map<Integer, ConnectionPool> connectionPoolMap;
 
@@ -54,6 +58,8 @@ public class DbConnections {
 	 * @throws SQLException
 	 */
 	public static void createConnectionPools(ArtDatabase artDbConfig) throws SQLException {
+		logger.debug("Entering createConnectionPools");
+		
 		Objects.requireNonNull(artDbConfig, "artDbConfig must not be null");
 
 		//reset pools map
@@ -62,6 +68,9 @@ public class DbConnections {
 
 		ConnectionPoolLibrary connectionPoolLibrary = artDbConfig.getConnectionPoolLibrary();
 		int maxPoolSize = artDbConfig.getMaxPoolConnections(); //will apply to all connection pools
+		
+		logger.debug("connectionPoolLibrary={}", connectionPoolLibrary);
+		logger.debug("maxPoolSize={}", maxPoolSize);
 
 		//create connection pool for the art database
 		createConnectionPool(artDbConfig, maxPoolSize, connectionPoolLibrary);
@@ -83,9 +92,13 @@ public class DbConnections {
 
 	public static void createConnectionPool(DatasourceInfo datasourceInfo, int maxPoolSize,
 			ConnectionPoolLibrary connectionPoolLibrary) {
+		
+		logger.debug("Entering createConnectionPool");
 
 		//remove any existing connection pool for this datasource
 		removeConnectionPool(datasourceInfo.getDatasourceId());
+		
+		logger.debug("datasourceInfo.isJndi()={}", datasourceInfo.isJndi());
 
 		ConnectionPool pool;
 		if (datasourceInfo.isJndi()) {
@@ -104,11 +117,12 @@ public class DbConnections {
 	}
 
 	private static ConnectionPool getConnectionPool(int datasourceId) {
+		logger.debug("Entering getConnectionPool: datasourceId={}", datasourceId);
+		
 		if (connectionPoolMap == null) {
 			throw new IllegalStateException("connectionPoolMap is null");
 		}
 
-//		return connectionPoolMap.get(datasourceId);
 		ConnectionPool pool = connectionPoolMap.get(datasourceId);
 		if (pool == null) {
 			throw new RuntimeException("Connection pool doesn't exist for datasource id " + datasourceId);
@@ -118,6 +132,8 @@ public class DbConnections {
 	}
 
 	private static DataSource getDataSource(int datasourceId) {
+		logger.debug("Entering getDataSource: datasourceId={}", datasourceId);
+		
 		return getConnectionPool(datasourceId).getPool();
 	}
 
@@ -128,6 +144,8 @@ public class DbConnections {
 	 * exist
 	 */
 	public static DataSource getArtDbConnectionPool() {
+		logger.debug("Entering getArtDbConnectionPool");
+		
 		return getDataSource(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 	}
 
@@ -141,6 +159,8 @@ public class DbConnections {
 	 * database error
 	 */
 	public static Connection getConnection(int datasourceId) throws SQLException {
+		logger.debug("Entering getConnection: datasourceId={}", datasourceId);
+		
 		return getDataSource(datasourceId).getConnection();
 
 	}
@@ -153,6 +173,8 @@ public class DbConnections {
 	 * @throws java.sql.SQLException
 	 */
 	public static Connection getArtDbConnection() throws SQLException {
+		logger.debug("Entering getArtDbConnection");
+		
 		return getConnection(ArtDatabase.ART_DATABASE_DATASOURCE_ID);
 	}
 
@@ -166,6 +188,8 @@ public class DbConnections {
 	 * database error
 	 */
 	public static Connection getConnection(String datasourceName) throws SQLException {
+		logger.debug("Entering getConnection: datasourceName='{}'", datasourceName);
+		
 		Connection conn = null;
 
 		for (ConnectionPool pool : connectionPoolMap.values()) {
@@ -182,6 +206,8 @@ public class DbConnections {
 	 * connection pools) and clear and nullify the connection pool map
 	 */
 	public static void closeAllConnections() {
+		logger.debug("Entering closeAllConnections");
+		
 		if (connectionPoolMap == null) {
 			return;
 		}
@@ -195,6 +221,8 @@ public class DbConnections {
 	}
 
 	public static List<ConnectionPoolDetails> getAllConnectionPoolDetails() {
+		logger.debug("Entering getAllConnectionPoolDetails");
+		
 		List<ConnectionPoolDetails> details = new ArrayList<>(connectionPoolMap.size());
 
 		for (ConnectionPool pool : connectionPoolMap.values()) {
@@ -205,14 +233,20 @@ public class DbConnections {
 	}
 
 	public static ConnectionPoolDetails getConnectionPoolDetails(int datasourceId) {
+		logger.debug("Entering getConnectionPoolDetails: datasourceId={}", datasourceId);
+		
 		return getConnectionPool(datasourceId).getPoolDetails();
 	}
 
 	public static void refreshConnectionPool(int datasourceId) {
+		logger.debug("Entering refreshConnectionPool: datasourceId={}", datasourceId);
+		
 		getConnectionPool(datasourceId).refresh();
 	}
 
 	public static void removeConnectionPool(int datasourceId) {
+		logger.debug("Entering removeConnectionPool: datasourceId={}", datasourceId);
+		
 		ConnectionPool pool = connectionPoolMap.get(datasourceId);
 		if (pool != null) {
 			pool.closePool();

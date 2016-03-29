@@ -17,8 +17,8 @@
 package art.usergroupmembership;
 
 import art.dbutils.DbService;
-import art.user.User;
-import art.usergroup.UserGroup;
+import art.user.UserService;
+import art.usergroup.UserGroupService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -44,6 +44,12 @@ public class UserGroupMembershipService {
 
 	@Autowired
 	private DbService dbService;
+	
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private UserGroupService userGroupService;
 
 	private final String SQL_SELECT_ALL
 			= "SELECT AU.USER_ID, AU.USERNAME, AUG.USER_GROUP_ID, AUG.NAME AS GROUP_NAME"
@@ -70,18 +76,9 @@ public class UserGroupMembershipService {
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			UserGroupMembership membership = new UserGroupMembership();
-
-			User user = new User();
-			user.setUserId(rs.getInt("USER_ID"));
-			user.setUsername(rs.getString("USERNAME"));
-
-			membership.setUser(user);
-
-			UserGroup group = new UserGroup();
-			group.setUserGroupId(rs.getInt("USER_GROUP_ID"));
-			group.setName(rs.getString("GROUP_NAME"));
-
-			membership.setUserGroup(group);
+			
+			membership.setUser(userService.getUser(rs.getInt("USER_ID")));
+			membership.setUserGroup(userGroupService.getUserGroup(rs.getInt("USER_GROUP_ID")));
 
 			return type.cast(membership);
 		}

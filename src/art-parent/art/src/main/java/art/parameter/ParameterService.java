@@ -135,7 +135,7 @@ public class ParameterService {
 		ResultSetHandler<Parameter> h = new BeanHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(sql, h, id);
 	}
-	
+
 	@Cacheable("parameters")
 	public String getParameterName(int id) throws SQLException {
 		logger.debug("Entering getParameterName: id={}", id);
@@ -154,7 +154,7 @@ public class ParameterService {
 	 */
 	@Cacheable("parameters")
 	public List<Parameter> getReportParameters(int reportId) throws SQLException {
-		logger.debug("Entering getReportParameters");
+		logger.debug("Entering getReportParameters: reportId={}", reportId);
 
 		String sql = SQL_SELECT_ALL
 				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"
@@ -173,7 +173,7 @@ public class ParameterService {
 	 */
 	@Cacheable("parameters")
 	public List<Parameter> getDrilldownParameters(int reportId) throws SQLException {
-		logger.debug("Entering getDrilldownParameters");
+		logger.debug("Entering getDrilldownParameters: reportId={}", reportId);
 
 		String sql = SQL_SELECT_ALL
 				+ " INNER JOIN ART_REPORT_PARAMETERS ARP"

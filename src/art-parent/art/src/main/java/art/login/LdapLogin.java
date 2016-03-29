@@ -80,18 +80,12 @@ public class LdapLogin {
 		if (StringUtils.isBlank(ldapServer)) {
 			result.setMessage("login.message.ldapAuthenticationNotConfigured");
 			result.setDetails("ldap server not defined");
-
-			logger.debug("Leaving authenticateUsingUnboundId: {}", result);
 			return result;
 		} else if (StringUtils.isBlank(baseDn)) {
 			result.setMessage("login.message.ldapAuthenticationNotConfigured");
 			result.setDetails("ldap base dn not defined");
-
-			logger.debug("Leaving authenticateUsingUnboundId: {}", result);
 			return result;
 		}
-
-		logger.debug("Starting main block");
 
 		LDAPConnection ldapConnection = null;
 
@@ -243,7 +237,6 @@ public class LdapLogin {
 			ldapConnection.close();
 		}
 
-		logger.debug("Leaving authenticateUsingUnboundId: {}", result);
 		return result;
 	}
 
@@ -263,7 +256,7 @@ public class LdapLogin {
 
 		LoginResult result = new LoginResult();
 
-		Hashtable<String, String> env = new Hashtable<String, String>();
+		Hashtable<String, String> env = new Hashtable<>();
 
 		env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
 		env.put(Context.PROVIDER_URL, Config.getSettings().getLdapUrl());
@@ -386,8 +379,6 @@ public class LdapLogin {
 				}
 			}
 		}
-
-		logger.debug("Leaving authenticateUsingJndi: {}", result);
 
 		return result;
 	}

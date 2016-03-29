@@ -93,15 +93,24 @@ public class AdminRightController {
 		logger.debug("Entering deleteAdminRight: id='{}'", id);
 
 		AjaxResponse response = new AjaxResponse();
+		
+		logger.debug("id='{}'", id);
 
 		//id format = <right type>-<admin user id>-<datasource or report group id>
 		String[] values = StringUtils.split(id, "-");
+		String rightType=values[0];
+		int adminUserId=NumberUtils.toInt(values[1]);
+		int objectId=NumberUtils.toInt(values[2]);
+		
+		logger.debug("rightType='{}'", rightType);
+		logger.debug("adminUserId={}", adminUserId);
+		logger.debug("objectId={}", objectId);
 
 		try {
-			if (StringUtils.equalsIgnoreCase(values[0], "datasourceRight")) {
-				adminRightService.deleteAdminDatasourceRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
-			} else if (StringUtils.equalsIgnoreCase(values[0], "reportGroupRight")) {
-				adminRightService.deleteAdminReportGroupRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
+			if (StringUtils.equalsIgnoreCase(rightType, "datasourceRight")) {
+				adminRightService.deleteAdminDatasourceRight(adminUserId, objectId);
+			} else if (StringUtils.equalsIgnoreCase(rightType, "reportGroupRight")) {
+				adminRightService.deleteAdminReportGroupRight(adminUserId, objectId);
 			}
 			response.setSuccess(true);
 		} catch (SQLException ex) {

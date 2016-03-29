@@ -28,18 +28,15 @@ import art.job.JobService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
-import art.report.ChartOptions;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
-import art.runreport.ReportOptions;
 import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
-import art.utils.Encrypter;
 import art.utils.FilenameHelper;
 import java.io.File;
 import java.io.FileInputStream;
@@ -96,16 +93,21 @@ public class ReportJob implements org.quartz.Job {
 	@Override
 	@CacheEvict(value = "jobs", allEntries = true)
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		JobDataMap dataMap = null;
+		if (!Config.getSettings().isSchedulingEnabled()) {
+			return;
+		}
 
-		dataMap = context.getMergedJobDataMap();
+		JobDataMap dataMap = context.getMergedJobDataMap();
 		int tempJobId = dataMap.getInt("jobId");
+
 		JobService jobService = new JobService();
+
 		try {
 			job = jobService.getJob(tempJobId);
 		} catch (SQLException ex) {
-			java.util.logging.Logger.getLogger(ReportJob.class.getName()).log(Level.SEVERE, null, ex);
+			logger.error("Error", ex);
 		}
+
 		if (job == null) {
 			return;
 		}
@@ -157,8 +159,8 @@ public class ReportJob implements org.quartz.Job {
 
 			afterCompletion();
 
-		} catch (Exception e) {
-			logger.error("Error", e);
+		} catch (Exception ex) {
+			logger.error("Error", ex);
 		} finally {
 			DatabaseUtils.close(conn);
 		}
@@ -167,8 +169,6 @@ public class ReportJob implements org.quartz.Job {
 	private void sendEmail(Mailer mailer) throws MessagingException, IOException {
 		if (Config.isEmailServerConfigured()) {
 			mailer.send();
-		} else {
-			logger.warn("Email server not configured");
 		}
 	}
 
@@ -192,7 +192,6 @@ public class ReportJob implements org.quartz.Job {
 	 * @param mailer
 	 */
 	private void prepareEmailJob(Mailer mailer, String msg, String outputFileName) throws FileNotFoundException, IOException {
-
 		mailer.setSubject(subject);
 		mailer.setFrom(from);
 
@@ -202,9 +201,9 @@ public class ReportJob implements org.quartz.Job {
 
 		if (jobType.isEmailAttachment()) {
 			// e-mail output as attachment
-			List<File> l = new ArrayList<File>();
-			l.add(new File(outputFileName));
-			mailer.setAttachments(l);
+			List<File> attachments = new ArrayList<>();
+			attachments.add(new File(outputFileName));
+			mailer.setAttachments(attachments);
 		} else if (jobType.isEmailInline()) {
 			// inline html within email
 			// read the file and include it in the HTML message
@@ -246,7 +245,6 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	private void afterCompletion() throws SQLException {
-
 		//update job details
 		String sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ?,"
 				+ " LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=? WHERE JOB_ID = ?";
@@ -263,16 +261,15 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	private void runDynamicRecipientsJob(Connection conn) {
-
 		String tos = job.getMailTo();
 		String username = job.getUser().getUsername();
 		int recipientsQueryId = job.getRecipientsQueryId();
 		String cc = job.getMailCc();
 		String bcc = job.getMailBcc();
 
-		ReportRunner recipientsQuery = null; //recipients query
+		ReportRunner recipientsQuery = null;
+
 		try {
-			//get recipient data
 			recipientsQuery = prepareQuery(username, recipientsQueryId, false);
 
 			recipientsQuery.execute();
@@ -283,7 +280,7 @@ public class ReportJob implements org.quartz.Job {
 
 			if (columnCount == 1) {
 				//only email column. add dynamic recipient emails to Tos and run like normal job
-				ArrayList<String> emailsList = new ArrayList<String>();
+				ArrayList<String> emailsList = new ArrayList<>();
 				while (rs.next()) {
 					String email = rs.getString(1); //first column has email addresses
 					if (org.apache.commons.lang.StringUtils.length(email) > 4) {
@@ -299,7 +296,7 @@ public class ReportJob implements org.quartz.Job {
 			} else if (columnCount > 1) {
 				//personalization fields present
 				//Get the column names. column indices start from 1
-				ArrayList<String> columnList = new ArrayList<String>();
+				ArrayList<String> columnList = new ArrayList<>();
 				for (int i = 1; i < columnCount + 1; i++) {
 					String columnName = rsmd.getColumnLabel(i); //use alias if available
 
@@ -312,7 +309,7 @@ public class ReportJob implements org.quartz.Job {
 					//separate emails, different email message, different report data
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses
-						Map<String, String> recipientColumns = new HashMap<String, String>();
+						Map<String, String> recipientColumns = new HashMap<>();
 						String columnName;
 						String columnValue;
 						for (int i = 1; i <= columnCount; i++) { //column numbering starts from 1 not 0
@@ -326,8 +323,8 @@ public class ReportJob implements org.quartz.Job {
 							recipientColumns.put(columnName.toLowerCase(), columnValue); //use lowercase so that special columns are found
 						}
 
-						if (org.apache.commons.lang.StringUtils.length(email) > 4) {
-							Map<String, Map<String, String>> recipient = new HashMap<String, Map<String, String>>();
+						if (StringUtils.length(email) > 4) {
+							Map<String, Map<String, String>> recipient = new HashMap<>();
 							recipient.put(email, recipientColumns);
 
 							//run job for this recipient
@@ -337,15 +334,16 @@ public class ReportJob implements org.quartz.Job {
 					rs.close();
 
 					//run normal job in case tos, cc etc configured
-					if (org.apache.commons.lang.StringUtils.length(tos) > 4 || org.apache.commons.lang.StringUtils.length(cc) > 4 || org.apache.commons.lang.StringUtils.length(bcc) > 4) {
+					if (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4
+							|| StringUtils.length(bcc) > 4) {
 						runNormalJob(conn);
 					}
 				} else {
 					//separate emails, different email message, same report data
-					Map<String, Map<String, String>> recipients = new HashMap<String, Map<String, String>>();
+					Map<String, Map<String, String>> recipients = new HashMap<>();
 					while (rs.next()) {
 						String email = rs.getString(1); //first column has email addresses
-						Map<String, String> recipientColumns = new HashMap<String, String>();
+						Map<String, String> recipientColumns = new HashMap<>();
 						String columnName;
 						String columnValue;
 						for (int i = 1; i <= columnCount; i++) { //column numbering starts from 1 not 0
@@ -359,7 +357,7 @@ public class ReportJob implements org.quartz.Job {
 							recipientColumns.put(columnName, columnValue);
 						}
 
-						if (org.apache.commons.lang.StringUtils.length(email) > 4) {
+						if (StringUtils.length(email) > 4) {
 							recipients.put(email, recipientColumns);
 						}
 					}
@@ -573,7 +571,6 @@ public class ReportJob implements org.quartz.Job {
 			 * the result set in the cache database (append) 10 = Cache the
 			 * result set in the cache database (drop/insert)
 			 */
-			//trim address fields. to aid in checking if emails are configured
 			userEmail = StringUtils.trim(userEmail);
 
 			String jobName = job.getName();
@@ -585,6 +582,7 @@ public class ReportJob implements org.quartz.Job {
 			String cc = job.getMailCc();
 			String bcc = job.getMailBcc();
 
+			//trim address fields. to aid in checking if emails are configured
 			tos = StringUtils.trim(tos);
 			cc = StringUtils.trim(cc);
 			bcc = StringUtils.trim(bcc);
@@ -711,7 +709,6 @@ public class ReportJob implements org.quartz.Job {
 									logger.debug("Error", ex);
 									runMessage = "jobs.message.errorSendingAlert";
 									runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
-
 								}
 
 							} else {
@@ -729,13 +726,6 @@ public class ReportJob implements org.quartz.Job {
 				/*
 				 * MAILwithAttachment or PUBLISH or MAILinLine
 				 */
-//				ResultSet rs = null;
-//				ResultSetMetaData rsmd = null;
-//				if (reportType != ReportType.JasperReportsTemplate
-//						&& reportType != ReportType.JxlsTemplate ) {
-//					rs = reportRunner.getResultSet();
-//					rsmd = rs.getMetaData();
-//				}
 				logger.debug("Job Id {} - Mail or Publish. Type: {}", jobId, jobType);
 
 				//determine if the query returns records. to know if to generate output for conditional jobs
@@ -768,7 +758,6 @@ public class ReportJob implements org.quartz.Job {
 				}
 
 				if (generateOutput) {
-					int reportId = job.getReport().getReportId();
 					Report report = job.getReport();
 					ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 
@@ -817,7 +806,7 @@ public class ReportJob implements org.quartz.Job {
 						if (recipientDetails != null) {
 							Mailer mailer = getMailer();
 
-							String email = "";
+							String email;
 
 							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 								email = entry.getKey();
@@ -1030,7 +1019,6 @@ public class ReportJob implements org.quartz.Job {
 
 	//create job audit record
 	private void createAuditRecord(String user) throws SQLException {
-
 		if (job.isEnableAudit()) {
 			//generate unique key for this job run
 			jobAuditKey = generateKey();
@@ -1081,7 +1069,6 @@ public class ReportJob implements org.quartz.Job {
 	 * ART_JOBS_AUDIT table
 	 */
 	private void afterExecution(Connection conn, boolean splitJob, String user) throws SQLException {
-
 		String sql;
 
 		if (runDetails.length() > 4000) {
@@ -1182,13 +1169,15 @@ public class ReportJob implements org.quartz.Job {
 			Timestamp lastStartDate, Timestamp lastEndDate) {
 
 		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		PreparedStatement ps2 = null;
+		PreparedStatement ps3 = null;
 
 		try {
 			conn = DbConnections.getArtDbConnection();
 
 			String sql;
-			PreparedStatement ps;
-			ResultSet rs;
 
 			boolean jobShared = false;
 			if (job.isAllowSharing()) {
@@ -1205,7 +1194,6 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			String archiveId = generateKey();
-			int jobId = job.getJobId();
 			int runsToArchive = job.getRunsToArchive();
 
 			//add record to archive
@@ -1224,21 +1212,20 @@ public class ReportJob implements org.quartz.Job {
 			ps.setString(7, jobSharedFlag);
 
 			ps.executeUpdate();
-			ps.close();
 
 			//delete previous run's records
-			List<String> oldRecords = new ArrayList<String>();
+			List<String> oldRecords = new ArrayList<>();
 			if (jobSharedFlag.equals("S")) {
 				sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
 						+ " FROM ART_JOB_ARCHIVES "
 						+ " WHERE JOB_ID=? AND USERNAME=?"
 						+ " ORDER BY START_DATE DESC";
 
-				ps = conn.prepareStatement(sql);
-				ps.setInt(1, jobId);
-				ps.setString(2, user);
+				ps2 = conn.prepareStatement(sql);
+				ps2.setInt(1, jobId);
+				ps2.setString(2, user);
 
-				rs = ps.executeQuery();
+				rs = ps2.executeQuery();
 				int count = 0;
 				while (rs.next()) {
 					count++;
@@ -1262,18 +1249,16 @@ public class ReportJob implements org.quartz.Job {
 						}
 					}
 				}
-				rs.close();
-				ps.close();
 			} else {
 				sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
 						+ " FROM ART_JOB_ARCHIVES "
 						+ " WHERE JOB_ID=?"
 						+ " ORDER BY START_DATE DESC";
 
-				ps = conn.prepareStatement(sql);
-				ps.setInt(1, jobId);
+				ps2 = conn.prepareStatement(sql);
+				ps2.setInt(1, jobId);
 
-				rs = ps.executeQuery();
+				rs = ps2.executeQuery();
 				int count = 0;
 				while (rs.next()) {
 					count++;
@@ -1297,28 +1282,22 @@ public class ReportJob implements org.quartz.Job {
 						}
 					}
 				}
-				rs.close();
-				ps.close();
 			}
 
 			//delete old archive records
 			if (oldRecords.size() > 0) {
 				String oldRecordsString = org.apache.commons.lang.StringUtils.join(oldRecords, ",");
 				sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
-				ps = conn.prepareStatement(sql);
-				ps.executeUpdate();
-				ps.close();
+				ps3 = conn.prepareStatement(sql);
+				ps3.executeUpdate();
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
+			DatabaseUtils.close(ps);
+			DatabaseUtils.close(rs, ps2);
+			DatabaseUtils.close(ps3);
+			DatabaseUtils.close(conn);
 		}
 	}
 
@@ -1326,17 +1305,18 @@ public class ReportJob implements org.quartz.Job {
 	 * Delete all records from job archives table for this job id
 	 */
 	private void deleteArchives() {
-
 		Connection conn = null;
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		PreparedStatement ps2 = null;
 
 		try {
 			conn = DbConnections.getArtDbConnection();
 
 			String sql;
-			PreparedStatement ps;
-			ResultSet rs;
 
-			List<String> oldRecords = new ArrayList<String>();
+			List<String> oldRecords = new ArrayList<>();
 
 			sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
 					+ " FROM ART_JOB_ARCHIVES "
@@ -1365,27 +1345,20 @@ public class ReportJob implements org.quartz.Job {
 					}
 				}
 			}
-			rs.close();
-			ps.close();
 
 			//delete old archive records
 			if (oldRecords.size() > 0) {
 				String oldRecordsString = org.apache.commons.lang.StringUtils.join(oldRecords, ",");
 				sql = "DELETE FROM ART_JOB_ARCHIVES WHERE ARCHIVE_ID IN(" + oldRecordsString + ")";
-				ps = conn.prepareStatement(sql);
-				ps.executeUpdate();
-				ps.close();
+				ps2 = conn.prepareStatement(sql);
+				ps2.executeUpdate();
 			}
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
-			try {
-				if (conn != null) {
-					conn.close();
-				}
-			} catch (Exception e) {
-				logger.error("Error", e);
-			}
+			DatabaseUtils.close(rs, ps);
+			DatabaseUtils.close(ps2);
+			DatabaseUtils.close(conn);
 		}
 	}
 }

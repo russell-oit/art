@@ -211,7 +211,6 @@ public class AuthorizationFilter implements Filter {
 
 		int accessLevel = user.getAccessLevel().getValue();
 
-		//TODO use permissions instead of access level
 		if (StringUtils.equals(page, "reports")
 				|| StringUtils.equals(page, "selectReportParameters")
 				|| StringUtils.equals(page, "showDashboard")

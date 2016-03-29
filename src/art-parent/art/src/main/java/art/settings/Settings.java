@@ -7,6 +7,7 @@ import art.enums.LdapConnectionEncryptionMethod;
 import art.enums.PdfPageSize;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 
 /**
  * Class to hold application settings
@@ -14,8 +15,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Timothy Anyona
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Settings {
+public class Settings implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String smtpServer;
 	private int smtpPort;
 	private boolean smtpUseStartTls;

@@ -72,19 +72,24 @@ public class AnalysisController {
 	@RequestMapping(value = "/app/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showAnalysis(HttpServletRequest request, Model model,
 			HttpSession session) {
+		
+		logger.debug("Entering showAnalysis");
 
 		try {
 			int reportId = 0;
 			if (request.getParameter("reportId") == null) {
 				//not passed when using olap navigator
-				Integer i = (Integer) session.getAttribute("pivotReportId");
-				if (i != null) {
-					reportId = i;
+				Integer sessionReportId = (Integer) session.getAttribute("pivotReportId");
+				logger.debug("sessionReportId={}", sessionReportId);
+				if (sessionReportId != null) {
+					reportId = sessionReportId;
 				}
 			} else {
 				//save to session in case olap navigator is used
 				reportId = Integer.parseInt(request.getParameter("reportId"));
 				session.setAttribute("pivotReportId", reportId);
+				
+				logger.debug("reportId={}", reportId);
 			}
 
 			Report report = reportService.getReport(reportId);

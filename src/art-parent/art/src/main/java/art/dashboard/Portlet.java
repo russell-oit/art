@@ -17,11 +17,15 @@
  */
 package art.dashboard;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Timothy Anyona
  */
-public class Portlet {
+public class Portlet implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private String source;
 	private String baseUrl;
 	private String classNamePrefix;

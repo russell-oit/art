@@ -56,8 +56,7 @@ public class ReportParameterController {
 
 	@RequestMapping(value = "/app/reportParameterConfig", method = RequestMethod.GET)
 	public String showReportParameterConfig(Model model, @RequestParam("reportId") Integer reportId) {
-
-		logger.debug("Entering showReportParameters");
+		logger.debug("Entering showReportParameterConfig: reportId={}", reportId);
 
 		try {
 			model.addAttribute("reportId", reportId);
@@ -91,8 +90,6 @@ public class ReportParameterController {
 
 	@RequestMapping(value = "/app/addReportParameter", method = RequestMethod.GET)
 	public String addReportParameter(Model model, @RequestParam("reportId") Integer reportId) {
-		logger.debug("Entering addReportParameter");
-
 		logger.debug("Entering addReportParameter: reportId={}", reportId);
 
 		model.addAttribute("reportParameter", new ReportParameter());
@@ -176,13 +173,13 @@ public class ReportParameterController {
 
 	@RequestMapping(value = "/app/moveReportParameter", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse moveDrilldown(Model model,
+	AjaxResponse moveReportParameter(Model model,
 			@RequestParam("id") Integer id,
 			@RequestParam("fromPosition") Integer fromPosition,
 			@RequestParam("toPosition") Integer toPosition,
 			@RequestParam("direction") String direction) {
 
-		logger.debug("Entering moveDrilldown: id={}, fromPosition={}, toPosition={}, direction='{}'",
+		logger.debug("Entering moveReportParameter: id={}, fromPosition={}, toPosition={}, direction='{}'",
 				id, fromPosition, toPosition, direction);
 
 		AjaxResponse response = new AjaxResponse();
@@ -190,7 +187,7 @@ public class ReportParameterController {
 		try {
 			ReportParameter reportParameter = reportParameterService.getReportParameter(id);
 			if (reportParameter == null) {
-				logger.warn("Drilldown not found: {}", id);
+				logger.warn("Report parameter not found: {}", id);
 			} else {
 				reportParameterService.moveReportParameter(id, fromPosition, toPosition, direction, reportParameter.getReport().getReportId());
 				response.setSuccess(true);

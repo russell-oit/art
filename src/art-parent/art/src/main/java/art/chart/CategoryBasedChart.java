@@ -91,7 +91,7 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			hop = 1;
 		}
 
-		//TODO use different report type or a report option or first column name to indicate static/dynamic series?
+		//use different report type or a report option or first column name to indicate static/dynamic series?
 		ResultSetMetaData rsmd = rs.getMetaData();
 		boolean dynamicSeries = false;
 		String secondColumnClassName = rsmd.getColumnClassName(2 + hop);

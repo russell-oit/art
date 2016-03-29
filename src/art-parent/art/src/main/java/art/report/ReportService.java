@@ -227,13 +227,13 @@ public class ReportService {
 					chartOptions.setShowPoints(true);
 				} else if (StringUtils.startsWithIgnoreCase(token, "showData")) {
 					chartOptions.setShowData(true);
-				} else if (token.indexOf("x") != -1) { //must come after named options e.g. rotate_at
+				} else if (token.contains("x")) { //must come after named options e.g. rotate_at
 					int idx = token.indexOf("x");
 					String width = token.substring(0, idx);
 					String height = token.substring(idx + 1);
 					chartOptions.setWidth(NumberUtils.toInt(width));
 					chartOptions.setHeight(NumberUtils.toInt(height));
-				} else if (token.indexOf(":") != -1) { //must come after named options e.g. rotate_at
+				} else if (token.contains(":")) { //must come after named options e.g. rotate_at
 					int idx = token.indexOf(":");
 					String yMin = token.substring(0, idx);
 					String yMax = token.substring(idx + 1);
@@ -258,6 +258,8 @@ public class ReportService {
 	 */
 	@Cacheable("reports")
 	public List<Report> getAvailableReports(int userId) throws SQLException {
+		logger.debug("Entering getAvailableReports: userId={}", userId);
+
 		String sql = SQL_SELECT_ALL
 				//only show active reports
 				+ " WHERE AQ.REPORT_STATUS=?"
@@ -604,6 +606,8 @@ public class ReportService {
 	 * @throws SQLException
 	 */
 	public void updateReportSource(int reportId, String reportSource) throws SQLException {
+		logger.debug("Entering updateReportSource: reportId={}", reportId);
+
 		// Delete Old Source
 		String sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
 		dbService.update(sql, reportId);
@@ -629,8 +633,7 @@ public class ReportService {
 
 		while (end < textLength) {
 			values.add(new Object[]{
-				Integer.valueOf(reportId),
-				Integer.valueOf(lineNumber),
+				reportId, lineNumber,
 				reportSource.substring(start, end)
 			});
 			start = end;
@@ -638,8 +641,7 @@ public class ReportService {
 			lineNumber++;
 		}
 		values.add(new Object[]{
-			Integer.valueOf(reportId),
-			Integer.valueOf(lineNumber),
+			reportId, lineNumber,
 			reportSource.substring(start)
 		});
 
@@ -667,7 +669,6 @@ public class ReportService {
 				+ " ORDER BY LINE_NUMBER";
 
 		try {
-			//TODO use map list result set handler
 			conn = DbConnections.getArtDbConnection();
 			rs = DatabaseUtils.query(conn, ps, sql, report.getReportId());
 			StringBuilder sb = new StringBuilder(1024);
@@ -695,6 +696,9 @@ public class ReportService {
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
 	public void copyReport(Report report, int originalReportId, User actionUser) throws SQLException {
+		logger.debug("Entering copyReport: report={}, originalReportId={}, actionUser={}",
+				report, originalReportId, actionUser);
+
 		//insert new report
 		int newId = addReport(report, actionUser);
 
@@ -708,7 +712,7 @@ public class ReportService {
 			//copy drilldown reports
 			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId);
 		} catch (SQLException ex) {
-			//if an error occurred when copying report details, delete report also
+			//if an error occurred when copying new report details, delete new report also
 			deleteReport(newId);
 			throw ex;
 		}
@@ -828,7 +832,7 @@ public class ReportService {
 
 	@Cacheable(value = "reports")
 	public List<Report> getDynamicRecipientReports() throws SQLException {
-		logger.debug("Entering getLovReports");
+		logger.debug("Entering getDynamicRecipientReports");
 
 		String sql = SQL_SELECT_ALL
 				+ " WHERE QUERY_TYPE=121";
@@ -927,6 +931,8 @@ public class ReportService {
 	}
 
 	public void grantAccess(Report report, User user) throws SQLException {
+		logger.debug("Entering grantAccess: report={}, user={}", report, user);
+
 		String sql = "INSERT INTO ART_USER_QUERIES (USERNAME, USER_ID, QUERY_ID)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 3) + ")";
 

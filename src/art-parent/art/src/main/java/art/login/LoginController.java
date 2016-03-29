@@ -36,6 +36,7 @@ import org.springframework.web.bind.support.SessionStatus;
 public class LoginController {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+	
 	@Autowired
 	private UserService userService;
 
@@ -49,6 +50,8 @@ public class LoginController {
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
 			Model model,
 			SessionStatus sessionStatus) {
+		
+		logger.debug("Entering showLogin");
 
 		HttpSession session = request.getSession();
 
@@ -174,8 +177,9 @@ public class LoginController {
 			@RequestParam("username") String username,
 			@RequestParam("password") String password,
 			Model model,
-			SessionStatus sessionStatus
-	) {
+			SessionStatus sessionStatus){
+		
+		logger.debug("Entering processLogin");
 
 		//explicitly name requestparams to avoid error if code compiled without debug option
 		//see http://www.java-allandsundry.com/2012/10/method-parameter-names-and-spring.html

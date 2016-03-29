@@ -248,7 +248,7 @@ public class ArtUtils {
 		}
 
 		//consider "civil" days rather than "mathematical" days. so use LocalDate and not DateTime
-		//see //https://stackoverflow.com/questions/3802893/number-of-days-between-two-dates-in-joda-time
+		//see https://stackoverflow.com/questions/3802893/number-of-days-between-two-dates-in-joda-time
 		return Days.daysBetween(new LocalDate(before.getTime()), new LocalDate(after.getTime())).getDays();
 	}
 
@@ -288,7 +288,7 @@ public class ArtUtils {
 //		}
 //	}
 	public static String ColorToHexString(Color color) {
-		http://www.javacreed.com/how-to-get-the-hex-value-from-color/
+		//http://www.javacreed.com/how-to-get-the-hex-value-from-color/
 
 		if (color == null) {
 			return null;

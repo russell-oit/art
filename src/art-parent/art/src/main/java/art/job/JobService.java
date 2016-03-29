@@ -203,7 +203,7 @@ public class JobService {
 		if (jobType == JobType.CacheAppend || jobType == JobType.CacheInsert) {
 			// Delete
 			int targetDatabaseId = Integer.parseInt(job.getOutputFormat()); //TODO use separate - new db field, not output format
-			Connection connCache=DbConnections.getConnection(targetDatabaseId);
+			Connection connCache = DbConnections.getConnection(targetDatabaseId);
 			try {
 				String cachedTableName = job.getCachedTableName();
 				if (StringUtils.isBlank(cachedTableName)) {
@@ -212,7 +212,7 @@ public class JobService {
 				CachedResult cr = new CachedResult();
 				cr.setTargetConnection(connCache);
 				cr.setCachedTableName(cachedTableName);
-				cr.drop(); //TODO potential sql injection. drop hardcoded table names only
+				cr.drop(); //potential sql injection. drop hardcoded table names only
 			} finally {
 				DatabaseUtils.close(connCache);
 			}
@@ -247,7 +247,7 @@ public class JobService {
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
 	public synchronized int addJob(Job job, User actionUser) throws SQLException {
-		logger.debug("Entering addJob: job={}", job);
+		logger.debug("Entering addJob: job={}, actionUser={}", job, actionUser);
 
 		//generate new id
 		String sql = "SELECT MAX(JOB_ID) FROM ART_JOBS";
@@ -280,7 +280,7 @@ public class JobService {
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
 	public void updateJob(Job job, User actionUser) throws SQLException {
-		logger.debug("Entering updateJob: job={}", job);
+		logger.debug("Entering updateJob: job={}, actionUser={}", job, actionUser);
 
 		boolean newRecord = false;
 
@@ -297,6 +297,8 @@ public class JobService {
 	 */
 	@Cacheable("jobs")
 	public List<Job> getJobs(int userId) throws SQLException {
+		logger.debug("Entering getJobs: userId={}", userId);
+
 		List<Job> jobs = new ArrayList<>();
 
 		jobs.addAll(getOwnedJobs(userId));
@@ -360,7 +362,7 @@ public class JobService {
 	 * @throws java.sql.SQLException
 	 */
 	public List<Job> getNonQuartzJobs() throws SQLException {
-		logger.debug("Entering getNonQuartzJobs.");
+		logger.debug("Entering getNonQuartzJobs");
 
 		String sql = SQL_SELECT_ALL + " WHERE AJ.MIGRATED_TO_QUARTZ='N'";
 		ResultSetHandler<List<Job>> h = new BeanListHandler<>(Job.class, new JobMapper());
@@ -368,8 +370,7 @@ public class JobService {
 	}
 
 	private void saveJob(Job job, boolean newRecord, User actionUser) throws SQLException {
-//		logger.debug("Entering saveSchedule: schedule={}, newRecord={}, actionUser={}",
-//				schedule, newRecord, actionUser);
+		logger.debug("Entering saveJob: job={}, newRecord={}, actionUser={}", job, newRecord, actionUser);
 
 		Integer reportId; //database column doesn't allow null
 		if (job.getReport() == null) {
@@ -493,8 +494,8 @@ public class JobService {
 		logger.debug("affectedRows={}", affectedRows);
 
 		if (affectedRows != 1) {
-//			logger.warn("Problem with save. affectedRows={}, newRecord={}, schedule={}",
-//					affectedRows, newRecord, schedule);
+			logger.warn("Problem with save. affectedRows={}, newRecord={}, job={}",
+					affectedRows, newRecord, job);
 		}
 	}
 

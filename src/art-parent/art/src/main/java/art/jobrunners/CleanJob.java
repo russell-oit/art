@@ -42,7 +42,7 @@ public class CleanJob implements org.quartz.Job {
 
 	@Override
 	public void execute(JobExecutionContext jec) throws JobExecutionException {
-		logger.debug("Running clean");
+		logger.debug("Entering execute");
 
 		// Delete old files in the reports export directory
 		cleanDirectory(Config.getReportsExportPath());
@@ -57,6 +57,8 @@ public class CleanJob implements org.quartz.Job {
 	 * @param directoryPath
 	 */
 	private void cleanDirectory(String directoryPath) {
+		logger.debug("Entering cleanDirectory: directoryPath='{}'", directoryPath);
+		
 		File directory = new File(directoryPath);
 		File[] files = directory.listFiles();
 		final long DELETE_FILES_MINUTES = 45; // Delete exported files older than x minutes

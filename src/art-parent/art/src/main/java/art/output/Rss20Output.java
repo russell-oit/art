@@ -86,7 +86,7 @@ public class Rss20Output extends StandardOutput {
 			return;
 		}
 
-		//TODO needs to be tested, this is not RSS 2.0 compliant
+		//needs to be tested, this is not RSS 2.0 compliant
 		// hence, do not check the show params flag if not for debugging
 		out.println("<art:reportparams>");
 		for (ReportParameter reportParam : reportParamsList) {

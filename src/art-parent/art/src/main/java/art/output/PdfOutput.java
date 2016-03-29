@@ -124,7 +124,6 @@ public class PdfOutput extends StandardOutput {
 		}
 
 		try {
-			//TODO don't use numbered list
 			//show parameters in a numbered list
 			com.lowagie.text.List list = new List(true, 10);
 			//set font to use for the list item numbers
@@ -149,12 +148,6 @@ public class PdfOutput extends StandardOutput {
 
 	private void addNewline(Document doc, FontSelector fs) throws DocumentException {
 		doc.add(new Paragraph(fs.process("\n")));
-
-		//TODO test if font matters or if new line needed or can just have single space (empty space doesn't work?)
-//		//or
-//		document.add(Chunk.NEWLINE);
-//		//or
-//		document.add(new Paragraph(" "));
 	}
 
 	@Override
@@ -199,9 +192,6 @@ public class PdfOutput extends StandardOutput {
 	public void addCellNumeric(Double value) {
 		String formattedValue;
 
-		//TODO review abstract methods for numerics and dates
-		//add method to take formatted string that can just
-		//be displayed instead of every output class having formatting logic
 		if (value == null) {
 			formattedValue = "0";
 		} else {

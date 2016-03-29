@@ -22,7 +22,6 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;

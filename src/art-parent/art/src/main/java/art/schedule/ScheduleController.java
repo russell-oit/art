@@ -83,6 +83,7 @@ public class ScheduleController {
 	@RequestMapping(value = "/app/getSchedule", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse getSchedule(@RequestParam("id") Integer id) {
+		logger.debug("Entering getSchedule: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
