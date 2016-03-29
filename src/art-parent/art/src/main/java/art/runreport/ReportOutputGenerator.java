@@ -71,6 +71,7 @@ import net.sf.jxls.exception.ParsePropertyException;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -195,7 +196,7 @@ public class ReportOutputGenerator {
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
+			ChartOptions chartOptions = paramProcessorResult.getChartOptions();
 
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
@@ -274,18 +275,26 @@ public class ReportOutputGenerator {
 						throw new IllegalArgumentException("Unexpected chart report type: " + reportType);
 				}
 
-				//TODO set effective chart options. default to report options but override with html parameters
-				//using object wrappers will require extra null checks e.g. if boolean property is true
-				//alternatively use helper libraries e.g. commons-lang, BooleanUtils.isTrue( bool )
-//					ChartOptions reportChartOptions = report.getChartOptions();
-//					ChartOptions effectiveChartOptions = reportChartOptions;
-//					BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
-//					notNull.copyProperties(effectiveChartOptions, parameterChartOptions);
-				//TODO set default label format. {2} for category based charts
+				//set default label format.
+				//{2} for category based charts
 				//{0} ({2}) for pie chart html output
 				//{0} = {1} ({2}) for pie chart png and pdf output
+				String labelFormat = chartOptions.getLabelFormat();
+				if (StringUtils.isBlank(labelFormat)) {
+					if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
+						if (reportFormat == ReportFormat.html) {
+							labelFormat = "{0} ({2})";
+						} else {
+							labelFormat = "{0} = {1} ({2})";
+						}
+					} else {
+						labelFormat = "{2}";
+					}
+					chartOptions.setLabelFormat(labelFormat);
+				}
+
 				chart.setLocale(locale);
-				chart.setChartOptions(parameterChartOptions);
+				chart.setChartOptions(chartOptions);
 				chart.setTitle(report.getShortDescription());
 
 				Drilldown drilldown = null;
@@ -300,7 +309,7 @@ public class ReportOutputGenerator {
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
-				if (parameterChartOptions.isShowData()
+				if (chartOptions.isShowData()
 						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
 					int rsType = rs.getType();
 					if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {

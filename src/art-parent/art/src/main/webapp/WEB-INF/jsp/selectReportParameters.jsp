@@ -186,23 +186,51 @@ Display report parameters and initiate running of report
 														</label>
 														<div class="col-md-7">
 															<label class="checkbox-inline">
-																<input type="checkbox" name="showLegend" value="">
+																<input type="checkbox" name="showLegend" value=""
+																	   ${report.chartOptions.showLegend ? "checked" : ""}>
 																<spring:message code="reports.label.showLegend"/>
 															</label>
 															<label class="checkbox-inline">
-																<input type="checkbox" name="showLabels" value="">
+																<input type="checkbox" name="showLabels" value=""
+																	   ${report.chartOptions.showLabels ? "checked" : ""}>
 																<spring:message code="reports.label.showLabels"/>
 															</label>
 															<label class="checkbox-inline">
-																<input type="checkbox" name="showPoints" value="">
+																<input type="checkbox" name="showPoints" value=""
+																	   ${report.chartOptions.showPoints ? "checked" : ""}>
 																<spring:message code="reports.label.showPoints"/>
 															</label>
 															<label class="checkbox-inline">
-																<input type="checkbox" name="showData" value="">
+																<input type="checkbox" name="showData" value=""
+																	   ${report.chartOptions.showData ? "checked" : ""}>
 																<spring:message code="reports.label.showData"/>
 															</label>
 														</div>
 													</div>
+													<div class="form-group">
+														<label class="control-label col-md-5" for="chartWidth">
+															<spring:message code="reports.label.width"/>
+														</label>
+														<div class="col-md-7">
+															<input type="text" name="chartWidth" 
+																   maxlength="4" class="form-control"
+																   value="${report.chartOptions.width}">
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="control-label col-md-5" for="chartHeight">
+															<spring:message code="reports.label.height"/>
+														</label>
+														<div class="col-md-7">
+															<input type="text" name="chartHeight" 
+																   maxlength="4" class="form-control"
+																   value="${report.chartOptions.height}">
+														</div>
+													</div>
+													<input type="hidden" name="yAxisMin" value="${report.chartOptions.yAxisMin}"> 
+													<input type="hidden" name="yAxisMax" value="${report.chartOptions.yAxisMax}"> 
+													<input type="hidden" name="backgroundColor" value="${report.chartOptions.backgroundColor}"> 
+													<input type="hidden" name="labelFormat" value="${report.chartOptions.labelFormat}"> 
 												</div>
 											</c:if>
 

@@ -133,7 +133,7 @@ public class ReportController {
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-				ChartOptions chartOptions = paramProcessorResult.getChartOptions();
+				ChartOptions chartOptions = report.getChartOptions();
 
 				ParameterService parameterService = new ParameterService();
 

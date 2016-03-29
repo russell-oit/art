@@ -378,36 +378,42 @@ public class ParameterProcessor {
 				String paramValue = paramValues[0];
 
 				if (StringUtils.equalsIgnoreCase(htmlParamName, "showLegend")) {
-					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
-						chartOptions.setShowLegend(false);
-					} else {
-						chartOptions.setShowLegend(true);
-					}
+					chartOptions.setShowLegend(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showLabels")) {
-					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
-						chartOptions.setShowLabels(false);
-					} else {
-						chartOptions.setShowLabels(true);
-					}
+					chartOptions.setShowLabels(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showData")) {
-					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
-						chartOptions.setShowData(false);
-					} else {
-						chartOptions.setShowData(true);
-					}
+					chartOptions.setShowData(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showPoints")) {
-					if (StringUtils.equalsIgnoreCase(paramValue, "false")) {
-						chartOptions.setShowPoints(false);
-					} else {
-						chartOptions.setShowPoints(true);
-					}
+					chartOptions.setShowPoints(true);
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "rotateAt")) {
-					chartOptions.setRotateAt(Integer.parseInt(paramValue));
+					if (StringUtils.isNotBlank(paramValue)) {
+						chartOptions.setRotateAt(Integer.parseInt(paramValue));
+					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "removeAt")) {
-					chartOptions.setRemoveAt(Integer.parseInt(paramValue));
+					if (StringUtils.isNotBlank(paramValue)) {
+						chartOptions.setRemoveAt(Integer.parseInt(paramValue));
+					}
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "chartWidth")) {
+					if (StringUtils.isNotBlank(paramValue)) {
+						chartOptions.setWidth(Integer.parseInt(paramValue));
+					}
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "chartHeight")) {
+					if (StringUtils.isNotBlank(paramValue)) {
+						chartOptions.setHeight(Integer.parseInt(paramValue));
+					}
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "yAxisMin")) {
+					if (StringUtils.isNotBlank(paramValue)) {
+						chartOptions.setyAxisMin(Double.parseDouble(paramValue));
+					}
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "yAxisMax")) {
+					if (StringUtils.isNotBlank(paramValue)) {
+						chartOptions.setyAxisMax(Double.parseDouble(paramValue));
+					}
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "backgroundColor")) {
+					chartOptions.setBackgroundColor(paramValue);
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "labelFormat")) {
+					chartOptions.setBackgroundColor(paramValue);
 				}
-
-				//TODO process other params
 			}
 		}
 
