@@ -285,6 +285,7 @@ public class ReportOutputGenerator {
 				//{0} = {1} ({2}) for pie chart png and pdf output
 				chart.setLocale(locale);
 				chart.setChartOptions(parameterChartOptions);
+				chart.setTitle(report.getShortDescription());
 
 				Drilldown drilldown = null;
 				if (reportFormat == ReportFormat.html) {

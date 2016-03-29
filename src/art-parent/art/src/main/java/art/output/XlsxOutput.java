@@ -219,6 +219,13 @@ public class XlsxOutput extends StandardOutput {
 
 			// dispose of temporary files backing this workbook on disk
 			wb.dispose();
+
+			//delete template file
+			File templateFile = new File(templateFileName);
+			boolean deleted = templateFile.delete();
+			if (!deleted) {
+				logger.warn("Template file not deleted: {}", templateFileName);
+			}
 		} catch (IOException e) {
 			logger.error("Error", e);
 		}

@@ -84,6 +84,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private boolean hasHyperLinks;
 	private boolean hasTooltips; //if true class must implement a ToolTipGenerator (otherwise showChart.jsp will fail on the <cewolf:map> tag)
 	private DrilldownLinkHelper drilldownLinkHelper;
+	private List<ReportParameter> reportParamsList;
 
 	/**
 	 * @return the hasTooltips
@@ -297,6 +298,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 	public void prepareDataset(ResultSet rs, Drilldown drilldown,
 			List<ReportParameter> reportParamsList) throws SQLException {
+		
+		this.reportParamsList=reportParamsList;
 
 		prepareDrilldownDetails(drilldown, reportParamsList);
 		prepareHyperLinkDetails(rs);
@@ -460,7 +463,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (reportFormat == ReportFormat.png) {
 			ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, width, height);
 		} else if (reportFormat == ReportFormat.pdf) {
-			//TODO pdf output
+			PdfChart.createPdf(chart, outputFileName, title, data, reportParamsList);
 		} else {
 			throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
 		}
