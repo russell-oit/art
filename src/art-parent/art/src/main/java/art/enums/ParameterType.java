@@ -27,7 +27,7 @@ import java.util.List;
  */
 public enum ParameterType {
 
-	SingleValue("Single-Value"), MultiValue("Multi-Value"), Filter("Filter");
+	SingleValue("Single-Value"), MultiValue("Multi-Value");
 	private String value;
 
 	private ParameterType(String value) {

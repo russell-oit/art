@@ -196,7 +196,7 @@ public class JobService {
 		JobType jobType = job.getJobType();
 		if (jobType == JobType.CacheAppend || jobType == JobType.CacheInsert) {
 			// Delete
-			int targetDatabaseId = Integer.parseInt(job.getOutputFormat()); //TODO use separate - new db field, not output format
+			int targetDatabaseId = Integer.parseInt(job.getOutputFormat());
 			Connection connCache = DbConnections.getConnection(targetDatabaseId);
 			try {
 				String cachedTableName = job.getCachedTableName();

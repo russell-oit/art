@@ -26,7 +26,7 @@ public class Job implements Serializable {
 	private String sharedLastRunDetails;
 	private Date sharedLastStartDate;
 	private Date sharedLastEndDate;
-	private String outputFormat; //TODO change to ReportFormat instead of string?
+	private String outputFormat;
 	private String mailTo;
 	private String mailMessage;
 	private String mailSubject;

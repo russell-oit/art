@@ -291,7 +291,7 @@ Display report parameters and initiate running of report
 											<div class="form-group">
 												<div class="col-md-8 col-md-offset-2">
 													<div id="actionsDiv" style="text-align: center">
-														<c:if test="${enableRunInline}">
+														<c:if test="${enablePrint}">
 															<button type="button" class="btn btn-default action" onclick="PrintElem('#reportOutput')" >
 																<spring:message code="reports.action.print"/>
 															</button>

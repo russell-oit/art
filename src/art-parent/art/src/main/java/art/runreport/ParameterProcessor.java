@@ -20,6 +20,8 @@ import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
+import art.report.Report;
+import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
 import art.utils.ArtUtils;
@@ -113,6 +115,7 @@ public class ParameterProcessor {
 
 		//set actual values to be used when running the query
 		setActualParameterValues(reportParamsList);
+		handleAllValues(reportParamsMap);
 
 		ParameterProcessorResult result = new ParameterProcessorResult();
 
@@ -125,12 +128,14 @@ public class ParameterProcessor {
 		ChartOptions chartOptions = processChartOptions(passedValuesMap);
 		result.setChartOptions(chartOptions);
 
+		setIsChainedParent(reportParamsList);
+
 		return result;
 	}
 
-	private void setPassedParameterValues(Map<String, String[]> passedValuesMap, Map<String, ReportParameter> reportParams) {
+	private void setPassedParameterValues(Map<String, String[]> passedValuesMap, Map<String, ReportParameter> reportParamsMap) {
 		logger.debug("Entering setPassedParameterValues");
-		
+
 		//process report parameters
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
 			String htmlParamName = entry.getKey();
@@ -143,7 +148,7 @@ public class ParameterProcessor {
 				String paramName = htmlParamName.substring(2);
 				logger.debug("paramName='{}'", paramName);
 
-				ReportParameter reportParam = reportParams.get(paramName);
+				ReportParameter reportParam = reportParamsMap.get(paramName);
 				logger.debug("reportParam={}", reportParam);
 
 				if (reportParam == null) {
@@ -170,9 +175,44 @@ public class ParameterProcessor {
 		}
 	}
 
+	private void handleAllValues(Map<String, ReportParameter> reportParamsMap) throws SQLException, ParseException {
+		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+			ReportParameter reportParam = entry.getValue();
+			Parameter param = reportParam.getParameter();
+
+			if (param.getParameterType() == ParameterType.MultiValue) {
+				String[] passedValues = reportParam.getPassedParameterValues();
+				List<String> actualValueStrings = new ArrayList<>();
+				if (passedValues != null) {
+					actualValueStrings.addAll(Arrays.asList(passedValues));
+				}
+
+				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
+					//get all possible lov values.
+					ReportRunner lovReportRunner = new ReportRunner();
+					int lovReportId = param.getLovReportId();
+					ReportService reportService = new ReportService();
+					Report lovReport = reportService.getReport(lovReportId);
+					lovReportRunner.setReport(lovReport);
+					lovReportRunner.setReportParamsMap(reportParamsMap);
+					boolean applyFilters = false; //don't apply filters so as to get all values
+					Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
+
+					List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
+					for (Entry<String, String> entry2 : lovValues.entrySet()) {
+						String actualValueString = entry2.getKey();
+						Object actualValue = convertParameterStringValueToObject(actualValueString, param);
+						actualValues.add(actualValue);
+					}
+					reportParam.setActualParameterValues(actualValues);
+				}
+			}
+		}
+	}
+
 	private void setActualParameterValues(List<ReportParameter> reportParamsList) throws NumberFormatException, ParseException {
 		logger.debug("Entering setActualParameterValues");
-		
+
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
 			logger.debug("param={}", param);
@@ -208,7 +248,8 @@ public class ParameterProcessor {
 				}
 
 				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
-					//TODO get all values
+					//do nothing. all possible values will be added later
+					//so that parameter substitution is available
 				} else {
 					for (String actualValueString : actualValueStrings) {
 						//convert string value to appropriate object
@@ -225,7 +266,7 @@ public class ParameterProcessor {
 
 	public Object convertParameterStringValueToObject(String value, Parameter param) throws ParseException {
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
-		
+
 		ParameterDataType paramDataType = param.getDataType();
 
 		if (paramDataType.isNumeric()) {
@@ -240,7 +281,7 @@ public class ParameterProcessor {
 
 	private Object convertParameterStringValueToNumber(String value, Parameter param) {
 		logger.debug("Entering convertParameterStringValueToNumber: value='{}'", value);
-		
+
 		String finalValue;
 		if (StringUtils.isBlank(value)) {
 			finalValue = "0";
@@ -280,7 +321,7 @@ public class ParameterProcessor {
 
 	public Date convertParameterStringValueToDate(String value) throws ParseException {
 		logger.debug("Entering convertParameterStringValueToDate: value='{}'", value);
-		
+
 		Date dateValue;
 
 		if (value == null || StringUtils.equalsIgnoreCase(value, "now")
@@ -332,7 +373,7 @@ public class ParameterProcessor {
 
 	private ReportOptions processReportOptions(Map<String, String[]> passedValuesMap) {
 		logger.debug("Entering processReportOptions");
-		
+
 		ReportOptions reportOptions = new ReportOptions();
 
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
@@ -359,7 +400,7 @@ public class ParameterProcessor {
 
 	private ChartOptions processChartOptions(Map<String, String[]> passedValuesMap) {
 		logger.debug("Entering processChartOptions");
-		
+
 		ChartOptions chartOptions = new ChartOptions();
 
 		for (Entry<String, String[]> entry : passedValuesMap.entrySet()) {
@@ -411,6 +452,25 @@ public class ParameterProcessor {
 		}
 
 		return chartOptions;
+	}
+
+	private void setIsChainedParent(List<ReportParameter> reportParamsList) {
+		StringBuilder allchainedParentsSb = new StringBuilder();
+
+		for (ReportParameter reportParam : reportParamsList) {
+			String chainedParents = reportParam.getChainedParents();
+			if (StringUtils.isNotBlank(chainedParents)) {
+				allchainedParentsSb.append(chainedParents);
+			}
+		}
+
+		String allChainedParents = allchainedParentsSb.toString();
+		for (ReportParameter reportParam : reportParamsList) {
+			String paramName = reportParam.getParameter().getName();
+			if (allChainedParents.contains(paramName)) {
+				reportParam.setChainedParent(true);
+			}
+		}
 	}
 
 }

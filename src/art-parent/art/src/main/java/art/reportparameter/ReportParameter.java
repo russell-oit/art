@@ -46,6 +46,21 @@ public class ReportParameter implements Serializable {
 	private List<Object> actualParameterValues;
 	private String chainedParents;
 	private String chainedDepends;
+	private boolean chainedParent;
+
+	/**
+	 * @return the chainedParent
+	 */
+	public boolean isChainedParent() {
+		return chainedParent;
+	}
+
+	/**
+	 * @param chainedParent the chainedParent to set
+	 */
+	public void setChainedParent(boolean chainedParent) {
+		this.chainedParent = chainedParent;
+	}
 
 	/**
 	 * @return the chainedParents

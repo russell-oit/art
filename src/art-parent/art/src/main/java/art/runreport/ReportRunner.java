@@ -580,10 +580,25 @@ public class ReportRunner {
 				String paramName = entry.getKey();
 				ReportParameter reportParam = entry.getValue();
 
+				List<Object> actualParameterValues = reportParam.getActualParameterValues();
+
+				if (actualParameterValues == null || actualParameterValues.isEmpty()) {
+					continue;
+				}
+
 				String paramIdentifier = "#!" + paramName + "#";
 				String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
-				String replaceString = Matcher.quoteReplacement(String.valueOf(reportParam.getActualParameterValues())); //quote in case it contains special regex characters
-				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+				for (Object value : actualParameterValues) {
+					String paramValue;
+					if (value instanceof Date) {
+						Date dateValue = (Date) value;
+						paramValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
+					} else {
+						paramValue = String.valueOf(value);
+					}
+					String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
+					querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+				}
 			}
 		}
 
@@ -591,6 +606,12 @@ public class ReportRunner {
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			String paramName = entry.getKey();
 			ReportParameter reportParam = entry.getValue();
+
+			List<Object> actualParameterValues = reportParam.getActualParameterValues();
+
+			if (actualParameterValues == null || actualParameterValues.isEmpty()) {
+				continue;
+			}
 
 			String paramIdentifier = "#" + paramName + "#";
 			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
@@ -851,6 +872,33 @@ public class ReportRunner {
 		return getLovValues(true, newUseRules);
 	}
 
+	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
+		Map<String, String> lovValues = new LinkedHashMap<>();
+
+		Map<Object, String> lovValuesAsObjects = getLovValuesAsObjects(overrideUseRules, newUseRules);
+
+		for (Entry<Object, String> entry : lovValuesAsObjects.entrySet()) {
+			Object dataValue = entry.getKey();
+			String displayValue = entry.getValue();
+
+			String stringValue;
+			if (dataValue instanceof Date) {
+				Date dateValue = (Date) dataValue;
+				stringValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
+			} else {
+				stringValue = String.valueOf(dataValue);
+			}
+
+			lovValues.put(stringValue, displayValue);
+		}
+
+		return lovValues;
+	}
+
+	public Map<Object, String> getLovValuesAsObjects(boolean newUseRules) throws SQLException {
+		return getLovValuesAsObjects(true, newUseRules);
+	}
+
 	/**
 	 * Run lov report and return the lov values (value and label)
 	 *
@@ -859,8 +907,8 @@ public class ReportRunner {
 	 * @return values for an lov
 	 * @throws SQLException
 	 */
-	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
-		Map<String, String> lovValues = new LinkedHashMap<>();
+	public Map<Object, String> getLovValuesAsObjects(boolean overrideUseRules, boolean newUseRules) throws SQLException {
+		Map<Object, String> lovValues = new LinkedHashMap<>();
 
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
 
@@ -887,20 +935,14 @@ public class ReportRunner {
 				//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
 				//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
 				Object dataValue = rs.getObject(1);
-				String stringValue;
-				if (dataValue instanceof Date) {
-					Date dateValue = (Date) dataValue;
-					stringValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
-				} else {
-					stringValue = String.valueOf(dataValue);
-				}
-
-				String displayValue = null;
+				String displayValue;
 				if (columnCount > 1) {
 					displayValue = rs.getString(2);
+				} else {
+					displayValue = rs.getString(1);
 				}
 
-				lovValues.put(stringValue, displayValue);
+				lovValues.put(dataValue, displayValue);
 			}
 		}
 

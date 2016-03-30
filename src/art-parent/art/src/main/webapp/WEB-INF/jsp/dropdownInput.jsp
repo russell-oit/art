@@ -11,10 +11,19 @@ Display report parameter that uses dropdown input
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
-<select class="form-control selectpicker"
+<select class="form-control"
 		name="${reportParam.htmlElementName}"
-		id="${reportParam.htmlElementName}">
+		id="${reportParam.htmlElementName}"
+		${reportParam.parameter.parameterType == 'MultiValue' ? "multiple size='5'" : ""}>
+	
+	<c:if test="${reportParam.chainedParent}">
+		<option value="">--</option>
+	</c:if>
+	<c:if test="${reportParam.parameter.parameterType == 'MultiValue'}">
+		<option value="ALL_ITEMS"><spring:message code="reports.text.allItems"/></option>
+	</c:if>
 	<c:forEach var="lovValue" items="${lovValues}">
 		<option value="${lovValue.key}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${lovValue.value}</option>
 	</c:forEach>

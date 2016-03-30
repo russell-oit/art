@@ -162,6 +162,7 @@ public class ReportController {
 					case SqlServerXmla:
 					case Update:
 					case Text:
+					case TabularHtml:
 						enableReportFormats = false;
 						break;
 					default:
@@ -177,7 +178,7 @@ public class ReportController {
 				boolean enableSchedule;
 				if (accessLevel >= AccessLevel.ScheduleUser.getValue()
 						&& Config.getSettings().isSchedulingEnabled()) {
-					
+
 					switch (reportType) {
 						case Dashboard:
 						case Mondrian:
@@ -227,12 +228,36 @@ public class ReportController {
 				model.addAttribute("isChart", reportType.isChart());
 
 				boolean enableRunInline;
-				if (reportType == ReportType.Dashboard || reportType.isOlap()) {
-					enableRunInline = false;
-				} else {
-					enableRunInline = true;
+
+				switch (reportType) {
+					case Dashboard:
+					case Mondrian:
+					case MondrianXmla:
+					case SqlServerXmla:
+						enableRunInline = false;
+						break;
+					default:
+						enableRunInline = true;
 				}
 				model.addAttribute("enableRunInline", enableRunInline);
+
+				boolean enablePrint;
+
+				switch (reportType) {
+					case Dashboard:
+					case Mondrian:
+					case MondrianXmla:
+					case SqlServerXmla:
+						enablePrint = false;
+						break;
+					default:
+						if (reportType.isChart()) {
+							enablePrint = false;
+						} else {
+							enablePrint = true;
+						}
+				}
+				model.addAttribute("enablePrint", enablePrint);
 			}
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);

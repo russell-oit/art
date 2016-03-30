@@ -262,29 +262,19 @@ public class RunReportController {
 					ParameterService parameterService = new ParameterService();
 
 					for (ReportParameter reportParam : reportParamsList) {
-						Parameter param = reportParam.getParameter();
-						if (param.isUseLov()) {
-							//get all possible lov values.							
-							ReportRunner lovReportRunner = new ReportRunner();
-							lovReportRunner.setReportId(param.getLovReportId());
-							//for chained parameters, handle #filter# parameter
-							int filterPosition = param.getEffectiveChainedValuePosition();
-							if (filterPosition > 0) {
-								//parameter chained on another parameter. get filter value
-								Parameter filterParam = parameterService.getParameter(reportId, filterPosition);
-								if (filterParam != null) {
-									ReportParameter filterReportParam = reportParamsMap.get(filterParam.getName());
-									if (filterReportParam != null) {
-										String[] filterValues = filterReportParam.getPassedParameterValues();
-										lovReportRunner.setFilterValues(filterValues);
-									}
-								}
-							}
-							boolean applyFilters = false; //don't apply filters so as to get all values
-							Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
-
-							reportParam.setLovValues(lovValues);
-						}
+//						Parameter param = reportParam.getParameter();
+//						if (param.isUseLov()) {
+//							//get all possible lov values.							
+//							ReportRunner lovReportRunner = new ReportRunner();
+//							int lovReportId=param.getLovReportId();
+//							Report lovReport = reportService.getReport(lovReportId);
+//							lovReportRunner.setReport(lovReport);
+//							lovReportRunner.setReportParamsMap(reportParamsMap);
+//							boolean applyFilters = false; //don't apply filters so as to get all values
+//							Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
+//
+//							reportParam.setLovValues(lovValues);
+//						}
 
 						parameterDisplayValues.put(reportParam.getPosition(), reportParam.getNameAndDisplayValues());
 					}
