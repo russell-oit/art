@@ -161,6 +161,7 @@ public class ReportController {
 					case MondrianXmla:
 					case SqlServerXmla:
 					case Update:
+					case Text:
 						enableReportFormats = false;
 						break;
 					default:
@@ -176,18 +177,25 @@ public class ReportController {
 				boolean enableSchedule;
 				if (accessLevel >= AccessLevel.ScheduleUser.getValue()
 						&& Config.getSettings().isSchedulingEnabled()) {
-					if (reportType == ReportType.Dashboard || reportType.isOlap()) {
-						enableSchedule = false;
-					} else {
-						enableSchedule = true;
+					
+					switch (reportType) {
+						case Dashboard:
+						case Mondrian:
+						case MondrianXmla:
+						case SqlServerXmla:
+						case Text:
+							enableSchedule = false;
+							break;
+						default:
+							enableSchedule = true;
 					}
 				} else {
 					enableSchedule = false;
 				}
 				model.addAttribute("enableSchedule", enableSchedule);
 
-				boolean enableShowSql = false;
-				boolean enableShowSelectedParameters = false;
+				boolean enableShowSql;
+				boolean enableShowSelectedParameters;
 
 				switch (reportType) {
 					case Dashboard:
@@ -196,13 +204,21 @@ public class ReportController {
 					case SqlServerXmla:
 					case JasperReportsTemplate:
 					case JxlsTemplate:
+					case Text:
+						enableShowSql = false;
+						enableShowSelectedParameters = false;
 						break;
 					default:
 						if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 							enableShowSql = true;
+						} else {
+							enableShowSql = false;
 						}
+
 						if (!reportParamsList.isEmpty()) {
 							enableShowSelectedParameters = true;
+						} else {
+							enableShowSelectedParameters = false;
 						}
 				}
 				model.addAttribute("enableShowSql", enableShowSql);
@@ -222,13 +238,13 @@ public class ReportController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		
+
 		return "selectReportParameters";
 	}
 
 	private List<String> getAvailableReportFormats(ReportType reportType) {
 		logger.debug("Entering getAvailableReportFormats: reportType={}", reportType);
-		
+
 		List<String> formats = new ArrayList<>();
 
 		if (reportType.isChart()) {
@@ -274,9 +290,9 @@ public class ReportController {
 	List<Report> getReports(HttpSession session, HttpServletRequest request) {
 		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
-		
+
 		logger.debug("Entering getReports");
-		
+
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		List<Report> reports = null;
@@ -360,7 +376,7 @@ public class ReportController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session, @RequestParam("action") String action,
 			@RequestParam("templateFile") MultipartFile templateFile,
-			@RequestParam("subreportFile") MultipartFile subreportFile) {
+			@RequestParam("resourcesFile") MultipartFile resourcesFile) {
 
 		logger.debug("Entering saveReport: report={}, action='{}'", report, action);
 
@@ -372,7 +388,7 @@ public class ReportController {
 
 		try {
 			//finalise report properties
-			String prepareReportMessage = prepareReport(report, templateFile, subreportFile, action);
+			String prepareReportMessage = prepareReport(report, templateFile, resourcesFile, action);
 			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
 			if (prepareReportMessage != null) {
 				model.addAttribute("message", prepareReportMessage);
@@ -442,7 +458,7 @@ public class ReportController {
 		}
 
 		model.addAttribute("action", action);
-		
+
 		return "editReport";
 	}
 
@@ -645,7 +661,7 @@ public class ReportController {
 	 *
 	 * @param report
 	 * @param templateFile
-	 * @param subreportFile
+	 * @param resourcesFile
 	 * @param action
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
@@ -653,7 +669,7 @@ public class ReportController {
 	 * @throws SQLException
 	 */
 	private String prepareReport(Report report, MultipartFile templateFile,
-			MultipartFile subreportFile, String action) throws IOException, SQLException {
+			MultipartFile resourcesFile, String action) throws IOException, SQLException {
 
 		logger.debug("Entering prepareReport: report={}, action='{}'", report, action);
 
@@ -664,7 +680,7 @@ public class ReportController {
 			return message;
 		}
 
-		message = saveFile(subreportFile);
+		message = saveFile(resourcesFile);
 		if (message != null) {
 			return message;
 		}
@@ -676,5 +692,5 @@ public class ReportController {
 
 		return null;
 	}
-	
+
 }

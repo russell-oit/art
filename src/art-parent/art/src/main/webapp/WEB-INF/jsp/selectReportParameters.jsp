@@ -99,6 +99,11 @@ Display report parameters and initiate running of report
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
+				
+				$(function() {
+					//needed if tooltips shown on input-group element or button
+					$("[data-toggle='tooltip']").tooltip({container: 'body'});
+				});
 
 				//immediately run query inline
 //				$("#runInline").click();
@@ -241,7 +246,7 @@ Display report parameters and initiate running of report
 															<spring:message code="reports.label.format"/>
 														</label>
 														<div class="col-md-7">
-															<select name="reportFormat" id="reportFormat" class="form-control">
+															<select name="reportFormat" id="reportFormat" class="form-control selectpicker">
 																<c:forEach var="reportFormat" items="${reportFormats}">
 																	<option value="${reportFormat}">
 																		<spring:message code="reports.format.${reportFormat}"/>

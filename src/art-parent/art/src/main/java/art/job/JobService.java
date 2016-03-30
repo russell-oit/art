@@ -58,13 +58,7 @@ public class JobService {
 		userService = new UserService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT AJ.*,"
-			+ " AQ.NAME AS REPORT_NAME, AU.USERNAME"
-			+ " FROM ART_JOBS AJ"
-			+ " LEFT JOIN ART_QUERIES AQ"
-			+ " ON AJ.QUERY_ID=AQ.QUERY_ID"
-			+ " LEFT JOIN ART_USERS AU"
-			+ " ON AJ.USER_ID=AU.USER_ID";
+	private final String SQL_SELECT_ALL = "SELECT AJ.* FROM ART_JOBS AJ";
 
 	/**
 	 * Class to map resultset to an object

@@ -37,12 +37,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -659,30 +661,31 @@ public class ReportService {
 			return;
 		}
 
-		Connection conn = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
 		String sql = "SELECT SOURCE_INFO"
 				+ " FROM ART_ALL_SOURCES "
 				+ " WHERE OBJECT_ID=?"
 				+ " ORDER BY LINE_NUMBER";
 
-		try {
-			conn = DbConnections.getArtDbConnection();
-			rs = DatabaseUtils.query(conn, ps, sql, report.getReportId());
-			StringBuilder sb = new StringBuilder(1024);
-			while (rs.next()) {
-				sb.append(rs.getString("SOURCE_INFO"));
+		int reportId = report.getReportId();
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> sourceLines = dbService.query(sql, h, reportId);
+
+		StringBuilder sb = new StringBuilder(1024);
+		if (!sourceLines.isEmpty()) {
+			for (Map<String, Object> sourceLine : sourceLines) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				String line = (String) sourceLine.get("SOURCE_INFO");
+				sb.append(line);
 			}
-			report.setReportSource(sb.toString());
-			//set html source for use with text reports
-			ReportType reportType = report.getReportType();
-			if (reportType == ReportType.Text) {
-				report.setReportSourceHtml(report.getReportSource());
-			}
-		} finally {
-			DatabaseUtils.close(rs, ps, conn);
+		}
+
+		String finalSource = sb.toString();
+		report.setReportSource(finalSource);
+		//set html source for use with text reports
+		ReportType reportType = report.getReportType();
+		if (reportType == ReportType.Text) {
+			report.setReportSourceHtml(report.getReportSource());
 		}
 	}
 

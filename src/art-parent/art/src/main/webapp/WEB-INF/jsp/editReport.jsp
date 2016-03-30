@@ -630,13 +630,13 @@ Edit report page
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
 						</div>
 						<div>
-							Subreport
+							<spring:message code="reports.text.resources"/>
 						</div>
 						<div class="fileinput fileinput-new" data-provides="fileinput">
 							<span class="btn btn-default btn-file">
 								<span class="fileinput-new">${selectFileText}</span>
 								<span class="fileinput-exists">${changeText}</span>
-								<input type="file" name="subreportFile">
+								<input type="file" name="resourcesFile">
 							</span>
 							<span class="fileinput-filename"></span>
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>

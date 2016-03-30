@@ -149,7 +149,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					</li>
 					<li>
 						<a href="${pageContext.request.contextPath}/app/logs.do">
-							<i class="fa fa-reorder"></i> 
+							<i class="fa fa-bars"></i> 
 							<spring:message code="header.link.logs"/>
 						</a>
 					</li>

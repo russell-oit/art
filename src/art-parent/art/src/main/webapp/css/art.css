@@ -217,4 +217,6 @@ td.chartDataHeader {
 	border: 1px solid #000000;
 }
 
-
+.panel-group .panel {
+  overflow: visible;
+}

@@ -596,8 +596,8 @@ public class UpgradeHelper {
 		sql = "SELECT *"
 				+ " FROM ART_USER_RULES"
 				+ " WHERE RULE_VALUE_KEY IS NULL AND RULE_TYPE='EXACT'";
-		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
-		List<Map<String, Object>> userRules = dbService.query(sql, h2);
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> userRules = dbService.query(sql, h);
 
 		logger.debug("userRules.isEmpty()={}", userRules.isEmpty());
 		if (!userRules.isEmpty()) {

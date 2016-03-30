@@ -19,7 +19,7 @@ Reports page. Also main/home page
 <spring:message code="page.text.description" var="descriptionText"/>
 <spring:message code="page.text.reports" var="mainPanelTitle"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" charset="utf-8">
