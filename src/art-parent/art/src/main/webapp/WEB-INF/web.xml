@@ -147,15 +147,6 @@
         <!-- Load this servlet at server startup time -->
         <load-on-startup>3</load-on-startup>
     </servlet>
-    <servlet>
-        <description>
-			Periodically perform some actions e.g. clean export files 	   
-		</description>
-        <servlet-name>Scheduler</servlet-name>
-        <servlet-class>art.servlets.Cleaner</servlet-class>
-        <!-- load after ArtConfig -->
-        <load-on-startup>5</load-on-startup>
-    </servlet>
     <session-config>
         <!-- timeout in minutes -->
         <session-timeout>120</session-timeout>
