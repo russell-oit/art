@@ -72,7 +72,7 @@
 				<tr>
 					<th class="jobIdCol"><spring:message code="jobs.text.jobId"/></th>
 					<th class="jobNameCol"><spring:message code="jobs.text.jobName"/></th>
-					<th><spring:message code="logs.text.Date"/></th>
+					<th><spring:message code="logs.text.date"/></th>
 					<th><spring:message code="jobs.text.result"/></th>
 				</tr>
 			</thead>

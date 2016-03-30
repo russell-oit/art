@@ -258,24 +258,8 @@ public class RunReportController {
 				boolean showParams = false;
 				if (reportOptions.isShowSelectedParameters() || report.isParametersInOutput()) {
 					showParams = true;
-					//get display values for selections from lov parameters
-					ParameterService parameterService = new ParameterService();
 
 					for (ReportParameter reportParam : reportParamsList) {
-//						Parameter param = reportParam.getParameter();
-//						if (param.isUseLov()) {
-//							//get all possible lov values.							
-//							ReportRunner lovReportRunner = new ReportRunner();
-//							int lovReportId=param.getLovReportId();
-//							Report lovReport = reportService.getReport(lovReportId);
-//							lovReportRunner.setReport(lovReport);
-//							lovReportRunner.setReportParamsMap(reportParamsMap);
-//							boolean applyFilters = false; //don't apply filters so as to get all values
-//							Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
-//
-//							reportParam.setLovValues(lovValues);
-//						}
-
 						parameterDisplayValues.put(reportParam.getPosition(), reportParam.getNameAndDisplayValues());
 					}
 				}

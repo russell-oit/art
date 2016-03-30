@@ -49,6 +49,18 @@ public class CacheController {
 		return "caches";
 	}
 
+	@RequestMapping(value = "/app/clearAllCaches", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse clearAllCaches() {
+		AjaxResponse response = new AjaxResponse();
+		
+		cacheHelper.clearAll();
+		
+		response.setSuccess(true);
+		
+		return response;
+	}
+
 	@RequestMapping(value = "/app/clearCache", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse clearCache(@RequestParam("id") String id) {

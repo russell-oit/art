@@ -56,7 +56,6 @@ Display schedules
 						undefined //linkedRecordsExistText
 						);
 
-
 			}); //end document ready
 		</script>
 	</jsp:attribute>

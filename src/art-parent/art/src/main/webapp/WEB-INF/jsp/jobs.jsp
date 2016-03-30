@@ -41,10 +41,10 @@ Display user jobs and jobs configuration
 				$(function () {
 					var actionValue = '${action}';
 					if (actionValue === 'config') {
-						$('a[id="jobsConfigLink"]').parent().addClass('active');
-//						$('a[href*="jobsConfig.do"]').parent().addClass('active');
+//						$('a[id="jobsConfigLink"]').parent().addClass('active');
+						$('a[href*="jobsConfig.do"]').parent().addClass('active');
 					} else {
-						$('a[id="jobsLink"]').parent().addClass('active');
+						$('a[href*="jobs.do"]').parent().addClass('active');
 					}
 				});
 

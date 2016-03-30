@@ -19,14 +19,15 @@ Page to allow manual clearing of caches
 <spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="caches.message.cacheCleared" var="cacheClearedText"/>
+<spring:message code="caches.message.cachesCleared" var="cachesClearedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[href*="caches.do"]').parent().addClass('active');
 				});
 
@@ -54,6 +55,23 @@ Page to allow manual clearing of caches
 
 			});
 		</script>
+
+		<script type="text/javascript">
+			$(function () {
+				$('#clearAll').click(function () {
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/app/clearAllCaches.do',
+						dataType: 'json',
+						success: function (response) 
+						{
+							notifyActionSuccess("${cachesClearedText}", undefined);
+						},
+						error: ajaxErrorHandler
+					});
+				});
+			});
+		</script>
 	</jsp:attribute>
 
 	<jsp:body>
@@ -68,6 +86,12 @@ Page to allow manual clearing of caches
 		</c:if>
 
 		<div id="ajaxResponse">
+		</div>
+
+		<div style="margin-bottom: 10px;">
+			<button id="clearAll" type="button" class="btn btn-default">
+				<spring:message code="caches.button.clearAll"/>
+			</button>
 		</div>
 
 		<table id="caches" class="table table-striped table-bordered">

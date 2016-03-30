@@ -1,5 +1,6 @@
 package art.artdatabase;
 
+import art.cache.CacheHelper;
 import art.dbutils.DatabaseUtils;
 import art.enums.ConnectionPoolLibrary;
 import art.servlets.Config;
@@ -16,6 +17,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -33,6 +35,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ArtDatabaseController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
+	
+	@Autowired
+	private CacheHelper cacheHelper;
 
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
@@ -80,6 +85,8 @@ public class ArtDatabaseController {
 			model.addAttribute("formErrors", "");
 			return "artDatabase";
 		}
+		
+		cacheHelper.clearAll();
 
 		//set password field as appropriate
 		String newPassword = artDatabase.getPassword();
@@ -147,12 +154,12 @@ public class ArtDatabaseController {
 
 				ps.executeBatch();
 			}
-
+			
 			//save settings
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
-
+			
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)
 			redirectAttributes.addFlashAttribute("message", "artDatabase.message.configurationSaved");

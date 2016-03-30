@@ -71,7 +71,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private static final long serialVersionUID = 1L;
 	protected final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
-
 	private int height = 300;
 	private int width = 500;
 	private String backgroundColor = WHITE_HEX_COLOR_CODE;

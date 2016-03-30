@@ -285,7 +285,8 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "caches") || StringUtils.endsWith(page, "Cache")) {
+		} else if (StringUtils.equals(page, "caches") || StringUtils.endsWith(page, "Cache")
+				|| StringUtils.equals(page, "clearAllCaches")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;

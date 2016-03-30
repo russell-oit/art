@@ -145,4 +145,10 @@ public class CacheHelper {
 		logger.debug("Entering clearParameters");
 	}
 
+	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
+		"datasources", "schedules", "jobs", "filters", "parameters"}, allEntries = true)
+	public void clearAll() {
+		clearMondrian();
+	}
+
 }
