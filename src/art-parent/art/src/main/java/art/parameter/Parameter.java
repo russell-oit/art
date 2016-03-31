@@ -41,8 +41,6 @@ public class Parameter implements Serializable {
 	private boolean useLov;
 	private int lovReportId;
 	private boolean useFiltersInLov;
-	private int chainedPosition;
-	private int chainedValuePosition;
 	private int drilldownColumnIndex;
 	private boolean useDirectSubstitution;
 	private Date creationDate;
@@ -51,37 +49,6 @@ public class Parameter implements Serializable {
 	private String createdBy;
 	private String updatedBy;
 	
-	/**
-	 * Utility method to determine, if the parameter is chained (it's value
-	 * depends on another one), the position of the parameter which determines
-	 * this parameter's value
-	 *
-	 * @return the position of the parameter which determines this parameter's
-	 * value
-	 */
-	public int getEffectiveChainedValuePosition() {
-		if (chainedPosition > 0 && chainedValuePosition > 0) {
-			//parameter is chained, but value doesn't come from the master parameter
-			return chainedValuePosition;
-		} else {
-			return chainedPosition;
-		}
-	}
-
-	/**
-	 * Utility method to determine if the parameter is chained (it's value
-	 * depends on another parameter)
-	 *
-	 * @return <code>true</code> if parameter is chained
-	 */
-	public boolean isChained() {
-		if (chainedPosition > 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	/**
 	 * @return the createdBy
 	 */
@@ -280,34 +247,6 @@ public class Parameter implements Serializable {
 	 */
 	public void setUseFiltersInLov(boolean useFiltersInLov) {
 		this.useFiltersInLov = useFiltersInLov;
-	}
-
-	/**
-	 * @return the chainedPosition
-	 */
-	public int getChainedPosition() {
-		return chainedPosition;
-	}
-
-	/**
-	 * @param chainedPosition the chainedPosition to set
-	 */
-	public void setChainedPosition(int chainedPosition) {
-		this.chainedPosition = chainedPosition;
-	}
-
-	/**
-	 * @return the chainedValuePosition
-	 */
-	public int getChainedValuePosition() {
-		return chainedValuePosition;
-	}
-
-	/**
-	 * @param chainedValuePosition the chainedValuePosition to set
-	 */
-	public void setChainedValuePosition(int chainedValuePosition) {
-		this.chainedValuePosition = chainedValuePosition;
 	}
 
 	/**

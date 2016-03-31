@@ -280,9 +280,6 @@ CREATE TABLE ART_USER_QUERY_GROUPS
 -- USE_LOV: boolean
 -- USE_FILTERS_IN_LOV: boolean
 -- USE_DIRECT_SUBSTITUTION: boolean
--- CHAINED_POSITION is the position of the chained parameter
--- CHAINED_VALUE_POSITION - allow chained parameter value to come from
--- a different parameter from the previous one in the chained parameter sequence
 -- DRILLDOWN_COLUMN_INDEX - if used in a drilldown report, refers to the column in
 -- the parent report on which the parameter will be applied (index starts from 1)
 

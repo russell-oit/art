@@ -93,8 +93,6 @@ public class ParameterService {
 			parameter.setUseLov(rs.getBoolean("USE_LOV"));
 			parameter.setLovReportId(rs.getInt("LOV_REPORT_ID"));
 			parameter.setUseFiltersInLov(rs.getBoolean("USE_FILTERS_IN_LOV"));
-			parameter.setChainedPosition(rs.getInt("CHAINED_POSITION"));
-			parameter.setChainedValuePosition(rs.getInt("CHAINED_VALUE_POSITION"));
 			parameter.setDrilldownColumnIndex(rs.getInt("DRILLDOWN_COLUMN_INDEX"));
 			parameter.setUseDirectSubstitution(rs.getBoolean("USE_DIRECT_SUBSTITUTION"));
 			parameter.setCreationDate(rs.getTimestamp("CREATION_DATE"));
