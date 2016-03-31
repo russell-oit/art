@@ -78,34 +78,17 @@ public class ReportController {
 	private DatasourceService datasourceService;
 
 	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
-	public String showReports(HttpSession session,
-			@RequestParam(value = "reportId", required = false) Integer reportGroupId,
-			HttpServletRequest request, Model model) {
-
-		logger.debug("Entering showReports: reportGroupId={}", reportGroupId);
+	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
+		logger.debug("Entering showReports");
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-
-			List<Report> reports = reportService.getAvailableReports(sessionUser.getUserId());
-
-			//allow to focus public_user in one report only. is this feature used? it's not documented
-			if (reportGroupId != null) {
-				List<Report> filteredReports = new ArrayList<>();
-				for (Report report : reports) {
-					if (report.getReportGroup().getReportGroupId() == reportGroupId) {
-						filteredReports.add(report);
-					}
-				}
-				model.addAttribute("reports", filteredReports);
-			} else {
-				model.addAttribute("reports", reports);
-			}
+			model.addAttribute("reports", reportService.getAvailableReports(sessionUser.getUserId()));
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-
+		
 		return "reports";
 	}
 

@@ -21,8 +21,6 @@ import art.enums.ReportFormat;
 import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.output.StandardOutput;
-import art.parameter.Parameter;
-import art.parameter.ParameterService;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
