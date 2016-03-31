@@ -32,7 +32,8 @@ bootstrap js, jquery js, datatables css, datatables js
 	</jsp:attribute>
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables/DataTables-1.10.11/css/dataTables.bootstrap.min.css"/>
+
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">
 
 		<jsp:invoke fragment="css"/>
@@ -41,8 +42,8 @@ bootstrap js, jquery js, datatables css, datatables js
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/js/jquery.dataTables.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.0/bootstrap/3/dataTables.bootstrap.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/DataTables-1.10.11/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables/DataTables-1.10.11/js/dataTables.bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 

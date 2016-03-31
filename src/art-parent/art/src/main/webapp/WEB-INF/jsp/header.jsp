@@ -169,7 +169,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					</c:if>
 					<li>
 						<a href="${pageContext.request.contextPath}/app/language.do">
-							<i class="fa fa-comment"></i> 
+							<i class="fa fa-commenting-o"></i> 
 							<spring:message code="header.link.language"/>
 						</a>
 					</li>
