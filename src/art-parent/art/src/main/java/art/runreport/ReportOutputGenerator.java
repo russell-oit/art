@@ -66,7 +66,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jxls.exception.ParsePropertyException;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
@@ -164,7 +163,7 @@ public class ReportOutputGenerator {
 			ReportType reportType, ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
 			PrintWriter writer, String fullOutputFilename)
-			throws IOException, SQLException, JRException, ParsePropertyException,
+			throws IOException, SQLException, JRException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException {
 

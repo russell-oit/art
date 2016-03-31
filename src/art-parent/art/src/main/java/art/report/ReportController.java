@@ -521,9 +521,9 @@ public class ReportController {
 		validExtensions.add("xls");
 		validExtensions.add("xlsx");
 		validExtensions.add("png");
-		validExtensions.add("jpeg");
+		validExtensions.add("jpg");
 
-		long maxUploadSize = Config.getSettings().getMaxFileUploadSize(); //size in MB
+		long maxUploadSize = Config.getSettings().getMaxFileUploadSizeMB(); //size in MB
 		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
 
 		//save template file

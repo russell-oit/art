@@ -1,34 +1,17 @@
 ART 3.0
-* Fix for incorrect handling of " within lov parameter values
-* Fix for incorrect sorting of numeric values with grid view mode in italian locale
-* Fix for error when using Conditional Email Output (Inline) jobs
-* Fix for null pointer exception when clob field (e.g. varchar(max)) is null
-* Fix for error when running a job that uses a jXLS spreadsheet query
 * Reorganised the code for easier maintenance and enhanced user experience
- - now using maven, spring mvc, bootstrap, datatables, among other libraries 
-* Enable multi parameter to act as a chained parameter master
-* Allow chained parameter slave to have default values
-* Improved support for sun jdbc-odbc bridge driver
-* Allow datasources to be disabled
+ - now using maven, spring mvc, bootstrap, among other libraries
 * Renamed "Report on Column" query types to "Group"
 * Renamed "Graph" query types to "Chart"
 * Renamed "Query" concept to "Report"
 * Renamed "View Modes" to "Report Formats"
 * Renamed "Rules" to "Filters"
-* Interchanged meaning of parameter name and label
 * Modified application settings configuration. Settings need to be manually re-entered.
 * Modified application urls. Previously bookmarked urls may no longer work.
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0
-* Updated cewolf to 1.2.4
-* Updated jasperreports to 5.5.1
-* Updated jtds to 1.3.1
-* Updated quartz to 2.2.1
-* Updated poi to 3.10
-* Updated jxls to 1.0.5
-* Updated datatables to 1.10
-* Updated logback to 1.1.2
+* Updated libraries, including jasperreports, quartz, jxls, among others
 
 ART 2.5.3
 * Fix for incorrect handling of " in parameter value

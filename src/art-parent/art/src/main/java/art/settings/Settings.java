@@ -62,24 +62,24 @@ public class Settings implements Serializable {
 	private int mondrianCacheExpiryPeriod;
 	private boolean schedulingEnabled = true;
 	private String rssLink;
-	private int maxFileUploadSize = 5; //size in MB
+	private int maxFileUploadSizeMB = 5;
 
 	/**
-	 * Get the value of maxFileUploadSize
+	 * Get the value of maxFileUploadSizeMB
 	 *
-	 * @return the value of maxFileUploadSize
+	 * @return the value of maxFileUploadSizeMB
 	 */
-	public int getMaxFileUploadSize() {
-		return maxFileUploadSize;
+	public int getMaxFileUploadSizeMB() {
+		return maxFileUploadSizeMB;
 	}
 
 	/**
-	 * Set the value of maxFileUploadSize
+	 * Set the value of maxFileUploadSizeMB
 	 *
-	 * @param maxFileUploadSize new value of maxFileUploadSize
+	 * @param maxFileUploadSizeMB new value of maxFileUploadSizeMB
 	 */
-	public void setMaxFileUploadSize(int maxFileUploadSize) {
-		this.maxFileUploadSize = maxFileUploadSize;
+	public void setMaxFileUploadSizeMB(int maxFileUploadSizeMB) {
+		this.maxFileUploadSizeMB = maxFileUploadSizeMB;
 	}
 
 	/**

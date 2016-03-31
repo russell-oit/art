@@ -17,6 +17,7 @@
  */
 package art.output;
 
+import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.enums.ReportType;
 import art.report.Report;
@@ -24,7 +25,11 @@ import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,10 +37,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import net.sf.jxls.exception.ParsePropertyException;
-import net.sf.jxls.transformer.XLSTransformer;
+//import net.sf.jxls.exception.ParsePropertyException;
+//import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.jxls.common.Context;
+import org.jxls.jdbc.JdbcHelper;
+import org.jxls.util.JxlsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,8 +78,8 @@ public class JxlsOutput {
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
 			ReportType reportType, String outputFileName)
-			throws SQLException, ParsePropertyException, IOException, InvalidFormatException {
-		
+			throws SQLException, IOException, InvalidFormatException {
+
 		logger.debug("Entering generateReport");
 
 		Objects.requireNonNull(report, "report must not be null");
@@ -93,26 +101,42 @@ public class JxlsOutput {
 
 			//set objects to be passed to jxls
 			Map<String, Object> jxlsParams = new HashMap<>();
+			Context context = new Context();
 
 			//pass query parameters
 			for (ReportParameter reportParam : reportParams) {
-				jxlsParams.put(reportParam.getParameter().getName(), reportParam.getEffectiveActualParameterValue());
+//				jxlsParams.put(reportParam.getParameter().getName(), reportParam.getEffectiveActualParameterValue());
+				context.putVar(reportParam.getParameter().getName(), reportParam.getEffectiveActualParameterValue());
 			}
 
 			if (reportType == ReportType.JxlsTemplate) {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
-				JxlsReportManager reportManager = new JxlsReportManager(conn);
-				jxlsParams.put("rm", reportManager);
+//				JxlsReportManager reportManager = new JxlsReportManager(conn);
+//				jxlsParams.put("rm", reportManager);
+				JdbcHelper jdbcHelper = new JdbcHelper(conn);
+				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
+					try (OutputStream os = new FileOutputStream(outputFileName)) {
+						context.putVar("conn", conn);
+						context.putVar("jdbc", jdbcHelper);
+						JxlsHelper.getInstance().processTemplate(is, os, context);
+					}
+				}
 			} else {
 				//use recordset based on art query 
 				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, false, true); //use lowercase properties = false, use column labels =true
-				jxlsParams.put("results", rsdc.getRows());
+//				jxlsParams.put("results", rsdc.getRows());
+				context.putVar("results", rsdc.getRows());
+				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
+					try (OutputStream os = new FileOutputStream(outputFileName)) {
+						JxlsHelper.getInstance().processTemplate(is, os, context);
+					}
+				}
 			}
 
 			//generate output
-			XLSTransformer transformer = new XLSTransformer();
-			transformer.transformXLS(fullTemplateFileName, jxlsParams, outputFileName);
+//			XLSTransformer transformer = new XLSTransformer();
+//			transformer.transformXLS(fullTemplateFileName, jxlsParams, outputFileName);
 		} finally {
 			DatabaseUtils.close(conn);
 		}

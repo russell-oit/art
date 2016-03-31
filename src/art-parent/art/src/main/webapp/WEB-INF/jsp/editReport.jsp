@@ -630,7 +630,7 @@ Edit report page
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
 						</div>
 						<div>
-							<spring:message code="reports.text.resources"/>
+							<b><spring:message code="reports.text.resources"/></b>
 						</div>
 						<div class="fileinput fileinput-new" data-provides="fileinput">
 							<span class="btn btn-default btn-file">

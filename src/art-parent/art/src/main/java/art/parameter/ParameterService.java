@@ -296,10 +296,10 @@ public class ParameterService {
 			String sql = "INSERT INTO ART_PARAMETERS"
 					+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
 					+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
-					+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV, CHAINED_POSITION,"
-					+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
+					+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV,"
+					+ " DRILLDOWN_COLUMN_INDEX,"
 					+ " USE_DIRECT_SUBSTITUTION, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 18) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
 
 			Object[] values = {
 				parameter.getParameterId(),
@@ -314,8 +314,6 @@ public class ParameterService {
 				parameter.isUseLov(),
 				parameter.getLovReportId(),
 				parameter.isUseFiltersInLov(),
-				parameter.getChainedPosition(),
-				parameter.getChainedValuePosition(),
 				parameter.getDrilldownColumnIndex(),
 				parameter.isUseDirectSubstitution(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
@@ -327,7 +325,6 @@ public class ParameterService {
 			String sql = "UPDATE ART_PARAMETERS SET NAME=?, DESCRIPTION=?, PARAMETER_TYPE=?,"
 					+ " PARAMETER_LABEL=?, HELP_TEXT=?, DATA_TYPE=?, DEFAULT_VALUE=?,"
 					+ " HIDDEN=?, USE_LOV=?, LOV_REPORT_ID=?, USE_FILTERS_IN_LOV=?,"
-					+ " CHAINED_POSITION=?, CHAINED_VALUE_POSITION=?,"
 					+ " DRILLDOWN_COLUMN_INDEX=?, USE_DIRECT_SUBSTITUTION=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE PARAMETER_ID=?";
@@ -344,8 +341,6 @@ public class ParameterService {
 				parameter.isUseLov(),
 				parameter.getLovReportId(),
 				parameter.isUseFiltersInLov(),
-				parameter.getChainedPosition(),
-				parameter.getChainedValuePosition(),
 				parameter.getDrilldownColumnIndex(),
 				parameter.isUseDirectSubstitution(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
