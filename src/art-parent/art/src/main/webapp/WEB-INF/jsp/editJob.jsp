@@ -135,15 +135,17 @@
 						url: '${pageContext.request.contextPath}/app/getSchedule.do',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response) //on recieve of reply
+						success: function (response)
 						{
 							var schedule = response.data;
 
-							$('#scheduleMinute').val(schedule.minute);
-							$('#scheduleHour').val(schedule.hour);
-							$('#scheduleDay').val(schedule.day);
-							$('#scheduleMonth').val(schedule.month);
-							$('#scheduleWeekday').val(schedule.weekday);
+							if (schedule !== null) {
+								$('#scheduleMinute').val(schedule.minute);
+								$('#scheduleHour').val(schedule.hour);
+								$('#scheduleDay').val(schedule.day);
+								$('#scheduleMonth').val(schedule.month);
+								$('#scheduleWeekday').val(schedule.weekday);
+							}
 						},
 						error: ajaxErrorHandler
 					});

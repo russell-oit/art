@@ -672,12 +672,10 @@ public class ReportService {
 		List<Map<String, Object>> sourceLines = dbService.query(sql, h, reportId);
 
 		StringBuilder sb = new StringBuilder(1024);
-		if (!sourceLines.isEmpty()) {
-			for (Map<String, Object> sourceLine : sourceLines) {
-				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				String line = (String) sourceLine.get("SOURCE_INFO");
-				sb.append(line);
-			}
+		for (Map<String, Object> sourceLine : sourceLines) {
+			//map list handler uses a case insensitive map, so case of column names doesn't matter
+			String line = (String) sourceLine.get("SOURCE_INFO");
+			sb.append(line);
 		}
 
 		String finalSource = sb.toString();
@@ -946,6 +944,64 @@ public class ReportService {
 		};
 
 		dbService.update(sql, values);
+	}
+
+	/**
+	 * Determine if query is only directly allocated to a single user
+	 *
+	 * @param conn connection to art repository
+	 * @param username username of user to check
+	 * @return <code>true</code> if user has exclusive access to this query
+	 */
+	public boolean hasExclusiveAccess(User user, Report report) throws SQLException {
+		boolean exclusive = false;
+
+		String sql;
+		int userAccessCount = 0;
+		boolean userHasAccess = false;
+		boolean assignedToGroup = false;
+
+		sql = "SELECT USER_GROUP_ID FROM ART_USER_GROUP_QUERIES "
+				+ " WHERE QUERY_ID = ?";
+
+		int reportId = report.getReportId();
+
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> userGroupsList = dbService.query(sql, h, reportId);
+
+		if (!userGroupsList.isEmpty()) {
+			//query granted to a group. user doesn't have exclusive access
+			assignedToGroup = true;
+		}
+
+		if (!assignedToGroup) {
+			sql = "SELECT USERNAME FROM ART_USER_QUERIES "
+					+ " WHERE QUERY_ID = ?";
+
+			ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+			List<Map<String, Object>> usersList = dbService.query(sql, h2, reportId);
+
+			String username = user.getUsername();
+			for (Map<String, Object> userRecord : usersList) {
+				userAccessCount++;
+				if (userAccessCount >= 2) {
+					//more than one user has access
+					break;
+				}
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				String usernameValue = (String) userRecord.get("USERNAME");
+				if (StringUtils.equals(username, usernameValue)) {
+					userHasAccess = true;
+				}
+			}
+		}
+
+		if (!assignedToGroup && userHasAccess && userAccessCount == 1) {
+			//only one user has explicit access
+			exclusive = true;
+		}
+
+		return exclusive;
 	}
 
 }

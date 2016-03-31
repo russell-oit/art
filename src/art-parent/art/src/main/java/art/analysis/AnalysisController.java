@@ -72,7 +72,7 @@ public class AnalysisController {
 	@RequestMapping(value = "/app/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showAnalysis(HttpServletRequest request, Model model,
 			HttpSession session) {
-		
+
 		logger.debug("Entering showAnalysis");
 
 		try {
@@ -88,7 +88,7 @@ public class AnalysisController {
 				//save to session in case olap navigator is used
 				reportId = Integer.parseInt(request.getParameter("reportId"));
 				session.setAttribute("pivotReportId", reportId);
-				
+
 				logger.debug("reportId={}", reportId);
 			}
 
@@ -138,13 +138,13 @@ public class AnalysisController {
 	private void prepareVariables(HttpServletRequest request, HttpSession session,
 			Report report, Model model) throws NumberFormatException, SQLException, ParseException, MalformedURLException {
 
-		int queryId = report.getReportId();
-		model.addAttribute("reportId", queryId);
+		int reportId = report.getReportId();
+		model.addAttribute("reportId", reportId);
 
 		String reportName = report.getName();
 		model.addAttribute("reportName", reportName);
 
-		String jpivotQueryId = "query" + queryId;
+		String jpivotQueryId = "query" + reportId;
 		model.addAttribute("jpivotQueryId", jpivotQueryId);
 
 		if (request.getParameter("action") == null && request.getParameter("null") == null) {
@@ -160,7 +160,7 @@ public class AnalysisController {
 
 			//put title in session. may be lost if olap navigator option on jpivot toolbar is used
 			String title = report.getName();
-			session.setAttribute("pivotTitle" + queryId, title);
+			session.setAttribute("pivotTitle" + reportId, title);
 
 			if (reportType == ReportType.Mondrian) {
 				Datasource ds = report.getDatasource();
@@ -234,25 +234,32 @@ public class AnalysisController {
 
 			String query = reportRunner.getQuerySql();
 			model.addAttribute("query", query);
+
+			//check if this is the only user who has access. if so, he can overwrite the pivot table view with a different view
+			boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, report);
+
+			//save status in the session. will be lost as navigation is done on the pivot table
+			session.setAttribute("pivotExclusiveAccess" + reportId, exclusiveAccess);
 		}
 
 		//get title from session
-		String title = (String) session.getAttribute("pivotTitle" + queryId);
+		String title = (String) session.getAttribute("pivotTitle" + reportId);
 		model.addAttribute("title", title);
 
-//get exclusive access status from the session
-//	Boolean accessBoolean = (Boolean) session.getAttribute("pivotExclusiveAccess" + queryId);
-//	exclusiveAccess = accessBoolean.booleanValue();
-//set identifiers for jpivot objects
-		String tableId = "table" + queryId;
-		String mdxEditId = "mdxedit" + queryId;
-		String printId = "print" + queryId;
-		String printFormId = "printform" + queryId;
-		String navigatorId = "navi" + queryId;
-		String sortFormId = "sortform" + queryId;
-		String chartId = "chart" + queryId;
-		String chartFormId = "chartform" + queryId;
-		String toolbarId = "toolbar" + queryId;
+		//get exclusive access status from the session
+		Boolean exclusiveAccess = (Boolean) session.getAttribute("pivotExclusiveAccess" + reportId);
+		model.addAttribute("exclusiveAccess", exclusiveAccess);
+
+		//set identifiers for jpivot objects
+		String tableId = "table" + reportId;
+		String mdxEditId = "mdxedit" + reportId;
+		String printId = "print" + reportId;
+		String printFormId = "printform" + reportId;
+		String navigatorId = "navi" + reportId;
+		String sortFormId = "sortform" + reportId;
+		String chartId = "chart" + reportId;
+		String chartFormId = "chartform" + reportId;
+		String toolbarId = "toolbar" + reportId;
 
 		String queryDrillThroughTable = jpivotQueryId + ".drillthroughtable";
 
@@ -277,8 +284,8 @@ public class AnalysisController {
 		String chartFormVisible = "#{" + chartFormId + ".visible}";
 		String printFormVisible = "#{" + printFormId + ".visible}";
 
-		String printExcel = request.getContextPath() + "/Print?cube=" + queryId + "&type=0";
-		String printPdf = request.getContextPath() + "/Print?cube=" + queryId + "&type=1";
+		String printExcel = request.getContextPath() + "/Print?cube=" + reportId + "&type=0";
+		String printPdf = request.getContextPath() + "/Print?cube=" + reportId + "&type=1";
 
 		model.addAttribute("tableId", tableId);
 		model.addAttribute("mdxEditId", mdxEditId);
@@ -335,7 +342,7 @@ public class AnalysisController {
 		}
 
 //save current mdx in the session
-		session.setAttribute("mdx" + queryId, currentMdx);
+		session.setAttribute("mdx" + reportId, currentMdx);
 
 //get object with olap query and result
 		OlapModel _olapModel = (OlapModel) session.getAttribute(jpivotQueryId);
