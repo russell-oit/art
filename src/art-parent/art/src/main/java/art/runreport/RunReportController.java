@@ -349,7 +349,7 @@ public class RunReportController {
 					reportOutputGenerator.setResponse(response);
 					reportOutputGenerator.setServletContext(servletContext);
 
-					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner, reportType,
+					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
 							reportFormat, locale, paramProcessorResult, writer, outputFileName);
 
 					if (outputResult.isSuccess()) {

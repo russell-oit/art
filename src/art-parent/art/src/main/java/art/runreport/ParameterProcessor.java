@@ -429,11 +429,11 @@ public class ParameterProcessor {
 					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "chartWidth")) {
 					if (StringUtils.isNotBlank(paramValue)) {
-						chartOptions.setWidth(Integer.parseInt(paramValue));
+						chartOptions.setWidth(Integer.valueOf(paramValue));
 					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "chartHeight")) {
 					if (StringUtils.isNotBlank(paramValue)) {
-						chartOptions.setHeight(Integer.parseInt(paramValue));
+						chartOptions.setHeight(Integer.valueOf(paramValue));
 					}
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "yAxisMin")) {
 					if (StringUtils.isNotBlank(paramValue)) {

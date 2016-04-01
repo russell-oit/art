@@ -785,7 +785,7 @@ public class ReportJob implements org.quartz.Job {
 					reportOutputGenerator.setJobId(jobId);
 
 					Locale locale = Locale.getDefault();
-					reportOutputGenerator.generateOutput(report, reportRunner, reportType,
+					reportOutputGenerator.generateOutput(report, reportRunner,
 							reportFormat, locale, paramProcessorResult, writer, outputFileName);
 
 					// the file is on the PrintWriter (for html)

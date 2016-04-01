@@ -32,8 +32,8 @@ public class ChartOptions implements Serializable {
 	private boolean showData;
 	private int rotateAt;
 	private int removeAt;
-	private int width;
-	private int height;
+	private Integer width;
+	private Integer height;
 	private double yAxisMin;
 	private double yAxisMax;
 	private String backgroundColor;
@@ -140,28 +140,28 @@ public class ChartOptions implements Serializable {
 	/**
 	 * @return the width
 	 */
-	public int getWidth() {
+	public Integer getWidth() {
 		return width;
 	}
 
 	/**
 	 * @param width the width to set
 	 */
-	public void setWidth(int width) {
+	public void setWidth(Integer width) {
 		this.width = width;
 	}
 
 	/**
 	 * @return the height
 	 */
-	public int getHeight() {
+	public Integer getHeight() {
 		return height;
 	}
 
 	/**
 	 * @param height the height to set
 	 */
-	public void setHeight(int height) {
+	public void setHeight(Integer height) {
 		this.height = height;
 	}
 

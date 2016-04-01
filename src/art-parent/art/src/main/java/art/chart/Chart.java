@@ -71,8 +71,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private static final long serialVersionUID = 1L;
 	protected final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
-	private int height = 300;
-	private int width = 500;
 	private String backgroundColor = WHITE_HEX_COLOR_CODE;
 	private Dataset dataset;
 	private ChartOptions chartOptions;
@@ -184,34 +182,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	/**
-	 * @return the height
-	 */
-	public int getHeight() {
-		return height;
-	}
-
-	/**
-	 * @param height the height to set
-	 */
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
-	/**
-	 * @return the width
-	 */
-	public int getWidth() {
-		return width;
-	}
-
-	/**
-	 * @param width the width to set
-	 */
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	/**
 	 * @return the backgroundColor
 	 */
 	public String getBackgroundColor() {
@@ -250,13 +220,6 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 */
 	public String getTitle() {
 		return title;
-	}
-
-	/**
-	 * @return the showLegend
-	 */
-	public boolean isShowLegend() {
-		return showLegend;
 	}
 
 	/**
@@ -451,7 +414,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	//produces the basic jfree chart. called by getChart()
 	@Override
 	protected JFreeChart produceChart() throws DatasetProduceException, ChartValidationException {
-		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, showLegend);
+		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, chartOptions.isShowLegend());
 	}
 
 	public void generateFile(ReportFormat reportFormat, String outputFileName, RowSetDynaClass data)
@@ -460,7 +423,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		JFreeChart chart = getFinalChart();
 
 		if (reportFormat == ReportFormat.png) {
-			ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, width, height);
+			ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(),chartOptions.getHeight());
 		} else if (reportFormat == ReportFormat.pdf) {
 			PdfChart.createPdf(chart, outputFileName, title, data, reportParamsList);
 		} else {

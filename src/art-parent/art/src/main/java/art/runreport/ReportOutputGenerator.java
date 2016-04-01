@@ -160,7 +160,7 @@ public class ReportOutputGenerator {
 	}
 
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
-			ReportType reportType, ReportFormat reportFormat, Locale locale,
+			ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
 			PrintWriter writer, String fullOutputFilename)
 			throws IOException, SQLException, JRException,
@@ -176,6 +176,7 @@ public class ReportOutputGenerator {
 		Integer rowsRetrieved = null;
 
 		int reportId = report.getReportId();
+		ReportType reportType = report.getReportType();
 
 		boolean isJob = false;
 		if (jobId > 0) {
@@ -195,7 +196,7 @@ public class ReportOutputGenerator {
 
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
-			ChartOptions chartOptions = paramProcessorResult.getChartOptions();
+			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
@@ -274,26 +275,10 @@ public class ReportOutputGenerator {
 						throw new IllegalArgumentException("Unexpected chart report type: " + reportType);
 				}
 
-				//set default label format.
-				//{2} for category based charts
-				//{0} ({2}) for pie chart html output
-				//{0} = {1} ({2}) for pie chart png and pdf output
-				String labelFormat = chartOptions.getLabelFormat();
-				if (StringUtils.isBlank(labelFormat)) {
-					if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
-						if (reportFormat == ReportFormat.html) {
-							labelFormat = "{0} ({2})";
-						} else {
-							labelFormat = "{0} = {1} ({2})";
-						}
-					} else {
-						labelFormat = "{2}";
-					}
-					chartOptions.setLabelFormat(labelFormat);
-				}
+				ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
 
 				chart.setLocale(locale);
-				chart.setChartOptions(chartOptions);
+				chart.setChartOptions(effectiveChartOptions);
 				chart.setTitle(report.getShortDescription());
 
 				Drilldown drilldown = null;
@@ -308,7 +293,7 @@ public class ReportOutputGenerator {
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
-				if (chartOptions.isShowData()
+				if (parameterChartOptions.isShowData()
 						&& (reportFormat == ReportFormat.html || reportFormat == ReportFormat.pdf)) {
 					int rsType = rs.getType();
 					if (rsType == ResultSet.TYPE_SCROLL_INSENSITIVE || rsType == ResultSet.TYPE_SCROLL_SENSITIVE) {
@@ -477,6 +462,58 @@ public class ReportOutputGenerator {
 		}
 
 		return rowCount;
+	}
+
+	private ChartOptions getEffectiveChartOptions(Report report, ChartOptions parameterChartOptions,
+			ReportFormat reportFormat) {
+
+		ChartOptions reportChartOptions = report.getChartOptions();
+		ChartOptions effectiveChartOptions = parameterChartOptions;
+
+		Integer width = effectiveChartOptions.getWidth();
+		if (width == null || width <= 0) {
+			effectiveChartOptions.setWidth(reportChartOptions.getWidth());
+		}
+		width = effectiveChartOptions.getWidth();
+		if (width == null || width <= 0) {
+			final int DEFAULT_WIDTH = 500;
+			effectiveChartOptions.setWidth(DEFAULT_WIDTH);
+		}
+
+		Integer height = effectiveChartOptions.getHeight();
+		if (height == null || height <= 0) {
+			effectiveChartOptions.setHeight(reportChartOptions.getHeight());
+		}
+		height = effectiveChartOptions.getHeight();
+		if (height == null || height <= 0) {
+			final int DEFAULT_HEIGHT = 300;
+			effectiveChartOptions.setHeight(DEFAULT_HEIGHT);
+		}
+
+		//set default label format.
+		//{2} for category based charts
+		//{0} ({2}) for pie chart html output
+		//{0} = {1} ({2}) for pie chart png and pdf output
+		ReportType reportType = report.getReportType();
+		String labelFormat = effectiveChartOptions.getLabelFormat();
+		if (StringUtils.isBlank(labelFormat)) {
+			effectiveChartOptions.setLabelFormat(reportChartOptions.getLabelFormat());
+		}
+		labelFormat = effectiveChartOptions.getLabelFormat();
+		if (StringUtils.isBlank(labelFormat)) {
+			if (reportType == ReportType.Pie2DChart || reportType == ReportType.Pie3DChart) {
+				if (reportFormat == ReportFormat.html) {
+					labelFormat = "{0} ({2})";
+				} else {
+					labelFormat = "{0} = {1} ({2})";
+				}
+			} else {
+				labelFormat = "{2}";
+			}
+			effectiveChartOptions.setLabelFormat(labelFormat);
+		}
+
+		return effectiveChartOptions;
 	}
 
 }
