@@ -79,7 +79,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 	@Override
 	public void beginHeader() {
 		out.println("<div style='border: 1px solid black; width: 95%; margin: 0 auto'>");
-		out.println("<table class='display' id='" + tableId + "'>");
+		out.println("<table class='table table-bordered table-striped table-condensed' id='" + tableId + "'>");
 		out.println("<thead><tr>");
 	}
 
