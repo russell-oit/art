@@ -555,8 +555,9 @@ public class ReportController {
 		}
 
 		//set report source for text reports
-		logger.debug("report.getReportType()={}", report.getReportType());
-		ReportType reportType = report.getReportType();
+		logger.debug("report.getReportTypeId()={}", report.getReportTypeId());
+		ReportType reportType = ReportType.toEnum(report.getReportTypeId());
+		report.setReportType(reportType);
 		if (reportType == ReportType.Text) {
 			report.setReportSource(report.getReportSourceHtml());
 		}

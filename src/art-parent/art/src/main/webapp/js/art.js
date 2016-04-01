@@ -447,7 +447,7 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 		if (showConfirmDialog) {
 			//display confirm dialog
 			bootbox.confirm({
-				message: "<b>" + deleteRecordText + ":</b> " + recordName,
+				message: deleteRecordText + ": <b>" + recordName + "</b>",
 				buttons: {
 					cancel: {
 						label: cancelText

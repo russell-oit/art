@@ -233,13 +233,13 @@ Edit report page
 					$("#chartFields").hide();
 				}
 				
-				//show/hide display resultset
+				//show/hide group column
 				switch (reportTypeId) {
 					case 1: //group
-						$("#groupColumntDiv").show();
+						$("#groupColumnDiv").show();
 						break;
 					default:
-						$("#groupColumntDiv").hide();
+						$("#groupColumnDiv").hide();
 				}
 			}
 		</script>
