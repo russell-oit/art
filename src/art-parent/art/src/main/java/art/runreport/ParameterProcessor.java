@@ -117,6 +117,8 @@ public class ParameterProcessor {
 		setActualParameterValues(reportParamsList);
 		handleAllValues(reportParamsMap);
 
+		setLovValues(reportParamsMap);
+
 		ParameterProcessorResult result = new ParameterProcessorResult();
 
 		result.setReportParamsList(reportParamsList);
@@ -131,6 +133,26 @@ public class ParameterProcessor {
 		setIsChainedParent(reportParamsList);
 
 		return result;
+	}
+
+	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
+		ReportService reportService = new ReportService();
+		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+			ReportParameter reportParam = entry.getValue();
+			Parameter param = reportParam.getParameter();
+			if (param.isUseLov()) {
+				ReportRunner lovReportRunner = new ReportRunner();
+				int lovReportId = param.getLovReportId();
+				Report lovReport = reportService.getReport(lovReportId);
+				lovReportRunner.setReport(lovReport);
+				lovReportRunner.setReportParamsMap(reportParamsMap);
+				boolean applyFilters = false; //don't apply filters so as to get all values
+				Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
+				reportParam.setLovValues(lovValues);
+				Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
+				reportParam.setLovValuesAsString(lovValuesAsString);
+			}
+		}
 	}
 
 	private void setPassedParameterValues(Map<String, String[]> passedValuesMap, Map<String, ReportParameter> reportParamsMap) {
@@ -196,12 +218,11 @@ public class ParameterProcessor {
 					lovReportRunner.setReport(lovReport);
 					lovReportRunner.setReportParamsMap(reportParamsMap);
 					boolean applyFilters = false; //don't apply filters so as to get all values
-					Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
+					Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
 
 					List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
-					for (Entry<String, String> entry2 : lovValues.entrySet()) {
-						String actualValueString = entry2.getKey();
-						Object actualValue = convertParameterStringValueToObject(actualValueString, param);
+					for (Entry<Object, String> entry2 : lovValues.entrySet()) {
+						Object actualValue = entry2.getKey();
 						actualValues.add(actualValue);
 					}
 					reportParam.setActualParameterValues(actualValues);

@@ -34,8 +34,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
-//import net.sf.jxls.exception.ParsePropertyException;
-//import net.sf.jxls.transformer.XLSTransformer;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jxls.common.Context;
@@ -101,7 +99,10 @@ public class JxlsOutput {
 
 			//pass query parameters
 			for (ReportParameter reportParam : reportParams) {
-				context.putVar(reportParam.getParameter().getName(), reportParam.getEffectiveActualParameterValue());
+				String paramName = reportParam.getParameter().getName();
+//				context.putVar(paramName, reportParam.getEffectiveActualParameterValue());
+				String paramKey = "param." + paramName;
+				context.putVar(paramName, reportParam);
 			}
 
 			if (reportType == ReportType.JxlsTemplate) {

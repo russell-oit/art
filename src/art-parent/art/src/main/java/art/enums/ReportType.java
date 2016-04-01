@@ -92,10 +92,12 @@ public enum ReportType {
 	 * @return
 	 */
 	public boolean isJxls() {
-		if (this == JxlsArt || this == JxlsTemplate) {
-			return true;
-		} else {
-			return false;
+		switch (this) {
+			case JxlsArt:
+			case JxlsTemplate:
+				return true;
+			default:
+				return false;
 		}
 	}
 

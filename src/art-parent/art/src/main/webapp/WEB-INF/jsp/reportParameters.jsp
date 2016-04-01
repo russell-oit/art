@@ -12,8 +12,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 
-<c:forEach var="reportParam" items="${reportParamsList}">
-	<c:set var="reportParam" value="${reportParam}" scope="request"/>
+<c:forEach var="reportParameter" items="${reportParams}">
+	<c:set var="reportParam" value="${reportParameter.value}" scope="request"/>
 
 	<div class="form-group">
 		<label class="control-label col-md-5" for="${reportParam.htmlElementName}">
@@ -23,7 +23,7 @@
 			<div class="input-group">
 				<c:choose>
 					<c:when test="${reportParam.parameter.useLov}">
-						<c:set var="lovValues" value="${reportParam.lovValues}" scope="request"/>
+						<c:set var="lovValues" value="${reportParam.lovValuesAsString}" scope="request"/>
 						<c:choose>
 							<c:when test="${not empty reportParam.chainedParents}">
 								<jsp:include page="chainedInput.jsp" />

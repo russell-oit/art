@@ -77,7 +77,7 @@ public class ParameterController {
 
 		try {
 			ActionResult deleteResult = parameterService.deleteParameter(id);
-			
+
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -97,7 +97,10 @@ public class ParameterController {
 	public String addParameter(Model model) {
 		logger.debug("Entering addParameter");
 
-		model.addAttribute("parameter", new Parameter());
+		Parameter param = new Parameter();
+		param.setParameterType(ParameterType.SingleValue);
+
+		model.addAttribute("parameter", param);
 		return showParameter("add", model);
 	}
 

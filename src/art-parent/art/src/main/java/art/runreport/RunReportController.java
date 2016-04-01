@@ -43,6 +43,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
@@ -339,7 +340,15 @@ public class RunReportController {
 					String baseFileName = filenameHelper.getFileName(report);
 					String exportPath = Config.getReportsExportPath();
 
-					String fileName = baseFileName + "." + reportFormat.getFilenameExtension();
+					String extension;
+					if (reportType.isJxls()) {
+						String jxlsFilename = report.getTemplate();
+						extension = FilenameUtils.getExtension(jxlsFilename);
+					} else {
+						extension = reportFormat.getFilenameExtension();
+					}
+
+					String fileName = baseFileName + "." + extension;
 					String outputFileName = exportPath + fileName;
 
 					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();

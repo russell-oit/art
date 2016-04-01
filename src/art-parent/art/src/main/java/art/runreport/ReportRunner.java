@@ -894,7 +894,7 @@ public class ReportRunner {
 
 		return lovValues;
 	}
-
+	
 	public Map<Object, String> getLovValuesAsObjects(boolean newUseRules) throws SQLException {
 		return getLovValuesAsObjects(true, newUseRules);
 	}

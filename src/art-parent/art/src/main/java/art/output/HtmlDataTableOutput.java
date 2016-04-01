@@ -33,9 +33,10 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void init() {
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.9.4/css/demo_table.css'>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.6.2.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.9.4/js/jquery.dataTables.min.js'></script>");
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.11/css/dataTables.bootstrap.min.css'>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.10.2.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.11/js/jquery.dataTables.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.11/js/dataTables.bootstrap.min.js'></script>");
 
 		//set language file to use for localization. language files to be put in the /js directory and to be named dataTables.xx_XX.txt	
 		//language file content examples at http://datatables.net/plug-ins/i18n

@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -127,13 +128,21 @@ public class ReportController {
 							lovReportRunner.setReport(lovReport);
 							lovReportRunner.setReportParamsMap(reportParamsMap);
 							boolean applyFilters = false; //don't apply filters so as to get all values
-							Map<String, String> lovValues = lovReportRunner.getLovValues(applyFilters);
+							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
 							reportParam.setLovValues(lovValues);
+							Map<String, String> lovValuesAsString=reportParam.convertLovValuesFromObjectToString(lovValues);
+							reportParam.setLovValuesAsString(lovValuesAsString);
 						}
 					}
 				}
+				
+				//create map in order to display parameters by position
+				Map<Integer,ReportParameter> reportParams=new TreeMap<>();
+				for(ReportParameter reportParam : reportParamsList){
+					reportParams.put(reportParam.getPosition(), reportParam);
+				}
 
-				model.addAttribute("reportParamsList", reportParamsList);
+				model.addAttribute("reportParams", reportParams);
 
 				ReportType reportType = report.getReportType();
 
@@ -146,6 +155,8 @@ public class ReportController {
 					case Update:
 					case Text:
 					case TabularHtml:
+					case JxlsArt:
+					case JxlsTemplate:
 						enableReportFormats = false;
 						break;
 					default:
@@ -273,10 +284,6 @@ public class ReportController {
 					formats.add("xls");
 					formats.add("xlsx");
 					formats.add("html");
-					break;
-				case JxlsArt:
-				case JxlsTemplate:
-					formats.add("xls");
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);

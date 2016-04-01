@@ -25,6 +25,7 @@ import art.utils.ArtUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -42,11 +43,30 @@ public class ReportParameter implements Serializable {
 	private Parameter parameter;
 	private int position;
 	private String[] passedParameterValues; //used for run report logic
-	private Map<String, String> lovValues; //store value and label for lov parameters
+	private Map<Object, String> lovValues; //store value and label for lov parameters
 	private List<Object> actualParameterValues;
 	private String chainedParents;
 	private String chainedDepends;
 	private boolean chainedParent;
+	private Map<String, String> lovValuesAsString;
+	
+	public Object getValue(){
+		return getEffectiveActualParameterValue();
+	}
+
+	/**
+	 * @return the lovValuesAsString
+	 */
+	public Map<String, String> getLovValuesAsString() {
+		return lovValuesAsString;
+	}
+
+	/**
+	 * @param lovValuesAsString the lovValuesAsString to set
+	 */
+	public void setLovValuesAsString(Map<String, String> lovValuesAsString) {
+		this.lovValuesAsString = lovValuesAsString;
+	}
 
 	/**
 	 * @return the chainedParent
@@ -113,7 +133,7 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @return the value of lovValues
 	 */
-	public Map<String, String> getLovValues() {
+	public Map<Object, String> getLovValues() {
 		return lovValues;
 	}
 
@@ -122,7 +142,7 @@ public class ReportParameter implements Serializable {
 	 *
 	 * @param lovValues new value of lovValues
 	 */
-	public void setLovValues(Map<String, String> lovValues) {
+	public void setLovValues(Map<Object, String> lovValues) {
 		this.lovValues = lovValues;
 	}
 
@@ -228,12 +248,16 @@ public class ReportParameter implements Serializable {
 
 		for (Object paramValue : actualParameterValues) {
 			String paramValueString;
-			if (parameter.getDataType() == ParameterDataType.Date) {
-				paramValueString = ArtUtils.isoDateFormatter.format((Date) paramValue);
-			} else if (parameter.getDataType() == ParameterDataType.DateTime) {
-				paramValueString = ArtUtils.isoDateTimeFormatter.format((Date) paramValue);
-			} else {
-				paramValueString = String.valueOf(paramValue);
+			ParameterDataType parameterDataType = parameter.getDataType();
+			switch (parameterDataType) {
+				case Date:
+					paramValueString = ArtUtils.isoDateFormatter.format((Date) paramValue);
+					break;
+				case DateTime:
+					paramValueString = ArtUtils.isoDateTimeFormatter.format((Date) paramValue);
+					break;
+				default:
+					paramValueString = String.valueOf(paramValue);
 			}
 
 			String displayValue = null;
@@ -307,12 +331,37 @@ public class ReportParameter implements Serializable {
 		String finalIds = StringUtils.join(idsList, ",");
 		return finalIds;
 	}
-	
-	public boolean isChained(){
-		if(StringUtils.isBlank(chainedParents)){
+
+	public boolean isChained() {
+		if (StringUtils.isBlank(chainedParents)) {
 			return false;
 		} else {
 			return true;
 		}
+	}
+
+	public Map<String, String> convertLovValuesFromObjectToString(Map<Object, String> lovValuesAsObjects) {
+		Map<String, String> stringLovValues = new LinkedHashMap<>();
+
+		for (Map.Entry<Object, String> entry : lovValuesAsObjects.entrySet()) {
+			Object dataValue = entry.getKey();
+			String displayValue = entry.getValue();
+
+			String stringValue;
+			switch (parameter.getDataType()) {
+				case Date:
+					stringValue = ArtUtils.isoDateFormatter.format(dataValue);
+					break;
+				case DateTime:
+					stringValue = ArtUtils.isoDateTimeFormatter.format(dataValue);
+					break;
+				default:
+					stringValue = String.valueOf(dataValue);
+			}
+
+			stringLovValues.put(stringValue, displayValue);
+		}
+
+		return stringLovValues;
 	}
 }
