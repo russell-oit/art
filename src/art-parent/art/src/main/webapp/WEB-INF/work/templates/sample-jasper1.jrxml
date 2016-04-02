@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sample-jasper1" language="groovy" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="01558f1c-2289-4ef7-81fa-78992e4be9c0">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sample-jasper1" language="java" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="01558f1c-2289-4ef7-81fa-78992e4be9c0">
 	<property name="ireport.zoom" value="1.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<parameter name="order_date" class="java.util.Date">
 		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
 	</parameter>
-	<parameter name="city" class="java.lang.Long"/>
+	<parameter name="cityId" class="java.lang.Integer"/>
 	<parameter name="item" class="java.util.List"/>
 	<queryString>
 		<![CDATA[select o.order_id, c.name city_name, i.name item_name, o.order_date, o.volume from
 orders o, cities c, items i
 where o.city_id=c.city_id and o.item_id=i.item_id
 and order_date>=$P{order_date}
-and o.city_id=$P{city}
+and o.city_id=$P{cityId}
 and $X{IN,o.item_id,item}
 order by o.order_date, o.order_id]]>
 	</queryString>

@@ -100,8 +100,6 @@ public class JxlsOutput {
 			//pass query parameters
 			for (ReportParameter reportParam : reportParams) {
 				String paramName = reportParam.getParameter().getName();
-//				context.putVar(paramName, reportParam.getEffectiveActualParameterValue());
-				String paramKey = "param." + paramName;
 				context.putVar(paramName, reportParam);
 			}
 

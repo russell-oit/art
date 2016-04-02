@@ -62,6 +62,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -766,8 +767,16 @@ public class ReportJob implements org.quartz.Job {
 					FilenameHelper filenameHelper = new FilenameHelper();
 					String baseFileName = filenameHelper.getFileName(job);
 					String exportPath = Config.getJobsExportPath();
+					
+					String extension;
+					if (reportType.isJxls()) {
+						String jxlsFilename = report.getTemplate();
+						extension = FilenameUtils.getExtension(jxlsFilename);
+					} else {
+						extension = reportFormat.getFilenameExtension();
+					}
 
-					fileName = baseFileName + "." + reportFormat.getFilenameExtension();
+					fileName = baseFileName + "." + extension;
 					String outputFileName = exportPath + fileName;
 
 					//printwriter not needed for all output types. Avoid creating extra html file when output is not html, xml or rss
