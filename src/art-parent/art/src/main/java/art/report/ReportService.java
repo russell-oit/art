@@ -861,9 +861,6 @@ public class ReportService {
 				//everyone can run lov report
 				+ " QUERY_TYPE IN(?,?)"
 				+ " OR"
-				//everyone can run public text report
-				+ " QUERY_TYPE=?"
-				+ " OR"
 				//everyone can run report if the public user has direct access to it
 				+ " EXISTS (SELECT *"
 				+ " FROM ART_USER_QUERIES AUQ"

@@ -21,6 +21,7 @@ import art.drilldown.Drilldown;
 import art.parameter.Parameter;
 import art.parameter.ParameterService;
 import art.reportparameter.ReportParameter;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
@@ -33,8 +34,9 @@ import java.util.Set;
  *
  * @author Timothy Anyona
  */
-public class DrilldownLinkHelper {
+public class DrilldownLinkHelper implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private final Drilldown drilldown;
 	private final List<Parameter> drilldownParams;
 	private final Set<String> drilldownParamNames;

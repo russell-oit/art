@@ -47,118 +47,154 @@ Header that appears at the top of all pages, except the login and logs pages
 							<spring:message code="header.link.archives"/>
 						</a>
 					</li>
-					<li class="dropdown">
-						<a id="configure" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
-							<i class="fa fa-wrench"></i> 
-							<spring:message code="header.link.configure"/>
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu">
-							<li>
-								<a href="${pageContext.request.contextPath}/app/artDatabase.do">
-									<spring:message code="header.link.artDatabase"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/settings.do">
-									<spring:message code="header.link.settings"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/datasources.do">
-									<spring:message code="header.link.datasources"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/reportsConfig.do">
-									<spring:message code="header.link.reportsConfiguration"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/reportGroups.do">
-									<spring:message code="header.link.reportGroups"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/users.do">
-									<spring:message code="header.link.users"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/userGroups.do">
-									<spring:message code="header.link.userGroups"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/userGroupMembershipConfig.do">
-									<spring:message code="header.link.userGroupMembership"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/accessRightsConfig.do">
-									<spring:message code="header.link.accessRights"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/adminRightsConfig.do">
-									<spring:message code="header.link.adminRights"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/parameters.do">
-									<spring:message code="header.link.parameters"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/filters.do">
-									<spring:message code="header.link.filters"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/filterValuesConfig.do">
-									<spring:message code="header.link.filterValues"/>
-								</a>
-							</li>
-							<li>
-								<a id="jobsConfigLink" href="${pageContext.request.contextPath}/app/jobsConfig.do">
-									<spring:message code="header.link.jobsConfiguration"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/schedules.do">
-									<spring:message code="header.link.schedules"/>
-								</a>
-							</li>
-							<li class="divider"></li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/caches.do">
-									<spring:message code="header.link.caches"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/connections.do">
-									<spring:message code="header.link.connections"/>
-								</a>
-							</li>
-							<li>
-								<a href="${pageContext.request.contextPath}/app/loggers.do">
-									<spring:message code="header.link.loggers"/>
-								</a>
-							</li>
-						</ul>
-					</li>
-					<li>
-						<a href="${pageContext.request.contextPath}/app/logs.do">
-							<i class="fa fa-bars"></i> 
-							<spring:message code="header.link.logs"/>
-						</a>
-					</li>
-					<li>
-						<a href="${pageContext.request.contextPath}/docs">
-							<i class="fa fa-book"></i> 
-							<spring:message code="header.link.documentation"/>
-						</a>
-					</li>
+					<c:if test="${sessionUser.accessLevel.value >= 10 || sessionUser.accessLevel.value < 0}">
+						<li class="dropdown">
+							<a id="configure" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
+								<i class="fa fa-wrench"></i> 
+								<spring:message code="header.link.configure"/>
+								<b class="caret"></b>
+							</a>
+							<ul class="dropdown-menu">
+								<c:if test="${sessionUser.accessLevel.value >= 100 || sessionUser.accessLevel.value < 0}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/artDatabase.do">
+											<spring:message code="header.link.artDatabase"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 100}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/settings.do">
+											<spring:message code="header.link.settings"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 80}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/datasources.do">
+											<spring:message code="header.link.datasources"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 10}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/reportsConfig.do">
+											<spring:message code="header.link.reportsConfiguration"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 80}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/reportGroups.do">
+											<spring:message code="header.link.reportGroups"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 40}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/users.do">
+											<spring:message code="header.link.users"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 40}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/userGroups.do">
+											<spring:message code="header.link.userGroups"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 40}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/userGroupMembershipConfig.do">
+											<spring:message code="header.link.userGroupMembership"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 30}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/accessRightsConfig.do">
+											<spring:message code="header.link.accessRights"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 40}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/adminRightsConfig.do">
+											<spring:message code="header.link.adminRights"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 10}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/parameters.do">
+											<spring:message code="header.link.parameters"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 80}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/filters.do">
+											<spring:message code="header.link.filters"/>
+										</a>
+									</li>
+									<li>
+										<a href="${pageContext.request.contextPath}/app/filterValuesConfig.do">
+											<spring:message code="header.link.filterValues"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 40}">
+									<li>
+										<a id="jobsConfigLink" href="${pageContext.request.contextPath}/app/jobsConfig.do">
+											<spring:message code="header.link.jobsConfiguration"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 80}">
+									<li>
+										<a href="${pageContext.request.contextPath}/app/schedules.do">
+											<spring:message code="header.link.schedules"/>
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${sessionUser.accessLevel.value >= 80}">
+									<li class="divider"></li>
+									<li>
+										<a href="${pageContext.request.contextPath}/app/caches.do">
+											<spring:message code="header.link.caches"/>
+										</a>
+									</li>
+									<li>
+										<a href="${pageContext.request.contextPath}/app/connections.do">
+											<spring:message code="header.link.connections"/>
+										</a>
+									</li>
+									<li>
+										<a href="${pageContext.request.contextPath}/app/loggers.do">
+											<spring:message code="header.link.loggers"/>
+										</a>
+									</li>
+								</c:if>
+							</ul>
+						</li>
+					</c:if>
+					<c:if test="${sessionUser.accessLevel.value >= 80}">
+						<li>
+							<a href="${pageContext.request.contextPath}/app/logs.do">
+								<i class="fa fa-bars"></i> 
+								<spring:message code="header.link.logs"/>
+							</a>
+						</li>
+					</c:if>
+					<c:if test="${sessionUser.accessLevel.value >= 10}">
+						<li>
+							<a href="${pageContext.request.contextPath}/docs">
+								<i class="fa fa-book"></i> 
+								<spring:message code="header.link.documentation"/>
+							</a>
+						</li>
+					</c:if>
 					<c:if test="${authenticationMethod eq internalAuthentication}">
 						<li>
 							<a href="${pageContext.request.contextPath}/app/password.do">
