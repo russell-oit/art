@@ -136,6 +136,14 @@ public class CacheHelper {
 	public void clearFilters() {
 		logger.debug("Entering clearFilters");
 	}
+	
+	/**
+	 * Clear rules cache
+	 */
+	@CacheEvict(value = "rules", allEntries = true)
+	public void clearRules() {
+		logger.debug("Entering clearRules");
+	}
 
 	/**
 	 * Clear parameters cache
@@ -146,7 +154,7 @@ public class CacheHelper {
 	}
 
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
-		"datasources", "schedules", "jobs", "filters", "parameters"}, allEntries = true)
+		"datasources", "schedules", "jobs", "filters", "rules", "parameters"}, allEntries = true)
 	public void clearAll() {
 		clearMondrian();
 	}

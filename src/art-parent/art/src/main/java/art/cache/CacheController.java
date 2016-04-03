@@ -99,8 +99,8 @@ public class CacheController {
 				case Jobs:
 					cacheHelper.clearJobs();
 					break;
-				case Filters:
-					cacheHelper.clearFilters();
+				case Rules:
+					cacheHelper.clearRules();
 					break;
 				case Parameters:
 					cacheHelper.clearParameters();

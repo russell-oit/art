@@ -134,13 +134,13 @@ Header that appears at the top of all pages, except the login and logs pages
 								</c:if>
 								<c:if test="${sessionUser.accessLevel.value >= 80}">
 									<li>
-										<a href="${pageContext.request.contextPath}/app/filters.do">
-											<spring:message code="header.link.filters"/>
+										<a href="${pageContext.request.contextPath}/app/rules.do">
+											<spring:message code="header.link.rules"/>
 										</a>
 									</li>
 									<li>
-										<a href="${pageContext.request.contextPath}/app/filterValuesConfig.do">
-											<spring:message code="header.link.filterValues"/>
+										<a href="${pageContext.request.contextPath}/app/ruleValuesConfig.do">
+											<spring:message code="header.link.ruleValues"/>
 										</a>
 									</li>
 								</c:if>

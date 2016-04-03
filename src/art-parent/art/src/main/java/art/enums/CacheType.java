@@ -29,7 +29,7 @@ public enum CacheType {
 
 	Mondrian("Mondrian"), Reports("Reports"), ReportGroups("ReportGroups"),
 	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
-	Schedules("Schedules"), Jobs("Jobs"), Filters("Filters"), Parameters("Parameters");
+	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters");
 	private String value;
 
 	private CacheType(String value) {

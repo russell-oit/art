@@ -160,8 +160,8 @@ Reports configuration page
 									</li>
 									<li>
 										<a 
-										   href="${pageContext.request.contextPath}/app/reportFilters.do?reportId=${report.reportId}">
-											<spring:message code="reports.action.filters"/>
+										   href="${pageContext.request.contextPath}/app/reportRules.do?reportId=${report.reportId}">
+											<spring:message code="reports.action.rules"/>
 										</a>
 									</li>
 									<li>

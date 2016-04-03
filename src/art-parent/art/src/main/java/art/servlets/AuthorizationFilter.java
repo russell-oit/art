@@ -101,7 +101,7 @@ public class AuthorizationFilter implements Filter {
 					} catch (SQLException ex) {
 						logger.error("Error", ex);
 					}
-					
+
 					if (user == null) {
 						//user doesn't exist
 						//always display invalidAccount message in login page. log actual cause
@@ -345,7 +345,17 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.equals(page, "rules") || StringUtils.endsWith(page, "Rule")) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
 		} else if (StringUtils.equals(page, "reportFilters") || StringUtils.endsWith(page, "ReportFilter")) {
+			//junior admins and above
+			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "reportRules") || StringUtils.endsWith(page, "ReportRule")) {
 			//junior admins and above
 			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;
@@ -357,6 +367,12 @@ public class AuthorizationFilter implements Filter {
 			}
 		} else if (StringUtils.equals(page, "filterValues") || StringUtils.endsWith(page, "FilterValue")
 				|| StringUtils.equals(page, "filterValuesConfig") || StringUtils.endsWith(page, "FilterValues")) {
+			//senior admins and above
+			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "ruleValues") || StringUtils.endsWith(page, "RuleValue")
+				|| StringUtils.equals(page, "ruleValuesConfig") || StringUtils.endsWith(page, "RuleValues")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
