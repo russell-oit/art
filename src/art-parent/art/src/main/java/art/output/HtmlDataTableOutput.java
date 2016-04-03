@@ -161,7 +161,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void endRows() {
-		out.println("</tr></tbody></table></div><br><br>");
+		out.println("</tr></tbody></table></div>");
 	}
 
 }
