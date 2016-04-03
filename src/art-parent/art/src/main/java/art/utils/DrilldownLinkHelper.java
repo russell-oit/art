@@ -68,7 +68,7 @@ public class DrilldownLinkHelper implements Serializable {
 			int drilldownReportId = drilldown.getDrilldownReport().getReportId();
 			String drilldownReportFormat = drilldown.getReportFormat();
 			if (drilldownReportFormat == null || drilldownReportFormat.equalsIgnoreCase("all")) {
-				sb.append("showReport.do?reportId=").append(drilldownReportId);
+				sb.append("selectReportParameters.do?reportId=").append(drilldownReportId);
 			} else {
 				sb.append("runReport.do?reportId=").append(drilldownReportId)
 						.append("&reportFormat=").append(drilldownReportFormat);
@@ -119,12 +119,11 @@ public class DrilldownLinkHelper implements Serializable {
 
 		//add drilldown parameters
 		if (drilldownParams != null) {
-			int paramCount = 0;
 			for (Parameter drilldownParam : drilldownParams) {
-				paramCount++;
+				int drilldownColumnIndex = drilldownParam.getDrilldownColumnIndex();
 				String paramName = drilldownParam.getName();
-				Object paramValueObject = paramValues[paramCount - 1];
-				String paramValueString=drilldownParam.getHtmlValue(paramValueObject);
+				Object paramValueObject = paramValues[drilldownColumnIndex - 1];
+				String paramValueString = drilldownParam.getHtmlValue(paramValueObject);
 				addUrlParameter(paramName, paramValueString, sb);
 			}
 		}

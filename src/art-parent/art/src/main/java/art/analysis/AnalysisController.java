@@ -486,6 +486,7 @@ public class AnalysisController {
 
 				//give this user direct access to the view he has just created. so that he can update and overwrite it if desired
 				reportService.grantAccess(report, sessionUser);
+				
 				redirectAttributes.addFlashAttribute("message", "analysis.message.reportAdded");
 				return "redirect:/app/success.do";
 			}

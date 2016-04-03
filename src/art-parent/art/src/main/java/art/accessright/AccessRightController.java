@@ -61,7 +61,7 @@ public class AccessRightController {
 
 	@Autowired
 	private ReportService reportService;
-	
+
 	@Autowired
 	private JobService jobService;
 
@@ -72,8 +72,10 @@ public class AccessRightController {
 		try {
 			model.addAttribute("userReportRights", accessRightService.getAllUserReportRights());
 			model.addAttribute("userReportGroupRights", accessRightService.getAllUserReportGroupRights());
+			model.addAttribute("userJobRights", accessRightService.getAllUserJobRights());
 			model.addAttribute("userGroupReportRights", accessRightService.getAllUserGroupReportRights());
 			model.addAttribute("userGroupReportGroupRights", accessRightService.getAllUserGroupReportGroupRights());
+			model.addAttribute("userGroupJobRights", accessRightService.getAllUserGroupJobRights());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -110,18 +112,23 @@ public class AccessRightController {
 
 		AjaxResponse response = new AjaxResponse();
 
-		//id format = <right type>-<user or user group id>-<report or report group id>
+		//id format = <right type>-<user or user group id>-<report, report group or job id>
 		String[] values = StringUtils.split(id, "-");
+		String rightType = values[0];
 
 		try {
-			if (StringUtils.equalsIgnoreCase(values[0], "userReportRight")) {
+			if (StringUtils.equalsIgnoreCase(rightType, "userReportRight")) {
 				accessRightService.deleteUserReportRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
-			} else if (StringUtils.equalsIgnoreCase(values[0], "userReportGroupRight")) {
+			} else if (StringUtils.equalsIgnoreCase(rightType, "userReportGroupRight")) {
 				accessRightService.deleteUserReportGroupRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
-			} else if (StringUtils.equalsIgnoreCase(values[0], "userGroupReportRight")) {
+			} else if (StringUtils.equalsIgnoreCase(rightType, "userJobRight")) {
+				accessRightService.deleteUserJobRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
+			} else if (StringUtils.equalsIgnoreCase(rightType, "userGroupReportRight")) {
 				accessRightService.deleteUserGroupReportRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
-			} else if (StringUtils.equalsIgnoreCase(values[0], "userGroupReportGroupRight")) {
+			} else if (StringUtils.equalsIgnoreCase(rightType, "userGroupReportGroupRight")) {
 				accessRightService.deleteUserGroupReportGroupRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
+			} else if (StringUtils.equalsIgnoreCase(rightType, "userGroupJobRight")) {
+				accessRightService.deleteUserGroupJobRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
 			}
 			response.setSuccess(true);
 		} catch (SQLException ex) {

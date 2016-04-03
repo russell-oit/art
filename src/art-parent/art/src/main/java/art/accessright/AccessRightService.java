@@ -17,6 +17,7 @@
 package art.accessright;
 
 import art.dbutils.DbService;
+import art.job.Job;
 import art.report.Report;
 import art.reportgroup.ReportGroup;
 import art.user.User;
@@ -64,6 +65,14 @@ public class AccessRightService {
 			+ " INNER JOIN ART_QUERY_GROUPS AQG ON"
 			+ " AUQG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID";
 
+	private final String SQL_SELECT_ALL_USER_JOB_RIGHTS
+			= "SELECT AU.USER_ID, AU.USERNAME, AJ.JOB_ID, AJ.JOB_NAME"
+			+ " FROM ART_USER_JOBS AUJ"
+			+ " INNER JOIN ART_USERS AU ON"
+			+ " AUJ.USER_ID=AU.USER_ID"
+			+ " INNER JOIN ART_JOBS AJ ON"
+			+ " AUJ.JOB_ID=AJ.JOB_ID";
+
 	private final String SQL_SELECT_ALL_USER_GROUP_REPORT_RIGHTS
 			= "SELECT AUG.USER_GROUP_ID, AUG.NAME AS USER_GROUP_NAME, AQ.QUERY_ID, AQ.NAME AS REPORT_NAME"
 			+ " FROM ART_USER_GROUP_QUERIES AUGQ"
@@ -80,6 +89,15 @@ public class AccessRightService {
 			+ " AUGG.USER_GROUP_ID=AUG.USER_GROUP_ID"
 			+ " INNER JOIN ART_QUERY_GROUPS AQG ON"
 			+ " AUGG.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID";
+
+	private final String SQL_SELECT_ALL_USER_GROUP_JOB_RIGHTS
+			= "SELECT AUG.USER_GROUP_ID, AUG.NAME AS USER_GROUP_NAME, AJ.JOB_ID,"
+			+ " AJ.JOB_NAME"
+			+ " FROM ART_USER_GROUP_JOBS AUGJ"
+			+ " INNER JOIN ART_USER_GROUPS AUG ON"
+			+ " AUGJ.USER_GROUP_ID=AUG.USER_GROUP_ID"
+			+ " INNER JOIN ART_JOBS AJ ON"
+			+ " AUGJ.JOB_ID=AJ.JOB_ID";
 
 	/**
 	 * Class to map resultset to an object
@@ -152,6 +170,40 @@ public class AccessRightService {
 	/**
 	 * Class to map resultset to an object
 	 */
+	private class UserJobRightMapper extends BasicRowProcessor {
+
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			UserJobRight right = new UserJobRight();
+
+			User user = new User();
+			user.setUserId(rs.getInt("USER_ID"));
+			user.setUsername(rs.getString("USERNAME"));
+
+			right.setUser(user);
+
+			Job job = new Job();
+			job.setJobId(rs.getInt("JOB_ID"));
+			job.setName(rs.getString("JOB_NAME"));
+
+			right.setJob(job);
+
+			return type.cast(right);
+		}
+	}
+
+	/**
+	 * Class to map resultset to an object
+	 */
 	private class UserGroupReportRightMapper extends BasicRowProcessor {
 
 		@Override
@@ -216,6 +268,40 @@ public class AccessRightService {
 			return type.cast(right);
 		}
 	}
+	
+	/**
+	 * Class to map resultset to an object
+	 */
+	private class UserGroupJobRightMapper extends BasicRowProcessor {
+
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			UserGroupJobRight right = new UserGroupJobRight();
+
+			UserGroup userGroup = new UserGroup();
+			userGroup.setUserGroupId(rs.getInt("USER_GROUP_ID"));
+			userGroup.setName(rs.getString("USER_GROUP_NAME"));
+
+			right.setUserGroup(userGroup);
+
+			Job job = new Job();
+			job.setJobId(rs.getInt("JOB_ID"));
+			job.setName(rs.getString("JOB_NAME"));
+
+			right.setJob(job);
+
+			return type.cast(right);
+		}
+	}
 
 	/**
 	 * Get all user-report rights
@@ -242,6 +328,19 @@ public class AccessRightService {
 		ResultSetHandler<List<UserReportGroupRight>> h = new BeanListHandler<>(UserReportGroupRight.class, new UserReportGroupRightMapper());
 		return dbService.query(SQL_SELECT_ALL_USER_REPORT_GROUP_RIGHTS, h);
 	}
+	
+	/**
+	 * Get all user-job rights
+	 *
+	 * @return list of all user-job rights, empty list otherwise
+	 * @throws SQLException
+	 */
+	public List<UserJobRight> getAllUserJobRights() throws SQLException {
+		logger.debug("Entering getAllUserJobRights");
+
+		ResultSetHandler<List<UserJobRight>> h = new BeanListHandler<>(UserJobRight.class, new UserJobRightMapper());
+		return dbService.query(SQL_SELECT_ALL_USER_JOB_RIGHTS, h);
+	}
 
 	/**
 	 * Get all user group-report rights
@@ -267,6 +366,19 @@ public class AccessRightService {
 
 		ResultSetHandler<List<UserGroupReportGroupRight>> h = new BeanListHandler<>(UserGroupReportGroupRight.class, new UserGroupReportGroupRightMapper());
 		return dbService.query(SQL_SELECT_ALL_USER_GROUP_REPORT_GROUP_RIGHTS, h);
+	}
+	
+	/**
+	 * Get all user group-job rights
+	 *
+	 * @return list of all user group-job rights, empty list otherwise
+	 * @throws SQLException
+	 */
+	public List<UserGroupJobRight> getAllUserGroupJobRights() throws SQLException {
+		logger.debug("Entering getAllUserGroupJobRights");
+
+		ResultSetHandler<List<UserGroupJobRight>> h = new BeanListHandler<>(UserGroupJobRight.class, new UserGroupJobRightMapper());
+		return dbService.query(SQL_SELECT_ALL_USER_GROUP_JOB_RIGHTS, h);
 	}
 
 	/**
@@ -300,6 +412,22 @@ public class AccessRightService {
 		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=? AND QUERY_GROUP_ID=?";
 		dbService.update(sql, userId, reportGroupId);
 	}
+	
+	/**
+	 * Delete a user-job right
+	 *
+	 * @param userId
+	 * @param jobId
+	 * @throws SQLException
+	 */
+	public void deleteUserJobRight(int userId, int jobId) throws SQLException {
+		logger.debug("Entering deleteUserJobRight: userId={}, jobId={}", userId, jobId);
+
+		String sql;
+
+		sql = "DELETE FROM ART_USER_JOBS WHERE USER_ID=? AND JOB_ID=?";
+		dbService.update(sql, userId, jobId);
+	}
 
 	/**
 	 * Delete a user group-report right
@@ -332,11 +460,28 @@ public class AccessRightService {
 		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE USER_GROUP_ID=? AND QUERY_GROUP_ID=?";
 		dbService.update(sql, userGroupId, reportGroupId);
 	}
+	
+	/**
+	 * Delete a user group-job right
+	 *
+	 * @param userGroupId
+	 * @param jobId
+	 * @throws SQLException
+	 */
+	public void deleteUserGroupJobRight(int userGroupId, int jobId) throws SQLException {
+		logger.debug("Entering deleteUserGroupJobRight: userGroupId={}, jobId={}", userGroupId, jobId);
+
+		String sql;
+
+		sql = "DELETE FROM ART_USER_GROUP_JOBS WHERE USER_GROUP_ID=? AND JOB_ID=?";
+		dbService.update(sql, userGroupId, jobId);
+	}
 
 	/**
 	 * Grant or revoke access rights
 	 *
-	 * @param action "grant" or "revoke". anything else will be treated as revoke
+	 * @param action "grant" or "revoke". anything else will be treated as
+	 * revoke
 	 * @param users
 	 * @param userGroups array of user group ids
 	 * @param reports array of report ids
@@ -360,17 +505,22 @@ public class AccessRightService {
 		if (users != null) {
 			String sqlUserReport;
 			String sqlUserReportGroup;
+			String sqlUserJob;
 
 			if (grant) {
 				sqlUserReport = "INSERT INTO ART_USER_QUERIES (USER_ID, USERNAME, QUERY_ID) VALUES (?, ?, ?)";
 				sqlUserReportGroup = "INSERT INTO ART_USER_QUERY_GROUPS (USER_ID, USERNAME, QUERY_GROUP_ID) VALUES (?, ?, ?)";
+				sqlUserJob = "INSERT INTO ART_USER_JOBS (USER_ID, USERNAME, JOB_ID) VALUES (?, ?, ?)";
 			} else {
 				sqlUserReport = "DELETE FROM ART_USER_QUERIES WHERE USER_ID=? AND USERNAME=? AND QUERY_ID=?";
 				sqlUserReportGroup = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=? AND USERNAME=? AND QUERY_GROUP_ID=?";
+				sqlUserJob = "DELETE FROM ART_USER_JOBS WHERE USER_ID=? AND USERNAME=? AND JOB_ID=?";
 			}
 
 			String sqlTestUserReport = "UPDATE ART_USER_QUERIES SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND QUERY_ID=?";
 			String sqlTestUserReportGroup = "UPDATE ART_USER_QUERY_GROUPS SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND QUERY_GROUP_ID=?";
+			String sqlTestUserJob = "UPDATE ART_USER_JOBS SET USER_ID=? WHERE USER_ID=? AND USERNAME=? AND JOB_ID=?";
+
 			int affectedRows;
 			boolean updateRight;
 
@@ -418,6 +568,24 @@ public class AccessRightService {
 					}
 				}
 
+				//update job privileges
+				if (jobs != null) {
+					for (Integer jobId : jobs) {
+						updateRight = true;
+						if (grant) {
+							//test if right exists. to avoid integrity constraint error
+							affectedRows = dbService.update(sqlTestUserJob, userId, userId, username, jobId);
+							if (affectedRows > 0) {
+								//right exists. don't attempt a reinsert.
+								updateRight = false;
+							}
+						}
+						if (updateRight) {
+							dbService.update(sqlUserJob, userId, username, jobId);
+						}
+					}
+				}
+
 			}
 		}
 
@@ -440,6 +608,7 @@ public class AccessRightService {
 			String sqlTestUserGroupReport = "UPDATE ART_USER_GROUP_QUERIES SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND QUERY_ID=?";
 			String sqlTestUserGroupReportGroup = "UPDATE ART_USER_GROUP_GROUPS SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND QUERY_GROUP_ID=?";
 			String sqlTestUserGroupJob = "UPDATE ART_USER_GROUP_JOBS SET USER_GROUP_ID=? WHERE USER_GROUP_ID=? AND JOB_ID=?";
+
 			int affectedRows;
 			boolean updateRight;
 
@@ -482,7 +651,7 @@ public class AccessRightService {
 						}
 					}
 				}
-				
+
 				//update job privileges
 				if (jobs != null) {
 					for (Integer jobId : jobs) {

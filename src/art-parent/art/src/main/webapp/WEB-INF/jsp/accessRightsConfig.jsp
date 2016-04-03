@@ -226,6 +226,10 @@ Access rights configuration
 				<div class="form-group">
 					<div class="col-md-12">
 						<div id="actionsDiv" class="pull-right">
+							<a class="btn btn-default" 
+							   href="${pageContext.request.contextPath}/app/accessRights.do">
+								<spring:message code="page.action.show"/>
+							</a>
 							<button type="button" class="btn btn-default updateRights" data-action="grant">
 								<spring:message code="page.action.grant"/>
 							</button>

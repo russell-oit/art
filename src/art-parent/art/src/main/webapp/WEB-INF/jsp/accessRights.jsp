@@ -20,13 +20,13 @@ Display access rights
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[href*="accessRightsConfig.do"]').parent().addClass('active');
 				});
 
@@ -78,6 +78,7 @@ Display access rights
 					<th><spring:message code="page.text.userGroup"/></th>
 					<th><spring:message code="page.text.report"/></th>
 					<th><spring:message code="page.text.reportGroup"/></th>
+					<th><spring:message code="jobs.text.job"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -90,6 +91,7 @@ Display access rights
 						<td><encode:forHtmlContent value="${userReportRight.user.username}"/></td>
 						<td></td>
 						<td><encode:forHtmlContent value="${userReportRight.report.name}"/></td>
+						<td></td>
 						<td></td>
 						<td>
 							<button type="button" class="btn btn-default deleteRecord">
@@ -109,6 +111,26 @@ Display access rights
 						<td></td>
 						<td></td>
 						<td><encode:forHtmlContent value="${userReportGroupRight.reportGroup.name}"/></td>
+						<td></td>
+						<td>
+							<button type="button" class="btn btn-default deleteRecord">
+								<i class="fa fa-trash-o"></i>
+								<spring:message code="page.action.revoke"/>
+							</button>
+						</td>
+					</tr>
+				</c:forEach>
+
+				<c:forEach var="userJobRight" items="${userJobRights}">
+					<tr data-name="${encode:forHtmlAttribute(userJobRight.user.username)} -
+						${encode:forHtmlAttribute(userJobRight.job.name)}"
+						data-id="userJobRight-${userJobRight.user.userId}-${userJobRight.job.jobId}">
+
+						<td><encode:forHtmlContent value="${userJobRight.user.username}"/></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td><encode:forHtmlContent value="${userJobRight.job.name}"/></td>
 						<td>
 							<button type="button" class="btn btn-default deleteRecord">
 								<i class="fa fa-trash-o"></i>
@@ -126,6 +148,7 @@ Display access rights
 						<td></td>
 						<td><encode:forHtmlContent value="${userGroupReportRight.userGroup.name}"/></td>
 						<td><encode:forHtmlContent value="${userGroupReportRight.report.name}"/></td>
+						<td></td>
 						<td></td>
 						<td>
 							<button type="button" class="btn btn-default deleteRecord">
@@ -145,6 +168,26 @@ Display access rights
 						<td><encode:forHtmlContent value="${userGroupReportGroupRight.userGroup.name}"/></td>
 						<td></td>
 						<td><encode:forHtmlContent value="${userGroupReportGroupRight.reportGroup.name}"/></td>
+						<td></td>
+						<td>
+							<button type="button" class="btn btn-default deleteRecord">
+								<i class="fa fa-trash-o"></i>
+								<spring:message code="page.action.revoke"/>
+							</button>
+						</td>
+					</tr>
+				</c:forEach>
+
+				<c:forEach var="userGroupJobRight" items="${userGroupJobRights}">
+					<tr data-name="${encode:forHtmlAttribute(userGroupJobRight.userGroup.name)} -
+						${encode:forHtmlAttribute(userGroupJobRight.job.name)}"
+						data-id="userGroupJobRight-${userGroupJobRight.userGroup.userGroupId}-${userGroupJobRight.job.jobId}">
+
+						<td></td>
+						<td><encode:forHtmlContent value="${userGroupJobRight.userGroup.name}"/></td>
+						<td></td>
+						<td></td>
+						<td><encode:forHtmlContent value="${userGroupJobRight.job.name}"/></td>
 						<td>
 							<button type="button" class="btn btn-default deleteRecord">
 								<i class="fa fa-trash-o"></i>
