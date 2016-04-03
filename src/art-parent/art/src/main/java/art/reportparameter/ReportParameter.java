@@ -49,10 +49,6 @@ public class ReportParameter implements Serializable {
 	private String chainedDepends;
 	private boolean chainedParent;
 	private Map<String, String> lovValuesAsString;
-	
-	public Object getValue(){
-		return getEffectiveActualParameterValue();
-	}
 
 	/**
 	 * @return the lovValuesAsString
@@ -363,5 +359,73 @@ public class ReportParameter implements Serializable {
 		}
 
 		return stringLovValues;
+	}
+
+	public Object getValue() {
+		//for use with jxls
+		return getEffectiveActualParameterValue();
+	}
+
+	public Object getSqlValue() {
+		//for use with jxls
+		ParameterType parameterType = parameter.getParameterType();
+
+		if (parameterType == ParameterType.SingleValue) {
+			Object value = getEffectiveActualParameterValue();
+			String finalValue;
+			switch (parameter.getDataType()) {
+				case Integer:
+				case Datasource:
+				case Number:
+					finalValue = String.valueOf(value);
+					break;
+				case Date:
+					finalValue = "'" + ArtUtils.isoDateFormatter.format(value) + "'";
+					break;
+				case DateTime:
+					finalValue = "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'";
+					break;
+				default:
+					finalValue = String.valueOf(value);
+					StringUtils.replace(finalValue, "'", "''");
+					finalValue = "'" + finalValue + "'";
+			}
+			return finalValue;
+		} else if (parameterType == ParameterType.MultiValue) {
+			List<Object> values = (List) getEffectiveActualParameterValue();
+			String finalValues;
+			List<String> stringValues = new ArrayList<>();
+			switch (parameter.getDataType()) {
+				case Integer:
+				case Datasource:
+				case Number:
+					for (Object value : values) {
+						stringValues.add(String.valueOf(value));
+					}
+					break;
+				case Date:
+					for (Object value : values) {
+						stringValues.add("'" + ArtUtils.isoDateFormatter.format(value) + "'");
+					}
+					break;
+				case DateTime:
+					for (Object value : values) {
+						stringValues.add("'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'");
+					}
+					break;
+				default:
+					for (Object value : values) {
+						String stringValue = String.valueOf(value);
+						StringUtils.replace(stringValue, "'", "''");
+						stringValue = "'" + stringValue + "'";
+						stringValues.add(stringValue);
+					}
+			}
+			finalValues = StringUtils.join(stringValues, ",");
+
+			return finalValues;
+		} else {
+			throw new IllegalStateException("Unexpected parameter type: " + parameterType);
+		}
 	}
 }
