@@ -54,7 +54,7 @@ Display application logs
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: -1,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.txt"
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
 					},
 					initComplete: function() {
 						$('div.dataTables_filter input').focus();
