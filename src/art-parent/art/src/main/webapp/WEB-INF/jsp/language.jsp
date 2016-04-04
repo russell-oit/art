@@ -45,7 +45,7 @@ Display application language selection page
 						<c:set var="localeCode" value="${pageContext.response.locale}"/>
 						<select name="lang" id="lang" class="form-control">
 							<c:forEach var="language" items="${languages}">
-								<option value="${language.key}" ${localeCode == language.key ? "selected" : ""}>${language.value}</option>
+								<option value="${language.value}" ${localeCode == language.value ? "selected" : ""}>${language.key}</option>
 							</c:forEach>
 						</select>
 					</div>

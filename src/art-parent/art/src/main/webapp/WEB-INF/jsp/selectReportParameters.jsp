@@ -32,7 +32,7 @@ Display report parameters and initiate running of report
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
@@ -81,11 +81,15 @@ Display report parameters and initiate running of report
 				});
 
 				$('.datepicker').datetimepicker({
-					format: 'YYYY-MM-DD'
+					format: 'YYYY-MM-DD',
+					locale: '${pageContext.response.locale}',
+					keepInvalid: true
 				});
 
 				$('.datetimepicker').datetimepicker({
-					format: 'YYYY-MM-DD HH:mm:ss'
+					format: 'YYYY-MM-DD HH:mm:ss',
+					locale: '${pageContext.response.locale}',
+					keepInvalid: true
 				});
 
 				//Enable Bootstrap-Select
@@ -99,8 +103,8 @@ Display report parameters and initiate running of report
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
-				$(function() {
+
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
@@ -179,9 +183,9 @@ Display report parameters and initiate running of report
 											<input type="hidden" name="showInline" id="showInline" value="true">
 											<input type="hidden" name="nextPage" id="nextPage" value="jobs.do">
 
-											<jsp:include page="reportParameters.jsp">
-												<jsp:param name="reportParamsList" value="${reportParamsList}"/>
-											</jsp:include>
+											<c:set var="labelColClass" value="col-md-5" scope="request"/>
+											<c:set var="inputColClass" value="col-md-7" scope="request"/>
+											<jsp:include page="reportParameters.jsp"/>
 
 											<c:if test="${isChart}">
 												<div id="chartOptions">

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -224,7 +225,14 @@ public class JobController {
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-			model.addAttribute("reportParamsList", reportParamsList);
+
+			//create map in order to display parameters by position
+			Map<Integer, ReportParameter> reportParams = new TreeMap<>();
+			for (ReportParameter reportParam : reportParamsList) {
+				reportParams.put(reportParam.getPosition(), reportParam);
+			}
+
+			model.addAttribute("reportParams", reportParams);
 
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -277,9 +285,9 @@ public class JobController {
 
 	private void saveJobParameters(HttpServletRequest request, int jobId)
 			throws NumberFormatException, SQLException {
-		
+
 		logger.debug("Entering saveJobParameters: jobId={}", jobId);
-		
+
 		Map<String, String[]> passedValues = new HashMap<>();
 		Enumeration<String> htmlParamNames = request.getParameterNames();
 		while (htmlParamNames.hasMoreElements()) {
@@ -353,9 +361,8 @@ public class JobController {
 
 	private void finalizeSchedule(Job job) throws SchedulerException, ParseException {
 		logger.debug("Entering finalizeSchedule: job={}", job);
-		
-		//create quartz job to be running this job
 
+		//create quartz job to be running this job
 		//build cron expression for the schedule
 		String minute;
 		String hour;
@@ -459,7 +466,7 @@ public class JobController {
 		//build cron expression.
 		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
 		String cronString = second + " " + minute + " " + hour + " " + day + " " + month + " " + weekday;
-		
+
 		logger.debug("cronString='{}'", cronString);
 
 		//determine if start date and end date are valid dates

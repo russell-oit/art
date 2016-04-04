@@ -48,7 +48,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
@@ -79,10 +79,12 @@
 				});
 
 				$('#startDatePicker').datetimepicker({
-					format: 'YYYY-MM-DD HH:mm:ss'
+					format: 'YYYY-MM-DD HH:mm:ss',
+					locale: '${pageContext.response.locale}'
 				});
 				$('#endDatePicker').datetimepicker({
 					format: 'YYYY-MM-DD HH:mm:ss',
+					locale: '${pageContext.response.locale}',
 					useCurrent: false //Important! See issue #1075
 				});
 				$("#startDatePicker").on("dp.change", function (e) {
@@ -93,11 +95,15 @@
 				});
 
 				$('.datepicker').datetimepicker({
-					format: 'YYYY-MM-DD'
+					format: 'YYYY-MM-DD',
+					locale: '${pageContext.response.locale}',
+					keepInvalid: true
 				});
 
 				$('.datetimepicker').datetimepicker({
-					format: 'YYYY-MM-DD HH:mm:ss'
+					format: 'YYYY-MM-DD HH:mm:ss',
+					locale: '${pageContext.response.locale}',
+					keepInvalid: true
 				});
 
 				//Enable Bootstrap-Select
@@ -278,12 +284,12 @@
 				<input type="hidden" name="action" value="${action}">
 				<input type="hidden" name="nextPage" value="${param.nextPage}">
 
-				<c:if test="${not empty reportParamsList}">
+				<c:if test="${not empty reportParams}">
 					<fieldset>
 						<legend><spring:message code="jobs.text.parameters"/></legend>
-						<jsp:include page="reportParameters.jsp">
-							<jsp:param name="reportParamsList" value="${reportParamsList}"/>
-						</jsp:include>
+						<c:set var="labelColClass" value="col-md-4" scope="request"/>
+						<c:set var="inputColClass" value="col-md-8" scope="request"/>
+						<jsp:include page="reportParameters.jsp"/>
 					</fieldset>
 				</c:if>
 
