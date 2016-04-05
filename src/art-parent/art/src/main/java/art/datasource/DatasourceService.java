@@ -69,7 +69,7 @@ public class DatasourceService {
 	@Cacheable("datasources")
 	public List<Datasource> getAllDatasources() throws SQLException {
 		logger.debug("Entering getAllDatasources");
-		
+
 		ResultSetHandler<List<Datasource>> h = new BeanListHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
@@ -84,7 +84,7 @@ public class DatasourceService {
 	@Cacheable("datasources")
 	public Datasource getDatasource(int id) throws SQLException {
 		logger.debug("Entering getDatasource: id={}", id);
-		
+
 		String sql = SQL_SELECT_ALL + " WHERE DATABASE_ID=?";
 		ResultSetHandler<Datasource> h = new BeanHandler<>(Datasource.class, new DatasourceMapper());
 		return dbService.query(sql, h, id);
@@ -117,6 +117,34 @@ public class DatasourceService {
 		dbService.update(sql, id);
 
 		result.setSuccess(true);
+		return result;
+	}
+
+	/**
+	 * Delete a datasource
+	 *
+	 * @param ids
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * reports which prevented the datasource from being deleted
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "datasources", allEntries = true)
+	public ActionResult deleteDatasources(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteDatasource: id={}", (Object) ids);
+
+		ActionResult result = new ActionResult();
+		boolean someRecordsNotDeleted = false;
+
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteDatasource(id);
+			if (!deleteResult.isSuccess()) {
+				someRecordsNotDeleted = true;
+			}
+		}
+
+		if (!someRecordsNotDeleted) {
+			result.setSuccess(true);
+		}
 		return result;
 	}
 

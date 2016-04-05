@@ -276,7 +276,8 @@ public class AuthorizationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "datasources") || StringUtils.endsWith(page, "Datasource")
-				|| StringUtils.equals(page, "testDatasource")) {
+				|| StringUtils.equals(page, "testDatasource")
+				|| StringUtils.endsWith(page, "Datasources")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;

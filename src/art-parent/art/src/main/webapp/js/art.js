@@ -358,6 +358,20 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
 }
 
 /**
+ * Display notification if record cannot be deleted because important linked records exist.
+ * String arguments should be html escaped. Message goes to a div with id "ajaxResponse"
+ * 
+ * @param {string} someRecordsNotDeletedText - basic message shown in notification
+ */
+function notifySomeRecordsNotDeleted(someRecordsNotDeletedText) {
+	var msg;
+	msg = alertCloseButton + someRecordsNotDeletedText;
+
+	$("#ajaxResponse").attr("class", "alert alert-danger alert-dismissable").html(msg);
+	$.notify(cannotDeleteRecordText, "error");
+}
+
+/**
  * Callback for delete record ajax done successfully. String arguments should be html escaped
  * 
  * @param {PlainObject} response

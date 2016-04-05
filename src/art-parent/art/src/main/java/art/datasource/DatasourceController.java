@@ -102,6 +102,27 @@ public class DatasourceController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteDatasources", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteDatasources(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteDatasources: ids={}", (Object)ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult=datasourceService.deleteDatasources(ids);
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.GET)
 	public String addDatasource(Model model) {
