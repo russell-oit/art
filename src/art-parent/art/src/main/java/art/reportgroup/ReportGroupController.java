@@ -87,6 +87,30 @@ public class ReportGroupController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteReportGroups", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteReportGroups(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteReportGroups: ids={}", (Object)ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = reportGroupService.deleteReportGroups(ids);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				response.setData(deleteResult.getData());
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/addReportGroup", method = RequestMethod.GET)
 	public String addReportGroup(Model model) {

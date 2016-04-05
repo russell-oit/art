@@ -237,6 +237,36 @@ public class ReportGroupService {
 		result.setSuccess(true);
 		return result;
 	}
+	
+		/**
+	 * Delete a report group
+	 *
+	 * @param ids
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * reports which prevented the report group from being deleted
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reportGroups", allEntries = true)
+	public ActionResult deleteReportGroups(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteReportGrousp: ids={}", (Object)ids);
+
+		ActionResult result = new ActionResult();
+		List<Integer> nonDeletedRecords=new ArrayList<>();
+		
+		for(Integer id : ids){
+			ActionResult deleteResult=deleteReportGroup(id);
+			if(!deleteResult.isSuccess()){
+				nonDeletedRecords.add(id);
+			}
+		}
+		
+		if(nonDeletedRecords.isEmpty()){
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+		return result;
+	}
 
 	/**
 	 * Add a new report group to the database

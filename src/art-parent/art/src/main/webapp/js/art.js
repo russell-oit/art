@@ -275,7 +275,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
             style: 'multi'
         },
 		language: {
-			url: contextPath + "/js/dataTables-1.10.0/i18n/dataTables_" + localeCode + ".txt"
+			url: contextPath + "/js/dataTables-1.10.11/i18n/dataTables_" + localeCode + ".txt"
 		},
 		initComplete: datatablesInitComplete
 	});
