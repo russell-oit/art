@@ -259,7 +259,7 @@ public class JobController {
 			java.util.logging.Logger.getLogger(JobController.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
-		return showJob("add", model);
+		return showEditJob("add", model);
 	}
 
 	@RequestMapping(value = "/app/saveJob", method = RequestMethod.POST)
@@ -273,7 +273,7 @@ public class JobController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showJob(action, model);
+			return showEditJob(action, model);
 		}
 
 		try {
@@ -298,7 +298,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showJob(action, model);
+		return showEditJob(action, model);
 	}
 
 	private void saveJobParameters(HttpServletRequest request, int jobId)
@@ -350,7 +350,7 @@ public class JobController {
 			model.addAttribute("error", ex);
 		}
 
-		return showJob("edit", model);
+		return showEditJob("edit", model);
 	}
 
 	/**
@@ -360,8 +360,8 @@ public class JobController {
 	 * @param model
 	 * @return
 	 */
-	private String showJob(String action, Model model) {
-		logger.debug("Entering showJob: action='{}'", action);
+	private String showEditJob(String action, Model model) {
+		logger.debug("Entering showEditJob: action='{}'", action);
 
 		model.addAttribute("action", action);
 

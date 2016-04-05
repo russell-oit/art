@@ -94,7 +94,7 @@ public class LoggerController {
 		logger.debug("Entering addLogger");
 
 		model.addAttribute("log", new art.logger.Logger());
-		return showLogger("add", model);
+		return showEditLogger("add", model);
 	}
 
 	@RequestMapping(value = "/app/saveLogger", method = RequestMethod.POST)
@@ -107,7 +107,7 @@ public class LoggerController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showLogger(action, model);
+			return showEditLogger(action, model);
 		}
 
 		//create or edit logger
@@ -142,7 +142,7 @@ public class LoggerController {
 		}
 
 		model.addAttribute("log", log);
-		return showLogger("edit", model);
+		return showEditLogger("edit", model);
 	}
 
 	/**
@@ -153,11 +153,12 @@ public class LoggerController {
 	 * @param session
 	 * @return
 	 */
-	private String showLogger(String action, Model model) {
-		logger.debug("Entering showLogger: action='{}'", action);
+	private String showEditLogger(String action, Model model) {
+		logger.debug("Entering showEditLogger: action='{}'", action);
 
 		model.addAttribute("levels", LoggerLevel.list());
 		model.addAttribute("action", action);
+		
 		return "editLogger";
 	}
 

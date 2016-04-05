@@ -94,7 +94,7 @@ public class FilterController {
 		logger.debug("Entering addFilter");
 
 		model.addAttribute("filter", new Filter());
-		return showFilter("add", model);
+		return showEditFilter("add", model);
 	}
 
 	@RequestMapping(value = "/app/editFilter", method = RequestMethod.GET)
@@ -108,7 +108,7 @@ public class FilterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showFilter("edit", model);
+		return showEditFilter("edit", model);
 	}
 
 	@RequestMapping(value = "/app/saveFilter", method = RequestMethod.POST)
@@ -122,7 +122,7 @@ public class FilterController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showFilter(action, model);
+			return showEditFilter(action, model);
 		}
 
 		try {
@@ -141,7 +141,7 @@ public class FilterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showFilter(action, model);
+		return showEditFilter(action, model);
 	}
 
 	/**
@@ -151,11 +151,12 @@ public class FilterController {
 	 * @param model
 	 * @return
 	 */
-	private String showFilter(String action, Model model) {
-		logger.debug("Entering showFilter: action='{}'", action);
+	private String showEditFilter(String action, Model model) {
+		logger.debug("Entering showEditFilter: action='{}'", action);
 
 		model.addAttribute("dataTypes", ParameterDataType.list());
 		model.addAttribute("action", action);
+		
 		return "editFilter";
 	}
 

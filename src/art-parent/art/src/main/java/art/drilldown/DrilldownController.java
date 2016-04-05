@@ -99,7 +99,7 @@ public class DrilldownController {
 		logger.debug("Entering addDrilldown: parent={}", parent);
 
 		model.addAttribute("drilldown", new Drilldown());
-		return showDrilldown("add", model, locale, parent);
+		return showEditDrilldown("add", model, locale, parent);
 	}
 	
 	@RequestMapping(value = "/app/editDrilldown", method = RequestMethod.GET)
@@ -121,7 +121,7 @@ public class DrilldownController {
 			model.addAttribute("error", ex);
 		}
 
-		return showDrilldown("edit", model, locale, parentReportId);
+		return showEditDrilldown("edit", model, locale, parentReportId);
 	}
 
 	@RequestMapping(value = "/app/saveDrilldown", method = RequestMethod.POST)
@@ -136,7 +136,7 @@ public class DrilldownController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showDrilldown(action, model, locale, parent);
+			return showEditDrilldown(action, model, locale, parent);
 		}
 
 		try {
@@ -154,7 +154,7 @@ public class DrilldownController {
 			model.addAttribute("error", ex);
 		}
 
-		return showDrilldown(action, model, locale, parent);
+		return showEditDrilldown(action, model, locale, parent);
 	}
 
 	/**
@@ -164,10 +164,8 @@ public class DrilldownController {
 	 * @param model
 	 * @return
 	 */
-	private String showDrilldown(String action, Model model, Locale locale,
-			Integer parent) {
-
-		logger.debug("Entering showDrilldown: action='{}', parent={}", action, parent);
+	private String showEditDrilldown(String action, Model model, Locale locale, Integer parent) {
+		logger.debug("Entering showEditDrilldown: action='{}', parent={}", action, parent);
 
 		try {
 			model.addAttribute("parentReportName", reportService.getReportName(parent));
@@ -181,6 +179,7 @@ public class DrilldownController {
 
 		model.addAttribute("parent", parent);
 		model.addAttribute("action", action);
+		
 		return "editDrilldown";
 	}
 

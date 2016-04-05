@@ -137,7 +137,7 @@ public class DatasourceController {
 		datasource.setConnectionPoolTimeout(20);
 
 		model.addAttribute("datasource", datasource);
-		return showDatasource("add", model);
+		return showEditDatasource("add", model);
 	}
 
 	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
@@ -151,7 +151,7 @@ public class DatasourceController {
 			model.addAttribute("error", ex);
 		}
 
-		return showDatasource("edit", model);
+		return showEditDatasource("edit", model);
 	}
 
 	@RequestMapping(value = "/app/saveDatasource", method = RequestMethod.POST)
@@ -165,7 +165,7 @@ public class DatasourceController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showDatasource(action, model);
+			return showEditDatasource(action, model);
 		}
 
 		try {
@@ -174,7 +174,7 @@ public class DatasourceController {
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
-				return showDatasource(action, model);
+				return showEditDatasource(action, model);
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
@@ -201,7 +201,7 @@ public class DatasourceController {
 			model.addAttribute("error", ex);
 		}
 
-		return showDatasource(action, model);
+		return showEditDatasource(action, model);
 	}
 
 	/**
@@ -211,14 +211,15 @@ public class DatasourceController {
 	 * @param model
 	 * @return
 	 */
-	private String showDatasource(String action, Model model) {
-		logger.debug("Entering showDatasource: action='{}'", action);
+	private String showEditDatasource(String action, Model model) {
+		logger.debug("Entering showEditDatasource: action='{}'", action);
 
 		Map<String, String> databaseTypes = ArtUtils.getDatabaseTypes();
 		databaseTypes.remove("demo");
 
 		model.addAttribute("databaseTypes", databaseTypes);
 		model.addAttribute("action", action);
+		
 		return "editDatasource";
 	}
 

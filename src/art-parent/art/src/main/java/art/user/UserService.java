@@ -25,6 +25,7 @@ import art.utils.ActionResult;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -258,7 +259,7 @@ public class UserService {
 		result.setSuccess(true);
 		return result;
 	}
-	
+
 	/**
 	 * Delete a user and all related records
 	 *
@@ -269,19 +270,19 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public ActionResult deleteUsers(Integer[] ids) throws SQLException {
-		logger.debug("Entering deleteUsers: ids={}", (Object)ids);
+		logger.debug("Entering deleteUsers: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords=new ArrayList<>();
-		
-		for(Integer id : ids){
-			ActionResult deleteResult=deleteUser(id);
-			if(!deleteResult.isSuccess()){
+		List<Integer> nonDeletedRecords = new ArrayList<>();
+
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteUser(id);
+			if (!deleteResult.isSuccess()) {
 				nonDeletedRecords.add(id);
 			}
 		}
-		
-		if(nonDeletedRecords.isEmpty()){
+
+		if (nonDeletedRecords.isEmpty()) {
 			result.setSuccess(true);
 		} else {
 			result.setData(nonDeletedRecords);
@@ -366,6 +367,36 @@ public class UserService {
 		logger.debug("Entering updateUser: user={}, actionUser={}", user, actionUser);
 
 		saveUser(user, false, actionUser);
+	}
+
+	/**
+	 * Update an existing user record
+	 *
+	 * @param multipleUserEdit
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public void updateUsers(MultipleUserEdit multipleUserEdit, User actionUser) throws SQLException {
+		logger.debug("Entering updateUsers: user={}, actionUser={}", multipleUserEdit, actionUser);
+
+		String sql;
+
+		String[] ids = StringUtils.split(multipleUserEdit.getIds(), ",");
+		if (!multipleUserEdit.isActiveUnchanged()) {
+			sql = "UPDATE ART_USERS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(multipleUserEdit.isActive());
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, (Object[]) valuesArray);
+		}
 	}
 
 	/**

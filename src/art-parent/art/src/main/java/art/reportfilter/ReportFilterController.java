@@ -96,7 +96,7 @@ public class ReportFilterController {
 		logger.debug("Entering addReportFilter: reportId={}", reportId);
 
 		model.addAttribute("reportFilter", new ReportFilter());
-		return showReportFilter("add", model, reportId);
+		return showEditReportFilter("add", model, reportId);
 	}
 	
 	@RequestMapping(value = "/app/editReportFilter", method = RequestMethod.GET)
@@ -116,7 +116,7 @@ public class ReportFilterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReportFilter("edit", model, reportId);
+		return showEditReportFilter("edit", model, reportId);
 	}
 
 	@RequestMapping(value = "/app/saveReportFilter", method = RequestMethod.POST)
@@ -130,7 +130,7 @@ public class ReportFilterController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReportFilter(action, model, reportId);
+			return showEditReportFilter(action, model, reportId);
 		}
 
 		try {
@@ -148,7 +148,7 @@ public class ReportFilterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReportFilter(action, model, reportId);
+		return showEditReportFilter(action, model, reportId);
 	}
 
 	/**
@@ -158,8 +158,8 @@ public class ReportFilterController {
 	 * @param model
 	 * @return
 	 */
-	private String showReportFilter(String action, Model model, Integer reportId) {
-		logger.debug("Entering showReportFilter: action='{}', reportId={}", action, reportId);
+	private String showEditReportFilter(String action, Model model, Integer reportId) {
+		logger.debug("Entering showEditReportFilter: action='{}', reportId={}", action, reportId);
 
 		try {
 			model.addAttribute("reportName", reportService.getReportName(reportId));
@@ -171,6 +171,7 @@ public class ReportFilterController {
 
 		model.addAttribute("reportId", reportId);
 		model.addAttribute("action", action);
+		
 		return "editReportFilter";
 	}
 

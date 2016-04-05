@@ -391,7 +391,7 @@ public class ReportController {
 		logger.debug("Entering addReport");
 
 		model.addAttribute("report", new Report());
-		return showReport("add", model, session);
+		return showEditReport("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
@@ -407,7 +407,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport("edit", model, session);
+		return showEditReport("edit", model, session);
 	}
 
 	@RequestMapping(value = "/app/saveReport", method = RequestMethod.POST)
@@ -422,7 +422,7 @@ public class ReportController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReport(action, model, session);
+			return showEditReport(action, model, session);
 		}
 
 		try {
@@ -431,7 +431,7 @@ public class ReportController {
 			logger.debug("prepareReportMessage='{}'", prepareReportMessage);
 			if (prepareReportMessage != null) {
 				model.addAttribute("message", prepareReportMessage);
-				return showReport(action, model, session);
+				return showEditReport(action, model, session);
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
@@ -453,7 +453,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport(action, model, session);
+		return showEditReport(action, model, session);
 	}
 
 	@RequestMapping(value = "/app/copyReport", method = RequestMethod.GET)
@@ -469,7 +469,7 @@ public class ReportController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReport("copy", model, session);
+		return showEditReport("copy", model, session);
 	}
 
 	/**
@@ -480,8 +480,8 @@ public class ReportController {
 	 * @param session
 	 * @return
 	 */
-	private String showReport(String action, Model model, HttpSession session) {
-		logger.debug("Entering showReport: action='{}'", action);
+	private String showEditReport(String action, Model model, HttpSession session) {
+		logger.debug("Entering showEditReport: action='{}'", action);
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");

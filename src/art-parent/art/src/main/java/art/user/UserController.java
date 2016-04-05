@@ -122,7 +122,7 @@ public class UserController {
 		user.setCanChangePassword(true);
 
 		model.addAttribute("user", user);
-		return showUser("add", model, session);
+		return showEditUser("add", model, session);
 	}
 
 	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
@@ -146,7 +146,36 @@ public class UserController {
 		}
 
 		model.addAttribute("user", user);
-		return showUser("edit", model, session);
+		return showEditUser("edit", model, session);
+	}
+
+	@RequestMapping(value = "/app/editUsers", method = RequestMethod.GET)
+	public String editUsers(@RequestParam("ids") String ids, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering editUsers: ids={}", ids);
+
+		String[] singleIds = StringUtils.split(ids, ",");
+
+		for (String singleId : singleIds) {
+			try {
+				int id = Integer.parseInt(singleId);
+				User user = userService.getUser(id);
+				//ensure an admin cannot edit admins of higher access level than himself
+				if (!canEditUser(session, user)) {
+					return "accessDenied";
+				}
+			} catch (SQLException ex) {
+				logger.error("Error", ex);
+				model.addAttribute("error", ex);
+			}
+		}
+
+		MultipleUserEdit multipleUserEdit = new MultipleUserEdit();
+		multipleUserEdit.setIds(ids);
+
+		model.addAttribute("multipleUserEdit", multipleUserEdit);
+		return "editUsers";
 	}
 
 	@RequestMapping(value = "/app/saveUser", method = RequestMethod.POST)
@@ -167,7 +196,7 @@ public class UserController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUser(action, model, session);
+			return showEditUser(action, model, session);
 		}
 
 		try {
@@ -176,7 +205,7 @@ public class UserController {
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
 			if (setPasswordMessage != null) {
 				model.addAttribute("message", setPasswordMessage);
-				return showUser(action, model, session);
+				return showEditUser(action, model, session);
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
@@ -202,7 +231,34 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUser(action, model, session);
+		return showEditUser(action, model, session);
+	}
+
+	@RequestMapping(value = "/app/saveUsers", method = RequestMethod.POST)
+	public String saveUsers(@ModelAttribute("multipleUserEdit") @Valid MultipleUserEdit multipleUserEdit,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveUsers");
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showEditUsers(model, session);
+		}
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			userService.updateUsers(multipleUserEdit, sessionUser);
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
+			redirectAttributes.addFlashAttribute("recordName", multipleUserEdit.getIds());
+			return "redirect:/app/users.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditUsers(model, session);
 	}
 
 	/**
@@ -213,8 +269,8 @@ public class UserController {
 	 * @param session
 	 * @return
 	 */
-	private String showUser(String action, Model model, HttpSession session) {
-		logger.debug("Entering showUser: action='{}'", action);
+	private String showEditUser(String action, Model model, HttpSession session) {
+		logger.debug("Entering showEditUser: action='{}'", action);
 
 		try {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
@@ -227,6 +283,29 @@ public class UserController {
 
 		model.addAttribute("action", action);
 		return "editUser";
+	}
+
+	/**
+	 * Prepare model data for edit user page and return jsp file to display
+	 *
+	 * @param action
+	 * @param model
+	 * @param session
+	 * @return
+	 */
+	private String showEditUsers(Model model, HttpSession session) {
+		logger.debug("Entering showUsers");
+
+		try {
+			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
+			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
+			model.addAttribute("accessLevels", getAccessLevels(session));
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return "editUsers";
 	}
 
 	/**

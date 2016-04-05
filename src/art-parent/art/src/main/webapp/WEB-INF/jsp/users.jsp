@@ -110,6 +110,20 @@ Display user configuration page
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
+				
+				$('#editRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[0];
+						});
+						window.location.href='${pageContext.request.contextPath}/app/editUsers.do?ids=' + ids;
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
+
 
 			});
 
@@ -141,6 +155,10 @@ Display user configuration page
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
+			<button type="button" id="editRecords" class="btn btn-default">
+				<i class="fa fa-pencil-square-o"></i>
+				<spring:message code="page.action.edit"/>
+			</button>
 			<button type="button" id="deleteRecords" class="btn btn-default">
 				<i class="fa fa-trash-o"></i>
 				<spring:message code="page.action.delete"/>

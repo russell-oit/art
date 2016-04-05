@@ -391,8 +391,9 @@ public class ReportParameter implements Serializable {
 					finalValue = "'" + finalValue + "'";
 			}
 			return finalValue;
-		} else if (value instanceof List<?>) {
-			List<?> values = (List<?>) value;
+		} else if (parameterType == ParameterType.MultiValue) {
+			@SuppressWarnings("unchecked")
+			List<Object> values = (List<Object>) value;
 			String finalValues;
 			List<String> stringValues = new ArrayList<>();
 			switch (parameter.getDataType()) {

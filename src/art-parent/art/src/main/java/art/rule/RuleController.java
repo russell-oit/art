@@ -118,7 +118,7 @@ public class RuleController {
 		logger.debug("Entering addRule");
 
 		model.addAttribute("rule", new Rule());
-		return showRule("add", model);
+		return showEditRule("add", model);
 	}
 
 	@RequestMapping(value = "/app/editRule", method = RequestMethod.GET)
@@ -132,7 +132,7 @@ public class RuleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showRule("edit", model);
+		return showEditRule("edit", model);
 	}
 
 	@RequestMapping(value = "/app/saveRule", method = RequestMethod.POST)
@@ -146,7 +146,7 @@ public class RuleController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showRule(action, model);
+			return showEditRule(action, model);
 		}
 
 		try {
@@ -165,7 +165,7 @@ public class RuleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showRule(action, model);
+		return showEditRule(action, model);
 	}
 
 	/**
@@ -175,8 +175,8 @@ public class RuleController {
 	 * @param model
 	 * @return
 	 */
-	private String showRule(String action, Model model) {
-		logger.debug("Entering showRule: action='{}'", action);
+	private String showEditRule(String action, Model model) {
+		logger.debug("Entering showEditRule: action='{}'", action);
 
 		model.addAttribute("dataTypes", ParameterDataType.list());
 		model.addAttribute("action", action);

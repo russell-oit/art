@@ -117,7 +117,7 @@ public class ReportGroupController {
 		logger.debug("Entering addReportGroup");
 
 		model.addAttribute("group", new ReportGroup());
-		return showReportGroup("add", model);
+		return showEditReportGroup("add", model);
 	}
 
 	@RequestMapping(value = "/app/editReportGroup", method = RequestMethod.GET)
@@ -131,7 +131,7 @@ public class ReportGroupController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReportGroup("edit", model);
+		return showEditReportGroup("edit", model);
 	}
 
 	@RequestMapping(value = "/app/saveReportGroup", method = RequestMethod.POST)
@@ -145,7 +145,7 @@ public class ReportGroupController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReportGroup(action, model);
+			return showEditReportGroup(action, model);
 		}
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
@@ -165,7 +165,7 @@ public class ReportGroupController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReportGroup(action, model);
+		return showEditReportGroup(action, model);
 	}
 
 	/**
@@ -176,8 +176,8 @@ public class ReportGroupController {
 	 * @param session
 	 * @return
 	 */
-	private String showReportGroup(String action, Model model) {
-		logger.debug("Entering showReportGroup: action='{}'", action);
+	private String showEditReportGroup(String action, Model model) {
+		logger.debug("Entering showEditReportGroup: action='{}'", action);
 
 		model.addAttribute("action", action);
 		return "editReportGroup";

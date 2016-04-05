@@ -93,7 +93,7 @@ public class ReportParameterController {
 		logger.debug("Entering addReportParameter: reportId={}", reportId);
 
 		model.addAttribute("reportParameter", new ReportParameter());
-		return showReportParameter("add", model, reportId);
+		return showEditReportParameter("add", model, reportId);
 	}
 
 	@RequestMapping(value = "/app/editReportParameter", method = RequestMethod.GET)
@@ -113,7 +113,7 @@ public class ReportParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReportParameter("edit", model, reportId);
+		return showEditReportParameter("edit", model, reportId);
 	}
 
 	@RequestMapping(value = "/app/saveReportParameter", method = RequestMethod.POST)
@@ -127,7 +127,7 @@ public class ReportParameterController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showReportParameter(action, model, reportId);
+			return showEditReportParameter(action, model, reportId);
 		}
 
 		try {
@@ -145,7 +145,7 @@ public class ReportParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showReportParameter(action, model, reportId);
+		return showEditReportParameter(action, model, reportId);
 	}
 
 	/**
@@ -155,8 +155,8 @@ public class ReportParameterController {
 	 * @param model
 	 * @return
 	 */
-	private String showReportParameter(String action, Model model, Integer reportId) {
-		logger.debug("Entering showReportParameter: action='{}', reportId={}", action, reportId);
+	private String showEditReportParameter(String action, Model model, Integer reportId) {
+		logger.debug("Entering showEditReportParameter: action='{}', reportId={}", action, reportId);
 
 		try {
 			model.addAttribute("reportName", reportService.getReportName(reportId));

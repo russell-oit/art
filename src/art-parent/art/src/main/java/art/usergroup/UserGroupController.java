@@ -107,7 +107,7 @@ public class UserGroupController {
 		logger.debug("Entering addUserGroup");
 
 		model.addAttribute("group", new UserGroup());
-		return showUserGroup("add", model);
+		return showEditUserGroup("add", model);
 	}
 
 	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
@@ -121,7 +121,7 @@ public class UserGroupController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroup("edit", model);
+		return showEditUserGroup("edit", model);
 	}
 
 	@RequestMapping(value = "/app/saveUserGroup", method = RequestMethod.POST)
@@ -135,7 +135,7 @@ public class UserGroupController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserGroup(action, model);
+			return showEditUserGroup(action, model);
 		}
 
 		try {
@@ -154,7 +154,7 @@ public class UserGroupController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroup(action, model);
+		return showEditUserGroup(action, model);
 	}
 
 	/**
@@ -164,8 +164,8 @@ public class UserGroupController {
 	 * @param model
 	 * @return
 	 */
-	private String showUserGroup(String action, Model model) {
-		logger.debug("Entering showUserGroup: action='{}'", action);
+	private String showEditUserGroup(String action, Model model) {
+		logger.debug("Entering showEditUserGroup: action='{}'", action);
 
 		try {
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());

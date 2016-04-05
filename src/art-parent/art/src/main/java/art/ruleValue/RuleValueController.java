@@ -180,7 +180,7 @@ public class RuleValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserRuleValue();
+		return showEditUserRuleValue();
 	}
 
 	@RequestMapping(value = "/app/saveUserRuleValue", method = RequestMethod.POST)
@@ -192,7 +192,7 @@ public class RuleValueController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserRuleValue();
+			return showEditUserRuleValue();
 		}
 
 		try {
@@ -209,7 +209,7 @@ public class RuleValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserRuleValue();
+		return showEditUserRuleValue();
 	}
 
 	@RequestMapping(value = "/app/editUserGroupRuleValue", method = RequestMethod.GET)
@@ -223,7 +223,7 @@ public class RuleValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroupRuleValue();
+		return showEditUserGroupRuleValue();
 	}
 
 	@RequestMapping(value = "/app/saveUserGroupRuleValue", method = RequestMethod.POST)
@@ -235,7 +235,7 @@ public class RuleValueController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserGroupRuleValue();
+			return showEditUserGroupRuleValue();
 		}
 
 		try {
@@ -252,7 +252,7 @@ public class RuleValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroupRuleValue();
+		return showEditUserGroupRuleValue();
 	}
 
 	/**
@@ -260,8 +260,8 @@ public class RuleValueController {
 	 *
 	 * @return
 	 */
-	private String showUserRuleValue() {
-		logger.debug("Entering showUserRuleValue");
+	private String showEditUserRuleValue() {
+		logger.debug("Entering showEditUserRuleValue");
 
 		return "editUserRuleValue";
 	}
@@ -271,8 +271,8 @@ public class RuleValueController {
 	 *
 	 * @return
 	 */
-	private String showUserGroupRuleValue() {
-		logger.debug("Entering showUserGroupRuleValue");
+	private String showEditUserGroupRuleValue() {
+		logger.debug("Entering showEditUserGroupRuleValue");
 
 		return "editUserGroupRuleValue";
 	}

@@ -125,7 +125,7 @@ public class ParameterController {
 		param.setParameterType(ParameterType.SingleValue);
 
 		model.addAttribute("parameter", param);
-		return showParameter("add", model);
+		return showEditParameter("add", model);
 	}
 
 	@RequestMapping(value = "/app/editParameter", method = RequestMethod.GET)
@@ -139,7 +139,7 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showParameter("edit", model);
+		return showEditParameter("edit", model);
 	}
 
 	@RequestMapping(value = "/app/saveParameter", method = RequestMethod.POST)
@@ -153,7 +153,7 @@ public class ParameterController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showParameter(action, model);
+			return showEditParameter(action, model);
 		}
 
 		try {
@@ -172,7 +172,7 @@ public class ParameterController {
 			model.addAttribute("error", ex);
 		}
 
-		return showParameter(action, model);
+		return showEditParameter(action, model);
 	}
 
 	/**
@@ -182,8 +182,8 @@ public class ParameterController {
 	 * @param model
 	 * @return
 	 */
-	private String showParameter(String action, Model model) {
-		logger.debug("Entering showParameter: action='{}'", action);
+	private String showEditParameter(String action, Model model) {
+		logger.debug("Entering showEditParameter: action='{}'", action);
 
 		try {
 			model.addAttribute("lovReports", reportService.getLovReports());
@@ -196,6 +196,7 @@ public class ParameterController {
 		//model.addAttribute("dataTypes", ParameterDataType.list()); //datatypes loaded automatically?
 
 		model.addAttribute("action", action);
+		
 		return "editParameter";
 	}
 

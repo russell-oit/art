@@ -122,7 +122,7 @@ public class ScheduleController {
 		logger.debug("Entering addSchedule");
 
 		model.addAttribute("schedule", new Schedule());
-		return showSchedule("add", model);
+		return showEditSchedule("add", model);
 	}
 
 	@RequestMapping(value = "/app/editSchedule", method = RequestMethod.GET)
@@ -136,7 +136,7 @@ public class ScheduleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showSchedule("edit", model);
+		return showEditSchedule("edit", model);
 	}
 
 	@RequestMapping(value = "/app/saveSchedule", method = RequestMethod.POST)
@@ -150,7 +150,7 @@ public class ScheduleController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showSchedule(action, model);
+			return showEditSchedule(action, model);
 		}
 
 		//remove spaces in schedule fields. not legal but may commonly be put by users
@@ -176,7 +176,7 @@ public class ScheduleController {
 			model.addAttribute("error", ex);
 		}
 
-		return showSchedule(action, model);
+		return showEditSchedule(action, model);
 	}
 
 	/**
@@ -187,7 +187,7 @@ public class ScheduleController {
 	 * @param session
 	 * @return
 	 */
-	private String showSchedule(String action, Model model) {
+	private String showEditSchedule(String action, Model model) {
 		logger.debug("Entering showSchedule: action='{}'", action);
 
 		model.addAttribute("action", action);

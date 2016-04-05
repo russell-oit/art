@@ -178,7 +178,7 @@ public class FilterValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserFilterValue();
+		return showEditUserFilterValue();
 	}
 
 	@RequestMapping(value = "/app/saveUserFilterValue", method = RequestMethod.POST)
@@ -190,7 +190,7 @@ public class FilterValueController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserFilterValue();
+			return showEditUserFilterValue();
 		}
 
 		try {
@@ -207,7 +207,7 @@ public class FilterValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserFilterValue();
+		return showEditUserFilterValue();
 	}
 
 	@RequestMapping(value = "/app/editUserGroupFilterValue", method = RequestMethod.GET)
@@ -221,7 +221,7 @@ public class FilterValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroupFilterValue();
+		return showEditUserGroupFilterValue();
 	}
 
 	@RequestMapping(value = "/app/saveUserGroupFilterValue", method = RequestMethod.POST)
@@ -233,7 +233,7 @@ public class FilterValueController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showUserGroupFilterValue();
+			return showEditUserGroupFilterValue();
 		}
 
 		try {
@@ -250,7 +250,7 @@ public class FilterValueController {
 			model.addAttribute("error", ex);
 		}
 
-		return showUserGroupFilterValue();
+		return showEditUserGroupFilterValue();
 	}
 
 	/**
@@ -258,8 +258,8 @@ public class FilterValueController {
 	 *
 	 * @return
 	 */
-	private String showUserFilterValue() {
-		logger.debug("Entering showUserFilterValue");
+	private String showEditUserFilterValue() {
+		logger.debug("Entering showEditUserFilterValue");
 
 		return "editUserFilterValue";
 	}
@@ -269,8 +269,8 @@ public class FilterValueController {
 	 *
 	 * @return
 	 */
-	private String showUserGroupFilterValue() {
-		logger.debug("Entering showUserGroupFilterValue");
+	private String showEditUserGroupFilterValue() {
+		logger.debug("Entering showEditUserGroupFilterValue");
 
 		return "editUserGroupFilterValue";
 	}
