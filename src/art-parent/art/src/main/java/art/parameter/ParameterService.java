@@ -213,6 +213,37 @@ public class ParameterService {
 		result.setSuccess(true);
 		return result;
 	}
+	
+		/**
+	 * Delete a parameter
+	 *
+	 * @param ids
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * reports which prevented the parameter from being deleted
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public ActionResult deleteParameters(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteParameters: ids={}", (Object)ids);
+
+		ActionResult result = new ActionResult();
+		List<Integer> nonDeletedRecords=new ArrayList<>();
+		
+		for(Integer id : ids){
+			ActionResult deleteResult=deleteParameter(id);
+			if(!deleteResult.isSuccess()){
+				nonDeletedRecords.add(id);
+			}
+		}
+		
+		if(nonDeletedRecords.isEmpty()){
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+		return result;
+		
+	}
 
 	/**
 	 * Add a new parameter to the database

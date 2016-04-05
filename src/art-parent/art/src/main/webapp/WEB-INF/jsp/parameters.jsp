@@ -24,6 +24,9 @@ Display parameters
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="parameters.message.linkedReportsExist" var="linkedReportsExistText"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
+<spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -36,7 +39,7 @@ Display parameters
 				var tbl = $('#parameters');
 
 				//initialize datatable and process delete action
-				initConfigPage(tbl,
+				var oTable = initConfigPage(tbl,
 						undefined, //pageLength. pass undefined to use the default
 						"${showAllRowsText}",
 						"${pageContext.request.contextPath}",
@@ -54,6 +57,55 @@ Display parameters
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
 						"${linkedReportsExistText}" //linkedRecordsExistText
 						);
+				
+				var table = oTable.api();
+
+				$('#deleteRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[0];
+						});
+						bootbox.confirm({
+							message: "${deleteRecordText}: <b>" + ids + "</b>",
+							buttons: {
+								cancel: {
+									label: "${cancelText}"
+								},
+								confirm: {
+									label: "${okText}"
+								}
+							},
+							callback: function (result) {
+								if (result) {
+									//user confirmed delete. make delete request
+									$.ajax({
+										type: "POST",
+										dataType: "json",
+										url: "${pageContext.request.contextPath}/app/deleteParameters.do",
+										data: {ids: ids},
+										success: function (response) {
+											var nonDeletedRecords = response.data;
+											if (response.success) {
+												selectedRows.remove().draw(false);
+												notifyActionSuccess("${recordsDeletedText}", ids);
+											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
+											} else {
+												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											}
+										},
+										error: ajaxErrorHandler
+									});
+								} //end if result
+							} //end callback
+						}); //end bootbox confirm
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
+
 
 			}); //end document ready
 		</script>
@@ -84,6 +136,10 @@ Display parameters
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
+			<button type="button" id="deleteRecords" class="btn btn-default">
+				<i class="fa fa-trash-o"></i>
+				<spring:message code="page.action.delete"/>
+			</button>
 		</div>
 
 		<table id="parameters" class="table table-bordered table-striped table-condensed">

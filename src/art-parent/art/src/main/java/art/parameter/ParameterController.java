@@ -92,6 +92,30 @@ public class ParameterController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteParameters", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteParameters(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteParameters: ids={}", (Object)ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = parameterService.deleteParameters(ids);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				response.setData(deleteResult.getData());
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/addParameter", method = RequestMethod.GET)
 	public String addParameter(Model model) {
