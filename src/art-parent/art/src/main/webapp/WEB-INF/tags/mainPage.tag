@@ -27,12 +27,13 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.0.0/js/bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
-
+		
 		<jsp:invoke fragment="headContent"/>
 	</jsp:attribute>
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.11/DataTables-1.10.11/css/dataTables.bootstrap.min.css"/>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.11/Select-1.1.2/css/select.bootstrap.min.css"/>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">
 
@@ -44,6 +45,7 @@ bootstrap js, jquery js, datatables css, datatables js
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/DataTables-1.10.11/js/jquery.dataTables.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/DataTables-1.10.11/js/dataTables.bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Select-1.1.2/js/dataTables.select.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
 

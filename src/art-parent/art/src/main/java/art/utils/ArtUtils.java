@@ -214,13 +214,13 @@ public class ArtUtils {
 	 * value=database name
 	 */
 	public static Map<String, String> getDatabaseTypes() {
-		//use linkedhashmap so that items are displayed in the order listed here
 		Map<String, String> databaseTypes = new TreeMap<>();
 
 		databaseTypes.put("demo", "Demo");
 		databaseTypes.put("cubrid", "CUBRID");
 		databaseTypes.put("oracle", "Oracle");
 		databaseTypes.put("mysql", "MySQL");
+		databaseTypes.put("mariadb", "MariaDB");
 		databaseTypes.put("postgresql", "PostgreSQL");
 		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver)");
 		databaseTypes.put("sqlserver-jtds", "SQL Server (jTDS driver)");

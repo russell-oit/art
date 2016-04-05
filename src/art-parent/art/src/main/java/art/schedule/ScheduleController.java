@@ -79,6 +79,24 @@ public class ScheduleController {
 
 		return response;
 	}
+	
+		@RequestMapping(value = "/app/deleteSchedules", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteSchedules(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteSchedule: ids={}", ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			scheduleService.deleteSchedules(ids);
+			response.setSuccess(true);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/getSchedule", method = RequestMethod.POST)
 	public @ResponseBody

@@ -92,6 +92,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.mysql.jdbc.Driver";
 		urlElement.value = "jdbc:mysql://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "mariadb") {
+		driverElement.value = "com.mariadb.jdbc.Driver";
+		urlElement.value = "jdbc:mariadb://<server_name>/<database_name>";
+		testSqlElement.value = "select 1";
 	} else if (dbType === "postgresql") {
 		driverElement.value = "org.postgresql.Driver";
 		urlElement.value = "jdbc:postgresql://<server_name>/<database_name>";
@@ -267,6 +271,9 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		pagingType: "full_numbers",
 		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
 		pageLength: pageLength,
+		select: {
+            style: 'multi'
+        },
 		language: {
 			url: contextPath + "/js/dataTables-1.10.0/i18n/dataTables_" + localeCode + ".txt"
 		},

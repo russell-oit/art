@@ -211,7 +211,7 @@ public class RunReportController {
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
 				writer.flush();
 			}
-
+			
 			long totalTime = 0;
 			long fetchTime = 0;
 

@@ -133,6 +133,23 @@ public class ScheduleService {
 	}
 
 	/**
+	 * Delete a schedule
+	 *
+	 * @param ids
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "schedules", allEntries = true)
+	public void deleteSchedules(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteSchedules: ids={}", (Object) ids);
+
+		String sql;
+
+		sql = "DELETE FROM ART_JOB_SCHEDULES"
+				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		dbService.update(sql, (Object[]) ids);
+	}
+
+	/**
 	 * Add a new schedule to the database
 	 *
 	 * @param schedule
