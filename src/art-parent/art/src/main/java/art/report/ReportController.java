@@ -361,6 +361,30 @@ public class ReportController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteReports", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteReports(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteReports: ids={}", (Object)ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = reportService.deleteReports(ids);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				response.setData(deleteResult.getData());
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.GET)
 	public String addReport(Model model, HttpSession session) {

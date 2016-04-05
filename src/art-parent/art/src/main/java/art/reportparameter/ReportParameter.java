@@ -370,8 +370,8 @@ public class ReportParameter implements Serializable {
 		//for use with jxls
 		ParameterType parameterType = parameter.getParameterType();
 
+		Object value = getEffectiveActualParameterValue();
 		if (parameterType == ParameterType.SingleValue) {
-			Object value = getEffectiveActualParameterValue();
 			String finalValue;
 			switch (parameter.getDataType()) {
 				case Integer:
@@ -391,31 +391,31 @@ public class ReportParameter implements Serializable {
 					finalValue = "'" + finalValue + "'";
 			}
 			return finalValue;
-		} else if (parameterType == ParameterType.MultiValue) {
-			List<Object> values = (List) getEffectiveActualParameterValue();
+		} else if (value instanceof List<?>) {
+			List<?> values = (List<?>) value;
 			String finalValues;
 			List<String> stringValues = new ArrayList<>();
 			switch (parameter.getDataType()) {
 				case Integer:
 				case Datasource:
 				case Number:
-					for (Object value : values) {
-						stringValues.add(String.valueOf(value));
+					for (Object listValue : values) {
+						stringValues.add(String.valueOf(listValue));
 					}
 					break;
 				case Date:
-					for (Object value : values) {
-						stringValues.add("'" + ArtUtils.isoDateFormatter.format(value) + "'");
+					for (Object listValue : values) {
+						stringValues.add("'" + ArtUtils.isoDateFormatter.format(listValue) + "'");
 					}
 					break;
 				case DateTime:
-					for (Object value : values) {
-						stringValues.add("'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'");
+					for (Object listValue : values) {
+						stringValues.add("'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(listValue) + "'");
 					}
 					break;
 				default:
-					for (Object value : values) {
-						String stringValue = String.valueOf(value);
+					for (Object listValue : values) {
+						String stringValue = String.valueOf(listValue);
 						StringUtils.replace(stringValue, "'", "''");
 						stringValue = "'" + stringValue + "'";
 						stringValues.add(stringValue);

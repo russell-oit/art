@@ -231,6 +231,22 @@ public class JobService {
 		sql = "DELETE FROM ART_JOBS WHERE JOB_ID=?";
 		dbService.update(sql, id);
 	}
+	
+		/**
+	 * Delete a job
+	 *
+	 * @param ids
+	 * @throws SQLException
+	 * @throws org.quartz.SchedulerException
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public void deleteJobs(Integer[] ids) throws SQLException, SchedulerException {
+		logger.debug("Entering deleteJobs: ids={}", (Object)ids);
+		
+		for(Integer id : ids){
+			deleteJob(id);
+		}
+	}
 
 	/**
 	 * Add a new job to the database

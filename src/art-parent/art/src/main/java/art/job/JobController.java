@@ -133,6 +133,24 @@ public class JobController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteJobs", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteJobs(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteJobs: ids={}", (Object)ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			jobService.deleteJobs(ids);
+			response.setSuccess(true);
+		} catch (SQLException | SchedulerException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@CacheEvict(value = "jobs", allEntries = true)
 	@RequestMapping(value = "/app/refreshJob", method = RequestMethod.POST)

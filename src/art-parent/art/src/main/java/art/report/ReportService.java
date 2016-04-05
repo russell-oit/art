@@ -419,6 +419,37 @@ public class ReportService {
 		result.setSuccess(true);
 		return result;
 	}
+	
+		/**
+	 * Delete a report
+	 *
+	 * @param ids
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * jobs which prevented the report from being deleted
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public ActionResult deleteReports(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteReports: ids={}", (Object)ids);
+
+		ActionResult result = new ActionResult();
+		List<Integer> nonDeletedRecords=new ArrayList<>();
+		
+		for(Integer id : ids){
+			ActionResult deleteResult=deleteReport(id);
+			if(!deleteResult.isSuccess()){
+				nonDeletedRecords.add(id);
+			}
+		}
+		
+		if(nonDeletedRecords.isEmpty()){
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+		return result;
+		
+	}
 
 	/**
 	 * Add a new report to the database
