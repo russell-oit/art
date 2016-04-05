@@ -85,6 +85,32 @@ public class UserController {
 		return response;
 	}
 
+	@RequestMapping(value = "/app/deleteUsers", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteUsers(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteUsers: id={}", (Object) ids);
+
+		//object will be automatically converted to json
+		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = userService.deleteUsers(ids);
+
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				response.setData(deleteResult.getData());
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
 	@RequestMapping(value = "/app/addUser", method = RequestMethod.GET)
 	public String addUser(Model model, HttpSession session) {
 		logger.debug("Entering addUser");

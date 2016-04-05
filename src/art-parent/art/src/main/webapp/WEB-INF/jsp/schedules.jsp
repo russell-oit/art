@@ -87,9 +87,12 @@ Display schedules
 										url: "${pageContext.request.contextPath}/app/deleteSchedules.do",
 										data: {ids: ids},
 										success: function (response) {
-											selectedRows.remove().draw(false);
-
-											notifyActionSuccess("${recordsDeletedText}", undefined);
+											if (response.success) {
+												selectedRows.remove().draw(false);
+												notifyActionSuccess("${recordsDeletedText}", undefined);
+											} else {
+												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											}
 										},
 										error: ajaxErrorHandler
 									});

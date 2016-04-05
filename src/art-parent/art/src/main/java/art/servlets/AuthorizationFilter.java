@@ -236,8 +236,8 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "users") || StringUtils.endsWith(page, "User")) {
-			//users.do, addUser.do, editUser.do, deleteUser.do
+		} else if (StringUtils.equals(page, "users") || StringUtils.endsWith(page, "User")
+				|| StringUtils.endsWith(page, "Users")) {
 			//standard admins and above, and repository user
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()
 					|| accessLevel == AccessLevel.RepositoryUser.getValue()) {

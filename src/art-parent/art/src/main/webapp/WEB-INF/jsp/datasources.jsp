@@ -36,7 +36,9 @@ Display datasources
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function () {
 				$('a[href*="datasources.do"]').parent().addClass('active');
+				
 				var tbl = $('#datasources');
+				
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
 						undefined, //pageLength. pass undefined to use the default
@@ -56,7 +58,9 @@ Display datasources
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
 						"${linkedReportsExistText}" //linkedRecordsExistText
 						);
+
 				var table = oTable.api();
+
 				$('#deleteRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();

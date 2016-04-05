@@ -258,6 +258,37 @@ public class UserService {
 		result.setSuccess(true);
 		return result;
 	}
+	
+	/**
+	 * Delete a user and all related records
+	 *
+	 * @param ids
+	 * @return ActionResult. if not successful, data contains a list of linked
+	 * jobs which prevented the user from being deleted
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "users", allEntries = true)
+	public ActionResult deleteUsers(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteUsers: ids={}", (Object)ids);
+
+		ActionResult result = new ActionResult();
+		boolean someRecordsNotDeleted=false;
+		List<Integer> nonDeletedRecords=new ArrayList<>();
+		
+		for(Integer id : ids){
+			ActionResult deleteResult=deleteUser(id);
+			if(!deleteResult.isSuccess()){
+				nonDeletedRecords.add(id);
+			}
+		}
+		
+		if(nonDeletedRecords.isEmpty()){
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+		return result;
+	}
 
 	/**
 	 * Update a user's password
