@@ -269,7 +269,8 @@ public class AuthorizationFilter implements Filter {
 				|| StringUtils.equals(page, "reportError")) {
 			//all can access
 			authorised = true;
-		} else if (StringUtils.equals(page, "userGroups") || StringUtils.endsWith(page, "UserGroup")) {
+		} else if (StringUtils.equals(page, "userGroups") || StringUtils.endsWith(page, "UserGroup")
+				|| StringUtils.endsWith(page, "UserGroups")) {
 			//standard admins and above
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
@@ -308,7 +309,7 @@ public class AuthorizationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "schedules") || StringUtils.endsWith(page, "Schedule")
-				|| StringUtils.equals(page, "deleteSchedules") ) {
+				|| StringUtils.endsWith(page, "Schedules") ) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;

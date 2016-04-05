@@ -84,6 +84,24 @@ public class UserGroupController {
 		return response;
 	}
 
+	@RequestMapping(value = "/app/deleteUserGroups", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteUserGroups(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteUserGroups: ids={}", (Object)ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			userGroupService.deleteUserGroups(ids);
+			response.setSuccess(true);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
 	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.GET)
 	public String addUserGroup(Model model) {
 		logger.debug("Entering addUserGroup");

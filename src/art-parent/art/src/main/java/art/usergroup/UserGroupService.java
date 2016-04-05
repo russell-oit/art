@@ -178,6 +178,21 @@ public class UserGroupService {
 	}
 
 	/**
+	 * Delete the user group with the given id
+	 *
+	 * @param ids
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "userGroups", allEntries = true)
+	public void deleteUserGroups(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteUserGroups: ids={}", (Object)ids);
+
+		for (Integer id : ids) {
+			deleteUserGroup(id);
+		}
+	}
+
+	/**
 	 * Add a new user group
 	 *
 	 * @param group

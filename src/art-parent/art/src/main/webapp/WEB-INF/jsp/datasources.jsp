@@ -24,6 +24,8 @@ Display datasources
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="datasources.message.linkedReportsExist" var="linkedReportsExistText"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
@@ -31,7 +33,7 @@ Display datasources
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('a[href*="datasources.do"]').parent().addClass('active');
 
 				var tbl = $('#datasources');
@@ -79,7 +81,11 @@ Display datasources
 			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addDatasource.do">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
-			</a> 
+			</a>
+			<button type="button" id="deleteRecords" class="btn btn-default">
+				<i class="fa fa-trash-o"></i>
+				<spring:message code="page.action.delete"/>
+			</button>
 		</div>
 
 		<table id="datasources" class="table table-bordered table-striped table-condensed">
