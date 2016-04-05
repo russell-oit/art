@@ -171,6 +171,36 @@ public class RuleService {
 		result.setSuccess(true);
 		return result;
 	}
+	
+	/**
+	 * Delete a rule
+	 *
+	 * @param ids
+	 * @return ActionResult. if delete was not successful, data contains a list
+	 * of linked reports which prevented the rule from being deleted
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "rules", allEntries = true)
+	public ActionResult deleteRules(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteRules: ids={}", (Object)ids);
+
+		ActionResult result = new ActionResult();
+		List<Integer> nonDeletedRecords=new ArrayList<>();
+		
+		for(Integer id : ids){
+			ActionResult deleteResult=deleteRule(id);
+			if(!deleteResult.isSuccess()){
+				nonDeletedRecords.add(id);
+			}
+		}
+		
+		if(nonDeletedRecords.isEmpty()){
+			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
+		}
+		return result;
+	}
 
 	/**
 	 * Add a new rule to the database

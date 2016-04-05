@@ -88,6 +88,30 @@ public class RuleController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteRules", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteRules(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteRules: id={}", (Object)ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			ActionResult deleteResult = ruleService.deleteRules(ids);
+			
+			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
+			if (deleteResult.isSuccess()) {
+				response.setSuccess(true);
+			} else {
+				response.setData(deleteResult.getData());
+			}
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/addRule", method = RequestMethod.GET)
 	public String addRule(Model model) {

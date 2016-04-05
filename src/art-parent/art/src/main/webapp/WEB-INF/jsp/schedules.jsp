@@ -89,7 +89,7 @@ Display schedules
 										success: function (response) {
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", undefined);
+												notifyActionSuccess("${recordsDeletedText}", ids);
 											} else {
 												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 											}

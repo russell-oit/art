@@ -90,7 +90,7 @@ Report groups configuration page
 											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
-												notifyActionSuccess("${recordsDeletedText}", undefined);
+												notifyActionSuccess("${recordsDeletedText}", ids);
 											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
 												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
