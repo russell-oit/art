@@ -22,6 +22,7 @@ import art.enums.AccessLevel;
 import art.user.User;
 import art.utils.ActionResult;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -133,17 +134,19 @@ public class DatasourceService {
 		logger.debug("Entering deleteDatasource: id={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		boolean someRecordsNotDeleted = false;
+		List<Integer> nonDeletedRecords = new ArrayList<>();
 
 		for (Integer id : ids) {
 			ActionResult deleteResult = deleteDatasource(id);
 			if (!deleteResult.isSuccess()) {
-				someRecordsNotDeleted = true;
+				nonDeletedRecords.add(id);
 			}
 		}
 
-		if (!someRecordsNotDeleted) {
+		if (nonDeletedRecords.isEmpty()) {
 			result.setSuccess(true);
+		} else {
+			result.setData(nonDeletedRecords);
 		}
 		return result;
 	}

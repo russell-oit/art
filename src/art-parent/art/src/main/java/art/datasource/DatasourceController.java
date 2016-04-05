@@ -115,6 +115,8 @@ public class DatasourceController {
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
+			} else {
+				response.setData(deleteResult.getData());
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);

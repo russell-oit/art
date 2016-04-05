@@ -87,11 +87,14 @@ Display datasources
 										url: "${pageContext.request.contextPath}/app/deleteDatasources.do",
 										data: {ids: ids},
 										success: function (response) {
+											var nonDeletedRecords = response.data;
 											if (response.success) {
 												selectedRows.remove().draw(false);
 												notifyActionSuccess("${recordsDeletedText}", undefined);
+											} else if (nonDeletedRecords !== null && nonDeletedRecords.length > 0) {
+												notifySomeRecordsNotDeleted(nonDeletedRecords, "${someRecordsNotDeletedText}");
 											} else {
-												notifySomeRecordsNotDeleted("${someRecordsNotDeletedText}");
+												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 											}
 										},
 										error: ajaxErrorHandler

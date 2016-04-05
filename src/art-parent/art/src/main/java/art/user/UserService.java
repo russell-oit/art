@@ -272,7 +272,6 @@ public class UserService {
 		logger.debug("Entering deleteUsers: ids={}", (Object)ids);
 
 		ActionResult result = new ActionResult();
-		boolean someRecordsNotDeleted=false;
 		List<Integer> nonDeletedRecords=new ArrayList<>();
 		
 		for(Integer id : ids){
