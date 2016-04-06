@@ -18,7 +18,6 @@ package art.report;
 
 import art.datasource.DatasourceService;
 import art.enums.AccessLevel;
-import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.parameter.Parameter;
 import art.reportgroup.ReportGroupService;
@@ -324,9 +323,6 @@ public class ReportController {
 	public String showReportsConfig(Model model) {
 		logger.debug("Entering showReportsConfig");
 
-		model.addAttribute("activeStatus", ReportStatus.Active.getValue());
-		model.addAttribute("disabledStatus", ReportStatus.Disabled.getValue());
-
 		try {
 			model.addAttribute("reports", reportService.getAllReports());
 		} catch (SQLException ex) {
@@ -487,7 +483,6 @@ public class ReportController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
-			model.addAttribute("reportStatuses", ReportStatus.list());
 			model.addAttribute("reportTypes", ReportType.list());
 
 			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));

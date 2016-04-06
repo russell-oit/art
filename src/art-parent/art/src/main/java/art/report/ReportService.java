@@ -23,7 +23,6 @@ import art.connectionpool.DbConnections;
 import art.datasource.DatasourceService;
 import art.enums.AccessLevel;
 import art.enums.ParameterType;
-import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import art.reportgroup.ReportGroupService;
@@ -119,7 +118,8 @@ public class ReportService {
 			report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
 			report.setUsesFilters(rs.getBoolean("USES_FILTERS"));
-			report.setReportStatus(ReportStatus.toEnum(rs.getString("REPORT_STATUS")));
+			report.setActive(rs.getBoolean("ACTIVE"));
+			report.setHidden(rs.getBoolean("HIDDEN"));
 			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
 			report.setxAxisLabel(rs.getString("X_AXIS_LABEL"));
 			report.setyAxisLabel(rs.getString("Y_AXIS_LABEL"));
@@ -264,7 +264,9 @@ public class ReportService {
 
 		String sql = SQL_SELECT_ALL
 				//only show active reports
-				+ " WHERE AQ.REPORT_STATUS=?"
+				+ " WHERE AQ.ACTIVE=1"
+				//don't show hidden reports
+				+ " AND AQ.HIDDEN<>1"
 				//don't show lov reports
 				+ " AND AQ.QUERY_TYPE NOT IN(?,?)"
 				//don't show job recipient reports
@@ -296,7 +298,6 @@ public class ReportService {
 				+ ")";
 
 		Object[] values = {
-			ReportStatus.Active.getValue(), //valid report status
 			ReportType.LovDynamic.getValue(), //omitted report types
 			ReportType.LovStatic.getValue(),
 			ReportType.JobRecipients.getValue(),
@@ -528,14 +529,6 @@ public class ReportService {
 			datasourceId = report.getDatasource().getDatasourceId();
 		}
 
-		String reportStatus;
-		if (report.getReportStatus() == null) {
-			logger.warn("Report status not defined. Defaulting to null");
-			reportStatus = null;
-		} else {
-			reportStatus = report.getReportStatus().getValue();
-		}
-
 		Integer reportTypeId;
 		if (report.getReportType() == null) {
 			logger.warn("Report type not defined. Defaulting to 0");
@@ -549,11 +542,11 @@ public class ReportService {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
 					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
-					+ " REPORT_STATUS, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
+					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET, XMLA_URL,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 24) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -565,7 +558,8 @@ public class ReportService {
 				datasourceId,
 				report.getContactPerson(),
 				report.isUsesFilters(),
-				reportStatus,
+				report.isActive(),
+				report.isHidden(),
 				report.isParametersInOutput(),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
@@ -585,8 +579,8 @@ public class ReportService {
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 					+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
-					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, "
-					+ " REPORT_STATUS=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
+					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, ACTIVE=?,"
+					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
 					+ " XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=?, UPDATED_BY=?"
@@ -601,7 +595,8 @@ public class ReportService {
 				datasourceId,
 				report.getContactPerson(),
 				report.isUsesFilters(),
-				reportStatus,
+				report.isActive(),
+				report.isHidden(),
 				report.isParametersInOutput(),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),

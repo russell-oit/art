@@ -18,7 +18,6 @@
 package art.analysis;
 
 import art.datasource.Datasource;
-import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.report.Report;
 import art.report.ReportService;
@@ -106,7 +105,7 @@ public class AnalysisController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			if (!sessionUser.isAdminUser()) {
-				if (report.getReportStatus() == ReportStatus.Disabled) {
+				if (!report.isActive()) {
 					model.addAttribute("message", "reports.message.reportDisabled");
 					return errorPage;
 				}
@@ -460,8 +459,9 @@ public class AnalysisController {
 				newReport.setShortDescription("");
 				newReport.setContactPerson(sessionUser.getUsername());
 				newReport.setUsesFilters(report.isUsesFilters());
-				newReport.setReportStatus(report.getReportStatus());
 				newReport.setTemplate(report.getTemplate());
+				newReport.setActive(report.isActive());
+				newReport.setHidden(report.isHidden());
 
 				if (queryDescription == null || queryDescription.length() == 0) {
 					//no description provided. use original query description

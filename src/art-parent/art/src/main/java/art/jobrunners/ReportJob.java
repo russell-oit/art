@@ -22,7 +22,6 @@ import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
 import art.enums.JobType;
 import art.enums.ReportFormat;
-import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.job.JobService;
 import art.jobparameter.JobParameter;
@@ -144,7 +143,7 @@ public class ReportJob implements org.quartz.Job {
 
 			if (!job.isActive()) {
 				runMessage = "jobs.message.jobDisabled";
-			} else if (job.getReport().getReportStatus() != ReportStatus.Active) {
+			} else if (!job.getReport().isActive()) {
 				runMessage = "jobs.message.reportDisabled";
 			} else if (!job.getUser().isActive()) {
 				runMessage = "jobs.message.ownerDisabled";

@@ -17,7 +17,6 @@
  */
 package art.dashboard;
 
-import art.enums.ReportStatus;
 import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
@@ -80,7 +79,7 @@ public class DashboardController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 
 			if (!sessionUser.isAdminUser()) {
-				if (report.getReportStatus() == ReportStatus.Disabled) {
+				if (!report.isActive()) {
 					model.addAttribute("message", "reports.message.reportDisabled");
 					return errorPage;
 				}

@@ -232,7 +232,7 @@ Edit report page
 				} else {
 					$("#chartFields").hide();
 				}
-				
+
 				//show/hide group column
 				switch (reportTypeId) {
 					case 1: //group
@@ -318,18 +318,23 @@ Edit report page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4">
-						<spring:message code="reports.text.status"/>
+					<label class="control-label col-md-4" for="active">
+						<spring:message code="page.label.active"/>
 					</label>
 					<div class="col-md-8">
-						<c:forEach var="reportStatus" items="${reportStatuses}">
-							<label class="radio-inline">
-								<form:radiobutton path="reportStatus"
-												  value="${reportStatus}"/>
-								<spring:message code="${reportStatus.localizedDescription}"/>
-							</label>
-						</c:forEach>
-						<form:errors path="reportStatus" cssClass="error"/>
+						<div class="checkbox">
+							<form:checkbox path="active" id="active"/>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-md-4" for="hidden">
+						<spring:message code="parameters.label.hidden"/>
+					</label>
+					<div class="col-md-8">
+						<div class="checkbox">
+							<form:checkbox path="hidden" id="hidden"/>
+						</div>
 					</div>
 				</div>
 				<div class="form-group">

@@ -54,16 +54,17 @@ public class HtmlDataTableOutput extends StandardOutput {
 					+ "js" + File.separator + languageFileName;
 			File languageFile = new File(languageFilePath);
 			if (languageFile.exists()) {
-				languageSetting = ", \"oLanguage\": {\"sUrl\": " + contextPath + "/js/" + languageFileName + "\"}";
+				languageSetting = ", oLanguage: {\"sUrl\": " + contextPath + "/js/" + languageFileName + "\"}";
 			}
 		}
 
 		//set table options. see http://www.datatables.net/ref
 		String dataTableOptions = "{aaSorting: []"
-				+ ", \"sPaginationType\":\"full_numbers\""
+				+ ", PaginationType:\"full_numbers\""
 				+ languageSetting
-				+ ", \"iDisplayLength\": 50" //default item in show entries e.g. -1
-				+ ", \"aLengthMenu\": [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
+				+ ", iDisplayLength: 50" //default item in show entries e.g. -1
+				+ ", aLengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
+				+ ", orderClasses: false"
 				+ "}";
 
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
@@ -122,11 +123,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 			sortValue = sortNumberFormatter.format(value);
 		}
 
-		//display value in invisible span so that sorting can work correctly when there are numbers with the thousand separator e.g. 1,000
-		out.println("<td style='text-align: right'>"
-				+ "<span style='display: none;'>" + sortValue + "</span>"
-				+ formattedValue
-				+ "</td>");
+		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
+				+ formattedValue + "</td>");
 	}
 
 	@Override
@@ -142,10 +140,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 			formattedValue = Config.getDateDisplayString(value);
 		}
 
-		out.println("<td style='text-align: left'>"
-				+ "<span style='display: none;'>" + sortValue + "</span>"
-				+ formattedValue
-				+ "</td>");
+		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
+				+ formattedValue + "</td>");
 	}
 
 	@Override

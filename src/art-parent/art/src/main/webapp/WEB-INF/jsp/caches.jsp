@@ -97,6 +97,7 @@ Page to allow manual clearing of caches
 		<table id="caches" class="table table-striped table-bordered">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="caches.text.cache"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
@@ -106,6 +107,7 @@ Page to allow manual clearing of caches
 					<tr data-id="${cache.value}"
 						data-name="${cache.value}">
 
+						<td></td>
 						<td><spring:message code="${cache.localizedDescription}"/></td>
 						<td>
 							<button type="button" class="btn btn-default clearCache">

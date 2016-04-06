@@ -345,7 +345,7 @@ public class DatasourceService {
 
 			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
 
-			dbService.update(sql, (Object[]) valuesArray);
+			dbService.update(sql, valuesArray);
 		}
 	}
 

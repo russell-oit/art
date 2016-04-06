@@ -72,6 +72,7 @@ Display current loggers
 		<table id="loggers" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.level"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
@@ -80,6 +81,8 @@ Display current loggers
 			<tbody>
 				<c:forEach var="logger" items="${loggers}">
 					<tr data-name="${encode:forHtmlAttribute(logger.name)}">
+						
+						<td></td>
 						<td>${encode:forHtmlContent(logger.name)}</td>
 						<td>${encode:forHtmlContent(logger.level)}</td>
 						<td>

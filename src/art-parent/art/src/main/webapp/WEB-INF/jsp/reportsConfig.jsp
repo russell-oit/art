@@ -33,8 +33,8 @@ Reports configuration page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[href*="reportsConfig.do"]').parent().addClass('active');
 				});
 				var tbl = $('#reports');
@@ -58,7 +58,7 @@ Reports configuration page
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
 						"${linkedJobsExistText}" //linkedRecordsExistText
 						);
-				
+
 				var table = oTable.api();
 
 				$('#deleteRecords').click(function () {
@@ -149,7 +149,7 @@ Reports configuration page
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
-					<th><spring:message code="reports.text.status"/></th>
+					<th><spring:message code="page.text.active"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -165,24 +165,9 @@ Reports configuration page
 											   updateDate="${report.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(report.description)}</td>
-						<td>
-							<c:choose>
-								<c:when test="${report.reportStatus.value == activeStatus}">
-									<span class="label label-success">
-										<spring:message code="${report.reportStatus.localizedDescription}"/>
-									</span>
-								</c:when>
-								<c:when test="${report.reportStatus.value == disabledStatus}">
-									<span class="label label-danger">
-										<spring:message code="${report.reportStatus.localizedDescription}"/>
-									</span>
-								</c:when>
-								<c:otherwise>
-									<span class="label label-default">
-										<spring:message code="${report.reportStatus.localizedDescription}"/>
-									</span>
-								</c:otherwise>
-							</c:choose>
+						<td><t:displayActiveStatus active="${report.active}"
+												   activeText="${activeText}"
+												   disabledText="${disabledText}"/>
 						</td>
 						<td>
 							<div class="btn-group">
@@ -211,26 +196,26 @@ Reports configuration page
 								<ul class="dropdown-menu">
 									<li>
 										<a 
-										   href="${pageContext.request.contextPath}/app/reportParameterConfig.do?reportId=${report.reportId}">
+											href="${pageContext.request.contextPath}/app/reportParameterConfig.do?reportId=${report.reportId}">
 											<spring:message code="reports.action.parameters"/>
 										</a>
 									</li>
 									<li>
 										<a 
-										   href="${pageContext.request.contextPath}/app/reportRules.do?reportId=${report.reportId}">
+											href="${pageContext.request.contextPath}/app/reportRules.do?reportId=${report.reportId}">
 											<spring:message code="reports.action.rules"/>
 										</a>
 									</li>
 									<li>
 										<a 
-										   href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${report.reportId}">
+											href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${report.reportId}">
 											<spring:message code="reports.action.drilldowns"/>
 										</a>
 									</li>
 									<li class="divider"></li>
 									<li>
 										<a 
-										   href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
+											href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
 											<spring:message code="reports.action.preview"/>
 										</a>
 									</li>

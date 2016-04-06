@@ -17,7 +17,6 @@
 package art.report;
 
 import art.datasource.Datasource;
-import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
 import java.io.Serializable;
@@ -40,7 +39,6 @@ public class Report implements Serializable {
 	private Datasource datasource;
 	private String contactPerson;
 	private boolean usesFilters;
-	private ReportStatus reportStatus;
 	private boolean parametersInOutput;
 	private String xAxisLabel;
 	private String yAxisLabel;
@@ -62,6 +60,36 @@ public class Report implements Serializable {
 	private String updatedBy;
 	private ReportType reportType;
 	private int groupColumn;
+	private boolean active;
+	private boolean hidden;
+
+	/**
+	 * @return the active
+	 */
+	public boolean isActive() {
+		return active;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the hidden
+	 */
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	/**
+	 * @param hidden the hidden to set
+	 */
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
+	}
 
 	/**
 	 * @return the groupColumn
@@ -330,20 +358,6 @@ public class Report implements Serializable {
 	 */
 	public void setUsesFilters(boolean usesFilters) {
 		this.usesFilters = usesFilters;
-	}
-
-	/**
-	 * @return the reportStatus
-	 */
-	public ReportStatus getReportStatus() {
-		return reportStatus;
-	}
-
-	/**
-	 * @param reportStatus the reportStatus to set
-	 */
-	public void setReportStatus(ReportStatus reportStatus) {
-		this.reportStatus = reportStatus;
 	}
 
 	/**

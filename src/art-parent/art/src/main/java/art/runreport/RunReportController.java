@@ -18,7 +18,6 @@ package art.runreport;
 
 import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
-import art.enums.ReportStatus;
 import art.enums.ReportType;
 import art.output.StandardOutput;
 import art.report.Report;
@@ -118,7 +117,7 @@ public class RunReportController {
 			String username = sessionUser.getUsername();
 
 			if (!sessionUser.isAdminUser()) {
-				if (report.getReportStatus() == ReportStatus.Disabled) {
+				if (!report.isActive()) {
 					model.addAttribute("message", "reports.message.reportDisabled");
 					return errorPage;
 				}

@@ -57,10 +57,10 @@ Page to display connections status
 						success: function (response) {
 							var pool = response.data;
 
-							table.cell(row, 3).data(pool.highestReachedPoolSize);
-							table.cell(row, 4).data(pool.currentPoolSize);
-							table.cell(row, 5).data(pool.inUseCount);
-							table.cell(row, 6).data(pool.totalConnectionRequests);
+							table.cell(row, 4).data(pool.highestReachedPoolSize);
+							table.cell(row, 5).data(pool.currentPoolSize);
+							table.cell(row, 6).data(pool.inUseCount);
+							table.cell(row, 7).data(pool.totalConnectionRequests);
 
 							notifyActionSuccess("${connectionResetText}", recordName);
 						},
@@ -93,6 +93,7 @@ Page to display connections status
 		<table id="connections" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="connections.text.datasourceId"/></th>
 					<th><spring:message code="connections.text.datasourceName"/></th>
 					<th><spring:message code="connections.text.maxConnectionCount"/></th>
@@ -111,6 +112,7 @@ Page to display connections status
 					<tr data-id="${pool.poolId}"
 						data-name="${encode:forHtmlAttribute(pool.name)}">
 
+						<td></td>
 						<td>${pool.poolId}</td>
 						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>${pool.maxPoolSize}</td>

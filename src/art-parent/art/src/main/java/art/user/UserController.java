@@ -244,7 +244,7 @@ public class UserController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditUsers(model, session);
+			return showEditUsers();
 		}
 
 		try {
@@ -258,7 +258,7 @@ public class UserController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditUsers(model, session);
+		return showEditUsers();
 	}
 
 	/**
@@ -293,17 +293,8 @@ public class UserController {
 	 * @param session
 	 * @return
 	 */
-	private String showEditUsers(Model model, HttpSession session) {
+	private String showEditUsers() {
 		logger.debug("Entering showEditUsers");
-
-		try {
-			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
-			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
-			model.addAttribute("accessLevels", getAccessLevels(session));
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
-			model.addAttribute("error", ex);
-		}
 
 		return "editUsers";
 	}
