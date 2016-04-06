@@ -65,7 +65,7 @@ Display rules
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -144,6 +144,7 @@ Display rules
 		<table id="rules" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
@@ -155,6 +156,7 @@ Display rules
 					<tr data-id="${rule.ruleId}" 
 						data-name="${encode:forHtmlAttribute(rule.name)}">
 
+						<td></td>
 						<td>${rule.ruleId}</td>
 						<td>${encode:forHtmlContent(rule.name)} &nbsp;
 							<t:displayNewLabel creationDate="${rule.creationDate}"

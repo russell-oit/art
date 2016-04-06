@@ -66,7 +66,7 @@ Report groups configuration page
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -145,6 +145,7 @@ Report groups configuration page
 		<table id="reportGroups" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
@@ -156,6 +157,7 @@ Report groups configuration page
 					<tr data-id="${group.reportGroupId}" 
 						data-name="${encode:forHtmlAttribute(group.name)}">
 
+						<td></td>
 						<td>${group.reportGroupId}</td>
 						<td>${encode:forHtmlContent(group.name)} &nbsp;
 							<t:displayNewLabel creationDate="${group.creationDate}"

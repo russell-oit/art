@@ -62,7 +62,7 @@ Display user groups
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 
 						bootbox.confirm({
@@ -139,6 +139,7 @@ Display user groups
 		<table id="userGroups" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
@@ -151,6 +152,7 @@ Display user groups
 					<tr data-id="${group.userGroupId}" 
 						data-name="${encode:forHtmlAttribute(group.name)}">
 
+						<td></td>
 						<td>${group.userGroupId}</td>
 						<td>${encode:forHtmlContent(group.name)} &nbsp;
 							<t:displayNewLabel creationDate="${group.creationDate}"

@@ -65,7 +65,7 @@ Display schedules
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 
 						bootbox.confirm({
@@ -142,6 +142,7 @@ Display schedules
 		<table id="schedules" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
@@ -153,6 +154,7 @@ Display schedules
 					<tr data-id="${schedule.scheduleId}" 
 						data-name="${encode:forHtmlAttribute(schedule.name)}">
 
+						<td></td>
 						<td>${schedule.scheduleId}</td>
 						<td>${encode:forHtmlContent(schedule.name)} &nbsp;
 							<t:displayNewLabel creationDate="${schedule.creationDate}"

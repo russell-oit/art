@@ -66,7 +66,7 @@ Display datasources
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -139,6 +139,7 @@ Display datasources
 		<table id="datasources" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
@@ -151,6 +152,7 @@ Display datasources
 					<tr data-id="${datasource.datasourceId}"
 						data-name="${encode:forHtmlAttribute(datasource.name)}">
 
+						<td></td>
 						<td>${datasource.datasourceId}</td>
 						<td>${encode:forHtmlContent(datasource.name)} &nbsp;
 							<t:displayNewLabel creationDate="${datasource.creationDate}"

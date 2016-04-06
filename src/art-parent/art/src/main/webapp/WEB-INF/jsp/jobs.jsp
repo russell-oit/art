@@ -87,8 +87,11 @@ Display user jobs and jobs configuration
 						data: {id: recordId},
 						success: function (response) //on recieve of reply
 						{
-							var runningText = '${runningText}';
-							$.notify(runningText, "success");
+							if (response.success) {
+								notifyActionSuccess("${runningText}", recordName);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
 						},
 						error: ajaxErrorHandler
 					});
@@ -104,41 +107,45 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/app/refreshJob.do',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response) //on recieve of reply
+						success: function (response)
 						{
-							var job = response.data;
+							if (response.success) {
+								var job = response.data;
 
-							var result = '';
-							if (job.lastFileName) {
-								result = '<a type="application/octet-stream" ';
-								result = result + 'href="${pageContext.request.contextPath}/export/jobs/' + job.lastFileName + '">';
-								result = result + job.lastFileName + '</a>';
-								result = result + '<br>';
-							}
-							if (job.lastRunMessage) {
-								result = result + job.lastRunMessage;
-								result = result + '<br>';
-							}
-							if (job.lastRunDetails) {
-								result = result + job.lastRunDetails;
-							}
+								var result = '';
+								if (job.lastFileName) {
+									result = '<a type="application/octet-stream" ';
+									result = result + 'href="${pageContext.request.contextPath}/export/jobs/' + job.lastFileName + '">';
+									result = result + job.lastFileName + '</a>';
+									result = result + '<br>';
+								}
+								if (job.lastRunMessage) {
+									result = result + job.lastRunMessage;
+									result = result + '<br>';
+								}
+								if (job.lastRunDetails) {
+									result = result + job.lastRunDetails;
+								}
 
-							table.cell(row, 2).data(job.lastEndDateString);
-							table.cell(row, 3).data(result);
-							table.cell(row, 4).data(job.nextRunDateString);
+								table.cell(row, 3).data(job.lastEndDateString);
+								table.cell(row, 4).data(result);
+								table.cell(row, 5).data(job.nextRunDateString);
 
-							notifyActionSuccess("${refreshedText}", recordName);
+								notifyActionSuccess("${refreshedText}", recordName);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
 						},
 						error: ajaxErrorHandler
 					});
 				});
-				
+
 				$('#deleteRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 
 						bootbox.confirm({
@@ -207,17 +214,22 @@ Display user jobs and jobs configuration
 
 		<div id="ajaxResponse">
 		</div>
-		
-		<div style="margin-bottom: 10px;">
-			<button type="button" id="deleteRecords" class="btn btn-default">
-				<i class="fa fa-trash-o"></i>
-				<spring:message code="page.action.delete"/>
-			</button>
-		</div>
+
+		<c:choose>
+			<c:when test="${action == 'config'}">
+				<div style="margin-bottom: 10px;">
+					<button type="button" id="deleteRecords" class="btn btn-default">
+						<i class="fa fa-trash-o"></i>
+						<spring:message code="page.action.delete"/>
+					</button>
+				</div>
+			</c:when>
+		</c:choose>
 
 		<table id="jobs" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="jobs.text.lastEndDate"/></th>
@@ -231,6 +243,7 @@ Display user jobs and jobs configuration
 					<tr data-id="${job.jobId}" 
 						data-name="${encode:forHtmlAttribute(job.name)}">
 
+						<td></td>
 						<td>${job.jobId}</td>
 						<td>${encode:forHtmlContent(job.name)}</td>
 						<td data-sort="${job.lastEndDate.time}">

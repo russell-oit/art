@@ -65,7 +65,7 @@ Display parameters
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -145,6 +145,7 @@ Display parameters
 		<table id="parameters" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
@@ -156,6 +157,7 @@ Display parameters
 					<tr data-id="${parameter.parameterId}" 
 						data-name="${encode:forHtmlAttribute(parameter.name)}">
 
+						<td></td>
 						<td>${parameter.parameterId}</td>
 						<td>${encode:forHtmlContent(parameter.name)} &nbsp;
 							<t:displayNewLabel creationDate="${parameter.creationDate}"

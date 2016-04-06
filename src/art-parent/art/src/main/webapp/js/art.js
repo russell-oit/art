@@ -271,9 +271,16 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		pagingType: "full_numbers",
 		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
 		pageLength: pageLength,
+		columnDefs: [ {
+            orderable: false,
+            className: 'select-checkbox',
+            targets:   0
+        } ],
 		select: {
-            style: 'multi'
+            style: 'multi',
+			selector: 'td:first-child'
         },
+		order: [[ 1, 'asc' ]],
 		language: {
 			url: contextPath + "/js/dataTables-1.10.11/i18n/dataTables_" + localeCode + ".txt"
 		},

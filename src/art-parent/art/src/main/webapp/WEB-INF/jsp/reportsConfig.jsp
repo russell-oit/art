@@ -66,7 +66,7 @@ Reports configuration page
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -145,6 +145,7 @@ Reports configuration page
 		<table id="reports" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
@@ -157,6 +158,7 @@ Reports configuration page
 					<tr data-name="${encode:forHtmlAttribute(report.name)}"
 						data-id="${report.reportId}">
 
+						<td></td>
 						<td>${report.reportId}</td>
 						<td>${encode:forHtmlContent(report.name)} &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"

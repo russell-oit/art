@@ -70,7 +70,7 @@ Display user configuration page
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 						bootbox.confirm({
 							message: "${deleteRecordText}: <b>" + ids + "</b>",
@@ -116,7 +116,7 @@ Display user configuration page
 					var data = selectedRows.data();
 					if (data.length > 0) {
 						var ids = $.map(data, function (item) {
-							return item[0];
+							return item[1];
 						});
 						window.location.href='${pageContext.request.contextPath}/app/editUsers.do?ids=' + ids;
 					} else {
@@ -168,6 +168,7 @@ Display user configuration page
 		<table id="users" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="users.text.username"/></th>
 					<th><spring:message code="users.text.fullName"/></th>
@@ -180,6 +181,7 @@ Display user configuration page
 					<tr data-id="${user.userId}"
 						data-name="${encode:forHtmlAttribute(user.username)}">
 
+						<td></td>
 						<td>${user.userId}</td>
 						<td>${encode:forHtmlContent(user.username)}</td>
 						<td>${encode:forHtmlContent(user.fullName)}</td>
