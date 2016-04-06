@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -231,8 +232,8 @@ public class JobService {
 		sql = "DELETE FROM ART_JOBS WHERE JOB_ID=?";
 		dbService.update(sql, id);
 	}
-	
-		/**
+
+	/**
 	 * Delete a job
 	 *
 	 * @param ids
@@ -241,9 +242,9 @@ public class JobService {
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
 	public void deleteJobs(Integer[] ids) throws SQLException, SchedulerException {
-		logger.debug("Entering deleteJobs: ids={}", (Object)ids);
-		
-		for(Integer id : ids){
+		logger.debug("Entering deleteJobs: ids={}", (Object) ids);
+
+		for (Integer id : ids) {
 			deleteJob(id);
 		}
 	}
@@ -295,6 +296,36 @@ public class JobService {
 		boolean newRecord = false;
 
 		saveJob(job, newRecord, actionUser);
+	}
+
+	/**
+	 * Update an existing user record
+	 *
+	 * @param multipleJobEdit
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "jobs", allEntries = true)
+	public void updateJobs(MultipleJobEdit multipleJobEdit, User actionUser) throws SQLException {
+		logger.debug("Entering updateJobs: multipleJobEdit={}, actionUser={}", multipleJobEdit, actionUser);
+
+		String sql;
+
+		String[] ids = StringUtils.split(multipleJobEdit.getIds(), ",");
+		if (!multipleJobEdit.isActiveUnchanged()) {
+			sql = "UPDATE ART_JOBS SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(multipleJobEdit.isActive());
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, (Object[]) valuesArray);
+		}
 	}
 
 	/**

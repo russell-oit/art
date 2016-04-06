@@ -205,7 +205,7 @@ public class DatasourceController {
 	}
 
 	@RequestMapping(value = "/app/saveDatasources", method = RequestMethod.POST)
-	public String saveUsers(@ModelAttribute("multipleDatasourceEdit") @Valid MultipleDatasourceEdit multipleDatasourceEdit,
+	public String saveDatasources(@ModelAttribute("multipleDatasourceEdit") @Valid MultipleDatasourceEdit multipleDatasourceEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 

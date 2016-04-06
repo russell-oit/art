@@ -300,6 +300,45 @@ public class JobController {
 
 		return showEditJob(action, model);
 	}
+	
+	@RequestMapping(value = "/app/saveJobs", method = RequestMethod.POST)
+	public String saveJobs(@ModelAttribute("multipleJobEdit") @Valid MultipleJobEdit multipleJobEdit,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveJobs: multipleJobEdit={}", multipleJobEdit);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showEditJobs();
+		}
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			jobService.updateJobs(multipleJobEdit, sessionUser);
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
+			redirectAttributes.addFlashAttribute("recordName", multipleJobEdit.getIds());
+			return "redirect:/app/users.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditJobs();
+	}
+	
+	/**
+	 * Prepare model data and return jsp file to display
+	 *
+	 * @param action
+	 * @param model
+	 * @return
+	 */
+	private String showEditJobs() {
+		logger.debug("Entering showEditJobs");
+		return "editJobs";
+	}
 
 	private void saveJobParameters(HttpServletRequest request, int jobId)
 			throws NumberFormatException, SQLException {
