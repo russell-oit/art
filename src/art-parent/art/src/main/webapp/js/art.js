@@ -124,7 +124,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "net.sourceforge.jtds.jdbc.Driver";
 		urlElement.value = "jdbc:jtds:sqlserver://<server_name>/<database_name>";
 		testSqlElement.value = "select 1";
-	} else if (dbType === "log4jdbc") {
+	} else if (dbType === "sql-logging") {
 		driverElement.value = "net.sf.log4jdbc.DriverSpy";
 		urlElement.value = "jdbc:log4" + urlElement.value;
 		testSqlElement.value = "";
@@ -132,7 +132,7 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "com.ibm.db2.jcc.DB2Driver";
 		urlElement.value = "jdbc:db2://<server_name>/<database_name>";
 		testSqlElement.value = "select 1 from sysibm.sysdummy1";
-	} else if (dbType === "odbc") {
+	} else if (dbType === "generic-odbc") {
 		driverElement.value = "sun.jdbc.odbc.JdbcOdbcDriver";
 		urlElement.value = "jdbc:odbc:<dsn_name>";
 		testSqlElement.value = "";

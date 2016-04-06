@@ -183,6 +183,19 @@ Display user jobs and jobs configuration
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
+				
+				$('#editRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[1];
+						});
+						window.location.href='${pageContext.request.contextPath}/app/editJobs.do?ids=' + ids;
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
 
 			}); //end document ready
 		</script>
@@ -218,6 +231,10 @@ Display user jobs and jobs configuration
 		<c:choose>
 			<c:when test="${action == 'config'}">
 				<div style="margin-bottom: 10px;">
+					<button type="button" id="editRecords" class="btn btn-default">
+						<i class="fa fa-pencil-square-o"></i>
+						<spring:message code="page.action.edit"/>
+					</button>
 					<button type="button" id="deleteRecords" class="btn btn-default">
 						<i class="fa fa-trash-o"></i>
 						<spring:message code="page.action.delete"/>

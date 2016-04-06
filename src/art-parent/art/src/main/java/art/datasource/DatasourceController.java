@@ -154,6 +154,20 @@ public class DatasourceController {
 		return showEditDatasource("edit", model);
 	}
 
+	@RequestMapping(value = "/app/editDatasources", method = RequestMethod.GET)
+	public String editDatasources(@RequestParam("ids") String ids, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering editDatasources: ids={}", ids);
+
+		MultipleDatasourceEdit multipleDatasourceEdit = new MultipleDatasourceEdit();
+		multipleDatasourceEdit.setIds(ids);
+
+		model.addAttribute("multipleDatasourceEdit", multipleDatasourceEdit);
+
+		return "editDatasources";
+	}
+
 	@RequestMapping(value = "/app/saveDatasource", method = RequestMethod.POST)
 	public String saveDatasource(@ModelAttribute("datasource")
 			@Valid Datasource datasource, @RequestParam("action") String action,
@@ -222,7 +236,7 @@ public class DatasourceController {
 			datasourceService.updateDatasources(multipleDatasourceEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleDatasourceEdit.getIds());
-			return "redirect:/app/users.do";
+			return "redirect:/app/datasources.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

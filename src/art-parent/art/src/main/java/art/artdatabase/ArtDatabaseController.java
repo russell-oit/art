@@ -45,7 +45,7 @@ public class ArtDatabaseController {
 		//generic sun jdbc-odbc bridge driver not supported for the art database
 		//for the jdbc-odbc bridge, you can only read column values ONCE
 		//and in the ORDER they appear in the select. Adhering to this is brittle and cumbersome.
-		databaseTypes.remove("odbc");
+		databaseTypes.remove("generic-odbc");
 		return databaseTypes;
 	}
 

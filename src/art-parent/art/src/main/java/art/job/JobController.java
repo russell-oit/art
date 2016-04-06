@@ -133,11 +133,11 @@ public class JobController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/app/deleteJobs", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteJobs(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteJobs: ids={}", (Object)ids);
+		logger.debug("Entering deleteJobs: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -300,7 +300,7 @@ public class JobController {
 
 		return showEditJob(action, model);
 	}
-	
+
 	@RequestMapping(value = "/app/saveJobs", method = RequestMethod.POST)
 	public String saveJobs(@ModelAttribute("multipleJobEdit") @Valid MultipleJobEdit multipleJobEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -319,7 +319,7 @@ public class JobController {
 			jobService.updateJobs(multipleJobEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleJobEdit.getIds());
-			return "redirect:/app/users.do";
+			return "redirect:/app/jobsConfig.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -327,7 +327,7 @@ public class JobController {
 
 		return showEditJobs();
 	}
-	
+
 	/**
 	 * Prepare model data and return jsp file to display
 	 *
@@ -390,6 +390,20 @@ public class JobController {
 		}
 
 		return showEditJob("edit", model);
+	}
+
+	@RequestMapping(value = "/app/editJobs", method = RequestMethod.GET)
+	public String editJobs(@RequestParam("ids") String ids, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering editJobs: ids={}", ids);
+
+		MultipleJobEdit multipleJobEdit = new MultipleJobEdit();
+		multipleJobEdit.setIds(ids);
+
+		model.addAttribute("multipleJobEdit", multipleJobEdit);
+
+		return "editJobs";
 	}
 
 	/**
