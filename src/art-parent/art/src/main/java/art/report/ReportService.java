@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -498,6 +499,36 @@ public class ReportService {
 		logger.debug("Entering updateReport: report={}, actionUser={}", report, actionUser);
 
 		saveReport(report, false, actionUser);
+	}
+	
+		/**
+	 * Update an existing user record
+	 *
+	 * @param multipleReportEdit
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "reports", allEntries = true)
+	public void updateReports(MultipleReportEdit multipleReportEdit, User actionUser) throws SQLException {
+		logger.debug("Entering updateReports: multipleReportEdit={}, actionUser={}", multipleReportEdit, actionUser);
+
+		String sql;
+
+		String[] ids = StringUtils.split(multipleReportEdit.getIds(), ",");
+		if (!multipleReportEdit.isActiveUnchanged()) {
+			sql = "UPDATE ART_QUERIES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(multipleReportEdit.isActive());
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, valuesArray);
+		}
 	}
 
 	/**

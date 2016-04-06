@@ -88,7 +88,7 @@ public class ReportController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		
+
 		return "reports";
 	}
 
@@ -129,15 +129,15 @@ public class ReportController {
 							boolean applyFilters = false; //don't apply filters so as to get all values
 							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
 							reportParam.setLovValues(lovValues);
-							Map<String, String> lovValuesAsString=reportParam.convertLovValuesFromObjectToString(lovValues);
+							Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
 							reportParam.setLovValuesAsString(lovValuesAsString);
 						}
 					}
 				}
-				
+
 				//create map in order to display parameters by position
-				Map<Integer,ReportParameter> reportParams=new TreeMap<>();
-				for(ReportParameter reportParam : reportParamsList){
+				Map<Integer, ReportParameter> reportParams = new TreeMap<>();
+				for (ReportParameter reportParam : reportParamsList) {
 					reportParams.put(reportParam.getPosition(), reportParam);
 				}
 
@@ -357,11 +357,11 @@ public class ReportController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/app/deleteReports", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReports(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteReports: ids={}", (Object)ids);
+		logger.debug("Entering deleteReports: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -404,6 +404,19 @@ public class ReportController {
 		}
 
 		return showEditReport("edit", model, session);
+	}
+
+	@RequestMapping(value = "/app/editReports", method = RequestMethod.GET)
+	public String editReports(@RequestParam("ids") String ids, Model model,
+			HttpSession session) {
+
+		logger.debug("Entering editReports: ids={}", ids);
+
+		MultipleReportEdit multipleReportEdit = new MultipleReportEdit();
+		multipleReportEdit.setIds(ids);
+
+		model.addAttribute("multipleReportEdit", multipleReportEdit);
+		return "editReports";
 	}
 
 	@RequestMapping(value = "/app/saveReport", method = RequestMethod.POST)
@@ -450,6 +463,46 @@ public class ReportController {
 		}
 
 		return showEditReport(action, model, session);
+	}
+
+	@RequestMapping(value = "/app/saveReports", method = RequestMethod.POST)
+	public String saveReports(@ModelAttribute("multipleReportEdit") @Valid MultipleReportEdit multipleReportEdit,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveReports: multipleReportEdit={}", multipleReportEdit);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showEditReports();
+		}
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			reportService.updateReports(multipleReportEdit, sessionUser);
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
+			redirectAttributes.addFlashAttribute("recordName", multipleReportEdit.getIds());
+			return "redirect:/app/reportsConfig.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditReports();
+	}
+
+	/**
+	 * Prepare model data for edit user page and return jsp file to display
+	 *
+	 * @param action
+	 * @param model
+	 * @param session
+	 * @return
+	 */
+	private String showEditReports() {
+		logger.debug("Entering showEditReports");
+		return "editReports";
 	}
 
 	@RequestMapping(value = "/app/copyReport", method = RequestMethod.GET)
