@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-package art.user;
+package art.datasource;
 
 import java.io.Serializable;
 
@@ -23,8 +23,8 @@ import java.io.Serializable;
  *
  * @author Timothy Anyona
  */
-public class MultipleUserEdit implements Serializable {
-
+public class MultipleDatasourceEdit implements Serializable {
+	
 	private static final long serialVersionUID = 1L;
 	private String ids;
 	private boolean active;
@@ -71,9 +71,9 @@ public class MultipleUserEdit implements Serializable {
 	public void setActiveUnchanged(boolean activeUnchanged) {
 		this.activeUnchanged = activeUnchanged;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "MultipleUserEdit{" + "ids=" + ids + '}';
+		return "MultipleDatasourceEdit{" + "ids=" + ids + '}';
 	}
 }

@@ -102,16 +102,16 @@ public class DatasourceController {
 
 		return response;
 	}
-	
+
 	@RequestMapping(value = "/app/deleteDatasources", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteDatasources(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteDatasources: ids={}", (Object)ids);
+		logger.debug("Entering deleteDatasources: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			ActionResult deleteResult=datasourceService.deleteDatasources(ids);
+			ActionResult deleteResult = datasourceService.deleteDatasources(ids);
 			logger.debug("deleteResult.isSuccess() = {}", deleteResult.isSuccess());
 			if (deleteResult.isSuccess()) {
 				response.setSuccess(true);
@@ -204,6 +204,33 @@ public class DatasourceController {
 		return showEditDatasource(action, model);
 	}
 
+	@RequestMapping(value = "/app/saveDatasources", method = RequestMethod.POST)
+	public String saveUsers(@ModelAttribute("multipleDatasourceEdit") @Valid MultipleDatasourceEdit multipleDatasourceEdit,
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
+		logger.debug("Entering saveDatasources: multipleDatasourceEdit={}", multipleDatasourceEdit);
+
+		logger.debug("result.hasErrors()={}", result.hasErrors());
+		if (result.hasErrors()) {
+			model.addAttribute("formErrors", "");
+			return showEditDatasources();
+		}
+
+		try {
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			datasourceService.updateDatasources(multipleDatasourceEdit, sessionUser);
+			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
+			redirectAttributes.addFlashAttribute("recordName", multipleDatasourceEdit.getIds());
+			return "redirect:/app/users.do";
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			model.addAttribute("error", ex);
+		}
+
+		return showEditDatasources();
+	}
+
 	/**
 	 * Prepare model data and return jsp file to display
 	 *
@@ -219,8 +246,20 @@ public class DatasourceController {
 
 		model.addAttribute("databaseTypes", databaseTypes);
 		model.addAttribute("action", action);
-		
+
 		return "editDatasource";
+	}
+
+	/**
+	 * Prepare model data and return jsp file to display
+	 *
+	 * @param action
+	 * @param model
+	 * @return
+	 */
+	private String showEditDatasources() {
+		logger.debug("Entering showEditDatasources");
+		return "editDatasources";
 	}
 
 	@RequestMapping(value = "/app/testDatasource", method = RequestMethod.POST)

@@ -378,7 +378,7 @@ public class UserService {
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void updateUsers(MultipleUserEdit multipleUserEdit, User actionUser) throws SQLException {
-		logger.debug("Entering updateUsers: user={}, actionUser={}", multipleUserEdit, actionUser);
+		logger.debug("Entering updateUsers: multipleUserEdit={}, actionUser={}", multipleUserEdit, actionUser);
 
 		String sql;
 

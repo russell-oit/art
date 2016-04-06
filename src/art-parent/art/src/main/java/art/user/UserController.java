@@ -239,7 +239,7 @@ public class UserController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
 
-		logger.debug("Entering saveUsers");
+		logger.debug("Entering saveUsers: multipleUserEdit={}", multipleUserEdit);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -294,7 +294,7 @@ public class UserController {
 	 * @return
 	 */
 	private String showEditUsers(Model model, HttpSession session) {
-		logger.debug("Entering showUsers");
+		logger.debug("Entering showEditUsers");
 
 		try {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());

@@ -19,10 +19,12 @@ package art.datasource;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.AccessLevel;
+import art.user.MultipleUserEdit;
 import art.user.User;
 import art.utils.ActionResult;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.dbutils.ResultSetHandler;
@@ -315,6 +317,36 @@ public class DatasourceService {
 					+ " AND AAP.PRIVILEGE = 'DB' "
 					+ " AND AAP.USER_ID = ?";
 			return dbService.query(sql, h, user.getUserId());
+		}
+	}
+	
+	/**
+	 * Update an existing user record
+	 *
+	 * @param multipleDatasourceEdit
+	 * @param actionUser
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "datasources", allEntries = true)
+	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit, User actionUser) throws SQLException {
+		logger.debug("Entering updateDatasources: multipleDatasourceEdit={}, actionUser={}", multipleDatasourceEdit, actionUser);
+
+		String sql;
+
+		String[] ids = StringUtils.split(multipleDatasourceEdit.getIds(), ",");
+		if (!multipleDatasourceEdit.isActiveUnchanged()) {
+			sql = "UPDATE ART_DATABASES SET ACTIVE=?, UPDATED_BY=?, UPDATE_DATE=?"
+					+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+
+			List<Object> valuesList = new ArrayList<>();
+			valuesList.add(multipleDatasourceEdit.isActive());
+			valuesList.add(actionUser.getUsername());
+			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
+			valuesList.addAll(Arrays.asList(ids));
+
+			Object[] valuesArray = valuesList.toArray(new Object[valuesList.size()]);
+
+			dbService.update(sql, (Object[]) valuesArray);
 		}
 	}
 
