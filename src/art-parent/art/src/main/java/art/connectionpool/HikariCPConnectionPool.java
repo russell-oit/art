@@ -51,9 +51,9 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		//(hikaricp does this check every time a connection is requested)
 		if (StringUtils.isBlank(datasourceInfo.getTestSql())
 				|| StringUtils.equals(datasourceInfo.getTestSql(), "isValid")) {
-			config.setJdbc4ConnectionTest(true);
+			//config.setJdbc4ConnectionTest(true);
 		} else {
-			config.setJdbc4ConnectionTest(false);
+			//config.setJdbc4ConnectionTest(false);
 			config.setConnectionTestQuery(datasourceInfo.getTestSql());
 		}
 

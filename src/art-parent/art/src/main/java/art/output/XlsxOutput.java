@@ -90,7 +90,7 @@ public class XlsxOutput extends StandardOutput {
 			wb = new SXSSFWorkbook(wb_template);
 			wb.setCompressTempFiles(true);
 
-			sh = (SXSSFSheet) wb.getSheetAt(0);
+			sh = wb.getSheetAt(0);
 			sh.setRandomAccessWindowSize(100);// keep 100 rows in memory, exceeding rows will be flushed to disk
 
 			styles = new HashMap<>();
