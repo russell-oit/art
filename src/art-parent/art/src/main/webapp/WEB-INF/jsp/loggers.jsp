@@ -31,13 +31,16 @@ Display current loggers
 
 				var tbl = $("#loggers");
 
-				initConfigTable(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						false //addColumnFilters
-						);
+				tbl.dataTable({
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
 
 
 			}); //end document ready
@@ -72,7 +75,6 @@ Display current loggers
 		<table id="loggers" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.level"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
@@ -82,7 +84,6 @@ Display current loggers
 				<c:forEach var="logger" items="${loggers}">
 					<tr data-name="${encode:forHtmlAttribute(logger.name)}">
 						
-						<td></td>
 						<td>${encode:forHtmlContent(logger.name)}</td>
 						<td>${encode:forHtmlContent(logger.level)}</td>
 						<td>

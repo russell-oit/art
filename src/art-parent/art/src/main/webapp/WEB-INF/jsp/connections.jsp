@@ -33,13 +33,16 @@ Page to display connections status
 
 				var tbl = $("#connections");
 
-				var oTable = initConfigTable(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						false //addColumnFilters
-						);
+				var oTable = tbl.dataTable({
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
 
 				//get datatables api instance
 				var table = oTable.api();
@@ -55,14 +58,18 @@ Page to display connections status
 						url: "${pageContext.request.contextPath}/app/refreshConnectionPool.do",
 						data: {id: recordId},
 						success: function (response) {
-							var pool = response.data;
+							if (response.success) {
+								var pool = response.data;
 
-							table.cell(row, 4).data(pool.highestReachedPoolSize);
-							table.cell(row, 5).data(pool.currentPoolSize);
-							table.cell(row, 6).data(pool.inUseCount);
-							table.cell(row, 7).data(pool.totalConnectionRequests);
+								table.cell(row, 3).data(pool.highestReachedPoolSize);
+								table.cell(row, 4).data(pool.currentPoolSize);
+								table.cell(row, 5).data(pool.inUseCount);
+								table.cell(row, 6).data(pool.totalConnectionRequests);
 
-							notifyActionSuccess("${connectionResetText}", recordName);
+								notifyActionSuccess("${connectionResetText}", recordName);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
 						},
 						error: ajaxErrorHandler
 					});
@@ -93,7 +100,6 @@ Page to display connections status
 		<table id="connections" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
 					<th><spring:message code="connections.text.datasourceId"/></th>
 					<th><spring:message code="connections.text.datasourceName"/></th>
 					<th><spring:message code="connections.text.maxConnectionCount"/></th>
@@ -104,7 +110,7 @@ Page to display connections status
 						<th><spring:message code="connections.text.inUseCount"/></th>
 						<th><spring:message code="connections.text.totalConnectionRequests"/></th>
 						<th class="noFilter"><spring:message code="page.text.action"/></th>
-					</c:if>
+						</c:if>
 				</tr>
 			</thead>
 			<tbody>
@@ -112,7 +118,6 @@ Page to display connections status
 					<tr data-id="${pool.poolId}"
 						data-name="${encode:forHtmlAttribute(pool.name)}">
 
-						<td></td>
 						<td>${pool.poolId}</td>
 						<td>${encode:forHtmlContent(pool.name)}</td>
 						<td>${pool.maxPoolSize}</td>

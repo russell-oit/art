@@ -53,6 +53,7 @@ public class ConnectionController {
 		DbConnections.refreshConnectionPool(datasourceId);
 		response.setData(DbConnections.getConnectionPoolDetails(datasourceId));
 
+		response.setSuccess(true);
 		return response;
 	}
 

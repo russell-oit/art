@@ -33,45 +33,58 @@ Page to allow manual clearing of caches
 
 				var tbl = $('#caches');
 
-				//initialize datatable and process delete action
-				initConfigPage(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						false, //addColumnFilters
-						".clearCache", //deleteButtonSelector
-						false, //showConfirmDialog
-						undefined, //deleteRecordText
-						undefined, //okText
-						undefined, //cancelText
-						"clearCache.do", //deleteUrl
-						"${cacheClearedText}", //recordDeletedText
-						"${errorOccurredText}",
-						false, //deleteRow
-						undefined, //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
-						);
+				var oTable = tbl.dataTable({
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
 
-			});
-		</script>
+				tbl.find('tbody').on('click', '.clearCache', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
 
-		<script type="text/javascript">
-			$(function () {
+					$.ajax({
+						type: "POST",
+						dataType: "json",
+						url: "${pageContext.request.contextPath}/app/clearCache.do",
+						data: {id: recordId},
+						success: function (response) {
+							if (response.success) {
+								notifyActionSuccess("${cacheClearedText}", recordName);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
+						},
+						error: ajaxErrorHandler
+					});
+				});
+
 				$('#clearAll').click(function () {
 					$.ajax({
 						type: 'POST',
 						url: '${pageContext.request.contextPath}/app/clearAllCaches.do',
 						dataType: 'json',
-						success: function (response) 
+						success: function (response)
 						{
-							notifyActionSuccess("${cachesClearedText}", undefined);
+							if (response.success) {
+								notifyActionSuccess("${cachesClearedText}", undefined);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
 						},
 						error: ajaxErrorHandler
 					});
 				});
+
 			});
 		</script>
+
 	</jsp:attribute>
 
 	<jsp:body>
@@ -97,7 +110,6 @@ Page to allow manual clearing of caches
 		<table id="caches" class="table table-striped table-bordered">
 			<thead>
 				<tr>
-					<th class="noFilter"></th>
 					<th><spring:message code="caches.text.cache"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
@@ -107,7 +119,6 @@ Page to allow manual clearing of caches
 					<tr data-id="${cache.value}"
 						data-name="${cache.value}">
 
-						<td></td>
 						<td><spring:message code="${cache.localizedDescription}"/></td>
 						<td>
 							<button type="button" class="btn btn-default clearCache">
