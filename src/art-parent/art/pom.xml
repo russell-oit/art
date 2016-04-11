@@ -26,6 +26,7 @@
 	<properties>
 		<poi.version>3.14</poi.version>
 		<owasp.encoder.version>1.2</owasp.encoder.version>
+		<thymeleaf.version>3.0.0.BETA02</thymeleaf.version>
 	</properties>
 
 	<build>
@@ -547,6 +548,16 @@
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 			<version>2.4.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf</artifactId>
+			<version>${thymeleaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf-spring4</artifactId>
+			<version>${thymeleaf.version}</version>
 		</dependency>
 	</dependencies>
 

@@ -154,7 +154,6 @@ public class Config extends HttpServlet {
 		//save variables in application scope for access from jsp pages
 		artVersion = ctx.getInitParameter("versionNumber");
 		ctx.setAttribute("artVersion", artVersion);
-		ctx.setAttribute("dateDisplayPattern", "dd-MMM-yyyy HH:mm:ss"); //format of dates displayed in tables
 		setJspEnumValues(ctx);
 
 		//set application path
@@ -211,6 +210,9 @@ public class Config extends HttpServlet {
 
 		//load settings and initialize variables
 		loadSettings();
+
+		String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
+		ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 
 		//initialize datasources
 		initializeArtDatabase();

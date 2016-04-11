@@ -12,10 +12,10 @@
 	
 	<cache name="reports"
 		   timeToIdleSeconds="1200" timeToLiveSeconds="1800"
-		   eternal="false" maxEntriesLocalHeap="50" />
+		   eternal="false" maxEntriesLocalHeap="20" />
 	
 	<cache name="users"
-		   eternal="true" maxEntriesLocalHeap="50" />
+		   eternal="true" maxEntriesLocalHeap="20" />
 	
 	<cache name="userGroups"
 		   eternal="true" maxEntriesLocalHeap="10" />
@@ -24,7 +24,7 @@
 		   eternal="true" maxEntriesLocalHeap="10" />
 	
 	<cache name="reportGroups"
-		   eternal="true" maxEntriesLocalHeap="50" />
+		   eternal="true" maxEntriesLocalHeap="20" />
 	
 	<cache name="schedules"
 		   eternal="true" maxEntriesLocalHeap="10" />

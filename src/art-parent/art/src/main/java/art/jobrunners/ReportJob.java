@@ -69,6 +69,9 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring4.SpringTemplateEngine;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
  * Class to run report jobs
@@ -169,6 +172,8 @@ public class ReportJob implements org.quartz.Job {
 	private void sendEmail(Mailer mailer) throws MessagingException, IOException {
 		if (Config.isEmailServerConfigured()) {
 			mailer.send();
+		} else {
+			logger.info("Email server not configured. Job Id: {}", jobId);
 		}
 	}
 
@@ -182,7 +187,21 @@ public class ReportJob implements org.quartz.Job {
 	private void prepareAlertJob(Mailer mailer, String msg) {
 		mailer.setSubject(subject);
 		mailer.setFrom(from);
-		mailer.setMessage("<html>" + msg + "<hr><small>This is an automatically generated message (ART, Job ID " + jobId + ")</small></html>");
+
+		String mainMessage;
+		if (StringUtils.isBlank(msg)) {
+			mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
+		} else {
+			mainMessage = msg;
+		}
+
+		Context ctx = new Context(Locale.getDefault());
+		ctx.setVariable("mainMessage", mainMessage);
+		ctx.setVariable("job", job);
+
+		SpringTemplateEngine templateEngine = getTemplateEngine();
+		String finalMessage = templateEngine.process("emailTemplate.html", ctx);
+		mailer.setMessage(finalMessage);
 	}
 
 	/**
@@ -195,9 +214,16 @@ public class ReportJob implements org.quartz.Job {
 		mailer.setSubject(subject);
 		mailer.setFrom(from);
 
+		String mainMessage;
 		if (StringUtils.isBlank(msg)) {
-			msg = "&nbsp;"; //if message is blank, ensure there's a space before the hr
+			mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
+		} else {
+			mainMessage = msg;
 		}
+
+		Context ctx = new Context(Locale.getDefault());
+		ctx.setVariable("mainMessage", mainMessage);
+		ctx.setVariable("job", job);
 
 		if (jobType.isEmailAttachment()) {
 			// e-mail output as attachment
@@ -214,15 +240,29 @@ public class ReportJob implements org.quartz.Job {
 					logger.warn("EOF reached for inline email file: {}", outputFileName);
 				}
 				// convert the file to a string and get only the html table
-				String htmlTable = new String(fileBytes, "UTF-8");
-				//htmlTable = htmlTable.substring(htmlTable.indexOf("<html>") + 6, htmlTable.indexOf("</html>"));
-				htmlTable = htmlTable.substring(htmlTable.indexOf("<body>") + 6, htmlTable.indexOf("</body>")); //html plain output now has head and body sections
-				msg = msg + "<hr>" + htmlTable;
+				String data = new String(fileBytes, "UTF-8");
+				data = data.substring(data.indexOf("<body>") + 6, data.indexOf("</body>")); //html plain output now has head and body sections
+				ctx.setVariable("data", data);
 			}
 		}
 
-		String autoMessage = "<hr><small>This is an automatically generated message (ART, Job ID " + jobId + ")</small>";
-		mailer.setMessage("<html>" + msg + autoMessage + "</html>");
+		SpringTemplateEngine templateEngine = getTemplateEngine();
+		String finalMessage = templateEngine.process("emailTemplate.html", ctx);
+		mailer.setMessage(finalMessage);
+	}
+
+	private SpringTemplateEngine getTemplateEngine() {
+		//http://blog.zenika.com/2013/01/18/introducing-the-thymeleaf-template-engine/
+		ClassLoaderTemplateResolver emailResolver = new ClassLoaderTemplateResolver();
+		emailResolver.setPrefix("mail/");
+		emailResolver.setTemplateMode("HTML");
+		emailResolver.setCharacterEncoding("UTF-8");
+		emailResolver.setOrder(1);
+
+		SpringTemplateEngine engine = new SpringTemplateEngine();
+		engine.addTemplateResolver(emailResolver);
+
+		return engine;
 	}
 
 	private void beforeExecution(Date nextRunDate) throws SQLException {
@@ -766,7 +806,7 @@ public class ReportJob implements org.quartz.Job {
 					FilenameHelper filenameHelper = new FilenameHelper();
 					String baseFileName = filenameHelper.getFileName(job);
 					String exportPath = Config.getJobsExportPath();
-					
+
 					String extension;
 					if (reportType.isJxls()) {
 						String jxlsFilename = report.getTemplate();
