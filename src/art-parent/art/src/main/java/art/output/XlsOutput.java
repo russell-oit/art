@@ -29,6 +29,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +57,9 @@ public class XlsOutput extends StandardOutput {
 	private int currentRow;
 	private int cellNumber;
 	private ZipType zipType;
-	
-	public XlsOutput(){
-		zipType=ZipType.None;
+
+	public XlsOutput() {
+		zipType = ZipType.None;
 	}
 
 	public XlsOutput(ZipType zipType) {
@@ -72,8 +73,8 @@ public class XlsOutput extends StandardOutput {
 
 		try {
 			fout = new FileOutputStream(fullOutputFilename);
-			
-			String filename=FilenameUtils.getBaseName(fullOutputFilename);
+
+			String filename = FilenameUtils.getBaseName(fullOutputFilename);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".xls");
@@ -113,12 +114,7 @@ public class XlsOutput extends StandardOutput {
 
 	@Override
 	public void beginHeader() {
-		final int MAX_SHEET_NAME = 30; //excel max is 31
-		String sheetName = reportName;
-		if (sheetName.length() > MAX_SHEET_NAME) {
-			sheetName = sheetName.substring(0, MAX_SHEET_NAME);
-		}
-
+		String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 		wb.setSheetName(0, sheetName);
 
 		newRow();

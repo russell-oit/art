@@ -26,6 +26,7 @@ import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -65,27 +66,22 @@ public class XlsxOutput extends StandardOutput {
 	public void init() {
 		try {
 			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.
-			final int MAX_SHEET_NAME = 30; //excel max is 31
-			String sheetName = reportName;
-			if (sheetName.length() > MAX_SHEET_NAME) {
-				sheetName = sheetName.substring(0, MAX_SHEET_NAME);
-			}
+			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 
 			String fullPath = FilenameUtils.getFullPath(fullOutputFilename);
 			String baseName = FilenameUtils.getBaseName(fullOutputFilename);
 			templateFileName = fullPath + "template-" + baseName + ".xlsx";
 
 			//save the template
-			try (FileOutputStream fout = new FileOutputStream(templateFileName)) {
-				XSSFWorkbook tmpwb = new XSSFWorkbook();
+			try (FileOutputStream fout = new FileOutputStream(templateFileName); XSSFWorkbook tmpwb = new XSSFWorkbook()) {
 				tmpwb.createSheet(sheetName);
 				tmpwb.write(fout);
-				tmpwb.close();
 			}
 
-			FileInputStream inputStream = new FileInputStream(templateFileName);
-			XSSFWorkbook wb_template = new XSSFWorkbook(inputStream);
-			inputStream.close();
+			XSSFWorkbook wb_template;
+			try (FileInputStream inputStream = new FileInputStream(templateFileName)) {
+				wb_template = new XSSFWorkbook(inputStream);
+			}
 
 			wb = new SXSSFWorkbook(wb_template);
 			wb.setCompressTempFiles(true);
