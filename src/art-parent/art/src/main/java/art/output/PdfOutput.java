@@ -88,7 +88,7 @@ public class PdfOutput extends StandardOutput {
 
 			document.open();
 
-			table = new PdfPTable(resultSetColumnCount);
+			table = new PdfPTable(totalColumnCount);
 			table.getDefaultCell().setBorder(0);
 			table.setWidthPercentage(100F); //default is 80
 			table.setHeaderRows(1);

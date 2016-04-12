@@ -597,8 +597,9 @@ public abstract class StandardOutput {
 		StandardOutputResult result = new StandardOutputResult();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
-		int colCount = rsmd.getColumnCount();
-		if (colCount != 3 && colCount != 5) {
+		resultSetColumnCount = rsmd.getColumnCount();
+		
+		if (resultSetColumnCount != 3 && resultSetColumnCount != 5) {
 			result.setMessage("reports.message.invalidCrosstab");
 			return result;
 		}
@@ -606,14 +607,14 @@ public abstract class StandardOutput {
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
 		DisplayNull displayNullSetting = Config.getSettings().getDisplayNull();
 
-		boolean alternateSort = (colCount > 3 ? true : false);
+		boolean alternateSort = (resultSetColumnCount > 3 ? true : false);
 
-		HashMap<String, Object> values = new HashMap<String, Object>();
+		HashMap<String, Object> values = new HashMap<>();
 		Object[] xa;
 		Object[] ya;
 		if (alternateSort) { // name1, altSort1, name2, altSort2, value
-			TreeMap<Object, Object> x = new TreeMap<Object, Object>(); // allows a sorted toArray (or Iterator())
-			TreeMap<Object, Object> y = new TreeMap<Object, Object>();
+			TreeMap<Object, Object> x = new TreeMap<>(); // allows a sorted toArray (or Iterator())
+			TreeMap<Object, Object> y = new TreeMap<>();
 
 			// Scroll resultset and feed data structures
 			// to read it as a crosstab (pivot)
@@ -686,8 +687,8 @@ public abstract class StandardOutput {
 			}
 
 		} else {
-			TreeSet<Object> x = new TreeSet<Object>(); // allows a sorted toArray (or Iterator())
-			TreeSet<Object> y = new TreeSet<Object>();
+			TreeSet<Object> x = new TreeSet<>(); // allows a sorted toArray (or Iterator())
+			TreeSet<Object> y = new TreeSet<>();
 
 			// Scroll resultset and feed data structures
 			// to read it as a crosstab (pivot)

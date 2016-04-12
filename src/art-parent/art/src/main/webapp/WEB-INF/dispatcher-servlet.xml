@@ -49,24 +49,6 @@
 		  p:prefix="/WEB-INF/jsp/"
 		  p:suffix=".jsp" />
 	
-	<bean id="emailTemplateResolver" class="org.thymeleaf.templateresolver.ClassLoaderTemplateResolver">
-		<property name="prefix" value="mail/" />
-		<property name="templateMode" value="HTML" />
-		<!--<property name="characterEncoding" value="UTF-8" />-->
-		<property name="order" value="1" />
-		<!-- Template cache is true by default. Set to false if you want -->
-		<!-- templates to be automatically updated when modified.        -->
-		<!--<property name="cacheable" value="true" />-->
-	</bean>
-	
-	<bean id="templateEngine" class="org.thymeleaf.spring4.SpringTemplateEngine">  
-		<property name="templateResolvers">
-			<set>
-				<ref bean="emailTemplateResolver"/>
-			</set>
-		</property>
-	</bean>
-	
 	<!-- enable caching -->
 	<!-- Enables the caching through annotations -->
 	<cache:annotation-driven key-generator="cacheKeyGenerator" />
