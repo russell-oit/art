@@ -24,7 +24,7 @@
 	</licenses>
 	
 	<properties>
-		<poi.version>3.14</poi.version>
+		<poi.version>3.12</poi.version>
 		<owasp.encoder.version>1.2</owasp.encoder.version>
 		<thymeleaf.version>3.0.0.BETA02</thymeleaf.version>
 	</properties>
