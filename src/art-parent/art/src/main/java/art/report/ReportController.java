@@ -121,16 +121,23 @@ public class ReportController {
 						//don't run chained parameters. their values will be
 						//loaded dynamically depending on parent and depends paremeter values
 						if (!reportParam.isChained()) {
-							ReportRunner lovReportRunner = new ReportRunner();
-							int lovReportId = param.getLovReportId();
-							Report lovReport = reportService.getReport(lovReportId);
-							lovReportRunner.setReport(lovReport);
-							lovReportRunner.setReportParamsMap(reportParamsMap);
-							boolean applyFilters = false; //don't apply filters so as to get all values
-							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
-							reportParam.setLovValues(lovValues);
-							Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
-							reportParam.setLovValuesAsString(lovValuesAsString);
+							ReportRunner lovReportRunner = null;
+							try {
+								lovReportRunner = new ReportRunner();
+								int lovReportId = param.getLovReportId();
+								Report lovReport = reportService.getReport(lovReportId);
+								lovReportRunner.setReport(lovReport);
+								lovReportRunner.setReportParamsMap(reportParamsMap);
+								boolean applyFilters = false; //don't apply filters so as to get all values
+								Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
+								reportParam.setLovValues(lovValues);
+								Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
+								reportParam.setLovValuesAsString(lovValuesAsString);
+							} finally {
+								if (lovReportRunner != null) {
+									lovReportRunner.close();
+								}
+							}
 						}
 					}
 				}

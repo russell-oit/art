@@ -51,15 +51,17 @@ public class ChainedParameterController {
 	public @ResponseBody
 	Map<String, String> getLovValues(@RequestParam("reportId") Integer reportId,
 			HttpSession session, HttpServletRequest request) {
-		
+
 		logger.debug("Entering getLovValues: reportId={}", reportId);
 
 		Map<String, String> values = new HashMap<>();
 
+		ReportRunner reportRunner = null;
+
 		try {
 			ReportService reportService = new ReportService();
-			
-			ReportRunner reportRunner = new ReportRunner();
+
+			reportRunner = new ReportRunner();
 			Report report = reportService.getReport(reportId);
 			reportRunner.setReport(report);
 
@@ -71,11 +73,15 @@ public class ChainedParameterController {
 			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportRunner.setReportParamsMap(reportParamsMap);
-			
+
 			boolean useRules = false;
 			values = reportRunner.getLovValues(useRules);
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);
+		} finally {
+			if (reportRunner != null) {
+				reportRunner.close();
+			}
 		}
 
 		return values;

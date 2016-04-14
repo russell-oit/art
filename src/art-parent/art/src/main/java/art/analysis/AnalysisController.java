@@ -217,22 +217,29 @@ public class AnalysisController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			String username = sessionUser.getUsername();
 
-			ReportRunner reportRunner = new ReportRunner();
-			reportRunner.setUsername(username);
-			reportRunner.setReport(report);
+			ReportRunner reportRunner = null;
+			try {
+				reportRunner = new ReportRunner();
+				reportRunner.setUsername(username);
+				reportRunner.setReport(report);
 
-			//prepare report parameters
-			ParameterProcessor paramProcessor = new ParameterProcessor();
-			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				//prepare report parameters
+				ParameterProcessor paramProcessor = new ParameterProcessor();
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 
-			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 
-			reportRunner.setReportParamsMap(reportParamsMap);
+				reportRunner.setReportParamsMap(reportParamsMap);
 
-			reportRunner.execute();
+				reportRunner.execute();
 
-			String query = reportRunner.getQuerySql();
-			model.addAttribute("query", query);
+				String query = reportRunner.getQuerySql();
+				model.addAttribute("query", query);
+			} finally {
+				if (reportRunner != null) {
+					reportRunner.close();
+				}
+			}
 
 			//check if this is the only user who has access. if so, he can overwrite the pivot table view with a different view
 			boolean exclusiveAccess = reportService.hasExclusiveAccess(sessionUser, report);
@@ -486,7 +493,7 @@ public class AnalysisController {
 
 				//give this user direct access to the view he has just created. so that he can update and overwrite it if desired
 				reportService.grantAccess(report, sessionUser);
-				
+
 				redirectAttributes.addFlashAttribute("message", "analysis.message.reportAdded");
 				return "redirect:/app/success.do";
 			}

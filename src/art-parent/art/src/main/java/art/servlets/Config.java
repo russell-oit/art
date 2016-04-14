@@ -18,6 +18,7 @@ package art.servlets;
 
 import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
+import art.encryption.AesEncryptor;
 import art.enums.ArtAuthenticationMethod;
 import art.enums.ConnectionPoolLibrary;
 import art.enums.DisplayNull;
@@ -343,8 +344,8 @@ public class Config extends HttpServlet {
 						= mapper.readValue(artDatabaseFile, ArtDatabase.class
 						);
 
-				//de-obfuscate password field
-				artDatabase.setPassword(Encrypter.decrypt(artDatabase.getPassword()));
+				//decrypt password field
+				artDatabase.setPassword(AesEncryptor.decrypt(artDatabase.getPassword()));
 			} else {
 				logger.info("ART Database configuration file not found");
 			}
@@ -370,8 +371,8 @@ public class Config extends HttpServlet {
 	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase)
 			throws IOException {
 
-		//obfuscate password field for storing
-		artDatabase.setPassword(Encrypter.encrypt(artDatabase.getPassword()));
+		//encrypt password field for storing
+		artDatabase.setPassword(AesEncryptor.encrypt(artDatabase.getPassword()));
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
@@ -393,10 +394,9 @@ public class Config extends HttpServlet {
 			if (settingsFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
 				newSettings = mapper.readValue(settingsFile, Settings.class);
-
-				//de-obfuscate password fields
-				newSettings.setSmtpPassword(Encrypter.decrypt(newSettings.getSmtpPassword()));
-				newSettings.setLdapBindPassword(Encrypter.decrypt(newSettings.getLdapBindPassword()));
+				//decrypt password fields
+				newSettings.setSmtpPassword(AesEncryptor.decrypt(newSettings.getSmtpPassword()));
+				newSettings.setLdapBindPassword(AesEncryptor.decrypt(newSettings.getLdapBindPassword()));
 			}
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -451,12 +451,12 @@ public class Config extends HttpServlet {
 	 * @throws IOException
 	 */
 	public static void saveSettings(Settings newSettings) throws IOException {
-		//obfuscate password fields
+		//encrypt password fields
 		String clearTextSmtpPassword = newSettings.getSmtpPassword();
 		String clearTextLdapBindPassword = newSettings.getLdapBindPassword();
 
-		newSettings.setSmtpPassword(Encrypter.encrypt(clearTextSmtpPassword));
-		newSettings.setLdapBindPassword(Encrypter.encrypt(clearTextLdapBindPassword));
+		newSettings.setSmtpPassword(AesEncryptor.encrypt(clearTextSmtpPassword));
+		newSettings.setLdapBindPassword(AesEncryptor.encrypt(clearTextLdapBindPassword));
 
 		File settingsFile = new File(settingsFilePath);
 		ObjectMapper mapper = new ObjectMapper();

@@ -308,13 +308,14 @@ public class ReportJob implements org.quartz.Job {
 		String bcc = job.getMailBcc();
 
 		ReportRunner recipientsQuery = null;
+		ResultSet rs = null;
 
 		try {
 			recipientsQuery = prepareQuery(username, recipientsQueryId, false);
 
 			recipientsQuery.execute();
 
-			ResultSet rs = recipientsQuery.getResultSet();
+			rs = recipientsQuery.getResultSet();
 			ResultSetMetaData rsmd = rs.getMetaData();
 			int columnCount = rsmd.getColumnCount();
 
@@ -323,14 +324,13 @@ public class ReportJob implements org.quartz.Job {
 				ArrayList<String> emailsList = new ArrayList<>();
 				while (rs.next()) {
 					String email = rs.getString(1); //first column has email addresses
-					if (org.apache.commons.lang.StringUtils.length(email) > 4) {
+					if (StringUtils.length(email) > 4) {
 						emailsList.add(email);
 					}
 				}
-				rs.close();
 
 				if (emailsList.size() > 0) {
-					String emails = org.apache.commons.lang.StringUtils.join(emailsList, ";");
+					String emails = StringUtils.join(emailsList, ";");
 					runNormalJob(conn, emails);
 				}
 			} else if (columnCount > 1) {
@@ -371,7 +371,6 @@ public class ReportJob implements org.quartz.Job {
 							runJob(conn, true, username, tos, recipient, true);
 						}
 					}
-					rs.close();
 
 					//run normal job in case tos, cc etc configured
 					if (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4
@@ -401,7 +400,6 @@ public class ReportJob implements org.quartz.Job {
 							recipients.put(email, recipientColumns);
 						}
 					}
-					rs.close();
 
 					//run job for all recipients
 					runJob(conn, true, username, tos, recipients);
@@ -410,6 +408,8 @@ public class ReportJob implements org.quartz.Job {
 		} catch (Exception e) {
 			logger.error("Error", e);
 		} finally {
+			DatabaseUtils.close(rs);
+
 			if (recipientsQuery != null) {
 				recipientsQuery.close();
 			}
@@ -671,49 +671,79 @@ public class ReportJob implements org.quartz.Job {
 				if (generateEmail || recipientDetails != null) {
 					runMessage = "jobs.message.noAlert";
 
-					ResultSet rs = reportRunner.getResultSet();
-					if (rs.next()) {
-						int value = rs.getInt(1);
-						if (value > 0) {
-							runMessage = "jobs.message.alertExists";
+					ResultSet rs = null;
+					try {
+						rs = reportRunner.getResultSet();
+						if (rs.next()) {
+							int value = rs.getInt(1);
+							if (value > 0) {
+								runMessage = "jobs.message.alertExists";
 
-							logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
+								logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
 
-							// compatibility with Art pre 1.8 where subject was not editable
-							if (subject == null) {
-								subject = "ART Alert: " + jobName + " (Job " + jobId + ")";
-							}
+								// compatibility with Art pre 1.8 where subject was not editable
+								if (subject == null) {
+									subject = "ART Alert: " + jobName + " (Job " + jobId + ")";
+								}
 
-							//send customized emails to dynamic recipients
-							if (recipientDetails != null) {
-								Mailer mailer = getMailer();
+								//send customized emails to dynamic recipients
+								if (recipientDetails != null) {
+									Mailer mailer = getMailer();
 
-								for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
-									String email = entry.getKey();
-									Map<String, String> recipientColumns = entry.getValue();
+									for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+										String email = entry.getKey();
+										Map<String, String> recipientColumns = entry.getValue();
 
-									//customize message by replacing field labels with values for this recipient
-									String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
-									if (customMessage == null) {
-										customMessage = "";
-									}
+										//customize message by replacing field labels with values for this recipient
+										String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
+										if (customMessage == null) {
+											customMessage = "";
+										}
 
-									if (StringUtils.isNotBlank(customMessage)) {
-										for (Map.Entry<String, String> entry2 : recipientColumns.entrySet()) {
-											String columnName = entry2.getKey();
-											String columnValue = entry2.getValue();
+										if (StringUtils.isNotBlank(customMessage)) {
+											for (Map.Entry<String, String> entry2 : recipientColumns.entrySet()) {
+												String columnName = entry2.getKey();
+												String columnValue = entry2.getValue();
 
-											String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
-											String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
-											customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+												String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
+												String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
+												customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+											}
+										}
+
+										prepareAlertJob(mailer, customMessage);
+
+										mailer.setTo(email);
+
+										//send email for this recipient
+										try {
+											sendEmail(mailer);
+											runMessage = "jobs.message.alertSent";
+										} catch (MessagingException ex) {
+											logger.debug("Error", ex);
+											runMessage = "jobs.message.errorSendingAlert";
+											runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
+
 										}
 									}
 
-									prepareAlertJob(mailer, customMessage);
+									if (recipientFilterPresent) {
+										//don't run normal email job after filtered email sent
+										generateEmail = false;
+									}
+								}
 
-									mailer.setTo(email);
+								//send email to normal recipients
+								if (generateEmail) {
+									Mailer mailer = getMailer();
 
-									//send email for this recipient
+									prepareAlertJob(mailer, message);
+
+									//set recipients						
+									mailer.setTo(tosEmail);
+									mailer.setCc(ccs);
+									mailer.setBcc(bccs);
+
 									try {
 										sendEmail(mailer);
 										runMessage = "jobs.message.alertSent";
@@ -721,42 +751,17 @@ public class ReportJob implements org.quartz.Job {
 										logger.debug("Error", ex);
 										runMessage = "jobs.message.errorSendingAlert";
 										runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
-
 									}
+
+								} else {
+									logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
 								}
-
-								if (recipientFilterPresent) {
-									//don't run normal email job after filtered email sent
-									generateEmail = false;
-								}
-							}
-
-							//send email to normal recipients
-							if (generateEmail) {
-								Mailer mailer = getMailer();
-
-								prepareAlertJob(mailer, message);
-
-								//set recipients						
-								mailer.setTo(tosEmail);
-								mailer.setCc(ccs);
-								mailer.setBcc(bccs);
-
-								try {
-									sendEmail(mailer);
-									runMessage = "jobs.message.alertSent";
-								} catch (MessagingException ex) {
-									logger.debug("Error", ex);
-									runMessage = "jobs.message.errorSendingAlert";
-									runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
-								}
-
 							} else {
-								logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
+								logger.debug("Job Id {} - Empty resultset for alert", jobId);
 							}
-						} else {
-							logger.debug("Job Id {} - Empty resultset for alert", jobId);
 						}
+					} finally {
+						DatabaseUtils.close(rs);
 					}
 				} else {
 					//no emails configured
@@ -773,19 +778,27 @@ public class ReportJob implements org.quartz.Job {
 
 				if (jobType.isConditional()) {
 					//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
-					ReportRunner pqCount = prepareQuery(user);
-					pqCount.setReportParamsMap(reportParamsMap);
+					ReportRunner countReportRunner = null;
+					ResultSet rsCount = null;
+					try {
+						countReportRunner = prepareQuery(user);
+						countReportRunner.setReportParamsMap(reportParamsMap);
 
-					pqCount.execute();
+						countReportRunner.execute();
 
-					ResultSet rsCount = pqCount.getResultSet();
-					if (!rsCount.next()) {
-						//no records
-						generateOutput = false;
-						runMessage = "jobs.message.noRecords";
+						rsCount = countReportRunner.getResultSet();
+						if (!rsCount.next()) {
+							//no records
+							generateOutput = false;
+							runMessage = "jobs.message.noRecords";
+						}
+					} finally {
+						DatabaseUtils.close(rsCount);
+
+						if (countReportRunner != null) {
+							countReportRunner.close();
+						}
 					}
-					rsCount.close();
-					pqCount.close();
 				}
 
 				//for emailing jobs, only run query if some emails are configured
@@ -960,25 +973,32 @@ public class ReportJob implements org.quartz.Job {
 
 				String cachedTableName = job.getCachedTableName();
 
-				Connection cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
-				ResultSet rs = reportRunner.getResultSet();
-				CachedResult cr = new CachedResult();
-				cr.setTargetConnection(cacheDatabaseConnection);
-				cr.setResultSet(rs);
-				if (cachedTableName == null || cachedTableName.length() == 0) {
-					cachedTableName = queryName + "_J" + jobId;
+				Connection cacheDatabaseConnection = null;
+				ResultSet rs = null;
+				try {
+					cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
+					rs = reportRunner.getResultSet();
+					CachedResult cr = new CachedResult();
+					cr.setTargetConnection(cacheDatabaseConnection);
+					cr.setResultSet(rs);
+					if (cachedTableName == null || cachedTableName.length() == 0) {
+						cachedTableName = queryName + "_J" + jobId;
+					}
+					cr.setCachedTableName(cachedTableName);
+					if (jobType == JobType.CacheAppend) {
+						// 1 = append 2 = drop/insert (3 = update (not implemented))
+						cr.setCacheMode(1);
+					} else if (jobType == JobType.CacheInsert) {
+						cr.setCacheMode(2);
+					}
+					cr.cacheIt();
+					runDetails = "Table Name (rows inserted):  <code>"
+							+ cr.getCachedTableName() + "</code> (" + cr.getRowsCount() + ")"
+							+ "<br />Columns Names:<br /><code>"
+							+ cr.getCachedTableColumnsName() + "</code>";
+				} finally {
+					DatabaseUtils.close(rs, cacheDatabaseConnection);
 				}
-				cr.setCachedTableName(cachedTableName);
-				if (jobType == JobType.CacheAppend) {
-					// 1 = append 2 = drop/insert (3 = update (not implemented))
-					cr.setCacheMode(1);
-				} else if (jobType == JobType.CacheInsert) {
-					cr.setCacheMode(2);
-				}
-				cr.cacheIt();
-				cacheDatabaseConnection.close();
-				runDetails = "Table Name (rows inserted):  <code>" + cr.getCachedTableName() + "</code> (" + cr.getRowsCount() + ")"
-						+ "<br />Columns Names:<br /><code>" + cr.getCachedTableColumnsName() + "</code>";
 
 			} else { // jobType 4:just run it.
 				// This is used Used to start batch jobs at db level via calls to stored procs

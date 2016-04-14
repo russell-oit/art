@@ -141,16 +141,23 @@ public class ParameterProcessor {
 			ReportParameter reportParam = entry.getValue();
 			Parameter param = reportParam.getParameter();
 			if (param.isUseLov()) {
-				ReportRunner lovReportRunner = new ReportRunner();
-				int lovReportId = param.getLovReportId();
-				Report lovReport = reportService.getReport(lovReportId);
-				lovReportRunner.setReport(lovReport);
-				lovReportRunner.setReportParamsMap(reportParamsMap);
-				boolean applyFilters = false; //don't apply filters so as to get all values
-				Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
-				reportParam.setLovValues(lovValues);
-				Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
-				reportParam.setLovValuesAsString(lovValuesAsString);
+				ReportRunner lovReportRunner = null;
+				try {
+					lovReportRunner = new ReportRunner();
+					int lovReportId = param.getLovReportId();
+					Report lovReport = reportService.getReport(lovReportId);
+					lovReportRunner.setReport(lovReport);
+					lovReportRunner.setReportParamsMap(reportParamsMap);
+					boolean applyFilters = false; //don't apply filters so as to get all values
+					Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
+					reportParam.setLovValues(lovValues);
+					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
+					reportParam.setLovValuesAsString(lovValuesAsString);
+				} finally {
+					if (lovReportRunner != null) {
+						lovReportRunner.close();
+					}
+				}
 			}
 		}
 	}
@@ -211,21 +218,28 @@ public class ParameterProcessor {
 
 				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
 					//get all possible lov values.
-					ReportRunner lovReportRunner = new ReportRunner();
-					int lovReportId = param.getLovReportId();
-					ReportService reportService = new ReportService();
-					Report lovReport = reportService.getReport(lovReportId);
-					lovReportRunner.setReport(lovReport);
-					lovReportRunner.setReportParamsMap(reportParamsMap);
-					boolean applyFilters = false; //don't apply filters so as to get all values
-					Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
+					ReportRunner lovReportRunner = null;
+					try {
+						lovReportRunner = new ReportRunner();
+						int lovReportId = param.getLovReportId();
+						ReportService reportService = new ReportService();
+						Report lovReport = reportService.getReport(lovReportId);
+						lovReportRunner.setReport(lovReport);
+						lovReportRunner.setReportParamsMap(reportParamsMap);
+						boolean applyFilters = false; //don't apply filters so as to get all values
+						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
 
-					List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
-					for (Entry<Object, String> entry2 : lovValues.entrySet()) {
-						Object actualValue = entry2.getKey();
-						actualValues.add(actualValue);
+						List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
+						for (Entry<Object, String> entry2 : lovValues.entrySet()) {
+							Object actualValue = entry2.getKey();
+							actualValues.add(actualValue);
+						}
+						reportParam.setActualParameterValues(actualValues);
+					} finally {
+						if (lovReportRunner != null) {
+							lovReportRunner.close();
+						}
 					}
-					reportParam.setActualParameterValues(actualValues);
 				}
 			}
 		}

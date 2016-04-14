@@ -74,7 +74,7 @@ public class PooledConnection implements Connection {
 	 * @throws SQLException
 	 */
 	public PooledConnection(String jdbcUrl, String username, String password, Properties properties) throws SQLException {
-		logger.debug("Entering PooledConnection: jdbcUrl='{}', username='{}", jdbcUrl, username);
+		logger.debug("Entering PooledConnection: jdbcUrl='{}', username='{}'", jdbcUrl, username);
 
 		Properties dbProperties = new Properties();
 		dbProperties.put("user", username);
@@ -131,7 +131,7 @@ public class PooledConnection implements Connection {
 			inUse = false;
 
 			lastCloseTime = System.currentTimeMillis();
-			logger.debug("lastCloseTime", lastCloseTime);
+			logger.debug("lastCloseTime={}", lastCloseTime);
 		} else {
 			logger.info("More threads are using the same connection - statements not closed. inUseCount={}", inUseCount);
 		}

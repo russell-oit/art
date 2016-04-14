@@ -42,6 +42,8 @@ public class DatabaseUtils {
 	 * @param rs
 	 */
 	public static void close(ResultSet rs) {
+		logger.debug("Entering close resultset");
+		
 		if (rs != null) {
 			try {
 				rs.close();
@@ -57,6 +59,8 @@ public class DatabaseUtils {
 	 * @param st
 	 */
 	public static void close(Statement st) {
+		logger.debug("Entering close statement");
+		
 		if (st != null) {
 			try {
 				st.close();
@@ -72,6 +76,8 @@ public class DatabaseUtils {
 	 * @param conn
 	 */
 	public static void close(Connection conn) {
+		logger.debug("Entering close connection");
+		
 		if (conn != null) {
 			try {
 				conn.close();
