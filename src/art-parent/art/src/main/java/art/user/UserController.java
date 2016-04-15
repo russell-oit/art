@@ -1,11 +1,11 @@
 package art.user;
 
+import art.encryption.PasswordUtils;
 import art.enums.AccessLevel;
 import art.reportgroup.ReportGroupService;
 import art.usergroup.UserGroupService;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
-import art.utils.Encrypter;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -400,7 +400,7 @@ public class UserController {
 			}
 		} else {
 			//hash new password
-			user.setPassword(Encrypter.HashPasswordBcrypt(newPassword));
+			user.setPassword(PasswordUtils.HashPasswordBcrypt(newPassword));
 			user.setPasswordAlgorithm("bcrypt");
 		}
 

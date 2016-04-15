@@ -56,10 +56,10 @@ public class XmlOutput extends StandardOutput {
 
 		out.println("<reportparams>");
 		for (ReportParameter reportParam : reportParamsList) {
-			String paramName = reportParam.getParameter().getName();
+			String paramLabel = reportParam.getParameter().getLabel();
 			String displayValues = reportParam.getDisplayValues();
 
-			String outputString = "<name>" + StringEscapeUtils.escapeXml(paramName)
+			String outputString = "<name>" + StringEscapeUtils.escapeXml(paramLabel)
 					+ "</name><value>" + StringEscapeUtils.escapeXml(displayValues) + "<value>";
 
 			out.println("<param>");

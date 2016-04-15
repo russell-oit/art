@@ -29,6 +29,8 @@ Reports page. Also main/home page
 				});
 
 				var tbl = $('#reports');
+				
+				var columnFilterRow = createColumnFilters(tbl);
 
 				var oTable = tbl.dataTable({
 					columnDefs: [
@@ -38,7 +40,7 @@ Reports page. Also main/home page
 							searchable: false
 						},
 						{
-							targets: ["reportGroupCol", "descriptionCol"], //target name matches class name of th.
+							targets: ["descriptionCol"], //target name matches class name of th.
 							visible: false
 						}
 					],
@@ -54,9 +56,15 @@ Reports page. Also main/home page
 						$('div.dataTables_filter input').focus();
 					}
 				});
+				
+				//move column filter row after heading row
+				columnFilterRow.insertAfter(columnFilterRow.next());
 
 				//get datatables api object
 				var table = oTable.api();
+				
+				// Apply the column filter
+				applyColumnFilters(tbl, table);
 
 				//show/hide details
 				//http://datatables.net/examples/server_side/row_details.html
@@ -93,25 +101,9 @@ Reports page. Also main/home page
 			function formatDetails(data) {
 				var descriptionText = "${descriptionText}";
 				return '<div class="details">' + descriptionText + ': '
-						+ data[7] + '</div>';
+						+ data[2] + '</div>';
 			}
 
-			/* Formating function for row details */
-			function fnFormatDetails(oTable, nTr)
-			{
-				var descriptionText = "${descriptionText}";
-
-				var aData = oTable.fnGetData(nTr);
-				var sOut = '<div class="innerDetails">';
-				sOut += '<table style="margin-left:30px;">';
-				sOut += '<tbody>';
-				sOut += '<tr><td>' + descriptionText + ':</td><td>' + aData[2] + '</td></tr>';
-				sOut += '</tbody>';
-				sOut += '</table>';
-				sOut += '</div>';
-
-				return sOut;
-			}
 		</script>
 	</jsp:attribute>
 
@@ -130,7 +122,7 @@ Reports page. Also main/home page
 			<thead>
 				<tr>
 					<th class="detailsCol noFilter"></th> <%-- details control column --%>
-					<th class="reportGroupCol"></th> <%-- group name. hidden --%>
+					<th class="reportGroupCol"><spring:message code="reports.text.groupName"/></th> <%-- group name. --%>
 					<th class="descriptionCol"></th> <%-- description column. hidden --%>
 					<th><spring:message code="reports.text.reportName"/></th>
 				</tr>
@@ -139,8 +131,8 @@ Reports page. Also main/home page
 				<c:forEach var="report" items="${reports}">
 					<tr>
 						<td class="details-control"></td> <%-- details control column --%>
-						<td><encode:forHtmlContent value="${report.reportGroup.name}</td>"/>
-						<td><encode:forHtmlContent value="${report.description}</td>"/>
+						<td><encode:forHtmlContent value="${report.reportGroup.name}"/></td>
+						<td><encode:forHtmlContent value="${report.description}"/></td>
 						<td>
 							<a href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
 								<encode:forHtmlContent value="${report.name}"/>

@@ -182,7 +182,7 @@ Header that appears at the top of all pages, except the login and logs pages
 					<c:if test="${sessionUser.accessLevel.value >= 80}">
 						<li>
 							<a href="${pageContext.request.contextPath}/app/logs.do">
-								<i class="fa fa-bookmark"></i> 
+								<i class="fa fa-bars"></i> 
 								<spring:message code="header.link.logs"/>
 							</a>
 						</li>

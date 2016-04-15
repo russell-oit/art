@@ -118,7 +118,7 @@ public class XlsOutput extends StandardOutput {
 		wb.setSheetName(0, sheetName);
 
 		newRow();
-		addCellString(reportName + " - " + ArtUtils.isoDateTimeFormatter.format(new Date()));
+		addCellString(reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
 		newRow();
 	}
 

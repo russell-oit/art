@@ -17,7 +17,7 @@
  */
 package art.datasource;
 
-import art.utils.Encrypter;
+import art.encryption.DesEncryptor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class DatasourceMapper extends BasicRowProcessor {
 		// decrypt password if stored encrypted
 		String password = datasource.getPassword();
 		if (StringUtils.startsWith(password, "o:")) {
-			password = Encrypter.decrypt(password.substring(2));
+			password = DesEncryptor.decrypt(password.substring(2));
 			datasource.setPassword(password);
 		}
 

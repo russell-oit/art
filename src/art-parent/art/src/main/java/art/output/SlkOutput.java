@@ -75,6 +75,10 @@ public class SlkOutput extends StandardOutput {
 	@Override
 	public void init() {
 		exportFileStrBuf = new StringBuffer(8 * 1024);
+		// insert slk header
+		// This is the Ooo header:
+		exportFileStrBuf.append("ID;PSCALC3\n");
+
 		counter = 0;
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);
@@ -97,16 +101,12 @@ public class SlkOutput extends StandardOutput {
 	}
 
 	@Override
-	public void beginHeader() {
-		// insert slk header
-		// This is the Ooo header:
-		exportFileStrBuf.append("ID;PSCALC3\n");
-		localRowCount = 1;
-		columnCount = 1;
+	public void addTitle() {
+		newRow();
 
 		exportFileStrBuf.append("C;Y").append(localRowCount++).append(";X1;K\"")
 				.append(reportName).append(" - ")
-				.append(ArtUtils.isoDateTimeFormatter.format(new Date()))
+				.append(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()))
 				.append("\"\n"); // first row Y1
 
 	}
@@ -118,16 +118,19 @@ public class SlkOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			String paramName = reportParam.getParameter().getName();
-			addHeaderCell(paramName);
-			localRowCount++;
+			newRow();
+			String paramLabel = reportParam.getParameter().getLabel();
+			String paramDisplayValues = reportParam.getDisplayValues();
+			addHeaderCell(paramLabel);
+			addCellString(paramDisplayValues);
 		}
 
-		for (ReportParameter reportParam : reportParamsList) {
-			addCellString(reportParam.getDisplayValues());
-		}
-
-		localRowCount++;
+	}
+	
+	@Override
+	public void beginHeader(){
+		newRow();
+		newRow();
 	}
 
 	@Override

@@ -27,7 +27,7 @@ import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
-import art.utils.Encrypter;
+import art.encryption.DesEncryptor;
 import com.tonbeller.jpivot.olap.model.OlapModel;
 import com.tonbeller.jpivot.olap.model.OlapModelDecorator;
 import com.tonbeller.jpivot.olap.query.MdxOlapModel;
@@ -178,7 +178,7 @@ public class AnalysisController {
 				String xmlaUrl = report.getXmlaUrl();
 				String xmlaUsername = report.getXmlaUsername();
 				String xmlaPassword = report.getXmlaPassword();
-				xmlaPassword = Encrypter.decrypt(xmlaPassword);
+				xmlaPassword = DesEncryptor.decrypt(xmlaPassword);
 				URL url;
 
 				url = new URL(xmlaUrl);

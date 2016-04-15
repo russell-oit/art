@@ -24,7 +24,7 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
-import art.utils.Encrypter;
+import art.encryption.DesEncryptor;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -339,7 +339,7 @@ public class DatasourceController {
 		} else {
 			if (password.startsWith("o:")) {
 				//password is encrypted. decrypt
-				password = Encrypter.decrypt(password.substring(2));
+				password = DesEncryptor.decrypt(password.substring(2));
 			}
 		}
 
@@ -433,7 +433,7 @@ public class DatasourceController {
 		} else {
 			//encrypt new password
 			if (StringUtils.isNotEmpty(newPassword)) {
-				newPassword = "o:" + Encrypter.encrypt(newPassword);
+				newPassword = "o:" + DesEncryptor.encrypt(newPassword);
 			}
 			datasource.setPassword(newPassword);
 		}

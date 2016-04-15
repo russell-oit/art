@@ -16,9 +16,9 @@
  */
 package art.password;
 
+import art.encryption.PasswordUtils;
 import art.user.User;
 import art.user.UserService;
-import art.utils.Encrypter;
 import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -60,7 +60,7 @@ public class PasswordController {
 			model.addAttribute("message", "password.message.passwordsDontMatch");
 		} else {
 			//change password
-			String passwordHash = Encrypter.HashPasswordBcrypt(newPassword1);
+			String passwordHash = PasswordUtils.HashPasswordBcrypt(newPassword1);
 			String passwordAlgorithm = "bcrypt";
 			
 			User sessionUser = (User) session.getAttribute("sessionUser");

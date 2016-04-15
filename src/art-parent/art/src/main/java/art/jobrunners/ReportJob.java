@@ -1199,13 +1199,15 @@ public class ReportJob implements org.quartz.Job {
 		//update job details
 		//no need to update jobs table if non-split job. aftercompletion will do the final update to the jobs table
 		if (splitJob) {
-			sql = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?"
-					+ ", LAST_RUN_DETAILS=? LAST_START_DATE = ?, LAST_END_DATE = ? "
+			sql = "UPDATE ART_USER_JOBS SET LAST_FILE_NAME = ?,"
+					+ " LAST_RUN_DETAILS=?, LAST_RUN_MESSAGE=?,"
+					+ " LAST_START_DATE = ?, LAST_END_DATE = ? "
 					+ " WHERE JOB_ID = ? AND USERNAME = ?";
 
 			Object[] values = {
 				fileName,
 				runDetails,
+				runMessage,
 				jobStartDate,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				jobId,

@@ -60,6 +60,7 @@ public class ArtUtils {
 	public static final String ISO_DATE_TIME_MILLISECONDS_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 	public static final SimpleDateFormat isoDateFormatter = new SimpleDateFormat(ISO_DATE_FORMAT);
 	public static final SimpleDateFormat isoDateTimeFormatter = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
+	public static final SimpleDateFormat isoDateTimeSecondsFormatter = new SimpleDateFormat(ISO_DATE_TIME_SECONDS_FORMAT);
 	public static final SimpleDateFormat isoDateTimeMillisecondsFormatter = new SimpleDateFormat(ISO_DATE_TIME_MILLISECONDS_FORMAT);
 	public static final String FILE_NAME_DATE_FORMAT="yyyy_MM_dd-HH_mm_ss_SSS";
 	public static final SimpleDateFormat fileNameDateFormatter=new SimpleDateFormat(FILE_NAME_DATE_FORMAT);

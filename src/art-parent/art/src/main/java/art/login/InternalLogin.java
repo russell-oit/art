@@ -1,8 +1,8 @@
 package art.login;
 
+import art.encryption.PasswordUtils;
 import art.user.User;
 import art.user.UserService;
-import art.utils.Encrypter;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -38,7 +38,7 @@ public class InternalLogin {
 				if (user.isActive()) {
 					boolean passwordVerified = false;
 					try {
-						passwordVerified = Encrypter.VerifyPassword(password, user.getPassword(), user.getPasswordAlgorithm());
+						passwordVerified = PasswordUtils.VerifyPassword(password, user.getPassword(), user.getPasswordAlgorithm());
 					} catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
 						logger.error("Error. username='{}'", username, ex);
 					}

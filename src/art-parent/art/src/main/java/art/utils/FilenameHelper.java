@@ -38,19 +38,21 @@ public class FilenameHelper {
 
 	private String getFileName(Report report, Job job) {
 		int jobId;
+		String namePart;
 		if (job == null) {
 			jobId = 0;
+			namePart = report.getName();
 		} else {
 			jobId = job.getJobId();
+			namePart = job.getName();
 		}
 
 		int reportId = report.getReportId();
-		String reportName = report.getName();
 		String timestamp = ArtUtils.fileNameDateFormatter.format(new Date());
 		final int RANDOM_CHARACTER_COUNT = 5;
 		String random = RandomStringUtils.randomAlphanumeric(RANDOM_CHARACTER_COUNT);
 
-		String fileName = reportName + "-" + timestamp + "-" + random
+		String fileName = namePart + "-" + timestamp + "-" + random
 				+ "-" + reportId + "-" + jobId;
 
 		fileName = ArtUtils.cleanFileName(fileName);

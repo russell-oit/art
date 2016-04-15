@@ -29,7 +29,7 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
-import art.utils.Encrypter;
+import art.encryption.DesEncryptor;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -743,7 +743,7 @@ public class ReportController {
 		} else {
 			logger.debug("StringUtils.isNotEmpty(newXmlaPassword)={}", StringUtils.isNotEmpty(newXmlaPassword));
 			if (StringUtils.isNotEmpty(newXmlaPassword)) {
-				newXmlaPassword = "o:" + Encrypter.encrypt(newXmlaPassword);
+				newXmlaPassword = "o:" + DesEncryptor.encrypt(newXmlaPassword);
 			}
 			report.setXmlaPassword(newXmlaPassword);
 		}

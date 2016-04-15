@@ -15,18 +15,14 @@
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package art.utils;
+package art.encryption;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +36,9 @@ import org.slf4j.LoggerFactory;
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
-public class Encrypter {
+public class DesEncryptor {
 
-	private static final Logger logger = LoggerFactory.getLogger(Encrypter.class);
+	private static final Logger logger = LoggerFactory.getLogger(DesEncryptor.class);
 	private static final String staticKey = "d-jhbgy&5153tygo8176!"; // this is used as an additional static key
 	private static final String defaultPassword = "1tra"; //to allow use and single point of replacing the default password
 
@@ -144,114 +140,4 @@ public class Encrypter {
 		return null;
 	}
 
-	/**
-	 * Hash a password using the bcrypt algorithm and return the hashed
-	 * password.
-	 *
-	 * @param clearText
-	 * @return
-	 */
-	public static String HashPasswordBcrypt(String clearText) {
-		return HashPasswordBcrypt(clearText, 6);
-	}
-
-	/**
-	 * Hash a password using the bcrypt algorithm and return the hashed
-	 * password.
-	 *
-	 * @param clearText
-	 * @param rounds
-	 * @return
-	 */
-	public static String HashPasswordBcrypt(String clearText, int rounds) {
-		//NOTE: bcrypt only uses the first 72 bytes so long texts
-		//with the first 72 bytes the same will give the same hash
-
-		//rounds must be 4-31
-		//increase rounds to have slower password generation
-		if (rounds < 4 || rounds > 31) {
-			rounds = 6; //default
-		}
-
-		return BCrypt.hashpw(clearText, BCrypt.gensalt(rounds));
-	}
-
-	/**
-	 * Verify a password against it's bcrypt hashed equivalent
-	 *
-	 * @param clearText clear text password
-	 * @param hashedPassword hashed password
-	 * @return <code>true</code> if password matches hash
-	 */
-	public static boolean VerifyPasswordBcrypt(String clearText, String hashedPassword) {
-		if (clearText == null || hashedPassword == null || hashedPassword.length() == 0) {
-			return false;
-		}
-
-		//hashedPassword must not be empty string otherwise error will be thrown
-		//hashedPassword must be a valid bcrypt hash otherwise error will be thrown
-		return BCrypt.checkpw(clearText, hashedPassword);
-	}
-
-	/**
-	 * Hash a password using the a jdk provided algorithm specified and return
-	 * the hashed password.
-	 *
-	 * @param clearText clear text password
-	 * @param algorithm algorithm to use
-	 * @return hashed password. null if clearText or algorithm is null
-	 * @throws NoSuchAlgorithmException
-	 * @throws UnsupportedEncodingException
-	 */
-	public static String HashPassword(String clearText, String algorithm)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
-		if (algorithm == null || clearText == null) {
-			return null;
-		}
-
-		//valid algorithm strings - MD2,MD5,SHA-1,SHA-256,SHA-384,SHA-512
-		//Algorithm MD5 will generate a 128bit (16 byte) digested byte[]
-		//SHA-1 algorithm  will produce a 160bit (20 byte) digested byte[]
-		MessageDigest mdg = MessageDigest.getInstance(algorithm);
-
-		// To avoid the use of the (implicit) platform-specific encoding
-		// that can undermine portability of an existent ART instance
-		// we enforce the "UTF-8" encoding
-		byte[] hashedMsg = mdg.digest(clearText.getBytes("UTF-8"));
-		// The String is now digested
-
-		
-		//convert byte array to string in hex format
-		return Hex.encodeHexString(hashedMsg);
-		
-	}
-
-	/**
-	 * Verify a password against it's hashed equivalent
-	 *
-	 * @param clearText clear text password
-	 * @param hashedPassword hashed password
-	 * @param algorithm hashing algorithm
-	 * @return <code>true</code> if password matches hash
-	 * @throws NoSuchAlgorithmException
-	 * @throws UnsupportedEncodingException
-	 */
-	public static boolean VerifyPassword(String clearText, String hashedPassword, String algorithm)
-			throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
-		if (clearText == null || hashedPassword == null || algorithm == null) {
-			return false;
-		}
-
-		boolean verified = false;
-
-		if (algorithm.equals("bcrypt")) {
-			verified = VerifyPasswordBcrypt(clearText, hashedPassword);
-		} else if (hashedPassword.equals(HashPassword(clearText, algorithm))) {
-			verified = true;
-		}
-
-		return verified;
-	}
 }

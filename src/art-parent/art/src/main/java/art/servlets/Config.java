@@ -29,7 +29,6 @@ import art.jobrunners.CleanJob;
 import art.settings.CustomSettings;
 import art.settings.Settings;
 import art.utils.ArtUtils;
-import art.utils.Encrypter;
 import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -548,7 +547,7 @@ public class Config extends HttpServlet {
 			pSettings.setLdapUserIdAttribute("uid");
 		}
 		if (StringUtils.isBlank(pSettings.getDateFormat())) {
-			pSettings.setDateFormat("yyyy-MM-dd");
+			pSettings.setDateFormat("dd-MMM-yyyy");
 		}
 		if (StringUtils.isBlank(pSettings.getTimeFormat())) {
 			pSettings.setTimeFormat("HH:mm:ss");

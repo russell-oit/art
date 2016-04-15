@@ -119,9 +119,9 @@ public class XlsxOutput extends StandardOutput {
 	}
 
 	@Override
-	public void beginHeader() {
+	public void addTitle() {
 		newRow();
-		addCellString(reportName + " - " + ArtUtils.isoDateTimeFormatter.format(new Date()));
+		addCellString(reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
 		newRow();
 	}
 
@@ -132,24 +132,17 @@ public class XlsxOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			// rows with parameter names
 			newRow();
+			String paramLabel = reportParam.getParameter().getLabel();
 			String paramDisplayValues = reportParam.getDisplayValues();
+			addHeaderCell(paramLabel);
 			addCellString(paramDisplayValues);
 		}
-
-		// rows with parameter values
+	}
+	
+	@Override
+	public void beginHeader(){
 		newRow();
-
-		for (ReportParameter reportParam : reportParamsList) {
-			// rows with parameter names
-			newRow();
-			Parameter param = reportParam.getParameter();
-			String paramName = param.getName();
-			addHeaderCell(paramName);
-		}
-
-		// prepare row for columns header
 		newRow();
 	}
 

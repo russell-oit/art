@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 public class AesEncryptor {
 	//http://javapointers.com/tutorial/how-to-encrypt-and-decrypt-using-aes-in-java/
 	//https://stackoverflow.com/questions/15554296/simple-java-aes-encrypt-decrypt-example
+	//http://www.madirish.net/561
 	//https://www.grc.com/passwords.htm
 
 	private static final Logger logger = LoggerFactory.getLogger(AesEncryptor.class);
