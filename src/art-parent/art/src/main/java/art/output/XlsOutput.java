@@ -82,8 +82,9 @@ public class XlsOutput extends StandardOutput {
 				zout.putNextEntry(ze);
 			}
 
+			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			wb = new HSSFWorkbook();
-			sheet = wb.createSheet();
+			sheet = wb.createSheet(sheetName);
 			row = null;
 			cell = null;
 			headerStyle = wb.createCellStyle();
@@ -113,12 +114,10 @@ public class XlsOutput extends StandardOutput {
 	}
 
 	@Override
-	public void beginHeader() {
-		String sheetName = WorkbookUtil.createSafeSheetName(reportName);
-		wb.setSheetName(0, sheetName);
-
+	public void addTitle() {
 		newRow();
-		addCellString(reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
+		String title = reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date());
+		addCellString(title);
 		newRow();
 	}
 
@@ -129,21 +128,25 @@ public class XlsOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			addCellString(reportParam.getNameAndDisplayValues());
+			newRow();
+			String paramLabel = reportParam.getParameter().getLabel();
+			String paramDisplayValues = reportParam.getDisplayValues();
+			addHeaderCell(paramLabel);
+			addCellString(paramDisplayValues);
 		}
 	}
-
+	
 	@Override
-	public void endHeader() {
-		// prepare row for columns header
+	public void beginHeader(){
+		newRow();
 		newRow();
 	}
 
 	@Override
-	public void addHeaderCell(String s) {
+	public void addHeaderCell(String value) {
 		cell = row.createCell(cellNumber++);
 		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
-		cell.setCellValue(new HSSFRichTextString(s));
+		cell.setCellValue(new HSSFRichTextString(value));
 		cell.setCellStyle(headerStyle);
 	}
 
@@ -153,10 +156,10 @@ public class XlsOutput extends StandardOutput {
 	}
 
 	@Override
-	public void addCellString(String s) {
+	public void addCellString(String value) {
 		cell = row.createCell(cellNumber++);
 		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
-		cell.setCellValue(new HSSFRichTextString(s));
+		cell.setCellValue(new HSSFRichTextString(value));
 		cell.setCellStyle(bodyStyle);
 	}
 

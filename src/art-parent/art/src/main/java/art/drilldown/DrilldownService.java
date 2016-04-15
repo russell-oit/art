@@ -42,7 +42,7 @@ import org.springframework.stereotype.Service;
 public class DrilldownService {
 
 	private static final Logger logger = LoggerFactory.getLogger(DrilldownService.class);
-	
+
 	private final DbService dbService;
 
 	@Autowired
@@ -137,9 +137,24 @@ public class DrilldownService {
 
 		String sql;
 
-		//finally delete drilldown
 		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE DRILLDOWN_ID=?";
 		dbService.update(sql, id);
+	}
+
+	/**
+	 * Delete a drilldown
+	 *
+	 * @param ids
+	 * @throws SQLException
+	 */
+	public void deleteDrilldowns(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteDrilldowns: ids={}", (Object) ids);
+
+		String sql;
+
+		sql = "DELETE FROM ART_DRILLDOWN_QUERIES"
+				+ " WHERE DRILLDOWN_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		dbService.update(sql, (Object[]) ids);
 	}
 
 	/**
@@ -208,10 +223,10 @@ public class DrilldownService {
 
 	/**
 	 * Save a drilldown
-	 * 
+	 *
 	 * @param drilldown
 	 * @param newRecord
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private void saveDrilldown(Drilldown drilldown, boolean newRecord) throws SQLException {
 		logger.debug("Entering saveDrilldown: drilldown={}", drilldown);

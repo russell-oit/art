@@ -92,6 +92,24 @@ public class DrilldownController {
 		return response;
 	}
 
+	@RequestMapping(value = "/app/deleteDrilldowns", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteDrilldowns(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteDrilldowns: ids={}", (Object) ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			drilldownService.deleteDrilldowns(ids);
+			response.setSuccess(true);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
 	@RequestMapping(value = "/app/addDrilldown", method = RequestMethod.GET)
 	public String addDrilldown(Model model, Locale locale,
 			@RequestParam("parent") Integer parent) {
@@ -101,7 +119,7 @@ public class DrilldownController {
 		model.addAttribute("drilldown", new Drilldown());
 		return showEditDrilldown("add", model, locale, parent);
 	}
-	
+
 	@RequestMapping(value = "/app/editDrilldown", method = RequestMethod.GET)
 	public String editDrilldown(@RequestParam("id") Integer id, Model model,
 			Locale locale) {
@@ -179,7 +197,7 @@ public class DrilldownController {
 
 		model.addAttribute("parent", parent);
 		model.addAttribute("action", action);
-		
+
 		return "editDrilldown";
 	}
 

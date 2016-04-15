@@ -188,9 +188,25 @@ public class ReportParameterService {
 
 		String sql;
 
-		//finally delete report parameter
 		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_PARAMETER_ID=?";
 		dbService.update(sql, id);
+	}
+
+	/**
+	 * Delete a report parameter
+	 *
+	 * @param ids
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "parameters", allEntries = true)
+	public void deleteReportParameters(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteReportParameters: ids={}", (Object) ids);
+
+		String sql;
+
+		sql = "DELETE FROM ART_REPORT_PARAMETERS"
+				+ " WHERE REPORT_PARAMETER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		dbService.update(sql, (Object[]) ids);
 	}
 
 	/**

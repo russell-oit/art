@@ -24,67 +24,157 @@ Display report drilldowns
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.recordMoved" var="recordMovedText"/>
 <spring:message code="page.help.dragToReorder" var="dragToReorderText"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+
+	<jsp:attribute name="css">
+		<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.11/RowReorder-1.1.1/css/rowReorder.bootstrap.min.css"/>-->
+	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
-			$.fn.bsTooltip = $.fn.tooltip.noConflict();
-		</script>
+			$.fn.bsTooltip = $.fn.tooltip.noConflict();</script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"></script>
 
+		<!--<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/RowReorder-1.1.1/js/dataTables.rowReorder.min.js"></script>-->
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[href*="reportsConfig.do"]').parent().addClass('active');
 				});
-
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
 				});
-
 				var tbl = $('#drilldowns');
 
-				//initialize datatable and process delete action
-				var oTable = initConfigPage(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						undefined, //addColumnFilters. pass undefined to use default
-						".deleteRecord", //deleteButtonSelector
-						true, //showConfirmDialog
-						"${deleteRecordText}",
-						"${okText}",
-						"${cancelText}",
-						"deleteDrilldown.do", //deleteUrl
-						"${recordDeletedText}",
-						"${errorOccurredText}",
-						true, //deleteRow
-						undefined, //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
-						);
+				var oTable = tbl.dataTable({
+					rowReorder: true,
+					columnDefs: [
+						{orderable: true, targets: 1},
+						{orderable: false, targets: '_all'},
+						{
+							orderable: false,
+							className: 'select-checkbox',
+							targets: 0
+						}
+					],
+					order: [[1, 'asc']],
+					select: {
+						style: 'multi',
+						selector: 'td:first-child'
+					},
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
+
+				tbl.find('tbody').on('click', '.deleteRecord', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + recordName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/app/deleteDrilldown.do",
+									data: {id: recordId},
+									success: function (response) {
+										if (response.success) {
+											notifyActionSuccess("${cacheClearedText}", recordName);
+										} else {
+											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
+				var table = oTable.api();
 
 				//enable changing of drilldown position using drag and drop
 				oTable.rowReordering({
+					iIndexColumn: 1,
 					sURL: "moveDrilldown.do",
 					sRequestType: "POST",
-					fnSuccess: function(response) {
+					fnSuccess: function (response) {
 						if (response.success) {
 							notifyActionSuccess("${recordMovedText}", escapeHtmlContent(response.data));
 						} else {
 							notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 						}
 					},
-					fnAlert: function(message) {
+					fnAlert: function (message) {
 						bootbox.alert(message);
 					}
+				});
 
+				$('#deleteRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[2];
+						});
+						bootbox.confirm({
+							message: "${deleteRecordText}: <b>" + ids + "</b>",
+							buttons: {
+								cancel: {
+									label: "${cancelText}"
+								},
+								confirm: {
+									label: "${okText}"
+								}
+							},
+							callback: function (result) {
+								if (result) {
+									//user confirmed delete. make delete request
+									$.ajax({
+										type: "POST",
+										dataType: "json",
+										url: "${pageContext.request.contextPath}/app/deleteDrilldowns.do",
+										data: {ids: ids},
+										success: function (response) {
+											if (response.success) {
+												selectedRows.remove().draw(false);
+												notifyActionSuccess("${recordsDeletedText}", ids);
+											} else {
+												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											}
+										},
+										error: ajaxErrorHandler
+									});
+								} //end if result
+							} //end callback
+						}); //end bootbox confirm
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
 				});
 
 			}); //end document ready
@@ -119,11 +209,16 @@ Display report drilldowns
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
+			<button type="button" id="deleteRecords" class="btn btn-default">
+				<i class="fa fa-trash-o"></i>
+				<spring:message code="page.action.delete"/>
+			</button>
 		</div>
 
 		<table id="drilldowns" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.position"/></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="drilldowns.text.drilldownReport"/></th>
@@ -136,6 +231,7 @@ Display report drilldowns
 						data-name="${encode:forHtmlAttribute(drilldown.drilldownReport.name)}"
 						id="${drilldown.drilldownId}">
 
+						<td></td>
 						<td>${drilldown.position}</td>
 						<td>${drilldown.drilldownId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">

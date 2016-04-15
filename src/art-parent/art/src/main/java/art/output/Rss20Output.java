@@ -163,8 +163,4 @@ public class Rss20Output extends StandardOutput {
 		out.println("</rss>");
 	}
 
-//    @Override
-//    public boolean isShowQueryHeaderAndFooter() {
-//        return false; // if set to true, art will add standard html header&footer around the output
-//    }
 }

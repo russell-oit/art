@@ -148,8 +148,4 @@ public class XmlOutput extends StandardOutput {
 		out.println("</table>");
 	}
 
-//	@Override
-//	public boolean isShowQueryHeaderAndFooter() {
-//		return false; // if set to true, art will add a standard html header&footer around the output
-//	}
 }

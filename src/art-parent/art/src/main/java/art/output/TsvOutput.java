@@ -77,8 +77,8 @@ public class TsvOutput extends StandardOutput {
 
 		try {
 			fout = new FileOutputStream(fullOutputFilename);
-			
-			String filename=FilenameUtils.getBaseName(fullOutputFilename);
+
+			String filename = FilenameUtils.getBaseName(fullOutputFilename);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".tsv");
@@ -104,35 +104,38 @@ public class TsvOutput extends StandardOutput {
 	}
 
 	@Override
-	public void addHeaderCell(String s) {
-		exportFileStrBuf.append(s);
+	public void addHeaderCell(String value) {
+		exportFileStrBuf.append(value);
 		exportFileStrBuf.append("\t");
 	}
 
 	@Override
-	public void addCellString(String s) {
-		if (s == null) {
-			exportFileStrBuf.append(s);
+	public void addCellString(String value) {
+		if (value == null) {
+			exportFileStrBuf.append(value);
 			exportFileStrBuf.append("\t");
 		} else {
-			exportFileStrBuf.append(s.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
+			exportFileStrBuf.append(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
 			exportFileStrBuf.append("\t");
 
 		}
 	}
 
 	@Override
-	public void addCellNumeric(Double d) {
-		String formattedValue = "";
-		if (d != null) {
-			formattedValue = nfPlain.format(d.doubleValue());
+	public void addCellNumeric(Double value) {
+		String formattedValue;
+		if (value == null) {
+			formattedValue = "";
+		} else {
+			formattedValue = nfPlain.format(value.doubleValue());
 		}
+
 		exportFileStrBuf.append(formattedValue).append("\t");
 	}
 
 	@Override
-	public void addCellDate(Date d) {
-		exportFileStrBuf.append(Config.getDateDisplayString(d)).append("\t");
+	public void addCellDate(Date value) {
+		exportFileStrBuf.append(Config.getDateDisplayString(value)).append("\t");
 	}
 
 	@Override

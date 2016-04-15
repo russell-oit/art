@@ -323,7 +323,9 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "drilldowns") || StringUtils.endsWith(page, "Drilldown")) {
+		} else if (StringUtils.equals(page, "drilldowns")
+				|| StringUtils.endsWith(page, "Drilldown")
+				|| StringUtils.endsWith(page, "Drilldowns")) {
 			//junior admins and above
 			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;
@@ -385,7 +387,9 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;
 			}
-		} else if (StringUtils.equals(page, "reportParameterConfig") || StringUtils.endsWith(page, "ReportParameter")) {
+		} else if (StringUtils.equals(page, "reportParameterConfig")
+				|| StringUtils.endsWith(page, "ReportParameter")
+				|| StringUtils.endsWith(page, "ReportParameters")) {
 			//junior admins and above
 			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;

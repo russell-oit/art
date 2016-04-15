@@ -87,6 +87,24 @@ public class ReportParameterController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteReportParameters", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteReportParameters(@RequestParam("ids[]") Integer[] ids) {
+		logger.debug("Entering deleteReportParameters: ids={}",(Object) ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			reportParameterService.deleteReportParameters(ids);
+			response.setSuccess(true);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/addReportParameter", method = RequestMethod.GET)
 	public String addReportParameter(Model model, @RequestParam("reportId") Integer reportId) {

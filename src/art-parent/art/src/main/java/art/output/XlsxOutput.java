@@ -121,7 +121,8 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void addTitle() {
 		newRow();
-		addCellString(reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
+		String title = reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date());
+		addCellString(title);
 		newRow();
 	}
 
@@ -139,18 +140,18 @@ public class XlsxOutput extends StandardOutput {
 			addCellString(paramDisplayValues);
 		}
 	}
-	
+
 	@Override
-	public void beginHeader(){
+	public void beginHeader() {
 		newRow();
 		newRow();
 	}
 
 	@Override
-	public void addHeaderCell(String s) {
+	public void addHeaderCell(String value) {
 		cell = row.createCell(cellNumber++);
 		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
-		cell.setCellValue(new XSSFRichTextString(s));
+		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(headerStyle);
 	}
 
@@ -160,34 +161,30 @@ public class XlsxOutput extends StandardOutput {
 	}
 
 	@Override
-	public void addCellString(String s) {
+	public void addCellString(String value) {
 		cell = row.createCell(cellNumber++);
 		cell.setCellType(XSSFCell.CELL_TYPE_STRING);
-		cell.setCellValue(new XSSFRichTextString(s));
+		cell.setCellValue(new XSSFRichTextString(value));
 		cell.setCellStyle(bodyStyle);
 	}
 
 	@Override
-	public void addCellNumeric(Double d) {
+	public void addCellNumeric(Double value) {
 		cell = row.createCell(cellNumber++);
 
-		if (d == null) {
-			return;
-		} else {
+		if (value != null) {
 			cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
-			cell.setCellValue(d);
+			cell.setCellValue(value);
 			cell.setCellStyle(bodyStyle);
 		}
 	}
 
 	@Override
-	public void addCellDate(Date d) {
+	public void addCellDate(Date value) {
 		cell = row.createCell(cellNumber++);
 
-		if (d == null) {
-			return;
-		} else {
-			cell.setCellValue(Config.getDateDisplayString(d));
+		if (value != null) {
+			cell.setCellValue(Config.getDateDisplayString(value));
 			cell.setCellStyle(dateStyle);
 		}
 	}
