@@ -339,6 +339,7 @@ public class ReportParameterService {
 	 * @param parentReportId
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = "parameters", allEntries = true)
 	public void moveReportParameter(int id, int fromPosition, int toPosition, String direction,
 			int parentReportId) throws SQLException {
 

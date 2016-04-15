@@ -72,6 +72,7 @@
 
 				//enable changing of report parameter position using drag and drop
 				oTable.rowReordering({
+					iIndexColumn: 1,
 					sURL: "moveReportParameter.do",
 					sRequestType: "POST",
 					fnSuccess: function (response) {
@@ -85,6 +86,8 @@
 						bootbox.alert(message);
 					}
 				});
+				
+				var table = oTable.api();
 
 				$('#deleteRecords').click(function () {
 					var selectedRows = table.rows({selected: true});

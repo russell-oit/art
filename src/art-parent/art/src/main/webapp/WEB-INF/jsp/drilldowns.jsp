@@ -29,10 +29,6 @@ Display report drilldowns
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
-	<jsp:attribute name="css">
-		<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.11/RowReorder-1.1.1/css/rowReorder.bootstrap.min.css"/>-->
-	</jsp:attribute>
-
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
@@ -41,7 +37,6 @@ Display report drilldowns
 			$.fn.bsTooltip = $.fn.tooltip.noConflict();</script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"></script>
 
-		<!--<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/RowReorder-1.1.1/js/dataTables.rowReorder.min.js"></script>-->
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function () {
@@ -115,7 +110,6 @@ Display report drilldowns
 						} //end callback
 					}); //end bootbox confirm
 				});
-				var table = oTable.api();
 
 				//enable changing of drilldown position using drag and drop
 				oTable.rowReordering({
@@ -133,6 +127,8 @@ Display report drilldowns
 						bootbox.alert(message);
 					}
 				});
+				
+				var table = oTable.api();
 
 				$('#deleteRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
