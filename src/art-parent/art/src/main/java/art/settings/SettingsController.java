@@ -70,7 +70,7 @@ public class SettingsController {
 	@RequestMapping(value = "app/settings", method = RequestMethod.GET)
 	public String showSettings(Model model) {
 		logger.debug("Entering showSettings");
-		
+
 		Settings settings = Config.getSettings();
 
 		model.addAttribute("settings", settings);
@@ -80,7 +80,7 @@ public class SettingsController {
 	@RequestMapping(value = "app/settings", method = RequestMethod.POST)
 	public String processSettings(@ModelAttribute("settings") @Valid Settings settings,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-		
+
 		logger.debug("Entering processSettings: settings={}", settings);
 
 		if (result.hasErrors()) {
@@ -116,6 +116,9 @@ public class SettingsController {
 
 			//save administrator email in application context. for display in footer
 			ctx.setAttribute("administratorEmail", settings.getAdministratorEmail());
+
+			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
+			ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");
