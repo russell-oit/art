@@ -145,10 +145,10 @@ Edit report page
 					case 117: //jxls template
 					case 120: //static lov
 					case 121: //dynamic job recipients
-						$("#usesFiltersDiv").hide();
+						$("#usesRulesDiv").hide();
 						break;
 					default:
-						$("#usesFiltersDiv").show();
+						$("#usesRulesDiv").show();
 				}
 
 				//show/hide datasource
@@ -247,7 +247,7 @@ Edit report page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#reports">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
@@ -383,7 +383,7 @@ Edit report page
 										  itemLabel="description" itemValue="value"/>
 						</form:select>
 						<div class="text-right">
-							<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
+							<a href="${pageContext.request.contextPath}/docs/Manual.html#report-types">
 								<spring:message code="page.link.help"/>
 							</a>
 						</div>
@@ -429,15 +429,15 @@ Edit report page
 						<form:errors path="datasource.datasourceId" cssClass="error"/>
 					</div>
 				</div>
-				<div id="usesFiltersDiv" class="form-group">
-					<label class="control-label col-md-4" for="usesFilters">
-						<spring:message code="reports.label.usesFilters"/>
+				<div id="usesRulesDiv" class="form-group">
+					<label class="control-label col-md-4" for="usesRules">
+						<spring:message code="reports.label.usesRules"/>
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="usesFilters" id="usesFilters"/>
+							<form:checkbox path="usesRules" id="usesRules"/>
 						</div>
-						<form:errors path="usesFilters" cssClass="error"/>
+						<form:errors path="usesRules" cssClass="error"/>
 					</div>
 				</div>
 				<div id="parametersInOutputDiv" class="form-group">

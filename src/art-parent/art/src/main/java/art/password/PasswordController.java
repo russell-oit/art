@@ -41,13 +41,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class PasswordController {
 
 	private static final Logger logger = LoggerFactory.getLogger(PasswordController.class);
-	
+
 	@Autowired
 	private UserService userService;
 
 	@RequestMapping(value = "/app/password", method = RequestMethod.GET)
-	public String showPassword() {
-		return "password";
+	public String showPassword(HttpSession session) {
+		logger.debug("Entering showPassword");
+		
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		
+		if (sessionUser.isCanChangePassword()) {
+			return "password";
+		} else {
+			return "accessDenied";
+		}
 	}
 
 	@RequestMapping(value = "/app/password", method = RequestMethod.POST)
@@ -55,6 +63,8 @@ public class PasswordController {
 			@RequestParam("newPassword1") String newPassword1,
 			@RequestParam("newPassword2") String newPassword2,
 			Model model, RedirectAttributes redirectAttributes) {
+		
+		logger.debug("Entering processPassword");
 
 		if (!StringUtils.equals(newPassword1, newPassword2)) {
 			model.addAttribute("message", "password.message.passwordsDontMatch");
@@ -62,10 +72,10 @@ public class PasswordController {
 			//change password
 			String passwordHash = PasswordUtils.HashPasswordBcrypt(newPassword1);
 			String passwordAlgorithm = "bcrypt";
-			
+
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			try {
-				userService.updatePassword(sessionUser.getUserId(), passwordHash, passwordAlgorithm,sessionUser);
+				userService.updatePassword(sessionUser.getUserId(), passwordHash, passwordAlgorithm, sessionUser);
 
 				//update session user object
 				sessionUser.setPassword(passwordHash);

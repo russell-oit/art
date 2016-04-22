@@ -40,7 +40,7 @@ public class Parameter implements Serializable {
 	private boolean hidden;
 	private boolean useLov;
 	private int lovReportId;
-	private boolean useFiltersInLov;
+	private boolean useRulesInLov;
 	private int drilldownColumnIndex;
 	private boolean useDirectSubstitution;
 	private Date creationDate;
@@ -236,17 +236,17 @@ public class Parameter implements Serializable {
 	}
 
 	/**
-	 * @return the useFiltersInLov
+	 * @return the useRulesInLov
 	 */
-	public boolean isUseFiltersInLov() {
-		return useFiltersInLov;
+	public boolean isUseRulesInLov() {
+		return useRulesInLov;
 	}
 
 	/**
-	 * @param useFiltersInLov the useFiltersInLov to set
+	 * @param useRulesInLov the useRulesInLov to set
 	 */
-	public void setUseFiltersInLov(boolean useFiltersInLov) {
-		this.useFiltersInLov = useFiltersInLov;
+	public void setUseRulesInLov(boolean useRulesInLov) {
+		this.useRulesInLov = useRulesInLov;
 	}
 
 	/**

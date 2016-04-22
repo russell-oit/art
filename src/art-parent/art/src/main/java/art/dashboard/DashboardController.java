@@ -187,13 +187,19 @@ public class DashboardController {
 
 		// Get the portlet xml info
 		link = XmlParser.getXmlElementValue(portletXml, "OBJECTID");
+		
 		//allow use of QUERYID tag
 		if (link == null) {
 			link = XmlParser.getXmlElementValue(portletXml, "QUERYID");
 		}
+		
+		//allow use of REPORTID tag
+		if (link == null) {
+			link = XmlParser.getXmlElementValue(portletXml, "REPORTID");
+		}
 
 		if (link == null) {
-			//no query defined. use url tag
+			//no report defined. use url tag
 			link = XmlParser.getXmlElementValue(portletXml, "URL");
 		} else {
 			// context path as suffix + build url + switch off html header&footer 

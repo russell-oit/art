@@ -81,7 +81,7 @@ Display edit user page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#users">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#users">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
@@ -204,7 +204,7 @@ Display edit user page
 									 itemLabel="description" 
 									 class="form-control selectpicker"/>
 						<div class="text-right">
-							<a href="${pageContext.request.contextPath}/docs/manual.htm">
+							<a href="${pageContext.request.contextPath}/docs/Manual.html#access-levels">
 								<spring:message code="page.link.help"/>
 							</a>
 						</div>

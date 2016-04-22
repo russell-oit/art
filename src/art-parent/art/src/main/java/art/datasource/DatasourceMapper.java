@@ -54,7 +54,7 @@ public class DatasourceMapper extends BasicRowProcessor {
 		datasource.setUrl(rs.getString("URL"));
 		datasource.setUsername(rs.getString("USERNAME"));
 		datasource.setPassword(rs.getString("PASSWORD"));
-		datasource.setConnectionPoolTimeout(rs.getInt("POOL_TIMEOUT"));
+		datasource.setConnectionPoolTimeoutMins(rs.getInt("POOL_TIMEOUT"));
 		datasource.setTestSql(rs.getString("TEST_SQL"));
 		datasource.setActive(rs.getBoolean("ACTIVE"));
 		datasource.setCreationDate(rs.getTimestamp("CREATION_DATE"));

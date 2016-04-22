@@ -465,7 +465,7 @@ public class AnalysisController {
 				newReport.setReportType(report.getReportType());
 				newReport.setShortDescription("");
 				newReport.setContactPerson(sessionUser.getUsername());
-				newReport.setUsesFilters(report.isUsesFilters());
+				newReport.setUsesRules(report.isUsesRules());
 				newReport.setTemplate(report.getTemplate());
 				newReport.setActive(report.isActive());
 				newReport.setHidden(report.isHidden());

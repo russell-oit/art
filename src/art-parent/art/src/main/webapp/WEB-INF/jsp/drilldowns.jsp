@@ -50,7 +50,6 @@ Display report drilldowns
 				var tbl = $('#drilldowns');
 
 				var oTable = tbl.dataTable({
-					rowReorder: true,
 					columnDefs: [
 						{orderable: true, targets: 1},
 						{orderable: false, targets: '_all'},

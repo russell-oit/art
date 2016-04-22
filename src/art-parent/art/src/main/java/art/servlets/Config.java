@@ -586,8 +586,8 @@ public class Config extends HttpServlet {
 			return;
 		}
 
-		if (artDatabase.getConnectionPoolTimeout() <= 0) {
-			artDatabase.setConnectionPoolTimeout(20);
+		if (artDatabase.getConnectionPoolTimeoutMins() <= 0) {
+			artDatabase.setConnectionPoolTimeoutMins(20);
 		}
 		if (artDatabase.getMaxPoolConnections() <= 0) {
 			artDatabase.setMaxPoolConnections(20);

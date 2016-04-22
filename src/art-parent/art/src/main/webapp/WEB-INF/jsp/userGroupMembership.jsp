@@ -33,24 +33,52 @@ Display user group membership
 				var tbl = $('#memberships');
 
 				//initialize datatable and process delete action
-				initConfigPage(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						undefined, //addColumnFilters. pass undefined to use default
-						".deleteRecord", //deleteButtonSelector
-						true, //showConfirmDialog
-						"${deleteRecordText}",
-						"${okText}",
-						"${cancelText}",
-						"deleteUserGroupMembership.do", //deleteUrl
-						"${recordDeletedText}",
-						"${errorOccurredText}",
-						true, //deleteRow
-						undefined, //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
-						);
+				tbl.dataTable({
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
+
+				tbl.find('tbody').on('click', '.deleteRecord', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + recordName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/app/deleteUserGroupMembership.do",
+									data: {id: recordId},
+									success: function (response) {
+										if (response.success) {
+											notifyActionSuccess("${membershipRemovedText}", recordName);
+										} else {
+											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
 
 
 			});

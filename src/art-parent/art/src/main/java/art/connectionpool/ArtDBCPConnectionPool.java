@@ -36,7 +36,7 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 
 	@Override
 	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
-		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasourceInfo.getConnectionPoolTimeout());  //convert timeout mins to seconds
+		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasourceInfo.getConnectionPoolTimeoutMins());  //convert timeout mins to seconds
 		artDbcpDataSource = new ArtDBCPDataSource(timeoutSeconds);
 
 		artDbcpDataSource.setPoolName(datasourceInfo.getName()); //use the datasoure name as the connection pool name

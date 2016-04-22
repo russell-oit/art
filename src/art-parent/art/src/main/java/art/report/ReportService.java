@@ -118,7 +118,7 @@ public class ReportService {
 			report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
 			report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
-			report.setUsesFilters(rs.getBoolean("USES_FILTERS"));
+			report.setUsesRules(rs.getBoolean("USES_FILTERS"));
 			report.setActive(rs.getBoolean("ACTIVE"));
 			report.setHidden(rs.getBoolean("HIDDEN"));
 			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
@@ -588,7 +588,7 @@ public class ReportService {
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
-				report.isUsesFilters(),
+				report.isUsesRules(),
 				report.isActive(),
 				report.isHidden(),
 				report.isParametersInOutput(),
@@ -625,7 +625,7 @@ public class ReportService {
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
-				report.isUsesFilters(),
+				report.isUsesRules(),
 				report.isActive(),
 				report.isHidden(),
 				report.isParametersInOutput(),

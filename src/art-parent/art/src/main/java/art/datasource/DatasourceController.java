@@ -134,7 +134,7 @@ public class DatasourceController {
 
 		//set defaults
 		datasource.setActive(true);
-		datasource.setConnectionPoolTimeout(20);
+		datasource.setConnectionPoolTimeoutMins(20);
 
 		model.addAttribute("datasource", datasource);
 		return showEditDatasource("add", model);

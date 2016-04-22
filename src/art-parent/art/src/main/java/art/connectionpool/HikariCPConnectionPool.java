@@ -57,7 +57,7 @@ public class HikariCPConnectionPool extends ConnectionPool {
 			config.setConnectionTestQuery(datasourceInfo.getTestSql());
 		}
 
-		long timeoutMillis = TimeUnit.MINUTES.toMillis(datasourceInfo.getConnectionPoolTimeout());
+		long timeoutMillis = TimeUnit.MINUTES.toMillis(datasourceInfo.getConnectionPoolTimeoutMins());
 		config.setIdleTimeout(timeoutMillis);
 
 		//set application name connection property

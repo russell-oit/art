@@ -234,12 +234,12 @@ Edit parameter definition
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="useFiltersInLov">
-						<spring:message code="parameters.label.useFiltersInLov"/>
+					<label class="control-label col-md-4" for="useRulesInLov">
+						<spring:message code="parameters.label.useRulesInLov"/>
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="useFiltersInLov" id="useFiltersInLov"/>
+							<form:checkbox path="useRulesInLov" id="useRulesInLov"/>
 						</div>
 					</div>
 				</div>
@@ -251,25 +251,6 @@ Edit parameter definition
 					<div class="col-md-8">
 						<form:input path="drilldownColumnIndex" maxlength="2" class="form-control"/>
 						<form:errors path="drilldownColumnIndex" cssClass="error"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-md-4" for="useDirectSubstitution">
-						<spring:message code="parameters.label.useDirectSubstitution"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<div class="checkbox">
-								<form:checkbox path="useDirectSubstitution" id="useDirectSubstitution"/>
-							</div>
-							<spring:message code="parameters.help.useDirectSubstitution" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
 					</div>
 				</div>
 				<div class="form-group">

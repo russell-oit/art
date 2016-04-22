@@ -799,7 +799,7 @@ public class Job implements Serializable {
 	}
 
 	public boolean isSplitJob() {
-		if (report != null && report.isUsesFilters() && allowSplitting) {
+		if (report != null && report.isUsesRules() && allowSplitting) {
 			return true;
 		} else {
 			return false;

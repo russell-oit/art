@@ -692,7 +692,7 @@ public class ReportRunner {
 		
 		reportType = report.getReportType();
 		displayResultset = report.getDisplayResultset();
-		useRules = report.isUsesFilters();
+		useRules = report.isUsesRules();
 
 		//override use rules setting if required, especially for lovs
 		if (overrideUseRules) {

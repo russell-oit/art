@@ -154,7 +154,7 @@ public class CacheHelper {
 	}
 
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
-		"datasources", "schedules", "jobs", "filters", "rules", "parameters"}, allEntries = true)
+		"datasources", "schedules", "jobs", "rules", "parameters"}, allEntries = true)
 	public void clearAll() {
 		clearMondrian();
 	}

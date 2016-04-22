@@ -195,7 +195,7 @@ Header that appears at the top of all pages, except the login and logs pages
 							</a>
 						</li>
 					</c:if>
-					<c:if test="${authenticationMethod eq internalAuthentication}">
+					<c:if test="${authenticationMethod eq internalAuthentication && sessionUser.canChangePassword}">
 						<li>
 							<a href="${pageContext.request.contextPath}/app/password.do">
 								<i class="fa fa-lock"></i> 

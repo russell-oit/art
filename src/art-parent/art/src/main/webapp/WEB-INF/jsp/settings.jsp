@@ -66,7 +66,7 @@ Settings configuration page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#settings">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#settings">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

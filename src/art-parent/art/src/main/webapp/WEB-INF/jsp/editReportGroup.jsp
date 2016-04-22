@@ -42,7 +42,7 @@ Edit report group page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#report-groups">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

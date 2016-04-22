@@ -35,7 +35,7 @@ public abstract class DatasourceInfo {
 	@JsonIgnore
 	private boolean useBlankPassword; //only used for user interface logic
 	private String testSql;
-	private int connectionPoolTimeout;
+	private int connectionPoolTimeoutMins;
 	private boolean jndi;
 
 	/**
@@ -121,21 +121,21 @@ public abstract class DatasourceInfo {
 	}
 
 	/**
-	 * Get the value of connectionPoolTimeout
+	 * Get the value of connectionPoolTimeoutMins
 	 *
-	 * @return the value of connectionPoolTimeout
+	 * @return the value of connectionPoolTimeoutMins
 	 */
-	public int getConnectionPoolTimeout() {
-		return connectionPoolTimeout;
+	public int getConnectionPoolTimeoutMins() {
+		return connectionPoolTimeoutMins;
 	}
 
 	/**
-	 * Set the value of connectionPoolTimeout
+	 * Set the value of connectionPoolTimeoutMins
 	 *
-	 * @param connectionPoolTimeout new value of connectionPoolTimeout
+	 * @param connectionPoolTimeoutMins new value of connectionPoolTimeoutMins
 	 */
-	public void setConnectionPoolTimeout(int connectionPoolTimeout) {
-		this.connectionPoolTimeout = connectionPoolTimeout;
+	public void setConnectionPoolTimeoutMins(int connectionPoolTimeoutMins) {
+		this.connectionPoolTimeoutMins = connectionPoolTimeoutMins;
 	}
 
 	/**

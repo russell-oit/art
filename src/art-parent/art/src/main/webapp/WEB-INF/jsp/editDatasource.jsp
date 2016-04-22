@@ -101,7 +101,7 @@ Edit datasource page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#datasources">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#datasources">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
@@ -110,7 +110,7 @@ Edit datasource page
 	<jsp:attribute name="belowMainPanel">
 		<div class="col-md-6 col-md-offset-3">
 			<div class="alert alert-info">
-				<jsp:include page="/WEB-INF/html/oracleNote.html"/>
+				<jsp:include page="/WEB-INF/html/datasourceNotes.html"/>
 			</div>
 		</div>
 	</jsp:attribute>
@@ -297,12 +297,12 @@ Edit datasource page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="connectionPoolTimeout">
+					<label class="control-label col-md-4" for="connectionPoolTimeoutMins">
 						<spring:message code="page.label.connectionPoolTimeout"/>
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="connectionPoolTimeout" maxlength="5" class="form-control"/>
+							<form:input path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
 							<spring:message code="page.help.connectionPoolTimeout" var="help" />
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -311,7 +311,7 @@ Edit datasource page
 								</button>
 							</span>
 						</div>
-						<form:errors path="connectionPoolTimeout" cssClass="error"/>
+						<form:errors path="connectionPoolTimeoutMins" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">

@@ -17,7 +17,6 @@
  */
 package art.output;
 
-import art.parameter.Parameter;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtUtils;

@@ -49,6 +49,14 @@ Display art database configuration page
 		</script>
 	</jsp:attribute>
 
+	<jsp:attribute name="aboveMainPanel">
+		<div class="text-right">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#art-database">
+				<spring:message code="page.link.help"/>
+			</a>
+		</div>
+	</jsp:attribute>
+
 	<jsp:attribute name="rightMainPanel">
 		<c:if test="${not empty initialSetup}">
 			<div class="col-md-3">
@@ -62,7 +70,7 @@ Display art database configuration page
 	<jsp:attribute name="belowMainPanel">
 		<div class="col-md-6 col-md-offset-3">
 			<div class="alert alert-info">
-				<jsp:include page="/WEB-INF/html/oracleNote.html"/>
+				<jsp:include page="/WEB-INF/html/datasourceNotes.html"/>
 			</div>
 		</div>
 	</jsp:attribute>
@@ -201,12 +209,12 @@ Display art database configuration page
 				</div>
 				<hr>
 				<div class="form-group">
-					<label class="control-label col-md-4" for="connectionPoolTimeout">
+					<label class="control-label col-md-4" for="connectionPoolTimeoutMins">
 						<spring:message code="page.label.connectionPoolTimeout"/>
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="connectionPoolTimeout" maxlength="5" class="form-control"/>
+							<form:input path="connectionPoolTimeoutMins" maxlength="5" class="form-control"/>
 							<spring:message code="page.help.connectionPoolTimeout"
 											var="help" />
 							<span class="input-group-btn" >
@@ -216,7 +224,7 @@ Display art database configuration page
 								</button>
 							</span>
 						</div>
-						<form:errors path="connectionPoolTimeout" cssClass="error"/>
+						<form:errors path="connectionPoolTimeoutMins" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
