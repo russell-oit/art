@@ -199,8 +199,7 @@ public class RunReportController {
 			}
 
 			//handle output formats that require data only
-			if (reportFormat == ReportFormat.xml
-					|| reportFormat == ReportFormat.rss20) {
+			if (reportFormat == ReportFormat.xml || reportFormat == ReportFormat.rss20) {
 				showInline = true;
 			}
 			//output page header. if showInline, page header and footer already exist. 
@@ -272,8 +271,7 @@ public class RunReportController {
 				//is scroll insensitive much slower than forward only?
 				int resultSetType;
 				if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
-						|| reportType == ReportType.Group
-						|| (reportType.isChart())) {
+						|| reportType == ReportType.Group || reportType.isChart()) {
 					//need scrollable resultset for jasper and jxls art report in order to display record count
 					//need scrollable resultset in order to generate group report
 					//need scrollable resultset for charts for show data option

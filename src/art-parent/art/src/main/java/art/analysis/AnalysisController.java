@@ -131,11 +131,11 @@ public class AnalysisController {
 		}
 
 		return "showAnalysis";
-
 	}
 
 	private void prepareVariables(HttpServletRequest request, HttpSession session,
-			Report report, Model model) throws NumberFormatException, SQLException, ParseException, MalformedURLException {
+			Report report, Model model)
+			throws NumberFormatException, SQLException, ParseException, MalformedURLException {
 
 		int reportId = report.getReportId();
 		model.addAttribute("reportId", reportId);
@@ -325,7 +325,7 @@ public class AnalysisController {
 		model.addAttribute("printExcel", printExcel);
 		model.addAttribute("printPdf", printPdf);
 
-//get the current mdx
+		//get the current mdx
 		String currentMdx = "";
 		TableComponent table = (TableComponent) session.getAttribute(tableId);
 		if (table != null) {
@@ -347,10 +347,10 @@ public class AnalysisController {
 			}
 		}
 
-//save current mdx in the session
+		//save current mdx in the session
 		session.setAttribute("mdx" + reportId, currentMdx);
 
-//get object with olap query and result
+		//get object with olap query and result
 		OlapModel _olapModel = (OlapModel) session.getAttribute(jpivotQueryId);
 
 		String overflowResult = null;
@@ -362,7 +362,7 @@ public class AnalysisController {
 				}
 			} catch (Throwable t) {
 				logger.error("Error", t);
-				overflowResult = "Error Occurred While getting Resultset";
+				overflowResult = "Error occurred while getting resultset";
 			}
 		}
 		model.addAttribute("overflowResult", overflowResult);
@@ -374,8 +374,7 @@ public class AnalysisController {
 	}
 
 	@RequestMapping(value = "/app/jpivotError", method = {RequestMethod.GET, RequestMethod.POST})
-	public String jpivotError(HttpServletRequest request, Locale locale,
-			Model model) {
+	public String jpivotError(HttpServletRequest request, Locale locale, Model model) {
 		String msg = messageSource.getMessage("analysis.text.jpivotError", null, locale);
 
 		Throwable e = (Throwable) request.getAttribute("javax.servlet.jsp.jspException");

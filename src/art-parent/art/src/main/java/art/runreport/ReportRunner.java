@@ -58,7 +58,7 @@ public class ReportRunner {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ReportRunner.class);
 	private String username; //used in replacing :username tag
-	private StringBuilder querySb;
+	private final StringBuilder querySb;
 	private boolean useRules = false;
 	private PreparedStatement psQuery; // this is the ps object produced by this query
 	private Connection connQuery; // this is the connection to the datasource for this query
@@ -71,9 +71,8 @@ public class ReportRunner {
 	private int displayResultset;
 	private int updateCount; //update count of display resultset
 	private Report report;
-	private String[] filterValues; //value of filter used with chained parameters
 	private Map<String, ReportParameter> reportParamsMap;
-	private List<Object> jdbcParams = new ArrayList<>();
+	private final List<Object> jdbcParams = new ArrayList<>();
 	private ReportType reportType;
 	
 	public ReportRunner() {
@@ -87,24 +86,6 @@ public class ReportRunner {
 	 */
 	public void setReportParamsMap(Map<String, ReportParameter> reportParamsMap) {
 		this.reportParamsMap = reportParamsMap;
-	}
-
-	/**
-	 * Get the value of filterValues
-	 *
-	 * @return the value of filterValues
-	 */
-	public String[] getFilterValues() {
-		return filterValues;
-	}
-
-	/**
-	 * Set the value of filterValues
-	 *
-	 * @param filterValues new value of filterValues
-	 */
-	public void setFilterValues(String[] filterValues) {
-		this.filterValues = filterValues;
 	}
 
 	/**
@@ -370,10 +351,10 @@ public class ReportRunner {
 		} finally {
 			DatabaseUtils.close(rs, ps, conn);
 		}
-		
 	}
 	
-	public StringBuilder getRuleValues(Connection conn, String ruleUsername, String currentRule, int counter, String columnDataType)
+	public StringBuilder getRuleValues(Connection conn, String ruleUsername,
+			String currentRule, int counter, String columnDataType)
 			throws SQLException {
 		
 		StringBuilder tmpSb = new StringBuilder(64);
@@ -662,6 +643,7 @@ public class ReportRunner {
 	/**
 	 * execute overload with a default resultset type
 	 *
+	 * @throws java.sql.SQLException
 	 */
 	public void execute() throws SQLException {
 		execute(ResultSet.TYPE_FORWARD_ONLY);

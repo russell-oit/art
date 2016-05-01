@@ -43,7 +43,7 @@ public class Job implements Serializable {
 	private String createdBy;
 	private String updatedBy;
 	private boolean active;
-	private int recipientsQueryId;
+	private int recipientsReportId;
 	private boolean allowSharing;
 	private boolean allowSplitting;
 	private boolean enableAudit;
@@ -256,17 +256,17 @@ public class Job implements Serializable {
 	}
 
 	/**
-	 * @return the recipientsQueryId
+	 * @return the recipientsReportId
 	 */
-	public int getRecipientsQueryId() {
-		return recipientsQueryId;
+	public int getRecipientsReportId() {
+		return recipientsReportId;
 	}
 
 	/**
-	 * @param recipientsQueryId the recipientsQueryId to set
+	 * @param recipientsReportId the recipientsReportId to set
 	 */
-	public void setRecipientsQueryId(int recipientsQueryId) {
-		this.recipientsQueryId = recipientsQueryId;
+	public void setRecipientsReportId(int recipientsReportId) {
+		this.recipientsReportId = recipientsReportId;
 	}
 
 	/**

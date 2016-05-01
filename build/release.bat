@@ -10,6 +10,10 @@ robocopy art-nightly ..\Releases\%1\art-%1 /mir
 rem create zip package
 7z a ..\Releases\%1\art-%1.zip ..\Releases\%1\art-%1\
 
+rem copy docs
+robocopy ..\Manuals\automated\ ..\Manuals\%1 *.pdf
+robocopy ..\Manuals\automated\ ..\Manuals\%1 *.html
+
 goto :eof
 
 :usage

@@ -107,7 +107,7 @@ public class JobService {
 			job.setEnableAudit(rs.getBoolean("ENABLE_AUDIT"));
 			job.setAllowSharing(rs.getBoolean("ALLOW_SHARING"));
 			job.setAllowSplitting(rs.getBoolean("ALLOW_SPLITTING"));
-			job.setRecipientsQueryId(rs.getInt("RECIPIENTS_QUERY_ID"));
+			job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
 			job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
 			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
@@ -474,7 +474,7 @@ public class JobService {
 				job.isEnableAudit(),
 				job.isAllowSharing(),
 				job.isAllowSplitting(),
-				job.getRecipientsQueryId(),
+				job.getRecipientsReportId(),
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
@@ -521,7 +521,7 @@ public class JobService {
 				job.isEnableAudit(),
 				job.isAllowSharing(),
 				job.isAllowSplitting(),
-				job.getRecipientsQueryId(),
+				job.getRecipientsReportId(),
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),

@@ -335,16 +335,6 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="control-label col-md-4" for="active">
-							<spring:message code="page.label.active"/>
-						</label>
-						<div class="col-md-8">
-							<div class="checkbox">
-								<form:checkbox path="active" id="active"/>
-							</div>
-						</div>
-					</div>
-					<div class="form-group">
 						<label class="col-md-4 control-label " for="outputFormat">
 							<spring:message code="jobs.label.outputFormat"/>
 						</label>
@@ -353,6 +343,25 @@
 
 							</form:select>
 							<form:errors path="outputFormat" cssClass="error"/>
+						</div>
+					</div>
+					<div id="cachedTableNameDiv" class="form-group">
+						<label class="col-md-4 control-label " for="cachedTableName">
+							<spring:message code="jobs.label.cachedTableName"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="cachedTableName" maxlength="200" class="form-control"/>
+							<form:errors path="cachedTableName" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="active">
+							<spring:message code="page.label.active"/>
+						</label>
+						<div class="col-md-8">
+							<div class="checkbox">
+								<form:checkbox path="active" id="active"/>
+							</div>
 						</div>
 					</div>
 					<div class="form-group">
@@ -374,15 +383,6 @@
 								<form:input path="runsToArchive" maxlength="2" class="form-control"/>
 							</div>
 							<form:errors path="runsToArchive" cssClass="error"/>
-						</div>
-					</div>
-					<div id="cachedTableNameDiv" class="form-group">
-						<label class="col-md-4 control-label " for="cachedTableName">
-							<spring:message code="jobs.label.cachedTableName"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="cachedTableName" maxlength="200" class="form-control"/>
-							<form:errors path="cachedTableName" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
@@ -451,12 +451,12 @@
 							<form:errors path="mailTo" cssClass="error"/>
 						</div>
 					</div>
-					<div id="datasourceDiv" class="form-group">
-						<label class="col-md-4 control-label " for="recipientsQueryId">
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="recipientsReportId">
 							<spring:message code="jobs.label.mailRecipients"/>
 						</label>
 						<div class="col-md-8">
-							<form:select path="recipientsQueryId" class="form-control selectpicker">
+							<form:select path="recipientsReportId" class="form-control selectpicker">
 								<form:option value="0"><spring:message code="select.text.none"/></form:option>
 									<option data-divider="true"></option>
 								<c:forEach var="dynamicRecipientReport" items="${dynamicRecipientReports}">
@@ -465,7 +465,7 @@
 									</form:option>
 								</c:forEach>
 							</form:select>
-							<form:errors path="recipientsQueryId" cssClass="error"/>
+							<form:errors path="recipientsReportId" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">

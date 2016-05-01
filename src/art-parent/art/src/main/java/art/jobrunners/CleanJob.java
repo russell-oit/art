@@ -118,8 +118,8 @@ public class CleanJob implements org.quartz.Job {
 				try {
 					//create/update file that indicates when the cache was last cleared
 					FileUtils.writeStringToFile(cacheFile, new Date().toString());
-				} catch (IOException e) {
-					logger.error("Error", e);
+				} catch (IOException ex) {
+					logger.error("Error", ex);
 				}
 			}
 		}
