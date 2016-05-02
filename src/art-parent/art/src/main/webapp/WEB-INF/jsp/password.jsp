@@ -19,8 +19,8 @@ Display change password page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[href*="password.do"]').parent().addClass('active');
 				});
 
@@ -42,10 +42,12 @@ Display change password page
 					<div class="alert alert-danger alert-dismissable">
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
-						<p>${error}</p>
+						<c:if test="${showErrors}">
+							<p><encode:forHtmlContent value="${error}"/></p>
+						</c:if>
 					</div>
 				</c:if>
-				
+
 				<div class="form-group">
 					<label class="col-md-4 control-label" for="newPassword1">
 						<spring:message code="password.label.newPassword"/>

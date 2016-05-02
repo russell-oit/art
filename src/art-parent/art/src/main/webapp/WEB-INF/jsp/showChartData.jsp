@@ -18,7 +18,7 @@
 					<c:forEach var="dynaProperties" items="${row.dynaClass.dynaProperties}">
 						<c:set var="columnName" value="${dynaProperties.name}"/>
 						<td class="chartDataHeader">
-							${columnName}
+							${encode:forHtmlContent(columnName)}
 						</td>
 					</c:forEach>
 				</tr>
@@ -28,7 +28,7 @@
 					<c:set var="columnName" value="${dynaProperties.name}"/>
 					<c:set var="columnValue" value="${row.get(columnName)}"/>
 					<td class="chartData">
-						${columnValue}
+						${encode:forHtmlContent(columnValue)}
 					</td>
 				</c:forEach>
 			</tr>

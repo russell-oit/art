@@ -13,6 +13,6 @@ Display report parameter that uses text input
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <input type='text' class="form-control"
-	   name="${reportParam.htmlElementName}"
-	   value="${reportParam.htmlValue}">
+	   name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+	   value="${encode:forHtmlAttribute(reportParam.htmlValue)}">
 

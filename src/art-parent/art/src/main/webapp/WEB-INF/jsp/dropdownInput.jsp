@@ -14,8 +14,8 @@ Display report parameter that uses dropdown input
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <select class="form-control"
-		name="${reportParam.htmlElementName}"
-		id="${reportParam.htmlElementName}"
+		name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+		id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		${reportParam.parameter.parameterType == 'MultiValue' ? "multiple size='5'" : ""}>
 	
 	<c:if test="${reportParam.chainedParent}">

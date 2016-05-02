@@ -12,6 +12,7 @@
 <%@taglib uri="http://www.tonbeller.com/jpivot" prefix="jp" %>
 <%@taglib uri="http://www.tonbeller.com/wcf" prefix="wcf" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <!DOCTYPE html>
 <html>
@@ -61,7 +62,7 @@
 
 	<table class="pivot centerTable" style="margin: 0 auto; width: 50%">
 		<tr> <td class="title">
-				<b> <br /> ${title} </b> <br /> <br />
+				<b> <br /> ${encode:forHtmlContent(title)} </b> <br /> <br />
 			</td> </tr>
 
 		<tr><td>

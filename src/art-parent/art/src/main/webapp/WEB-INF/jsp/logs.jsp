@@ -158,7 +158,7 @@ Display application logs
 										<c:if test="${throwable != null}">
 											<c:set var="commonFrames" value="${throwable.commonFrames}" />
 											<c:if test="${commonFrames gt 0}">
-												<br> Caused by: 
+												<br> <spring:message code="logs.text.causedBy"/>: 
 											</c:if>
 											${throwable.className}: <encode:forHtmlContent value="${throwable.message}"/>
 											<c:set var="traceArray" value="${throwable.stackTraceElementProxyArray}" />
@@ -166,11 +166,11 @@ Display application logs
 												<br>&nbsp;&nbsp;&nbsp;&nbsp; ${traceArray[loop.index]}
 											</c:forEach>
 											<c:if test="${commonFrames gt 0}">
-												<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} common frames omitted 
+												<br>&nbsp;&nbsp;&nbsp;&nbsp; ... ${commonFrames} <spring:message code="logs.text.commonFramesOmitted"/> 
 											</c:if>
 										</c:if>
 										<c:if test="${loop.last && throwable != null}">
-											More causes not listed...
+											<spring:message code="logs.text.moreCausesNotListed"/>...
 										</c:if>
 										<c:set var="throwable" value="${throwable.cause}" />
 									</c:forEach>

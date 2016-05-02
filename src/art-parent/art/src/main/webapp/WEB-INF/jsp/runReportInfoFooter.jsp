@@ -11,7 +11,6 @@ e.g number of records retrieved and time taken to run the report
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
-<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div class="reportBanner">
 	<spring:message code="reports.text.rowsRetrieved"/>: ${rowsRetrieved} <br>

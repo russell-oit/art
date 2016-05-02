@@ -8,6 +8,7 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div align="center">
 	<table style="width: 90%; border: 0;">
@@ -15,7 +16,7 @@
 			<td>
 				<div align="center" style="width: 90%;" class="greyBack">
 					<c:forEach var="parameterDisplayValue" items="${parameterDisplayValues}">
-						${parameterDisplayValue.value}
+						${encode:forHtmlContent(parameterDisplayValue.value)}
 						<br>
 					</c:forEach>
 				</div>

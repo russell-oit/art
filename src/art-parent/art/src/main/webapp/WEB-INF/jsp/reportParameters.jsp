@@ -17,8 +17,8 @@
 
 	<c:if test="${!reportParam.parameter.hidden}">
 		<div class="form-group">
-			<label class="control-label ${labelColClass}" for="${reportParam.htmlElementName}">
-				${reportParam.parameter.label}
+			<label class="control-label ${labelColClass}" for="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
+				${encode:forHtmlContent(reportParam.parameter.label)}
 			</label>
 			<div class="${inputColClass}">
 				<div class="input-group">

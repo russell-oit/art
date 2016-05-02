@@ -92,7 +92,7 @@ Display rule values
 					<tr data-name="${encode:forHtmlAttribute(userRuleValue.user.username)} -
 						${encode:forHtmlAttribute(userRuleValue.rule.name)} -
 						${encode:forHtmlAttribute(userRuleValue.ruleValue)}"
-						data-id="userRuleValue~${userRuleValue.ruleValueKey}">
+						data-id="userRuleValue~${encode:forHtmlAttribute(userRuleValue.ruleValueKey)}">
 
 						<td><encode:forHtmlContent value="${userRuleValue.user.username}"/></td>
 						<td></td>
@@ -118,7 +118,7 @@ Display rule values
 					<tr data-name="${encode:forHtmlAttribute(userGroupRuleValue.userGroup.name)} -
 						${encode:forHtmlAttribute(userGroupRuleValue.rule.name)} - 
 						${encode:forHtmlAttribute(userGroupRuleValue.ruleValue)}"
-						data-id="userGroupRuleValue~${userGroupRuleValue.ruleValueKey}">
+						data-id="userGroupRuleValue~${encode:forHtmlAttribute(userGroupRuleValue.ruleValueKey)}">
 
 						<td></td>
 						<td><encode:forHtmlContent value="${userGroupRuleValue.userGroup.name}"/></td>

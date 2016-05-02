@@ -159,7 +159,7 @@ Display report parameters and initiate running of report
 			<div class="col-md-6 col-md-offset-3">
 				<div class="panel panel-success">
 					<div class="panel-body text-center">
-						${report.name}
+						${encode:forHtmlContent(report.name)}
 					</div>
 				</div>
 			</div>

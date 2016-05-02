@@ -33,7 +33,7 @@ Page to allow manual clearing of caches
 
 				var tbl = $('#caches');
 
-				var oTable = tbl.dataTable({
+				tbl.dataTable({
 					orderClasses: false,
 					pagingType: "full_numbers",
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],

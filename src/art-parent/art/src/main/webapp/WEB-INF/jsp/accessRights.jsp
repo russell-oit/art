@@ -51,8 +51,6 @@ Display access rights
 						undefined, //cannotDeleteRecordText
 						undefined //linkedRecordsExistText
 						);
-
-
 			});
 		</script>
 	</jsp:attribute>

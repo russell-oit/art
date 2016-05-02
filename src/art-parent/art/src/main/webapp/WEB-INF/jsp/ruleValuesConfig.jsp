@@ -192,7 +192,7 @@ Configure rule value
 					<div class="col-md-9">
 						<select name="rule" id="rule" class="form-control selectpicker">
 							<c:forEach var="rule" items="${rules}">
-								<option value="${rule.ruleId}-${rule.name}">
+								<option value="${rule.ruleId}-${encode:forHtmlAttribute(rule.name)}">
 									<encode:forHtmlContent value="${rule.name}"/>
 								</option>
 							</c:forEach>
