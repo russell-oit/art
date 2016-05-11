@@ -94,6 +94,7 @@ public class JobService {
 			job.setMailBcc(rs.getString("MAIL_BCC"));
 			job.setMailSubject(rs.getString("SUBJECT"));
 			job.setMailMessage(rs.getString("MESSAGE"));
+			job.setCachedDatasourceId(rs.getInt("CACHED_DATASOURCE_ID"));
 			job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
 			job.setStartDate(rs.getTimestamp("START_DATE"));
 			job.setEndDate(rs.getTimestamp("END_DATE"));
@@ -440,12 +441,12 @@ public class JobService {
 					+ " (JOB_ID, JOB_NAME, QUERY_ID, USER_ID, USERNAME,"
 					+ " OUTPUT_FORMAT, JOB_TYPE, JOB_MINUTE, JOB_HOUR, JOB_DAY,"
 					+ " JOB_WEEKDAY, JOB_MONTH, MAIL_TOS, MAIL_FROM, MAIL_CC,"
-					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_TABLE_NAME,"
+					+ " MAIL_BCC, SUBJECT, MESSAGE, CACHED_DATASOURCE_ID, CACHED_TABLE_NAME,"
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 31) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 32) + ")";
 
 			Object[] values = {
 				job.getJobId(),
@@ -466,6 +467,7 @@ public class JobService {
 				job.getMailBcc(),
 				job.getMailSubject(),
 				job.getMailMessage(),
+				job.getCachedDatasourceId(),
 				job.getCachedTableName(),
 				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
 				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
@@ -487,8 +489,8 @@ public class JobService {
 					+ " USER_ID=?, USERNAME=?, OUTPUT_FORMAT=?, JOB_TYPE=?,"
 					+ " JOB_MINUTE=?, JOB_HOUR=?, JOB_DAY=?, JOB_WEEKDAY=?,"
 					+ " JOB_MONTH=?, MAIL_TOS=?, MAIL_FROM=?, MAIL_CC=?, MAIL_BCC=?,"
-					+ " SUBJECT=?, MESSAGE=?, CACHED_TABLE_NAME=?, START_DATE=?,"
-					+ " END_DATE=?, NEXT_RUN_DATE=?,"
+					+ " SUBJECT=?, MESSAGE=?, CACHED_DATASOURCE_ID=?, CACHED_TABLE_NAME=?,"
+					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
 					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?, "
@@ -513,6 +515,7 @@ public class JobService {
 				job.getMailBcc(),
 				job.getMailSubject(),
 				job.getMailMessage(),
+				job.getCachedDatasourceId(),
 				job.getCachedTableName(),
 				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
 				DatabaseUtils.toSqlTimestamp(job.getEndDate()),

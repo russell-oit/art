@@ -1,5 +1,6 @@
 package art.job;
 
+import art.datasource.DatasourceService;
 import art.enums.JobType;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
@@ -79,7 +80,7 @@ public class JobController {
 	private MessageSource messageSource;
 
 	@Autowired
-	private UserService userService;
+	private DatasourceService datasourceService;
 
 	@Autowired
 	private JobParameterService jobParameterService;
@@ -423,6 +424,7 @@ public class JobController {
 		try {
 			model.addAttribute("dynamicRecipientReports", reportService.getDynamicRecipientReports());
 			model.addAttribute("schedules", scheduleService.getAllSchedules());
+			model.addAttribute("datasources", datasourceService.getAllDatasources());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

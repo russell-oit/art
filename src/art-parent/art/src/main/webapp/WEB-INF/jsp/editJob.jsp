@@ -213,6 +213,13 @@
 			function toggleVisibleFields() {
 				var jobType = $('#jobType option:selected').val();
 
+				toggleEmailFieldsVisibility(jobType);
+				toggleCachedFieldsVisibility(jobType);
+				toggleRunsToArchiveVisibility(jobType)
+				toggleOutputFormatVisibility(jobType);
+			}
+
+			function toggleEmailFieldsVisibility(jobType) {
 				//show/hide emailFields
 				switch (jobType) {
 					case 'CacheAppend':
@@ -223,23 +230,32 @@
 					default:
 						$("#emailFields").show();
 				}
-
-				//show/hide cachedTableNameDiv
-				toggleCachedTableNameVisibility(jobType);
-
 			}
 
-			function toggleCachedTableNameVisibility(jobType) {
-				//show/hide cachedTableNameDiv
+			function toggleCachedFieldsVisibility(jobType) {
+				//show/hide cachedFields
 				switch (jobType) {
 					case 'CacheAppend':
 					case 'CacheInsert':
-						$("#cachedTableNameDiv").show();
+						$("#cachedFields").show();
 						break;
 					default:
-						$("#cachedTableNameDiv").hide();
+						$("#cachedFields").hide();
 				}
+			}
 
+			function toggleOutputFormatVisibility(jobType) {
+				//show/hide outputFormatDiv
+				switch (jobType) {
+					case 'Alert':
+					case 'JustRun':
+					case 'CacheAppend':
+					case 'CacheInsert':
+						$("#outputFormatDiv").hide();
+						break;
+					default:
+						$("#outputFormatDiv").show();
+				}
 			}
 
 			function toggleRunsToArchiveVisibility(jobType) {
@@ -252,7 +268,6 @@
 					default:
 						$("#runsToArchiveDiv").hide();
 				}
-
 			}
 		</script>
 	</jsp:attribute>
@@ -334,7 +349,7 @@
 							<form:errors path="jobType" cssClass="error"/>
 						</div>
 					</div>
-					<div class="form-group">
+					<div id="outputFormatDiv" class="form-group">
 						<label class="col-md-4 control-label " for="outputFormat">
 							<spring:message code="jobs.label.outputFormat"/>
 						</label>
@@ -345,15 +360,38 @@
 							<form:errors path="outputFormat" cssClass="error"/>
 						</div>
 					</div>
-					<div id="cachedTableNameDiv" class="form-group">
-						<label class="col-md-4 control-label " for="cachedTableName">
-							<spring:message code="jobs.label.cachedTableName"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="cachedTableName" maxlength="200" class="form-control"/>
-							<form:errors path="cachedTableName" cssClass="error"/>
+					<fieldset id="cachedFields">
+						<div id="datasourceDiv" class="form-group">
+							<label class="col-md-4 control-label " for="cachedDatasourceId">
+								<spring:message code="jobs.label.cachedDatasource"/>
+							</label>
+							<div class="col-md-8">
+								<form:select path="cachedDatasourceId" class="form-control selectpicker">
+									<form:option value="0"><spring:message code="select.text.none"/></form:option>
+										<option data-divider="true"></option>
+									<c:forEach var="datasource" items="${datasources}">
+										<c:set var="datasourceStatus">
+											<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
+										</c:set>
+										<form:option value="${datasource.datasourceId}"
+													 data-content="${datasource.name} ${datasourceStatus}">
+											${datasource.name} 
+										</form:option>
+									</c:forEach>
+								</form:select>
+								<form:errors path="cachedDatasourceId" cssClass="error"/>
+							</div>
 						</div>
-					</div>
+						<div class="form-group">
+							<label class="col-md-4 control-label " for="cachedTableName">
+								<spring:message code="jobs.label.cachedTableName"/>
+							</label>
+							<div class="col-md-8">
+								<form:input path="cachedTableName" maxlength="30" class="form-control"/>
+								<form:errors path="cachedTableName" cssClass="error"/>
+							</div>
+						</div>
+					</fieldset>
 					<div class="form-group">
 						<label class="control-label col-md-4" for="active">
 							<spring:message code="page.label.active"/>

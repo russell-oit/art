@@ -279,7 +279,7 @@ Display user jobs and jobs configuration
 								<br>
 							</c:if>
 							<c:if test="${not empty job.lastRunDetails}">
-								${encode:forHtmlContent(job.lastRunDetails)}
+								${job.lastRunDetails}
 							</c:if>
 						</td>
 						<td data-sort="${job.nextRunDate.time}">

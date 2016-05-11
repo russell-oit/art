@@ -58,6 +58,21 @@ public class Job implements Serializable {
 	private String lastRunMessage;
 	private String lastEndDateString;
 	private String nextRunDateString;
+	private int cachedDatasourceId;
+
+	/**
+	 * @return the cachedDatasourceId
+	 */
+	public int getCachedDatasourceId() {
+		return cachedDatasourceId;
+	}
+
+	/**
+	 * @param cachedDatasourceId the cachedDatasourceId to set
+	 */
+	public void setCachedDatasourceId(int cachedDatasourceId) {
+		this.cachedDatasourceId = cachedDatasourceId;
+	}
 
 	/**
 	 * @return the lastEndDateString

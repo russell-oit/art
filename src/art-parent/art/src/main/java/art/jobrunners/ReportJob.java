@@ -610,9 +610,9 @@ public class ReportJob implements org.quartz.Job {
 			} else {
 				resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 			}
-			
+
 			reportRunner.execute(resultSetType);
-			
+
 			userEmail = StringUtils.trim(userEmail);
 
 			String message = job.getMailMessage();
@@ -845,7 +845,7 @@ public class ReportJob implements org.quartz.Job {
 					if (writer != null) {
 						writer.close();
 					}
-					
+
 					if (fos != null) {
 						fos.close();
 					}
@@ -956,30 +956,32 @@ public class ReportJob implements org.quartz.Job {
 				}
 
 			} else if (jobType.isCache()) {
-				// Cache the result in the cache database
-				int targetDatabaseId = Integer.parseInt(outputFormat);
-
-				String cachedTableName = job.getCachedTableName();
-
 				Connection cacheDatabaseConnection = null;
 				ResultSet rs = null;
 				try {
+					int targetDatabaseId = job.getCachedDatasourceId();
 					cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
 					rs = reportRunner.getResultSet();
+
 					CachedResult cr = new CachedResult();
 					cr.setTargetConnection(cacheDatabaseConnection);
 					cr.setResultSet(rs);
+
+					String cachedTableName = job.getCachedTableName();
 					if (cachedTableName == null || cachedTableName.length() == 0) {
 						cachedTableName = queryName + "_J" + jobId;
 					}
 					cr.setCachedTableName(cachedTableName);
+
 					if (jobType == JobType.CacheAppend) {
 						// 1 = append 2 = drop/insert (3 = update (not implemented))
 						cr.setCacheMode(1);
 					} else if (jobType == JobType.CacheInsert) {
 						cr.setCacheMode(2);
 					}
+
 					cr.cacheIt();
+
 					runDetails = "Table Name (rows inserted):  <code>"
 							+ cr.getCachedTableName() + "</code> (" + cr.getRowsCount() + ")"
 							+ "<br />Columns Names:<br /><code>"
@@ -988,7 +990,8 @@ public class ReportJob implements org.quartz.Job {
 					DatabaseUtils.close(rs, cacheDatabaseConnection);
 				}
 
-			} else { // jobType 4:just run it.
+			} else if (jobType == JobType.JustRun) {
+				// do nothing
 				// This is used Used to start batch jobs at db level via calls to stored procs
 				// or just to run update statements.
 			}

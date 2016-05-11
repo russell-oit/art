@@ -246,6 +246,7 @@ public class UpgradeHelper {
 					addParameters();
 					addUserRuleValueKeys();
 					addUserGroupRuleValueKeys();
+					addCachedDatasourceIds();
 
 					logger.info("Done performing 3.0 upgrade steps");
 				}
@@ -643,6 +644,36 @@ public class UpgradeHelper {
 						+ " WHERE USER_GROUP_ID=? AND RULE_NAME=? AND RULE_VALUE=?"
 						+ " AND RULE_TYPE='EXACT'";
 				dbService.update(sql, ArtUtils.getUniqueId(), userGroupId, ruleName, ruleValue);
+			}
+		}
+	}
+	
+	/**
+	 * Populate cached_datasource_id column. Column added in 3.0
+	 */
+	private void addCachedDatasourceIds() throws SQLException {
+		logger.debug("Entering addCachedDatasourceIds");
+
+		String sql;
+
+		sql = "SELECT OUTPUT_FORMAT, JOB_ID"
+				+ " FROM ART_JOBS"
+				+ " WHERE CACHED_DATASOURCE_ID IS NULL AND JOB_TYPE IN('CacheInsert','CacheAppend')";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> records = dbService.query(sql, h2);
+
+		logger.debug("records.isEmpty()={}", records.isEmpty());
+		if (!records.isEmpty()) {
+			logger.info("Adding cached datasource ids");
+
+			for (Map<String, Object> record : records) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer jobId = (Integer) record.get("JOB_ID");
+				String cachedDatasourceIdString = (String) record.get("OUTPUT_FORMAT");
+				Integer cachedDatasourceId=Integer.valueOf(cachedDatasourceIdString);
+				sql = "UPDATE ART_JOBS SET CACHED_DATASOURCE_ID=?"
+						+ " WHERE JOB_ID=?";
+				dbService.update(sql, cachedDatasourceId, jobId);
 			}
 		}
 	}
