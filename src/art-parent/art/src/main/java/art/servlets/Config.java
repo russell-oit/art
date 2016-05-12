@@ -339,9 +339,7 @@ public class Config extends HttpServlet {
 			File artDatabaseFile = new File(artDatabaseFilePath);
 			if (artDatabaseFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
-				artDatabase
-						= mapper.readValue(artDatabaseFile, ArtDatabase.class
-						);
+				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
 				//decrypt password field
 				artDatabase.setPassword(AesEncryptor.decrypt(artDatabase.getPassword()));

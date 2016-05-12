@@ -54,7 +54,6 @@ public class DbConnections {
 	 * Create connections to all report databases. Connections are pooled
 	 *
 	 * @param artDbConfig
-	 * @throws NamingException
 	 * @throws SQLException
 	 */
 	public static void createConnectionPools(ArtDatabase artDbConfig) throws SQLException {

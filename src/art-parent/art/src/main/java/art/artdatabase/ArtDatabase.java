@@ -17,7 +17,7 @@ public class ArtDatabase extends DatasourceInfo implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private int maxPoolConnections; //setting used by art database and all report datasources
 	private ConnectionPoolLibrary connectionPoolLibrary; //setting used by art database and all report datasources
-	public static final int ART_DATABASE_DATASOURCE_ID = 0; //"datasource id" for the art database in the connection pool map
+	public static final int ART_DATABASE_DATASOURCE_ID = -1; //"datasource id" for the art database in the connection pool map
 	private static final String ART_DATABASE_DATASOURCE_NAME = "ART Database"; //"datasource name" for the art database in the connection pool map
 
 	@Override
