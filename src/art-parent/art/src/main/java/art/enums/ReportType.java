@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for report types
+ * Represents report types
  *
  * @author Timothy Anyona
  */
@@ -45,23 +45,11 @@ public enum ReportType {
 	}
 
 	/**
-	 * Determine if this report type uses sql queries
+	 * Returns <code>true</code> if this is a lov dynamic or lov static report
+	 * type
 	 *
-	 * @return
-	 */
-	public boolean usesSql() {
-		if (this == Dashboard || this == Text || isOlap()
-				|| this == LovStatic) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	/**
-	 * Determine if this is an lov report type
-	 *
-	 * @return
+	 * @return <code>true</code> if this is a lov dynamic or lov static report
+	 * type
 	 */
 	public boolean isLov() {
 		switch (this) {
@@ -74,22 +62,28 @@ public enum ReportType {
 	}
 
 	/**
-	 * Determine if this is a jasper reports type
+	 * Returns <code>true</code> if this is a jasper reports art or jasper
+	 * reports template report type
 	 *
-	 * @return
+	 * @return <code>true</code> if this is a jasper reports art or jasper
+	 * reports template report type
 	 */
 	public boolean isJasperReports() {
-		if (this == JasperReportsArt || this == JasperReportsTemplate) {
-			return true;
-		} else {
-			return false;
+		switch (this) {
+			case JasperReportsArt:
+			case JasperReportsTemplate:
+				return true;
+			default:
+				return false;
 		}
 	}
 
 	/**
-	 * Determine if this is a jxls report type
+	 * Returns <code>true</code> if this is a jxls art or jxls template report
+	 * type
 	 *
-	 * @return
+	 * @return <code>true</code> if this is a jxls art or jxls template report
+	 * type
 	 */
 	public boolean isJxls() {
 		switch (this) {
@@ -102,9 +96,11 @@ public enum ReportType {
 	}
 
 	/**
-	 * Returns true if this is an olap report type
+	 * Returns <code>true</code> if this is a mondrian, mondrian xmla or sql
+	 * server xmla report type
 	 *
-	 * @return
+	 * @return <code>true</code> if this is a mondrian, mondrian xmla or sql
+	 * server xmla report type
 	 */
 	public boolean isOlap() {
 		switch (this) {
@@ -118,22 +114,26 @@ public enum ReportType {
 	}
 
 	/**
-	 * Determine if this is a crosstab type
+	 * Returns <code>true</code> if this is a crosstab or crosstab html report
+	 * type
 	 *
-	 * @return
+	 * @return <code>true</code> if this is a crosstab or crosstab html report
+	 * type
 	 */
 	public boolean isCrosstab() {
-		if (this == Crosstab || this == CrosstabHtml) {
-			return true;
-		} else {
-			return false;
+		switch (this) {
+			case Crosstab:
+			case CrosstabHtml:
+				return true;
+			default:
+				return false;
 		}
 	}
 
 	/**
-	 * Determine if this is a chart report
+	 * Returns <code>true</code> if this is a chart report type
 	 *
-	 * @return
+	 * @return <code>true</code> if this is a chart report type
 	 */
 	public boolean isChart() {
 		if (value < 0) {
@@ -144,9 +144,11 @@ public enum ReportType {
 	}
 
 	/**
-	 * Determine if this is a direct output report
+	 * Returns <code>true</code> if this is a tabular, crosstab, lov, job
+	 * recipients report type
 	 *
-	 * @return
+	 * @return <code>true</code> if this is a tabular, crosstab, lov, job
+	 * recipients report type
 	 */
 	public boolean isStandardOutput() {
 		switch (this) {
@@ -164,18 +166,18 @@ public enum ReportType {
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public int getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<ReportType> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -185,22 +187,22 @@ public enum ReportType {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, Tabular is returned
+	 * Converts a value to an enum. If the conversion fails, Tabular is returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ReportType toEnum(int value) {
 		return toEnum(value, Tabular);
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, the specified
+	 * Converts a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ReportType toEnum(int value, ReportType defaultEnum) {
 		for (ReportType v : values()) {
@@ -213,10 +215,9 @@ public enum ReportType {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return this enum option's description
 	 */
 	public String getDescription() {
 		switch (this) {
@@ -294,5 +295,4 @@ public enum ReportType {
 				return this.name();
 		}
 	}
-
 }

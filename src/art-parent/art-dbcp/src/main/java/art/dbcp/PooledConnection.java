@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of art-dbcp.
  *

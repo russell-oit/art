@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -37,13 +37,13 @@ public class DatabaseUtils {
 	private static final Logger logger = LoggerFactory.getLogger(DatabaseUtils.class);
 
 	/**
-	 * Close resultset
+	 * Closes a resultset
 	 *
-	 * @param rs
+	 * @param rs the resultset to close
 	 */
 	public static void close(ResultSet rs) {
 		logger.debug("Entering close resultset");
-		
+
 		if (rs != null) {
 			try {
 				rs.close();
@@ -54,13 +54,13 @@ public class DatabaseUtils {
 	}
 
 	/**
-	 * Close statement
+	 * Closes a statement
 	 *
-	 * @param st
+	 * @param st the statement to close
 	 */
 	public static void close(Statement st) {
 		logger.debug("Entering close statement");
-		
+
 		if (st != null) {
 			try {
 				st.close();
@@ -71,13 +71,13 @@ public class DatabaseUtils {
 	}
 
 	/**
-	 * Close connection
+	 * Closes a connection
 	 *
-	 * @param conn
+	 * @param conn the connection to close
 	 */
 	public static void close(Connection conn) {
 		logger.debug("Entering close connection");
-		
+
 		if (conn != null) {
 			try {
 				conn.close();
@@ -88,11 +88,11 @@ public class DatabaseUtils {
 	}
 
 	/**
-	 * Close resultset, statement and connection
+	 * Closes a resultset, statement and connection
 	 *
-	 * @param rs
-	 * @param st
-	 * @param conn
+	 * @param rs the resultset to close
+	 * @param st the statement to close
+	 * @param conn the connection to close
 	 */
 	public static void close(ResultSet rs, Statement st, Connection conn) {
 		close(rs);
@@ -101,37 +101,37 @@ public class DatabaseUtils {
 	}
 
 	/**
-	 * Close statement and connection
+	 * Closes a statement and connection
 	 *
-	 * @param st
-	 * @param conn
+	 * @param st the statement to close
+	 * @param conn the connection to close
 	 */
 	public static void close(Statement st, Connection conn) {
 		close(null, st, conn);
 	}
 
 	/**
-	 * Close resultset and connection
+	 * Closes a resultset and connection
 	 *
-	 * @param rs
-	 * @param conn
+	 * @param rs the resultset to close
+	 * @param conn the connection to close
 	 */
 	public static void close(ResultSet rs, Connection conn) {
 		close(rs, null, conn);
 	}
 
 	/**
-	 * Close resultset and statement
+	 * Closes a resultset and statement
 	 *
-	 * @param rs
-	 * @param st
+	 * @param rs the resultset to close
+	 * @param st the statement to close
 	 */
 	public static void close(ResultSet rs, Statement st) {
 		close(rs, st, null);
 	}
 
 	/**
-	 * Set the given parameter values in the given PreparedStatement.
+	 * Sets the given parameter values in the given PreparedStatement.
 	 *
 	 * @param ps The PreparedStatement to set the given parameter values in.
 	 * @param values The parameter values to be set in the created
@@ -149,10 +149,10 @@ public class DatabaseUtils {
 	}
 
 	/**
-	 * Converts the given java.util.Date to java.sql.Date
+	 * Converts the given java.util.Date to a java.sql.Date
 	 *
-	 * @param date The java.util.Date to be converted to java.sql.Date.
-	 * @return The converted java.sql.Date.
+	 * @param date The java.util.Date to be converted, may be null
+	 * @return The converted java.sql.Date. null if date passed was null
 	 */
 	public static java.sql.Date toSqlDate(java.util.Date date) {
 		if (date == null) {
@@ -163,10 +163,10 @@ public class DatabaseUtils {
 	}
 
 	/**
-	 * Converts the given java.util.Date to java.sql.Timestamp
+	 * Converts the given java.util.Date to a java.sql.Timestamp
 	 *
-	 * @param date The java.util.Date to be converted to java.sql.Date.
-	 * @return The converted java.sql.Timestamp
+	 * @param date The java.util.Date to be converted, may be null
+	 * @return The converted java.sql.Timestamp. null if date passed was null
 	 */
 	public static java.sql.Timestamp toSqlTimestamp(java.util.Date date) {
 		if (date == null) {
@@ -179,25 +179,25 @@ public class DatabaseUtils {
 	/**
 	 * Gets the current time as a java.sql.Timestamp
 	 *
-	 * @return
+	 * @return the current time as a java.sql.Timestamp
 	 */
 	public static java.sql.Timestamp getCurrentTimeAsSqlTimestamp() {
 		return new java.sql.Timestamp(System.currentTimeMillis());
 	}
 
 	/**
-	 * Execute an sql statement that returns a resultset
+	 * Executes an sql statement that returns a resultset
 	 *
-	 * @param conn
-	 * @param ps
-	 * @param sql
-	 * @param values
-	 * @return
+	 * @param conn the connection to use, not null
+	 * @param ps the preparedstatement to use
+	 * @param sql the sql to execute
+	 * @param values the parameters to be used in the sql statement
+	 * @return the resultset generated after executing the sql
 	 * @throws SQLException
 	 * @throws NullPointerException if conn is null
 	 */
 	public static ResultSet query(Connection conn, PreparedStatement ps, String sql, Object... values) throws SQLException {
-		Objects.requireNonNull(conn, "Connection must not be null");
+		Objects.requireNonNull(conn, "conn must not be null");
 
 		ps = conn.prepareStatement(sql);
 		setValues(ps, values);
@@ -206,7 +206,7 @@ public class DatabaseUtils {
 	}
 
 	/**
-	 * Execute an sql statement that doesn't return a resultset
+	 * Executes an sql statement that doesn't return a resultset
 	 *
 	 * @param conn
 	 * @param ps
@@ -225,11 +225,14 @@ public class DatabaseUtils {
 //		return ps.executeUpdate();
 //	}
 	/**
-	 * 
-	 * @param rs
-	 * @param columnName
-	 * @return
-	 * @throws SQLException 
+	 * Returns <code>true</code> if the given resultset contains a column with
+	 * the given name
+	 *
+	 * @param rs the resultset to use
+	 * @param columnName the column name to look for
+	 * @return <code>true</code> if the given resultset contains a column with
+	 * the given name
+	 * @throws SQLException
 	 */
 	public static boolean ResultSetHasColumn(ResultSet rs, String columnName) throws SQLException {
 		//https://stackoverflow.com/questions/3599861/how-can-i-determine-if-the-column-name-exist-in-the-resultset

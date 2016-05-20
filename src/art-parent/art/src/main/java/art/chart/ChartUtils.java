@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -25,11 +25,18 @@ import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 
 /**
+ * Provides methods for preparing for chart generation including preparing the
+ * theme
  *
  * @author Timothy Anyona
  */
 public class ChartUtils {
 
+	/**
+	 * Prepare the theme to be used by charts
+	 * 
+	 * @param pdfFontName the custom font to be used in charts, or null/blank
+	 */
 	public static void prepareTheme(String pdfFontName) {
 		//reset jfreechat theme to the default theme ("jfree"). jasper reports sets it to the legacy theme and this affects the speedometer chart
 		//use legacy theme to ensure you have white plot backgrounds. this was changed in jfreechart 1.0.11 to default to grey
@@ -58,7 +65,7 @@ public class ChartUtils {
 			chartTheme.setLargeFont(largeFont);
 			chartTheme.setRegularFont(regularFont);
 		}
-		
+
 		ChartFactory.setChartTheme(chartTheme);
 	}
 }

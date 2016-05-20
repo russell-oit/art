@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -14,16 +14,13 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-/*
- * Grid html output mode
- */
 package art.output;
 
 import art.servlets.Config;
 import java.util.Date;
 
 /**
- * Grid html output mode
+ * Generates Grid html output mode
  *
  * @author Enrico Liboni
  */

@@ -5,32 +5,33 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for ldap connection encryption methods
+ * Represents ldap connection encryption methods
  *
  * @author Timothy Anyona
  */
 public enum LdapConnectionEncryptionMethod {
 
 	None("None"), SSL("SSL"), StartTLS("StartTLS");
-	private String value;
+	
+	private final String value;
 
 	private LdapConnectionEncryptionMethod(String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<LdapConnectionEncryptionMethod> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -40,10 +41,10 @@ public enum LdapConnectionEncryptionMethod {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, None is returned
+	 * Converts a value to an enum. If the conversion fails, None is returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static LdapConnectionEncryptionMethod toEnum(String value) {
 		return toEnum(value, None);
@@ -53,9 +54,9 @@ public enum LdapConnectionEncryptionMethod {
 	 * Convert a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static LdapConnectionEncryptionMethod toEnum(String value, LdapConnectionEncryptionMethod defaultEnum) {
 		for (LdapConnectionEncryptionMethod v : values()) {
@@ -67,10 +68,9 @@ public enum LdapConnectionEncryptionMethod {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return this enum option's description
 	 */
 	public String getDescription() {
 		return value;

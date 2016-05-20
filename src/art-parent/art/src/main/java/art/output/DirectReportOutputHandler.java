@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -25,8 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate report output by scrolling the resultset and feeding the
- * ReportOutputInterface object
+ * Generates group reports
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -35,20 +34,20 @@ public class DirectReportOutputHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(DirectReportOutputHandler.class);
 
-		/**
-	 * Generate a group report
+	/**
+	 * Generates a group report
 	 *
-	 * @param out
-	 * @param rs needs to be a scrollable resultset
-	 * @param splitCol
+	 * @param out the writer to output to
+	 * @param rs the resultse to use. Needs to be a scrollable.
+	 * @param splitCol the group column
 	 * @return number of rows output
 	 * @throws SQLException
 	 */
 	public static int generateGroupReport(PrintWriter out, ResultSet rs, int splitCol) throws SQLException {
-		logger.debug("Entering generateGroupReport");
-		
+		logger.debug("Entering generateGroupReport: splitCol={}", splitCol);
+
 		ResultSetMetaData rsmd = rs.getMetaData();
-		
+
 		int colCount = rsmd.getColumnCount();
 		int i;
 		int counter = 0;
@@ -89,7 +88,7 @@ public class DirectReportOutputHandler {
 
 		while (rs.next() && counter < maxRows) {
 			// Separators
-			out.println("<br><hr style=\"width:90%;height:1px\"><br>");
+			o.separator();
 
 			// Output Main Header and Main Data
 			o.header(90);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate xls output
+ * Generates xls output
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -56,7 +56,7 @@ public class XlsOutput extends StandardOutput {
 	private HSSFFont bodyFont;
 	private int currentRow;
 	private int cellNumber;
-	private ZipType zipType;
+	private final ZipType zipType;
 
 	public XlsOutput() {
 		zipType = ZipType.None;
@@ -66,11 +66,8 @@ public class XlsOutput extends StandardOutput {
 		this.zipType = zipType;
 	}
 
-	/**
-	 * Initialise objects required to generate output
-	 */
+	@Override
 	public void init() {
-
 		try {
 			fout = new FileOutputStream(fullOutputFilename);
 
@@ -135,9 +132,9 @@ public class XlsOutput extends StandardOutput {
 			addCellString(paramDisplayValues);
 		}
 	}
-	
+
 	@Override
-	public void beginHeader(){
+	public void beginHeader() {
 		newRow();
 		newRow();
 	}
@@ -167,9 +164,7 @@ public class XlsOutput extends StandardOutput {
 	public void addCellNumeric(Double value) {
 		cell = row.createCell(cellNumber++);
 
-		if (value == null) {
-			return;
-		} else {
+		if (value != null) {
 			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
 			cell.setCellValue(value);
 			cell.setCellStyle(bodyStyle);
@@ -180,9 +175,7 @@ public class XlsOutput extends StandardOutput {
 	public void addCellDate(Date value) {
 		cell = row.createCell(cellNumber++);
 
-		if (value == null) {
-			return;
-		} else {
+		if (value != null) {
 			cell.setCellValue(Config.getDateDisplayString(value));
 			cell.setCellStyle(dateStyle);
 		}
@@ -190,7 +183,6 @@ public class XlsOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		//open new row
 		row = sheet.createRow(currentRow++);
 		cellNumber = 0;
 	}

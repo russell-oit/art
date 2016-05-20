@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class that represents a connection pool
+ * Represents a connection pool
  *
  * @author Timothy Anyona
  */
@@ -79,7 +79,7 @@ public abstract class ConnectionPool {
 
 	public void close() {
 		logger.debug("Entering close");
-		
+
 		closePool();
 		pool = null;
 	}
@@ -129,23 +129,22 @@ public abstract class ConnectionPool {
 	}
 
 	/**
-	 * Get application name connection property to identify ART connections
+	 * Returns application name connection property to identify ART connections
+	 * in profiling tools
 	 *
-	 * @param dbUrl
-	 * @param poolName
-	 *
-	 * @param pool
+	 * @param dbUrl the jdbc url for the database
+	 * @param poolName the datasource name
+	 * @return the application name connection property
 	 */
 	protected Properties getAppNameProperty(String dbUrl, String poolName) {
 		logger.debug("Entering getAppNameProperty: dbUrl='{}', poolName='{}'", dbUrl, poolName);
-		
+
 		//ApplicationName property
 		//see http://docs.oracle.com/javase/7/docs/api/java/sql/Connection.html#setClientInfo%28java.lang.String,%20java.lang.String%29
 		//has different name and maxlength for different drivers
 		//maxlength mostly in the 254 range. Some exceptions include postgresql maxlength=64
 		//some drivers don't seem to define it explicitly so may not support it and throw exception?
 		//e.g. mysql, hsqldb
-
 		Properties properties = new Properties();
 
 		String connectionName = "ART - " + poolName;
@@ -169,5 +168,4 @@ public abstract class ConnectionPool {
 
 		return properties;
 	}
-
 }

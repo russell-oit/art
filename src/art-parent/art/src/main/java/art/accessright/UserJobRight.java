@@ -22,11 +22,12 @@ import art.user.User;
 import java.io.Serializable;
 
 /**
+ * Represents a user-job right
  *
  * @author Timothy Anyona
  */
 public class UserJobRight implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private User user;
 	private Job job;
@@ -58,5 +59,5 @@ public class UserJobRight implements Serializable {
 	public void setJob(Job job) {
 		this.job = job;
 	}
-	
+
 }

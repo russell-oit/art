@@ -21,7 +21,8 @@ import art.enums.ParameterType;
 import java.io.Serializable;
 
 /**
- *
+ * Represents a job parameter
+ * 
  * @author Timothy Anyona
  */
 public class JobParameter implements Serializable {

@@ -20,7 +20,8 @@ package art.dashboard;
 import java.io.Serializable;
 
 /**
- *
+ * Represents a portlet that is contained within a dashboard
+ * 
  * @author Timothy Anyona
  */
 public class Portlet implements Serializable {
@@ -116,5 +117,4 @@ public class Portlet implements Serializable {
 	public void setRefreshPeriod(String refreshPeriod) {
 		this.refreshPeriod = refreshPeriod;
 	}
-	
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -146,12 +146,11 @@ public class LoggerController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
+	 * @param action the action to take
+	 * @param model the model
+	 * @return the jsp file to display
 	 */
 	private String showEditLogger(String action, Model model) {
 		logger.debug("Entering showEditLogger: action='{}'", action);
@@ -161,5 +160,4 @@ public class LoggerController {
 		
 		return "editLogger";
 	}
-
 }

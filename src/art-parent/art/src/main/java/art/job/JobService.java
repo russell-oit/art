@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.job;
 
 import art.connectionpool.DbConnections;
@@ -33,9 +50,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to jobs
+ * Provides methods for retrieving, adding, updating and deleting jobs
  *
- * @author Timothy
+ * @author Timothy Anyona
  */
 @Service
 public class JobService {
@@ -62,7 +79,7 @@ public class JobService {
 	private final String SQL_SELECT_ALL = "SELECT AJ.* FROM ART_JOBS AJ";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class JobMapper extends BasicRowProcessor {
 
@@ -126,9 +143,9 @@ public class JobService {
 	}
 
 	/**
-	 * Get all jobs
+	 * Returns all jobs
 	 *
-	 * @return list of all jobs, empty list otherwise
+	 * @return all jobs
 	 * @throws SQLException
 	 */
 	@Cacheable("jobs")
@@ -140,10 +157,10 @@ public class JobService {
 	}
 
 	/**
-	 * Get a job
+	 * Returns a job with the given id
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the job id
+	 * @return job if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("jobs")
@@ -154,24 +171,24 @@ public class JobService {
 	}
 
 	/**
-	 * Get a job. Data always retrieved from the database and not the cache
+	 * Returns a job. Data always retrieved from the database and not the cache
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the job id
+	 * @return job if found, null otherwise
 	 * @throws SQLException
 	 */
 	public Job getFreshJob(int id) throws SQLException {
 		logger.debug("Entering getFreshJob: id={}", id);
 
-		String sql = SQL_SELECT_ALL + " WHERE JOB_ID = ? ";
+		String sql = SQL_SELECT_ALL + " WHERE JOB_ID = ?";
 		ResultSetHandler<Job> h = new BeanHandler<>(Job.class, new JobMapper());
 		return dbService.query(sql, h, id);
 	}
 
 	/**
-	 * Delete a job
+	 * Deletes a job
 	 *
-	 * @param id
+	 * @param id the job id
 	 * @throws SQLException
 	 * @throws org.quartz.SchedulerException
 	 */
@@ -235,9 +252,9 @@ public class JobService {
 	}
 
 	/**
-	 * Delete a job
+	 * Deletes multiple jobs
 	 *
-	 * @param ids
+	 * @param ids the job ids to delete
 	 * @throws SQLException
 	 * @throws org.quartz.SchedulerException
 	 */
@@ -251,9 +268,10 @@ public class JobService {
 	}
 
 	/**
-	 * Add a new job to the database
+	 * Adds a new job to the database
 	 *
-	 * @param job
+	 * @param job the new job
+	 * @param actionUser the user who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -285,9 +303,10 @@ public class JobService {
 	}
 
 	/**
-	 * Update an existing job
+	 * Updates an existing job
 	 *
-	 * @param job
+	 * @param job the updated job
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
@@ -300,10 +319,10 @@ public class JobService {
 	}
 
 	/**
-	 * Update an existing user record
+	 * Updates multiple jobs
 	 *
-	 * @param multipleJobEdit
-	 * @param actionUser
+	 * @param multipleJobEdit the multiple job edit details
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
@@ -330,11 +349,11 @@ public class JobService {
 	}
 
 	/**
-	 * Get all the jobs a user has access to. Both the jobs the user owns and
-	 * jobs shared with him
+	 * Returns all the jobs a user has access to - both the jobs the user owns
+	 * and jobs shared with him.
 	 *
-	 * @param userId
-	 * @return all the jobs a user has access to
+	 * @param userId the user id
+	 * @return all the jobs the user has access to
 	 * @throws java.sql.SQLException
 	 */
 	@Cacheable("jobs")
@@ -350,10 +369,10 @@ public class JobService {
 	}
 
 	/**
-	 * Get the jobs a user owns
+	 * Returns the jobs a user owns
 	 *
-	 * @param userId
-	 * @return list of jobs that the user owns, empty list if none
+	 * @param userId the user id
+	 * @return all the jobs that the user owns
 	 * @throws java.sql.SQLException
 	 */
 	public List<Job> getOwnedJobs(int userId) throws SQLException {
@@ -365,10 +384,10 @@ public class JobService {
 	}
 
 	/**
-	 * Get the shared jobs a user has access to
+	 * Returns the shared jobs a user has access to
 	 *
-	 * @param userId
-	 * @return the shared jobs a user has access to
+	 * @param userId the user id
+	 * @return all the shared jobs the user has access to
 	 * @throws java.sql.SQLException
 	 */
 	public List<SharedJob> getSharedJobs(int userId) throws SQLException {
@@ -398,7 +417,7 @@ public class JobService {
 	}
 
 	/**
-	 * Get jobs that have not been migrated to the quartz scheduling system
+	 * Returns jobs that have not been migrated to the quartz scheduling system
 	 *
 	 * @return jobs that have not been migrated to the quartz scheduling system
 	 * @throws java.sql.SQLException
@@ -411,6 +430,14 @@ public class JobService {
 		return dbService.query(sql, h);
 	}
 
+	/**
+	 * Saves a job
+	 * 
+	 * @param job the job to save
+	 * @param newRecord whether this is a new job
+	 * @param actionUser the user who is performing the action
+	 * @throws SQLException 
+	 */
 	private void saveJob(Job job, boolean newRecord, User actionUser) throws SQLException {
 		logger.debug("Entering saveJob: job={}, newRecord={}, actionUser={}", job, newRecord, actionUser);
 
@@ -542,5 +569,4 @@ public class JobService {
 					affectedRows, newRecord, job);
 		}
 	}
-
 }

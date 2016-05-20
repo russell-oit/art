@@ -64,7 +64,7 @@ public class ReportGroupService {
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERY_GROUPS";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class ReportGroupMapper extends BasicRowProcessor {
 

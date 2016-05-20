@@ -1,13 +1,19 @@
 /*
- * Copyright (C)   Enrico Liboni  - enrico@computer.org
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the LGPL License as published by
- *   the Free Software Foundation;
+ * This file is part of ART.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. *  
+ * ART is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.chart;
 
@@ -22,6 +28,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Objects;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
@@ -31,32 +38,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Save a chart to a pdf file
+ * Provides methods to save a jfree chart to a pdf file
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
 public class PdfChart {
 
-	final static Logger logger = LoggerFactory.getLogger(PdfChart.class);
-
-	public static void createPdf(Object chartObject, String filename, String title) {
-		createPdf(chartObject, filename, title, null, null);
-	}
-
-	public static void createPdf(Object chartObject, String filename, String title, RowSetDynaClass graphData) {
-		createPdf(chartObject, filename, title, graphData, null);
-	}
+	private static final Logger logger = LoggerFactory.getLogger(PdfChart.class);
 
 	/**
-	 * Save chart to pdf
+	 * Saves the chart to a pdf file
 	 *
-	 * @param chart chart object
-	 * @param filename full file name to use to save the chart
-	 * @param title chart title
+	 * @param chart the chart object
+	 * @param filename the full file path to use
+	 * @param title the chart title, or null, or blank
+	 * @param data the data to be displayed with the chart image, or null
+	 * @param reportParamsList the report parameters to be displayed, or null or
+	 * empty
 	 */
-	public static void createPdf(Object chartObject, String filename, String title,
-			RowSetDynaClass graphData, java.util.List<ReportParameter> reportParamsList) {
+	public static void createPdf(JFreeChart chart, String filename, String title,
+			RowSetDynaClass data, java.util.List<ReportParameter> reportParamsList) {
+
+		logger.debug("Entering createPdf: filename='{}', title='{}'", filename, title);
+		
+		Objects.requireNonNull(chart, "chart must not be null");
+		Objects.requireNonNull(filename, "filename must not be null");
 
 		Rectangle pageSize;
 		PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();
@@ -93,7 +100,7 @@ public class PdfChart {
 //			document.setFooter(footer);
 			document.open();
 
-			//set fonts to be used, incase custom font is defined
+			//set fonts to be used, in case custom font is defined
 			FontSelector fsBody = new FontSelector();
 			FontSelector fsHeading = new FontSelector();
 			PdfOutput pdfo = new PdfOutput();
@@ -103,7 +110,6 @@ public class PdfChart {
 			pdfo.outputSelectedParameters(document, fsBody, reportParamsList);
 
 			//create chart in pdf						
-			JFreeChart chart = (JFreeChart) chartObject;
 			DefaultFontMapper mapper = new DefaultFontMapper();
 
 			//enable use of custom font so as to display non-ascii characters			
@@ -147,13 +153,13 @@ public class PdfChart {
 			chartImage.setAlignment(Image.ALIGN_CENTER);
 			document.add(chartImage);
 
-			//display chart data below graph if so required
-			if (graphData != null) {
+			//display chart data below chart if so required
+			if (data != null) {
 				Paragraph p = new Paragraph(fsBody.process("Data\n"));
 				p.setAlignment(Element.ALIGN_CENTER);
 				document.add(p);
 
-				java.util.List<DynaBean> rows = graphData.getRows();
+				java.util.List<DynaBean> rows = data.getRows();
 				DynaProperty[] dynaProperties = null;
 				String columnName;
 				String columnValue;
@@ -194,14 +200,14 @@ public class PdfChart {
 					}
 				}
 
-				//add graph data to document
+				//add chart data to document
 				document.add(new Paragraph(fsBody.process("\n")));
 				document.add(table);
 			}
 		} catch (FileNotFoundException | DocumentException ex) {
 			logger.error("Error", ex);
 		}
-		
+
 		document.close();
 	}
 }

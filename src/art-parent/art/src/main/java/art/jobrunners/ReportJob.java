@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -46,7 +46,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -61,6 +60,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
+import org.apache.commons.dbutils.ResultSetHandler;
+import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
@@ -74,7 +75,7 @@ import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
- * Class to run report jobs
+ * Runs report jobs
  *
  * @author Timothy Anyona
  */
@@ -145,23 +146,12 @@ public class ReportJob implements org.quartz.Job {
 			} else if (!job.getUser().isActive()) {
 				runMessage = "jobs.message.ownerDisabled";
 			} else {
-
-				Connection conn = null;
-
-				try {
-					conn = DbConnections.getArtDbConnection();
-
-					if (job.getRecipientsReportId() > 0) {
-						//job has dynamic recipients
-						runDynamicRecipientsJob(conn);
-					} else {
-						//job doesn't have dynamic recipients
-						runNormalJob(conn);
-					}
-				} catch (SQLException ex) {
-					logger.error("Error", ex);
-				} finally {
-					DatabaseUtils.close(conn);
+				if (job.getRecipientsReportId() > 0) {
+					//job has dynamic recipients
+					runDynamicRecipientsJob();
+				} else {
+					//job doesn't have dynamic recipients
+					runNormalJob();
 				}
 			}
 
@@ -171,7 +161,16 @@ public class ReportJob implements org.quartz.Job {
 		}
 	}
 
+	/**
+	 * Sends an email
+	 *
+	 * @param mailer the mailer to use
+	 * @throws MessagingException
+	 * @throws IOException
+	 */
 	private void sendEmail(Mailer mailer) throws MessagingException, IOException {
+		logger.debug("Entering sendEmail");
+
 		if (Config.isEmailServerConfigured()) {
 			mailer.send();
 		} else {
@@ -180,13 +179,14 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Prepare mailer object for sending alert job. Used for normal jobs, and
-	 * dynamic recipient jobs
+	 * Prepares a mailer object for sending an alert job
 	 *
-	 * @param mailer
-	 * @param msg
+	 * @param mailer the mailer to use
+	 * @param msg the message of the email
 	 */
 	private void prepareAlertJob(Mailer mailer, String msg) {
+		logger.debug("Entering prepareAlertJob");
+
 		String from = job.getMailFrom();
 
 		String subject = job.getMailSubject();
@@ -215,13 +215,16 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Prepare mailer object for sending email job. Used for normal jobs, and
-	 * dynamic recipient jobs
+	 * Prepares a mailer object for sending an email job
 	 *
-	 * @param mailer
+	 * @param mailer the mailer to use
+	 * @param msg the message of the email
+	 * @param outputFileName the full path of a file to include with the email
 	 */
 	private void prepareEmailJob(Mailer mailer, String msg, String outputFileName)
 			throws FileNotFoundException, IOException {
+
+		logger.debug("Entering prepareEmailJob: outputFileName='{}'", outputFileName);
 
 		String from = job.getMailFrom();
 
@@ -271,7 +274,14 @@ public class ReportJob implements org.quartz.Job {
 		mailer.setMessage(finalMessage);
 	}
 
+	/**
+	 * Returns a spring template engine
+	 *
+	 * @return a spring template engine
+	 */
 	private SpringTemplateEngine getTemplateEngine() {
+		logger.debug("Entering getTemplateEngine");
+
 		//http://blog.zenika.com/2013/01/18/introducing-the-thymeleaf-template-engine/
 		ClassLoaderTemplateResolver emailResolver = new ClassLoaderTemplateResolver();
 		emailResolver.setPrefix("mail/");
@@ -285,7 +295,16 @@ public class ReportJob implements org.quartz.Job {
 		return engine;
 	}
 
+	/**
+	 * Performs database updates required before the job is run. This includes
+	 * updating the last start date and next run date columns.
+	 *
+	 * @param nextRunDate the next run date for the job
+	 * @throws SQLException
+	 */
 	private void beforeExecution(Date nextRunDate) throws SQLException {
+		logger.debug("Entering beforeExecution: nextRunDate={}", nextRunDate);
+
 		//update last start date and next run date on art jobs table
 		String sql = "UPDATE ART_JOBS SET LAST_START_DATE = ?,"
 				+ " LAST_FILE_NAME='', LAST_RUN_MESSAGE='', LAST_RUN_DETAILS='',"
@@ -300,7 +319,15 @@ public class ReportJob implements org.quartz.Job {
 		dbService.update(sql, values);
 	}
 
+	/**
+	 * Performs database updates required after the job completes. This includes
+	 * updating the last end date and last run details columns.
+	 *
+	 * @throws SQLException
+	 */
 	private void afterCompletion() throws SQLException {
+		logger.debug("Entering afterCompletion");
+
 		//update job details
 		String sql = "UPDATE ART_JOBS SET LAST_END_DATE = ?, LAST_FILE_NAME = ?,"
 				+ " LAST_RUN_MESSAGE=?, LAST_RUN_DETAILS=? WHERE JOB_ID = ?";
@@ -316,7 +343,13 @@ public class ReportJob implements org.quartz.Job {
 		dbService.update(sql, values);
 	}
 
-	private void runDynamicRecipientsJob(Connection conn) {
+	/**
+	 * Runs a dynamic recipients job
+	 *
+	 */
+	private void runDynamicRecipientsJob() {
+		logger.debug("Entering runDynamicRecipientsJob");
+
 		String tos = job.getMailTo();
 		String username = job.getUser().getUsername();
 		int recipientsReportId = job.getRecipientsReportId();
@@ -347,7 +380,7 @@ public class ReportJob implements org.quartz.Job {
 
 				if (emailsList.size() > 0) {
 					String emails = StringUtils.join(emailsList, ";");
-					runNormalJob(conn, emails);
+					runNormalJob(emails);
 				}
 			} else if (columnCount > 1) {
 				//personalization fields present
@@ -386,14 +419,14 @@ public class ReportJob implements org.quartz.Job {
 							//run job for this recipient
 							boolean splitJob = true;
 							boolean recipientFilterPresent = true;
-							runJob(conn, splitJob, username, tos, recipient, recipientFilterPresent);
+							runJob(splitJob, username, tos, recipient, recipientFilterPresent);
 						}
 					}
 
 					//run normal job in case tos, cc etc configured
 					if (StringUtils.length(tos) > 4 || StringUtils.length(cc) > 4
 							|| StringUtils.length(bcc) > 4) {
-						runNormalJob(conn);
+						runNormalJob();
 					}
 				} else {
 					//separate emails, different email message, same report data
@@ -420,7 +453,7 @@ public class ReportJob implements org.quartz.Job {
 
 					//run job for all recipients
 					boolean splitJob = true;
-					runJob(conn, splitJob, username, tos, recipients);
+					runJob(splitJob, username, tos, recipients);
 				}
 			}
 		} catch (SQLException ex) {
@@ -434,15 +467,29 @@ public class ReportJob implements org.quartz.Job {
 		}
 	}
 
-	private void runNormalJob(Connection conn) {
-		runNormalJob(conn, null);
+	/**
+	 * Runs a normal job (not a dynamic recipients job)
+	 *
+	 * @param conn a connection to the art database
+	 */
+	private void runNormalJob() {
+		logger.debug("Entering runNormalJob");
+		runNormalJob(null);
 	}
 
-	private void runNormalJob(Connection conn, String dynamicRecipientEmails) {
+	/**
+	 * Runs a normal job (not a dynamic recipients job)
+	 *
+	 * @param conn a connection the the art database
+	 * @param dynamicRecipientEmails a list of dynamic recipient emails, each
+	 * separated by ;
+	 */
+	private void runNormalJob(String dynamicRecipientEmails) {
+		logger.debug("Entering runNormalJob: dynamicRecipientEmails='{}'", dynamicRecipientEmails);
+
 		//run job. if job isn't shared, generate single output
 		//if job is shared and doesn't use rules, generate single output to be used by all users
 		//if job is shared and uses rules, generate multiple, individualized output for each shared user
-
 		try {
 			int userCount = 0; //number of shared users
 			String ownerFileName = null; //for shared jobs, ensure the jobs table has the job owner's file
@@ -456,32 +503,29 @@ public class ReportJob implements org.quartz.Job {
 					//generate individualized output for all shared users
 
 					//update art_user_jobs table with users who have access through group membership. so that users newly added to a group can get their own output
-					addSharedJobUsers(conn);
+					addSharedJobUsers();
 
 					//get users to generate output for
-					String usersSQL = "SELECT AUJ.USERNAME, AU.EMAIL"
+					String usersSql = "SELECT AUJ.USERNAME, AU.EMAIL"
 							+ " FROM ART_USER_JOBS AUJ"
 							+ " INNER JOIN ART_USERS AU ON"
 							+ " AUJ.USERNAME = AU.USERNAME"
 							+ " WHERE AUJ.JOB_ID = ? AND AU.ACTIVE=1";
 
-					PreparedStatement ps = null;
-					ResultSet rs = null;
-					try {
-						ps = conn.prepareStatement(usersSQL);
-						ps.setInt(1, jobId);
+					ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+					List<Map<String, Object>> records = dbService.query(usersSql, h, jobId);
 
-						rs = ps.executeQuery();
-						while (rs.next()) {
-							userCount += 1;
-							runJob(conn, splitJob, rs.getString("USERNAME"), rs.getString("EMAIL"));
-							//ensure that the job owner's output version is saved in the jobs table
-							if (username.equals(rs.getString("USERNAME"))) {
-								ownerFileName = fileName;
-							}
+					for (Map<String, Object> record : records) {
+						userCount += 1;
+						//map list handler uses a case insensitive map, so case of column names doesn't matter
+						String user = (String) record.get("USERNAME");
+						String email = (String) record.get("EMAIL");
+
+						runJob(splitJob, user, email);
+						//ensure that the job owner's output version is saved in the jobs table
+						if (username.equals(user)) {
+							ownerFileName = fileName;
 						}
-					} finally {
-						DatabaseUtils.close(rs, ps);
 					}
 
 					if (userCount == 0) {
@@ -490,7 +534,7 @@ public class ReportJob implements org.quartz.Job {
 						if (dynamicRecipientEmails != null) {
 							emails = emails + ";" + dynamicRecipientEmails;
 						}
-						runJob(conn, splitJob, username, emails);
+						runJob(splitJob, username, emails);
 					}
 				} else {
 					//generate one single output to be used by all users
@@ -498,7 +542,7 @@ public class ReportJob implements org.quartz.Job {
 					if (dynamicRecipientEmails != null) {
 						emails = emails + ";" + dynamicRecipientEmails;
 					}
-					runJob(conn, splitJob, username, emails);
+					runJob(splitJob, username, emails);
 				}
 			} else {
 				//job isn't shared. generate one file for the job owner
@@ -506,7 +550,7 @@ public class ReportJob implements org.quartz.Job {
 				if (dynamicRecipientEmails != null) {
 					emails = emails + ";" + dynamicRecipientEmails;
 				}
-				runJob(conn, splitJob, username, emails);
+				runJob(splitJob, username, emails);
 			}
 
 			//ensure jobs table always has job owner's file, or a note if no output was produced for the job owner
@@ -521,55 +565,93 @@ public class ReportJob implements org.quartz.Job {
 		}
 	}
 
-	public void addSharedJobUsers(Connection conn) throws SQLException {
+	/**
+	 * Adds records to the art_user_jobs table so that the users can have access
+	 * to the job
+	 *
+	 * @throws SQLException
+	 */
+	public void addSharedJobUsers() throws SQLException {
+		logger.debug("Entering addSharedJobUsers");
+
 		String sql;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 
-		try {
-			//get users who should have access to the job through group membership but don't already have it
-			sql = "SELECT AU.USERNAME, AUGA.USER_GROUP_ID "
-					+ " FROM ART_USERS AU, ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUP_JOBS AUGJ "
-					+ " WHERE AU.USERNAME = AUGA.USERNAME AND AUGA.USER_GROUP_ID = AUGJ.USER_GROUP_ID "
-					+ " AND AUGJ.JOB_ID = ? "
-					+ " AND NOT EXISTS "
-					+ " (SELECT * FROM ART_USER_JOBS AUJ "
-					+ " WHERE AUJ.USERNAME = AU.USERNAME AND AUJ.JOB_ID = ?)";
+		//get users who should have access to the job through group membership but don't already have it
+		sql = "SELECT AU.USERNAME, AUGA.USER_GROUP_ID"
+				+ " FROM ART_USERS AU, ART_USER_GROUP_ASSIGNMENT AUGA, ART_USER_GROUP_JOBS AUGJ"
+				+ " WHERE AU.USERNAME = AUGA.USERNAME AND AUGA.USER_GROUP_ID = AUGJ.USER_GROUP_ID"
+				+ " AND AUGJ.JOB_ID = ?"
+				+ " AND NOT EXISTS"
+				+ " (SELECT * FROM ART_USER_JOBS AUJ"
+				+ " WHERE AUJ.USERNAME = AU.USERNAME AND AUJ.JOB_ID = ?)";
 
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, jobId);
-			ps.setInt(2, jobId);
-			rs = ps.executeQuery();
+		ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+		List<Map<String, Object>> records = dbService.query(sql, h, jobId, jobId);
 
-			sql = "INSERT INTO ART_USER_JOBS (JOB_ID, USERNAME, USER_GROUP_ID) VALUES (?,?,?)";
+		sql = "INSERT INTO ART_USER_JOBS (JOB_ID, USERNAME, USER_GROUP_ID) VALUES (?,?,?)";
 
-			while (rs.next()) {
-				//insert records into the art_user_jobs table so that the users can have access to the job
-				Object[] values = {
-					jobId,
-					rs.getString("USERNAME"),
-					rs.getString("USER_GROUP_ID")
-				};
+		for (Map<String, Object> record : records) {
+			//map list handler uses a case insensitive map, so case of column names doesn't matter
+			String username = (String) record.get("USERNAME");
+			Integer userGroupId = (Integer) record.get("USER_GROUP_ID");
 
-				dbService.update(sql, values);
-			}
-		} finally {
-			DatabaseUtils.close(rs, ps);
+			//insert records into the art_user_jobs table so that the users can have access to the job
+			Object[] values = {
+				jobId,
+				username,
+				userGroupId
+			};
+
+			dbService.update(sql, values);
 		}
 	}
 
-	private void runJob(Connection conn, boolean splitJob, String user, String userEmail) throws SQLException {
-		runJob(conn, splitJob, user, userEmail, null, false);
+	/**
+	 * Runs a job
+	 *
+	 * @param splitJob whether this is a split job
+	 * @param user the username under which the job is run
+	 * @param userEmail the email address to include in the to section of the
+	 * email
+	 * @throws SQLException
+	 */
+	private void runJob(boolean splitJob, String user, String userEmail) throws SQLException {
+		runJob(splitJob, user, userEmail, null, false);
 	}
 
-	private void runJob(Connection conn, boolean splitJob, String user, String userEmail,
+	/**
+	 * Runs a job
+	 *
+	 * @param splitJob whether this is a split job
+	 * @param user the username under which the job is run
+	 * @param userEmail the email address to include in the to section of the
+	 * email
+	 * @param recipientDetails dynamic recipient details
+	 * @throws SQLException
+	 */
+	private void runJob(boolean splitJob, String user, String userEmail,
 			Map<String, Map<String, String>> recipientDetails) throws SQLException {
-		runJob(conn, splitJob, user, userEmail, recipientDetails, false);
+
+		runJob(splitJob, user, userEmail, recipientDetails, false);
 	}
 
-	//run job
-	private void runJob(Connection conn, boolean splitJob, String user, String userEmail,
+	/**
+	 * Runs a job
+	 *
+	 * @param splitJob whether this is a split job
+	 * @param user the username under which the job is run
+	 * @param userEmail the email address to include in the to section of the
+	 * email
+	 * @param recipientDetails dynamic recipient details
+	 * @param recipientFilterPresent whether the recipient filter is present
+	 * @throws SQLException
+	 */
+	private void runJob(boolean splitJob, String user, String userEmail,
 			Map<String, Map<String, String>> recipientDetails, boolean recipientFilterPresent) throws SQLException {
+
+		logger.debug("Entering runJob: splitJob={}, user='{}', userEmail='{}', recipientFilterPresent={}",
+				splitJob, user, userEmail, recipientFilterPresent);
+
 		//set job start date. relevant for split jobs
 		jobStartDate = new Timestamp(System.currentTimeMillis());
 
@@ -616,7 +698,6 @@ public class ReportJob implements org.quartz.Job {
 			userEmail = StringUtils.trim(userEmail);
 
 			String message = job.getMailMessage();
-			String outputFormat = job.getOutputFormat();
 			String queryName = job.getReport().getName();
 
 			String tos = job.getMailTo();
@@ -1005,19 +1086,30 @@ public class ReportJob implements org.quartz.Job {
 				reportRunner.close();
 			}
 			// set audit timestamp and update archives
-			afterExecution(conn, splitJob, user);
+			afterExecution(splitJob, user);
 		}
 	}
 
+	/**
+	 * Prepares a report runner, including setting the user and report. The
+	 * report used will be that of the executing job
+	 *
+	 * @param user the username to set
+	 */
 	private ReportRunner prepareReportRunner(String user) throws SQLException {
+		logger.debug("Entering prepareReportRunner: user='{}'", user);
+
 		return prepareReportRunner(user, job.getReport());
 	}
 
 	/**
-	 * Prepares a job for its execution Loads additional info needed to execute
-	 * (immediately) the job (query id, datasource etc).
+	 * Prepares a report runner, including setting the user and report
+	 *
+	 * @param user the username to set
+	 * @param reportId the report id of the report to set
 	 */
 	private ReportRunner prepareReportRunner(String user, int reportId) throws SQLException {
+		logger.debug("Entering prepareReportRunner: user='{}', reportId={}", user, reportId);
 
 		ReportService reportService = new ReportService();
 		Report report = reportService.getReport(reportId);
@@ -1026,10 +1118,13 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Prepares a job for its execution Loads additional info needed to execute
-	 * (immediately) the job (query id, datasource etc).
+	 * Prepares a report runner, including setting the user and report
+	 *
+	 * @param user the username to set
+	 * @param report the report to set
 	 */
 	private ReportRunner prepareReportRunner(String user, Report report) throws SQLException {
+		logger.debug("Entering prepareReportRunner: user='{}', report={}", user, report);
 
 		ReportRunner reportRunner = new ReportRunner();
 		reportRunner.setUsername(user);
@@ -1039,7 +1134,17 @@ public class ReportJob implements org.quartz.Job {
 
 	}
 
+	/**
+	 * Builds parameters for a job
+	 *
+	 * @param reportId the report id
+	 * @param jId the job id
+	 * @return parameter processor result
+	 * @throws SQLException
+	 */
 	public ParameterProcessorResult buildParameters(int reportId, int jId) throws SQLException {
+		logger.debug("Entering buildParameters: reportId={}, jId={}", reportId, jId);
+
 		ParameterProcessorResult paramProcessorResult = null;
 
 		JobParameterService jobParameterService = new JobParameterService();
@@ -1085,8 +1190,15 @@ public class ReportJob implements org.quartz.Job {
 		return paramProcessorResult;
 	}
 
-	//create job audit record
+	/**
+	 * Creates a job audit record
+	 *
+	 * @param user the username of the user running the job
+	 * @throws SQLException
+	 */
 	private void createAuditRecord(String user) throws SQLException {
+		logger.debug("Entering createAuditRecord: user='{}'", user);
+
 		if (job.isEnableAudit()) {
 			//generate unique key for this job run
 			jobAuditKey = generateKey();
@@ -1107,11 +1219,26 @@ public class ReportJob implements org.quartz.Job {
 		}
 	}
 
+	/**
+	 * Generates a key that can be used as a primary key for audit or archive
+	 * records
+	 *
+	 * @return
+	 */
 	private String generateKey() {
+		logger.debug("Entering generateKey");
+
 		return ArtUtils.getUniqueId();
 	}
 
+	/**
+	 * Returns a mailer object that can be used to send emails
+	 *
+	 * @return a mailer object that can be used to send emails
+	 */
 	private Mailer getMailer() {
+		logger.debug("Entering getMailer");
+
 		String smtpServer = Config.getSettings().getSmtpServer();
 		String smtpUsername = Config.getSettings().getSmtpUsername();
 		String smtpPassword = Config.getSettings().getSmtpPassword();
@@ -1131,60 +1258,51 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Update ART_USER_JOBS table. If Audit Flag is set, a new row is added to
-	 * ART_JOBS_AUDIT table
+	 * Updates the ART_USER_JOBS table. If Audit Flag is set, a new row is added
+	 * to the ART_JOBS_AUDIT table
 	 */
-	private void afterExecution(Connection conn, boolean splitJob, String user) throws SQLException {
+	private void afterExecution(boolean splitJob, String user) throws SQLException {
+		logger.debug("Entering afterExecution: splitJob={}, user='{}'", splitJob, user);
+
 		String sql;
 
 		if (jobType == JobType.Publish || jobType == JobType.CondPublish) {
+			//for publish jobs, delete previous file and update job archives as necessary
+			sql = "SELECT LAST_FILE_NAME, LAST_START_DATE, LAST_END_DATE"
+					+ " FROM ART_JOBS"
+					+ " WHERE JOB_ID = ?";
 
-			PreparedStatement ps = null;
-			ResultSet rs = null;
+			ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+			List<Map<String, Object>> records = dbService.query(sql, h, jobId);
 
-			try {
-				//for publish jobs, delete previous file and update job archives as necessary
-				sql = "SELECT LAST_FILE_NAME, LAST_START_DATE, LAST_END_DATE"
-						+ " FROM ART_JOBS"
-						+ " WHERE JOB_ID = ?";
-				ps = conn.prepareStatement(sql);
-				ps.setInt(1, jobId);
-				rs = ps.executeQuery();
+			if (!records.isEmpty()) {
+				Map<String, Object> record = records.get(0);
+				String archiveFileName = (String) record.get("LAST_FILE_NAME");
+				Timestamp archiveStartDate = (Timestamp) record.get("LAST_START_DATE");
+				Timestamp archiveEndDate = (Timestamp) record.get("LAST_END_DATE");
 
-				String archiveFileName;
-				Timestamp archiveStartDate;
-				Timestamp archiveEndDate;
+				int runsToArchive = job.getRunsToArchive();
 
-				if (rs.next()) {
-					archiveFileName = rs.getString("LAST_FILE_NAME");
-					archiveStartDate = rs.getTimestamp("LAST_START_DATE");
-					archiveEndDate = rs.getTimestamp("LAST_END_DATE");
-
-					int runsToArchive = job.getRunsToArchive();
-
-					if (runsToArchive > 0 && archiveFileName != null) {
-						//update archives
-						updateArchives(splitJob, user, archiveFileName, archiveStartDate, archiveEndDate);
-					} else {
-						//if not archiving, delete previous file
-						if (archiveFileName != null && !archiveFileName.startsWith("-")) {
-							List<String> details = ArtUtils.getFileDetailsFromResult(archiveFileName);
-							archiveFileName = details.get(0);
-							String filePath = Config.getJobsExportPath() + archiveFileName;
-							File previousFile = new File(filePath);
-							if (previousFile.exists()) {
-								previousFile.delete();
-							}
-						}
-
-						//delete old archives if they exist
-						if (runsToArchive == 0) {
-							deleteArchives();
+				if (runsToArchive > 0 && archiveFileName != null) {
+					//update archives
+					updateArchives(splitJob, user, archiveFileName, archiveStartDate, archiveEndDate);
+				} else {
+					//if not archiving, delete previous file
+					if (archiveFileName != null && !archiveFileName.startsWith("-")) {
+						List<String> details = ArtUtils.getFileDetailsFromResult(archiveFileName);
+						archiveFileName = details.get(0);
+						String filePath = Config.getJobsExportPath() + archiveFileName;
+						File previousFile = new File(filePath);
+						if (previousFile.exists()) {
+							previousFile.delete();
 						}
 					}
+
+					//delete old archives if they exist
+					if (runsToArchive == 0) {
+						deleteArchives();
+					}
 				}
-			} finally {
-				DatabaseUtils.close(rs, ps);
 			}
 		}
 
@@ -1229,18 +1347,21 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Update job archives table
+	 * Updates the job archives table
+	 *
+	 * @param splitJob whether this is a split job
+	 * @param user the username of the archive record
+	 * @param archiveFileName the file name of the archive run
+	 * @param startDate the start date of the archive run
+	 * @param endDate the end date of the archive run
 	 */
 	private void updateArchives(boolean splitJob, String user, String archiveFileName,
-			Timestamp lastStartDate, Timestamp lastEndDate) {
+			Timestamp startDate, Timestamp endDate) {
 
-		Connection conn = null;
-		ResultSet rs = null;
-		PreparedStatement ps = null;
+		logger.debug("Entering updateArchives: splitJob={}, user='{}', archiveFileName='{}'",
+				splitJob, user, archiveFileName);
 
 		try {
-			conn = DbConnections.getArtDbConnection();
-
 			String sql;
 
 			boolean jobShared = false;
@@ -1271,8 +1392,8 @@ public class ReportJob implements org.quartz.Job {
 				jobId,
 				user,
 				archiveFileName,
-				lastStartDate,
-				lastEndDate,
+				startDate,
+				endDate,
 				jobSharedFlag
 			};
 
@@ -1286,18 +1407,16 @@ public class ReportJob implements org.quartz.Job {
 						+ " WHERE JOB_ID=? AND USERNAME=?"
 						+ " ORDER BY START_DATE DESC";
 
-				ps = conn.prepareStatement(sql);
-				ps.setInt(1, jobId);
-				ps.setString(2, user);
+				ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+				List<Map<String, Object>> records = dbService.query(sql, h, jobId, user);
 
-				rs = ps.executeQuery();
 				int count = 0;
-				while (rs.next()) {
+				for (Map<String, Object> record : records) {
 					count++;
 					if (count > runsToArchive) {
 						//delete archive file and database record
-						String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
-						String oldArchive = rs.getString("ARCHIVE_ID");
+						String oldFileName = (String) record.get("ARCHIVE_FILE_NAME");
+						String oldArchive = (String) record.get("ARCHIVE_ID");
 
 						//remember database record for deletion
 						oldRecords.add("'" + oldArchive + "'");
@@ -1320,17 +1439,16 @@ public class ReportJob implements org.quartz.Job {
 						+ " WHERE JOB_ID=?"
 						+ " ORDER BY START_DATE DESC";
 
-				ps = conn.prepareStatement(sql);
-				ps.setInt(1, jobId);
+				ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+				List<Map<String, Object>> records = dbService.query(sql, h, jobId);
 
-				rs = ps.executeQuery();
 				int count = 0;
-				while (rs.next()) {
+				for (Map<String, Object> record : records) {
 					count++;
 					if (count > runsToArchive) {
 						//delete archive file and database record
-						String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
-						String oldArchive = rs.getString("ARCHIVE_ID");
+						String oldFileName = (String) record.get("ARCHIVE_FILE_NAME");
+						String oldArchive = (String) record.get("ARCHIVE_ID");
 
 						//remember database record for deletion
 						oldRecords.add("'" + oldArchive + "'");
@@ -1357,39 +1475,31 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
-		} finally {
-			DatabaseUtils.close(rs, ps, conn);
 		}
 	}
 
 	/**
-	 * Delete all records from job archives table for this job id
+	 * Deletes all records from job archives table for this job
 	 */
 	private void deleteArchives() {
-		Connection conn = null;
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
+		logger.debug("Entering deleteArchives");
 
 		try {
-			conn = DbConnections.getArtDbConnection();
-
 			String sql;
 
 			List<String> oldRecords = new ArrayList<>();
 
-			sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME "
-					+ " FROM ART_JOB_ARCHIVES "
+			sql = "SELECT ARCHIVE_ID, ARCHIVE_FILE_NAME"
+					+ " FROM ART_JOB_ARCHIVES"
 					+ " WHERE JOB_ID=?";
 
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, jobId);
+			ResultSetHandler<List<Map<String, Object>>> h = new MapListHandler();
+			List<Map<String, Object>> records = dbService.query(sql, h, jobId);
 
-			rs = ps.executeQuery();
-			while (rs.next()) {
+			for (Map<String, Object> record : records) {
 				//delete archive file and database record
-				String oldFileName = rs.getString("ARCHIVE_FILE_NAME");
-				String oldArchive = rs.getString("ARCHIVE_ID");
+				String oldFileName = (String) record.get("ARCHIVE_FILE_NAME");
+				String oldArchive = (String) record.get("ARCHIVE_ID");
 
 				//remember database record for deletion
 				oldRecords.add("'" + oldArchive + "'");
@@ -1414,8 +1524,6 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
-		} finally {
-			DatabaseUtils.close(rs, ps, conn);
 		}
 	}
 }

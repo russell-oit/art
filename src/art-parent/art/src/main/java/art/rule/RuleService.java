@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -55,7 +55,7 @@ public class RuleService {
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_RULES";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class RuleMapper extends BasicRowProcessor {
 

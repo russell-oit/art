@@ -20,7 +20,8 @@ package art.datasource;
 import java.io.Serializable;
 
 /**
- *
+ * Represents a multiple datasource edit
+ * 
  * @author Timothy Anyona
  */
 public class MultipleDatasourceEdit implements Serializable {

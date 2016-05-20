@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for application authentication methods
+ * Represents application authentication methods
  *
  * @author Timothy Anyona
  */
@@ -16,25 +16,26 @@ public enum ArtAuthenticationMethod {
 	Database("Database"), LDAP("LDAP"),
 	//values used internally by ART
 	Repository("repository"), Custom("custom"), Public("public");
-	private String value;
+
+	private final String value;
 
 	private ArtAuthenticationMethod(String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<ArtAuthenticationMethod> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -44,22 +45,23 @@ public enum ArtAuthenticationMethod {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, Internal is returned
+	 * Converts a value to an enum. If the conversion fails, Internal is
+	 * returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ArtAuthenticationMethod toEnum(String value) {
 		return toEnum(value, Internal);
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, the specified
+	 * Converts a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ArtAuthenticationMethod toEnum(String value, ArtAuthenticationMethod defaultEnum) {
 		for (ArtAuthenticationMethod v : values()) {
@@ -71,10 +73,9 @@ public enum ArtAuthenticationMethod {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return enum option description
 	 */
 	public String getDescription() {
 		switch (this) {

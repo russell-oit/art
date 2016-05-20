@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with ART. If not, see <http://www.gnu.org/licenses/>.
  */
-
 package art.datasource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * Abstract representation of details common to report datasources and art database configuration
- * 
+ * Represents details common to report datasources and art database
+ * configuration
+ *
  * @author Timothy Anyona
  */
 public abstract class DatasourceInfo {
+
 	private int datasourceId;
 	private String name;
 	private String driver;

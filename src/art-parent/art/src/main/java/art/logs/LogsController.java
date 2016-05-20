@@ -40,6 +40,8 @@ public class LogsController {
 
 	@RequestMapping(value = "/app/logs", method = RequestMethod.GET)
 	public String showLogs(Model model) {
+		logger.debug("Entering showLogs");
+		
 		final String CYCLIC_BUFFER_APPENDER_NAME = "CYCLIC"; //name of cyclic appender in logback.xml
 
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -69,5 +71,4 @@ public class LogsController {
 
 		return "logs";
 	}
-
 }

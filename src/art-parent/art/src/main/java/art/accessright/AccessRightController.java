@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -107,7 +107,6 @@ public class AccessRightController {
 	@RequestMapping(value = "/app/deleteAccessRight", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteAccessRight(@RequestParam("id") String id) {
-
 		logger.debug("Entering deleteAccessRight: id='{}'", id);
 
 		AjaxResponse response = new AjaxResponse();

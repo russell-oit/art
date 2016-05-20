@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Class with methods related to drilldowns
+ * Provides methods for retrieveing, adding, updating and deleting drilldowns
  *
  * @author Timothy Anyona
  */
@@ -61,7 +61,7 @@ public class DrilldownService {
 			+ " ADQ.DRILLDOWN_QUERY_ID=AQ.QUERY_ID";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class DrilldownMapper extends BasicRowProcessor {
 
@@ -97,14 +97,14 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Get drilldowns for a given report
+	 * Returns drilldowns for a given report
 	 *
-	 * @param parentReportId
-	 * @return list of drilldowns for a given report, empty list otherwise
+	 * @param parentReportId the report id
+	 * @return drilldowns for the given report
 	 * @throws SQLException
 	 */
 	public List<Drilldown> getDrilldowns(int parentReportId) throws SQLException {
-		logger.debug("Entering getDrilldowns");
+		logger.debug("Entering getDrilldowns: parentReportId={}", parentReportId);
 
 		String sql = SQL_SELECT_ALL + " WHERE ADQ.QUERY_ID=?";
 		ResultSetHandler<List<Drilldown>> h = new BeanListHandler<>(Drilldown.class, new DrilldownMapper());
@@ -112,10 +112,10 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Get a drilldown
+	 * Returns a drilldown
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the drilldown id
+	 * @return drilldown if found, null otherwise
 	 * @throws SQLException
 	 */
 	public Drilldown getDrilldown(int id) throws SQLException {
@@ -127,9 +127,9 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Delete a drilldown
+	 * Deletes a drilldown
 	 *
-	 * @param id
+	 * @param id the drilldown id
 	 * @throws SQLException
 	 */
 	public void deleteDrilldown(int id) throws SQLException {
@@ -142,9 +142,9 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Delete a drilldown
+	 * Deletes multiple drilldowns
 	 *
-	 * @param ids
+	 * @param ids the ids of the drilldowns to delete
 	 * @throws SQLException
 	 */
 	public void deleteDrilldowns(Integer[] ids) throws SQLException {
@@ -158,11 +158,11 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Add a new drilldown to the database
+	 * Adds a new drilldown to the database
 	 *
-	 * @param drilldown
-	 * @param parentReportId
-	 * @return new record id
+	 * @param drilldown the drilldown to add
+	 * @param parentReportId the parent report id
+	 * @return new drilldown's id
 	 * @throws SQLException
 	 */
 	public synchronized int addDrilldown(Drilldown drilldown, int parentReportId) throws SQLException {
@@ -210,9 +210,9 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Update an existing drilldown
+	 * Updates an existing drilldown
 	 *
-	 * @param drilldown
+	 * @param drilldown the updated drilldown
 	 * @throws SQLException
 	 */
 	public void updateDrilldown(Drilldown drilldown) throws SQLException {
@@ -222,10 +222,10 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Save a drilldown
+	 * Saves a drilldown
 	 *
-	 * @param drilldown
-	 * @param newRecord
+	 * @param drilldown the drilldown to save
+	 * @param newRecord whether this is a new drilldown
 	 * @throws SQLException
 	 */
 	private void saveDrilldown(Drilldown drilldown, boolean newRecord) throws SQLException {
@@ -279,17 +279,21 @@ public class DrilldownService {
 	}
 
 	/**
-	 * Move a drilldown to a different position
+	 * Moves a drilldown to a different position
 	 *
-	 * @param id
-	 * @param fromPosition
-	 * @param toPosition
-	 * @param direction
-	 * @param parentReportId
+	 * @param id the drilldown id
+	 * @param fromPosition the current position
+	 * @param toPosition the new position
+	 * @param direction "forward" or "back"
+	 * @param parentReportId the drilldown's parent report id
 	 * @throws SQLException
 	 */
 	public void moveDrilldown(int id, int fromPosition, int toPosition, String direction,
 			int parentReportId) throws SQLException {
+
+		logger.debug("Entering moveDrilldown: id={}, fromPosition={}, toPosition={},"
+				+ " direction='{}', parentReportId={}", id, fromPosition, toPosition,
+				direction, parentReportId);
 
 		String sql;
 
@@ -323,8 +327,8 @@ public class DrilldownService {
 					+ " WHERE DRILLDOWN_QUERY_POSITION=0"
 					+ " AND QUERY_ID=?";
 			dbService.update(sql, finalPosition, parentReportId);
-		} else {
-			//"forward". toPosition > fromPosition
+		} else if (StringUtils.equals(direction, "forward")) {
+			//toPosition > fromPosition
 			int finalPosition = toPosition - 1;
 
 			sql = "UPDATE ART_DRILLDOWN_QUERIES"
@@ -381,5 +385,4 @@ public class DrilldownService {
 //				+ " WHERE DRILLDOWN_ID=?";
 //		dbService.update(sql, toPosition);
 	}
-
 }

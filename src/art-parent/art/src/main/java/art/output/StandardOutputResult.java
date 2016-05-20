@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -18,10 +18,12 @@
 package art.output;
 
 /**
+ * Represents the results of standard output generation
  *
  * @author Timothy Anyona
  */
 public class StandardOutputResult {
+
 	private String message;
 	private boolean success;
 	private int rowCount;
@@ -82,5 +84,5 @@ public class StandardOutputResult {
 	public void setRowCount(int rowCount) {
 		this.rowCount = rowCount;
 	}
-	
+
 }

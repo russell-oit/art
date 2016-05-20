@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -40,7 +40,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class with methods for datasources
+ * Provides methods for retrieving, adding, updating and deleting datasources
  *
  * @author Timothy Anyona
  */
@@ -63,9 +63,9 @@ public class DatasourceService {
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_DATABASES";
 
 	/**
-	 * Get all datasources
+	 * Returns all datasources
 	 *
-	 * @return list of all datasources, empty list otherwise
+	 * @return all datasources
 	 * @throws SQLException
 	 */
 	@Cacheable("datasources")
@@ -77,10 +77,10 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Get a datasource
+	 * Returns a datasource with the given id
 	 *
-	 * @param id
-	 * @return populated object if datasource found, null otherwise
+	 * @param id the datasource id
+	 * @return the datasource found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("datasources")
@@ -93,11 +93,12 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Delete a datasource
+	 * Deletes a datasource
 	 *
-	 * @param id
-	 * @return ActionResult. if not successful, data contains a list of linked
-	 * reports which prevented the datasource from being deleted
+	 * @param id the datasource id
+	 * @return ActionResult. if ActionResult.success is false, ActionResult.data
+	 * contains a list of linked reports which prevented the datasource from
+	 * being deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
@@ -123,16 +124,16 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Delete a datasource
+	 * Deletes multiple datasources
 	 *
-	 * @param ids
-	 * @return ActionResult. if not successful, data contains a list of linked
-	 * reports which prevented the datasource from being deleted
+	 * @param ids the ids of the datasources to delete
+	 * @return ActionResult. if ActionResult.success is false, ActionResult.data
+	 * contains a list of datasource ids that were not deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
 	public ActionResult deleteDatasources(Integer[] ids) throws SQLException {
-		logger.debug("Entering deleteDatasource: id={}", (Object) ids);
+		logger.debug("Entering deleteDatasource: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
 		List<Integer> nonDeletedRecords = new ArrayList<>();
@@ -153,10 +154,10 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Add a new datasource to the database
+	 * Adds a new datasource to the database
 	 *
-	 * @param datasource
-	 * @param actionUser
+	 * @param datasource the datasource to add
+	 * @param actionUser the user who is performing the add
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -184,14 +185,13 @@ public class DatasourceService {
 		saveDatasource(datasource, true, actionUser);
 
 		return newId;
-
 	}
 
 	/**
-	 * Update an existing datasource
+	 * Updates an existing datasource
 	 *
-	 * @param datasource
-	 * @param actionUser
+	 * @param datasource the updated datasource
+	 * @param actionUser the user who is performing the update
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
@@ -202,11 +202,11 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Save a datasource
+	 * Saves a datasource
 	 *
-	 * @param datasource
-	 * @param newRecord
-	 * @param actionUser
+	 * @param datasource the datasource to save
+	 * @param newRecord whether this is a new datasource
+	 * @param actionUser the user who is performing the save
 	 * @throws SQLException
 	 */
 	private void saveDatasource(Datasource datasource, boolean newRecord, User actionUser) throws SQLException {
@@ -271,10 +271,10 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Get reports that use a given datasource
+	 * Returns reports that use a given datasource
 	 *
-	 * @param datasourceId
-	 * @return list with linked report names, empty list otherwise
+	 * @param datasourceId the datasource id
+	 * @return linked report names
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int datasourceId) throws SQLException {
@@ -289,10 +289,10 @@ public class DatasourceService {
 	}
 
 	/**
-	 * Get datasources that an admin can use, according to his access level
+	 * Returns datasources that an admin can use, according to his access level
 	 *
-	 * @param user
-	 * @return list of available datasources, empty list otherwise
+	 * @param user the admin user
+	 * @return available datasources
 	 * @throws SQLException
 	 */
 	@Cacheable("datasources")
@@ -318,12 +318,12 @@ public class DatasourceService {
 			return dbService.query(sql, h, user.getUserId());
 		}
 	}
-	
+
 	/**
-	 * Update an existing user record
+	 * Updates multiple datasources
 	 *
-	 * @param multipleDatasourceEdit
-	 * @param actionUser
+	 * @param multipleDatasourceEdit the multiple datasource edit object
+	 * @param actionUser the user who is performing the edit
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
@@ -348,5 +348,4 @@ public class DatasourceService {
 			dbService.update(sql, valuesArray);
 		}
 	}
-
 }

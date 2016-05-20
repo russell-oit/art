@@ -23,7 +23,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- *
+ * Represents a job archive
+ * 
  * @author Timothy Anyona
  */
 public class Archive implements Serializable {

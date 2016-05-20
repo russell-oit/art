@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate tsv output
+ * Generates tsv output
  *
  * @author Enrico Liboni
  */
@@ -43,16 +43,13 @@ public class TsvOutput extends StandardOutput {
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
 	private GZIPOutputStream gzout;
-	private StringBuffer exportFileStrBuf;
+	private StringBuilder exportFileStrBuf;
 	private NumberFormat nfPlain;
 	private int counter;
 	private int columns;
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
-	private ZipType zipType;
+	private final ZipType zipType;
 
-	/**
-	 * Constructor
-	 */
 	public TsvOutput() {
 		zipType = ZipType.None;
 
@@ -63,12 +60,9 @@ public class TsvOutput extends StandardOutput {
 
 	}
 
-	/**
-	 * Initialise objects required to generate output
-	 */
 	@Override
 	public void init() {
-		exportFileStrBuf = new StringBuffer(8 * 1024);
+		exportFileStrBuf = new StringBuilder(8 * 1024);
 		counter = 0;
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);
@@ -145,8 +139,7 @@ public class TsvOutput extends StandardOutput {
 		if ((counter * columns) > FLUSH_SIZE) {
 			try {
 				String tmpstr = exportFileStrBuf.toString();
-				byte[] buf = new byte[tmpstr.length()];
-				buf = tmpstr.getBytes("UTF-8");
+				byte[] buf = tmpstr.getBytes("UTF-8");
 
 				if (zout == null) {
 					fout.write(buf);
@@ -156,7 +149,7 @@ public class TsvOutput extends StandardOutput {
 					zout.flush();
 				}
 
-				exportFileStrBuf = new StringBuffer(32 * 1024);
+				exportFileStrBuf = new StringBuilder(32 * 1024);
 			} catch (IOException e) {
 				logger.error("Error. Data not completed. Please narrow your search", e);
 			}
@@ -170,8 +163,7 @@ public class TsvOutput extends StandardOutput {
 
 		try {
 			String tmpstr = exportFileStrBuf.toString();
-			byte[] buf = new byte[tmpstr.length()];
-			buf = tmpstr.getBytes("UTF-8");
+			byte[] buf = tmpstr.getBytes("UTF-8");
 
 			switch (zipType) {
 				case None:
@@ -191,11 +183,11 @@ public class TsvOutput extends StandardOutput {
 				default:
 					throw new IllegalArgumentException("Unexpected zip type: " + zipType);
 			}
+
 			fout.close();
 			fout = null; // these nulls are because it seems to be a memory leak in some JVMs
 		} catch (IOException e) {
 			logger.error("Error", e);
 		}
 	}
-
 }

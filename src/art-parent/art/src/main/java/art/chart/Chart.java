@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -61,13 +61,17 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.data.general.Dataset;
 import org.jfree.ui.TextAnchor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Provides methods for working with charts
  *
  * @author Timothy Anyona
  */
 public abstract class Chart extends AbstractChartDefinition implements DatasetProducer, ChartPostProcessor {
 
+	private static final Logger logger = LoggerFactory.getLogger(Chart.class);
 	private static final long serialVersionUID = 1L;
 	protected final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
 	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
@@ -251,26 +255,36 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	/**
-	 * Produces the chart dataset based on the given resultset
+	 * Generates the chart dataset based on the given resultset
 	 *
-	 * @param rs
+	 * @param rs the resultset to use
 	 * @throws SQLException
 	 */
 	protected abstract void fillDataset(ResultSet rs) throws SQLException;
 
+	/**
+	 * Generates the chart dataset based on the given resultset
+	 *
+	 * @param rs the resultset to use
+	 * @param drilldown the drilldown to use, if any
+	 * @param reportParamsList the report parameters to use
+	 * @throws SQLException
+	 */
 	public void prepareDataset(ResultSet rs, Drilldown drilldown,
 			List<ReportParameter> reportParamsList) throws SQLException {
-		
-		this.reportParamsList=reportParamsList;
 
-		prepareDrilldownDetails(drilldown, reportParamsList);
+		logger.debug("Entering prepareDataset");
+
+		this.reportParamsList = reportParamsList;
+
+		prepareDrilldownDetails(drilldown);
 		prepareHyperLinkDetails(rs);
 
 		fillDataset(rs);
 	}
 
-	private void prepareDrilldownDetails(Drilldown drilldown,
-			List<ReportParameter> reportParamsList) throws SQLException {
+	private void prepareDrilldownDetails(Drilldown drilldown) throws SQLException {
+		logger.debug("Entering prepareDrilldownDetails: drilldown={}", drilldown);
 
 		if (drilldown == null) {
 			return;
@@ -282,6 +296,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	private void prepareHyperLinkDetails(ResultSet rs) throws SQLException {
+		logger.debug("Entering prepareHyperLinkDetails");
+
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 		String lastColumnName = rsmd.getColumnLabel(columnCount);
@@ -328,6 +344,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	//<cewolf:chartpostprocessor> tag only allows passing of string parameters
 	@Override
 	public void processChart(JFreeChart chart, Map<String, String> params) {
+		logger.debug("Entering processChart");
+
 		Objects.requireNonNull(chart, "chart must not be null");
 
 		//perform chart post processing
@@ -338,7 +356,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		rotateLabels(chart);
 	}
 
+	/**
+	 * Performs post processing action of setting the y axis range
+	 * 
+	 * @param chart 
+	 */
 	protected void processYAxisRange(JFreeChart chart) {
+		logger.debug("Entering processYAxisRange");
+
 		if (chartOptions == null) {
 			return;
 		}
@@ -359,7 +384,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		}
 	}
 
+	/**
+	 * Performs post processing action of setting maximum x axis label lines
+	 * 
+	 * @param chart 
+	 */
 	private void processXAxisLabelLines(JFreeChart chart) {
+		logger.debug("Entering processXAxisLabelLines");
+
 		Plot plot = chart.getPlot();
 
 		if (plot instanceof CategoryPlot) {
@@ -370,7 +402,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		}
 	}
 
+	/**
+	 * Performs post processing action of displaying labels
+	 * 
+	 * @param chart 
+	 */
 	private void processLabels(JFreeChart chart) {
+		logger.debug("Entering processLabels");
+
 		if (chartOptions == null) {
 			return;
 		}
@@ -406,32 +445,66 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 					renderer.setBaseNegativeItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.OUTSIDE12, TextAnchor.TOP_CENTER));
 				}
 			}
-
 		}
-
 	}
 
-	//produces the basic jfree chart. called by getChart()
+	/**
+	 * Produces the basic jfree chart, without any post processing. Called by getChart()
+	 * 
+	 * @return the basic chart
+	 * @throws DatasetProduceException
+	 * @throws ChartValidationException 
+	 */
 	@Override
 	protected JFreeChart produceChart() throws DatasetProduceException, ChartValidationException {
 		return CewolfChartFactory.getChartInstance(type, title, xAxisLabel, yAxisLabel, dataset, chartOptions.isShowLegend());
 	}
 
+	/**
+	 * Generates the chart and creates a png or pdf file with the image
+	 *
+	 * @param reportFormat the report format. Either png or pdf
+	 * @param outputFileName the full path of the file name to use
+	 * @param data for pdf format, if it is required to show the chart data
+	 * together with the image. Null if show data is not required.
+	 * @throws IOException
+	 * @throws DatasetProduceException
+	 * @throws ChartValidationException
+	 * @throws PostProcessingException
+	 */
 	public void generateFile(ReportFormat reportFormat, String outputFileName, RowSetDynaClass data)
 			throws IOException, DatasetProduceException, ChartValidationException, PostProcessingException {
 
+		logger.debug("Entering generateFile: reportFormat={}, outputFileName='{}'", reportFormat, outputFileName);
+
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
+		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
+
 		JFreeChart chart = getFinalChart();
 
-		if (reportFormat == ReportFormat.png) {
-			ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(),chartOptions.getHeight());
-		} else if (reportFormat == ReportFormat.pdf) {
-			PdfChart.createPdf(chart, outputFileName, title, data, reportParamsList);
-		} else {
-			throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
+		switch (reportFormat) {
+			case png:
+				ChartUtilities.saveChartAsPNG(new File(outputFileName), chart, chartOptions.getWidth(), chartOptions.getHeight());
+				break;
+			case pdf:
+				PdfChart.createPdf(chart, outputFileName, title, data, reportParamsList);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported report format: " + reportFormat);
 		}
 	}
 
+	/**
+	 * Returns the final chart object after all processing is complete
+	 *
+	 * @return the final chart object
+	 * @throws DatasetProduceException
+	 * @throws ChartValidationException
+	 * @throws PostProcessingException
+	 */
 	public JFreeChart getFinalChart() throws DatasetProduceException, ChartValidationException, PostProcessingException {
+		logger.debug("Entering getFinalChart");
+
 		//use cewolf to generate chart in order to achieve similar look as with interactive/browser display
 		setBackgroundPaint(Color.decode(backgroundColor));
 
@@ -454,7 +527,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		}
 	}
 
+	/**
+	 * Performs post processing action of showing data points
+	 *
+	 * @param chart
+	 */
 	private void showPoints(JFreeChart chart) {
+		logger.debug("Entering showPoints");
+
 		if (chartOptions == null) {
 			return;
 		}
@@ -465,7 +545,14 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		pointsProcessor.processChart(chart, lineOptions);
 	}
 
+	/**
+	 * Performs post processing action of rotating labels
+	 *
+	 * @param chart
+	 */
 	private void rotateLabels(JFreeChart chart) {
+		logger.debug("Entering rotateLabels");
+
 		if (chartOptions == null) {
 			return;
 		}

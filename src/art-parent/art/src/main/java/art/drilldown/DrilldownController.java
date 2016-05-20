@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -57,10 +57,9 @@ public class DrilldownController {
 	private MessageSource messageSource;
 
 	@RequestMapping(value = "/app/drilldowns", method = RequestMethod.GET)
-	public String showDrilldowns(Model model,
-			@RequestParam("reportId") Integer reportId) {
+	public String showDrilldowns(Model model, @RequestParam("reportId") Integer reportId) {
 
-		logger.debug("Entering showDrilldowns: reportId={}");
+		logger.debug("Entering showDrilldowns: reportId={}", reportId);
 
 		try {
 			model.addAttribute("parentReportId", reportId);
@@ -149,7 +148,8 @@ public class DrilldownController {
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			Locale locale) {
 
-		logger.debug("Entering saveDrilldown: drilldown={}, action='{}', parent={}", drilldown, action, parent);
+		logger.debug("Entering saveDrilldown: drilldown={}, action='{}', parent={}",
+				drilldown, action, parent);
 
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
@@ -176,11 +176,11 @@ public class DrilldownController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @param action "add" or "edit"
+	 * @param model the spring model to populate
+	 * @return the jsp file to display
 	 */
 	private String showEditDrilldown(String action, Model model, Locale locale, Integer parent) {
 		logger.debug("Entering showEditDrilldown: action='{}', parent={}", action, parent);
@@ -230,5 +230,4 @@ public class DrilldownController {
 
 		return response;
 	}
-
 }

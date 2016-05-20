@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 // "decent" means that a string like "00123" is not
 // considered as the number 123
 /**
- * Create slk output.
+ * Generates slk output
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -47,18 +47,15 @@ public class SlkOutput extends StandardOutput {
 	private static final Logger logger = LoggerFactory.getLogger(SlkOutput.class);
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
-	private StringBuffer exportFileStrBuf;
+	private StringBuilder exportFileStrBuf;
 	private NumberFormat nfPlain;
 	private int localRowCount;
 	private int columnCount;
 	private int columns;
 	private int counter;
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;) 
-	private ZipType zipType;
+	private final ZipType zipType;
 
-	/**
-	 * Constructor
-	 */
 	public SlkOutput() {
 		zipType = ZipType.None;
 
@@ -69,12 +66,9 @@ public class SlkOutput extends StandardOutput {
 
 	}
 
-	/**
-	 * Initialise objects required to generate output
-	 */
 	@Override
 	public void init() {
-		exportFileStrBuf = new StringBuffer(8 * 1024);
+		exportFileStrBuf = new StringBuilder(8 * 1024);
 		// insert slk header
 		// This is the Ooo header:
 		exportFileStrBuf.append("ID;PSCALC3\n");
@@ -108,7 +102,6 @@ public class SlkOutput extends StandardOutput {
 				.append(reportName).append(" - ")
 				.append(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()))
 				.append("\"\n"); // first row Y1
-
 	}
 
 	@Override
@@ -124,7 +117,6 @@ public class SlkOutput extends StandardOutput {
 			addHeaderCell(paramLabel);
 			addCellString(paramDisplayValues);
 		}
-
 	}
 	
 	@Override
@@ -135,7 +127,8 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String s) {
-		exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\"" + s + "\"\n");
+		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+				.append(columnCount++).append(";K\"").append(s).append("\"\n");
 	}
 
 	@Override
@@ -150,30 +143,35 @@ public class SlkOutput extends StandardOutput {
 	@Override
 	public void addCellString(String value) {
 		if (value == null) {
-			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\"" + value + "\"\n");
+			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+					.append(columnCount++).append(";K\"").append(value).append("\"\n");
 		} else {
 			if (value.trim().length() > 250) {
 				value = value.substring(0, 250) + "[...]";
 			}
-			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\""
-					+ value.replace('\n', ' ').replace('\r', ' ').replace(';', '-').trim() + "\"\n");
+			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+					.append(columnCount++).append(";K\"")
+					.append(value.replace('\n', ' ').replace('\r', ' ').replace(';', '-').trim()).append("\"\n");
 		}
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
 		if (value == null) {
-			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++ + ";K\"" + value + "\"\n");
+			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+					.append(columnCount++).append(";K\"").append(value).append("\"\n");
 		} else {
-			exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++
-					+ ";K" + nfPlain.format(value.doubleValue()) + "\n");
+			exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+					.append(columnCount++).append(";K")
+					.append(nfPlain.format(value.doubleValue())).append("\n");
 		}
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		exportFileStrBuf.append("C;Y" + localRowCount + ";X" + columnCount++
-				+ ";K\"" + Config.getDateDisplayString(value) + "\"\n");
+		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+				.append(columnCount++).append(";K\"")
+				.append(Config.getDateDisplayString(value)).append("\"\n");
 	}
 
 	@Override
@@ -185,11 +183,10 @@ public class SlkOutput extends StandardOutput {
 		if ((counter * columns) > FLUSH_SIZE) {
 			try {
 				String tmpstr = exportFileStrBuf.toString();
-				byte[] buf = new byte[tmpstr.length()];
-				buf = tmpstr.getBytes("UTF-8");
+				byte[] buf = tmpstr.getBytes("UTF-8");
 				fout.write(buf);
 				fout.flush();
-				exportFileStrBuf = new StringBuffer(32 * 1024);
+				exportFileStrBuf = new StringBuilder(32 * 1024);
 			} catch (IOException e) {
 				logger.error("Error. Data not completed. Please narrow your search", e);
 			}
@@ -205,8 +202,8 @@ public class SlkOutput extends StandardOutput {
 
 		try {
 			String tmpstr = exportFileStrBuf.toString();
-			byte[] buf = new byte[tmpstr.length()];
-			buf = tmpstr.getBytes("UTF-8");
+//			byte[] buf = new byte[tmpstr.length()];
+			byte[] buf = tmpstr.getBytes("UTF-8");
 			exportFileStrBuf = null;
 
 			if (zout == null) {
@@ -225,5 +222,4 @@ public class SlkOutput extends StandardOutput {
 			logger.error("Error", e);
 		}
 	}
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -23,17 +23,24 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Represents a connection pool using the hikari cp library
  *
  * @author Timothy Anyona
  */
 public class HikariCPConnectionPool extends ConnectionPool {
 
+	private static final Logger logger = LoggerFactory.getLogger(HikariCPConnectionPool.class);
+
 	private HikariDataSource hikariDataSource;
 
 	@Override
 	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
+		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
+
 		HikariConfig config = new HikariConfig();
 
 		config.setPoolName(datasourceInfo.getName());
@@ -46,14 +53,10 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		config.setJdbcUrl(datasourceInfo.getUrl());
 		config.setDriverClassName(datasourceInfo.getDriver()); //registers/loads the driver
 
-		//Either jdbc4ConnectionTest must be enabled or a connectionTestQuery must be specified
-		//othwerise error will be thrown when valid connection check is done
-		//(hikaricp does this check every time a connection is requested)
 		if (StringUtils.isBlank(datasourceInfo.getTestSql())
 				|| StringUtils.equals(datasourceInfo.getTestSql(), "isValid")) {
-			//config.setJdbc4ConnectionTest(true);
+			//do nothing
 		} else {
-			//config.setJdbc4ConnectionTest(false);
 			config.setConnectionTestQuery(datasourceInfo.getTestSql());
 		}
 
@@ -71,5 +74,4 @@ public class HikariCPConnectionPool extends ConnectionPool {
 	protected void closePool() {
 		hikariDataSource.close();
 	}
-
 }

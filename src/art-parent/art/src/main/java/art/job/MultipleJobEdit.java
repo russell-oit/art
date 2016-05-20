@@ -20,7 +20,8 @@ package art.job;
 import java.io.Serializable;
 
 /**
- *
+ * Represents details of a multiple job edit
+ * 
  * @author Timothy Anyona
  */
 public class MultipleJobEdit implements Serializable {

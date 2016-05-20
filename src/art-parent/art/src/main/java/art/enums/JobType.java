@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for job types
+ * Represents job types
  *
  * @author Timothy Anyona
  */
@@ -40,16 +40,23 @@ public enum JobType {
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
-	
-	public boolean isEmailInline(){
-		switch(this){
+
+	/**
+	 * Returns <code>true</code> if this is an email inline or conditional email
+	 * inline job type
+	 *
+	 * @return <code>true</code> if this is an email inline or conditional email
+	 * inline job type
+	 */
+	public boolean isEmailInline() {
+		switch (this) {
 			case EmailInline:
 			case CondEmailInline:
 				return true;
@@ -58,6 +65,13 @@ public enum JobType {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if this is an email attachment or conditional
+	 * email attachment job type
+	 *
+	 * @return <code>true</code> if this is an email attachment or conditional
+	 * email attachment job type
+	 */
 	public boolean isEmailAttachment() {
 		switch (this) {
 			case EmailAttachment:
@@ -68,6 +82,13 @@ public enum JobType {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if this is a cache append or cache insert job
+	 * type
+	 *
+	 * @return <code>true</code> if this is a cache append or cache insert job
+	 * type
+	 */
 	public boolean isCache() {
 		switch (this) {
 			case CacheAppend:
@@ -78,6 +99,13 @@ public enum JobType {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if this is a conditional email attachment,
+	 * conditional email inline or conditional publish job type
+	 *
+	 * @return <code>true</code> if this is a conditional email attachment,
+	 * conditional email inline or conditional publish job type
+	 */
 	public boolean isConditional() {
 		switch (this) {
 			case CondEmailAttachment:
@@ -89,6 +117,13 @@ public enum JobType {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if this is an email attachment, email inline,
+	 * conditional email attachment or conditional email inline job type
+	 *
+	 * @return <code>true</code> if this is an email attachment, email inline,
+	 * conditional email attachment or conditional email inline job type
+	 */
 	public boolean isEmail() {
 		switch (this) {
 			case EmailAttachment:
@@ -101,6 +136,13 @@ public enum JobType {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if this is a publish or conditional publish job
+	 * type
+	 *
+	 * @return <code>true</code> if this is a publish or conditional publish job
+	 * type
+	 */
 	public boolean isPublish() {
 		switch (this) {
 			case Publish:
@@ -112,9 +154,9 @@ public enum JobType {
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<JobType> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it afterwards
@@ -124,22 +166,22 @@ public enum JobType {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, null is returned
+	 * Converts a value to an enum. If the conversion fails, null is returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static JobType toEnum(String value) {
 		return toEnum(value, null);
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, the specified
+	 * Converts a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static JobType toEnum(String value, JobType defaultEnum) {
 		for (JobType v : values()) {
@@ -151,22 +193,20 @@ public enum JobType {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return this enum option's description
 	 */
 	public String getDescription() {
 		return value;
 	}
 
 	/**
-	 * Get description message string for use in the user interface.
+	 * Returns this enum option's i18n message string
 	 *
-	 * @return
+	 * @return this enum option's i18n message string
 	 */
 	public String getLocalizedDescription() {
 		return "jobType.option." + value;
 	}
-
 }

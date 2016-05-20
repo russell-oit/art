@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -24,114 +24,130 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 /**
- *
+ * Generates a group report
+ * 
  * @author Timothy Anyona
  */
 public abstract class GroupOutput {
 
 	/**
-	 * Output report header. Report width is 80% of the page
+	 * Outputs report header
 	 */
 	public abstract void header();
 
 	/**
-	 * Output report header with explicit report width
+	 * Outputs report header with explicit report width
 	 *
 	 * @param width report width as percentage of page
 	 */
 	public abstract void header(int width);
 
 	/**
-	 *
-	 * @param value
+	 * Outputs a value to the main header
+	 * 
+	 * @param value the value to output
 	 */
 	public abstract void addCellToMainHeader(String value);
 
 	/**
-	 *
-	 * @param value
+	 * Outputs a value to the sub header
+	 * 
+	 * @param value the value to output
 	 */
 	public abstract void addCellToSubHeader(String value);
 
 	/**
-	 *
+	 * Outputs the main header
 	 */
 	public abstract void printMainHeader();
 
 	/**
-	 *
+	 * Outputs the sub header
 	 */
 	public abstract void printSubHeader();
 
+	/**
+	 * Outputs the separator
+	 */
 	public abstract void separator();
 
 	/**
-	 *
-	 * @param value
+	 * Outputs a value to a line
+	 * 
+	 * @param value the value to output
 	 */
 	public abstract void addCellToLine(String value);
 
 	/**
-	 *
-	 * @param value
-	 * @param numOfCells
+	 * Outputs a value to a line
+	 * 
+	 * @param value the value to output
+	 * @param numOfCells the number of cells to use
 	 */
 	public abstract void addCellToLine(String value, int numOfCells);
 
 	/**
-	 *
-	 * @param value
-	 * @param cssclass
-	 * @param numOfCells
+	 * Outputs a value to a line
+	 * 
+	 * @param value the value to output
+	 * @param cssclass the css class to use
+	 * @param numOfCells the number of cells to use
 	 */
 	public abstract void addCellToLine(String value, String cssclass, int numOfCells);
 
 	/**
-	 *
-	 * @param value
-	 * @param cssclass
-	 * @param align
-	 * @param numOfCells
+	 * Outputs a value to a line
+	 * 
+	 * @param value the value to output
+	 * @param cssclass the css class to use
+	 * @param align the align attribute to use
+	 * @param numOfCells the number of cells to use
 	 */
 	public abstract void addCellToLine(String value, String cssclass, String align, int numOfCells);
 
 	/**
-	 *
+	 * Begins a row
 	 */
 	public abstract void beginLines();
 
 	/**
-	 *
+	 * Ends a row
 	 */
 	public abstract void endLines();
 
 	/**
-	 *
+	 * Begins a new line
 	 */
 	public abstract void newLine();
 
 	/**
-	 *
+	 * Outputs the footer
 	 */
 	public abstract void footer();
 	
 	/**
-	 * Generate a group report
+	 * Returns the maximum number of rows to output
+	 * 
+	 * @return the maximum number of rows to output
+	 */
+	public int getMaxRows(){
+		return Config.getMaxRows("htmlreport");
+	}
+	
+	/**
+	 * Generates a group report
 	 *
-	 * @param out
-	 * @param rs needs to be a scrollable resultset
-	 * @param splitCol
+	 * @param rs the resultset to use. Needs to be a scrollable.
+	 * @param splitCol the group column
 	 * @return number of rows output
 	 * @throws SQLException
 	 */
-	public static int generateGroupReport(PrintWriter out, ResultSet rs, int splitCol) throws SQLException {
-		
+	public int generateGroupReport(ResultSet rs, int splitCol) throws SQLException {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		
 		int colCount = rsmd.getColumnCount();
 		int i;
 		int counter = 0;
-		GroupHtmlOutput o = new GroupHtmlOutput(out);
 		String tmpstr;
 		StringBuffer cmpStr; // temporary string used to compare values
 		StringBuffer tmpCmpStr; // temporary string used to compare values
@@ -154,44 +170,45 @@ public abstract class GroupOutput {
 		// Build main header HTML
 		for (i = 0; i < (splitCol); i++) {
 			tmpstr = rsmd.getColumnLabel(i + 1);
-			o.addCellToMainHeader(tmpstr);
+			addCellToMainHeader(tmpstr);
 		}
 		// Now the header is completed
 
 		// Build the Sub Header
 		for (; i < colCount; i++) {
 			tmpstr = rsmd.getColumnLabel(i + 1);
-			o.addCellToSubHeader(tmpstr);
+			addCellToSubHeader(tmpstr);
 		}
 
-		int maxRows = Config.getMaxRows("htmlreport");
+		int maxRows = getMaxRows();
 
 		while (rs.next() && counter < maxRows) {
 			// Separators
-			out.println("<br><hr style=\"width:90%;height:1px\"><br>");
+			separator();
 
 			// Output Main Header and Main Data
-			o.header(90);
-			o.printMainHeader();
-			o.beginLines();
+			header(90);
+			printMainHeader();
+			beginLines();
 			cmpStr = new StringBuffer();
 
 			// Output Main Data (only one row, obviously)
 			for (i = 0; i < splitCol; i++) {
-				o.addCellToLine(rs.getString(i + 1));
+				addCellToLine(rs.getString(i + 1));
 				cmpStr.append(rs.getString(i + 1));
 			}
-			o.endLines();
-			o.footer();
+			
+			endLines();
+			footer();
 
 			// Output Sub Header and Sub Data
-			o.header(80);
-			o.printSubHeader();
-			o.beginLines();
+			header(80);
+			printSubHeader();
+			beginLines();
 
 			// Output Sub Data (first line)
 			for (; i < colCount; i++) {
-				o.addCellToLine(rs.getString(i + 1));
+				addCellToLine(rs.getString(i + 1));
 			}
 
 			boolean currentMain = true;
@@ -206,14 +223,14 @@ public abstract class GroupOutput {
 					}
 
 					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
-						o.newLine();
+						newLine();
 						// Add data lines
 						for (; i < colCount; i++) {
-							o.addCellToLine(rs.getString(i + 1));
+							addCellToLine(rs.getString(i + 1));
 						}
 					} else {
-						o.endLines();
-						o.footer();
+						endLines();
+						footer();
 						currentMain = false;
 						rs.previous();
 					}
@@ -225,15 +242,14 @@ public abstract class GroupOutput {
 		}
 
 		if (!(counter < maxRows)) {
-			o.newLine();
-			o.addCellToLine("<blink>Too many rows (>" + maxRows
+			newLine();
+			addCellToLine("<blink>Too many rows (>" + maxRows
 					+ "). Data not completed. Please narrow your search.</blink>", "qeattr", "left", colCount);
 		}
 
-		o.endLines();
-		o.footer();
+		endLines();
+		footer();
 
 		return counter + 1; // number of rows
 	}
-	
 }

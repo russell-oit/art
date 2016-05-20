@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Spring controller for setting application language
+ * Controller for setting application language
  *
  * @author Timothy Anyona
  */
@@ -42,5 +42,4 @@ public class LanguageController {
 		redirectAttributes.addFlashAttribute("message", "language.message.languageUpdated");
 		return "redirect:/app/success.do";
 	}
-
 }

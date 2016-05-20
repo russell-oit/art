@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -26,22 +26,33 @@ import java.text.NumberFormat;
 import java.util.Objects;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Provides methods for working with pie charts
  *
  * @author Timothy Anyona
  */
 public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLinkGenerator {
 
+	private static final Logger logger = LoggerFactory.getLogger(PieChart.class);
 	private static final long serialVersionUID = 1L;
 
 	public PieChart(ReportType reportType) {
-		if (reportType == ReportType.Pie2DChart) {
-			setType("pie");
-		} else if (reportType == ReportType.Pie3DChart) {
-			setType("pie3d");
-		} else {
-			throw new IllegalArgumentException("Unsupported report type: " + reportType);
+		logger.debug("Entering PieChart: reportType={}", reportType);
+
+		Objects.requireNonNull(reportType, "reportType must not be null");
+
+		switch (reportType) {
+			case Pie2DChart:
+				setType("pie");
+				break;
+			case Pie3DChart:
+				setType("pie3d");
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported report type: " + reportType);
 		}
 
 		setHasTooltips(true);
@@ -49,7 +60,9 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
-		Objects.requireNonNull(rs, "resultset must not be null");
+		logger.debug("Entering fillDataset");
+		
+		Objects.requireNonNull(rs, "rs must not be null");
 
 		DefaultPieDataset dataset = new DefaultPieDataset();
 
@@ -103,5 +116,4 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 
 		return link;
 	}
-
 }

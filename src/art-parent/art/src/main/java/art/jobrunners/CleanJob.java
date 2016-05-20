@@ -33,7 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Deletes old report files and clears the mondrian cache
+ * 
  * @author Timothy Anyona
  */
 public class CleanJob implements org.quartz.Job {
@@ -52,9 +53,9 @@ public class CleanJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Delete old files in a directory
+	 * Deletes old files in a given directory
 	 *
-	 * @param directoryPath
+	 * @param directoryPath the directory path
 	 */
 	private void cleanDirectory(String directoryPath) {
 		logger.debug("Entering cleanDirectory: directoryPath='{}'", directoryPath);
@@ -92,7 +93,7 @@ public class CleanJob implements org.quartz.Job {
 	}
 
 	/**
-	 * clear mondrian cache according to configured cache expiry
+	 * Clears the mondrian cache
 	 */
 	private void clearMondrianCache() {
 		logger.debug("Entering clearMondrianCache");
@@ -124,5 +125,4 @@ public class CleanJob implements org.quartz.Job {
 			}
 		}
 	}
-
 }

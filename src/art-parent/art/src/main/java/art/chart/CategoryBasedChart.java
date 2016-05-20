@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -30,16 +30,23 @@ import java.util.Objects;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Provides methods for working with category based charts. These include the
+ * line chart and bar charts.
  *
  * @author Timothy Anyona
  */
 public class CategoryBasedChart extends Chart implements CategoryToolTipGenerator, CategoryItemLinkGenerator {
 
+	private static final Logger logger = LoggerFactory.getLogger(CategoryBasedChart.class);
 	private static final long serialVersionUID = 1L;
 
 	public CategoryBasedChart(ReportType reportType) {
+		logger.debug("Entering CategoryBasedChart: reportType={}", reportType);
+
 		Objects.requireNonNull(reportType, "reportType must not be null");
 
 		switch (reportType) {
@@ -79,7 +86,9 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 
 	@Override
 	protected void fillDataset(ResultSet rs) throws SQLException {
-		Objects.requireNonNull(rs, "resultset must not be null");
+		logger.debug("Entering fillDataset");
+
+		Objects.requireNonNull(rs, "rs must not be null");
 
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
@@ -193,5 +202,4 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 
 		return link;
 	}
-
 }

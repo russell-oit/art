@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -148,5 +148,4 @@ public class Datasource extends DatasourceInfo implements Serializable {
 	public String toString() {
 		return "Datasource{" + "name=" + getName() + '}';
 	}
-
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.encryption;
 
 import java.io.UnsupportedEncodingException;
@@ -15,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Provides encryption and decryption of strings using the AES-128 algorithm
  *
  * @author Timothy Anyona
  */
@@ -28,6 +45,13 @@ public class AesEncryptor {
 	private static final String IV = "9F962822F431B19B"; // 16 bytes IV
 	private static final String KEY = "XH6YUHlrofcQDZjd"; // 128 bit key
 
+	/**
+	 * Encrypts a string
+	 *
+	 * @param clearText the string to encrypt, not null
+	 * @return the encrypted string, null if an error occurred or if clearText
+	 * is null
+	 */
 	public static String encrypt(String clearText) {
 		try {
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes("UTF-8"));
@@ -44,6 +68,12 @@ public class AesEncryptor {
 		return null;
 	}
 
+	/**
+	 * Decrypts a string
+	 * 
+	 * @param cipherText the encrypted string
+	 * @return the decrypted string, null if an error occurred
+	 */
 	public static String decrypt(String cipherText) {
 		try {
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes("UTF-8"));

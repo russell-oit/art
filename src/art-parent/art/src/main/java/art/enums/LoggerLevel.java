@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for art configuration logger level
+ * Represents logger levels
  *
  * @author Timothy Anyona
  */
@@ -29,25 +29,25 @@ public enum LoggerLevel {
 
 	OFF("OFF"), DEBUG("DEBUG"), INFO("INFO"), WARN("WARN"), ERROR("ERROR");
 
-	private String value;
+	private final String value;
 
 	private LoggerLevel(String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<LoggerLevel> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -57,10 +57,10 @@ public enum LoggerLevel {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, OFF is returned
+	 * Converts a value to an enum. If the conversion fails, OFF is returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static LoggerLevel toEnum(String value) {
 		return toEnum(value, OFF);
@@ -70,9 +70,9 @@ public enum LoggerLevel {
 	 * Convert a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static LoggerLevel toEnum(String value, LoggerLevel defaultEnum) {
 		for (LoggerLevel v : values()) {
@@ -84,13 +84,11 @@ public enum LoggerLevel {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
 	 * @return
 	 */
 	public String getDescription() {
 		return value;
 	}
-
 }

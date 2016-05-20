@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -20,7 +20,7 @@ import art.report.Report;
 import java.io.Serializable;
 
 /**
- * Class to represent a drilldown
+ * Represents a drilldown
  *
  * @author Timothy Anyona
  */

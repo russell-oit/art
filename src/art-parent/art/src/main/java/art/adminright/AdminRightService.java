@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -35,7 +35,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to admin rights
+ * Provides methods for retrieving, adding and deleting admin rights
  *
  * @author Timothy Anyona
  */
@@ -66,7 +66,7 @@ public class AdminRightService {
 			+ " WHERE AAP.PRIVILEGE='GRP'";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class AdminDatasourceRightMapper extends BasicRowProcessor {
 
@@ -100,7 +100,7 @@ public class AdminRightService {
 	}
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class AdminReportGroupRightMapper extends BasicRowProcessor {
 
@@ -134,9 +134,9 @@ public class AdminRightService {
 	}
 
 	/**
-	 * Get all admin-datasource rights
+	 * Returns all admin-datasource rights
 	 *
-	 * @return list of all admin-datasource rights, empty list otherwise
+	 * @return all admin-datasource rights
 	 * @throws SQLException
 	 */
 	public List<AdminDatasourceRight> getAllAdminDatasourceRights() throws SQLException {
@@ -147,9 +147,9 @@ public class AdminRightService {
 	}
 
 	/**
-	 * Get all admin-report group rights
+	 * Returns all admin-report group rights
 	 *
-	 * @return list of all admin-report group rights, empty list otherwise
+	 * @return all admin-report group rights
 	 * @throws SQLException
 	 */
 	public List<AdminReportGroupRight> getAllAdminReportGroupRights() throws SQLException {
@@ -160,10 +160,10 @@ public class AdminRightService {
 	}
 
 	/**
-	 * Delete an admin-datasource right
+	 * Deletes an admin-datasource right
 	 *
-	 * @param userId
-	 * @param datasourceId
+	 * @param userId the user id for the right
+	 * @param datasourceId the datasource id for the right
 	 * @throws SQLException
 	 */
 	public void deleteAdminDatasourceRight(int userId, int datasourceId) throws SQLException {
@@ -178,10 +178,10 @@ public class AdminRightService {
 	}
 
 	/**
-	 * Delete an admin-report group right
+	 * Deletes an admin-report group right
 	 *
-	 * @param userId
-	 * @param reportGroupId
+	 * @param userId the user id for the right
+	 * @param reportGroupId the report group id for the right
 	 * @throws SQLException
 	 */
 	public void deleteAdminReportGroupRight(int userId, int reportGroupId) throws SQLException {
@@ -196,15 +196,17 @@ public class AdminRightService {
 	}
 
 	/**
-	 * Grant or revoke admin rights
+	 * Grants or revokes admin rights
 	 *
-	 * @param action "grant" or "revoke". anything else will be treated as revoke
-	 * @param admins
-	 * @param datasources array of datasource ids
-	 * @param reportGroups array of report group ids
+	 * @param action "grant" or "revoke". anything else will be treated as
+	 * revoke
+	 * @param admins the relevant user identifiers in the format user
+	 * id-username
+	 * @param datasources the relevant datasource ids
+	 * @param reportGroups the relevant report group ids
 	 * @throws SQLException
 	 */
-	@CacheEvict(value = {"datasources","reportGroups"}, allEntries = true) //clear caches so that admins can work with new values
+	@CacheEvict(value = {"datasources", "reportGroups"}, allEntries = true) //clear caches so that admins can work with new values
 	public void updateAdminRights(String action, String[] admins, Integer[] datasources,
 			Integer[] reportGroups) throws SQLException {
 
@@ -215,7 +217,7 @@ public class AdminRightService {
 			logger.warn("Update not performed. admins is null");
 			return;
 		}
-		
+
 		boolean grant;
 		if (StringUtils.equalsIgnoreCase(action, "grant")) {
 			grant = true;
@@ -244,7 +246,7 @@ public class AdminRightService {
 			//username won't be needed once user id columns completely replace username in foreign keys
 			String username = StringUtils.substringAfter(admin, "-");
 
-			//update datasource privileges
+			//update datasource rights
 			if (datasources != null) {
 				for (Integer datasourceId : datasources) {
 					//if you use a batch update, some drivers e.g. oracle will
@@ -265,7 +267,7 @@ public class AdminRightService {
 				}
 			}
 
-			//update report group privileges
+			//update report group rights
 			if (reportGroups != null) {
 				for (Integer reportGroupId : reportGroups) {
 					updateRight = true;

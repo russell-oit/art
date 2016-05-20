@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -26,7 +26,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Class to map resultset to a Datasource object. Use public class in it's own
+ * Maps resultset to a Datasource object. Use public class in its own
  * file for reuse by DatasourceService and DbConnections
  *
  * @author Timothy Anyona

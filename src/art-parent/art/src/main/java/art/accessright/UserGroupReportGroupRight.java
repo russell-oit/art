@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import art.usergroup.UserGroup;
 import java.io.Serializable;
 
 /**
- * Class to represent user group-report group right
+ * Represents a user group-report group right
  *
  * @author Timothy Anyona
  */

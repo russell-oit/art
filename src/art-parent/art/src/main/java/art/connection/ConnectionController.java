@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -20,6 +20,8 @@ import art.connectionpool.DbConnections;
 import art.enums.ConnectionPoolLibrary;
 import art.servlets.Config;
 import art.utils.AjaxResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,15 +30,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Controller for the connection pool status + refresh page
+ * Controller for the connection pool status page
  *
  * @author Timothy Anyona
  */
 @Controller
 public class ConnectionController {
 
+	private static final Logger logger = LoggerFactory.getLogger(ConnectionController.class);
+
 	@RequestMapping(value = "/app/connections", method = RequestMethod.GET)
 	public String showConnections(Model model) {
+		logger.debug("Entering showConnections");
+
 		model.addAttribute("connectionPoolDetails", DbConnections.getAllConnectionPoolDetails());
 		ConnectionPoolLibrary connectionPoolLibrary = Config.getArtDbConfig().getConnectionPoolLibrary();
 		if (connectionPoolLibrary == ConnectionPoolLibrary.ArtDBCP) {
@@ -48,6 +54,8 @@ public class ConnectionController {
 	@RequestMapping(value = "/app/refreshConnectionPool", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse refreshConnectionPool(@RequestParam("id") Integer datasourceId) {
+		logger.debug("Entering refreshConnectionPool: id={}", datasourceId);
+
 		AjaxResponse response = new AjaxResponse();
 
 		DbConnections.refreshConnectionPool(datasourceId);
@@ -56,5 +64,4 @@ public class ConnectionController {
 		response.setSuccess(true);
 		return response;
 	}
-
 }

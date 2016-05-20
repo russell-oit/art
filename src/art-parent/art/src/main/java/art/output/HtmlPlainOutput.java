@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,14 +21,14 @@ import art.servlets.Config;
 import java.util.Date;
 
 /**
- * Simple html output mode. Can be used on scheduling because the output does
+ * Generates plain html output. Can be used for jobs because the output does
  * not depend on other files (css etc) and it is a standalone page
  *
  * @author Enrico Liboni
  */
 public class HtmlPlainOutput extends StandardOutput {
 
-	private boolean fileOutput;
+	private final boolean fileOutput;
 
 	public HtmlPlainOutput(boolean fileOutput) {
 		this.fileOutput = fileOutput;
@@ -121,5 +121,4 @@ public class HtmlPlainOutput extends StandardOutput {
 			out.println("</body></html>");
 		}
 	}
-
 }

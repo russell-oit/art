@@ -93,7 +93,7 @@ public class ReportService {
 			+ " AQ.DATABASE_ID=AD.DATABASE_ID";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class ReportMapper extends BasicRowProcessor {
 

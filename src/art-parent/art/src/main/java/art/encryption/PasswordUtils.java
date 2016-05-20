@@ -23,29 +23,29 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.commons.codec.binary.Hex;
 
 /**
+ * Provides methods for generating and verifying password hashes
  *
  * @author Timothy Anyona
  */
 public class PasswordUtils {
+
 	/**
-	 * Hash a password using the bcrypt algorithm and return the hashed
-	 * password.
+	 * Hashes a password using the bcrypt algorithm
 	 *
-	 * @param clearText
-	 * @return
+	 * @param clearText the password to hash
+	 * @return the bcrypt hash
 	 */
 	public static String HashPasswordBcrypt(String clearText) {
-		int rounds=10;
+		int rounds = 10;
 		return HashPasswordBcrypt(clearText, rounds);
 	}
 
 	/**
-	 * Hash a password using the bcrypt algorithm and return the hashed
-	 * password.
+	 * Hashes a password using the bcrypt algorithm
 	 *
-	 * @param clearText
-	 * @param rounds
-	 * @return
+	 * @param clearText the password to hash
+	 * @param rounds the number of rounds to use
+	 * @return the bcrypt hash
 	 */
 	public static String HashPasswordBcrypt(String clearText, int rounds) {
 		//NOTE: bcrypt only uses the first 72 bytes so long texts
@@ -61,10 +61,10 @@ public class PasswordUtils {
 	}
 
 	/**
-	 * Verify a password against it's bcrypt hashed equivalent
+	 * Returns <code>true</code> if the password matches the bcrypt hash
 	 *
-	 * @param clearText clear text password
-	 * @param hashedPassword hashed password
+	 * @param clearText the clear text password
+	 * @param hashedPassword the bcrypt hash
 	 * @return <code>true</code> if password matches hash
 	 */
 	public static boolean VerifyPasswordBcrypt(String clearText, String hashedPassword) {
@@ -78,12 +78,12 @@ public class PasswordUtils {
 	}
 
 	/**
-	 * Hash a password using the a jdk provided algorithm specified and return
-	 * the hashed password.
+	 * Hashes a password using the the jdk provided algorithm specified
 	 *
-	 * @param clearText clear text password
-	 * @param algorithm algorithm to use
-	 * @return hashed password. null if clearText or algorithm is null
+	 * @param clearText the clear text password
+	 * @param algorithm the algorithm to use e.g. MD2, MD5, SHA-1, SHA-256,
+	 * SHA-384, SHA-512
+	 * @return password hash. null if clearText or algorithm is null
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException
 	 */
@@ -105,18 +105,17 @@ public class PasswordUtils {
 		byte[] hashedMsg = mdg.digest(clearText.getBytes("UTF-8"));
 		// The String is now digested
 
-		
 		//convert byte array to string in hex format
 		return Hex.encodeHexString(hashedMsg);
-		
 	}
 
 	/**
-	 * Verify a password against it's hashed equivalent
+	 * Returns <code>true</code> if the password matches the hash
 	 *
-	 * @param clearText clear text password
-	 * @param hashedPassword hashed password
-	 * @param algorithm hashing algorithm
+	 * @param clearText the clear text password
+	 * @param hashedPassword the password hash
+	 * @param algorithm the hashing algorithm. bcrypt or MD2, MD5, SHA-1, SHA-256,
+	 * SHA-384, SHA-512
 	 * @return <code>true</code> if password matches hash
 	 * @throws NoSuchAlgorithmException
 	 * @throws UnsupportedEncodingException

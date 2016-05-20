@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -33,6 +33,7 @@ import art.enums.ReportType;
 import art.enums.ZipType;
 import art.output.StandardOutput;
 import art.output.DirectReportOutputHandler;
+import art.output.GroupHtmlOutput;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlFancyOutput;
 import art.output.HtmlGridOutput;
@@ -236,7 +237,10 @@ public class ReportOutputGenerator {
 					splitColumn = report.getGroupColumn();
 				}
 
-				rowsRetrieved = DirectReportOutputHandler.generateGroupReport(writer, rs, splitColumn);
+				//can have other group output formats depending on selected
+				//report format e.g. xls group reports
+				GroupHtmlOutput groupHtmlOutput=new GroupHtmlOutput(writer);
+				rowsRetrieved=groupHtmlOutput.generateGroupReport(rs, splitColumn);
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 

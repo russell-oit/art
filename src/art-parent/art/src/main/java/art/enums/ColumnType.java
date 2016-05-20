@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -18,9 +18,11 @@
 package art.enums;
 
 /**
+ * Represents database column types used in report output generation
  *
  * @author Timothy Anyona
  */
 public enum ColumnType {
-	Numeric,Date,Clob,String;
+
+	Numeric, Date, Clob, String;
 }

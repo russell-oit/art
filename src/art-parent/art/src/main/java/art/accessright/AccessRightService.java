@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -37,7 +37,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to access rights
+ * Provides methods for retrieving, adding and deleting access rights
  *
  * @author Timothy Anyona
  */
@@ -100,7 +100,7 @@ public class AccessRightService {
 			+ " AUGJ.JOB_ID=AJ.JOB_ID";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserReportRightMapper extends BasicRowProcessor {
 
@@ -134,7 +134,7 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserReportGroupRightMapper extends BasicRowProcessor {
 
@@ -168,7 +168,7 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserJobRightMapper extends BasicRowProcessor {
 
@@ -202,7 +202,7 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserGroupReportRightMapper extends BasicRowProcessor {
 
@@ -236,7 +236,7 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserGroupReportGroupRightMapper extends BasicRowProcessor {
 
@@ -268,9 +268,9 @@ public class AccessRightService {
 			return type.cast(right);
 		}
 	}
-	
+
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserGroupJobRightMapper extends BasicRowProcessor {
 
@@ -304,9 +304,9 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Get all user-report rights
+	 * Returns all user-report rights
 	 *
-	 * @return list of all user-report rights, empty list otherwise
+	 * @return all user-report rights
 	 * @throws SQLException
 	 */
 	public List<UserReportRight> getAllUserReportRights() throws SQLException {
@@ -317,9 +317,9 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Get all user-report group rights
+	 * Returns all user-report group rights
 	 *
-	 * @return list of all user-report group rights, empty list otherwise
+	 * @return all user-report group rights
 	 * @throws SQLException
 	 */
 	public List<UserReportGroupRight> getAllUserReportGroupRights() throws SQLException {
@@ -328,11 +328,11 @@ public class AccessRightService {
 		ResultSetHandler<List<UserReportGroupRight>> h = new BeanListHandler<>(UserReportGroupRight.class, new UserReportGroupRightMapper());
 		return dbService.query(SQL_SELECT_ALL_USER_REPORT_GROUP_RIGHTS, h);
 	}
-	
+
 	/**
-	 * Get all user-job rights
+	 * Returns all user-job rights
 	 *
-	 * @return list of all user-job rights, empty list otherwise
+	 * @return all user-job rights
 	 * @throws SQLException
 	 */
 	public List<UserJobRight> getAllUserJobRights() throws SQLException {
@@ -343,9 +343,9 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Get all user group-report rights
+	 * Returns all user group-report rights
 	 *
-	 * @return list of all user group-report rights, empty list otherwise
+	 * @return all user group-report rights
 	 * @throws SQLException
 	 */
 	public List<UserGroupReportRight> getAllUserGroupReportRights() throws SQLException {
@@ -356,9 +356,9 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Get all user group-report group rights
+	 * Returns all user group-report group rights
 	 *
-	 * @return list of all user group-report group rights, empty list otherwise
+	 * @return all user group-report group rights
 	 * @throws SQLException
 	 */
 	public List<UserGroupReportGroupRight> getAllUserGroupReportGroupRights() throws SQLException {
@@ -367,11 +367,11 @@ public class AccessRightService {
 		ResultSetHandler<List<UserGroupReportGroupRight>> h = new BeanListHandler<>(UserGroupReportGroupRight.class, new UserGroupReportGroupRightMapper());
 		return dbService.query(SQL_SELECT_ALL_USER_GROUP_REPORT_GROUP_RIGHTS, h);
 	}
-	
+
 	/**
-	 * Get all user group-job rights
+	 * Returns all user group-job rights
 	 *
-	 * @return list of all user group-job rights, empty list otherwise
+	 * @return all user group-job rights
 	 * @throws SQLException
 	 */
 	public List<UserGroupJobRight> getAllUserGroupJobRights() throws SQLException {
@@ -382,10 +382,10 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Delete a user-report right
+	 * Deletes a user-report right
 	 *
-	 * @param userId
-	 * @param reportId
+	 * @param userId the user id for the right
+	 * @param reportId the report id for the right
 	 * @throws SQLException
 	 */
 	public void deleteUserReportRight(int userId, int reportId) throws SQLException {
@@ -398,10 +398,10 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Delete a user-report group right
+	 * Deletes a user-report group right
 	 *
-	 * @param userId
-	 * @param reportGroupId
+	 * @param userId the user id for the right
+	 * @param reportGroupId the report group id for the right
 	 * @throws SQLException
 	 */
 	public void deleteUserReportGroupRight(int userId, int reportGroupId) throws SQLException {
@@ -412,12 +412,12 @@ public class AccessRightService {
 		sql = "DELETE FROM ART_USER_QUERY_GROUPS WHERE USER_ID=? AND QUERY_GROUP_ID=?";
 		dbService.update(sql, userId, reportGroupId);
 	}
-	
+
 	/**
-	 * Delete a user-job right
+	 * Deletes a user-job right
 	 *
-	 * @param userId
-	 * @param jobId
+	 * @param userId the user id for the right
+	 * @param jobId the job id for the right
 	 * @throws SQLException
 	 */
 	public void deleteUserJobRight(int userId, int jobId) throws SQLException {
@@ -430,10 +430,10 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Delete a user group-report right
+	 * Deletes a user group-report right
 	 *
-	 * @param userGroupId
-	 * @param reportId
+	 * @param userGroupId the user group id for the right
+	 * @param reportId the report id for the right
 	 * @throws SQLException
 	 */
 	public void deleteUserGroupReportRight(int userGroupId, int reportId) throws SQLException {
@@ -446,10 +446,10 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Delete a user group-report group right
+	 * Deletes a user group-report group right
 	 *
-	 * @param userGroupId
-	 * @param reportGroupId
+	 * @param userGroupId the user group id for the right
+	 * @param reportGroupId the report group id for the right
 	 * @throws SQLException
 	 */
 	public void deleteUserGroupReportGroupRight(int userGroupId, int reportGroupId) throws SQLException {
@@ -460,12 +460,12 @@ public class AccessRightService {
 		sql = "DELETE FROM ART_USER_GROUP_GROUPS WHERE USER_GROUP_ID=? AND QUERY_GROUP_ID=?";
 		dbService.update(sql, userGroupId, reportGroupId);
 	}
-	
+
 	/**
-	 * Delete a user group-job right
+	 * Deletes a user group-job right
 	 *
-	 * @param userGroupId
-	 * @param jobId
+	 * @param userGroupId the user group id for the right
+	 * @param jobId the job id for the right
 	 * @throws SQLException
 	 */
 	public void deleteUserGroupJobRight(int userGroupId, int jobId) throws SQLException {
@@ -478,14 +478,15 @@ public class AccessRightService {
 	}
 
 	/**
-	 * Grant or revoke access rights
+	 * Grants or revokes access rights
 	 *
 	 * @param action "grant" or "revoke". anything else will be treated as
 	 * revoke
-	 * @param users
-	 * @param userGroups array of user group ids
-	 * @param reports array of report ids
-	 * @param reportGroups array of report group ids
+	 * @param users the relevant user identifiers in the format user id-username
+	 * @param userGroups the relevant user group ids
+	 * @param reports the relevant report ids
+	 * @param reportGroups the relevant report group ids
+	 * @param jobs the relevant job ids
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true) //clear reports cache so that reports available to users are updated
@@ -529,7 +530,7 @@ public class AccessRightService {
 				//username won't be needed once user id columns completely replace username in foreign keys
 				String username = StringUtils.substringAfter(user, "-");
 
-				//update report privileges
+				//update report rights
 				if (reports != null) {
 					for (Integer reportId : reports) {
 						//if you use a batch update, some drivers e.g. oracle will
@@ -550,7 +551,7 @@ public class AccessRightService {
 					}
 				}
 
-				//update report group privileges
+				//update report group rights
 				if (reportGroups != null) {
 					for (Integer reportGroupId : reportGroups) {
 						updateRight = true;
@@ -568,7 +569,7 @@ public class AccessRightService {
 					}
 				}
 
-				//update job privileges
+				//update job rights
 				if (jobs != null) {
 					for (Integer jobId : jobs) {
 						updateRight = true;
@@ -613,7 +614,7 @@ public class AccessRightService {
 			boolean updateRight;
 
 			for (Integer userGroupId : userGroups) {
-				//update report privileges
+				//update report rights
 				if (reports != null) {
 					for (Integer reportId : reports) {
 						//if you use a batch update, some drivers e.g. oracle will
@@ -634,7 +635,7 @@ public class AccessRightService {
 					}
 				}
 
-				//update report group privileges
+				//update report group rights
 				if (reportGroups != null) {
 					for (Integer reportGroupId : reportGroups) {
 						updateRight = true;
@@ -652,7 +653,7 @@ public class AccessRightService {
 					}
 				}
 
-				//update job privileges
+				//update job rights
 				if (jobs != null) {
 					for (Integer jobId : jobs) {
 						updateRight = true;

@@ -39,7 +39,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
+ * Controller for chained parameter calls
+ * 
  * @author Timothy Anyona
  */
 @Controller
@@ -85,6 +86,5 @@ public class ChainedParameterController {
 		}
 
 		return values;
-
 	}
 }

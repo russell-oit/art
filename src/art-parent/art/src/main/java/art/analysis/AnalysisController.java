@@ -44,6 +44,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -54,13 +55,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
+ * Controller for displaying pivot table reports
  *
  * @author Timothy Anyona
  */
 @Controller
 public class AnalysisController {
 
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(AnalysisController.class);
+	private static final Logger logger = LoggerFactory.getLogger(AnalysisController.class);
 
 	@Autowired
 	private ReportService reportService;
@@ -69,9 +71,7 @@ public class AnalysisController {
 	private MessageSource messageSource;
 
 	@RequestMapping(value = "/app/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
-	public String showAnalysis(HttpServletRequest request, Model model,
-			HttpSession session) {
-
+	public String showAnalysis(HttpServletRequest request, Model model, HttpSession session) {
 		logger.debug("Entering showAnalysis");
 
 		try {
@@ -133,6 +133,19 @@ public class AnalysisController {
 		return "showAnalysis";
 	}
 
+	/**
+	 * Prepares model and session attributes in readiness for pivot table
+	 * display
+	 *
+	 * @param request
+	 * @param session
+	 * @param report
+	 * @param model
+	 * @throws NumberFormatException
+	 * @throws SQLException
+	 * @throws ParseException
+	 * @throws MalformedURLException
+	 */
 	private void prepareVariables(HttpServletRequest request, HttpSession session,
 			Report report, Model model)
 			throws NumberFormatException, SQLException, ParseException, MalformedURLException {
@@ -375,6 +388,8 @@ public class AnalysisController {
 
 	@RequestMapping(value = "/app/jpivotError", method = {RequestMethod.GET, RequestMethod.POST})
 	public String jpivotError(HttpServletRequest request, Locale locale, Model model) {
+		logger.debug("Entering jpivotError");
+		
 		String msg = messageSource.getMessage("analysis.text.jpivotError", null, locale);
 
 		Throwable e = (Throwable) request.getAttribute("javax.servlet.jsp.jspException");
@@ -395,12 +410,16 @@ public class AnalysisController {
 
 	@RequestMapping(value = "/app/jpivotBusy", method = {RequestMethod.GET, RequestMethod.POST})
 	public String jpivotBusy() {
+		logger.debug("Entering jpivotBusy");
+		
 		return "jpivotBusy";
 	}
 
 	@RequestMapping(value = "/app/saveAnalysis", method = RequestMethod.POST)
 	public String saveAnalysis(HttpServletRequest request,
 			HttpSession session, RedirectAttributes redirectAttributes) {
+		
+		logger.debug("Entering saveAnalysis");
 
 		try {
 			int reportId;
@@ -500,6 +519,5 @@ public class AnalysisController {
 			redirectAttributes.addFlashAttribute("error", ex);
 			return "redirect:/app/reportError.do";
 		}
-
 	}
 }

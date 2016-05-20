@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -246,7 +246,7 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
 	 * @param action
 	 * @param model
@@ -265,7 +265,7 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns jsp file to display
 	 *
 	 * @param action
 	 * @param model
@@ -285,8 +285,8 @@ public class DatasourceController {
 			@RequestParam("useBlankPassword") Boolean useBlankPassword,
 			Locale locale) {
 
-		logger.debug("Entering testDatasource: jndi={}, driver='{}', url='{}', username='{}', useBlankPassword={}",
-				jndi, driver, url, username, useBlankPassword);
+		logger.debug("Entering testDatasource: jndi={}, driver='{}', url='{}', username='{}',"
+				+ " useBlankPassword={}", jndi, driver, url, username, useBlankPassword);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -326,10 +326,10 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Decrypt datasource password
+	 * Decrypts a datasource password
 	 *
-	 * @param password
-	 * @return
+	 * @param password the encrypted password
+	 * @return the decrypted password
 	 */
 	private String decryptPassword(String password) {
 		logger.debug("Entering decryptPassword");
@@ -347,7 +347,7 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Test datasource configuration and refresh art connections
+	 * Tests datasource configuration and refreshes art connections
 	 *
 	 * @param datasource
 	 * @throws Exception
@@ -371,16 +371,18 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Test a datasource configuration
-	 *
-	 * @param jndi
-	 * @param driver
-	 * @param url
-	 * @param username
-	 * @param password clear text password
+	 * Tests a datasource configuration
+	 * 
+	 * @param jndi whether the datasource is a jndi datasource
+	 * @param driver the jdbc driver for the datasource
+	 * @param url the jdbc url for the datasource
+	 * @param username the username for the datasource connection
+	 * @param password the clear text password for the datasource connection
 	 * @throws Exception if connection failed, otherwise connection successful
 	 */
-	private void testConnection(boolean jndi, String driver, String url, String username, String password) throws Exception {
+	private void testConnection(boolean jndi, String driver, String url,
+			String username, String password) throws Exception {
+		
 		logger.debug("Entering testConnection: jndi={}, driver='{}', url='{}', username='{}'",
 				jndi, driver, url, username);
 
@@ -399,10 +401,10 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Set password
+	 * Sets the password field of the datasource
 	 *
-	 * @param datasource
-	 * @param action
+	 * @param datasource the datasource object to set
+	 * @param action "add or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException
@@ -440,5 +442,4 @@ public class DatasourceController {
 
 		return null;
 	}
-
 }

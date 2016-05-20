@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -23,7 +23,7 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * JQuery DataTables html output mode
+ * Generates DataTables html output
  *
  * @author Enrico Liboni
  */
@@ -159,5 +159,4 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void endRows() {
 		out.println("</tr></tbody></table></div>");
 	}
-
 }

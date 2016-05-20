@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.login;
 
 import art.enums.LdapAuthenticationMethod;
@@ -37,7 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to authenticate user using ldap
+ * Authenticates a user using ldap
  *
  * @author Timothy Anyona
  */
@@ -45,6 +61,13 @@ public class LdapLogin {
 
 	private static final Logger logger = LoggerFactory.getLogger(LdapLogin.class);
 
+	/**
+	 * Authenticates a user using ldap credentials
+	 *
+	 * @param username the username to use
+	 * @param password the password to use
+	 * @return the result of the authentication process
+	 */
 	public static LoginResult authenticate(String username, String password) {
 		logger.debug("Entering authenticate: username='{}'", username);
 
@@ -60,11 +83,11 @@ public class LdapLogin {
 	}
 
 	/**
-	 * Authenticate user using UnboundID library
+	 * Authenticates a user using the UnboundID library
 	 *
-	 * @param username
-	 * @param password
-	 * @return
+	 * @param username the username to use
+	 * @param password the password to use
+	 * @return the result of the authentication process
 	 */
 	private static LoginResult authenticateUsingUnboundId(String username, String password) {
 		logger.debug("Entering authenticateUsingUnboundId: username='{}'", username);
@@ -241,11 +264,11 @@ public class LdapLogin {
 	}
 
 	/**
-	 * Authenticate user using jndi
+	 * Authenticates a user using jndi
 	 *
-	 * @param username
-	 * @param password
-	 * @return
+	 * @param username the username to use
+	 * @param password the password to use
+	 * @return the result of the authentication process
 	 */
 	private static LoginResult authenticateUsingJndi(String username, String password) {
 		//example code
@@ -384,13 +407,13 @@ public class LdapLogin {
 	}
 
 	/**
-	 * Escape string used in ldap search filter
+	 * Escapes a string used in ldap search filter
 	 *
-	 * @param filter
-	 * @return
+	 * @param filter the original filter string
+	 * @return the escaped filter string
 	 */
 	public static final String escapeLDAPSearchFilter(String filter) {
-		//based on https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
+		//https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
 
 		if (filter == null) {
 			return null;
@@ -419,17 +442,18 @@ public class LdapLogin {
 					sb.append(curChar);
 			}
 		}
+		
 		return sb.toString();
 	}
 
 	/**
-	 * Escape ldap dn
+	 * Escapes an ldap dn
 	 *
-	 * @param name
-	 * @return
+	 * @param name the dn to escape
+	 * @return the escaped dn
 	 */
 	public static String escapeDN(String name) {
-		//based on https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
+		//https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
 
 		if (name == null) {
 			return null;
@@ -467,9 +491,11 @@ public class LdapLogin {
 					sb.append(curChar);
 			}
 		}
+		
 		if ((name.length() > 1) && (name.charAt(name.length() - 1) == ' ')) {
 			sb.insert(sb.length() - 1, '\\'); // add the trailing backslash if needed
 		}
+		
 		return sb.toString();
 	}
 }

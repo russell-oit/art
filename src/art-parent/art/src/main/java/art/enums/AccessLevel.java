@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for user access levels
+ * Represents user access levels
  *
  * @author Timothy Anyona
  */
@@ -13,25 +13,26 @@ public enum AccessLevel {
 
 	NormalUser(0), ScheduleUser(5), JuniorAdmin(10), MidAdmin(30),
 	StandardAdmin(40), SeniorAdmin(80), SuperAdmin(100), RepositoryUser(-1);
-	private int value;
+	
+	private final int value;
 
 	private AccessLevel(int value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public int getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<AccessLevel> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -41,23 +42,23 @@ public enum AccessLevel {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, NormalUser is
+	 * Converts a value to an enum. If the conversion fails, NormalUser is
 	 * returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static AccessLevel toEnum(int value) {
 		return toEnum(value, NormalUser);
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, the specified
+	 * Converts a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static AccessLevel toEnum(int value, AccessLevel defaultEnum) {
 		for (AccessLevel v : values()) {
@@ -69,10 +70,9 @@ public enum AccessLevel {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return enum option description
 	 */
 	public String getDescription() {
 		switch (this) {

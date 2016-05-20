@@ -18,9 +18,11 @@
 package art.enums;
 
 /**
+ * Represents zip types
  *
  * @author Timothy Anyona
  */
 public enum ZipType {
-	None,Zip,Gzip;
+
+	None, Zip, Gzip;
 }

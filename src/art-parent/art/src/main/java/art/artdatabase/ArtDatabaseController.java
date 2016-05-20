@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.artdatabase;
 
 import art.cache.CacheHelper;
@@ -27,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Spring controller for the art database configuration process
+ * Controller for the art database configuration process
  *
  * @author Timothy Anyona
  */
@@ -46,6 +63,7 @@ public class ArtDatabaseController {
 		//for the jdbc-odbc bridge, you can only read column values ONCE
 		//and in the ORDER they appear in the select. Adhering to this is brittle and cumbersome.
 		databaseTypes.remove("generic-odbc");
+		databaseTypes.remove("hbase-phoenix");
 		return databaseTypes;
 	}
 
@@ -80,6 +98,8 @@ public class ArtDatabaseController {
 	public String processArtDatabaseConfiguration(
 			@ModelAttribute("artDatabase") @Valid ArtDatabase artDatabase,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+		
+		logger.debug("Entering processArtDatabaseConfiguration");
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -29,6 +29,7 @@ import java.util.List;
 public enum ConnectionPoolLibrary {
 
 	ArtDBCP("ART-DBCP"), HikariCP("HikariCP");
+	
 	private final String value;
 
 	private ConnectionPoolLibrary(String value) {
@@ -36,18 +37,18 @@ public enum ConnectionPoolLibrary {
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<ConnectionPoolLibrary> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -57,11 +58,11 @@ public enum ConnectionPoolLibrary {
 	}
 
 	/**
-	 * Convert a value to an enum. If the value doesn't represent a known enum,
+	 * Converts a value to an enum. If the value doesn't represent a known enum,
 	 * an IllegalArgumentException is thrown
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ConnectionPoolLibrary toEnum(String value) {
 		for (ConnectionPoolLibrary v : values()) {
@@ -69,17 +70,15 @@ public enum ConnectionPoolLibrary {
 				return v;
 			}
 		}
-		throw new IllegalArgumentException("Invalid enum value - " + value);
+		throw new IllegalArgumentException("Invalid enum value: " + value);
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return this enum option's description
 	 */
 	public String getDescription() {
 		return value;
 	}
-
 }

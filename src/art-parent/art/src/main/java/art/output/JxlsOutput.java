@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -43,8 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to generate formatted excel workbooks using the jxls library. Doesn't
- * implement artOutputInterface like other output classes
+ * Generates formatted excel workbooks using the jxls library
  *
  * @author Timothy Anyona
  */
@@ -61,12 +60,12 @@ public class JxlsOutput {
 	}
 
 	/**
-	 * Generate report output
+	 * Generates report output
 	 *
-	 * @param report
-	 * @param reportParams
-	 * @param reportType
-	 * @param outputFileName
+	 * @param report the report to use, not null
+	 * @param reportParams the report parameters, not null
+	 * @param reportType the report type
+	 * @param outputFileName the full path of the output file, not null
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 * @throws org.apache.poi.openxml4j.exceptions.InvalidFormatException

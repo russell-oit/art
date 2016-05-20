@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for cache types
+ * Represents cache types
  *
  * @author Timothy Anyona
  */
@@ -30,25 +30,26 @@ public enum CacheType {
 	Mondrian("Mondrian"), Reports("Reports"), ReportGroups("ReportGroups"),
 	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
 	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters");
-	private String value;
+	
+	private final String value;
 
 	private CacheType(String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<CacheType> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -58,10 +59,10 @@ public enum CacheType {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, null is returned
+	 * Converts a value to an enum. If the conversion fails, null is returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value, null otherwise
 	 */
 	public static CacheType toEnum(String value) {
 		return toEnum(value, null);
@@ -71,9 +72,9 @@ public enum CacheType {
 	 * Convert a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static CacheType toEnum(String value, CacheType defaultEnum) {
 		for (CacheType v : values()) {
@@ -85,22 +86,21 @@ public enum CacheType {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return enum option description
 	 */
 	public String getDescription() {
 		return value;
 	}
 
 	/**
-	 * Get description message string for use in the user interface.
+	 * Returns this enum option's i18n message string for use in the user
+	 * interface
 	 *
-	 * @return
+	 * @return this enum option's i18n message string
 	 */
 	public String getLocalizedDescription() {
 		return "cacheType.option." + value;
 	}
-
 }

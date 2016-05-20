@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -35,8 +35,12 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
+ * Provides methods for working with time series base charts. These include time
+ * series and date series charts.
  *
  * @author Timothy Anyona
  */
@@ -44,24 +48,33 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 	//similar to xychart except for the type of dataset
 	//use separate class because there's no generic addSeries() method for xyseriescolletion and timeseriescollection
+	private static final Logger logger = LoggerFactory.getLogger(TimeSeriesBasedChart.class);
 	private static final long serialVersionUID = 1L;
 	private ReportType reportType;
 
 	public TimeSeriesBasedChart(ReportType reportType) {
-		if (reportType != ReportType.TimeSeriesChart
-				&& reportType != ReportType.DateSeriesChart) {
-			throw new IllegalArgumentException("Unsupported report type: " + reportType);
+		logger.debug("Entering TimeSeriesBasedChart: reportType={}", reportType);
+
+		Objects.requireNonNull(reportType, "reportType must not be null");
+
+		switch (reportType) {
+			case TimeSeriesChart:
+			case DateSeriesChart:
+				this.reportType = reportType;
+				setType("timeseries");
+				setHasTooltips(true);
+				break;
+			default:
+				throw new IllegalArgumentException("Unsupported report type: " + reportType);
+
 		}
-
-		this.reportType = reportType;
-
-		setType("timeseries");
-		setHasTooltips(true);
 	}
 
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
-		Objects.requireNonNull(rs, "resultset must not be null");
+		logger.debug("Entering fillDataset");
+		
+		Objects.requireNonNull(rs, "rs must not be null");
 
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
 
@@ -218,5 +231,4 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 		return link;
 	}
-
 }

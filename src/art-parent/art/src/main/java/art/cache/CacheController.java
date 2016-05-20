@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Controller for cache pages
+ * Controller for cache configuration
  *
  * @author Timothy Anyona
  */
@@ -52,6 +52,8 @@ public class CacheController {
 	@RequestMapping(value = "/app/clearAllCaches", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse clearAllCaches() {
+		logger.debug("Entering clearAllCaches");
+		
 		AjaxResponse response = new AjaxResponse();
 		
 		cacheHelper.clearAll();

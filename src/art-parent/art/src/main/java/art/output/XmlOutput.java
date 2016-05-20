@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
- * Generate xml output
+ * Generates xml output
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -147,5 +147,4 @@ public class XmlOutput extends StandardOutput {
 		out.println("<totalrows>" + rowCount + "</totalrows>");
 		out.println("</table>");
 	}
-
 }

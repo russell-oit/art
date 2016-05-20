@@ -22,7 +22,8 @@ import art.usergroup.UserGroup;
 import java.io.Serializable;
 
 /**
- *
+ * Represents a user group-job right
+ * 
  * @author Timothy Anyona
  */
 public class UserGroupJobRight implements Serializable {

@@ -21,11 +21,12 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
+ * Represents a dashboard, whose details are displayed in a dashboard report
  *
  * @author Timothy Anyona
  */
 public class Dashboard implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
 	private String title;
 	private String description;

@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.login;
 
 import art.connectionpool.DbConnections;
@@ -27,7 +43,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
 
 /**
- * Spring controller for the login process
+ * Controller for the login process
  *
  * @author Timothy Anyona
  */
@@ -36,7 +52,7 @@ import org.springframework.web.bind.support.SessionStatus;
 public class LoginController {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
-	
+
 	@Autowired
 	private UserService userService;
 
@@ -48,9 +64,8 @@ public class LoginController {
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
-			Model model,
-			SessionStatus sessionStatus) {
-		
+			Model model, SessionStatus sessionStatus) {
+
 		logger.debug("Entering showLogin");
 
 		HttpSession session = request.getSession();
@@ -171,14 +186,12 @@ public class LoginController {
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public String processLogin(
-			HttpServletRequest request,
+	public String processLogin(HttpServletRequest request,
 			@RequestParam(value = "windowsDomain", required = false) String windowsDomain,
 			@RequestParam("username") String username,
 			@RequestParam("password") String password,
-			Model model,
-			SessionStatus sessionStatus){
-		
+			Model model, SessionStatus sessionStatus) {
+
 		logger.debug("Entering processLogin");
 
 		//explicitly name requestparams to avoid error if code compiled without debug option
@@ -287,10 +300,18 @@ public class LoginController {
 			model.addAttribute("result", result);
 
 			return "login";
-
 		}
 	}
 
+	/**
+	 * Returns the page to display after successful login
+	 *
+	 * @param session the http session
+	 * @param user the user who is logging in
+	 * @param loginMethod the authentication method used
+	 * @param sessionStatus the session status
+	 * @return the page to display after successful login
+	 */
 	private String getLoginSuccessNextPage(HttpSession session, User user,
 			ArtAuthenticationMethod loginMethod, SessionStatus sessionStatus) {
 
@@ -320,13 +341,17 @@ public class LoginController {
 	}
 
 	/**
-	 * Determine if given credentials match those of the art database user
+	 * Returns <code>true</code> if given credentials match those of the art
+	 * database user
 	 *
-	 * @param username
-	 * @param password
-	 * @return
+	 * @param username the username to match
+	 * @param password the password to match
+	 * @return <code>true</code> if given credentials match those of the art
+	 * database user
 	 */
 	public boolean isValidRepositoryUser(String username, String password) {
+		logger.debug("Entering isValidRepositoryUser: username='{}'", username);
+
 		boolean validRepositoryUser = false;
 
 		String artDbUsername = Config.getArtDbConfig().getUsername();

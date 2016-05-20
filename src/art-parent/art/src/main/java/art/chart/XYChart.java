@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -31,7 +31,8 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 /**
- *
+ * Provides methods for working with xy charts
+ * 
  * @author Timothy Anyona
  */
 public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGenerator {
@@ -45,7 +46,7 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
-		Objects.requireNonNull(rs, "resultset must not be null");
+		Objects.requireNonNull(rs, "rs must not be null");
 
 		XYSeriesCollection dataset = new XYSeriesCollection();
 
@@ -166,5 +167,4 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 
 		return link;
 	}
-
 }

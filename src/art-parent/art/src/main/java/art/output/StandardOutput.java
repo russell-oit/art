@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -18,7 +18,6 @@
 package art.output;
 
 import art.drilldown.Drilldown;
-import art.enums.DisplayNull;
 import art.enums.ReportFormat;
 import art.enums.ColumnType;
 import art.reportparameter.ReportParameter;
@@ -45,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Generates standard/tabular output
  *
  * @author Timothy Anyona
  */
@@ -159,10 +159,8 @@ public abstract class StandardOutput {
 	}
 
 	/**
-	 * Set the output stream.
-	 * <br>Use it to print something: <br>
-	 * <code>o.println("Hello Word!"); </code><br>
-	 * will print <i>Hello Word!</i> to the user browser
+	 * Sets the output stream
+	 *
 	 *
 	 * @param writer
 	 */
@@ -202,108 +200,118 @@ public abstract class StandardOutput {
 		return "text/html;charset=utf-8";
 	}
 
+	/**
+	 * Returns <code>true</code> if page header and footer should be output also
+	 *
+	 * @return
+	 */
 	public boolean outputHeaderandFooter() {
 		return true;
 	}
 
+	/**
+	 * Performs any initialization required by the output generator
+	 */
 	public void init() {
 
 	}
 
+	/**
+	 * Outputs the report title
+	 */
 	public void addTitle() {
 
 	}
 
+	/**
+	 * Outputs report parameters
+	 *
+	 * @param reportParamsList the selected report parameters
+	 */
 	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
 
 	}
 
 	/**
-	 * This method is invoked to state that the header begins. Output class
-	 * should do initialization here
+	 * Performs initialization required before outputting the header
 	 */
 	public void beginHeader() {
 
 	}
 
 	/**
-	 * This method is invoked to set a column header name (from the result set
-	 * meta data).
+	 * Outputs a value to the header
 	 *
-	 * @param value column header name
+	 * @param value the value to output
 	 */
 	public abstract void addHeaderCell(String value);
 
 	/**
-	 * Add a header cell whose text is left aligned
+	 * Outputs a value to the header whose text is left aligned
 	 *
-	 * @param value
+	 * @param value the value to output
 	 */
 	public void addHeaderCellLeftAligned(String value) {
 		addHeaderCell(value);
 	}
 
 	/**
-	 * Method invoked to state that the header finishes.
+	 * Performs any cleanup after outputting of the header
 	 */
 	public void endHeader() {
 
 	}
 
 	/**
-	 * Method invoked to state that the result set rows begin.
+	 * Performs any initialization before resultset output begins
 	 */
 	public void beginRows() {
 
 	}
 
 	/**
-	 * Method invoked to add a String value in the current row.
+	 * Outputs a String value to the current row
 	 *
-	 * @param value value to output
+	 * @param value the value to output
 	 */
 	public abstract void addCellString(String value);
 
 	/**
-	 * Method invoked to add a numeric value in the current row.
+	 * Outputs numeric value to the current row
 	 *
-	 * @param value value to output
+	 * @param value the value to output
 	 */
 	public abstract void addCellNumeric(Double value);
 
 	/**
-	 * Method invoked to add a Date value in the current row.
+	 * Outputs a Date value to the current row
 	 *
-	 * @param value value to output
+	 * @param value the value to output
 	 */
 	public abstract void addCellDate(Date value);
 
 	/**
-	 * Method invoked to close the current row and open a new one.
-	 * <br>This method should return true if the new row is allocatable, false
-	 * if it is not possible to proceed (for example MaxRows reached or an error
-	 * raised). If false is returned, the output generator will stop feeding the
-	 * object, it will call endRows() and close the result set.
+	 * Closes the current row and opens a new one.
 	 */
 	public abstract void newRow();
 
 	/**
-	 * This method is invoked when the last row has been flushed.
-	 * <br> Usually, here the total number of rows are printed and open streams
-	 * (files) are closed.
+	 * Closes report output. Any final cleanup should be done here.
 	 */
 	public abstract void endRows();
 
 	/**
-	 * Output query results
+	 * Generates a tabular report
 	 *
+	 * @param rs the resultset to use
+	 * @param reportFormat the report format to use
 	 * @return StandardOutputResult. if successful, rowCount contains the number
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
 	 * @throws SQLException
 	 */
-	public StandardOutputResult generateTabularOutput(ResultSet rs,
-			ReportFormat reportFormat) throws SQLException {
+	public StandardOutputResult generateTabularOutput(ResultSet rs, ReportFormat reportFormat)
+			throws SQLException {
 
 		logger.debug("Entering generateTabularOutput");
 
@@ -367,7 +375,6 @@ public abstract class StandardOutput {
 		beginRows();
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
-		DisplayNull displayNullSetting = Config.getSettings().getDisplayNull();
 		List<ColumnType> columnTypes = getColumnTypes(rsmd);
 
 		while (rs.next()) {
@@ -393,7 +400,7 @@ public abstract class StandardOutput {
 				result.setTooManyRows(true);
 				return result;
 			} else {
-				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, displayNullSetting);
+				List<Object> columnValues = outputResultSetColumns(columnTypes, rs);
 				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
 			}
 		}
@@ -406,6 +413,13 @@ public abstract class StandardOutput {
 		return result;
 	}
 
+	/**
+	 * Returns the column types corresponding to the given resultset metadata
+	 *
+	 * @param rsmd the resultset metadata
+	 * @return the column types corresponding to the given resultset metadata
+	 * @throws SQLException
+	 */
 	private List<ColumnType> getColumnTypes(ResultSetMetaData rsmd) throws SQLException {
 		List<ColumnType> columnTypes = new ArrayList<>();
 		for (int i = 0; i < rsmd.getColumnCount(); i++) {
@@ -424,8 +438,16 @@ public abstract class StandardOutput {
 		return columnTypes;
 	}
 
+	/**
+	 * Outputs one row for the resultset data
+	 *
+	 * @param columnTypes the column types for the records
+	 * @param rs the resultset with the data to output
+	 * @return data for the output row
+	 * @throws SQLException
+	 */
 	private List<Object> outputResultSetColumns(List<ColumnType> columnTypes,
-			ResultSet rs, DisplayNull displayNullSetting) throws SQLException {
+			ResultSet rs) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -453,11 +475,11 @@ public abstract class StandardOutput {
 					if (clob != null) {
 						value = clob.getSubString(1, (int) clob.length());
 					}
-					addString(value, displayNullSetting);
+					addString(value);
 					break;
 				default:
 					value = rs.getString(columnIndex);
-					addString(value, displayNullSetting);
+					addString(value);
 			}
 
 			columnValues.add(value);
@@ -466,6 +488,14 @@ public abstract class StandardOutput {
 		return columnValues;
 	}
 
+	/**
+	 * Outputs values for drilldown columns
+	 *
+	 * @param drilldowns the drilldowns to use, may be null
+	 * @param reportParamsList the report parameters
+	 * @param columnValues the values from the resultset data
+	 * @throws SQLException
+	 */
 	private void outputDrilldownColumns(List<Drilldown> drilldowns,
 			List<ReportParameter> reportParamsList, List<Object> columnValues)
 			throws SQLException {
@@ -493,6 +523,12 @@ public abstract class StandardOutput {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if the given sql type is a numeric one
+	 *
+	 * @param sqlType the sql/jdbc type
+	 * @return <code>true</code> if the given sql type is a numeric one
+	 */
 	private boolean isNumeric(int sqlType) {
 		boolean numeric;
 
@@ -515,6 +551,12 @@ public abstract class StandardOutput {
 		return numeric;
 	}
 
+	/**
+	 * Returns <code>true</code> if the given sql type is a date one
+	 *
+	 * @param sqlType the sql/jdbc type
+	 * @return <code>true</code> if the given sql type is a date one
+	 */
 	private boolean isDate(int sqlType) {
 		boolean date;
 
@@ -531,6 +573,12 @@ public abstract class StandardOutput {
 		return date;
 	}
 
+	/**
+	 * Returns <code>true</code> if the given sql type is a clob one
+	 *
+	 * @param sqlType the sql/jdbc type
+	 * @return <code>true</code> if the given sql type is a clob one
+	 */
 	private boolean isClob(int sqlType) {
 		boolean clob;
 
@@ -546,7 +594,12 @@ public abstract class StandardOutput {
 		return clob;
 	}
 
-	private void addString(Object value, DisplayNull displayNullSetting) {
+	/**
+	 * Outputs a string value
+	 *
+	 * @param value the value to output
+	 */
+	private void addString(Object value) {
 		if (value == null) {
 			addCellString(""); //display nulls as empty string
 		} else {
@@ -554,6 +607,11 @@ public abstract class StandardOutput {
 		}
 	}
 
+	/**
+	 * Outputs a numeric value
+	 *
+	 * @param value the value to output
+	 */
 	private void addNumeric(Object value) {
 		if (value == null) {
 			//either way, default to displaying empty string or 0 respectively
@@ -564,6 +622,14 @@ public abstract class StandardOutput {
 		}
 	}
 
+	/**
+	 * Generates crosstab output
+	 *
+	 * @param rs the resultset to use
+	 * @param reportFormat the report format to use
+	 * @return output result
+	 * @throws SQLException
+	 */
 	public StandardOutputResult generateCrosstabOutput(ResultSet rs,
 			ReportFormat reportFormat) throws SQLException {
 
@@ -598,16 +664,21 @@ public abstract class StandardOutput {
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		resultSetColumnCount = rsmd.getColumnCount();
-		
+
 		if (resultSetColumnCount != 3 && resultSetColumnCount != 5) {
 			result.setMessage("reports.message.invalidCrosstab");
 			return result;
 		}
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
-		DisplayNull displayNullSetting = Config.getSettings().getDisplayNull();
 
-		boolean alternateSort = (resultSetColumnCount > 3 ? true : false);
+		boolean alternateSort;
+
+		if (resultSetColumnCount > 3) {
+			alternateSort = true;
+		} else {
+			alternateSort = false;
+		}
 
 		HashMap<String, Object> values = new HashMap<>();
 		Object[] xa;
@@ -681,7 +752,7 @@ public abstract class StandardOutput {
 					addHeaderCellLeftAligned(y.get(Dy).toString()); //column 1 data displayed as a header
 					for (i = 0; i < xa.length; i++) {
 						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-						addString(value, displayNullSetting);
+						addString(value);
 					}
 				}
 			}
@@ -754,7 +825,7 @@ public abstract class StandardOutput {
 					addHeaderCellLeftAligned(Dy.toString()); //column 1 data displayed as a header
 					for (i = 0; i < xa.length; i++) {
 						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
-						addString(value, displayNullSetting);
+						addString(value);
 					}
 				}
 			}
@@ -768,8 +839,8 @@ public abstract class StandardOutput {
 	}
 
 	/**
-	 * Used to cast and store the right object type in the Hashmap used by
-	 * flushXOutput to cache sorted values
+	 * Stores the right object type in the Hashmap used by
+	 * generateCrosstabOutput to cache sorted values
 	 */
 	private static void addValue(String key, Map<String, Object> values,
 			ResultSet rs, int columnIndex, ColumnType columnType) throws SQLException {

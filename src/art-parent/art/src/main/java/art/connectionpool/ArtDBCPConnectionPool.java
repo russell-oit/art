@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Represents a connection pool using the art dbcp library
+ * 
  * @author Timothy Anyona
  */
 public class ArtDBCPConnectionPool extends ConnectionPool {
@@ -36,7 +37,9 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 
 	@Override
 	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
-		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasourceInfo.getConnectionPoolTimeoutMins());  //convert timeout mins to seconds
+		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
+		
+		long timeoutSeconds = TimeUnit.MINUTES.toSeconds(datasourceInfo.getConnectionPoolTimeoutMins());
 		artDbcpDataSource = new ArtDBCPDataSource(timeoutSeconds);
 
 		artDbcpDataSource.setPoolName(datasourceInfo.getName()); //use the datasoure name as the connection pool name
@@ -64,7 +67,7 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 			//https://stackoverflow.com/questions/2092659/what-is-difference-between-class-forname-and-class-forname-newinstance/2093236#2093236
 //			Class.forName(driver).newInstance();
 			Class.forName(driver);
-			logger.debug("JDBC driver registered: {}", driver);
+			logger.debug("JDBC driver registered: '{}'", driver);
 		} catch (ClassNotFoundException ex) {
 			logger.error("Error while registering JDBC driver: '{}'", driver, ex);
 		}
@@ -82,7 +85,7 @@ public class ArtDBCPConnectionPool extends ConnectionPool {
 	
 	@Override
 	public Integer getCurrentSize() {
-			return artDbcpDataSource.getCurrentPoolSize();
+		return artDbcpDataSource.getCurrentPoolSize();
 	}
 	
 	@Override

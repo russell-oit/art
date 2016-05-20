@@ -5,32 +5,33 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for supported ldap authentication methods
+ * Represents supported ldap authentication methods
  *
  * @author Timothy Anyona
  */
 public enum LdapAuthenticationMethod {
 
 	Simple("Simple"), DigestMD5("Digest-MD5");
-	private String value;
+	
+	private final String value;
 
 	private LdapAuthenticationMethod(String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<LdapAuthenticationMethod> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -40,22 +41,22 @@ public enum LdapAuthenticationMethod {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, Simple is returned
+	 * Converts a value to an enum. If the conversion fails, Simple is returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static LdapAuthenticationMethod toEnum(String value) {
 		return toEnum(value, Simple);
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, the specified
+	 * Converts a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static LdapAuthenticationMethod toEnum(String value, LdapAuthenticationMethod defaultEnum) {
 		for (LdapAuthenticationMethod v : values()) {
@@ -67,8 +68,7 @@ public enum LdapAuthenticationMethod {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
 	 * @return
 	 */

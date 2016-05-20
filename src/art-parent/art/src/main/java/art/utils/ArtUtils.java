@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -231,6 +231,7 @@ public class ArtUtils {
 		databaseTypes.put("generic-odbc", "Generic ODBC");
 		databaseTypes.put("sql-logging", "SQL Logging");
 		databaseTypes.put("other", "Other");
+		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver)");
 
 		return databaseTypes;
 	}

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -69,7 +69,7 @@ public class FilterValueService {
 			+ " AUGR.RULE_ID=AR.RULE_ID";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserFilterValueMapper extends BasicRowProcessor {
 
@@ -107,7 +107,7 @@ public class FilterValueService {
 	}
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserGroupFilterValueMapper extends BasicRowProcessor {
 

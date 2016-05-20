@@ -35,7 +35,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- *
+ * Provides methods for retrieving archives
+ * 
  * @author Timothy Anyona
  */
 @Service
@@ -61,7 +62,7 @@ public class ArchiveService {
 	}
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class ArchiveMapper extends BasicRowProcessor {
 
@@ -94,6 +95,13 @@ public class ArchiveService {
 		}
 	}
 
+	/**
+	 * Returns the archives that the given user has access to
+	 * 
+	 * @param userId the user id for the relevant user
+	 * @return archives that the given user has access to
+	 * @throws SQLException 
+	 */
 	public List<Archive> getArchives(int userId) throws SQLException {
 		logger.debug("Entering getArchives: userId={}", userId);
 

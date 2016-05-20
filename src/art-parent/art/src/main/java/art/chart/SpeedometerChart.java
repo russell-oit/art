@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -33,7 +33,8 @@ import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
 
 /**
- *
+ * Provides methods for working with speedometer charts
+ * 
  * @author Timothy Anyona
  */
 public class SpeedometerChart extends Chart {
@@ -55,7 +56,7 @@ public class SpeedometerChart extends Chart {
 	//prepare graph data structures with query results
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
-		Objects.requireNonNull(rs, "resultset must not be null");
+		Objects.requireNonNull(rs, "rs must not be null");
 
 		DefaultValueDataset dataset = new DefaultValueDataset();
 		
@@ -141,5 +142,4 @@ public class SpeedometerChart extends Chart {
 		double tickInterval = (maxValue - minValue) / 10.0;
 		plot.setTickSize(tickInterval);
 	}
-
 }

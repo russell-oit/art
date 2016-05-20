@@ -2,7 +2,7 @@
  * @file ART javascript. General functions and global variables
  * @author Timothy Anyona
  * 
- * @copyright Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * @copyright Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -145,6 +145,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		if (usernameElement !== null) {
 			usernameElement.value = "";
 		}
+	} else if (dbType === "hbase-phoenix") {
+		driverElement.value = "org.apache.phoenix.jdbc.PhoenixDriver";
+		urlElement.value = "jdbc:phoenix:<server_name>";
+		testSqlElement.value = "";
 	}
 }
 

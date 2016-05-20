@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -27,7 +27,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
 /**
- * Class to provide method to manually clear caches
+ * Provides methods for clearing ehcache caches
  *
  * @author Timothy Anyona
  */
@@ -37,7 +37,7 @@ public class CacheHelper {
 	private static final Logger logger = LoggerFactory.getLogger(CacheHelper.class);
 
 	/**
-	 * Clear all mondrian caches
+	 * Clears all mondrian caches
 	 */
 	public void clearMondrian() {
 		logger.debug("Entering clearMondrian");
@@ -58,8 +58,8 @@ public class CacheHelper {
 			out = new BufferedWriter(new FileWriter(cacheFilePath));
 			Date now = new Date();
 			out.write(now.toString());
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
 		} finally {
 			//Close the BufferedWriter
 			try {
@@ -67,14 +67,14 @@ public class CacheHelper {
 					out.flush();
 					out.close();
 				}
-			} catch (IOException e) {
-				logger.error("Error while closing writer", e);
+			} catch (IOException ex) {
+				logger.error("Error while closing writer", ex);
 			}
 		}
 	}
 
 	/**
-	 * Clear reports cache
+	 * Clears reports cache
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
 	public void clearReports() {
@@ -82,7 +82,7 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear report groups cache
+	 * Clears report groups cache
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
 	public void clearReportGroups() {
@@ -90,7 +90,7 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear users cache
+	 * Clears users cache
 	 */
 	@CacheEvict(value = "users", allEntries = true)
 	public void clearUsers() {
@@ -98,7 +98,7 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear user groups cache
+	 * Clears user groups cache
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
 	public void clearUserGroups() {
@@ -106,7 +106,7 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear datasources cache
+	 * Clears datasources cache
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
 	public void clearDatasources() {
@@ -114,7 +114,7 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear schedules cache
+	 * Clears schedules cache
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
 	public void clearSchedules() {
@@ -122,7 +122,7 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear jobs cache
+	 * Clears jobs cache
 	 */
 	@CacheEvict(value = "jobs", allEntries = true)
 	public void clearJobs() {
@@ -130,7 +130,7 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear filters cache
+	 * Clears filters cache
 	 */
 	@CacheEvict(value = "filters", allEntries = true)
 	public void clearFilters() {
@@ -138,7 +138,7 @@ public class CacheHelper {
 	}
 	
 	/**
-	 * Clear rules cache
+	 * Clears rules cache
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
 	public void clearRules() {
@@ -146,16 +146,21 @@ public class CacheHelper {
 	}
 
 	/**
-	 * Clear parameters cache
+	 * Clears parameters cache
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public void clearParameters() {
 		logger.debug("Entering clearParameters");
 	}
 
+	/**
+	 * Clears all caches
+	 */
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
 		"datasources", "schedules", "jobs", "rules", "parameters"}, allEntries = true)
 	public void clearAll() {
+		logger.debug("Entering clearAll");
+		
 		clearMondrian();
 	}
 

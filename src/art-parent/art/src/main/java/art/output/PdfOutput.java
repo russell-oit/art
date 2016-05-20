@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate pdf output. See
+ * Generates pdf output. See
  * http://itextdocs.lowagie.com/examples/com/lowagie/examples/objects/tables/pdfptable/FragmentTable.java
  *
  * @author Marios Timotheou
@@ -37,22 +37,16 @@ import org.slf4j.LoggerFactory;
  */
 public class PdfOutput extends StandardOutput {
 
-	private static final Logger logger = LoggerFactory.getLogger(PdfOutput.class);
 	private Document document;
 	private PdfPTable table;
 	private PdfPCell cell;
-	private float headergray = 0.9F;
+	private final float headergray = 0.9F;
 	private FontSelector fsBody; //fonts to use for document body
 	private FontSelector fsHeading; //fonts to use for document title and column headings
 	public final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
 
-	/**
-	 * Initialise objects required to generate output
-	 */
 	@Override
 	public void init() {
-		logger.debug("Entering init");
-		
 		try {
 			Rectangle pageSize;
 			PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();
@@ -118,6 +112,13 @@ public class PdfOutput extends StandardOutput {
 		outputSelectedParameters(document, fsBody, reportParamsList);
 	}
 
+	/**
+	 * Outputs parameters used for the report
+	 * 
+	 * @param doc the itext document object
+	 * @param fs the fontselector to be used
+	 * @param reportParamsList the report parameters
+	 */
 	public void outputSelectedParameters(Document doc, FontSelector fs, java.util.List<ReportParameter> reportParamsList) {
 		if (reportParamsList == null || reportParamsList.isEmpty()) {
 			return;
@@ -146,6 +147,13 @@ public class PdfOutput extends StandardOutput {
 		}
 	}
 
+	/**
+	 * Adds a new line
+	 * 
+	 * @param doc the document to use
+	 * @param fs the fontselector to use
+	 * @throws DocumentException 
+	 */
 	private void addNewline(Document doc, FontSelector fs) throws DocumentException {
 		doc.add(new Paragraph(fs.process("\n")));
 	}
@@ -226,7 +234,6 @@ public class PdfOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-
 		// split table in smaller pieces in order to save memory:
 		// fragment size should come from Config servlet, web.xml or properties		
 		if (rowCount % 500 == 500 - 1) {
@@ -238,7 +245,6 @@ public class PdfOutput extends StandardOutput {
 				throw new RuntimeException(ex);
 			}
 		}
-
 	}
 
 	@Override
@@ -254,8 +260,7 @@ public class PdfOutput extends StandardOutput {
 	}
 
 	/**
-	 * Set font selector objects to be used for body text and header text Also
-	 * used by pdfgraph class
+	 * Sets font selector objects to be used for body text and header text
 	 *
 	 * @param body
 	 * @param header
@@ -286,5 +291,4 @@ public class PdfOutput extends StandardOutput {
 		body.addFont(FontFactory.getFont(BaseFont.HELVETICA, 8, Font.NORMAL));
 		header.addFont(FontFactory.getFont(BaseFont.HELVETICA, 10, Font.BOLD));
 	}
-
 }

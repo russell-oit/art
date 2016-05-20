@@ -71,7 +71,7 @@ public class UserService {
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USERS";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class UserMapper extends BasicRowProcessor {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -17,153 +17,116 @@
  */
 package art.output;
 
+import art.servlets.Config;
 import java.io.PrintWriter;
 
 /**
- * Generate "Group: n columns" reports
+ * Generates "Group: n columns" reports
  * 
  * @author Enrico Liboni
  */
 public class GroupHtmlOutput extends GroupOutput {
 	
-	private PrintWriter out;
-	private StringBuilder mainHeader = new StringBuilder();
+	private final PrintWriter out;
+	private final StringBuilder mainHeader = new StringBuilder();
 	// temporary string used to store Main Header Values
-	private StringBuilder subHeader = new StringBuilder();
+	private final StringBuilder subHeader = new StringBuilder();
 
 
     /**
-     * Constructor. Set the output object
+     * Sets the output writer
      * 
-     * @param htmlWriter output object
+     * @param htmlWriter output writer
      */
     public GroupHtmlOutput(PrintWriter htmlWriter) {
         out = htmlWriter;
     }
 
     /**
-     * Output report header. Report width is 80% of the page
+     * Outputs report header. Report width is 80% of the page
      */
+	@Override
     public void header() {
         out.println("<div align=\"center\">");
         out.println("<table border=\"0\" width=\"80%\">");
     }
 
-    /**
-     * Output report header with explicit report width
-     * 
-     * @param width report width as percentage of page
-     */
+	@Override
     public void header(int width) {
         out.println("<div align=\"center\">");
         out.println("<table border=\"0\" width=\"" + width + "%\">");
     }
 
-    /**
-     * 
-     * @param value
-     */
+	@Override
     public void addCellToMainHeader(String value) {
         mainHeader.append("<td class=\"qeattr\">");
         mainHeader.append(value);
         mainHeader.append("</td>");
     }
 
-    /**
-     * 
-     * @param value
-     */
+	@Override
     public void addCellToSubHeader(String value) {
         subHeader.append("<td class=\"qesubattr\">");
         subHeader.append(value);
         subHeader.append("</td>");
     }
 
-    /**
-     * 
-     */
+	@Override
     public void printMainHeader() {
         beginLines();
         out.println(mainHeader.toString());
         endLines();
     }
 
-    /**
-     * 
-     */
+	@Override
     public void printSubHeader() {
         beginLines();
         out.println(subHeader.toString());
         endLines();
     }
 	
+	@Override
 	public void separator(){
 		out.println("<br><hr style=\"width:90%;height:1px\"><br>");
 	}
 
-    /**
-     * 
-     * @param value
-     */
+	@Override
     public void addCellToLine(String value) {
         out.println("<td class=\"data\">" + value + "</td>");
     }
 
-    /**
-     * 
-     * @param value
-     * @param numOfCells
-     */
+	@Override
     public void addCellToLine(String value, int numOfCells) {
         out.println("<td colspan=\"" + numOfCells + "\" class=\"data\">" + value + "</td>");
     }
 
-    /**
-     * 
-     * @param value
-     * @param cssclass
-     * @param numOfCells
-     */
+	@Override
     public void addCellToLine(String value, String cssclass, int numOfCells) {
         out.println("<td colspan=\"" + numOfCells + "\" class=\"" + cssclass + "\">" + value + "</td>");
     }
 
-    /**
-     * 
-     * @param value
-     * @param cssclass
-     * @param align
-     * @param numOfCells
-     */
+	@Override
     public void addCellToLine(String value, String cssclass, String align, int numOfCells) {
         out.println("<td colspan=\"" + numOfCells + "\" class=\"" + cssclass
                 + "\" align =\"" + align + "\">" + value + "</td>");
     }
 
-    /**
-     * 
-     */
+	@Override
     public void beginLines() {
         out.println("<tr>");
     }
 
-    /**
-     * 
-     */
+	@Override
     public void endLines() {
         out.println("</tr>");
     }
 
-    /**
-     * 
-     */
+	@Override
     public void newLine() {
         out.println("</tr><tr>");
     }
 
-    /**
-     * 
-     */
+	@Override
     public void footer() {
         out.println("</table></div>");
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -33,13 +33,13 @@ public class DbService {
 	/**
 	 * Executes an INSERT, UPDATE or DELETE query against the art database
 	 *
-	 * @param sql
-	 * @param params
+	 * @param sql the sql to execute
+	 * @param params the parameters to use
 	 * @return number of records affected
 	 * @throws SQLException
 	 */
 	public int update(String sql, Object... params) throws SQLException {
-		QueryRunner run = new QueryRunner(DbConnections.getArtDbConnectionPool());
+		QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
 		return run.update(sql, params);
 	}
 
@@ -48,14 +48,14 @@ public class DbService {
 	 * appropriate, populated object
 	 *
 	 * @param <T> the type of object that the handler returns
-	 * @param sql
+	 * @param sql the sql to execute
 	 * @param rsh the handler that converts the results into an object
-	 * @param params
+	 * @param params the parameters to use
 	 * @return the object returned by the handler
 	 * @throws SQLException
 	 */
 	public <T> T query(String sql, ResultSetHandler<T> rsh, Object... params) throws SQLException {
-		QueryRunner run = new QueryRunner(DbConnections.getArtDbConnectionPool());
+		QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
 		return run.query(sql, rsh, params);
 	}
 
@@ -63,14 +63,14 @@ public class DbService {
 	 * Executes a batch of INSERT, UPDATE, or DELETE queries against the art
 	 * database
 	 *
-	 * @param sql
+	 * @param sql the sql to execute
 	 * @param params the array of query replacement parameters. Each row in this
 	 * array is one set of batch replacement values.
 	 * @return the number of rows updated per statement
 	 * @throws SQLException
 	 */
 	public int[] batch(String sql, Object[][] params) throws SQLException {
-		QueryRunner run = new QueryRunner(DbConnections.getArtDbConnectionPool());
+		QueryRunner run = new QueryRunner(DbConnections.getArtDbDataSource());
 		return run.batch(sql, params);
 	}
 }

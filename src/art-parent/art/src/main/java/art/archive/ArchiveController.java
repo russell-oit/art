@@ -30,7 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- *
+ * Controller for displaying the archives page
+ * 
  * @author Timothy Anyona
  */
 @Controller

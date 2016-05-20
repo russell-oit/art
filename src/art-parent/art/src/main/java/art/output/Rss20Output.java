@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -25,7 +25,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
- * Generate RSS 2.0 output. The query column names MUST follow the RSS 2.0
+ * Generates RSS 2.0 output. The query column names MUST follow the RSS 2.0
  * naming convention for &lt;item&gt; i.e. at least one of "title" or
  * "description" must exists. for other valid columns names (i.e. item sub-tags)
  * refer to the RSS 2.0 specs. (pubDate and guid should be there) <br>
@@ -46,9 +46,10 @@ public class Rss20Output extends StandardOutput {
 	public final SimpleDateFormat Rfc822DateFormat = new SimpleDateFormat("EEE', 'dd' 'MMM' 'yyyy' 'HH:mm:ss' 'Z");
 
 	/**
-	 *
-	 * @param date
-	 * @return rfc822 representation of date
+	 * Returns the given date in rfc 822 format
+	 * 
+	 * @param date the date to format
+	 * @return rfc822 representation of the date
 	 */
 	public String getDateAsRFC822String(Date date) {
 		return Rfc822DateFormat.format(date);
@@ -162,5 +163,4 @@ public class Rss20Output extends StandardOutput {
 		out.println("</channel>");
 		out.println("</rss>");
 	}
-
 }

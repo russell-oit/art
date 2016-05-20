@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * Controller to display error page for unhandled exceptions at the servlet
  * container level. That is exceptions that aren't caught by the spring
- * framework i.e that aren't generated within spring controllers
+ * framework i.e that aren't generated within spring controllers.
  *
  * @author Timothy Anyona
  */
@@ -48,5 +48,4 @@ public class ErrorController {
 			return "error";
 		}
 	}
-
 }

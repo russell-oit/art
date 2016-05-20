@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.job;
 
 import art.datasource.DatasourceService;
@@ -13,7 +30,6 @@ import art.runreport.ParameterProcessorResult;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.user.User;
-import art.user.UserService;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
@@ -58,7 +74,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Controller for jobs page and jobs configuration pages
+ * Controller for jobs and jobs configuration pages
  *
  * @author Timothy Anyona
  */
@@ -220,9 +236,7 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/app/addJob", method = {RequestMethod.GET, RequestMethod.POST})
-	public String addJob(Model model, HttpServletRequest request,
-			HttpSession session) {
-
+	public String addJob(Model model, HttpServletRequest request, HttpSession session) {
 		logger.debug("Entering addJob");
 
 		try {
@@ -330,17 +344,23 @@ public class JobController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @return the jsp file to display
 	 */
 	private String showEditJobs() {
 		logger.debug("Entering showEditJobs");
 		return "editJobs";
 	}
 
+	/**
+	 * Saves job parameters
+	 *
+	 * @param request the http request that contains the job parameters
+	 * @param jobId the job's id
+	 * @throws NumberFormatException
+	 * @throws SQLException
+	 */
 	private void saveJobParameters(HttpServletRequest request, int jobId)
 			throws NumberFormatException, SQLException {
 
@@ -408,11 +428,11 @@ public class JobController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @param action "add" or "edit"
+	 * @param model the spring model
+	 * @return the jsp file to display
 	 */
 	private String showEditJob(String action, Model model) {
 		logger.debug("Entering showEditJob: action='{}'", action);
@@ -429,9 +449,17 @@ public class JobController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
+
 		return "editJob";
 	}
 
+	/**
+	 * Processes the job schedule details and schedules the job using quartz
+	 *
+	 * @param job the job to schedule
+	 * @throws SchedulerException
+	 * @throws ParseException
+	 */
 	private void finalizeSchedule(Job job) throws SchedulerException, ParseException {
 		logger.debug("Entering finalizeSchedule: job={}", job);
 
@@ -610,7 +638,5 @@ public class JobController {
 			//add job and trigger to scheduler
 			scheduler.scheduleJob(quartzJob, trigger);
 		}
-
 	}
-
 }

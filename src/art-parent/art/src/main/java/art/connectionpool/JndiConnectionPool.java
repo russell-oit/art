@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Represents a connection pool using jndi
+ * 
  * @author Timothy Anyona
  */
 public class JndiConnectionPool extends ConnectionPool {
@@ -34,6 +35,8 @@ public class JndiConnectionPool extends ConnectionPool {
 
 	@Override
 	protected DataSource createPool(DatasourceInfo datasourceInfo, int maxPoolSize) {
+		logger.debug("Entering createPool: maxPoolSize={}", maxPoolSize);
+		
 		DataSource dataSource = null;
 		
 		try {
@@ -45,5 +48,4 @@ public class JndiConnectionPool extends ConnectionPool {
 
 		return dataSource;
 	}
-
 }

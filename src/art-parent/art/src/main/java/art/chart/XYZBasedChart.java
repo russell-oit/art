@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -38,6 +38,8 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
 
 /**
+ * Provides methods for working with xyz based charts. These include bubble
+ * charts and heat maps.
  *
  * @author Timothy Anyona
  */
@@ -69,7 +71,7 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 
 	@Override
 	protected void fillDataset(ResultSet rs) throws SQLException {
-		Objects.requireNonNull(rs, "resultset must not be null");
+		Objects.requireNonNull(rs, "rs must not be null");
 
 		DefaultXYZDataset dataset = new DefaultXYZDataset();
 
@@ -211,5 +213,4 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		HeatmapEnhancer heatmapPP = new HeatmapEnhancer();
 		heatmapPP.processChart(chart, heatmapOptions);
 	}
-
 }

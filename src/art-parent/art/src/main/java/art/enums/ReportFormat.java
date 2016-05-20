@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum for report formats
+ * Represents report formats
  *
  * @author Timothy Anyona
  */
@@ -31,6 +31,7 @@ public enum ReportFormat {
 	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
 	pdf("pdf"), slk("slk"), slkZip("slkZip"), tsv("tsv"), tsvZip("tsvZip"),
 	tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png");
+
 	private final String value;
 
 	private ReportFormat(String value) {
@@ -38,16 +39,14 @@ public enum ReportFormat {
 	}
 
 	/**
-	 * Get enum value
+	 * Returns <code>true</code> if this is a html, htmlDataTable, htmlFancy,
+	 * htmlGrid or htmlPlain report format
 	 *
-	 * @return
+	 * @return <code>true</code> if this is a html, htmlDataTable, htmlFancy,
+	 * htmlGrid or htmlPlain report format
 	 */
-	public String getValue() {
-		return value;
-	}
-	
-	public boolean isHtml(){
-		switch(this){
+	public boolean isHtml() {
+		switch (this) {
 			case html:
 			case htmlDataTable:
 			case htmlFancy:
@@ -59,6 +58,11 @@ public enum ReportFormat {
 		}
 	}
 
+	/**
+	 * Return's the file name extension to use for this report format
+	 *
+	 * @return the file name extension to use for this report format
+	 */
 	public String getFilenameExtension() {
 		switch (this) {
 			case htmlPlain:
@@ -90,45 +94,19 @@ public enum ReportFormat {
 		}
 	}
 
-	public String getDirectOutputClassName() {
-		final String PACKAGE_NAME = "art.output.";
-
-		switch (this) {
-			case htmlPlain:
-				return PACKAGE_NAME + "HtmlPlainOutput";
-			case htmlFancy:
-				return PACKAGE_NAME + "HtmlFancyOutput";
-			case htmlGrid:
-				return PACKAGE_NAME + "HtmlGridOutput";
-			case htmlDataTable:
-				return PACKAGE_NAME + "HtmlDataTableOutput";
-			case xls:
-			case xlsZip:
-				return PACKAGE_NAME + "XlsOutput";
-			case xlsx:
-				return PACKAGE_NAME + "XlsxOutput";
-			case pdf:
-				return PACKAGE_NAME + "PdfOutput";
-			case slk:
-			case slkZip:
-				return PACKAGE_NAME + "SlkOutput";
-			case tsv:
-			case tsvZip:
-			case tsvGz:
-				return PACKAGE_NAME + "TsvOutput";
-			case xml:
-				return PACKAGE_NAME + "XmlOutput";
-			case rss20:
-				return PACKAGE_NAME + "Rss20Output";
-			default:
-				return null;
-		}
+	/**
+	 * Returns this enum option's value
+	 *
+	 * @return this enum option's value
+	 */
+	public String getValue() {
+		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<ReportFormat> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -138,10 +116,11 @@ public enum ReportFormat {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, Active is returned
+	 * Converts a value to an enum. If the conversion fails,
+	 * IllegalArgumentException is thrown
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ReportFormat toEnum(String value) {
 		for (ReportFormat v : values()) {
@@ -153,8 +132,7 @@ public enum ReportFormat {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
 	 * @return
 	 */
@@ -163,12 +141,11 @@ public enum ReportFormat {
 	}
 
 	/**
-	 * Get description message string for use in the user interface.
+	 * Returns this enum option's i18n message string
 	 *
-	 * @return
+	 * @return this enum option's i18n message string
 	 */
 	public String getLocalizedDescription() {
 		return "reports.format." + value;
 	}
-
 }

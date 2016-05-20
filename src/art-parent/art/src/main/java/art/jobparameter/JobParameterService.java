@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
+ * Provides methods for retrieving, adding, updating and deleting job parameters
  *
  * @author Timothy Anyona
  */
@@ -54,7 +55,7 @@ public class JobParameterService {
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS_PARAMETERS";
 
 	/**
-	 * Class to map resultset to an object
+	 * Maps a resultset to an object
 	 */
 	private class JobParameterMapper extends BasicRowProcessor {
 
@@ -82,23 +83,29 @@ public class JobParameterService {
 	}
 
 	/**
-	 * Get a filter
+	 * Returns job parameters for the given job
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param jobId the job id
+	 * @return job parameters for the given job
 	 * @throws SQLException
 	 */
-	public List<JobParameter> getJobParameters(int id) throws SQLException {
-		logger.debug("Entering getJobParameters: id={}", id);
+	public List<JobParameter> getJobParameters(int jobId) throws SQLException {
+		logger.debug("Entering getJobParameters: jobId={}", jobId);
 
 		String sql = SQL_SELECT_ALL + " WHERE JOB_ID=?";
 		ResultSetHandler<List<JobParameter>> h = new BeanListHandler<>(JobParameter.class, new JobParameterMapper());
-		return dbService.query(sql, h, id);
+		return dbService.query(sql, h, jobId);
 	}
 
+	/**
+	 * Updates a job parameter
+	 * 
+	 * @param jobParam the updated job parameter
+	 * @throws SQLException 
+	 */
 	public void updateJobParameter(JobParameter jobParam) throws SQLException {
 		logger.debug("Entering updateJobParameter");
-		
+
 		String sql = "UPDATE ART_JOBS_PARAMETERS SET PARAM_VALUE=?"
 				+ " WHERE JOB_ID=? AND PARAM_NAME=?";
 
@@ -110,10 +117,16 @@ public class JobParameterService {
 
 		dbService.update(sql, values);
 	}
-	
-	public void deleteJobParameters(int jobId) throws SQLException{
+
+	/**
+	 * Deletes job parameters for the given job
+	 * 
+	 * @param jobId the job id
+	 * @throws SQLException 
+	 */
+	public void deleteJobParameters(int jobId) throws SQLException {
 		logger.debug("Entering deleteJobParameters: jobId={}", jobId);
-		
+
 		String sql = "DELETE FROM ART_JOBS_PARAMETERS"
 				+ " WHERE JOB_ID=?";
 
@@ -123,17 +136,25 @@ public class JobParameterService {
 
 		dbService.update(sql, values);
 	}
-	
+
+	/**
+	 * Adds a job parameter
+	 * 
+	 * @param jobParam the job parameter to add
+	 * @throws SQLException 
+	 */
 	public void addJobParameter(JobParameter jobParam) throws SQLException {
 		logger.debug("Entering addJobParameter");
-		
+
 		String sql = "INSERT INTO ART_JOBS_PARAMETERS"
 				+ " (JOB_ID, PARAM_TYPE, PARAM_NAME, PARAM_VALUE)"
 				+ " VALUES(" + StringUtils.repeat("?", ",", 4) + ")";
+		
+		String parameterTypeString="X";
 
 		Object[] values = {
 			jobParam.getJobId(),
-			"X",
+			parameterTypeString,
 			jobParam.getName(),
 			jobParam.getValue()
 		};

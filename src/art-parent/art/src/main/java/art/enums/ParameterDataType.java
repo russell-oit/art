@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Enum to represent parameter data types
+ * Represents parameter data types
  *
  * @author Timothy Anyona
  */
@@ -29,51 +29,57 @@ public enum ParameterDataType {
 
 	Varchar("Varchar"), Text("Text"), Integer("Integer"), Number("Number"),
 	Date("Date"), DateTime("DateTime"), Datasource("Datasource");
-	private String value;
+	
+	private final String value;
 
 	private ParameterDataType(String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Determine if this data type contains numeric values
+	 * Returns <code>true</code> if this data type represents numeric values
 	 *
-	 * @return
+	 * @return <code>true</code> if this data type represents numeric values
 	 */
 	public boolean isNumeric() {
-		if (this == Integer || this == Number || this == Datasource) {
-			return true;
-		} else {
-			return false;
+		switch(this){
+			case Integer:
+			case Number:
+			case Datasource:
+				return true;
+			default:
+				return false;
 		}
 	}
 
 	/**
-	 * Determine if this data type contains date values
+	 * Returns <code>true</code> if this data type contains date values
 	 *
-	 * @return
+	 * @return <code>true</code> if this data type contains date values
 	 */
 	public boolean isDate() {
-		if (this == Date || this == DateTime) {
-			return true;
-		} else {
-			return false;
+		switch(this){
+			case Date:
+			case DateTime:
+				return true;
+			default:
+				return false;
 		}
 	}
 
 	/**
-	 * Get enum value
+	 * Returns this enum option's value
 	 *
-	 * @return
+	 * @return this enum option's value
 	 */
 	public String getValue() {
 		return value;
 	}
 
 	/**
-	 * Get a list of all enum values
+	 * Returns all enum options
 	 *
-	 * @return
+	 * @return all enum options
 	 */
 	public static List<ParameterDataType> list() {
 		//use a new list as Arrays.asList() returns a fixed-size list. can't add or remove from it
@@ -83,22 +89,22 @@ public enum ParameterDataType {
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, Varchar is returned
+	 * Converts a value to an enum. If the conversion fails, Varchar is returned
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to convert
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ParameterDataType toEnum(String value) {
 		return toEnum(value, Varchar);
 	}
 
 	/**
-	 * Convert a value to an enum. If the conversion fails, the specified
+	 * Converts a value to an enum. If the conversion fails, the specified
 	 * default is returned
 	 *
-	 * @param value
-	 * @param defaultEnum
-	 * @return
+	 * @param value the value to convert
+	 * @param defaultEnum the default enum option to use
+	 * @return the enum option that corresponds to the value
 	 */
 	public static ParameterDataType toEnum(String value, ParameterDataType defaultEnum) {
 		for (ParameterDataType v : values()) {
@@ -110,13 +116,11 @@ public enum ParameterDataType {
 	}
 
 	/**
-	 * Get enum description. In case description needs to be different from
-	 * internal value
+	 * Returns this enum option's description
 	 *
-	 * @return
+	 * @return this enum option's description
 	 */
 	public String getDescription() {
 		return value;
 	}
-
 }

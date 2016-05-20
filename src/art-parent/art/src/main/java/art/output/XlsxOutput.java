@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2001-2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -35,9 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Generate xlsx output. Using code based on BigGridDemo
- * (http://svn.apache.org/repos/asf/poi/trunk/src/examples/src/org/apache/poi/xssf/usermodel/examples/BigGridDemo.java)
- * in order to enable generation of large xlsx files with limited memory
+ * Generates xlsx output
  *
  * @author Timothy Anyona
  */
@@ -58,9 +56,6 @@ public class XlsxOutput extends StandardOutput {
 	private Row row;
 	private Cell cell;
 
-	/**
-	 * Initialise objects required to generate output
-	 */
 	@Override
 	public void init() {
 		try {
@@ -198,9 +193,9 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void endRows() {
 		try {
-			FileOutputStream fout = new FileOutputStream(fullOutputFilename);
-			wb.write(fout);
-			fout.close();
+			try (FileOutputStream fout = new FileOutputStream(fullOutputFilename)) {
+				wb.write(fout);
+			}
 
 			// dispose of temporary files backing this workbook on disk
 			wb.dispose();
@@ -211,9 +206,8 @@ public class XlsxOutput extends StandardOutput {
 			if (!deleted) {
 				logger.warn("Template file not deleted: {}", templateFileName);
 			}
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
 		}
 	}
-
 }

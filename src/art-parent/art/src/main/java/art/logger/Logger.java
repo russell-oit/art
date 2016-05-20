@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2014 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Class used to represent an art logger configuration entity
+ * Represent a logger
  *
  * @author Timothy Anyona
  */
@@ -85,5 +85,4 @@ public class Logger implements Serializable {
 	public String toString() {
 		return "Logger{" + "name=" + name + '}';
 	}
-
 }

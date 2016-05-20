@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -55,7 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class to generate reports using the JasperReports library
+ * Generates reports using the JasperReports library
  *
  * @author Timothy Anyona
  */
@@ -73,13 +73,13 @@ public class JasperReportsOutput {
 	}
 
 	/**
-	 * Generate report output
+	 * Generates report output
 	 *
-	 * @param report
-	 * @param reportParams
-	 * @param reportType
-	 * @param reportFormat
-	 * @param outputFileName
+	 * @param report the report to use, not null
+	 * @param reportParams the report parameters to use, not null
+	 * @param reportType the report type to use
+	 * @param reportFormat the report format to use, not null
+	 * @param outputFileName the full path of the output file to use, not null
 	 * @throws java.io.IOException
 	 * @throws java.sql.SQLException
 	 * @throws net.sf.jasperreports.engine.JRException
@@ -87,6 +87,8 @@ public class JasperReportsOutput {
 	public void generateReport(Report report, List<ReportParameter> reportParams,
 			ReportType reportType, ReportFormat reportFormat, String outputFileName)
 			throws IOException, SQLException, JRException {
+
+		logger.debug("Entering generateReport");
 
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(reportParams, "reportParams must not be null");
@@ -194,8 +196,8 @@ public class JasperReportsOutput {
 	}
 
 	/**
-	 * Create a jasper reports virtualizer using settings in the
-	 * jasperreports.properties file. swap virtualizer will be used if none is
+	 * Creates a jasper reports virtualizer using settings in the
+	 * jasperreports.properties file. Swap virtualizer will be used if none is
 	 * configured.
 	 *
 	 * @return created virtualizer or null if virtualizer property in the file
@@ -281,7 +283,7 @@ public class JasperReportsOutput {
 	}
 
 	/**
-	 * Compile a report and all it's subreports
+	 * Compiles a report and all its subreports
 	 *
 	 * @param baseFileName report file name without the extension
 	 */
