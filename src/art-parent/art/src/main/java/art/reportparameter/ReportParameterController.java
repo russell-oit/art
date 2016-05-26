@@ -37,7 +37,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- *
+ * Controller for report parameter configuration
+ * 
  * @author Timothy Anyona
  */
 @Controller
@@ -167,11 +168,11 @@ public class ReportParameterController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @param action the action to take
+	 * @param model the model to use
+	 * @return the jsp file to display
 	 */
 	private String showEditReportParameter(String action, Model model, Integer reportId) {
 		logger.debug("Entering showEditReportParameter: action='{}', reportId={}", action, reportId);

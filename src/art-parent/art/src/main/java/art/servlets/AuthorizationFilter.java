@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.servlets;
 
 import art.enums.AccessLevel;
@@ -48,7 +64,7 @@ public class AuthorizationFilter implements Filter {
 	}
 
 	/**
-	 * Ensure user has access to the requested page
+	 * Ensures a user has access to the requested page
 	 *
 	 * @param srequest
 	 * @param sresponse
@@ -177,10 +193,10 @@ public class AuthorizationFilter implements Filter {
 	}
 
 	/**
-	 * Add mdc attributes
+	 * Adds mdc attributes
 	 *
-	 * @param request
-	 * @param user
+	 * @param request the http request
+	 * @param user the logged in user
 	 */
 	private void addMdcAttributes(HttpServletRequest request, User user) {
 		//http://logback.qos.ch/manual/mdc.html
@@ -192,7 +208,7 @@ public class AuthorizationFilter implements Filter {
 	}
 
 	/**
-	 * Clear mdc attributes.
+	 * Clears mdc attributes.
 	 */
 	private void removeMdcAttributes() {
 		//everything added to mdc should be removed here
@@ -202,6 +218,14 @@ public class AuthorizationFilter implements Filter {
 		MDC.remove("xForwardedFor");
 	}
 
+	/**
+	 * Returns <code>true</code> if the logged in user can access the given page
+	 *
+	 * @param page the page
+	 * @param user the user
+	 * @param session the http session
+	 * @return <code>true</code> if the logged in user can access the given page
+	 */
 	private boolean canAccessPage(String page, User user, HttpSession session) {
 		if (user.getAccessLevel() == null) {
 			return false;
@@ -283,7 +307,7 @@ public class AuthorizationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "reportsConfig") || StringUtils.endsWith(page, "Report")
-				||  StringUtils.endsWith(page, "Reports")) {
+				|| StringUtils.endsWith(page, "Reports")) {
 			//junior admins and above
 			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;
@@ -312,7 +336,7 @@ public class AuthorizationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "schedules") || StringUtils.endsWith(page, "Schedule")
-				|| StringUtils.endsWith(page, "Schedules") ) {
+				|| StringUtils.endsWith(page, "Schedules")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
 				authorised = true;

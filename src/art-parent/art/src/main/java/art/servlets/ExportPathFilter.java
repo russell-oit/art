@@ -87,8 +87,8 @@ public class ExportPathFilter implements Filter {
 			IOUtils.closeQuietly(fs);
 			try {
 				os.flush();
-			} catch (IOException e) {
-				logger.debug("Error flushing stream ", e);
+			} catch (IOException ex) {
+				logger.debug("Error flushing stream ", ex);
 			}
 		}
 	}

@@ -176,11 +176,11 @@ public class ParameterController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @param action the action to be performed
+	 * @param model the model to use
+	 * @return the jsp file to display
 	 */
 	private String showEditParameter(String action, Model model) {
 		logger.debug("Entering showEditParameter: action='{}'", action);
@@ -199,5 +199,4 @@ public class ParameterController {
 		
 		return "editParameter";
 	}
-
 }

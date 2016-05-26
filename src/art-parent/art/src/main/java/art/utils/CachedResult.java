@@ -15,21 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Reverse a resultset in a table Usage
- *
- * CachedResult cr = new CachedResult();
- * cr.setTargetConnection(targetConnection); cr.setResultset(rs);
- * cr.setCachedTableName(tableName); cr.setMode(1|2); // 1 = append 2 =
- * truncate/insert (3 = update (not implemented)) cr.cacheIt();
- *
- * List l = cr.getColumnsNames();
- *
- * Usage to delete an existing cached table CachedResult cr = new
- * CachedResult(); cr.setTargetConnection(targetConnection);
- * cr.setCachedTableName(tableName); cr.drop();
- *
- */
 package art.utils;
 
 import java.sql.*;

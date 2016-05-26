@@ -19,7 +19,7 @@ package art.report;
 import java.io.Serializable;
 
 /**
- * Class to hold chart options
+ * Represents chart options
  *
  * @author Timothy Anyona
  */

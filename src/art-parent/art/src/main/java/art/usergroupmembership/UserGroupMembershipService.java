@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to user group membership
+ * Provides methods for retrieving, updating and deleting user group memberships
  *
  * @author Timothy Anyona
  */
@@ -85,9 +85,9 @@ public class UserGroupMembershipService {
 	}
 
 	/**
-	 * Get all user group memberships
+	 * Returns all user group memberships
 	 *
-	 * @return list of all user group memberships, empty list otherwise
+	 * @return all user group memberships
 	 * @throws SQLException
 	 */
 	public List<UserGroupMembership> getAllUserGroupMemberships() throws SQLException {
@@ -98,10 +98,10 @@ public class UserGroupMembershipService {
 	}
 
 	/**
-	 * Delete a user group membership
+	 * Deletes a user group membership
 	 *
-	 * @param userId
-	 * @param userGroupId
+	 * @param userId the user id
+	 * @param userGroupId the user group id
 	 * @throws SQLException
 	 */
 	public void deleteUserGroupMembership(int userId, int userGroupId) throws SQLException {
@@ -115,11 +115,11 @@ public class UserGroupMembershipService {
 	}
 
 	/**
-	 * Add or remove user group memberships
+	 * Adds or removes user group memberships
 	 *
 	 * @param action "add" or "remove". anything else will be treated as remove
-	 * @param users
-	 * @param userGroups array of user group ids
+	 * @param users user identifiers in the format user id-username
+	 * @param userGroups user group ids
 	 * @throws SQLException
 	 */
 	public void updateUserGroupMembership(String action, String[] users, Integer[] userGroups) throws SQLException {
@@ -172,5 +172,4 @@ public class UserGroupMembershipService {
 			}
 		}
 	}
-
 }

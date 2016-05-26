@@ -44,12 +44,12 @@ public class SchedulerUtils {
 	private static Scheduler scheduler;
 
 	/**
-	 * Creates and starts a new scheduler instance, shutting down the existing
+	 * Creates and starts a new quartz scheduler instance, shutting down the existing
 	 * one if any. The scheduler is stored as a static variable in this class.
 	 *
-	 * @param artDbConfig
-	 * @param propertiesFilePath
-	 * @return
+	 * @param artDbConfig the art database configuration
+	 * @param propertiesFilePath the quartz scheduler properties file path
+	 * @return the created scheduler instance
 	 */
 	public static Scheduler createScheduler(ArtDatabase artDbConfig, String propertiesFilePath) {
 		try {
@@ -71,10 +71,18 @@ public class SchedulerUtils {
 		return scheduler;
 	}
 
+	/**
+	 * Returns the quartz scheduler
+	 * 
+	 * @return the quartz scheduler
+	 */
 	public static Scheduler getScheduler() {
 		return scheduler;
 	}
 
+	/**
+	 * Shuts down the quartz scheduler
+	 */
 	public static void shutdownScheduler() {
 		if (scheduler != null) {
 			try {
@@ -87,11 +95,11 @@ public class SchedulerUtils {
 	}
 
 	/**
-	 * Get populated properties object
+	 * Returns quartz scheduler properties
 	 *
-	 * @param artDbConfig
-	 * @param propertiesFilePath
-	 * @return populated properties object
+	 * @param artDbConfig the art database configuration, not null
+	 * @param propertiesFilePath the quartz scheduler propertis file
+	 * @return quartz scheduler properties
 	 */
 	private static Properties getSchedulerProperties(ArtDatabase artDbConfig, String propertiesFilePath) {
 		logger.debug("Entering getSchedulerProperties: propertiesFilePath='{}'", propertiesFilePath);

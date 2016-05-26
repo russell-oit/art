@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Class to represent user rule values
+ * Represents a user rule value
  *
  * @author Timothy Anyona
  */

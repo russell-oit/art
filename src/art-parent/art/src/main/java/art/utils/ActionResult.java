@@ -19,7 +19,7 @@
 package art.utils;
 
 /**
- * Class to hold results of an action
+ * Represents results of an action
  * 
  * @author Timothy Anyona
  */

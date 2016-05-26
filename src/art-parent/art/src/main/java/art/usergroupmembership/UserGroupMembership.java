@@ -22,7 +22,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Class to represent user group memberships
+ * Represents user group memberships
  *
  * @author Timothy Anyona
  */

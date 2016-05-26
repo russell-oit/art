@@ -19,8 +19,8 @@ package art.settings;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
- * Class to represent custom settings that can't be set from the user interface.
- * Mainly to enhance security.
+ * Represents custom settings that can't be set from the user interface. Mainly
+ * to enhance security.
  *
  * @author Timothy Anyona
  */

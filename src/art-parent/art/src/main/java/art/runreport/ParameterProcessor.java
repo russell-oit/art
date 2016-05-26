@@ -44,8 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Takes report parameters contained in a http request and populates maps with
- * their values
+ * Processes report parameters contained in http requests or maps and provides
+ * their final values
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
@@ -55,14 +55,13 @@ public class ParameterProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(ParameterProcessor.class);
 
 	/**
-	 * Process a http request for running a report and fill objects with
+	 * Processes a http request for running a report and fills objects with
 	 * parameter values to be used when running a report
 	 *
-	 * @param request http request
-	 * @param reportId report id
-	 * @return map with report parameters. key is parameter name, value is
-	 * populated report parameter object
+	 * @param request the http request
+	 * @return final report parameters
 	 * @throws java.sql.SQLException
+	 * @throws java.text.ParseException
 	 */
 	public ParameterProcessorResult processHttpParameters(
 			HttpServletRequest request) throws SQLException, ParseException {
@@ -85,15 +84,15 @@ public class ParameterProcessor {
 	}
 
 	/**
-	 * Process parameter value strings and fill objects with parameter values to
-	 * be used when running a report
+	 * Processes parameter value strings and fills objects with parameter values
+	 * to be used when running a report
 	 *
-	 * @param passedValuesMap map passed parameter values. key is html parameter
-	 * name e.g. p-due_date, value is string array with values
-	 * @param reportId report id
-	 * @return map with report parameters. key is parameter name e.g. due_date,
-	 * value is populated report parameter object
+	 * @param passedValuesMap the parameter values. key is html parameter name
+	 * e.g. p-due_date, value is string array with values
+	 * @param reportId the report id
+	 * @return final report parameters
 	 * @throws java.sql.SQLException
+	 * @throws java.text.ParseException
 	 */
 	public ParameterProcessorResult process(Map<String, String[]> passedValuesMap,
 			int reportId) throws SQLException, ParseException {
@@ -135,6 +134,12 @@ public class ParameterProcessor {
 		return result;
 	}
 
+	/**
+	 * Populates lov values for all lov parameters
+	 *
+	 * @param reportParamsMap the report parameters
+	 * @throws SQLException
+	 */
 	private void setLovValues(Map<String, ReportParameter> reportParamsMap) throws SQLException {
 		ReportService reportService = new ReportService();
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
@@ -162,7 +167,15 @@ public class ParameterProcessor {
 		}
 	}
 
-	private void setPassedParameterValues(Map<String, String[]> passedValuesMap, Map<String, ReportParameter> reportParamsMap) {
+	/**
+	 * Populates the passed values property of the report parameters
+	 *
+	 * @param passedValuesMap the passed values
+	 * @param reportParamsMap the report parameters
+	 */
+	private void setPassedParameterValues(Map<String, String[]> passedValuesMap,
+			Map<String, ReportParameter> reportParamsMap) {
+
 		logger.debug("Entering setPassedParameterValues");
 
 		//process report parameters
@@ -204,7 +217,19 @@ public class ParameterProcessor {
 		}
 	}
 
-	private void handleAllValues(Map<String, ReportParameter> reportParamsMap) throws SQLException, ParseException {
+	/**
+	 * Processes final report parameters where "All" is selected for multi-value
+	 * parameters
+	 *
+	 * @param reportParamsMap the report parameters
+	 * @throws SQLException
+	 * @throws ParseException
+	 */
+	private void handleAllValues(Map<String, ReportParameter> reportParamsMap)
+			throws SQLException, ParseException {
+
+		logger.debug("Entering handleAllValues");
+
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			ReportParameter reportParam = entry.getValue();
 			Parameter param = reportParam.getParameter();
@@ -245,7 +270,16 @@ public class ParameterProcessor {
 		}
 	}
 
-	private void setActualParameterValues(List<ReportParameter> reportParamsList) throws NumberFormatException, ParseException {
+	/**
+	 * Populates actual parameter values to be used for the report parameters
+	 *
+	 * @param reportParamsList the report parameters
+	 * @throws NumberFormatException
+	 * @throws ParseException
+	 */
+	private void setActualParameterValues(List<ReportParameter> reportParamsList)
+			throws NumberFormatException, ParseException {
+
 		logger.debug("Entering setActualParameterValues");
 
 		for (ReportParameter reportParam : reportParamsList) {
@@ -299,6 +333,15 @@ public class ParameterProcessor {
 		}
 	}
 
+	/**
+	 * Converts a string parameter value to an object of the appropriate type,
+	 * depending on the parameter data type
+	 *
+	 * @param value the string parameter value
+	 * @param param the parameter object
+	 * @return an object of the appropriate type
+	 * @throws ParseException
+	 */
 	public Object convertParameterStringValueToObject(String value, Parameter param) throws ParseException {
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
 
@@ -314,6 +357,14 @@ public class ParameterProcessor {
 		}
 	}
 
+	/**
+	 * Converts a string parameter value to an appropriate numeric object,
+	 * depending on the parameter data type
+	 *
+	 * @param value the string parameter value
+	 * @param param the parameter object
+	 * @return an appropriate numeric object e.g. Integer, Double
+	 */
 	private Object convertParameterStringValueToNumber(String value, Parameter param) {
 		logger.debug("Entering convertParameterStringValueToNumber: value='{}'", value);
 
@@ -354,6 +405,13 @@ public class ParameterProcessor {
 		}
 	}
 
+	/**
+	 * Converts a string parameter value to a date object
+	 *
+	 * @param value the string parameter value
+	 * @return a date object
+	 * @throws ParseException
+	 */
 	public Date convertParameterStringValueToDate(String value) throws ParseException {
 		logger.debug("Entering convertParameterStringValueToDate: value='{}'", value);
 
@@ -406,6 +464,13 @@ public class ParameterProcessor {
 		return dateValue;
 	}
 
+	/**
+	 * Processes report options in a given set of parameters
+	 *
+	 * @param passedValuesMap the parameters that may contain some report
+	 * options
+	 * @return final report option values to use when running a report
+	 */
 	private ReportOptions processReportOptions(Map<String, String[]> passedValuesMap) {
 		logger.debug("Entering processReportOptions");
 
@@ -433,6 +498,12 @@ public class ParameterProcessor {
 		return reportOptions;
 	}
 
+	/**
+	 * Processes chart options in a given set of parameters
+	 *
+	 * @param passedValuesMap the parameters that may contain some chart options
+	 * @return final chart options to use when running a report
+	 */
 	private ChartOptions processChartOptions(Map<String, String[]> passedValuesMap) {
 		logger.debug("Entering processChartOptions");
 
@@ -489,6 +560,11 @@ public class ParameterProcessor {
 		return chartOptions;
 	}
 
+	/**
+	 * Populates the chained parent property for report parameters
+	 * 
+	 * @param reportParamsList the report parameters
+	 */
 	private void setIsChainedParent(List<ReportParameter> reportParamsList) {
 		StringBuilder allchainedParentsSb = new StringBuilder();
 
@@ -507,5 +583,4 @@ public class ParameterProcessor {
 			}
 		}
 	}
-
 }

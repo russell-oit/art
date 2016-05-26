@@ -20,7 +20,8 @@ package art.user;
 import java.io.Serializable;
 
 /**
- *
+ * Represents a multiple user edit
+ * 
  * @author Timothy Anyona
  */
 public class MultipleUserEdit implements Serializable {

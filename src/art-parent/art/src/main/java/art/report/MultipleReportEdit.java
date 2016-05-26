@@ -20,7 +20,8 @@ package art.report;
 import java.io.Serializable;
 
 /**
- *
+ * Represents multiple report edit details
+ * 
  * @author Timothy Anyona
  */
 public class MultipleReportEdit implements Serializable {

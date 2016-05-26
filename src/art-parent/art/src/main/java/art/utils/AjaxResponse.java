@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -17,7 +17,7 @@
 package art.utils;
 
 /**
- * Class to hold ajax response. To be returned as json.
+ * Represents an ajax response
  *
  * @author Timothy Anyona
  */
@@ -25,7 +25,6 @@ public class AjaxResponse {
 
 	private boolean success;
 	private String errorMessage;
-
 	private Object data;
 
 	/**

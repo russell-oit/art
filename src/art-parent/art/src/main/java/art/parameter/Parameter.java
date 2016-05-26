@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Class to represent a parameter
+ * Represent a parameter
  *
  * @author Timothy Anyona
  */

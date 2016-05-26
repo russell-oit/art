@@ -31,7 +31,8 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- *
+ * Provides methods for generating drilldown links
+ * 
  * @author Timothy Anyona
  */
 public class DrilldownLinkHelper implements Serializable {
@@ -42,6 +43,13 @@ public class DrilldownLinkHelper implements Serializable {
 	private final Set<String> drilldownParamNames;
 	private final List<ReportParameter> reportParamsList;
 
+	/**
+	 * Constructs a new drilldown link helper
+	 * 
+	 * @param drilldown the drilldown to use
+	 * @param reportParamsList the report parameters, may be null
+	 * @throws SQLException 
+	 */
 	public DrilldownLinkHelper(Drilldown drilldown, List<ReportParameter> reportParamsList) throws SQLException {
 		Objects.requireNonNull(drilldown, "drilldown must not be null");
 
@@ -63,6 +71,11 @@ public class DrilldownLinkHelper implements Serializable {
 		}
 	}
 
+	/**
+	 * Adds the drilldown base url
+	 * 
+	 * @param sb drilldown link string builder
+	 */
 	private void addDrilldownBaseUrl(StringBuilder sb) {
 		if (drilldown != null) {
 			int drilldownReportId = drilldown.getDrilldownReport().getReportId();
@@ -76,6 +89,13 @@ public class DrilldownLinkHelper implements Serializable {
 		}
 	}
 
+	/**
+	 * Adds a parameter to the drilldown url
+	 * 
+	 * @param paramName the parameter name
+	 * @param paramValue the parameter value
+	 * @param sb the drilldown link string builder
+	 */
 	private void addUrlParameter(String paramName, String paramValue, StringBuilder sb) {
 		if (paramName == null || paramValue == null || sb == null) {
 			return;
@@ -89,6 +109,11 @@ public class DrilldownLinkHelper implements Serializable {
 		}
 	}
 
+	/**
+	 * Adds parameters from the parent report
+	 * 
+	 * @param sb the drilldown link string builder
+	 */
 	private void addParentParameters(StringBuilder sb) {
 		if (reportParamsList == null) {
 			return;
@@ -108,9 +133,14 @@ public class DrilldownLinkHelper implements Serializable {
 				}
 			}
 		}
-
 	}
 
+	/**
+	 * Returns the drilldown link to use
+	 * 
+	 * @param paramValues the parameters to include
+	 * @return the drilldown link to use
+	 */
 	public String getDrilldownLink(Object... paramValues) {
 		StringBuilder sb = new StringBuilder(200);
 
@@ -135,5 +165,4 @@ public class DrilldownLinkHelper implements Serializable {
 
 		return drilldownUrl;
 	}
-
 }

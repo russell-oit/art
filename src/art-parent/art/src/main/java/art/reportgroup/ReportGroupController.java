@@ -169,12 +169,12 @@ public class ReportGroupController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and return the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
+	 * @param action "add" or "edit"
+	 * @param model the model to use
+	 * @param session the http session
+	 * @return the jsp file to display
 	 */
 	private String showEditReportGroup(String action, Model model) {
 		logger.debug("Entering showEditReportGroup: action='{}'", action);
@@ -182,5 +182,4 @@ public class ReportGroupController {
 		model.addAttribute("action", action);
 		return "editReportGroup";
 	}
-
 }

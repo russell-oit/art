@@ -67,17 +67,21 @@ public class UpgradeHelper {
 		dbService = new DbService();
 	}
 
+	/**
+	 * Runs upgrade steps
+	 * 
+	 * @param artVersion the art version
+	 * @param upgradeFilePath the path to the upgrade file 
+	 */
 	public void upgrade(String artVersion, String upgradeFilePath) {
 		migrateJobsToQuartz();
 		upgradeDatabase(artVersion, upgradeFilePath);
 	}
 
 	/**
-	 * Migrate existing jobs created in art versions before 1.11 to quartz jobs
-	 *
+	 * Migrates art jobs to quartz jobs
 	 */
 	private void migrateJobsToQuartz() {
-
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
@@ -223,7 +227,10 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * run upgrade steps
+	 * Runs upgrade steps
+	 * 
+	 * @param artVersion the art version
+	 * @param upgradeFilePath the path to the upgrade file
 	 */
 	private void upgradeDatabase(String artVersion, String upgradeFilePath) {
 		File upgradeFile = new File(upgradeFilePath);
@@ -262,7 +269,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate user_id columns. Columns added in 3.0
+	 * Populates user_id columns. Columns added in 3.0
 	 */
 	private void addUserIds() throws SQLException {
 		logger.debug("Entering addUserIds");
@@ -322,7 +329,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate schedule_id column. Column added in 3.0
+	 * Populates schedule_id column. Column added in 3.0
 	 */
 	private void addScheduleIds() throws SQLException {
 		logger.debug("Entering addScheduleIds");
@@ -356,7 +363,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate drilldown_id column. Column added in 3.0
+	 * Populates drilldown_id column. Column added in 3.0
 	 */
 	private void addDrilldownIds() throws SQLException {
 		logger.debug("Entering addDrilldownIds");
@@ -396,7 +403,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate rule_id column. Column added in 3.0
+	 * Populates rule_id column. Column added in 3.0
 	 */
 	private void addRuleIds() throws SQLException {
 		logger.debug("Entering addRuleIds");
@@ -440,7 +447,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate query rule id column. Column added in 3.0
+	 * Populates query rule id column. Column added in 3.0
 	 */
 	private void addQueryRuleIds() throws SQLException {
 		logger.debug("Entering addQueryRuleIds");
@@ -480,7 +487,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate art_parameters table. Added in 3.0
+	 * Populates art_parameters table. Added in 3.0
 	 */
 	private void addParameters() throws SQLException {
 		logger.debug("Entering addParameters");
@@ -587,7 +594,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate user rule value key column. Column added in 3.0
+	 * Populates user rule value key column. Column added in 3.0
 	 */
 	private void addUserRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserRuleValueKeys");
@@ -618,7 +625,7 @@ public class UpgradeHelper {
 	}
 
 	/**
-	 * Populate user group rule value key column. Column added in 3.0
+	 * Populates user group rule value key column. Column added in 3.0
 	 */
 	private void addUserGroupRuleValueKeys() throws SQLException {
 		logger.debug("Entering addUserGroupRuleValueKeys");
@@ -649,7 +656,7 @@ public class UpgradeHelper {
 	}
 	
 	/**
-	 * Populate cached_datasource_id column. Column added in 3.0
+	 * Populates cached_datasource_id column. Column added in 3.0
 	 */
 	private void addCachedDatasourceIds() throws SQLException {
 		logger.debug("Entering addCachedDatasourceIds");

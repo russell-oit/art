@@ -18,8 +18,8 @@
 package art.utils;
 
 /**
- * A generic application exception. This class is used to wrap exceptions of the
- * underlying code, for example SQLExceptions
+ * Represents a generic application exception. This class is used to wrap
+ * exceptions of the underlying code, for example SQLExceptions
  *
  * @author Timothy Anyona
  */

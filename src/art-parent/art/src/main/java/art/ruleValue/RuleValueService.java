@@ -38,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to rule values
+ * Provides methods for retrieving, adding, updating and deleting rule values
  *
  * @author Timothy Anyona
  */
@@ -145,9 +145,9 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Get all user rule values
+	 * Returns all user rule values
 	 *
-	 * @return list of all user rule values, empty list otherwise
+	 * @return all user rule values
 	 * @throws SQLException
 	 */
 	public List<UserRuleValue> getAllUserRuleValues() throws SQLException {
@@ -158,10 +158,10 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Get a user rule value
+	 * Returns a user rule value
 	 *
-	 * @param id rule value key
-	 * @return populated object if found, null otherwise
+	 * @param id the rule value key
+	 * @return user rule value if found, null otherwise
 	 * @throws SQLException
 	 */
 	public UserRuleValue getUserRuleValue(String id) throws SQLException {
@@ -173,9 +173,9 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Get all user group rule values
+	 * Returns all user group rule values
 	 *
-	 * @return list of all user group rule values, empty list otherwise
+	 * @return all user group rule values
 	 * @throws SQLException
 	 */
 	public List<UserGroupRuleValue> getAllUserGroupRuleValues() throws SQLException {
@@ -186,10 +186,10 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Get a user group rule value
+	 * Returns a user group rule value
 	 *
-	 * @param id rule value key
-	 * @return populated object if found, null otherwise
+	 * @param id the rule value key
+	 * @return user group rule value if found, null otherwise
 	 * @throws SQLException
 	 */
 	public UserGroupRuleValue getUserGroupRuleValue(String id) throws SQLException {
@@ -201,9 +201,9 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Delete a user rule value
+	 * Deletes a user rule value
 	 *
-	 * @param id rule value key
+	 * @param id the rule value key
 	 * @throws SQLException
 	 */
 	public void deleteUserRuleValue(String id) throws SQLException {
@@ -216,9 +216,9 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Delete a user group rule value
+	 * Deletes a user group rule value
 	 *
-	 * @param id rule value key
+	 * @param id the rule value key
 	 * @throws SQLException
 	 */
 	public void deleteUserGroupRuleValue(String id) throws SQLException {
@@ -231,11 +231,11 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Delete all user rule values
+	 * Deletes all user rule values
 	 *
-	 * @param users
-	 * @param userGroups array of user group ids
-	 * @param ruleId
+	 * @param users user identifiers in the format user id-username
+	 * @param userGroups user group ids
+	 * @param ruleId the rule id
 	 * @throws SQLException
 	 */
 	public void deleteAllRuleValues(String[] users, Integer[] userGroups,
@@ -290,16 +290,15 @@ public class RuleValueService {
 
 			dbService.update(finalSql, finalValues.toArray());
 		}
-
 	}
 
 	/**
-	 * Add rule value for users and/or user groups
+	 * Adds a rule value for users or user groups
 	 *
-	 * @param users
-	 * @param userGroups array of user group ids
-	 * @param ruleKey
-	 * @param ruleValue
+	 * @param users user identifiers in the format user id-username
+	 * @param userGroups user group ids
+	 * @param ruleKey the rule key
+	 * @param ruleValue the rule value
 	 * @throws SQLException
 	 */
 	public void addRuleValue(String[] users, Integer[] userGroups,
@@ -347,9 +346,9 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Update a user rule value record
+	 * Updates a user rule value
 	 *
-	 * @param value
+	 * @param value the updated rule value
 	 * @throws SQLException
 	 */
 	public void updateUserRuleValue(UserRuleValue value) throws SQLException {
@@ -367,9 +366,9 @@ public class RuleValueService {
 	}
 
 	/**
-	 * Update a user group rule value record
+	 * Updates a user group rule value
 	 *
-	 * @param value
+	 * @param value the updated rule value
 	 * @throws SQLException
 	 */
 	public void updateUserGroupRuleValue(UserGroupRuleValue value) throws SQLException {
@@ -385,5 +384,4 @@ public class RuleValueService {
 
 		dbService.update(sql, values);
 	}
-
 }

@@ -40,7 +40,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to rules
+ * Provides methods for retrieving, adding, updating and deleting rules
  *
  * @author Timothy Anyona
  */
@@ -86,9 +86,9 @@ public class RuleService {
 	}
 
 	/**
-	 * Get all rules
+	 * Returns all rules
 	 *
-	 * @return list of all rules, empty list otherwise
+	 * @return all rules
 	 * @throws SQLException
 	 */
 	@Cacheable("rules")
@@ -100,10 +100,10 @@ public class RuleService {
 	}
 
 	/**
-	 * Get a rule
+	 * Returns a rule
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the rule id
+	 * @return rule if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("rules")
@@ -116,10 +116,10 @@ public class RuleService {
 	}
 
 	/**
-	 * Get reports that use a given rule
+	 * Returns reports that use a given rule
 	 *
-	 * @param ruleId
-	 * @return list with linked report names, empty list otherwise
+	 * @param ruleId the rule id
+	 * @return linked report names
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int ruleId) throws SQLException {
@@ -136,9 +136,9 @@ public class RuleService {
 	}
 
 	/**
-	 * Delete a rule
+	 * Deletes a rule
 	 *
-	 * @param id
+	 * @param id the rule id
 	 * @return ActionResult. if delete was not successful, data contains a list
 	 * of linked reports which prevented the rule from being deleted
 	 * @throws SQLException
@@ -171,30 +171,30 @@ public class RuleService {
 		result.setSuccess(true);
 		return result;
 	}
-	
+
 	/**
-	 * Delete a rule
+	 * Deletes multiple rules
 	 *
-	 * @param ids
-	 * @return ActionResult. if delete was not successful, data contains a list
-	 * of linked reports which prevented the rule from being deleted
+	 * @param ids the ids of the rules to delete
+	 * @return ActionResult. if delete was not successful, data contains ids of
+	 * rules which were not deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
 	public ActionResult deleteRules(Integer[] ids) throws SQLException {
-		logger.debug("Entering deleteRules: ids={}", (Object)ids);
+		logger.debug("Entering deleteRules: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords=new ArrayList<>();
-		
-		for(Integer id : ids){
-			ActionResult deleteResult=deleteRule(id);
-			if(!deleteResult.isSuccess()){
+		List<Integer> nonDeletedRecords = new ArrayList<>();
+
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteRule(id);
+			if (!deleteResult.isSuccess()) {
 				nonDeletedRecords.add(id);
 			}
 		}
-		
-		if(nonDeletedRecords.isEmpty()){
+
+		if (nonDeletedRecords.isEmpty()) {
 			result.setSuccess(true);
 		} else {
 			result.setData(nonDeletedRecords);
@@ -203,10 +203,10 @@ public class RuleService {
 	}
 
 	/**
-	 * Add a new rule to the database
+	 * Adds a new rule
 	 *
-	 * @param rule
-	 * @param actionUser
+	 * @param rule the rule to add
+	 * @param actionUser the user who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -237,10 +237,10 @@ public class RuleService {
 	}
 
 	/**
-	 * Update an existing rule
+	 * Updates an existing rule
 	 *
-	 * @param rule
-	 * @param actionUser
+	 * @param rule the updated rule
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
@@ -251,11 +251,11 @@ public class RuleService {
 	}
 
 	/**
-	 * Save a rule
+	 * Saves a rule
 	 *
-	 * @param rule
-	 * @param newRecord
-	 * @param actionUser
+	 * @param rule the rule to save
+	 * @param newRecord whether this is a new record
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	private void saveRule(Rule rule, boolean newRecord, User actionUser) throws SQLException {
@@ -314,10 +314,10 @@ public class RuleService {
 	}
 
 	/**
-	 * Get the name of a given rule
+	 * Returns the name of a given rule
 	 *
-	 * @param id
-	 * @return
+	 * @param id the rule id
+	 * @return the name of the given rule
 	 * @throws SQLException
 	 */
 	@Cacheable("rules")
@@ -328,5 +328,4 @@ public class RuleService {
 		ResultSetHandler<String> h = new ScalarHandler<>(1);
 		return dbService.query(sql, h, id);
 	}
-
 }

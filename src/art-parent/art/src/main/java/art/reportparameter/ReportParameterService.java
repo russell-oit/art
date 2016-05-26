@@ -39,7 +39,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to report parameters
+ * Provide methods for retrieving, addding, updating and deleting report
+ * parameters
  *
  * @author Timothy Anyona
  */
@@ -100,11 +101,11 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Get the report parameter that is in a given position
+	 * Returns the report parameter that is in a given position
 	 *
-	 * @param reportId
-	 * @param position
-	 * @return populated object if found, null otherwise
+	 * @param reportId the report id
+	 * @param position the parameter position
+	 * @return report parameter if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -119,11 +120,10 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Get all report parameters for a given report
+	 * Returns all report parameters for a given report
 	 *
-	 * @param reportId
-	 * @return list of all report parameters for a given report, empty list
-	 * otherwise
+	 * @param reportId the report id
+	 * @return all report parameters for the given report
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -138,11 +138,11 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Get all report parameters for a given report
+	 * Returns all report parameters for a given report
 	 *
-	 * @param reportId
-	 * @return map of all report parameters for a given report. the key is the
-	 * parameter name
+	 * @param reportId the report id
+	 * @return map of all report parameters for a given report. The key is the
+	 * parameter name.
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -161,10 +161,10 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Get a report parameter
+	 * Returns a report parameter
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the report parameter id
+	 * @return report parameter if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -177,9 +177,9 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Delete a report parameter
+	 * Deletes a report parameter
 	 *
-	 * @param id
+	 * @param id the report parameter id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
@@ -193,9 +193,9 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Delete a report parameter
+	 * Deletes multiple report parameters
 	 *
-	 * @param ids
+	 * @param ids the ids of the report parameters to delete
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
@@ -210,10 +210,10 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Add a new report parameter to the database
+	 * Adds a new report parameter to the database
 	 *
-	 * @param param
-	 * @param actionUser
+	 * @param param the report parameter
+	 * @param reportId the report id
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -263,10 +263,9 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Update an existing report parameter
+	 * Updates an existing report parameter
 	 *
-	 * @param param
-	 * @param actionUser
+	 * @param param the updated report parameter
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
@@ -277,11 +276,10 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Save a report parameter
+	 * Saves a report parameter
 	 *
-	 * @param reportParam
-	 * @param newRecord
-	 * @param actionUser
+	 * @param reportParam the report parameter
+	 * @param newRecord whether this is a new record
 	 * @throws SQLException
 	 */
 	private void saveReportParameter(ReportParameter reportParam, boolean newRecord) throws SQLException {
@@ -330,22 +328,22 @@ public class ReportParameterService {
 	}
 
 	/**
-	 * Move a drilldown to a different position
+	 * Moves a report parameter to a different position
 	 *
-	 * @param id
-	 * @param fromPosition
-	 * @param toPosition
-	 * @param direction
-	 * @param parentReportId
+	 * @param id the report parameter id
+	 * @param fromPosition the position to move from
+	 * @param toPosition the position to move to
+	 * @param direction the direction. "forward" or "back"
+	 * @param reportId the report id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public void moveReportParameter(int id, int fromPosition, int toPosition, String direction,
-			int parentReportId) throws SQLException {
+			int reportId) throws SQLException {
 
 		logger.debug("Entering moveReportParameter: id={}, fromPosition={},"
 				+ " toPosition={}, direction='{}', parentReportId={}",
-				id, fromPosition, toPosition, direction, parentReportId);
+				id, fromPosition, toPosition, direction, reportId);
 
 		String sql;
 
@@ -358,13 +356,13 @@ public class ReportParameterService {
 					+ " SET PARAMETER_POSITION=0"
 					+ " WHERE PARAMETER_POSITION=?"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, toPosition, parentReportId);
+			dbService.update(sql, toPosition, reportId);
 
 			sql = "UPDATE ART_REPORT_PARAMETERS"
 					+ " SET PARAMETER_POSITION=?"
 					+ " WHERE REPORT_PARAMETER_ID=?"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, toPosition, id, parentReportId);
+			dbService.update(sql, toPosition, id, reportId);
 
 			sql = "UPDATE ART_REPORT_PARAMETERS"
 					+ " SET PARAMETER_POSITION=PARAMETER_POSITION + 1"
@@ -372,28 +370,28 @@ public class ReportParameterService {
 					+ " AND PARAMETER_POSITION<=?)"
 					+ " AND REPORT_PARAMETER_ID<>? AND PARAMETER_POSITION<>0"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, toPosition, fromPosition, id, parentReportId);
+			dbService.update(sql, toPosition, fromPosition, id, reportId);
 
 			sql = "UPDATE ART_REPORT_PARAMETERS"
 					+ " SET PARAMETER_POSITION=?"
 					+ " WHERE PARAMETER_POSITION=0"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, finalPosition, parentReportId);
-		} else {
-			//"forward". toPosition > fromPosition
+			dbService.update(sql, finalPosition, reportId);
+		} else if (StringUtils.equals(direction, "forward")) {
+			//toPosition > fromPosition
 			int finalPosition = toPosition - 1;
 
 			sql = "UPDATE ART_REPORT_PARAMETERS"
 					+ " SET PARAMETER_POSITION=0"
 					+ " WHERE PARAMETER_POSITION=?"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, toPosition, parentReportId);
+			dbService.update(sql, toPosition, reportId);
 
 			sql = "UPDATE ART_REPORT_PARAMETERS"
 					+ " SET PARAMETER_POSITION=?"
 					+ " WHERE REPORT_PARAMETER_ID=?"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, toPosition, id, parentReportId);
+			dbService.update(sql, toPosition, id, reportId);
 
 			sql = "UPDATE ART_REPORT_PARAMETERS"
 					+ " SET PARAMETER_POSITION=PARAMETER_POSITION - 1"
@@ -401,13 +399,13 @@ public class ReportParameterService {
 					+ " AND PARAMETER_POSITION<=?)"
 					+ " AND REPORT_PARAMETER_ID<>? AND PARAMETER_POSITION<>0"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, fromPosition, toPosition, id, parentReportId);
+			dbService.update(sql, fromPosition, toPosition, id, reportId);
 
 			sql = "UPDATE ART_REPORT_PARAMETERS"
 					+ " SET PARAMETER_POSITION=?"
 					+ " WHERE PARAMETER_POSITION=0"
 					+ " AND REPORT_ID=?";
-			dbService.update(sql, finalPosition, parentReportId);
+			dbService.update(sql, finalPosition, reportId);
 		}
 
 		//http://www.codeproject.com/Articles/331986/Table-Row-Drag-and-Drop-in-ASP-NET-MVC-JQuery-Data
@@ -437,5 +435,4 @@ public class ReportParameterService {
 //				+ " WHERE REPORT_PARAMETER_ID=?";
 //		dbService.update(sql, toPosition);
 	}
-
 }

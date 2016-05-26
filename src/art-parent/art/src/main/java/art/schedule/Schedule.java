@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Class to represent a schedule
+ * Represents a schedule
  *
  * @author Timothy Anyona
  */

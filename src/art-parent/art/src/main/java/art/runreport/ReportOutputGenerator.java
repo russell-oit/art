@@ -76,7 +76,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Generates report output
+ * 
  * @author Timothy Anyona
  */
 public class ReportOutputGenerator {
@@ -160,6 +161,26 @@ public class ReportOutputGenerator {
 		this.servletContext = servletContext;
 	}
 
+	/**
+	 * Generates report output
+	 * 
+	 * @param report the report to use
+	 * @param reportRunner the report runner to use
+	 * @param reportFormat the report format
+	 * @param locale the locale to use
+	 * @param paramProcessorResult the parameter processor result
+	 * @param writer the output writer to use
+	 * @param fullOutputFilename the full path of the output file name
+	 * @return the output result
+	 * @throws IOException
+	 * @throws SQLException
+	 * @throws JRException
+	 * @throws InvalidFormatException
+	 * @throws DatasetProduceException
+	 * @throws ChartValidationException
+	 * @throws PostProcessingException
+	 * @throws ServletException 
+	 */
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
@@ -351,7 +372,7 @@ public class ReportOutputGenerator {
 				//generate output
 				rs = reportRunner.getResultSet();
 
-				StandardOutputResult standardOutputResult = null;
+				StandardOutputResult standardOutputResult;
 				if (reportType.isCrosstab()) {
 					standardOutputResult = standardOutput.generateCrosstabOutput(rs, reportFormat);
 				} else {
@@ -381,10 +402,19 @@ public class ReportOutputGenerator {
 
 		outputResult.setRowCount(rowsRetrieved);
 		return outputResult;
-
 	}
 
-	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob) throws IllegalArgumentException {
+	/**
+	 * Returns a standard output instance based on the given report format
+	 * 
+	 * @param reportFormat the report format
+	 * @param isJob whether this is a job or an interactive report
+	 * @return the standard output instance
+	 * @throws IllegalArgumentException 
+	 */
+	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob)
+			throws IllegalArgumentException {
+		
 		logger.debug("Entering getStandardOutputInstance: reportFormat={}, isJob={}", reportFormat, isJob);
 
 		StandardOutput standardOutput;
@@ -442,12 +472,25 @@ public class ReportOutputGenerator {
 		return standardOutput;
 	}
 
+	/**
+	 * Outputs a file link to the web browser
+	 * 
+	 * @param fileName the file name
+	 * @throws IOException
+	 * @throws ServletException 
+	 */
 	private void displayFileLink(String fileName) throws IOException, ServletException {
 		//display link to access report
 		request.setAttribute("fileName", fileName);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);
 	}
 
+	/**
+	 * Returns the row count for a given resultset
+	 * 
+	 * @param rs the resultset
+	 * @return the row count
+	 */
 	private Integer getResultSetRowCount(ResultSet rs) {
 		Integer rowCount = null;
 
@@ -468,6 +511,14 @@ public class ReportOutputGenerator {
 		return rowCount;
 	}
 
+	/**
+	 * Returns the final chart options to use based on the given chart options, report and report format
+	 * 
+	 * @param report the report
+	 * @param parameterChartOptions the passed chart options
+	 * @param reportFormat the report format
+	 * @return the final chart options
+	 */
 	private ChartOptions getEffectiveChartOptions(Report report, ChartOptions parameterChartOptions,
 			ReportFormat reportFormat) {
 
@@ -519,5 +570,4 @@ public class ReportOutputGenerator {
 
 		return effectiveChartOptions;
 	}
-
 }

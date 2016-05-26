@@ -93,7 +93,7 @@ public class Config extends HttpServlet {
 	private static CustomSettings customSettings;
 	private static String workDirectoryPath;
 	private static String artVersion;
-	private static Map<String, String> languages = new TreeMap<>();
+	private static final Map<String, String> languages = new TreeMap<>();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -103,7 +103,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Stops the quartz scheduler, closes database connections and deregisters
+	 * Stops the quartz scheduler, closes database connections and de-registers
 	 * jdbc drivers
 	 */
 	@Override
@@ -129,6 +129,9 @@ public class Config extends HttpServlet {
 		logger.info("ART stopped");
 	}
 
+	/**
+	 * De-registers jdbc drivers
+	 */
 	private void deregisterJdbcDrivers() {
 		Enumeration<Driver> drivers = DriverManager.getDrivers();
 		while (drivers.hasMoreElements()) {
@@ -143,11 +146,11 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Initializes database connections, the quartz scheduler, application
+	 * Initializes database connections, the quartz scheduler and application
 	 * settings
 	 */
 	private void ConfigInit() {
-		logger.debug("Entering ArtConfigInit");
+		logger.debug("Entering ConfigInit");
 
 		ServletContext ctx = getServletConfig().getServletContext();
 
@@ -218,10 +221,18 @@ public class Config extends HttpServlet {
 		initializeArtDatabase();
 	}
 
+	/**
+	 * Returns the available application languages or translations
+	 *
+	 * @return available application languages or translations
+	 */
 	public static Map<String, String> getLanguages() {
 		return languages;
 	}
 
+	/**
+	 * Loads available language translations
+	 */
 	private void loadLanguages() {
 		Properties prop = new Properties();
 		InputStream inputStream;
@@ -248,36 +259,41 @@ public class Config extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Sets enum values in the application context for use in jsp pages
+	 *
+	 * @param ctx the servlet context
+	 */
 	private void setJspEnumValues(ServletContext ctx) {
 		ctx.setAttribute("windowsDomainAuthentication", ArtAuthenticationMethod.WindowsDomain.getValue());
 		ctx.setAttribute("internalAuthentication", ArtAuthenticationMethod.Internal.getValue());
 	}
 
 	/**
-	 * Register custom fonts to be used in pdf output
+	 * Registers custom fonts to be used in pdf output
 	 */
-	private static void registerPdfFonts(Settings pSettings) {
+	private static void registerPdfFonts() {
 		//register pdf fonts. 
 		//fresh registering of 661 fonts in c:\windows\fonts can take as little as 10 secs
 		//re-registering already registered directory of 661 fonts takes as little as 1 sec
 
-		if (pSettings == null) {
+		if (settings == null) {
 			return;
 		}
 
-		String pdfFontName = pSettings.getPdfFontName();
+		String pdfFontName = settings.getPdfFontName();
 		if (StringUtils.isNotBlank(pdfFontName)) {
 			//register pdf font if not already registered
 			if (!FontFactory.isRegistered(pdfFontName)) {
 				//font not registered. register any defined font files or directories
-				String pdfFontDirectory = pSettings.getPdfFontDirectory();
+				String pdfFontDirectory = settings.getPdfFontDirectory();
 				if (StringUtils.isNotBlank(pdfFontDirectory)) {
 					logger.info("Registering fonts from directory: '{}'", pdfFontDirectory);
 					int i = FontFactory.registerDirectory(pdfFontDirectory);
 					logger.info("{} fonts registered", i);
 				}
 
-				String pdfFontFile = pSettings.getPdfFontFile();
+				String pdfFontFile = settings.getPdfFontFile();
 				if (StringUtils.isNotBlank(pdfFontFile)) {
 					logger.info("Registering font file: '{}'", pdfFontFile);
 					FontFactory.register(pdfFontFile);
@@ -325,12 +341,10 @@ public class Config extends HttpServlet {
 
 		//create quartz scheduler
 		createQuartzScheduler();
-
 	}
 
 	/**
-	 * Load art database configuration from art-database file
-	 *
+	 * Loads art database configuration from the art-database file
 	 */
 	private static void loadArtDatabaseConfiguration() {
 		ArtDatabase artDatabase = null;
@@ -360,9 +374,9 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Save art database configuration to file
+	 * Saves art database configuration to file
 	 *
-	 * @param artDatabase
+	 * @param artDatabase the art database configuration
 	 * @throws java.io.IOException
 	 */
 	public static void saveArtDatabaseConfiguration(ArtDatabase artDatabase)
@@ -380,8 +394,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Load application settings and set appropriate configurations
-	 *
+	 * Loads application settings
 	 */
 	private static void loadSettings() {
 		Settings newSettings = null;
@@ -426,7 +439,7 @@ public class Config extends HttpServlet {
 		}
 
 		//register pdf fonts 
-		registerPdfFonts(settings);
+		registerPdfFonts();
 
 		//register database authentication jdbc driver
 		String driver = settings.getDatabaseAuthenticationDriver();
@@ -442,9 +455,9 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Save settings to file
+	 * Saves application settings to file
 	 *
-	 * @param newSettings
+	 * @param newSettings the settings to saave
 	 * @throws IOException
 	 */
 	public static void saveSettings(Settings newSettings) throws IOException {
@@ -463,6 +476,9 @@ public class Config extends HttpServlet {
 		loadSettings();
 	}
 
+	/**
+	 * Creates the quartz scheduler instance for use when scheduling jobs
+	 */
 	private static void createQuartzScheduler() {
 		if (artDbConfig == null) {
 			logger.warn("ART Database configuration not available");
@@ -474,6 +490,11 @@ public class Config extends HttpServlet {
 		createCleanJob(scheduler);
 	}
 
+	/**
+	 * Creates a job on the quartz scheduler to delete old report files
+	 *
+	 * @param scheduler the quartz scheduler instance
+	 */
 	private static void createCleanJob(Scheduler scheduler) {
 		try {
 			if (scheduler == null) {
@@ -490,7 +511,7 @@ public class Config extends HttpServlet {
 					.build();
 
 			//build cron expression for the schedule
-			String minute = "0/10";
+			String minute = "0/10"; //run it every 10 mins
 			String hour = "*";
 			String day = "*";
 			String weekday = "?";
@@ -525,7 +546,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Set defaults for settings that have invalid values
+	 * Sets defaults for application settings that have invalid values
 	 */
 	private static void setSettingsDefaults(Settings pSettings) {
 		if (pSettings == null) {
@@ -574,10 +595,10 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Set defaults for art database configuration items that have invalid
+	 * Sets defaults for art database configuration items that have invalid
 	 * values
 	 *
-	 * @param artDatabase
+	 * @param artDatabase the art database configuration
 	 */
 	public static void setArtDatabaseDefaults(ArtDatabase artDatabase) {
 		if (artDatabase == null) {
@@ -597,7 +618,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Load custom settings
+	 * Loads custom settings
 	 */
 	private static void loadCustomSettings() {
 		CustomSettings newCustomSettings = null;
@@ -625,16 +646,16 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get current custom settings
+	 * Returns the current custom settings
 	 *
-	 * @return
+	 * @return the current custom settings
 	 */
 	public static CustomSettings getCustomSettings() {
 		return customSettings;
 	}
 
 	/**
-	 * Create art work directories
+	 * Creates work directories
 	 */
 	private void createWorkDirectories() {
 		makeDirectory(getTemplatesPath());
@@ -644,9 +665,9 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Create a directory given a full path
+	 * Creates a directory given a full path
 	 *
-	 * @param directoryPath
+	 * @param directoryPath the directory path to create
 	 */
 	private void makeDirectory(String directoryPath) {
 		if (directoryPath == null) {
@@ -665,9 +686,9 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Determine if art database has been configured
+	 * Returns <code>true</code> if art database has been configured
 	 *
-	 * @return
+	 * @return <code>true</code> if art database has been configured
 	 */
 	public static boolean isArtDatabaseConfigured() {
 		if (artDbConfig == null) {
@@ -678,7 +699,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the art-database file
+	 * Returns the full path to the art-database file
 	 *
 	 * @return full path to the art-database file
 	 */
@@ -687,7 +708,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the web-inf directory.
+	 * Returns the full path to the web-inf directory.
 	 *
 	 * @return full path to the web-inf directory
 	 */
@@ -696,7 +717,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the hsqldb directory.
+	 * Returns the full path to the hsqldb directory.
 	 *
 	 * @return full path to the hsqldb directory
 	 */
@@ -705,7 +726,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the classes directory.
+	 * Returns the full path to the classes directory.
 	 *
 	 * @return full path to the classes directory
 	 */
@@ -714,7 +735,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the export directory.
+	 * Returns the full path to the export directory.
 	 *
 	 * @return full path to the export directory
 	 */
@@ -723,7 +744,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the jobs export directory.
+	 * Returns the full path to the jobs export directory
 	 *
 	 * @return full path to the jobs export directory
 	 */
@@ -732,7 +753,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the reports export directory.
+	 * Returns the full path to the reports export directory
 	 *
 	 * @return full path to the reports export directory
 	 */
@@ -741,7 +762,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the templates directory.
+	 * Returns the full path to the templates directory
 	 *
 	 * @return full path to the templates directory
 	 */
@@ -750,7 +771,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get full path to the WEB-INF\tmp directory.
+	 * Returns the full path to the WEB-INF\tmp directory
 	 *
 	 * @return full path to the templates directory
 	 */
@@ -759,8 +780,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get the relative path to the templates directory. Used by
-	 * showAnalysis.jsp
+	 * Returns the relative path to the templates directory
 	 *
 	 * @return relative path to the templates directory
 	 */
@@ -769,7 +789,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get the full application path
+	 * Returns the full application path
 	 *
 	 * @return the full application path
 	 */
@@ -778,7 +798,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get the art version
+	 * Returns the art version
 	 *
 	 * @return the art version
 	 */
@@ -787,7 +807,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Determine whether a custom font should be used in pdf output
+	 * Returns <code>true</code> if a custom font should be used in pdf output
 	 *
 	 * @return <code>true</code> if a custom font should be used in pdf output
 	 */
@@ -799,6 +819,11 @@ public class Config extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Returns <code>true</code> if the email server has been configured
+	 *
+	 * @return <code>true</code> if the email server has been configured
+	 */
 	public static boolean isEmailServerConfigured() {
 		if (StringUtils.isBlank(settings.getSmtpServer())) {
 			return false;
@@ -808,7 +833,7 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get user selectable report formats
+	 * Returns the user selectable report formats
 	 *
 	 * @return user selectable report formats
 	 */
@@ -817,9 +842,9 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get the max rows for the given report format
+	 * Returns the max rows for the given report format
 	 *
-	 * @param reportFormatString
+	 * @param reportFormatString the report format
 	 * @return the max rows for the given report format
 	 */
 	public static int getMaxRows(String reportFormatString) {
@@ -841,10 +866,10 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get string to be displayed in query output for a date field
+	 * Returns the string to be displayed in report output for a date field
 	 *
-	 * @param date
-	 * @return
+	 * @param date the date value
+	 * @return the string value to be displayed
 	 */
 	public static String getDateDisplayString(Date date) {
 		String dateString;
@@ -862,10 +887,10 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get string to be displayed in query output for a date field
+	 * Returns the string to be displayed in report output for a date field
 	 *
-	 * @param date
-	 * @return
+	 * @param date the date value
+	 * @return the string value in iso format
 	 */
 	public static String getIsoDateDisplayString(Date date) {
 		String dateString;
@@ -883,9 +908,9 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get art database configuration settings
+	 * Returns the art database configuration settings
 	 *
-	 * @return object with art database settings or null if art database not
+	 * @return art database configuration or null if art database is not
 	 * configured
 	 */
 	public static ArtDatabase getArtDbConfig() {
@@ -893,12 +918,11 @@ public class Config extends HttpServlet {
 	}
 
 	/**
-	 * Get current settings
+	 * Returns application settings
 	 *
-	 * @return
+	 * @return application settings
 	 */
 	public static Settings getSettings() {
 		return settings;
 	}
-
 }

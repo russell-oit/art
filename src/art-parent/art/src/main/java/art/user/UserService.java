@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -42,7 +42,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to users
+ * Provides methods for retrieving, adding, updating and deleting users
  *
  * @author Timothy Anyona
  */
@@ -109,9 +109,9 @@ public class UserService {
 	}
 
 	/**
-	 * Get all users
+	 * Returns all users
 	 *
-	 * @return list of all users, empty list otherwise
+	 * @return all users
 	 * @throws SQLException
 	 */
 	@Cacheable("users")
@@ -123,9 +123,9 @@ public class UserService {
 	}
 
 	/**
-	 * Get admin users (junior admin and above)
+	 * Returns admin users (junior admin and above)
 	 *
-	 * @return list of admin users, empty list otherwise
+	 * @return admin users
 	 * @throws SQLException
 	 */
 	@Cacheable("users")
@@ -138,10 +138,10 @@ public class UserService {
 	}
 
 	/**
-	 * Get a user
+	 * Returns a user
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the user id
+	 * @return user if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("users")
@@ -156,10 +156,10 @@ public class UserService {
 	}
 
 	/**
-	 * Get a user
+	 * Returns a user
 	 *
-	 * @param username
-	 * @return populated object if found, null otherwise
+	 * @param username the username
+	 * @return user if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("users")
@@ -174,10 +174,10 @@ public class UserService {
 	}
 
 	/**
-	 * Populate a user's user groups and set properties whose values may come
+	 * Populates a user's user groups and sets properties whose values may come
 	 * from user groups
 	 *
-	 * @param user
+	 * @param user the user
 	 */
 	private void populateUserGroups(User user) throws SQLException {
 		if (user == null) {
@@ -205,9 +205,9 @@ public class UserService {
 	}
 
 	/**
-	 * Delete a user and all related records
+	 * Deletes a user and all related records
 	 *
-	 * @param id
+	 * @param id the user id
 	 * @return ActionResult. if not successful, data contains a list of linked
 	 * jobs which prevented the user from being deleted
 	 * @throws SQLException
@@ -261,11 +261,11 @@ public class UserService {
 	}
 
 	/**
-	 * Delete a user and all related records
+	 * Deletes multiple users
 	 *
-	 * @param ids
-	 * @return ActionResult. if not successful, data contains a list of linked
-	 * jobs which prevented the user from being deleted
+	 * @param ids the ids for users to delete
+	 * @return ActionResult. if not successful, data contains the ids of users
+	 * who weren't deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
@@ -291,12 +291,12 @@ public class UserService {
 	}
 
 	/**
-	 * Update a user's password
+	 * Updates a user's password
 	 *
-	 * @param userId
-	 * @param newPassword password hash
-	 * @param passwordAlgorithm
-	 * @param actionUser
+	 * @param userId the user id
+	 * @param newPassword the new password hash
+	 * @param passwordAlgorithm the password algorithm
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
@@ -322,10 +322,10 @@ public class UserService {
 	}
 
 	/**
-	 * Add a new user to the database
+	 * Adds a new user
 	 *
-	 * @param user
-	 * @param actionUser
+	 * @param user the user to add
+	 * @param actionUser the user who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -356,10 +356,10 @@ public class UserService {
 	}
 
 	/**
-	 * Update an existing user record
+	 * Updates a user record
 	 *
-	 * @param user
-	 * @param actionUser
+	 * @param user the updated user record
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
@@ -370,10 +370,10 @@ public class UserService {
 	}
 
 	/**
-	 * Update an existing user record
+	 * Updates multiple users
 	 *
-	 * @param multipleUserEdit
-	 * @param actionUser
+	 * @param multipleUserEdit the multiple user edit details
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "users", allEntries = true)
@@ -400,11 +400,11 @@ public class UserService {
 	}
 
 	/**
-	 * Save a user
+	 * Saves a user
 	 *
-	 * @param user
-	 * @param newRecord
-	 * @param actionUser
+	 * @param user the user to save
+	 * @param newRecord whether this is a new record
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	private void saveUser(User user, boolean newRecord, User actionUser) throws SQLException {
@@ -480,10 +480,10 @@ public class UserService {
 	}
 
 	/**
-	 * Get jobs that are owned by a given user
+	 * Returns jobs that are owned by a given user
 	 *
-	 * @param userId
-	 * @return list with linked job names, empty list otherwise
+	 * @param userId the user id
+	 * @return linked job names
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedJobs(int userId) throws SQLException {
@@ -496,5 +496,4 @@ public class UserService {
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("JOB_NAME");
 		return dbService.query(sql, h, userId);
 	}
-
 }

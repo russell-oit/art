@@ -15,12 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
-/** 
- * This object is used by the PreparedQuery/XmlParser
- *  to maintain the text in an xml tag as
- *  well as its initial and end position in the SQL query
- *  string
- */
 package art.utils;
 
 /**

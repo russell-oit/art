@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class for helper methods. Can have dependencies on other art classes
+ * Provides helper methods to be used within the application
  *
  * @author Timothy Anyona
  */
@@ -38,17 +38,19 @@ public class ArtHelper {
 	private static final int MAX_LOG_MESSAGE_LENGTH = 500;
 	
 	/**
-	 * Log some action to the ART_LOGS table.
+	 * Logs some action to the ART_LOGS table.
 	 *
-	 * @param user username of user who executed the query
-	 * @param type type of event
-	 * @param ip ip address from which query was run
-	 * @param queryId id of the query that was run
-	 * @param totalTime total time to execute the query and display the results
-	 * @param fetchTime time to fetch the results from the database
-	 * @param message log message
+	 * @param user the username of user who executed the report
+	 * @param type the type of event
+	 * @param ip the ip address from which report was run
+	 * @param reportId the id of the report that was run
+	 * @param totalTime the total time to run the report and display the results
+	 * @param fetchTime the time to fetch the results from the database
+	 * @param message the log message
 	 */
-	public static void log(String user, String type, String ip, int queryId, long totalTime, long fetchTime, String message) {
+	public static void log(String user, String type, String ip, int reportId, long totalTime,
+			long fetchTime, String message) {
+		
 		if (StringUtils.length(message) > MAX_LOG_MESSAGE_LENGTH) {
 			message = message.substring(0, MAX_LOG_MESSAGE_LENGTH);
 		}
@@ -70,7 +72,7 @@ public class ArtHelper {
 			ps.setString(2, user);
 			ps.setString(3, type);
 			ps.setString(4, ip);
-			ps.setInt(5, queryId);
+			ps.setInt(5, reportId);
 			ps.setInt(6, (int) totalTime);
 			ps.setInt(7, (int) fetchTime);
 			ps.setString(8, message);
@@ -84,12 +86,12 @@ public class ArtHelper {
 	}
 
 	/**
-	 * Log login attempts to the ART_LOGS table.
+	 * Logs login attempts to the ART_LOGS table.
 	 *
-	 * @param user username
+	 * @param user the username
 	 * @param type "login" if successful or "loginerr" if not
-	 * @param ip ip address from which login was done or attempted
-	 * @param message log message
+	 * @param ip the ip address from which login was done or attempted
+	 * @param message the log message
 	 */
 	public static void log(String user, String type, String ip, String message) {
 		if (StringUtils.length(message) > MAX_LOG_MESSAGE_LENGTH) {
@@ -119,5 +121,4 @@ public class ArtHelper {
 			DatabaseUtils.close(ps, conn);
 		}
 	}
-
 }

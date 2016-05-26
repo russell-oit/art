@@ -37,7 +37,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to schedules
+ * Provides methods for retrieving, adding, updating and deleting schedules
  *
  * @author Timothy Anyona
  */
@@ -87,9 +87,9 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Get all schedules
+	 * Returns all schedules
 	 *
-	 * @return list of all schedules, empty list otherwise
+	 * @return all schedules
 	 * @throws SQLException
 	 */
 	@Cacheable("schedules")
@@ -101,10 +101,10 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Get a schedule
+	 * Returns a schedule
 	 *
-	 * @param id
-	 * @return populated object if schedule found, null otherwise
+	 * @param id the schedule id
+	 * @return schedule if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("schedules")
@@ -117,9 +117,9 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Delete a schedule
+	 * Deletes a schedule
 	 *
-	 * @param id
+	 * @param id the schedule id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
@@ -133,9 +133,9 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Delete a schedule
+	 * Deletes multiple schedule
 	 *
-	 * @param ids
+	 * @param ids the ids of schedules to delete
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
@@ -150,10 +150,10 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Add a new schedule to the database
+	 * Adds a new schedule
 	 *
-	 * @param schedule
-	 * @param actionUser
+	 * @param schedule the schedule to add
+	 * @param actionUser the user who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -184,10 +184,10 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Update an existing schedule
+	 * Updates an existing schedule
 	 *
-	 * @param schedule
-	 * @param actionUser
+	 * @param schedule the updated schedule
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "schedules", allEntries = true)
@@ -198,11 +198,11 @@ public class ScheduleService {
 	}
 
 	/**
-	 * Save a schedule
+	 * Saves a schedule
 	 *
-	 * @param schedule
-	 * @param newRecord
-	 * @param actionUser
+	 * @param schedule the schedule to save
+	 * @param newRecord whether this is a new record
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	private void saveSchedule(Schedule schedule, boolean newRecord, User actionUser) throws SQLException {
@@ -259,5 +259,4 @@ public class ScheduleService {
 					affectedRows, newRecord, schedule);
 		}
 	}
-
 }

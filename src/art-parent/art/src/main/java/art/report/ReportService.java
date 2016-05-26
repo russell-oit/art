@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -56,7 +56,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to reports
+ * Provides methods for retrieving, adding, updating and deleting reports
  *
  * @author Timothy Anyona
  */
@@ -149,10 +149,9 @@ public class ReportService {
 		}
 
 		/**
-		 * Set display options for graphs
+		 * Sets display options for charts
 		 *
-		 * @param optionsString
-		 * @param usingShortDescription
+		 * @param report the report to set
 		 */
 		private void setChartOptions(Report report) {
 
@@ -252,11 +251,11 @@ public class ReportService {
 	}
 
 	/**
-	 * Get the reports that a user can access from the reports page. Excludes
-	 * disabled reports and some report types e.g. lovs
+	 * Returns the reports that a user can access from the reports page.
+	 * Excludes disabled reports and some report types e.g. lovs
 	 *
-	 * @param userId
-	 * @return list of available reports, empty list otherwise
+	 * @param userId the user id
+	 * @return available reports
 	 * @throws SQLException
 	 */
 	@Cacheable("reports")
@@ -313,9 +312,9 @@ public class ReportService {
 	}
 
 	/**
-	 * Get all reports
+	 * Returns all reports
 	 *
-	 * @return list of all reports, empty list otherwise
+	 * @return all reports
 	 * @throws SQLException
 	 */
 	@Cacheable(value = "reports")
@@ -327,10 +326,10 @@ public class ReportService {
 	}
 
 	/**
-	 * Get a report
+	 * Returns a report
 	 *
-	 * @param id
-	 * @return populated object if report found, null otherwise
+	 * @param id the report id
+	 * @return report if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("reports")
@@ -346,10 +345,10 @@ public class ReportService {
 	}
 
 	/**
-	 * Get jobs that use a given report
+	 * Returns jobs that use a given report
 	 *
-	 * @param reportId
-	 * @return list with linked job names, empty list otherwise
+	 * @param reportId the report id
+	 * @return linked job names
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedJobs(int reportId) throws SQLException {
@@ -364,9 +363,9 @@ public class ReportService {
 	}
 
 	/**
-	 * Delete a report
+	 * Deletes a report
 	 *
-	 * @param id
+	 * @param id the report id
 	 * @return ActionResult. if not successful, data contains a list of linked
 	 * jobs which prevented the report from being deleted
 	 * @throws SQLException
@@ -421,43 +420,43 @@ public class ReportService {
 		result.setSuccess(true);
 		return result;
 	}
-	
-		/**
-	 * Delete a report
+
+	/**
+	 * Deletes multiple reports
 	 *
-	 * @param ids
-	 * @return ActionResult. if not successful, data contains a list of linked
-	 * jobs which prevented the report from being deleted
+	 * @param ids the ids of the reports to delete
+	 * @return ActionResult. if not successful, data contains ids of reports
+	 * that were not deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
 	public ActionResult deleteReports(Integer[] ids) throws SQLException {
-		logger.debug("Entering deleteReports: ids={}", (Object)ids);
+		logger.debug("Entering deleteReports: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords=new ArrayList<>();
-		
-		for(Integer id : ids){
-			ActionResult deleteResult=deleteReport(id);
-			if(!deleteResult.isSuccess()){
+		List<Integer> nonDeletedRecords = new ArrayList<>();
+
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteReport(id);
+			if (!deleteResult.isSuccess()) {
 				nonDeletedRecords.add(id);
 			}
 		}
-		
-		if(nonDeletedRecords.isEmpty()){
+
+		if (nonDeletedRecords.isEmpty()) {
 			result.setSuccess(true);
 		} else {
 			result.setData(nonDeletedRecords);
 		}
 		return result;
-		
+
 	}
 
 	/**
-	 * Add a new report to the database
+	 * Adds a new report to the database
 	 *
-	 * @param report
-	 * @param actionUser
+	 * @param report the report to add
+	 * @param actionUser the user who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -488,10 +487,10 @@ public class ReportService {
 	}
 
 	/**
-	 * Update an existing report
+	 * Updates an existing report
 	 *
-	 * @param report
-	 * @param actionUser
+	 * @param report the updated report
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
@@ -500,12 +499,12 @@ public class ReportService {
 
 		saveReport(report, false, actionUser);
 	}
-	
-		/**
-	 * Update an existing user record
+
+	/**
+	 * Updates multiple reports
 	 *
-	 * @param multipleReportEdit
-	 * @param actionUser
+	 * @param multipleReportEdit the multiple report edit details
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
@@ -532,12 +531,11 @@ public class ReportService {
 	}
 
 	/**
-	 * Save a report
+	 * Saves a report
 	 *
-	 * @param report
-	 * @param newRecord true if adding a new record, false if updating an
-	 * existing record
-	 * @param actionUser
+	 * @param report the report to save
+	 * @param newRecord whether this is a new report
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	private void saveReport(Report report, boolean newRecord, User actionUser) throws SQLException {
@@ -658,10 +656,10 @@ public class ReportService {
 	}
 
 	/**
-	 * Update the report source for a given report
+	 * Updates the report source for a given report
 	 *
-	 * @param reportId
-	 * @param reportSource new report source
+	 * @param reportId the report id
+	 * @param reportSource the new report source
 	 * @throws SQLException
 	 */
 	public void updateReportSource(int reportId, String reportSource) throws SQLException {
@@ -708,9 +706,9 @@ public class ReportService {
 	}
 
 	/**
-	 * Get and populate the report source for a report
+	 * Populates the report source property for a report
 	 *
-	 * @param report
+	 * @param report the report to use
 	 * @throws SQLException
 	 */
 	private void setReportSource(Report report) throws SQLException {
@@ -745,11 +743,11 @@ public class ReportService {
 	}
 
 	/**
-	 * Copy a report
+	 * Copies a report
 	 *
-	 * @param report new report
-	 * @param originalReportId
-	 * @param actionUser
+	 * @param report the new report
+	 * @param originalReportId the original report id
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
@@ -777,12 +775,12 @@ public class ReportService {
 	}
 
 	/**
-	 * Copy some aspect of a report
+	 * Copies some aspect of a report
 	 *
-	 * @param tableName
-	 * @param keyColumnName
-	 * @param keyId
-	 * @param newKeyId
+	 * @param tableName the name of the table to copy
+	 * @param keyColumnName the name of the key column
+	 * @param keyId the original value of the key column
+	 * @param newKeyId the new value of the key column
 	 * @return the number of records copied, 0 otherwise
 	 * @throws SQLException
 	 * @throws IllegalStateException if connection to the art database is not
@@ -790,6 +788,9 @@ public class ReportService {
 	 */
 	private int copyTableRow(String tableName, String keyColumnName,
 			int keyId, int newKeyId) throws SQLException {
+
+		logger.debug("Entering copyTableRow: tableName='{}', keyColumnName='{}',"
+				+ " keyId={}, newKeyId={}", tableName, keyColumnName, keyId, newKeyId);
 
 		int count = 0; //number of records copied
 
@@ -835,25 +836,25 @@ public class ReportService {
 	}
 
 	/**
-	 * Get the name of a given report
+	 * Returns the name of a given report
 	 *
-	 * @param id
-	 * @return
+	 * @param reportId the report id
+	 * @return the report name
 	 * @throws SQLException
 	 */
 	@Cacheable("reports")
-	public String getReportName(int id) throws SQLException {
-		logger.debug("Entering getReportName: id={}", id);
+	public String getReportName(int reportId) throws SQLException {
+		logger.debug("Entering getReportName: reportId={}", reportId);
 
 		String sql = "SELECT NAME FROM ART_QUERIES WHERE QUERY_ID=?";
 		ResultSetHandler<String> h = new ScalarHandler<>(1);
-		return dbService.query(sql, h, id);
+		return dbService.query(sql, h, reportId);
 	}
 
 	/**
-	 * Get drilldown reports
+	 * Returns drilldown reports
 	 *
-	 * @return
+	 * @return drilldown reports
 	 * @throws SQLException
 	 */
 	@Cacheable(value = "reports")
@@ -872,9 +873,9 @@ public class ReportService {
 	}
 
 	/**
-	 * Get lov reports
+	 * Returns lov reports
 	 *
-	 * @return
+	 * @return lov reports
 	 * @throws SQLException
 	 */
 	@Cacheable(value = "reports")
@@ -888,6 +889,12 @@ public class ReportService {
 		return dbService.query(sql, h);
 	}
 
+	/**
+	 * Returns dynamic recipient reports
+	 *
+	 * @return dynamic recipient reports
+	 * @throws SQLException
+	 */
 	@Cacheable(value = "reports")
 	public List<Report> getDynamicRecipientReports() throws SQLException {
 		logger.debug("Entering getDynamicRecipientReports");
@@ -900,11 +907,11 @@ public class ReportService {
 	}
 
 	/**
-	 * Determine if a user can run a report
+	 * Returns <code>true</code> if a user can run a report
 	 *
-	 * @param userId
-	 * @param reportId
-	 * @return
+	 * @param userId the user id
+	 * @param reportId the report id
+	 * @return <code>true</code> if a user can run a report
 	 * @throws SQLException
 	 */
 //	@Cacheable(value = "reports") 
@@ -985,6 +992,13 @@ public class ReportService {
 		}
 	}
 
+	/**
+	 * Grants access for a given report to a user
+	 *
+	 * @param report the report
+	 * @param user the user
+	 * @throws SQLException
+	 */
 	public void grantAccess(Report report, User user) throws SQLException {
 		logger.debug("Entering grantAccess: report={}, user={}", report, user);
 
@@ -1001,13 +1015,17 @@ public class ReportService {
 	}
 
 	/**
-	 * Determine if query is only directly allocated to a single user
+	 * Returns <code>true</code> if a report is only directly allocated to a
+	 * single user
 	 *
-	 * @param conn connection to art repository
-	 * @param username username of user to check
-	 * @return <code>true</code> if user has exclusive access to this query
+	 * @param user the user
+	 * @param report the report
+	 * @return <code>true</code> if user has exclusive access to the report
+	 * @throws java.sql.SQLException
 	 */
 	public boolean hasExclusiveAccess(User user, Report report) throws SQLException {
+		logger.debug("Entering hasExclusiveAccess: user={}, report={}", user, report);
+		
 		boolean exclusive = false;
 
 		String sql;
@@ -1057,5 +1075,4 @@ public class ReportService {
 
 		return exclusive;
 	}
-	
 }

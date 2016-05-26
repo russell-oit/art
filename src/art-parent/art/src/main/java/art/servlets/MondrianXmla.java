@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Servlet to enable ART to serve mondrian via xmla requests.
+ * Servlet to enable ART to serve mondrian via xmla requests
  * 
  * @author Timothy Anyona
  */
@@ -36,19 +36,14 @@ public class MondrianXmla extends DynamicDatasourceXmlaServlet {
     
     private static final Logger logger = LoggerFactory.getLogger(MondrianXmla.class);
     
-
-    /**
-     * 
-     * @param config
-     * @throws ServletException
-     */
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
     }
 
     /**
-     * 
+     * Returns datasources
+	 * 
      * @param config
      * @return datasources as configured in datasources.xml file
      */
@@ -61,8 +56,8 @@ public class MondrianXmla extends DynamicDatasourceXmlaServlet {
 
         try {
             return parseDataSourcesUrl(file.toURI().toURL());
-        } catch (Exception e) {
-            logger.error("Error",e);
+        } catch (Exception ex) {
+            logger.error("Error",ex);
             return null;
         }
     }

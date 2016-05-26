@@ -93,7 +93,6 @@ public class RuleValueController {
 	@RequestMapping(value = "/app/deleteRuleValue", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteRuleValue(@RequestParam("id") String id) {
-
 		logger.debug("Entering deleteRuleValue: id='{}'", id);
 
 		AjaxResponse response = new AjaxResponse();
@@ -256,9 +255,9 @@ public class RuleValueController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @return
+	 * @return the jsp file to display
 	 */
 	private String showEditUserRuleValue() {
 		logger.debug("Entering showEditUserRuleValue");
@@ -267,14 +266,13 @@ public class RuleValueController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @return
+	 * @return the jsp file to display
 	 */
 	private String showEditUserGroupRuleValue() {
 		logger.debug("Entering showEditUserGroupRuleValue");
 
 		return "editUserGroupRuleValue";
 	}
-
 }

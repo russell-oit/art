@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -41,7 +41,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to report groups
+ * Provides methods for retrieving, adding, updating and deleting report groups
  *
  * @author Timothy Anyona
  */
@@ -94,10 +94,10 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Get report groups that are available for selection for a given user
+	 * Returns report groups that are available for a given user
 	 *
-	 * @param username
-	 * @return
+	 * @param username the user's username
+	 * @return available report groups
 	 * @throws SQLException
 	 */
 	@Cacheable("reportGroups")
@@ -140,9 +140,9 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Get all report groups
+	 * Returns all report groups
 	 *
-	 * @return list of all report groups, empty list otherwise
+	 * @return all report groups
 	 * @throws SQLException
 	 */
 	@Cacheable("reportGroups")
@@ -154,10 +154,11 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Get report groups that an admin can use, according to his access level
+	 * Returns report groups that an admin can use, according to his access
+	 * level
 	 *
-	 * @param user
-	 * @return list of available report groups, empty list otherwise
+	 * @param user the admin user
+	 * @return available report groups
 	 * @throws SQLException
 	 */
 	@Cacheable("reportGroups")
@@ -185,10 +186,10 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Get a report group
+	 * Returns a report group
 	 *
-	 * @param id
-	 * @return populated object if report group found, null otherwise
+	 * @param id the report group id
+	 * @return report group if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("reportGroups")
@@ -201,9 +202,9 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Delete a report group
+	 * Deletes a report group
 	 *
-	 * @param id
+	 * @param id the report group id
 	 * @return ActionResult. if not successful, data contains a list of linked
 	 * reports which prevented the report group from being deleted
 	 * @throws SQLException
@@ -237,30 +238,30 @@ public class ReportGroupService {
 		result.setSuccess(true);
 		return result;
 	}
-	
-		/**
-	 * Delete a report group
+
+	/**
+	 * Deletes multiple report groups
 	 *
-	 * @param ids
-	 * @return ActionResult. if not successful, data contains a list of linked
-	 * reports which prevented the report group from being deleted
+	 * @param ids the ids of the report groups to delete
+	 * @return ActionResult. if not successful, data contains ids of the report
+	 * groups that were not deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
 	public ActionResult deleteReportGroups(Integer[] ids) throws SQLException {
-		logger.debug("Entering deleteReportGrousp: ids={}", (Object)ids);
+		logger.debug("Entering deleteReportGrousp: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords=new ArrayList<>();
-		
-		for(Integer id : ids){
-			ActionResult deleteResult=deleteReportGroup(id);
-			if(!deleteResult.isSuccess()){
+		List<Integer> nonDeletedRecords = new ArrayList<>();
+
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteReportGroup(id);
+			if (!deleteResult.isSuccess()) {
 				nonDeletedRecords.add(id);
 			}
 		}
-		
-		if(nonDeletedRecords.isEmpty()){
+
+		if (nonDeletedRecords.isEmpty()) {
 			result.setSuccess(true);
 		} else {
 			result.setData(nonDeletedRecords);
@@ -269,10 +270,10 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Add a new report group to the database
+	 * Adds a new report group to the database
 	 *
-	 * @param group
-	 * @param actionUser
+	 * @param group the report group to add
+	 * @param actionUser the user who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -303,10 +304,10 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Update an existing report group
+	 * Updates an existing report group
 	 *
-	 * @param group
-	 * @param actionUser
+	 * @param group the updated report group
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reportGroups", allEntries = true)
@@ -317,11 +318,11 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Save a report group
+	 * Saves a report group
 	 *
-	 * @param group
-	 * @param newRecord
-	 * @param actionUser
+	 * @param group the report group
+	 * @param newRecord whether this is a new record
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	private void saveReportGroup(ReportGroup group, boolean newRecord, User actionUser) throws SQLException {
@@ -368,10 +369,10 @@ public class ReportGroupService {
 	}
 
 	/**
-	 * Get reports that are in a given report group
+	 * Returns reports that are in a given report group
 	 *
-	 * @param reportGroupId
-	 * @return list with linked report names, empty list otherwise
+	 * @param reportGroupId the report group id
+	 * @return linked report names
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int reportGroupId) throws SQLException {
@@ -384,5 +385,4 @@ public class ReportGroupService {
 		ResultSetHandler<List<String>> h = new ColumnListHandler<>("NAME");
 		return dbService.query(sql, h, reportGroupId);
 	}
-
 }

@@ -423,15 +423,34 @@ public class RunReportController {
 		return null;
 	}
 
+	/**
+	 * Displays report progress
+	 * 
+	 * @param out the writer to output to
+	 * @param message the message to output
+	 */
 	private void displayReportProgress(PrintWriter out, String message) {
 		displayInfo(out, message, "reportProgress");
 		out.flush();
 	}
 
+	/**
+	 * Displays report information
+	 * 
+	 * @param out the writer to use
+	 * @param message the message to output
+	 */
 	private void displayReportInfo(PrintWriter out, String message) {
 		displayInfo(out, message, "reportInfo");
 	}
 
+	/**
+	 * Displays information to the report output
+	 * 
+	 * @param out the output writer to use
+	 * @param message the message to output
+	 * @param elementId the html element to output to
+	 */
 	private void displayInfo(PrintWriter out, String message, String elementId) {
 		//can use jquery, e.g. $('reportProgress').html(), but need to ensure jquery library 
 		//has been included in the page before calling this method
@@ -440,8 +459,12 @@ public class RunReportController {
 				+ "</script>");
 	}
 
+	/**
+	 * Clears the report progress indicator
+	 * 
+	 * @param writer the output writer to use
+	 */
 	private void clearReportProgress(PrintWriter writer) {
 		displayReportProgress(writer, "");
 	}
-
 }

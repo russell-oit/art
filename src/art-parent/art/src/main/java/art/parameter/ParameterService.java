@@ -41,7 +41,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to parameters
+ * Provides methods for retrieving, adding, updating and deleting parameters
  *
  * @author Timothy Anyona
  */
@@ -105,9 +105,9 @@ public class ParameterService {
 	}
 
 	/**
-	 * Get all parameters
+	 * Returns all parameters
 	 *
-	 * @return list of all parameters, empty list otherwise
+	 * @return all parameters
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -119,10 +119,10 @@ public class ParameterService {
 	}
 
 	/**
-	 * Get a parameter
+	 * Returns a parameter
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the parameter's id
+	 * @return parameter if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -134,6 +134,13 @@ public class ParameterService {
 		return dbService.query(sql, h, id);
 	}
 
+	/**
+	 * Returns a parameter's name
+	 *
+	 * @param id the parameter's id
+	 * @return the parameter's name
+	 * @throws SQLException
+	 */
 	@Cacheable("parameters")
 	public String getParameterName(int id) throws SQLException {
 		logger.debug("Entering getParameterName: id={}", id);
@@ -144,10 +151,10 @@ public class ParameterService {
 	}
 
 	/**
-	 * Get all parameters for a report
+	 * Returns parameters for a report
 	 *
-	 * @param reportId
-	 * @return list of all parameters, empty list otherwise
+	 * @param reportId the report id
+	 * @return parameters for the report
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -163,10 +170,10 @@ public class ParameterService {
 	}
 
 	/**
-	 * Get all drilldown parameters for a report
+	 * Returns drilldown parameters for a report
 	 *
-	 * @param reportId
-	 * @return list of all drilldown parameters, empty list otherwise
+	 * @param reportId the report id
+	 * @return drilldown parameters for the report
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -184,9 +191,9 @@ public class ParameterService {
 	}
 
 	/**
-	 * Delete a parameter
+	 * Deletes a parameter
 	 *
-	 * @param id
+	 * @param id the parameter id
 	 * @return ActionResult. if not successful, data contains a list of linked
 	 * reports which prevented the parameter from being deleted
 	 * @throws SQLException
@@ -213,43 +220,43 @@ public class ParameterService {
 		result.setSuccess(true);
 		return result;
 	}
-	
-		/**
-	 * Delete a parameter
+
+	/**
+	 * Deletes multiple parameters
 	 *
-	 * @param ids
-	 * @return ActionResult. if not successful, data contains a list of linked
-	 * reports which prevented the parameter from being deleted
+	 * @param ids the ids of the parameters to delete
+	 * @return ActionResult. if not successful, data contains the ids of the
+	 * parameters which were not deleted
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
 	public ActionResult deleteParameters(Integer[] ids) throws SQLException {
-		logger.debug("Entering deleteParameters: ids={}", (Object)ids);
+		logger.debug("Entering deleteParameters: ids={}", (Object) ids);
 
 		ActionResult result = new ActionResult();
-		List<Integer> nonDeletedRecords=new ArrayList<>();
-		
-		for(Integer id : ids){
-			ActionResult deleteResult=deleteParameter(id);
-			if(!deleteResult.isSuccess()){
+		List<Integer> nonDeletedRecords = new ArrayList<>();
+
+		for (Integer id : ids) {
+			ActionResult deleteResult = deleteParameter(id);
+			if (!deleteResult.isSuccess()) {
 				nonDeletedRecords.add(id);
 			}
 		}
-		
-		if(nonDeletedRecords.isEmpty()){
+
+		if (nonDeletedRecords.isEmpty()) {
 			result.setSuccess(true);
 		} else {
 			result.setData(nonDeletedRecords);
 		}
 		return result;
-		
+
 	}
 
 	/**
-	 * Add a new parameter to the database
+	 * Adds a new parameter to the database
 	 *
-	 * @param parameter
-	 * @param actionUser
+	 * @param parameter the parameter to add
+	 * @param actionUser the use who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -280,10 +287,10 @@ public class ParameterService {
 	}
 
 	/**
-	 * Update an existing parameter
+	 * Updates an existing parameter
 	 *
-	 * @param parameter
-	 * @param actionUser
+	 * @param parameter the updated parameter
+	 * @param actionUser the user performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "parameters", allEntries = true)
@@ -294,11 +301,11 @@ public class ParameterService {
 	}
 
 	/**
-	 * Save a parameter
+	 * Saves a parameter
 	 *
-	 * @param parameter
-	 * @param newRecord
-	 * @param actionUser
+	 * @param parameter the parameter to save
+	 * @param newRecord whether this is a new record
+	 * @param actionUser the user performing the action
 	 * @throws SQLException
 	 */
 	private void saveParameter(Parameter parameter, boolean newRecord, User actionUser) throws SQLException {
@@ -391,10 +398,10 @@ public class ParameterService {
 	}
 
 	/**
-	 * Get reports that use a given parameter
+	 * Returns reports that use a given parameter
 	 *
-	 * @param parameterId
-	 * @return list with linked report names, empty list otherwise
+	 * @param parameterId the parameter id
+	 * @return linked report names
 	 * @throws SQLException
 	 */
 	public List<String> getLinkedReports(int parameterId) throws SQLException {
@@ -411,11 +418,11 @@ public class ParameterService {
 	}
 
 	/**
-	 * Get the parameter for a given report that is in a given position
+	 * Returns the parameter for a given report that is in a given position
 	 *
-	 * @param reportId
-	 * @param position
-	 * @return populated object if found, null otherwise
+	 * @param reportId the report id
+	 * @param position the parameter position
+	 * @return parameter if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("parameters")
@@ -430,5 +437,4 @@ public class ParameterService {
 		ResultSetHandler<Parameter> h = new BeanHandler<>(Parameter.class, new ParameterMapper());
 		return dbService.query(sql, h, reportId, position);
 	}
-
 }

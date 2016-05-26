@@ -92,7 +92,7 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Get all user groups
+	 * Returns all user groups
 	 *
 	 * @return all user groups
 	 * @throws SQLException
@@ -106,9 +106,9 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Get the user group with the given id
+	 * Returns the user group with the given id
 	 *
-	 * @param id
+	 * @param id the user group id
 	 * @return the user group if found, null otherwise
 	 * @throws SQLException
 	 */
@@ -122,9 +122,9 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Get the user groups that the given user belongs to
+	 * Returns the user groups that the given user belongs to
 	 *
-	 * @param userId
+	 * @param userId the user id
 	 * @return the user's user groups
 	 * @throws SQLException
 	 */
@@ -142,9 +142,9 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Delete the user group with the given id
+	 * Deletes the user group with the given id
 	 *
-	 * @param id
+	 * @param id the user group id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
@@ -178,9 +178,9 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Delete the user group with the given id
+	 * Deletes the user groups with the given ids
 	 *
-	 * @param ids
+	 * @param ids the user group ids
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
@@ -193,10 +193,10 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Add a new user group
+	 * Adds a new user group
 	 *
-	 * @param group
-	 * @param actionUser
+	 * @param group the user group
+	 * @param actionUser the user who is performing the action
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -227,10 +227,10 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Update an existing user group
+	 * Updates a user group
 	 *
-	 * @param group
-	 * @param actionUser
+	 * @param group the updated user group
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "userGroups", allEntries = true)
@@ -241,11 +241,11 @@ public class UserGroupService {
 	}
 
 	/**
-	 * Save a user group
+	 * Saves a user group
 	 *
-	 * @param group
-	 * @param newRecord
-	 * @param actionUser
+	 * @param group the user group
+	 * @param newRecord whether this is a new record
+	 * @param actionUser the user who is performing the action
 	 * @throws SQLException
 	 */
 	private void saveUserGroup(UserGroup group, boolean newRecord, User actionUser) throws SQLException {

@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ *
+ * This file is part of ART.
+ *
+ * ART is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2 of the License.
+ *
+ * ART is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ART. If not, see <http://www.gnu.org/licenses/>.
+ */
 package art.user;
 
 import art.encryption.PasswordUtils;
@@ -26,7 +43,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Spring controller for the user configuration process
+ * Controller for the user configuration process
  *
  * @author Timothy Anyona
  */
@@ -88,7 +105,7 @@ public class UserController {
 	@RequestMapping(value = "/app/deleteUsers", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUsers(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteUsers: id={}", (Object) ids);
+		logger.debug("Entering deleteUsers: ids={}", (Object) ids);
 
 		//object will be automatically converted to json
 		//see http://www.mkyong.com/spring-mvc/spring-3-mvc-and-json-example/
@@ -262,12 +279,13 @@ public class UserController {
 	}
 
 	/**
-	 * Prepare model data for edit user page and return jsp file to display
+	 * Prepares model data for edit user page and returns the jsp file to
+	 * display
 	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
+	 * @param action the action. "add" or "edit"
+	 * @param model the model to use
+	 * @param session the http session
+	 * @return returns the jsp file to display
 	 */
 	private String showEditUser(String action, Model model, HttpSession session) {
 		logger.debug("Entering showEditUser: action='{}'", action);
@@ -286,12 +304,10 @@ public class UserController {
 	}
 
 	/**
-	 * Prepare model data for edit user page and return jsp file to display
+	 * Prepares model data for edit users page and returns the jsp file to
+	 * display
 	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
+	 * @return returns the jsp file to display
 	 */
 	private String showEditUsers() {
 		logger.debug("Entering showEditUsers");
@@ -300,10 +316,10 @@ public class UserController {
 	}
 
 	/**
-	 * Get relevant access levels to be used in the edit user page
+	 * Returns the relevant access levels to be used in the edit user page
 	 *
-	 * @param session
-	 * @return
+	 * @param session the http session
+	 * @return the access levels to be used
 	 */
 	private List<AccessLevel> getAccessLevels(HttpSession session) {
 		logger.debug("Entering getAccessLevels");
@@ -334,11 +350,11 @@ public class UserController {
 	}
 
 	/**
-	 * Determine if the session user can edit a given user
+	 * Returns <code>true</code> if the session user can edit a given user
 	 *
-	 * @param sessionUser
-	 * @param editUser
-	 * @return
+	 * @param sessionUser the session user
+	 * @param editUser the user to edit
+	 * @return <code>true</code> if the session user can edit the given user
 	 */
 	private boolean canEditUser(HttpSession session, User editUser) {
 		logger.debug("Entering canEditUser");
@@ -363,9 +379,10 @@ public class UserController {
 	}
 
 	/**
-	 * Set password
+	 * Encrypts the password for the given user
 	 *
-	 * @param user
+	 * @param user the user, containing the new password to be used
+	 * @param action the action being taken. "add" or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException

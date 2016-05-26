@@ -180,12 +180,11 @@ public class ScheduleController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
+	 * @param action the action to use
+	 * @param model the model to use
+	 * @return the jsp file to display
 	 */
 	private String showEditSchedule(String action, Model model) {
 		logger.debug("Entering showSchedule: action='{}'", action);
@@ -193,5 +192,4 @@ public class ScheduleController {
 		model.addAttribute("action", action);
 		return "editSchedule";
 	}
-
 }

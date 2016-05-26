@@ -32,5 +32,4 @@ public class StringToDouble implements Converter<String, Double> {
 	public Double convert(String s) {
 		return NumberUtils.toDouble(s);
 	}
-
 }

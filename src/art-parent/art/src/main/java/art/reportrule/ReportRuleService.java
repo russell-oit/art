@@ -37,7 +37,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
- * Class to provide methods related to report rules
+ * Provides methods for retrieving, adding, updating and deleting report rules
  *
  * @author Timothy Anyona
  */
@@ -90,10 +90,10 @@ public class ReportRuleService {
 	}
 
 	/**
-	 * Get report rules for a given report
+	 * Returns report rules for a given report
 	 *
-	 * @param reportId
-	 * @return list of report rules for a given report, empty list otherwise
+	 * @param reportId the report id
+	 * @return report rules for the given report
 	 * @throws SQLException
 	 */
 	@Cacheable("rules")
@@ -106,10 +106,10 @@ public class ReportRuleService {
 	}
 
 	/**
-	 * Get a report rule
+	 * Returns a report rule
 	 *
-	 * @param id
-	 * @return populated object if found, null otherwise
+	 * @param id the report rule id
+	 * @return report rule if found, null otherwise
 	 * @throws SQLException
 	 */
 	@Cacheable("rules")
@@ -122,9 +122,9 @@ public class ReportRuleService {
 	}
 
 	/**
-	 * Delete a report rule
+	 * Deletes a report rule
 	 *
-	 * @param id
+	 * @param id the report rule id
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
@@ -138,10 +138,10 @@ public class ReportRuleService {
 	}
 
 	/**
-	 * Add a new report rule to the database
+	 * Adds a new report rule to the database
 	 *
-	 * @param reportRule
-	 * @param reportId
+	 * @param reportRule the report rule
+	 * @param reportId the report id
 	 * @return new record id
 	 * @throws SQLException
 	 */
@@ -184,9 +184,9 @@ public class ReportRuleService {
 	}
 
 	/**
-	 * Update an existing report rule
+	 * Updates an existing report rule
 	 *
-	 * @param reportRule
+	 * @param reportRule the updated report rule
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "rules", allEntries = true)
@@ -209,5 +209,4 @@ public class ReportRuleService {
 
 		dbService.update(sql, values);
 	}
-
 }

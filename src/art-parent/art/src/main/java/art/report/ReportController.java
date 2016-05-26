@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -59,7 +59,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Spring controller for reports pages
+ * Controller for reports pages
  *
  * @author Timothy Anyona
  */
@@ -267,6 +267,12 @@ public class ReportController {
 		return "selectReportParameters";
 	}
 
+	/**
+	 * Returns the available report formats for the given report type
+	 * 
+	 * @param reportType the report type
+	 * @return the available report formats
+	 */
 	private List<String> getAvailableReportFormats(ReportType reportType) {
 		logger.debug("Entering getAvailableReportFormats: reportType={}", reportType);
 
@@ -299,13 +305,6 @@ public class ReportController {
 		return formats;
 	}
 
-	/**
-	 * Return available reports using ajax
-	 *
-	 * @param session
-	 * @param request
-	 * @return
-	 */
 	@RequestMapping(value = "/app/getReports", method = RequestMethod.GET)
 	public @ResponseBody
 	List<Report> getReports(HttpSession session, HttpServletRequest request) {
@@ -500,12 +499,9 @@ public class ReportController {
 	}
 
 	/**
-	 * Prepare model data for edit user page and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
+	 * @return returns the jsp file to display
 	 */
 	private String showEditReports() {
 		logger.debug("Entering showEditReports");
@@ -529,12 +525,12 @@ public class ReportController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @param session
-	 * @return
+	 * @param action the action to take
+	 * @param model the model to use
+	 * @param session the http session
+	 * @return the jsp file to display
 	 */
 	private String showEditReport(String action, Model model, HttpSession session) {
 		logger.debug("Entering showEditReport: action='{}'", action);
@@ -557,10 +553,10 @@ public class ReportController {
 	}
 
 	/**
-	 * Save file
+	 * Saves a file
 	 *
-	 * @param file
-	 * @return
+	 * @param file the file to save
+	 * @return an i18n message string if there was a problem, otherwise null
 	 * @throws IOException
 	 */
 	private String saveFile(MultipartFile file) throws IOException {
@@ -568,11 +564,11 @@ public class ReportController {
 	}
 
 	/**
-	 * Save file and update report template property with the file name
+	 * Saves a file and updates the report template property with the file name
 	 *
-	 * @param file
-	 * @param report
-	 * @return
+	 * @param file the file to save
+	 * @param report the report to set
+	 * @return an i18n message string if there was a problem, otherwise null
 	 * @throws IOException
 	 */
 	private String saveFile(MultipartFile file, Report report) throws IOException {
@@ -623,10 +619,10 @@ public class ReportController {
 	}
 
 	/**
-	 * Set xmla password and chart options setting properties
+	 * Sets xmla password and chart options for the given report
 	 *
-	 * @param report
-	 * @param action
+	 * @param report the report to use
+	 * @param action the action to take, "add" or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException
@@ -705,10 +701,10 @@ public class ReportController {
 	}
 
 	/**
-	 * Set xmla password
+	 * Sets the xmla password for the given report
 	 *
-	 * @param report
-	 * @param action
+	 * @param report the report to use
+	 * @param action the action to take, "add" or "edit"
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws SQLException
@@ -752,12 +748,12 @@ public class ReportController {
 	}
 
 	/**
-	 * Finalise report properties
+	 * Finalises report properties
 	 *
-	 * @param report
-	 * @param templateFile
-	 * @param resourcesFile
-	 * @param action
+	 * @param report the report to use
+	 * @param templateFile the template file
+	 * @param resourcesFile the resources file
+	 * @param action the action to take
 	 * @return i18n message to display in the user interface if there was a
 	 * problem, null otherwise
 	 * @throws IOException
@@ -787,5 +783,4 @@ public class ReportController {
 
 		return null;
 	}
-
 }

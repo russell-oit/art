@@ -27,12 +27,20 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Utility functions used to aid running of reports
+ * Provides utility functions used to aid running of reports
  *
  * @author Timothy Anyona
  */
 public class RunReportHelper {
 
+	/**
+	 * Returns the connection to use for running the given report
+	 * 
+	 * @param report the report
+	 * @param reportParams the report parameters
+	 * @return the connection to use for running the report
+	 * @throws SQLException 
+	 */
 	public Connection getEffectiveReportDatasource(Report report,
 			Collection<ReportParameter> reportParams) throws SQLException {
 
@@ -59,6 +67,14 @@ public class RunReportHelper {
 		return conn;
 	}
 
+	/**
+	 * Returns the connection to use for running the given report
+	 * 
+	 * @param report the report
+	 * @param reportParamsMap the report parameters
+	 * @return the connection to use for running the report
+	 * @throws SQLException 
+	 */
 	public Connection getEffectiveReportDatasource(Report report,
 			Map<String, ReportParameter> reportParamsMap) throws SQLException {
 

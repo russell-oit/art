@@ -31,7 +31,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Class to represent report parameter
+ * Represents a report parameter
  *
  * @author Timothy Anyona
  */
@@ -239,6 +239,11 @@ public class ReportParameter implements Serializable {
 		return "ReportParameter{" + "reportParameterId=" + reportParameterId + '}';
 	}
 
+	/**
+	 * Returns actual parameter values in a formatted manner
+	 *
+	 * @return actual parameter values in a formatted manner
+	 */
 	public String getDisplayValues() {
 		List<String> paramDisplayStrings = new ArrayList<>();
 
@@ -275,10 +280,23 @@ public class ReportParameter implements Serializable {
 		return StringUtils.join(paramDisplayStrings, ", ");
 	}
 
+	/**
+	 * Returns the parameter name and actual parameter values in a formatted
+	 * manner
+	 *
+	 * @return the parameter name and actual parameter values in a formatted
+	 * manner
+	 */
 	public String getNameAndDisplayValues() {
 		return parameter.getLabel() + ": " + getDisplayValues();
 	}
 
+	/**
+	 * Returns the effective actual parameter value. An appropriate object for
+	 * single-value parameters or a list for multi-value parameters.
+	 *
+	 * @return the effective actual parameter value
+	 */
 	public Object getEffectiveActualParameterValue() {
 		if (parameter.getParameterType() == ParameterType.SingleValue) {
 			return actualParameterValues.get(0);
@@ -287,10 +305,20 @@ public class ReportParameter implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns the html element name to be used for this parameter
+	 *
+	 * @return the html element name to be used for this parameter
+	 */
 	public String getHtmlElementName() {
 		return "p-" + parameter.getName();
 	}
 
+	/**
+	 * Returns the html element value to be used for this parameter
+	 *
+	 * @return the html element value to be used for this parameter
+	 */
 	public String getHtmlValue() {
 		Object value = getEffectiveActualParameterValue();
 
@@ -304,14 +332,30 @@ public class ReportParameter implements Serializable {
 		}
 	}
 
+	/**
+	 * Returns the html element ids of chained parents elements
+	 *
+	 * @return the html element ids of chained parents elements
+	 */
 	public String getChainedParentsHtmlIds() {
 		return getHtmlIds(chainedParents);
 	}
 
+	/**
+	 * Returns the html element ids of chained depends elements
+	 *
+	 * @return the html element ids of chained depends elements
+	 */
 	public String getChainedDependsHtmlIds() {
 		return getHtmlIds(chainedDepends);
 	}
 
+	/**
+	 * Returns html element ids to be used with the given strings
+	 *
+	 * @param ids the strings to use
+	 * @return html element ids to be used with the given strings
+	 */
 	private String getHtmlIds(String ids) {
 		if (StringUtils.isBlank(ids)) {
 			return "";
@@ -328,6 +372,11 @@ public class ReportParameter implements Serializable {
 		return finalIds;
 	}
 
+	/**
+	 * Returns <code>true</code> if this parameter is chained
+	 *
+	 * @return <code>true</code> if this parameter is chained
+	 */
 	public boolean isChained() {
 		if (StringUtils.isBlank(chainedParents)) {
 			return false;
@@ -336,6 +385,12 @@ public class ReportParameter implements Serializable {
 		}
 	}
 
+	/**
+	 * Converts lov values to string
+	 *
+	 * @param lovValuesAsObjects lov values using objects
+	 * @return lov values using strings
+	 */
 	public Map<String, String> convertLovValuesFromObjectToString(Map<Object, String> lovValuesAsObjects) {
 		Map<String, String> stringLovValues = new LinkedHashMap<>();
 
@@ -361,11 +416,23 @@ public class ReportParameter implements Serializable {
 		return stringLovValues;
 	}
 
+	/**
+	 * Returns the effective actual parameter value. Returns the same result as
+	 * getEffectiveActualParameterValue
+	 *
+	 * @return effective actual parameter value
+	 */
 	public Object getValue() {
 		//for use with jxls
 		return getEffectiveActualParameterValue();
 	}
 
+	/**
+	 * Returns the effective actual parameter value for use within an sql query.
+	 * Values are escaped.
+	 *
+	 * @return effective actual parameter value for use within an sql query
+	 */
 	public Object getSqlValue() {
 		//for use with jxls
 		ParameterType parameterType = parameter.getParameterType();

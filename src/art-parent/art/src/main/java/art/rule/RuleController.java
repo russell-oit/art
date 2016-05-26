@@ -169,11 +169,11 @@ public class RuleController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @param action the action to take
+	 * @param model the model to use
+	 * @return the jsp file to display
 	 */
 	private String showEditRule(String action, Model model) {
 		logger.debug("Entering showEditRule: action='{}'", action);
@@ -182,5 +182,4 @@ public class RuleController {
 		model.addAttribute("action", action);
 		return "editRule";
 	}
-
 }

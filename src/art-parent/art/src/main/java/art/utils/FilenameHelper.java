@@ -20,25 +20,49 @@ package art.utils;
 import art.job.Job;
 import art.report.Report;
 import java.util.Date;
+import java.util.Objects;
 import org.apache.commons.lang3.RandomStringUtils;
 
 /**
- *
+ * Provides methods for generating file names for use with report output
+ * 
  * @author Timothy Anyona
  */
 public class FilenameHelper {
 
+	/**
+	 * Returns a file name to be used for the given report
+	 * 
+	 * @param report the report
+	 * @return a file name to be used for the given report
+	 */
 	public String getFileName(Report report) {
 		return getFileName(report, null);
 	}
 
+	/**
+	 * Returns a file name to be used for the given job
+	 * 
+	 * @param job the job
+	 * @return a file name to be used for the given job
+	 */
 	public String getFileName(Job job) {
 		return getFileName(job.getReport(), job);
 	}
 
+	/**
+	 * Returns a file name to be used for the given report or job
+	 * 
+	 * @param report the report, not null
+	 * @param job the job, may be null
+	 * @return a file name to be used for the given report or job
+	 */
 	private String getFileName(Report report, Job job) {
+		Objects.requireNonNull(report, "report must not be null");
+		
 		int jobId;
 		String namePart;
+		
 		if (job == null) {
 			jobId = 0;
 			namePart = report.getName();
@@ -58,7 +82,5 @@ public class FilenameHelper {
 		fileName = ArtUtils.cleanFileName(fileName);
 
 		return fileName;
-
 	}
-
 }

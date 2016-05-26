@@ -158,11 +158,11 @@ public class UserGroupController {
 	}
 
 	/**
-	 * Prepare model data and return jsp file to display
+	 * Prepares model data and returns the jsp file to display
 	 *
-	 * @param action
-	 * @param model
-	 * @return
+	 * @param action the action. "add" or "edit"
+	 * @param model the model to use
+	 * @return the jsp file to display
 	 */
 	private String showEditUserGroup(String action, Model model) {
 		logger.debug("Entering showEditUserGroup: action='{}'", action);
@@ -175,7 +175,7 @@ public class UserGroupController {
 		}
 
 		model.addAttribute("action", action);
+		
 		return "editUserGroup";
 	}
-
 }

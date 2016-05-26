@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
- * Spring controller for the change password process
+ * Controller for the change password process
  *
  * @author Timothy Anyona
  */
@@ -91,5 +91,4 @@ public class PasswordController {
 
 		return "password";
 	}
-
 }

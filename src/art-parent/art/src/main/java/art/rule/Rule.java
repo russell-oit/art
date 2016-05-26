@@ -21,7 +21,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Class to represent a filter
+ * Represents a rule
  *
  * @author Timothy Anyona
  */
@@ -177,7 +177,6 @@ public class Rule implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Filter{" + "name=" + name + '}';
+		return "Rule{" + "name=" + name + '}';
 	}
-
 }

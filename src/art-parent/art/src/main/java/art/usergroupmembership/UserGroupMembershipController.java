@@ -129,5 +129,4 @@ public class UserGroupMembershipController {
 
 		return response;
 	}
-
 }

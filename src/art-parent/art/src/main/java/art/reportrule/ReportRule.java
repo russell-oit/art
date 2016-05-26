@@ -20,7 +20,7 @@ import art.rule.Rule;
 import java.io.Serializable;
 
 /**
- * Class to represent a reportId rule
+ * Represents a report rule
  *
  * @author Timothy Anyona
  */
@@ -33,14 +33,14 @@ public class ReportRule implements Serializable {
 	private String reportColumn;
 
 	/**
-	 * @return the reportIdFilterId
+	 * @return the reportRuleId
 	 */
 	public int getReportRuleId() {
 		return reportRuleId;
 	}
 
 	/**
-	 * @param reportRuleId the reportIdFilterId to set
+	 * @param reportRuleId the reportRuleId to set
 	 */
 	public void setReportRuleId(int reportRuleId) {
 		this.reportRuleId = reportRuleId;
@@ -75,14 +75,14 @@ public class ReportRule implements Serializable {
 	}
 
 	/**
-	 * @return the reportIdColumn
+	 * @return the reportColumn
 	 */
 	public String getReportColumn() {
 		return reportColumn;
 	}
 
 	/**
-	 * @param reportColumn the reportIdColumn to set
+	 * @param reportColumn the reportColumn to set
 	 */
 	public void setReportColumn(String reportColumn) {
 		this.reportColumn = reportColumn;
@@ -114,5 +114,4 @@ public class ReportRule implements Serializable {
 	public String toString() {
 		return "ReportRule{" + "reportRuleId=" + reportRuleId + '}';
 	}
-
 }

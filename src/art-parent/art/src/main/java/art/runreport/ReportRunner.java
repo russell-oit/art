@@ -49,13 +49,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Execute query
+ * Runs a report
  *
  * @author Enrico Liboni
  * @author Timothy Anyona
  */
 public class ReportRunner {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ReportRunner.class);
 	private String username; //used in replacing :username tag
 	private final StringBuilder querySb;
@@ -74,7 +74,7 @@ public class ReportRunner {
 	private Map<String, ReportParameter> reportParamsMap;
 	private final List<Object> jdbcParams = new ArrayList<>();
 	private ReportType reportType;
-	
+
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
 	}
@@ -186,14 +186,15 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Process the report source and apply tags, dynamic sql and parameters
+	 * Processes the report source and applies tags, dynamic sql, parameters and
+	 * rules
 	 */
 	private void processReportSource() throws SQLException {
 		logger.debug("Entering processReportSource");
 
 		//update querySb with report sql
 		querySb.replace(0, querySb.length(), report.getReportSource());
-		
+
 		applyTags(querySb);
 		applyDynamicSql(querySb);
 		applyParameterPlaceholders(querySb);
@@ -201,13 +202,19 @@ public class ReportRunner {
 		//handle dynamic recipient label
 		applyDynamicRecipient(querySb);
 		applyRules(querySb);
-		
+
 		logger.debug("Sql query now is:\n{}", querySb.toString());
 	}
-	
+
+	/**
+	 * Applies rules to the report source
+	 *
+	 * @param sb the report source
+	 * @throws SQLException
+	 */
 	private void applyRules(StringBuilder sb) throws SQLException {
 		logger.debug("Entering applyRules");
-		
+
 		if (!useRules) {
 			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
 			String querySql = sb.toString();
@@ -215,10 +222,10 @@ public class ReportRunner {
 
 			//update sb with new sql
 			sb.replace(0, sb.length(), querySql);
-			
+
 			return;
 		}
-		
+
 		int insertPosLast = 0;
 
 		// Determine if we have a GROUP BY or an ORDER BY
@@ -239,18 +246,18 @@ public class ReportRunner {
 		if (labelPosition != -1) {
 			usingLabelledRules = true;
 		}
-		
+
 		String ruleName;
 		String columnName;
 		String columnDataType;
 		ResultSet rs = null;
 		Connection conn = null;
 		PreparedStatement ps = null;
-		
+
 		int queryId = report.getReportId();
-		
+
 		try {
-			
+
 			conn = DbConnections.getArtDbConnection();
 
 			// Get rules for the current query
@@ -265,12 +272,12 @@ public class ReportRunner {
 			// Note: if we don't have rules for this query, the sb is left untouched
 			while (rs.next()) {
 				count++;
-				
+
 				StringBuilder tmpSb;
 				ruleName = rs.getString("RULE_NAME");
 				columnName = rs.getString("FIELD_NAME");
 				columnDataType = rs.getString("FIELD_DATA_TYPE");
-				
+
 				tmpSb = getRuleValues(conn, username, ruleName, 1, columnDataType);
 				String groupValues = getGroupRuleValues(conn, ruleName, columnName, columnDataType);
 				if (tmpSb == null) { // it is null only if 	ALL_ITEMS
@@ -298,7 +305,7 @@ public class ReportRunner {
 						if (StringUtils.length(groupValues) > 0) {
 							groupCondition = groupValues;
 						}
-						
+
 						if (StringUtils.length(condition) > 0) {
 							//rule values defined for user
 							if (StringUtils.length(groupCondition) > 0) {
@@ -309,7 +316,7 @@ public class ReportRunner {
 							//no rule values for user. use user group values
 							condition = groupCondition;
 						}
-						
+
 						condition = " ( " + condition + " ) "; //enclose this rule values in brackets to treat it as a single condition
 
 						if (usingLabelledRules) {
@@ -352,11 +359,22 @@ public class ReportRunner {
 			DatabaseUtils.close(rs, ps, conn);
 		}
 	}
-	
+
+	/**
+	 * Returns rule values for the given user and rule
+	 *
+	 * @param conn a connection to the art database
+	 * @param ruleUsername the user name
+	 * @param currentRule the rule name
+	 * @param counter a counter for the recursion count
+	 * @param columnDataType the column data type
+	 * @return rule values, or null if all values are to be used
+	 * @throws SQLException
+	 */
 	public StringBuilder getRuleValues(Connection conn, String ruleUsername,
 			String currentRule, int counter, String columnDataType)
 			throws SQLException {
-		
+
 		StringBuilder tmpSb = new StringBuilder(64);
 		boolean isAllItemsForThisRule = false;
 		final int MAX_RECURSIVE_LOOKUP = 20;
@@ -373,15 +391,15 @@ public class ReportRunner {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		String sql;
-		
+
 		try {
-			
+
 			if (NumberUtils.isNumber(ruleUsername)) {
 				//get values from user group
 				sql = "SELECT RULE_VALUE, RULE_TYPE "
 						+ " FROM ART_USER_GROUP_RULES "
 						+ " WHERE USER_GROUP_ID = ? AND RULE_NAME = ?";
-				
+
 				ps = conn.prepareStatement(sql);
 				ps.setInt(1, Integer.parseInt(ruleUsername));
 				ps.setString(2, currentRule);
@@ -390,12 +408,12 @@ public class ReportRunner {
 				sql = "SELECT RULE_VALUE, RULE_TYPE "
 						+ " FROM ART_USER_RULES "
 						+ " WHERE USERNAME = ? AND RULE_NAME = ?";
-				
+
 				ps = conn.prepareStatement(sql);
 				ps.setString(1, ruleUsername);
 				ps.setString(2, currentRule);
 			}
-			
+
 			rs = ps.executeQuery();
 
 			// Build the tmp string, handle ALL_ITEMS and
@@ -436,48 +454,51 @@ public class ReportRunner {
 		} finally {
 			DatabaseUtils.close(rs, ps);
 		}
-		
+
 		if (!isAllItemsForThisRule) {
 			// return the <list> for the current rule and user
 			return tmpSb;
 		}
-		
+
 		return null;
 	}
 
 	/**
-	 * Get rule values for the user's user groups
+	 * Returns rule values for the user's user groups
 	 *
-	 * @param columnName
-	 * @param columnDataType
-	 * @return
+	 * @param conn a connection to the art database
+	 * @param ruleName the rule name
+	 * @param columnName the column name
+	 * @param columnDataType the columne data type
+	 * @return the rule values
 	 */
-	private String getGroupRuleValues(Connection conn, String ruleName, String columnName, String columnDataType) throws SQLException {
+	private String getGroupRuleValues(Connection conn, String ruleName, String columnName,
+			String columnDataType) throws SQLException {
 
 		//get user's user groups
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		String sql;
 		StringBuilder valuesSb = new StringBuilder(512);
-		
+
 		try {
-			
+
 			sql = "SELECT USER_GROUP_ID "
 					+ " FROM ART_USER_GROUP_ASSIGNMENT "
 					+ " WHERE USERNAME=? ";
-			
+
 			ps = conn.prepareStatement(sql);
 			ps.setString(1, username);
-			
+
 			rs = ps.executeQuery();
-			
+
 			int count = 0;
-			
+
 			while (rs.next()) {
 				//for each group, get the group's rule values
 				String userGroupId = rs.getString("USER_GROUP_ID");
 				StringBuilder tmpSb = getRuleValues(conn, userGroupId, ruleName, 1, columnDataType);
-				
+
 				String condition;
 				if (tmpSb == null) {
 					//rule value defined for this group as ALL_ITEMS
@@ -497,7 +518,7 @@ public class ReportRunner {
 				if (StringUtils.length(condition) > 0) {
 					//some rule value defined for this group
 					count++;
-					
+
 					if (count == 1) {
 						valuesSb.append(condition);
 					} else {
@@ -508,17 +529,22 @@ public class ReportRunner {
 		} finally {
 			DatabaseUtils.close(rs, ps);
 		}
-		
+
 		return valuesSb.toString();
 	}
-	
+
+	/**
+	 * Applies parameter placeholders for the report source
+	 *
+	 * @param sb the report source
+	 */
 	private void applyParameterPlaceholders(StringBuilder sb) {
 		logger.debug("Entering applyParameterPlaceholders");
-		
+
 		if (reportParamsMap == null || reportParamsMap.isEmpty()) {
 			return;
 		}
-		
+
 		String querySql = sb.toString();
 
 		//get and store param identifier order for use with jdbc preparedstatement
@@ -527,7 +553,7 @@ public class ReportRunner {
 			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 				String paramName = entry.getKey();
 				ReportParameter reportParam = entry.getValue();
-				
+
 				String paramIdentifier = "#" + paramName + "#";
 				int index = StringUtils.indexOfIgnoreCase(querySql, paramIdentifier);
 				while (index >= 0) {
@@ -535,7 +561,7 @@ public class ReportRunner {
 					index = StringUtils.indexOfIgnoreCase(querySql, paramIdentifier, index + paramIdentifier.length());
 				}
 			}
-			
+
 			jdbcParams.clear();
 			for (ReportParameter reportParam : jdbcParamOrder.values()) {
 				for (Object paramValue : reportParam.getActualParameterValues()) {
@@ -550,13 +576,13 @@ public class ReportRunner {
 			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 				String paramName = entry.getKey();
 				ReportParameter reportParam = entry.getValue();
-				
+
 				List<Object> actualParameterValues = reportParam.getActualParameterValues();
-				
+
 				if (actualParameterValues == null || actualParameterValues.isEmpty()) {
 					continue;
 				}
-				
+
 				String paramIdentifier = "#!" + paramName + "#";
 				String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
 				for (Object value : actualParameterValues) {
@@ -577,13 +603,13 @@ public class ReportRunner {
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			String paramName = entry.getKey();
 			ReportParameter reportParam = entry.getValue();
-			
+
 			List<Object> actualParameterValues = reportParam.getActualParameterValues();
-			
+
 			if (actualParameterValues == null || actualParameterValues.isEmpty()) {
 				continue;
 			}
-			
+
 			String paramIdentifier = "#" + paramName + "#";
 			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
 			String replaceString = Matcher.quoteReplacement(StringUtils.repeat("?", ",", reportParam.getActualParameterValues().size())); //quote in case it contains special regex characters
@@ -594,7 +620,15 @@ public class ReportRunner {
 		//update querySb with new sql
 		sb.replace(0, sb.length(), querySql);
 	}
-	
+
+	/**
+	 * Adds parameters to be used when executing the report via jdbc. Date
+	 * parameters are converted to the appropriate java.sql.Date or
+	 * java.sql.Timestamp
+	 *
+	 * @param paramValue the parameter value
+	 * @param paramDataType the parameter data type
+	 */
 	private void addJdbcParam(Object paramValue, ParameterDataType paramDataType) {
 		if (paramValue instanceof Date) {
 			Date dateValue = (Date) paramValue;
@@ -607,12 +641,17 @@ public class ReportRunner {
 			jdbcParams.add(paramValue);
 		}
 	}
-	
+
+	/**
+	 * Applies dynamic recipients to the report source
+	 *
+	 * @param sb the report source
+	 */
 	private void applyDynamicRecipient(StringBuilder sb) {
 		logger.debug("Entering applyDynamicRecipient");
-		
+
 		String querySql = sb.toString();
-		
+
 		if (recipientFilterPresent) {
 			//replace #recipient# label with recipient values
 			if (recipientColumn != null && recipientId != null) {
@@ -625,7 +664,7 @@ public class ReportRunner {
 					recipientValue = "'" + escapeSql(recipientId) + "'";
 				}
 				String replaceString = recipientColumn + "=" + recipientValue;
-				
+
 				String searchString = Pattern.quote(RECIPIENT_LABEL);
 				replaceString = Matcher.quoteReplacement(replaceString);
 				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString);
@@ -641,7 +680,7 @@ public class ReportRunner {
 	}
 
 	/**
-	 * execute overload with a default resultset type
+	 * Runs the report using a forward only cursor
 	 *
 	 * @throws java.sql.SQLException
 	 */
@@ -650,28 +689,37 @@ public class ReportRunner {
 	}
 
 	/**
-	 * execute overload with a given resultset type
+	 * Runs the report using the given resultset type
 	 *
+	 * @param resultSetType the resultset type
+	 * @throws java.sql.SQLException
 	 */
 	public void execute(int resultSetType) throws SQLException {
 		execute(resultSetType, false, false);
 	}
 
 	/**
-	 * execute overload with use rules setting
+	 * Runs the report using a forward only cursor and the given use rules
+	 * setting
 	 *
+	 * @param newUseRules the use rules setting to use
+	 * @throws java.sql.SQLException
 	 */
 	public void execute(boolean newUseRules) throws SQLException {
 		execute(ResultSet.TYPE_FORWARD_ONLY, true, newUseRules);
 	}
 
 	/**
-	 * Execute the Query sql
+	 * Runs the report using the given resultset type and new use rules setting
 	 *
-	 * @param resultSetType
+	 * @param resultSetType the resultset type to use
+	 * @param overrideUseRules whether to override the report's use rule setting
+	 * @param newUseRules the new use rules setting
+	 * @throws java.sql.SQLException
 	 */
-	public void execute(int resultSetType, boolean overrideUseRules, boolean newUseRules) throws SQLException {
-		
+	public void execute(int resultSetType, boolean overrideUseRules, boolean newUseRules)
+			throws SQLException {
+
 		reportType = report.getReportType();
 		displayResultset = report.getDisplayResultset();
 		useRules = report.isUsesRules();
@@ -702,34 +750,38 @@ public class ReportRunner {
 		//use dynamic datasource if so configured
 		RunReportHelper runReportHelper = new RunReportHelper();
 		connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
-		
+
 		String querySql = querySb.toString();
-		
+
 		Object[] paramValues = jdbcParams.toArray(new Object[0]);
 		finalSql = generateFinalSql(querySql, paramValues);
-		
+
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
-		
+
 		DatabaseUtils.setValues(psQuery, paramValues);
-		
+
 		psQuery.execute();
 	}
-	
+
+	/**
+	 * Returns the query sql
+	 *
+	 * @return
+	 */
 	public String getQuerySql() {
 		return querySb.toString();
 	}
 
 	/**
-	 * Get the result set to use for this query. query sql may have several
-	 * statements
+	 * Returns the resultset produced for this report
 	 *
-	 * @return the result set of this query
+	 * @return the resultset produced for this report
 	 * @throws SQLException
 	 */
 	public ResultSet getResultSet() throws SQLException {
 		ResultSet rs = psQuery.getResultSet();
 		updateCount = psQuery.getUpdateCount();
-		
+
 		if (displayResultset == -1) {
 			//use the select statement. will use first select statement. having several selects isn't useful
 			if (rs == null) {
@@ -750,15 +802,15 @@ public class ReportRunner {
 			int count = 0;
 			while (psQuery.getMoreResults(Statement.KEEP_CURRENT_RESULT) != false
 					|| psQuery.getUpdateCount() != -1) {
-				
+
 				count++;
-				
+
 				if (rs != null) {
 					rs.close();
 				}
 				rs = psQuery.getResultSet();
 				updateCount = psQuery.getUpdateCount();
-				
+
 				if (count > MAX_LOOPS) {
 					logger.warn("MAX_LOOPS reached. Report Id = {}", report.getReportId());
 					break;
@@ -771,20 +823,20 @@ public class ReportRunner {
 				count++;
 				rs = psQuery.getResultSet();
 				updateCount = psQuery.getUpdateCount();
-				
+
 				if (count == displayResultset) {
 					break;
 				}
 			}
 		}
-		
+
 		return rs;
 	}
 
 	/**
-	 * Get the number of rows updated by this query
+	 * Returns the number of rows updated by this report
 	 *
-	 * @return the number of rows updated by this query
+	 * @return the number of rows updated by this report
 	 * @throws SQLException
 	 */
 	public int getUpdateCount() throws SQLException {
@@ -792,9 +844,9 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Execute and get the result set for this query
+	 * Runs this report and returns the generated resultset
 	 *
-	 * @return <code>true</code> if successful
+	 * @return the generated resultset for this report
 	 * @throws SQLException
 	 */
 	public ResultSet executeQuery() throws SQLException {
@@ -802,9 +854,11 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Execute and get the result set for this query
+	 * Runs this report and returns the generated resultset, using the given use
+	 * rules setting
 	 *
-	 * @return <code>true</code> if successful
+	 * @param newUseRules the use rules setting to use
+	 * @return the generated resultset
 	 * @throws SQLException
 	 */
 	public ResultSet executeQuery(boolean newUseRules) throws SQLException {
@@ -812,11 +866,14 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Execute and get the result set for this query
+	 * Runs this report and returns the generated resultset, using the given use
+	 * rules setting and using a forward only cursor
 	 *
-	 * @return <code>true</code> if successful
+	 * @param overrideUseRules whether to override the report's use rules
+	 * setting
+	 * @param newUseRules the new use rules setting to use
+	 * @return the generated resultset
 	 * @throws SQLException
-	 * @throws ArtException
 	 */
 	public ResultSet executeQuery(boolean overrideUseRules, boolean newUseRules) throws SQLException {
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
@@ -824,9 +881,9 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Run lov report and return the lov values (value and label)
+	 * Runs an lov report and returns the lov values (value and label)
 	 *
-	 * @return values for an lov
+	 * @return the lov values
 	 * @throws SQLException
 	 */
 	public Map<String, String> getLovValues() throws SQLException {
@@ -834,25 +891,38 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Run lov report and return the lov values (value and label)
+	 * Runs an lov report and returns the lov values, using the given use rules
+	 * setting
 	 *
-	 * @param newUseRules
-	 * @return values for an lov
+	 * @param newUseRules the use rules setting to use
+	 * @return lov values
 	 * @throws SQLException
 	 */
 	public Map<String, String> getLovValues(boolean newUseRules) throws SQLException {
 		return getLovValues(true, newUseRules);
 	}
-	
-	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules) throws SQLException {
+
+	/**
+	 * Runs an lov report and returns the lov values, using the given use rules
+	 * setting
+	 *
+	 * @param overrideUseRules whether to override the report's use rules
+	 * setting
+	 * @param newUseRules the new use rules setting
+	 * @return lov values
+	 * @throws SQLException
+	 */
+	public Map<String, String> getLovValues(boolean overrideUseRules, boolean newUseRules)
+			throws SQLException {
+
 		Map<String, String> lovValues = new LinkedHashMap<>();
-		
+
 		Map<Object, String> lovValuesAsObjects = getLovValuesAsObjects(overrideUseRules, newUseRules);
-		
+
 		for (Entry<Object, String> entry : lovValuesAsObjects.entrySet()) {
 			Object dataValue = entry.getKey();
 			String displayValue = entry.getValue();
-			
+
 			String stringValue;
 			if (dataValue instanceof Date) {
 				Date dateValue = (Date) dataValue;
@@ -860,30 +930,42 @@ public class ReportRunner {
 			} else {
 				stringValue = String.valueOf(dataValue);
 			}
-			
+
 			lovValues.put(stringValue, displayValue);
 		}
-		
+
 		return lovValues;
 	}
-	
+
+	/**
+	 * Runs an lov report and returns the lov values (value and label), using
+	 * the given use rules setting
+	 *
+	 * @param newUseRules the use rules setting to use
+	 * @return lov values
+	 * @throws SQLException
+	 */
 	public Map<Object, String> getLovValuesAsObjects(boolean newUseRules) throws SQLException {
 		return getLovValuesAsObjects(true, newUseRules);
 	}
 
 	/**
-	 * Run lov report and return the lov values (value and label)
+	 * Runs an lov report and returns the lov values (value and label), using
+	 * the given use rules setting
 	 *
-	 * @param overrideUseRules
-	 * @param newUseRules
-	 * @return values for an lov
+	 * @param overrideUseRules whether to override the report's use rules
+	 * setting
+	 * @param newUseRules the new use rules setting
+	 * @return lov values
 	 * @throws SQLException
 	 */
-	public Map<Object, String> getLovValuesAsObjects(boolean overrideUseRules, boolean newUseRules) throws SQLException {
+	public Map<Object, String> getLovValuesAsObjects(boolean overrideUseRules, boolean newUseRules)
+			throws SQLException {
+
 		Map<Object, String> lovValues = new LinkedHashMap<>();
-		
+
 		execute(ResultSet.TYPE_FORWARD_ONLY, overrideUseRules, newUseRules);
-		
+
 		if (reportType == ReportType.LovStatic) {
 			//static lov. values coming from static values defined in sql source
 			String items = querySb.toString();
@@ -903,7 +985,7 @@ public class ReportRunner {
 			try {
 				int columnCount = rs.getMetaData().getColumnCount();
 				while (rs.next()) {
-				//use getObject(). for dates, using getString() will return
+					//use getObject(). for dates, using getString() will return
 					//different strings for different databases and drivers
 					//https://stackoverflow.com/questions/8229727/how-to-get-jdbc-date-format
 					//https://stackoverflow.com/questions/14700962/default-jdbc-date-format-when-reading-date-as-a-string-from-resultset
@@ -914,54 +996,54 @@ public class ReportRunner {
 					} else {
 						displayValue = rs.getString(1);
 					}
-					
+
 					lovValues.put(dataValue, displayValue);
 				}
 			} finally {
 				DatabaseUtils.close(rs);
 			}
 		}
-		
+
 		return lovValues;
 	}
 
 	/**
-	 * Release resources (mainly, return the connection to the target database
-	 * for this query) IT IS MANDATORY TO CALL THIS AFTER THE execute() IN ORDER
-	 * TO RETURN THE CONNECTION TO THE POOL
+	 * Releases resources (mainly, return the connection to the target database
+	 * to the connection pool). IT IS MANDATORY TO CALL THIS AFTER THE execute()
+	 * IN ORDER TO RETURN THE CONNECTION TO THE POOL.
 	 */
 	public void close() {
 		DatabaseUtils.close(psQuery, connQuery);
 	}
 
-	// escape the ' char in a parameter value (used in multi params)
-	private String escapeSql(String s) {
+	/**
+	 * Escape the ' char in a parameter value
+	 *
+	 * @param value the value
+	 * @return the escaped value
+	 */
+	private String escapeSql(String value) {
 		String escaped = null;
-		if (s != null) {
-			escaped = StringUtils.replace(s, "'", "''");
+		if (value != null) {
+			escaped = StringUtils.replace(value, "'", "''");
 		}
 		return escaped;
 	}
 
 	/**
-	 * Dynamic SQL is parsed, evaluated and the querySb is modified according
+	 * Applies dynamic sql to the report source
+	 *
+	 * @param sb the report source
 	 */
 	private void applyDynamicSql(StringBuilder sb) {
-		applyDynamicSql(sb, false);
-	}
-
-	/**
-	 * Dynamic SQL is parsed, evaluated and the querySb is modified according
-	 */
-	private void applyDynamicSql(StringBuilder sb, boolean usingFilter) {
 		logger.debug("Entering applyDynamicSql");
-		
+
 		String element = "IF";
 
 		// XmlInfo stores the text between a tag as well as
 		// the start and end position of the tag
 		XmlInfo xinfo = XmlParser.getXmlElementInfo(sb.toString(), element, 0);
-		
+
 		while (xinfo != null) {
 			String xmlText = xinfo.getText(); // stores xml code between the IF element
 
@@ -974,31 +1056,13 @@ public class ReportRunner {
 			String exp2Value = getDynamicSqlExpressionValue(exp2);
 			String opValue = getDynamicSqlExpressionValue(op);
 
-			//enable use of same lov for chained and non-chained parameters			
-			if (StringUtils.equals(exp1, "#filter#") && (StringUtils.equalsIgnoreCase(op, "is not null") || StringUtils.equalsIgnoreCase(op, "is not blank"))) {
-				if (!usingFilter) {
-					//determine if we have filter
-					if (reportParamsMap != null) {
-						if (reportParamsMap.get("filter") != null) {
-							usingFilter = true;
-						}
-					}
-				}
-				
-				if (usingFilter) {
-					exp1Value = "#filter#"; //any string. just so that if condition is returned
-				} else {
-					exp1Value = ""; //empty sting. so that else value is returned
-				}
-			}
-			
 			String finalElementValue;
 			if (evaluateIF(exp1Value, opValue, exp2Value)) {
 				finalElementValue = XmlParser.getXmlElementValue(xmlText, "TEXT");
 			} else {
 				finalElementValue = XmlParser.getXmlElementValue(xmlText, "ELSETEXT");
 			}
-			
+
 			if (finalElementValue == null) {
 				finalElementValue = "";
 			}
@@ -1011,7 +1075,13 @@ public class ReportRunner {
 			xinfo = XmlParser.getXmlElementInfo(sb.toString(), element, xinfo.getStart() + finalElementValue.length());
 		}
 	}
-	
+
+	/**
+	 * Returns a dynamic expression value
+	 *
+	 * @param exp the expression
+	 * @return the value
+	 */
 	private String getDynamicSqlExpressionValue(String exp) {
 		String expValue;
 		if (StringUtils.startsWith(exp, "#") && StringUtils.endsWith(exp, "#") && StringUtils.length(exp) > 2) {
@@ -1019,13 +1089,13 @@ public class ReportRunner {
 			if (reportParamsMap == null) {
 				throw new IllegalStateException("Report parameters not available");
 			}
-			
+
 			String paramName = exp.substring(1, exp.length() - 1);
 			ReportParameter reportParam = reportParamsMap.get(paramName);
 			if (reportParam == null) {
 				throw new IllegalStateException("Parameter not found: " + paramName);
 			}
-			
+
 			if (reportParam.getEffectiveActualParameterValue() instanceof Date) {
 				Date dateValue = (Date) reportParam.getEffectiveActualParameterValue();
 				expValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
@@ -1036,18 +1106,18 @@ public class ReportRunner {
 			//expression isn't a report parameter. use as is
 			expValue = exp;
 		}
-		
+
 		return expValue;
 	}
 
 	/**
-	 * Evaluate the IF element in Dynamic SQL
+	 * Evaluates the IF element in a dynamic sql expression
 	 */
 	private boolean evaluateIF(String exp1, String op, String exp2) {
 		if (exp1 == null) {
 			exp1 = "";
 		}
-		
+
 		if (exp2 == null) {
 			exp2 = "";
 		}
@@ -1063,74 +1133,75 @@ public class ReportRunner {
 		//evaluate conditions
 		if (StringUtils.equalsIgnoreCase(op, "eq") || StringUtils.equalsIgnoreCase(op, "equals")) { // -- equals
 			return exp1.equals(exp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "neq") || StringUtils.equalsIgnoreCase(op, "not equals")) { // -- not equals
 			return !exp1.equals(exp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "la")) { //less than  (alphanumeric)
 			return (exp1.compareTo(exp2) < 0 ? true : false);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "ga")) { //greater than (alphanumeric)
 			return (exp1.compareTo(exp2) > 0 ? true : false);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "ln")) { //less than (numeric)
 			double e1 = Double.parseDouble(exp1);
 			double e2 = Double.parseDouble(exp2);
 			return (e1 < e2 ? true : false);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "gn")) { //greater than (numeric)
 			double e1 = Double.parseDouble(exp1);
 			double e2 = Double.parseDouble(exp2);
 			return (e1 > e2 ? true : false);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "is blank") || StringUtils.equalsIgnoreCase(op, "is null")) { //is empty string. "is null" for backward compatibility
 			return exp1.equals("");
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "is not blank") || StringUtils.equalsIgnoreCase(op, "is not null")) { //is not empty string. "is not null" for backward compatibility			
 			return !exp1.equals("");
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "starts with")) {
 			return exp1.startsWith(exp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "ends with")) {
 			return exp1.endsWith(exp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "contains")) {
 			return (exp1.contains(exp2) ? true : false);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "eq cs") || StringUtils.equalsIgnoreCase(op, "equals cs")) { // equals case sensitive
 			return csExp1.equals(csExp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "neq cs") || StringUtils.equalsIgnoreCase(op, "not equals cs")) { // not equals case sensitive
 			return !csExp1.equals(csExp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "la cs")) { // less than (alphanumeric) case sensitive
 			return (csExp1.compareTo(csExp2) < 0 ? true : false);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "ga cs")) { // great than (alphanumeric) case sensitive
 			return (csExp1.compareTo(csExp2) > 0 ? true : false);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "starts with cs")) { // starts with case sensitive
 			return csExp1.startsWith(csExp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "ends with cs")) { // ends with case sensitive
 			return csExp1.endsWith(csExp2);
-			
+
 		} else if (StringUtils.equalsIgnoreCase(op, "contains cs")) { // contains case sensitive
 			return (csExp1.contains(csExp2) ? true : false);
-			
+
 		} else {
 			throw new IllegalArgumentException("Unknown operand: " + op);
 		}
-		
 	}
 
 	/**
-	 * Replace :TAGS
+	 * Applies :TAGS in the report source. This includes :USERNAME, :TIME, :DATE
+	 *
+	 * @param sb the report source
 	 */
 	private void applyTags(StringBuilder sb) {
 		logger.debug("Entering applyTags");
-		
+
 		String querySql = sb.toString();
 
 		//replace :USERNAME with currently logged in user's username
@@ -1139,7 +1210,7 @@ public class ReportRunner {
 
 		//replace :DATE with current date
 		Date now = new Date();
-		
+
 		String dateFormat = "yyyy-MM-dd";
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 		String date = dateFormatter.format(now);
@@ -1153,15 +1224,22 @@ public class ReportRunner {
 
 		//update querySb with new sql
 		sb.replace(0, sb.length(), querySql);
-		
+
 		logger.debug("Sql query now is:\n{}", sb);
 	}
-	
+
+	/**
+	 * Generates the final sql that is executed
+	 * 
+	 * @param sqlQuery the sql query with parameter placeholders
+	 * @param parameters the parameter values
+	 * @return final sql
+	 */
 	private String generateFinalSql(String sqlQuery, Object... parameters) {
 		//https://stackoverflow.com/questions/2683214/get-query-from-java-sql-preparedstatement
 
 		logger.debug("Entering generateFinalSql");
-		
+
 		String[] parts = sqlQuery.split("\\?");
 		StringBuilder sb = new StringBuilder();
 
@@ -1173,10 +1251,16 @@ public class ReportRunner {
 				sb.append(formatParameter(parameters[i]));
 			}
 		}
-		
+
 		return sb.toString();
 	}
-	
+
+	/**
+	 * Formats a parameter value for use in the final sql string
+	 * 
+	 * @param parameter the parameter value
+	 * @return the formatted value
+	 */
 	private String formatParameter(Object parameter) {
 		if (parameter == null) {
 			return "NULL";

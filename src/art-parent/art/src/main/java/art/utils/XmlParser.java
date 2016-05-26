@@ -14,10 +14,6 @@
  * You should have received a copy of the GNU General Public License along with
  * ART. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Very simple and minimal implementation of a XML Parser (parse just ELEMENTS
- * and text within them) Used for dynamic SQL and Dashboards
- */
 package art.utils;
 
 import java.util.*;
@@ -76,7 +72,7 @@ public class XmlParser {
 	public static List<String> getXmlElementValues(String xml, String element) {
 
 		String xmlString = xml;
-		List<String> values = new ArrayList<String>();
+		List<String> values = new ArrayList<>();
 
 		String startElement = "<" + element + ">";
 		String endElement = "</" + element + ">";

@@ -18,7 +18,8 @@
 package art.runreport;
 
 /**
- *
+ * Represents a report output generator result
+ * 
  * @author Timothy Anyona
  */
 public class ReportOutputGeneratorResult {
