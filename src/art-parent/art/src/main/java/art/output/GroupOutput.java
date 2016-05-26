@@ -18,7 +18,6 @@
 package art.output;
 
 import art.servlets.Config;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

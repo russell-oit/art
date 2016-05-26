@@ -163,6 +163,7 @@ public class ReportController {
 					case TabularHtml:
 					case JxlsArt:
 					case JxlsTemplate:
+					case Group:
 						enableReportFormats = false;
 						break;
 					default:

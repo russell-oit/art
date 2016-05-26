@@ -32,7 +32,6 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
 import art.output.StandardOutput;
-import art.output.DirectReportOutputHandler;
 import art.output.GroupHtmlOutput;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlFancyOutput;

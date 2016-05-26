@@ -17,7 +17,6 @@
  */
 package art.output;
 
-import art.servlets.Config;
 import java.io.PrintWriter;
 
 /**
@@ -59,14 +58,14 @@ public class GroupHtmlOutput extends GroupOutput {
 
 	@Override
     public void addCellToMainHeader(String value) {
-        mainHeader.append("<td class=\"qeattr\">");
+        mainHeader.append("<td>");
         mainHeader.append(value);
         mainHeader.append("</td>");
     }
 
 	@Override
     public void addCellToSubHeader(String value) {
-        subHeader.append("<td class=\"qesubattr\">");
+        subHeader.append("<td>");
         subHeader.append(value);
         subHeader.append("</td>");
     }
