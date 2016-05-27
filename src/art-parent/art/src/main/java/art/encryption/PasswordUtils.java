@@ -54,7 +54,7 @@ public class PasswordUtils {
 		//rounds must be 4-31
 		//increase rounds to have slower password generation
 		if (rounds < 4 || rounds > 31) {
-			rounds = 6;
+			throw new IllegalArgumentException("Invalid rounds: " + rounds + ". Expected 4-31");
 		}
 
 		return BCrypt.hashpw(clearText, BCrypt.gensalt(rounds));

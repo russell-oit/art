@@ -22,6 +22,7 @@ import art.user.UserService;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class InternalLogin {
 
 	/**
 	 * Authenticates a user using art internal credentials
-	 * 
+	 *
 	 * @param username the username to use
 	 * @param password the password to use
 	 * @return the result of the authentication process
@@ -60,8 +61,9 @@ public class InternalLogin {
 			} else {
 				if (user.isActive()) {
 					boolean passwordVerified = false;
+					String passwordAlgorithm = user.getPasswordAlgorithm();
 					try {
-						passwordVerified = PasswordUtils.VerifyPassword(password, user.getPassword(), user.getPasswordAlgorithm());
+						passwordVerified = PasswordUtils.VerifyPassword(password, user.getPassword(), passwordAlgorithm);
 					} catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
 						logger.error("Error. username='{}'", username, ex);
 					}
@@ -70,6 +72,15 @@ public class InternalLogin {
 
 					if (passwordVerified) {
 						result.setAuthenticated(true);
+
+						//replace md5 password hashes with bcrypt hashes
+						if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "md5")) {
+							String bcryptPassword = PasswordUtils.HashPasswordBcrypt(password);
+							user.setPassword(bcryptPassword);
+							String bcryptAlgorithm = "bcrypt";
+							user.setPasswordAlgorithm(bcryptAlgorithm);
+							userService.updatePassword(user.getUserId(), bcryptPassword, bcryptAlgorithm, user);
+						}
 					} else {
 						//invalid password
 						result.setMessage("login.message.invalidCredentials");
