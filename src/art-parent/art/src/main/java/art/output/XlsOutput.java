@@ -52,8 +52,6 @@ public class XlsOutput extends StandardOutput {
 	private HSSFCellStyle headerStyle;
 	private HSSFCellStyle bodyStyle;
 	private HSSFCellStyle dateStyle;
-	private HSSFFont headerFont;
-	private HSSFFont bodyFont;
 	private int currentRow;
 	private int cellNumber;
 	private final ZipType zipType;
@@ -86,8 +84,9 @@ public class XlsOutput extends StandardOutput {
 			cell = null;
 			headerStyle = wb.createCellStyle();
 			bodyStyle = wb.createCellStyle();
-			headerFont = wb.createFont();
-			bodyFont = wb.createFont();
+			
+			HSSFFont headerFont = wb.createFont();
+			HSSFFont bodyFont = wb.createFont();
 
 			currentRow = 0;
 
@@ -105,8 +104,8 @@ public class XlsOutput extends StandardOutput {
 			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
 			dateStyle.setFont(bodyFont);
 
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
 		}
 	}
 
@@ -197,8 +196,8 @@ public class XlsOutput extends StandardOutput {
 				zout.close();
 			}
 			fout.close();
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
 		}
 	}
 }

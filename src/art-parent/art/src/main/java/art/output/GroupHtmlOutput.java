@@ -17,116 +17,244 @@
  */
 package art.output;
 
-import java.io.PrintWriter;
+import art.servlets.Config;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 /**
- * Generates "Group: n columns" reports
+ * Generates group html reports
  * 
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class GroupHtmlOutput extends GroupOutput {
 	
-	private final PrintWriter out;
 	private final StringBuilder mainHeader = new StringBuilder();
-	// temporary string used to store Main Header Values
 	private final StringBuilder subHeader = new StringBuilder();
+	
+	public void init() {
+		//include required css and javascript files
+		out.println("<link rel='stylesheet' type='text/css' href='" + getContextPath() + "/css/groupHtmlOutput.css'>");
+	}
 
 
-    /**
-     * Sets the output writer
-     * 
-     * @param htmlWriter output writer
-     */
-    public GroupHtmlOutput(PrintWriter htmlWriter) {
-        out = htmlWriter;
+	/**
+	 * Outputs the report header
+	 * 
+	 * @param width the header width as a percentage
+	 */
+    private void header(int width) {
+        out.println("<div align='center'>");
+        out.println("<table border='0' width='" + width + "%'>");
     }
 
-    /**
-     * Outputs report header. Report width is 80% of the page
-     */
-	@Override
-    public void header() {
-        out.println("<div align=\"center\">");
-        out.println("<table border=\"0\" width=\"80%\">");
-    }
-
-	@Override
-    public void header(int width) {
-        out.println("<div align=\"center\">");
-        out.println("<table border=\"0\" width=\"" + width + "%\">");
-    }
-
-	@Override
-    public void addCellToMainHeader(String value) {
+	/**
+	 * Outputs a value to the main header
+	 * 
+	 * @param value the value to output
+	 */
+    private void addCellToMainHeader(String value) {
         mainHeader.append("<td>");
         mainHeader.append(value);
         mainHeader.append("</td>");
     }
 
-	@Override
-    public void addCellToSubHeader(String value) {
+	/**
+	 * Outputs a value to the sub header
+	 * 
+	 * @param value the value to output
+	 */
+    private void addCellToSubHeader(String value) {
         subHeader.append("<td>");
         subHeader.append(value);
         subHeader.append("</td>");
     }
 
-	@Override
-    public void printMainHeader() {
+	/**
+	 * Outputs the main header
+	 */
+    private void printMainHeader() {
         beginLines();
         out.println(mainHeader.toString());
         endLines();
     }
 
-	@Override
-    public void printSubHeader() {
+	/**
+	 * Outputs the sub header
+	 */
+    private void printSubHeader() {
         beginLines();
         out.println(subHeader.toString());
         endLines();
     }
 	
-	@Override
-	public void separator(){
-		out.println("<br><hr style=\"width:90%;height:1px\"><br>");
+	/**
+	 * Outputs a group separator
+	 */
+	private void separator(){
+		out.println("<br><hr style='width:90%; height:1px'><br>");
 	}
 
-	@Override
-    public void addCellToLine(String value) {
-        out.println("<td class=\"data\">" + value + "</td>");
+	/**
+	 * Outputs a data value
+	 * 
+	 * @param value the value to output
+	 */
+    private void addCellToLine(String value) {
+        out.println("<td class='data'>" + value + "</td>");
     }
 
-	@Override
-    public void addCellToLine(String value, int numOfCells) {
-        out.println("<td colspan=\"" + numOfCells + "\" class=\"data\">" + value + "</td>");
+	/**
+	 * Outputs a data value
+	 * 
+	 * @param value the value to output
+	 * @param numOfCells 
+	 */
+    private void addErrorCell(String value, int numOfCells) {
+        out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + value + "</td>");
     }
 
-	@Override
-    public void addCellToLine(String value, String cssclass, int numOfCells) {
-        out.println("<td colspan=\"" + numOfCells + "\" class=\"" + cssclass + "\">" + value + "</td>");
-    }
-
-	@Override
-    public void addCellToLine(String value, String cssclass, String align, int numOfCells) {
-        out.println("<td colspan=\"" + numOfCells + "\" class=\"" + cssclass
-                + "\" align =\"" + align + "\">" + value + "</td>");
-    }
-
-	@Override
-    public void beginLines() {
+	/**
+	 * Performs initialization in readiness for data output
+	 */
+    private void beginLines() {
         out.println("<tr>");
     }
 
-	@Override
-    public void endLines() {
+	/**
+	 * Finalizes data output
+	 */
+    private void endLines() {
         out.println("</tr>");
     }
 
-	@Override
-    public void newLine() {
+	/**
+	 * Creates a new row
+	 */
+    private void newLine() {
         out.println("</tr><tr>");
     }
 
-	@Override
-    public void footer() {
+	/**
+	 * Finalizes report
+	 */
+    private void footer() {
         out.println("</table></div>");
     }
+	
+	@Override
+	public int generateGroupReport(ResultSet rs, int splitCol) throws SQLException {
+		ResultSetMetaData rsmd = rs.getMetaData();
+		
+		int colCount = rsmd.getColumnCount();
+		int i;
+		int counter = 0;
+		String tmpstr;
+		StringBuffer cmpStr; // temporary string used to compare values
+		StringBuffer tmpCmpStr; // temporary string used to compare values
+
+		// Report, is intended to be something like that:
+		/*
+		 * ------------------------------------- | Attr1 | Attr2 | Attr3 | //
+		 * Main header ------------------------------------- | Value1 | Value2 |
+		 * Value3 | // Main Data -------------------------------------
+		 *
+		 * -----------------------------... | SubAttr1 | Subattr2 |... // Sub
+		 * Header -----------------------------... | SubValue1.1 | SubValue1.2
+		 * |... // Sub Data -----------------------------... | SubValue2.1 |
+		 * SubValue2.2 |... -----------------------------...
+		 * ................................ ................................
+		 * ................................
+		 *
+		 * etc...
+		 */
+		
+		init();
+		
+		// Build main header HTML
+		for (i = 0; i < (splitCol); i++) {
+			tmpstr = rsmd.getColumnLabel(i + 1);
+			addCellToMainHeader(tmpstr);
+		}
+		// Now the header is completed
+
+		// Build the Sub Header
+		for (; i < colCount; i++) {
+			tmpstr = rsmd.getColumnLabel(i + 1);
+			addCellToSubHeader(tmpstr);
+		}
+
+		int maxRows = Config.getMaxRows("html");
+
+		while (rs.next() && counter < maxRows) {
+			// Separators
+			separator();
+
+			// Output Main Header and Main Data
+			header(90);
+			printMainHeader();
+			beginLines();
+			cmpStr = new StringBuffer();
+
+			// Output Main Data (only one row, obviously)
+			for (i = 0; i < splitCol; i++) {
+				addCellToLine(rs.getString(i + 1));
+				cmpStr.append(rs.getString(i + 1));
+			}
+			
+			endLines();
+			footer();
+
+			// Output Sub Header and Sub Data
+			header(80);
+			printSubHeader();
+			beginLines();
+
+			// Output Sub Data (first line)
+			for (; i < colCount; i++) {
+				addCellToLine(rs.getString(i + 1));
+			}
+
+			boolean currentMain = true;
+			while (currentMain && counter < maxRows) {  // next line
+				// Get Main Data in order to compare it
+				if (rs.next()) {
+					counter++;
+					tmpCmpStr = new StringBuffer();
+
+					for (i = 0; i < splitCol; i++) {
+						tmpCmpStr.append(rs.getString(i + 1));
+					}
+
+					if (tmpCmpStr.toString().equals(cmpStr.toString()) == true) { // same Main
+						newLine();
+						// Add data lines
+						for (; i < colCount; i++) {
+							addCellToLine(rs.getString(i + 1));
+						}
+					} else {
+						endLines();
+						footer();
+						currentMain = false;
+						rs.previous();
+					}
+				} else {
+					currentMain = false;
+					// The outer and inner while will exit
+				}
+			}
+		}
+
+		if (!(counter < maxRows)) {
+			newLine();
+			addErrorCell("<b>Too many rows (>" + maxRows
+					+ "). Data not completed. Please narrow your search.</b>", colCount);
+		}
+
+		endLines();
+		footer();
+
+		return counter + 1; // number of rows
+	}
 }

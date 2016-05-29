@@ -1,0 +1,47 @@
+/*
+Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+
+This file is part of ART.
+
+ART is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, version 2 of the License.
+
+ART is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with ART. If not, see <http://www.gnu.org/licenses/>.
+*/
+/* 
+    Created on : 29-May-2016, 18:18:36
+    Author     : Timothy Anyona
+*/
+
+td.groupData {
+	font-size: 10pt;
+	background-image: URL('../images/bg-gray.png');
+	background-repeat: repeat-x;
+	background-color:#FFFFFF;
+	vertical-align: middle;
+	color:#003366;
+	padding-left: 2pt;
+	padding-right: 2pt;
+	/* border: 1px solid #000000; */
+}
+
+td.groupError {
+ color: #000000;
+ font-size: 10pt;
+ font-weight: bold;
+ text-align: center;
+ background-image: URL('../images/bg-gray-dark.png');
+ background-repeat: repeat-x;
+ background-color:#FFFFFF;
+ padding-left: 5pt;
+ padding-right: 5pt;
+ border: 1px solid #000000;
+}
+

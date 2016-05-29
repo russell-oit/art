@@ -47,8 +47,6 @@ public class XlsxOutput extends StandardOutput {
 	private CellStyle headerStyle;
 	private CellStyle bodyStyle;
 	private CellStyle dateStyle;
-	private Font headerFont;
-	private Font bodyFont;
 	private int currentRow;
 	private int cellNumber;
 	private String templateFileName;
@@ -86,7 +84,7 @@ public class XlsxOutput extends StandardOutput {
 			styles = new HashMap<>();
 
 			headerStyle = wb.createCellStyle();
-			headerFont = wb.createFont();
+			Font headerFont = wb.createFont();
 			headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
 			headerFont.setColor(IndexedColors.BLUE.getIndex());
 			headerFont.setFontHeightInPoints((short) 12);
@@ -95,7 +93,7 @@ public class XlsxOutput extends StandardOutput {
 			styles.put("header", headerStyle);
 
 			bodyStyle = wb.createCellStyle();
-			bodyFont = wb.createFont();
+			Font bodyFont = wb.createFont();
 			bodyFont.setColor(Font.COLOR_NORMAL);
 			bodyFont.setFontHeightInPoints((short) 10);
 			bodyStyle.setFont(bodyFont);

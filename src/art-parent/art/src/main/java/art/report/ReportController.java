@@ -163,7 +163,6 @@ public class ReportController {
 					case TabularHtml:
 					case JxlsArt:
 					case JxlsTemplate:
-					case Group:
 						enableReportFormats = false;
 						break;
 					default:
@@ -297,6 +296,10 @@ public class ReportController {
 					formats.add("xls");
 					formats.add("xlsx");
 					formats.add("html");
+					break;
+				case Group:
+					formats.add("html");
+					formats.add("xlsx");
 					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);

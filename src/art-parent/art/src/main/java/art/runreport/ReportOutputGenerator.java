@@ -33,6 +33,8 @@ import art.enums.ReportType;
 import art.enums.ZipType;
 import art.output.StandardOutput;
 import art.output.GroupHtmlOutput;
+import art.output.GroupOutput;
+import art.output.GroupXlsxOutput;
 import art.output.HtmlDataTableOutput;
 import art.output.HtmlFancyOutput;
 import art.output.HtmlGridOutput;
@@ -76,7 +78,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Generates report output
- * 
+ *
  * @author Timothy Anyona
  */
 public class ReportOutputGenerator {
@@ -162,7 +164,7 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Generates report output
-	 * 
+	 *
 	 * @param report the report to use
 	 * @param reportRunner the report runner to use
 	 * @param reportFormat the report format
@@ -178,7 +180,7 @@ public class ReportOutputGenerator {
 	 * @throws DatasetProduceException
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportFormat reportFormat, Locale locale,
@@ -257,10 +259,34 @@ public class ReportOutputGenerator {
 					splitColumn = report.getGroupColumn();
 				}
 
+				String contextPath = null;
+				if (request != null) {
+					contextPath = request.getContextPath();
+				}
+
 				//can have other group output formats depending on selected
 				//report format e.g. xls group reports
-				GroupHtmlOutput groupHtmlOutput=new GroupHtmlOutput(writer);
-				rowsRetrieved=groupHtmlOutput.generateGroupReport(rs, splitColumn);
+				GroupOutput groupOutput;
+				switch (reportFormat) {
+					case html:
+						groupOutput = new GroupHtmlOutput();
+						groupOutput.setWriter(writer);
+						groupOutput.setContextPath(contextPath);
+						break;
+					case xlsx:
+						groupOutput = new GroupXlsxOutput();
+						groupOutput.setReportName(report.getName());
+						groupOutput.setFullOutputFileName(fullOutputFilename);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected group report format: " + reportFormat);
+				}
+
+				rowsRetrieved = groupOutput.generateGroupReport(rs, splitColumn);
+
+				if (reportFormat == ReportFormat.xlsx) {
+					displayFileLink(fileName);
+				}
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 
@@ -405,15 +431,15 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Returns a standard output instance based on the given report format
-	 * 
+	 *
 	 * @param reportFormat the report format
 	 * @param isJob whether this is a job or an interactive report
 	 * @return the standard output instance
-	 * @throws IllegalArgumentException 
+	 * @throws IllegalArgumentException
 	 */
 	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob)
 			throws IllegalArgumentException {
-		
+
 		logger.debug("Entering getStandardOutputInstance: reportFormat={}, isJob={}", reportFormat, isJob);
 
 		StandardOutput standardOutput;
@@ -473,10 +499,10 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Outputs a file link to the web browser
-	 * 
+	 *
 	 * @param fileName the file name
 	 * @throws IOException
-	 * @throws ServletException 
+	 * @throws ServletException
 	 */
 	private void displayFileLink(String fileName) throws IOException, ServletException {
 		//display link to access report
@@ -486,7 +512,7 @@ public class ReportOutputGenerator {
 
 	/**
 	 * Returns the row count for a given resultset
-	 * 
+	 *
 	 * @param rs the resultset
 	 * @return the row count
 	 */
@@ -511,8 +537,9 @@ public class ReportOutputGenerator {
 	}
 
 	/**
-	 * Returns the final chart options to use based on the given chart options, report and report format
-	 * 
+	 * Returns the final chart options to use based on the given chart options,
+	 * report and report format
+	 *
 	 * @param report the report
 	 * @param parameterChartOptions the passed chart options
 	 * @param reportFormat the report format
