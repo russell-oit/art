@@ -38,6 +38,21 @@ public abstract class DatasourceInfo {
 	private String testSql;
 	private int connectionPoolTimeoutMins;
 	private boolean jndi;
+	private String passwordAlgorithm;
+
+	/**
+	 * @return the passwordAlgorithm
+	 */
+	public String getPasswordAlgorithm() {
+		return passwordAlgorithm;
+	}
+
+	/**
+	 * @param passwordAlgorithm the passwordAlgorithm to set
+	 */
+	public void setPasswordAlgorithm(String passwordAlgorithm) {
+		this.passwordAlgorithm = passwordAlgorithm;
+	}
 
 	/**
 	 * @return the datasourceId

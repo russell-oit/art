@@ -217,8 +217,9 @@ public class DatasourceService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DATABASES"
 					+ " (DATABASE_ID, NAME, DESCRIPTION, JNDI, DRIVER, URL, USERNAME,"
-					+ " PASSWORD, POOL_TIMEOUT, TEST_SQL, ACTIVE, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 13) + ")";
+					+ " PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT, TEST_SQL,"
+					+ " ACTIVE, CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 			Object[] values = {
 				datasource.getDatasourceId(),
@@ -229,6 +230,7 @@ public class DatasourceService {
 				datasource.getUrl(),
 				datasource.getUsername(),
 				datasource.getPassword(),
+				datasource.getPasswordAlgorithm(),
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
 				datasource.isActive(),
@@ -239,7 +241,7 @@ public class DatasourceService {
 			affectedRows = dbService.update(sql, values);
 		} else {
 			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, JNDI=?,"
-					+ " DRIVER=?, URL=?, USERNAME=?, PASSWORD=?,"
+					+ " DRIVER=?, URL=?, USERNAME=?, PASSWORD=?, PASSWORD_ALGORITHM=?,"
 					+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DATABASE_ID=?";
 
@@ -251,6 +253,7 @@ public class DatasourceService {
 				datasource.getUrl(),
 				datasource.getUsername(),
 				datasource.getPassword(),
+				datasource.getPasswordAlgorithm(),
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
 				datasource.isActive(),

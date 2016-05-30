@@ -20,6 +20,8 @@ package art.utils;
 import art.connectionpool.DbConnections;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
+import art.encryption.AesEncryptor;
+import art.encryption.DesEncryptor;
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.job.Job;
@@ -69,9 +71,9 @@ public class UpgradeHelper {
 
 	/**
 	 * Runs upgrade steps
-	 * 
+	 *
 	 * @param artVersion the art version
-	 * @param upgradeFilePath the path to the upgrade file 
+	 * @param upgradeFilePath the path to the upgrade file
 	 */
 	public void upgrade(String artVersion, String upgradeFilePath) {
 		migrateJobsToQuartz();
@@ -228,7 +230,7 @@ public class UpgradeHelper {
 
 	/**
 	 * Runs upgrade steps
-	 * 
+	 *
 	 * @param artVersion the art version
 	 * @param upgradeFilePath the path to the upgrade file
 	 */
@@ -254,6 +256,7 @@ public class UpgradeHelper {
 					addUserRuleValueKeys();
 					addUserGroupRuleValueKeys();
 					addCachedDatasourceIds();
+					updateDatasourcePasswords();
 
 					logger.info("Done performing 3.0 upgrade steps");
 				}
@@ -654,7 +657,7 @@ public class UpgradeHelper {
 			}
 		}
 	}
-	
+
 	/**
 	 * Populates cached_datasource_id column. Column added in 3.0
 	 */
@@ -677,10 +680,53 @@ public class UpgradeHelper {
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
 				Integer jobId = (Integer) record.get("JOB_ID");
 				String cachedDatasourceIdString = (String) record.get("OUTPUT_FORMAT");
-				Integer cachedDatasourceId=Integer.valueOf(cachedDatasourceIdString);
+				Integer cachedDatasourceId = Integer.valueOf(cachedDatasourceIdString);
 				sql = "UPDATE ART_JOBS SET CACHED_DATASOURCE_ID=?"
 						+ " WHERE JOB_ID=?";
 				dbService.update(sql, cachedDatasourceId, jobId);
+			}
+		}
+	}
+
+	/**
+	 * Updates datasource passwords to use AES-128
+	 *
+	 * @throws SQLException
+	 */
+	private void updateDatasourcePasswords() throws SQLException {
+		logger.debug("Entering updateDatasourcePasswords");
+		
+		String sql;
+
+		sql = "SELECT PASSWORD, PASSWORD_ALGORITHM, DATABASE_ID"
+				+ " FROM ART_DATABASES"
+				+ " WHERE PASSWORD_ALGORITHM='ART'";
+		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
+		List<Map<String, Object>> records = dbService.query(sql, h2);
+
+		logger.debug("records.isEmpty()={}", records.isEmpty());
+		if (!records.isEmpty()) {
+			logger.info("Updating datasource passwords");
+
+			for (Map<String, Object> record : records) {
+				//map list handler uses a case insensitive map, so case of column names doesn't matter
+				Integer datasourceId = (Integer) record.get("DATABASE_ID");
+				String oldPassword = (String) record.get("PASSWORD");
+
+				if (oldPassword == null) {
+					oldPassword = "";
+				} else {
+					if (oldPassword.startsWith("o:")) {
+						//password is encrypted. decrypt
+						oldPassword = DesEncryptor.decrypt(oldPassword.substring(2));
+					}
+				}
+
+				String aesPassword = AesEncryptor.encrypt(oldPassword);
+
+				sql = "UPDATE ART_DATABASES SET PASSWORD=?, PASSWORD_ALGORITHM='AES'"
+						+ " WHERE DATABASE_ID=?";
+				dbService.update(sql, aesPassword, datasourceId);
 			}
 		}
 	}

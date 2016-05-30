@@ -17,6 +17,7 @@
  */
 package art.datasource;
 
+import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,8 +27,8 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * Maps resultset to a Datasource object. Use public class in its own
- * file for reuse by DatasourceService and DbConnections
+ * Maps resultset to a Datasource object. Use public class in its own file for
+ * reuse by DatasourceService and DbConnections
  *
  * @author Timothy Anyona
  */
@@ -54,6 +55,7 @@ public class DatasourceMapper extends BasicRowProcessor {
 		datasource.setUrl(rs.getString("URL"));
 		datasource.setUsername(rs.getString("USERNAME"));
 		datasource.setPassword(rs.getString("PASSWORD"));
+		datasource.setPasswordAlgorithm(rs.getString("PASSWORD_ALGORITHM"));
 		datasource.setConnectionPoolTimeoutMins(rs.getInt("POOL_TIMEOUT"));
 		datasource.setTestSql(rs.getString("TEST_SQL"));
 		datasource.setActive(rs.getBoolean("ACTIVE"));
@@ -62,10 +64,16 @@ public class DatasourceMapper extends BasicRowProcessor {
 		datasource.setCreatedBy(rs.getString("CREATED_BY"));
 		datasource.setUpdatedBy(rs.getString("UPDATED_BY"));
 
-		// decrypt password if stored encrypted
+		//decrypt password
 		String password = datasource.getPassword();
-		if (StringUtils.startsWith(password, "o:")) {
-			password = DesEncryptor.decrypt(password.substring(2));
+		String passwordAlgorithm = datasource.getPasswordAlgorithm();
+		if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "art")) {
+			if (StringUtils.startsWith(password, "o:")) {
+				password = DesEncryptor.decrypt(password.substring(2));
+				datasource.setPassword(password);
+			}
+		} else if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "aes")) {
+			password = AesEncryptor.decrypt(password);
 			datasource.setPassword(password);
 		}
 

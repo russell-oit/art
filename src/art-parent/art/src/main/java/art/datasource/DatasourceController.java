@@ -19,6 +19,7 @@ package art.datasource;
 import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
+import art.encryption.AesEncryptor;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
@@ -334,16 +335,7 @@ public class DatasourceController {
 	private String decryptPassword(String password) {
 		logger.debug("Entering decryptPassword");
 
-		if (password == null) {
-			password = "";
-		} else {
-			if (password.startsWith("o:")) {
-				//password is encrypted. decrypt
-				password = DesEncryptor.decrypt(password.substring(2));
-			}
-		}
-
-		return password;
+		return AesEncryptor.decrypt(password);
 	}
 
 	/**
@@ -434,10 +426,9 @@ public class DatasourceController {
 			}
 		} else {
 			//encrypt new password
-			if (StringUtils.isNotEmpty(newPassword)) {
-				newPassword = "o:" + DesEncryptor.encrypt(newPassword);
-			}
+			newPassword=AesEncryptor.encrypt(newPassword);
 			datasource.setPassword(newPassword);
+			datasource.setPasswordAlgorithm("AES");
 		}
 
 		return null;
