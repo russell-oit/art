@@ -179,7 +179,7 @@
 					list.append(new Option('${pdfText}', 'pdf'));
 					list.append(new Option('${xlsText}', 'xls'));
 					list.append(new Option('${xlsxText}', 'xlsx'));
-				} else if (reportTypeId === 115 || reportTypeId === 116) {
+				} else if (reportTypeId === 117 || reportTypeId === 118) {
 					//jxls
 					list.append(new Option('${xlsText}', 'xls'));
 				} else {
@@ -204,6 +204,12 @@
 							list.append(new Option('${xlsxText}', 'xlsx'));
 							list.append(new Option('${tsvZipText}', 'tsvZip'));
 							break;
+						case 'Print':
+							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
+							list.append(new Option('${pdfText}', 'pdf'));
+							list.append(new Option('${xlsText}', 'xls'));
+							list.append(new Option('${xlsxText}', 'xlsx'));
+							break;
 						default:
 							list.append(new Option('', '--'));
 					}
@@ -225,6 +231,7 @@
 					case 'CacheAppend':
 					case 'CacheInsert':
 					case 'JustRun':
+					case 'Print':
 						$("#emailFields").hide();
 						break;
 					default:

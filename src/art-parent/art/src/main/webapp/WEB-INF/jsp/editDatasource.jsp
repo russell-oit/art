@@ -145,6 +145,8 @@ Edit datasource page
 				</div>
 
 				<input type="hidden" name="action" value="${action}">
+				<form:hidden path="passwordAlgorithm" />
+				
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>

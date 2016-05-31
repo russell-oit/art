@@ -269,7 +269,7 @@ public class ReportController {
 
 	/**
 	 * Returns the available report formats for the given report type
-	 * 
+	 *
 	 * @param reportType the report type
 	 * @return the available report formats
 	 */

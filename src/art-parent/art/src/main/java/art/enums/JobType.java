@@ -31,7 +31,7 @@ public enum JobType {
 	Alert("Alert"), Publish("Publish"), JustRun("JustRun"),
 	CondEmailAttachment("CondEmailAttachment"), CondEmailInline("CondEmailInline"),
 	CondPublish("CondPublish"), CacheAppend("CacheAppend"),
-	CacheInsert("CacheInsert");
+	CacheInsert("CacheInsert"), Print("Print");
 
 	private final String value;
 

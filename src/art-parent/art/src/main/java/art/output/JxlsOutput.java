@@ -23,18 +23,25 @@ import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jxls.common.Context;
 import org.jxls.jdbc.JdbcHelper;
@@ -84,7 +91,11 @@ public class JxlsOutput {
 
 		try {
 			String templateFileName = report.getTemplate();
+			String templateFileBaseName = FilenameUtils.getBaseName(templateFileName);
+			String templateFileExtension = FilenameUtils.getExtension(templateFileName);
 			String templatesPath = Config.getTemplatesPath();
+			String templateCopyFileName = templateFileBaseName + ArtUtils.getRandomFileNameString() + "." + templateFileExtension;
+			String fullTemplateCopyFileName = templatesPath + templateCopyFileName;
 			String fullTemplateFileName = templatesPath + templateFileName;
 
 			//check if template file exists
@@ -92,6 +103,15 @@ public class JxlsOutput {
 			if (!templateFile.exists()) {
 				throw new IllegalStateException("Template file not found: " + templateFileName);
 			}
+
+			//create copy of template file. in case 2 jobs running at the same time use same template
+			Path templateFilePath = Paths.get(fullTemplateFileName);
+			Path templateCopyFilePath = Paths.get(fullTemplateCopyFileName);
+			//overwrite existing file, if exists
+			CopyOption[] options = new CopyOption[]{
+				StandardCopyOption.REPLACE_EXISTING
+			};
+			Files.copy(templateFilePath, templateCopyFilePath, options);
 
 			//set objects to be passed to jxls
 			Context context = new Context();
@@ -106,7 +126,7 @@ public class JxlsOutput {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
 				JdbcHelper jdbcHelper = new JdbcHelper(conn);
-				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
+				try (InputStream is = new FileInputStream(fullTemplateCopyFileName)) {
 					try (OutputStream os = new FileOutputStream(outputFileName)) {
 						context.putVar("conn", conn);
 						context.putVar("jdbc", jdbcHelper);
@@ -114,15 +134,20 @@ public class JxlsOutput {
 					}
 				}
 			} else {
-				//use recordset based on art query 
-				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, false, true); //use lowercase properties = false, use column labels =true
+				//use recordset based on art query
+				boolean useLowerCaseProperties = false;
+				boolean useColumnLabels = true;
+				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 				context.putVar("results", rsdc.getRows());
-				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
+				try (InputStream is = new FileInputStream(fullTemplateCopyFileName)) {
 					try (OutputStream os = new FileOutputStream(outputFileName)) {
 						JxlsHelper.getInstance().processTemplate(is, os, context);
 					}
 				}
 			}
+
+			//delete template copy file
+//			Files.delete(templateCopyFilePath);
 		} finally {
 			DatabaseUtils.close(conn);
 		}

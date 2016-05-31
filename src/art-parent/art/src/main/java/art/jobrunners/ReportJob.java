@@ -38,6 +38,7 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.FilenameHelper;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -647,7 +648,8 @@ public class ReportJob implements org.quartz.Job {
 	 * @throws SQLException
 	 */
 	private void runJob(boolean splitJob, String user, String userEmail,
-			Map<String, Map<String, String>> recipientDetails, boolean recipientFilterPresent) throws SQLException {
+			Map<String, Map<String, String>> recipientDetails, boolean recipientFilterPresent)
+			throws SQLException {
 
 		logger.debug("Entering runJob: splitJob={}, user='{}', userEmail='{}', recipientFilterPresent={}",
 				splitJob, user, userEmail, recipientFilterPresent);
@@ -843,8 +845,9 @@ public class ReportJob implements org.quartz.Job {
 					//no emails configured
 					runMessage = "jobs.message.noEmailsConfigured";
 				}
-			} else if (jobType.isPublish() || jobType.isEmail()) {
-				logger.debug("Job Id {} - Mail or Publish. Type: {}", jobId, jobType);
+			} else if (jobType.isPublish() || jobType.isEmail()
+					|| jobType == JobType.Print) {
+				logger.debug("Job Id: {}. Job Type: {}", jobId, jobType);
 
 				//determine if the query returns records. to know if to generate output for conditional jobs
 				boolean generateOutput = true;
@@ -931,7 +934,13 @@ public class ReportJob implements org.quartz.Job {
 						fos.close();
 					}
 
-					if (generateEmail || recipientDetails != null) {
+					if (jobType == JobType.Print) {
+						File file = new File(outputFileName);
+						Desktop desktop = Desktop.getDesktop();
+						if (desktop.isSupported(Desktop.Action.PRINT)) {
+							desktop.print(file);
+						}
+					} else if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
 
 						//send customized emails to dynamic recipients
@@ -987,7 +996,7 @@ public class ReportJob implements org.quartz.Job {
 								generateEmail = false;
 							}
 
-							//set filename to status of last recipient email sent
+							//delete file since email has been sent
 							File f = new File(outputFileName);
 							boolean deleted = f.delete();
 							if (!deleted) {
@@ -1031,7 +1040,6 @@ public class ReportJob implements org.quartz.Job {
 										+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
 								logger.warn(msg);
 							}
-
 						}
 					}
 				}

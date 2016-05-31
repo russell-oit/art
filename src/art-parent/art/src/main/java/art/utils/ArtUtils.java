@@ -135,7 +135,7 @@ public class ArtUtils {
 	 * @return random string to be appended to output filenames
 	 */
 	public static String getRandomFileNameString() {
-		return "-" + RandomStringUtils.randomAlphanumeric(10);
+		return "-" + RandomStringUtils.randomAlphanumeric(5);
 	}
 
 	/**
