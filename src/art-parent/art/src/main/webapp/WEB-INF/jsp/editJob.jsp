@@ -208,7 +208,6 @@
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
 							list.append(new Option('${pdfText}', 'pdf'));
 							list.append(new Option('${xlsText}', 'xls'));
-							list.append(new Option('${xlsxText}', 'xlsx'));
 							break;
 						default:
 							list.append(new Option('', '--'));

@@ -266,7 +266,6 @@ public class JobController {
 			}
 
 			model.addAttribute("reportParams", reportParams);
-
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -406,7 +405,13 @@ public class JobController {
 			int reportId = job.getReport().getReportId();
 			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id);
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-			model.addAttribute("reportParamsList", reportParamsList);
+			//create map in order to display parameters by position
+			Map<Integer, ReportParameter> reportParams = new TreeMap<>();
+			for (ReportParameter reportParam : reportParamsList) {
+				reportParams.put(reportParam.getPosition(), reportParam);
+			}
+
+			model.addAttribute("reportParams", reportParams);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

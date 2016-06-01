@@ -91,11 +91,7 @@ public class JxlsOutput {
 
 		try {
 			String templateFileName = report.getTemplate();
-			String templateFileBaseName = FilenameUtils.getBaseName(templateFileName);
-			String templateFileExtension = FilenameUtils.getExtension(templateFileName);
 			String templatesPath = Config.getTemplatesPath();
-			String templateCopyFileName = templateFileBaseName + ArtUtils.getRandomFileNameString() + "." + templateFileExtension;
-			String fullTemplateCopyFileName = templatesPath + templateCopyFileName;
 			String fullTemplateFileName = templatesPath + templateFileName;
 
 			//check if template file exists
@@ -103,16 +99,6 @@ public class JxlsOutput {
 			if (!templateFile.exists()) {
 				throw new IllegalStateException("Template file not found: " + templateFileName);
 			}
-
-			//create copy of template file. in case 2 jobs running at the same time use same template
-			//http://www.javapractices.com/topic/TopicAction.do?Id=246
-			Path templateFilePath = Paths.get(fullTemplateFileName);
-			Path templateCopyFilePath = Paths.get(fullTemplateCopyFileName);
-			//overwrite existing file, if exists
-//			CopyOption[] options = new CopyOption[]{
-//				StandardCopyOption.REPLACE_EXISTING
-//			};
-//			Files.copy(templateFilePath, templateCopyFilePath);
 
 			//set objects to be passed to jxls
 			Context context = new Context();
@@ -146,9 +132,6 @@ public class JxlsOutput {
 					}
 				}
 			}
-
-			//delete template copy file
-//			Files.delete(templateCopyFilePath);
 		} finally {
 			DatabaseUtils.close(conn);
 		}
