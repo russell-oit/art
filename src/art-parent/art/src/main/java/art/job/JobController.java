@@ -304,6 +304,8 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
+			createQuartzJob(job);
+
 			saveJobParameters(request, job.getJobId());
 
 			redirectAttributes.addFlashAttribute("recordName", job.getName());
@@ -454,13 +456,12 @@ public class JobController {
 	}
 
 	/**
-	 * Processes the job schedule details and schedules the job using quartz
+	 * Processes the job schedule details
 	 *
 	 * @param job the job to schedule
-	 * @throws SchedulerException
 	 * @throws ParseException
 	 */
-	private void finalizeSchedule(Job job) throws SchedulerException, ParseException {
+	private void finalizeSchedule(Job job) throws ParseException {
 		logger.debug("Entering finalizeSchedule: job={}", job);
 
 		//create quartz job to be running this job
@@ -570,7 +571,6 @@ public class JobController {
 
 		logger.debug("cronString='{}'", cronString);
 
-		//determine if start date and end date are valid dates
 		String startDateString = job.getStartDateString();
 		if (StringUtils.isBlank(startDateString)) {
 			startDateString = "now";
@@ -598,7 +598,6 @@ public class JobController {
 
 		job.setNextRunDate(nextRunDate);
 
-		//save job details to the art database. generates job id for new jobs
 		job.setScheduleMinute(minute);
 		job.setScheduleHour(hour);
 		job.setScheduleDay(day);
@@ -607,9 +606,15 @@ public class JobController {
 
 		job.setStartDate(startDate);
 		job.setEndDate(endDate);
+	}
 
-		//create quartz job
-		//get scheduler instance
+	/**
+	 * Creates a quartz job for the given art job
+	 *
+	 * @param job the art job
+	 * @throws SchedulerException
+	 */
+	private void createQuartzJob(Job job) throws SchedulerException {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler != null) {
@@ -623,12 +628,19 @@ public class JobController {
 					.usingJobData("jobId", jobId)
 					.build();
 
+			//build cron expression.
+			//cron format is sec min hr dayofmonth month dayofweek (optionally year)
+			String second = "0";
+			String cronString = second + " " + job.getScheduleMinute()
+					+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
+					+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
+
 			//create trigger that defines the schedule for the job
 			CronTrigger trigger = newTrigger()
 					.withIdentity(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP))
 					.withSchedule(cronSchedule(cronString))
-					.startAt(startDate)
-					.endAt(endDate)
+					.startAt(job.getStartDate())
+					.endAt(job.getEndDate())
 					.build();
 
 			//delete any existing jobs or triggers with the same id before adding them to the scheduler

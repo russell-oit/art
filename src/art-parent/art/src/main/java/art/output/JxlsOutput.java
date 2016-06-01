@@ -105,13 +105,14 @@ public class JxlsOutput {
 			}
 
 			//create copy of template file. in case 2 jobs running at the same time use same template
+			//http://www.javapractices.com/topic/TopicAction.do?Id=246
 			Path templateFilePath = Paths.get(fullTemplateFileName);
 			Path templateCopyFilePath = Paths.get(fullTemplateCopyFileName);
 			//overwrite existing file, if exists
-			CopyOption[] options = new CopyOption[]{
-				StandardCopyOption.REPLACE_EXISTING
-			};
-			Files.copy(templateFilePath, templateCopyFilePath, options);
+//			CopyOption[] options = new CopyOption[]{
+//				StandardCopyOption.REPLACE_EXISTING
+//			};
+//			Files.copy(templateFilePath, templateCopyFilePath);
 
 			//set objects to be passed to jxls
 			Context context = new Context();
@@ -126,7 +127,7 @@ public class JxlsOutput {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
 				JdbcHelper jdbcHelper = new JdbcHelper(conn);
-				try (InputStream is = new FileInputStream(fullTemplateCopyFileName)) {
+				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
 					try (OutputStream os = new FileOutputStream(outputFileName)) {
 						context.putVar("conn", conn);
 						context.putVar("jdbc", jdbcHelper);
@@ -139,7 +140,7 @@ public class JxlsOutput {
 				boolean useColumnLabels = true;
 				RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 				context.putVar("results", rsdc.getRows());
-				try (InputStream is = new FileInputStream(fullTemplateCopyFileName)) {
+				try (InputStream is = new FileInputStream(fullTemplateFileName)) {
 					try (OutputStream os = new FileOutputStream(outputFileName)) {
 						JxlsHelper.getInstance().processTemplate(is, os, context);
 					}

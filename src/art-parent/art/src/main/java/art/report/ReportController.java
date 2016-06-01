@@ -248,6 +248,10 @@ public class ReportController {
 					case Mondrian:
 					case MondrianXmla:
 					case SqlServerXmla:
+					case JxlsArt:
+					case JxlsTemplate:
+					case JasperReportsArt:
+					case JasperReportsTemplate:
 						enablePrint = false;
 						break;
 					default:
