@@ -84,7 +84,7 @@ public class XlsOutput extends StandardOutput {
 			cell = null;
 			headerStyle = wb.createCellStyle();
 			bodyStyle = wb.createCellStyle();
-			
+
 			HSSFFont headerFont = wb.createFont();
 			HSSFFont bodyFont = wb.createFont();
 
@@ -188,6 +188,10 @@ public class XlsOutput extends StandardOutput {
 
 	@Override
 	public void endRows() {
+		for (int i = 0; i < resultSetColumnCount; i++) {
+			sheet.autoSizeColumn(i);
+		}
+
 		try {
 			if (zout == null) {
 				wb.write(fout);

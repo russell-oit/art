@@ -25,7 +25,6 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
-import art.encryption.DesEncryptor;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

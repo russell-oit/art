@@ -24,6 +24,7 @@
 	</licenses>
 	
 	<properties>
+		<!-- jxls-poi as at 1.0.9 needs poi 3.12. error thrown with 3.13+ -->
 		<poi.version>3.12</poi.version>
 		<owasp.encoder.version>1.2</owasp.encoder.version>
 		<thymeleaf.version>3.0.0.BETA02</thymeleaf.version>
@@ -486,12 +487,12 @@
 		<dependency>
 			<groupId>org.jxls</groupId>
 			<artifactId>jxls</artifactId>
-			<version>2.2.9</version>
+			<version>2.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jxls</groupId>
 			<artifactId>jxls-poi</artifactId>
-			<version>1.0.8</version>
+			<version>1.0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.lowagie</groupId>
