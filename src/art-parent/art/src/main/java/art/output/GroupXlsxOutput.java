@@ -210,6 +210,7 @@ public class GroupXlsxOutput extends GroupOutput {
 			newLine();
 
 			beginLines();
+			
 			cmpStr = new StringBuilder();
 			List<String> summaryValues = new ArrayList<>();
 
@@ -290,6 +291,10 @@ public class GroupXlsxOutput extends GroupOutput {
 			newLine();
 			addCell("Too many rows (>" + maxRows
 					+ "). Data not completed. Please narrow your search.");
+		}
+		
+		for (i = 0; i < colCount; i++) {
+			sheet.autoSizeColumn(i);
 		}
 
 		endLines();

@@ -17,12 +17,15 @@
 package art.usergroupmembership;
 
 import art.dbutils.DbService;
+import art.user.User;
 import art.user.UserService;
+import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -30,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
@@ -44,10 +48,10 @@ public class UserGroupMembershipService {
 
 	@Autowired
 	private DbService dbService;
-	
+
 	@Autowired
 	private UserService userService;
-	
+
 	@Autowired
 	private UserGroupService userGroupService;
 
@@ -76,7 +80,7 @@ public class UserGroupMembershipService {
 		@Override
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			UserGroupMembership membership = new UserGroupMembership();
-			
+
 			membership.setUser(userService.getUser(rs.getInt("USER_ID")));
 			membership.setUserGroup(userGroupService.getUserGroup(rs.getInt("USER_GROUP_ID")));
 
@@ -104,6 +108,7 @@ public class UserGroupMembershipService {
 	 * @param userGroupId the user group id
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
 	public void deleteUserGroupMembership(int userId, int userGroupId) throws SQLException {
 		logger.debug("Entering deleteUserGroupMembership: userId={}, userGroupId={}",
 				userId, userGroupId);
@@ -115,6 +120,44 @@ public class UserGroupMembershipService {
 	}
 
 	/**
+	 * Delete all user group memberships for the given user
+	 *
+	 * @param userId the user id
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
+	public void deleteAllUserGroupMembershipsForUser(int userId) throws SQLException {
+		logger.debug("Entering deleteAllUserGroupMembershipsForUser: userId={}", userId);
+
+		String sql = "DELETE FROM ART_USER_GROUP_ASSIGNMENT WHERE USER_ID=?";
+		dbService.update(sql, userId);
+	}
+
+	/**
+	 * Adds user group memberships for the given user
+	 * 
+	 * @param user the user, not null
+	 * @param userGroups the user groups
+	 * @throws SQLException 
+	 */
+	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
+	public void addUserGroupMemberships(User user, List<UserGroup> userGroups) throws SQLException {
+		Objects.requireNonNull(user, "user must not be null");
+		
+		if (userGroups == null || userGroups.isEmpty()) {
+			return;
+		}
+
+		List<Integer> userGroupIds = new ArrayList<>();
+		for (UserGroup userGroup : userGroups) {
+			userGroupIds.add(userGroup.getUserGroupId());
+		}
+		String[] users = {user.getUserId() + "-" + user.getUsername()};
+		String action = "add";
+		updateUserGroupMembership(action, users, userGroupIds.toArray(new Integer[0]));
+	}
+
+	/**
 	 * Adds or removes user group memberships
 	 *
 	 * @param action "add" or "remove". anything else will be treated as remove
@@ -122,6 +165,7 @@ public class UserGroupMembershipService {
 	 * @param userGroups user group ids
 	 * @throws SQLException
 	 */
+	@CacheEvict(value = {"users", "userGroups"}, allEntries = true)
 	public void updateUserGroupMembership(String action, String[] users, Integer[] userGroups) throws SQLException {
 		logger.debug("Entering updateUserGroupMemberships: action='{}'", action);
 
@@ -131,7 +175,7 @@ public class UserGroupMembershipService {
 			logger.warn("Update not performed. users or userGroups is null.");
 			return;
 		}
-		
+
 		boolean add;
 		if (StringUtils.equalsIgnoreCase(action, "add")) {
 			add = true;

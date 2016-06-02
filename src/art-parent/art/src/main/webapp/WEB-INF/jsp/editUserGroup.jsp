@@ -29,9 +29,13 @@ Edit user group page
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+	
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
@@ -130,6 +134,7 @@ Edit user group page
 					<div class="col-md-8">
 						<form:select path="defaultReportGroup" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+							<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>
 						<form:errors path="defaultReportGroup" cssClass="error"/>

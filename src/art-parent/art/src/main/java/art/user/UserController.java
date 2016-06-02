@@ -20,7 +20,9 @@ package art.user;
 import art.encryption.PasswordUtils;
 import art.enums.AccessLevel;
 import art.reportgroup.ReportGroupService;
+import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
+import art.usergroupmembership.UserGroupMembershipService;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
@@ -60,6 +62,9 @@ public class UserController {
 
 	@Autowired
 	private ReportGroupService reportGroupService;
+
+	@Autowired
+	private UserGroupMembershipService userGroupMembershipService;
 
 	@RequestMapping(value = "/app/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
@@ -242,6 +247,9 @@ public class UserController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", user.getUsername());
+
+			saveUserGroups(user);
+			
 			return "redirect:/app/users.do";
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -249,6 +257,17 @@ public class UserController {
 		}
 
 		return showEditUser(action, model, session);
+	}
+
+	/**
+	 * Save user groups for the given user
+	 * 
+	 * @param user the user
+	 * @throws SQLException 
+	 */
+	private void saveUserGroups(User user) throws SQLException {
+		userGroupMembershipService.deleteAllUserGroupMembershipsForUser(user.getUserId());
+		userGroupMembershipService.addUserGroupMemberships(user, user.getUserGroups());
 	}
 
 	@RequestMapping(value = "/app/saveUsers", method = RequestMethod.POST)

@@ -29,9 +29,13 @@ Display edit user page
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+	
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
@@ -47,8 +51,6 @@ Display edit user page
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
 					noneSelectedText: '${nothingSelectedText}',
 					noneResultsText: '${noResultsMatchText}',
 					countSelectedText: '${selectedCountText}'
@@ -58,19 +60,6 @@ Display edit user page
 				//must come after bootstrap-select initialization
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
-				});
-
-				$('#userGroupsAll').change(function() {
-					if ($('#userGroupsAll').is(':checked')) {
-						$('#userGroups').selectpicker('selectAll');
-					} else {
-						$('#userGroups').selectpicker('deselectAll');
-					}
-				});
-
-				//must come after selectpicker initialization (which creates button with appropriate data-id
-				$('#userGroupsDiv .dropdown-menu > li > a').on('click', function() {
-					$('#userGroupsAll').prop('checked', false);
 				});
 
 				$('#username').focus();
@@ -250,13 +239,8 @@ Display edit user page
 						<form:select path="userGroups" items="${userGroups}" multiple="true" 
 									 itemLabel="name" itemValue="userGroupId" 
 									 class="form-control selectpicker"
+									 data-actions-box="true"
 									 />
-						<div class="checkbox">
-							<label>
-								<input type="checkbox" name="userGroupsAll" id="userGroupsAll">
-								<spring:message code="page.checkbox.all"/>
-							</label>
-						</div>
 						<form:errors path="userGroups" cssClass="error"/>
 					</div>
 				</div>

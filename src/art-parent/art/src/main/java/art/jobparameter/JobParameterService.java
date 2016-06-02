@@ -127,8 +127,7 @@ public class JobParameterService {
 	public void deleteJobParameters(int jobId) throws SQLException {
 		logger.debug("Entering deleteJobParameters: jobId={}", jobId);
 
-		String sql = "DELETE FROM ART_JOBS_PARAMETERS"
-				+ " WHERE JOB_ID=?";
+		String sql = "DELETE FROM ART_JOBS_PARAMETERS WHERE JOB_ID=?";
 
 		Object[] values = {
 			jobId
