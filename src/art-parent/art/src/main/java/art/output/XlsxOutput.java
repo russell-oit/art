@@ -103,13 +103,6 @@ public class XlsxOutput extends StandardOutput {
 			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
 			dateStyle.setFont(bodyFont);
 			styles.put("date", dateStyle);
-
-			//enable when using poi 3.14+
-			//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
-//			for (int i = 0; i < resultSetColumnCount; i++) {
-//				sh.trackColumnForAutoSizing(i);
-//			}
-
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 			throw new RuntimeException(ex);
@@ -196,11 +189,10 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void endRows() {
-		//enable when using poi 3.14+
 		//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
-//		for (int i = 0; i < resultSetColumnCount; i++) {
-//			sh.autoSizeColumn(i);
-//		}
+		for (int i = 0; i < resultSetColumnCount; i++) {
+			sh.autoSizeColumn(i);
+		}
 
 		try {
 			try (FileOutputStream fout = new FileOutputStream(fullOutputFilename)) {
