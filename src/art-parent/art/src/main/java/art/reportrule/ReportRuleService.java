@@ -138,6 +138,23 @@ public class ReportRuleService {
 	}
 
 	/**
+	 * Deletes multiple report rules
+	 *
+	 * @param ids the report rule ids
+	 * @throws SQLException
+	 */
+	@CacheEvict(value = "rules", allEntries = true)
+	public void deleteReportRules(Integer[] ids) throws SQLException {
+		logger.debug("Entering deleteReportRules: ids={}", (Object) ids);
+
+		String sql;
+
+		sql = "DELETE FROM ART_QUERY_RULES WHERE"
+				+ " QUERY_RULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		dbService.update(sql, (Object[]) ids);
+	}
+
+	/**
 	 * Adds a new report rule to the database
 	 *
 	 * @param reportRule the report rule

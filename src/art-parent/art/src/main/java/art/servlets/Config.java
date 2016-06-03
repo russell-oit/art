@@ -457,7 +457,7 @@ public class Config extends HttpServlet {
 	/**
 	 * Saves application settings to file
 	 *
-	 * @param newSettings the settings to saave
+	 * @param newSettings the settings to save
 	 * @throws IOException
 	 */
 	public static void saveSettings(Settings newSettings) throws IOException {
@@ -465,8 +465,11 @@ public class Config extends HttpServlet {
 		String clearTextSmtpPassword = newSettings.getSmtpPassword();
 		String clearTextLdapBindPassword = newSettings.getLdapBindPassword();
 
-		newSettings.setSmtpPassword(AesEncryptor.encrypt(clearTextSmtpPassword));
-		newSettings.setLdapBindPassword(AesEncryptor.encrypt(clearTextLdapBindPassword));
+		String encryptedSmtpPassword = AesEncryptor.encrypt(clearTextSmtpPassword);
+		String encryptedLdapBindPassword = AesEncryptor.encrypt(clearTextLdapBindPassword);
+
+		newSettings.setSmtpPassword(encryptedSmtpPassword);
+		newSettings.setLdapBindPassword(encryptedLdapBindPassword);
 
 		File settingsFile = new File(settingsFilePath);
 		ObjectMapper mapper = new ObjectMapper();

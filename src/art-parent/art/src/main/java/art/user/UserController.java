@@ -20,7 +20,6 @@ package art.user;
 import art.encryption.PasswordUtils;
 import art.enums.AccessLevel;
 import art.reportgroup.ReportGroupService;
-import art.usergroup.UserGroup;
 import art.usergroup.UserGroupService;
 import art.usergroupmembership.UserGroupMembershipService;
 import art.utils.ActionResult;

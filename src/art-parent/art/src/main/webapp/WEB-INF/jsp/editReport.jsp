@@ -36,12 +36,10 @@ Edit report page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.0/css/jasny-bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.0/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 

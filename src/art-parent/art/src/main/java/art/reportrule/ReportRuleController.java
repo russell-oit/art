@@ -88,6 +88,24 @@ public class ReportRuleController {
 
 		return response;
 	}
+	
+	@RequestMapping(value = "/app/deleteReportRules", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse deleteReportRules(@RequestParam("ids") Integer[] ids) {
+		logger.debug("Entering deleteReportRules: ids={}",(Object) ids);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			reportRuleService.deleteReportRules(ids);
+			response.setSuccess(true);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
 
 	@RequestMapping(value = "/app/addReportRule", method = RequestMethod.GET)
 	public String addReportRule(Model model, @RequestParam("reportId") Integer reportId) {

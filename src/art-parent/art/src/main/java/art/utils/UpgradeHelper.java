@@ -246,18 +246,7 @@ public class UpgradeHelper {
 				//changes introduced in 3.0
 				if (StringUtils.equals(version, "3.0")) {
 					logger.info("Performing 3.0 upgrade steps");
-
-					addUserIds();
-					addScheduleIds();
-					addDrilldownIds();
-					addRuleIds();
-					addQueryRuleIds();
-					addParameters();
-					addUserRuleValueKeys();
-					addUserGroupRuleValueKeys();
-					addCachedDatasourceIds();
-					updateDatasourcePasswords();
-
+					upgradeTo30();
 					logger.info("Done performing 3.0 upgrade steps");
 				}
 
@@ -269,6 +258,19 @@ public class UpgradeHelper {
 				logger.error("Error", ex);
 			}
 		}
+	}
+
+	private void upgradeTo30() throws SQLException {
+		addUserIds();
+		addScheduleIds();
+		addDrilldownIds();
+		addRuleIds();
+		addQueryRuleIds();
+		addParameters();
+		addUserRuleValueKeys();
+		addUserGroupRuleValueKeys();
+		addCachedDatasourceIds();
+		updateDatasourcePasswords();
 	}
 
 	/**
@@ -461,10 +463,10 @@ public class UpgradeHelper {
 				+ " FROM ART_QUERY_RULES"
 				+ " WHERE QUERY_RULE_ID IS NULL";
 		ResultSetHandler<List<Map<String, Object>>> h2 = new MapListHandler();
-		List<Map<String, Object>> reportFilters = dbService.query(sql, h2);
+		List<Map<String, Object>> reportRules = dbService.query(sql, h2);
 
-		logger.debug("reportFilters.isEmpty()={}", reportFilters.isEmpty());
-		if (!reportFilters.isEmpty()) {
+		logger.debug("reportFilters.isEmpty()={}", reportRules.isEmpty());
+		if (!reportRules.isEmpty()) {
 			logger.info("Adding query rule ids");
 
 			//generate new id
@@ -477,11 +479,11 @@ public class UpgradeHelper {
 				maxId = 0;
 			}
 
-			for (Map<String, Object> reportFilter : reportFilters) {
+			for (Map<String, Object> reportRule : reportRules) {
 				maxId++;
 				//map list handler uses a case insensitive map, so case of column names doesn't matter
-				Integer reportId = (Integer) reportFilter.get("QUERY_ID");
-				String ruleName = (String) reportFilter.get("RULE_NAME");
+				Integer reportId = (Integer) reportRule.get("QUERY_ID");
+				String ruleName = (String) reportRule.get("RULE_NAME");
 				sql = "UPDATE ART_QUERY_RULES SET QUERY_RULE_ID=?"
 						+ " WHERE QUERY_ID=? AND RULE_NAME=?";
 				dbService.update(sql, maxId, reportId, ruleName);

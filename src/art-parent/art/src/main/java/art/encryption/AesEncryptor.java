@@ -53,13 +53,17 @@ public class AesEncryptor {
 	 * is null
 	 */
 	public static String encrypt(String clearText) {
+		if (clearText == null) {
+			return null;
+		}
+
 		try {
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes("UTF-8"));
 			SecretKeySpec secretKeySpec = new SecretKeySpec(KEY.getBytes("UTF-8"), "AES");
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 
 			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
-			byte[] encrypted = cipher.doFinal(clearText.getBytes());
+			byte[] encrypted = cipher.doFinal(clearText.getBytes("UTF-8"));
 			return Base64.encodeBase64String(encrypted);
 		} catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
 			logger.error("Error", ex);
@@ -70,11 +74,16 @@ public class AesEncryptor {
 
 	/**
 	 * Decrypts a string
-	 * 
+	 *
 	 * @param cipherText the encrypted string
-	 * @return the decrypted string, null if an error occurred
+	 * @return the decrypted string, null if an error occurred or if cipherText
+	 * is null
 	 */
 	public static String decrypt(String cipherText) {
+		if (cipherText == null) {
+			return null;
+		}
+
 		try {
 			IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes("UTF-8"));
 			SecretKeySpec secretKeySpec = new SecretKeySpec(KEY.getBytes("UTF-8"), "AES");

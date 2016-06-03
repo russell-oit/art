@@ -22,6 +22,8 @@ Display report filters
 <spring:message code="dialog.button.ok" var="okText"/>
 <spring:message code="dialog.message.deleteRecord" var="deleteRecordText"/>
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
+<spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
+<spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -39,26 +41,112 @@ Display report filters
 				});
 
 				var tbl = $('#reportRules');
+				
+				var oTable = tbl.dataTable({
+					columnDefs: [
+						{orderable: true, targets: 1},
+						{orderable: false, targets: '_all'},
+						{
+							orderable: false,
+							className: 'select-checkbox',
+							targets: 0
+						}
+					],
+					order: [[1, 'asc']],
+					select: {
+						style: 'multi',
+						selector: 'td:first-child'
+					},
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
+				
+				tbl.find('tbody').on('click', '.deleteRecord', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
+					bootbox.confirm({
+						message: "${deleteRecordText}: <b>" + recordName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/app/deleteReportRule.do",
+									data: {id: recordId},
+									success: function (response) {
+										if (response.success) {
+											notifyActionSuccess("${cacheClearedText}", recordName);
+										} else {
+											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
+				
+				var table = oTable.api();
 
-				//initialize datatable and process delete action
-				initConfigPage(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						undefined, //addColumnFilters. pass undefined to use default
-						".deleteRecord", //deleteButtonSelector
-						true, //showConfirmDialog
-						"${deleteRecordText}",
-						"${okText}",
-						"${cancelText}",
-						"deleteReportRule.do", //deleteUrl
-						"${recordDeletedText}",
-						"${errorOccurredText}",
-						true, //deleteRow
-						undefined, //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
-						);
+				$('#deleteRecords').click(function () {
+					var selectedRows = table.rows({selected: true});
+					var data = selectedRows.data();
+					if (data.length > 0) {
+						var ids = $.map(data, function (item) {
+							return item[2];
+						});
+						bootbox.confirm({
+							message: "${deleteRecordText}: <b>" + ids + "</b>",
+							buttons: {
+								cancel: {
+									label: "${cancelText}"
+								},
+								confirm: {
+									label: "${okText}"
+								}
+							},
+							callback: function (result) {
+								if (result) {
+									//user confirmed delete. make delete request
+									$.ajax({
+										type: "POST",
+										dataType: "json",
+										url: "${pageContext.request.contextPath}/app/deleteReportRules.do",
+										data: {ids: ids},
+										success: function (response) {
+											if (response.success) {
+												selectedRows.remove().draw(false);
+												notifyActionSuccess("${recordsDeletedText}", ids);
+											} else {
+												notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+											}
+										},
+										error: ajaxErrorHandler
+									});
+								} //end if result
+							} //end callback
+						}); //end bootbox confirm
+					} else {
+						bootbox.alert("${selectRecordsText}");
+					}
+				});
 
 			}); //end document ready
 		</script>
@@ -92,11 +180,16 @@ Display report filters
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
+			<button type="button" id="deleteRecords" class="btn btn-default">
+				<i class="fa fa-trash-o"></i>
+				<spring:message code="page.action.delete"/>
+			</button>
 		</div>
 
 		<table id="reportRules" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
+					<th class="noFilter"></th>
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.rule"/></th>
 					<th><spring:message code="page.text.reportColumn"/></th>
@@ -108,6 +201,7 @@ Display report filters
 					<tr data-id="${reportRule.reportRuleId}" 
 						data-name="${encode:forHtmlAttribute(reportRule.rule.name)}">
 
+						<td></td>
 						<td>${reportRule.reportRuleId}</td>
 						<td>${encode:forHtmlContent(reportRule.rule.name)}</td>							
 						<td>${encode:forHtmlContent(reportRule.reportColumn)}</td>
