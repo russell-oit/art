@@ -24,9 +24,7 @@ Edit user group page
 	</c:when>
 </c:choose>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	
@@ -51,11 +49,7 @@ Edit user group page
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
+					noneResultsText: '${noResultsMatchText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover

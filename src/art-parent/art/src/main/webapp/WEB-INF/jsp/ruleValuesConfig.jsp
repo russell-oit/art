@@ -23,15 +23,17 @@ Configure rule value
 <spring:message code="page.text.available" var="availableText"/>
 <spring:message code="page.text.selected" var="selectedText"/>
 <spring:message code="page.text.search" var="searchText"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
@@ -80,11 +82,7 @@ Configure rule value
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
+					noneResultsText: '${noResultsMatchText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover

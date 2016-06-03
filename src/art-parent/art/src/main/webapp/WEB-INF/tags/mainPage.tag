@@ -36,8 +36,6 @@ bootstrap js, jquery js, datatables css, datatables js
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.11/Select-1.1.2/css/select.bootstrap.min.css"/>
 		<!--<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/dataTables-1.10.11/Responsive-2.0.2/css/responsive.bootstrap.min.css"/>-->
 
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.css">
-
 		<jsp:invoke fragment="css"/>
 	</jsp:attribute>
 

@@ -106,10 +106,10 @@ Display report filters
 			<tbody>
 				<c:forEach var="reportRule" items="${reportRules}">
 					<tr data-id="${reportRule.reportRuleId}" 
-						data-name="${encode:forHtmlAttribute(reportRule.filter.name)}">
+						data-name="${encode:forHtmlAttribute(reportRule.rule.name)}">
 
 						<td>${reportRule.reportRuleId}</td>
-						<td>${encode:forHtmlContent(reportRule.filter.name)}</td>							
+						<td>${encode:forHtmlContent(reportRule.rule.name)}</td>							
 						<td>${encode:forHtmlContent(reportRule.reportColumn)}</td>
 						<td>
 							<div class="btn-group">

@@ -27,9 +27,7 @@ Edit report page
 	</c:otherwise>
 </c:choose>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 <spring:message code="reports.text.selectFile" var="selectFileText"/>
 <spring:message code="reports.text.change" var="changeText"/>
 <spring:message code="reports.label.reportSource" var="reportSourceText"/>
@@ -39,12 +37,13 @@ Edit report page
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.0/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.0/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -76,11 +75,7 @@ Edit report page
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
+					noneResultsText: '${noResultsMatchText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
@@ -309,7 +304,7 @@ Edit report page
 					<div class="col-md-8">
 						<form:select path="reportGroup.reportGroupId" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-								<option data-divider="true"></option>
+							<option data-divider="true"></option>
 							<c:forEach var="group" items="${reportGroups}">
 								<form:option value="${group.reportGroupId}">${group.name}</form:option>
 							</c:forEach>
@@ -415,7 +410,7 @@ Edit report page
 					<div class="col-md-8">
 						<form:select path="datasource.datasourceId" class="form-control selectpicker">
 							<form:option value="0"><spring:message code="select.text.none"/></form:option>
-								<option data-divider="true"></option>
+							<option data-divider="true"></option>
 							<c:forEach var="datasource" items="${datasources}">
 								<c:set var="datasourceStatus">
 									<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>

@@ -18,7 +18,6 @@
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$(function () {
@@ -29,22 +28,6 @@
 				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				});
-
-				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker({
-					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
-				});
-
-				//activate dropdown-hover. to make bootstrap-select open on hover
-				//must come after bootstrap-select initialization
-				$('button.dropdown-toggle').dropdownHover({
-					delay: 100
 				});
 
 				$('#activeUnchanged').change(function () {

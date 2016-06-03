@@ -16,6 +16,7 @@ Display art database configuration page
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="page.title.artDatabase" var="pageTitle"/>
+<spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	
@@ -38,7 +39,10 @@ Display art database configuration page
 				});
 
 				//Enable Bootstrap-Select
-				$('.selectpicker').selectpicker();
+				$('.selectpicker').selectpicker({
+					liveSearch: true,
+					noneResultsText: '${noResultsMatchText}'
+				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
 				//must come after bootstrap-select initialization

@@ -24,17 +24,19 @@ Edit datasource page
 	</c:when>
 </c:choose>
 
-<spring:message code="select.text.nothingSelected" var="nothingSelectedText"/>
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
-<spring:message code="select.text.selectedCount" var="selectedCountText"/>
 <spring:message code="datasources.message.connectionSuccessful" var="connectionSuccessfulText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+	
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.4.3/bootstrap-select-modified.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$(function () {
@@ -82,11 +84,7 @@ Edit datasource page
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
-					iconBase: 'fa',
-					tickIcon: 'fa-check-square',
-					noneSelectedText: '${nothingSelectedText}',
-					noneResultsText: '${noResultsMatchText}',
-					countSelectedText: '${selectedCountText}'
+					noneResultsText: '${noResultsMatchText}'
 				});
 
 				//activate dropdown-hover. to make bootstrap-select open on hover
@@ -96,8 +94,10 @@ Edit datasource page
 				});
 
 				$('#name').focus();
-			});</script>
-		</jsp:attribute>
+
+			});
+		</script>
+	</jsp:attribute>
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
@@ -146,7 +146,7 @@ Edit datasource page
 
 				<input type="hidden" name="action" value="${action}">
 				<form:hidden path="passwordAlgorithm" />
-				
+
 				<div class="form-group">
 					<label class="control-label col-md-4">
 						<spring:message code="page.label.id"/>
@@ -196,6 +196,7 @@ Edit datasource page
 								<option value="">
 									<spring:message code="select.text.none"/>
 								</option>
+								<option data-divider="true"></option>
 								<c:forEach var="dbType" items="${databaseTypes}">
 									<option value="${dbType.key}">${dbType.value}</option>
 								</c:forEach>
