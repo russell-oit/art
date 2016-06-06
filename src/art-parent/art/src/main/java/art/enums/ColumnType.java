@@ -24,5 +24,5 @@ package art.enums;
  */
 public enum ColumnType {
 
-	Numeric, Date, Clob, String;
+	Numeric, Date, Clob, String, Other;
 }

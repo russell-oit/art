@@ -29,7 +29,7 @@ Edit datasource page
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
@@ -50,7 +50,11 @@ Edit datasource page
 				});
 
 				$('#testConnection').on('click', function () {
-					var id = $("#datasourceId").val();
+					var action = '${action}';
+					var id = 0;
+					if (action === 'edit') {
+						id = $("#datasourceId").val();
+					}
 					var jndi = $("#jndi").is(":checked");
 					var driver = $("#driver").val();
 					var url = $("#url").val();
@@ -63,7 +67,8 @@ Edit datasource page
 						dataType: "json",
 						url: "${pageContext.request.contextPath}/app/testDatasource.do",
 						data: {id: id, jndi: jndi, driver: driver, url: url, username: username,
-							password: password, useBlankPassword: useBlankPassword},
+							password: password, useBlankPassword: useBlankPassword,
+							action: action},
 						success: function (response) {
 							if (response.success) {
 								msg = alertCloseButton + "${connectionSuccessfulText}";

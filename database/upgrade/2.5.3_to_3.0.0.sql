@@ -386,25 +386,6 @@ INSERT INTO ART_REPORT_TYPES VALUES (-15,'Chart: Stacked Vertical Bar 2D');
 INSERT INTO ART_REPORT_TYPES VALUES (-16,'Chart: Horizontal Bar 2D');
 INSERT INTO ART_REPORT_TYPES VALUES (-17,'Chart: Stacked Horizontal Bar 2D');
 
--- add reference table for job types
-CREATE TABLE ART_JOB_TYPES
-(
-	JOB_TYPE INTEGER NOT NULL,
-	DESCRIPTION VARCHAR(100),
-	CONSTRAINT ajt_pk PRIMARY KEY(JOB_TYPE)
-);
--- insert job types
-INSERT INTO ART_JOB_TYPES VALUES(1,'Alert');
-INSERT INTO ART_JOB_TYPES VALUES(2,'Email Output (Attachment)');
-INSERT INTO ART_JOB_TYPES VALUES(3,'Publish');
-INSERT INTO ART_JOB_TYPES VALUES(4,'Just Run It');
-INSERT INTO ART_JOB_TYPES VALUES(5,'Email Output (Inline)');
-INSERT INTO ART_JOB_TYPES VALUES(6,'Conditional Email Output (Attachment)');
-INSERT INTO ART_JOB_TYPES VALUES(7,'Conditional Email Output (Inline)');
-INSERT INTO ART_JOB_TYPES VALUES(8,'Conditional Publish');
-INSERT INTO ART_JOB_TYPES VALUES(9,'Cache ResultSet (Append)');
-INSERT INTO ART_JOB_TYPES VALUES(10,'Cache ResultSet (Delete & Insert)');
-
 -- add reference table for access levels
 CREATE TABLE ART_ACCESS_LEVELS
 (

@@ -149,6 +149,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.apache.phoenix.jdbc.PhoenixDriver";
 		urlElement.value = "jdbc:phoenix:<server_name>";
 		testSqlElement.value = "";
+	} else if (dbType === "msaccess-ucanaccess") {
+		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
+		urlElement.value = "jdbc:ucanaccess://c:/file_path.mdb";
+		testSqlElement.value = "";
 	}
 }
 

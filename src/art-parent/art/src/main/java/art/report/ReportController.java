@@ -399,8 +399,11 @@ public class ReportController {
 	@RequestMapping(value = "/app/addReport", method = RequestMethod.GET)
 	public String addReport(Model model, HttpSession session) {
 		logger.debug("Entering addReport");
+		
+		Report report=new Report();
+		report.setActive(true);
 
-		model.addAttribute("report", new Report());
+		model.addAttribute("report", report);
 		return showEditReport("add", model, session);
 	}
 

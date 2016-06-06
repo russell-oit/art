@@ -283,10 +283,12 @@ public class DatasourceController {
 			@RequestParam("driver") String driver, @RequestParam("url") String url,
 			@RequestParam("username") String username, @RequestParam("password") String password,
 			@RequestParam("useBlankPassword") Boolean useBlankPassword,
+			@RequestParam("action") String action,
 			Locale locale) {
 
 		logger.debug("Entering testDatasource: jndi={}, driver='{}', url='{}', username='{}',"
-				+ " useBlankPassword={}", jndi, driver, url, username, useBlankPassword);
+				+ " useBlankPassword={}, action='{}'", jndi, driver, url, username,
+				useBlankPassword, action);
 
 		AjaxResponse response = new AjaxResponse();
 
@@ -302,7 +304,7 @@ public class DatasourceController {
 				}
 			}
 
-			if (useCurrentPassword) {
+			if (StringUtils.equalsIgnoreCase(action, "edit") && useCurrentPassword) {
 				//password field blank. use current password
 				Datasource currentDatasource = datasourceService.getDatasource(id);
 				logger.debug("currentDatasource={}", currentDatasource);

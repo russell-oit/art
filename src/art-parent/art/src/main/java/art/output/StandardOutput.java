@@ -430,6 +430,8 @@ public abstract class StandardOutput {
 				columnTypes.add(ColumnType.Date);
 			} else if (isClob(sqlType)) {
 				columnTypes.add(ColumnType.Clob);
+			} else if (sqlType == Types.OTHER) {
+				columnTypes.add(ColumnType.Other);
 			} else {
 				columnTypes.add(ColumnType.String);
 			}
@@ -474,6 +476,13 @@ public abstract class StandardOutput {
 					Clob clob = rs.getClob(columnIndex);
 					if (clob != null) {
 						value = clob.getSubString(1, (int) clob.length());
+					}
+					addString(value);
+					break;
+				case Other:
+					value = rs.getObject(columnIndex);
+					if (value != null) {
+						value = value.toString();
 					}
 					addString(value);
 					break;
