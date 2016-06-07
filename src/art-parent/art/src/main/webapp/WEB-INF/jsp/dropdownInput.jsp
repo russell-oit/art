@@ -18,9 +18,6 @@ Display report parameter that uses dropdown input
 		id="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
 		${reportParam.parameter.parameterType == 'MultiValue' ? "multiple size='5'" : ""}>
 	
-	<c:if test="${reportParam.chainedParent}">
-		<option value="">--</option>
-	</c:if>
 	<c:if test="${reportParam.parameter.parameterType == 'MultiValue'}">
 		<option value="ALL_ITEMS"><spring:message code="reports.text.allItems"/></option>
 	</c:if>

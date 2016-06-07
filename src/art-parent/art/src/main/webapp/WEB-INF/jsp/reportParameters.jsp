@@ -68,3 +68,13 @@
 	</c:if>
 </c:forEach>
 
+<c:forEach var="reportParameter" items="${reportParams}">
+	<c:set var="reportParam" value="${reportParameter.value}" scope="request"/>
+
+	<c:if test="${reportParam.chainedParent}">
+		<script type="text/javascript">
+			$("#${reportParam.htmlElementName}").change();
+		</script>
+	</c:if>
+</c:forEach>
+
