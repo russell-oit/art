@@ -312,7 +312,7 @@ public class DatasourceController {
 					response.setErrorMessage(messageSource.getMessage("page.message.cannotUseCurrentPassword", null, locale));
 					return response;
 				} else {
-					password = decryptPassword(currentDatasource.getPassword());
+					password = currentDatasource.getPassword();
 				}
 			}
 
@@ -328,35 +328,24 @@ public class DatasourceController {
 	}
 
 	/**
-	 * Decrypts a datasource password
-	 *
-	 * @param password the encrypted password
-	 * @return the decrypted password
-	 */
-	private String decryptPassword(String password) {
-		logger.debug("Entering decryptPassword");
-
-		return AesEncryptor.decrypt(password);
-	}
-
-	/**
 	 * Tests datasource configuration and refreshes art connections
 	 *
 	 * @param datasource
 	 * @throws Exception
 	 */
 	private void updateConnectionPool(Datasource datasource) throws Exception {
-		logger.debug("Entering updateConnection: datasource={}", datasource);
+		logger.debug("Entering updateConnectionPool: datasource={}", datasource);
 
 		String driver = datasource.getDriver();
 		String url = datasource.getUrl();
 		String username = datasource.getUsername();
-		String password = decryptPassword(datasource.getPassword());
+		String clearTextPassword = AesEncryptor.decrypt(datasource.getPassword());
+		datasource.setPassword(clearTextPassword);
 		boolean jndi = datasource.isJndi();
 
 		logger.debug("datasource.isActive()={}", datasource.isActive());
 		if (datasource.isActive()) {
-			testConnection(jndi, driver, url, username, password);
+			testConnection(jndi, driver, url, username, clearTextPassword);
 
 			ArtDatabase artDbConfig = Config.getArtDbConfig();
 			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());
@@ -365,7 +354,7 @@ public class DatasourceController {
 
 	/**
 	 * Tests a datasource configuration
-	 * 
+	 *
 	 * @param jndi whether the datasource is a jndi datasource
 	 * @param driver the jdbc driver for the datasource
 	 * @param url the jdbc url for the datasource
@@ -375,7 +364,7 @@ public class DatasourceController {
 	 */
 	private void testConnection(boolean jndi, String driver, String url,
 			String username, String password) throws Exception {
-		
+
 		logger.debug("Entering testConnection: jndi={}, driver='{}', url='{}', username='{}'",
 				jndi, driver, url, username);
 
@@ -423,14 +412,14 @@ public class DatasourceController {
 			if (currentDatasource == null) {
 				return "page.message.cannotUseCurrentPassword";
 			} else {
-				datasource.setPassword(currentDatasource.getPassword());
+				newPassword = currentDatasource.getPassword();
 			}
-		} else {
-			//encrypt new password
-			newPassword=AesEncryptor.encrypt(newPassword);
-			datasource.setPassword(newPassword);
-			datasource.setPasswordAlgorithm("AES");
 		}
+
+		//encrypt new password
+		String encryptedPassword = AesEncryptor.encrypt(newPassword);
+		datasource.setPassword(encryptedPassword);
+		datasource.setPasswordAlgorithm("AES");
 
 		return null;
 	}
