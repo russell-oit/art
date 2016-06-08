@@ -92,9 +92,9 @@ div[class="tooltip-inner"] {
 }
 
 /* override bootstrap container width so as to make use of the whole screen */
-.container{
+/*.container{
 	max-width:100%;
-}
+}*/
 
 /* add padding to navbar so that main body content isn't hidden under it */
 #header{

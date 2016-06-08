@@ -91,6 +91,7 @@ Display report filters
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {
+											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											notifyActionSuccess("${cacheClearedText}", recordName);
 										} else {
 											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));

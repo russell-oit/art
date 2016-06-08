@@ -17,7 +17,7 @@ Error page for 404 errors (page not found)
     <head>
         <meta charset='utf-8'>
         <title>ART - Page Not Found</title>
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6-dist/css/bootstrap.min.css">
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
     </head>
     <body>

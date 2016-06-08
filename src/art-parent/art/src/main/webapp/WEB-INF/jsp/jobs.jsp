@@ -252,7 +252,7 @@ Display user jobs and jobs configuration
 					<th><spring:message code="jobs.text.lastEndDate"/></th>
 					<th><spring:message code="jobs.text.result"/></th>
 					<th><spring:message code="jobs.text.nextRunDate"/></th>
-					<th><spring:message code="page.text.action"/></th>
+					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
 			<tbody>

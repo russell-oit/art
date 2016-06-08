@@ -31,7 +31,7 @@ Includes bootstrap css, font awesome css, art css
 
 		<jsp:invoke fragment="headContent"/>
 
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.0.0/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6-dist/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
 
@@ -50,7 +50,7 @@ Includes bootstrap css, font awesome css, art css
 			<jsp:invoke fragment="header"/>
 
 			<div id="pageContent">
-				<div  class="container">
+				<div  class="container-fluid">
 					<jsp:doBody/>
 				</div>
 			</div>

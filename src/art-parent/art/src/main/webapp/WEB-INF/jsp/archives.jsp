@@ -28,13 +28,27 @@
 
 				var tbl = $("#archives");
 
-				initConfigTable(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						true //addColumnFilters
-						);
+				var columnFilterRow = createColumnFilters(tbl);
+
+				var oTable = tbl.dataTable({
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
+
+				//move column filter row after heading row
+				columnFilterRow.insertAfter(columnFilterRow.next());
+
+				//get datatables api object
+				var table = oTable.api();
+
+				// Apply the column filter
+				applyColumnFilters(tbl, table);
 
 			}); //end document ready
 		</script>

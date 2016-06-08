@@ -19,6 +19,7 @@ Display current admin rights
 <spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
+<spring:message code="page.action.revoke" var="revokeText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -32,25 +33,65 @@ Display current admin rights
 
 				var tbl = $('#rights');
 
+				var columnFilterRow = createColumnFilters(tbl);
+
 				//initialize datatable and process delete action
-				initConfigPage(tbl,
-						undefined, //pageLength. pass undefined to use the default
-						"${showAllRowsText}",
-						"${pageContext.request.contextPath}",
-						"${pageContext.response.locale}",
-						undefined, //addColumnFilters. pass undefined to use default
-						".deleteRecord", //deleteButtonSelector
-						false, //showConfirmDialog
-						undefined, //deleteRecordText
-						undefined, //okText
-						undefined, //cancelText
-						"deleteAdminRight.do", //deleteUrl
-						"${rightsRevokedText}", //recordDeletedText
-						"${errorOccurredText}",
-						true, //deleteRow
-						undefined, //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
-						);
+				var oTable = tbl.dataTable({
+					orderClasses: false,
+					pagingType: "full_numbers",
+					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
+					pageLength: 10,
+					language: {
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+					},
+					initComplete: datatablesInitComplete
+				});
+				
+				//move column filter row after heading row
+				columnFilterRow.insertAfter(columnFilterRow.next());
+
+				//get datatables api object
+				var table = oTable.api();
+
+				// Apply the column filter
+				applyColumnFilters(tbl, table);
+
+				tbl.find('tbody').on('click', '.deleteRecord', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
+					bootbox.confirm({
+						message: "${revokeText}: <b>" + recordName + "</b>",
+						buttons: {
+							cancel: {
+								label: "${cancelText}"
+							},
+							confirm: {
+								label: "${okText}"
+							}
+						},
+						callback: function (result) {
+							if (result) {
+								//user confirmed delete. make delete request
+								$.ajax({
+									type: "POST",
+									dataType: "json",
+									url: "${pageContext.request.contextPath}/app/deleteAdminRight.do",
+									data: {id: recordId},
+									success: function (response) {
+										if (response.success) {
+											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
+											notifyActionSuccess("${rightsRevokedText}", recordName);
+										} else {
+											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+										}
+									},
+									error: ajaxErrorHandler
+								});
+							} //end if result
+						} //end callback
+					}); //end bootbox confirm
+				});
 
 
 			});

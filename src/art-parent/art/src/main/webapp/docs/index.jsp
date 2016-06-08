@@ -40,37 +40,37 @@ Page to provide access to application documentation
 								<tr>
 									<td>
 										<a href="Features.html">Features</a>
-										&nbsp; <a type="application/octet-stream" href="Features.pdf">pdf</a>
+										&nbsp; (<a type="application/octet-stream" href="Features.pdf">pdf</a>)
 									</td>
 								</tr>
 								<tr>
 									<td>
 										<a href="Installing.html">Installing</a>
-										&nbsp; <a type="application/octet-stream" href="Installing.pdf">pdf</a>
+										&nbsp; (<a type="application/octet-stream" href="Installing.pdf">pdf</a>)
 									</td>
 								</tr>
 								<tr>
 									<td>
 										<a href="Upgrading.html">Upgrading</a>
-										&nbsp; <a type="application/octet-stream" href="Upgrading.pdf">pdf</a>
+										&nbsp; (<a type="application/octet-stream" href="Upgrading.pdf">pdf</a>)
 									</td>
 								</tr>
 								<tr>
 									<td>
 										<a href="Tips.html">Tips</a>
-										&nbsp; <a type="application/octet-stream" href="Tips.pdf">pdf</a>
+										&nbsp; (<a type="application/octet-stream" href="Tips.pdf">pdf</a>)
 									</td>
 								</tr>
 								<tr>
 									<td>
 										<a href="Libraries.html">Libraries</a>
-										&nbsp; <a type="application/octet-stream" href="Libraries.pdf">pdf</a>
+										&nbsp; (<a type="application/octet-stream" href="Libraries.pdf">pdf</a>)
 									</td>
 								</tr>
 								<tr>
 									<td>
 										<a href="Manual.html">Manual</a>
-										&nbsp; <a type="application/octet-stream" href="Manual.pdf">pdf</a>
+										&nbsp; (<a type="application/octet-stream" href="Manual.pdf">pdf</a>)
 									</td>
 								</tr>
 							</tbody>

@@ -19,6 +19,7 @@ Display user group membership
 <spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.membershipRemoved" var="membershipRemovedText"/>
+<spring:message code="page.action.remove" var="removeText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -31,9 +32,11 @@ Display user group membership
 				});
 
 				var tbl = $('#memberships');
+				
+				var columnFilterRow = createColumnFilters(tbl);
 
 				//initialize datatable and process delete action
-				tbl.dataTable({
+				var oTable = tbl.dataTable({
 					orderClasses: false,
 					pagingType: "full_numbers",
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
@@ -43,13 +46,22 @@ Display user group membership
 					},
 					initComplete: datatablesInitComplete
 				});
+				
+				//move column filter row after heading row
+				columnFilterRow.insertAfter(columnFilterRow.next());
+
+				//get datatables api object
+				var table = oTable.api();
+
+				// Apply the column filter
+				applyColumnFilters(tbl, table);
 
 				tbl.find('tbody').on('click', '.deleteRecord', function () {
 					var row = $(this).closest("tr"); //jquery object
 					var recordName = escapeHtmlContent(row.data("name"));
 					var recordId = row.data("id");
 					bootbox.confirm({
-						message: "${deleteRecordText}: <b>" + recordName + "</b>",
+						message: "${removeText}: <b>" + recordName + "</b>",
 						buttons: {
 							cancel: {
 								label: "${cancelText}"
@@ -68,6 +80,7 @@ Display user group membership
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {
+											table.row(row).remove().draw(false); //draw(false) to prevent datatables from going back to page 1
 											notifyActionSuccess("${membershipRemovedText}", recordName);
 										} else {
 											notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));

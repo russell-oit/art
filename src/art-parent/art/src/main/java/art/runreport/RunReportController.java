@@ -216,7 +216,8 @@ public class RunReportController {
 			if (reportType == ReportType.Text) {
 				//http://jsoup.org/apidocs/org/jsoup/safety/Whitelist.html
 				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
-				String cleanSource = Jsoup.clean(report.getReportSource(), Whitelist.relaxed());
+				String reportSource = report.getReportSource();
+				String cleanSource = Jsoup.clean(reportSource, Whitelist.relaxed());
 				request.setAttribute("reportSource", cleanSource);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showTextReport.jsp").include(request, response);
 			} else {
