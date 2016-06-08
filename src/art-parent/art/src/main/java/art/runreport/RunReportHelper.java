@@ -18,6 +18,7 @@
 package art.runreport;
 
 import art.connectionpool.DbConnections;
+import art.datasource.Datasource;
 import art.enums.ParameterDataType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
@@ -35,11 +36,11 @@ public class RunReportHelper {
 
 	/**
 	 * Returns the connection to use for running the given report
-	 * 
+	 *
 	 * @param report the report
 	 * @param reportParams the report parameters
 	 * @return the connection to use for running the report
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public Connection getEffectiveReportDatasource(Report report,
 			Collection<ReportParameter> reportParams) throws SQLException {
@@ -58,7 +59,8 @@ public class RunReportHelper {
 
 		if (dynamicDatasourceId == null) {
 			//use datasource defined on the report
-			conn = DbConnections.getConnection(report.getDatasource().getDatasourceId());
+			Datasource reportDatasource = report.getDatasource();
+			conn = DbConnections.getConnection(reportDatasource.getDatasourceId());
 		} else {
 			//use datasource indicated in parameter
 			conn = DbConnections.getConnection(dynamicDatasourceId);
@@ -69,11 +71,11 @@ public class RunReportHelper {
 
 	/**
 	 * Returns the connection to use for running the given report
-	 * 
+	 *
 	 * @param report the report
 	 * @param reportParamsMap the report parameters
 	 * @return the connection to use for running the report
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	public Connection getEffectiveReportDatasource(Report report,
 			Map<String, ReportParameter> reportParamsMap) throws SQLException {
