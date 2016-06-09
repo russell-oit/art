@@ -65,6 +65,7 @@ public enum ReportFormat {
 	 */
 	public String getFilenameExtension() {
 		switch (this) {
+			case html:
 			case htmlPlain:
 				return "html";
 			case xls:

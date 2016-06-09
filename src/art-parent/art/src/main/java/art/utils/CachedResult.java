@@ -3,17 +3,16 @@
  *
  * This file is part of ART.
  *
- * ART is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 2 of the License.
+ * ART is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, version 2 of the License.
  *
- * ART is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * ART is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with ART.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * ART. If not, see <http://www.gnu.org/licenses/>.
  */
 package art.utils;
 
@@ -49,14 +48,13 @@ import org.slf4j.LoggerFactory;
 public class CachedResult {
 
 	private static final Logger logger = LoggerFactory.getLogger(CachedResult.class);
-	final String sVERSION = "0.1";
-	Connection conn; //target connection
-	ResultSet rs; // resultsetto reverse in the target connection
-	String tableName;
-	int cacheMode; // 1 = append 2 = drop/insert
-	int rowsCount = 0;
-	int BATCH_EXECUTE_SIZE = 500; // states after how many inserts the batch is executed
-	List<String> columnsNameList;
+	private Connection conn; //target connection
+	private ResultSet rs; // resultset to reverse in the target connection
+	private String tableName;
+	private int cacheMode; // 1 = append 2 = drop/insert
+	private int rowsCount = 0;
+	private final int BATCH_EXECUTE_SIZE = 500; // states after how many inserts the batch is executed
+	private List<String> columnsNameList;
 
 	/**
 	 *
@@ -67,7 +65,7 @@ public class CachedResult {
 	/* Setters
 	 */
 	/**
-	 * Set where the new table will be created/data inserted (chached)
+	 * Set where the new table will be created/data inserted (cached)
 	 *
 	 * @param c
 	 */
@@ -151,9 +149,9 @@ public class CachedResult {
 	/**
 	 * Cache the result
 	 *
-	 * @throws Exception
+	 * @throws SQLException
 	 */
-	public void cacheIt() throws Exception {
+	public void cacheIt() throws SQLException {
 		try {
 			//check if the table exist in the target database (if yes assume it is correct)
 			DatabaseMetaData dbmd = conn.getMetaData();
@@ -174,7 +172,7 @@ public class CachedResult {
 			}
 			// reverse the resultset into the table
 			insertData();
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			// log and throw the exception
 			logger.error("Error", e);
 			throw e;
@@ -384,6 +382,7 @@ public class CachedResult {
 	 * Remove special chars and replace with _
 	 */
 	private String parseString(String s) {
-		return s.replace(" ", "_").replace(",", "_").replace("(", "_").replace(")", "_").replace("'", "_").replace("*", "_").replace("#", "_").replace("-", "_");
+		return s.replace(" ", "_").replace(",", "_").replace("(", "_").replace(")", "_")
+				.replace("'", "_").replace("*", "_").replace("#", "_").replace("-", "_");
 	}
 }

@@ -29,6 +29,7 @@
 <spring:message code="reports.format.xlsx" var="xlsxText"/>
 <spring:message code="reports.format.tsvZip" var="tsvZipText"/>
 <spring:message code="reports.format.png" var="pngText"/>
+<spring:message code="reports.format.html" var="htmlText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
@@ -180,12 +181,15 @@
 				} else if (reportTypeId === 117 || reportTypeId === 118) {
 					//jxls
 					list.append(new Option('${xlsText}', 'xls'));
+				} else if (reportTypeId === 122) {
+					//freemarker
+					list.append(new Option('${htmlText}', 'html'));
 				} else {
 					//non-chart
 					switch (jobType) {
 						case 'Alert':
 						case 'JustRun':
-							list.append(new Option('', '--'));
+							list.append(new Option('--', '--'));
 							break;
 						case 'EmailInline':
 						case 'CondEmailInline':
@@ -208,31 +212,37 @@
 							list.append(new Option('${xlsText}', 'xls'));
 							break;
 						default:
-							list.append(new Option('', '--'));
+							list.append(new Option('--', '--'));
 					}
 				}
 			}
 
 			function toggleVisibleFields() {
 				var jobType = $('#jobType option:selected').val();
+				var reportTypeId = parseInt($('input[name="report.reportTypeId"]').val(), 10);
 
-				toggleEmailFieldsVisibility(jobType);
+				toggleEmailFieldsVisibility(jobType, reportTypeId);
 				toggleCachedFieldsVisibility(jobType);
 				toggleRunsToArchiveVisibility(jobType)
-				toggleOutputFormatVisibility(jobType);
+				toggleOutputFormatVisibility(jobType, reportTypeId);
 			}
 
-			function toggleEmailFieldsVisibility(jobType) {
+			function toggleEmailFieldsVisibility(jobType, reportTypeId) {
 				//show/hide emailFields
-				switch (jobType) {
-					case 'CacheAppend':
-					case 'CacheInsert':
-					case 'JustRun':
-					case 'Print':
-						$("#emailFields").hide();
-						break;
-					default:
-						$("#emailFields").show();
+				if (reportTypeId === 122) {
+					//freemarker
+					$("#mailMessageDiv").hide();
+				} else {
+					switch (jobType) {
+						case 'CacheAppend':
+						case 'CacheInsert':
+						case 'JustRun':
+						case 'Print':
+							$("#emailFields").hide();
+							break;
+						default:
+							$("#emailFields").show();
+					}
 				}
 			}
 
@@ -248,17 +258,21 @@
 				}
 			}
 
-			function toggleOutputFormatVisibility(jobType) {
+			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
-				switch (jobType) {
-					case 'Alert':
-					case 'JustRun':
-					case 'CacheAppend':
-					case 'CacheInsert':
-						$("#outputFormatDiv").hide();
-						break;
-					default:
-						$("#outputFormatDiv").show();
+				if (reportTypeId === 122) {
+					$("#outputFormatDiv").hide();
+				} else {
+					switch (jobType) {
+						case 'Alert':
+						case 'JustRun':
+						case 'CacheAppend':
+						case 'CacheInsert':
+							$("#outputFormatDiv").hide();
+							break;
+						default:
+							$("#outputFormatDiv").show();
+					}
 				}
 			}
 
@@ -535,13 +549,15 @@
 							<form:errors path="mailSubject" cssClass="error"/>
 						</div>
 					</div>
-					<label class="col-md-12 control-label" style="text-align: center">
-						<spring:message code="jobs.label.mailMessage"/>
-					</label>
-					<div class="form-group">
-						<div class="col-md-12">
-							<form:textarea path="mailMessage" rows="8" cols="60" class="form-control editor"/>
-							<form:errors path="mailMessage" cssClass="error"/>
+					<div id="mailMessageDiv">
+						<label class="col-md-12 control-label" style="text-align: center">
+							<spring:message code="jobs.label.mailMessage"/>
+						</label>
+						<div class="form-group">
+							<div class="col-md-12">
+								<form:textarea path="mailMessage" rows="8" cols="60" class="form-control editor"/>
+								<form:errors path="mailMessage" cssClass="error"/>
+							</div>
 						</div>
 					</div>
 				</fieldset>

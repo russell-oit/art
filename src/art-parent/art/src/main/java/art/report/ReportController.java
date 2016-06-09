@@ -186,7 +186,6 @@ public class ReportController {
 						case MondrianXmla:
 						case SqlServerXmla:
 						case Text:
-						case FreeMarker:
 							enableSchedule = false;
 							break;
 						default:

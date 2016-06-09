@@ -38,6 +38,9 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.FilenameHelper;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,6 +49,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -184,9 +189,10 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param mailer the mailer to use
 	 * @param msg the message of the email
+	 * @param value the alert value
 	 */
-	private void prepareAlertJob(Mailer mailer, String msg) {
-		logger.debug("Entering prepareAlertJob");
+	private void prepareAlertMailer(Mailer mailer, String msg, int value) {
+		logger.debug("Entering prepareAlertMailer");
 
 		String from = job.getMailFrom();
 
@@ -204,6 +210,11 @@ public class ReportJob implements org.quartz.Job {
 			mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
 		} else {
 			mainMessage = msg;
+
+			//replace value placeholder in the message if it exists
+			String searchString = Pattern.quote("#value#"); //quote in case it contains special regex characters
+			String replaceString = Matcher.quoteReplacement(String.valueOf(value)); //quote in case it contains special regex characters
+			mainMessage = mainMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
 
 		Context ctx = new Context(Locale.getDefault());
@@ -216,16 +227,86 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
+	 * Prepares a mailer object for sending an alert job
+	 *
+	 * @param mailer the mailer to use
+	 * @param value the alert value
+	 */
+	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value)
+			throws TemplateException, IOException {
+
+		prepareFreeMarkerAlertMailer(mailer, value, null);
+	}
+
+	/**
+	 * Prepares a mailer object for sending an alert job
+	 *
+	 * @param mailer the mailer to use
+	 * @param value the alert value
+	 * @param recipientColumns the recipient column details
+	 */
+	private void prepareFreeMarkerAlertMailer(Mailer mailer, int value,
+			Map<String, String> recipientColumns) throws TemplateException, IOException {
+
+		logger.debug("Entering prepareFreeMarkerAlertMailer");
+
+		String from = job.getMailFrom();
+
+		String subject = job.getMailSubject();
+		// compatibility with Art pre 1.8 where subject was not editable
+		if (subject == null) {
+			subject = "ART Alert: (Job " + jobId + ")";
+		}
+
+		mailer.setSubject(subject);
+		mailer.setFrom(from);
+
+		Report report = job.getReport();
+		String templateFileName = report.getTemplate();
+		String templatesPath = Config.getTemplatesPath();
+		String fullTemplateFileName = templatesPath + templateFileName;
+
+		//check if template file exists
+		File templateFile = new File(fullTemplateFileName);
+		if (!templateFile.exists()) {
+			throw new IllegalStateException("Template file not found: " + templateFileName);
+		}
+
+		Configuration cfg = Config.getFreemarkerConfig();
+		Template template = cfg.getTemplate(templateFileName);
+
+		//set objects to be passed to freemarker
+		Map<String, Object> data = new HashMap<>();
+
+		if (recipientColumns != null) {
+			for (Map.Entry<String, String> entry : recipientColumns.entrySet()) {
+				String columnName = entry.getKey();
+				String columnValue = entry.getValue();
+				data.put(columnName, columnValue);
+			}
+		}
+
+		data.put("value", value);
+
+		//create output
+		Writer writer = new StringWriter();
+		template.process(data, writer);
+
+		String finalMessage = writer.toString();
+		mailer.setMessage(finalMessage);
+	}
+
+	/**
 	 * Prepares a mailer object for sending an email job
 	 *
 	 * @param mailer the mailer to use
 	 * @param msg the message of the email
 	 * @param outputFileName the full path of a file to include with the email
 	 */
-	private void prepareEmailJob(Mailer mailer, String msg, String outputFileName)
+	private void prepareMailer(Mailer mailer, String msg, String outputFileName)
 			throws FileNotFoundException, IOException {
 
-		logger.debug("Entering prepareEmailJob: outputFileName='{}'", outputFileName);
+		logger.debug("Entering prepareEmailMailer: outputFileName='{}'", outputFileName);
 
 		String from = job.getMailFrom();
 
@@ -238,16 +319,10 @@ public class ReportJob implements org.quartz.Job {
 		mailer.setSubject(subject);
 		mailer.setFrom(from);
 
-		String mainMessage;
-		if (StringUtils.isBlank(msg)) {
-			mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
-		} else {
-			mainMessage = msg;
-		}
+		Report report = job.getReport();
+		ReportType reportType = report.getReportType();
 
-		Context ctx = new Context(Locale.getDefault());
-		ctx.setVariable("mainMessage", mainMessage);
-		ctx.setVariable("job", job);
+		String messageData="";
 
 		if (jobType.isEmailAttachment()) {
 			// e-mail output as attachment
@@ -259,20 +334,41 @@ public class ReportJob implements org.quartz.Job {
 			// read the file and include it in the HTML message
 			try (FileInputStream fis = new FileInputStream(outputFileName)) {
 				byte fileBytes[] = new byte[fis.available()];
+
 				int result = fis.read(fileBytes);
 				if (result == -1) {
-					logger.warn("EOF reached for inline email file: {}", outputFileName);
+					logger.warn("EOF reached for inline email file: '{}'", outputFileName);
 				}
+
 				// convert the file to a string and get only the html table
-				String data = new String(fileBytes, "UTF-8");
-				data = data.substring(data.indexOf("<body>") + 6, data.indexOf("</body>")); //html plain output now has head and body sections
-				ctx.setVariable("data", data);
+				messageData = new String(fileBytes, "UTF-8");
+
+				if (reportType != ReportType.FreeMarker) {
+					messageData = messageData.substring(messageData.indexOf("<body>") + 6, messageData.indexOf("</body>")); //html plain output now has head and body sections
+				}
+
 			}
 		}
 
-		SpringTemplateEngine templateEngine = getTemplateEngine();
-		String finalMessage = templateEngine.process("emailTemplate.html", ctx);
-		mailer.setMessage(finalMessage);
+		if (reportType == ReportType.FreeMarker) {
+			mailer.setMessage(messageData);
+		} else {
+			String mainMessage;
+			if (StringUtils.isBlank(msg)) {
+				mainMessage = "&nbsp;"; //if message is blank, ensure there's a space before the hr
+			} else {
+				mainMessage = msg;
+			}
+
+			Context ctx = new Context(Locale.getDefault());
+			ctx.setVariable("mainMessage", mainMessage);
+			ctx.setVariable("job", job);
+			ctx.setVariable("data", messageData);
+
+			SpringTemplateEngine templateEngine = getTemplateEngine();
+			String finalMessage = templateEngine.process("emailTemplate.html", ctx);
+			mailer.setMessage(finalMessage);
+		}
 	}
 
 	/**
@@ -681,11 +777,14 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			//prepare report parameters
-			ParameterProcessorResult paramProcessorResult = buildParameters(job.getReport().getReportId(), jobId);
+			Report report = job.getReport();
+			int reportId = report.getReportId();
+
+			ParameterProcessorResult paramProcessorResult = buildParameters(reportId, jobId);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportRunner.setReportParamsMap(reportParamsMap);
 
-			ReportType reportType = job.getReport().getReportType();
+			ReportType reportType = report.getReportType();
 
 			//jobs don't show record count so generally no need for scrollable resultsets
 			int resultSetType;
@@ -696,48 +795,33 @@ public class ReportJob implements org.quartz.Job {
 				resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 			}
 
+			//run report
 			reportRunner.execute(resultSetType);
 
-			userEmail = StringUtils.trim(userEmail);
-
+			//get email message fields
 			String message = job.getMailMessage();
-			String queryName = job.getReport().getName();
 
-			String tos = job.getMailTo();
+			String to = job.getMailTo();
 			String cc = job.getMailCc();
 			String bcc = job.getMailBcc();
 
 			//trim address fields. to aid in checking if emails are configured
-			tos = StringUtils.trim(tos);
+			to = StringUtils.trim(to);
 			cc = StringUtils.trim(cc);
 			bcc = StringUtils.trim(bcc);
 
-			//determine if emailing is required and emails are configured
-			boolean generateEmail = false;
-			if (jobType.isPublish()) {
-				//for split published jobs, tos should have a value to enable confirmation email for individual users
-				if (!StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4
-						|| StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)
-						&& StringUtils.length(userEmail) > 4) {
-					generateEmail = true;
-				} else if (StringUtils.equals(tos, userEmail) && (StringUtils.length(tos) > 4
-						|| StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)) {
-					generateEmail = true;
-				}
-			} else {
-				//for non-publish jobs, if an email address is available, generate email
-				if (StringUtils.length(userEmail) > 4 || StringUtils.length(cc) > 4
-						|| StringUtils.length(bcc) > 4) {
-					generateEmail = true;
-				}
-			}
+			userEmail = StringUtils.trim(userEmail);
 
-			//set email fields
-			String[] tosEmail = null;
+			//determine if emailing is required and emails are configured
+			boolean generateEmail = isGenerateEmail(to, userEmail, cc, bcc);
+
+			//set email fields to be used by the mailer
+			String[] tos = null;
 			String[] ccs = null;
 			String[] bccs = null;
+
 			if (generateEmail) {
-				tosEmail = StringUtils.split(userEmail, ";");
+				tos = StringUtils.split(userEmail, ";");
 				ccs = StringUtils.split(cc, ";");
 				bccs = StringUtils.split(bcc, ";");
 
@@ -747,138 +831,12 @@ public class ReportJob implements org.quartz.Job {
 			}
 
 			if (jobType == JobType.Alert) {
-				/*
-				 * ALERT if the resultset is not null and the first column is a
-				 * positive integer => send the alert email
-				 */
-
-				//only run alert query if we have some emails configured
-				if (generateEmail || recipientDetails != null) {
-					runMessage = "jobs.message.noAlert";
-
-					ResultSet rs = null;
-					try {
-						rs = reportRunner.getResultSet();
-						if (rs.next()) {
-							int value = rs.getInt(1);
-							if (value > 0) {
-								runMessage = "jobs.message.alertExists";
-
-								logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
-
-								//send customized emails to dynamic recipients
-								if (recipientDetails != null) {
-									Mailer mailer = getMailer();
-
-									for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
-										String email = entry.getKey();
-										Map<String, String> recipientColumns = entry.getValue();
-
-										//customize message by replacing field labels with values for this recipient
-										String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
-										if (customMessage == null) {
-											customMessage = "";
-										}
-
-										if (StringUtils.isNotBlank(customMessage)) {
-											for (Map.Entry<String, String> entry2 : recipientColumns.entrySet()) {
-												String columnName = entry2.getKey();
-												String columnValue = entry2.getValue();
-
-												String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
-												String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
-												customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
-											}
-										}
-
-										prepareAlertJob(mailer, customMessage);
-
-										mailer.setTo(email);
-
-										//send email for this recipient
-										try {
-											sendEmail(mailer);
-											runMessage = "jobs.message.alertSent";
-										} catch (MessagingException ex) {
-											logger.debug("Error", ex);
-											runMessage = "jobs.message.errorSendingAlert";
-											runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
-										}
-									}
-
-									if (recipientFilterPresent) {
-										//don't run normal email job after filtered email sent
-										generateEmail = false;
-									}
-								}
-
-								//send email to normal recipients
-								if (generateEmail) {
-									Mailer mailer = getMailer();
-
-									prepareAlertJob(mailer, message);
-
-									//set recipients						
-									mailer.setTo(tosEmail);
-									mailer.setCc(ccs);
-									mailer.setBcc(bccs);
-
-									try {
-										sendEmail(mailer);
-										runMessage = "jobs.message.alertSent";
-									} catch (MessagingException ex) {
-										logger.debug("Error", ex);
-										runMessage = "jobs.message.errorSendingAlert";
-										runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
-									}
-
-								} else {
-									logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
-								}
-							} else {
-								logger.debug("Job Id {} - Empty resultset for alert", jobId);
-							}
-						}
-					} finally {
-						DatabaseUtils.close(rs);
-					}
-				} else {
-					//no emails configured
-					runMessage = "jobs.message.noEmailsConfigured";
-				}
-			} else if (jobType.isPublish() || jobType.isEmail()
-					|| jobType == JobType.Print) {
-				logger.debug("Job Id: {}. Job Type: {}", jobId, jobType);
-
+				runAlertJob(generateEmail, recipientDetails, reportRunner, message, recipientFilterPresent, tos, ccs, bccs);
+			} else if (jobType.isPublish() || jobType.isEmail() || jobType == JobType.Print) {
 				//determine if the query returns records. to know if to generate output for conditional jobs
-				boolean generateOutput = true;
+				boolean generateOutput = isGenerateOutput(user, reportParamsMap);
 
-				if (jobType.isConditional()) {
-					//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
-					ReportRunner countReportRunner = null;
-					ResultSet rsCount = null;
-					try {
-						countReportRunner = prepareReportRunner(user);
-						countReportRunner.setReportParamsMap(reportParamsMap);
-
-						countReportRunner.execute();
-
-						rsCount = countReportRunner.getResultSet();
-						if (!rsCount.next()) {
-							//no records
-							generateOutput = false;
-							runMessage = "jobs.message.noRecords";
-						}
-					} finally {
-						DatabaseUtils.close(rsCount);
-
-						if (countReportRunner != null) {
-							countReportRunner.close();
-						}
-					}
-				}
-
-				//for emailing jobs, only run query if some emails are configured
+				//for emailing jobs, only generate output if some emails are configured
 				if (jobType.isEmail()) {
 					//email attachment, email inline, conditional email attachment, conditional email inline
 					if (!generateEmail && recipientDetails == null) {
@@ -888,52 +846,8 @@ public class ReportJob implements org.quartz.Job {
 				}
 
 				if (generateOutput) {
-					Report report = job.getReport();
-					ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
-
 					//generate output
-					//generate file name to use for report types and formats that generate files
-					FilenameHelper filenameHelper = new FilenameHelper();
-					String baseFileName = filenameHelper.getFileName(job);
-					String exportPath = Config.getJobsExportPath();
-
-					String extension;
-					if (reportType.isJxls()) {
-						String jxlsFilename = report.getTemplate();
-						extension = FilenameUtils.getExtension(jxlsFilename);
-					} else {
-						extension = reportFormat.getFilenameExtension();
-					}
-
-					fileName = baseFileName + "." + extension;
-					String outputFileName = exportPath + fileName;
-
-					//printwriter not needed for all output types. Avoid creating extra html file when output is not html, xml or rss
-					FileOutputStream fos = null;
-					PrintWriter writer = null;
-
-					if (reportFormat.isHtml()
-							|| reportFormat == ReportFormat.xml
-							|| reportFormat == ReportFormat.rss20) {
-						fos = new FileOutputStream(outputFileName);
-						writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
-					}
-
-					ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-					reportOutputGenerator.setJobId(jobId);
-
-					Locale locale = Locale.getDefault();
-					reportOutputGenerator.generateOutput(report, reportRunner,
-							reportFormat, locale, paramProcessorResult, writer, outputFileName);
-
-					// the file is on the PrintWriter (for html)
-					if (writer != null) {
-						writer.close();
-					}
-
-					if (fos != null) {
-						fos.close();
-					}
+					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult);
 
 					if (jobType == JobType.Print) {
 						File file = new File(outputFileName);
@@ -943,143 +857,11 @@ public class ReportJob implements org.quartz.Job {
 						}
 					} else if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
-
-						//send customized emails to dynamic recipients
-						if (recipientDetails != null) {
-							Mailer mailer = getMailer();
-
-							String email;
-
-							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
-								email = entry.getKey();
-								Map<String, String> recipientColumns = entry.getValue();
-
-								//customize message by replacing field labels with values for this recipient
-								String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
-								if (customMessage == null) {
-									customMessage = "";
-								}
-
-								if (StringUtils.isNotBlank(customMessage)) {
-									for (Map.Entry<String, String> entry2 : recipientColumns.entrySet()) {
-										String columnName = entry2.getKey();
-										String columnValue = entry2.getValue();
-
-										String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
-										String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
-										customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
-									}
-								}
-
-								prepareEmailJob(mailer, customMessage, outputFileName);
-
-								mailer.setTo(email);
-
-								//send email for this recipient
-								try {
-									sendEmail(mailer);
-									runMessage = "jobs.message.fileEmailed";
-								} catch (MessagingException ex) {
-									logger.debug("Error", ex);
-									runMessage = "jobs.message.errorSendingSomeEmails";
-									runDetails = "<b>Error: </b>"
-											+ " <p>" + ex.toString() + "</p>";
-
-									String msg = "Error when sending some emails."
-											+ " \n" + ex.toString()
-											+ " \n To: " + email;
-									logger.warn(msg);
-								}
-							}
-
-							if (recipientFilterPresent) {
-								//don't run normal email job after filtered email sent
-								generateEmail = false;
-							}
-
-							//delete file since email has been sent
-							File f = new File(outputFileName);
-							boolean deleted = f.delete();
-							if (!deleted) {
-								logger.warn("Email attachment file not deleted: {}", outputFileName);
-							}
-						}
-
-						//send email to normal recipients
-						if (generateEmail) {
-							Mailer mailer = getMailer();
-
-							prepareEmailJob(mailer, message, outputFileName);
-
-							//set recipients						
-							mailer.setTo(tosEmail);
-							mailer.setCc(ccs);
-							mailer.setBcc(bccs);
-
-							//check if mail was successfully sent
-							try {
-								sendEmail(mailer);
-								runMessage = "jobs.message.fileEmailed";
-
-								if (jobType.isEmail()) {
-									// delete the file since it has
-									// been sent via email (for publish jobs it is deleted by the scheduler)
-									File file = new File(outputFileName);
-									file.delete();
-									fileName = "";
-								} else {
-									runMessage = "jobs.message.reminderSent";
-								}
-							} catch (MessagingException ex) {
-								logger.debug("Error", ex);
-								runMessage = "jobs.message.errorSendingSomeEmails";
-								runDetails = "<b>Error: </b>"
-										+ " <p>" + ex.toString() + "</p>";
-
-								String msg = "Error when sending some emails."
-										+ " \n" + ex.toString()
-										+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
-								logger.warn(msg);
-							}
-						}
+						processAndSendEmail(recipientDetails, message, outputFileName, recipientFilterPresent, generateEmail, tos, ccs, bccs, userEmail, cc, bcc);
 					}
 				}
-
 			} else if (jobType.isCache()) {
-				Connection cacheDatabaseConnection = null;
-				ResultSet rs = null;
-				try {
-					int targetDatabaseId = job.getCachedDatasourceId();
-					cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
-					rs = reportRunner.getResultSet();
-
-					CachedResult cr = new CachedResult();
-					cr.setTargetConnection(cacheDatabaseConnection);
-					cr.setResultSet(rs);
-
-					String cachedTableName = job.getCachedTableName();
-					if (cachedTableName == null || cachedTableName.length() == 0) {
-						cachedTableName = queryName + "_J" + jobId;
-					}
-					cr.setCachedTableName(cachedTableName);
-
-					if (jobType == JobType.CacheAppend) {
-						// 1 = append 2 = drop/insert (3 = update (not implemented))
-						cr.setCacheMode(1);
-					} else if (jobType == JobType.CacheInsert) {
-						cr.setCacheMode(2);
-					}
-
-					cr.cacheIt();
-
-					runDetails = "Table Name (rows inserted):  <code>"
-							+ cr.getCachedTableName() + "</code> (" + cr.getRowsCount() + ")"
-							+ "<br />Columns Names:<br /><code>"
-							+ cr.getCachedTableColumnsName() + "</code>";
-				} finally {
-					DatabaseUtils.close(rs, cacheDatabaseConnection);
-				}
-
+				runCacheJob(reportRunner);
 			} else if (jobType == JobType.JustRun) {
 				// do nothing
 				// This is used Used to start batch jobs at db level via calls to stored procs
@@ -1097,6 +879,437 @@ public class ReportJob implements org.quartz.Job {
 			// set audit timestamp and update archives
 			afterExecution(splitJob, user);
 		}
+	}
+
+	/**
+	 * Finalizes the email message to send and sends it
+	 *
+	 * @param recipientDetails
+	 * @param message
+	 * @param outputFileName
+	 * @param recipientFilterPresent
+	 * @param generateEmail
+	 * @param tos
+	 * @param ccs
+	 * @param bccs
+	 * @param userEmail
+	 * @param cc
+	 * @param bcc
+	 * @throws IOException
+	 */
+	private void processAndSendEmail(Map<String, Map<String, String>> recipientDetails,
+			String message, String outputFileName, boolean recipientFilterPresent,
+			boolean generateEmail, String[] tos, String[] ccs, String[] bccs,
+			String userEmail, String cc, String bcc) throws IOException {
+
+		logger.debug("Entering processAndSendEmail");
+
+		//send customized emails to dynamic recipients
+		if (recipientDetails != null) {
+			Mailer mailer = getMailer();
+
+			String email;
+
+			for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+				email = entry.getKey();
+				Map<String, String> recipientColumns = entry.getValue();
+
+				//customize message by replacing field labels with values for this recipient
+				String customMessage = prepareCustomMessage(message, recipientColumns); //message for a particular recipient. may include personalization e.g. Dear Jane
+				prepareMailer(mailer, customMessage, outputFileName);
+
+				mailer.setTo(email);
+
+				//send email for this recipient
+				try {
+					sendEmail(mailer);
+					runMessage = "jobs.message.fileEmailed";
+				} catch (MessagingException ex) {
+					logger.debug("Error", ex);
+					runMessage = "jobs.message.errorSendingSomeEmails";
+					runDetails = "<b>Error: </b>"
+							+ " <p>" + ex.toString() + "</p>";
+
+					String msg = "Error when sending some emails."
+							+ " \n" + ex.toString()
+							+ " \n To: " + email;
+					logger.warn(msg);
+				}
+			}
+
+			if (recipientFilterPresent) {
+				//don't run normal email job after filtered email sent
+				generateEmail = false;
+
+				//delete file since email has been sent
+				File f = new File(outputFileName);
+				boolean deleted = f.delete();
+				if (!deleted) {
+					logger.warn("Email attachment file not deleted: {}", outputFileName);
+				}
+			}
+		}
+
+		//send email to normal recipients
+		if (generateEmail) {
+			Mailer mailer = getMailer();
+
+			prepareMailer(mailer, message, outputFileName);
+
+			//set recipients
+			mailer.setTo(tos);
+			mailer.setCc(ccs);
+			mailer.setBcc(bccs);
+
+			try {
+				sendEmail(mailer);
+				runMessage = "jobs.message.fileEmailed";
+
+				if (jobType.isEmail()) {
+					// delete the file since it has
+					// been sent via email
+					File file = new File(outputFileName);
+					file.delete();
+					fileName = "";
+				} else {
+					runMessage = "jobs.message.reminderSent";
+				}
+			} catch (MessagingException ex) {
+				logger.debug("Error", ex);
+				runMessage = "jobs.message.errorSendingSomeEmails";
+				runDetails = "<b>Error: </b>"
+						+ " <p>" + ex.toString() + "</p>";
+
+				String msg = "Error when sending some emails."
+						+ " \n" + ex.toString()
+						+ " \n Complete address list:\n To: " + userEmail + "\n Cc: " + cc + "\n Bcc: " + bcc;
+				logger.warn(msg);
+			}
+		}
+	}
+
+	/**
+	 * Generates report output to file
+	 *
+	 * @param reportRunner the report runner to use
+	 * @param paramProcessorResult the parameter processor result
+	 * @return the full path to the output file used
+	 * @throws Exception
+	 */
+	private String generateOutputFile(ReportRunner reportRunner,
+			ParameterProcessorResult paramProcessorResult) throws Exception {
+
+		logger.debug("Entering generateOutputFile");
+
+		Report report = job.getReport();
+		ReportType reportType = report.getReportType();
+		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
+
+		//generate file name to use
+		FilenameHelper filenameHelper = new FilenameHelper();
+		String baseFileName = filenameHelper.getFileName(job);
+		String exportPath = Config.getJobsExportPath();
+		String extension;
+
+		if (reportType.isJxls()) {
+			String jxlsFilename = report.getTemplate();
+			extension = FilenameUtils.getExtension(jxlsFilename);
+		} else {
+			extension = reportFormat.getFilenameExtension();
+		}
+
+		fileName = baseFileName + "." + extension;
+		String outputFileName = exportPath + fileName;
+
+		//create html file to output to as required
+		FileOutputStream fos = null;
+		PrintWriter writer = null;
+
+		if (reportFormat.isHtml() || reportFormat == ReportFormat.xml
+				|| reportFormat == ReportFormat.rss20) {
+			fos = new FileOutputStream(outputFileName);
+			writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
+		}
+
+		//generate output
+		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+
+		reportOutputGenerator.setJobId(jobId);
+		Locale locale = Locale.getDefault();
+
+		reportOutputGenerator.generateOutput(report, reportRunner,
+				reportFormat, locale, paramProcessorResult, writer, outputFileName);
+
+		if (writer != null) {
+			writer.close();
+		}
+
+		if (fos != null) {
+			fos.close();
+		}
+
+		return outputFileName;
+	}
+
+	/**
+	 * Returns <code>true</code> if emailing is required and emails are
+	 * configured
+	 *
+	 * @param tos to mail to setting
+	 * @param userEmail the user email
+	 * @param cc the mail cc setting
+	 * @param bcc the mail bcc setting
+	 * @return
+	 */
+	private boolean isGenerateEmail(String to, String userEmail, String cc, String bcc) {
+		logger.debug("Entering isGenerateEmail: to='{}', userEmail='{}', cc='{}', bcc='{}'",
+				to, userEmail, cc, bcc);
+
+		boolean generateEmail = false;
+
+		if (jobType.isPublish()) {
+			//for split published jobs, tos should have a value to enable confirmation email for individual users
+			if (!StringUtils.equals(to, userEmail) && (StringUtils.length(to) > 4
+					|| StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)
+					&& StringUtils.length(userEmail) > 4) {
+				generateEmail = true;
+			} else if (StringUtils.equals(to, userEmail) && (StringUtils.length(to) > 4
+					|| StringUtils.length(cc) > 4 || StringUtils.length(bcc) > 4)) {
+				generateEmail = true;
+			}
+		} else {
+			//for non-publish jobs, if an email address is available, generate email
+			if (StringUtils.length(userEmail) > 4 || StringUtils.length(cc) > 4
+					|| StringUtils.length(bcc) > 4) {
+				generateEmail = true;
+			}
+		}
+
+		return generateEmail;
+	}
+
+	/**
+	 * Returns <code>true</code> if the job should generate some output
+	 *
+	 * @param user the user under whose access the job is running
+	 * @param reportParamsMap the report parameters
+	 * @return <code>true</code> if the job should generate some output
+	 * @throws SQLException
+	 */
+	private boolean isGenerateOutput(String user, Map<String, ReportParameter> reportParamsMap) throws SQLException {
+		//determine if the query returns records. to know if to generate output for conditional jobs
+		boolean generateOutput = true;
+
+		if (jobType.isConditional()) {
+			//conditional job. check if resultset has records. no "recordcount" method so we have to execute query again
+			ReportRunner countReportRunner = null;
+			ResultSet rsCount = null;
+			try {
+				countReportRunner = prepareReportRunner(user);
+				countReportRunner.setReportParamsMap(reportParamsMap);
+
+				countReportRunner.execute();
+
+				rsCount = countReportRunner.getResultSet();
+				if (!rsCount.next()) {
+					//no records
+					generateOutput = false;
+					runMessage = "jobs.message.noRecords";
+				}
+			} finally {
+				DatabaseUtils.close(rsCount);
+
+				if (countReportRunner != null) {
+					countReportRunner.close();
+				}
+			}
+		}
+
+		return generateOutput;
+	}
+
+	/**
+	 * Runs cache insert and cache append jobs
+	 *
+	 * @param reportRunner the report runner to use
+	 * @throws Exception
+	 */
+	private void runCacheJob(ReportRunner reportRunner) throws SQLException {
+		logger.debug("Entering runCacheJob");
+
+		Connection cacheDatabaseConnection = null;
+		ResultSet rs = null;
+
+		try {
+			int targetDatabaseId = job.getCachedDatasourceId();
+			cacheDatabaseConnection = DbConnections.getConnection(targetDatabaseId);
+			rs = reportRunner.getResultSet();
+
+			CachedResult cr = new CachedResult();
+			cr.setTargetConnection(cacheDatabaseConnection);
+			cr.setResultSet(rs);
+
+			String cachedTableName = job.getCachedTableName();
+			if (StringUtils.isBlank(cachedTableName)) {
+				String reportName = job.getReport().getName();
+				cachedTableName = reportName + "_J" + jobId;
+			}
+			cr.setCachedTableName(cachedTableName);
+
+			if (jobType == JobType.CacheAppend) {
+				// 1 = append 2 = drop/insert (3 = update (not implemented))
+				cr.setCacheMode(1);
+			} else if (jobType == JobType.CacheInsert) {
+				cr.setCacheMode(2);
+			}
+
+			cr.cacheIt();
+
+			runDetails = "Table Name (rows inserted):  <code>"
+					+ cr.getCachedTableName() + "</code> (" + cr.getRowsCount() + ")"
+					+ "<br />Columns Names:<br /><code>"
+					+ cr.getCachedTableColumnsName() + "</code>";
+		} finally {
+			DatabaseUtils.close(rs, cacheDatabaseConnection);
+		}
+	}
+
+	/**
+	 * Runs an alert job type
+	 *
+	 * @param generateEmail
+	 * @param recipientDetails
+	 * @param reportRunner
+	 * @param message
+	 * @param recipientFilterPresent
+	 * @param tosEmail
+	 * @param ccs
+	 * @param bccs
+	 * @throws IOException
+	 * @throws SQLException
+	 */
+	private void runAlertJob(boolean generateEmail, Map<String, Map<String, String>> recipientDetails,
+			ReportRunner reportRunner, String message, boolean recipientFilterPresent,
+			String[] tosEmail, String[] ccs, String[] bccs)
+			throws IOException, SQLException, TemplateException {
+		/*
+		 * ALERT if the resultset is not null and the first column is a
+		 * positive integer => send the alert email
+		 */
+
+		//only run alert query if we have some emails configured
+		if (generateEmail || recipientDetails != null) {
+			runMessage = "jobs.message.noAlert";
+
+			ResultSet rs = null;
+			try {
+				rs = reportRunner.getResultSet();
+				if (rs.next()) {
+					int value = rs.getInt(1);
+					if (value > 0) {
+						runMessage = "jobs.message.alertExists";
+
+						logger.debug("Job Id {} - Raising Alert. Value is {}", jobId, value);
+
+						Report report = job.getReport();
+						ReportType reportType = report.getReportType();
+
+						//send customized emails to dynamic recipients
+						if (recipientDetails != null) {
+							Mailer mailer = getMailer();
+
+							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+								String email = entry.getKey();
+								Map<String, String> recipientColumns = entry.getValue();
+
+								if (reportType == ReportType.FreeMarker) {
+									prepareFreeMarkerAlertMailer(mailer, value, recipientColumns);
+								} else {
+									String customMessage = prepareCustomMessage(message, recipientColumns);
+									prepareAlertMailer(mailer, customMessage, value);
+								}
+
+								mailer.setTo(email);
+
+								//send email for this recipient
+								try {
+									sendEmail(mailer);
+									runMessage = "jobs.message.alertSent";
+								} catch (MessagingException ex) {
+									logger.debug("Error", ex);
+									runMessage = "jobs.message.errorSendingAlert";
+									runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
+								}
+							}
+
+							if (recipientFilterPresent) {
+								//don't run normal email job after filtered email sent
+								generateEmail = false;
+							}
+						}
+
+						//send email to normal recipients
+						if (generateEmail) {
+							Mailer mailer = getMailer();
+
+							if (reportType == ReportType.FreeMarker) {
+								prepareFreeMarkerAlertMailer(mailer, value);
+							} else {
+								prepareAlertMailer(mailer, message, value);
+							}
+
+							//set recipients
+							mailer.setTo(tosEmail);
+							mailer.setCc(ccs);
+							mailer.setBcc(bccs);
+
+							try {
+								sendEmail(mailer);
+								runMessage = "jobs.message.alertSent";
+							} catch (MessagingException ex) {
+								logger.debug("Error", ex);
+								runMessage = "jobs.message.errorSendingAlert";
+								runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
+							}
+						}
+					} else {
+						logger.debug("Job Id {} - No Alert. Value is {}", jobId, value);
+					}
+				} else {
+					logger.debug("Job Id {} - Empty resultset for alert", jobId);
+				}
+			} finally {
+				DatabaseUtils.close(rs);
+			}
+		} else {
+			//no emails configured
+			runMessage = "jobs.message.noEmailsConfigured";
+		}
+	}
+
+	/**
+	 * Customizes the email message for a dynamic recipient by replacing field
+	 * labels with values for this recipient
+	 *
+	 * @param message the original email message
+	 * @param recipientColumns the recipient details
+	 * @return the customized message with field labels replaced
+	 */
+	private String prepareCustomMessage(String message, Map<String, String> recipientColumns) {
+		String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
+
+		if (StringUtils.isNotBlank(customMessage)) {
+			for (Map.Entry<String, String> entry : recipientColumns.entrySet()) {
+				String columnName = entry.getKey();
+				String columnValue = entry.getValue();
+
+				String searchString = Pattern.quote("#" + columnName + "#"); //quote in case it contains special regex characters
+				String replaceString = Matcher.quoteReplacement(columnValue); //quote in case it contains special regex characters
+				customMessage = customMessage.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+			}
+		}
+
+		return customMessage;
 	}
 
 	/**
