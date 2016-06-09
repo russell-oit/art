@@ -219,20 +219,20 @@ public class ArtUtils {
 
 		databaseTypes.put("demo", "Demo");
 		databaseTypes.put("cubrid", "CUBRID");
-		databaseTypes.put("oracle", "Oracle");
+		databaseTypes.put("oracle", "Oracle - driver not included");
 		databaseTypes.put("mysql", "MySQL");
 		databaseTypes.put("mariadb", "MariaDB");
 		databaseTypes.put("postgresql", "PostgreSQL");
-		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver)");
+		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver) - driver not included");
 		databaseTypes.put("sqlserver-jtds", "SQL Server (jTDS driver)");
 		databaseTypes.put("hsqldb-standalone", "HSQLDB (Standalone mode)");
 		databaseTypes.put("hsqldb-server", "HSQLDB (Server mode)");
-		databaseTypes.put("db2", "DB2");
+		databaseTypes.put("db2", "DB2 - driver not included");
 //		databaseTypes.put("generic-odbc", "Generic ODBC"); //generic jdbc-odbc will be removed in Java 8
 		databaseTypes.put("sql-logging", "SQL Logging");
 		databaseTypes.put("other", "Other");
-		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver)");
-		databaseTypes.put("msaccess-ucanaccess", "MS-Access (UCanAccess driver)");
+		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver) - driver not included");
+		databaseTypes.put("msaccess-ucanaccess", "MS Access (UCanAccess driver)");
 
 		return databaseTypes;
 	}

@@ -226,6 +226,8 @@ Edit parameter definition
 					</label>
 					<div class="col-md-8">
 						<form:select path="lovReportId" class="form-control selectpicker">
+							<form:option value="0">--</form:option>
+							<option data-divider="true"></option>
 							<form:options items="${lovReports}" itemLabel="name" itemValue="reportId"/>
 						</form:select>
 						<form:errors path="lovReportId" cssClass="error"/>

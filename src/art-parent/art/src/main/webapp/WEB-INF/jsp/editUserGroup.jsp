@@ -127,7 +127,7 @@ Edit user group page
 					</label>
 					<div class="col-md-8">
 						<form:select path="defaultReportGroup" class="form-control selectpicker">
-							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+							<form:option value="0">--</form:option>
 							<option data-divider="true"></option>
 							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
 						</form:select>

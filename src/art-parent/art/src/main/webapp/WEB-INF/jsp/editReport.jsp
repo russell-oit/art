@@ -303,7 +303,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<form:select path="reportGroup.reportGroupId" class="form-control selectpicker">
-							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+							<form:option value="0">--</form:option>
 							<option data-divider="true"></option>
 							<c:forEach var="group" items="${reportGroups}">
 								<form:option value="${group.reportGroupId}">${group.name}</form:option>
@@ -409,7 +409,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<form:select path="datasource.datasourceId" class="form-control selectpicker">
-							<form:option value="0"><spring:message code="select.text.none"/></form:option>
+							<form:option value="0">--</form:option>
 							<option data-divider="true"></option>
 							<c:forEach var="datasource" items="${datasources}">
 								<c:set var="datasourceStatus">

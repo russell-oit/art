@@ -284,6 +284,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering getTemplateEngine");
 
 		//http://blog.zenika.com/2013/01/18/introducing-the-thymeleaf-template-engine/
+		//https://stackoverflow.com/questions/14723310/using-thymeleaf-template-for-sending-mail-with-spring
 		ClassLoaderTemplateResolver emailResolver = new ClassLoaderTemplateResolver();
 		emailResolver.setPrefix("mail/");
 		emailResolver.setTemplateMode("HTML");

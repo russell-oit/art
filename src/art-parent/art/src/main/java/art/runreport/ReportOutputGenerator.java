@@ -421,7 +421,7 @@ public class ReportOutputGenerator {
 					outputResult.setSuccess(false);
 					outputResult.setMessage(standardOutputResult.getMessage());
 				}
-			} else if(reportType == ReportType.Freemarker){
+			} else if(reportType == ReportType.FreeMarker){
 				FreemarkerOutput freemarkerOutput=new FreemarkerOutput();
 				rs = reportRunner.getResultSet();
 				freemarkerOutput.generateReport(report, reportParamsList, rs, writer);

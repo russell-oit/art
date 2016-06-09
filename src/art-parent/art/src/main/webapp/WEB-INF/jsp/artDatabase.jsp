@@ -107,9 +107,7 @@ Display art database configuration page
 						<div class="input-group">
 							<select name="databaseType" id="databaseType" class="form-control selectpicker"
 									onchange="setDatasourceFields(this.value, 'driver', 'url', 'testSql');">
-								<option value="">
-									<spring:message code="select.text.none"/>
-								</option>
+								<option value="">--</option>
 								<option data-divider="true"></option>
 								<c:forEach var="dbType" items="${databaseTypes}">
 									<option value="${dbType.key}">${dbType.value}</option>

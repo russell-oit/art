@@ -163,7 +163,7 @@ public class ReportController {
 					case TabularHtml:
 					case JxlsArt:
 					case JxlsTemplate:
-					case Freemarker:
+					case FreeMarker:
 						enableReportFormats = false;
 						break;
 					default:
@@ -186,7 +186,7 @@ public class ReportController {
 						case MondrianXmla:
 						case SqlServerXmla:
 						case Text:
-						case Freemarker:
+						case FreeMarker:
 							enableSchedule = false;
 							break;
 						default:

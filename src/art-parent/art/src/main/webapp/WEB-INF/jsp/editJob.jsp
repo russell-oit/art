@@ -369,7 +369,7 @@
 							</label>
 							<div class="col-md-8">
 								<form:select path="cachedDatasourceId" class="form-control selectpicker">
-									<form:option value="0"><spring:message code="select.text.none"/></form:option>
+									<form:option value="0">--</form:option>
 										<option data-divider="true"></option>
 									<c:forEach var="datasource" items="${datasources}">
 										<c:set var="datasourceStatus">
@@ -497,7 +497,7 @@
 						</label>
 						<div class="col-md-8">
 							<form:select path="recipientsReportId" class="form-control selectpicker">
-								<form:option value="0"><spring:message code="select.text.none"/></form:option>
+								<form:option value="0">--</form:option>
 									<option data-divider="true"></option>
 								<c:forEach var="dynamicRecipientReport" items="${dynamicRecipientReports}">
 									<form:option value="${dynamicRecipientReport.reportId}">
@@ -555,6 +555,7 @@
 						<div class="col-md-8">
 							<select name="schedules" id="schedules" class="form-control selectpicker">
 								<option value="0">--</option>
+								<option data-divider="true"></option>
 								<c:forEach var="schedule" items="${schedules}">
 									<option value="${schedule.scheduleId}">${schedule.name}</option>
 								</c:forEach>
