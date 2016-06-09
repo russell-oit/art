@@ -41,9 +41,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Timothy Anyona
  */
-public class FreemarkerOutput {
+public class FreeMarkerOutput {
 
-	private static final Logger logger = LoggerFactory.getLogger(FreemarkerOutput.class);
+	private static final Logger logger = LoggerFactory.getLogger(FreeMarkerOutput.class);
 
 	/**
 	 * Generates report output

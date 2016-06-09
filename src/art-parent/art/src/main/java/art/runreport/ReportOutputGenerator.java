@@ -31,7 +31,7 @@ import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
-import art.output.FreemarkerOutput;
+import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.GroupHtmlOutput;
 import art.output.GroupOutput;
@@ -422,7 +422,7 @@ public class ReportOutputGenerator {
 					outputResult.setMessage(standardOutputResult.getMessage());
 				}
 			} else if(reportType == ReportType.FreeMarker){
-				FreemarkerOutput freemarkerOutput=new FreemarkerOutput();
+				FreeMarkerOutput freemarkerOutput=new FreeMarkerOutput();
 				rs = reportRunner.getResultSet();
 				freemarkerOutput.generateReport(report, reportParamsList, rs, writer);
 				rowsRetrieved = getResultSetRowCount(rs);
