@@ -96,7 +96,7 @@ public class JxlsOutput {
 			//set objects to be passed to jxls
 			Context context = new Context();
 
-			//pass query parameters
+			//pass report parameters
 			for (ReportParameter reportParam : reportParams) {
 				String paramName = reportParam.getParameter().getName();
 				context.putVar(paramName, reportParam);

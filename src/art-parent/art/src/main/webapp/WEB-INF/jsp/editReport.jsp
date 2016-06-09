@@ -164,6 +164,7 @@ Edit report page
 					case 117: //jxls template
 					case 118: //jxls art
 					case 112: //mondrian
+					case 122: //freemarker
 						$("#templateDiv").show();
 						break;
 					default:
@@ -203,7 +204,8 @@ Edit report page
 				}
 
 				//show/hide display parameters in output
-				if (reportTypeId <= 99 || reportTypeId === 101 || reportTypeId === 102 || reportTypeId === 103) {
+				if (reportTypeId <= 99 || reportTypeId === 101 || reportTypeId === 102
+						|| reportTypeId === 103) {
 					//show parameters only for chart, tabular, group, and crosstab reports
 					$("#displayResultsetDiv").show();
 				} else {

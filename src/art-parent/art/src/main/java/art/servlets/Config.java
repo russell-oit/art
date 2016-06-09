@@ -33,6 +33,8 @@ import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
+import freemarker.template.Configuration;
+import freemarker.template.TemplateExceptionHandler;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,6 +96,7 @@ public class Config extends HttpServlet {
 	private static String workDirectoryPath;
 	private static String artVersion;
 	private static final Map<String, String> languages = new TreeMap<>();
+	private static Configuration freemarkerConfig;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -209,6 +212,8 @@ public class Config extends HttpServlet {
 		//ensure work directories exist
 		createWorkDirectories();
 
+		createFreemarkerConfiguration();
+
 		loadLanguages();
 
 		//load settings and initialize variables
@@ -219,6 +224,31 @@ public class Config extends HttpServlet {
 
 		//initialize datasources
 		initializeArtDatabase();
+	}
+
+	/**
+	 * Creates the freemarker configuration object
+	 */
+	private static void createFreemarkerConfiguration() {
+		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_23);
+		
+		try {
+			freemarkerConfig.setDirectoryForTemplateLoading(new File(getTemplatesPath()));
+			freemarkerConfig.setDefaultEncoding("UTF-8");
+			freemarkerConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+			freemarkerConfig.setLogTemplateExceptions(false);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		}
+	}
+	
+	/**
+	 * Returns the freemarker configuration object
+	 * 
+	 * @return the freemarker configuration object
+	 */
+	public static Configuration getFreemarkerConfig(){
+		return freemarkerConfig;
 	}
 
 	/**

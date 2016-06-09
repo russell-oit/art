@@ -163,6 +163,7 @@ public class ReportController {
 					case TabularHtml:
 					case JxlsArt:
 					case JxlsTemplate:
+					case Freemarker:
 						enableReportFormats = false;
 						break;
 					default:
@@ -185,6 +186,7 @@ public class ReportController {
 						case MondrianXmla:
 						case SqlServerXmla:
 						case Text:
+						case Freemarker:
 							enableSchedule = false;
 							break;
 						default:
@@ -598,6 +600,7 @@ public class ReportController {
 		validExtensions.add("xlsx");
 		validExtensions.add("png");
 		validExtensions.add("jpg");
+		validExtensions.add("ftl");
 
 		long maxUploadSize = Config.getSettings().getMaxFileUploadSizeMB(); //size in MB
 		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes

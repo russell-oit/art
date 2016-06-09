@@ -31,6 +31,7 @@ import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
+import art.output.FreemarkerOutput;
 import art.output.StandardOutput;
 import art.output.GroupHtmlOutput;
 import art.output.GroupOutput;
@@ -56,6 +57,7 @@ import art.servlets.Config;
 import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.PostProcessingException;
+import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
@@ -181,6 +183,7 @@ public class ReportOutputGenerator {
 	 * @throws ChartValidationException
 	 * @throws PostProcessingException
 	 * @throws ServletException
+	 * @throws freemarker.template.TemplateException
 	 */
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportFormat reportFormat, Locale locale,
@@ -188,7 +191,7 @@ public class ReportOutputGenerator {
 			PrintWriter writer, String fullOutputFilename)
 			throws IOException, SQLException, JRException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
-			PostProcessingException, ServletException {
+			PostProcessingException, ServletException, TemplateException {
 
 		logger.debug("Entering generateOutput");
 
@@ -418,9 +421,12 @@ public class ReportOutputGenerator {
 					outputResult.setSuccess(false);
 					outputResult.setMessage(standardOutputResult.getMessage());
 				}
-
+			} else if(reportType == ReportType.Freemarker){
+				FreemarkerOutput freemarkerOutput=new FreemarkerOutput();
+				rs = reportRunner.getResultSet();
+				freemarkerOutput.generateReport(report, reportParamsList, rs, writer);
+				rowsRetrieved = getResultSetRowCount(rs);
 			}
-
 		} finally {
 			DatabaseUtils.close(rs);
 		}

@@ -31,7 +31,7 @@ public enum ReportType {
 	Update(100), Crosstab(101), CrosstabHtml(102),
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
-	LovDynamic(119), LovStatic(120), JobRecipients(121),
+	LovDynamic(119), LovStatic(120), JobRecipients(121), Freemarker(122),
 	XYChart(-1), Pie3DChart(-2), HorizontalBar3DChart(-3), VerticalBar3DChart(-4),
 	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
@@ -291,6 +291,8 @@ public enum ReportType {
 				return "Chart: Stacked Horizontal Bar 2D";
 			case Group:
 				return "Group";
+			case Freemarker:
+				return "Freemarker";
 			default:
 				return this.name();
 		}
