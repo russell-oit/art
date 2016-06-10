@@ -30,6 +30,8 @@
 <spring:message code="reports.format.tsvZip" var="tsvZipText"/>
 <spring:message code="reports.format.png" var="pngText"/>
 <spring:message code="reports.format.html" var="htmlText"/>
+<spring:message code="switch.text.yes" var="yesText"/>
+<spring:message code="switch.text.no" var="noText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
@@ -44,6 +46,7 @@
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
@@ -53,9 +56,9 @@
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -120,6 +123,12 @@
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
+				
+				//enable bootstrap-switch
+				$('.switch-yes-no').bootstrapSwitch({
+					onText: '${yesText}',
+					offText: '${noText}'
+				});
 
 				$("#jobType").change(function () {
 					toggleVisibleFields();
@@ -131,7 +140,7 @@
 
 				$('#name').focus();
 
-				//display clock. updates every second (1000 milliseconds)
+				//display current time. updates every 1000 milliseconds
 				setInterval('updateClock()', 1000);
 
 			});
@@ -423,7 +432,7 @@
 						</label>
 						<div class="col-md-8">
 							<div class="checkbox">
-								<form:checkbox path="active" id="active"/>
+								<form:checkbox path="active" id="active" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -433,7 +442,7 @@
 						</label>
 						<div class="col-md-8">
 							<div class="checkbox">
-								<form:checkbox path="enableAudit" id="enableAudit"/>
+								<form:checkbox path="enableAudit" id="enableAudit" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -454,7 +463,7 @@
 						</label>
 						<div class="col-md-8">
 							<div class="checkbox">
-								<form:checkbox path="allowSharing" id="allowSharing"/>
+								<form:checkbox path="allowSharing" id="allowSharing" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -464,7 +473,7 @@
 						</label>
 						<div class="col-md-8">
 							<div class="checkbox">
-								<form:checkbox path="allowSplitting" id="allowSplitting"/>
+								<form:checkbox path="allowSplitting" id="allowSplitting" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>

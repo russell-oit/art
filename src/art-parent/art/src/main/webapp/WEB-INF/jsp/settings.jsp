@@ -17,31 +17,52 @@ Settings configuration page
 
 <spring:message code="page.title.settings" var="pageTitle" scope="page"/>
 
+<spring:message code="switch.text.yes" var="yesText"/>
+<spring:message code="switch.text.no" var="noText"/>
+
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" charset="utf-8">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				toggleSmtpUsernameEnabled(); // enable/disable on page load
 				toggleLdapBindDnEnabled();
 
-				$(function() {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="settings.do"]').parent().addClass('active');
 				});
 
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
-				$('#useSmtpAuthentication').change(function() {
+//				$('#useSmtpAuthentication').change(function () {
+//					toggleSmtpUsernameEnabled();
+//				});
+
+				$('#useSmtpAuthentication').on('switchChange.bootstrapSwitch', function (event, state) {
 					toggleSmtpUsernameEnabled();
 				});
 
-				$('#useLdapAnonymousBind').change(function() {
+//				$('#useLdapAnonymousBind').change(function () {
+//					toggleLdapBindDnEnabled();
+//				});
+				
+				$('#useLdapAnonymousBind').on('switchChange.bootstrapSwitch', function (event, state) {
 					toggleLdapBindDnEnabled();
+				});
+
+				//enable bootstrap-switch
+				$('.switch-yes-no').bootstrapSwitch({
+					onText: '${yesText}',
+					offText: '${noText}'
 				});
 
 			});
@@ -117,7 +138,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="smtpUseStartTls" id="smtpUseStartTls"/>
+								<form:checkbox path="smtpUseStartTls" id="smtpUseStartTls" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -127,7 +148,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="useSmtpAuthentication" id="useSmtpAuthentication"/>
+								<form:checkbox path="useSmtpAuthentication" id="useSmtpAuthentication" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -333,7 +354,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="useLdapAnonymousBind" id="useLdapAnonymousBind"/>
+								<form:checkbox path="useLdapAnonymousBind" id="useLdapAnonymousBind" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -569,7 +590,7 @@ Settings configuration page
 						<div class="col-md-7">
 							<div class="input-group">
 								<div class="checkbox">
-									<form:checkbox path="pdfFontEmbedded" id="pdfFontEmbedded"/>
+									<form:checkbox path="pdfFontEmbedded" id="pdfFontEmbedded" class="switch-yes-no"/>
 								</div>
 								<spring:message code="settings.help.pdfFontEmbedded" var="help"/>
 								<span class="input-group-btn" >
@@ -705,7 +726,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="showHeaderInPublicUserSession" id="showHeaderInPublicUserSession"/>
+								<form:checkbox path="showHeaderInPublicUserSession" id="showHeaderInPublicUserSession" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -733,7 +754,7 @@ Settings configuration page
 						</label>
 						<div class="col-md-7">
 							<div class="checkbox">
-								<form:checkbox path="schedulingEnabled" id="schedulingEnabled"/>
+								<form:checkbox path="schedulingEnabled" id="schedulingEnabled" class="switch-yes-no"/>
 							</div>
 						</div>
 					</div>
@@ -755,7 +776,7 @@ Settings configuration page
 							<form:errors path="rssLink" cssClass="error"/>
 						</div>
 					</div>
-						<div class="form-group">
+					<div class="form-group">
 						<label class="control-label col-md-5" for="maxFileUploadSizeMB">
 							<spring:message code="settings.label.maxFileUploadSizeMB"/>
 						</label>

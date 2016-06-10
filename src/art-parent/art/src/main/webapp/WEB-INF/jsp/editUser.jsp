@@ -29,15 +29,19 @@ Display edit user page
 <spring:message code="select.text.selectedCount" var="selectedCountText"/>
 <spring:message code="select.text.selectAll" var="selectAllText"/>
 <spring:message code="select.text.deselectAll" var="deselectAllText"/>
+<spring:message code="switch.text.yes" var="yesText"/>
+<spring:message code="switch.text.no" var="noText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$(function() {
@@ -64,6 +68,12 @@ Display edit user page
 				//must come after bootstrap-select initialization
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
+				});
+				
+				//enable bootstrap-switch
+				$('.switch-yes-no').bootstrapSwitch({
+					onText: '${yesText}',
+					offText: '${noText}'
 				});
 
 				$('#username').focus();
@@ -174,7 +184,7 @@ Display edit user page
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="active" id="active"/>
+							<form:checkbox path="active" id="active" class="switch-yes-no"/>
 						</div>
 					</div>
 				</div>
@@ -184,7 +194,7 @@ Display edit user page
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="canChangePassword" id="canChangePassword"/>
+							<form:checkbox path="canChangePassword" id="canChangePassword" class="switch-yes-no"/>
 						</div>
 					</div>
 				</div>

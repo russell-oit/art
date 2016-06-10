@@ -15,9 +15,18 @@
 
 <spring:message code="page.title.editDatasources" var="pageTitle"/>
 
+<spring:message code="switch.text.yes" var="yesText"/>
+<spring:message code="switch.text.no" var="noText"/>
+
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$(function () {
@@ -30,21 +39,29 @@
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
 
+				//enable bootstrap-switch
+				$('.switch-yes-no').bootstrapSwitch({
+					onText: '${yesText}',
+					offText: '${noText}'
+				});
+
 				$('#activeUnchanged').change(function () {
 					toggleActiveEnabled();
 				});
-				
+
 				toggleActiveEnabled();
 
 			});
 		</script>
-		
+
 		<script type="text/javascript">
 			function toggleActiveEnabled() {
 				if ($('#activeUnchanged').is(':checked')) {
-					$('#active').prop('disabled', true);
+//					$('#active').prop('disabled', true);
+					$('#active').bootstrapSwitch('disabled', true);
 				} else {
-					$('#active').prop('disabled', false);
+//					$('#active').prop('disabled', false);
+					$('#active').bootstrapSwitch('disabled', false);
 				}
 			}
 		</script>
@@ -90,7 +107,7 @@
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="active" id="active"/>
+							<form:checkbox path="active" id="active" class="switch-yes-no"/>
 						</div>
 						<div class="checkbox">
 							<label>

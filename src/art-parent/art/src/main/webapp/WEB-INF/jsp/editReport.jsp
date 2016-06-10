@@ -32,16 +32,20 @@ Edit report page
 <spring:message code="reports.text.change" var="changeText"/>
 <spring:message code="reports.label.reportSource" var="reportSourceText"/>
 <spring:message code="page.link.help" var="helpText"/>
+<spring:message code="switch.text.yes" var="yesText"/>
+<spring:message code="switch.text.no" var="noText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -80,6 +84,12 @@ Edit report page
 				//must come after bootstrap-select initialization
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
+				});
+				
+				//enable bootstrap-switch
+				$('.switch-yes-no').bootstrapSwitch({
+					onText: '${yesText}',
+					offText: '${noText}'
 				});
 
 				$("#reportTypeId").change(function () {
@@ -318,7 +328,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="active" id="active"/>
+							<form:checkbox path="active" id="active" class="switch-yes-no"/>
 						</div>
 					</div>
 				</div>
@@ -328,7 +338,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="hidden" id="hidden"/>
+							<form:checkbox path="hidden" id="hidden" class="switch-yes-no"/>
 						</div>
 					</div>
 				</div>
@@ -430,7 +440,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="usesRules" id="usesRules"/>
+							<form:checkbox path="usesRules" id="usesRules" class="switch-yes-no"/>
 						</div>
 						<form:errors path="usesRules" cssClass="error"/>
 					</div>
@@ -441,7 +451,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="checkbox">
-							<form:checkbox path="parametersInOutput" id="parametersInOutput"/>
+							<form:checkbox path="parametersInOutput" id="parametersInOutput" class="switch-yes-no"/>
 						</div>
 						<form:errors path="parametersInOutput" cssClass="error"/>
 					</div>
