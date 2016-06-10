@@ -34,11 +34,19 @@ Display user jobs and jobs configuration
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
+<spring:message code="jobs.message.scheduled" var="scheduledText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
+	<jsp:attribute name="css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
+	</jsp:attribute>
+
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+
 		<script type="text/javascript" charset="utf-8">
 			$(document).ready(function () {
 				$(function () {
@@ -89,6 +97,41 @@ Display user jobs and jobs configuration
 						{
 							if (response.success) {
 								notifyActionSuccess("${runningText}", recordName);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
+						},
+						error: ajaxErrorHandler
+					});
+				});
+
+				tbl.find('tbody').on('click', '.runLater', function () {
+					var row = $(this).closest("tr"); //jquery object
+					var recordName = escapeHtmlContent(row.data("name"));
+					var recordId = row.data("id");
+
+					var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss")
+					$('#runLaterDate').val(currentTimeString);
+					$('#runLaterJobId').val(recordId);
+					$('#runLaterJobName').val(recordName);
+					$('#runLaterModal').modal('show');
+				});
+
+				$("#runLaterSubmit").click(function (e) {
+					e.preventDefault();
+
+					var recordName = $('#runLaterJobName').val();
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/app/runLaterJob.do',
+						dataType: 'json',
+						data: $('#runLaterForm').serialize(),
+						success: function (response) //on recieve of reply
+						{
+							if (response.success) {
+								$("#runLaterModal").modal('hide');
+								notifyActionSuccess("${scheduledText}", recordName);
 							} else {
 								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
 							}
@@ -183,7 +226,7 @@ Display user jobs and jobs configuration
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#editRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -191,13 +234,45 @@ Display user jobs and jobs configuration
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href='${pageContext.request.contextPath}/app/editJobs.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/app/editJobs.do?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
 
+				$('.datetimepicker').datetimepicker({
+					format: 'YYYY-MM-DD HH:mm:ss',
+					locale: '${pageContext.response.locale}'
+				});
+
+//				$('.datetimepicker').datetimepicker({
+//					format: 'YYYY-MM-DD HH:mm:ss',
+//					locale: '${pageContext.response.locale}',
+//					useCurrent: false
+//				}).on('dp.show', function () {
+//					// https://github.com/Eonasdan/bootstrap-datetimepicker/issues/1311 (Time always starts at 12:00 AM)
+//					if ($(this).data("DateTimePicker").date() === null)
+//						$(this).data("DateTimePicker").date(moment());
+//				});
+
+//				$('.datetimepicker').on('dp.change', function (e) {
+//					if (e.oldDate === null) {
+//						$(this).data('DateTimePicker').date(new Date());
+//					}
+//				});
+
+				//display current time. updates every 1000 milliseconds
+				setInterval('updateClock()', 1000);
+
 			}); //end document ready
+		</script>
+
+		<script type="text/javascript">
+			function updateClock()
+			{
+				var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
+				$("#clock").val(currentTimeString);
+			}
 		</script>
 
 	</jsp:attribute>
@@ -301,6 +376,11 @@ Display user jobs and jobs configuration
 										<i class="fa fa-bolt"></i>
 										<spring:message code="jobs.action.run"/>
 									</button>
+									<button type="button" class="btn btn-default runLater"
+											data-toggle="modal">
+										<i class="fa fa-clock-o"></i>
+										<spring:message code="jobs.action.runLater"/>
+									</button>
 									<button type="button" class="btn btn-default refresh">
 										<i class="fa fa-refresh"></i>
 										<spring:message code="page.action.refresh"/>
@@ -312,6 +392,52 @@ Display user jobs and jobs configuration
 				</c:forEach>
 			</tbody>
 		</table>
+
+		<div id="runLaterModal" class="modal fade" role="dialog" 
+			 aria-labelledby="runLater" aria-hidden="true" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+
+					<form id="runLaterForm" role="form" method="POST" value="${pageContext.request.contextPath}/app/runLaterJob.do">
+						<!-- Modal Header -->
+						<div class="modal-header">
+							<button type="button" class="close" 
+									data-dismiss="modal">
+								<span aria-hidden="true">&times;</span>
+								<span class="sr-only">Close</span>
+							</button>
+							<h4 class="modal-title" id="runLater">
+								<spring:message code="jobs.action.runLater"/>
+							</h4>
+						</div>
+
+						<!-- Modal Body -->
+						<div class="modal-body">
+							<input type="hidden" id="runLaterJobId" name="runLaterJobId"/>
+							<input type="text" id="runLaterJobName" name="runLaterJobName" readonly class="form-control"/>
+							<input type="text" id="clock" readonly class="form-control"/>
+							<div id="runLaterDatePicker" class='input-group date datetimepicker'>
+								<input type="text" id="runLaterDate" name="runLaterDate" value="" class="form-control"/>
+								<span class="input-group-addon">
+									<span class="glyphicon glyphicon-calendar"></span>
+								</span>
+							</div>
+						</div>
+
+						<!-- Modal Footer -->
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+									data-dismiss="modal">
+								<spring:message code="dialog.button.cancel"/>
+							</button>
+							<button type="submit" id="runLaterSubmit" class="btn btn-primary">
+								<spring:message code="dialog.button.ok"/>
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 	</jsp:body>
 </t:mainPageWithPanel>
 

@@ -597,7 +597,7 @@
 							<button type="button" id="getSchedule" class="btn btn-default">
 								<spring:message code="jobs.button.getSchedule"/>
 							</button>
-							<input type="text" id="clock" readonly="true" class="form-control"/>
+							<input type="text" id="clock" readonly class="form-control"/>
 						</div>
 					</div>
 

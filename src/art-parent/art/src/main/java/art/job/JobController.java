@@ -61,7 +61,6 @@ import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -169,7 +168,6 @@ public class JobController {
 		return response;
 	}
 
-	@CacheEvict(value = "jobs", allEntries = true)
 	@RequestMapping(value = "/app/refreshJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse refreshJob(@RequestParam("id") Integer id, Locale locale) {
@@ -178,7 +176,7 @@ public class JobController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			Job job = jobService.getJob(id);
+			Job job = jobService.getFreshJob(id);
 
 			String lastRunMessage = job.getLastRunMessage();
 			if (StringUtils.isNotBlank(lastRunMessage)) {
@@ -201,7 +199,6 @@ public class JobController {
 		return response;
 	}
 
-	@CacheEvict(value = "jobs", allEntries = true)
 	@RequestMapping(value = "/app/runJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse runJob(@RequestParam("id") Integer id) {
@@ -228,6 +225,45 @@ public class JobController {
 			scheduler.scheduleJob(tempJob, tempTrigger);
 			response.setSuccess(true);
 		} catch (SchedulerException ex) {
+			logger.error("Error", ex);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
+	@RequestMapping(value = "/app/runLaterJob", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse runLaterJob(@RequestParam("runLaterJobId") Integer runLaterJobId,
+			@RequestParam("runLaterDate") String runLaterDate) {
+		
+		logger.debug("Entering runLaterJob: runLaterJobId={}, runLaterDate='{}'",
+				runLaterJobId, runLaterDate);
+
+		AjaxResponse response = new AjaxResponse();
+
+		try {
+			String runId = runLaterJobId + "-" + ArtUtils.getUniqueId();
+
+			JobDetail tempJob = newJob(ReportJob.class)
+					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
+					.usingJobData("jobId", runLaterJobId)
+					.usingJobData("tempJob", Boolean.TRUE)
+					.build();
+
+			ParameterProcessor parameterProcessor = new ParameterProcessor();
+			Date runDate = parameterProcessor.convertParameterStringValueToDate(runLaterDate);
+
+			// create SimpleTrigger that will fire once, immediately		        
+			SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
+					.withIdentity(triggerKey("tempTrigger-" + runId, "tempTriggerGroup"))
+					.startAt(runDate)
+					.build();
+
+			Scheduler scheduler = SchedulerUtils.getScheduler();
+			scheduler.scheduleJob(tempJob, tempTrigger);
+			response.setSuccess(true);
+		} catch (SchedulerException | ParseException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

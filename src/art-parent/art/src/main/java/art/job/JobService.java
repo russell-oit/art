@@ -148,7 +148,7 @@ public class JobService {
 	 * @return all jobs
 	 * @throws SQLException
 	 */
-	@Cacheable("jobs")
+//	@Cacheable("jobs")
 	public List<Job> getAllJobs() throws SQLException {
 		logger.debug("Entering getAllJobs");
 

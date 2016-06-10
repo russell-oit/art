@@ -75,7 +75,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring4.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -99,8 +98,12 @@ public class ReportJob implements org.quartz.Job {
 	private String runMessage;
 
 	@Override
-	@CacheEvict(value = "jobs", allEntries = true)
+//	@CacheEvict(value = "jobs", allEntries = true)
 	public void execute(JobExecutionContext context) throws JobExecutionException {
+		//clearing the jobs cache from this method either using a CacheEvict annotation
+		//or calling CacheHelper.clearJobs() doesn't seem to clear the cache.
+		//so don't use a cache for jobs at all? 
+		//or only use jobs cache for job entity details but not when need run details
 		if (!Config.getSettings().isSchedulingEnabled()) {
 			return;
 		}
@@ -165,6 +168,10 @@ public class ReportJob implements org.quartz.Job {
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
+		
+		//clear jobs cache as some database details have been changed
+//		CacheHelper cacheHelper=new CacheHelper();
+//		cacheHelper.clearJobs();
 	}
 
 	/**
