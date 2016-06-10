@@ -131,6 +131,9 @@
 
 				$('#name').focus();
 
+				//display clock. updates every second (1000 milliseconds)
+				setInterval('updateClock()', 1000);
+
 			});
 		</script>
 
@@ -286,6 +289,12 @@
 					default:
 						$("#runsToArchiveDiv").hide();
 				}
+			}
+
+			function updateClock()
+			{
+				var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
+				$("#clock").val(currentTimeString);
 			}
 		</script>
 	</jsp:attribute>
@@ -579,6 +588,7 @@
 							<button type="button" id="getSchedule" class="btn btn-default">
 								<spring:message code="jobs.button.getSchedule"/>
 							</button>
+							<input type="text" id="clock" readonly="true" class="form-control"/>
 						</div>
 					</div>
 
