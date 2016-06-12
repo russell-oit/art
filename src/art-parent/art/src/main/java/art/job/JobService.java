@@ -148,7 +148,6 @@ public class JobService {
 	 * @return all jobs
 	 * @throws SQLException
 	 */
-//	@Cacheable("jobs")
 	public List<Job> getAllJobs() throws SQLException {
 		logger.debug("Entering getAllJobs");
 
@@ -356,7 +355,6 @@ public class JobService {
 	 * @return all the jobs the user has access to
 	 * @throws java.sql.SQLException
 	 */
-	@Cacheable("jobs")
 	public List<Job> getJobs(int userId) throws SQLException {
 		logger.debug("Entering getJobs: userId={}", userId);
 

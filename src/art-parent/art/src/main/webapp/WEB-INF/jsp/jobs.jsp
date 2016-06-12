@@ -245,22 +245,6 @@ Display user jobs and jobs configuration
 					locale: '${pageContext.response.locale}'
 				});
 
-//				$('.datetimepicker').datetimepicker({
-//					format: 'YYYY-MM-DD HH:mm:ss',
-//					locale: '${pageContext.response.locale}',
-//					useCurrent: false
-//				}).on('dp.show', function () {
-//					// https://github.com/Eonasdan/bootstrap-datetimepicker/issues/1311 (Time always starts at 12:00 AM)
-//					if ($(this).data("DateTimePicker").date() === null)
-//						$(this).data("DateTimePicker").date(moment());
-//				});
-
-//				$('.datetimepicker').on('dp.change', function (e) {
-//					if (e.oldDate === null) {
-//						$(this).data('DateTimePicker').date(new Date());
-//					}
-//				});
-
 				//display current time. updates every 1000 milliseconds
 				setInterval('updateClock()', 1000);
 

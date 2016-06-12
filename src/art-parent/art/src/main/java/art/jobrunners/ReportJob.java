@@ -98,7 +98,6 @@ public class ReportJob implements org.quartz.Job {
 	private String runMessage;
 
 	@Override
-//	@CacheEvict(value = "jobs", allEntries = true)
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//clearing the jobs cache from this method either using a CacheEvict annotation
 		//or calling CacheHelper.clearJobs() doesn't seem to clear the cache.
@@ -168,10 +167,6 @@ public class ReportJob implements org.quartz.Job {
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
-		
-		//clear jobs cache as some database details have been changed
-//		CacheHelper cacheHelper=new CacheHelper();
-//		cacheHelper.clearJobs();
 	}
 
 	/**
