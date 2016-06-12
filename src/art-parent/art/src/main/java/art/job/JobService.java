@@ -141,6 +141,70 @@ public class JobService {
 			return type.cast(job);
 		}
 	}
+	
+	/**
+	 * Maps a resultset to an object
+	 */
+	private class SharedJobMapper extends BasicRowProcessor {
+
+		@Override
+		public <T> List<T> toBeanList(ResultSet rs, Class<T> type) throws SQLException {
+			List<T> list = new ArrayList<>();
+			while (rs.next()) {
+				list.add(toBean(rs, type));
+			}
+			return list;
+		}
+
+		@Override
+		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
+			SharedJob job = new SharedJob();
+
+			job.setJobId(rs.getInt("JOB_ID"));
+			job.setName(rs.getString("JOB_NAME"));
+			job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
+			job.setJobType(JobType.toEnum(rs.getString("JOB_TYPE")));
+			job.setScheduleMinute(rs.getString("JOB_MINUTE"));
+			job.setScheduleHour(rs.getString("JOB_HOUR"));
+			job.setScheduleDay(rs.getString("JOB_DAY"));
+			job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
+			job.setScheduleMonth(rs.getString("JOB_MONTH"));
+			job.setMailTo(rs.getString("MAIL_TOS"));
+			job.setMailFrom(rs.getString("MAIL_FROM"));
+			job.setMailCc(rs.getString("MAIL_CC"));
+			job.setMailBcc(rs.getString("MAIL_BCC"));
+			job.setMailSubject(rs.getString("SUBJECT"));
+			job.setMailMessage(rs.getString("MESSAGE"));
+			job.setCachedDatasourceId(rs.getInt("CACHED_DATASOURCE_ID"));
+			job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
+			job.setStartDate(rs.getTimestamp("START_DATE"));
+			job.setEndDate(rs.getTimestamp("END_DATE"));
+			job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
+			job.setLastFileName(rs.getString("LAST_FILE_NAME"));
+			job.setLastRunMessage(rs.getString("LAST_RUN_MESSAGE"));
+			job.setLastRunDetails(rs.getString("LAST_RUN_DETAILS"));
+			job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
+			job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
+			job.setActive(rs.getBoolean("ACTIVE"));
+			job.setEnableAudit(rs.getBoolean("ENABLE_AUDIT"));
+			job.setAllowSharing(rs.getBoolean("ALLOW_SHARING"));
+			job.setAllowSplitting(rs.getBoolean("ALLOW_SPLITTING"));
+			job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
+			job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
+			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+			job.setCreatedBy(rs.getString("CREATED_BY"));
+			job.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+			Report report = reportService.getReport(rs.getInt("QUERY_ID"));
+			job.setReport(report);
+
+			User user = userService.getUser(rs.getInt("USER_ID"));
+			job.setUser(user);
+
+			return type.cast(job);
+		}
+	}
 
 	/**
 	 * Returns all jobs
@@ -401,7 +465,7 @@ public class JobService {
 				+ " WHERE AJ.USER_ID <> ? AND EXISTS "
 				+ " (SELECT * FROM ART_USER_GROUP_ASSIGNMENT AUGA WHERE AUGA.USER_ID = ? "
 				+ " AND AUGA.USER_GROUP_ID=AUGJ.USER_GROUP_ID)";
-		ResultSetHandler<List<SharedJob>> h = new BeanListHandler<>(SharedJob.class, new JobMapper());
+		ResultSetHandler<List<SharedJob>> h = new BeanListHandler<>(SharedJob.class, new SharedJobMapper());
 		jobs.addAll(dbService.query(sql, h, userId, userId));
 
 		//get shared jobs user has direct access to, but doesn't own. both split and non-split jobs

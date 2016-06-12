@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class CommonController {
 
-	@RequestMapping(value = "/app/accessDenied", method = RequestMethod.GET)
+	@RequestMapping(value = "/app/accessDenied", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showAccessDenied() {
 		return "accessDenied";
 	}
@@ -21,7 +21,7 @@ public class CommonController {
 	public String showSuccess() {
 		return "success";
 	}
-	
+
 	@RequestMapping(value = "/app/reportError", method = RequestMethod.GET)
 	public String showReportError() {
 		return "reportError";

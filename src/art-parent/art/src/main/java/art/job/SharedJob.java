@@ -30,43 +30,34 @@ public class SharedJob extends Job {
 
 	@Override
 	public Date getLastEndDate() {
-		Date lastEndDate;
 		if (isSplitJob()) {
 			//split job. get value from the art_user_jobs table
-			lastEndDate = this.getSharedLastEndDate();
+			return sharedLastEndDate;
 		} else {
 			//non-split job. get value from jobs table
-			lastEndDate = this.getLastEndDate();
+			return lastEndDate;
 		}
-
-		return lastEndDate;
 	}
 	
 	@Override
 	public String getLastFileName() {
-		String lastFileName;
 		if (isSplitJob()) {
 			//split job. get value from the art_user_jobs table
-			lastFileName = this.getSharedLastFileName();
+			return sharedLastFileName;
 		} else {
 			//non-split job. get value from jobs table
-			lastFileName = this.getLastFileName();
+			return lastFileName;
 		}
-
-		return lastFileName;
 	}
 	
 	@Override
 	public String getLastRunDetails() {
-		String lastRunDetails;
 		if (isSplitJob()) {
 			//split job. get value from the art_user_jobs table
-			lastRunDetails = this.getSharedLastRunDetails();
+			return sharedLastRunDetails;
 		} else {
 			//non-split job. get value from jobs table
-			lastRunDetails = this.getLastRunDetails();
+			return lastRunDetails;
 		}
-
-		return lastRunDetails;
 	}
 }

@@ -106,7 +106,8 @@ public class JobController {
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			model.addAttribute("jobs", jobService.getJobs(sessionUser.getUserId()));
+			List<Job> jobs = jobService.getJobs(sessionUser.getUserId());
+			model.addAttribute("jobs", jobs);
 			model.addAttribute("nextPage", "jobs.do");
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
@@ -236,7 +237,7 @@ public class JobController {
 	public @ResponseBody
 	AjaxResponse runLaterJob(@RequestParam("runLaterJobId") Integer runLaterJobId,
 			@RequestParam("runLaterDate") String runLaterDate) {
-		
+
 		logger.debug("Entering runLaterJob: runLaterJobId={}, runLaterDate='{}'",
 				runLaterJobId, runLaterDate);
 

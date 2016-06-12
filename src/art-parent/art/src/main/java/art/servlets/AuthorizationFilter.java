@@ -255,6 +255,16 @@ public class AuthorizationFilter implements Filter {
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}
+		} else if (StringUtils.endsWith(page, "Job") || StringUtils.endsWith(page, "Jobs")) {
+			//schedule users and above
+			if (accessLevel >= AccessLevel.ScheduleUser.getValue()) {
+				authorised = true;
+			}
+		} else if (StringUtils.equals(page, "jobsConfig")) {
+			//standard admins and above
+			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
+				authorised = true;
+			}
 		} else if (StringUtils.equals(page, "logs")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
@@ -339,12 +349,6 @@ public class AuthorizationFilter implements Filter {
 				|| StringUtils.endsWith(page, "Schedules")) {
 			//senior admins and above
 			if (accessLevel >= AccessLevel.SeniorAdmin.getValue()) {
-				authorised = true;
-			}
-		} else if (StringUtils.equals(page, "jobsConfig") || StringUtils.endsWith(page, "Job")
-				|| StringUtils.endsWith(page, "Jobs")) {
-			//standard admins and above
-			if (accessLevel >= AccessLevel.StandardAdmin.getValue()) {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "drilldowns")
