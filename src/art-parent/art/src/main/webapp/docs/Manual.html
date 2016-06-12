@@ -72,7 +72,7 @@
      <li><a href="#drill-down-reports">Drill Down Reports</a> 
       <ol> 
        <li><a href="#defining-the-main-report">Defining the main report</a></li> 
-       <li><a href="#defining-the-drill-down-query">Defining the drill down query</a></li> 
+       <li><a href="#defining-the-drill-down-report">Defining the drill down report</a></li> 
        <li><a href="#example">Example</a></li> 
        <li><a href="#using-the-main-reports-parameters">Using the main report's parameters</a></li> 
       </ol></li> 
@@ -1772,7 +1772,7 @@ where #rules#
      <p>The main report can be a normal tabular query - displayed in one of the html view modes - or a chart. The drill down report can be of any type.</p> 
      <h2 id="defining-the-main-report">Defining the main report</h2> 
      <p>The main report is created like any other report. Once the report is saved, use the <strong>More | Drilldowns</strong> button to add or modify the drill down reports that will be available for that report.</p> 
-     <h2 id="defining-the-drill-down-query">Defining the drill down query</h2> 
+     <h2 id="defining-the-drill-down-report">Defining the drill down report</h2> 
      <p>The drill down report is created like any other report. The only requirement is that it needs to have at least one single-value parameter defined, with this parameter having the <strong>Drilldown Column Index</strong> field with a value greater than or equal to 1. The Drill Down Column refers to the column in the main report that will provide the value for the parameter. If the value will come from the first field, the drill down column will have a value of 1 and so on.</p> 
      <h2 id="example">Example</h2> 
      <ul> 
@@ -1796,10 +1796,10 @@ WHERE REGION = #region#
      <p>On the Main report, select the <strong>More | Drilldowns</strong> option</p> 
      <p>Select <strong>Add</strong> and:</p> 
      <ul> 
-      <li>Pick the Drill Down query from the list</li> 
+      <li>Pick the Drill Down report from the list</li> 
       <li>Specify the link column title (header) and link text </li> 
       <li>Select which report format will be used to display the Drill Down Report results. Using the <strong>All</strong> option will enable the user to select the report format.</li> 
-      <li>Set if the result of the drill down query should be opened in a new window</li> 
+      <li>Set if the result of the drill down report should be opened in a new window</li> 
      </ul> 
      <p>When running the Main Report, a new column will appear on the right:</p> 
      <p>Click on it and the drill down report will be executed - the <code>#region#</code> parameter will match with the first column value</p> 
