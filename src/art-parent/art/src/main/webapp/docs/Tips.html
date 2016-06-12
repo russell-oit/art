@@ -24,7 +24,6 @@
    <div class="toc"> 
     <ol> 
      <li><a href="#using-the-jtds-driver">Using the jTDS driver</a></li> 
-     <li><a href="#customizing-labels-for-pie-charts">Customizing labels for pie charts</a></li> 
      <li><a href="#migrating-the-art-repository">Migrating the ART repository</a> 
       <ol> 
        <li><a href="#migrating-between-the-same-rdbms">Migrating between the same RDBMS</a></li> 
@@ -41,25 +40,23 @@
    </div> 
    <h1 id="using-the-jtds-driver">Using the jTDS driver</h1> 
    <ul> 
-    <li>When using the <a class="" href="http://jtds.sourceforge.net">jTDS driver</a> to report from an SQL Server 2005/2008 database, the sql browser service needs to be running</li> 
+    <li>When using the <a class="" href="http://jtds.sourceforge.net/">jTDS driver</a> to report from an SQL Server 2005/2008 database, the sql browser service needs to be running</li> 
     <li> <p>If connecting to a named instance e.g. if you are using SQL Server 2008 Express, use a JDBC url like the following</p> 
      <div class="codehilite"> 
       <pre><span class="n">jdbc</span><span class="o">:</span><span class="n">jtds</span><span class="o">:</span><span class="n">sqlserver</span><span class="o">://</span><span class="n">localhost</span><span class="o">/</span><span class="n">mydatabase</span><span class="o">;</span><span class="n">instance</span><span class="o">=</span><span class="n">SQLEXPRESS</span>
 </pre> 
      </div> </li> 
    </ul> 
-   <h1 id="customizing-labels-for-pie-charts">Customizing labels for pie charts</h1> 
-   <p>To customize the labels shown for pie chart sections, edit the <strong>art\user\showGraph.jsp</strong> file. Set the <strong>pieLabelFormat</strong> variable to the desired format. E.g. setting it to &quot;{0} = {1} ({2})&quot; would display a string like &quot;Laptops = 17 (42%)&quot; for a section of the pie chart showing laptops numbering 17 and having a percentage value of 42%.</p> 
    <h1 id="migrating-the-art-repository">Migrating the ART repository</h1> 
    <p>ART doesn't provide any in-built tools to migrate the repository from one database to another. The following are suggested techniques for such a migration.</p> 
    <h2 id="migrating-between-the-same-rdbms">Migrating between the same RDBMS</h2> 
    <p>To migrate between the same RDBMS e.g. from a MySQL database to another MySQL database, use the backup/restore tools provided for your RDBMS</p> 
    <h2 id="migrating-between-different-rdbmss">Migrating between different RDBMSs</h2> 
-   <p>To migrate between different RDBMSs e.g. from a PostgreSQL database to a MySQL database, use ETL tools e.g. <a class="" href="http://kettle.pentaho.com" rel="nofollow">Pentaho Data Integration</a></p> 
+   <p>To migrate between different RDBMSs e.g. from a PostgreSQL database to a MySQL database, use ETL tools e.g. <a class="" href="http://kettle.pentaho.com/" rel="nofollow">Pentaho Data Integration</a></p> 
    <h3 id="using-pentaho-data-integration">Using Pentaho Data Integration</h3> 
    <p>These steps illustrate the steps to migrate an ART repository database on PostgreSQL to MySQL.</p> 
    <ul> 
-    <li>Create a new database on your MySQL server to serve as the destination. Run the <strong>art_tables.sql</strong> and quartz\<strong>tables_mysql.sql</strong> scripts on this database to create a new, empty ART repository</li> 
+    <li>Create a new database on your MySQL server to serve as the destination. Run the <strong>art-tables.sql</strong> and quartz\<strong>tables_mysql.sql</strong> scripts on this database to create a new, empty ART repository</li> 
     <li>Run the <strong>spoon.bat</strong> file in the PDI_HOME\data-integration directory</li> 
     <li>From the <strong>Tools | Wizards | Create database connection</strong> menu, create connections for your source and destination database</li> 
     <li>Select the <strong>Tools | Wizards | Copy tables</strong> menu</li> 
@@ -67,7 +64,7 @@
     <li>In the available items list, select all the tables that begin with art_ i.e. don't select the qrtz_xx tables. This is so that you don't run into foreign key constraint issues when you run the job.</li> 
     <li>Provide a name and directory where the job should be saved. The job must be saved before it runs.</li> 
     <li>Run the job. You can use the <strong>Run this job</strong> icon to do this.</li> 
-    <li> <p>Run the following statement on your destination database e.g. using <a class="" href="http://www.heidisql.com" rel="nofollow">HeidiSQL</a></p> 
+    <li> <p>Run the following statement on your destination database e.g. using <a class="" href="http://www.heidisql.com/" rel="nofollow">HeidiSQL</a></p> 
      <div class="codehilite"> 
       <pre><span class="k">update</span> <span class="n">art_jobs</span> <span class="k">set</span> <span class="n">migrated_to_quartz</span><span class="o">=</span><span class="s1">'N'</span>
 </pre> 
@@ -95,7 +92,7 @@
      </div> </li> 
    </ul> 
    <h1 id="upgrading-a-hsqldb-database">Upgrading a HSQLDB database</h1> 
-   <p>If you are upgrading your ART installation and are using a hsqldb database for the art repository, you can use the <a class="" href="http://squirrel-sql.sourceforge.net">SQuirrel SQL Client</a> to run the upgrade scripts to update your repository.</p> 
+   <p>If you are upgrading your ART installation and are using a hsqldb database for the art repository, you can use the <a class="" href="http://squirrel-sql.sourceforge.net/">SQuirrel SQL Client</a> to run the upgrade scripts to update your repository.</p> 
    <ul> 
     <li>Download, install and run SQuirrel SQL Client</li> 
     <li>In the <strong>Drivers</strong> section, right click on the <strong>HSQLDB Standalone</strong> driver and select <strong>Modify Driver</strong></li> 

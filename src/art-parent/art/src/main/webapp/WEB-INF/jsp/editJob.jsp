@@ -310,7 +310,7 @@
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#scheduling">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

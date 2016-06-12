@@ -57,24 +57,24 @@
    <h1 id="requirements">Requirements</h1> 
    <ul> 
     <li>Java EE application server e.g. Apache Tomcat</li> 
-    <li>Java 1.6 and above</li> 
+    <li>Java 7 and above</li> 
    </ul> 
    <h1 id="download-art">Download ART</h1> 
    <ul> 
-    <li>Download the latest ART package from <a href="http://sourceforge.net/projects/art/files">http://sourceforge.net/projects/art/files/</a></li> 
+    <li>Download the latest ART package from <a href="http://sourceforge.net/projects/art/files/">http://sourceforge.net/projects/art/files/</a></li> 
     <li>Unzip the package to a temporary location. The resulting directory path will be referred to as PACKAGE_PATH.</li> 
    </ul> 
    <h1 id="deploy-the-web-application">Deploy the web application</h1> 
    <p>Deploy the ART web application to the application server. If you don't already have a java application server set up, you can download and use Apache Tomcat.</p> 
    <h2 id="installing-tomcat">Installing Tomcat</h2> 
-   <p>You can get Tomcat from <a href="http://tomcat.apache.org" rel="nofollow">http://tomcat.apache.org/</a></p> 
+   <p>You can get Tomcat from <a href="http://tomcat.apache.org/" rel="nofollow">http://tomcat.apache.org/</a></p> 
    <h3 id="linux-installation">Linux Installation</h3> 
    <ul> 
     <li>Download the latest binary distribution</li> 
     <li> <p>Unpack the archive somewhere e.g.</p> 
      <div class="codehilite"> 
-      <pre><span class="n">tar</span> <span class="n">xvzf</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mf">7.0.23</span><span class="p">.</span><span class="n">tar</span><span class="p">.</span><span class="n">gz</span>
-<span class="n">sudo</span> <span class="n">mv</span> <span class="n">apache</span><span class="o">-</span><span class="n">tomcat</span><span class="o">-</span><span class="mf">7.0.23</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">tomcat</span>
+      <pre>tar xvzf apache-tomcat-7.0.23.tar.gz
+sudo mv apache-tomcat-7.0.23 /usr/local/tomcat
 </pre> 
      </div> </li> 
    </ul> 
@@ -150,17 +150,17 @@
     <li>Ensure the path to mysql.exe is included in the PATH environment variable</li> 
     <li> <p>Open a command prompt window <br /> </p> 
      <div class="codehilite"> 
-      <pre><span class="nl">c:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">mysql</span> <span class="o">-</span><span class="n">h</span> <span class="n">localhost</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="o">-</span><span class="n">p</span>
+      <pre>c:\&gt; mysql -h localhost -u root -p
 </pre> 
      </div> </li> 
     <li> <p>Enter the password</p> 
      <div class="codehilite"> 
-      <pre><span class="n">mysql</span><span class="o">&gt;</span> <span class="n">create</span> <span class="n">database</span> <span class="n">art</span><span class="p">;</span>
-<span class="n">mysql</span><span class="o">&gt;</span> <span class="n">grant</span> <span class="n">all</span> <span class="n">on</span> <span class="n">art</span><span class="p">.</span><span class="o">*</span> <span class="n">to</span> <span class="n">artuser</span><span class="err">@</span><span class="n">localhost</span> <span class="n">identified</span> <span class="n">by</span> <span class="s">&quot;artpassword&quot;</span><span class="p">;</span>
-<span class="n">mysql</span><span class="o">&gt;</span> <span class="n">use</span> <span class="n">art</span><span class="p">;</span>
-<span class="n">mysql</span><span class="o">&gt;</span> <span class="err">\</span><span class="p">.</span> <span class="s">&quot;PACKAGE_PATH\database</span><span class="se">\a</span><span class="s">rt_tables.sql&quot;</span>
-<span class="n">mysql</span><span class="o">&gt;</span> <span class="err">\</span><span class="p">.</span> <span class="s">&quot;PACKAGE_PATH\database\quartz</span><span class="se">\t</span><span class="s">ables_mysql.sql&quot;</span>
-<span class="n">mysql</span><span class="o">&gt;</span> <span class="n">quit</span><span class="p">;</span>
+      <pre>mysql&gt; create database art;
+mysql&gt; grant all on art.* to artuser@localhost identified by &quot;artpassword&quot;;
+mysql&gt; use art;
+mysql&gt; \. &quot;PACKAGE_PATH\database\art_tables.sql&quot;
+mysql&gt; \. &quot;PACKAGE_PATH\database\quartz\tables_mysql.sql&quot;
+mysql&gt; quit;
 </pre> 
      </div> </li> 
    </ul> 
@@ -170,18 +170,18 @@
     <li>Ensure the path to the PostgreSQL bin folder is included in the PATH environment variable</li> 
     <li> <p>Open a command prompt window</p> 
      <div class="codehilite"> 
-      <pre><span class="nl">c:</span><span class="err">\</span><span class="o">&gt;</span> <span class="n">psql</span> <span class="o">-</span><span class="n">U</span> <span class="n">postgres</span>
+      <pre>c:\&gt; psql -U postgres
 </pre> 
      </div> </li> 
     <li> <p>When prompted for a password, enter the password for the postgres database user created when installing PostgreSQL. If the username of the account is not &quot;postgres&quot;, use the appropriate name in place of postgres in the -U switch of the command.</p> 
      <div class="codehilite"> 
-      <pre><span class="n">postgres</span><span class="o">=</span><span class="err">#</span> <span class="n">create</span> <span class="n">user</span> <span class="n">artuser</span> <span class="n">password</span> <span class="err">'</span><span class="n">artpassword</span><span class="err">'</span><span class="p">;</span>
-<span class="n">postgres</span><span class="o">=</span><span class="err">#</span> <span class="n">create</span> <span class="n">database</span> <span class="n">art</span> <span class="n">owner</span> <span class="n">artuser</span><span class="p">;</span>
-<span class="n">postgres</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">c</span> <span class="n">art</span>
+      <pre>postgres=# create user artuser password 'artpassword';
+postgres=# create database art owner artuser;
+postgres=# \c art
 
-<span class="n">art</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">i</span> <span class="err">'</span><span class="n">c</span><span class="o">:/</span><span class="n">somepath</span><span class="o">/</span><span class="n">database</span><span class="o">/</span><span class="n">art_tables</span><span class="p">.</span><span class="n">sql</span><span class="err">'</span>
-<span class="n">art</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">i</span> <span class="err">'</span><span class="n">c</span><span class="o">:/</span><span class="n">somepath</span><span class="o">/</span><span class="n">database</span><span class="o">/</span><span class="n">quartz</span><span class="o">/</span><span class="n">tables_postgres</span><span class="p">.</span><span class="n">sql</span><span class="err">'</span>
-<span class="n">art</span><span class="o">=</span><span class="err">#</span> <span class="err">\</span><span class="n">q</span>
+art=# \i 'c:/somepath/database/art_tables.sql'
+art=# \i 'c:/somepath/database/quartz/tables_postgres.sql'
+art=# \q
 </pre> 
      </div> </li> 
    </ul> 

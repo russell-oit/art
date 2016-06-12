@@ -382,7 +382,7 @@ Display user jobs and jobs configuration
 			<div class="modal-dialog">
 				<div class="modal-content">
 
-					<form id="runLaterForm" role="form" method="POST" value="${pageContext.request.contextPath}/app/runLaterJob.do">
+					<form id="runLaterForm" role="form" method="POST" action="${pageContext.request.contextPath}/app/runLaterJob.do">
 						<!-- Modal Header -->
 						<div class="modal-header">
 							<button type="button" class="close" 

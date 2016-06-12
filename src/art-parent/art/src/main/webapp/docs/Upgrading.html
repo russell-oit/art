@@ -24,8 +24,8 @@
     <li>Extract the zip package to a temporary location</li> 
     <li>Review the <strong>changelog.txt</strong> file to see what has changed</li> 
     <li>Backup the ART directory contained on the application server </li> 
-    <li>Backup the ART repository (database)</li> 
-    <li>Connect to the ART repository and run any database upgrade scripts included in the download package to bring the ART database up to date</li> 
+    <li>Backup the ART database</li> 
+    <li>Connect to the ART database and run any database upgrade scripts included in the download package to bring the ART database up to date</li> 
     <li>Deploy the new <strong>art.war</strong> file to the application server. There are a number of ways to do this. You can do the following if using Apache Tomcat. 
      <ul> 
       <li>Stop Tomcat</li> 
@@ -34,23 +34,66 @@
       <li>Copy the new art.war file to the webapps directory</li> 
       <li>Start Tomcat </li> 
      </ul> </li> 
-    <li>Copy the contents of the backup <strong>art\WEB-INF\templates</strong> directory to the new version's templates directory</li> 
-    <li>If you were using the default HSQLDB database for your repository, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="alink" href="/p/art/wiki/Tips">[wiki:Tips]</a> documentation to see how you can upgrade an HSQLDB database.</li> 
-    <li> <p>If you are using JasperReports templates and the new ART version has included an updated jasperreports engine, delete all the <strong>.jasper</strong> files contained in the templates directory so that they will be recompiled with the new engine. Alternatively, if you have Apache Ant set up, run the following commands</p> 
-     <div class="codehilite"> 
-      <pre><span class="n">cd</span> <span class="n">art</span>
-<span class="n">ant</span> <span class="n">clean</span><span class="o">-</span><span class="n">jasperreports</span>
-<span class="n">ant</span> <span class="n">compile</span><span class="o">-</span><span class="n">jasperreports</span>
-</pre> 
-     </div> </li> 
-    <li> <p>Copy the contents of the backup <strong>art\export</strong> directory to the new version's export directory</p> </li> 
-    <li>If you had put any <strong>jdbc drivers</strong> in the art\WEB-INF\lib directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
-    <li>Copy the file <strong>art\WEB-INF\art.properties</strong> from the backup ART directory to the new version's WEB-INF directory</li> 
+    <li>Copy the contents of the backup <strong>art\WEB-INF\work</strong> directory to the new version's work directory</li> 
+    <li>If you were using the demo HSQLDB database, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="" href="https://sourceforge.net/p/art/wiki/Tips/">Tips</a> documentation to see how you can upgrade an HSQLDB database.</li> 
+    <li>If you had put any <strong>JDBC drivers</strong> in the <strong>art\WEB-INF\lib</strong> directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
     <li>Restart Tomcat</li> 
-    <li>Log in to ART as an administrator. From the <strong>Admin Console</strong>, go to the <strong>Settings</strong> page and click on the <strong>Submit</strong> button to update application settings.</li> 
-    <li>Clear your browser's cache e.g. for Firefox, use the Clear Recent History menu.</li> 
    </ul> 
-   <p>The upgrade is complete. All users, queries, scheduled jobs etc should continue to work as before.</p>
+   <p>The upgrade is complete. All users, reports, scheduled jobs etc should continue to work as before.</p> 
+   <h2 id="notes">Notes</h2> 
+   <p>Some upgrades may require special attention or additional effort due to feature changes and incompatibilities with previous versions.</p> 
+   <h3 id="30">3.0</h3> 
+   <p>ART 3.0 is a major upgrade and may require extensive testing to verify that it continues to fulfill the needs of an existing installation.</p> 
+   <table border="1"> 
+    <thead> 
+     <tr> 
+      <th>Item</th> 
+      <th>Comments</th> 
+     </tr> 
+    </thead> 
+    <tbody> 
+     <tr> 
+      <td><strong>URL changes</strong></td> 
+      <td>URLs that were being used in bookmarks or other links will need updating. Review the new application to see the appropriate new URL to use.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>ART Database configuration</strong></td> 
+      <td>The details of the ART Database will need to be entered afresh</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Settings</strong></td> 
+      <td>Application settings will need to be entered afresh</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Internet Explorer</strong></td> 
+      <td>If using Internet Explorer, you will need to use version 8 and above</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Java</strong></td> 
+      <td>Java 7 and above is required</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Application Server</strong></td> 
+      <td>An application server that supports servlet 3.0 will be required e.g. Tomcat 7 and above</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Renamed concepts</strong></td> 
+      <td>Some concepts have been renamed e.g. &quot;Queries&quot; are now &quot;Reports&quot;, &quot;Graphs&quot; are now &quot;Charts&quot;, &quot;View Modes&quot; are now &quot;Report Formats&quot;, &quot;Report on Column&quot; report types are now &quot;Group&quot; reports.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>jXLS templates</strong></td> 
+      <td>jXLS templates need to be recreated. Review the sample templates located in the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, or the jXLS website, <a href="http://jxls.sourceforge.net/">http://jxls.sourceforge.net/</a>, to see the new template structure.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Chained Parameters</strong></td> 
+      <td>Reports that use chained parameters will need to be modified. Review the chained parameter example in the demo database or the admin manual to see the new method of specifying chained parameters.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Directory location changes</strong></td> 
+      <td>The templates directory has been moved to <strong>ART_HOME\WEB-INF\work\templates</strong>. The export directory has been moved to <strong>ART_HOME\WEB-INF\work\export</strong>.</td> 
+     </tr> 
+    </tbody> 
+   </table>
   </div>  
  </body>
 </html>

@@ -231,7 +231,7 @@ public class Config extends HttpServlet {
 	 */
 	private static void createFreemarkerConfiguration() {
 		freemarkerConfig = new Configuration(Configuration.VERSION_2_3_23);
-		
+
 		try {
 			freemarkerConfig.setDirectoryForTemplateLoading(new File(getTemplatesPath()));
 			freemarkerConfig.setDefaultEncoding("UTF-8");
@@ -241,13 +241,13 @@ public class Config extends HttpServlet {
 			logger.error("Error", ex);
 		}
 	}
-	
+
 	/**
 	 * Returns the freemarker configuration object
-	 * 
+	 *
 	 * @return the freemarker configuration object
 	 */
-	public static Configuration getFreemarkerConfig(){
+	public static Configuration getFreemarkerConfig() {
 		return freemarkerConfig;
 	}
 
@@ -362,9 +362,10 @@ public class Config extends HttpServlet {
 			DbConnections.createConnectionPools(artDbConfig);
 
 			//upgrade art database
-			String upgradeFilePath = Config.getArtTempPath() + "upgrade.txt";
+			String upgradeFilePath = getArtTempPath() + "upgrade.txt";
+			String templatesPath = getTemplatesPath();
 			UpgradeHelper upgradeHelper = new UpgradeHelper();
-			upgradeHelper.upgrade(artVersion, upgradeFilePath);
+			upgradeHelper.upgrade(artVersion, upgradeFilePath, templatesPath);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}

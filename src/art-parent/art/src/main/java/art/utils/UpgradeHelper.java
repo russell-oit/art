@@ -74,10 +74,11 @@ public class UpgradeHelper {
 	 *
 	 * @param artVersion the art version
 	 * @param upgradeFilePath the path to the upgrade file
+	 * @param templatesPath the path to the templates directory
 	 */
-	public void upgrade(String artVersion, String upgradeFilePath) {
+	public void upgrade(String artVersion, String upgradeFilePath, String templatesPath) {
 		migrateJobsToQuartz();
-		upgradeDatabase(artVersion, upgradeFilePath);
+		upgradeDatabase(artVersion, upgradeFilePath, templatesPath);
 	}
 
 	/**
@@ -233,8 +234,9 @@ public class UpgradeHelper {
 	 *
 	 * @param artVersion the art version
 	 * @param upgradeFilePath the path to the upgrade file
+	 * @param templatesPath the path to the templates directory
 	 */
-	private void upgradeDatabase(String artVersion, String upgradeFilePath) {
+	private void upgradeDatabase(String artVersion, String upgradeFilePath, String templatesPath) {
 		File upgradeFile = new File(upgradeFilePath);
 		if (upgradeFile.exists()) {
 			try {
@@ -246,7 +248,8 @@ public class UpgradeHelper {
 				//changes introduced in 3.0
 				if (StringUtils.equals(version, "3.0")) {
 					logger.info("Performing 3.0 upgrade steps");
-					upgradeTo30();
+					upgradeDatabaseTo30();
+					deleteDotJasperFiles(templatesPath);
 					logger.info("Done performing 3.0 upgrade steps");
 				}
 
@@ -260,7 +263,12 @@ public class UpgradeHelper {
 		}
 	}
 
-	private void upgradeTo30() throws SQLException {
+	/**
+	 * Upgrades the database to 3.0
+	 * 
+	 * @throws SQLException 
+	 */
+	private void upgradeDatabaseTo30() throws SQLException {
 		addUserIds();
 		addScheduleIds();
 		addDrilldownIds();
@@ -697,7 +705,7 @@ public class UpgradeHelper {
 	 */
 	private void updateDatasourcePasswords() throws SQLException {
 		logger.debug("Entering updateDatasourcePasswords");
-		
+
 		String sql;
 
 		sql = "SELECT PASSWORD, PASSWORD_ALGORITHM, DATABASE_ID"
@@ -729,6 +737,22 @@ public class UpgradeHelper {
 				sql = "UPDATE ART_DATABASES SET PASSWORD=?, PASSWORD_ALGORITHM='AES'"
 						+ " WHERE DATABASE_ID=?";
 				dbService.update(sql, aesPassword, datasourceId);
+			}
+		}
+	}
+
+	/**
+	 * Deletes .jasper files in the given directory
+	 * 
+	 * @param directoryPath the directory path
+	 */
+	private void deleteDotJasperFiles(String directoryPath) {
+		File folder = new File(directoryPath);
+		File fList[] = folder.listFiles();
+
+		for (File f : fList) {
+			if (f.getName().endsWith(".jasper")) {
+				f.delete();
 			}
 		}
 	}

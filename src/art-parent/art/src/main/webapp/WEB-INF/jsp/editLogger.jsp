@@ -40,14 +40,6 @@ Edit logger page
 		</script>
 	</jsp:attribute>
 
-	<jsp:attribute name="aboveMainPanel">
-		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/manual.htm#user-groups">
-				<spring:message code="page.link.help"/>
-			</a>
-		</div>
-	</jsp:attribute>
-
 	<jsp:body>
 		<spring:url var="formUrl" value="/app/saveLogger.do"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="log">
