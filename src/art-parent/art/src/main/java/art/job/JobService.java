@@ -96,52 +96,13 @@ public class JobService {
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			Job job = new Job();
 
-			job.setJobId(rs.getInt("JOB_ID"));
-			job.setName(rs.getString("JOB_NAME"));
-			job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
-			job.setJobType(JobType.toEnum(rs.getString("JOB_TYPE")));
-			job.setScheduleMinute(rs.getString("JOB_MINUTE"));
-			job.setScheduleHour(rs.getString("JOB_HOUR"));
-			job.setScheduleDay(rs.getString("JOB_DAY"));
-			job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
-			job.setScheduleMonth(rs.getString("JOB_MONTH"));
-			job.setMailTo(rs.getString("MAIL_TOS"));
-			job.setMailFrom(rs.getString("MAIL_FROM"));
-			job.setMailCc(rs.getString("MAIL_CC"));
-			job.setMailBcc(rs.getString("MAIL_BCC"));
-			job.setMailSubject(rs.getString("SUBJECT"));
-			job.setMailMessage(rs.getString("MESSAGE"));
-			job.setCachedDatasourceId(rs.getInt("CACHED_DATASOURCE_ID"));
-			job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
-			job.setStartDate(rs.getTimestamp("START_DATE"));
-			job.setEndDate(rs.getTimestamp("END_DATE"));
-			job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
-			job.setLastFileName(rs.getString("LAST_FILE_NAME"));
-			job.setLastRunMessage(rs.getString("LAST_RUN_MESSAGE"));
-			job.setLastRunDetails(rs.getString("LAST_RUN_DETAILS"));
-			job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
-			job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
-			job.setActive(rs.getBoolean("ACTIVE"));
-			job.setEnableAudit(rs.getBoolean("ENABLE_AUDIT"));
-			job.setAllowSharing(rs.getBoolean("ALLOW_SHARING"));
-			job.setAllowSplitting(rs.getBoolean("ALLOW_SPLITTING"));
-			job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
-			job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
-			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-			job.setCreatedBy(rs.getString("CREATED_BY"));
-			job.setUpdatedBy(rs.getString("UPDATED_BY"));
-
-			Report report = reportService.getReport(rs.getInt("QUERY_ID"));
-			job.setReport(report);
-
-			User user = userService.getUser(rs.getInt("USER_ID"));
-			job.setUser(user);
+			populateJob(job, rs);
 
 			return type.cast(job);
 		}
+
 	}
-	
+
 	/**
 	 * Maps a resultset to an object
 	 */
@@ -160,50 +121,61 @@ public class JobService {
 		public <T> T toBean(ResultSet rs, Class<T> type) throws SQLException {
 			SharedJob job = new SharedJob();
 
-			job.setJobId(rs.getInt("JOB_ID"));
-			job.setName(rs.getString("JOB_NAME"));
-			job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
-			job.setJobType(JobType.toEnum(rs.getString("JOB_TYPE")));
-			job.setScheduleMinute(rs.getString("JOB_MINUTE"));
-			job.setScheduleHour(rs.getString("JOB_HOUR"));
-			job.setScheduleDay(rs.getString("JOB_DAY"));
-			job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
-			job.setScheduleMonth(rs.getString("JOB_MONTH"));
-			job.setMailTo(rs.getString("MAIL_TOS"));
-			job.setMailFrom(rs.getString("MAIL_FROM"));
-			job.setMailCc(rs.getString("MAIL_CC"));
-			job.setMailBcc(rs.getString("MAIL_BCC"));
-			job.setMailSubject(rs.getString("SUBJECT"));
-			job.setMailMessage(rs.getString("MESSAGE"));
-			job.setCachedDatasourceId(rs.getInt("CACHED_DATASOURCE_ID"));
-			job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
-			job.setStartDate(rs.getTimestamp("START_DATE"));
-			job.setEndDate(rs.getTimestamp("END_DATE"));
-			job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
-			job.setLastFileName(rs.getString("LAST_FILE_NAME"));
-			job.setLastRunMessage(rs.getString("LAST_RUN_MESSAGE"));
-			job.setLastRunDetails(rs.getString("LAST_RUN_DETAILS"));
-			job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
-			job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
-			job.setActive(rs.getBoolean("ACTIVE"));
-			job.setEnableAudit(rs.getBoolean("ENABLE_AUDIT"));
-			job.setAllowSharing(rs.getBoolean("ALLOW_SHARING"));
-			job.setAllowSplitting(rs.getBoolean("ALLOW_SPLITTING"));
-			job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
-			job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
-			job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
-			job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
-			job.setCreatedBy(rs.getString("CREATED_BY"));
-			job.setUpdatedBy(rs.getString("UPDATED_BY"));
-
-			Report report = reportService.getReport(rs.getInt("QUERY_ID"));
-			job.setReport(report);
-
-			User user = userService.getUser(rs.getInt("USER_ID"));
-			job.setUser(user);
+			populateJob(job, rs);
 
 			return type.cast(job);
 		}
+	}
+
+	/**
+	 * Populates a job object
+	 *
+	 * @param job the job to populate
+	 * @param rs the resultset that contains the job's details
+	 * @throws SQLException
+	 */
+	private void populateJob(Job job, ResultSet rs) throws SQLException {
+		job.setJobId(rs.getInt("JOB_ID"));
+		job.setName(rs.getString("JOB_NAME"));
+		job.setOutputFormat(rs.getString("OUTPUT_FORMAT"));
+		job.setJobType(JobType.toEnum(rs.getString("JOB_TYPE")));
+		job.setScheduleMinute(rs.getString("JOB_MINUTE"));
+		job.setScheduleHour(rs.getString("JOB_HOUR"));
+		job.setScheduleDay(rs.getString("JOB_DAY"));
+		job.setScheduleWeekday(rs.getString("JOB_WEEKDAY"));
+		job.setScheduleMonth(rs.getString("JOB_MONTH"));
+		job.setMailTo(rs.getString("MAIL_TOS"));
+		job.setMailFrom(rs.getString("MAIL_FROM"));
+		job.setMailCc(rs.getString("MAIL_CC"));
+		job.setMailBcc(rs.getString("MAIL_BCC"));
+		job.setMailSubject(rs.getString("SUBJECT"));
+		job.setMailMessage(rs.getString("MESSAGE"));
+		job.setCachedDatasourceId(rs.getInt("CACHED_DATASOURCE_ID"));
+		job.setCachedTableName(rs.getString("CACHED_TABLE_NAME"));
+		job.setStartDate(rs.getTimestamp("START_DATE"));
+		job.setEndDate(rs.getTimestamp("END_DATE"));
+		job.setNextRunDate(rs.getTimestamp("NEXT_RUN_DATE"));
+		job.setLastFileName(rs.getString("LAST_FILE_NAME"));
+		job.setLastRunMessage(rs.getString("LAST_RUN_MESSAGE"));
+		job.setLastRunDetails(rs.getString("LAST_RUN_DETAILS"));
+		job.setLastStartDate(rs.getTimestamp("LAST_START_DATE"));
+		job.setLastEndDate(rs.getTimestamp("LAST_END_DATE"));
+		job.setActive(rs.getBoolean("ACTIVE"));
+		job.setEnableAudit(rs.getBoolean("ENABLE_AUDIT"));
+		job.setAllowSharing(rs.getBoolean("ALLOW_SHARING"));
+		job.setAllowSplitting(rs.getBoolean("ALLOW_SPLITTING"));
+		job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
+		job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
+		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
+		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
+		job.setCreatedBy(rs.getString("CREATED_BY"));
+		job.setUpdatedBy(rs.getString("UPDATED_BY"));
+
+		Report report = reportService.getReport(rs.getInt("QUERY_ID"));
+		job.setReport(report);
+
+		User user = userService.getUser(rs.getInt("USER_ID"));
+		job.setUser(user);
 	}
 
 	/**
@@ -494,11 +466,11 @@ public class JobService {
 
 	/**
 	 * Saves a job
-	 * 
+	 *
 	 * @param job the job to save
 	 * @param newRecord whether this is a new job
 	 * @param actionUser the user who is performing the action
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private void saveJob(Job job, boolean newRecord, User actionUser) throws SQLException {
 		logger.debug("Entering saveJob: job={}, newRecord={}, actionUser={}", job, newRecord, actionUser);
