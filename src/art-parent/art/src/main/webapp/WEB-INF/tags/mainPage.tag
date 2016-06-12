@@ -48,7 +48,7 @@ bootstrap js, jquery js, datatables css, datatables js
 <!--		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Responsive-2.0.2/js/dataTables.responsive.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Responsive-2.0.2/js/responsive.bootstrap.min.js"></script>-->
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.1.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ajaxStart(function () {

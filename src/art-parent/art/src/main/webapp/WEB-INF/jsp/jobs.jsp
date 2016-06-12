@@ -129,8 +129,8 @@ Display user jobs and jobs configuration
 						data: $('#runLaterForm').serialize(),
 						success: function (response) //on recieve of reply
 						{
+							$("#runLaterModal").modal('hide');
 							if (response.success) {
-								$("#runLaterModal").modal('hide');
 								notifyActionSuccess("${scheduledText}", recordName);
 							} else {
 								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
