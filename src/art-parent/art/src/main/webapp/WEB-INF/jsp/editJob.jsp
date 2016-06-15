@@ -16,9 +16,13 @@
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addJob" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editJob" var="pageTitle"/>
+		<spring:message code="page.title.editJob" var="panelTitle"/>
+		<c:set var="pageTitle">
+			${panelTitle} - ${job.name}
+		</c:set>
 	</c:when>
 </c:choose>
 
@@ -33,7 +37,8 @@
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="belowMainPanel">
 		<div class="col-md-6 col-md-offset-3">

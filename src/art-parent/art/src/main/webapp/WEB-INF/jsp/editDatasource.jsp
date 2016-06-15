@@ -18,9 +18,13 @@ Edit datasource page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addDatasource" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editDatasource" var="pageTitle"/>
+		<spring:message code="page.title.editDatasource" var="panelTitle"/>
+		<c:set var="pageTitle">
+			${panelTitle} - ${datasource.name}
+		</c:set>
 	</c:when>
 </c:choose>
 
@@ -30,7 +34,8 @@ Edit datasource page
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">

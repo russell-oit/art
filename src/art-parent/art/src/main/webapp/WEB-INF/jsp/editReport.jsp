@@ -18,13 +18,18 @@ Edit report page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addReport" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
 	<c:when test="${action == 'copy'}">
 		<spring:message code="page.title.copyReport" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
-	<c:otherwise>
-		<spring:message code="page.title.editReport" var="pageTitle"/>
-	</c:otherwise>
+	<c:when test="${action == 'edit'}">
+		<spring:message code="page.title.editReport" var="panelTitle"/>
+		<c:set var="pageTitle">
+			${panelTitle} - ${report.name}
+		</c:set>
+	</c:when>
 </c:choose>
 
 <spring:message code="select.text.noResultsMatch" var="noResultsMatchText"/>
@@ -35,7 +40,8 @@ Edit report page
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">

@@ -18,13 +18,18 @@ Edit report group page
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addReportGroup" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editReportGroup" var="pageTitle"/>
+		<spring:message code="page.title.editReportGroup" var="panelTitle"/>
+		<c:set var="pageTitle">
+			${panelTitle} - ${group.name}
+		</c:set>
 	</c:when>
 </c:choose>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">

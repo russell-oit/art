@@ -18,9 +18,13 @@ Edit parameter definition
 <c:choose>
 	<c:when test="${action == 'add'}">
 		<spring:message code="page.title.addParameter" var="pageTitle"/>
+		<c:set var="panelTitle" value="${pageTitle}"/>
 	</c:when>
 	<c:when test="${action == 'edit'}">
-		<spring:message code="page.title.editParameter" var="pageTitle"/>
+		<spring:message code="page.title.editParameter" var="panelTitle"/>
+		<c:set var="pageTitle">
+			${panelTitle} - ${parameter.name}
+		</c:set>
 	</c:when>
 </c:choose>
 
@@ -28,7 +32,8 @@ Edit parameter definition
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
+<t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
+					 mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
