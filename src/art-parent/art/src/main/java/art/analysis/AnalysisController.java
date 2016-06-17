@@ -174,13 +174,12 @@ public class AnalysisController {
 			String title = report.getName();
 			session.setAttribute("pivotTitle" + reportId, title);
 
+			Datasource datasource = report.getDatasource();
 			if (reportType == ReportType.Mondrian) {
-				Datasource ds = report.getDatasource();
-
-				String databaseUrl = ds.getUrl().trim();
-				String databaseUser = ds.getUsername().trim();
-				String databasePassword = ds.getPassword();
-				String databaseDriver = ds.getDriver().trim();
+				String databaseUrl = datasource.getUrl().trim();
+				String databaseUser = datasource.getUsername().trim();
+				String databasePassword = datasource.getPassword();
+				String databaseDriver = datasource.getDriver().trim();
 
 				model.addAttribute("databaseUrl", databaseUrl);
 				model.addAttribute("databaseUser", databaseUser);
@@ -188,10 +187,9 @@ public class AnalysisController {
 				model.addAttribute("databaseDriver", databaseDriver);
 			} else {
 				//construct xmla url to incoporate username and password if present
-				String xmlaUrl = report.getXmlaUrl();
-				String xmlaUsername = report.getXmlaUsername();
-				String xmlaPassword = report.getXmlaPassword();
-				xmlaPassword = DesEncryptor.decrypt(xmlaPassword);
+				String xmlaUrl = datasource.getUrl();
+				String xmlaUsername = datasource.getUsername();
+				String xmlaPassword = datasource.getPassword();
 				URL url;
 
 				url = new URL(xmlaUrl);

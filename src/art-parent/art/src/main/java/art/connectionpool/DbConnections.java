@@ -22,6 +22,7 @@ import art.datasource.Datasource;
 import art.datasource.DatasourceInfo;
 import art.datasource.DatasourceMapper;
 import art.enums.ConnectionPoolLibrary;
+import art.enums.DatasourceType;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -102,6 +103,10 @@ public class DbConnections {
 
 		//remove any existing connection pool for this datasource
 		removeConnectionPool(datasourceInfo.getDatasourceId());
+		
+		if (datasourceInfo.getDatasourceType() == DatasourceType.OLAP) {
+			return;
+		}
 
 		logger.debug("datasourceInfo.isJndi()={}", datasourceInfo.isJndi());
 

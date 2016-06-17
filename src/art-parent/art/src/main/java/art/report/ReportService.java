@@ -84,13 +84,7 @@ public class ReportService {
 		reportGroupService = new ReportGroupService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT AQ.*, "
-			+ " AQG.NAME AS GROUP_NAME, AD.NAME AS DATASOURCE_NAME"
-			+ " FROM ART_QUERIES AQ"
-			+ " LEFT JOIN ART_QUERY_GROUPS AQG ON" //use left join so that all reports are returned
-			+ " AQ.QUERY_GROUP_ID=AQG.QUERY_GROUP_ID"
-			+ " LEFT JOIN ART_DATABASES AD ON"
-			+ " AQ.DATABASE_ID=AD.DATABASE_ID";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERIES AQ";
 
 	/**
 	 * Maps a resultset to an object
@@ -127,11 +121,8 @@ public class ReportService {
 			report.setChartOptionsSetting(rs.getString("GRAPH_OPTIONS"));
 			report.setTemplate(rs.getString("TEMPLATE"));
 			report.setDisplayResultset(rs.getInt("DISPLAY_RESULTSET"));
-			report.setXmlaUrl(rs.getString("XMLA_URL"));
 			report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
 			report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
-			report.setXmlaUsername(rs.getString("XMLA_USERNAME"));
-			report.setXmlaPassword(rs.getString("XMLA_PASSWORD"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -572,10 +563,10 @@ public class ReportService {
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
 					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
-					+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET, XMLA_URL,"
-					+ " XMLA_DATASOURCE, XMLA_CATALOG, XMLA_USERNAME, XMLA_PASSWORD,"
+					+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET,"
+					+ " XMLA_DATASOURCE, XMLA_CATALOG,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 24) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 21) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -595,11 +586,8 @@ public class ReportService {
 				report.getChartOptionsSetting(),
 				report.getTemplate(),
 				report.getDisplayResultset(),
-				report.getXmlaUrl(),
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
-				report.getXmlaUsername(),
-				report.getXmlaPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -610,9 +598,9 @@ public class ReportService {
 					+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
 					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, ACTIVE=?,"
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
-					+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?, XMLA_URL=?,"
+					+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
-					+ " XMLA_USERNAME=?, XMLA_PASSWORD=?, UPDATE_DATE=?, UPDATED_BY=?"
+					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
 			Object[] values = {
@@ -632,11 +620,8 @@ public class ReportService {
 				report.getChartOptionsSetting(),
 				report.getTemplate(),
 				report.getDisplayResultset(),
-				report.getXmlaUrl(),
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
-				report.getXmlaUsername(),
-				report.getXmlaPassword(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

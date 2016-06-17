@@ -24,7 +24,7 @@ CREATE TABLE ART_DATABASE_VERSION
 	DATABASE_VERSION VARCHAR(50)
 );
 -- insert database version
-INSERT INTO ART_DATABASE_VERSION VALUES('3.0-alpha10');
+INSERT INTO ART_DATABASE_VERSION VALUES('3.0-alpha11');
 
 
 -- ART_USERS 
@@ -87,6 +87,7 @@ CREATE TABLE ART_DATABASES
 	DATABASE_ID INTEGER NOT NULL,
 	NAME	          VARCHAR(25) NOT NULL,
 	DESCRIPTION VARCHAR(200),
+	DATASOURCE_TYPE VARCHAR(20),
 	JNDI INTEGER,
 	DRIVER            VARCHAR(200) NOT NULL,
 	URL               VARCHAR(2000) NOT NULL,
@@ -125,23 +126,6 @@ CREATE TABLE ART_QUERY_GROUPS
 -- ART_QUERIES
 -- Stores query definitions 
 
--- Query types:
--- 0 = normal query, 1 = group, 100 = update, 101 = crosstab
--- 102 = crosstab html only, 103 = normal query html only, 110 = dashboard
--- 111 = text, 112 = mondrian cube, 113 = mondrian cube via xmla
--- 114 = sql server analysis services cube via xmla
--- 115 = jasper report with template query, 116 = jasper report with art query
--- 117 = jxls spreadsheet with template query, 118 = jxls spreadsheet with art query
--- 119 = dynamic lov, 120 = static lov, 121 = dynamic job recipients
-
--- Query types for graphs:
--- -1 = XY, -2 = Pie 3D, -3 = Horizontal bar 3D, -4 = Vertical bar 3D, -5 = Line
--- -6 = Time series, -7 = Date series, -8 = Stacked vertical bar 3D
--- -9 = Stacked horizontal bar 3D, -10 = Speedometer, -11 = Bubble chart
--- -12 = Heat Map, -13 = Pie 2D, -14 = Vertical bar 2D
--- -15 = Stacked vertical bar 2D, -16 = Horizontal bar 2D
--- -17 = Stacked horizontal bar 2D
-
 -- USES_FILTERS: boolean. 0=false, 1=true
 -- PARAMETERS_IN_OUTPUT: boolean. 0=false, 1=true. indicates whether
 -- selected report parameters will be shown in the report output
@@ -167,12 +151,9 @@ CREATE TABLE ART_QUERIES
 	Y_AXIS_LABEL VARCHAR(50),
 	GRAPH_OPTIONS VARCHAR(200),
 	TEMPLATE VARCHAR(100),
-	DISPLAY_RESULTSET INTEGER,
-	XMLA_URL VARCHAR(2000),
+	DISPLAY_RESULTSET INTEGER,	
 	XMLA_DATASOURCE VARCHAR(50),
-	XMLA_CATALOG VARCHAR(50),
-	XMLA_USERNAME VARCHAR(50),
-	XMLA_PASSWORD VARCHAR(50),
+	XMLA_CATALOG VARCHAR(50),	
 	CREATION_DATE TIMESTAMP,
 	CREATED_BY VARCHAR(50),
 	UPDATE_DATE TIMESTAMP,
@@ -216,6 +197,7 @@ INSERT INTO ART_REPORT_TYPES VALUES (118,'jXLS Spreadsheet: ART Query');
 INSERT INTO ART_REPORT_TYPES VALUES (119,'LOV: Dynamic');
 INSERT INTO ART_REPORT_TYPES VALUES (120,'LOV: Static');
 INSERT INTO ART_REPORT_TYPES VALUES (121,'Dynamic Job Recipients');
+INSERT INTO ART_REPORT_TYPES VALUES (122,'FreeMarker');
 INSERT INTO ART_REPORT_TYPES VALUES (-1,'Chart: XY');
 INSERT INTO ART_REPORT_TYPES VALUES (-2,'Chart: Pie 3D');
 INSERT INTO ART_REPORT_TYPES VALUES (-3,'Chart: Horizontal Bar 3D');

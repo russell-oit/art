@@ -106,16 +106,44 @@ Edit datasource page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
 					offText: '${noText}'
 				});
 
+				$("input[name='datasourceType']:radio").change(function () {
+					toggleVisibleFields();
+				});
+
+				toggleVisibleFields(); //show/hide on page load
+
 				$('#name').focus();
 
 			});
+		</script>
+
+		<script type="text/javascript">
+			function toggleVisibleFields() {
+				var datasourceType=$('input[name="datasourceType"]:checked').val();
+				
+				if (datasourceType === 'JDBC') {
+					$("#databaseTypeDiv").show();
+					$("#jndiDiv").show();
+					$("#driverDiv").show();
+					$("#testSqlDiv").show();
+					$("#connectionPoolTimeoutDiv").show();
+					$("#testConnection").show();
+				} else if (datasourceType === 'OLAP') {
+					$("#databaseTypeDiv").hide();
+					$("#jndiDiv").hide();
+					$("#driverDiv").hide();
+					$("#testSqlDiv").hide();
+					$("#connectionPoolTimeoutDiv").hide();
+					$("#testConnection").hide();
+				}
+			}
 		</script>
 	</jsp:attribute>
 
@@ -206,6 +234,20 @@ Edit datasource page
 					</div>
 				</div>
 				<div class="form-group">
+					<label class="control-label col-md-4">
+						<spring:message code="datasources.label.datasourceType"/>
+					</label>
+					<div class="col-md-8">
+						<c:forEach var="datasourceType" items="${datasourceTypes}">
+							<label class="radio-inline">
+								<form:radiobutton path="datasourceType"
+												  value="${datasourceType}"/> ${datasourceType.description}
+							</label>
+						</c:forEach>
+						<form:errors path="datasourceType" cssClass="error"/>
+					</div>
+				</div>
+				<div id="databaseTypeDiv" class="form-group">
 					<label class="control-label col-md-4" for="databaseType">
 						<spring:message code="page.label.databaseType"/>
 					</label>
@@ -229,7 +271,7 @@ Edit datasource page
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="jndiDiv" class="form-group">
 					<label class="control-label col-md-4" for="jndi">
 						<spring:message code="page.label.jndi"/>
 					</label>
@@ -239,7 +281,7 @@ Edit datasource page
 						</div>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="driverDiv" class="form-group">
 					<label class="control-label col-md-4" for="driver">
 						<spring:message code="page.label.jdbcDriver"/>
 					</label>
@@ -250,7 +292,7 @@ Edit datasource page
 				</div>
 				<div class="form-group">
 					<label class="control-label col-md-4" for="url">
-						<spring:message code="page.label.jdbcUrl"/>
+						<spring:message code="datasources.label.Url"/>
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
@@ -299,7 +341,7 @@ Edit datasource page
 						<form:errors path="password" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="testSqlDiv" class="form-group">
 					<label class="control-label col-md-4" for="testSql">
 						<spring:message code="page.label.testSql"/>
 					</label>
@@ -317,7 +359,7 @@ Edit datasource page
 						<form:errors path="testSql" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
+				<div id="connectionPoolTimeoutDiv" class="form-group">
 					<label class="control-label col-md-4" for="connectionPoolTimeoutMins">
 						<spring:message code="page.label.connectionPoolTimeout"/>
 					</label>

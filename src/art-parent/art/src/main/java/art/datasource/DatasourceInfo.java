@@ -17,6 +17,7 @@
  */
 package art.datasource;
 
+import art.enums.DatasourceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
@@ -39,6 +40,21 @@ public abstract class DatasourceInfo {
 	private int connectionPoolTimeoutMins;
 	private boolean jndi;
 	private String passwordAlgorithm;
+	private DatasourceType datasourceType;
+
+	/**
+	 * @return the datasourceType
+	 */
+	public DatasourceType getDatasourceType() {
+		return datasourceType;
+	}
+
+	/**
+	 * @param datasourceType the datasourceType to set
+	 */
+	public void setDatasourceType(DatasourceType datasourceType) {
+		this.datasourceType = datasourceType;
+	}
 
 	/**
 	 * @return the passwordAlgorithm

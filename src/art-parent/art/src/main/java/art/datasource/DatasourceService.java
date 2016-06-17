@@ -216,15 +216,16 @@ public class DatasourceService {
 		int affectedRows;
 		if (newRecord) {
 			String sql = "INSERT INTO ART_DATABASES"
-					+ " (DATABASE_ID, NAME, DESCRIPTION, JNDI, DRIVER, URL, USERNAME,"
-					+ " PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT, TEST_SQL,"
+					+ " (DATABASE_ID, NAME, DESCRIPTION, DATASOURCE_TYPE, JNDI, DRIVER,"
+					+ " URL, USERNAME, PASSWORD, PASSWORD_ALGORITHM, POOL_TIMEOUT, TEST_SQL,"
 					+ " ACTIVE, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 15) + ")";
 
 			Object[] values = {
 				datasource.getDatasourceId(),
 				datasource.getName(),
 				datasource.getDescription(),
+				datasource.getDatasourceType().getValue(),
 				datasource.isJndi(),
 				datasource.getDriver(),
 				datasource.getUrl(),
@@ -240,14 +241,15 @@ public class DatasourceService {
 
 			affectedRows = dbService.update(sql, values);
 		} else {
-			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, JNDI=?,"
-					+ " DRIVER=?, URL=?, USERNAME=?, PASSWORD=?, PASSWORD_ALGORITHM=?,"
+			String sql = "UPDATE ART_DATABASES SET NAME=?, DESCRIPTION=?, DATASOURCE_TYPE=?,"
+					+ " JNDI=?, DRIVER=?, URL=?, USERNAME=?, PASSWORD=?, PASSWORD_ALGORITHM=?,"
 					+ " POOL_TIMEOUT=?, TEST_SQL=?, ACTIVE=?, UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE DATABASE_ID=?";
 
 			Object[] values = {
 				datasource.getName(),
 				datasource.getDescription(),
+				datasource.getDatasourceType().getValue(),
 				datasource.isJndi(),
 				datasource.getDriver(),
 				datasource.getUrl(),

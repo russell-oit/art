@@ -20,6 +20,7 @@ import art.artdatabase.ArtDatabase;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.encryption.AesEncryptor;
+import art.enums.DatasourceType;
 import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
@@ -135,6 +136,7 @@ public class DatasourceController {
 		//set defaults
 		datasource.setActive(true);
 		datasource.setConnectionPoolTimeoutMins(20);
+		datasource.setDatasourceType(DatasourceType.JDBC);
 
 		model.addAttribute("datasource", datasource);
 		return showEditDatasource("add", model);
@@ -259,6 +261,7 @@ public class DatasourceController {
 		databaseTypes.remove("demo");
 
 		model.addAttribute("databaseTypes", databaseTypes);
+		model.addAttribute("datasourceTypes", DatasourceType.list());
 		model.addAttribute("action", action);
 
 		return "editDatasource";
@@ -345,7 +348,9 @@ public class DatasourceController {
 
 		logger.debug("datasource.isActive()={}", datasource.isActive());
 		if (datasource.isActive()) {
-			testConnection(jndi, driver, url, username, clearTextPassword);
+			if (datasource.getDatasourceType() == DatasourceType.JDBC) {
+				testConnection(jndi, driver, url, username, clearTextPassword);
+			}
 
 			ArtDatabase artDbConfig = Config.getArtDbConfig();
 			DbConnections.createConnectionPool(datasource, artDbConfig.getMaxPoolConnections(), artDbConfig.getConnectionPoolLibrary());

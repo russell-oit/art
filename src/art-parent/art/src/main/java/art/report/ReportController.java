@@ -643,12 +643,6 @@ public class ReportController {
 	private String setProperties(Report report, String action) throws SQLException {
 		logger.debug("Entering setProperties: report={}, action='{}'", report, action);
 
-		String setXmlaPasswordMessage = setXmlaPassword(report, action);
-		logger.debug("setXmlaPasswordMessage='{}'", setXmlaPasswordMessage);
-		if (setXmlaPasswordMessage != null) {
-			return setXmlaPasswordMessage;
-		}
-
 		//set report source for text reports
 		logger.debug("report.getReportTypeId()={}", report.getReportTypeId());
 		ReportType reportType = ReportType.toEnum(report.getReportTypeId());
@@ -708,53 +702,6 @@ public class ReportController {
 
 			logger.debug("options='{}'", StringUtils.join(options, " "));
 			report.setChartOptionsSetting(StringUtils.join(options, " "));
-		}
-
-		return null;
-	}
-
-	/**
-	 * Sets the xmla password for the given report
-	 *
-	 * @param report the report to use
-	 * @param action the action to take, "add" or "edit"
-	 * @return i18n message to display in the user interface if there was a
-	 * problem, null otherwise
-	 * @throws SQLException
-	 */
-	private String setXmlaPassword(Report report, String action) throws SQLException {
-		logger.debug("Entering setXmlapassword: report={}, action='{}'", report, action);
-
-		boolean useCurrentXmlaPassword = false;
-		String newXmlaPassword = report.getXmlaPassword();
-
-		logger.debug("report.isUseBlankXmlaPassword()={}", report.isUseBlankXmlaPassword());
-		if (report.isUseBlankXmlaPassword()) {
-			newXmlaPassword = "";
-		} else {
-			logger.debug("StringUtils.isEmpty(newXmlaPassword)={}", StringUtils.isEmpty(newXmlaPassword));
-			if (StringUtils.isEmpty(newXmlaPassword) && StringUtils.equals(action, "edit")) {
-				//password field blank. use current password
-				useCurrentXmlaPassword = true;
-			}
-		}
-
-		logger.debug("useCurrentXmlaPassword={}", useCurrentXmlaPassword);
-		if (useCurrentXmlaPassword) {
-			//password field blank. use current password
-			Report currentReport = reportService.getReport(report.getReportId());
-			logger.debug("currentReport={}", currentReport);
-			if (currentReport == null) {
-				return "page.message.cannotUseCurrentXmlaPassword";
-			} else {
-				report.setXmlaPassword(currentReport.getXmlaPassword());
-			}
-		} else {
-			logger.debug("StringUtils.isNotEmpty(newXmlaPassword)={}", StringUtils.isNotEmpty(newXmlaPassword));
-			if (StringUtils.isNotEmpty(newXmlaPassword)) {
-				newXmlaPassword = "o:" + DesEncryptor.encrypt(newXmlaPassword);
-			}
-			report.setXmlaPassword(newXmlaPassword);
 		}
 
 		return null;

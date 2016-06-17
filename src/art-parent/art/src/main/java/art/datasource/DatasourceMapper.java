@@ -19,6 +19,7 @@ package art.datasource;
 
 import art.encryption.AesEncryptor;
 import art.encryption.DesEncryptor;
+import art.enums.DatasourceType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public class DatasourceMapper extends BasicRowProcessor {
 		datasource.setDatasourceId(rs.getInt("DATABASE_ID"));
 		datasource.setName(rs.getString("NAME"));
 		datasource.setDescription(rs.getString("DESCRIPTION"));
+		datasource.setDatasourceType(DatasourceType.toEnum(rs.getString("DATASOURCE_TYPE")));
 		datasource.setJndi(rs.getBoolean("JNDI"));
 		datasource.setDriver(rs.getString("DRIVER"));
 		datasource.setUrl(rs.getString("URL"));

@@ -147,7 +147,7 @@
 					</p>
 
 					<p>
-					<spring:message code="analysis.text.saveCurrentView"/>:
+					<spring:message code="analysis.text.slicer"/>:
 					<wcf:render ref="${tableId}" xslUri="/WEB-INF/jpivot/table/mdxslicer.xsl" xslCache="true"/>
 					</p>
 

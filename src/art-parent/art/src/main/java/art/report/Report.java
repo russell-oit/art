@@ -45,11 +45,8 @@ public class Report implements Serializable {
 	private String chartOptionsSetting;
 	private String template;
 	private int displayResultset;
-	private String xmlaUrl;
 	private String xmlaDatasource;
 	private String xmlaCatalog;
-	private String xmlaUsername;
-	private String xmlaPassword;
 	private Date creationDate;
 	private Date updateDate;
 	private String reportSource;
@@ -445,20 +442,6 @@ public class Report implements Serializable {
 	}
 
 	/**
-	 * @return the xmlaUrl
-	 */
-	public String getXmlaUrl() {
-		return xmlaUrl;
-	}
-
-	/**
-	 * @param xmlaUrl the xmlaUrl to set
-	 */
-	public void setXmlaUrl(String xmlaUrl) {
-		this.xmlaUrl = xmlaUrl;
-	}
-
-	/**
 	 * @return the xmlaDatasource
 	 */
 	public String getXmlaDatasource() {
@@ -484,34 +467,6 @@ public class Report implements Serializable {
 	 */
 	public void setXmlaCatalog(String xmlaCatalog) {
 		this.xmlaCatalog = xmlaCatalog;
-	}
-
-	/**
-	 * @return the xmlaUsername
-	 */
-	public String getXmlaUsername() {
-		return xmlaUsername;
-	}
-
-	/**
-	 * @param xmlaUsername the xmlaUsername to set
-	 */
-	public void setXmlaUsername(String xmlaUsername) {
-		this.xmlaUsername = xmlaUsername;
-	}
-
-	/**
-	 * @return the xmlaPassword
-	 */
-	public String getXmlaPassword() {
-		return xmlaPassword;
-	}
-
-	/**
-	 * @param xmlaPassword the xmlaPassword to set
-	 */
-	public void setXmlaPassword(String xmlaPassword) {
-		this.xmlaPassword = xmlaPassword;
 	}
 
 	/**

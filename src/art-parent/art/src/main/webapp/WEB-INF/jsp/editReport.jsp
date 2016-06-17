@@ -154,6 +154,9 @@ Edit report page
 					case 117: //jxls template
 					case 120: //static lov
 					case 121: //dynamic job recipients
+					case 112: //mondrian
+					case 113: //mondrian xmla
+					case 114: //microsoft xmla
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -164,8 +167,6 @@ Edit report page
 				switch (reportTypeId) {
 					case 110: //dashboard
 					case 111: //text
-					case 113: //mondrian xmla
-					case 114: //sql server xmla
 					case 120: //static lov
 						$("#datasourceDiv").hide();
 						break;
@@ -220,10 +221,10 @@ Edit report page
 				}
 
 				//show/hide display parameters in output
-				if (reportTypeId <= 99 || reportTypeId === 101 || reportTypeId === 102
+				if (reportTypeId <= 1 || reportTypeId === 101 || reportTypeId === 102
 						|| reportTypeId === 103) {
 					//show parameters only for chart, tabular, group, and crosstab reports
-					$("#displayResultsetDiv").show();
+					$("#parametersInOutputDiv").show();
 				} else {
 					$("#parametersInOutputDiv").hide();
 				}
@@ -661,15 +662,6 @@ Edit report page
 				</div>
 
 				<fieldset id="xmlaFields">
-					<div class="form-group">
-						<label class="control-label col-md-4" for="xmlaUrl">
-							<spring:message code="reports.label.xmlaUrl"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="xmlaUrl" maxlength="2000" class="form-control"/>
-							<form:errors path="xmlaUrl" cssClass="error"/>
-						</div>
-					</div>
 					<div id="xmlaDatasourceDiv" class="form-group">
 						<label class="control-label col-md-4" for="xmlaDatasource">
 							<spring:message code="reports.label.xmlaDatasource"/>
@@ -686,39 +678,6 @@ Edit report page
 						<div class="col-md-8">
 							<form:input path="xmlaCatalog" maxlength="50" class="form-control"/>
 							<form:errors path="xmlaCatalog" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-md-4" for="xmlaUsername">
-							<spring:message code="reports.label.xmlaUsername"/>
-						</label>
-						<div class="col-md-8">
-							<form:input path="xmlaUsername" maxlength="50" class="form-control"/>
-							<form:errors path="xmlaUsername" cssClass="error"/>
-						</div>
-					</div>
-					<div class="form-group">
-						<label class="control-label col-md-4" for="xmlaPassword">
-							<spring:message code="reports.label.xmlaPassword"/>
-						</label>
-						<div class="col-md-8">
-							<div class="input-group">
-								<form:password path="xmlaPassword" autocomplete="off" maxlength="50" class="form-control" />
-								<spring:message code="page.help.password" var="help" />
-								<span class="input-group-btn" >
-									<button class="btn btn-default" type="button"
-											data-toggle="tooltip" title="${help}">
-										<i class="fa fa-info"></i>
-									</button>
-								</span>
-							</div>
-							<div class="checkbox">
-								<label>
-									<form:checkbox path="useBlankXmlaPassword"/>
-									<spring:message code="page.checkbox.useBlankPassword"/>
-								</label>
-							</div>
-							<form:errors path="xmlaPassword" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>
