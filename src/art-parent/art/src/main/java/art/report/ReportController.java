@@ -29,7 +29,6 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
-import art.encryption.DesEncryptor;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;

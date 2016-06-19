@@ -21,6 +21,9 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
+import mondrian.olap.CacheControl;
+import mondrian.rolap.RolapSchema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -43,11 +46,9 @@ public class CacheHelper {
 		logger.debug("Entering clearMondrian");
 
 		//clear all mondrian caches
-		java.util.Iterator<mondrian.rolap.RolapSchema> schemaIterator = mondrian.rolap.RolapSchema.getRolapSchemas();
-		while (schemaIterator.hasNext()) {
-			mondrian.rolap.RolapSchema schema = schemaIterator.next();
-			mondrian.olap.CacheControl cacheControl = schema.getInternalConnection().getCacheControl(null);
-
+		List<RolapSchema> schemas = RolapSchema.getRolapSchemas();
+		for (RolapSchema schema : schemas) {
+			CacheControl cacheControl = schema.getInternalConnection().getCacheControl(null);
 			cacheControl.flushSchemaCache();
 		}
 

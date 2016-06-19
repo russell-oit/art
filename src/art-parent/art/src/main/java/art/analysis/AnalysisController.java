@@ -27,7 +27,6 @@ import art.runreport.ParameterProcessorResult;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
 import art.user.User;
-import art.encryption.DesEncryptor;
 import com.tonbeller.jpivot.olap.model.OlapModel;
 import com.tonbeller.jpivot.olap.model.OlapModelDecorator;
 import com.tonbeller.jpivot.olap.query.MdxOlapModel;

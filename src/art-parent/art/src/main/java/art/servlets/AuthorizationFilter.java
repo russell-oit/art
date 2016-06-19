@@ -204,7 +204,13 @@ public class AuthorizationFilter implements Filter {
 		MDC.put("user", user.getUsername());
 		MDC.put("remoteAddr", request.getRemoteAddr());
 		MDC.put("requestURI", request.getRequestURI());
-		MDC.put("xForwardedFor", request.getHeader("X-Forwarded-For"));
+		
+		String xForwardedFor = request.getHeader("X-Forwarded-For");
+		if (xForwardedFor == null) {
+			//ensure it isn't null otherwise pivot table display will throw null pointer error
+			xForwardedFor = "";
+		}
+		MDC.put("xForwardedFor", xForwardedFor);
 	}
 
 	/**
