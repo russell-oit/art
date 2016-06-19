@@ -585,6 +585,8 @@ public class ReportRunner {
 
 				String paramIdentifier = "#!" + paramName + "#";
 				String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
+
+				List<String> paramValues = new ArrayList<>();
 				for (Object value : actualParameterValues) {
 					String paramValue;
 					if (value instanceof Date) {
@@ -593,9 +595,12 @@ public class ReportRunner {
 					} else {
 						paramValue = String.valueOf(value);
 					}
-					String replaceString = Matcher.quoteReplacement(paramValue); //quote in case it contains special regex characters
-					querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+					paramValues.add(paramValue);
 				}
+
+				String paramValuesString = StringUtils.join(paramValues, ",");
+				String replaceString = Matcher.quoteReplacement(paramValuesString); //quote in case it contains special regex characters
+				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 			}
 		}
 
@@ -1230,7 +1235,7 @@ public class ReportRunner {
 
 	/**
 	 * Generates the final sql that is executed
-	 * 
+	 *
 	 * @param sqlQuery the sql query with parameter placeholders
 	 * @param parameters the parameter values
 	 * @return final sql
@@ -1257,7 +1262,7 @@ public class ReportRunner {
 
 	/**
 	 * Formats a parameter value for use in the final sql string
-	 * 
+	 *
 	 * @param parameter the parameter value
 	 * @return the formatted value
 	 */

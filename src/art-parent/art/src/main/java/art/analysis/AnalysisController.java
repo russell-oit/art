@@ -190,9 +190,8 @@ public class AnalysisController {
 				String xmlaUrl = datasource.getUrl();
 				String xmlaUsername = datasource.getUsername();
 				String xmlaPassword = datasource.getPassword();
-				URL url;
 
-				url = new URL(xmlaUrl);
+				URL url = new URL(xmlaUrl);
 				if (StringUtils.length(xmlaUsername) > 0) {
 					xmlaUrl = url.getProtocol() + "://" + xmlaUsername;
 					if (StringUtils.length(xmlaPassword) > 0) {
@@ -213,7 +212,7 @@ public class AnalysisController {
 					//prepend provider if only datasource name provided
 					xmlaDatasource = report.getXmlaDatasource();
 					if (!StringUtils.startsWithIgnoreCase(xmlaDatasource, "provider=mondrian")) {
-						xmlaDatasource = "Provider=Mondrian;DataSource=" + xmlaDatasource; //datasource name in datasources.xml file must be exactly the same
+						xmlaDatasource = "Provider=mondrian;DataSource=" + xmlaDatasource; //datasource name in datasources.xml file must be exactly the same
 					}
 				} else if (reportType == ReportType.SqlServerXmla) {
 					xmlaDatasource = "Provider=MSOLAP";
