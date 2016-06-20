@@ -336,6 +336,9 @@ public class UpgradeHelper {
 
 				sql = "UPDATE ART_JOB_ARCHIVES SET USER_ID=? WHERE USERNAME=?";
 				dbService.update(sql, maxId, user);
+				
+				sql = "UPDATE ART_JOBS_AUDIT SET USER_ID=? WHERE USERNAME=?";
+				dbService.update(sql, maxId, user);
 			}
 		}
 
