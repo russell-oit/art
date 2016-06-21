@@ -16,7 +16,7 @@ Display report filters
 
 <spring:message code="page.title.reportRules" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>

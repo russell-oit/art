@@ -255,9 +255,13 @@ function datatablesInitComplete() {
  * @param {string} contextPath
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
+ * @param {string} selectAllText
+ * @param {string} deselectAllText
  * @returns {jQuery} datatables jquery object
  */
-function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode, addColumnFilters) {
+function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
+	addColumnFilters, selectAllText, deselectAllText) {
+		
 	if (pageLength === undefined || isNaN(pageLength)) {
 		pageLength = 10;
 	}
@@ -284,13 +288,22 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
             className: 'select-checkbox',
             targets:   0
         } ],
+		dom: 'lBfrtip',
+		buttons: [
+			'selectAll',
+			'selectNone'
+		],
 		select: {
             style: 'multi',
 			selector: 'td:first-child'
         },
 		order: [[ 1, 'asc' ]],
 		language: {
-			url: contextPath + "/js/dataTables-1.10.11/i18n/dataTables_" + localeCode + ".txt"
+			url: contextPath + "/js/dataTables-1.10.11/i18n/dataTables_" + localeCode + ".txt",
+			buttons: {
+				selectAll: selectAllText,
+				selectNone: deselectAllText
+			}
 		},
 		initComplete: datatablesInitComplete
 	});
@@ -538,18 +551,21 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {boolean} deleteRow
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
+ * @param {string} selectAllText
+ * @param {string} deselectAllText
  * @returns {jQuery} datatables jquery object
  */
 function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCode, addColumnFilters,
 		deleteButtonSelector,
 		showConfirmDialog, deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
+		deleteRow, cannotDeleteRecordText, linkedRecordsExistText,
+		selectAllText, deselectAllText) {
 
 	$('a[id="configure"]').parent().addClass('active');
 
-	var oTable = initConfigTable(tbl, pageLength, showAllRowsText,
-			contextPath, localeCode, addColumnFilters);
+	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
+			localeCode, addColumnFilters, selectAllText, deselectAllText);
 
 	//get datatables api object
 	var table = oTable.api();

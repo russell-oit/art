@@ -16,7 +16,7 @@ Display current loggers
 
 <spring:message code="page.title.loggers" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 

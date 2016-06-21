@@ -14,7 +14,7 @@
 
 <spring:message code="page.title.archives" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 

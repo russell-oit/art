@@ -16,7 +16,7 @@ Page to display connections status
 
 <spring:message code="page.title.connections" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="connections.message.connectionReset" var="connectionResetText"/>
 

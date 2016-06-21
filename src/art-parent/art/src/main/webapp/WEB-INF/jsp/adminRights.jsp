@@ -16,7 +16,7 @@ Display current admin rights
 
 <spring:message code="page.title.adminRights" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="page.action.revoke" var="revokeText"/>

@@ -16,7 +16,7 @@ Display report drilldowns
 
 <spring:message code="page.title.drilldowns" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
@@ -26,6 +26,8 @@ Display report drilldowns
 <spring:message code="page.help.dragToReorder" var="dragToReorderText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
+<spring:message code="dataTables.text.selectAll" var="selectAllText"/>
+<spring:message code="dataTables.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -61,6 +63,11 @@ Display report drilldowns
 						}
 					],
 					order: [[1, 'asc']],
+					dom: 'lBfrtip',
+					buttons: [
+						'selectAll',
+						'selectNone'
+					],
 					select: {
 						style: 'multi',
 						selector: 'td:first-child'
@@ -70,7 +77,11 @@ Display report drilldowns
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt",
+						buttons: {
+							selectAll: "${selectAllText}",
+							selectNone: "${deselectAllText}"
+						}
 					},
 					initComplete: datatablesInitComplete
 				});

@@ -16,7 +16,7 @@ Display user groups
 
 <spring:message code="page.title.userGroups" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
@@ -24,6 +24,8 @@ Display user groups
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
+<spring:message code="dataTables.text.selectAll" var="selectAllText"/>
+<spring:message code="dataTables.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -52,7 +54,9 @@ Display user groups
 						"${errorOccurredText}",
 						true, //deleteRow
 						undefined, //cannotDeleteRecordText
-						undefined //linkedRecordsExistText
+						undefined, //linkedRecordsExistText
+						"${selectAllText}",
+						"${deselectAllText}"
 						);
 
 				var table = oTable.api();

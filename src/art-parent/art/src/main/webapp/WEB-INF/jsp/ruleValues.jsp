@@ -16,7 +16,7 @@ Display rule values
 
 <spring:message code="page.title.ruleValues" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="ruleValues.message.valueRemoved" var="valueRemovedText"/>
 <spring:message code="page.action.remove" var="removeText"/>

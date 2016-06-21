@@ -16,7 +16,7 @@ Display datasources
 
 <spring:message code="page.title.datasources" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
@@ -27,7 +27,8 @@ Display datasources
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
-
+<spring:message code="dataTables.text.selectAll" var="selectAllText"/>
+<spring:message code="dataTables.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
@@ -56,7 +57,9 @@ Display datasources
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedReportsExistText}" //linkedRecordsExistText
+						"${linkedReportsExistText}", //linkedRecordsExistText
+						"${selectAllText}",
+						"${deselectAllText}"
 						);
 
 				var table = oTable.api();

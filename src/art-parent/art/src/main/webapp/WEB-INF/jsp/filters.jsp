@@ -16,7 +16,7 @@ Display filters
 
 <spring:message code="page.title.filters" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="dialog.button.cancel" var="cancelText"/>
 <spring:message code="dialog.button.ok" var="okText"/>
@@ -24,6 +24,8 @@ Display filters
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="filters.message.linkedReportsExist" var="linkedReportsExistText"/>
+<spring:message code="dataTables.text.selectAll" var="selectAllText"/>
+<spring:message code="dataTables.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -52,7 +54,9 @@ Display filters
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedReportsExistText}" //linkedRecordsExistText
+						"${linkedReportsExistText}", //linkedRecordsExistText
+						"${selectAllText}",
+						"${deselectAllText}"
 						);
 
 			}); //end document ready

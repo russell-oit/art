@@ -16,7 +16,7 @@ Display user group membership
 
 <spring:message code="page.title.userGroupMembership" var="pageTitle"/>
 
-<spring:message code="datatables.text.showAllRows" var="showAllRowsText"/>
+<spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.membershipRemoved" var="membershipRemovedText"/>
 <spring:message code="page.action.remove" var="removeText"/>
