@@ -24,6 +24,8 @@ Display report filters
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
+<spring:message code="dataTables.text.selectAll" var="selectAllText"/>
+<spring:message code="dataTables.text.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
@@ -53,6 +55,11 @@ Display report filters
 						}
 					],
 					order: [[1, 'asc']],
+					dom: 'lBfrtip',
+					buttons: [
+						'selectAll',
+						'selectNone'
+					],
 					select: {
 						style: 'multi',
 						selector: 'td:first-child'
@@ -62,7 +69,11 @@ Display report filters
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt"
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt",
+						buttons: {
+							selectAll: "${selectAllText}",
+							selectNone: "${deselectAllText}"
+						}
 					},
 					initComplete: datatablesInitComplete
 				});
