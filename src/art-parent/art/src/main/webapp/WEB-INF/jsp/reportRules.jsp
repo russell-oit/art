@@ -24,8 +24,8 @@ Display report filters
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
-<spring:message code="dataTables.text.selectAll" var="selectAllText"/>
-<spring:message code="dataTables.text.deselectAll" var="deselectAllText"/>
+<spring:message code="dataTables.button.selectAll" var="selectAllText"/>
+<spring:message code="dataTables.button.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 

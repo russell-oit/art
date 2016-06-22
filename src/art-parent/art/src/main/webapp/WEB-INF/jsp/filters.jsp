@@ -24,8 +24,8 @@ Display filters
 <spring:message code="page.message.recordDeleted" var="recordDeletedText"/>
 <spring:message code="page.message.cannotDeleteRecord" var="cannotDeleteRecordText"/>
 <spring:message code="filters.message.linkedReportsExist" var="linkedReportsExistText"/>
-<spring:message code="dataTables.text.selectAll" var="selectAllText"/>
-<spring:message code="dataTables.text.deselectAll" var="deselectAllText"/>
+<spring:message code="dataTables.button.selectAll" var="selectAllText"/>
+<spring:message code="dataTables.button.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
