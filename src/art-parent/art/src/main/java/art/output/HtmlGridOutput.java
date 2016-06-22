@@ -113,8 +113,9 @@ public class HtmlGridOutput extends StandardOutput {
 		//open new row
 		out.println("<tr class='rows' onclick='javascript:selectRow(this)'"
 				+ " ondblclick='javascript:selectRow2(this)'"
-				+ " onmouseover='javascript:highLight(this,'hiliterows')'"
-				+ " onmouseout='javascript:highLight(this,'rows')'>");
+				+ " onmouseover='javascript:highLight(this,\"hiliterows\")'"
+				+ " onmouseout='javascript:highLight(this,\"rows\")'"
+				+ ">");
 	}
 
 	@Override

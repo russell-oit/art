@@ -206,10 +206,18 @@ public class RunReportController {
 			if (!showInline) {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
+				
+				boolean allowSelectParameters = Boolean.valueOf(request.getParameter("allowSelectParameters"));
+				if (allowSelectParameters) {
+					request.setAttribute("allowSelectParameters", allowSelectParameters);
+					RunReportHelper runReportHelper = new RunReportHelper();
+					runReportHelper.setSelectReportParameterAttributes(model, report, request, session, reportService);
+				}
+				
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
 				writer.flush();
 			}
-			
+
 			long totalTime = 0;
 			long fetchTime = 0;
 
@@ -427,7 +435,7 @@ public class RunReportController {
 
 	/**
 	 * Displays report progress
-	 * 
+	 *
 	 * @param out the writer to output to
 	 * @param message the message to output
 	 */
@@ -438,7 +446,7 @@ public class RunReportController {
 
 	/**
 	 * Displays report information
-	 * 
+	 *
 	 * @param out the writer to use
 	 * @param message the message to output
 	 */
@@ -448,7 +456,7 @@ public class RunReportController {
 
 	/**
 	 * Displays information to the report output
-	 * 
+	 *
 	 * @param out the output writer to use
 	 * @param message the message to output
 	 * @param elementId the html element to output to
@@ -463,7 +471,7 @@ public class RunReportController {
 
 	/**
 	 * Clears the report progress indicator
-	 * 
+	 *
 	 * @param writer the output writer to use
 	 */
 	private void clearReportProgress(PrintWriter writer) {
