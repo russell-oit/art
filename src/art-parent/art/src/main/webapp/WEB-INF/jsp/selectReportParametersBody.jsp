@@ -229,9 +229,9 @@ Display section to allow selecting of report parameters and initiate running of 
 												</label>
 												<div class="col-md-7">
 													<select name="reportFormat" id="reportFormat" class="form-control">
-														<c:forEach var="reportFormat" items="${reportFormats}">
-															<option value="${reportFormat}">
-																<spring:message code="reports.format.${reportFormat}"/>
+														<c:forEach var="format" items="${reportFormats}">
+															<option value="${format}" ${reportFormat == format ? "selected" : ""}>
+																<spring:message code="reports.format.${format}"/>
 															</option>
 														</c:forEach>
 													</select>
