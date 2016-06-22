@@ -16,3 +16,8 @@ Display result (link to file) e.g. with jasper report, jxls report, chart pdf or
 		<spring:message code="page.link.download"/>
 	</a>
 </div>
+
+<script type="text/javascript">
+	var url = "${pageContext.request.contextPath}/export/reports/${fileName}";
+	window.open(url);
+</script>
