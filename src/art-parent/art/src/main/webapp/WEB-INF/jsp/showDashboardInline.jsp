@@ -14,7 +14,7 @@
 	<table class="plain">
 		<tr>
 			<c:forEach var="column" items="${dashboard.columns}">
-				<td>
+				<td style="vertical-align: top">
 					<c:forEach var="portlet" items="${column}">
 						<div id="div_${portlet.source}">
 							<ajax:portlet
@@ -33,9 +33,7 @@
 						</div>
 					</c:forEach>
 				</td>
-
 			</c:forEach>
-
 		</tr>
 	</table>
 </div> 
