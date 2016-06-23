@@ -36,6 +36,8 @@
 <spring:message code="reports.format.html" var="htmlText"/>
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="reports.format.docx" var="docxText"/>
+<spring:message code="reports.format.odt" var="odtText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -201,6 +203,16 @@
 				} else if (reportTypeId === 122) {
 					//freemarker
 					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 123 || reportTypeId === 124) {
+					//xdocreport docx
+					list.append(new Option('${docxText}', 'docx'));
+					list.append(new Option('${pdfText}', 'pdf'));
+					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 125 || reportTypeId === 126) {
+					//xdocreport odt
+					list.append(new Option('${odtText}', 'odt'));
+					list.append(new Option('${pdfText}', 'pdf'));
+					list.append(new Option('${htmlText}', 'html'));
 				} else {
 					//non-chart
 					switch (jobType) {
@@ -278,6 +290,7 @@
 			function toggleOutputFormatVisibility(jobType, reportTypeId) {
 				//show/hide outputFormatDiv
 				if (reportTypeId === 122) {
+					//freemarker
 					$("#outputFormatDiv").hide();
 				} else {
 					switch (jobType) {

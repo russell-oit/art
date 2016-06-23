@@ -321,6 +321,18 @@ public class RunReportHelper {
 					formats.add("html");
 					formats.add("xlsx");
 					break;
+				case XDocReportFreeMarkerDocx:
+				case XDocReportVelocityDocx:
+					formats.add("docx");
+					formats.add("pdf");
+					formats.add("html");
+					break;
+				case XDocReportFreeMarkerOdt:
+				case XDocReportVelocityOdt:
+					formats.add("odt");
+					formats.add("pdf");
+					formats.add("html");
+					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

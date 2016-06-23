@@ -65,7 +65,8 @@ public class XlsxOutput extends StandardOutput {
 			templateFileName = fullPath + "template-" + baseName + ".xlsx";
 
 			//save the template
-			try (FileOutputStream fout = new FileOutputStream(templateFileName); XSSFWorkbook tmpwb = new XSSFWorkbook()) {
+			try (FileOutputStream fout = new FileOutputStream(templateFileName)) {
+				XSSFWorkbook tmpwb = new XSSFWorkbook();
 				tmpwb.createSheet(sheetName);
 				tmpwb.write(fout);
 			}

@@ -32,6 +32,8 @@ public enum ReportType {
 	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122),
+	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
+	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
 	XYChart(-1), Pie3DChart(-2), HorizontalBar3DChart(-3), VerticalBar3DChart(-4),
 	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
@@ -55,6 +57,59 @@ public enum ReportType {
 		switch (this) {
 			case LovDynamic:
 			case LovStatic:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a xdocreport freemarker or
+	 * xdocreport velocity report
+	 *
+	 * @return <code>true</code> if this is a xdocreport freemarker or
+	 * xdocreport velocity report
+	 */
+	public boolean isXDocReport() {
+		switch (this) {
+			case XDocReportFreeMarkerDocx:
+			case XDocReportVelocityDocx:
+			case XDocReportFreeMarkerOdt:
+			case XDocReportVelocityOdt:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a xdocreport report that produces
+	 * docx output
+	 *
+	 * @return <code>true</code> if this is a xdocreport report that produces
+	 * docx output
+	 */
+	public boolean isXDocReportDocx() {
+		switch (this) {
+			case XDocReportFreeMarkerDocx:
+			case XDocReportVelocityDocx:
+				return true;
+			default:
+				return false;
+		}
+	}
+	
+	/**
+	 * Returns <code>true</code> if this is a xdocreport report that produces
+	 * odt output
+	 *
+	 * @return <code>true</code> if this is a xdocreport report that produces
+	 * odt output
+	 */
+	public boolean isXDocReportOdt() {
+		switch (this) {
+			case XDocReportFreeMarkerOdt:
+			case XDocReportVelocityOdt:
 				return true;
 			default:
 				return false;
@@ -293,6 +348,14 @@ public enum ReportType {
 				return "Group";
 			case FreeMarker:
 				return "FreeMarker";
+			case XDocReportFreeMarkerDocx:
+				return "XDocReport: Freemarker engine - Docx";
+			case XDocReportVelocityDocx:
+				return "XDocReport: Velocity engine - Docx";
+			case XDocReportFreeMarkerOdt:
+				return "XDocReport: Freemarker engine - ODT";
+			case XDocReportVelocityOdt:
+				return "XDocReport: Velocity engine - ODT";
 			default:
 				return this.name();
 		}

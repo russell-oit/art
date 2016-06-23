@@ -47,6 +47,7 @@ import art.output.Rss20Output;
 import art.output.SlkOutput;
 import art.output.StandardOutputResult;
 import art.output.TsvOutput;
+import art.output.XDocReportOutput;
 import art.output.XlsOutput;
 import art.output.XlsxOutput;
 import art.output.XmlOutput;
@@ -57,6 +58,7 @@ import art.servlets.Config;
 import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.PostProcessingException;
+import fr.opensagres.xdocreport.core.XDocReportException;
 import freemarker.template.TemplateException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -191,7 +193,7 @@ public class ReportOutputGenerator {
 			PrintWriter writer, String fullOutputFilename)
 			throws IOException, SQLException, JRException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
-			PostProcessingException, ServletException, TemplateException {
+			PostProcessingException, ServletException, TemplateException, XDocReportException {
 
 		logger.debug("Entering generateOutput");
 
@@ -200,9 +202,6 @@ public class ReportOutputGenerator {
 
 		ResultSet rs = null;
 		Integer rowsRetrieved = null;
-
-		int reportId = report.getReportId();
-		ReportType reportType = report.getReportType();
 
 		boolean isJob = false;
 		if (jobId > 0) {
@@ -224,6 +223,9 @@ public class ReportOutputGenerator {
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
 
+			int reportId = report.getReportId();
+			ReportType reportType = report.getReportType();
+
 			//generate report output
 			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
@@ -233,7 +235,7 @@ public class ReportOutputGenerator {
 						jrOutput.setResultSet(rs);
 					}
 
-					jrOutput.generateReport(report, reportParamsList, reportType, reportFormat, fullOutputFilename);
+					jrOutput.generateReport(report, reportParamsList, reportFormat, fullOutputFilename);
 				} else {
 					//jxls output
 					JxlsOutput jxlsOutput = new JxlsOutput();
@@ -242,14 +244,11 @@ public class ReportOutputGenerator {
 						jxlsOutput.setResultSet(rs);
 					}
 
-					jxlsOutput.generateReport(report, reportParamsList, reportType, fullOutputFilename);
+					jxlsOutput.generateReport(report, reportParamsList, fullOutputFilename);
 				}
 
 				rowsRetrieved = getResultSetRowCount(rs);
-
-				if (!isJob) {
-					displayFileLink(fileName);
-				}
+				displayFileLink(fileName);
 			} else if (reportType == ReportType.Group) {
 				rs = reportRunner.getResultSet();
 
@@ -421,17 +420,24 @@ public class ReportOutputGenerator {
 					outputResult.setSuccess(false);
 					outputResult.setMessage(standardOutputResult.getMessage());
 				}
-			} else if(reportType == ReportType.FreeMarker){
-				FreeMarkerOutput freemarkerOutput=new FreeMarkerOutput();
+			} else if (reportType == ReportType.FreeMarker) {
+				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				rs = reportRunner.getResultSet();
 				freemarkerOutput.generateReport(report, reportParamsList, rs, writer);
 				rowsRetrieved = getResultSetRowCount(rs);
+			} else if (reportType.isXDocReport()) {
+				XDocReportOutput xdocReportOutput = new XDocReportOutput();
+				rs = reportRunner.getResultSet();
+				xdocReportOutput.generateReport(report, reportParamsList, rs, reportFormat, fullOutputFilename);
+				rowsRetrieved = getResultSetRowCount(rs);
+				displayFileLink(fileName);
 			}
 		} finally {
 			DatabaseUtils.close(rs);
 		}
 
 		outputResult.setRowCount(rowsRetrieved);
+
 		return outputResult;
 	}
 
@@ -511,6 +517,10 @@ public class ReportOutputGenerator {
 	 * @throws ServletException
 	 */
 	private void displayFileLink(String fileName) throws IOException, ServletException {
+		if (request == null) {
+			return;
+		}
+
 		//display link to access report
 		request.setAttribute("fileName", fileName);
 		servletContext.getRequestDispatcher("/WEB-INF/jsp/showFileLink.jsp").include(request, response);

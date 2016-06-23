@@ -182,6 +182,10 @@ Edit report page
 					case 118: //jxls art
 					case 112: //mondrian
 					case 122: //freemarker
+					case 123: //xdocreport freemarker docx
+					case 124: //xdocreport velocity docx
+					case 125: //xdocreport freemarker odt
+					case 126: //xdocreport velocity odt
 						$("#templateDiv").show();
 						break;
 					default:

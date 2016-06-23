@@ -77,7 +77,6 @@ public class JasperReportsOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param reportParams the report parameters to use, not null
-	 * @param reportType the report type to use
 	 * @param reportFormat the report format to use, not null
 	 * @param outputFileName the full path of the output file to use, not null
 	 * @throws java.io.IOException
@@ -85,7 +84,7 @@ public class JasperReportsOutput {
 	 * @throws net.sf.jasperreports.engine.JRException
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ReportType reportType, ReportFormat reportFormat, String outputFileName)
+			ReportFormat reportFormat, String outputFileName)
 			throws IOException, SQLException, JRException {
 
 		logger.debug("Entering generateReport");
@@ -132,6 +131,7 @@ public class JasperReportsOutput {
 
 			//fill report with data
 			JasperPrint jasperPrint;
+			ReportType reportType=report.getReportType();
 			if (reportType == ReportType.JasperReportsTemplate) {
 				Connection conn = null;
 				try {

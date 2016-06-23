@@ -29,8 +29,8 @@ public enum ReportFormat {
 
 	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"), htmlGrid("htmlGrid"),
 	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
-	pdf("pdf"), slk("slk"), slkZip("slkZip"), tsv("tsv"), tsvZip("tsvZip"),
-	tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png");
+	pdf("pdf"), docx("docx"), odt("odt"), slk("slk"), slkZip("slkZip"), tsv("tsv"), 
+	tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png");
 
 	private final String value;
 
@@ -90,6 +90,10 @@ public enum ReportFormat {
 				return "xml";
 			case rss20:
 				return "html";
+			case docx:
+				return "docx";
+			case odt:
+				return "odt";
 			default:
 				return value;
 		}

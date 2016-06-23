@@ -206,14 +206,14 @@ public class RunReportController {
 			if (!showInline) {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
-				
+
 				boolean allowSelectParameters = Boolean.valueOf(request.getParameter("allowSelectParameters"));
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.setSelectReportParameterAttributes(model, report, request, session, reportService);
 				}
-				
+
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
 				writer.flush();
 			}
@@ -277,20 +277,8 @@ public class RunReportController {
 					displayReportProgress(writer, messageSource.getMessage("reports.message.running", null, locale));
 				}
 
-				//is scroll insensitive much slower than forward only?
-				int resultSetType;
-				if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
-						|| reportType == ReportType.FreeMarker
-						|| reportType == ReportType.Group || reportType.isChart()) {
-					//need scrollable resultset for jasper art report, jxls art report, freemarker in order to display record count
-					//need scrollable resultset in order to generate group report
-					//need scrollable resultset for charts for show data option
-					resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
-				} else {
-					//report types will determine the record count e.g. for standard output reports
-					//or no way to determine record count e.g. with jasper reports template report
-					resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-				}
+				//get resultset type to use
+				int resultSetType = getResultSetType(reportType);
 
 				//run query
 				long queryStartTime = System.currentTimeMillis();
@@ -431,6 +419,31 @@ public class RunReportController {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns the resultset type to use for a given report type
+	 *
+	 * @param reportType the report type
+	 * @return the resultset type to use
+	 */
+	private int getResultSetType(ReportType reportType) {
+		//is scroll insensitive much slower than forward only?
+		int resultSetType;
+		if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
+				|| reportType == ReportType.FreeMarker || reportType.isXDocReport()
+				|| reportType == ReportType.Group || reportType.isChart()) {
+			//need scrollable resultset for jasper art report, jxls art report, freemarker, xdocreport in order to display record count
+			//need scrollable resultset in order to generate group report
+			//need scrollable resultset for charts for show data option
+			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
+		} else {
+			//report types will determine the record count e.g. for standard output reports
+			//or no way to determine record count e.g. with jasper reports template report
+			resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+		}
+
+		return resultSetType;
 	}
 
 	/**

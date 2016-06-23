@@ -24,10 +24,12 @@
 	</licenses>
 	
 	<properties>
-		<!-- jxls-poi as at 1.0.9 needs poi 3.12. error thrown with 3.13+ -->
-		<poi.version>3.12</poi.version>
+		<!-- jxls-poi as at 1.0.9 has error with poi 3.13+ -->
+		<!-- xdocreport as at 1.0.6 has error with poi 3.12+ -->
+		<poi.version>3.10-FINAL</poi.version>
 		<owasp.encoder.version>1.2</owasp.encoder.version>
 		<thymeleaf.version>3.0.0.RELEASE</thymeleaf.version>
+		<xdocreport.version>1.0.6</xdocreport.version>
 	</properties>
 
 	<build>
@@ -173,6 +175,11 @@
 				<artifactId>xalan</artifactId>
 				<version>2.7.1</version>
 			</dependency>
+<!--			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>ooxml-schemas</artifactId>
+				<version>1.3</version>
+			</dependency>-->
 		</dependencies>
 	</dependencyManagement>
 
@@ -581,5 +588,41 @@
 			<artifactId>freemarker</artifactId>
 			<version>2.3.23</version>
 		</dependency>
+		<dependency>
+			<groupId>fr.opensagres.xdocreport</groupId>
+			<artifactId>fr.opensagres.xdocreport.document.docx</artifactId>
+			<version>${xdocreport.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.opensagres.xdocreport</groupId>
+			<artifactId>fr.opensagres.xdocreport.document.pptx</artifactId>
+			<version>${xdocreport.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.opensagres.xdocreport</groupId>
+			<artifactId>fr.opensagres.xdocreport.document.odt</artifactId>
+			<version>${xdocreport.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.opensagres.xdocreport</groupId>
+			<artifactId>fr.opensagres.xdocreport.template.freemarker</artifactId>
+			<version>${xdocreport.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.opensagres.xdocreport</groupId>
+			<artifactId>fr.opensagres.xdocreport.template.velocity</artifactId>
+			<version>${xdocreport.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.opensagres.xdocreport</groupId>
+			<artifactId>fr.opensagres.xdocreport.converter.docx.xwpf</artifactId>
+			<version>${xdocreport.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.opensagres.xdocreport</groupId>
+			<artifactId>fr.opensagres.xdocreport.converter.odt.odfdom</artifactId>
+			<version>${xdocreport.version}</version>
+		</dependency>
+
 	</dependencies>
 </project>

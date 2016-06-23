@@ -64,14 +64,13 @@ public class JxlsOutput {
 	 *
 	 * @param report the report to use, not null
 	 * @param reportParams the report parameters, not null
-	 * @param reportType the report type
 	 * @param outputFileName the full path of the output file, not null
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 * @throws org.apache.poi.openxml4j.exceptions.InvalidFormatException
 	 */
 	public void generateReport(Report report, List<ReportParameter> reportParams,
-			ReportType reportType, String outputFileName)
+			String outputFileName)
 			throws SQLException, IOException, InvalidFormatException {
 
 		logger.debug("Entering generateReport");
@@ -102,6 +101,7 @@ public class JxlsOutput {
 				context.putVar(paramName, reportParam);
 			}
 
+			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				conn = runReportHelper.getEffectiveReportDatasource(report, reportParams);
