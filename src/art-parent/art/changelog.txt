@@ -7,6 +7,8 @@ ART 3.0
 * Renamed "View Modes" to "Report Formats"
 * Modified application settings configuration. Settings need to be manually re-entered.
 * Modified application urls. Previously bookmarked urls may no longer work.
+* Added ability to create reports based on FreeMarker templates
+* Added ability to create reports based on MS Word (docx) and LibreOffice/OpenOffice (odt) templates
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0
