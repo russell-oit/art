@@ -28,15 +28,19 @@ import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
+import art.utils.ArtUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -343,5 +347,52 @@ public class RunReportHelper {
 		}
 
 		return formats;
+	}
+
+	/**
+	 * Replaces direct parameter substitution placeholders with parameter values
+	 *
+	 * @param sourceString the string the contains the parameter placeholders
+	 * @param reportParamsMap the parameter values
+	 * @return a string with parameter placeholders replaced with their values
+	 */
+	public String performDirectParameterSubstitution(String sourceString,
+			Map<String, ReportParameter> reportParamsMap) {
+
+		logger.debug("Entering performDirectParameterSubstitution");
+
+		String outputString = sourceString;
+
+		for (Map.Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+			String paramName = entry.getKey();
+			ReportParameter reportParam = entry.getValue();
+
+			List<Object> actualParameterValues = reportParam.getActualParameterValues();
+
+			if (actualParameterValues == null || actualParameterValues.isEmpty()) {
+				continue;
+			}
+
+			String paramIdentifier = "#!" + paramName + "#";
+			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
+
+			List<String> paramValues = new ArrayList<>();
+			for (Object value : actualParameterValues) {
+				String paramValue;
+				if (value instanceof Date) {
+					Date dateValue = (Date) value;
+					paramValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
+				} else {
+					paramValue = String.valueOf(value);
+				}
+				paramValues.add(paramValue);
+			}
+
+			String paramValuesString = StringUtils.join(paramValues, ",");
+			String replaceString = Matcher.quoteReplacement(paramValuesString); //quote in case it contains special regex characters
+			outputString = outputString.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+		}
+
+		return outputString;
 	}
 }

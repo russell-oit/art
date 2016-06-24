@@ -19,6 +19,10 @@ package art.dashboard;
 
 import art.report.Report;
 import art.report.ReportService;
+import art.reportparameter.ReportParameter;
+import art.runreport.ParameterProcessor;
+import art.runreport.ParameterProcessorResult;
+import art.runreport.RunReportHelper;
 import art.user.User;
 import art.utils.XmlParser;
 import java.io.UnsupportedEncodingException;
@@ -27,6 +31,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang.StringUtils;
@@ -123,7 +128,16 @@ public class DashboardController {
 
 		Dashboard dashboard = new Dashboard();
 
-		dashboard.setTitle(report.getShortDescription());
+		ParameterProcessor paramProcessor = new ParameterProcessor();
+		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+
+		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+
+		String shortDescription = report.getShortDescription();
+		RunReportHelper runReportHelper = new RunReportHelper();
+		shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
+
+		dashboard.setTitle(shortDescription);
 		dashboard.setDescription(report.getDescription());
 
 		String dashboardXml = report.getReportSource();
@@ -135,7 +149,7 @@ public class DashboardController {
 
 		for (String columnXml : columnsXml) {
 			logger.debug("columnXml='{}'", columnXml);
-			
+
 			List<Portlet> columnPortlets = new ArrayList<>();
 			String columnSize = XmlParser.getXmlElementValue(columnXml, "SIZE");
 			logger.debug("columnSize='{}'", columnSize);
@@ -146,7 +160,7 @@ public class DashboardController {
 			List<String> portletsXml = XmlParser.getXmlElementValues(columnXml, "PORTLET");
 			for (String portletXml : portletsXml) {
 				logger.debug("portletXml='{}'", portletXml);
-				
+
 				Portlet portlet = new Portlet();
 
 				String source = RandomStringUtils.randomAlphanumeric(5);
@@ -180,13 +194,13 @@ public class DashboardController {
 
 	/**
 	 * Returns the refresh period for a portlet
-	 * 
+	 *
 	 * @param portletXml the portlet's xml
 	 * @return the refresh period for the portlet
 	 */
 	private String getPortletRefreshPeriod(String portletXml) {
 		logger.debug("Entering getPortletRefreshPeriod");
-		
+
 		String value = XmlParser.getXmlElementValue(portletXml, "REFRESH");
 
 		String refreshPeriodString = null;
@@ -210,17 +224,17 @@ public class DashboardController {
 
 	/**
 	 * Return's the link to use for a portlet
-	 * 
+	 *
 	 * @param portletXml the portlet's xml
 	 * @param request
 	 * @return the link to use for the portlet
 	 * @throws UnsupportedEncodingException
 	 * @throws SQLException
-	 * @throws ParseException 
+	 * @throws ParseException
 	 */
 	private String getPortletLink(String portletXml, HttpServletRequest request) throws UnsupportedEncodingException, SQLException, ParseException {
 		logger.debug("Entering getPortletLink");
-		
+
 		String link;
 
 		// Get the portlet xml info
@@ -251,13 +265,13 @@ public class DashboardController {
 
 	/**
 	 * Returns the portlet's on load setting
-	 * 
+	 *
 	 * @param portletXml the portlet's xml
 	 * @return the portlet's on load setting
 	 */
 	private boolean getPortletExecuteOnLoad(String portletXml) {
 		logger.debug("Entering getPortletExecuteOnLoad");
-		
+
 		String value = XmlParser.getXmlElementValue(portletXml, "ONLOAD");
 
 		boolean executeOnLoad = true;
@@ -270,7 +284,7 @@ public class DashboardController {
 
 	/**
 	 * Return's the portlet's title string
-	 * 
+	 *
 	 * @param portletXml the portlet's xml
 	 * @param request
 	 * @param executeOnLoad whether to execute the portlet on load
@@ -280,9 +294,9 @@ public class DashboardController {
 	 */
 	private String getPortletTitle(String portletXml, HttpServletRequest request,
 			boolean executeOnLoad, String refreshPeriod, Locale locale) {
-		
+
 		logger.debug("Entering getPortletTitle");
-		
+
 		String title = XmlParser.getXmlElementValue(portletXml, "TITLE");
 
 		String contextPath = request.getContextPath();
@@ -302,13 +316,13 @@ public class DashboardController {
 
 	/**
 	 * Returns the class name prefix to use for the portlet
-	 * 
+	 *
 	 * @param columnSize the portlet's column size setting
 	 * @return the class name prefix to use for the portlet
 	 */
 	private String getPortletClassNamePrefix(String columnSize) {
 		logger.debug("Entering getPortletClassNamePrefix: columnSize='{}'", columnSize);
-		
+
 		String prefix = "portlet" + StringUtils.upperCase(columnSize);
 		return prefix;
 	}

@@ -573,35 +573,8 @@ public class ReportRunner {
 		//replace direct substitution parameters
 		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
 				|| reportType.isOlap()) {
-			for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
-				String paramName = entry.getKey();
-				ReportParameter reportParam = entry.getValue();
-
-				List<Object> actualParameterValues = reportParam.getActualParameterValues();
-
-				if (actualParameterValues == null || actualParameterValues.isEmpty()) {
-					continue;
-				}
-
-				String paramIdentifier = "#!" + paramName + "#";
-				String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
-
-				List<String> paramValues = new ArrayList<>();
-				for (Object value : actualParameterValues) {
-					String paramValue;
-					if (value instanceof Date) {
-						Date dateValue = (Date) value;
-						paramValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
-					} else {
-						paramValue = String.valueOf(value);
-					}
-					paramValues.add(paramValue);
-				}
-
-				String paramValuesString = StringUtils.join(paramValues, ",");
-				String replaceString = Matcher.quoteReplacement(paramValuesString); //quote in case it contains special regex characters
-				querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
-			}
+			RunReportHelper runReportHelper = new RunReportHelper();
+			querySql = runReportHelper.performDirectParameterSubstitution(querySql, reportParamsMap);
 		}
 
 		//replace jdbc parameter identifiers with ?

@@ -66,6 +66,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -218,7 +219,7 @@ public class ReportOutputGenerator {
 		String fileName = FilenameUtils.getName(fullOutputFilename);
 
 		try {
-
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
 			ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 			ChartOptions parameterChartOptions = paramProcessorResult.getChartOptions();
@@ -329,9 +330,13 @@ public class ReportOutputGenerator {
 
 				ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
 
+				String shortDescription = report.getShortDescription();
+				RunReportHelper runReportHelper = new RunReportHelper();
+				shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
+
 				chart.setLocale(locale);
 				chart.setChartOptions(effectiveChartOptions);
-				chart.setTitle(report.getShortDescription());
+				chart.setTitle(shortDescription);
 
 				Drilldown drilldown = null;
 				if (reportFormat == ReportFormat.html) {
@@ -517,7 +522,7 @@ public class ReportOutputGenerator {
 	 * @throws ServletException
 	 */
 	private void displayFileLink(String fileName) throws IOException, ServletException {
-		if (request == null) {
+		if (request == null || servletContext == null) {
 			return;
 		}
 

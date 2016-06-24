@@ -288,6 +288,8 @@ public class RunReportController {
 				// display status information, parameters and final sql
 				if (showReportHeaderAndFooter) {
 					String shortDescription = report.getShortDescription();
+					RunReportHelper runReportHelper = new RunReportHelper();
+					shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
 
 					String description = "";
 					shortDescription = StringUtils.trim(shortDescription);
