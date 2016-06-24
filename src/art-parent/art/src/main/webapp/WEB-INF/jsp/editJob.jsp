@@ -38,6 +38,7 @@
 <spring:message code="switch.text.no" var="noText"/>
 <spring:message code="reports.format.docx" var="docxText"/>
 <spring:message code="reports.format.odt" var="odtText"/>
+<spring:message code="reports.format.pptx" var="pptxText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -213,6 +214,9 @@
 					list.append(new Option('${odtText}', 'odt'));
 					list.append(new Option('${pdfText}', 'pdf'));
 					list.append(new Option('${htmlText}', 'html'));
+				} else if (reportTypeId === 127 || reportTypeId === 128) {
+					//xdocreport pptx
+					list.append(new Option('${pptxText}', 'pptx'));
 				} else {
 					//non-chart
 					switch (jobType) {

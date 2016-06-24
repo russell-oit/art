@@ -333,6 +333,10 @@ public class RunReportHelper {
 					formats.add("pdf");
 					formats.add("html");
 					break;
+				case XDocReportFreeMarkerPptx:
+				case XDocReportVelocityPptx:
+					formats.add("pptx");
+					break;
 				default:
 					throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

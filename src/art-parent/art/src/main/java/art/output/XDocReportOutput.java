@@ -61,7 +61,7 @@ public class XDocReportOutput {
 	 * @param report the report to use, not null
 	 * @param reportParams the report parameters
 	 * @param resultSet the resultset containing report data, not null
-	 * @param reportFormat
+	 * @param reportFormat the report format for the report
 	 * @param outputFileName the full output file name to use for the generated
 	 * report
 	 * @throws java.sql.SQLException
@@ -77,11 +77,12 @@ public class XDocReportOutput {
 		Objects.requireNonNull(report, "report must not be null");
 		Objects.requireNonNull(resultSet, "resultset must not be null");
 		Objects.requireNonNull(outputFileName, "outputFileName must not be null");
+		Objects.requireNonNull(reportFormat, "reportFormat must not be null");
 
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();
 		String fullTemplateFileName = templatesPath + templateFileName;
-
+		
 		//check if template file exists
 		File templateFile = new File(fullTemplateFileName);
 		if (!templateFile.exists()) {
@@ -91,18 +92,15 @@ public class XDocReportOutput {
 		//load doc
 		ReportType reportType = report.getReportType();
 		TemplateEngineKind templateEngineKind;
-		switch (reportType) {
-			case XDocReportFreeMarkerDocx:
-			case XDocReportFreeMarkerOdt:
-				templateEngineKind = TemplateEngineKind.Freemarker;
-				break;
-			case XDocReportVelocityDocx:
-			case XDocReportVelocityOdt:
-				templateEngineKind = TemplateEngineKind.Velocity;
-				break;
-			default:
-				throw new IllegalArgumentException("Unexpected report type: " + reportType);
+		
+		if(reportType.isXDocReportFreeMarker()){
+			templateEngineKind = TemplateEngineKind.Freemarker;
+		} else if(reportType.isXDocReportVelocity()){
+			templateEngineKind = TemplateEngineKind.Velocity;
+		} else {
+			throw new IllegalArgumentException("Unexpected report type: " + reportType);
 		}
+		
 		InputStream in = new FileInputStream(fullTemplateFileName);
 		IXDocReport xdocReport = XDocReportRegistry.getRegistry().loadReport(in, templateEngineKind);
 
@@ -123,7 +121,7 @@ public class XDocReportOutput {
 		RowSetDynaClass rsdc = new RowSetDynaClass(resultSet, useLowerCaseProperties, useColumnLabels);
 		context.put("results", rsdc.getRows());
 
-		//add metadata for iteration of results using list syntax
+		//add metadata to indicate results fields are list fields
 		FieldsMetadata metadata = new FieldsMetadata();
 		DynaProperty[] columns = rsdc.getDynaProperties();
 		for (DynaProperty column : columns) {
@@ -131,11 +129,12 @@ public class XDocReportOutput {
 			metadata.addFieldAsList(metadataFieldName);
 		}
 		xdocReport.setFieldsMetadata(metadata);
-
+		
 		//create output
 		try (OutputStream out = new FileOutputStream(new File(outputFileName))) {
 			if ((reportType.isXDocReportDocx() && reportFormat == ReportFormat.docx)
-					|| (reportType.isXDocReportOdt() && reportFormat == ReportFormat.odt)) {
+					|| (reportType.isXDocReportOdt() && reportFormat == ReportFormat.odt)
+					|| (reportType.isXDocReportPptx() && reportFormat == ReportFormat.pptx)) {
 				//no conversion
 				xdocReport.process(context, out);
 			} else {

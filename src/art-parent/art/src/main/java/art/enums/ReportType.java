@@ -34,6 +34,7 @@ public enum ReportType {
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
+	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128),
 	XYChart(-1), Pie3DChart(-2), HorizontalBar3DChart(-3), VerticalBar3DChart(-4),
 	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
@@ -76,6 +77,8 @@ public enum ReportType {
 			case XDocReportVelocityDocx:
 			case XDocReportFreeMarkerOdt:
 			case XDocReportVelocityOdt:
+			case XDocReportFreeMarkerPptx:
+			case XDocReportVelocityPptx:
 				return true;
 			default:
 				return false;
@@ -98,7 +101,7 @@ public enum ReportType {
 				return false;
 		}
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if this is a xdocreport report that produces
 	 * odt output
@@ -110,6 +113,59 @@ public enum ReportType {
 		switch (this) {
 			case XDocReportFreeMarkerOdt:
 			case XDocReportVelocityOdt:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a xdocreport report that produces
+	 * pptx output
+	 *
+	 * @return <code>true</code> if this is a xdocreport report that produces
+	 * pptx output
+	 */
+	public boolean isXDocReportPptx() {
+		switch (this) {
+			case XDocReportFreeMarkerPptx:
+			case XDocReportVelocityPptx:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a xdocreport report that uses the
+	 * freemarker engine
+	 *
+	 * @return <code>true</code> if this is a xdocreport report that uses the
+	 * freemarker engine
+	 */
+	public boolean isXDocReportFreeMarker() {
+		switch (this) {
+			case XDocReportFreeMarkerDocx:
+			case XDocReportFreeMarkerOdt:
+			case XDocReportFreeMarkerPptx:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a xdocreport report that uses the
+	 * velocity engine
+	 *
+	 * @return <code>true</code> if this is a xdocreport report that uses the
+	 * velocity engine
+	 */
+	public boolean isXDocReportVelocity() {
+		switch (this) {
+			case XDocReportVelocityDocx:
+			case XDocReportVelocityOdt:
+			case XDocReportVelocityPptx:
 				return true;
 			default:
 				return false;
@@ -356,6 +412,10 @@ public enum ReportType {
 				return "XDocReport: Freemarker engine - ODT";
 			case XDocReportVelocityOdt:
 				return "XDocReport: Velocity engine - ODT";
+			case XDocReportFreeMarkerPptx:
+				return "XDocReport: Freemarker engine - PPTX";
+			case XDocReportVelocityPptx:
+				return "XDocReport: Velocity engine - PPTX";
 			default:
 				return this.name();
 		}

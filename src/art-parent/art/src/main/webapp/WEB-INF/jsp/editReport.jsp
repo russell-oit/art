@@ -186,6 +186,8 @@ Edit report page
 					case 124: //xdocreport velocity docx
 					case 125: //xdocreport freemarker odt
 					case 126: //xdocreport velocity odt
+					case 127: //xdocreport freemarker pptx
+					case 128: //xdocreport velocity pptx
 						$("#templateDiv").show();
 						break;
 					default:
