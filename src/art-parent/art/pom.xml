@@ -26,7 +26,7 @@
 	<properties>
 		<!-- jxls-poi as at 1.0.9 has error with poi 3.13+ -->
 		<!-- xdocreport as at 1.0.6 has error with poi 3.12+ -->
-		<poi.version>3.10-FINAL</poi.version>
+		<poi.version>3.12</poi.version>
 		<owasp.encoder.version>1.2</owasp.encoder.version>
 		<thymeleaf.version>3.0.0.RELEASE</thymeleaf.version>
 		<xdocreport.version>1.0.6</xdocreport.version>
@@ -175,11 +175,6 @@
 				<artifactId>xalan</artifactId>
 				<version>2.7.1</version>
 			</dependency>
-<!--			<dependency>
-				<groupId>org.apache.poi</groupId>
-				<artifactId>ooxml-schemas</artifactId>
-				<version>1.3</version>
-			</dependency>-->
 		</dependencies>
 	</dependencyManagement>
 
@@ -498,6 +493,14 @@
 			<artifactId>poi-ooxml</artifactId>
 		</dependency>
 		<dependency>
+			<!-- poi-scratchpad 3.12 needed for xdocreport. won't be needed with poi 3.13+ -->
+			<!-- see https://github.com/opensagres/xdocreport/issues/39 -->
+			<!-- and https://bz.apache.org/bugzilla/show_bug.cgi?id=57957 -->
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-scratchpad</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.jxls</groupId>
 			<artifactId>jxls</artifactId>
 			<version>2.3.0</version>
@@ -623,6 +626,5 @@
 			<artifactId>fr.opensagres.xdocreport.converter.odt.odfdom</artifactId>
 			<version>${xdocreport.version}</version>
 		</dependency>
-
 	</dependencies>
 </project>
