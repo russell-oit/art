@@ -348,8 +348,8 @@ public class RunReportHelper {
 
 		return formats;
 	}
-
-	/**
+	
+		/**
 	 * Replaces direct parameter substitution placeholders with parameter values
 	 *
 	 * @param sourceString the string the contains the parameter placeholders
@@ -357,6 +357,21 @@ public class RunReportHelper {
 	 * @return a string with parameter placeholders replaced with their values
 	 */
 	public String performDirectParameterSubstitution(String sourceString,
+			Map<String, ReportParameter> reportParamsMap) {
+		
+		String placeholderPrefix=""; //default to no prefix
+		return performDirectParameterSubstitution(sourceString,placeholderPrefix,reportParamsMap);
+	}
+
+	/**
+	 * Replaces direct parameter substitution placeholders with parameter values
+	 *
+	 * @param sourceString the string the contains the parameter placeholders
+	 * @param placeholderPrefix a prefix to be added to the parameter name
+	 * @param reportParamsMap the parameter values
+	 * @return a string with parameter placeholders replaced with their values
+	 */
+	public String performDirectParameterSubstitution(String sourceString, String placeholderPrefix,
 			Map<String, ReportParameter> reportParamsMap) {
 
 		logger.debug("Entering performDirectParameterSubstitution");
@@ -373,7 +388,7 @@ public class RunReportHelper {
 				continue;
 			}
 
-			String paramIdentifier = "#!" + paramName + "#";
+			String paramIdentifier = "#" + placeholderPrefix + paramName + "#";
 			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
 
 			List<String> paramValues = new ArrayList<>();

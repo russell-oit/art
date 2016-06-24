@@ -574,7 +574,8 @@ public class ReportRunner {
 		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
 				|| reportType.isOlap()) {
 			RunReportHelper runReportHelper = new RunReportHelper();
-			querySql = runReportHelper.performDirectParameterSubstitution(querySql, reportParamsMap);
+			String placeholderPrefix = "!"; //use #!<param_name># syntax
+			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
 		}
 
 		//replace jdbc parameter identifiers with ?
