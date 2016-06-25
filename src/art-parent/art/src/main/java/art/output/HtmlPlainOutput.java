@@ -21,8 +21,8 @@ import art.servlets.Config;
 import java.util.Date;
 
 /**
- * Generates plain html output. Can be used for jobs because the output does
- * not depend on other files (css etc) and it is a standalone page
+ * Generates plain html output. Can be used for jobs because the output does not
+ * depend on other files (css etc) and it is a standalone page
  *
  * @author Enrico Liboni
  */
@@ -78,27 +78,13 @@ public class HtmlPlainOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = null;
-		} else {
-			formattedValue = actualNumberFormatter.format(value);
-		}
-
+		String formattedValue = formatNumbericValue(value);
 		out.println("<td style='text-align: right'>" + formattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = Config.getDateDisplayString(value);
-		}
-
+		String formattedValue = formatDateValue(value);
 		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
 	}
 

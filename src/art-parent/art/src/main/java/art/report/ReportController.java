@@ -395,6 +395,7 @@ public class ReportController {
 		validExtensions.add("ftl");
 		validExtensions.add("docx");
 		validExtensions.add("odt");
+		validExtensions.add("pptx");
 
 		long maxUploadSize = Config.getSettings().getMaxFileUploadSizeMB(); //size in MB
 		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes

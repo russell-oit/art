@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public class XlsxOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
+	
 	private SXSSFWorkbook wb;
 	private SXSSFSheet sh;
 	private CellStyle headerStyle;
@@ -104,7 +105,6 @@ public class XlsxOutput extends StandardOutput {
 			dateStyle.setFont(bodyFont);
 			styles.put("date", dateStyle);
 		} catch (IOException ex) {
-			logger.error("Error", ex);
 			throw new RuntimeException(ex);
 		}
 	}
@@ -182,7 +182,6 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void newRow() {
-		//open new row
 		row = sh.createRow(currentRow++);
 		cellNumber = 0;
 	}

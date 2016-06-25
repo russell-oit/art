@@ -80,7 +80,7 @@ public class PdfOutput extends StandardOutput {
 
 			document.open();
 
-			table = new PdfPTable(totalColumnCount);
+			table = new PdfPTable(totalColumnCount); //use total column count insead of resultset column count because of crosstab output
 			table.getDefaultCell().setBorder(0);
 			table.setWidthPercentage(100F); //default is 80
 			table.setHeaderRows(1);
@@ -112,7 +112,7 @@ public class PdfOutput extends StandardOutput {
 
 	/**
 	 * Outputs parameters used for the report
-	 * 
+	 *
 	 * @param doc the itext document object
 	 * @param fs the fontselector to be used
 	 * @param reportParamsList the report parameters
@@ -147,10 +147,10 @@ public class PdfOutput extends StandardOutput {
 
 	/**
 	 * Adds a new line
-	 * 
+	 *
 	 * @param doc the document to use
 	 * @param fs the fontselector to use
-	 * @throws DocumentException 
+	 * @throws DocumentException
 	 */
 	private void addNewline(Document doc, FontSelector fs) throws DocumentException {
 		doc.add(new Paragraph(fs.process("\n")));
@@ -196,13 +196,7 @@ public class PdfOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "0";
-		} else {
-			formattedValue = actualNumberFormatter.format(value);
-		}
+		String formattedValue = formatNumbericValue(value);
 
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
 
@@ -215,13 +209,7 @@ public class PdfOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue;
-
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = Config.getDateDisplayString(value);
-		}
+		String formattedValue = formatDateValue(value);
 
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
 		cell.setPaddingLeft(5f);

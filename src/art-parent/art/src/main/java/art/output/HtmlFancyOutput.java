@@ -29,7 +29,7 @@ import java.util.Date;
  * @author Enrico Liboni
  */
 public class HtmlFancyOutput extends StandardOutput {
-	
+
 	@Override
 	public void init() {
 		//include required css and javascript files
@@ -49,7 +49,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	}
 
 	@Override
-	public void addHeaderCellLeftAligned(String value) {
+	public void addHeaderCellAlignLeft(String value) {
 		out.println("<td class='qeattrLeft'>" + value + "</td>");
 	}
 
@@ -72,12 +72,7 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue;
-		if (value == null) {
-			formattedValue = null;
-		} else {
-			formattedValue = actualNumberFormatter.format(value);
-		}
+		String formattedValue = formatNumbericValue(value);
 
 		String cssClass;
 		if (evenRow) {
@@ -91,12 +86,7 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue;
-		if (value == null) {
-			formattedValue = "";
-		} else {
-			formattedValue = Config.getDateDisplayString(value);
-		}
+		String formattedValue = formatDateValue(value);
 
 		String cssClass;
 		if (evenRow) {

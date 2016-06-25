@@ -49,7 +49,7 @@ public class HtmlGridOutput extends StandardOutput {
 	}
 
 	@Override
-	public void addHeaderCellLeftAligned(String value) {
+	public void addHeaderCellAlignLeft(String value) {
 		out.println("<th style='text-align: left'>" + value + "</th>");
 	}
 
@@ -71,14 +71,12 @@ public class HtmlGridOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue;
+		String formattedValue = formatNumbericValue(value);
 		String sortValue;
 
 		if (value == null) {
-			formattedValue = null;
 			sortValue = null;
 		} else {
-			formattedValue = actualNumberFormatter.format(value);
 			sortValue = sortNumberFormatter.format(value);
 		}
 
@@ -88,16 +86,8 @@ public class HtmlGridOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue;
-		long sortValue;
-
-		if (value == null) {
-			formattedValue = "";
-			sortValue = 0;
-		} else {
-			sortValue = value.getTime();
-			formattedValue = Config.getDateDisplayString(value);
-		}
+		String formattedValue = formatDateValue(value);
+		long sortValue = getDateSortValue(value);
 
 		out.println("<td style='text-align: left' sorttable_customkey='"
 				+ sortValue + "'>" + formattedValue + "</td>");

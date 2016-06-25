@@ -251,7 +251,7 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 */
-	public void addHeaderCellLeftAligned(String value) {
+	public void addHeaderCellAlignLeft(String value) {
 		addHeaderCell(value);
 	}
 
@@ -299,6 +299,60 @@ public abstract class StandardOutput {
 	 * Closes report output. Any final cleanup should be done here.
 	 */
 	public abstract void endRows();
+	
+	/**
+	 * Formats a numberic value for display
+	 * 
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	public String formatNumbericValue(Double value){
+		String formattedValue;
+
+		if (value == null) {
+			formattedValue = "0";
+		} else {
+			formattedValue = actualNumberFormatter.format(value);
+		}
+		
+		return formattedValue;
+	}
+	
+	/**
+	 * Formats a date value for display
+	 * 
+	 * @param value the value to format
+	 * @return the string representation to display
+	 */
+	public String formatDateValue(Date value){
+		String formattedValue;
+		
+		if (value == null) {
+			formattedValue = "";
+		} else {
+			formattedValue = Config.getDateDisplayString(value);
+		}
+		
+		return formattedValue;
+	}
+	
+	/**
+	 * Returns a value to use to sort date columns
+	 * 
+	 * @param value the actual date
+	 * @return the sort value for the date
+	 */
+	public long getDateSortValue(Date value){
+		long sortValue;
+		
+		if (value == null) {
+			sortValue = 0;
+		} else {
+			sortValue = value.getTime();
+		}
+		
+		return sortValue;
+	}
 
 	/**
 	 * Generates a tabular report
@@ -758,7 +812,7 @@ public abstract class StandardOutput {
 					return result;
 				} else {
 					Object Dy = ya[j];
-					addHeaderCellLeftAligned(y.get(Dy).toString()); //column 1 data displayed as a header
+					addHeaderCellAlignLeft(y.get(Dy).toString()); //column 1 data displayed as a header
 					for (i = 0; i < xa.length; i++) {
 						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
 						addString(value);
@@ -831,7 +885,7 @@ public abstract class StandardOutput {
 				} else {
 					Object Dy = ya[j];
 					//o.addHeaderCell(Dy.toString()); //column 1 data displayed as a header
-					addHeaderCellLeftAligned(Dy.toString()); //column 1 data displayed as a header
+					addHeaderCellAlignLeft(Dy.toString()); //column 1 data displayed as a header
 					for (i = 0; i < xa.length; i++) {
 						Object value = values.get(Dy.toString() + "-" + xa[i].toString());
 						addString(value);

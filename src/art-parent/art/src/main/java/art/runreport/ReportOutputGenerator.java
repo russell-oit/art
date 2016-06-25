@@ -31,6 +31,7 @@ import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
+import art.output.DocxOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.GroupHtmlOutput;
@@ -249,7 +250,10 @@ public class ReportOutputGenerator {
 				}
 
 				rowsRetrieved = getResultSetRowCount(rs);
-				displayFileLink(fileName);
+
+				if (!isJob) {
+					displayFileLink(fileName);
+				}
 			} else if (reportType == ReportType.Group) {
 				rs = reportRunner.getResultSet();
 
@@ -435,7 +439,9 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 				xdocReportOutput.generateReport(report, reportParamsList, rs, reportFormat, fullOutputFilename);
 				rowsRetrieved = getResultSetRowCount(rs);
-				displayFileLink(fileName);
+				if (!isJob) {
+					displayFileLink(fileName);
+				}
 			}
 		} finally {
 			DatabaseUtils.close(rs);
@@ -506,6 +512,9 @@ public class ReportOutputGenerator {
 				break;
 			case tsvGz:
 				standardOutput = new TsvOutput(ZipType.Gzip);
+				break;
+			case docx:
+				standardOutput = new DocxOutput();
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
