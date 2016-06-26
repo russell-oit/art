@@ -10,6 +10,7 @@ ART 3.0
 * Added ability to create reports based on FreeMarker templates
 * Added ability to create reports based on MS Word (docx), LibreOffice/OpenOffice Writer (odt) and MS PowerPoint (pptx) templates
 * Added docx report format for tabular reports
+* Added odt report format for tabular reports
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0

@@ -26,8 +26,6 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -59,12 +57,10 @@ import org.slf4j.LoggerFactory;
  */
 public class DocxOutput extends StandardOutput {
 
-	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(DocxOutput.class);
-
-	XWPFDocument document;
-	XWPFTable table;
-	XWPFTableRow row;
-	XWPFTableCell cell;
+	private XWPFDocument document;
+	private XWPFTable table;
+	private XWPFTableRow row;
+	private XWPFTableCell cell;
 	private int cellNumber;
 
 	@Override

@@ -14,7 +14,7 @@
 	<table style="width: 90%; border: 0;">
 		<tr>
 			<td>
-				<div align="center" style="width: 90%;" class="greyBack">
+				<div align="center" class="greyBack">
 					<c:forEach var="parameterDisplayValue" items="${parameterDisplayValues}">
 						${encode:forHtmlContent(parameterDisplayValue.value)}
 						<br>

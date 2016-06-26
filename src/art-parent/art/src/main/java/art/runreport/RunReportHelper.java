@@ -317,7 +317,6 @@ public class RunReportHelper {
 				case JasperReportsArt:
 				case JasperReportsTemplate:
 					formats.add("pdf");
-					formats.add("xls");
 					formats.add("xlsx");
 					formats.add("html");
 					break;
