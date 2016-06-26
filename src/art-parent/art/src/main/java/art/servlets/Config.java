@@ -361,6 +361,9 @@ public class Config extends HttpServlet {
 			//create connection pools
 			DbConnections.createConnectionPools(artDbConfig);
 
+			//create quartz scheduler. must be done before upgrade is run
+			createQuartzScheduler();
+
 			//upgrade art database
 			String upgradeFilePath = getArtTempPath() + "upgrade.txt";
 			String templatesPath = getTemplatesPath();
@@ -369,9 +372,6 @@ public class Config extends HttpServlet {
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 		}
-
-		//create quartz scheduler
-		createQuartzScheduler();
 	}
 
 	/**
@@ -606,7 +606,7 @@ public class Config extends HttpServlet {
 			pSettings.setTimeFormat("HH:mm:ss");
 		}
 		if (StringUtils.isBlank(pSettings.getReportFormats())) {
-			pSettings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,odt,htmlPlain");
+			pSettings.setReportFormats("htmlDataTable,htmlGrid,xlsx,pdf,docx,odt,ods,htmlPlain");
 		}
 		if (pSettings.getMaxRunningReports() <= 0) {
 			pSettings.setMaxRunningReports(1000);

@@ -112,8 +112,8 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void addTitle() {
 		newRow();
-		String title = reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date());
-		addCellString(title);
+		addCellString(reportName);
+		addCellString(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
 		newRow();
 	}
 
@@ -130,11 +130,12 @@ public class XlsxOutput extends StandardOutput {
 			addHeaderCell(paramLabel);
 			addCellString(paramDisplayValues);
 		}
+		
+		newRow();
 	}
 
 	@Override
 	public void beginHeader() {
-		newRow();
 		newRow();
 	}
 

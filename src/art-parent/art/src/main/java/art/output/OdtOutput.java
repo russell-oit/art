@@ -81,7 +81,7 @@ public class OdtOutput extends StandardOutput {
 
 	@Override
 	public void beginHeader() {
-		document.addParagraph("");
+		document.addParagraph(""); //for paragraph/space/line between title and results table
 		int rows = 1;
 		int cols = totalColumnCount;
 		table = document.addTable(rows, cols);

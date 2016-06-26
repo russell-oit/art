@@ -29,6 +29,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,7 @@ public class XlsOutput extends StandardOutput {
 			currentRow = 0;
 
 			headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-			headerFont.setColor(org.apache.poi.hssf.util.HSSFColor.BLUE.index);
+			headerFont.setColor(HSSFColor.BLUE.index);
 			headerFont.setFontHeightInPoints((short) 12);
 			headerStyle.setFont(headerFont);
 			headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
@@ -112,8 +113,8 @@ public class XlsOutput extends StandardOutput {
 	@Override
 	public void addTitle() {
 		newRow();
-		String title = reportName + " - " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date());
-		addCellString(title);
+		addCellString(reportName);
+		addCellString(ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
 		newRow();
 	}
 
@@ -130,11 +131,12 @@ public class XlsOutput extends StandardOutput {
 			addHeaderCell(paramLabel);
 			addCellString(paramDisplayValues);
 		}
+		
+		newRow();
 	}
 
 	@Override
 	public void beginHeader() {
-		newRow();
 		newRow();
 	}
 

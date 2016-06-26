@@ -43,6 +43,7 @@ import art.output.HtmlGridOutput;
 import art.output.HtmlPlainOutput;
 import art.output.JasperReportsOutput;
 import art.output.JxlsOutput;
+import art.output.OdsOutput;
 import art.output.OdtOutput;
 import art.output.PdfOutput;
 import art.output.Rss20Output;
@@ -518,7 +519,10 @@ public class ReportOutputGenerator {
 				standardOutput = new DocxOutput();
 				break;
 			case odt:
-				standardOutput=new OdtOutput();
+				standardOutput = new OdtOutput();
+				break;
+			case ods:
+				standardOutput = new OdsOutput();
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);
