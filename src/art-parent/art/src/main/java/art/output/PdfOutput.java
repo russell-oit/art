@@ -46,25 +46,7 @@ public class PdfOutput extends StandardOutput {
 	@Override
 	public void init() {
 		try {
-			Rectangle pageSize;
-			PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();
-
-			switch (pageSizeSetting) {
-				case A4:
-					pageSize = PageSize.A4;
-					break;
-				case A4Landscape:
-					pageSize = PageSize.A4.rotate();
-					break;
-				case Letter:
-					pageSize = PageSize.LETTER;
-					break;
-				case LetterLandscape:
-					pageSize = PageSize.LETTER.rotate();
-					break;
-				default:
-					throw new IllegalArgumentException("Unexpected pdf page size setting: " + pageSizeSetting);
-			}
+			Rectangle pageSize = getPageSize();
 
 			//set document margins
 			//document with 72pt (1 inch) margins for left, right, top, bottom
@@ -91,6 +73,36 @@ public class PdfOutput extends StandardOutput {
 		} catch (DocumentException | IOException ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+
+	/**
+	 * Returns the page size to use for the document
+	 *
+	 * @return the page size to use
+	 * @throws IllegalArgumentException
+	 */
+	private Rectangle getPageSize() throws IllegalArgumentException {
+		Rectangle pageSize;
+
+		PdfPageSize pageSizeSetting = Config.getSettings().getPdfPageSize();
+		switch (pageSizeSetting) {
+			case A4:
+				pageSize = PageSize.A4;
+				break;
+			case A4Landscape:
+				pageSize = PageSize.A4.rotate();
+				break;
+			case Letter:
+				pageSize = PageSize.LETTER;
+				break;
+			case LetterLandscape:
+				pageSize = PageSize.LETTER.rotate();
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected pdf page size setting: " + pageSizeSetting);
+		}
+
+		return pageSize;
 	}
 
 	@Override

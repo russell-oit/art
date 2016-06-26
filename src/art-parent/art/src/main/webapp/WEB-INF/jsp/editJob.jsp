@@ -233,13 +233,15 @@
 						case 'CondEmailAttachment':
 						case 'CondPublish':
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
-							list.append(new Option('${pdfText}', 'pdf'));
 							list.append(new Option('${xlsxText}', 'xlsx'));
+							list.append(new Option('${pdfText}', 'pdf'));
+							list.append(new Option('${docxText}', 'docx'));
 							break;
 						case 'Print':
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
-							list.append(new Option('${pdfText}', 'pdf'));
 							list.append(new Option('${xlsxText}', 'xlsx'));
+							list.append(new Option('${pdfText}', 'pdf'));
+							list.append(new Option('${docxText}', 'docx'));
 							break;
 						default:
 							list.append(new Option('--', '--'));
