@@ -17,7 +17,6 @@
  */
 package art.output;
 
-import art.servlets.Config;
 import java.util.Date;
 
 /**

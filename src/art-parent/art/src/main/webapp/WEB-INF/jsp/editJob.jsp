@@ -39,6 +39,7 @@
 <spring:message code="reports.format.docx" var="docxText"/>
 <spring:message code="reports.format.odt" var="odtText"/>
 <spring:message code="reports.format.pptx" var="pptxText"/>
+<spring:message code="reports.format.ods" var="odsText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -131,7 +132,7 @@
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
@@ -196,10 +197,13 @@
 				} else if (reportTypeId === 115 || reportTypeId === 116) {
 					//jasper report
 					list.append(new Option('${pdfText}', 'pdf'));
+					list.append(new Option('${docxText}', 'docx'));
+					list.append(new Option('${odtText}', 'odt'));
 					list.append(new Option('${xlsxText}', 'xlsx'));
+					list.append(new Option('${odsText}', 'ods'));
 				} else if (reportTypeId === 117 || reportTypeId === 118) {
 					//jxls
-					list.append(new Option('${xlsText}', 'xls'));
+					list.append(new Option('${xlsxText}', 'xlsx'));
 				} else if (reportTypeId === 122) {
 					//freemarker
 					list.append(new Option('${htmlText}', 'html'));
@@ -233,6 +237,7 @@
 						case 'CondPublish':
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
 							list.append(new Option('${xlsxText}', 'xlsx'));
+							list.append(new Option('${odsText}', 'ods'));
 							list.append(new Option('${pdfText}', 'pdf'));
 							list.append(new Option('${docxText}', 'docx'));
 							list.append(new Option('${odtText}', 'odt'));
@@ -240,6 +245,7 @@
 						case 'Print':
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
 							list.append(new Option('${xlsxText}', 'xlsx'));
+							list.append(new Option('${odsText}', 'ods'));
 							list.append(new Option('${pdfText}', 'pdf'));
 							list.append(new Option('${docxText}', 'docx'));
 							list.append(new Option('${odtText}', 'odt'));

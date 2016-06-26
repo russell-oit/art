@@ -48,7 +48,6 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTString;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STPageOrientation;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generates docx output

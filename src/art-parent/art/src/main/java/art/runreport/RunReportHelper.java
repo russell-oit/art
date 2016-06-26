@@ -279,6 +279,12 @@ public class RunReportHelper {
 			case JxlsTemplate:
 			case JasperReportsArt:
 			case JasperReportsTemplate:
+			case XDocReportFreeMarkerDocx:
+			case XDocReportFreeMarkerOdt:
+			case XDocReportFreeMarkerPptx:
+			case XDocReportVelocityDocx:
+			case XDocReportVelocityOdt:
+			case XDocReportVelocityPptx:
 				enablePrint = false;
 				break;
 			default:
@@ -317,7 +323,10 @@ public class RunReportHelper {
 				case JasperReportsArt:
 				case JasperReportsTemplate:
 					formats.add("pdf");
+					formats.add("docx");
+					formats.add("odt");
 					formats.add("xlsx");
+					formats.add("ods");
 					formats.add("html");
 					break;
 				case Group:

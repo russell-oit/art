@@ -39,6 +39,9 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRXhtmlExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
+import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
+import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
+import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.fill.JRAbstractLRUVirtualizer;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
@@ -131,7 +134,7 @@ public class JasperReportsOutput {
 
 			//fill report with data
 			JasperPrint jasperPrint;
-			ReportType reportType=report.getReportType();
+			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JasperReportsTemplate) {
 				Connection conn = null;
 				try {
@@ -185,8 +188,34 @@ public class JasperReportsOutput {
 
 					xlsxExporter.exportReport();
 					break;
+				case docx:
+					JRDocxExporter docxExporter = new JRDocxExporter();
+
+					docxExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+					docxExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
+
+					docxExporter.exportReport();
+					break;
+				case odt:
+					JROdtExporter odtExporter = new JROdtExporter();
+
+					odtExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+					odtExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
+
+					odtExporter.exportReport();
+					break;
+				case ods:
+					JROdsExporter odsExporter = new JROdsExporter();
+
+					odsExporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+					odsExporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, outputFileName);
+					odsExporter.setParameter(JRXlsExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
+					odsExporter.setParameter(JRXlsExporterParameter.IS_REMOVE_EMPTY_SPACE_BETWEEN_ROWS, Boolean.TRUE);
+
+					odsExporter.exportReport();
+					break;
 				default:
-					throw new IllegalArgumentException("Invalid report format: " + reportFormat);
+					throw new IllegalArgumentException("Unexpected report format: " + reportFormat);
 			}
 		} finally {
 			if (jrVirtualizer != null) {
