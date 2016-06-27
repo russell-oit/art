@@ -21,6 +21,7 @@ import art.enums.ReportType;
 import de.laures.cewolf.links.PieSectionLinkGenerator;
 import de.laures.cewolf.tooltips.PieToolTipGenerator;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Objects;
@@ -68,6 +69,10 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 
 		//resultset structure
 		//category, value [, link]
+		
+		ResultSetMetaData rsmd = rs.getMetaData();
+		setSeriesColorOptions(rsmd);
+		
 		while (rs.next()) {
 			String category = rs.getString(1);
 			double value = rs.getDouble(2);

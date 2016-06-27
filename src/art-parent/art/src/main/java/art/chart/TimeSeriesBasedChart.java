@@ -73,7 +73,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 	@Override
 	public void fillDataset(ResultSet rs) throws SQLException {
 		logger.debug("Entering fillDataset");
-		
+
 		Objects.requireNonNull(rs, "rs must not be null");
 
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
@@ -109,9 +109,14 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 				int columnIndex = seriesIndex + 2 + hop; //start from column 2
 				String seriesName = rsmd.getColumnLabel(columnIndex);
+				if (isOptionsColumn(seriesName)) {
+					continue;
+				}
 				finalSeries.put(seriesIndex, new TimeSeries(seriesName));
 			}
 		}
+
+		setSeriesColorOptions(rsmd);
 
 		int rowCount = 0;
 
@@ -159,6 +164,9 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = rsmd.getColumnLabel(columnIndex);
+					if (isOptionsColumn(seriesName)) {
+						continue;
+					}
 					double yValue = rs.getDouble(columnIndex);
 					addData(rs, finalSeries, seriesIndex, itemIndex, yValue, date, seriesName);
 				}
@@ -173,6 +181,18 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		setDataset(dataset);
 	}
 
+	/**
+	 * Adds data from the resultset to the dataset
+	 *
+	 * @param rs the resultset to use
+	 * @param finalSeries the dataset to populate
+	 * @param seriesIndex the series index
+	 * @param itemIndex the item index
+	 * @param yValue the y value
+	 * @param date the date
+	 * @param seriesName the series name
+	 * @throws SQLException
+	 */
 	private void addData(ResultSet rs, Map<Integer, TimeSeries> finalSeries,
 			int seriesIndex, int itemIndex, double yValue, Date date, String seriesName) throws SQLException {
 

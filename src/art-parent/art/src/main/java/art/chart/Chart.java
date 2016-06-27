@@ -29,6 +29,7 @@ import de.laures.cewolf.DatasetProducer;
 import de.laures.cewolf.PostProcessingException;
 import de.laures.cewolf.cpp.LineRendererProcessor;
 import de.laures.cewolf.cpp.RotatedAxisLabels;
+import de.laures.cewolf.cpp.SeriesPaintProcessor;
 import de.laures.cewolf.taglib.AbstractChartDefinition;
 import de.laures.cewolf.taglib.CewolfChartFactory;
 import java.awt.Color;
@@ -86,6 +87,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private boolean hasTooltips; //if true class must implement a ToolTipGenerator (otherwise showChart.jsp will fail on the <cewolf:map> tag)
 	private DrilldownLinkHelper drilldownLinkHelper;
 	private List<ReportParameter> reportParamsList;
+	protected Map<String, String> seriesColors;
 
 	/**
 	 * @return the hasTooltips
@@ -354,12 +356,13 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		processXAxisLabelLines(chart);
 		showPoints(chart);
 		rotateLabels(chart);
+		setSeriesColors(chart);
 	}
 
 	/**
 	 * Performs post processing action of setting the y axis range
-	 * 
-	 * @param chart 
+	 *
+	 * @param chart
 	 */
 	protected void processYAxisRange(JFreeChart chart) {
 		logger.debug("Entering processYAxisRange");
@@ -386,8 +389,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 	/**
 	 * Performs post processing action of setting maximum x axis label lines
-	 * 
-	 * @param chart 
+	 *
+	 * @param chart
 	 */
 	private void processXAxisLabelLines(JFreeChart chart) {
 		logger.debug("Entering processXAxisLabelLines");
@@ -404,8 +407,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 	/**
 	 * Performs post processing action of displaying labels
-	 * 
-	 * @param chart 
+	 *
+	 * @param chart
 	 */
 	private void processLabels(JFreeChart chart) {
 		logger.debug("Entering processLabels");
@@ -449,11 +452,12 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	}
 
 	/**
-	 * Produces the basic jfree chart, without any post processing. Called by getChart()
-	 * 
+	 * Produces the basic jfree chart, without any post processing. Called by
+	 * getChart()
+	 *
 	 * @return the basic chart
 	 * @throws DatasetProduceException
-	 * @throws ChartValidationException 
+	 * @throws ChartValidationException
 	 */
 	@Override
 	protected JFreeChart produceChart() throws DatasetProduceException, ChartValidationException {
@@ -570,6 +574,60 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		if (drilldownLinkHelper != null) {
 			String drilldownUrl = drilldownLinkHelper.getDrilldownLink(paramValues);
 			getDrilldownLinks().put(linkId, drilldownUrl);
+		}
+	}
+
+	/**
+	 * Sets custom series colors if so configured
+	 *
+	 * @param chart the jfree chart to process
+	 */
+	private void setSeriesColors(JFreeChart chart) {
+		logger.debug("Entering setSeriesColors");
+
+		if (seriesColors == null || seriesColors.isEmpty()) {
+			return;
+		}
+
+		SeriesPaintProcessor seriesPaintProcessor = new SeriesPaintProcessor();
+		seriesPaintProcessor.processChart(chart, seriesColors);
+	}
+
+	/**
+	 * Sets series color options as specified in the query sql
+	 *
+	 * @param rsmd the rsmd object for the chart resultset
+	 * @throws SQLException
+	 */
+	protected void setSeriesColorOptions(ResultSetMetaData rsmd) throws SQLException {
+		logger.debug("Entering setSeriesColorOptions");
+
+		seriesColors = new HashMap<>();
+		for (int i = 0; i < rsmd.getColumnCount(); i++) {
+			int columnIndex = i + 1;
+			String columnName = rsmd.getColumnLabel(columnIndex);
+			if (StringUtils.startsWithIgnoreCase(columnName, "seriesColor:")) {
+				String[] colorDetails = StringUtils.split(columnName, ":");
+				String seriesId = colorDetails[1];
+				String hexColorCode = colorDetails[2];
+				seriesColors.put(seriesId, hexColorCode);
+			}
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if the resultset column with the given name is
+	 * an options definition column
+	 *
+	 * @param columnName the column name
+	 * @return <code>true</code> if the resultset column with the given name is
+	 * an options definition column
+	 */
+	protected boolean isOptionsColumn(String columnName) {
+		if (StringUtils.startsWithIgnoreCase(columnName, "seriesColor:")) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 

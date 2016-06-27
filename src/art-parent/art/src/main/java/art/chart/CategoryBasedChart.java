@@ -27,7 +27,7 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.slf4j.Logger;
@@ -118,6 +118,8 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			seriesCount = rsmd.getColumnCount() - 1 - hop; //1 for xValue column
 		}
 
+		setSeriesColorOptions(rsmd);
+
 		while (rs.next()) {
 			String categoryName = rs.getString(1);
 
@@ -141,6 +143,9 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 				for (int seriesIndex = 0; seriesIndex < seriesCount; seriesIndex++) {
 					int columnIndex = seriesIndex + 2 + hop; //start from column 2
 					String seriesName = rsmd.getColumnLabel(columnIndex);
+					if (isOptionsColumn(seriesName)) {
+						continue;
+					}
 					double yValue = rs.getDouble(columnIndex);
 					addData(rs, dataset, seriesIndex, yValue, categoryName, seriesName);
 				}
@@ -150,6 +155,17 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 		setDataset(dataset);
 	}
 
+	/**
+	 * Adds data from the resultset to the dataset object
+	 *
+	 * @param rs the sesultset to use
+	 * @param dataset the dataset to populate
+	 * @param seriesIndex the series index
+	 * @param yValue the y value
+	 * @param categoryName the category name
+	 * @param seriesName the series name
+	 * @throws SQLException
+	 */
 	private void addData(ResultSet rs, DefaultCategoryDataset dataset,
 			int seriesIndex, double yValue, String categoryName, String seriesName) throws SQLException {
 

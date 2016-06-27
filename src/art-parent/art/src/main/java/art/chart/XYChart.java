@@ -32,7 +32,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 /**
  * Provides methods for working with xy charts
- * 
+ *
  * @author Timothy Anyona
  */
 public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGenerator {
@@ -56,8 +56,17 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 
+		int optionsColumnCount = 0;
+		for (int i = 0; i < columnCount; i++) {
+			int columnIndex = i + 1;
+			String columnName = rsmd.getColumnLabel(columnIndex);
+			if (isOptionsColumn(columnName)) {
+				optionsColumnCount++;
+			}
+		}
+
 		boolean dynamicSeries = false;
-		final int dynamicSeriesColumnCount = 3; //xValue, yValue, seriesName
+		int dynamicSeriesColumnCount = 3 + optionsColumnCount; //xValue, yValue, seriesName
 		if (isHasHyperLinks()) {
 			if (columnCount == dynamicSeriesColumnCount + 1) { //+1 for hyperlink column
 				dynamicSeries = true;
@@ -67,6 +76,8 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 				dynamicSeries = true;
 			}
 		}
+
+		setSeriesColorOptions(rsmd);
 
 		int seriesCount = 0; //start series index at 0 as generateLink() uses zero-based indices to idenfity series
 		Map<Integer, XYSeries> finalSeries = new HashMap<>(); //<series index, series>
