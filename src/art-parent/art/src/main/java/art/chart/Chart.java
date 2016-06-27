@@ -29,7 +29,6 @@ import de.laures.cewolf.DatasetProducer;
 import de.laures.cewolf.PostProcessingException;
 import de.laures.cewolf.cpp.LineRendererProcessor;
 import de.laures.cewolf.cpp.RotatedAxisLabels;
-import de.laures.cewolf.cpp.SeriesPaintProcessor;
 import de.laures.cewolf.taglib.AbstractChartDefinition;
 import de.laures.cewolf.taglib.CewolfChartFactory;
 import java.awt.Color;
@@ -589,7 +588,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			return;
 		}
 
-		SeriesPaintProcessor seriesPaintProcessor = new SeriesPaintProcessor();
+		ArtSeriesPaintProcessor seriesPaintProcessor = new ArtSeriesPaintProcessor();
 		seriesPaintProcessor.processChart(chart, seriesColors);
 	}
 
