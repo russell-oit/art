@@ -46,6 +46,7 @@ public class CacheController {
 		logger.debug("Entering showCaches");
 
 		model.addAttribute("caches", CacheType.list());
+		
 		return "caches";
 	}
 

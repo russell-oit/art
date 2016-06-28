@@ -187,6 +187,7 @@ public class ReportParameterController {
 
 		model.addAttribute("reportId", reportId);
 		model.addAttribute("action", action);
+		
 		return "editReportParameter";
 	}
 

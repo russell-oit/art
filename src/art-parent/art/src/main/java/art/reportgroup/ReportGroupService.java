@@ -266,6 +266,7 @@ public class ReportGroupService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
+		
 		return result;
 	}
 

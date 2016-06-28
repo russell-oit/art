@@ -252,7 +252,7 @@ public class AuthorizationFilter implements Filter {
 				|| StringUtils.equals(page, "archives")
 				|| StringUtils.equals(page, "getLovValues")) {
 			//everyone can access
-			//NOTE: "everyone" doesn't include when accessing as the art repository user
+			//NOTE: "everyone" doesn't include when accessing as the art database user
 			if (accessLevel >= AccessLevel.NormalUser.getValue()) {
 				authorised = true;
 			}

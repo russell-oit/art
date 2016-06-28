@@ -349,7 +349,6 @@ public class Config extends HttpServlet {
 	 * upgrade steps on the art database and starts the quartz scheduler
 	 */
 	public static void initializeArtDatabase() {
-
 		//load art database settings
 		loadArtDatabaseConfiguration();
 
@@ -532,6 +531,7 @@ public class Config extends HttpServlet {
 	private static void createCleanJob(Scheduler scheduler) {
 		try {
 			if (scheduler == null) {
+				logger.warn("Cannot create clean job. Scheduler not available.");
 				return;
 			}
 

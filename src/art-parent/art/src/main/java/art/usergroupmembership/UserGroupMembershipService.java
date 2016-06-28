@@ -55,13 +55,7 @@ public class UserGroupMembershipService {
 	@Autowired
 	private UserGroupService userGroupService;
 
-	private final String SQL_SELECT_ALL
-			= "SELECT AU.USER_ID, AU.USERNAME, AUG.USER_GROUP_ID, AUG.NAME AS GROUP_NAME"
-			+ " FROM ART_USER_GROUP_ASSIGNMENT AUGA"
-			+ " INNER JOIN ART_USERS AU ON"
-			+ " AUGA.USER_ID=AU.USER_ID"
-			+ " INNER JOIN ART_USER_GROUPS AUG ON"
-			+ " AUGA.USER_GROUP_ID=AUG.USER_GROUP_ID";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_USER_GROUP_ASSIGNMENT";
 
 	/**
 	 * Maps a resultset to an object

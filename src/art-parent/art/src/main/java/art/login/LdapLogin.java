@@ -241,19 +241,13 @@ public class LdapLogin {
 					result.setError(ex.toString());
 				}
 			}
-		} catch (LDAPException ex) {
+		} catch (LDAPException | GeneralSecurityException ex) {
 			logger.error("Error. username='{}'", username, ex);
 
 			result.setMessage("page.message.errorOccurred");
 			result.setDetails(ex.getMessage());
 			result.setError(ex.toString());
-		} catch (GeneralSecurityException ex) {
-			logger.error("Error. username='{}'", username, ex);
-
-			result.setMessage("page.message.errorOccurred");
-			result.setDetails(ex.getMessage());
-			result.setError(ex.toString());
-		}
+		} 
 
 		logger.debug("ldapConnection != null ={}", ldapConnection != null);
 		if (ldapConnection != null) {
@@ -271,7 +265,6 @@ public class LdapLogin {
 	 * @return the result of the authentication process
 	 */
 	private static LoginResult authenticateUsingJndi(String username, String password) {
-		//example code
 		//http://stackoverflow.com/questions/12163947/ldap-how-to-authenticate-user-with-connection-details
 		//http://www.adamretter.org.uk/blog/entries/LDAPTest.java
 

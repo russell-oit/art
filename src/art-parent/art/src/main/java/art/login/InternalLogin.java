@@ -75,11 +75,7 @@ public class InternalLogin {
 
 						//replace md5 password hashes with bcrypt hashes
 						if (StringUtils.equalsIgnoreCase(passwordAlgorithm, "md5")) {
-							String bcryptPassword = PasswordUtils.HashPasswordBcrypt(password);
-							user.setPassword(bcryptPassword);
-							String bcryptAlgorithm = "bcrypt";
-							user.setPasswordAlgorithm(bcryptAlgorithm);
-							userService.updatePassword(user.getUserId(), bcryptPassword, bcryptAlgorithm, user);
+							createBcryptPassword(password, user, userService);
 						}
 					} else {
 						//invalid password
@@ -101,5 +97,23 @@ public class InternalLogin {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Creates a bcrypt password for the given user
+	 * 
+	 * @param password the clear text password
+	 * @param user the user
+	 * @param userService the user service
+	 * @throws SQLException 
+	 */
+	private static void createBcryptPassword(String password, User user, UserService userService)
+			throws SQLException {
+		
+		String bcryptPassword = PasswordUtils.HashPasswordBcrypt(password);
+		user.setPassword(bcryptPassword);
+		String bcryptAlgorithm = "bcrypt";
+		user.setPasswordAlgorithm(bcryptAlgorithm);
+		userService.updatePassword(user.getUserId(), bcryptPassword, bcryptAlgorithm, user);
 	}
 }

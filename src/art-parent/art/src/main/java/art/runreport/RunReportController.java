@@ -202,6 +202,7 @@ public class RunReportController {
 			if (reportFormat == ReportFormat.xml || reportFormat == ReportFormat.rss20) {
 				showInline = true;
 			}
+			
 			//output page header. if showInline, page header and footer already exist. 
 			if (!showInline) {
 				request.setAttribute("title", reportName);
@@ -211,7 +212,7 @@ public class RunReportController {
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
 					RunReportHelper runReportHelper = new RunReportHelper();
-					runReportHelper.setSelectReportParameterAttributes(model, report, request, session, reportService);
+					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 				}
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
@@ -294,14 +295,14 @@ public class RunReportController {
 					String description = "";
 					shortDescription = StringUtils.trim(shortDescription);
 					if (StringUtils.length(shortDescription) > 0) {
-						description = " :: " + shortDescription;
+						description = " | " + shortDescription;
 					}
 
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
 
 					String reportInfo = "<b>" + reportName + "</b>"
-							+ description + " :: " + startTimeString;
+							+ description + " | " + startTimeString;
 
 					displayReportInfo(writer, reportInfo);
 

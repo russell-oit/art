@@ -100,7 +100,6 @@ public class DashboardController {
 			model.addAttribute("dashboard", dashboard);
 
 			model.addAttribute("reportName", report.getName());
-
 		} catch (SQLException | UnsupportedEncodingException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -204,7 +203,7 @@ public class DashboardController {
 		String value = XmlParser.getXmlElementValue(portletXml, "REFRESH");
 
 		String refreshPeriodString = null;
-		int minimumRefresh = 5;
+		int minimumRefresh = 5; //5 seconds
 		if (value != null) {
 			if (NumberUtils.isNumber(value)) {
 				if (Integer.parseInt(value) < minimumRefresh) {

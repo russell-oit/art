@@ -69,6 +69,12 @@ public class LoggerController {
 		return "loggers";
 	}
 
+	/**
+	 * Returns <code>true</code> if the given logback logger has appenders
+	 * 
+	 * @param log the logback logger
+	 * @return <code>true</code> if the given logback logger has appenders
+	 */
 	private boolean hasAppenders(ch.qos.logback.classic.Logger log) {
 		Iterator<Appender<ILoggingEvent>> it = log.iteratorForAppenders();
 		return it.hasNext();

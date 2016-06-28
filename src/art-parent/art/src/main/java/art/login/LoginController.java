@@ -289,7 +289,6 @@ public class LoginController {
 		//finally, authentication process finished. display appropriate page
 		if (result.isAuthenticated() && user != null) {
 			//access granted 
-
 			return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
 		} else {
 			//login failure. always display invalid account message rather than actual result details

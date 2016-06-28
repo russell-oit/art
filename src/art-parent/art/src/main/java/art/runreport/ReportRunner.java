@@ -534,7 +534,7 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Applies parameter placeholders for the report source
+	 * Applies parameter placeholders to the report source
 	 *
 	 * @param sb the report source
 	 */

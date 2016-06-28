@@ -248,7 +248,7 @@ public class JobService {
 
 		// Delete the Cached table if this job is a cache result one
 		JobType jobType = job.getJobType();
-		if (jobType == JobType.CacheAppend || jobType == JobType.CacheInsert) {
+		if (jobType.isCache()) {
 			// Delete
 			int targetDatabaseId = Integer.parseInt(job.getOutputFormat());
 			Connection connCache = DbConnections.getConnection(targetDatabaseId);

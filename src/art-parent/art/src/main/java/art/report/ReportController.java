@@ -97,7 +97,7 @@ public class ReportController {
 				return "reportError";
 			} else {
 				RunReportHelper runReportHelper = new RunReportHelper();
-				runReportHelper.setSelectReportParameterAttributes(model, report, request, session, reportService);
+				runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 			}
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);
@@ -428,7 +428,7 @@ public class ReportController {
 	}
 
 	/**
-	 * Sets xmla password and chart options for the given report
+	 * Sets report source and chart options for the given report
 	 *
 	 * @param report the report to use
 	 * @param action the action to take, "add" or "edit"
@@ -450,57 +450,68 @@ public class ReportController {
 		//build chart options setting string
 		logger.debug("(report.getChartOptions() != null) = {}", report.getChartOptions() != null);
 		if (reportType.isChart() && report.getChartOptions() != null) {
-			String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
-			String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
-
-			logger.debug("size='{}'", size);
-			logger.debug("yRange='{}'", yRange);
-
-			String showLegend = "";
-			String showLabels = "";
-			String showPoints = "";
-			String showData = "";
-
-			logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().isShowLegend());
-			if (report.getChartOptions().isShowLegend()) {
-				showLegend = "showLegend";
-			}
-			logger.debug("report.getChartOptions().isShowLabels() = {}", report.getChartOptions().isShowLabels());
-			if (report.getChartOptions().isShowLabels()) {
-				showLabels = "showLabels";
-			}
-			logger.debug("report.getChartOptions().isShowPoints() = {}", report.getChartOptions().isShowPoints());
-			if (report.getChartOptions().isShowPoints()) {
-				showPoints = "showPoints";
-			}
-			logger.debug("report.getChartOptions().isShowData() = {}", report.getChartOptions().isShowData());
-			if (report.getChartOptions().isShowData()) {
-				showData = "showData";
-			}
-
-			String rotateAt = "rotateAt:" + report.getChartOptions().getRotateAt();
-			String removeAt = "removeAt:" + report.getChartOptions().getRemoveAt();
-
-			logger.debug("rotateAt='{}'", rotateAt);
-			logger.debug("removeAt='{}'", removeAt);
-
-			Object[] options = {
-				size,
-				yRange,
-				report.getChartOptions().getBackgroundColor(),
-				showLegend,
-				showLabels,
-				showPoints,
-				showData,
-				rotateAt,
-				removeAt
-			};
-
-			logger.debug("options='{}'", StringUtils.join(options, " "));
-			report.setChartOptionsSetting(StringUtils.join(options, " "));
+			setChartOptionsSettingString(report);
 		}
 
 		return null;
+	}
+
+	/**
+	 * Sets the chart options setting property of the given report
+	 * 
+	 * @param report the report
+	 */
+	private void setChartOptionsSettingString(Report report) {
+		logger.debug("Entering setChartOptionsSettingString: report={}", report);
+		
+		String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
+		String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
+		
+		logger.debug("size='{}'", size);
+		logger.debug("yRange='{}'", yRange);
+		
+		String showLegend = "";
+		String showLabels = "";
+		String showPoints = "";
+		String showData = "";
+		
+		logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().isShowLegend());
+		if (report.getChartOptions().isShowLegend()) {
+			showLegend = "showLegend";
+		}
+		logger.debug("report.getChartOptions().isShowLabels() = {}", report.getChartOptions().isShowLabels());
+		if (report.getChartOptions().isShowLabels()) {
+			showLabels = "showLabels";
+		}
+		logger.debug("report.getChartOptions().isShowPoints() = {}", report.getChartOptions().isShowPoints());
+		if (report.getChartOptions().isShowPoints()) {
+			showPoints = "showPoints";
+		}
+		logger.debug("report.getChartOptions().isShowData() = {}", report.getChartOptions().isShowData());
+		if (report.getChartOptions().isShowData()) {
+			showData = "showData";
+		}
+		
+		String rotateAt = "rotateAt:" + report.getChartOptions().getRotateAt();
+		String removeAt = "removeAt:" + report.getChartOptions().getRemoveAt();
+		
+		logger.debug("rotateAt='{}'", rotateAt);
+		logger.debug("removeAt='{}'", removeAt);
+		
+		Object[] options = {
+			size,
+			yRange,
+			report.getChartOptions().getBackgroundColor(),
+			showLegend,
+			showLabels,
+			showPoints,
+			showData,
+			rotateAt,
+			removeAt
+		};
+		
+		logger.debug("options='{}'", StringUtils.join(options, " "));
+		report.setChartOptionsSetting(StringUtils.join(options, " "));
 	}
 
 	/**

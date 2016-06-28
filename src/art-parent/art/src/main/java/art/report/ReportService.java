@@ -697,6 +697,8 @@ public class ReportService {
 	 * @throws SQLException
 	 */
 	private void setReportSource(Report report) throws SQLException {
+		logger.debug("Entering setReportSource: report={}", report);
+		
 		if (report == null) {
 			return;
 		}

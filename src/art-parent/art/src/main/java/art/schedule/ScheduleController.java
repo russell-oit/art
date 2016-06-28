@@ -79,11 +79,11 @@ public class ScheduleController {
 
 		return response;
 	}
-	
-		@RequestMapping(value = "/app/deleteSchedules", method = RequestMethod.POST)
+
+	@RequestMapping(value = "/app/deleteSchedules", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteSchedules(@RequestParam("ids[]") Integer[] ids) {
-		logger.debug("Entering deleteSchedule: ids={}", (Object)ids);
+		logger.debug("Entering deleteSchedule: ids={}", (Object) ids);
 
 		AjaxResponse response = new AjaxResponse();
 

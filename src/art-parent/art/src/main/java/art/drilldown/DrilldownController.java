@@ -53,9 +53,6 @@ public class DrilldownController {
 	@Autowired
 	private ReportService reportService;
 
-	@Autowired
-	private MessageSource messageSource;
-
 	@RequestMapping(value = "/app/drilldowns", method = RequestMethod.GET)
 	public String showDrilldowns(Model model, @RequestParam("reportId") Integer reportId) {
 
@@ -110,18 +107,18 @@ public class DrilldownController {
 	}
 
 	@RequestMapping(value = "/app/addDrilldown", method = RequestMethod.GET)
-	public String addDrilldown(Model model, Locale locale,
+	public String addDrilldown(Model model,
 			@RequestParam("parent") Integer parent) {
 
 		logger.debug("Entering addDrilldown: parent={}", parent);
 
 		model.addAttribute("drilldown", new Drilldown());
-		return showEditDrilldown("add", model, locale, parent);
+		
+		return showEditDrilldown("add", model, parent);
 	}
 
 	@RequestMapping(value = "/app/editDrilldown", method = RequestMethod.GET)
-	public String editDrilldown(@RequestParam("id") Integer id, Model model,
-			Locale locale) {
+	public String editDrilldown(@RequestParam("id") Integer id, Model model){
 
 		logger.debug("Entering editDrilldown: id={}", id);
 
@@ -138,15 +135,14 @@ public class DrilldownController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditDrilldown("edit", model, locale, parentReportId);
+		return showEditDrilldown("edit", model, parentReportId);
 	}
 
 	@RequestMapping(value = "/app/saveDrilldown", method = RequestMethod.POST)
 	public String saveDrilldown(@ModelAttribute("drilldown") @Valid Drilldown drilldown,
 			@RequestParam("action") String action,
 			@RequestParam("parent") Integer parent,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes,
-			Locale locale) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes){
 
 		logger.debug("Entering saveDrilldown: drilldown={}, action='{}', parent={}",
 				drilldown, action, parent);
@@ -154,7 +150,7 @@ public class DrilldownController {
 		logger.debug("result.hasErrors()={}", result.hasErrors());
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
-			return showEditDrilldown(action, model, locale, parent);
+			return showEditDrilldown(action, model, parent);
 		}
 
 		try {
@@ -172,7 +168,7 @@ public class DrilldownController {
 			model.addAttribute("error", ex);
 		}
 
-		return showEditDrilldown(action, model, locale, parent);
+		return showEditDrilldown(action, model, parent);
 	}
 
 	/**
@@ -180,9 +176,10 @@ public class DrilldownController {
 	 *
 	 * @param action "add" or "edit"
 	 * @param model the spring model to populate
+	 * @param parent the report id of the parent report
 	 * @return the jsp file to display
 	 */
-	private String showEditDrilldown(String action, Model model, Locale locale, Integer parent) {
+	private String showEditDrilldown(String action, Model model, Integer parent) {
 		logger.debug("Entering showEditDrilldown: action='{}', parent={}", action, parent);
 
 		try {

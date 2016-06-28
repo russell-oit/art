@@ -265,8 +265,8 @@ public class UpgradeHelper {
 
 	/**
 	 * Upgrades the database to 3.0
-	 * 
-	 * @throws SQLException 
+	 *
+	 * @throws SQLException
 	 */
 	private void upgradeDatabaseTo30() throws SQLException {
 		addUserIds();
@@ -336,7 +336,7 @@ public class UpgradeHelper {
 
 				sql = "UPDATE ART_JOB_ARCHIVES SET USER_ID=? WHERE USERNAME=?";
 				dbService.update(sql, maxId, user);
-				
+
 				sql = "UPDATE ART_JOBS_AUDIT SET USER_ID=? WHERE USERNAME=?";
 				dbService.update(sql, maxId, user);
 			}
@@ -547,7 +547,7 @@ public class UpgradeHelper {
 				sql = "INSERT INTO ART_PARAMETERS"
 						+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
 						+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
-						+ " LOV_REPORT_ID, USE_FILTERS_IN_LOV, CHAINED_POSITION,"
+						+ " LOV_REPORT_ID, USE_RULES_IN_LOV, CHAINED_POSITION,"
 						+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
 						+ " USE_DIRECT_SUBSTITUTION)"
 						+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
@@ -565,9 +565,10 @@ public class UpgradeHelper {
 				dataType = ParameterDataType.toEnum(dtType);
 
 				String useLov = (String) parameter.get("USE_LOV");
-				String useFiltersInLov = (String) parameter.get("APPLY_RULES_TO_LOV");
+				String useRulesInLov = (String) parameter.get("APPLY_RULES_TO_LOV");
 				String useDirectSubstitution = (String) parameter.get("DIRECT_SUBSTITUTION");
 
+				boolean hidden = false;
 				Object[] values = {
 					maxParameterId,
 					(String) parameter.get("PARAM_LABEL"), //name. meaning of name and label interchanged
@@ -577,10 +578,10 @@ public class UpgradeHelper {
 					(String) parameter.get("DESCRIPTION"), //help text
 					dataType.getValue(),
 					(String) parameter.get("DEFAULT_VALUE"),
-					false,
+					hidden,
 					BooleanUtils.toBoolean(useLov),
 					(Integer) parameter.get("LOV_QUERY_ID"),
-					BooleanUtils.toBoolean(useFiltersInLov),
+					BooleanUtils.toBoolean(useRulesInLov),
 					(Integer) parameter.get("CHAINED_PARAM_POSITION"),
 					(Integer) parameter.get("CHAINED_VALUE_POSITION"),
 					(Integer) parameter.get("DRILLDOWN_COLUMN"),
@@ -746,7 +747,7 @@ public class UpgradeHelper {
 
 	/**
 	 * Deletes .jasper files in the given directory
-	 * 
+	 *
 	 * @param directoryPath the directory path
 	 */
 	private void deleteDotJasperFiles(String directoryPath) {

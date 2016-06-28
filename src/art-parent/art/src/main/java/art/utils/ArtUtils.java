@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -303,5 +304,23 @@ public class ArtUtils {
 		}
 		return "#" + hexColor;
 	}
+	
+	/**
+	 * Returns a date object with the time component set to zero
+	 * 
+	 * @param date the date to set
+	 * @return the same date with time as zero
+	 */
+	public static Date zeroTime(Date date) {
+		//https://stackoverflow.com/questions/17821601/set-time-to-000000
+		//https://stackoverflow.com/questions/20414343/how-to-set-time-of-java-util-date-instance-to-000000
+        Calendar cal = Calendar.getInstance();  
+        cal.setTime(date);  
+        cal.set(Calendar.HOUR_OF_DAY, 0);  
+        cal.set(Calendar.MINUTE, 0);  
+        cal.set(Calendar.SECOND, 0);  
+        cal.set(Calendar.MILLISECOND, 0);  
+        return cal.getTime(); 
+    }
 
 }

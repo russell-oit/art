@@ -46,7 +46,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ui.Model;
 
 /**
  * Provides utility functions used to aid running of reports
@@ -117,7 +116,6 @@ public class RunReportHelper {
 	 * Sets request attributes relevant for the select parameters portion of the
 	 * run report page
 	 *
-	 * @param model the model to use
 	 * @param report the report that is being run
 	 * @param request the http request
 	 * @param session the http session
@@ -125,7 +123,7 @@ public class RunReportHelper {
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
-	public void setSelectReportParameterAttributes(Model model, Report report,
+	public void setSelectReportParameterAttributes(Report report,
 			HttpServletRequest request, HttpSession session, ReportService reportService)
 			throws ParseException, SQLException {
 

@@ -190,6 +190,7 @@ public class ReportOutputGenerator {
 	 * @throws PostProcessingException
 	 * @throws ServletException
 	 * @throws freemarker.template.TemplateException
+	 * @throws fr.opensagres.xdocreport.core.XDocReportException
 	 */
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportFormat reportFormat, Locale locale,
@@ -240,8 +241,7 @@ public class ReportOutputGenerator {
 					}
 
 					jrOutput.generateReport(report, reportParamsList, reportFormat, fullOutputFilename);
-				} else {
-					//jxls output
+				} else if (reportType.isJxls()) {
 					JxlsOutput jxlsOutput = new JxlsOutput();
 					if (reportType == ReportType.JxlsArt) {
 						rs = reportRunner.getResultSet();
@@ -273,8 +273,6 @@ public class ReportOutputGenerator {
 					contextPath = request.getContextPath();
 				}
 
-				//can have other group output formats depending on selected
-				//report format e.g. xls group reports
 				GroupOutput groupOutput;
 				switch (reportFormat) {
 					case html:
@@ -299,40 +297,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 
-				Chart chart;
-				switch (reportType) {
-					case Pie2DChart:
-					case Pie3DChart:
-						chart = new PieChart(reportType);
-						break;
-					case SpeedometerChart:
-						chart = new SpeedometerChart();
-						break;
-					case XYChart:
-						chart = new XYChart();
-						break;
-					case TimeSeriesChart:
-					case DateSeriesChart:
-						chart = new TimeSeriesBasedChart(reportType);
-						break;
-					case LineChart:
-					case HorizontalBar2DChart:
-					case HorizontalBar3DChart:
-					case VerticalBar2DChart:
-					case VerticalBar3DChart:
-					case StackedHorizontalBar2DChart:
-					case StackedHorizontalBar3DChart:
-					case StackedVerticalBar2DChart:
-					case StackedVerticalBar3DChart:
-						chart = new CategoryBasedChart(reportType);
-						break;
-					case BubbleChart:
-					case HeatmapChart:
-						chart = new XYZBasedChart(reportType);
-						break;
-					default:
-						throw new IllegalArgumentException("Unexpected chart report type: " + reportType);
-				}
+				Chart chart = getChartInstance(reportType);
 
 				ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
 
@@ -452,6 +417,55 @@ public class ReportOutputGenerator {
 		outputResult.setRowCount(rowsRetrieved);
 
 		return outputResult;
+	}
+
+	/**
+	 * Returns an appropriate instance of a chart object based on the given
+	 * report type
+	 *
+	 * @param reportType the report type
+	 * @return an appropriate instance of a chart object
+	 * @throws IllegalArgumentException
+	 */
+	private Chart getChartInstance(ReportType reportType) throws IllegalArgumentException {
+		logger.debug("Entering getChartInstance: reportType={}", reportType);
+		
+		Chart chart;
+		switch (reportType) {
+			case Pie2DChart:
+			case Pie3DChart:
+				chart = new PieChart(reportType);
+				break;
+			case SpeedometerChart:
+				chart = new SpeedometerChart();
+				break;
+			case XYChart:
+				chart = new XYChart();
+				break;
+			case TimeSeriesChart:
+			case DateSeriesChart:
+				chart = new TimeSeriesBasedChart(reportType);
+				break;
+			case LineChart:
+			case HorizontalBar2DChart:
+			case HorizontalBar3DChart:
+			case VerticalBar2DChart:
+			case VerticalBar3DChart:
+			case StackedHorizontalBar2DChart:
+			case StackedHorizontalBar3DChart:
+			case StackedVerticalBar2DChart:
+			case StackedVerticalBar3DChart:
+				chart = new CategoryBasedChart(reportType);
+				break;
+			case BubbleChart:
+			case HeatmapChart:
+				chart = new XYZBasedChart(reportType);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected chart report type: " + reportType);
+		}
+		
+		return chart;
 	}
 
 	/**

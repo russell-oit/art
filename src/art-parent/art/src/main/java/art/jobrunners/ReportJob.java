@@ -230,7 +230,8 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Prepares a mailer object for sending an alert job
+	 * Prepares a mailer object for sending an alert job based on a freemarker
+	 * report
 	 *
 	 * @param mailer the mailer to use
 	 * @param value the alert value
@@ -242,7 +243,8 @@ public class ReportJob implements org.quartz.Job {
 	}
 
 	/**
-	 * Prepares a mailer object for sending an alert job
+	 * Prepares a mailer object for sending an alert job based on a freemarker
+	 * report
 	 *
 	 * @param mailer the mailer to use
 	 * @param value the alert value
@@ -864,6 +866,8 @@ public class ReportJob implements org.quartz.Job {
 						Desktop desktop = Desktop.getDesktop();
 						if (desktop.isSupported(Desktop.Action.PRINT)) {
 							desktop.print(file);
+						} else {
+							logger.warn("Desktop print not supported. Job Id: {}", jobId);
 						}
 					} else if (generateEmail || recipientDetails != null) {
 						//some kind of emailing required
@@ -1047,15 +1051,18 @@ public class ReportJob implements org.quartz.Job {
 		reportOutputGenerator.setJobId(jobId);
 		Locale locale = Locale.getDefault();
 
-		reportOutputGenerator.generateOutput(report, reportRunner,
-				reportFormat, locale, paramProcessorResult, writer, outputFileName);
+		try {
+			reportOutputGenerator.generateOutput(report, reportRunner,
+					reportFormat, locale, paramProcessorResult, writer, outputFileName);
 
-		if (writer != null) {
-			writer.close();
-		}
+		} finally {
+			if (writer != null) {
+				writer.close();
+			}
 
-		if (fos != null) {
-			fos.close();
+			if (fos != null) {
+				fos.close();
+			}
 		}
 
 		return outputFileName;
@@ -1194,7 +1201,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @param reportRunner
 	 * @param message
 	 * @param recipientFilterPresent
-	 * @param tosEmail
+	 * @param tos
 	 * @param ccs
 	 * @param bccs
 	 * @throws IOException
@@ -1202,7 +1209,7 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runAlertJob(boolean generateEmail, Map<String, Map<String, String>> recipientDetails,
 			ReportRunner reportRunner, String message, boolean recipientFilterPresent,
-			String[] tosEmail, String[] ccs, String[] bccs)
+			String[] tos, String[] ccs, String[] bccs)
 			throws IOException, SQLException, TemplateException {
 		/*
 		 * ALERT if the resultset is not null and the first column is a
@@ -1271,7 +1278,7 @@ public class ReportJob implements org.quartz.Job {
 							}
 
 							//set recipients
-							mailer.setTo(tosEmail);
+							mailer.setTo(tos);
 							mailer.setCc(ccs);
 							mailer.setBcc(bccs);
 
@@ -1575,9 +1582,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @param user the user of the archive record
 	 */
 	private void updateArchives(boolean splitJob, User user) {
-
-		logger.debug("Entering updateArchives: splitJob={}, user={}",
-				splitJob, user);
+		logger.debug("Entering updateArchives: splitJob={}, user={}", splitJob, user);
 
 		try {
 			String sql;

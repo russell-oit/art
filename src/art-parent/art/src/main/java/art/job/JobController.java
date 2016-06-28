@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -130,6 +129,7 @@ public class JobController {
 		}
 
 		model.addAttribute("action", "config");
+
 		return "jobs";
 	}
 
@@ -255,7 +255,7 @@ public class JobController {
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			Date runDate = parameterProcessor.convertParameterStringValueToDate(runLaterDate);
 
-			// create SimpleTrigger that will fire once, immediately		        
+			// create SimpleTrigger that will fire once at the given date		        
 			SimpleTrigger tempTrigger = (SimpleTrigger) newTrigger()
 					.withIdentity(triggerKey("tempTrigger-" + runId, "tempTriggerGroup"))
 					.startAt(runDate)
@@ -303,11 +303,9 @@ public class JobController {
 			}
 
 			model.addAttribute("reportParams", reportParams);
-		} catch (SQLException ex) {
+		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
-		} catch (ParseException ex) {
-			java.util.logging.Logger.getLogger(JobController.class.getName()).log(Level.SEVERE, null, ex);
 		}
 
 		return showEditJob("add", model);
@@ -567,7 +565,7 @@ public class JobController {
 		}
 
 		if (hour.length() == 0) {
-			//no hour defined. use random value
+			//no hour defined. use random value between 3-6
 			hour = String.valueOf(ArtUtils.getRandomNumber(3, 6));
 		}
 
@@ -659,38 +657,41 @@ public class JobController {
 	private void createQuartzJob(Job job) throws SchedulerException {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
-		if (scheduler != null) {
-			int jobId = job.getJobId();
-
-			String jobName = "job" + jobId;
-			String triggerName = "trigger" + jobId;
-
-			JobDetail quartzJob = newJob(ReportJob.class)
-					.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
-					.usingJobData("jobId", jobId)
-					.build();
-
-			//build cron expression.
-			//cron format is sec min hr dayofmonth month dayofweek (optionally year)
-			String second = "0";
-			String cronString = second + " " + job.getScheduleMinute()
-					+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
-					+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
-
-			//create trigger that defines the schedule for the job
-			CronTrigger trigger = newTrigger()
-					.withIdentity(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP))
-					.withSchedule(cronSchedule(cronString))
-					.startAt(job.getStartDate())
-					.endAt(job.getEndDate())
-					.build();
-
-			//delete any existing jobs or triggers with the same id before adding them to the scheduler
-			scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
-			scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
-
-			//add job and trigger to scheduler
-			scheduler.scheduleJob(quartzJob, trigger);
+		if (scheduler == null) {
+			logger.warn("Scheduler not available");
+			return;
 		}
+
+		int jobId = job.getJobId();
+
+		String jobName = "job" + jobId;
+		String triggerName = "trigger" + jobId;
+
+		JobDetail quartzJob = newJob(ReportJob.class)
+				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
+				.usingJobData("jobId", jobId)
+				.build();
+
+		//build cron expression.
+		//cron format is sec min hr dayofmonth month dayofweek (optionally year)
+		String second = "0";
+		String cronString = second + " " + job.getScheduleMinute()
+				+ " " + job.getScheduleHour() + " " + job.getScheduleDay()
+				+ " " + job.getScheduleMonth() + " " + job.getScheduleWeekday();
+
+		//create trigger that defines the schedule for the job
+		CronTrigger trigger = newTrigger()
+				.withIdentity(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP))
+				.withSchedule(cronSchedule(cronString))
+				.startAt(job.getStartDate())
+				.endAt(job.getEndDate())
+				.build();
+
+		//delete any existing jobs or triggers with the same id before adding them to the scheduler
+		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+		scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
+
+		//add job and trigger to scheduler
+		scheduler.scheduleJob(quartzJob, trigger);
 	}
 }

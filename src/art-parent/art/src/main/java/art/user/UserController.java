@@ -143,6 +143,7 @@ public class UserController {
 		user.setCanChangePassword(true);
 
 		model.addAttribute("user", user);
+		
 		return showEditUser("add", model, session);
 	}
 

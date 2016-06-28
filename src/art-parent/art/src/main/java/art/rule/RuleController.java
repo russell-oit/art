@@ -180,6 +180,7 @@ public class RuleController {
 
 		model.addAttribute("dataTypes", ParameterDataType.list());
 		model.addAttribute("action", action);
+		
 		return "editRule";
 	}
 }

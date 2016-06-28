@@ -270,7 +270,7 @@ CREATE TABLE ART_USER_QUERY_GROUPS
 
 -- HIDDEN: boolean
 -- USE_LOV: boolean
--- USE_FILTERS_IN_LOV: boolean
+-- USE_RULES_IN_LOV: boolean
 -- USE_DIRECT_SUBSTITUTION: boolean
 -- DRILLDOWN_COLUMN_INDEX - if used in a drilldown report, refers to the column in
 -- the parent report on which the parameter will be applied (index starts from 1)
@@ -288,7 +288,7 @@ CREATE TABLE ART_PARAMETERS
 	HIDDEN INTEGER,
 	USE_LOV INTEGER, 
 	LOV_REPORT_ID  INTEGER,
-	USE_FILTERS_IN_LOV INTEGER,
+	USE_RULES_IN_LOV INTEGER,
 	DRILLDOWN_COLUMN_INDEX INTEGER,
 	USE_DIRECT_SUBSTITUTION INTEGER,	
 	CREATION_DATE TIMESTAMP,

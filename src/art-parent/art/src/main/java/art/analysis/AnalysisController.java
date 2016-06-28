@@ -418,16 +418,6 @@ public class AnalysisController {
 		logger.debug("Entering saveAnalysis");
 
 		try {
-			int reportId;
-			String queryName;
-			String mdx;
-			String queryDescription;
-
-			reportId = Integer.parseInt(request.getParameter("pivotReportId"));
-			queryName = request.getParameter("newPivotName");
-			queryDescription = request.getParameter("newPivotDescription");
-			mdx = (String) session.getAttribute("mdx" + reportId);
-
 			boolean overwriting;
 			if (request.getParameter("overwrite") != null) {
 				overwriting = true;
@@ -442,6 +432,9 @@ public class AnalysisController {
 				deleting = false;
 			}
 
+			int reportId = Integer.parseInt(request.getParameter("pivotReportId"));
+			String mdx = (String) session.getAttribute("mdx" + reportId);
+			
 			//check if any modification made
 			if ((mdx == null || mdx.length() == 0) && !deleting) {
 				redirectAttributes.addFlashAttribute("message", "analysis.message.nothingToSave");
@@ -456,6 +449,8 @@ public class AnalysisController {
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
+			String queryDescription = request.getParameter("newPivotDescription");
+			
 			if (overwriting) {
 				//overwrite query source with current mdx
 				//query details loaded. update query
@@ -490,6 +485,7 @@ public class AnalysisController {
 				}
 				newReport.setDescription(queryDescription);
 
+				String queryName = request.getParameter("newPivotName");
 				if (queryName == null || queryName.trim().length() == 0) {
 					//no name provided for the new query. create a default name
 					queryName = report.getName() + "-2";
@@ -502,7 +498,7 @@ public class AnalysisController {
 				//save current view's mdx
 				newReport.setReportSource(mdx);
 
-				//insert query
+				//add new report
 				reportService.addReport(newReport, sessionUser);
 
 				//give this user direct access to the view he has just created. so that he can update and overwrite it if desired

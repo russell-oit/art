@@ -287,6 +287,7 @@ public class UserService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
+		
 		return result;
 	}
 

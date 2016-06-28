@@ -150,6 +150,7 @@ public class DatasourceService {
 		} else {
 			result.setData(nonDeletedRecords);
 		}
+		
 		return result;
 	}
 
@@ -332,8 +333,11 @@ public class DatasourceService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "datasources", allEntries = true)
-	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit, User actionUser) throws SQLException {
-		logger.debug("Entering updateDatasources: multipleDatasourceEdit={}, actionUser={}", multipleDatasourceEdit, actionUser);
+	public void updateDatasources(MultipleDatasourceEdit multipleDatasourceEdit, User actionUser)
+			throws SQLException {
+		
+		logger.debug("Entering updateDatasources: multipleDatasourceEdit={}, actionUser={}",
+				multipleDatasourceEdit, actionUser);
 
 		String sql;
 

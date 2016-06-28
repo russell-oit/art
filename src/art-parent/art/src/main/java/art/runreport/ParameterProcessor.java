@@ -416,10 +416,13 @@ public class ParameterProcessor {
 		logger.debug("Entering convertParameterStringValueToDate: value='{}'", value);
 
 		Date dateValue;
+		Date now = new Date();
 
 		if (value == null || StringUtils.equalsIgnoreCase(value, "now")
 				|| StringUtils.isBlank(value)) {
-			dateValue = new Date();
+			dateValue = now;
+		} else if (StringUtils.startsWithIgnoreCase(value, "today")) {
+			dateValue = ArtUtils.zeroTime(now);
 		} else if (StringUtils.startsWithIgnoreCase(value, "add")) {
 			//e.g. add days 1
 			String[] tokens = StringUtils.split(value);
@@ -429,10 +432,11 @@ public class ParameterProcessor {
 
 			String period = tokens[1];
 			int offset = Integer.parseInt(tokens[2]);
-			Date now = new Date();
 
 			if (StringUtils.startsWithIgnoreCase(period, "day")) {
 				dateValue = DateUtils.addDays(now, offset);
+			} else if (StringUtils.startsWithIgnoreCase(period, "week")) {
+				dateValue = DateUtils.addWeeks(now, offset);
 			} else if (StringUtils.startsWithIgnoreCase(period, "month")) {
 				dateValue = DateUtils.addMonths(now, offset);
 			} else if (StringUtils.startsWithIgnoreCase(period, "year")) {
@@ -562,7 +566,7 @@ public class ParameterProcessor {
 
 	/**
 	 * Populates the chained parent property for report parameters
-	 * 
+	 *
 	 * @param reportParamsList the report parameters
 	 */
 	private void setIsChainedParent(List<ReportParameter> reportParamsList) {

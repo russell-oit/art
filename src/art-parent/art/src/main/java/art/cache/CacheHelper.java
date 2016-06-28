@@ -45,7 +45,6 @@ public class CacheHelper {
 	public void clearMondrian() {
 		logger.debug("Entering clearMondrian");
 
-		//clear all mondrian caches
 		List<RolapSchema> schemas = RolapSchema.getRolapSchemas();
 		for (RolapSchema schema : schemas) {
 			CacheControl cacheControl = schema.getInternalConnection().getCacheControl(null);

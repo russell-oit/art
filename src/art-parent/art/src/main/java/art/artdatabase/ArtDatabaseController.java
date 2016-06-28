@@ -62,7 +62,7 @@ public class ArtDatabaseController {
 		//generic sun jdbc-odbc bridge driver not supported for the art database
 		//for the jdbc-odbc bridge, you can only read column values ONCE
 		//and in the ORDER they appear in the select. Adhering to this is brittle and cumbersome.
-//		databaseTypes.remove("generic-odbc"); //sun jdbc-odbc bridge will be removed in Java 8
+//		databaseTypes.remove("generic-odbc"); //sun jdbc-odbc bridge is removed in Java 8
 		databaseTypes.remove("hbase-phoenix");
 		databaseTypes.remove("msaccess-ucanaccess");
 		return databaseTypes;
@@ -92,6 +92,7 @@ public class ArtDatabaseController {
 		artDatabase.setUseBlankPassword(false);
 
 		model.addAttribute("artDatabase", artDatabase);
+		
 		return "artDatabase";
 	}
 
@@ -176,7 +177,6 @@ public class ArtDatabaseController {
 				ps.executeBatch();
 			}
 			
-			//save settings
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
