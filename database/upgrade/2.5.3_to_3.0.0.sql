@@ -357,6 +357,9 @@ CREATE TABLE ART_LOGGED_IN_USERS
 -- add batch file field
 ALTER TABLE ART_JOBS ADD BATCH_FILE VARCHAR(50);
 
+-- add default_report_format field
+ALTER TABLE ART_QUERIES ADD DEFAULT_REPORT_FORMAT VARCHAR(20);
+
 
 
 -- add reference table for report types

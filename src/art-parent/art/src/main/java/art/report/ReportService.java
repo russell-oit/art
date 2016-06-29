@@ -123,6 +123,7 @@ public class ReportService {
 			report.setDisplayResultset(rs.getInt("DISPLAY_RESULTSET"));
 			report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
 			report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
+			report.setDefaultReportFormat(rs.getString("DEFAULT_REPORT_FORMAT"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -564,9 +565,9 @@ public class ReportService {
 					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET,"
-					+ " XMLA_DATASOURCE, XMLA_CATALOG,"
+					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 21) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -588,6 +589,7 @@ public class ReportService {
 				report.getDisplayResultset(),
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
+				report.getDefaultReportFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -599,7 +601,7 @@ public class ReportService {
 					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, ACTIVE=?,"
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
-					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?,"
+					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -622,6 +624,7 @@ public class ReportService {
 				report.getDisplayResultset(),
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
+				report.getDefaultReportFormat(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

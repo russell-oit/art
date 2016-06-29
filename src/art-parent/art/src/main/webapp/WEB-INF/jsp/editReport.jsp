@@ -259,6 +259,25 @@ Edit report page
 					default:
 						$("#groupColumnDiv").hide();
 				}
+				
+				//show/hide default report format
+				switch (reportTypeId) {
+					case 110: //dashboard
+					case 112: //mondrian
+					case 113: //mondrian xmla
+					case 114: //sql server xmla
+					case 100: //update
+					case 111: //text
+					case 103: //tabular html
+					case 102: //crosstab html
+					case 118: //jxls art
+					case 117: //jxls template
+					case 122: //freemarker
+						$("#defaultReportFormatDiv").hide();
+						break;
+					default:
+						$("#defaultReportFormatDiv").show();
+				}
 			}
 		</script>
 	</jsp:attribute>
@@ -485,6 +504,23 @@ Edit report page
 							</span>
 						</div>
 						<form:errors path="displayResultset" cssClass="error"/>
+					</div>
+				</div>
+				<div id="defaultReportFormatDiv" class="form-group">
+					<label class="col-md-4 control-label " for="defaultReportFormat">
+						<spring:message code="reports.label.defaultReportFormat"/>
+					</label>
+					<div class="col-md-8">
+						<form:select path="defaultReportFormat" class="form-control selectpicker">
+							<form:option value="default"><spring:message code="drilldowns.option.default"/></form:option>
+								<option data-divider="true"></option>
+							<c:forEach var="reportFormat" items="${reportFormats}">
+								<form:option value="${reportFormat.value}">
+									<spring:message code="${reportFormat.localizedDescription}"/>
+								</form:option>
+							</c:forEach>
+						</form:select>
+						<form:errors path="defaultReportFormat" cssClass="error"/>
 					</div>
 				</div>
 

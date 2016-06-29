@@ -59,6 +59,21 @@ public class Report implements Serializable {
 	private int groupColumn;
 	private boolean active;
 	private boolean hidden;
+	private String defaultReportFormat;
+
+	/**
+	 * @return the defaultReportFormat
+	 */
+	public String getDefaultReportFormat() {
+		return defaultReportFormat;
+	}
+
+	/**
+	 * @param defaultReportFormat the defaultReportFormat to set
+	 */
+	public void setDefaultReportFormat(String defaultReportFormat) {
+		this.defaultReportFormat = defaultReportFormat;
+	}
 
 	/**
 	 * @return the active

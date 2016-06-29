@@ -17,6 +17,7 @@
 package art.report;
 
 import art.datasource.DatasourceService;
+import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroupService;
 import art.runreport.RunReportHelper;
@@ -346,8 +347,8 @@ public class ReportController {
 
 			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
 			model.addAttribute("reportTypes", ReportType.list());
-
 			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
+			model.addAttribute("reportFormats", ReportFormat.list());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

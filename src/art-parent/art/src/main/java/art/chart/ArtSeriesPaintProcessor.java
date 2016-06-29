@@ -65,11 +65,13 @@ public class ArtSeriesPaintProcessor implements ChartPostProcessor, Serializable
 
 			@SuppressWarnings("rawtypes")
 			List keys = piePlot.getDataset().getKeys();
-			
+
 			for (Entry<String, String> entry : params.entrySet()) {
 				int seriesId = Integer.parseInt(entry.getKey());
 				String colorStr = entry.getValue();
-				piePlot.setSectionPaint((Comparable) keys.get(seriesId), Color.decode(colorStr));
+				@SuppressWarnings("rawtypes")
+				Comparable key = (Comparable) keys.get(seriesId);
+				piePlot.setSectionPaint(key, Color.decode(colorStr));
 			}
 
 			// category plots
@@ -85,14 +87,14 @@ public class ArtSeriesPaintProcessor implements ChartPostProcessor, Serializable
 			// spider web plots
 		} else if (plot instanceof SpiderWebPlot) {
 			SpiderWebPlot swPlot = (SpiderWebPlot) plot;
-			
+
 			for (Entry<String, String> entry : params.entrySet()) {
 				int seriesId = Integer.parseInt(entry.getKey());
 				String colorStr = entry.getValue();
 				swPlot.setSeriesPaint(seriesId, Color.decode(colorStr));
 			}
 
-		// XY plots
+			// XY plots
 		} else if (plot instanceof XYPlot) {
 			XYItemRenderer render = ((XYPlot) plot).getRenderer();
 

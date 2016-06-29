@@ -185,6 +185,7 @@ public class RunReportHelper {
 			case Update:
 			case Text:
 			case TabularHtml:
+			case CrosstabHtml:
 			case JxlsArt:
 			case JxlsTemplate:
 			case FreeMarker:
@@ -196,6 +197,7 @@ public class RunReportHelper {
 				request.setAttribute("reportFormats", reportFormats);
 		}
 		request.setAttribute("enableReportFormats", enableReportFormats);
+		request.setAttribute("reportFormat", report.getDefaultReportFormat());
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int accessLevel = sessionUser.getAccessLevel().getValue();
