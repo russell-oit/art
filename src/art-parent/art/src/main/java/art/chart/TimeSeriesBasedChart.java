@@ -30,6 +30,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.time.Day;
 import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
@@ -51,6 +55,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 	private static final Logger logger = LoggerFactory.getLogger(TimeSeriesBasedChart.class);
 	private static final long serialVersionUID = 1L;
 	private ReportType reportType;
+	private String dateFormat;
 
 	public TimeSeriesBasedChart(ReportType reportType) {
 		logger.debug("Entering TimeSeriesBasedChart: reportType={}", reportType);
@@ -118,6 +123,8 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 
 		setSeriesColorOptions(rsmd);
 
+		setDateFormat(rsmd);
+
 		int rowCount = 0;
 
 		while (rs.next()) {
@@ -179,6 +186,23 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		}
 
 		setDataset(dataset);
+	}
+
+	/**
+	 * Sets the optional date format property that defines a fixed date format
+	 * to use in the chart
+	 *
+	 * @param rsmd the resultset metadata
+	 * @throws SQLException
+	 */
+	private void setDateFormat(ResultSetMetaData rsmd) throws SQLException {
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			if (StringUtils.startsWithIgnoreCase(columnName, "dateFormat:")) {
+				dateFormat = StringUtils.substringAfter(columnName, ":");
+				break;
+			}
+		}
 	}
 
 	/**
@@ -250,5 +274,18 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 		}
 
 		return link;
+	}
+
+	@Override
+	public void processChart(JFreeChart chart, Map<String, String> params) {
+		postProcessChart(chart);
+
+		//set custom date format if applicable
+		if (StringUtils.isNotBlank(dateFormat)) {
+			XYPlot plot = (XYPlot) chart.getPlot();
+			DateAxis axis = (DateAxis) plot.getDomainAxis();
+			axis.setDateFormatOverride(new SimpleDateFormat(dateFormat));
+		}
+
 	}
 }

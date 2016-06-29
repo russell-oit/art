@@ -349,7 +349,17 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 		Objects.requireNonNull(chart, "chart must not be null");
 
-		//perform chart post processing
+		postProcessChart(chart);
+	}
+
+	/**
+	 * Perform additional post processing on the chart
+	 * 
+	 * @param chart the jfree chart
+	 */
+	protected void postProcessChart(JFreeChart chart) {
+		logger.debug("Entering postProcessChart");
+		
 		processYAxisRange(chart);
 		processLabels(chart);
 		processXAxisLabelLines(chart);
@@ -623,7 +633,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	 * an options definition column
 	 */
 	protected boolean isOptionsColumn(String columnName) {
-		if (StringUtils.startsWithIgnoreCase(columnName, "seriesColor:")) {
+		if (StringUtils.startsWithIgnoreCase(columnName, "seriesColor:")
+				|| StringUtils.startsWithIgnoreCase(columnName, "dateFormat:")) {
 			return true;
 		} else {
 			return false;
