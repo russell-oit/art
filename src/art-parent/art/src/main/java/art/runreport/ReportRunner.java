@@ -240,11 +240,12 @@ public class ReportRunner {
 		//check if using labelled rules 
 		int count = 0;
 		StringBuilder labelledValues = new StringBuilder(1024);
-		boolean usingLabelledRules = false;
+		boolean usingLabelledRules;
 		String querySql = sb.toString();
-		int labelPosition = querySql.toLowerCase().indexOf("#rules#"); //use all lowercase to make find case insensitive
-		if (labelPosition != -1) {
+		if (StringUtils.containsIgnoreCase(querySql, "#rules#")) { //use all lowercase to make find case insensitive
 			usingLabelledRules = true;
+		} else {
+			usingLabelledRules = false;
 		}
 
 		String ruleName;

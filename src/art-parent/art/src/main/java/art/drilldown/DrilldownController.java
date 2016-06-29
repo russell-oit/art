@@ -17,9 +17,11 @@
 package art.drilldown;
 
 import art.enums.ReportFormat;
+import art.report.Report;
 import art.report.ReportService;
 import art.utils.AjaxResponse;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Locale;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
@@ -113,12 +115,12 @@ public class DrilldownController {
 		logger.debug("Entering addDrilldown: parent={}", parent);
 
 		model.addAttribute("drilldown", new Drilldown());
-		
+
 		return showEditDrilldown("add", model, parent);
 	}
 
 	@RequestMapping(value = "/app/editDrilldown", method = RequestMethod.GET)
-	public String editDrilldown(@RequestParam("id") Integer id, Model model){
+	public String editDrilldown(@RequestParam("id") Integer id, Model model) {
 
 		logger.debug("Entering editDrilldown: id={}", id);
 
@@ -142,7 +144,7 @@ public class DrilldownController {
 	public String saveDrilldown(@ModelAttribute("drilldown") @Valid Drilldown drilldown,
 			@RequestParam("action") String action,
 			@RequestParam("parent") Integer parent,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes){
+			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
 		logger.debug("Entering saveDrilldown: drilldown={}, action='{}', parent={}",
 				drilldown, action, parent);
@@ -184,7 +186,9 @@ public class DrilldownController {
 
 		try {
 			model.addAttribute("parentReportName", reportService.getReportName(parent));
-			model.addAttribute("drilldownReports", reportService.getDrilldownReports());
+			List<Report> drilldownReports = reportService.getDrilldownReports();
+			drilldownReports.addAll(reportService.getDashboardReports());
+			model.addAttribute("drilldownReports", drilldownReports);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

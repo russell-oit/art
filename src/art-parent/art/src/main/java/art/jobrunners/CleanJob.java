@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -81,7 +82,7 @@ public class CleanJob implements org.quartz.Job {
 		for (File file : files) {
 			// Delete the file if it is older than DELETE_FILES_MINUTES
 			if (FileUtils.isFileOlder(file, limit)) {
-				String extension = FilenameUtils.getExtension(file.getName()).toLowerCase();
+				String extension = FilenameUtils.getExtension(file.getName()).toLowerCase(Locale.ENGLISH);
 				if (file.isDirectory() || validExtensions.contains(extension)) {
 					boolean deleted = FileUtils.deleteQuietly(file);
 					if (!deleted) {

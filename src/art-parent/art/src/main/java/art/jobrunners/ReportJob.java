@@ -494,7 +494,7 @@ public class ReportJob implements org.quartz.Job {
 
 					//store column names in lowercase to ensure special columns are found by list.contains()
 					//some RDBMSs make all column names uppercase					
-					columnList.add(columnName.toLowerCase());
+					columnList.add(columnName.toLowerCase(Locale.ENGLISH));
 				}
 
 				if (columnList.contains(ArtUtils.RECIPIENT_COLUMN) && columnList.contains(ArtUtils.RECIPIENT_ID)) {
@@ -513,7 +513,7 @@ public class ReportJob implements org.quartz.Job {
 								} else {
 									columnValue = rs.getString(columnName);
 								}
-								recipientColumns.put(columnName.toLowerCase(), columnValue); //use lowercase so that special columns are found
+								recipientColumns.put(columnName.toLowerCase(Locale.ENGLISH), columnValue); //use lowercase so that special columns are found
 							}
 
 							Map<String, Map<String, String>> recipient = new HashMap<>();

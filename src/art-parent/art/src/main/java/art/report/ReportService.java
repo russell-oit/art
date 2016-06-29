@@ -875,6 +875,23 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
+	
+	/**
+	 * Returns dashboard reports
+	 *
+	 * @return dashboard reports
+	 * @throws SQLException
+	 */
+	@Cacheable(value = "reports")
+	public List<Report> getDashboardReports() throws SQLException {
+		logger.debug("Entering getDashboardReports");
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE QUERY_TYPE=110";
+
+		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
+		return dbService.query(sql, h);
+	}
 
 	/**
 	 * Returns dynamic recipient reports

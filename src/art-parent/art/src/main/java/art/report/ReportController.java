@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -404,7 +405,7 @@ public class ReportController {
 		long uploadSize = file.getSize();
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);
-		String extension = FilenameUtils.getExtension(filename).toLowerCase();
+		String extension = FilenameUtils.getExtension(filename).toLowerCase(Locale.ENGLISH);
 
 		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
 		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //0 effectively means no uploads allowed
