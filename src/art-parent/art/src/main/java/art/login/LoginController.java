@@ -56,6 +56,9 @@ public class LoginController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private LoginService loginService;
+
 	@ModelAttribute("languages")
 	public Map<String, String> addLanguages() {
 		return Config.getLanguages();
@@ -73,6 +76,7 @@ public class LoginController {
 		if (!Config.isArtDatabaseConfigured()) {
 			User user = new User();
 
+			user.setUserId(-1);
 			user.setUsername("initial setup");
 			user.setAccessLevel(AccessLevel.RepositoryUser);
 
@@ -275,6 +279,7 @@ public class LoginController {
 			if (isValidRepositoryUser(username, password)) {
 				loginMethod = ArtAuthenticationMethod.Repository;
 				user = new User();
+				user.setUserId(-2);
 				user.setUsername("art db");
 				user.setAccessLevel(AccessLevel.RepositoryUser);
 
@@ -288,7 +293,13 @@ public class LoginController {
 
 		//finally, authentication process finished. display appropriate page
 		if (result.isAuthenticated() && user != null) {
-			//access granted 
+			//access granted
+			String ipAddress = request.getRemoteAddr();
+			try {
+				loginService.addLoggedInUser(user, ipAddress);
+			} catch (SQLException ex) {
+				logger.error("Error", ex);
+			}
 			return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
 		} else {
 			//login failure. always display invalid account message rather than actual result details

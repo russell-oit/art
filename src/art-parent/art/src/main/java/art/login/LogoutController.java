@@ -17,9 +17,12 @@
 package art.login;
 
 import art.enums.ArtAuthenticationMethod;
+import art.user.User;
+import java.sql.SQLException;
 import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,20 +34,29 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 public class LogoutController {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(LogoutController.class);
+
+	@Autowired
+	private LoginService loginService;
 
 	@RequestMapping(value = "/logout", method = RequestMethod.POST)
 	public String logout(HttpSession session) {
 		logger.debug("Entering logout");
-		
+
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
 		logger.debug("authenticationMethod='{}'", authenticationMethod);
-		
-		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
+
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		try {
+			loginService.removeLoggedInUser(sessionUser);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 
 		session.invalidate();
 
+		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 		if (loginMethod == ArtAuthenticationMethod.Auto) {
 			//display logout page for auto login.
 			return "logout";
