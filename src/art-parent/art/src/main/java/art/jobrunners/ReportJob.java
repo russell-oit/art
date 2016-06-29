@@ -59,6 +59,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +71,7 @@ import javax.mail.MessagingException;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -144,29 +146,82 @@ public class ReportJob implements org.quartz.Job {
 			nextRunDate = context.getTrigger().getFireTimeAfter(new Date());
 		}
 
-		try {
-			//set overall job start time in the jobs table
-			beforeExecution(nextRunDate);
+		//set overall job start time in the jobs table
+		beforeExecution(nextRunDate);
 
-			if (!job.isActive()) {
-				runMessage = "jobs.message.jobDisabled";
-			} else if (!job.getReport().isActive()) {
-				runMessage = "jobs.message.reportDisabled";
-			} else if (!job.getUser().isActive()) {
-				runMessage = "jobs.message.ownerDisabled";
+		if (!job.isActive()) {
+			runMessage = "jobs.message.jobDisabled";
+		} else if (!job.getReport().isActive()) {
+			runMessage = "jobs.message.reportDisabled";
+		} else if (!job.getUser().isActive()) {
+			runMessage = "jobs.message.ownerDisabled";
+		} else {
+			if (job.getRecipientsReportId() > 0) {
+				//job has dynamic recipients
+				runDynamicRecipientsJob();
 			} else {
-				if (job.getRecipientsReportId() > 0) {
-					//job has dynamic recipients
-					runDynamicRecipientsJob();
-				} else {
-					//job doesn't have dynamic recipients
-					runNormalJob();
-				}
+				//job doesn't have dynamic recipients
+				runNormalJob();
 			}
+		}
 
-			afterCompletion();
-		} catch (SQLException ex) {
-			logger.error("Error", ex);
+		afterCompletion();
+		
+		runBatchFile();
+	}
+
+	/**
+	 * Runs a batch file configured to be run after the job completes
+	 */
+	private void runBatchFile() {
+		String batchFileName = job.getBatchFile();
+
+		if (StringUtils.isBlank(batchFileName)) {
+			return;
+		}
+
+		String batchDirectory = Config.getBatchPath();
+		String fullBatchFileName = batchDirectory + batchFileName;
+
+		File batchFile = new File(fullBatchFileName);
+		if (batchFile.exists()) {
+			if (SystemUtils.IS_OS_WINDOWS) {
+				//https://stackoverflow.com/questions/20919001/execute-batch-file-through-java-passing-file-path-as-arguments-which-contains-s
+				//https://stackoverflow.com/questions/19103570/run-batch-file-from-java-code
+
+				List<String> cmdAndArgs = Arrays.asList("cmd", "/c", batchFileName, fileName);
+
+				ProcessBuilder pb = new ProcessBuilder(cmdAndArgs);
+				pb.directory(new File(batchDirectory));
+				try {
+					pb.start();
+				} catch (IOException ex) {
+					logger.error("Error", ex);
+				}
+			} else if (SystemUtils.IS_OS_UNIX) {
+				//https://stackoverflow.com/questions/25403765/when-runtime-getruntime-exec-call-linux-batch-file-could-not-find-its-physical
+
+				// Point to the shell that will run the script
+				String shell = "/bin/bash";
+
+				// Create a ProcessBuilder object
+				ProcessBuilder processBuilder = new ProcessBuilder(shell, fullBatchFileName);
+
+				// Set the script to run in its own directory
+				processBuilder.directory(new File(batchDirectory));
+
+				try {
+					// Run the script
+					processBuilder.start();
+				} catch (IOException ex) {
+					logger.error("Error", ex);
+				}
+			} else {
+				String os = SystemUtils.OS_NAME;
+				logger.warn("Unexpected OS: '{}'", os);
+			}
+		} else {
+			logger.warn("Batch file not found: '{}'", fullBatchFileName);
 		}
 	}
 
@@ -403,9 +458,8 @@ public class ReportJob implements org.quartz.Job {
 	 * updating the last start date and next run date columns.
 	 *
 	 * @param nextRunDate the next run date for the job
-	 * @throws SQLException
 	 */
-	private void beforeExecution(Date nextRunDate) throws SQLException {
+	private void beforeExecution(Date nextRunDate) {
 		logger.debug("Entering beforeExecution: nextRunDate={}", nextRunDate);
 
 		//update last start date and next run date on art jobs table
@@ -419,16 +473,18 @@ public class ReportJob implements org.quartz.Job {
 			jobId
 		};
 
-		dbService.update(sql, values);
+		try {
+			dbService.update(sql, values);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**
 	 * Performs database updates required after the job completes. This includes
 	 * updating the last end date and last run details columns.
-	 *
-	 * @throws SQLException
 	 */
-	private void afterCompletion() throws SQLException {
+	private void afterCompletion() {
 		logger.debug("Entering afterCompletion");
 
 		//update job details
@@ -443,7 +499,11 @@ public class ReportJob implements org.quartz.Job {
 			jobId
 		};
 
-		dbService.update(sql, values);
+		try {
+			dbService.update(sql, values);
+		} catch (SQLException ex) {
+			logger.error("Error", ex);
+		}
 	}
 
 	/**

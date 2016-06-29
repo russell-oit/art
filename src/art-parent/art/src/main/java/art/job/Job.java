@@ -76,6 +76,21 @@ public class Job implements Serializable {
 	private String lastEndDateString;
 	private String nextRunDateString;
 	private int cachedDatasourceId;
+	private String batchFile;
+
+	/**
+	 * @return the batchFile
+	 */
+	public String getBatchFile() {
+		return batchFile;
+	}
+
+	/**
+	 * @param batchFile the batchFile to set
+	 */
+	public void setBatchFile(String batchFile) {
+		this.batchFile = batchFile;
+	}
 
 	/**
 	 * @return the cachedDatasourceId

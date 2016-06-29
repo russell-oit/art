@@ -76,7 +76,7 @@ public class JobService {
 		userService = new UserService();
 	}
 
-	private final String SQL_SELECT_ALL = "SELECT AJ.* FROM ART_JOBS AJ";
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
 
 	/**
 	 * Maps a resultset to an object
@@ -166,6 +166,7 @@ public class JobService {
 		job.setAllowSplitting(rs.getBoolean("ALLOW_SPLITTING"));
 		job.setRecipientsReportId(rs.getInt("RECIPIENTS_QUERY_ID"));
 		job.setRunsToArchive(rs.getInt("RUNS_TO_ARCHIVE"));
+		job.setBatchFile(rs.getString("BATCH_FILE"));
 		job.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 		job.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 		job.setCreatedBy(rs.getString("CREATED_BY"));
@@ -506,7 +507,7 @@ public class JobService {
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
-					+ " CREATION_DATE, CREATED_BY)"
+					+ " BATCH_FILE, CREATION_DATE, CREATED_BY)"
 					+ " VALUES(" + StringUtils.repeat("?", ",", 32) + ")";
 
 			Object[] values = {
@@ -540,6 +541,7 @@ public class JobService {
 				job.getRecipientsReportId(),
 				job.getRunsToArchive(),
 				migratedToQuartz,
+				job.getBatchFile(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -554,7 +556,7 @@ public class JobService {
 					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
-					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?, "
+					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?, BATCH_FILE=?, "
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -588,6 +590,7 @@ public class JobService {
 				job.getRecipientsReportId(),
 				job.getRunsToArchive(),
 				migratedToQuartz,
+				job.getBatchFile(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()

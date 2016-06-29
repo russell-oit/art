@@ -696,6 +696,7 @@ public class Config extends HttpServlet {
 		makeDirectory(getArtTempPath());
 		makeDirectory(getJobsExportPath());
 		makeDirectory(getReportsExportPath());
+		makeDirectory(getBatchPath());
 	}
 
 	/**
@@ -794,6 +795,24 @@ public class Config extends HttpServlet {
 	public static String getReportsExportPath() {
 		return exportPath + "reports" + File.separator;
 	}
+	
+	/**
+	 * Returns the full path to the batch directory
+	 *
+	 * @return full path to the batch directory
+	 */
+	public static String getBatchPath() {
+		return workDirectoryPath + "batch" + File.separator;
+	}
+	
+	/**
+	 * Returns the full path to the WEB-INF\tmp directory
+	 *
+	 * @return full path to the templates directory
+	 */
+	public static String getArtTempPath() {
+		return workDirectoryPath + "tmp" + File.separator;
+	}
 
 	/**
 	 * Returns the full path to the templates directory
@@ -802,15 +821,6 @@ public class Config extends HttpServlet {
 	 */
 	public static String getTemplatesPath() {
 		return workDirectoryPath + "templates" + File.separator;
-	}
-
-	/**
-	 * Returns the full path to the WEB-INF\tmp directory
-	 *
-	 * @return full path to the templates directory
-	 */
-	public static String getArtTempPath() {
-		return workDirectoryPath + "tmp" + File.separator;
 	}
 
 	/**

@@ -505,6 +505,17 @@
 							</div>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="batchFile">
+							<spring:message code="jobs.label.batchFile"/>
+						</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<form:input path="batchFile" maxlength="50" class="form-control"/>
+							</div>
+							<form:errors path="batchFile" cssClass="error"/>
+						</div>
+					</div>
 
 					<hr>
 					<div class="form-group">
