@@ -89,9 +89,6 @@ Display section to allow selecting of report parameters and initiate running of 
 			$("[data-toggle='tooltip']").tooltip({container: 'body'});
 		});
 
-		//immediately run query inline
-//				$("#runInline").click();
-
 
 	}); //end document ready
 </script>
@@ -108,7 +105,7 @@ Display section to allow selecting of report parameters and initiate running of 
 		var mywindow = window.open('', '${report.name}', 'height=400,width=600');
 		mywindow.document.write('<html><head><title>${report.name}</title>');
 		/*optional stylesheet*/ //mywindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
-		mywindow.document.write('</head><body >');
+		mywindow.document.write('</head><body>');
 		mywindow.document.write(data);
 		mywindow.document.write('</body></html>');
 

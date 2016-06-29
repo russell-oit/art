@@ -166,7 +166,7 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		afterCompletion();
-		
+
 		runBatchFile();
 	}
 
@@ -174,11 +174,19 @@ public class ReportJob implements org.quartz.Job {
 	 * Runs a batch file configured to be run after the job completes
 	 */
 	private void runBatchFile() {
+		logger.debug("Entering runBatchFile");
+		
 		String batchFileName = job.getBatchFile();
 
 		if (StringUtils.isBlank(batchFileName)) {
 			return;
 		}
+		
+		logger.debug("batchFileName='{}'", batchFileName);
+
+		batchFileName = ArtUtils.cleanFileName(batchFileName);
+		
+		logger.debug("cleaned batchFileName='{}'", batchFileName);
 
 		String batchDirectory = Config.getBatchPath();
 		String fullBatchFileName = batchDirectory + batchFileName;
@@ -205,7 +213,7 @@ public class ReportJob implements org.quartz.Job {
 				String shell = "/bin/bash";
 
 				// Create a ProcessBuilder object
-				ProcessBuilder processBuilder = new ProcessBuilder(shell, fullBatchFileName);
+				ProcessBuilder processBuilder = new ProcessBuilder(shell, fullBatchFileName, fileName);
 
 				// Set the script to run in its own directory
 				processBuilder.directory(new File(batchDirectory));

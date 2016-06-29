@@ -167,7 +167,6 @@ Edit a drilldown
 					<div class="col-md-8">
 						<form:select path="reportFormat" class="form-control selectpicker">
 							<form:option value="default"><spring:message code="drilldowns.option.default"/></form:option>
-							<form:option value="ALL"><spring:message code="drilldowns.option.all"/></form:option>
 								<option data-divider="true"></option>
 							<c:forEach var="reportFormat" items="${reportFormats}">
 								<form:option value="${reportFormat.value}">
