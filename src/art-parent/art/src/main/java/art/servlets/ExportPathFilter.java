@@ -16,6 +16,7 @@
  */
 package art.servlets;
 
+import art.user.User;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,7 +30,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +50,19 @@ public class ExportPathFilter implements Filter {
 
 		HttpServletRequest request = (HttpServletRequest) srequest;
 		HttpServletResponse response = (HttpServletResponse) sresponse;
+
+		//ensure user is logged in
+		HttpSession session = request.getSession();
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		if (sessionUser == null) {
+			String nextPageAfterLogin = StringUtils.substringAfter(request.getRequestURI(), request.getContextPath());
+			if (request.getQueryString() != null) {
+				nextPageAfterLogin = nextPageAfterLogin + "?" + request.getQueryString();
+			}
+			session.setAttribute("nextPageAfterLogin", nextPageAfterLogin);
+			request.getRequestDispatcher("/login.do").forward(request, response);
+			return;
+		}
 
 		String requestUri = request.getRequestURI();
 		File requestPath = new File(requestUri);

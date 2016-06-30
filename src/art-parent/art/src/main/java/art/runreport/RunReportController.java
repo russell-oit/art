@@ -295,14 +295,14 @@ public class RunReportController {
 					String description = "";
 					shortDescription = StringUtils.trim(shortDescription);
 					if (StringUtils.length(shortDescription) > 0) {
-						description = " | " + shortDescription;
+						description = " :: " + shortDescription;
 					}
 
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
 
 					String reportInfo = "<b>" + reportName + "</b>"
-							+ description + " | " + startTimeString;
+							+ description + " :: " + startTimeString;
 
 					displayReportInfo(writer, reportInfo);
 

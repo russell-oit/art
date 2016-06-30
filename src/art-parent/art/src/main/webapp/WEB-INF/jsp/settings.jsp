@@ -54,7 +54,7 @@ Settings configuration page
 //				$('#useLdapAnonymousBind').change(function () {
 //					toggleLdapBindDnEnabled();
 //				});
-				
+
 				$('#useLdapAnonymousBind').on('switchChange.bootstrapSwitch', function (event, state) {
 					toggleLdapBindDnEnabled();
 				});
@@ -792,6 +792,24 @@ Settings configuration page
 								</span>
 							</div>
 							<form:errors path="maxFileUploadSizeMB" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="artBaseUrl">
+							<spring:message code="settings.label.artBaseUrl"/>
+						</label>
+						<div class="col-md-7">
+							<div class="input-group">
+								<form:input path="artBaseUrl" class="form-control"/>
+								<spring:message code="settings.help.artBaseUrl" var="help"/>
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<form:errors path="artBaseUrl" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

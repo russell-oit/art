@@ -197,7 +197,11 @@ public class RunReportHelper {
 				request.setAttribute("reportFormats", reportFormats);
 		}
 		request.setAttribute("enableReportFormats", enableReportFormats);
-		request.setAttribute("reportFormat", report.getDefaultReportFormat());
+		String reportFormat = (String) request.getAttribute("reportFormat");
+		if (reportFormat == null) {
+			reportFormat = report.getDefaultReportFormat();
+		}
+		request.setAttribute("reportFormat", reportFormat);
 
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		int accessLevel = sessionUser.getAccessLevel().getValue();
@@ -356,8 +360,8 @@ public class RunReportHelper {
 
 		return formats;
 	}
-	
-		/**
+
+	/**
 	 * Replaces direct parameter substitution placeholders with parameter values
 	 *
 	 * @param sourceString the string the contains the parameter placeholders
@@ -366,9 +370,9 @@ public class RunReportHelper {
 	 */
 	public String performDirectParameterSubstitution(String sourceString,
 			Map<String, ReportParameter> reportParamsMap) {
-		
-		String placeholderPrefix=""; //default to no prefix
-		return performDirectParameterSubstitution(sourceString,placeholderPrefix,reportParamsMap);
+
+		String placeholderPrefix = ""; //default to no prefix
+		return performDirectParameterSubstitution(sourceString, placeholderPrefix, reportParamsMap);
 	}
 
 	/**

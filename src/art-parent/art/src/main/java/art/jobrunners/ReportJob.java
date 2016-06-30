@@ -175,17 +175,17 @@ public class ReportJob implements org.quartz.Job {
 	 */
 	private void runBatchFile() {
 		logger.debug("Entering runBatchFile");
-		
+
 		String batchFileName = job.getBatchFile();
 
 		if (StringUtils.isBlank(batchFileName)) {
 			return;
 		}
-		
+
 		logger.debug("batchFileName='{}'", batchFileName);
 
 		batchFileName = ArtUtils.cleanFileName(batchFileName);
-		
+
 		logger.debug("cleaned batchFileName='{}'", batchFileName);
 
 		String batchDirectory = Config.getBatchPath();
@@ -226,10 +226,10 @@ public class ReportJob implements org.quartz.Job {
 				}
 			} else {
 				String os = SystemUtils.OS_NAME;
-				logger.warn("Unexpected OS: '{}'", os);
+				logger.warn("Unexpected OS: '{}'. Job Id: {}", os, jobId);
 			}
 		} else {
-			logger.warn("Batch file not found: '{}'", fullBatchFileName);
+			logger.warn("Batch file not found: '{}'. Job Id: {}", fullBatchFileName, jobId);
 		}
 	}
 
@@ -986,6 +986,17 @@ public class ReportJob implements org.quartz.Job {
 
 		logger.debug("Entering processAndSendEmail");
 
+		String finalMessage;
+		//append link to job output for publish reminders
+		String artBaseUrl = Config.getSettings().getArtBaseUrl();
+		if (jobType.isPublish() && StringUtils.isNotBlank(artBaseUrl)) {
+			String jobLink = artBaseUrl + "/export/jobs/" + fileName;
+			String jobLinkHtml = "<p><a href='" + jobLink + "'>" + jobLink + "</a></p>";
+			finalMessage = message + jobLinkHtml;
+		} else {
+			finalMessage = message;
+		}
+
 		//send customized emails to dynamic recipients
 		if (recipientDetails != null) {
 			Mailer mailer = getMailer();
@@ -997,7 +1008,7 @@ public class ReportJob implements org.quartz.Job {
 				Map<String, String> recipientColumns = entry.getValue();
 
 				//customize message by replacing field labels with values for this recipient
-				String customMessage = prepareCustomMessage(message, recipientColumns); //message for a particular recipient. may include personalization e.g. Dear Jane
+				String customMessage = prepareCustomMessage(finalMessage, recipientColumns); //message for a particular recipient. may include personalization e.g. Dear Jane
 				prepareMailer(mailer, customMessage, outputFileName);
 
 				mailer.setTo(email);
@@ -1036,7 +1047,7 @@ public class ReportJob implements org.quartz.Job {
 		if (generateEmail) {
 			Mailer mailer = getMailer();
 
-			prepareMailer(mailer, message, outputFileName);
+			prepareMailer(mailer, finalMessage, outputFileName);
 
 			//set recipients
 			mailer.setTo(tos);
@@ -1053,7 +1064,7 @@ public class ReportJob implements org.quartz.Job {
 					File file = new File(outputFileName);
 					file.delete();
 					fileName = "";
-				} else {
+				} else if (jobType.isPublish()) {
 					runMessage = "jobs.message.reminderSent";
 				}
 			} catch (MessagingException ex) {

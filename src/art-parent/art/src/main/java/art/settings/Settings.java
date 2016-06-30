@@ -79,6 +79,21 @@ public class Settings implements Serializable {
 	private boolean schedulingEnabled = true;
 	private String rssLink;
 	private int maxFileUploadSizeMB = 5;
+	private String artBaseUrl;
+
+	/**
+	 * @return the artBaseUrl
+	 */
+	public String getArtBaseUrl() {
+		return artBaseUrl;
+	}
+
+	/**
+	 * @param artBaseUrl the artBaseUrl to set
+	 */
+	public void setArtBaseUrl(String artBaseUrl) {
+		this.artBaseUrl = artBaseUrl;
+	}
 
 	/**
 	 * Get the value of maxFileUploadSizeMB

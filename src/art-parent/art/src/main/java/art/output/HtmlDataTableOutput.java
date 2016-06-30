@@ -33,6 +33,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void init() {
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6-dist/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/css/dataTables.bootstrap.min.css'>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.10.2.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/jquery.dataTables.min.js'></script>");

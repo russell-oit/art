@@ -254,6 +254,11 @@
 							list.append(new Option('--', '--'));
 					}
 				}
+				
+				//set the selected item according to the job output format
+				//https://jsfiddle.net/taditdash/dFK3K/
+				var jobOutputFormat="${job.outputFormat}";
+				$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
 			}
 
 			function toggleVisibleFields() {

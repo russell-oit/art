@@ -5,7 +5,7 @@
 		<meta charset="UTF-8">
 	</head>
 	<body>
-		<p th:utext="${mainMessage}">Main message</p>
+		<div th:utext="${mainMessage}">Main message</div>
 		<div th:if='${data != null}'>
 			<hr>
 				<p th:utext="${data}">Data</p>
