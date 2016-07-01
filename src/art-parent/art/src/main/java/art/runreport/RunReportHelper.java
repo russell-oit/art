@@ -302,25 +302,27 @@ public class RunReportHelper {
 		request.setAttribute("enablePrint", enablePrint);
 
 		boolean enableEmail;
-		switch (reportType) {
-			case Update:
-			case CrosstabHtml:
-			case TabularHtml:
-			case Dashboard:
-			case Text:
-			case Mondrian:
-			case MondrianXmla:
-			case SqlServerXmla:
-			case FreeMarker:
-				enableEmail = false;
-				break;
-			default:
-				enableEmail = true;
-		}
+//		switch (reportType) {
+//			case Update:
+//			case CrosstabHtml:
+//			case TabularHtml:
+//			case Dashboard:
+//			case Text:
+//			case Mondrian:
+//			case MondrianXmla:
+//			case SqlServerXmla:
+//			case FreeMarker:
+//				enableEmail = false;
+//				break;
+//			default:
+//				enableEmail = true;
+//		}
+//
+//		if (!Config.isEmailServerConfigured() || StringUtils.isBlank(sessionUser.getEmail())) {
+//			enableEmail = false;
+//		}
 
-		if (!Config.isEmailServerConfigured() || StringUtils.isBlank(sessionUser.getEmail())) {
-			enableEmail = false;
-		}
+		enableEmail = false; //disable email for now. feature may be abused by users to send spam?
 		request.setAttribute("enableEmail", enableEmail);
 	}
 

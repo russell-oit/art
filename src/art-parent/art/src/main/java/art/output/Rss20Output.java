@@ -94,8 +94,8 @@ public class Rss20Output extends StandardOutput {
 			String paramName = reportParam.getParameter().getName();
 			String displayValues = reportParam.getDisplayValues();
 
-			String outputString = "<art:name>" + StringEscapeUtils.escapeXml(paramName)
-					+ "</art:name><art:value>" + StringEscapeUtils.escapeXml(displayValues) + "<art:value>";
+			String outputString = "<art:name>" + StringEscapeUtils.escapeXml10(paramName)
+					+ "</art:name><art:value>" + StringEscapeUtils.escapeXml10(displayValues) + "<art:value>";
 
 			out.println("<art:param>");
 			out.println(outputString);
@@ -118,7 +118,7 @@ public class Rss20Output extends StandardOutput {
 	@Override
 	public void addCellString(String value) {
 		out.println("<" + columnNames[columnIndex] + ">"
-				+ StringEscapeUtils.escapeXml(value)
+				+ StringEscapeUtils.escapeXml10(value)
 				+ "</" + columnNames[columnIndex] + ">");
 		columnIndex++;
 	}

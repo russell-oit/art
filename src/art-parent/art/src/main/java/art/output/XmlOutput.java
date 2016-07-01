@@ -59,8 +59,8 @@ public class XmlOutput extends StandardOutput {
 			String paramLabel = reportParam.getParameter().getLabel();
 			String displayValues = reportParam.getDisplayValues();
 
-			String outputString = "<name>" + StringEscapeUtils.escapeXml(paramLabel)
-					+ "</name><value>" + StringEscapeUtils.escapeXml(displayValues) + "<value>";
+			String outputString = "<name>" + StringEscapeUtils.escapeXml10(paramLabel)
+					+ "</name><value>" + StringEscapeUtils.escapeXml10(displayValues) + "<value>";
 
 			out.println("<param>");
 			out.println(outputString);
@@ -99,7 +99,7 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<col type=\"header\">" + StringEscapeUtils.escapeXml(value) + "</col>");
+		out.println("<col type=\"header\">" + StringEscapeUtils.escapeXml10(value) + "</col>");
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
-		out.println("<col type=\"string\">" + StringEscapeUtils.escapeXml(value) + "</col>");
+		out.println("<col type=\"string\">" + StringEscapeUtils.escapeXml10(value) + "</col>");
 	}
 
 	@Override

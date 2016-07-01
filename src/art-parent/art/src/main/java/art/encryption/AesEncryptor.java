@@ -27,6 +27,8 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +44,8 @@ public class AesEncryptor {
 	//https://www.grc.com/passwords.htm
 
 	private static final Logger logger = LoggerFactory.getLogger(AesEncryptor.class);
-	private static final String IV = "9F962822F431B19B"; // 16 bytes IV
-	private static final String KEY = "XH6YUHlrofcQDZjd"; // 128 bit key
+	private static final String KEY = "XH6YUHlrofcQDZjd"; // 128 bit key (16 bytes)
+	private static final int AES_128_IV_LENGTH = 16; //16 bytes
 
 	/**
 	 * Encrypts a string
@@ -57,14 +59,19 @@ public class AesEncryptor {
 			return null;
 		}
 
+		//use random IV that will be prepended to the cipher text
+		//so that the same string generates different cipher text
+		byte[] IVBytes = RandomUtils.nextBytes(AES_128_IV_LENGTH); //can use SecureRandom but that may block if there's insufficient entropy
+
 		try {
-			IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes("UTF-8"));
+			IvParameterSpec ivParameterSpec = new IvParameterSpec(IVBytes);
 			SecretKeySpec secretKeySpec = new SecretKeySpec(KEY.getBytes("UTF-8"), "AES");
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 
 			cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
-			byte[] encrypted = cipher.doFinal(clearText.getBytes("UTF-8"));
-			return Base64.encodeBase64String(encrypted);
+			byte[] encryptedBytes = cipher.doFinal(clearText.getBytes("UTF-8"));
+			byte[] finalEncryptedBytes = ArrayUtils.addAll(IVBytes, encryptedBytes);
+			return Base64.encodeBase64String(finalEncryptedBytes);
 		} catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
 			logger.error("Error", ex);
 		}
@@ -85,12 +92,15 @@ public class AesEncryptor {
 		}
 
 		try {
-			IvParameterSpec ivParameterSpec = new IvParameterSpec(IV.getBytes("UTF-8"));
+			byte[] encryptedBytes = Base64.decodeBase64(cipherText);
+			byte[] IVBytes = ArrayUtils.subarray(encryptedBytes, 0, AES_128_IV_LENGTH);
+			byte[] finalEncryptedBytes = ArrayUtils.subarray(encryptedBytes, AES_128_IV_LENGTH, encryptedBytes.length);
+			IvParameterSpec ivParameterSpec = new IvParameterSpec(IVBytes);
 			SecretKeySpec secretKeySpec = new SecretKeySpec(KEY.getBytes("UTF-8"), "AES");
 			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 
 			cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
-			byte[] decryptedBytes = cipher.doFinal(Base64.decodeBase64(cipherText));
+			byte[] decryptedBytes = cipher.doFinal(finalEncryptedBytes);
 			return new String(decryptedBytes);
 		} catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
 			logger.error("Error", ex);
@@ -98,4 +108,5 @@ public class AesEncryptor {
 
 		return null;
 	}
+	
 }

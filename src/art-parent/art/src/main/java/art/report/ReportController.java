@@ -17,6 +17,7 @@
 package art.report;
 
 import art.datasource.DatasourceService;
+import art.encryption.AesEncryptor;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.jobrunners.ReportJob;
@@ -84,7 +85,7 @@ public class ReportController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-
+		
 		return "reports";
 	}
 
