@@ -19,6 +19,8 @@ package art.report;
 import art.datasource.DatasourceService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.jobrunners.ReportJob;
+import art.mail.Mailer;
 import art.reportgroup.ReportGroupService;
 import art.runreport.RunReportHelper;
 import art.servlets.Config;
@@ -32,6 +34,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -305,6 +308,105 @@ public class ReportController {
 		return showEditReports();
 	}
 
+	@RequestMapping(value = "/app/emailReport", method = RequestMethod.POST)
+	public @ResponseBody
+	AjaxResponse emailReport(@RequestParam("mailFrom") String mailFrom,
+			@RequestParam("mailTo") String mailTo,
+			@RequestParam("mailCc") String mailCc,
+			@RequestParam("mailBcc") String mailBcc,
+			@RequestParam("mailSubject") String mailSubject,
+			@RequestParam("mailMessage") String mailMessage,
+			HttpSession session) {
+
+		logger.debug("Entering emailReport: mailFrom='{}',"
+				+ " mailTo='{}', mailCc='{}', mailBcc='{}', mailSubject='{}'",
+				mailFrom, mailTo, mailCc, mailBcc, mailSubject);
+
+		AjaxResponse response = new AjaxResponse();
+		response.setSuccess(true);
+
+		String reportFileName = (String) session.getAttribute("reportFileName");
+		User sessionUser = (User) session.getAttribute("sessionUser");
+
+		String from = StringUtils.trim(mailFrom);
+		String to = StringUtils.trim(mailTo);
+
+		if (StringUtils.isBlank(reportFileName)) {
+			logger.info("Could not email report. reportFileName is blank. User = {}", sessionUser);
+			return response;
+		}
+
+		String fullReportFileName = Config.getReportsExportPath() + reportFileName;
+		File reportFile = new File(fullReportFileName);
+		if (!reportFile.exists()) {
+			logger.info("Could not email report. Report file does not exist: '{}'. User = {}", reportFileName, sessionUser);
+			return response;
+		}
+
+		if (StringUtils.length(from) < 5) {
+			logger.info("Could not email report. Invalid mailFrom. User = {}", sessionUser);
+			return response;
+		}
+
+		if (StringUtils.length(to) < 5) {
+			logger.info("Could not email report. Invalid mailTo. User = {}", sessionUser);
+			return response;
+		}
+
+		if (!Config.isEmailServerConfigured()) {
+			logger.info("Could not email report. Email server not configured. User = {}", sessionUser);
+			return response;
+		}
+
+		String subject = mailSubject;
+		if (StringUtils.isBlank(subject)) {
+			subject = "Report";
+		}
+
+		String[] tos;
+		if (StringUtils.contains(to, ",")) {
+			tos = StringUtils.split(to, ",");
+		} else {
+			tos = StringUtils.split(to, ";");
+		}
+
+		String[] ccs;
+		if (StringUtils.contains(mailCc, ",")) {
+			ccs = StringUtils.split(mailCc, ",");
+		} else {
+			ccs = StringUtils.split(mailCc, ";");
+		}
+
+		String[] bccs;
+		if (StringUtils.contains(mailBcc, ",")) {
+			bccs = StringUtils.split(mailBcc, ",");
+		} else {
+			bccs = StringUtils.split(mailBcc, ";");
+		}
+
+		ReportJob reportJob = new ReportJob();
+		Mailer mailer = reportJob.getMailer();
+		mailer.setFrom(from);
+		mailer.setSubject(subject);
+		mailer.setMessage(mailMessage);
+		List<File> attachments = new ArrayList<>();
+		attachments.add(reportFile);
+		mailer.setAttachments(attachments);
+		mailer.setTo(tos);
+		mailer.setCc(ccs);
+		mailer.setBcc(bccs);
+
+		try {
+			mailer.send();
+		} catch (MessagingException | IOException ex) {
+			logger.error("Error", ex);
+			response.setSuccess(false);
+			response.setErrorMessage(ex.toString());
+		}
+
+		return response;
+	}
+
 	/**
 	 * Prepares model data and returns the jsp file to display
 	 *
@@ -460,23 +562,23 @@ public class ReportController {
 
 	/**
 	 * Sets the chart options setting property of the given report
-	 * 
+	 *
 	 * @param report the report
 	 */
 	private void setChartOptionsSettingString(Report report) {
 		logger.debug("Entering setChartOptionsSettingString: report={}", report);
-		
+
 		String size = report.getChartOptions().getWidth() + "x" + report.getChartOptions().getHeight();
 		String yRange = report.getChartOptions().getyAxisMin() + ":" + report.getChartOptions().getyAxisMax();
-		
+
 		logger.debug("size='{}'", size);
 		logger.debug("yRange='{}'", yRange);
-		
+
 		String showLegend = "";
 		String showLabels = "";
 		String showPoints = "";
 		String showData = "";
-		
+
 		logger.debug("report.getChartOptions().isShowLegend() = {}", report.getChartOptions().isShowLegend());
 		if (report.getChartOptions().isShowLegend()) {
 			showLegend = "showLegend";
@@ -493,13 +595,13 @@ public class ReportController {
 		if (report.getChartOptions().isShowData()) {
 			showData = "showData";
 		}
-		
+
 		String rotateAt = "rotateAt:" + report.getChartOptions().getRotateAt();
 		String removeAt = "removeAt:" + report.getChartOptions().getRemoveAt();
-		
+
 		logger.debug("rotateAt='{}'", rotateAt);
 		logger.debug("removeAt='{}'", removeAt);
-		
+
 		Object[] options = {
 			size,
 			yRange,
@@ -511,7 +613,7 @@ public class ReportController {
 			rotateAt,
 			removeAt
 		};
-		
+
 		logger.debug("options='{}'", StringUtils.join(options, " "));
 		report.setChartOptionsSetting(StringUtils.join(options, " "));
 	}

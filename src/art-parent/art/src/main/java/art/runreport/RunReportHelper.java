@@ -289,6 +289,7 @@ public class RunReportHelper {
 			case XDocReportVelocityDocx:
 			case XDocReportVelocityOdt:
 			case XDocReportVelocityPptx:
+			case Update:
 				enablePrint = false;
 				break;
 			default:
@@ -299,6 +300,28 @@ public class RunReportHelper {
 				}
 		}
 		request.setAttribute("enablePrint", enablePrint);
+
+		boolean enableEmail;
+		switch (reportType) {
+			case Update:
+			case CrosstabHtml:
+			case TabularHtml:
+			case Dashboard:
+			case Text:
+			case Mondrian:
+			case MondrianXmla:
+			case SqlServerXmla:
+			case FreeMarker:
+				enableEmail = false;
+				break;
+			default:
+				enableEmail = true;
+		}
+
+		if (!Config.isEmailServerConfigured() || StringUtils.isBlank(sessionUser.getEmail())) {
+			enableEmail = false;
+		}
+		request.setAttribute("enableEmail", enableEmail);
 	}
 
 	/**

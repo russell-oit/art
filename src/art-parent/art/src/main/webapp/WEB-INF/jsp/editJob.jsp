@@ -554,7 +554,7 @@
 							<spring:message code="jobs.label.mailFrom"/>
 						</label>
 						<div class="col-md-8">
-							<form:input path="mailFrom" class="form-control"/>
+							<form:input path="mailFrom" readonly="true" class="form-control"/>
 							<form:errors path="mailFrom" cssClass="error"/>
 						</div>
 					</div>

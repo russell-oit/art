@@ -289,6 +289,7 @@ public class JobController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			job.setUser(sessionUser);
+			job.setMailFrom(sessionUser.getEmail());
 
 			model.addAttribute("job", job);
 

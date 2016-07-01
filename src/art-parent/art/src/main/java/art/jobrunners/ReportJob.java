@@ -390,7 +390,7 @@ public class ReportJob implements org.quartz.Job {
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
 
-		String messageData = "";
+		String messageData = null;
 
 		if (jobType.isEmailAttachment()) {
 			// e-mail output as attachment
@@ -419,6 +419,9 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		if (reportType == ReportType.FreeMarker) {
+			if (messageData == null) {
+				messageData = "";
+			}
 			mailer.setMessage(messageData);
 		} else {
 			String mainMessage;
@@ -1559,7 +1562,7 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @return a mailer object that can be used to send emails
 	 */
-	private Mailer getMailer() {
+	public Mailer getMailer() {
 		logger.debug("Entering getMailer");
 
 		String smtpServer = Config.getSettings().getSmtpServer();

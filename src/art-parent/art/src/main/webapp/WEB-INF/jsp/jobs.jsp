@@ -382,47 +382,67 @@ Display user jobs and jobs configuration
 		</table>
 
 		<div id="runLaterModal" class="modal fade" role="dialog" 
-			 aria-labelledby="runLater" aria-hidden="true" tabindex="-1">
+			 aria-labelledby="runLaterLabel" aria-hidden="true" tabindex="-1">
 			<div class="modal-dialog">
 				<div class="modal-content">
 
-					<form id="runLaterForm" role="form" method="POST" action="${pageContext.request.contextPath}/app/runLaterJob.do">
-						<!-- Modal Header -->
-						<div class="modal-header">
-							<button type="button" class="close" 
-									data-dismiss="modal">
-								<span aria-hidden="true">&times;</span>
-								<span class="sr-only">Close</span>
-							</button>
-							<h4 class="modal-title" id="runLater">
-								<spring:message code="jobs.action.runLater"/>
-							</h4>
-						</div>
+					<!-- Modal Header -->
+					<div class="modal-header">
+						<button type="button" class="close" 
+								data-dismiss="modal">
+							<span aria-hidden="true">&times;</span>
+							<span class="sr-only">Close</span>
+						</button>
+						<h4 class="modal-title" id="runLaterLabel">
+							<spring:message code="jobs.action.runLater"/>
+						</h4>
+					</div>
 
-						<!-- Modal Body -->
-						<div class="modal-body">
+					<!-- Modal Body -->
+					<div class="modal-body">
+						<form id="runLaterForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/app/runLaterJob.do">
 							<input type="hidden" id="runLaterJobId" name="runLaterJobId"/>
-							<input type="text" id="runLaterJobName" name="runLaterJobName" readonly class="form-control"/>
-							<input type="text" id="clock" readonly class="form-control"/>
-							<div id="runLaterDatePicker" class='input-group date datetimepicker'>
-								<input type="text" id="runLaterDate" name="runLaterDate" value="" class="form-control"/>
-								<span class="input-group-addon">
-									<span class="glyphicon glyphicon-calendar"></span>
-								</span>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="runLaterJobName">
+									<spring:message code="jobs.text.jobName"/>
+								</label>
+								<div class="col-md-8">
+									<input type="text" id="runLaterJobName" name="runLaterJobName" readonly class="form-control"/>
+								</div>
 							</div>
-						</div>
-
-						<!-- Modal Footer -->
-						<div class="modal-footer">
-							<button type="button" class="btn btn-default"
-									data-dismiss="modal">
-								<spring:message code="dialog.button.cancel"/>
-							</button>
-							<button type="submit" id="runLaterSubmit" class="btn btn-primary">
-								<spring:message code="dialog.button.ok"/>
-							</button>
-						</div>
-					</form>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="clock">
+									<spring:message code="jobs.label.currentTime"/>
+								</label>
+								<div class="col-md-8">
+									<input type="text" id="clock" readonly class="form-control"/>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-md-4" for="runLaterDate">
+									<spring:message code="jobs.label.runDate"/>
+								</label>
+								<div class="col-md-8">
+									<div id="runLaterDatePicker" class='input-group date datetimepicker'>
+										<input type="text" id="runLaterDate" name="runLaterDate" value="" class="form-control"/>
+										<span class="input-group-addon">
+											<span class="glyphicon glyphicon-calendar"></span>
+										</span>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					<!-- Modal Footer -->
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default"
+								data-dismiss="modal">
+							<spring:message code="dialog.button.cancel"/>
+						</button>
+						<button type="button" id="runLaterSubmit" class="btn btn-primary">
+							<spring:message code="dialog.button.ok"/>
+						</button>
+					</div>		
 				</div>
 			</div>
 		</div>

@@ -10,6 +10,7 @@ Display result (link to file) e.g. with jasper report, jxls report, chart pdf or
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <div style="text-align: center">
 	<a type="application/octet-stream" href="${pageContext.request.contextPath}/export/reports/${fileName}">
@@ -17,7 +18,9 @@ Display result (link to file) e.g. with jasper report, jxls report, chart pdf or
 	</a>
 </div>
 
+<c:set var="reportFileName" value="${fileName}" scope="session"/>
+
 <script type="text/javascript">
 	var url = "${pageContext.request.contextPath}/export/reports/${fileName}";
-	window.open(url);
+		window.open(url);
 </script>
