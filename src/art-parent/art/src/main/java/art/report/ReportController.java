@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -73,6 +74,9 @@ public class ReportController {
 
 	@Autowired
 	private DatasourceService datasourceService;
+	
+	@Autowired
+	private MessageSource messageSource;
 
 	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
@@ -317,16 +321,19 @@ public class ReportController {
 			@RequestParam("mailBcc") String mailBcc,
 			@RequestParam("mailSubject") String mailSubject,
 			@RequestParam("mailMessage") String mailMessage,
-			HttpSession session) {
+			HttpSession session, Locale locale) {
 
 		logger.debug("Entering emailReport: mailFrom='{}',"
 				+ " mailTo='{}', mailCc='{}', mailBcc='{}', mailSubject='{}'",
 				mailFrom, mailTo, mailCc, mailBcc, mailSubject);
 
 		AjaxResponse response = new AjaxResponse();
-		response.setSuccess(true);
+		String fileNotSentMessage=messageSource.getMessage("reports.message.fileNotSent", null, locale);
+		response.setSuccess(false);
+		response.setErrorMessage(fileNotSentMessage);
 
 		String reportFileName = (String) session.getAttribute("reportFileName");
+//		session.removeAttribute("reportFileName");
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		String from = StringUtils.trim(mailFrom);
@@ -397,6 +404,7 @@ public class ReportController {
 		mailer.setCc(ccs);
 		mailer.setBcc(bccs);
 
+		//disable email for now. feature may be abused by users to send spam?
 		try {
 			mailer.send();
 		} catch (MessagingException | IOException ex) {
@@ -405,6 +413,7 @@ public class ReportController {
 			response.setErrorMessage(ex.toString());
 		}
 
+		response.setSuccess(true);
 		return response;
 	}
 

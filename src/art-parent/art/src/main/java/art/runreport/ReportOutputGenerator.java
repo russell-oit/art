@@ -430,7 +430,7 @@ public class ReportOutputGenerator {
 	 */
 	private Chart getChartInstance(ReportType reportType) throws IllegalArgumentException {
 		logger.debug("Entering getChartInstance: reportType={}", reportType);
-		
+
 		Chart chart;
 		switch (reportType) {
 			case Pie2DChart:
@@ -465,7 +465,7 @@ public class ReportOutputGenerator {
 			default:
 				throw new IllegalArgumentException("Unexpected chart report type: " + reportType);
 		}
-		
+
 		return chart;
 	}
 

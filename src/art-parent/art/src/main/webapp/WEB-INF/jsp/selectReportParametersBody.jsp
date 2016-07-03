@@ -31,7 +31,10 @@ Display section to allow selecting of report parameters and initiate running of 
 
 		$("#emailReportSubmit").click(function (e) {
 			e.preventDefault();
-
+			
+			//https://stackoverflow.com/questions/2122085/jquery-and-tinymce-textarea-value-doesnt-submit
+			tinyMCE.triggerSave();
+			
 			$.ajax({
 				type: 'POST',
 				url: '${pageContext.request.contextPath}/app/emailReport.do',
@@ -42,16 +45,16 @@ Display section to allow selecting of report parameters and initiate running of 
 					$("#emailReportModal").modal('hide');
 //					 $(':input','#emailReportForm').val("");
 					if (response.success) {
-						notifyActionSuccess("${fileSentText}");
+						$.notify("${fileSentText}", "success");
 					} else {
-						notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+						$.notify(response.errorMessage, "error");
 					}
 				},
 				error: ajaxErrorHandler
 			});
 		});
 
-		$("#runInNewPage").click(function (e) {
+		$("#runInNewPage").click(function () {
 			$("#showInline").val("false");
 			$("#parametersForm").submit();
 		});
@@ -352,7 +355,7 @@ Display section to allow selecting of report parameters and initiate running of 
 										<div class="col-md-8 col-md-offset-2">
 											<div id="actionsDiv" style="text-align: center">
 												<c:if test="${enableEmail}">
-													<button type="button" id="emailButton" class="btn btn-default action emailReport"
+													<button type="button" id="emailButton" class="btn btn-default action"
 															data-toggle="modal" data-target="#emailReportModal">
 														<spring:message code="reports.action.email"/>
 													</button>
@@ -413,8 +416,8 @@ Display section to allow selecting of report parameters and initiate running of 
 							<spring:message code="jobs.label.mailFrom"/>
 						</label>
 						<div class="col-md-8">
-							<input type="text" id="mailFrom" name="mailFrom" readonly
-								   class="form-control" value="${sessionUser.email}"/>
+							<input type="text" id="mailFrom" name="mailFrom"
+								   readonly class="form-control" value="${sessionUser.email}"/>
 						</div>
 					</div>
 					<div class="form-group">
@@ -449,13 +452,13 @@ Display section to allow selecting of report parameters and initiate running of 
 							<input type="text" id="mailSubject" name="mailSubject" class="form-control"/>
 						</div>
 					</div>
-					<div id="mailMessageDiv">
+					<div>
 						<label class="col-md-12 control-label" style="text-align: center">
 							<spring:message code="jobs.label.mailMessage"/>
 						</label>
 						<div class="form-group">
 							<div class="col-md-12">
-								<textarea id="mailMessage" name="mailMessage" rows="8" cols="60" class="form-control editor">
+								<textarea id="mailMessage" name="mailMessage" rows="5" cols="60" class="form-control editor">
 								</textarea>
 							</div>
 						</div>
