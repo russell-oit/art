@@ -18,6 +18,7 @@
 package art.job;
 
 import art.enums.JobType;
+import art.ftpserver.FtpServer;
 import art.report.Report;
 import art.user.User;
 import java.io.Serializable;
@@ -77,6 +78,21 @@ public class Job implements Serializable {
 	private String nextRunDateString;
 	private int cachedDatasourceId;
 	private String batchFile;
+	private FtpServer ftpServer;
+
+	/**
+	 * @return the ftpServer
+	 */
+	public FtpServer getFtpServer() {
+		return ftpServer;
+	}
+
+	/**
+	 * @param ftpServer the ftpServer to set
+	 */
+	public void setFtpServer(FtpServer ftpServer) {
+		this.ftpServer = ftpServer;
+	}
 
 	/**
 	 * @return the batchFile

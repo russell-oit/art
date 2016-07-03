@@ -19,6 +19,7 @@ package art.job;
 
 import art.datasource.DatasourceService;
 import art.enums.JobType;
+import art.ftpserver.FtpServerService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.jobrunners.ReportJob;
@@ -98,6 +99,9 @@ public class JobController {
 
 	@Autowired
 	private JobParameterService jobParameterService;
+	
+	@Autowired
+	private FtpServerService ftpServerService;
 
 	@RequestMapping(value = "/app/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -488,6 +492,7 @@ public class JobController {
 			model.addAttribute("dynamicRecipientReports", reportService.getDynamicRecipientReports());
 			model.addAttribute("schedules", scheduleService.getAllSchedules());
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
+			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

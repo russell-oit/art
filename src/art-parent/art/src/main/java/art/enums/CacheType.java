@@ -29,7 +29,8 @@ public enum CacheType {
 
 	Mondrian("Mondrian"), Reports("Reports"), ReportGroups("ReportGroups"),
 	Users("Users"), UserGroups("UserGroups"), Datasources("Datasources"),
-	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters");
+	Schedules("Schedules"), Jobs("Jobs"), Rules("Rules"), Parameters("Parameters"),
+	FtpServers("FtpServers");
 	
 	private final String value;
 

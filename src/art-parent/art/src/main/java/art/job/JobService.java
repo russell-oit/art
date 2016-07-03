@@ -21,6 +21,8 @@ import art.connectionpool.DbConnections;
 import art.dbutils.DbService;
 import art.dbutils.DatabaseUtils;
 import art.enums.JobType;
+import art.ftpserver.FtpServer;
+import art.ftpserver.FtpServerService;
 import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
@@ -62,18 +64,23 @@ public class JobService {
 	private final DbService dbService;
 	private final ReportService reportService;
 	private final UserService userService;
+	private final FtpServerService ftpServerService;
 
 	@Autowired
-	public JobService(DbService dbService, ReportService reportService, UserService userService) {
+	public JobService(DbService dbService, ReportService reportService,
+			UserService userService, FtpServerService ftpServerService) {
+
 		this.dbService = dbService;
 		this.reportService = reportService;
 		this.userService = userService;
+		this.ftpServerService = ftpServerService;
 	}
 
 	public JobService() {
 		dbService = new DbService();
 		reportService = new ReportService();
 		userService = new UserService();
+		ftpServerService = new FtpServerService();
 	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_JOBS AJ";
@@ -177,6 +184,9 @@ public class JobService {
 
 		User user = userService.getUser(rs.getInt("USER_ID"));
 		job.setUser(user);
+
+		FtpServer ftpServer = ftpServerService.getFtpServer(rs.getInt("FTP_SERVER_ID"));
+		job.setFtpServer(ftpServer);
 	}
 
 	/**
@@ -495,6 +505,14 @@ public class JobService {
 			username = job.getUser().getUsername();
 		}
 
+		Integer ftpServerId;
+		if (job.getFtpServer() == null) {
+			logger.warn("Ftp server not defined. Defaulting to 0");
+			ftpServerId = 0;
+		} else {
+			ftpServerId = job.getFtpServer().getFtpServerId();
+		}
+
 		String migratedToQuartz = "X";
 
 		int affectedRows;
@@ -507,8 +525,9 @@ public class JobService {
 					+ " START_DATE, END_DATE, NEXT_RUN_DATE,"
 					+ " ACTIVE, ENABLE_AUDIT, ALLOW_SHARING, ALLOW_SPLITTING,"
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
-					+ " BATCH_FILE, CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 32) + ")";
+					+ " BATCH_FILE, FTP_SERVER_ID,"
+					+ " CREATION_DATE, CREATED_BY)"
+					+ " VALUES(" + StringUtils.repeat("?", ",", 33) + ")";
 
 			Object[] values = {
 				job.getJobId(),
@@ -542,6 +561,7 @@ public class JobService {
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getBatchFile(),
+				ftpServerId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -556,7 +576,7 @@ public class JobService {
 					+ " START_DATE=?, END_DATE=?, NEXT_RUN_DATE=?,"
 					+ " ACTIVE=?, ENABLE_AUDIT=?,"
 					+ " ALLOW_SHARING=?, ALLOW_SPLITTING=?, RECIPIENTS_QUERY_ID=?,"
-					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?, BATCH_FILE=?, "
+					+ " RUNS_TO_ARCHIVE=?, MIGRATED_TO_QUARTZ=?, BATCH_FILE=?, FTP_SERVER_ID=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE JOB_ID=?";
 
@@ -591,6 +611,7 @@ public class JobService {
 				job.getRunsToArchive(),
 				migratedToQuartz,
 				job.getBatchFile(),
+				ftpServerId,
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				job.getJobId()

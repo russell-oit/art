@@ -146,6 +146,7 @@ public class ScheduleService {
 
 		sql = "DELETE FROM ART_JOB_SCHEDULES"
 				+ " WHERE SCHEDULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		
 		dbService.update(sql, (Object[]) ids);
 	}
 

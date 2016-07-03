@@ -23,6 +23,7 @@ import art.dbutils.DbService;
 import art.enums.JobType;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
+import art.ftpserver.FtpServer;
 import art.job.JobService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
@@ -48,6 +49,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -73,6 +75,9 @@ import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -167,7 +172,94 @@ public class ReportJob implements org.quartz.Job {
 
 		afterCompletion();
 
+		ftpFile();
+
 		runBatchFile();
+	}
+
+	/**
+	 * Ftps a generated file
+	 */
+	private void ftpFile() {
+		logger.debug("Entering ftpFile");
+
+		FtpServer ftpServer = job.getFtpServer();
+		if (ftpServer == null) {
+			//no ftp server configured
+			return;
+		}
+
+		if (!ftpServer.isActive()) {
+			logger.info("FTP Server disabled. Job Id: {}", jobId);
+			return;
+		}
+
+		//http://www.codejava.net/java-se/networking/ftp/java-ftp-file-upload-tutorial-and-example
+		//https://commons.apache.org/proper/commons-net/examples/ftp/FTPClientExample.java
+		String server = ftpServer.getServer();
+		int port = ftpServer.getPort();
+		String user = ftpServer.getUser();
+		String pass = ftpServer.getPassword();
+
+		FTPClient ftpClient = new FTPClient();
+		try {
+			ftpClient.connect(server, port);
+
+			// After connection attempt, you should check the reply code to verify
+			// success.
+			int reply = ftpClient.getReplyCode();
+
+			if (!FTPReply.isPositiveCompletion(reply)) {
+				ftpClient.disconnect();
+				logger.info("FTP server refused connection. Job Id: {}", jobId);
+				return;
+			}
+
+			if (!ftpClient.login(user, pass)) {
+				logger.info("FTP login failed. Job Id: {}", jobId);
+				return;
+			}
+
+			ftpClient.enterLocalPassiveMode();
+
+			ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+
+			String jobsExportPath = Config.getJobsExportPath();
+			String fullLocalFileName = jobsExportPath + fileName;
+			String remoteDirectory = ftpServer.getRemoteDirectory();
+			remoteDirectory = StringUtils.trimToEmpty(remoteDirectory);
+			String remoteFileName = remoteDirectory + "/" + fileName;
+			File localFile = new File(fullLocalFileName);
+
+			boolean done;
+			try (InputStream inputStream = new FileInputStream(localFile)) {
+				done = ftpClient.storeFile(remoteFileName, inputStream);
+			}
+			if (done) {
+				logger.debug("Ftp file upload successful. Job Id: {}", jobId);
+			} else {
+				logger.info("Ftp file upload failed. Job Id: {}", jobId);
+			}
+
+			boolean completed = ftpClient.completePendingCommand();
+			if (completed) {
+				logger.debug("Ftp file upload completed. Job Id: {}", jobId);
+			} else {
+				logger.info("Ftp file upload not completed. Job Id: {}", jobId);
+			}
+
+			ftpClient.logout();
+		} catch (IOException ex) {
+			logger.error("Error", ex);
+		} finally {
+			try {
+				if (ftpClient.isConnected()) {
+					ftpClient.disconnect();
+				}
+			} catch (IOException ex) {
+				logger.error("Error", ex);
+			}
+		}
 	}
 
 	/**

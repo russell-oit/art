@@ -152,12 +152,20 @@ public class CacheHelper {
 	public void clearParameters() {
 		logger.debug("Entering clearParameters");
 	}
+	
+	/**
+	 * Clears the ftp servers cache
+	 */
+	@CacheEvict(value = "ftpServers", allEntries = true)
+	public void clearFtpServers() {
+		logger.debug("Entering clearFtpServers");
+	}
 
 	/**
 	 * Clears all caches
 	 */
 	@CacheEvict(value = {"reports", "reportGroups", "users", "userGroups",
-		"datasources", "schedules", "jobs", "rules", "parameters"}, allEntries = true)
+		"datasources", "schedules", "jobs", "rules", "parameters", "ftpServers"}, allEntries = true)
 	public void clearAll() {
 		logger.debug("Entering clearAll");
 		

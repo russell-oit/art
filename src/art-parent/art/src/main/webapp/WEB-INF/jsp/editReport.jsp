@@ -446,7 +446,7 @@ Edit report page
 					</div>
 				</div>
 				<div id="datasourceDiv" class="form-group">
-					<label class="col-md-4 control-label " for="datasource">
+					<label class="col-md-4 control-label " for="datasource.datasourceId">
 						<spring:message code="page.text.datasource"/>
 					</label>
 					<div class="col-md-8">

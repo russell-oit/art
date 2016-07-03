@@ -254,10 +254,10 @@
 							list.append(new Option('--', '--'));
 					}
 				}
-				
+
 				//set the selected item according to the job output format
 				//https://jsfiddle.net/taditdash/dFK3K/
-				var jobOutputFormat="${job.outputFormat}";
+				var jobOutputFormat = "${job.outputFormat}";
 				$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
 			}
 
@@ -508,6 +508,27 @@
 							<div class="checkbox">
 								<form:checkbox path="allowSplitting" id="allowSplitting" class="switch-yes-no"/>
 							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="ftpServer.ftpServerId">
+							<spring:message code="jobs.label.ftpServer"/>
+						</label>
+						<div class="col-md-8">
+							<form:select path="ftpServer.ftpServerId" class="form-control selectpicker">
+								<form:option value="0">--</form:option>
+									<option data-divider="true"></option>
+								<c:forEach var="ftpServer" items="${ftpServers}">
+									<c:set var="ftpServerStatus">
+										<t:displayActiveStatus active="${ftpServer.active}" hideActive="true"/>
+									</c:set>
+									<form:option value="${ftpServer.ftpServerId}"
+												 data-content="${ftpServer.name} ${ftpServerStatus}">
+										${ftpServer.name} 
+									</form:option>
+								</c:forEach>
+							</form:select>
+							<form:errors path="ftpServer.ftpServerId" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
