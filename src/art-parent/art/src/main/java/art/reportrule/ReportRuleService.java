@@ -46,16 +46,21 @@ public class ReportRuleService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportRuleService.class);
 
-	@Autowired
-	private DbService dbService;
+	private final DbService dbService;
+	private final RuleService ruleService;
 
 	@Autowired
-	private RuleService ruleService;
+	public ReportRuleService(DbService dbService, RuleService ruleService) {
+		this.dbService = dbService;
+		this.ruleService = ruleService;
+	}
 
-	private final String SQL_SELECT_ALL = "SELECT AQR.*, AR.RULE_ID, AR.RULE_NAME"
-			+ " FROM ART_QUERY_RULES AQR"
-			+ " INNER JOIN ART_RULES AR ON"
-			+ " AQR.RULE_ID=AR.RULE_ID";
+	public ReportRuleService() {
+		dbService = new DbService();
+		ruleService = new RuleService();
+	}
+
+	private final String SQL_SELECT_ALL = "SELECT * FROM ART_QUERY_RULES";
 
 	/**
 	 * Maps a resultset to an object
@@ -79,10 +84,7 @@ public class ReportRuleService {
 			reportRule.setReportId(rs.getInt("QUERY_ID"));
 			reportRule.setReportColumn(rs.getString("FIELD_NAME"));
 
-			Rule rule = new Rule();
-			rule.setRuleId(rs.getInt("RULE_ID"));
-			rule.setName(rs.getString("RULE_NAME"));
-
+			Rule rule = ruleService.getRule(rs.getInt("RULE_ID"));
 			reportRule.setRule(rule);
 
 			return type.cast(reportRule);
@@ -100,7 +102,7 @@ public class ReportRuleService {
 	public List<ReportRule> getReportRules(int reportId) throws SQLException {
 		logger.debug("Entering getReportRules: reportId={}", reportId);
 
-		String sql = SQL_SELECT_ALL + " WHERE AQR.QUERY_ID=?";
+		String sql = SQL_SELECT_ALL + " WHERE QUERY_ID=?";
 		ResultSetHandler<List<ReportRule>> h = new BeanListHandler<>(ReportRule.class, new ReportRuleMapper());
 		return dbService.query(sql, h, reportId);
 	}
@@ -151,6 +153,7 @@ public class ReportRuleService {
 
 		sql = "DELETE FROM ART_QUERY_RULES WHERE"
 				+ " QUERY_RULE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
+		
 		dbService.update(sql, (Object[]) ids);
 	}
 

@@ -98,7 +98,7 @@ public class RuleService {
 		ResultSetHandler<List<Rule>> h = new BeanListHandler<>(Rule.class, new RuleMapper());
 		return dbService.query(SQL_SELECT_ALL, h);
 	}
-
+	
 	/**
 	 * Returns a rule
 	 *

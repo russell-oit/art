@@ -16,13 +16,18 @@
  */
 package art.runreport;
 
-import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
+import art.reportrule.ReportRule;
+import art.reportrule.ReportRuleService;
+import art.rule.Rule;
+import art.ruleValue.RuleValueService;
 import art.servlets.Config;
+import art.user.User;
+import art.usergroup.UserGroup;
 import art.utils.ArtUtils;
 import art.utils.XmlInfo;
 import art.utils.XmlParser;
@@ -57,7 +62,6 @@ import org.slf4j.LoggerFactory;
 public class ReportRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportRunner.class);
-	private String username; //used in replacing :username tag
 	private final StringBuilder querySb;
 	private boolean useRules = false;
 	private PreparedStatement psQuery; // this is the ps object produced by this query
@@ -74,9 +78,24 @@ public class ReportRunner {
 	private Map<String, ReportParameter> reportParamsMap;
 	private final List<Object> jdbcParams = new ArrayList<>();
 	private ReportType reportType;
+	private User user;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the user
+	 */
+	public User getUser() {
+		return user;
+	}
+
+	/**
+	 * @param user the user to set
+	 */
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	/**
@@ -177,15 +196,6 @@ public class ReportRunner {
 	}
 
 	/**
-	 * Set the user who is executing the query
-	 *
-	 * @param s
-	 */
-	public void setUsername(String s) {
-		username = s;
-	}
-
-	/**
 	 * Processes the report source and applies tags, dynamic sql, parameters and
 	 * rules
 	 */
@@ -201,7 +211,7 @@ public class ReportRunner {
 
 		//handle dynamic recipient label
 		applyDynamicRecipient(querySb);
-		applyRules(querySb);
+		applyRulesToQuery(querySb);
 
 		logger.debug("Sql query now is:\n{}", querySb.toString());
 	}
@@ -212,12 +222,13 @@ public class ReportRunner {
 	 * @param sb the report source
 	 * @throws SQLException
 	 */
-	private void applyRules(StringBuilder sb) throws SQLException {
-		logger.debug("Entering applyRules");
+	private void applyRulesToQuery(StringBuilder sb) throws SQLException {
+		logger.debug("Entering applyRulesToQuery");
+
+		String querySql = sb.toString();
 
 		if (!useRules) {
 			//if use rules setting is overriden, i.e. it's false while the query has a #rules# label, remove label and put dummy condition
-			String querySql = sb.toString();
 			querySql = querySql.replaceAll("(?iu)#rules#", "1=1");
 
 			//update sb with new sql
@@ -226,139 +237,163 @@ public class ReportRunner {
 			return;
 		}
 
-		int insertPosLast = 0;
+		ReportRuleService reportRuleService = new ReportRuleService();
 
-		// Determine if we have a GROUP BY or an ORDER BY
-		int grb = sb.toString().lastIndexOf("GROUP BY");
-		int orb = sb.toString().lastIndexOf("ORDER BY");
-		if ((grb != -1) || (orb != -1)) {
-			// We have a GROUP BY or an ORDER BY clause. This is the "negative" offset
-			// that indicates where to insert the rule in the SQL statement
-			insertPosLast = sb.length() - ((grb > orb) && (orb > 0) ? orb : (grb == -1 ? orb : grb));
-		}
+		int reportId = report.getReportId();
+		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
 
-		//check if using labelled rules 
+		RuleValueService ruleValueService = new RuleValueService();
 		int count = 0;
 		StringBuilder labelledValues = new StringBuilder(1024);
-		boolean usingLabelledRules;
-		String querySql = sb.toString();
-		if (StringUtils.containsIgnoreCase(querySql, "#rules#")) { //use all lowercase to make find case insensitive
-			usingLabelledRules = true;
-		} else {
-			usingLabelledRules = false;
-		}
 
-		String ruleName;
-		String columnName;
-		String columnDataType;
-		ResultSet rs = null;
-		Connection conn = null;
-		PreparedStatement ps = null;
+		// for each rule build and add the AND column IN (list) string to the query
+		// Note: if we don't have rules for this query, the sb is left untouched
+		for (ReportRule reportRule : reportRules) {
+			count++;
+			Rule rule = reportRule.getRule();
+			List<String> userRuleValues = ruleValueService.getUserRuleValues(user.getUserId(), rule.getRuleId());
+			List<String> userGroupRuleValues = new ArrayList<>();
+			for (UserGroup userGroup : user.getUserGroups()) {
+				userGroupRuleValues.addAll(ruleValueService.getUserGroupRuleValues(userGroup.getUserGroupId(), rule.getRuleId()));
+			}
 
-		int queryId = report.getReportId();
-
-		try {
-
-			conn = DbConnections.getArtDbConnection();
-
-			// Get rules for the current query
-			String sql = "SELECT RULE_NAME, FIELD_NAME, FIELD_DATA_TYPE"
-					+ " FROM ART_QUERY_RULES"
-					+ " WHERE QUERY_ID=?";
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, queryId);
-			rs = ps.executeQuery();
-
-			// for each rule build and add the AND column IN (list) string to the query
-			// Note: if we don't have rules for this query, the sb is left untouched
-			while (rs.next()) {
-				count++;
-
-				StringBuilder tmpSb;
-				ruleName = rs.getString("RULE_NAME");
-				columnName = rs.getString("FIELD_NAME");
-				columnDataType = rs.getString("FIELD_DATA_TYPE");
-
-				tmpSb = getRuleValues(conn, username, ruleName, 1, columnDataType);
-				String groupValues = getGroupRuleValues(conn, ruleName, columnName, columnDataType);
-				if (tmpSb == null) { // it is null only if 	ALL_ITEMS
-					//ALL_ITEMS. effectively means the rule doesn't apply
-					if (usingLabelledRules) {
-						//using labelled rules. don't append AND before the first rule value
-						if (count == 1) {
-							labelledValues.append(" 1=1 ");
-						} else {
-							labelledValues.append(" AND 1=1 ");
-						}
-					}
+			if (userRuleValues.contains("ALL_ITEMS") || userGroupRuleValues.contains("ALL_ITEMS")) {
+				//ALL_ITEMS. effectively means the rule doesn't apply
+				//using labelled rules. don't append AND before the first rule value
+				if (count == 1) {
+					labelledValues.append(" 1=1 ");
 				} else {
-					// Add the rule to the query 
-					String values = tmpSb.toString();
-					if (StringUtils.length(values) == 0 && StringUtils.length(groupValues) == 0) {
-						//user doesn't have values set for at least one rule that the query uses. values needed for all rules
-						break;
-					} else {
-						String condition = "";
-						if (StringUtils.length(values) > 0) {
-							condition = columnName + " in (" + values.substring(1) + ")";
-						}
-						String groupCondition = "";
-						if (StringUtils.length(groupValues) > 0) {
-							groupCondition = groupValues;
-						}
-
-						if (StringUtils.length(condition) > 0) {
-							//rule values defined for user
-							if (StringUtils.length(groupCondition) > 0) {
-								groupCondition = " OR " + groupCondition;
-							}
-							condition = condition + groupCondition; // ( user values OR (user group values) )
+					labelledValues.append(" AND 1=1 ");
+				}
+			} else if (userRuleValues.isEmpty() && userGroupRuleValues.isEmpty()) {
+				//user doesn't have rule value for this rule
+				//rule values needed for all rules so just abort
+				break;
+			} else {
+				String condition = "";
+				String columnName = reportRule.getReportColumn();
+				ParameterDataType dataType = rule.getDataType();
+				if (!userRuleValues.isEmpty()) {
+					List<String> finalUserRuleValues = new ArrayList<>();
+					for (String ruleValue : userRuleValues) {
+						ruleValue = escapeSql(ruleValue);
+						if (dataType.isNumeric()) {
+							finalUserRuleValues.add(ruleValue);
 						} else {
-							//no rule values for user. use user group values
-							condition = groupCondition;
-						}
-
-						condition = " ( " + condition + " ) "; //enclose this rule values in brackets to treat it as a single condition
-
-						if (usingLabelledRules) {
-							//using labelled rules. don't append AND before the first rule value
-							// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
-							if (count == 1) {
-								labelledValues.append(condition);
-							} else {
-								labelledValues.append(" AND ").append(condition);
-							}
-						} else {
-						//append rule values for non-labelled rules
-
-							// Add the rule to the query (handle GROUP_BY and ORDER BY)
-							// NOTE: HAVING is not handled.
-							// tmpSb.toSting().substring(1) is the <list> of allowed values for the current rule,
-							// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
-							if (insertPosLast > 0) {
-								// We have a GROUP BY or an ORDER BY clause
-								// NOTE: sb changes dynamically
-
-								sb.insert(sb.length() - insertPosLast, " AND " + condition);
-							} else { //No group by or order by. We can just append
-								sb.append(" AND ").append(condition);
-							}
+							finalUserRuleValues.add("'" + ruleValue + "'");
 						}
 					}
+					String finalUserRuleValuesString = StringUtils.join(finalUserRuleValues, ",");
+					condition = columnName + " in (" + finalUserRuleValuesString + ")";
+				}
+
+				String groupCondition = "";
+				if (!userGroupRuleValues.isEmpty()) {
+					List<String> finalUserGroupRuleValues = new ArrayList<>();
+					for (String ruleValue : userGroupRuleValues) {
+						ruleValue = escapeSql(ruleValue);
+						if (dataType.isNumeric()) {
+							finalUserGroupRuleValues.add(ruleValue);
+						} else {
+							finalUserGroupRuleValues.add("'" + ruleValue + "'");
+						}
+					}
+					String finalUserGroupRuleValuesString = StringUtils.join(finalUserGroupRuleValues, ",");
+					groupCondition = columnName + " in (" + finalUserGroupRuleValuesString + ")";
+				}
+
+				if (StringUtils.isNotEmpty(condition)) {
+					//rule values defined for user
+					if (StringUtils.isNotEmpty(groupCondition)) {
+						groupCondition = " OR " + groupCondition;
+					}
+					condition = condition + groupCondition; // ( user values OR (user group values) )
+				} else {
+					//no rule values for user. use user group values
+					condition = groupCondition;
+				}
+
+				condition = " ( " + condition + " ) "; //enclose this rule values in brackets to treat it as a single condition
+
+				//using labelled rules. don't append AND before the first rule value
+				// the tmpSb returned by getRuleValues begins with a ',' so we need a .substring(1)
+				if (count == 1) {
+					labelledValues.append(condition);
+				} else {
+					labelledValues.append(" AND ").append(condition);
 				}
 			}
-
-			//replace all occurrences of labelled rule with rule values
-			if (usingLabelledRules) {
-				//replace rule values
-				String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
-				querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
-				//update sb with new sql
-				sb.replace(0, sb.length(), querySql);
-			}
-		} finally {
-			DatabaseUtils.close(rs, ps, conn);
 		}
+
+		//replace all occurrences of labelled rule with rule values
+		String replaceString = Matcher.quoteReplacement(labelledValues.toString()); //quote in case it contains special regex characters
+		querySql = querySql.replaceAll("(?iu)#rules#", replaceString);
+		//update sb with new sql
+		sb.replace(0, sb.length(), querySql);
+	}
+
+	/**
+	 * Applies rules to static lov values
+	 *
+	 * @param sb the report source
+	 * @throws SQLException
+	 */
+	private Map<Object, String> applyRulesToStaticLov(Map<Object, String> lovValues) throws SQLException {
+		logger.debug("Entering applyRulesToStaticLov");
+
+		if (!useRules) {
+			return lovValues;
+		}
+
+		Map<Object, String> finalLovValues = new LinkedHashMap<>();
+
+		ReportRuleService reportRuleService = new ReportRuleService();
+
+		int reportId = report.getReportId();
+		List<ReportRule> reportRules = reportRuleService.getReportRules(reportId);
+
+		RuleValueService ruleValueService = new RuleValueService();
+
+		// for each rule build and add the AND column IN (list) string to the query
+		// Note: if we don't have rules for this query, the sb is left untouched
+		for (ReportRule reportRule : reportRules) {
+			Rule rule = reportRule.getRule();
+			List<String> userRuleValues = ruleValueService.getUserRuleValues(user.getUserId(), rule.getRuleId());
+			List<String> userGroupRuleValues = new ArrayList<>();
+			for (UserGroup userGroup : user.getUserGroups()) {
+				userGroupRuleValues.addAll(ruleValueService.getUserGroupRuleValues(userGroup.getUserGroupId(), rule.getRuleId()));
+			}
+
+			if (userRuleValues.contains("ALL_ITEMS") || userGroupRuleValues.contains("ALL_ITEMS")) {
+				//ALL_ITEMS. effectively means the rule doesn't apply
+				//do nothing
+			} else {
+				for (Entry<Object, String> entry : lovValues.entrySet()) {
+					String staticValue = (String) entry.getKey();
+					String displayValue = entry.getValue();
+
+					for (String ruleValue : userRuleValues) {
+						if (StringUtils.equals(staticValue, ruleValue)) {
+							finalLovValues.put(staticValue, displayValue);
+						}
+					}
+
+					for (String ruleValue : userGroupRuleValues) {
+						if (StringUtils.equals(staticValue, ruleValue)) {
+							finalLovValues.put(staticValue, displayValue);
+						}
+					}
+
+				}
+			}
+		}
+
+		if (finalLovValues.isEmpty()) {
+			//use all values
+			finalLovValues.putAll(lovValues);
+		}
+
+		return finalLovValues;
 	}
 
 	/**
@@ -372,7 +407,7 @@ public class ReportRunner {
 	 * @return rule values, or null if all values are to be used
 	 * @throws SQLException
 	 */
-	public StringBuilder getRuleValues(Connection conn, String ruleUsername,
+	private StringBuilder getRuleValues(Connection conn, String ruleUsername,
 			String currentRule, int counter, String columnDataType)
 			throws SQLException {
 
@@ -462,76 +497,6 @@ public class ReportRunner {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Returns rule values for the user's user groups
-	 *
-	 * @param conn a connection to the art database
-	 * @param ruleName the rule name
-	 * @param columnName the column name
-	 * @param columnDataType the columne data type
-	 * @return the rule values
-	 */
-	private String getGroupRuleValues(Connection conn, String ruleName, String columnName,
-			String columnDataType) throws SQLException {
-
-		//get user's user groups
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		String sql;
-		StringBuilder valuesSb = new StringBuilder(512);
-
-		try {
-
-			sql = "SELECT USER_GROUP_ID "
-					+ " FROM ART_USER_GROUP_ASSIGNMENT "
-					+ " WHERE USERNAME=? ";
-
-			ps = conn.prepareStatement(sql);
-			ps.setString(1, username);
-
-			rs = ps.executeQuery();
-
-			int count = 0;
-
-			while (rs.next()) {
-				//for each group, get the group's rule values
-				String userGroupId = rs.getString("USER_GROUP_ID");
-				StringBuilder tmpSb = getRuleValues(conn, userGroupId, ruleName, 1, columnDataType);
-
-				String condition;
-				if (tmpSb == null) {
-					//rule value defined for this group as ALL_ITEMS
-					condition = " 1=1 ";
-				} else {
-					if (tmpSb.length() == 0) {
-						//no values defined for this rule for this group
-						condition = "";
-					} else {
-						//some values defined for this rule for this group
-						String groupValues = tmpSb.toString().substring(1); //first character returned from getRuleValues is ,
-						condition = columnName + " in(" + groupValues + ") ";
-					}
-				}
-
-				//build group values string
-				if (StringUtils.length(condition) > 0) {
-					//some rule value defined for this group
-					count++;
-
-					if (count == 1) {
-						valuesSb.append(condition);
-					} else {
-						valuesSb.append(" OR ").append(condition);
-					}
-				}
-			}
-		} finally {
-			DatabaseUtils.close(rs, ps);
-		}
-
-		return valuesSb.toString();
 	}
 
 	/**
@@ -959,6 +924,9 @@ public class ReportRunner {
 				}
 				lovValues.put(dataValue, displayValue);
 			}
+
+			//apply rules
+			lovValues = applyRulesToStaticLov(lovValues);
 		} else if (reportType == ReportType.LovDynamic) {
 			//dynamic lov. values coming from sql query
 			ResultSet rs = getResultSet();
@@ -1185,6 +1153,7 @@ public class ReportRunner {
 		String querySql = sb.toString();
 
 		//replace :USERNAME with currently logged in user's username
+		String username = user.getUsername();
 		String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
 		querySql = querySql.replaceAll("(?iu):username", replaceString); //(?iu) makes replace case insensitive across unicode characters
 

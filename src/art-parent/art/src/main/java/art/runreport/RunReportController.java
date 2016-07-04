@@ -114,7 +114,6 @@ public class RunReportController {
 			//check if user has permission to run report
 			//admins can run all reports, even disabled ones. only check for non admin users
 			sessionUser = (User) session.getAttribute("sessionUser");
-			String username = sessionUser.getUsername();
 
 			if (!sessionUser.isAdminUser()) {
 				if (!report.isActive()) {
@@ -246,7 +245,7 @@ public class RunReportController {
 				long overallStartTime = System.currentTimeMillis(); //overall start time
 
 				reportRunner = new ReportRunner();
-				reportRunner.setUsername(username);
+				reportRunner.setUser(sessionUser);
 				reportRunner.setReport(report);
 
 				//prepare report parameters
@@ -405,6 +404,7 @@ public class RunReportController {
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 
+			String username = sessionUser.getUsername();
 			ArtHelper.log(username, "query", request.getRemoteAddr(), reportId, totalTime, fetchTime, "query, " + reportFormatString);
 
 		} catch (Exception ex) {

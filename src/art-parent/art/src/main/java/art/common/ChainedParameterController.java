@@ -67,8 +67,7 @@ public class ChainedParameterController {
 			reportRunner.setReport(report);
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			String username = sessionUser.getUsername();
-			reportRunner.setUsername(username);
+			reportRunner.setUser(sessionUser);
 
 			ParameterProcessor paramProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);

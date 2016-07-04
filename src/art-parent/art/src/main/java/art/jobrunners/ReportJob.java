@@ -1542,7 +1542,7 @@ public class ReportJob implements org.quartz.Job {
 		logger.debug("Entering prepareReportRunner: user={}, report={}", user, report);
 
 		ReportRunner reportRunner = new ReportRunner();
-		reportRunner.setUsername(user.getUsername());
+		reportRunner.setUser(user);
 		reportRunner.setReport(report);
 
 		return reportRunner;

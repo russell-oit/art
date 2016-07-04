@@ -19,8 +19,11 @@ package art.ruleValue;
 import art.dbutils.DbService;
 import art.enums.ParameterDataType;
 import art.rule.Rule;
+import art.rule.RuleService;
 import art.user.User;
+import art.user.UserService;
 import art.usergroup.UserGroup;
+import art.usergroup.UserGroupService;
 import art.utils.ArtUtils;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,6 +34,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,26 +51,30 @@ public class RuleValueService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RuleValueService.class);
 
+	private final DbService dbService;
+	private final UserService userService;
+	private final RuleService ruleService;
+	private final UserGroupService userGroupService;
+
 	@Autowired
-	private DbService dbService;
+	public RuleValueService(DbService dbService, UserService userService,
+			RuleService ruleService, UserGroupService userGroupService) {
 
-	private final String SQL_SELECT_ALL_USER_RULE_VALUES
-			= "SELECT AUR.RULE_VALUE_KEY, AUR.RULE_VALUE, AU.USER_ID, AU.USERNAME,"
-			+ " AR.RULE_ID, AR.RULE_NAME, AR.DATA_TYPE"
-			+ " FROM ART_USER_RULES AUR"
-			+ " INNER JOIN ART_USERS AU ON"
-			+ " AUR.USER_ID=AU.USER_ID"
-			+ " INNER JOIN ART_RULES AR ON"
-			+ " AUR.RULE_ID=AR.RULE_ID";
+		this.dbService = dbService;
+		this.userService = userService;
+		this.ruleService = ruleService;
+		this.userGroupService = userGroupService;
+	}
 
-	private final String SQL_SELECT_ALL_USER_GROUP_RULE_VALUES
-			= "SELECT AUGR.RULE_VALUE_KEY, AUGR.RULE_VALUE, AUG.USER_GROUP_ID, AUG.NAME AS USER_GROUP_NAME,"
-			+ " AR.RULE_ID, AR.RULE_NAME, AR.DATA_TYPE"
-			+ " FROM ART_USER_GROUP_RULES AUGR"
-			+ " INNER JOIN ART_USER_GROUPS AUG ON"
-			+ " AUGR.USER_GROUP_ID=AUG.USER_GROUP_ID"
-			+ " INNER JOIN ART_RULES AR ON"
-			+ " AUGR.RULE_ID=AR.RULE_ID";
+	public RuleValueService() {
+		dbService = new DbService();
+		userService = new UserService();
+		ruleService = new RuleService();
+		userGroupService = new UserGroupService();
+	}
+
+	private final String SQL_SELECT_ALL_USER_RULE_VALUES = "SELECT * FROM ART_USER_RULES";
+	private final String SQL_SELECT_ALL_USER_GROUP_RULE_VALUES = "SELECT * FROM ART_USER_GROUP_RULES";
 
 	/**
 	 * Maps a resultset to an object
@@ -89,17 +97,10 @@ public class RuleValueService {
 			value.setRuleValue(rs.getString("RULE_VALUE"));
 			value.setRuleValueKey(rs.getString("RULE_VALUE_KEY"));
 
-			User user = new User();
-			user.setUserId(rs.getInt("USER_ID"));
-			user.setUsername(rs.getString("USERNAME"));
-
+			User user = userService.getUser(rs.getInt("USER_ID"));
 			value.setUser(user);
 
-			Rule rule = new Rule();
-			rule.setRuleId(rs.getInt("RULE_ID"));
-			rule.setName(rs.getString("RULE_NAME"));
-			rule.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
-
+			Rule rule = ruleService.getRule(rs.getInt("RULE_ID"));
 			value.setRule(rule);
 
 			return type.cast(value);
@@ -127,17 +128,10 @@ public class RuleValueService {
 			value.setRuleValue(rs.getString("RULE_VALUE"));
 			value.setRuleValueKey(rs.getString("RULE_VALUE_KEY"));
 
-			UserGroup userGroup = new UserGroup();
-			userGroup.setUserGroupId(rs.getInt("USER_GROUP_ID"));
-			userGroup.setName(rs.getString("USER_GROUP_NAME"));
-
+			UserGroup userGroup = userGroupService.getUserGroup(rs.getInt("USER_GROUP_ID"));
 			value.setUserGroup(userGroup);
 
-			Rule rule = new Rule();
-			rule.setRuleId(rs.getInt("RULE_ID"));
-			rule.setName(rs.getString("RULE_NAME"));
-			rule.setDataType(ParameterDataType.toEnum(rs.getString("DATA_TYPE")));
-
+			Rule rule = ruleService.getRule(rs.getInt("RULE_ID"));
 			value.setRule(rule);
 
 			return type.cast(value);
@@ -165,11 +159,27 @@ public class RuleValueService {
 	 * @throws SQLException
 	 */
 	public UserRuleValue getUserRuleValue(String id) throws SQLException {
-		logger.debug("Entering getUserRuleValue");
+		logger.debug("Entering getUserRuleValue: id='{}'", id);
 
 		String sql = SQL_SELECT_ALL_USER_RULE_VALUES + " WHERE RULE_VALUE_KEY=?";
 		ResultSetHandler<UserRuleValue> h = new BeanHandler<>(UserRuleValue.class, new UserRuleValueMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns rule values for the given user and rule
+	 *
+	 * @param userId the user's user id
+	 * @param ruleId the rule's rule id
+	 * @return rule values for the given user and rule
+	 * @throws SQLException
+	 */
+	public List<String> getUserRuleValues(int userId, int ruleId) throws SQLException {
+		logger.debug("Entering getUserRuleValues: userId={}, ruleId={}", userId, ruleId);
+
+		String sql = SQL_SELECT_ALL_USER_RULE_VALUES + " WHERE USER_ID=? AND RULE_ID=?";
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>("RULE_VALUE");
+		return dbService.query(sql, h, userId, ruleId);
 	}
 
 	/**
@@ -193,11 +203,27 @@ public class RuleValueService {
 	 * @throws SQLException
 	 */
 	public UserGroupRuleValue getUserGroupRuleValue(String id) throws SQLException {
-		logger.debug("Entering getUserGroupRuleValue");
+		logger.debug("Entering getUserGroupRuleValue: id='{}'", id);
 
 		String sql = SQL_SELECT_ALL_USER_GROUP_RULE_VALUES + " WHERE RULE_VALUE_KEY=?";
 		ResultSetHandler<UserGroupRuleValue> h = new BeanHandler<>(UserGroupRuleValue.class, new UserGroupRuleValueMapper());
 		return dbService.query(sql, h, id);
+	}
+
+	/**
+	 * Returns rule values for a given user group and rule
+	 *
+	 * @param userGroupId the user group's id
+	 * @param ruleId the rule id
+	 * @return rule values for a given user group and rule
+	 * @throws SQLException
+	 */
+	public List<String> getUserGroupRuleValues(int userGroupId, int ruleId) throws SQLException {
+		logger.debug("Entering getUserGroupRuleValues: userGroupId={}, ruleId={}", userGroupId, ruleId);
+
+		String sql = SQL_SELECT_ALL_USER_GROUP_RULE_VALUES + " WHERE USER_GROUP_ID=? AND RULE_ID=?";
+		ResultSetHandler<List<String>> h = new ColumnListHandler<>("RULE_VALUE");
+		return dbService.query(sql, h, userGroupId, ruleId);
 	}
 
 	/**
@@ -376,7 +402,7 @@ public class RuleValueService {
 
 		String sql = "UPDATE ART_USER_GROUP_RULES SET RULE_VALUE=?"
 				+ " WHERE RULE_VALUE_KEY=?";
-		
+
 		Object[] values = {
 			value.getRuleValue(),
 			value.getRuleValueKey()

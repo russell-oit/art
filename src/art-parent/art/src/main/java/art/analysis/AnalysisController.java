@@ -224,12 +224,11 @@ public class AnalysisController {
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
-			String username = sessionUser.getUsername();
 
 			ReportRunner reportRunner = null;
 			try {
 				reportRunner = new ReportRunner();
-				reportRunner.setUsername(username);
+				reportRunner.setUser(sessionUser);
 				reportRunner.setReport(report);
 
 				//prepare report parameters
