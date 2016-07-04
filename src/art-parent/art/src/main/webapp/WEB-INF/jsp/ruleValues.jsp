@@ -20,6 +20,8 @@ Display rule values
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="ruleValues.message.valueRemoved" var="valueRemovedText"/>
 <spring:message code="page.action.remove" var="removeText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 

@@ -20,6 +20,8 @@ Display current admin rights
 <spring:message code="page.message.errorOccurred" var="errorOccurredText"/>
 <spring:message code="page.message.rightsRevoked" var="rightsRevokedText"/>
 <spring:message code="page.action.revoke" var="revokeText"/>
+<spring:message code="dialog.button.cancel" var="cancelText"/>
+<spring:message code="dialog.button.ok" var="okText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 

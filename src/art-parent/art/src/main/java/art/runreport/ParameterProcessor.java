@@ -153,8 +153,8 @@ public class ParameterProcessor {
 					Report lovReport = reportService.getReport(lovReportId);
 					lovReportRunner.setReport(lovReport);
 					lovReportRunner.setReportParamsMap(reportParamsMap);
-					boolean applyFilters = false; //don't apply filters so as to get all values
-					Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
+					boolean useRules = false; //don't apply rules so as to get all values
+					Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
 					reportParam.setLovValues(lovValues);
 					Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
 					reportParam.setLovValuesAsString(lovValuesAsString);
@@ -251,8 +251,8 @@ public class ParameterProcessor {
 						Report lovReport = reportService.getReport(lovReportId);
 						lovReportRunner.setReport(lovReport);
 						lovReportRunner.setReportParamsMap(reportParamsMap);
-						boolean applyFilters = false; //don't apply filters so as to get all values
-						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
+						boolean useRules = false; //don't apply rules so as to get all values
+						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
 
 						List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
 						for (Entry<Object, String> entry2 : lovValues.entrySet()) {

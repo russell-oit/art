@@ -49,8 +49,16 @@ public class RuleService {
 
 	private static final Logger logger = LoggerFactory.getLogger(RuleService.class);
 
+	private final DbService dbService;
+	
 	@Autowired
-	private DbService dbService;
+	public RuleService(DbService dbService){
+		this.dbService=dbService;
+	}
+	
+	public RuleService(){
+		dbService=new DbService();
+	}
 
 	private final String SQL_SELECT_ALL = "SELECT * FROM ART_RULES";
 

@@ -268,7 +268,7 @@ public class ReportRunner {
 			} else if (userRuleValues.isEmpty() && userGroupRuleValues.isEmpty()) {
 				//user doesn't have rule value for this rule
 				//rule values needed for all rules so just abort
-				break;
+				break; //will result in an invalid sql statement error
 			} else {
 				String condition = "";
 				String columnName = reportRule.getReportColumn();
@@ -881,6 +881,16 @@ public class ReportRunner {
 
 		return lovValues;
 	}
+	
+	/**
+	 * Runs an lov report and returns the lov values (value and label)
+	 *
+	 * @return the lov values
+	 * @throws SQLException
+	 */
+	public Map<Object, String> getLovValuesAsObjects() throws SQLException {
+		return getLovValuesAsObjects(false, false);
+	}
 
 	/**
 	 * Runs an lov report and returns the lov values (value and label), using
@@ -1153,9 +1163,11 @@ public class ReportRunner {
 		String querySql = sb.toString();
 
 		//replace :USERNAME with currently logged in user's username
-		String username = user.getUsername();
-		String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
-		querySql = querySql.replaceAll("(?iu):username", replaceString); //(?iu) makes replace case insensitive across unicode characters
+		if (user != null) {
+			String username = user.getUsername();
+			String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
+			querySql = querySql.replaceAll("(?iu):username", replaceString); //(?iu) makes replace case insensitive across unicode characters
+		}
 
 		//replace :DATE with current date
 		Date now = new Date();

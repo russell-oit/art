@@ -130,6 +130,8 @@ public class RunReportHelper {
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
 
 		request.setAttribute("report", report);
+		
+		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		//prepare report parameters
 		ParameterProcessor paramProcessor = new ParameterProcessor();
@@ -141,7 +143,7 @@ public class RunReportHelper {
 		for (ReportParameter reportParam : reportParamsList) {
 			Parameter param = reportParam.getParameter();
 			if (param.isUseLov()) {
-				//get all possible lov values.
+				//get applicable lov values.
 				//don't run chained parameters. their values will be
 				//loaded dynamically depending on parent and depends paremeter values
 				if (!reportParam.isChained()) {
@@ -150,10 +152,10 @@ public class RunReportHelper {
 						lovReportRunner = new ReportRunner();
 						int lovReportId = param.getLovReportId();
 						Report lovReport = reportService.getReport(lovReportId);
+						lovReportRunner.setUser(sessionUser);
 						lovReportRunner.setReport(lovReport);
 						lovReportRunner.setReportParamsMap(reportParamsMap);
-						boolean applyFilters = false; //don't apply filters so as to get all values
-						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(applyFilters);
+						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
 						reportParam.setLovValues(lovValues);
 						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
 						reportParam.setLovValuesAsString(lovValuesAsString);
@@ -203,7 +205,6 @@ public class RunReportHelper {
 		}
 		request.setAttribute("reportFormat", reportFormat);
 
-		User sessionUser = (User) session.getAttribute("sessionUser");
 		int accessLevel = sessionUser.getAccessLevel().getValue();
 
 		boolean enableSchedule;
