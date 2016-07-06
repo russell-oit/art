@@ -235,6 +235,7 @@
 						case 'Publish':
 						case 'CondEmailAttachment':
 						case 'CondPublish':
+						case 'Burst':
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
 							list.append(new Option('${xlsxText}', 'xlsx'));
 							list.append(new Option('${odsText}', 'ods'));

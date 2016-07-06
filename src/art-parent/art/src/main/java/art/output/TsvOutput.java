@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 public class TsvOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(TsvOutput.class);
+
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
 	private GZIPOutputStream gzout;
@@ -52,27 +53,42 @@ public class TsvOutput extends StandardOutput {
 
 	public TsvOutput() {
 		zipType = ZipType.None;
-
 	}
 
 	public TsvOutput(ZipType zipType) {
 		this.zipType = zipType;
+	}
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		fout = null;
+		zout = null;
+		gzout = null;
+		exportFileStrBuf = null;
+		nfPlain = null;
+		counter = 0;
+		columns = 0;
 	}
 
 	@Override
 	public void init() {
+		resetVariables();
+		
 		exportFileStrBuf = new StringBuilder(8 * 1024);
-		counter = 0;
+		
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);
 		nfPlain.setGroupingUsed(false);
 		nfPlain.setMaximumFractionDigits(99);
 
 		try {
-			fout = new FileOutputStream(fullOutputFilename);
+			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFilename);
+			String filename = FilenameUtils.getBaseName(fullOutputFileName);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".tsv");

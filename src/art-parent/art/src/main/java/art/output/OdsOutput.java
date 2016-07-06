@@ -45,9 +45,26 @@ public class OdsOutput extends StandardOutput {
 	Font headerFont;
 	Font bodyFont;
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		document = null;
+		table = null;
+		row = null;
+		cell = null;
+		cellNumber = 0;
+		headerFont = null;
+		bodyFont = null;
+	}
+
 	@Override
 	public void init() {
 		try {
+			resetVariables();
+			
 			document = SpreadsheetDocument.newSpreadsheetDocument();
 //			table = document.getSheetByIndex(0);
 //			table.setTableName(reportName);
@@ -142,7 +159,8 @@ public class OdsOutput extends StandardOutput {
 	@Override
 	public void endRows() {
 		try {
-			document.save(fullOutputFilename);
+			document.save(fullOutputFileName);
+			document.close();
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}

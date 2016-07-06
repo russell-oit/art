@@ -43,16 +43,31 @@ public class PdfOutput extends StandardOutput {
 	private FontSelector fsHeading; //fonts to use for document title and column headings
 	public final String PDF_AUTHOR_ART = "ART - http://art.sourceforge.net";
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		document = null;
+		table = null;
+		cell = null;
+		fsBody = null;
+		fsHeading = null;
+	}
+
 	@Override
 	public void init() {
 		try {
+			resetVariables();
+			
 			Rectangle pageSize = getPageSize();
 
 			//set document margins
 			//document with 72pt (1 inch) margins for left, right, top, bottom
 			document = new Document(pageSize, 72, 72, 72, 72);
 
-			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFilename));
+			PdfWriter.getInstance(document, new FileOutputStream(fullOutputFileName));
 			document.addTitle(reportName);
 			document.addAuthor(PDF_AUTHOR_ART);
 

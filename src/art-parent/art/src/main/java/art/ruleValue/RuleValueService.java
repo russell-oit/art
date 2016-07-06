@@ -17,7 +17,6 @@
 package art.ruleValue;
 
 import art.dbutils.DbService;
-import art.enums.ParameterDataType;
 import art.rule.Rule;
 import art.rule.RuleService;
 import art.user.User;

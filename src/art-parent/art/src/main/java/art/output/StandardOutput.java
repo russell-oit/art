@@ -20,9 +20,14 @@ package art.output;
 import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
 import art.enums.ColumnType;
+import art.job.Job;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.DrilldownLinkHelper;
+import art.utils.FilenameHelper;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.sql.Clob;
 import java.sql.ResultSet;
@@ -64,7 +69,7 @@ public abstract class StandardOutput {
 	private List<Drilldown> drilldowns;
 	protected String reportName;
 	private List<ReportParameter> reportParamsList;
-	protected String fullOutputFilename;
+	protected String fullOutputFileName;
 	private boolean showSelectedParameters;
 
 	/**
@@ -82,17 +87,17 @@ public abstract class StandardOutput {
 	}
 
 	/**
-	 * @return the fullOutputFilename
+	 * @return the fullOutputFileName
 	 */
 	public String getFullOutputFileName() {
-		return fullOutputFilename;
+		return fullOutputFileName;
 	}
 
 	/**
-	 * @param fullOutputFileName the fullOutputFilename to set
+	 * @param fullOutputFileName the fullOutputFileName to set
 	 */
 	public void setFullOutputFileName(String fullOutputFileName) {
-		this.fullOutputFilename = fullOutputFileName;
+		this.fullOutputFileName = fullOutputFileName;
 	}
 
 	/**
@@ -299,14 +304,14 @@ public abstract class StandardOutput {
 	 * Closes report output. Any final cleanup should be done here.
 	 */
 	public abstract void endRows();
-	
+
 	/**
 	 * Formats a numberic value for display
-	 * 
+	 *
 	 * @param value the value to format
 	 * @return the string representation to display
 	 */
-	public String formatNumbericValue(Double value){
+	public String formatNumbericValue(Double value) {
 		String formattedValue;
 
 		if (value == null) {
@@ -314,43 +319,43 @@ public abstract class StandardOutput {
 		} else {
 			formattedValue = actualNumberFormatter.format(value);
 		}
-		
+
 		return formattedValue;
 	}
-	
+
 	/**
 	 * Formats a date value for display
-	 * 
+	 *
 	 * @param value the value to format
 	 * @return the string representation to display
 	 */
-	public String formatDateValue(Date value){
+	public String formatDateValue(Date value) {
 		String formattedValue;
-		
+
 		if (value == null) {
 			formattedValue = "";
 		} else {
 			formattedValue = Config.getDateDisplayString(value);
 		}
-		
+
 		return formattedValue;
 	}
-	
+
 	/**
 	 * Returns a value to use to sort date columns
-	 * 
+	 *
 	 * @param value the actual date
 	 * @return the sort value for the date
 	 */
-	public long getDateSortValue(Date value){
+	public long getDateSortValue(Date value) {
 		long sortValue;
-		
+
 		if (value == null) {
 			sortValue = 0;
 		} else {
 			sortValue = value.getTime();
 		}
-		
+
 		return sortValue;
 	}
 
@@ -372,16 +377,7 @@ public abstract class StandardOutput {
 		StandardOutputResult result = new StandardOutputResult();
 
 		//initialize number formatters
-		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-		actualNumberFormatter.applyPattern("#,##0.#");
-
-		//specifically use english locale for sorting e.g.
-		//in case user locale uses dot as thousands separator e.g. italian, german locale
-		sortNumberFormatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
-		sortNumberFormatter.applyPattern("#.#");
-		//set minimum digits to ensure all numbers are pre-padded with zeros,
-		//so that sorting works correctly
-		sortNumberFormatter.setMinimumIntegerDigits(20);
+		initializeNumberFormatters();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		resultSetColumnCount = rsmd.getColumnCount();
@@ -465,6 +461,190 @@ public abstract class StandardOutput {
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
 		return result;
+	}
+
+	/**
+	 * Generates burst output
+	 *
+	 * @param rs the resultset to use
+	 * @param reportFormat the report format to use
+	 * @param job the job that is generating the burst output
+	 * @throws SQLException
+	 * @throws java.io.IOException
+	 */
+	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat, Job job)
+			throws SQLException, IOException {
+
+		logger.debug("Entering generateBurstOutput");
+
+		initializeNumberFormatters();
+
+		ResultSetMetaData rsmd = rs.getMetaData();
+		resultSetColumnCount = rsmd.getColumnCount();
+
+		totalColumnCount = resultSetColumnCount;
+
+		int maxRows = Config.getMaxRows(reportFormat.getValue());
+		List<ColumnType> columnTypes = getColumnTypes(rsmd);
+
+		String previousBurstId = null;
+		FileOutputStream fos = null;
+
+		try {
+			while (rs.next()) {
+				rowCount++;
+
+				String currentBurstId = rs.getString(1);
+
+				boolean generateNewFile;
+				if (rowCount == 1) {
+					generateNewFile = true;
+				} else if (StringUtils.equals(previousBurstId, currentBurstId)) {
+					generateNewFile = false;
+				} else {
+					generateNewFile = true;
+				}
+
+				if (generateNewFile) {
+					if (rowCount > 1) {
+						//close previous file
+						fos = endBurstOutput(fos);
+					}
+
+					rowCount = 1;
+					previousBurstId = currentBurstId;
+
+					String fileNameBurstId;
+					if (currentBurstId == null) {
+						fileNameBurstId = "null";
+					} else {
+						fileNameBurstId = currentBurstId;
+					}
+
+					//generate file name to use
+					FilenameHelper filenameHelper = new FilenameHelper();
+					String baseFileName = filenameHelper.getFileName(job, fileNameBurstId);
+					String exportPath = Config.getJobsExportPath();
+					String extension;
+
+					extension = reportFormat.getFilenameExtension();
+
+					String fileName = baseFileName + "." + extension;
+					fullOutputFileName = exportPath + fileName;
+
+					//create html file to output to as required
+					if (reportFormat.isHtml() || reportFormat == ReportFormat.xml
+							|| reportFormat == ReportFormat.rss20) {
+						fos = new FileOutputStream(fullOutputFileName);
+						out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
+					}
+
+					initializeOutput(rsmd);
+				}
+
+				newRow();
+
+				if (rowCount % 2 == 0) {
+					evenRow = true;
+				} else {
+					evenRow = false;
+				}
+
+				if (rowCount > maxRows) {
+					//row limit exceeded
+					for (int i = 0; i < totalColumnCount; i++) {
+						addCellString("...");
+					}
+
+					fos = endBurstOutput(fos);
+					previousBurstId = null;
+				} else {
+					outputResultSetColumns(columnTypes, rs);
+				}
+			}
+
+			fos = endBurstOutput(fos);
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+
+			if (fos != null) {
+				fos.close();
+			}
+		}
+
+	}
+
+	/**
+	 * Finalizes burst output
+	 *
+	 * @param fos the file output stream used, that will be closed
+	 * @return the file output stream used
+	 * @throws IOException
+	 */
+	private FileOutputStream endBurstOutput(FileOutputStream fos) throws IOException {
+		endRows();
+
+		if (out != null) {
+			out.close();
+			out = null;
+		}
+
+		if (fos != null) {
+			fos.close();
+			fos = null;
+		}
+
+		return fos;
+	}
+
+	/**
+	 * Initializes actual and sort number formatters
+	 */
+	private void initializeNumberFormatters() {
+		//initialize number formatters
+		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
+		actualNumberFormatter.applyPattern("#,##0.#");
+
+		//specifically use english locale for sorting e.g.
+		//in case user locale uses dot as thousands separator e.g. italian, german locale
+		sortNumberFormatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
+		sortNumberFormatter.applyPattern("#.#");
+		//set minimum digits to ensure all numbers are pre-padded with zeros,
+		//so that sorting works correctly
+		sortNumberFormatter.setMinimumIntegerDigits(20);
+	}
+
+	/**
+	 * Starts output for burst output generation
+	 *
+	 * @param rsmd the resultset metadata object
+	 * @throws SQLException
+	 */
+	private void initializeOutput(ResultSetMetaData rsmd) throws SQLException {
+		//perform any required output initialization
+		init();
+
+		addTitle();
+
+		if (showSelectedParameters) {
+			addSelectedParameters(reportParamsList);
+		}
+
+		//begin header output
+		beginHeader();
+
+		//output header columns for the result set columns
+		for (int i = 0; i < resultSetColumnCount; i++) {
+			addHeaderCell(rsmd.getColumnLabel(i + 1));
+		}
+
+		//end header output
+		endHeader();
+
+		//begin data output
+		beginRows();
 	}
 
 	/**

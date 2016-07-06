@@ -43,9 +43,23 @@ public class OdtOutput extends StandardOutput {
 	private Cell cell;
 	private int cellNumber;
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		document = null;
+		table = null;
+		row = null;
+		cell = null;
+		cellNumber = 0;
+	}
+
 	@Override
 	public void init() {
 		try {
+			resetVariables();
 			document = TextDocument.newTextDocument();
 			createPageNumbers();
 		} catch (Exception ex) {
@@ -134,7 +148,8 @@ public class OdtOutput extends StandardOutput {
 	@Override
 	public void endRows() {
 		try {
-			document.save(fullOutputFilename);
+			document.save(fullOutputFileName);
+			document.close();
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -150,7 +165,7 @@ public class OdtOutput extends StandardOutput {
 		cell = row.getCellByIndex(cellNumber++);
 		cell.setStringValue(value);
 	}
-	
+
 	/**
 	 * Creates page numbers in the document footer
 	 */

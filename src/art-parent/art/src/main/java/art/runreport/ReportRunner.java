@@ -267,8 +267,8 @@ public class ReportRunner {
 				}
 			} else if (userRuleValues.isEmpty() && userGroupRuleValues.isEmpty()) {
 				//user doesn't have rule value for this rule
-				//rule values needed for all rules so just abort
-				break; //will result in an invalid sql statement error
+				//rule values needed for all rules
+				throw new RuntimeException("No values defined for rule: " + rule.getName());
 			} else {
 				String condition = "";
 				String columnName = reportRule.getReportColumn();
@@ -394,109 +394,6 @@ public class ReportRunner {
 		}
 
 		return finalLovValues;
-	}
-
-	/**
-	 * Returns rule values for the given user and rule
-	 *
-	 * @param conn a connection to the art database
-	 * @param ruleUsername the user name
-	 * @param currentRule the rule name
-	 * @param counter a counter for the recursion count
-	 * @param columnDataType the column data type
-	 * @return rule values, or null if all values are to be used
-	 * @throws SQLException
-	 */
-	private StringBuilder getRuleValues(Connection conn, String ruleUsername,
-			String currentRule, int counter, String columnDataType)
-			throws SQLException {
-
-		StringBuilder tmpSb = new StringBuilder(64);
-		boolean isAllItemsForThisRule = false;
-		final int MAX_RECURSIVE_LOOKUP = 20;
-
-		// Exit after MAX_RECURSIVE_LOOKUP calls
-		// this is to avoid a situation when user A lookups user B
-		// and viceversa
-		if (counter > MAX_RECURSIVE_LOOKUP) {
-			logger.warn("TOO MANY LOOPS - exiting");
-			return new StringBuilder("TOO MANY LOOPS");
-		}
-
-		// Retrieve user's rule value for this rule
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		String sql;
-
-		try {
-
-			if (NumberUtils.isNumber(ruleUsername)) {
-				//get values from user group
-				sql = "SELECT RULE_VALUE, RULE_TYPE "
-						+ " FROM ART_USER_GROUP_RULES "
-						+ " WHERE USER_GROUP_ID = ? AND RULE_NAME = ?";
-
-				ps = conn.prepareStatement(sql);
-				ps.setInt(1, Integer.parseInt(ruleUsername));
-				ps.setString(2, currentRule);
-			} else {
-				//get values from user
-				sql = "SELECT RULE_VALUE, RULE_TYPE "
-						+ " FROM ART_USER_RULES "
-						+ " WHERE USERNAME = ? AND RULE_NAME = ?";
-
-				ps = conn.prepareStatement(sql);
-				ps.setString(1, ruleUsername);
-				ps.setString(2, currentRule);
-			}
-
-			rs = ps.executeQuery();
-
-			// Build the tmp string, handle ALL_ITEMS and
-			// Recursively call applyRule() for LOOKUP
-			//  Note: null TYPE is handled as EXACT
-			while (rs.next() && !isAllItemsForThisRule) {
-				String ruleValue = rs.getString("RULE_VALUE");
-				if (!StringUtils.equals(ruleValue, "ALL_ITEMS")) {
-					if (StringUtils.equals(rs.getString("RULE_TYPE"), "LOOKUP")) {
-						// if type is lookup the VALUE is the name
-						// to look up. Recursively call getRuleValues
-						StringBuilder lookupSb = getRuleValues(conn, ruleValue, currentRule, ++counter, columnDataType);
-						if (lookupSb == null) {
-							//all values
-							isAllItemsForThisRule = true;
-							break;
-						} else {
-							String values = lookupSb.toString();
-							if (StringUtils.equals(values, "TOO MANY LOOPS")) {
-								values = "";
-							}
-							tmpSb.append(values);
-						}
-					} else { // Normal EXACT type
-						if (StringUtils.equals(columnDataType, "NUMBER") && org.apache.commons.lang.math.NumberUtils.isNumber(ruleValue)) {
-							//don't quote numbers
-							tmpSb.append(",").append(ruleValue);
-						} else {
-							//escape and quote non-numbers
-							tmpSb.append(",'").append(escapeSql(ruleValue)).append("'");
-						}
-					}
-				} else {
-					isAllItemsForThisRule = true;
-					break;
-				}
-			}
-		} finally {
-			DatabaseUtils.close(rs, ps);
-		}
-
-		if (!isAllItemsForThisRule) {
-			// return the <list> for the current rule and user
-			return tmpSb;
-		}
-
-		return null;
 	}
 
 	/**

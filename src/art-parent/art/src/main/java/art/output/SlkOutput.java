@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 public class SlkOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(SlkOutput.class);
+
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
 	private StringBuilder exportFileStrBuf;
@@ -58,31 +59,46 @@ public class SlkOutput extends StandardOutput {
 
 	public SlkOutput() {
 		zipType = ZipType.None;
-
 	}
 
 	public SlkOutput(ZipType zipType) {
 		this.zipType = zipType;
+	}
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		fout = null;
+		zout = null;
+		exportFileStrBuf = null;
+		nfPlain = null;
+		localRowCount = 0;
+		columnCount = 0;
+		columns = 0;
+		counter = 0;
 	}
 
 	@Override
 	public void init() {
+		resetVariables();
+		
 		exportFileStrBuf = new StringBuilder(8 * 1024);
 		// insert slk header
 		// This is the Ooo header:
 		exportFileStrBuf.append("ID;PSCALC3\n");
 
-		counter = 0;
 		nfPlain = NumberFormat.getInstance();
 		nfPlain.setMinimumFractionDigits(0);
 		nfPlain.setGroupingUsed(false);
 		nfPlain.setMaximumFractionDigits(99);
 
 		try {
-			fout = new FileOutputStream(fullOutputFilename);
+			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFilename);
+			String filename = FilenameUtils.getBaseName(fullOutputFileName);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".slk");
@@ -118,9 +134,9 @@ public class SlkOutput extends StandardOutput {
 			addCellString(paramDisplayValues);
 		}
 	}
-	
+
 	@Override
-	public void beginHeader(){
+	public void beginHeader() {
 		newRow();
 		newRow();
 	}

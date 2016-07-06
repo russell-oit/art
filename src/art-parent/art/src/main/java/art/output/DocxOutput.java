@@ -62,8 +62,23 @@ public class DocxOutput extends StandardOutput {
 	private XWPFTableCell cell;
 	private int cellNumber;
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		document = null;
+		table = null;
+		row = null;
+		cell = null;
+		cellNumber = 0;
+	}
+
 	@Override
 	public void init() {
+		resetVariables();
+		
 		document = new XWPFDocument();
 		setPageSize();
 		try {
@@ -210,7 +225,7 @@ public class DocxOutput extends StandardOutput {
 	@Override
 	public void endRows() {
 		try {
-			try (OutputStream fout = new FileOutputStream(fullOutputFilename)) {
+			try (OutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				document.write(fout);
 			}
 		} catch (IOException ex) {
@@ -234,9 +249,9 @@ public class DocxOutput extends StandardOutput {
 
 	/**
 	 * Creates a page footer for the document with page numbers
-	 * 
+	 *
 	 * @throws IOException
-	 * @throws XmlException 
+	 * @throws XmlException
 	 */
 	private void createPageNumbers() throws IOException, XmlException {
 		//https://stackoverflow.com/questions/23870311/apache-poi-ms-word-how-to-insert-page-number
@@ -250,7 +265,7 @@ public class DocxOutput extends StandardOutput {
 			}
 			headerFooterPolicy = new XWPFHeaderFooterPolicy(document, sectPr);
 		}
-		
+
 		CTP ctpFooter = CTP.Factory.newInstance();
 
 		XWPFParagraph[] parsFooter;

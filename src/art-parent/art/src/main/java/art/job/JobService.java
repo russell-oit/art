@@ -527,7 +527,7 @@ public class JobService {
 					+ " RECIPIENTS_QUERY_ID, RUNS_TO_ARCHIVE, MIGRATED_TO_QUARTZ,"
 					+ " BATCH_FILE, FTP_SERVER_ID,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 33) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 34) + ")";
 
 			Object[] values = {
 				job.getJobId(),

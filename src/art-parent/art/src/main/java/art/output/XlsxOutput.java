@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class XlsxOutput extends StandardOutput {
 
 	private static final Logger logger = LoggerFactory.getLogger(XlsxOutput.class);
-	
+
 	private SXSSFWorkbook wb;
 	private SXSSFSheet sh;
 	private CellStyle headerStyle;
@@ -55,14 +55,37 @@ public class XlsxOutput extends StandardOutput {
 	private Row row;
 	private Cell cell;
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		wb = null;
+		sh = null;
+		row = null;
+		cell = null;
+		currentRow = 0;
+		cellNumber = 0;
+		headerStyle = null;
+		bodyStyle = null;
+		dateStyle = null;
+		if (styles != null) {
+			styles.clear();
+			styles = null;
+		}
+	}
+
 	@Override
 	public void init() {
 		try {
+			resetVariables();
+
 			// Create a template file. Setup sheets and workbook-level objects e.g. cell styles, number formats, etc.
 			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 
-			String fullPath = FilenameUtils.getFullPath(fullOutputFilename);
-			String baseName = FilenameUtils.getBaseName(fullOutputFilename);
+			String fullPath = FilenameUtils.getFullPath(fullOutputFileName);
+			String baseName = FilenameUtils.getBaseName(fullOutputFileName);
 			templateFileName = fullPath + "template-" + baseName + ".xlsx";
 
 			//save the template
@@ -130,7 +153,7 @@ public class XlsxOutput extends StandardOutput {
 			addHeaderCell(paramLabel);
 			addCellString(paramDisplayValues);
 		}
-		
+
 		newRow();
 	}
 
@@ -190,12 +213,12 @@ public class XlsxOutput extends StandardOutput {
 	@Override
 	public void endRows() {
 		//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
-		for (int i = 0; i < resultSetColumnCount; i++) {
+		for (int i = 0; i < totalColumnCount; i++) {
 			sh.autoSizeColumn(i);
 		}
 
 		try {
-			try (FileOutputStream fout = new FileOutputStream(fullOutputFilename)) {
+			try (FileOutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				wb.write(fout);
 			}
 

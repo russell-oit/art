@@ -65,12 +65,33 @@ public class XlsOutput extends StandardOutput {
 		this.zipType = zipType;
 	}
 
+	/**
+	 * Resets global variables in readiness for output generation. Especially
+	 * important for burst output where the same standard output object is
+	 * reused for multiple output runs.
+	 */
+	private void resetVariables() {
+		fout = null;
+		zout = null;
+		wb = null;
+		sheet = null;
+		row = null;
+		cell = null;
+		headerStyle = null;
+		bodyStyle = null;
+		dateStyle = null;
+		currentRow = 0;
+		cellNumber = 0;
+	}
+
 	@Override
 	public void init() {
 		try {
-			fout = new FileOutputStream(fullOutputFilename);
+			resetVariables();
+			
+			fout = new FileOutputStream(fullOutputFileName);
 
-			String filename = FilenameUtils.getBaseName(fullOutputFilename);
+			String filename = FilenameUtils.getBaseName(fullOutputFileName);
 
 			if (zipType == ZipType.Zip) {
 				ZipEntry ze = new ZipEntry(filename + ".xls");
@@ -81,15 +102,11 @@ public class XlsOutput extends StandardOutput {
 			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			wb = new HSSFWorkbook();
 			sheet = wb.createSheet(sheetName);
-			row = null;
-			cell = null;
 			headerStyle = wb.createCellStyle();
 			bodyStyle = wb.createCellStyle();
 
 			HSSFFont headerFont = wb.createFont();
 			HSSFFont bodyFont = wb.createFont();
-
-			currentRow = 0;
 
 			headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 			headerFont.setColor(HSSFColor.BLUE.index);
@@ -104,7 +121,6 @@ public class XlsOutput extends StandardOutput {
 			dateStyle = wb.createCellStyle();
 			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
 			dateStyle.setFont(bodyFont);
-
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 		}
@@ -131,7 +147,7 @@ public class XlsOutput extends StandardOutput {
 			addHeaderCell(paramLabel);
 			addCellString(paramDisplayValues);
 		}
-		
+
 		newRow();
 	}
 
@@ -190,7 +206,7 @@ public class XlsOutput extends StandardOutput {
 
 	@Override
 	public void endRows() {
-		for (int i = 0; i < resultSetColumnCount; i++) {
+		for (int i = 0; i < totalColumnCount; i++) {
 			sheet.autoSizeColumn(i);
 		}
 

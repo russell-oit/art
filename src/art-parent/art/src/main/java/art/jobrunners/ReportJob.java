@@ -28,11 +28,13 @@ import art.job.JobService;
 import art.jobparameter.JobParameter;
 import art.jobparameter.JobParameterService;
 import art.mail.Mailer;
+import art.output.StandardOutput;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportOptions;
 import art.runreport.ReportOutputGenerator;
 import art.runreport.ReportRunner;
 import art.servlets.Config;
@@ -1040,9 +1042,11 @@ public class ReportJob implements org.quartz.Job {
 			} else if (jobType.isCache()) {
 				runCacheJob(reportRunner);
 			} else if (jobType == JobType.JustRun) {
-				// do nothing
 				// This is used Used to start batch jobs at db level via calls to stored procs
 				// or just to run update statements.
+				// do nothing
+			} else if (jobType == JobType.Burst) {
+				runBurstJob(reportRunner, paramProcessorResult);
 			}
 
 			logger.debug("Job Id {} ...finished", jobId);
@@ -1240,6 +1244,56 @@ public class ReportJob implements org.quartz.Job {
 		}
 
 		return outputFileName;
+	}
+
+	/**
+	 * Generates burst output
+	 *
+	 * @param reportRunner the report runner to use
+	 * @param paramProcessorResult the parameter processor result
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	private void runBurstJob(ReportRunner reportRunner,
+			ParameterProcessorResult paramProcessorResult) throws SQLException, IOException {
+
+		logger.debug("Entering runBurstJob");
+
+		Report report = job.getReport();
+		ReportType reportType = report.getReportType();
+		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
+
+		if (!reportType.isStandardOutput()) {
+			logger.warn("Invalid report type for burst job: {}. Job Id: {}", reportType, jobId);
+			return;
+		}
+
+		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+
+		//generate output
+		ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
+
+		reportOutputGenerator.setJobId(jobId);
+		Locale locale = Locale.getDefault();
+
+		ResultSet rs = null;
+		try {
+			boolean isJob = true;
+			StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob);
+
+			standardOutput.setReportParamsList(reportParamsList); //used to show selected parameters and drilldowns
+			standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
+			standardOutput.setLocale(locale);
+			standardOutput.setReportName(report.getName());
+
+			//generate output
+			rs = reportRunner.getResultSet();
+			standardOutput.generateBurstOutput(rs, reportFormat, job);
+			runMessage = "jobs.message.filesGenerated";
+		} finally {
+			DatabaseUtils.close(rs);
+		}
 	}
 
 	/**
