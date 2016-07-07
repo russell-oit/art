@@ -25,6 +25,7 @@ import art.servlets.Config;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -47,9 +48,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class SettingsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(SettingsController.class);
-
-	@Autowired
-	private ServletContext ctx;
 
 	@ModelAttribute("pdfPageSizes")
 	public PdfPageSize[] addPdfPageSizes() {
@@ -95,7 +93,8 @@ public class SettingsController {
 
 	@RequestMapping(value = "app/settings", method = RequestMethod.POST)
 	public String processSettings(@ModelAttribute("settings") @Valid Settings settings,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
 
 		logger.debug("Entering processSettings: settings={}", settings);
 
@@ -130,11 +129,11 @@ public class SettingsController {
 		try {
 			Config.saveSettings(settings);
 
-			ctx.setAttribute("administratorEmail", settings.getAdministratorEmail());
-			ctx.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
+			session.setAttribute("administratorEmail", settings.getAdministratorEmail());
+			session.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
 
 			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
-			ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
+			session.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");

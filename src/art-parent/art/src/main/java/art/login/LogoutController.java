@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -41,7 +42,7 @@ public class LogoutController {
 	private LoginService loginService;
 
 	@RequestMapping(value = "/logout", method = RequestMethod.POST)
-	public String logout(HttpSession session) {
+	public String logout(HttpSession session, Model model) {
 		logger.debug("Entering logout");
 
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
@@ -54,12 +55,17 @@ public class LogoutController {
 			logger.error("Error", ex);
 		}
 
+		String casLogoutUrl = (String) session.getAttribute("casLogoutUrl");
+
 		session.invalidate();
 
 		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 		if (loginMethod == ArtAuthenticationMethod.Auto) {
 			return "autoLogout";
 		} else if (loginMethod == ArtAuthenticationMethod.CAS) {
+			if (casLogoutUrl != null) {
+				model.addAttribute("casLogoutUrl", casLogoutUrl);
+			}
 			return "casLogout";
 		} else {
 			return "redirect:/login.do";
