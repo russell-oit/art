@@ -58,8 +58,9 @@ public class LogoutController {
 
 		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 		if (loginMethod == ArtAuthenticationMethod.Auto) {
-			//display logout page for auto login.
-			return "logout";
+			return "autoLogout";
+		} else if (loginMethod == ArtAuthenticationMethod.CAS) {
+			return "casLogout";
 		} else {
 			return "redirect:/login.do";
 		}

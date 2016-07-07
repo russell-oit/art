@@ -453,6 +453,16 @@ Settings configuration page
 							<form:errors path="ldapRealm" cssClass="error"/>
 						</div>
 					</div>
+					<hr>
+					<div class="form-group">
+						<label class="control-label col-md-5" for="casLogoutUrl">
+							<spring:message code="settings.label.casLogoutUrl"/>
+						</label>
+						<div class="col-md-7">
+							<form:input path="casLogoutUrl" class="form-control"/>
+							<form:errors path="casLogoutUrl" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<fieldset>

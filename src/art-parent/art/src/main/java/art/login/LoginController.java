@@ -86,8 +86,8 @@ public class LoginController {
 			return "redirect:/app/artDatabase.do";
 		}
 
-		//set administrator email
 		session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
+		session.setAttribute("casLogoutUrl", Config.getSettings().getCasLogoutUrl());
 
 		//ensure art database connection is available
 		Connection conn = null;
@@ -168,6 +168,54 @@ public class LoginController {
 			//give message and change default to internal login
 			model.addAttribute("invalidAutoLogin", "");
 			model.addAttribute("autoLoginUser", username);
+		} else if(loginMethod==ArtAuthenticationMethod.CAS) {
+			String ip = request.getRemoteAddr();
+			LoginHelper loginHelper = new LoginHelper();
+
+			LoginResult result;
+
+			//check if user is authenticated
+			String username = request.getRemoteUser();
+
+			if (StringUtils.isNotBlank(username)) {
+				//user authenticated. ensure they are a valid ART user
+				User user = null;
+				try {
+					user = userService.getUser(username);
+				} catch (SQLException ex) {
+					logger.error("Error", ex);
+					model.addAttribute("error", ex);
+				}
+
+				if (user == null) {
+					//user doesn't exist
+					result = new LoginResult();
+					result.setDetails(ArtUtils.ART_USER_INVALID);
+				} else if (!user.isActive()) {
+					//user is disabled
+					result = new LoginResult();
+					result.setDetails(ArtUtils.ART_USER_DISABLED);
+				} else {
+					//valid user
+					//log access
+					loginHelper.logSuccess(loginMethod, username, ip);
+
+					//go to next page
+					return getLoginSuccessNextPage(session, user, loginMethod, sessionStatus);
+				}
+			} else {
+				//user not authenticated. should never get here as browser won't have authenticated?
+				result = new LoginResult();
+				result.setDetails("invalid user");
+			}
+
+			//if we are here auto login failed or invalid user or disabed user
+			//log failure
+			loginHelper.logFailure(loginMethod, username, ip, result.getDetails());
+			
+			//give message and change default to internal login
+			model.addAttribute("invalidCasLogin", "");
+			model.addAttribute("casLoginUser", username);
 		}
 
 		if (loginMethod == ArtAuthenticationMethod.WindowsDomain) {

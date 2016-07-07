@@ -80,6 +80,21 @@ public class Settings implements Serializable {
 	private String rssLink;
 	private int maxFileUploadSizeMB = 5;
 	private String artBaseUrl;
+	private String casLogoutUrl;
+
+	/**
+	 * @return the casLogoutUrl
+	 */
+	public String getCasLogoutUrl() {
+		return casLogoutUrl;
+	}
+
+	/**
+	 * @param casLogoutUrl the casLogoutUrl to set
+	 */
+	public void setCasLogoutUrl(String casLogoutUrl) {
+		this.casLogoutUrl = casLogoutUrl;
+	}
 
 	/**
 	 * @return the artBaseUrl

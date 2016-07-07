@@ -130,8 +130,8 @@ public class SettingsController {
 		try {
 			Config.saveSettings(settings);
 
-			//save administrator email in application context. for display in footer
 			ctx.setAttribute("administratorEmail", settings.getAdministratorEmail());
+			ctx.setAttribute("casLogoutUrl", settings.getCasLogoutUrl());
 
 			String dateDisplayPattern = settings.getDateFormat() + " " + settings.getTimeFormat();
 			ctx.setAttribute("dateDisplayPattern", dateDisplayPattern); //format of dates displayed in tables

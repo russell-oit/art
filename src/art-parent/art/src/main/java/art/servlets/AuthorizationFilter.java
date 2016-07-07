@@ -135,6 +135,7 @@ public class AuthorizationFilter implements Filter {
 						session.setAttribute("sessionUser", user);
 						session.setAttribute("authenticationMethod", loginMethod.getValue());
 						session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
+						session.setAttribute("casLogoutUrl", Config.getSettings().getCasLogoutUrl());
 						//log success
 						loginHelper.logSuccess(loginMethod, username, ip);
 					}

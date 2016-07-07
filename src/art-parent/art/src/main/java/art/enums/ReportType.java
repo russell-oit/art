@@ -275,6 +275,21 @@ public enum ReportType {
 				return false;
 		}
 	}
+	
+	/**
+	 * Returns <code>true</code> if this is a tabular or tabular html report
+	 * 
+	 * @return <code>true</code> if this is a tabular or tabular html report
+	 */
+	public boolean isTabular(){
+		switch(this){
+			case Tabular:
+			case TabularHtml:
+				return true;
+			default:
+				return false;
+		}
+	}
 
 	/**
 	 * Returns this enum option's value

@@ -1263,8 +1263,9 @@ public class ReportJob implements org.quartz.Job {
 		ReportType reportType = report.getReportType();
 		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 
-		if (!reportType.isStandardOutput()) {
+		if (!reportType.isTabular()) {
 			logger.warn("Invalid report type for burst job: {}. Job Id: {}", reportType, jobId);
+			runDetails = "Invalid report type for burst job: " + reportType;
 			return;
 		}
 

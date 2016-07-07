@@ -13,7 +13,7 @@ public enum ArtAuthenticationMethod {
 
 	//values used by the login page
 	Internal("Internal"), Auto("Auto"), WindowsDomain("windowsDomain"),
-	Database("Database"), LDAP("LDAP"),
+	Database("Database"), LDAP("LDAP"), CAS("CAS"),
 	//values used internally by ART
 	Repository("repository"), Custom("custom"), Public("public");
 

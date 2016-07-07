@@ -38,7 +38,7 @@ Display edit user page
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
-	
+
 	<jsp:attribute name="css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
@@ -48,17 +48,17 @@ Display edit user page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
-				$(function() {
+			$(document).ready(function () {
+				$(function () {
 					$('a[id="configure"]').parent().addClass('active');
 					$('a[href*="users.do"]').parent().addClass('active');
 				});
 
-				$(function() {
+				$(function () {
 					//needed if tooltips shown on input-group element or button
 					$("[data-toggle='tooltip']").tooltip({container: 'body'});
 				});
-				
+
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({
 					liveSearch: true,
@@ -74,7 +74,7 @@ Display edit user page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
@@ -219,19 +219,7 @@ Display edit user page
 						<form:errors path="accessLevel" cssClass="error"/>
 					</div>
 				</div>
-				<div class="form-group">
-					<label class="col-md-4 control-label " for="defaultReportGroup">
-						<spring:message code="page.label.defaultReportGroup"/>
-					</label>
-					<div class="col-md-8">
-						<form:select path="defaultReportGroup" class="form-control selectpicker">
-							<form:option value="0">--</form:option>
-							<option data-divider="true"></option>
-							<form:options items="${reportGroups}" itemLabel="name" itemValue="reportGroupId"/>
-						</form:select>
-						<form:errors path="defaultReportGroup" cssClass="error"/>
-					</div>
-				</div>
+				<form:hidden path="defaultReportGroup" />
 				<div class="form-group">
 					<label class="col-md-4 control-label " for="startReport">
 						<spring:message code="page.label.startReport"/>

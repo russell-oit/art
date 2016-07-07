@@ -35,7 +35,7 @@ Login page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript">
-			$(document).ready(function() {
+			$(document).ready(function () {
 				$('#username').focus();
 			});
 		</script>
@@ -56,6 +56,13 @@ Login page
 							<div class="alert alert-danger alert-dismissable">
 								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 								<spring:message code="login.message.invalidAutoLoginUser" arguments="${autoLoginUser}"/>
+							</div>
+						</c:if>
+
+						<c:if test="${invalidCasLogin != null}">
+							<div class="alert alert-danger alert-dismissable">
+								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+								<spring:message code="login.message.invalidCasLoginUser" arguments="${casLoginUser}"/>
 							</div>
 						</c:if>
 
