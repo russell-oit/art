@@ -22,15 +22,17 @@ Display logout page when cas authentication is used
 			<div class="col-md-12 alert alert-info text-center spacer60">
 				<p>
 					<spring:message code="logout.message.loggedOutOfArt"/>. &nbsp;
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/login.do">
-					<spring:message code="logout.link.logInAgain"/>
-				</a>
+					<a class="btn btn-default" href="${pageContext.request.contextPath}/login.do">
+						<spring:message code="logout.link.logInAgain"/>
+					</a>
 				</p>
-				<br>
-				<spring:message code="logout.message.toLogOutOfAllApps"/>. &nbsp;
-				<a class="btn btn-default" href="${encode:forHtmlAttribute(casLogoutUrl)}">
-					${encode:forHtmlContent(casLogoutUrl)}
-				</a>
+				<c:if test="${not empty casLogoutUrl}">
+					<br>
+					<spring:message code="logout.message.toLogOutOfAllApps"/>. &nbsp;
+					<a class="btn btn-default" href="${encode:forHtmlAttribute(casLogoutUrl)}">
+						${encode:forHtmlContent(casLogoutUrl)}
+					</a>
+				</c:if>
 			</div>
 		</div>
 	</jsp:body>
