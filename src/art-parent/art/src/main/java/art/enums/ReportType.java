@@ -46,6 +46,48 @@ public enum ReportType {
 	private ReportType(int value) {
 		this.value = value;
 	}
+	
+	/**
+	 * Returns <code>true</code> if this report type is a chart that uses an xy
+	 * plot
+	 *
+	 * @return <code>true</code> if this report type is a chart that uses an xy
+	 * plot
+	 */
+	public boolean isXYPlotChart() {
+		switch (this) {
+			case XYChart:
+			case TimeSeriesChart:
+			case DateSeriesChart:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this report type is a chart that uses a
+	 * category plot
+	 *
+	 * @return <code>true</code> if this report type is a chart that uses a
+	 * category plot
+	 */
+	public boolean isCategoryPlotChart() {
+		switch (this) {
+			case LineChart:
+			case HorizontalBar2DChart:
+			case HorizontalBar3DChart:
+			case VerticalBar2DChart:
+			case VerticalBar3DChart:
+			case StackedHorizontalBar2DChart:
+			case StackedHorizontalBar3DChart:
+			case StackedVerticalBar2DChart:
+			case StackedVerticalBar3DChart:
+				return true;
+			default:
+				return false;
+		}
+	}
 
 	/**
 	 * Returns <code>true</code> if this is a lov dynamic or lov static report
@@ -275,14 +317,14 @@ public enum ReportType {
 				return false;
 		}
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if this is a tabular or tabular html report
-	 * 
+	 *
 	 * @return <code>true</code> if this is a tabular or tabular html report
 	 */
-	public boolean isTabular(){
-		switch(this){
+	public boolean isTabular() {
+		switch (this) {
 			case Tabular:
 			case TabularHtml:
 				return true;

@@ -56,8 +56,10 @@ import art.output.XlsxOutput;
 import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
+import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.user.User;
 import de.laures.cewolf.ChartValidationException;
 import de.laures.cewolf.DatasetProduceException;
 import de.laures.cewolf.PostProcessingException;
@@ -67,6 +69,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -195,7 +198,7 @@ public class ReportOutputGenerator {
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
-			PrintWriter writer, String fullOutputFilename)
+			PrintWriter writer, String fullOutputFilename, User user)
 			throws IOException, SQLException, JRException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException, TemplateException, XDocReportException {
@@ -297,27 +300,7 @@ public class ReportOutputGenerator {
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 
-				Chart chart = getChartInstance(reportType);
-
-				ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
-
-				String shortDescription = report.getShortDescription();
-				RunReportHelper runReportHelper = new RunReportHelper();
-				shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
-
-				chart.setLocale(locale);
-				chart.setChartOptions(effectiveChartOptions);
-				chart.setTitle(shortDescription);
-
-				Drilldown drilldown = null;
-				if (reportFormat == ReportFormat.html) {
-					List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
-					if (!drilldowns.isEmpty()) {
-						drilldown = drilldowns.get(0);
-					}
-				}
-
-				chart.prepareDataset(rs, drilldown, reportParamsList);
+				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, reportParamsList);
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
@@ -331,6 +314,34 @@ public class ReportOutputGenerator {
 						data = new RowSetDynaClass(rs, lowercaseColumnNames, useColumnAlias);
 					}
 
+				}
+
+				//add secondary charts
+				String secondaryChartSetting = report.getSecondaryCharts();
+				secondaryChartSetting = StringUtils.deleteWhitespace(secondaryChartSetting);
+				String[] secondaryChartIds = StringUtils.split(secondaryChartSetting, ",");
+				if (secondaryChartIds != null) {
+					List<Chart> secondaryCharts = new ArrayList<>();
+					ReportService reportService = new ReportService();
+					for (String secondaryChartIdString : secondaryChartIds) {
+						int secondaryChartId = Integer.parseInt(secondaryChartIdString);
+						Report secondaryReport = reportService.getReport(secondaryChartId);
+						ReportRunner secondaryReportRunner = new ReportRunner();
+						secondaryReportRunner.setUser(user);
+						secondaryReportRunner.setReport(secondaryReport);
+						secondaryReportRunner.setReportParamsMap(reportParamsMap);
+						ResultSet secondaryResultSet = null;
+						try {
+							secondaryReportRunner.execute();
+							secondaryResultSet = secondaryReportRunner.getResultSet();
+							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, reportParamsList);
+							secondaryCharts.add(secondaryChart);
+						} finally {
+							DatabaseUtils.close(secondaryResultSet);
+							secondaryReportRunner.close();
+						}
+					}
+					chart.setSecondaryCharts(secondaryCharts);
 				}
 
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
@@ -417,6 +428,55 @@ public class ReportOutputGenerator {
 		outputResult.setRowCount(rowsRetrieved);
 
 		return outputResult;
+	}
+
+	/**
+	 * Instantiates an appropriate chart object, sets some parameters and
+	 * prepares the chart dataset
+	 *
+	 * @param report the chart's report
+	 * @param reportFormat the report format to use
+	 * @param locale the locale to use
+	 * @param rs the resultset that has the chart data
+	 * @param parameterChartOptions the parameter chart options
+	 * @param reportParamsMap the report parameters map
+	 * @param reportParamsList the report parameters list
+	 * @return the prepared chart
+	 * @throws SQLException
+	 */
+	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
+			ResultSet rs, ChartOptions parameterChartOptions,
+			Map<String, ReportParameter> reportParamsMap,
+			List<ReportParameter> reportParamsList) throws SQLException {
+
+		ReportType reportType = report.getReportType();
+		Chart chart = getChartInstance(reportType);
+
+		ChartOptions effectiveChartOptions = getEffectiveChartOptions(report, parameterChartOptions, reportFormat);
+
+		String shortDescription = report.getShortDescription();
+		RunReportHelper runReportHelper = new RunReportHelper();
+		shortDescription = runReportHelper.performDirectParameterSubstitution(shortDescription, reportParamsMap);
+
+		chart.setReportType(reportType);
+		chart.setLocale(locale);
+		chart.setChartOptions(effectiveChartOptions);
+		chart.setTitle(shortDescription);
+		chart.setXAxisLabel(report.getxAxisLabel());
+		chart.setYAxisLabel(report.getyAxisLabel());
+
+		Drilldown drilldown = null;
+		if (reportFormat == ReportFormat.html) {
+			int reportId = report.getReportId();
+			List<Drilldown> drilldowns = drilldownService.getDrilldowns(reportId);
+			if (!drilldowns.isEmpty()) {
+				drilldown = drilldowns.get(0);
+			}
+		}
+
+		chart.prepareDataset(rs, drilldown, reportParamsList);
+
+		return chart;
 	}
 
 	/**

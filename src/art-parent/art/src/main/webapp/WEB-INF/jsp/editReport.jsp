@@ -668,6 +668,24 @@ Edit report page
 							<form:errors path="chartOptions.removeAt" cssClass="error"/>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="secondaryCharts">
+							<spring:message code="reports.label.secondaryCharts"/>
+						</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<form:input path="secondaryCharts" maxlength="100" class="form-control"/>
+								<spring:message code="reports.help.secondaryCharts" var="help"/>
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<form:errors path="secondaryCharts" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<div id="templateDiv" class="form-group">

@@ -60,6 +60,21 @@ public class Report implements Serializable {
 	private boolean active;
 	private boolean hidden;
 	private String defaultReportFormat;
+	private String secondaryCharts;
+
+	/**
+	 * @return the secondaryCharts
+	 */
+	public String getSecondaryCharts() {
+		return secondaryCharts;
+	}
+
+	/**
+	 * @param secondaryCharts the secondaryCharts to set
+	 */
+	public void setSecondaryCharts(String secondaryCharts) {
+		this.secondaryCharts = secondaryCharts;
+	}
 
 	/**
 	 * @return the defaultReportFormat

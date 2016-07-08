@@ -1024,7 +1024,7 @@ public class ReportJob implements org.quartz.Job {
 
 				if (generateOutput) {
 					//generate output
-					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult);
+					String outputFileName = generateOutputFile(reportRunner, paramProcessorResult, user);
 
 					if (jobType == JobType.Print) {
 						File file = new File(outputFileName);
@@ -1189,7 +1189,7 @@ public class ReportJob implements org.quartz.Job {
 	 * @throws Exception
 	 */
 	private String generateOutputFile(ReportRunner reportRunner,
-			ParameterProcessorResult paramProcessorResult) throws Exception {
+			ParameterProcessorResult paramProcessorResult, User user) throws Exception {
 
 		logger.debug("Entering generateOutputFile");
 
@@ -1231,8 +1231,7 @@ public class ReportJob implements org.quartz.Job {
 
 		try {
 			reportOutputGenerator.generateOutput(report, reportRunner,
-					reportFormat, locale, paramProcessorResult, writer, outputFileName);
-
+					reportFormat, locale, paramProcessorResult, writer, outputFileName, user);
 		} finally {
 			if (writer != null) {
 				writer.close();

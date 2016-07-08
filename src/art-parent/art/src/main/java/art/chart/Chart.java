@@ -19,6 +19,7 @@ package art.chart;
 
 import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
+import art.enums.ReportType;
 import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
 import art.utils.DrilldownLinkHelper;
@@ -58,8 +59,15 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.AbstractCategoryItemRenderer;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.renderer.xy.AbstractXYItemRenderer;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.Dataset;
+import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.TextAnchor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,8 +82,8 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private static final Logger logger = LoggerFactory.getLogger(Chart.class);
 	private static final long serialVersionUID = 1L;
 	protected final String WHITE_HEX_COLOR_CODE = "#FFFFFF";
-	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 	private String backgroundColor = WHITE_HEX_COLOR_CODE;
+	protected final String HYPERLINKS_COLUMN_NAME = "LINK";
 	private Dataset dataset;
 	private ChartOptions chartOptions;
 	private Locale locale;
@@ -87,6 +95,36 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	private DrilldownLinkHelper drilldownLinkHelper;
 	private List<ReportParameter> reportParamsList;
 	protected Map<String, String> seriesColors;
+	private ReportType reportType;
+	private List<Chart> secondaryCharts;
+
+	/**
+	 * @return the reportType
+	 */
+	public ReportType getReportType() {
+		return reportType;
+	}
+
+	/**
+	 * @param reportType the reportType to set
+	 */
+	public void setReportType(ReportType reportType) {
+		this.reportType = reportType;
+	}
+
+	/**
+	 * @return the secondaryCharts
+	 */
+	public List<Chart> getSecondaryCharts() {
+		return secondaryCharts;
+	}
+
+	/**
+	 * @param secondaryCharts the secondaryCharts to set
+	 */
+	public void setSecondaryCharts(List<Chart> secondaryCharts) {
+		this.secondaryCharts = secondaryCharts;
+	}
 
 	/**
 	 * @return the hasTooltips
@@ -354,18 +392,19 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 	/**
 	 * Perform additional post processing on the chart
-	 * 
+	 *
 	 * @param chart the jfree chart
 	 */
 	protected void postProcessChart(JFreeChart chart) {
 		logger.debug("Entering postProcessChart");
-		
+
 		processYAxisRange(chart);
 		processLabels(chart);
 		processXAxisLabelLines(chart);
 		showPoints(chart);
 		rotateLabels(chart);
 		setSeriesColors(chart);
+		addSecondaryCharts(chart);
 	}
 
 	/**
@@ -638,6 +677,92 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	/**
+	 * Adds secondary charts, allowing for multiple axis charts
+	 *
+	 * @param chart the chart object of this chart (the primary chart)
+	 */
+	private void addSecondaryCharts(JFreeChart chart) {
+		if (secondaryCharts == null || secondaryCharts.isEmpty()) {
+			return;
+		}
+
+		boolean showPoints;
+		if (chartOptions != null && chartOptions.isShowPoints()) {
+			showPoints = true;
+		} else {
+			showPoints = false;
+		}
+
+		int count = 0;
+		for (Chart secondaryChart : secondaryCharts) {
+			count++;
+			Dataset secondaryDataset;
+			try {
+				secondaryDataset = secondaryChart.getDataset();
+			} catch (DatasetProduceException ex) {
+				logger.error("Error", ex);
+				continue;
+			}
+			String secondaryYAxisLabel = secondaryChart.getyAxisLabel();
+			NumberAxis axis = new NumberAxis(secondaryYAxisLabel);
+			Plot plot = chart.getPlot();
+			if (plot instanceof CategoryPlot) {
+				CategoryPlot categoryPlot = (CategoryPlot) plot;
+				categoryPlot.setRangeAxis(count, axis);
+				CategoryDataset categoryDataset;
+				if ((secondaryDataset instanceof CategoryDataset)) {
+					categoryDataset = (CategoryDataset) secondaryDataset;
+				} else {
+					throw new IllegalStateException("Invalid secondary chart: " + secondaryChart.getTitle());
+				}
+				categoryPlot.setDataset(count, categoryDataset);
+				categoryPlot.mapDatasetToRangeAxis(count, count);
+				CategoryItemRenderer categoryRenderer;
+				ReportType secondaryReportType = secondaryChart.getReportType();
+				if (secondaryReportType.isCategoryPlotChart()) {
+					switch (secondaryChart.getReportType()) {
+						case LineChart:
+							LineAndShapeRenderer lineAndShapeRenderer = new LineAndShapeRenderer();
+							if (showPoints) {
+								lineAndShapeRenderer.setBaseShapesVisible(true);
+							}
+							categoryRenderer = lineAndShapeRenderer;
+							break;
+						default:
+							categoryRenderer = new BarRenderer();
+					}
+				} else {
+					throw new IllegalArgumentException("Invalid secondary chart: " + secondaryChart.getTitle());
+				}
+				categoryPlot.setRenderer(count, categoryRenderer);
+			} else if (plot instanceof XYPlot) {
+				XYPlot xyPlot = (XYPlot) plot;
+				xyPlot.setRangeAxis(count, axis);
+				XYDataset xyDateset;
+				if ((secondaryDataset instanceof XYDataset)) {
+					xyDateset = (XYDataset) secondaryDataset;
+				} else {
+					throw new IllegalStateException("Invalid secondary chart: " + secondaryChart.getTitle());
+				}
+				xyPlot.setDataset(count, xyDateset);
+				xyPlot.mapDatasetToRangeAxis(count, count);
+				AbstractXYItemRenderer xyRenderer;
+				ReportType secondaryReportType = secondaryChart.getReportType();
+				if (secondaryReportType.isXYPlotChart()) {
+					StandardXYItemRenderer standardXYItemRenderer = new StandardXYItemRenderer();
+					if (showPoints) {
+						standardXYItemRenderer.setBaseShapesVisible(true);
+					}
+					xyRenderer = standardXYItemRenderer;
+				} else {
+					throw new IllegalArgumentException("Invalid secondary chart: " + secondaryChart.getTitle());
+				}
+				xyPlot.setRenderer(count, xyRenderer);
+			}
 		}
 	}
 

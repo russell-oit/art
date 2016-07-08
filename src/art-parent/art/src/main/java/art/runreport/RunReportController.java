@@ -356,7 +356,7 @@ public class RunReportController {
 					reportOutputGenerator.setServletContext(servletContext);
 
 					ReportOutputGeneratorResult outputResult = reportOutputGenerator.generateOutput(report, reportRunner,
-							reportFormat, locale, paramProcessorResult, writer, outputFileName);
+							reportFormat, locale, paramProcessorResult, writer, outputFileName, sessionUser);
 
 					if (outputResult.isSuccess()) {
 						rowsRetrieved = outputResult.getRowCount();

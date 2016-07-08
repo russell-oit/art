@@ -130,10 +130,15 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			rowCount++;
 
 			Date date;
-			if (reportType == ReportType.TimeSeriesChart) {
-				date = rs.getTimestamp(1);
-			} else {
-				date = rs.getDate(1);
+			switch (reportType) {
+				case TimeSeriesChart:
+					date = rs.getTimestamp(1);
+					break;
+				case DateSeriesChart:
+					date = rs.getDate(1);
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
 
 			if (dynamicSeries) {

@@ -564,10 +564,10 @@ public class ReportService {
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
 					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
-					+ " GRAPH_OPTIONS, TEMPLATE, DISPLAY_RESULTSET,"
+					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 22) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -585,6 +585,7 @@ public class ReportService {
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
 				report.getChartOptionsSetting(),
+				report.getSecondaryCharts(),
 				report.getTemplate(),
 				report.getDisplayResultset(),
 				report.getXmlaDatasource(),
@@ -600,7 +601,7 @@ public class ReportService {
 					+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
 					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, ACTIVE=?,"
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
-					+ " GRAPH_OPTIONS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
+					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
@@ -620,6 +621,7 @@ public class ReportService {
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
 				report.getChartOptionsSetting(),
+				report.getSecondaryCharts(),
 				report.getTemplate(),
 				report.getDisplayResultset(),
 				report.getXmlaDatasource(),
