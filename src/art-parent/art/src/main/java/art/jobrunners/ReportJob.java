@@ -1289,7 +1289,16 @@ public class ReportJob implements org.quartz.Job {
 
 			//generate output
 			rs = reportRunner.getResultSet();
-			standardOutput.generateBurstOutput(rs, reportFormat, job);
+			
+			String hiddenColumnsSetting = report.getHiddenColumns();
+			String[] hiddenColumnsArray = StringUtils.split(hiddenColumnsSetting, ",");
+			List<String> hiddenColumnsList = null;
+			if (hiddenColumnsArray != null) {
+				hiddenColumnsArray = StringUtils.stripAll(hiddenColumnsArray, " ");
+				hiddenColumnsList = Arrays.asList(hiddenColumnsArray);
+			}
+			
+			standardOutput.generateBurstOutput(rs, reportFormat, job, hiddenColumnsList);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);

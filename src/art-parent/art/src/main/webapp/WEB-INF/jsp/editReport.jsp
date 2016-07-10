@@ -278,6 +278,17 @@ Edit report page
 					default:
 						$("#defaultReportFormatDiv").show();
 				}
+				
+				//show/hide hidden columns field
+				switch(reportTypeId){
+					case 0: //tabular
+					case 103: //tabular html
+					case 121: //job recipients
+						$("#hiddenColumnsDiv").show();
+						break;
+					default:
+						$("#hiddenColumnsDiv").hide();
+				}
 			}
 		</script>
 	</jsp:attribute>
@@ -521,6 +532,24 @@ Edit report page
 							</c:forEach>
 						</form:select>
 						<form:errors path="defaultReportFormat" cssClass="error"/>
+					</div>
+				</div>
+				<div id="hiddenColumnsDiv" class="form-group">
+					<label class="col-md-4 control-label " for="hiddenColumns">
+						<spring:message code="reports.label.hiddenColumns"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="hiddenColumns" maxlength="2000" class="form-control"/>
+							<spring:message code="reports.help.hiddenColumns" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="hiddenColumns" cssClass="error"/>
 					</div>
 				</div>
 

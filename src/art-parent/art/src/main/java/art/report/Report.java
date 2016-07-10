@@ -61,6 +61,21 @@ public class Report implements Serializable {
 	private boolean hidden;
 	private String defaultReportFormat;
 	private String secondaryCharts;
+	private String hiddenColumns;
+
+	/**
+	 * @return the hiddenColumns
+	 */
+	public String getHiddenColumns() {
+		return hiddenColumns;
+	}
+
+	/**
+	 * @param hiddenColumns the hiddenColumns to set
+	 */
+	public void setHiddenColumns(String hiddenColumns) {
+		this.hiddenColumns = hiddenColumns;
+	}
 
 	/**
 	 * @return the secondaryCharts

@@ -112,7 +112,7 @@ public class ReportService {
 			report.setReportType(ReportType.toEnum(rs.getInt("QUERY_TYPE")));
 			report.setGroupColumn(rs.getInt("GROUP_COLUMN"));
 			report.setContactPerson(rs.getString("CONTACT_PERSON"));
-			report.setUsesRules(rs.getBoolean("USES_FILTERS"));
+			report.setUsesRules(rs.getBoolean("USES_RULES"));
 			report.setActive(rs.getBoolean("ACTIVE"));
 			report.setHidden(rs.getBoolean("HIDDEN"));
 			report.setParametersInOutput(rs.getBoolean("PARAMETERS_IN_OUTPUT"));
@@ -124,6 +124,7 @@ public class ReportService {
 			report.setXmlaDatasource(rs.getString("XMLA_DATASOURCE"));
 			report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
 			report.setDefaultReportFormat(rs.getString("DEFAULT_REPORT_FORMAT"));
+			report.setHiddenColumns(rs.getString("HIDDEN_COLUMNS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -562,12 +563,12 @@ public class ReportService {
 		if (newRecord) {
 			String sql = "INSERT INTO ART_QUERIES"
 					+ " (QUERY_ID, NAME, SHORT_DESCRIPTION, DESCRIPTION, QUERY_TYPE,"
-					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_FILTERS,"
+					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
-					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
+					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT, HIDDEN_COLUMNS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 23) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 24) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -591,6 +592,7 @@ public class ReportService {
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
 				report.getDefaultReportFormat(),
+				report.getHiddenColumns(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -599,10 +601,11 @@ public class ReportService {
 		} else {
 			String sql = "UPDATE ART_QUERIES SET NAME=?, SHORT_DESCRIPTION=?,"
 					+ " DESCRIPTION=?, QUERY_TYPE=?, QUERY_GROUP_ID=?,"
-					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_FILTERS=?, ACTIVE=?,"
+					+ " DATABASE_ID=?, CONTACT_PERSON=?, USES_RULES=?, ACTIVE=?,"
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
+					+ " HIDDEN_COLUMNS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -627,6 +630,7 @@ public class ReportService {
 				report.getXmlaDatasource(),
 				report.getXmlaCatalog(),
 				report.getDefaultReportFormat(),
+				report.getHiddenColumns(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

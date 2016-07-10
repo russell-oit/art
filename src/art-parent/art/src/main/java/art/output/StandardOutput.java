@@ -59,8 +59,8 @@ public abstract class StandardOutput {
 
 	protected PrintWriter out;
 	protected int rowCount;
-	protected int resultSetColumnCount;
-	protected int totalColumnCount; //resultset column count + drilldown column count
+	private int resultSetColumnCount;
+	protected int totalColumnCount; //resultset column count + drilldown column count - hidden column count
 	protected DecimalFormat actualNumberFormatter;
 	protected DecimalFormat sortNumberFormatter;
 	protected String contextPath;
@@ -364,13 +364,15 @@ public abstract class StandardOutput {
 	 *
 	 * @param rs the resultset to use
 	 * @param reportFormat the report format to use
+	 * @param hiddenColumns column ids or column names of resultset columns that
+	 * should not be included in the output
 	 * @return StandardOutputResult. if successful, rowCount contains the number
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
 	 * @throws SQLException
 	 */
-	public StandardOutputResult generateTabularOutput(ResultSet rs, ReportFormat reportFormat)
-			throws SQLException {
+	public StandardOutputResult generateTabularOutput(ResultSet rs, ReportFormat reportFormat,
+			List<String> hiddenColumns) throws SQLException {
 
 		logger.debug("Entering generateTabularOutput");
 
@@ -389,6 +391,13 @@ public abstract class StandardOutput {
 
 		totalColumnCount = resultSetColumnCount + drilldownCount;
 
+		int hiddenColumnCount = 0;
+		if (hiddenColumns != null) {
+			hiddenColumnCount = hiddenColumns.size();
+		}
+
+		totalColumnCount = totalColumnCount - hiddenColumnCount;
+
 		//perform any required output initialization
 		init();
 
@@ -402,8 +411,10 @@ public abstract class StandardOutput {
 		beginHeader();
 
 		//output header columns for the result set columns
-		for (int i = 0; i < resultSetColumnCount; i++) {
-			addHeaderCell(rsmd.getColumnLabel(i + 1));
+		for (int i = 1; i <= resultSetColumnCount; i++) {
+			if (outputColumn(i, hiddenColumns, rsmd)) {
+				addHeaderCell(rsmd.getColumnLabel(i));
+			}
 		}
 
 		//output header columns for drill down reports
@@ -450,7 +461,7 @@ public abstract class StandardOutput {
 				result.setTooManyRows(true);
 				return result;
 			} else {
-				List<Object> columnValues = outputResultSetColumns(columnTypes, rs);
+				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns);
 				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
 			}
 		}
@@ -469,11 +480,13 @@ public abstract class StandardOutput {
 	 * @param rs the resultset to use
 	 * @param reportFormat the report format to use
 	 * @param job the job that is generating the burst output
+	 * @param hiddenColumns column ids or column names of resultset columns that
+	 * should not be included in the output
 	 * @throws SQLException
 	 * @throws java.io.IOException
 	 */
-	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat, Job job)
-			throws SQLException, IOException {
+	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat, Job job,
+			List<String> hiddenColumns) throws SQLException, IOException {
 
 		logger.debug("Entering generateBurstOutput");
 
@@ -483,6 +496,13 @@ public abstract class StandardOutput {
 		resultSetColumnCount = rsmd.getColumnCount();
 
 		totalColumnCount = resultSetColumnCount;
+
+		int hiddenColumnCount = 0;
+		if (hiddenColumns != null) {
+			hiddenColumnCount = hiddenColumns.size();
+		}
+
+		totalColumnCount = totalColumnCount - hiddenColumnCount;
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
 		List<ColumnType> columnTypes = getColumnTypes(rsmd);
@@ -539,7 +559,7 @@ public abstract class StandardOutput {
 						out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 					}
 
-					initializeOutput(rsmd);
+					initializeOutput(rsmd, hiddenColumns);
 				}
 
 				newRow();
@@ -559,7 +579,7 @@ public abstract class StandardOutput {
 					fos = endBurstOutput(fos);
 					previousBurstId = null;
 				} else {
-					outputResultSetColumns(columnTypes, rs);
+					outputResultSetColumns(columnTypes, rs, hiddenColumns);
 				}
 			}
 
@@ -620,9 +640,13 @@ public abstract class StandardOutput {
 	 * Starts output for burst output generation
 	 *
 	 * @param rsmd the resultset metadata object
+	 * @param hiddenColumns column ids or column names of resultset columns that
+	 * should not be included in the output
 	 * @throws SQLException
 	 */
-	private void initializeOutput(ResultSetMetaData rsmd) throws SQLException {
+	private void initializeOutput(ResultSetMetaData rsmd, List<String> hiddenColumns)
+			throws SQLException {
+
 		//perform any required output initialization
 		init();
 
@@ -636,8 +660,10 @@ public abstract class StandardOutput {
 		beginHeader();
 
 		//output header columns for the result set columns
-		for (int i = 0; i < resultSetColumnCount; i++) {
-			addHeaderCell(rsmd.getColumnLabel(i + 1));
+		for (int i = 1; i <= resultSetColumnCount; i++) {
+			if (outputColumn(i, hiddenColumns, rsmd)) {
+				addHeaderCell(rsmd.getColumnLabel(i));
+			}
 		}
 
 		//end header output
@@ -675,23 +701,63 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Returns <code>true</code> if the resultset column with the given index
+	 * should be included in the output
+	 *
+	 * @param columnIndex the column's index
+	 * @param hiddenColumns the list of columns to be hidden
+	 * @param rsmd the resultset metadata object
+	 * @return <code>true</code> if the resultset column with the given index
+	 * should be included in the output
+	 * @throws SQLException
+	 */
+	private boolean outputColumn(int columnIndex, List<String> hiddenColumns,
+			ResultSetMetaData rsmd) throws SQLException {
+
+		if (hiddenColumns == null || hiddenColumns.isEmpty()) {
+			return true;
+		}
+
+		boolean displayColumn;
+
+		String columnName = rsmd.getColumnLabel(columnIndex);
+
+		if (hiddenColumns.contains(String.valueOf(columnIndex)) || hiddenColumns.contains(columnName)) {
+			displayColumn = false;
+		} else {
+			displayColumn = true;
+		}
+
+		return displayColumn;
+	}
+
+	/**
 	 * Outputs one row for the resultset data
 	 *
 	 * @param columnTypes the column types for the records
 	 * @param rs the resultset with the data to output
+	 * @param hiddenColumns column ids or column names of resultset columns that
+	 * should not be included in the output
 	 * @return data for the output row
 	 * @throws SQLException
 	 */
 	private List<Object> outputResultSetColumns(List<ColumnType> columnTypes,
-			ResultSet rs) throws SQLException {
+			ResultSet rs, List<String> hiddenColumns) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
 		List<Object> columnValues = new ArrayList<>();
 
+		ResultSetMetaData rsmd = rs.getMetaData();
+
 		int columnIndex = 0;
 		for (ColumnType columnType : columnTypes) {
 			columnIndex++;
+
+			if (!outputColumn(columnIndex, hiddenColumns, rsmd)) {
+				continue;
+			}
+
 			Object value = null;
 
 			switch (columnType) {

@@ -79,7 +79,7 @@ public class Rss20Output extends StandardOutput {
 	public void init() {
 		resetVariables();
 
-		columnNames = new String[resultSetColumnCount]; // stores columns names (i.e. xml tags for items)
+		columnNames = new String[totalColumnCount]; // stores columns names (i.e. xml tags for items)
 		out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
 		// RSS 2.0 Header

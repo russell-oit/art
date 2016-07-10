@@ -70,6 +70,7 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -82,7 +83,7 @@ import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,6 +184,8 @@ public class ReportOutputGenerator {
 	 * @param paramProcessorResult the parameter processor result
 	 * @param writer the output writer to use
 	 * @param fullOutputFilename the full path of the output file name
+	 * @param user the user under who's permissions the report is being
+	 * generated
 	 * @return the output result
 	 * @throws IOException
 	 * @throws SQLException
@@ -394,7 +397,16 @@ public class ReportOutputGenerator {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
 					}
-					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat);
+					
+					String hiddenColumnsSetting = report.getHiddenColumns();
+					String[] hiddenColumnsArray = StringUtils.split(hiddenColumnsSetting, ",");
+					List<String> hiddenColumnsList = null;
+					if (hiddenColumnsArray != null) {
+						hiddenColumnsArray = StringUtils.stripAll(hiddenColumnsArray, " ");
+						hiddenColumnsList = Arrays.asList(hiddenColumnsArray);
+					}
+					
+					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, hiddenColumnsList);
 				}
 
 				if (standardOutputResult.isSuccess()) {
