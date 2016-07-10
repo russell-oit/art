@@ -63,8 +63,8 @@ public class ArtUtils {
 	public static final SimpleDateFormat isoDateTimeFormatter = new SimpleDateFormat(ISO_DATE_TIME_FORMAT);
 	public static final SimpleDateFormat isoDateTimeSecondsFormatter = new SimpleDateFormat(ISO_DATE_TIME_SECONDS_FORMAT);
 	public static final SimpleDateFormat isoDateTimeMillisecondsFormatter = new SimpleDateFormat(ISO_DATE_TIME_MILLISECONDS_FORMAT);
-	public static final String FILE_NAME_DATE_FORMAT="yyyy_MM_dd-HH_mm_ss_SSS";
-	public static final SimpleDateFormat fileNameDateFormatter=new SimpleDateFormat(FILE_NAME_DATE_FORMAT);
+	public static final String FILE_NAME_DATE_FORMAT = "yyyy_MM_dd-HH_mm_ss_SSS";
+	public static final SimpleDateFormat fileNameDateFormatter = new SimpleDateFormat(FILE_NAME_DATE_FORMAT);
 
 	public static List<String> getFileDetailsFromResult(String result) {
 		List<String> details = new ArrayList<>();
@@ -109,14 +109,15 @@ public class ArtUtils {
 	}
 
 	/**
-	 * Utility method to remove characters from query name that may result in an
-	 * invalid output file name.
+	 * Utility method to remove characters from a potential file name that may
+	 * result in an invalid file name.
 	 *
-	 * @param fileName query name
-	 * @return modified query name to be used in file names
+	 * @param fileName potential file name
+	 * @return file name with invalid characters replaced with underscores
 	 */
 	public static String cleanFileName(String fileName) {
-		//only allow english alphabets, numbers, dot, underscore, dash
+		//https://stackoverflow.com/questions/1155107/is-there-a-cross-platform-java-method-to-remove-filename-special-chars
+		//only allow english alphabets, numbers, dot, underscore, dash, space
 		String sane = fileName.replaceAll("[^a-zA-Z0-9\\._\\-\\s]+", "_");
 		return sane;
 
@@ -304,23 +305,23 @@ public class ArtUtils {
 		}
 		return "#" + hexColor;
 	}
-	
+
 	/**
 	 * Returns a date object with the time component set to zero
-	 * 
+	 *
 	 * @param date the date to set
 	 * @return the same date with time as zero
 	 */
 	public static Date zeroTime(Date date) {
 		//https://stackoverflow.com/questions/17821601/set-time-to-000000
 		//https://stackoverflow.com/questions/20414343/how-to-set-time-of-java-util-date-instance-to-000000
-        Calendar cal = Calendar.getInstance();  
-        cal.setTime(date);  
-        cal.set(Calendar.HOUR_OF_DAY, 0);  
-        cal.set(Calendar.MINUTE, 0);  
-        cal.set(Calendar.SECOND, 0);  
-        cal.set(Calendar.MILLISECOND, 0);  
-        return cal.getTime(); 
-    }
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
 
 }

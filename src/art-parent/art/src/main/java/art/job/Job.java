@@ -79,6 +79,21 @@ public class Job implements Serializable {
 	private int cachedDatasourceId;
 	private String batchFile;
 	private FtpServer ftpServer;
+	private String fixedFileName;
+
+	/**
+	 * @return the fixedFileName
+	 */
+	public String getFixedFileName() {
+		return fixedFileName;
+	}
+
+	/**
+	 * @param fixedFileName the fixedFileName to set
+	 */
+	public void setFixedFileName(String fixedFileName) {
+		this.fixedFileName = fixedFileName;
+	}
 
 	/**
 	 * @return the ftpServer

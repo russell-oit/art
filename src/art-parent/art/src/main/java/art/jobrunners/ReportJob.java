@@ -1198,20 +1198,44 @@ public class ReportJob implements org.quartz.Job {
 		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
 
 		//generate file name to use
-		FilenameHelper filenameHelper = new FilenameHelper();
-		String baseFileName = filenameHelper.getFileName(job);
 		String exportPath = Config.getJobsExportPath();
-		String extension;
+		String outputFileName;
 
-		if (reportType.isJxls()) {
-			String jxlsFilename = report.getTemplate();
-			extension = FilenameUtils.getExtension(jxlsFilename);
+		String fixedFileName = job.getFixedFileName();
+		if (StringUtils.isNotBlank(fixedFileName)) {
+			fileName = ArtUtils.cleanFileName(fixedFileName);
+
+			if (job.getRunsToArchive() > 0) {
+				int randomNumber = ArtUtils.getRandomNumber(100, 999);
+				fileName = fileName + "-" + String.valueOf(randomNumber);
+			} else {
+				String fullFixedFileName = exportPath + fileName;
+				File fixedFile = new File(fullFixedFileName);
+				if (fixedFile.exists()) {
+					boolean fileDeleted = fixedFile.delete();
+					if (!fileDeleted) {
+						logger.warn("Could not delete fixed file: " + fullFixedFileName);
+					}
+				}
+			}
 		} else {
-			extension = reportFormat.getFilenameExtension();
+			FilenameHelper filenameHelper = new FilenameHelper();
+			String baseFileName = filenameHelper.getFileName(job);
+			String extension;
+
+			if (reportType.isJxls()) {
+				String jxlsFilename = report.getTemplate();
+				extension = FilenameUtils.getExtension(jxlsFilename);
+			} else {
+				extension = reportFormat.getFilenameExtension();
+			}
+
+			fileName = baseFileName + "." + extension;
 		}
 
-		fileName = baseFileName + "." + extension;
-		String outputFileName = exportPath + fileName;
+		fileName = ArtUtils.cleanFileName(fileName);
+
+		outputFileName = exportPath + fileName;
 
 		//create html file to output to as required
 		FileOutputStream fos = null;
@@ -1289,7 +1313,7 @@ public class ReportJob implements org.quartz.Job {
 
 			//generate output
 			rs = reportRunner.getResultSet();
-			
+
 			String hiddenColumnsSetting = report.getHiddenColumns();
 			String[] hiddenColumnsArray = StringUtils.split(hiddenColumnsSetting, ",");
 			List<String> hiddenColumnsList = null;
@@ -1297,7 +1321,7 @@ public class ReportJob implements org.quartz.Job {
 				hiddenColumnsArray = StringUtils.stripAll(hiddenColumnsArray, " ");
 				hiddenColumnsList = Arrays.asList(hiddenColumnsArray);
 			}
-			
+
 			standardOutput.generateBurstOutput(rs, reportFormat, job, hiddenColumnsList);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {

@@ -23,6 +23,7 @@ import art.enums.ColumnType;
 import art.job.Job;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
+import art.utils.ArtUtils;
 import art.utils.DrilldownLinkHelper;
 import art.utils.FilenameHelper;
 import java.io.FileOutputStream;
@@ -44,6 +45,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -542,14 +544,25 @@ public abstract class StandardOutput {
 					}
 
 					//generate file name to use
-					FilenameHelper filenameHelper = new FilenameHelper();
-					String baseFileName = filenameHelper.getFileName(job, fileNameBurstId);
 					String exportPath = Config.getJobsExportPath();
+					String fileName;
+					String baseFileName;
 					String extension;
 
-					extension = reportFormat.getFilenameExtension();
+					String fixedFileName = job.getFixedFileName();
+					if (StringUtils.isNotBlank(fixedFileName)) {
+						baseFileName = FilenameUtils.getBaseName(fixedFileName);
+						extension = FilenameUtils.getExtension(fixedFileName);
+						fileName = baseFileName + "-BurstId-" + fileNameBurstId + "." + extension;
+					} else {
+						FilenameHelper filenameHelper = new FilenameHelper();
+						baseFileName = filenameHelper.getFileName(job, fileNameBurstId);
+						extension = reportFormat.getFilenameExtension();
+						fileName = baseFileName + "." + extension;
+					}
 
-					String fileName = baseFileName + "." + extension;
+					fileName = ArtUtils.cleanFileName(fileName);
+
 					fullOutputFileName = exportPath + fileName;
 
 					//create html file to output to as required
@@ -559,7 +572,7 @@ public abstract class StandardOutput {
 						out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 					}
 
-					initializeOutput(rsmd, hiddenColumns);
+					initializeBurstOutput(rsmd, hiddenColumns);
 				}
 
 				newRow();
@@ -644,7 +657,7 @@ public abstract class StandardOutput {
 	 * should not be included in the output
 	 * @throws SQLException
 	 */
-	private void initializeOutput(ResultSetMetaData rsmd, List<String> hiddenColumns)
+	private void initializeBurstOutput(ResultSetMetaData rsmd, List<String> hiddenColumns)
 			throws SQLException {
 
 		//perform any required output initialization

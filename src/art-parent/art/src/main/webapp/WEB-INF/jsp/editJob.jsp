@@ -485,9 +485,7 @@
 							<spring:message code="jobs.label.runsToArchive"/>
 						</label>
 						<div class="col-md-8">
-							<div class="input-group">
-								<form:input path="runsToArchive" maxlength="2" class="form-control"/>
-							</div>
+							<form:input path="runsToArchive" maxlength="2" class="form-control"/>
 							<form:errors path="runsToArchive" cssClass="error"/>
 						</div>
 					</div>
@@ -509,6 +507,15 @@
 							<div class="checkbox">
 								<form:checkbox path="allowSplitting" id="allowSplitting" class="switch-yes-no"/>
 							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="fixedFileName">
+							<spring:message code="jobs.label.fixedFileName"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="fixedFileName" maxlength="50" class="form-control"/>
+							<form:errors path="fixedFileName" cssClass="error"/>
 						</div>
 					</div>
 					<div class="form-group">
@@ -537,9 +544,7 @@
 							<spring:message code="jobs.label.batchFile"/>
 						</label>
 						<div class="col-md-8">
-							<div class="input-group">
-								<form:input path="batchFile" maxlength="50" class="form-control"/>
-							</div>
+							<form:input path="batchFile" maxlength="50" class="form-control"/>
 							<form:errors path="batchFile" cssClass="error"/>
 						</div>
 					</div>
