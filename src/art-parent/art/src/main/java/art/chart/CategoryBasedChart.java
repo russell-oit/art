@@ -170,7 +170,11 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 			int seriesIndex, double yValue, String categoryName, String seriesName) throws SQLException {
 
 		//add dataset value
-		dataset.addValue(yValue, seriesName, categoryName);
+		if (swapAxes) {
+			dataset.addValue(yValue, categoryName, seriesName);
+		} else {
+			dataset.addValue(yValue, seriesName, categoryName);
+		}
 
 		//use series index and category name to identify url in hashmap
 		//to ensure correct link will be returned by the generatelink() method. 

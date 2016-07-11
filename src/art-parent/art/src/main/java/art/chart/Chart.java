@@ -96,6 +96,21 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 	protected Map<String, String> seriesColors;
 	private ReportType reportType;
 	private List<Chart> secondaryCharts;
+	protected boolean swapAxes;
+
+	/**
+	 * @return the swapAxes
+	 */
+	public boolean isSwapAxes() {
+		return swapAxes;
+	}
+
+	/**
+	 * @param swapAxes the swapAxes to set
+	 */
+	public void setSwapAxes(boolean swapAxes) {
+		this.swapAxes = swapAxes;
+	}
 
 	/**
 	 * @return the reportType

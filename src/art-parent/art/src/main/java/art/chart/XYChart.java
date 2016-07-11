@@ -122,7 +122,11 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 			itemIndices.put(seriesName, itemIndex);
 
 			//add dataset value
-			finalSeries.get(seriesIndex).add(xValue, yValue);
+			if (swapAxes) {
+				finalSeries.get(seriesIndex).add(yValue, xValue);
+			} else {
+				finalSeries.get(seriesIndex).add(xValue, yValue);
+			}
 
 			//use series index and item index to identify url in hashmap
 			//to ensure correct link will be returned by the generatelink() method. 

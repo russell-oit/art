@@ -130,7 +130,7 @@ public class RunReportHelper {
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
 
 		request.setAttribute("report", report);
-		
+
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		//prepare report parameters
@@ -325,6 +325,25 @@ public class RunReportHelper {
 
 //		enableEmail = false; //disable email for now. feature may be abused by users to send spam?
 		request.setAttribute("enableEmail", enableEmail);
+
+		boolean enableSwapAxes;
+		switch (reportType) {
+			case XYChart:
+			case LineChart:
+			case HorizontalBar2DChart:
+			case HorizontalBar3DChart:
+			case VerticalBar2DChart:
+			case VerticalBar3DChart:
+			case StackedHorizontalBar2DChart:
+			case StackedHorizontalBar3DChart:
+			case StackedVerticalBar2DChart:
+			case StackedVerticalBar3DChart:
+				enableSwapAxes = true;
+				break;
+			default:
+				enableSwapAxes = false;
+		}
+		request.setAttribute("enableSwapAxes", enableSwapAxes);
 	}
 
 	/**

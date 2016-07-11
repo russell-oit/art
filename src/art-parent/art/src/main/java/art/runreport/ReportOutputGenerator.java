@@ -303,7 +303,14 @@ public class ReportOutputGenerator {
 			} else if (reportType.isChart()) {
 				rs = reportRunner.getResultSet();
 
-				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, reportParamsList);
+				boolean swapAxes = false;
+				if (request != null) {
+					if (request.getParameter("swapAxes") != null) {
+						swapAxes = true;
+					}
+				}
+
+				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, reportParamsList, swapAxes);
 
 				//store data for potential use in html and pdf output
 				RowSetDynaClass data = null;
@@ -337,7 +344,8 @@ public class ReportOutputGenerator {
 						try {
 							secondaryReportRunner.execute();
 							secondaryResultSet = secondaryReportRunner.getResultSet();
-							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, reportParamsList);
+							swapAxes = false;
+							Chart secondaryChart = prepareChart(secondaryReport, reportFormat, locale, secondaryResultSet, parameterChartOptions, reportParamsMap, reportParamsList, swapAxes);
 							secondaryCharts.add(secondaryChart);
 						} finally {
 							DatabaseUtils.close(secondaryResultSet);
@@ -397,7 +405,7 @@ public class ReportOutputGenerator {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
 					}
-					
+
 					String hiddenColumnsSetting = report.getHiddenColumns();
 					String[] hiddenColumnsArray = StringUtils.split(hiddenColumnsSetting, ",");
 					List<String> hiddenColumnsList = null;
@@ -405,7 +413,7 @@ public class ReportOutputGenerator {
 						hiddenColumnsArray = StringUtils.stripAll(hiddenColumnsArray, " ");
 						hiddenColumnsList = Arrays.asList(hiddenColumnsArray);
 					}
-					
+
 					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, hiddenColumnsList);
 				}
 
@@ -453,13 +461,14 @@ public class ReportOutputGenerator {
 	 * @param parameterChartOptions the parameter chart options
 	 * @param reportParamsMap the report parameters map
 	 * @param reportParamsList the report parameters list
+	 * @param swapAxes whether to swap the values of the x and y axes
 	 * @return the prepared chart
 	 * @throws SQLException
 	 */
 	private Chart prepareChart(Report report, ReportFormat reportFormat, Locale locale,
 			ResultSet rs, ChartOptions parameterChartOptions,
 			Map<String, ReportParameter> reportParamsMap,
-			List<ReportParameter> reportParamsList) throws SQLException {
+			List<ReportParameter> reportParamsList, boolean swapAxes) throws SQLException {
 
 		ReportType reportType = report.getReportType();
 		Chart chart = getChartInstance(reportType);
@@ -476,6 +485,7 @@ public class ReportOutputGenerator {
 		chart.setTitle(shortDescription);
 		chart.setXAxisLabel(report.getxAxisLabel());
 		chart.setYAxisLabel(report.getyAxisLabel());
+		chart.setSwapAxes(swapAxes);
 
 		Drilldown drilldown = null;
 		if (reportFormat == ReportFormat.html) {

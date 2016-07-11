@@ -225,10 +225,15 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			int seriesIndex, int itemIndex, double yValue, Date date, String seriesName) throws SQLException {
 
 		//add dataset value
-		if (reportType == ReportType.TimeSeriesChart) {
-			finalSeries.get(seriesIndex).add(new Millisecond(date), yValue);
-		} else {
-			finalSeries.get(seriesIndex).add(new Day(date), yValue);
+		switch(reportType){
+			case TimeSeriesChart:
+				finalSeries.get(seriesIndex).add(new Millisecond(date), yValue);
+				break;
+			case DateSeriesChart:
+				finalSeries.get(seriesIndex).add(new Day(date), yValue);
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 		}
 
 		//use series index and item index to identify url in hashmap
