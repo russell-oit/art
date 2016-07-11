@@ -1,6 +1,7 @@
 {
-	"showErrors": true,
+	"showErrors" : true,
 	"enableDirectParameterSubstitution" : false,
 	"exportDirectory" : "",
-	"workDirectory" : ""
+	"workDirectory" : "",
+	"checkExportFileAccess" : false
 }

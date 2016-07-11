@@ -16,12 +16,14 @@
  */
 package art.servlets;
 
+import art.report.ReportService;
 import art.user.User;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.sql.SQLException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -31,6 +33,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -67,34 +70,35 @@ public class ExportPathFilter implements Filter {
 		String requestUri = request.getRequestURI();
 		File requestPath = new File(requestUri);
 
-		String filename = URLDecoder.decode(requestPath.getName(), "UTF-8");
+		String fileName = URLDecoder.decode(requestPath.getName(), "UTF-8");
+		String fullFileName;
 
-		//ensure user has access to file. How to cater for old file name formats?
-//		String baseName = FilenameUtils.getBaseName(filename);
-//		String jobIdString = StringUtils.substringAfterLast(baseName, "-");
-//		String toReportId = StringUtils.substringBeforeLast(baseName, "-");
-//		String reportIdString = StringUtils.substringAfterLast(toReportId, "-");
-//		int reportId = Integer.parseInt(reportIdString);
 		if (requestUri.contains("/export/jobs/")) {
-			filename = Config.getJobsExportPath() + filename;
+			fullFileName = Config.getJobsExportPath() + fileName;
 		} else {
-//			HttpSession session = request.getSession();
-//			
-//			User sessionUser = (User) session.getAttribute("sessionUser");
-//			ReportService reportService = new ReportService();
-//			try {
-//				if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
-//					HttpServletResponse response = (HttpServletResponse) arg1;
-//					request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
-//					return;
-//				}
-//			} catch (SQLException ex) {
-//				logger.error("Error", ex);
-//			}
+			//ensure user has access to file
+			if (Config.getCustomSettings().isCheckExportFileAccess()) {
+				String baseName = FilenameUtils.getBaseName(fileName);
+//			String jobIdString = StringUtils.substringAfterLast(baseName, "-");
+				String uptoReportId = StringUtils.substringBeforeLast(baseName, "-");
+				String reportIdString = StringUtils.substringAfterLast(uptoReportId, "-");
+				int reportId = Integer.parseInt(reportIdString);
 
-			filename = Config.getReportsExportPath() + filename;
+				ReportService reportService = new ReportService();
+				try {
+					if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
+						request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
+						return;
+					}
+				} catch (SQLException ex) {
+					logger.error("Error", ex);
+				}
+			}
+
+			fullFileName = Config.getReportsExportPath() + fileName;
 		}
-		File file = new File(filename);
+
+		File file = new File(fullFileName);
 
 		if (!file.exists()) {
 			request.setAttribute("message", "reports.message.fileNotFound");
@@ -104,6 +108,7 @@ public class ExportPathFilter implements Filter {
 
 		FileInputStream fs = new FileInputStream(file);
 		OutputStream os = sresponse.getOutputStream();
+
 		try {
 			IOUtils.copyLarge(fs, os);
 		} finally {
