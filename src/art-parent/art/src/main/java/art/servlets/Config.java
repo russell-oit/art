@@ -658,7 +658,7 @@ public class Config extends HttpServlet {
 		CustomSettings newCustomSettings = null;
 
 		try {
-			String customSettingsFilePath = webinfPath + "art-config.json";
+			String customSettingsFilePath = webinfPath + "art-custom-settings.json";
 			File customSettingsFile = new File(customSettingsFilePath);
 			if (customSettingsFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
