@@ -130,7 +130,6 @@ public class RunReportController {
 					logger.warn("Report not run. Max running reports reached. user={}, report={}", sessionUser, report);
 					model.addAttribute("message", "reports.message.maxRunningReportsReached");
 					return errorPage;
-
 				}
 			}
 

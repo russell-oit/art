@@ -18,6 +18,7 @@ package art.runreport;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
+import art.enums.ReportType;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
@@ -34,6 +35,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -103,7 +105,22 @@ public class ParameterProcessor {
 
 		//get list of all defined report parameters
 		ReportParameterService reportParameterService = new ReportParameterService();
-		List<ReportParameter> reportParamsList = reportParameterService.getReportParameters(reportId);
+		ReportService reportService = new ReportService();
+		Report report = reportService.getReport(reportId);
+		List<ReportParameter> reportParamsList;
+		if (report.getReportType() == ReportType.Dashboard) {
+			List<Integer> reportIds = report.getDashboardReportIds();
+			List<ReportParameter> tempReportParamsList = reportParameterService.getDashboardReportParameters(reportIds);
+			//remove duplicates
+			//https://stackoverflow.com/questions/203984/how-do-i-remove-repeated-elements-from-arraylist
+			Map<String, ReportParameter> cleanMap = new LinkedHashMap<>();
+			for (ReportParameter reportParam : tempReportParamsList) {
+				cleanMap.put(reportParam.getParameter().getName(), reportParam);
+			}
+			reportParamsList = new ArrayList<>(cleanMap.values());
+		} else {
+			reportParamsList = reportParameterService.getReportParameters(reportId);
+		}
 
 		for (ReportParameter reportParam : reportParamsList) {
 			//build map for easier lookup
@@ -114,6 +131,7 @@ public class ParameterProcessor {
 
 		//set actual values to be used when running the query
 		setActualParameterValues(reportParamsList);
+
 		handleAllValues(reportParamsMap);
 
 		setLovValues(reportParamsMap);
@@ -121,12 +139,15 @@ public class ParameterProcessor {
 		ParameterProcessorResult result = new ParameterProcessorResult();
 
 		result.setReportParamsList(reportParamsList);
+
 		result.setReportParamsMap(reportParamsMap);
 
 		ReportOptions reportOptions = processReportOptions(passedValuesMap);
+
 		result.setReportOptions(reportOptions);
 
 		ChartOptions chartOptions = processChartOptions(passedValuesMap);
+
 		result.setChartOptions(chartOptions);
 
 		setIsChainedParent(reportParamsList);
@@ -194,7 +215,9 @@ public class ParameterProcessor {
 				logger.debug("reportParam={}", reportParam);
 
 				if (reportParam == null) {
-					throw new IllegalArgumentException("Report parameter not found: " + paramName);
+					//report parameter indicated in url but not configured for the report
+					//e.g. with dashboard reports where report parameters are passed to all reports
+					//do nothing
 				} else {
 					//check if this is a multi parameter that doesn't use an lov
 					//multi param that doesn't use an lov contains values separated by newlines

@@ -38,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ReportParameter implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
 	private int reportParameterId;
 	private Report report;
 	private Parameter parameter;

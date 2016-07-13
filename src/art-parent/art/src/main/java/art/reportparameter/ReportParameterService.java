@@ -22,6 +22,8 @@ import art.report.ReportService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,6 +137,28 @@ public class ReportParameterService {
 
 		ResultSetHandler<List<ReportParameter>> h = new BeanListHandler<>(ReportParameter.class, new ReportParameterMapper());
 		return dbService.query(sql, h, reportId);
+	}
+
+	/**
+	 * Returns all report parameters for a dashboard report
+	 *
+	 * @param reportIds the report ids of the reports within the dashboard
+	 * @return all report parameters for the dashboard report
+	 * @throws SQLException
+	 */
+	@Cacheable("parameters")
+	public List<ReportParameter> getDashboardReportParameters(List<Integer> reportIds) throws SQLException {
+		logger.debug("Entering getDashboardReportParameters");
+
+		if (reportIds == null || reportIds.isEmpty()) {
+			return Collections.EMPTY_LIST;
+		}
+
+		String sql = SQL_SELECT_ALL
+				+ " WHERE REPORT_ID IN(" + StringUtils.repeat("?", ",", reportIds.size()) + ")";
+
+		ResultSetHandler<List<ReportParameter>> h = new BeanListHandler<>(ReportParameter.class, new ReportParameterMapper());
+		return dbService.query(sql, h, reportIds.toArray());
 	}
 
 	/**

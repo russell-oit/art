@@ -42,6 +42,10 @@ Reports page. Also main/home page
 						{
 							targets: ["descriptionCol"], //target name matches class name of th.
 							visible: false
+						},
+						{
+							targets: ["reportIdCol"], //target name matches class name of th.
+							visible: false
 						}
 					],
 					orderClasses: false,
@@ -124,9 +128,10 @@ Reports page. Also main/home page
 			<thead>
 				<tr>
 					<th class="detailsCol noFilter"></th> <%-- details control column --%>
-					<th class="reportGroupCol"><spring:message code="reports.text.groupName"/></th> <%-- group name. --%>
-					<th class="descriptionCol"></th> <%-- description column. hidden --%>
+					<th class="reportGroupCol"><spring:message code="reports.text.groupName"/></th>
+					<th class="descriptionCol noFilter"></th> <%-- description column. hidden --%>
 					<th><spring:message code="reports.text.reportName"/></th>
+					<th class="reportIdCol noFilter"></th> <%-- report id column. hidden --%>
 				</tr>
 			</thead>
 			<tbody>
@@ -142,6 +147,7 @@ Reports page. Also main/home page
 							<t:displayNewLabel creationDate="${report.creationDate}"
 											   updateDate="${report.updateDate}"/>
 						</td>
+						<td><encode:forHtmlContent value="${report.reportId}"/></td>
 					</tr>
 				</c:forEach>
 			</tbody>

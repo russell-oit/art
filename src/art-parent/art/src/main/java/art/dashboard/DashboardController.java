@@ -26,9 +26,11 @@ import art.runreport.RunReportHelper;
 import art.user.User;
 import art.utils.XmlParser;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -257,6 +259,21 @@ public class DashboardController {
 			int reportId = Integer.parseInt(link);
 			link = request.getContextPath() + "/app/runReport.do?reportId=" + reportId
 					+ "&isFragment=true";
+			//add report parameters
+			StringBuilder paramsSb = new StringBuilder(254);
+			Enumeration names = request.getParameterNames();
+			while (names.hasMoreElements()) {
+				String name = (String) names.nextElement();
+				if (name.startsWith("p-")) {
+					String[] paramValues = request.getParameterValues(name);
+					for (String value : paramValues) {
+						String encodedParamValue = URLEncoder.encode(value, "UTF-8");
+						paramsSb.append("&").append(name).append("=").append(encodedParamValue);
+					}
+				}
+			}
+
+			link = link + paramsSb.toString();
 		}
 
 		return link;

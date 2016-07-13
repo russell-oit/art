@@ -170,8 +170,18 @@ public class RunReportHelper {
 
 		//create map in order to display parameters by position
 		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
-		for (ReportParameter reportParam : reportParamsList) {
-			reportParams.put(reportParam.getPosition(), reportParam);
+		//for dashboard different report parameters for different reports may have
+		//same position so just display all in the order of the list (an arbitrary order)
+		if (report.getReportType() == ReportType.Dashboard) {
+			Integer count = 0;
+			for (ReportParameter reportParam : reportParamsList) {
+				count++;
+				reportParams.put(count, reportParam);
+			}
+		} else {
+			for (ReportParameter reportParam : reportParamsList) {
+				reportParams.put(reportParam.getPosition(), reportParam);
+			}
 		}
 
 		request.setAttribute("reportParams", reportParams);

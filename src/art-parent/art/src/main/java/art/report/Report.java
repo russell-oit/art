@@ -19,8 +19,13 @@ package art.report;
 import art.datasource.Datasource;
 import art.enums.ReportType;
 import art.reportgroup.ReportGroup;
+import art.utils.XmlParser;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents a report
@@ -567,6 +572,29 @@ public class Report implements Serializable {
 	@Override
 	public String toString() {
 		return "Report [name=" + name + "]";
+	}
+
+	/**
+	 * Returns the report ids for reports defined within a dashboard report
+	 * 
+	 * @return the report ids for reports defined within a dashboard report
+	 */
+	public List<Integer> getDashboardReportIds() {
+		List<Integer> reportIds = new ArrayList<>();
+
+		if (StringUtils.isBlank(reportSource)) {
+			return Collections.EMPTY_LIST;
+		}
+
+		List<String> reportIdStrings = XmlParser.getXmlElementValues(reportSource, "OBJECTID");
+		reportIdStrings.addAll(XmlParser.getXmlElementValues(reportSource, "QUERYID"));
+		reportIdStrings.addAll(XmlParser.getXmlElementValues(reportSource, "REPORTID"));
+
+		for (String id : reportIdStrings) {
+			reportIds.add(Integer.valueOf(id));
+		}
+		
+		return reportIds;
 	}
 
 }

@@ -26,6 +26,7 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.DrilldownLinkHelper;
 import art.utils.FilenameHelper;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -554,6 +555,16 @@ public abstract class StandardOutput {
 						baseFileName = FilenameUtils.getBaseName(fixedFileName);
 						extension = FilenameUtils.getExtension(fixedFileName);
 						fileName = baseFileName + "-BurstId-" + fileNameBurstId + "." + extension;
+						fileName = ArtUtils.cleanFileName(fileName);
+
+						String fullFixedFileName = exportPath + fileName;
+						File fixedFile = new File(fullFixedFileName);
+						if (fixedFile.exists()) {
+							boolean fileDeleted = fixedFile.delete();
+							if (!fileDeleted) {
+								logger.warn("Could not delete fixed file: " + fullFixedFileName);
+							}
+						}
 					} else {
 						FilenameHelper filenameHelper = new FilenameHelper();
 						baseFileName = filenameHelper.getFileName(job, fileNameBurstId);
