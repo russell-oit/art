@@ -221,9 +221,21 @@ public class DocxOutput extends StandardOutput {
 		row = table.createRow();
 		cellNumber = 0;
 	}
+	
+	@Override
+	public void addCellTotal(Double value){
+		String formattedValue = formatNumbericValue(value);
+		
+		cell = row.getCell(cellNumber++);
+		XWPFParagraph paragraph = cell.getParagraphs().get(0);
+
+		XWPFRun run = paragraph.createRun();
+		run.setBold(true);
+		run.setText(formattedValue);
+	}
 
 	@Override
-	public void endRows() {
+	public void endOutput() {
 		try {
 			try (OutputStream fout = new FileOutputStream(fullOutputFileName)) {
 				document.write(fout);

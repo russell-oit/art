@@ -21,6 +21,7 @@ import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
 import art.enums.ColumnType;
 import art.job.Job;
+import art.report.Report;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.utils.ArtUtils;
@@ -39,11 +40,15 @@ import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
@@ -74,6 +79,7 @@ public abstract class StandardOutput {
 	private List<ReportParameter> reportParamsList;
 	protected String fullOutputFileName;
 	private boolean showSelectedParameters;
+	private Map<Integer, Double> columnTotals;
 
 	/**
 	 * @return the showSelectedParameters
@@ -304,9 +310,46 @@ public abstract class StandardOutput {
 	public abstract void newRow();
 
 	/**
+	 * Closes the current row
+	 */
+	public void endRow() {
+
+	}
+
+	/**
+	 * Finalizes data output
+	 */
+	public void endRows() {
+
+	}
+
+	/**
+	 * Begins output for the total row
+	 */
+	public void beginTotalRow() {
+		newRow();
+	}
+
+	/**
+	 * Outputs a total value
+	 *
+	 * @param value the value to output
+	 */
+	public void addCellTotal(Double value) {
+		addCellNumeric(value);
+	}
+
+	/**
+	 * Finalizes the total row
+	 */
+	public void endTotalRow() {
+		endRow();
+	}
+
+	/**
 	 * Closes report output. Any final cleanup should be done here.
 	 */
-	public abstract void endRows();
+	public abstract void endOutput();
 
 	/**
 	 * Formats a numberic value for display
@@ -367,15 +410,14 @@ public abstract class StandardOutput {
 	 *
 	 * @param rs the resultset to use
 	 * @param reportFormat the report format to use
-	 * @param hiddenColumns column ids or column names of resultset columns that
-	 * should not be included in the output
+	 * @param report the report that is being run
 	 * @return StandardOutputResult. if successful, rowCount contains the number
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
 	 * @throws SQLException
 	 */
 	public StandardOutputResult generateTabularOutput(ResultSet rs, ReportFormat reportFormat,
-			List<String> hiddenColumns) throws SQLException {
+			Report report) throws SQLException {
 
 		logger.debug("Entering generateTabularOutput");
 
@@ -393,6 +435,8 @@ public abstract class StandardOutput {
 		}
 
 		totalColumnCount = resultSetColumnCount + drilldownCount;
+
+		List<String> hiddenColumns = getHiddenColumnsList(report);
 
 		int hiddenColumnCount = 0;
 		if (hiddenColumns != null) {
@@ -415,7 +459,7 @@ public abstract class StandardOutput {
 
 		//output header columns for the result set columns
 		for (int i = 1; i <= resultSetColumnCount; i++) {
-			if (outputColumn(i, hiddenColumns, rsmd)) {
+			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
 				addHeaderCell(rsmd.getColumnLabel(i));
 			}
 		}
@@ -439,7 +483,12 @@ public abstract class StandardOutput {
 		beginRows();
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
-		List<ColumnType> columnTypes = getColumnTypes(rsmd);
+		Map<Integer, ColumnType> columnTypes = getColumnTypes(rsmd);
+
+		List<String> totalColumns = getTotalColumnsList(report);
+		if (!totalColumns.isEmpty()) {
+			columnTotals = new HashMap<>();
+		}
 
 		while (rs.next()) {
 			rowCount++;
@@ -458,7 +507,7 @@ public abstract class StandardOutput {
 					addCellString("...");
 				}
 
-				endRows();
+				endOutput();
 
 				result.setMessage("runReport.message.tooManyRows");
 				result.setTooManyRows(true);
@@ -469,12 +518,106 @@ public abstract class StandardOutput {
 			}
 		}
 
-		//end data output
+		if (rowCount > 1) {
+			endRow();
+		}
+
 		endRows();
+
+		//output total row
+		if (columnTotals != null) {
+			outputTotals(hiddenColumns, rsmd, drilldownCount, totalColumns);
+		}
+
+		//end data output
+		endOutput();
 
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
 		return result;
+	}
+
+	/**
+	 * Output totals
+	 *
+	 * @param hiddenColumns the list of columns to be hidden
+	 * @param rsmd the resultset metadata object
+	 * @param drilldownCount the number of drilldowns being displayed
+	 * @param totalColumns the list of columns to be totalled
+	 * @throws SQLException
+	 */
+	private void outputTotals(List<String> hiddenColumns, ResultSetMetaData rsmd,
+			int drilldownCount, List<String> totalColumns) throws SQLException {
+
+		beginTotalRow();
+
+		for (int i = 1; i <= resultSetColumnCount; i++) {
+			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
+				Double columnTotal = columnTotals.get(i);
+				if (columnTotal == null) {
+					addCellString("");
+				} else {
+					if (shouldTotalColumn(i, totalColumns, rsmd)) {
+						addCellTotal(columnTotal);
+					} else {
+						addCellString("");
+					}
+				}
+			}
+		}
+
+		//output total columns for drilldowns
+		for (int i = 0; i < drilldownCount; i++) {
+			addCellString("");
+		}
+
+		endTotalRow();
+	}
+
+	/**
+	 * Returns a list of column indexes or column names that should not be
+	 * included in the output
+	 *
+	 * @param report the report that is being run
+	 * @return a list of column indexes or column names that should not be
+	 * included in the output
+	 */
+	private List<String> getHiddenColumnsList(Report report) {
+		String hiddenColumnsSetting = report.getHiddenColumns();
+		String[] hiddenColumnsArray = StringUtils.split(hiddenColumnsSetting, ",");
+
+		List<String> hiddenColumns;
+		if (hiddenColumnsArray == null) {
+			hiddenColumns = Collections.emptyList();
+		} else {
+			hiddenColumnsArray = StringUtils.stripAll(hiddenColumnsArray, " ");
+			hiddenColumns = Arrays.asList(hiddenColumnsArray);
+		}
+
+		return hiddenColumns;
+	}
+
+	/**
+	 * Returns a list of column indexes or column names that should be totalled
+	 * in the output
+	 *
+	 * @param report the report that is being run
+	 * @return a list of column indexes or column names that should be totalled
+	 * in the output
+	 */
+	private List<String> getTotalColumnsList(Report report) {
+		String totalColumnsSetting = report.getTotalColumns();
+		String[] totalColumnsArray = StringUtils.split(totalColumnsSetting, ",");
+
+		List<String> totalColumns;
+		if (totalColumnsArray == null) {
+			totalColumns = Collections.emptyList();
+		} else {
+			totalColumnsArray = StringUtils.stripAll(totalColumnsArray, " ");
+			totalColumns = Arrays.asList(totalColumnsArray);
+		}
+
+		return totalColumns;
 	}
 
 	/**
@@ -483,13 +626,12 @@ public abstract class StandardOutput {
 	 * @param rs the resultset to use
 	 * @param reportFormat the report format to use
 	 * @param job the job that is generating the burst output
-	 * @param hiddenColumns column ids or column names of resultset columns that
-	 * should not be included in the output
+	 * @param report the report that is being run
 	 * @throws SQLException
 	 * @throws java.io.IOException
 	 */
 	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat, Job job,
-			List<String> hiddenColumns) throws SQLException, IOException {
+			Report report) throws SQLException, IOException {
 
 		logger.debug("Entering generateBurstOutput");
 
@@ -500,6 +642,8 @@ public abstract class StandardOutput {
 
 		totalColumnCount = resultSetColumnCount;
 
+		List<String> hiddenColumns = getHiddenColumnsList(report);
+
 		int hiddenColumnCount = 0;
 		if (hiddenColumns != null) {
 			hiddenColumnCount = hiddenColumns.size();
@@ -508,7 +652,9 @@ public abstract class StandardOutput {
 		totalColumnCount = totalColumnCount - hiddenColumnCount;
 
 		int maxRows = Config.getMaxRows(reportFormat.getValue());
-		List<ColumnType> columnTypes = getColumnTypes(rsmd);
+		Map<Integer, ColumnType> columnTypes = getColumnTypes(rsmd);
+
+		List<String> totalColumns = getTotalColumnsList(report);
 
 		String previousBurstId = null;
 		FileOutputStream fos = null;
@@ -531,7 +677,12 @@ public abstract class StandardOutput {
 				if (generateNewFile) {
 					if (rowCount > 1) {
 						//close previous file
-						fos = endBurstOutput(fos);
+						fos = endBurstOutput(fos, hiddenColumns, rsmd, totalColumns);
+					}
+
+					if (!totalColumns.isEmpty()) {
+						columnTotals = null;
+						columnTotals = new HashMap<>();
 					}
 
 					rowCount = 1;
@@ -583,6 +734,8 @@ public abstract class StandardOutput {
 						out = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 					}
 
+					reportName = report.getName() + " - " + currentBurstId;
+
 					initializeBurstOutput(rsmd, hiddenColumns);
 				}
 
@@ -600,14 +753,14 @@ public abstract class StandardOutput {
 						addCellString("...");
 					}
 
-					fos = endBurstOutput(fos);
+					fos = endBurstOutput(fos, hiddenColumns, rsmd, totalColumns);
 					previousBurstId = null;
 				} else {
 					outputResultSetColumns(columnTypes, rs, hiddenColumns);
 				}
 			}
 
-			fos = endBurstOutput(fos);
+			fos = endBurstOutput(fos, hiddenColumns, rsmd, totalColumns);
 		} finally {
 			if (out != null) {
 				out.close();
@@ -624,11 +777,29 @@ public abstract class StandardOutput {
 	 * Finalizes burst output
 	 *
 	 * @param fos the file output stream used, that will be closed
+	 * @param hiddenColumns the list of columns to be hidden
+	 * @param rsmd the resultset metadata object
+	 * @param totalColumns the list of columns to be totalled
 	 * @return the file output stream used
 	 * @throws IOException
 	 */
-	private FileOutputStream endBurstOutput(FileOutputStream fos) throws IOException {
+	private FileOutputStream endBurstOutput(FileOutputStream fos,
+			List<String> hiddenColumns, ResultSetMetaData rsmd,
+			List<String> totalColumns) throws IOException, SQLException {
+
+		if (rowCount > 1) {
+			endRow();
+		}
+
 		endRows();
+
+		//output total row
+		if (columnTotals != null) {
+			int drilldownCount = 0;
+			outputTotals(hiddenColumns, rsmd, drilldownCount, totalColumns);
+		}
+
+		endOutput();
 
 		if (out != null) {
 			out.close();
@@ -685,7 +856,7 @@ public abstract class StandardOutput {
 
 		//output header columns for the result set columns
 		for (int i = 1; i <= resultSetColumnCount; i++) {
-			if (outputColumn(i, hiddenColumns, rsmd)) {
+			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
 				addHeaderCell(rsmd.getColumnLabel(i));
 			}
 		}
@@ -702,22 +873,25 @@ public abstract class StandardOutput {
 	 *
 	 * @param rsmd the resultset metadata
 	 * @return the column types corresponding to the given resultset metadata
+	 * [column index, column type]
 	 * @throws SQLException
 	 */
-	private List<ColumnType> getColumnTypes(ResultSetMetaData rsmd) throws SQLException {
-		List<ColumnType> columnTypes = new ArrayList<>();
-		for (int i = 0; i < rsmd.getColumnCount(); i++) {
-			int sqlType = rsmd.getColumnType(i + 1);
+	private Map<Integer, ColumnType> getColumnTypes(ResultSetMetaData rsmd) throws SQLException {
+		Map<Integer, ColumnType> columnTypes = new LinkedHashMap<>();
+
+		for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+			int sqlType = rsmd.getColumnType(i);
+
 			if (isNumeric(sqlType)) {
-				columnTypes.add(ColumnType.Numeric);
+				columnTypes.put(i, ColumnType.Numeric);
 			} else if (isDate(sqlType)) {
-				columnTypes.add(ColumnType.Date);
+				columnTypes.put(i, ColumnType.Date);
 			} else if (isClob(sqlType)) {
-				columnTypes.add(ColumnType.Clob);
+				columnTypes.put(i, ColumnType.Clob);
 			} else if (sqlType == Types.OTHER) {
-				columnTypes.add(ColumnType.Other);
+				columnTypes.put(i, ColumnType.Other);
 			} else {
-				columnTypes.add(ColumnType.String);
+				columnTypes.put(i, ColumnType.String);
 			}
 		}
 
@@ -735,7 +909,7 @@ public abstract class StandardOutput {
 	 * should be included in the output
 	 * @throws SQLException
 	 */
-	private boolean outputColumn(int columnIndex, List<String> hiddenColumns,
+	private boolean shouldOutputColumn(int columnIndex, List<String> hiddenColumns,
 			ResultSetMetaData rsmd) throws SQLException {
 
 		if (hiddenColumns == null || hiddenColumns.isEmpty()) {
@@ -756,6 +930,37 @@ public abstract class StandardOutput {
 	}
 
 	/**
+	 * Returns <code>true</code> if the resultset column with the given index
+	 * should be totalled
+	 *
+	 * @param columnIndex the column's index
+	 * @param totalColumns the list of columns to be totalled
+	 * @param rsmd the resultset metadata object
+	 * @return <code>true</code> if the resultset column with the given index
+	 * should be totalled
+	 * @throws SQLException
+	 */
+	private boolean shouldTotalColumn(int columnIndex, List<String> totalColumns,
+			ResultSetMetaData rsmd) throws SQLException {
+
+		if (totalColumns == null || totalColumns.isEmpty()) {
+			return false;
+		}
+
+		boolean totalColumn;
+
+		String columnName = rsmd.getColumnLabel(columnIndex);
+
+		if (totalColumns.contains(String.valueOf(columnIndex)) || totalColumns.contains(columnName)) {
+			totalColumn = true;
+		} else {
+			totalColumn = false;
+		}
+
+		return totalColumn;
+	}
+
+	/**
 	 * Outputs one row for the resultset data
 	 *
 	 * @param columnTypes the column types for the records
@@ -765,7 +970,7 @@ public abstract class StandardOutput {
 	 * @return data for the output row
 	 * @throws SQLException
 	 */
-	private List<Object> outputResultSetColumns(List<ColumnType> columnTypes,
+	private List<Object> outputResultSetColumns(Map<Integer, ColumnType> columnTypes,
 			ResultSet rs, List<String> hiddenColumns) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
@@ -774,11 +979,11 @@ public abstract class StandardOutput {
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 
-		int columnIndex = 0;
-		for (ColumnType columnType : columnTypes) {
-			columnIndex++;
+		for (Entry<Integer, ColumnType> entry : columnTypes.entrySet()) {
+			int columnIndex = entry.getKey();
+			ColumnType columnType = entry.getValue();
 
-			if (!outputColumn(columnIndex, hiddenColumns, rsmd)) {
+			if (!shouldOutputColumn(columnIndex, hiddenColumns, rsmd)) {
 				continue;
 			}
 
@@ -791,6 +996,26 @@ public abstract class StandardOutput {
 						value = null;
 					}
 					addNumeric(value);
+
+					if (columnTotals != null) {
+						Double currentValue;
+
+						if (value == null) {
+							currentValue = 0D;
+						} else {
+							currentValue = (Double) value;
+						}
+
+						Double newTotal;
+						Double currentTotal = columnTotals.get(columnIndex);
+						if (currentTotal == null) {
+							newTotal = currentValue;
+						} else {
+							newTotal = currentTotal + currentValue;
+						}
+
+						columnTotals.put(columnIndex, newTotal);
+					}
 					break;
 				case Date:
 					value = rs.getTimestamp(columnIndex);
@@ -803,7 +1028,7 @@ public abstract class StandardOutput {
 					}
 					addString(value);
 					break;
-				case Other:
+				case Other: //ms-access (ucanaccess driver) data type
 					value = rs.getObject(columnIndex);
 					if (value != null) {
 						value = value.toString();
@@ -1075,7 +1300,7 @@ public abstract class StandardOutput {
 						addCellString("...");
 					}
 
-					endRows();
+					endOutput();
 
 					result.setMessage("runReport.message.tooManyRows");
 					result.setTooManyRows(true);
@@ -1147,7 +1372,7 @@ public abstract class StandardOutput {
 						addCellString("...");
 					}
 
-					endRows();
+					endOutput();
 
 					result.setMessage("runReport.message.tooManyRows");
 					result.setTooManyRows(true);
@@ -1164,7 +1389,7 @@ public abstract class StandardOutput {
 			}
 		}
 
-		endRows();
+		endOutput();
 
 		result.setSuccess(true);
 		result.setRowCount(rowCount);

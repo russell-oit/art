@@ -97,10 +97,36 @@ public class HtmlPlainOutput extends StandardOutput {
 		//open new row
 		out.println("<tr>");
 	}
-
+	
+	@Override
+	public void endRow(){
+		out.println("</tr>");
+	}
+	
 	@Override
 	public void endRows() {
-		out.println("</tr></table></div>");
+		out.println("</tbody>");
+	}
+	
+	@Override
+	public void beginTotalRow(){
+		out.println("<tfoot><tr>");
+	}
+	
+	@Override
+	public void addCellTotal(Double value){
+		String formattedValue = formatNumbericValue(value);
+		out.println("<td style='text-align: right'><b>" + formattedValue + "</b></td>");
+	}
+	
+	@Override
+	public void endTotalRow(){
+		out.println("</tr><tfoot>");
+	}
+
+	@Override
+	public void endOutput() {
+		out.println("</table></div>");
 
 		if (fileOutput) {
 			out.println("</body></html>");

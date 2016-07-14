@@ -107,10 +107,30 @@ public class HtmlFancyOutput extends StandardOutput {
 		//open new row
 		out.println("<tr>");
 	}
-
+	
+	@Override
+	public void endRow(){
+		out.println("</tr>");
+	}
+	
 	@Override
 	public void endRows() {
-		out.println("</tr></tbody></table></div>");
+		out.println("</tbody>");
+	}
+	
+	@Override
+	public void beginTotalRow(){
+		out.println("<tfoot><tr>");
+	}
+	
+	@Override
+	public void endTotalRow(){
+		out.println("</tr><tfoot>");
+	}
+
+	@Override
+	public void endOutput() {
+		out.println("</table></div>");
 	}
 
 }

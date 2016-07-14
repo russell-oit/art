@@ -1309,20 +1309,11 @@ public class ReportJob implements org.quartz.Job {
 			standardOutput.setReportParamsList(reportParamsList); //used to show selected parameters and drilldowns
 			standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
 			standardOutput.setLocale(locale);
-			standardOutput.setReportName(report.getName());
 
 			//generate output
 			rs = reportRunner.getResultSet();
 
-			String hiddenColumnsSetting = report.getHiddenColumns();
-			String[] hiddenColumnsArray = StringUtils.split(hiddenColumnsSetting, ",");
-			List<String> hiddenColumnsList = null;
-			if (hiddenColumnsArray != null) {
-				hiddenColumnsArray = StringUtils.stripAll(hiddenColumnsArray, " ");
-				hiddenColumnsList = Arrays.asList(hiddenColumnsArray);
-			}
-
-			standardOutput.generateBurstOutput(rs, reportFormat, job, hiddenColumnsList);
+			standardOutput.generateBurstOutput(rs, reportFormat, job, report);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);

@@ -70,7 +70,6 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -406,15 +405,7 @@ public class ReportOutputGenerator {
 						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
 					}
 
-					String hiddenColumnsSetting = report.getHiddenColumns();
-					String[] hiddenColumnsArray = StringUtils.split(hiddenColumnsSetting, ",");
-					List<String> hiddenColumnsList = null;
-					if (hiddenColumnsArray != null) {
-						hiddenColumnsArray = StringUtils.stripAll(hiddenColumnsArray, " ");
-						hiddenColumnsList = Arrays.asList(hiddenColumnsArray);
-					}
-
-					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, hiddenColumnsList);
+					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);
 				}
 
 				if (standardOutputResult.isSuccess()) {

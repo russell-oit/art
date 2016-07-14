@@ -140,10 +140,19 @@ public class XmlOutput extends StandardOutput {
 		//open new row
 		out.println("<row>");
 	}
+	
+	@Override
+	public void endRow(){
+		out.println("</row>");
+	}
+	
+	@Override
+	public void beginTotalRow(){
+		out.println("<row>");
+	}
 
 	@Override
-	public void endRows() {
-		out.println("</row>");
+	public void endOutput() {
 		out.println("<totalrows>" + rowCount + "</totalrows>");
 		out.println("</table>");
 	}

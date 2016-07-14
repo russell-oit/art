@@ -173,7 +173,7 @@ public class TsvOutput extends StandardOutput {
 	}
 
 	@Override
-	public void endRows() {
+	public void endOutput() {
 //		addCellString("\n Total rows retrieved:");
 //		addCellString("" + (counter));
 

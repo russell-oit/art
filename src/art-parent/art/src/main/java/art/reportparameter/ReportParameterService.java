@@ -22,7 +22,6 @@ import art.report.ReportService;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -151,7 +150,7 @@ public class ReportParameterService {
 		logger.debug("Entering getDashboardReportParameters");
 
 		if (reportIds == null || reportIds.isEmpty()) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		String sql = SQL_SELECT_ALL

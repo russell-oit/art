@@ -289,6 +289,17 @@ Edit report page
 					default:
 						$("#hiddenColumnsDiv").hide();
 				}
+				
+				//show/hide total columns field
+				switch(reportTypeId){
+					case 0: //tabular
+					case 103: //tabular html
+					case 121: //job recipients
+						$("#totalColumnsDiv").show();
+						break;
+					default:
+						$("#totalColumnsDiv").hide();
+				}
 			}
 		</script>
 	</jsp:attribute>
@@ -550,6 +561,24 @@ Edit report page
 							</span>
 						</div>
 						<form:errors path="hiddenColumns" cssClass="error"/>
+					</div>
+				</div>
+				<div id="totalColumnsDiv" class="form-group">
+					<label class="col-md-4 control-label " for="totalColumns">
+						<spring:message code="reports.label.totalColumns"/>
+					</label>
+					<div class="col-md-8">
+						<div class="input-group">
+							<form:input path="totalColumns" maxlength="2000" class="form-control"/>
+							<spring:message code="reports.help.totalColumns" var="help"/>
+							<span class="input-group-btn" >
+								<button class="btn btn-default" type="button"
+										data-toggle="tooltip" title="${help}">
+									<i class="fa fa-info"></i>
+								</button>
+							</span>
+						</div>
+						<form:errors path="totalColumns" cssClass="error"/>
 					</div>
 				</div>
 

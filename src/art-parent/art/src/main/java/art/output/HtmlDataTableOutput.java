@@ -33,6 +33,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void init() {
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6-dist/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/css/dataTables.bootstrap.min.css'>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.10.2.min.js'></script>");
@@ -145,9 +146,29 @@ public class HtmlDataTableOutput extends StandardOutput {
 		//open new row
 		out.println("<tr>");
 	}
-
+	
+	@Override
+	public void endRow(){
+		out.println("</tr>");
+	}
+	
 	@Override
 	public void endRows() {
-		out.println("</tr></tbody></table></div>");
+		out.println("</tbody>");
+	}
+	
+	@Override
+	public void beginTotalRow(){
+		out.println("<tfoot><tr>");
+	}
+	
+	@Override
+	public void endTotalRow(){
+		out.println("</tr><tfoot>");
+	}
+	
+	@Override
+	public void endOutput() {
+		out.println("</table></div>");
 	}
 }

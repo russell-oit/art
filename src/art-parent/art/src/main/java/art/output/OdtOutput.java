@@ -144,9 +144,21 @@ public class OdtOutput extends StandardOutput {
 		row = table.appendRow();
 		cellNumber = 0;
 	}
+	
+	@Override
+	public void addCellTotal(Double value){
+		String formattedValue = formatNumbericValue(value);
+		
+		cell = row.getCellByIndex(cellNumber++);
+		Paragraph paragraph = cell.addParagraph(formattedValue);
+		Font font = paragraph.getFont();
+		font.setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
+		paragraph.setFont(font);
+		
+	}
 
 	@Override
-	public void endRows() {
+	public void endOutput() {
 		try {
 			document.save(fullOutputFileName);
 			document.close();

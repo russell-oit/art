@@ -257,18 +257,20 @@ public class DashboardController {
 		} else {
 			// context path as suffix + build url + switch off html header&footer 
 			int reportId = Integer.parseInt(link);
+			
 			link = request.getContextPath() + "/app/runReport.do?reportId=" + reportId
 					+ "&isFragment=true";
+			
 			//add report parameters
 			StringBuilder paramsSb = new StringBuilder(254);
-			Enumeration names = request.getParameterNames();
-			while (names.hasMoreElements()) {
-				String name = (String) names.nextElement();
-				if (name.startsWith("p-")) {
-					String[] paramValues = request.getParameterValues(name);
+			Enumeration<String> htmlParamNames = request.getParameterNames();
+			while (htmlParamNames.hasMoreElements()) {
+				String htmlParamName = htmlParamNames.nextElement();
+				if (htmlParamName.startsWith("p-")) {
+					String[] paramValues = request.getParameterValues(htmlParamName);
 					for (String value : paramValues) {
 						String encodedParamValue = URLEncoder.encode(value, "UTF-8");
-						paramsSb.append("&").append(name).append("=").append(encodedParamValue);
+						paramsSb.append("&").append(htmlParamName).append("=").append(encodedParamValue);
 					}
 				}
 			}

@@ -121,3 +121,10 @@ div.qeparams {
 	border-color: #000000;
 }
 
+table.qe tfoot td {
+	font-weight: bold;
+	background-image: URL('../images/bg-gray-dark.png');
+	background-repeat: repeat-x;
+	background-color: #FFFFFF;
+}
+

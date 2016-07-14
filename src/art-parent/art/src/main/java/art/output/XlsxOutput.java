@@ -48,6 +48,7 @@ public class XlsxOutput extends StandardOutput {
 	private CellStyle headerStyle;
 	private CellStyle bodyStyle;
 	private CellStyle dateStyle;
+	private CellStyle totalStyle;
 	private int currentRow;
 	private int cellNumber;
 	private String templateFileName;
@@ -70,6 +71,8 @@ public class XlsxOutput extends StandardOutput {
 		headerStyle = null;
 		bodyStyle = null;
 		dateStyle = null;
+		totalStyle = null;
+
 		if (styles != null) {
 			styles.clear();
 			styles = null;
@@ -107,19 +110,21 @@ public class XlsxOutput extends StandardOutput {
 
 			styles = new HashMap<>();
 
-			headerStyle = wb.createCellStyle();
 			Font headerFont = wb.createFont();
 			headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
 			headerFont.setColor(IndexedColors.BLUE.getIndex());
-			headerFont.setFontHeightInPoints((short) 12);
+			short headerFontSize = 12;
+			headerFont.setFontHeightInPoints(headerFontSize);
+			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
 			headerStyle.setBorderBottom(CellStyle.BORDER_THIN);
 			styles.put("header", headerStyle);
 
-			bodyStyle = wb.createCellStyle();
 			Font bodyFont = wb.createFont();
 			bodyFont.setColor(Font.COLOR_NORMAL);
-			bodyFont.setFontHeightInPoints((short) 10);
+			short bodyFontSize = 10;
+			bodyFont.setFontHeightInPoints(bodyFontSize);
+			bodyStyle = wb.createCellStyle();
 			bodyStyle.setFont(bodyFont);
 			styles.put("body", bodyStyle);
 
@@ -127,6 +132,14 @@ public class XlsxOutput extends StandardOutput {
 			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
 			dateStyle.setFont(bodyFont);
 			styles.put("date", dateStyle);
+
+			Font totalFont = wb.createFont();
+			totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+			totalFont.setColor(Font.COLOR_NORMAL);
+			totalFont.setFontHeightInPoints(bodyFontSize);
+			totalStyle = wb.createCellStyle();
+			totalStyle.setFont(totalFont);
+			styles.put("total", totalStyle);
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -211,7 +224,18 @@ public class XlsxOutput extends StandardOutput {
 	}
 
 	@Override
-	public void endRows() {
+	public void addCellTotal(Double value) {
+		cell = row.createCell(cellNumber++);
+
+		if (value != null) {
+			cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
+			cell.setCellValue(value);
+			cell.setCellStyle(totalStyle);
+		}
+	}
+
+	@Override
+	public void endOutput() {
 		//https://poi.apache.org/spreadsheet/quick-guide.html#Autofit
 		for (int i = 0; i < totalColumnCount; i++) {
 			sh.autoSizeColumn(i);

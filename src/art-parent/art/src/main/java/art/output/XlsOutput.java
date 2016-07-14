@@ -53,6 +53,7 @@ public class XlsOutput extends StandardOutput {
 	private HSSFCellStyle headerStyle;
 	private HSSFCellStyle bodyStyle;
 	private HSSFCellStyle dateStyle;
+	private HSSFCellStyle totalStyle;
 	private int currentRow;
 	private int cellNumber;
 	private final ZipType zipType;
@@ -80,6 +81,7 @@ public class XlsOutput extends StandardOutput {
 		headerStyle = null;
 		bodyStyle = null;
 		dateStyle = null;
+		totalStyle = null;
 		currentRow = 0;
 		cellNumber = 0;
 	}
@@ -88,7 +90,7 @@ public class XlsOutput extends StandardOutput {
 	public void init() {
 		try {
 			resetVariables();
-			
+
 			fout = new FileOutputStream(fullOutputFileName);
 
 			String filename = FilenameUtils.getBaseName(fullOutputFileName);
@@ -102,25 +104,33 @@ public class XlsOutput extends StandardOutput {
 			String sheetName = WorkbookUtil.createSafeSheetName(reportName);
 			wb = new HSSFWorkbook();
 			sheet = wb.createSheet(sheetName);
-			headerStyle = wb.createCellStyle();
-			bodyStyle = wb.createCellStyle();
 
 			HSSFFont headerFont = wb.createFont();
-			HSSFFont bodyFont = wb.createFont();
-
 			headerFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 			headerFont.setColor(HSSFColor.BLUE.index);
-			headerFont.setFontHeightInPoints((short) 12);
+			short headerFontSize = 12;
+			headerFont.setFontHeightInPoints(headerFontSize);
+			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
 			headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
 
+			HSSFFont bodyFont = wb.createFont();
 			bodyFont.setColor(HSSFFont.COLOR_NORMAL);
-			bodyFont.setFontHeightInPoints((short) 10);
+			short bodyFontSize = 10;
+			bodyFont.setFontHeightInPoints(bodyFontSize);
+			bodyStyle = wb.createCellStyle();
 			bodyStyle.setFont(bodyFont);
 
 			dateStyle = wb.createCellStyle();
 			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
 			dateStyle.setFont(bodyFont);
+
+			HSSFFont totalFont = wb.createFont();
+			totalFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+			totalFont.setColor(HSSFFont.COLOR_NORMAL);
+			totalFont.setFontHeightInPoints(bodyFontSize);
+			totalStyle = wb.createCellStyle();
+			totalStyle.setFont(totalFont);
 		} catch (IOException ex) {
 			logger.error("Error", ex);
 		}
@@ -205,7 +215,18 @@ public class XlsOutput extends StandardOutput {
 	}
 
 	@Override
-	public void endRows() {
+	public void addCellTotal(Double value) {
+		cell = row.createCell(cellNumber++);
+
+		if (value != null) {
+			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			cell.setCellValue(value);
+			cell.setCellStyle(totalStyle);
+		}
+	}
+
+	@Override
+	public void endOutput() {
 		for (int i = 0; i < totalColumnCount; i++) {
 			sheet.autoSizeColumn(i);
 		}

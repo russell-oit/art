@@ -37,13 +37,13 @@ table.sortable {
 }
 
 table.sortable th {
-	background-color: #d4d0c8;
+	background-color:  #dfdad9; /*#d4d0c8*/
 	text-align: center;
 	border-top: 1px solid white;
 	border-right: 1px solid black;
 	border-left: 1px solid white;
 	border-bottom: 1px solid black;
-	font-weight: normal;
+	font-weight: bold;
 }
 
 table.sortable a.sortheader {
@@ -64,6 +64,11 @@ table.sortable td {
 	vertical-align: text-top;
 	padding-left: 5px;
 	padding-right: 5px;
+}
+
+table.sortable tfoot td {
+	background-color:  #dfdad9;
+	font-weight: bold;
 }
 
 tr.hiliterows {

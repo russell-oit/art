@@ -125,6 +125,7 @@ public class ReportService {
 			report.setXmlaCatalog(rs.getString("XMLA_CATALOG"));
 			report.setDefaultReportFormat(rs.getString("DEFAULT_REPORT_FORMAT"));
 			report.setHiddenColumns(rs.getString("HIDDEN_COLUMNS"));
+			report.setTotalColumns(rs.getString("TOTAL_COLUMNS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -566,9 +567,10 @@ public class ReportService {
 					+ " QUERY_GROUP_ID, DATABASE_ID, CONTACT_PERSON, USES_RULES,"
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
-					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT, HIDDEN_COLUMNS,"
+					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
+					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 24) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 25) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -593,6 +595,7 @@ public class ReportService {
 				report.getXmlaCatalog(),
 				report.getDefaultReportFormat(),
 				report.getHiddenColumns(),
+				report.getTotalColumns(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -605,7 +608,7 @@ public class ReportService {
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
-					+ " HIDDEN_COLUMNS=?,"
+					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -631,6 +634,7 @@ public class ReportService {
 				report.getXmlaCatalog(),
 				report.getDefaultReportFormat(),
 				report.getHiddenColumns(),
+				report.getTotalColumns(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

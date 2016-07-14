@@ -170,8 +170,18 @@ public class Rss20Output extends StandardOutput {
 	}
 
 	@Override
-	public void endRows() {
+	public void endRow() {
 		out.println("</item>");
+	}
+	
+	@Override
+	public void beginTotalRow(){
+		columnIndex = 0;
+		out.println("<item>");
+	}
+
+	@Override
+	public void endOutput() {
 		out.println("</channel>");
 		out.println("</rss>");
 	}

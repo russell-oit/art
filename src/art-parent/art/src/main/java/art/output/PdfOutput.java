@@ -60,7 +60,7 @@ public class PdfOutput extends StandardOutput {
 	public void init() {
 		try {
 			resetVariables();
-			
+
 			Rectangle pageSize = getPageSize();
 
 			//set document margins
@@ -261,7 +261,20 @@ public class PdfOutput extends StandardOutput {
 	}
 
 	@Override
-	public void endRows() {
+	public void addCellTotal(Double value) {
+		String formattedValue = formatNumbericValue(value);
+
+		cell = new PdfPCell(new Paragraph(fsHeading.process(formattedValue)));
+
+		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+		cell.setPaddingLeft(5f);
+		cell.setPaddingRight(5f);
+		
+		table.addCell(cell);
+	}
+
+	@Override
+	public void endOutput() {
 		// flush and close files
 		try {
 			addNewline(document, fsBody);

@@ -67,6 +67,21 @@ public class Report implements Serializable {
 	private String defaultReportFormat;
 	private String secondaryCharts;
 	private String hiddenColumns;
+	private String totalColumns;
+
+	/**
+	 * @return the totalColumns
+	 */
+	public String getTotalColumns() {
+		return totalColumns;
+	}
+
+	/**
+	 * @param totalColumns the totalColumns to set
+	 */
+	public void setTotalColumns(String totalColumns) {
+		this.totalColumns = totalColumns;
+	}
 
 	/**
 	 * @return the hiddenColumns
@@ -583,7 +598,7 @@ public class Report implements Serializable {
 		List<Integer> reportIds = new ArrayList<>();
 
 		if (StringUtils.isBlank(reportSource)) {
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 		}
 
 		List<String> reportIdStrings = XmlParser.getXmlElementValues(reportSource, "OBJECTID");

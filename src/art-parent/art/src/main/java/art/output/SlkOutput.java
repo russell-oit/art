@@ -133,11 +133,12 @@ public class SlkOutput extends StandardOutput {
 			addHeaderCell(paramLabel);
 			addCellString(paramDisplayValues);
 		}
+		
+		newRow();
 	}
 
 	@Override
 	public void beginHeader() {
-		newRow();
 		newRow();
 	}
 
@@ -210,7 +211,7 @@ public class SlkOutput extends StandardOutput {
 	}
 
 	@Override
-	public void endRows() {
+	public void endOutput() {
 //		newRow();
 //		addCellString("Total rows retrieved:");
 //		addCellNumeric(Double.valueOf(counter));
