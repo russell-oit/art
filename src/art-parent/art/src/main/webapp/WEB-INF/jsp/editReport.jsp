@@ -362,7 +362,7 @@ Edit report page
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="col-md-4 control-label " for="reportGroup">
+					<label class="col-md-4 control-label " for="reportGroup.reportGroupId">
 						<spring:message code="page.text.reportGroup"/>
 					</label>
 					<div class="col-md-8">
@@ -373,7 +373,7 @@ Edit report page
 								<form:option value="${group.reportGroupId}">${group.name}</form:option>
 							</c:forEach>
 						</form:select>
-						<form:errors path="reportGroup" cssClass="error"/>
+						<form:errors path="reportGroup.reportGroupId" cssClass="error"/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -551,7 +551,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="hiddenColumns" maxlength="2000" class="form-control"/>
+							<form:input path="hiddenColumns" maxlength="500" class="form-control"/>
 							<spring:message code="reports.help.hiddenColumns" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -569,7 +569,7 @@ Edit report page
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="totalColumns" maxlength="2000" class="form-control"/>
+							<form:input path="totalColumns" maxlength="500" class="form-control"/>
 							<spring:message code="reports.help.totalColumns" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
