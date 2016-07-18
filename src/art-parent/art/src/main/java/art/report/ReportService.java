@@ -126,6 +126,9 @@ public class ReportService {
 			report.setDefaultReportFormat(rs.getString("DEFAULT_REPORT_FORMAT"));
 			report.setHiddenColumns(rs.getString("HIDDEN_COLUMNS"));
 			report.setTotalColumns(rs.getString("TOTAL_COLUMNS"));
+			report.setDateFormat(rs.getString("DATE_COLUMN_FORMAT"));
+			report.setNumberFormat(rs.getString("NUMBER_COLUMN_FORMAT"));
+			report.setColumnFormats(rs.getString("COLUMN_FORMATS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -568,9 +571,10 @@ public class ReportService {
 					+ " ACTIVE, HIDDEN, PARAMETERS_IN_OUTPUT, X_AXIS_LABEL, Y_AXIS_LABEL,"
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
-					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS,"
+					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
+					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 25) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 28) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -596,6 +600,9 @@ public class ReportService {
 				report.getDefaultReportFormat(),
 				report.getHiddenColumns(),
 				report.getTotalColumns(),
+				report.getDateFormat(),
+				report.getNumberFormat(),
+				report.getColumnFormats(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -608,7 +615,8 @@ public class ReportService {
 					+ " HIDDEN=?, PARAMETERS_IN_OUTPUT=?, X_AXIS_LABEL=?, Y_AXIS_LABEL=?,"
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
-					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?,"
+					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
+					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -635,6 +643,9 @@ public class ReportService {
 				report.getDefaultReportFormat(),
 				report.getHiddenColumns(),
 				report.getTotalColumns(),
+				report.getDateFormat(),
+				report.getNumberFormat(),
+				report.getColumnFormats(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

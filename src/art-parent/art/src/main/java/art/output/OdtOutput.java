@@ -138,6 +138,11 @@ public class OdtOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 		outputCellText(formattedValue);
 	}
+	
+	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		outputCellText(formattedValue);
+	}
 
 	@Override
 	public void newRow() {

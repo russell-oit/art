@@ -186,9 +186,18 @@ public class SlkOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
+		String formattedValue=Config.getDateDisplayString(value);
+		
 		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
 				.append(columnCount++).append(";K\"")
-				.append(Config.getDateDisplayString(value)).append("\"\n");
+				.append(formattedValue).append("\"\n");
+	}
+	
+	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+				.append(columnCount++).append(";K\"")
+				.append(formattedValue).append("\"\n");
 	}
 
 	@Override

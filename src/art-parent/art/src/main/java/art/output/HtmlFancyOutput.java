@@ -15,9 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with ART.  If not, see <http://www.gnu.org/licenses/>.
  */
-/*
- * Fancy html output mode
- */
 package art.output;
 
 import java.util.Date;
@@ -26,6 +23,7 @@ import java.util.Date;
  * Fancy html output mode
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class HtmlFancyOutput extends StandardOutput {
 
@@ -88,6 +86,19 @@ public class HtmlFancyOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 
 		String cssClass;
+		if (evenRow) {
+			cssClass = "qeevenLeft";
+		} else {
+			cssClass = "qeoddLeft";
+		}
+
+		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		String cssClass;
+		
 		if (evenRow) {
 			cssClass = "qeevenLeft";
 		} else {

@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
  * Generates DataTables html output
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class HtmlDataTableOutput extends StandardOutput {
 
@@ -132,6 +133,12 @@ public class HtmlDataTableOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 		long sortValue = getDateSortValue(value);
 
+		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
+				+ formattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
 				+ formattedValue + "</td>");
 	}

@@ -39,6 +39,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,6 +81,8 @@ public abstract class StandardOutput {
 	protected String fullOutputFileName;
 	private boolean showSelectedParameters;
 	private Map<Integer, Double> columnTotals;
+	private SimpleDateFormat globalDateFormatter;
+	private Map<Integer, Object> columnFormatters;
 
 	/**
 	 * @return the showSelectedParameters
@@ -305,6 +308,17 @@ public abstract class StandardOutput {
 	public abstract void addCellDate(Date value);
 
 	/**
+	 * Outputs a date value to the current row
+	 *
+	 * @param dateValue the date value
+	 * @param formattedValue the formatted string for the date value
+	 * @param sortValue the sort value to use
+	 */
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		addCellDate(dateValue);
+	}
+
+	/**
 	 * Closes the current row and opens a new one.
 	 */
 	public abstract void newRow();
@@ -490,6 +504,51 @@ public abstract class StandardOutput {
 			columnTotals = new HashMap<>();
 		}
 
+		if (StringUtils.isNotBlank(report.getDateFormat())) {
+			String globalDateFormat = report.getDateFormat();
+			globalDateFormatter = new SimpleDateFormat(globalDateFormat, locale);
+		}
+
+		String columnFormatsSetting = report.getColumnFormats();
+		if (columnFormatsSetting != null) {
+			columnFormatters = new HashMap<>();
+			String columnFormatsArray[] = columnFormatsSetting.split("\\r?\\n");
+			List<String> columnFormatIds = new ArrayList<>();
+			Map<String, String> columnFormatDetails = new HashMap<>();
+			for (String columnFormat : columnFormatsArray) {
+				String id = StringUtils.substringBefore(columnFormat, ":");
+				id = StringUtils.strip(id);
+				String format = StringUtils.substringAfter(columnFormat, ":");
+				format = StringUtils.strip(format);
+				columnFormatIds.add(id);
+				columnFormatDetails.put(id, format);
+			}
+
+			for (int i = 1; i <= resultSetColumnCount; i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				if (columnFormatIds.contains(String.valueOf(i)) || columnFormatIds.contains(columnName)) {
+					String format = columnFormatDetails.get(String.valueOf(i));
+					if (format == null) {
+						format = columnFormatDetails.get(columnName);
+					}
+					ColumnType columnType = columnTypes.get(i);
+					switch (columnType) {
+						case Date:
+							SimpleDateFormat dateFormatter = new SimpleDateFormat(format, locale);
+							columnFormatters.put(i, dateFormatter);
+							break;
+						case Numeric:
+							DecimalFormat numberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
+							numberFormatter.applyPattern(format);
+							columnFormatters.put(i, numberFormatter);
+							break;
+						default:
+							throw new IllegalStateException("Formatting not supported for column: " + i + " or " + columnName);
+					}
+				}
+			}
+		}
+
 		while (rs.next()) {
 			rowCount++;
 
@@ -518,6 +577,25 @@ public abstract class StandardOutput {
 			}
 		}
 
+		finalizeOutput(hiddenColumns, rsmd, drilldownCount, totalColumns);
+
+		result.setSuccess(true);
+		result.setRowCount(rowCount);
+		return result;
+	}
+
+	/**
+	 * Finalizes tabular output
+	 *
+	 * @param hiddenColumns the list of columns to be hidden
+	 * @param rsmd the resultset metadata object
+	 * @param drilldownCount the number of drilldowns in use
+	 * @param totalColumns the list of columns to be totalled
+	 * @throws SQLException
+	 */
+	private void finalizeOutput(List<String> hiddenColumns, ResultSetMetaData rsmd,
+			int drilldownCount, List<String> totalColumns) throws SQLException {
+
 		if (rowCount > 1) {
 			endRow();
 		}
@@ -531,10 +609,6 @@ public abstract class StandardOutput {
 
 		//end data output
 		endOutput();
-
-		result.setSuccess(true);
-		result.setRowCount(rowCount);
-		return result;
 	}
 
 	/**
@@ -787,19 +861,8 @@ public abstract class StandardOutput {
 			List<String> hiddenColumns, ResultSetMetaData rsmd,
 			List<String> totalColumns) throws IOException, SQLException {
 
-		if (rowCount > 1) {
-			endRow();
-		}
-
-		endRows();
-
-		//output total row
-		if (columnTotals != null) {
-			int drilldownCount = 0;
-			outputTotals(hiddenColumns, rsmd, drilldownCount, totalColumns);
-		}
-
-		endOutput();
+		int drilldownCount = 0;
+		finalizeOutput(hiddenColumns, rsmd, drilldownCount, totalColumns);
 
 		if (out != null) {
 			out.close();
@@ -1019,7 +1082,33 @@ public abstract class StandardOutput {
 					break;
 				case Date:
 					value = rs.getTimestamp(columnIndex);
-					addCellDate((Date) value);
+					Date dateValue = (Date) value;
+					if (dateValue == null) {
+						addCellDate(dateValue);
+					} else {
+						long sortValue = getDateSortValue(dateValue);
+						String columnFormattedValue = null;
+
+						if (columnFormatters != null) {
+							SimpleDateFormat columnFormatter = (SimpleDateFormat) columnFormatters.get(columnIndex);
+							if (columnFormatter != null) {
+								columnFormattedValue = columnFormatter.format(dateValue);
+							}
+						}
+
+						if (columnFormattedValue != null) {
+							addCellDate(dateValue, columnFormattedValue, sortValue);
+						} else {
+							String formattedValue;
+							if (globalDateFormatter != null) {
+								formattedValue = globalDateFormatter.format(dateValue);
+							} else {
+								formattedValue = Config.getDateDisplayString(dateValue);
+							}
+
+							addCellDate(dateValue, formattedValue, sortValue);
+						}
+					}
 					break;
 				case Clob:
 					Clob clob = rs.getClob(columnIndex);

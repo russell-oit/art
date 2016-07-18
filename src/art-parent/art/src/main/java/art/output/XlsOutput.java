@@ -203,11 +203,11 @@ public class XlsOutput extends StandardOutput {
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellValue(Config.getDateDisplayString(value));
+			cell.setCellValue(value);
 			cell.setCellStyle(dateStyle);
 		}
 	}
-
+	
 	@Override
 	public void newRow() {
 		row = sheet.createRow(currentRow++);

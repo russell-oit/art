@@ -59,14 +59,14 @@ public class OdsOutput extends StandardOutput {
 		cellNumber = 0;
 		headerFont = null;
 		bodyFont = null;
-		totalFont=null;
+		totalFont = null;
 	}
 
 	@Override
 	public void init() {
 		try {
 			resetVariables();
-			
+
 			document = SpreadsheetDocument.newSpreadsheetDocument();
 //			table = document.getSheetByIndex(0);
 //			table.setTableName(reportName);
@@ -77,13 +77,13 @@ public class OdsOutput extends StandardOutput {
 			document.removeSheet(0);
 
 			String fontFamilyName = "Arial";
-			
+
 			double headerFontSize = 12D;
 			headerFont = new Font(fontFamilyName, StyleTypeDefinitions.FontStyle.BOLD, headerFontSize, Color.BLUE);
-			
+
 			double bodyFontSize = 10D;
 			bodyFont = new Font(fontFamilyName, StyleTypeDefinitions.FontStyle.REGULAR, bodyFontSize, Color.BLACK);
-			
+
 			totalFont = new Font(fontFamilyName, StyleTypeDefinitions.FontStyle.BOLD, bodyFontSize, Color.BLACK);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -161,9 +161,9 @@ public class OdsOutput extends StandardOutput {
 		row = table.appendRow();
 		cellNumber = 0;
 	}
-	
+
 	@Override
-	public void addCellTotal(Double value){
+	public void addCellTotal(Double value) {
 		cell = row.getCellByIndex(cellNumber++);
 		cell.setDoubleValue(value);
 		cell.setFont(totalFont);

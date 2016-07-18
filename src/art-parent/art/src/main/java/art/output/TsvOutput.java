@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * Generates tsv output
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class TsvOutput extends StandardOutput {
 
@@ -145,7 +146,14 @@ public class TsvOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
-		exportFileStrBuf.append(Config.getDateDisplayString(value)).append("\t");
+		String formattedValue=Config.getDateDisplayString(value);
+		
+		exportFileStrBuf.append(formattedValue).append("\t");
+	}
+	
+	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		exportFileStrBuf.append(formattedValue).append("\t");
 	}
 
 	@Override

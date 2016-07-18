@@ -91,7 +91,7 @@ Edit report page
 				$('button.dropdown-toggle').dropdownHover({
 					delay: 100
 				});
-				
+
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({
 					onText: '${yesText}',
@@ -259,7 +259,7 @@ Edit report page
 					default:
 						$("#groupColumnDiv").hide();
 				}
-				
+
 				//show/hide default report format
 				switch (reportTypeId) {
 					case 110: //dashboard
@@ -278,9 +278,9 @@ Edit report page
 					default:
 						$("#defaultReportFormatDiv").show();
 				}
-				
+
 				//show/hide hidden columns field
-				switch(reportTypeId){
+				switch (reportTypeId) {
 					case 0: //tabular
 					case 103: //tabular html
 					case 121: //job recipients
@@ -289,9 +289,9 @@ Edit report page
 					default:
 						$("#hiddenColumnsDiv").hide();
 				}
-				
+
 				//show/hide total columns field
-				switch(reportTypeId){
+				switch (reportTypeId) {
 					case 0: //tabular
 					case 103: //tabular html
 					case 121: //job recipients
@@ -299,6 +299,17 @@ Edit report page
 						break;
 					default:
 						$("#totalColumnsDiv").hide();
+				}
+				
+				//show/hide column format fields
+				switch (reportTypeId) {
+					case 0: //tabular
+					case 103: //tabular html
+					case 121: //job recipients
+						$("#columnFormatFields").show();
+						break;
+					default:
+						$("#columnFormatFields").hide();
 				}
 			}
 		</script>
@@ -368,7 +379,7 @@ Edit report page
 					<div class="col-md-8">
 						<form:select path="reportGroup.reportGroupId" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
-							<option data-divider="true"></option>
+								<option data-divider="true"></option>
 							<c:forEach var="group" items="${reportGroups}">
 								<form:option value="${group.reportGroupId}">${group.name}</form:option>
 							</c:forEach>
@@ -474,7 +485,7 @@ Edit report page
 					<div class="col-md-8">
 						<form:select path="datasource.datasourceId" class="form-control selectpicker">
 							<form:option value="0">--</form:option>
-							<option data-divider="true"></option>
+								<option data-divider="true"></option>
 							<c:forEach var="datasource" items="${datasources}">
 								<c:set var="datasourceStatus">
 									<t:displayActiveStatus active="${datasource.active}" hideActive="true"/>
@@ -581,6 +592,36 @@ Edit report page
 						<form:errors path="totalColumns" cssClass="error"/>
 					</div>
 				</div>
+
+				<fieldset id="columnFormatFields">
+					<div class="form-group">
+						<label class="control-label col-md-4" for="dateFormat">
+							<spring:message code="reports.label.dateFormat"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="dateFormat" maxlength="100" class="form-control"/>
+							<form:errors path="dateFormat" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="numberFormat">
+							<spring:message code="reports.label.numberFormat"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="numberFormat" maxlength="50" class="form-control"/>
+							<form:errors path="numberFormat" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="columnFormats">
+							<spring:message code="reports.label.columnFormats"/>
+						</label>
+						<div class="col-md-8">
+							<form:textarea path="columnFormats" rows="5" cols="20" wrap="off" class="form-control"/>
+							<form:errors path="columnFormats" cssClass="error"/>
+						</div>
+					</div>
+				</fieldset>
 
 				<fieldset id="chartFields">
 					<fieldset id="chartAxisLabelFields">

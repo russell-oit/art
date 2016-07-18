@@ -244,6 +244,15 @@ public class PdfOutput extends StandardOutput {
 //		cell.setGrayFill((oddline ? evengray : oddgray));
 		table.addCell(cell);
 	}
+	
+	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
+		cell.setPaddingLeft(5f);
+		cell.setPaddingRight(5f);
+//		cell.setGrayFill((oddline ? evengray : oddgray));
+		table.addCell(cell);
+	}
 
 	@Override
 	public void newRow() {

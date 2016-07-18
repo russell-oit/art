@@ -209,10 +209,11 @@ public class XlsxOutput extends StandardOutput {
 
 	@Override
 	public void addCellDate(Date value) {
+		//https://poi.apache.org/spreadsheet/quick-guide.html#CreateDateCells
 		cell = row.createCell(cellNumber++);
 
 		if (value != null) {
-			cell.setCellValue(Config.getDateDisplayString(value));
+			cell.setCellValue(value);
 			cell.setCellStyle(dateStyle);
 		}
 	}

@@ -22,6 +22,7 @@ import java.util.Date;
  * Generates Grid html output mode
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class HtmlGridOutput extends StandardOutput {
 
@@ -93,6 +94,12 @@ public class HtmlGridOutput extends StandardOutput {
 	}
 
 	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		out.println("<td style='text-align: left' sorttable_customkey='"
+				+ sortValue + "'>" + formattedValue + "</td>");
+	}
+
+	@Override
 	public void newRow() {
 		if (rowCount > 1) {
 			//close previous row
@@ -106,24 +113,24 @@ public class HtmlGridOutput extends StandardOutput {
 				+ " onmouseout='javascript:highLight(this,\"rows\")'"
 				+ ">");
 	}
-	
+
 	@Override
-	public void endRow(){
+	public void endRow() {
 		out.println("</tr>");
 	}
-	
+
 	@Override
 	public void endRows() {
 		out.println("</tbody>");
 	}
-	
+
 	@Override
-	public void beginTotalRow(){
+	public void beginTotalRow() {
 		out.println("<tfoot><tr>");
 	}
-	
+
 	@Override
-	public void endTotalRow(){
+	public void endTotalRow() {
 		out.println("</tr><tfoot>");
 	}
 

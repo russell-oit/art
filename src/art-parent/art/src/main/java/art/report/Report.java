@@ -68,6 +68,51 @@ public class Report implements Serializable {
 	private String secondaryCharts;
 	private String hiddenColumns;
 	private String totalColumns;
+	private String dateFormat;
+	private String numberFormat;
+	private String columnFormats;
+
+	/**
+	 * @return the numberFormat
+	 */
+	public String getNumberFormat() {
+		return numberFormat;
+	}
+
+	/**
+	 * @param numberFormat the numberFormat to set
+	 */
+	public void setNumberFormat(String numberFormat) {
+		this.numberFormat = numberFormat;
+	}
+
+	/**
+	 * @return the dateFormat
+	 */
+	public String getDateFormat() {
+		return dateFormat;
+	}
+
+	/**
+	 * @param dateFormat the dateFormat to set
+	 */
+	public void setDateFormat(String dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	/**
+	 * @return the columnFormats
+	 */
+	public String getColumnFormats() {
+		return columnFormats;
+	}
+
+	/**
+	 * @param columnFormats the columnFormats to set
+	 */
+	public void setColumnFormats(String columnFormats) {
+		this.columnFormats = columnFormats;
+	}
 
 	/**
 	 * @return the totalColumns

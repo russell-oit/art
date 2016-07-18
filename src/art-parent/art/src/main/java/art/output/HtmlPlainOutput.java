@@ -24,6 +24,7 @@ import java.util.Date;
  * depend on other files (css etc) and it is a standalone page
  *
  * @author Enrico Liboni
+ * @author Timothy Anyona
  */
 public class HtmlPlainOutput extends StandardOutput {
 
@@ -84,6 +85,11 @@ public class HtmlPlainOutput extends StandardOutput {
 	@Override
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
+		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
 	}
 
