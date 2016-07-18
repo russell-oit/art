@@ -183,6 +183,12 @@ public class SlkOutput extends StandardOutput {
 					.append(nfPlain.format(value.doubleValue())).append("\n");
 		}
 	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
+		exportFileStrBuf.append("C;Y").append(localRowCount).append(";X")
+					.append(columnCount++).append(";K\"").append(formattedValue).append("\"\n");
+	}
 
 	@Override
 	public void addCellDate(Date value) {

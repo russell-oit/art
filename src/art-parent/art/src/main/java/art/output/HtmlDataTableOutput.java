@@ -115,15 +115,15 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = formatNumbericValue(value);
-		String sortValue;
+		String formattedValue = formatNumericValue(value);
+		String sortValue = getNumericSortValue(value);
 
-		if (value == null) {
-			sortValue = null;
-		} else {
-			sortValue = sortNumberFormatter.format(value);
-		}
+		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
+				+ formattedValue + "</td>");
+	}
 
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
 				+ formattedValue + "</td>");
 	}
@@ -136,7 +136,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
 				+ formattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
@@ -153,27 +153,27 @@ public class HtmlDataTableOutput extends StandardOutput {
 		//open new row
 		out.println("<tr>");
 	}
-	
+
 	@Override
-	public void endRow(){
+	public void endRow() {
 		out.println("</tr>");
 	}
-	
+
 	@Override
 	public void endRows() {
 		out.println("</tbody>");
 	}
-	
+
 	@Override
-	public void beginTotalRow(){
+	public void beginTotalRow() {
 		out.println("<tfoot><tr>");
 	}
-	
+
 	@Override
-	public void endTotalRow(){
+	public void endTotalRow() {
 		out.println("</tr><tfoot>");
 	}
-	
+
 	@Override
 	public void endOutput() {
 		out.println("</table></div>");

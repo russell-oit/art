@@ -206,7 +206,12 @@ public class DocxOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
+		outputCellText(formattedValue);
+	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		outputCellText(formattedValue);
 	}
 
@@ -229,7 +234,7 @@ public class DocxOutput extends StandardOutput {
 	
 	@Override
 	public void addCellTotal(Double value){
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
 		
 		cell = row.getCell(cellNumber++);
 		XWPFParagraph paragraph = cell.getParagraphs().get(0);

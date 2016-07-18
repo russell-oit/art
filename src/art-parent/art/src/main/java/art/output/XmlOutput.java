@@ -124,10 +124,15 @@ public class XmlOutput extends StandardOutput {
 
 		out.println("<col type=\"numeric\">" + formattedValue + "</col>");
 	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
+		out.println("<col type=\"numeric\">" + formattedValue + "</col>");
+	}
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue=Config.getDateDisplayString(value);
+		String formattedValue=Config.getIsoDateDisplayString(value);
 		
 		out.println("<col type=\"date\">" + formattedValue + "</col>");
 	}

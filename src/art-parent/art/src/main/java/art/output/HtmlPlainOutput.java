@@ -78,7 +78,12 @@ public class HtmlPlainOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
+		out.println("<td style='text-align: right'>" + formattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		out.println("<td style='text-align: right'>" + formattedValue + "</td>");
 	}
 
@@ -121,7 +126,7 @@ public class HtmlPlainOutput extends StandardOutput {
 	
 	@Override
 	public void addCellTotal(Double value){
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
 		out.println("<td style='text-align: right'><b>" + formattedValue + "</b></td>");
 	}
 	

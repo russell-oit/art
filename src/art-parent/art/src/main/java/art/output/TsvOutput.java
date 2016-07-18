@@ -143,6 +143,11 @@ public class TsvOutput extends StandardOutput {
 
 		exportFileStrBuf.append(formattedValue).append("\t");
 	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
+		exportFileStrBuf.append(formattedValue).append("\t");
+	}
 
 	@Override
 	public void addCellDate(Date value) {

@@ -129,7 +129,12 @@ public class OdtOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
+		outputCellText(formattedValue);
+	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		outputCellText(formattedValue);
 	}
 
@@ -152,7 +157,7 @@ public class OdtOutput extends StandardOutput {
 	
 	@Override
 	public void addCellTotal(Double value){
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
 		
 		cell = row.getCellByIndex(cellNumber++);
 		Paragraph paragraph = cell.addParagraph(formattedValue);

@@ -83,6 +83,7 @@ public abstract class StandardOutput {
 	private Map<Integer, Double> columnTotals;
 	private SimpleDateFormat globalDateFormatter;
 	private Map<Integer, Object> columnFormatters;
+	private DecimalFormat globalNumericFormatter;
 
 	/**
 	 * @return the showSelectedParameters
@@ -299,6 +300,17 @@ public abstract class StandardOutput {
 	 * @param value the value to output
 	 */
 	public abstract void addCellNumeric(Double value);
+	
+	/**
+	 * Outputs numeric value to the current row
+	 * 
+	 * @param numericValue the numeric value
+	 * @param formattedValue the formatted string for the numeric value
+	 * @param sortValue the sort value to use
+	 */
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue){
+		addCellNumeric(numericValue);
+	}
 
 	/**
 	 * Outputs a Date value to the current row
@@ -371,7 +383,7 @@ public abstract class StandardOutput {
 	 * @param value the value to format
 	 * @return the string representation to display
 	 */
-	public String formatNumbericValue(Double value) {
+	public String formatNumericValue(Double value) {
 		String formattedValue;
 
 		if (value == null) {
@@ -414,6 +426,24 @@ public abstract class StandardOutput {
 			sortValue = 0;
 		} else {
 			sortValue = value.getTime();
+		}
+
+		return sortValue;
+	}
+
+	/**
+	 * Returns a value to use to sort numeric columns
+	 *
+	 * @param value the actual number
+	 * @return the sort value for the number
+	 */
+	public String getNumericSortValue(Double value) {
+		String sortValue;
+
+		if (value == null) {
+			sortValue = null;
+		} else {
+			sortValue = sortNumberFormatter.format(value);
 		}
 
 		return sortValue;
@@ -507,6 +537,12 @@ public abstract class StandardOutput {
 		if (StringUtils.isNotBlank(report.getDateFormat())) {
 			String globalDateFormat = report.getDateFormat();
 			globalDateFormatter = new SimpleDateFormat(globalDateFormat, locale);
+		}
+
+		if (StringUtils.isNoneBlank(report.getNumberFormat())) {
+			String globalNumberFormat = report.getNumberFormat();
+			globalNumericFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
+			globalNumericFormatter.applyPattern(globalNumberFormat);
 		}
 
 		String columnFormatsSetting = report.getColumnFormats();
@@ -1058,7 +1094,34 @@ public abstract class StandardOutput {
 					if (rs.wasNull()) {
 						value = null;
 					}
-					addNumeric(value);
+					Double numericValue=(Double)value;
+
+					if (numericValue == null) {
+						addNumeric(value);
+					} else {
+						String sortValue = getNumericSortValue(numericValue);
+						String columnFormattedValue = null;
+
+						if (columnFormatters != null) {
+							DecimalFormat columnFormatter = (DecimalFormat) columnFormatters.get(columnIndex);
+							if (columnFormatter != null) {
+								columnFormattedValue = columnFormatter.format(numericValue);
+							}
+						}
+
+						if (columnFormattedValue != null) {
+							addCellNumeric(numericValue, columnFormattedValue, sortValue);
+						} else {
+							String formattedValue;
+							if (globalNumericFormatter != null) {
+								formattedValue = globalNumericFormatter.format(numericValue);
+							} else {
+								formattedValue = formatNumericValue(numericValue);
+							}
+
+							addCellNumeric(numericValue, formattedValue, sortValue);
+						}
+					}
 
 					if (columnTotals != null) {
 						Double currentValue;

@@ -22,7 +22,7 @@ import art.utils.ArtUtils;
 import java.io.*;
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -49,6 +49,7 @@ public class XlsxOutput extends StandardOutput {
 	private CellStyle bodyStyle;
 	private CellStyle dateStyle;
 	private CellStyle totalStyle;
+	private CellStyle numberStyle;
 	private int currentRow;
 	private int cellNumber;
 	private String templateFileName;
@@ -56,9 +57,11 @@ public class XlsxOutput extends StandardOutput {
 	private Row row;
 	private Cell cell;
 	private final String javaDateFormat;
-	
-	public XlsxOutput(String javaDateFormat){
-		this.javaDateFormat=javaDateFormat;
+	private final String numberFormat;
+
+	public XlsxOutput(String javaDateFormat, String numberFormat) {
+		this.javaDateFormat = javaDateFormat;
+		this.numberFormat = numberFormat;
 	}
 
 	/**
@@ -77,6 +80,7 @@ public class XlsxOutput extends StandardOutput {
 		bodyStyle = null;
 		dateStyle = null;
 		totalStyle = null;
+		numberStyle = null;
 
 		if (styles != null) {
 			styles.clear();
@@ -140,6 +144,14 @@ public class XlsxOutput extends StandardOutput {
 			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 			dateStyle.setFont(bodyFont);
 			styles.put("date", dateStyle);
+
+			if (StringUtils.isNotBlank(numberFormat)) {
+				numberStyle = wb.createCellStyle();
+				DataFormat poiFormat2 = wb.createDataFormat();
+				numberStyle.setDataFormat(poiFormat2.getFormat(numberFormat));
+				numberStyle.setFont(bodyFont);
+				styles.put("number", numberStyle);
+			}
 
 			Font totalFont = wb.createFont();
 			totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
@@ -211,7 +223,11 @@ public class XlsxOutput extends StandardOutput {
 		if (value != null) {
 			cell.setCellType(XSSFCell.CELL_TYPE_NUMERIC);
 			cell.setCellValue(value);
-			cell.setCellStyle(bodyStyle);
+			if (numberStyle == null) {
+				cell.setCellStyle(bodyStyle);
+			} else {
+				cell.setCellStyle(numberStyle);
+			}
 		}
 	}
 

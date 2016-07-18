@@ -19,7 +19,6 @@ package art.output;
 
 import art.enums.ZipType;
 import art.reportparameter.ReportParameter;
-import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,6 +27,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.DataFormat;
@@ -56,19 +56,23 @@ public class XlsOutput extends StandardOutput {
 	private HSSFCellStyle bodyStyle;
 	private HSSFCellStyle dateStyle;
 	private HSSFCellStyle totalStyle;
+	private HSSFCellStyle numberStyle;
 	private int currentRow;
 	private int cellNumber;
 	private final ZipType zipType;
 	private final String javaDateFormat;
+	private final String numberFormat;
 
-	public XlsOutput(String javaDateFormat) {
+	public XlsOutput(String javaDateFormat, String numberFormat) {
 		zipType = ZipType.None;
 		this.javaDateFormat = javaDateFormat;
+		this.numberFormat = numberFormat;
 	}
 
-	public XlsOutput(ZipType zipType, String javaDateFormat) {
+	public XlsOutput(ZipType zipType, String javaDateFormat, String numberFormat) {
 		this.zipType = zipType;
 		this.javaDateFormat = javaDateFormat;
+		this.numberFormat = numberFormat;
 	}
 
 	/**
@@ -87,6 +91,7 @@ public class XlsOutput extends StandardOutput {
 		bodyStyle = null;
 		dateStyle = null;
 		totalStyle = null;
+		numberStyle = null;
 		currentRow = 0;
 		cellNumber = 0;
 	}
@@ -132,6 +137,13 @@ public class XlsOutput extends StandardOutput {
 			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
 			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 			dateStyle.setFont(bodyFont);
+
+			if (StringUtils.isNotBlank(numberFormat)) {
+				numberStyle = wb.createCellStyle();
+				DataFormat poiFormat2 = wb.createDataFormat();
+				numberStyle.setDataFormat(poiFormat2.getFormat(numberFormat));
+				numberStyle.setFont(bodyFont);
+			}
 
 			HSSFFont totalFont = wb.createFont();
 			totalFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
@@ -202,7 +214,11 @@ public class XlsOutput extends StandardOutput {
 		if (value != null) {
 			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
 			cell.setCellValue(value);
-			cell.setCellStyle(bodyStyle);
+			if (numberStyle == null) {
+				cell.setCellStyle(bodyStyle);
+			} else {
+				cell.setCellStyle(numberStyle);
+			}
 		}
 	}
 

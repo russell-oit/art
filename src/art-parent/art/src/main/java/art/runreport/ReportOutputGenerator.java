@@ -567,6 +567,14 @@ public class ReportOutputGenerator {
 			xlsDateFormat = reportDateFormat;
 		}
 
+		String xlsNumberFormat;
+		String reportNumberFormat = report.getNumberFormat();
+		if (StringUtils.isBlank(reportNumberFormat)) {
+			xlsNumberFormat = null;
+		} else {
+			xlsNumberFormat = reportNumberFormat;
+		}
+
 		switch (reportFormat) {
 			case htmlPlain:
 				standardOutput = new HtmlPlainOutput(isJob);
@@ -590,13 +598,13 @@ public class ReportOutputGenerator {
 				standardOutput = new Rss20Output();
 				break;
 			case xls:
-				standardOutput = new XlsOutput(xlsDateFormat);
+				standardOutput = new XlsOutput(xlsDateFormat, xlsNumberFormat);
 				break;
 			case xlsZip:
-				standardOutput = new XlsOutput(ZipType.Zip, xlsDateFormat);
+				standardOutput = new XlsOutput(ZipType.Zip, xlsDateFormat, xlsNumberFormat);
 				break;
 			case xlsx:
-				standardOutput = new XlsxOutput(xlsDateFormat);
+				standardOutput = new XlsxOutput(xlsDateFormat, xlsNumberFormat);
 				break;
 			case slk:
 				standardOutput = new SlkOutput();

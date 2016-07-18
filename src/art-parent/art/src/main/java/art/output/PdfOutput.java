@@ -223,8 +223,19 @@ public class PdfOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
 
+		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
+
+		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+		cell.setPaddingLeft(5f);
+		cell.setPaddingRight(5f);
+//		cell.setGrayFill((oddline ? evengray : oddgray));
+		table.addCell(cell);
+	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		cell = new PdfPCell(new Paragraph(fsBody.process(formattedValue)));
 
 		cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -271,7 +282,7 @@ public class PdfOutput extends StandardOutput {
 
 	@Override
 	public void addCellTotal(Double value) {
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
 
 		cell = new PdfPCell(new Paragraph(fsHeading.process(formattedValue)));
 

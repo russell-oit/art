@@ -71,15 +71,15 @@ public class HtmlGridOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = formatNumbericValue(value);
-		String sortValue;
+		String formattedValue = formatNumericValue(value);
+		String sortValue = getNumericSortValue(value);
 
-		if (value == null) {
-			sortValue = null;
-		} else {
-			sortValue = sortNumberFormatter.format(value);
-		}
-
+		out.println("<td style='text-align: right' sorttable_customkey='"
+				+ sortValue + "' >" + formattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue){
 		out.println("<td style='text-align: right' sorttable_customkey='"
 				+ sortValue + "' >" + formattedValue + "</td>");
 	}

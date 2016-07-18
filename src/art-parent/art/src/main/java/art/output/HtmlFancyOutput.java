@@ -69,8 +69,20 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addCellNumeric(Double value) {
-		String formattedValue = formatNumbericValue(value);
+		String formattedValue = formatNumericValue(value);
 
+		String cssClass;
+		if (evenRow) {
+			cssClass = "qeeven";
+		} else {
+			cssClass = "qeodd";
+		}
+
+		out.println("<td style='text-align: right' class='" + cssClass + "'>" + formattedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		String cssClass;
 		if (evenRow) {
 			cssClass = "qeeven";
