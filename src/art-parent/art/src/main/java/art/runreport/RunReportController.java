@@ -174,7 +174,8 @@ public class RunReportController {
 
 			if (reportType.isStandardOutput()) {
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
-				StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, false);
+				boolean isJob = false;
+				StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);
 
 				String contentType = standardOutput.getContentType();
 
@@ -200,7 +201,7 @@ public class RunReportController {
 			if (reportFormat == ReportFormat.xml || reportFormat == ReportFormat.rss20) {
 				showInline = true;
 			}
-			
+
 			//output page header. if showInline, page header and footer already exist. 
 			if (!showInline) {
 				request.setAttribute("title", reportName);

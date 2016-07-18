@@ -1304,7 +1304,7 @@ public class ReportJob implements org.quartz.Job {
 		ResultSet rs = null;
 		try {
 			boolean isJob = true;
-			StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob);
+			StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);
 
 			standardOutput.setReportParamsList(reportParamsList); //used to show selected parameters and drilldowns
 			standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());

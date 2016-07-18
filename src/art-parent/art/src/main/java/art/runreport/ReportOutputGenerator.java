@@ -379,7 +379,7 @@ public class ReportOutputGenerator {
 					rowsRetrieved = getResultSetRowCount(rs);
 				}
 			} else if (reportType.isStandardOutput()) {
-				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob);
+				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
 
 				standardOutput.setWriter(writer);
 				standardOutput.setFullOutputFileName(fullOutputFilename);
@@ -546,15 +546,26 @@ public class ReportOutputGenerator {
 	 *
 	 * @param reportFormat the report format
 	 * @param isJob whether this is a job or an interactive report
+	 * @param report the report that is being run
 	 * @return the standard output instance
 	 * @throws IllegalArgumentException
 	 */
-	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob)
-			throws IllegalArgumentException {
+	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob,
+			Report report) throws IllegalArgumentException {
 
-		logger.debug("Entering getStandardOutputInstance: reportFormat={}, isJob={}", reportFormat, isJob);
+		logger.debug("Entering getStandardOutputInstance: reportFormat={}, isJob={}, report={}", reportFormat, isJob, report);
 
 		StandardOutput standardOutput;
+
+		String xlsDateFormat;
+		String reportDateFormat = report.getDateFormat();
+		if (StringUtils.isBlank(reportDateFormat)) {
+			String appDateFormat = Config.getSettings().getDateFormat();
+			String appTimeFormat = Config.getSettings().getTimeFormat();
+			xlsDateFormat = appDateFormat + " " + appTimeFormat;
+		} else {
+			xlsDateFormat = reportDateFormat;
+		}
 
 		switch (reportFormat) {
 			case htmlPlain:
@@ -579,13 +590,13 @@ public class ReportOutputGenerator {
 				standardOutput = new Rss20Output();
 				break;
 			case xls:
-				standardOutput = new XlsOutput();
+				standardOutput = new XlsOutput(xlsDateFormat);
 				break;
 			case xlsZip:
-				standardOutput = new XlsOutput(ZipType.Zip);
+				standardOutput = new XlsOutput(ZipType.Zip, xlsDateFormat);
 				break;
 			case xlsx:
-				standardOutput = new XlsxOutput();
+				standardOutput = new XlsxOutput(xlsDateFormat);
 				break;
 			case slk:
 				standardOutput = new SlkOutput();

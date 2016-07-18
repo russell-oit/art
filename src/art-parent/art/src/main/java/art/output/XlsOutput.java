@@ -30,6 +30,8 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,13 +59,16 @@ public class XlsOutput extends StandardOutput {
 	private int currentRow;
 	private int cellNumber;
 	private final ZipType zipType;
+	private final String javaDateFormat;
 
-	public XlsOutput() {
+	public XlsOutput(String javaDateFormat) {
 		zipType = ZipType.None;
+		this.javaDateFormat = javaDateFormat;
 	}
 
-	public XlsOutput(ZipType zipType) {
+	public XlsOutput(ZipType zipType, String javaDateFormat) {
 		this.zipType = zipType;
+		this.javaDateFormat = javaDateFormat;
 	}
 
 	/**
@@ -122,7 +127,10 @@ public class XlsOutput extends StandardOutput {
 			bodyStyle.setFont(bodyFont);
 
 			dateStyle = wb.createCellStyle();
-			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+//			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			DataFormat poiFormat = wb.createDataFormat();
+			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 			dateStyle.setFont(bodyFont);
 
 			HSSFFont totalFont = wb.createFont();
@@ -207,7 +215,7 @@ public class XlsOutput extends StandardOutput {
 			cell.setCellStyle(dateStyle);
 		}
 	}
-	
+
 	@Override
 	public void newRow() {
 		row = sheet.createRow(currentRow++);

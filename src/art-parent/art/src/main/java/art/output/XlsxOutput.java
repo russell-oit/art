@@ -18,13 +18,13 @@
 package art.output;
 
 import art.reportparameter.ReportParameter;
-import art.servlets.Config;
 import art.utils.ArtUtils;
 import java.io.*;
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -55,6 +55,11 @@ public class XlsxOutput extends StandardOutput {
 	private Map<String, CellStyle> styles;
 	private Row row;
 	private Cell cell;
+	private final String javaDateFormat;
+	
+	public XlsxOutput(String javaDateFormat){
+		this.javaDateFormat=javaDateFormat;
+	}
 
 	/**
 	 * Resets global variables in readiness for output generation. Especially
@@ -129,7 +134,10 @@ public class XlsxOutput extends StandardOutput {
 			styles.put("body", bodyStyle);
 
 			dateStyle = wb.createCellStyle();
-			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+//			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			DataFormat poiFormat = wb.createDataFormat();
+			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
 			dateStyle.setFont(bodyFont);
 			styles.put("date", dateStyle);
 
