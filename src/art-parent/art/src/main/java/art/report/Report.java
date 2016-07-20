@@ -71,6 +71,21 @@ public class Report implements Serializable {
 	private String dateFormat;
 	private String numberFormat;
 	private String columnFormats;
+	private String locale;
+
+	/**
+	 * @return the locale
+	 */
+	public String getLocale() {
+		return locale;
+	}
+
+	/**
+	 * @param locale the locale to set
+	 */
+	public void setLocale(String locale) {
+		this.locale = locale;
+	}
 
 	/**
 	 * @return the numberFormat

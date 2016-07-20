@@ -120,6 +120,7 @@ public class XlsOutput extends StandardOutput {
 			headerFont.setColor(HSSFColor.BLUE.index);
 			short headerFontSize = 12;
 			headerFont.setFontHeightInPoints(headerFontSize);
+			
 			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
 			headerStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN);
@@ -128,20 +129,24 @@ public class XlsOutput extends StandardOutput {
 			bodyFont.setColor(HSSFFont.COLOR_NORMAL);
 			short bodyFontSize = 10;
 			bodyFont.setFontHeightInPoints(bodyFontSize);
+			
 			bodyStyle = wb.createCellStyle();
 			bodyStyle.setFont(bodyFont);
 
 			dateStyle = wb.createCellStyle();
-//			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
-			DataFormat poiFormat = wb.createDataFormat();
-			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
-			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			if (StringUtils.isBlank(javaDateFormat)) {
+				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			} else {
+				DataFormat poiFormat = wb.createDataFormat();
+				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+				dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			}
 			dateStyle.setFont(bodyFont);
 
 			if (StringUtils.isNotBlank(numberFormat)) {
 				numberStyle = wb.createCellStyle();
-				DataFormat poiFormat2 = wb.createDataFormat();
-				numberStyle.setDataFormat(poiFormat2.getFormat(numberFormat));
+				DataFormat poiFormat = wb.createDataFormat();
+				numberStyle.setDataFormat(poiFormat.getFormat(numberFormat));
 				numberStyle.setFont(bodyFont);
 			}
 
@@ -149,7 +154,12 @@ public class XlsOutput extends StandardOutput {
 			totalFont.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
 			totalFont.setColor(HSSFFont.COLOR_NORMAL);
 			totalFont.setFontHeightInPoints(bodyFontSize);
+			
 			totalStyle = wb.createCellStyle();
+			if (StringUtils.isNotBlank(numberFormat)) {
+				DataFormat poiFormat = wb.createDataFormat();
+				totalStyle.setDataFormat(poiFormat.getFormat(numberFormat));
+			}
 			totalStyle.setFont(totalFont);
 		} catch (IOException ex) {
 			logger.error("Error", ex);
@@ -247,6 +257,11 @@ public class XlsOutput extends StandardOutput {
 			cell.setCellValue(value);
 			cell.setCellStyle(totalStyle);
 		}
+	}
+	
+	@Override
+	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+		addCellTotal(totalValue);
 	}
 
 	@Override

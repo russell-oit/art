@@ -243,6 +243,16 @@ public class DocxOutput extends StandardOutput {
 		run.setBold(true);
 		run.setText(formattedValue);
 	}
+	
+	@Override
+	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+		cell = row.getCell(cellNumber++);
+		XWPFParagraph paragraph = cell.getParagraphs().get(0);
+
+		XWPFRun run = paragraph.createRun();
+		run.setBold(true);
+		run.setText(formattedValue);
+	}
 
 	@Override
 	public void endOutput() {

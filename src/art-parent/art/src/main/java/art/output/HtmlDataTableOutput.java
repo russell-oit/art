@@ -48,7 +48,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 		String language = "";
 		if (locale != null) {
-			language = locale.toString(); //e.g. en, en-us, it, fr etc
+			language = locale.toString(); //e.g. en, en_US, it, fr etc
 		}
 
 		if (StringUtils.isNotBlank(language)) {

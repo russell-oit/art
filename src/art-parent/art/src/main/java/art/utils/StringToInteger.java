@@ -16,7 +16,7 @@
  */
 package art.utils;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
 
 /**

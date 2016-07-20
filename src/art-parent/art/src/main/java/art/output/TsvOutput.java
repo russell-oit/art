@@ -81,7 +81,7 @@ public class TsvOutput extends StandardOutput {
 		
 		exportFileStrBuf = new StringBuilder(8 * 1024);
 		
-		nfPlain = NumberFormat.getInstance();
+		nfPlain = NumberFormat.getInstance(locale);
 		nfPlain.setMinimumFractionDigits(0);
 		nfPlain.setGroupingUsed(false);
 		nfPlain.setMaximumFractionDigits(99);

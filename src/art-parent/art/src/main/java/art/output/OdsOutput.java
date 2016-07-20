@@ -168,6 +168,11 @@ public class OdsOutput extends StandardOutput {
 		cell.setDoubleValue(value);
 		cell.setFont(totalFont);
 	}
+	
+	@Override
+	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+		addCellTotal(totalValue);
+	}
 
 	@Override
 	public void endOutput() {

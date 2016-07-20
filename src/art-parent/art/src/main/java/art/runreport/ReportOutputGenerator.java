@@ -560,9 +560,7 @@ public class ReportOutputGenerator {
 		String xlsDateFormat;
 		String reportDateFormat = report.getDateFormat();
 		if (StringUtils.isBlank(reportDateFormat)) {
-			String appDateFormat = Config.getSettings().getDateFormat();
-			String appTimeFormat = Config.getSettings().getTimeFormat();
-			xlsDateFormat = appDateFormat + " " + appTimeFormat;
+			xlsDateFormat = null;
 		} else {
 			xlsDateFormat = reportDateFormat;
 		}

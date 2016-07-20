@@ -131,6 +131,11 @@ public class HtmlPlainOutput extends StandardOutput {
 	}
 	
 	@Override
+	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+		out.println("<td style='text-align: right'><b>" + formattedValue + "</b></td>");
+	}
+	
+	@Override
 	public void endTotalRow(){
 		out.println("</tr><tfoot>");
 	}

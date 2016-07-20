@@ -90,7 +90,7 @@ public class SlkOutput extends StandardOutput {
 		// This is the Ooo header:
 		exportFileStrBuf.append("ID;PSCALC3\n");
 
-		nfPlain = NumberFormat.getInstance();
+		nfPlain = NumberFormat.getInstance(locale);
 		nfPlain.setMinimumFractionDigits(0);
 		nfPlain.setGroupingUsed(false);
 		nfPlain.setMaximumFractionDigits(99);

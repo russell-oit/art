@@ -129,6 +129,7 @@ public class ReportService {
 			report.setDateFormat(rs.getString("DATE_COLUMN_FORMAT"));
 			report.setNumberFormat(rs.getString("NUMBER_COLUMN_FORMAT"));
 			report.setColumnFormats(rs.getString("COLUMN_FORMATS"));
+			report.setLocale(rs.getString("LOCALE"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -572,9 +573,9 @@ public class ReportService {
 					+ " GRAPH_OPTIONS, SECONDARY_CHARTS, TEMPLATE, DISPLAY_RESULTSET,"
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
 					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
-					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS,"
+					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 28) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 29) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -603,6 +604,7 @@ public class ReportService {
 				report.getDateFormat(),
 				report.getNumberFormat(),
 				report.getColumnFormats(),
+				report.getLocale(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -616,7 +618,7 @@ public class ReportService {
 					+ " GRAPH_OPTIONS=?, SECONDARY_CHARTS=?, TEMPLATE=?, DISPLAY_RESULTSET=?,"
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
 					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
-					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?,"
+					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -646,6 +648,7 @@ public class ReportService {
 				report.getDateFormat(),
 				report.getNumberFormat(),
 				report.getColumnFormats(),
+				report.getLocale(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

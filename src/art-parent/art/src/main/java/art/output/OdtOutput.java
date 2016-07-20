@@ -164,7 +164,15 @@ public class OdtOutput extends StandardOutput {
 		Font font = paragraph.getFont();
 		font.setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
 		paragraph.setFont(font);
-		
+	}
+	
+	@Override
+	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+		cell = row.getCellByIndex(cellNumber++);
+		Paragraph paragraph = cell.addParagraph(formattedValue);
+		Font font = paragraph.getFont();
+		font.setFontStyle(StyleTypeDefinitions.FontStyle.BOLD);
+		paragraph.setFont(font);
 	}
 
 	@Override

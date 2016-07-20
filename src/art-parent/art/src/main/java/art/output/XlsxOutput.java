@@ -23,6 +23,7 @@ import java.io.*;
 import java.util.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFDataFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.DateFormatConverter;
 import org.apache.poi.ss.util.WorkbookUtil;
@@ -124,6 +125,7 @@ public class XlsxOutput extends StandardOutput {
 			headerFont.setColor(IndexedColors.BLUE.getIndex());
 			short headerFontSize = 12;
 			headerFont.setFontHeightInPoints(headerFontSize);
+			
 			headerStyle = wb.createCellStyle();
 			headerStyle.setFont(headerFont);
 			headerStyle.setBorderBottom(CellStyle.BORDER_THIN);
@@ -133,22 +135,26 @@ public class XlsxOutput extends StandardOutput {
 			bodyFont.setColor(Font.COLOR_NORMAL);
 			short bodyFontSize = 10;
 			bodyFont.setFontHeightInPoints(bodyFontSize);
+			
 			bodyStyle = wb.createCellStyle();
 			bodyStyle.setFont(bodyFont);
 			styles.put("body", bodyStyle);
 
 			dateStyle = wb.createCellStyle();
-//			dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
-			DataFormat poiFormat = wb.createDataFormat();
-			String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
-			dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			if (StringUtils.isBlank(javaDateFormat)) {
+				dateStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy h:mm"));
+			} else {
+				DataFormat poiFormat = wb.createDataFormat();
+				String excelDateFormat = DateFormatConverter.convert(locale, javaDateFormat);
+				dateStyle.setDataFormat(poiFormat.getFormat(excelDateFormat));
+			}
 			dateStyle.setFont(bodyFont);
 			styles.put("date", dateStyle);
 
 			if (StringUtils.isNotBlank(numberFormat)) {
 				numberStyle = wb.createCellStyle();
-				DataFormat poiFormat2 = wb.createDataFormat();
-				numberStyle.setDataFormat(poiFormat2.getFormat(numberFormat));
+				DataFormat poiFormat = wb.createDataFormat();
+				numberStyle.setDataFormat(poiFormat.getFormat(numberFormat));
 				numberStyle.setFont(bodyFont);
 				styles.put("number", numberStyle);
 			}
@@ -157,7 +163,12 @@ public class XlsxOutput extends StandardOutput {
 			totalFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
 			totalFont.setColor(Font.COLOR_NORMAL);
 			totalFont.setFontHeightInPoints(bodyFontSize);
+			
 			totalStyle = wb.createCellStyle();
+			if (StringUtils.isNotBlank(numberFormat)) {
+				DataFormat poiFormat = wb.createDataFormat();
+				totalStyle.setDataFormat(poiFormat.getFormat(numberFormat));
+			}
 			totalStyle.setFont(totalFont);
 			styles.put("total", totalStyle);
 		} catch (IOException ex) {
@@ -257,6 +268,11 @@ public class XlsxOutput extends StandardOutput {
 			cell.setCellValue(value);
 			cell.setCellStyle(totalStyle);
 		}
+	}
+	
+	@Override
+	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+		addCellTotal(totalValue);
 	}
 
 	@Override

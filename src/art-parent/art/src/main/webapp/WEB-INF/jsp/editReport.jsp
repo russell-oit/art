@@ -279,38 +279,16 @@ Edit report page
 						$("#defaultReportFormatDiv").show();
 				}
 
-				//show/hide hidden columns field
+				//show/hide tabular fields
 				switch (reportTypeId) {
 					case 0: //tabular
 					case 103: //tabular html
-					case 121: //job recipients
-						$("#hiddenColumnsDiv").show();
+						$("#tabularFields").show();
 						break;
 					default:
-						$("#hiddenColumnsDiv").hide();
+						$("#tabularFields").hide();
 				}
 
-				//show/hide total columns field
-				switch (reportTypeId) {
-					case 0: //tabular
-					case 103: //tabular html
-					case 121: //job recipients
-						$("#totalColumnsDiv").show();
-						break;
-					default:
-						$("#totalColumnsDiv").hide();
-				}
-				
-				//show/hide column format fields
-				switch (reportTypeId) {
-					case 0: //tabular
-					case 103: //tabular html
-					case 121: //job recipients
-						$("#columnFormatFields").show();
-						break;
-					default:
-						$("#columnFormatFields").hide();
-				}
 			}
 		</script>
 	</jsp:attribute>
@@ -556,44 +534,44 @@ Edit report page
 						<form:errors path="defaultReportFormat" cssClass="error"/>
 					</div>
 				</div>
-				<div id="hiddenColumnsDiv" class="form-group">
-					<label class="col-md-4 control-label " for="hiddenColumns">
-						<spring:message code="reports.label.hiddenColumns"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="hiddenColumns" maxlength="500" class="form-control"/>
-							<spring:message code="reports.help.hiddenColumns" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="hiddenColumns" cssClass="error"/>
-					</div>
-				</div>
-				<div id="totalColumnsDiv" class="form-group">
-					<label class="col-md-4 control-label " for="totalColumns">
-						<spring:message code="reports.label.totalColumns"/>
-					</label>
-					<div class="col-md-8">
-						<div class="input-group">
-							<form:input path="totalColumns" maxlength="500" class="form-control"/>
-							<spring:message code="reports.help.totalColumns" var="help"/>
-							<span class="input-group-btn" >
-								<button class="btn btn-default" type="button"
-										data-toggle="tooltip" title="${help}">
-									<i class="fa fa-info"></i>
-								</button>
-							</span>
-						</div>
-						<form:errors path="totalColumns" cssClass="error"/>
-					</div>
-				</div>
 
-				<fieldset id="columnFormatFields">
+				<fieldset id="tabularFields">
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="hiddenColumns">
+							<spring:message code="reports.label.hiddenColumns"/>
+						</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<form:input path="hiddenColumns" maxlength="500" class="form-control"/>
+								<spring:message code="reports.help.hiddenColumns" var="help"/>
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<form:errors path="hiddenColumns" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-md-4 control-label " for="totalColumns">
+							<spring:message code="reports.label.totalColumns"/>
+						</label>
+						<div class="col-md-8">
+							<div class="input-group">
+								<form:input path="totalColumns" maxlength="500" class="form-control"/>
+								<spring:message code="reports.help.totalColumns" var="help"/>
+								<span class="input-group-btn" >
+									<button class="btn btn-default" type="button"
+											data-toggle="tooltip" title="${help}">
+										<i class="fa fa-info"></i>
+									</button>
+								</span>
+							</div>
+							<form:errors path="totalColumns" cssClass="error"/>
+						</div>
+					</div>
 					<div class="form-group">
 						<label class="control-label col-md-4" for="dateFormat">
 							<spring:message code="reports.label.dateFormat"/>
@@ -619,6 +597,15 @@ Edit report page
 						<div class="col-md-8">
 							<form:textarea path="columnFormats" rows="5" cols="20" wrap="off" class="form-control"/>
 							<form:errors path="columnFormats" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="locale">
+							<spring:message code="reports.label.locale"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="locale" maxlength="50" class="form-control"/>
+							<form:errors path="locale" cssClass="error"/>
 						</div>
 					</div>
 				</fieldset>

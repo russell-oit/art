@@ -53,6 +53,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -300,15 +301,15 @@ public abstract class StandardOutput {
 	 * @param value the value to output
 	 */
 	public abstract void addCellNumeric(Double value);
-	
+
 	/**
 	 * Outputs numeric value to the current row
-	 * 
+	 *
 	 * @param numericValue the numeric value
 	 * @param formattedValue the formatted string for the numeric value
 	 * @param sortValue the sort value to use
 	 */
-	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue){
+	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		addCellNumeric(numericValue);
 	}
 
@@ -363,6 +364,17 @@ public abstract class StandardOutput {
 	 */
 	public void addCellTotal(Double value) {
 		addCellNumeric(value);
+	}
+
+	/**
+	 * Outputs a total value
+	 *
+	 * @param totalValue the total value
+	 * @param formattedValue the formatted string value
+	 * @param sortValue the sort value
+	 */
+	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
+		addCellNumeric(totalValue, formattedValue, sortValue);
 	}
 
 	/**
@@ -534,56 +546,7 @@ public abstract class StandardOutput {
 			columnTotals = new HashMap<>();
 		}
 
-		if (StringUtils.isNotBlank(report.getDateFormat())) {
-			String globalDateFormat = report.getDateFormat();
-			globalDateFormatter = new SimpleDateFormat(globalDateFormat, locale);
-		}
-
-		if (StringUtils.isNoneBlank(report.getNumberFormat())) {
-			String globalNumberFormat = report.getNumberFormat();
-			globalNumericFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-			globalNumericFormatter.applyPattern(globalNumberFormat);
-		}
-
-		String columnFormatsSetting = report.getColumnFormats();
-		if (columnFormatsSetting != null) {
-			columnFormatters = new HashMap<>();
-			String columnFormatsArray[] = columnFormatsSetting.split("\\r?\\n");
-			List<String> columnFormatIds = new ArrayList<>();
-			Map<String, String> columnFormatDetails = new HashMap<>();
-			for (String columnFormat : columnFormatsArray) {
-				String id = StringUtils.substringBefore(columnFormat, ":");
-				id = StringUtils.strip(id);
-				String format = StringUtils.substringAfter(columnFormat, ":");
-				format = StringUtils.strip(format);
-				columnFormatIds.add(id);
-				columnFormatDetails.put(id, format);
-			}
-
-			for (int i = 1; i <= resultSetColumnCount; i++) {
-				String columnName = rsmd.getColumnLabel(i);
-				if (columnFormatIds.contains(String.valueOf(i)) || columnFormatIds.contains(columnName)) {
-					String format = columnFormatDetails.get(String.valueOf(i));
-					if (format == null) {
-						format = columnFormatDetails.get(columnName);
-					}
-					ColumnType columnType = columnTypes.get(i);
-					switch (columnType) {
-						case Date:
-							SimpleDateFormat dateFormatter = new SimpleDateFormat(format, locale);
-							columnFormatters.put(i, dateFormatter);
-							break;
-						case Numeric:
-							DecimalFormat numberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
-							numberFormatter.applyPattern(format);
-							columnFormatters.put(i, numberFormatter);
-							break;
-						default:
-							throw new IllegalStateException("Formatting not supported for column: " + i + " or " + columnName);
-					}
-				}
-			}
-		}
+		initializeColumnFormatters(report, rsmd, columnTypes);
 
 		while (rs.next()) {
 			rowCount++;
@@ -618,6 +581,81 @@ public abstract class StandardOutput {
 		result.setSuccess(true);
 		result.setRowCount(rowCount);
 		return result;
+	}
+
+	/**
+	 * Initialize date and number formatters to be used for formatting column
+	 * values
+	 *
+	 * @param report the report being run
+	 * @param rsmd the resultset metadata object
+	 * @param columnTypes the column types of the resultset
+	 * @throws IllegalStateException
+	 * @throws SQLException
+	 */
+	private void initializeColumnFormatters(Report report, ResultSetMetaData rsmd,
+			Map<Integer, ColumnType> columnTypes) throws IllegalStateException, SQLException {
+
+		Locale columnFormatLocale;
+		String reportLocale = report.getLocale();
+		if (StringUtils.isBlank(reportLocale)) {
+			columnFormatLocale = locale;
+		} else if (StringUtils.contains(reportLocale, "-")) {
+			columnFormatLocale = Locale.forLanguageTag(reportLocale);
+		} else {
+			columnFormatLocale = LocaleUtils.toLocale(reportLocale);
+		}
+
+		if (StringUtils.isNotBlank(report.getDateFormat())) {
+			String globalDateFormat = report.getDateFormat();
+			globalDateFormatter = new SimpleDateFormat(globalDateFormat, columnFormatLocale);
+		}
+
+		if (StringUtils.isNoneBlank(report.getNumberFormat())) {
+			String globalNumberFormat = report.getNumberFormat();
+			globalNumericFormatter = (DecimalFormat) NumberFormat.getInstance(columnFormatLocale);
+			globalNumericFormatter.applyPattern(globalNumberFormat);
+		}
+
+		String columnFormatsSetting = report.getColumnFormats();
+		if (columnFormatsSetting != null) {
+			columnFormatters = new HashMap<>();
+			String columnFormatsArray[] = columnFormatsSetting.split("\\r?\\n");
+			List<String> columnFormatIds = new ArrayList<>();
+			Map<String, String> columnFormatDetails = new HashMap<>();
+			for (String columnFormat : columnFormatsArray) {
+				String id = StringUtils.substringBefore(columnFormat, ":");
+				id = StringUtils.strip(id);
+				String format = StringUtils.substringAfter(columnFormat, ":");
+				format = StringUtils.strip(format);
+				columnFormatIds.add(id);
+				columnFormatDetails.put(id, format);
+			}
+
+			for (int i = 1; i <= resultSetColumnCount; i++) {
+				String columnName = rsmd.getColumnLabel(i);
+				if (columnFormatIds.contains(String.valueOf(i)) || columnFormatIds.contains(columnName)) {
+					String format = columnFormatDetails.get(String.valueOf(i));
+					if (format == null) {
+						format = columnFormatDetails.get(columnName);
+					}
+					ColumnType columnType = columnTypes.get(i);
+					switch (columnType) {
+						case Date:
+							SimpleDateFormat dateFormatter = new SimpleDateFormat(format, columnFormatLocale);
+							columnFormatters.put(i, dateFormatter);
+							break;
+						case Numeric:
+							DecimalFormat numberFormatter = (DecimalFormat) NumberFormat.getInstance(columnFormatLocale);
+							numberFormatter.applyPattern(format);
+							columnFormatters.put(i, numberFormatter);
+							break;
+						default:
+							throw new IllegalStateException("Formatting not supported for column: " + i + " or " + columnName);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -668,7 +706,28 @@ public abstract class StandardOutput {
 					addCellString("");
 				} else {
 					if (shouldTotalColumn(i, totalColumns, rsmd)) {
-						addCellTotal(columnTotal);
+						String sortValue = getNumericSortValue(columnTotal);
+						String columnFormattedValue = null;
+
+						if (columnFormatters != null) {
+							DecimalFormat columnFormatter = (DecimalFormat) columnFormatters.get(i);
+							if (columnFormatter != null) {
+								columnFormattedValue = columnFormatter.format(columnTotal);
+							}
+						}
+
+						if (columnFormattedValue != null) {
+							addCellTotal(columnTotal, columnFormattedValue, sortValue);
+						} else {
+							String formattedValue;
+							if (globalNumericFormatter != null) {
+								formattedValue = globalNumericFormatter.format(columnTotal);
+							} else {
+								formattedValue = formatNumericValue(columnTotal);
+							}
+
+							addCellTotal(columnTotal, formattedValue, sortValue);
+						}
 					} else {
 						addCellString("");
 					}
@@ -765,6 +824,8 @@ public abstract class StandardOutput {
 		Map<Integer, ColumnType> columnTypes = getColumnTypes(rsmd);
 
 		List<String> totalColumns = getTotalColumnsList(report);
+
+		initializeColumnFormatters(report, rsmd, columnTypes);
 
 		String previousBurstId = null;
 		FileOutputStream fos = null;
@@ -1094,7 +1155,7 @@ public abstract class StandardOutput {
 					if (rs.wasNull()) {
 						value = null;
 					}
-					Double numericValue=(Double)value;
+					Double numericValue = (Double) value;
 
 					if (numericValue == null) {
 						addNumeric(value);
