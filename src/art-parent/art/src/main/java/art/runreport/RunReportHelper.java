@@ -455,7 +455,7 @@ public class RunReportHelper {
 				continue;
 			}
 
-			String paramIdentifier = "#" + placeholderPrefix + paramName + "#";
+			String paramIdentifier = placeholderPrefix + "#" + paramName + "#";
 			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
 
 			List<String> paramValues = new ArrayList<>();

@@ -38,6 +38,7 @@
     <li>If you were using the demo HSQLDB database, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="" href="https://sourceforge.net/p/art/wiki/Tips/">Tips</a> documentation to see how you can upgrade an HSQLDB database.</li> 
     <li>If you had put any <strong>JDBC drivers</strong> in the <strong>art\WEB-INF\lib</strong> directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
     <li>Restart Tomcat</li> 
+    <li>Clear your browser's cache e.g. for Firefox, use the History | Clear Recent History menu</li> 
    </ul> 
    <p>The upgrade is complete. All users, reports, scheduled jobs etc should continue to work as before.</p> 
    <h2 id="notes">Notes</h2> 
@@ -54,7 +55,7 @@
     <tbody> 
      <tr> 
       <td><strong>URL changes</strong></td> 
-      <td>URLs that were being used in bookmarks or other links will need updating. Review the new application to see the appropriate new URL to use.</td> 
+      <td>URLs that were being used in bookmarks or other links will need updating. Review the new application to see the appropriate URL to use or look at the admin manual to see new names for URL parameters.</td> 
      </tr> 
      <tr> 
       <td><strong>ART Database configuration</strong></td> 
@@ -91,6 +92,10 @@
      <tr> 
       <td><strong>Directory location changes</strong></td> 
       <td>The templates directory has been moved to <strong>ART_HOME\WEB-INF\work\templates</strong>. The export directory has been moved to <strong>ART_HOME\WEB-INF\work\export</strong>.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>XMLA Repors</strong></td> 
+      <td>For Mondrian XMLA and Microsoft XMLA reports, the url, username and password fields have been removed from the report definition page and instead a datasource needs to be created from the Datasource Configuration page and then used by selecting the Datasource field in the report definition.</td> 
      </tr> 
     </tbody> 
    </table>

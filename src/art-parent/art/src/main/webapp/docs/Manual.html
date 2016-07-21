@@ -46,6 +46,7 @@
        <li><a href="#windows-domain-authentication">Windows Domain Authentication</a></li> 
        <li><a href="#ldap-authentication">LDAP Authentication</a></li> 
        <li><a href="#database-authentication">Database Authentication</a></li> 
+       <li><a href="#cas-authentication">CAS Authentication</a></li> 
        <li><a href="#custom-authentication-sources">Custom Authentication Sources</a></li> 
       </ol></li> 
      <li><a href="#user-groups">User Groups</a></li> 
@@ -56,7 +57,12 @@
        <li><a href="#creating-a-new-report">Creating a new report</a></li> 
        <li><a href="#report-types">Report Types</a></li> 
        <li><a href="#parameters">Parameters</a></li> 
-       <li><a href="#running-a-report-via-url">Running a report via URL</a></li> 
+       <li><a href="#running-a-report-via-url">Running a report via URL</a> 
+        <ol> 
+         <li><a href="#report-options">Report Options</a></li> 
+         <li><a href="#chart-options">Chart Options</a></li> 
+         <li><a href="#examples">Examples</a></li> 
+        </ol></li> 
        <li><a href="#report-formats">Report Formats</a></li> 
       </ol></li> 
      <li><a href="#multiple-statements">Multiple Statements</a></li> 
@@ -86,9 +92,27 @@
      <li><a href="#jxls-spreadsheets">jXLS Spreadsheets</a></li> 
      <li><a href="#pivot-tables-olap">Pivot Tables (OLAP)</a> 
       <ol> 
-       <li><a href="#mondrian">Mondrian</a></li> 
-       <li><a href="#mondrian-xmla">Mondrian XMLA</a></li> 
-       <li><a href="#sql-server-xmla">SQL Server XMLA</a></li> 
+       <li><a href="#mondrian">Mondrian</a> 
+        <ol> 
+         <li><a href="#create-the-schema-xml-file">Create the schema xml file</a></li> 
+         <li><a href="#create-a-datasource">Create a datasource</a></li> 
+         <li><a href="#create-the-report">Create the report</a></li> 
+        </ol></li> 
+       <li><a href="#mondrian-xmla">Mondrian XMLA</a> 
+        <ol> 
+         <li><a href="#create-the-schema-xml-file_1">Create the schema xml file</a></li> 
+         <li><a href="#create-the-datasourcesxml-file">Create the datasources.xml file</a></li> 
+         <li><a href="#create-a-datasource_1">Create a datasource</a></li> 
+         <li><a href="#create-the-report_1">Create the report</a></li> 
+         <li><a href="#accessing-the-mondrian-xmla-instance-from-ms-excel">Accessing the Mondrian XMLA instance from MS Excel</a></li> 
+        </ol></li> 
+       <li><a href="#sql-server-xmla">SQL Server XMLA</a> 
+        <ol> 
+         <li><a href="#configure-ssas-for-http-access">Configure SSAS for HTTP access</a></li> 
+         <li><a href="#provide-access-to-the-cube">Provide access to the cube</a></li> 
+         <li><a href="#create-a-datasource_2">Create a datasource</a></li> 
+         <li><a href="#create-the-report_2">Create the report</a></li> 
+        </ol></li> 
       </ol></li> 
      <li><a href="#rules">Rules</a></li> 
      <li><a href="#chained-parameters">Chained Parameters</a> 
@@ -120,7 +144,8 @@
        <li><a href="#dynamic-recipients-personalization">Dynamic Recipients + Personalization</a></li> 
        <li><a href="#dynamic-recipients-filtering">Dynamic Recipients + Filtering</a></li> 
       </ol></li> 
-     <li><a href="#single-sign-on">Single Sign On</a> 
+     <li><a href="#ftp-servers">FTP Servers</a></li> 
+     <li><a href="#integrated-windows-authentication">Integrated Windows Authentication</a> 
       <ol> 
        <li><a href="#prerequisites">Prerequisites</a></li> 
        <li><a href="#on-the-active-directory-server">On the Active Directory server</a></li> 
@@ -132,6 +157,7 @@
        <li><a href="#using-a-keytab-file">Using a keytab file</a></li> 
        <li><a href="#changing-the-spnego-user">Changing the spnego user</a></li> 
       </ol></li> 
+     <li><a href="#cas-authentication">CAS Authentication</a></li> 
      <li><a href="#application-logs">Application Logs</a> 
       <ol> 
        <li><a href="#sql-logging">SQL Logging</a></li> 
@@ -447,6 +473,10 @@
         <td><strong>Max File Upload Size (MB)</strong></td> 
         <td>Maximum file upload size for jasperreports, jXLS or mondrian files. Set to -1 for no limit.</td> 
        </tr> 
+       <tr> 
+        <td><strong>ART Base URL</strong></td> 
+        <td>The base URL for ART e.g. <a href="http://art-server:8080/art." rel="nofollow">http://art-server:8080/art.</a> This is used to include a link to publish job output in publish job reminder emails.</td> 
+       </tr> 
       </tbody> 
      </table> 
     </div> 
@@ -484,6 +514,10 @@
        <tr> 
         <td><strong>Active</strong></td> 
         <td>Defines whether the datasource is available for use</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Datasource Type</strong></td> 
+        <td>Defines whether this is a JDBC based datasource or an OLAP datasource</td> 
        </tr> 
        <tr> 
         <td><strong>JNDI</strong></td> 
@@ -660,14 +694,14 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </div> </li> 
       <li> <p>Set the <strong>Allowed Windows Domains</strong> field to the windows domain name. Use all uppercase letters for the domain name</p> </li> 
      </ul> 
-     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their windows login username. The password can be left blank when creating the user. Grant them appropriate access to reports. The users can now log in to ART using their windows username and password.</p> 
+     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their windows login username. Grant them appropriate access to reports. The users can now log in to ART using their windows username and password.</p> 
      <h2 id="ldap-authentication">LDAP Authentication</h2> 
      <p>Do the following to configure ART to use LDAP authentication.</p> 
      <ul> 
       <li>In the Settings page, set the <strong>Default Authentication Method</strong> to <strong>LDAP</strong></li> 
       <li>Provide values for the LDAP fields. If you fill the ldap server and port fields, leave the url field blank. If you use the url field, leave the server and port fields blank.</li> 
      </ul> 
-     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their uid (or samAccountName for Active Directory). The password can be left blank when creating the user. Grant them appropriate access to reports. The users can now log in to ART using their ldap uid and password.</p> 
+     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their uid (or samAccountName for Active Directory). Grant them appropriate access to reports. The users can now log in to ART using their ldap uid and password.</p> 
      <h2 id="database-authentication">Database Authentication</h2> 
      <p>Database logins can also be used to access ART. Do the following to use the database authentication that comes with ART.</p> 
      <ul> 
@@ -675,7 +709,14 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
       <li>In the Settings page, set the <strong>Default Authentication Method</strong> to <strong>Database</strong></li> 
       <li>Fill the Database Authentication JDBC fields. The JDBC driver for the database will need to be available in the <strong>ART_HOME\WEB-INF\lib</strong> directory or <strong>TOMCAT_HOME\lib</strong> directory if using Apache Tomcat.</li> 
      </ul> 
-     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their database login username. The password can be left blank when creating the user. Grant them appropriate access to reports. The users can now log in to ART using their database username and password.</p> 
+     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their database login username. Grant them appropriate access to reports. The users can now log in to ART using their database username and password.</p> 
+     <h2 id="cas-authentication">CAS Authentication</h2> 
+     <p>ART can use an existing CAS server to do the authentication of users.</p> 
+     <ul> 
+      <li>In the Settings page, set the <strong>Default Authentication Method</strong> to <strong>CAS</strong></li> 
+      <li>Enter the <strong>CAS Logout URL</strong> e.g. <a href="https://cas-server:8443/cas/logout" rel="nofollow">https://cas-server:8443/cas/logout</a> to enable users to log out of CAS, and thereby logout of all applications that use CAS.</li> 
+     </ul> 
+     <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their CAS login username. Grant them appropriate access to reports. </p> 
      <h2 id="custom-authentication-sources">Custom Authentication Sources</h2> 
      <p>Additional, custom authentication sources can be used by creating a jsp page to check the user credentials - for example by executing a query on a remote database - and then redirecting to the reports.do page.</p> 
      <p>This is the code fragment to redirect an authenticated user to ART.</p> 
@@ -787,6 +828,42 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>The resultset to display if the sql source contains multiple sql statements. Leave as 0 if the sql source doesn't have multiple statements. Set to 1 to use the first statement, 2 to use the second, etc. Set to -1 to use the <strong>select</strong> statement, regardless of how many statements exist. Set to -2 to use the <strong>last</strong> statement, regardless of how many statements exist. Your RDBMS may not support multiple statements in a query or may require some configuration for it to work. See the <strong>Multiple Statements</strong> section for more details.</td> 
        </tr> 
        <tr> 
+        <td><strong>Default Report Format</strong></td> 
+        <td>The default report format that should be selected for this report. Please note that not all report formats are available for all report types.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Hidden Columns</strong></td> 
+        <td>For tabular reports, a comma separated list of column indices or column names for columns that should not be included in the generated output</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Total Columns</strong></td> 
+        <td>For tabular reports, a comma separated list of column indices or column names for columns that should be totalled in the generated output</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Date Format</strong></td> 
+        <td>For tabular reports, the format that should be used for date columns. Leave blank to use the default.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Number Format</strong></td> 
+        <td>For tabular reports, the format that should be used for numeric columns. Leave blank to use the default.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Column Formats</strong></td> 
+        <td>For tabular reports, the formats that should be used for specific date or numeric columns. Each column specification comes in a new line. The specification is in the format <code>{column index or column name}:{format}</code>. Examples <code>1:dd/MM/yyyy</code> or <code>due_date:dd MMM yyyy</code> or <code>amount:#,##0.00</code>. For xls and xlsx report formats, one cannot use individual column formats so the formats specified in the Date Format and Number Format fields would be used for all respective columns.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Locale</strong></td> 
+        <td>For tabular reports, the locale to be used when formatting dates and numbers e.g. <code>de</code> or <code>en_US</code>. Leave blank to use the default. For xls and xlsx report formats, this setting has no effect.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Null Number Display</strong></td> 
+        <td>For tabular reports, a string that should be used for numeric columns where the value is null. Leave blank to use the default. For xls and xlsx report formats, this setting has no effect.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Null String Display</strong></td> 
+        <td>For tabular reports, a string that should be used for string columns where the value is null. Leave blank to use the default.</td> 
+       </tr> 
+       <tr> 
         <td><strong>x-axis Label</strong></td> 
         <td>For charts, the x axis label</td> 
        </tr> 
@@ -823,12 +900,12 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>For charts, the number of categories at which labels are omitted from the chart. Set to 1 to always omit labels.</td> 
        </tr> 
        <tr> 
-        <td><strong>Template</strong></td> 
-        <td>For jasper reports, select the jrxml file to use. For pivot table (mondrian) reports, select the mondrian cube xml file to use. For jXLS reports, select the Excel template file to use.</td> 
+        <td><strong>Secondary Charts</strong></td> 
+        <td>For charts, a comma separated list of report IDs of other charts which are to be displayed with this one. These charts will use separate y-axes. Some chart types cannot have secondary charts, including pie charts, speedometer, bubble and heat map charts.</td> 
        </tr> 
        <tr> 
-        <td><strong>XMLA URL</strong></td> 
-        <td>For mondrian via xmla or Microsoft SQL Server Analysis Services (SSAS) via xmla, the url of the xmla server</td> 
+        <td><strong>Template</strong></td> 
+        <td>For jasper reports, select the .jrxml file to use. For pivot table (mondrian) reports, select the mondrian cube .xml file to use. For jXLS reports, select the .xls or .xlsx template file to use. For FreeMarker reports, select the .ftl template file to use. For XDocReport reports, select the .docx, .odt or .pptx template file to use.</td> 
        </tr> 
        <tr> 
         <td><strong>XMLA Datasource</strong></td> 
@@ -837,14 +914,6 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>XMLA Catalog</strong></td> 
         <td>For mondrian or mondrian via xmla, the catalog name as it appears in the mondrian cube xml file. For SSAS, the database name.</td> 
-       </tr> 
-       <tr> 
-        <td><strong>XMLA Username</strong></td> 
-        <td>For SSAS, if the server is configured to require basic authentication, the username to use</td> 
-       </tr> 
-       <tr> 
-        <td><strong>XMLA Password</strong></td> 
-        <td>For SSAS, if the server is configured to require basic authentication, the password to use</td> 
        </tr> 
        <tr> 
         <td><strong>Source</strong></td> 
@@ -1002,6 +1071,12 @@ FROM myvalues
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>ART uses the cewolf and jfreechart libraries to generate charts. These libraries in turn use standard java AWT to plot charts. In order to work correctly, AWT needs a graphic display. If you are using a &quot;headless&quot; workstation (i.e. a Unix box without X) you need to start the JVM with the option <strong>-Djava.awt.headless=true</strong></li> 
+      <li> <p>You can specify specific colours to be used for the series displayed in a chart by adding columns to the query resultset in the format <code>seriesColor:&lt;series index&gt;:&lt;hex color code&gt;</code> e.g. for a pie chart,</p> 
+       <div class="codehilite"> 
+        <pre>SELECT description, volume, &quot;seriesColor:0:#ff8000&quot;
+FROM orders
+</pre> 
+       </div> </li> 
       <li> <p>For <strong>bubble charts</strong>, the size of the bubbles is determined by <code>Value3</code>. The actual size of the bubbles as they appear in the chart is also relative to the values on the y axis (<code>Value2</code>). If your values for <code>Value3</code> are much larger than those for <code>Value2</code> for example, you may find the whole chart filled in one colour, with no bubbles. In this case, you can increase the range of the y axis by setting the <strong>y-axis Min</strong> and <strong>y-axis Max</strong> fields for the query. Alternatively, you can include an extra column in the result set that contains a normalised value that will be used to scale the size of the bubbles e.g.</p> 
        <div class="codehilite"> 
         <pre>SELECT Value1, Value2 &quot;MySeries&quot;, Value3,
@@ -1158,7 +1233,16 @@ FROM mytable
       <li><strong>Pivot Table: Microsoft XMLA</strong><br /> Used to provide OLAP analysis by accessing an SQL Server Analysis Services server via the xmla protocol. </li> 
       <li><strong>jXLS Spreadsheet: Template Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query within the jXLS template will be used to generate the results. The query will be run against the selected datasource.</li> 
       <li><strong>jXLS Spreadsheet: ART Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</li> 
-      <li><strong>FreeMarker</strong><br /> Displays a report in the browser based on a freemarker template. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>FreeMarker</strong><br /> Displays a report in the browser based on a freemarker (http://freemarker.org/) template. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>XDocReport: FreeMarker engine - Docx</strong><br /> You can use MS Word (docx), LibreOffice/OpenOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would like it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the XDocReport wiki, <a href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">https://github.com/opensagres/xdocreport/wiki</a>, for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the FreeMarker or Velocity expressions.</li> 
+     </ul> 
+     <p>Displays a report based on the selected docx template, which uses freemarker syntax (http://freemarker.org/docs/index.html) for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
+     <ul> 
+      <li><strong>XDocReport: Velocity engine - Docx</strong><br /> Displays a report based on the selected docx template, which uses velocity syntax (https://velocity.apache.org/engine/devel/user-guide.html) for expressions within the document. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>XDocReport: FreeMarker engine - ODT</strong><br /> Displays a report based on the selected odt template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>XDocReport: Velocity engine - ODT</strong><br /> Displays a report based on the selected odt template, which uses velocity syntax. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>XDocReport: FreeMarker engine - PPTX</strong><br /> Displays a report based on the selected pptx template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>XDocReport: Velocity engine - PPTX</strong><br /> Displays a report based on the selected pptx template, which uses velocity syntax. The query as defined in the SQL source will be used to generate the results.</li> 
       <li> <p><strong>LOV: Dynamic</strong><br /> Creates an LOV query whose values are based on an sql query. The query can have either one column, or two columns if the parameter value and the text displayed to the user needs to be different</p> 
        <div class="codehilite"> 
         <pre>SELECT city_id, city_name
@@ -1215,6 +1299,31 @@ AND vendor_name like #vendor# -- you do not need to put the ' character around t
       <li>The same parameter (<code>#parameter_name#</code>) can be used several times in the same query. All occurrences will be substituted with the same value.</li> 
       <li>Avoid using the special labels <strong>#rules#</strong> or <strong>#recipient#</strong>. These labels are used for the rules and dynamic job recipients functionality respectively, and using them for your parameters may result in your query not working as expected.</li> 
       <li>There is a slight difference between <code>Varchar</code> and <code>Text</code> parameters. <code>Varchar</code> parameters provide a text box for input of a few characters while <code>Text</code> parameters provide a text area for input of much longer strings.</li> 
+      <li>For <code>Date</code> and <code>DateTime</code> parameters, the following values can be used</li> 
+     </ul> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Value</th> 
+        <th>Meaning</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>now</strong></td> 
+        <td>The date and time when the report is run</td> 
+       </tr> 
+       <tr> 
+        <td><strong>today</strong></td> 
+        <td>The date when the report is run, with the time being 00:00</td> 
+       </tr> 
+       <tr> 
+        <td><strong>add</strong> <code>days,weeks,months,years</code> increment</td> 
+        <td>The date when the report is run plus the given increment e.g. <code>add days 1</code> for the run date plus one day, <code>add months -1</code> for the run date minus one month.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <ul> 
       <li><strong>Workaround for boolean parameters</strong><br /> </li> 
      </ul> 
      <p>There is no boolean data type for single-value parameters because different RDBMSs implement the boolean data type differently. As a workaround, you can create a static LOV query to return the boolean states true and false, as used in your database, and use that LOV query to provide the boolean parameter values.</p> 
@@ -1257,8 +1366,130 @@ WHERE product_name IN(#product_list#)
       <li>If the values for a multi-value parameter are not derived from an LOV, the end user will enter the multiple values required in the text box provided, with each value put on a new line.</li> 
      </ul> 
      <h2 id="running-a-report-via-url">Running a report via URL</h2> 
-     <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL.</p> 
+     <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL. The basic URL for running a report is something like <a href="http://server_name:port/art/app/runReport.do?reportId=x&amp;other_parameters" rel="nofollow">http://server_name:port/art/app/runReport.do?reportId=x&amp;other_parameters</a></p> 
      <p>If direct URL access is needed without requiring the user to log in to ART beforehand, the special user <strong>public_user</strong> must be granted access to the query and <strong>&amp;public=true</strong> must be included in the URL.</p> 
+     <h3 id="report-options">Report Options</h3> 
+     <p>Some report options can be specified in the URL to determine how the run should be handled.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Option</th> 
+        <th>Option Value Data Type</th> 
+        <th>Comments</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>p-{parameter_name}</strong></td> 
+        <td>String</td> 
+        <td>Specifies report parameters e.g. <code>p-duedate=2010-05-06</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>reportFormat</strong></td> 
+        <td>String</td> 
+        <td>Specifies the report format that should be used for the output generated by the report e.g. <code>reportFormat=pdf</code>. Not all report formats are available for all report types.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>splitColumn</strong></td> 
+        <td>Integer</td> 
+        <td>For group reports, the group column i.e. the column index by which grouping should be done e.g. <code>splitColumn=2</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>public</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, determines that the user doesn't need to be logged in to ART to view the report results e.g. <code>public=true</code>. If authentication is required, don't include this parameter, even with a value of false.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showSelectedParameters</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates that the used or selected report parameters should be included in the report output e.g. <code>showSelectedParameters=true</code>. Omit the parameter entirely if this is not required.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showSql</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates that the final SQL used to generate the report results is shown in the browser e.g. <code>showSql=true</code>. Omit the parameter entirely if this is not required.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>allowSelectParameters</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates the parameters box should be displayed in the browser to allow the user to re-run the report by changing the reports parameter values e.g. <code>allowSelectParameters=true</code>. Omit the parameter entirely if this is not required.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="chart-options">Chart Options</h3> 
+     <p>For chart reports, additional options specific to charts can be specified in the URL.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Option</th> 
+        <th>Option Value Data Type</th> 
+        <th>Comments</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>showLegend</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates that the legend should be shown e.g. <code>showLegend=true</code>. Omit the parameter entirely if this is not required.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showLabels</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates that data labels should be shown e.g. <code>showLabels=true</code>. Omit the parameter entirely if this is not required.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showData</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates that the data used to generate the chart should be shown e.g. <code>showData=true</code>. Omit the parameter entirely if this is not required.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>showPoints</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates that data points on the chart should be highlighted e.g. <code>showPoints=true</code>. Omit the parameter entirely if this is not required.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>rotateAt</strong></td> 
+        <td>Integer</td> 
+        <td>Indicates the number of categories after which the x-axis labels will be displayed vertically instead of horizontally e.g. <code>rotateAt=1</code>. This may aid in the readability of the labels for some charts.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>removeAt</strong></td> 
+        <td>Integer</td> 
+        <td>Indicates the number of categories after which the x-axis labels will be removed completely e.g. <code>removeAt=10</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>chartWidth</strong></td> 
+        <td>Integer</td> 
+        <td>Indicates the width of the chart in pixels e.g. <code>chartWidth=1000</code>. The maximum is 2048.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>chartHeight</strong></td> 
+        <td>Integer</td> 
+        <td>Indicates the height of the chart in pixels e.g. <code>chartHeight=700</code>. The maximum is 1024.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>yAxisMin</strong></td> 
+        <td>Double</td> 
+        <td>Indicates the minimum value of the y-axis e.g. <code>yAxisMin=-10.5</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>yAxisMax</strong></td> 
+        <td>Double</td> 
+        <td>Indicates the maximum value of the y-axis e.g. <code>yAxisMax=100</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>backgroundColor</strong></td> 
+        <td>String</td> 
+        <td>Indicates the hex colour code for the background color of the chart e.g. <code>backgroundColor=#FFFFFF</code>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>labelFormat</strong></td> 
+        <td>String</td> 
+        <td>Indicates the format of data labels e.g. <code>labelFormat={0} = {1} ({2})</code> or <code>labelFormat=off</code>. If set to &quot;off&quot;, this indicates that labels should not be shown. For pie charts, <code>{0}</code> will display the pie section key, <code>{1}</code> will display the absolute section value and <code>{2}</code> will display the percent amount of the pie section. Setting it to <code>{0} = {1} ({2})</code> would display a string like &quot;Laptops = 17 (42%)&quot; for a section of the pie chart showing laptops numbering 17 and having a percentage value of 42%. For bar charts, use <code>{2}</code> to display the data value.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="examples">Examples</h3> 
      <p><strong>Example 1:</strong> (single-value parameters)</p> 
      <div class="codehilite"> 
       <pre>    http://server_name:port/art/app/runReport.do?
@@ -1397,17 +1628,17 @@ WHERE product_name IN(#product_list#)
        </tr> 
        <tr> 
         <td><strong>tsv</strong></td> 
-        <td>Spreadsheet (text tsv)</td> 
+        <td>File (text tsv)</td> 
         <td>Creates a tab-separated-values text file to download</td> 
        </tr> 
        <tr> 
         <td><strong>tsvZip</strong></td> 
-        <td>Spreadsheet (zip tsv)</td> 
+        <td>File (zip tsv)</td> 
         <td>Creates a tab-separated-values text file to download, compressed using Zip</td> 
        </tr> 
        <tr> 
         <td><strong>tsvGz</strong></td> 
-        <td>Spreadsheet (gzip tsv)</td> 
+        <td>File (gzip tsv)</td> 
         <td>Creates a tab-separated-values text file to download, compressed using GZip</td> 
        </tr> 
        <tr> 
@@ -1418,7 +1649,7 @@ WHERE product_name IN(#product_list#)
        <tr> 
         <td><strong>png</strong></td> 
         <td>Image (png)</td> 
-        <td>Creates a png file to download. Only available for charts</td> 
+        <td>Creates a png file to download. Only available for charts.</td> 
        </tr> 
        <tr> 
         <td><strong>xml</strong></td> 
@@ -1430,13 +1661,33 @@ WHERE product_name IN(#product_list#)
         <td></td> 
         <td>Output data as a rss2.0 compliant feed</td> 
        </tr> 
+       <tr> 
+        <td><strong>docx</strong></td> 
+        <td>Document (docx)</td> 
+        <td>Creates a Microsoft Word document file to download (docx format)</td> 
+       </tr> 
+       <tr> 
+        <td><strong>odt</strong></td> 
+        <td>Document (odt)</td> 
+        <td>Creates an Open Document Format text document file to download (odt format)</td> 
+       </tr> 
+       <tr> 
+        <td><strong>ods</strong></td> 
+        <td>Spreadsheet (ods)</td> 
+        <td>Creates an Open Document Format spreadsheet file to download (ods format)</td> 
+       </tr> 
+       <tr> 
+        <td><strong>pptx</strong></td> 
+        <td>Document (pptx)</td> 
+        <td>Creates a Microsoft PowerPoint document file to download (pptx format). Only available for XDocReport - PPTX reports.</td> 
+       </tr> 
       </tbody> 
      </table> 
      <p>You can restrict which report formats are shown to users when running reports by modifying the Report Formats field in the Settings page.</p> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>There is a limit set for the maximum number of rows that can be output with certain report formats. These limits are set, and can be modified from the Settings page.</li> 
-      <li>Use xlsx, slk or tsv view modes for large data sets. In particular, if you use the xls view mode for large data sets, you are likely to get out of memory errors. This is mainly due to the nature of the xls file format.</li> 
+      <li>Use xlsx, slk or tsv report formats for large data sets. In particular, if you use the xls format for large data sets, you are likely to get out of memory errors. This is mainly due to the nature of the xls file format.</li> 
      </ul> 
     </div> 
    </div> 
@@ -2026,48 +2277,130 @@ WHERE REGION = #region#
      <p>ART uses the <a class="" href="http://mondrian.pentaho.com/" rel="nofollow">Mondrian</a> OLAP server to provide OLAP functionality. There are 3 report types that can be created to provide OLAP analysis.</p> 
      <h2 id="mondrian">Mondrian</h2> 
      <p>This report type uses ART's internal mondrian engine to run OLAP queries. To use it, do the following.</p> 
+     <h3 id="create-the-schema-xml-file">Create the schema xml file</h3> 
      <ul> 
       <li>Create a mondrian cube schema file that defines your cube</li> 
+     </ul> 
+     <h3 id="create-a-datasource">Create a datasource</h3> 
+     <ul> 
+      <li>Create a new datasource in ART using the <strong>Configure | Datasources</strong> menu and then clicking on the <strong>Add</strong> button</li> 
+      <li>In the <strong>Datasource Type</strong> section, select <strong>JDBC</strong></li> 
+      <li>Provide the url, username and password to use to access the database that has the star schema tables referenced in the schema xml file</li> 
+      <li>Save the datasource</li> 
+     </ul> 
+     <h3 id="create-the-report">Create the report</h3> 
+     <ul> 
       <li>Create a new report in ART of the type <strong>Pivot Table: Mondrian</strong></li> 
-      <li>Select the ART datasource that the cube is based on</li> 
-      <li>For the Template field, select the schema file for the cube</li> 
+      <li>In the <strong>Datasource</strong> field, select the datasource you have just created</li> 
+      <li>For the <strong>Template</strong> field, select the schema file for the cube</li> 
       <li>In the MDX source field, enter the MDX for your report</li> 
      </ul> 
      <h2 id="mondrian-xmla">Mondrian XMLA</h2> 
      <p>This report type is used to access cubes defined in an external mondrian server. To use it, do the following.</p> 
+     <h3 id="create-the-schema-xml-file_1">Create the schema xml file</h3> 
+     <ul> 
+      <li>Create a mondrian cube schema file that defines your cube</li> 
+     </ul> 
+     <h3 id="create-the-datasourcesxml-file">Create the datasources.xml file</h3> 
+     <ul> 
+      <li>Create the datasources.xml file that has the cube details. ART can act as a Mondrian XMLA server by configuring a file named <strong>datasources.xml</strong> and putting it in the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, and using a url like <a href="http://server-name:8080/art/xmla" rel="nofollow">http://server-name:8080/art/xmla</a> as the XMLA url.</li> 
+     </ul> 
+     <h3 id="create-a-datasource_1">Create a datasource</h3> 
+     <ul> 
+      <li>Create a new datasource in ART using the <strong>Configure | Datasources</strong> menu and then clicking on the <strong>Add</strong> button</li> 
+      <li>In the <strong>Datasource Type</strong> section, select <strong>OLAP</strong></li> 
+      <li>In the <strong>URL</strong> field, enter the url to use to access the xmla server e.g. <a href="http://localhost:8080/art/xmla" rel="nofollow">http://localhost:8080/art/xmla</a></li> 
+      <li>If the AuthenticationMode section of the datasources.xml file is set to Unauthenticated, leave the <strong>Username</strong> and <strong>Password</strong> fields blank. Otherwise enter the username and password to be used to access to the cube.</li> 
+      <li>Save the datasource</li> 
+     </ul> 
+     <h3 id="create-the-report_1">Create the report</h3> 
      <ul> 
       <li>Create a new report in ART of the type <strong>Pivot Table: Mondrian XMLA</strong></li> 
-      <li>Enter the url of the mondrian server</li> 
-      <li>Enter the required xmla datasource name. This should match exactly with the contents of the <strong>DataSourceName</strong> tag in the <strong>datasources.xml</strong> file defined on the external server</li> 
-      <li>Enter the required xmla catalog name. This should match exactly with the contents of the <strong>Catalog</strong> name in the <strong>datasources.xml</strong> file defined on the external server</li> 
+      <li>In the <strong>Datasource</strong> field, select the datasource you have just created</li> 
+      <li>Enter the required <strong>XMLA Datasource</strong> name. This should match exactly with the contents of the <strong>DataSourceName</strong> in the <strong>datasources.xml</strong> file defined on the external server. These names can be any string and don't have to match any name in the schema xml file.</li> 
+      <li>Enter the required <strong>XMLA Catalog</strong> name. This should match exactly with the contents of the <strong>Catalog</strong> name in the <strong>datasources.xml</strong> file defined on the external server. These names can be any string and don't have to match any name in the schema xml file.</li> 
       <li>In the MDX source field, enter the MDX for your report</li> 
      </ul> 
-     <h2 id="sql-server-xmla">SQL Server XMLA</h2> 
-     <p>This report type is used to access cubes defined in a Microsoft SQL Server Analysis Services (SSAS) server. To use it, do the following.</p> 
+     <p>If you encounter a <strong>404</strong> error, the URL specified in the ART datasource may be invalid. If you encounter a <strong>No metadata for catalog</strong> error, the catalog name in the XMLA Catalog field may be misspelt. Catalog names are case sensitive. If you get a <strong>XMLA connection datasource not found</strong> error, the datasource name in the XMLA Datasource field may be misspelt. Datasource names are case sensitive. If you get a <strong>XMLA Discover unparse results error</strong> error, the file specified in the Definition section of the Catalog section of the datasources.xml may not exist. Alternatively, the JDBC details provided in the DataSourceInfo tag may not be correct. Alternatively, the Catalog name may not be matching the name attribute of the Schema tag in the cube's schema xml file. Alternatively, the DataSource name may not be matching the XMLA Datasource field of the report. If you get a <strong>No metadata schema dimensions for catalog</strong> error, the Catalog name entered in the XMLA Catalog field may be incorrect. Note that if a change is made to the datasources.xml, the application needs to be restarted for the changes to take effect. </p> 
+     <h3 id="accessing-the-mondrian-xmla-instance-from-ms-excel">Accessing the Mondrian XMLA instance from MS Excel</h3> 
+     <p>You can configure ART to serve as a mondrian XMLA server by defining a file named <strong>datasources.xml</strong> and placing it in the <strong>ART_HOME\WEB-INF\work\templates</strong> directory. A sample datasources.xml file can be found in the ART_HOME\WEB-INF\etc directory. The steps outlined here refer to MS Excel 2010 and may be different for different versions of Excel.</p> 
      <ul> 
-      <li>Ensure the SSAS server is set up for HTTP access. See <a href="http://ssas-wiki.com/Articles#HTTP_Access" rel="nofollow">http://ssas-wiki.com/Articles#HTTP_Access</a> for resources on how to do this.</li> 
-      <li>Ensure security access to the required database is set up. To do this, 
-       <ul> 
-        <li>Connect to the SSAS server using SQL Server Management Studio</li> 
-        <li>Expand the required database and right-click on the <strong>Roles</strong> section</li> 
-        <li>Select the <strong>New Role</strong> menu to create a new role</li> 
-        <li>In the <strong>Membership</strong> section, add the required users. If HTTP access is configured for anonymous access, add the <strong>IUSR_&lt;machinename&gt;</strong> user. If not, add the user whose credentials will be used to access the cube</li> 
-        <li>Save the role</li> 
-       </ul> </li> 
-      <li>Enter the url of the SSAS server</li> 
-      <li>Enter the required xmla datasource name. This is the name of the analysis services database that the cube is based on.</li> 
-      <li>If the SSAS server is configured to allow anonymous access, leave the xmla username and password fields blank. If it's configured to require basic authentication, enter the username and password of a user in a role that has access to the required cube.</li> 
+      <li>Download the XMLA connect provider from <a href="https://sourceforge.net/projects/xmlaconnect/files/">https://sourceforge.net/projects/xmlaconnect/files/</a></li> 
+      <li>Run the .exe file</li> 
+      <li>Open Excel</li> 
+      <li>Select the <strong>Data</strong> tab</li> 
+      <li>Click on the <strong>From Other Sources</strong> menu and then select <strong>From Data Connection Wizard</strong></li> 
+      <li>In the dialog that opens, select <strong>Other/Advanced</strong> and then click on <strong>Next</strong></li> 
+      <li>Select the <strong>XMLA Data Source</strong> provider and click on <strong>Next</strong></li> 
+      <li>In the <strong>Location</strong> box, type a url like <a href="http://localhost:8080/art/xmla" rel="nofollow">http://localhost:8080/art/xmla</a> as per the ART installation</li> 
+      <li>Click on the drop-down arrow in the <strong>Catalog</strong> box and select the required item</li> 
+      <li>Click on <strong>OK</strong></li> 
+      <li>In the next screen, select which cube you want to deal with and click <strong>Next</strong></li> 
+      <li>Click on <strong>Finish</strong> to complete the process</li> 
+      <li>Click on <strong>OK</strong> to have the pivot table details loaded in the current work sheet</li> 
+      <li>From the <strong>Pivot Table Field List</strong> on the right, drag a measure under the Values section to the Values section in the below panel</li> 
+      <li>You should now have a value in your worksheet displaying the total value for this measure</li> 
+      <li>You can drag items to the Row Labels, Column Labels and Report Filter sections in order to do further analysis</li> 
+      <li>You can also slice the data. Click on any cell in the pivot table. From the <strong>Options</strong> tab, click on the <strong>Insert Slicer</strong> menu, check an item and click on <strong>OK</strong>. You can now slice your data by clicking the different available values of the slicer you selected, with the data being updated to reflect your selection. To remove the slicer, right-click on its heading or any empty space within the slicer and click on the <strong>Remove ...</strong> menu.</li> 
+     </ul> 
+     <p>If you want to view the MDX that is generated for the analysis you are doing, download and install the <strong>OLAP Pivot Table Extensions</strong> plugin for Excel from <a href="https://olappivottableextend.codeplex.com/." rel="nofollow">https://olappivottableextend.codeplex.com/.</a> Once you download the correct version of the plugin for your version of Excel, and start Excel, you can view the MDX for any analysis by right-clicking on any cell in the pivot table data, selecting the <strong>OLAP Pivot Tables Extensions</strong> menu and selecting the <strong>MDX</strong> tab.</p> 
+     <h2 id="sql-server-xmla">SQL Server XMLA</h2> 
+     <p>This report type is used to access cubes defined in a Microsoft SQL Server Analysis Services (SSAS) server. Before being able to run reports based on a SSAS cube, you need to configure SSAS for HTTP access.</p> 
+     <h3 id="configure-ssas-for-http-access">Configure SSAS for HTTP access</h3> 
+     <p>Some resources on how to do this are as follows</p> 
+     <ul> 
+      <li><a href="http://geekswithblogs.net/darrengosbell/archive/2007/11/04/SSAS-Connecting-via-HTTP-on-Windows-Vista.aspx" rel="nofollow">http://geekswithblogs.net/darrengosbell/archive/2007/11/04/SSAS-Connecting-via-HTTP-on-Windows-Vista.aspx</a></li> 
+      <li><a href="http://ssas-wiki.com/Articles#HTTP_Access" rel="nofollow">http://ssas-wiki.com/Articles#HTTP_Access</a> </li> 
+     </ul> 
+     <p>After you have finished the configuration, start IIS.</p> 
+     <p>To test that you can access SSAS via HTTP, open SQL Server Management Studio, select Analysis Services as the Server type, put the URL in the Server name box e.g. <a href="http://localhost/olap/msmdpump.dll" rel="nofollow">http://localhost/olap/msmdpump.dll</a> and try to connect. If you are able to connect, access to the server is fine, and next you need to provide access rights to the cube.</p> 
+     <h3 id="provide-access-to-the-cube">Provide access to the cube</h3> 
+     <p>These steps outline the process for providing access on SQL Server 2008R2 and may be different for other versions of SQL Server.</p> 
+     <ul> 
+      <li>Using SQL Server Management Studio, connect to the SSAS server using an administrator user</li> 
+      <li>Expand the <strong>Databases</strong> folder then expand the desired database</li> 
+      <li>Right-click on the <strong>Roles</strong> section for the database and select the <strong>New Role</strong> menu to create a new role</li> 
+      <li>Provide a <strong>Role name</strong> for the role and tick the <strong>Read definition</strong> box to give the role read access</li> 
+      <li>Select the <strong>Membership</strong> section on the left-hand pane to add the users who will have access. If HTTP access is configured for anonymous access, add the <strong>IUSR</strong> user. If not, add the user whose credentials will be used to access the cube. Enter a given user and click on the <strong>Check Names</strong> button to have the user retrieved.</li> 
+      <li>Select the <strong>Data Sources</strong> section on the left-hand pane and then select <strong>Read</strong> in the <strong>Access</strong> column of the desired cube</li> 
+      <li>Select the <strong>Cubes</strong> section on the left-hand pane and the select <strong>Read</strong> in the <strong>Access</strong> column for the desired cube</li> 
+      <li>Click on <strong>OK</strong> to save the role</li> 
+     </ul> 
+     <p>To verify that you can access the cube and generate reports from it</p> 
+     <ul> 
+      <li>Open a new SQL Server Management Studio instance and connect to SSAS using the msmdpump URL e.g. <a href="http://localhost/olap/msmdpump.dll" rel="nofollow">http://localhost/olap/msmdpump.dll</a> and using the user which you assigned to the role. </li> 
+      <li>Expand the <strong>Databases</strong> folder</li> 
+      <li>Expand the folder for your database</li> 
+      <li>Expand the <strong>Cubes</strong> folder</li> 
+      <li>Right click on your cube and select <strong>Browse</strong></li> 
+      <li>You should be able to drag and drop dimension members to the analysis pane to display some data</li> 
+     </ul> 
+     <h3 id="create-a-datasource_2">Create a datasource</h3> 
+     <ul> 
+      <li>Create a new datasource in ART using the <strong>Configure | Datasources</strong> menu and then clicking on the <strong>Add</strong> button</li> 
+      <li>In the <strong>Datasource Type</strong> section, select <strong>OLAP</strong></li> 
+      <li>In the <strong>URL</strong> field, enter the url to use to access SSAS e.g. <a href="http://localhost/olap/msmdpump.dll" rel="nofollow">http://localhost/olap/msmdpump.dll</a></li> 
+      <li>If the SSAS server is configured to allow anonymous access, leave the <strong>Username</strong> and <strong>Password</strong> fields blank. If it's configured to require basic authentication, enter the username and password of a user in a role that has access to the required cube.</li> 
+      <li>Save the datasource</li> 
+     </ul> 
+     <h3 id="create-the-report_2">Create the report</h3> 
+     <ul> 
+      <li>Create a new report in ART using the <strong>Configure | Report</strong> menu and then clicking on the <strong>Add</strong> button</li> 
+      <li>In the <strong>Type</strong> field, select <strong>Pivot Table: SQL Server XMLA</strong></li> 
+      <li>In the <strong>Datasource</strong> field, select the datasource you have just created</li> 
+      <li>In the <strong>XMLA Catalog</strong> field, enter the database name for your database on the SSAS server</li> 
       <li>In the MDX source field, enter the MDX for your report</li> 
      </ul> 
+     <p>You should now be able to run the report and perform analysis. If you encounter a <strong>connection refused</strong> error, IIS may not be started. If you encounter a <strong>No metadata schema dimensions for catalog</strong> error, you may not have permissions on the cube.</p> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li> <p>You can use single-value parameters in the mdx just like with any other ART report e.g.</p> 
+      <li> <p>You can use single-value parameters in the mdx using the direct parameter substitution syntax <code>#!&lt;param name&gt;#</code> e.g.</p> 
        <div class="codehilite"> 
         <pre><span class="n">SELECT</span> 
 <span class="p">{</span> <span class="p">[</span><span class="n">Measures</span><span class="p">].[</span><span class="n">Sales</span> <span class="n">Amount</span><span class="p">],</span> <span class="p">[</span><span class="n">Measures</span><span class="p">].[</span><span class="n">Tax</span> <span class="n">Amount</span><span class="p">]</span> <span class="p">}</span> <span class="n">ON</span> <span class="n">COLUMNS</span><span class="p">,</span> 
-<span class="p">{</span> <span class="p">[</span><span class="n">Date</span><span class="p">].[</span><span class="n">Fiscal</span><span class="p">].[</span><span class="n">Fiscal</span> <span class="n">Year</span><span class="p">].</span><span class="o">&amp;</span><span class="p">[</span><span class="err">#</span><span class="n">FromYear</span><span class="err">#</span><span class="p">],</span> <span class="p">[</span><span class="n">Date</span><span class="p">].[</span><span class="n">Fiscal</span><span class="p">].[</span><span class="n">Fiscal</span> <span class="n">Year</span><span class="p">].</span><span class="o">&amp;</span><span class="p">[</span><span class="err">#</span><span class="n">ToYear</span><span class="err">#</span><span class="p">]</span> <span class="p">}</span> <span class="n">ON</span> <span class="n">ROWS</span> 
+<span class="p">{</span> <span class="p">[</span><span class="n">Date</span><span class="p">].[</span><span class="n">Fiscal</span><span class="p">].[</span><span class="n">Fiscal</span> <span class="n">Year</span><span class="p">].</span><span class="o">&amp;</span><span class="p">[</span><span class="err">#</span><span class="o">!</span><span class="n">FromYear</span><span class="err">#</span><span class="p">],</span> <span class="p">[</span><span class="n">Date</span><span class="p">].[</span><span class="n">Fiscal</span><span class="p">].[</span><span class="n">Fiscal</span> <span class="n">Year</span><span class="p">].</span><span class="o">&amp;</span><span class="p">[</span><span class="err">#</span><span class="o">!</span><span class="n">ToYear</span><span class="err">#</span><span class="p">]</span> <span class="p">}</span> <span class="n">ON</span> <span class="n">ROWS</span> 
 <span class="n">FROM</span> <span class="p">[</span><span class="n">Adventure</span> <span class="n">Works</span><span class="p">]</span> 
-<span class="n">WHERE</span> <span class="p">(</span> <span class="p">[</span><span class="n">Sales</span> <span class="n">Territory</span><span class="p">].[</span><span class="err">#</span><span class="n">Territory</span><span class="err">#</span><span class="p">]</span> <span class="p">)</span>
+<span class="n">WHERE</span> <span class="p">(</span> <span class="p">[</span><span class="n">Sales</span> <span class="n">Territory</span><span class="p">].[</span><span class="err">#</span><span class="o">!</span><span class="n">Territory</span><span class="err">#</span><span class="p">]</span> <span class="p">)</span>
 </pre> 
        </div> </li> 
       <li> <p>You can also use multi-value parameters. In this case, construct the LOV query such that it returns strings as they would appear in the MDX. e.g.<br /> Example LOV</p> 
@@ -2078,10 +2411,11 @@ FROM dim_orders
        </div> <p>Use multi-value parameter in MDX as desired...</p> 
        <div class="codehilite"> 
         <pre>SELECT ... FROM ...
-WHERE {#saleTypes#}
+WHERE {#!saleTypes#}
 </pre> 
        </div> </li> 
-      <li> <p>Pivot Tables use cached data where possible. To manually clear the cache, use the <strong>Configure | Caches</strong> menu and <strong>Clear</strong> the Mondrian cache. If you'd like the cache to be automatically cleared periodically, use the <strong>Mondrian Cache Expiry Period</strong> setting on the Settings page.</p> </li> 
+      <li> <p>Pivot Tables use cached data where possible. To manually clear the cache, use the <strong>Configure | Caches</strong> menu and Clear the <strong>Mondrian</strong> cache. If you'd like the cache to be automatically cleared periodically, use the <strong>Mondrian Cache Expiry Period</strong> setting on the <strong>Settings</strong> page.</p> </li> 
+      <li>For the SQL Sever XMLA</li> 
      </ul> 
     </div> 
    </div> 
@@ -2178,6 +2512,13 @@ WHERE CITY_ID = #cityId#
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>Dashboards and pivot tables cannot be scheduled</li> 
+      <li>The <strong>Runs To Archive</strong> field indicates, for Publish and Conditional Publish jobs, how many runs should be kept for viewing from the Archives page e.g. setting it to 5 will retain output from the last 5 runs in the Archives page. This allows users to access past job output as per their requirements.</li> 
+      <li>The <strong>Fixed File Name</strong> field indicates that the output file generated should use the file name indicated in this field e.g. <code>test.html</code></li> 
+      <li> <p>The <strong>Batch File</strong> field indicates the name of a batch file or script that should be run after the job completes. The batch file must exist in the <strong>ART_HOME\WEB-INF\work\batch</strong> directory. You only set the file name in this field e.g. <code>test.bat</code> or <code>test.sh</code>. ART passes the file name of the generated output as the first parameter to the batch file so you can use this e.g. to copy the file to another location e.g. the <code>test.bat</code> file may have the following contents.</p> 
+       <div class="codehilite"> 
+        <pre>copy ..\export\jobs\%1 C:\temp
+</pre> 
+       </div> </li> 
      </ul> 
      <h2 id="job-types">Job Types</h2> 
      <ul> 
@@ -2200,6 +2541,8 @@ WHERE CITY_ID = #cityId#
       <li><strong>Conditional Publish</strong><br /> If the result set has records, the output will available from the Jobs page. A notification email is sent to the specified recipients if this is configured. If the result set has no records, no output is generated and no email is sent.</li> 
       <li><strong>Cache ResultSet (Append)</strong><br /> Cache the result set in a database table (Append)</li> 
       <li><strong>Cache ResultSet (Delete&amp;Insert)</strong><br /> Cache the result set in a database table (Delete&amp;Insert)</li> 
+      <li><strong>Print</strong><br /> Prints the report output to the default printer</li> 
+      <li><strong>Burst</strong><br /> Generates report files for each distinct value in a resultset. This requires that the query for the report be ordered by the first column, which will be the burst-id column. When the value of this column changes, a new file is generated. Burst jobs are only possible with <strong>Tabular</strong> reports. The files generated will have the burst-id in their file names so different files can be identified and copied or ftped to different locations for example.</li> 
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
@@ -2327,8 +2670,62 @@ WHERE CITY_ID = #cityId#
    <div> 
     <div class="markdown_content"> 
      <!--NewPage--> 
-     <h1 id="single-sign-on">Single Sign On</h1> 
-     <p>ART uses the spnego library available at <a href="http://spnego.sourceforge.net/">http://spnego.sourceforge.net/</a> to provide Single Sign On/Integrated Windows Authentication functionality. These instructions are largely based on the documentation found on that project's website.</p> 
+     <h1 id="ftp-servers">FTP Servers</h1> 
+     <p>You can configure ftp servers to be used after a publish job is generated, to ftp the generated file to a given ftp server.</p> 
+     <p>Use the <strong>Configure | FTP Servers</strong> menu to manage ftp server configurations. When Adding an ftp server, the following fields are available.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Field</th> 
+        <th>Comment</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>ID</strong></td> 
+        <td>A unique ID for the ftp server configuration, generated by ART</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Name</strong></td> 
+        <td>A name for the ftp server configuration. This will be used in the Add Job page in the list of available ftp servers.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Description</strong></td> 
+        <td>A description for the ftp server configuration</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Active</strong></td> 
+        <td>Whether this configuration is active or not. If it is not active, no files will be ftped for jobs that use this ftp server configuration.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Server</strong></td> 
+        <td>The IP address or host name of the ftp server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Port</strong></td> 
+        <td>The ftp port of the server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>User</strong></td> 
+        <td>The ftp user to use to connect to the server</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Password</strong></td> 
+        <td>The ftp user's password</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Remote Directory</strong></td> 
+        <td>If the files are to be ftped to the user's home directory, then this field should be left blank. If the files are to be ftped to another directory, then the path should be given here, always beginning with &quot;/&quot; e.g. /sub-folder-a or /sub-folder-a/sub-sub-folder-b.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="integrated-windows-authentication">Integrated Windows Authentication</h1> 
+     <p>ART uses the spnego library available at <a href="http://spnego.sourceforge.net/">http://spnego.sourceforge.net/</a> to provide Integrated Windows Authentication functionality. These instructions are largely based on the documentation found on that project's website.</p> 
      <h2 id="prerequisites">Prerequisites</h2> 
      <p>You need to have at least 3 separate machines as follows</p> 
      <ul> 
@@ -2534,6 +2931,14 @@ spnego-server {
     setspn -D HTTP/app-server.my.domain.com spnego
 </pre> 
      </div> 
+    </div> 
+   </div> 
+   <div> 
+    <div class="markdown_content"> 
+     <!--NewPage--> 
+     <h1 id="cas-authentication">CAS Authentication</h1> 
+     <p>To use CAS authentication, edit the <strong>web.xml</strong> file and uncomment the items in the CAS configuration section, providing appropriate urls for the CAS server and for ART. </p> 
+     <p>Also, from the Settings page, set the <strong>Default Authentication Method</strong> for ART to <strong>CAS</strong> and set the <strong>CAS Logout URL</strong> to enable users to log out of CAS after logging out of ART.</p> 
     </div> 
    </div> 
    <div> 
@@ -2777,7 +3182,7 @@ a2enmod proxy_http
       <li>To generate a war file to deploy, click on the drop down on the <strong>Run As</strong> icon in the menu bar, and select the configuration you created e.g. package. The generated art.war file will be located in the <code>PACKAGE_PATH\src\art-parent\art\target</code> directory. Deploy this file to your desired application server</li> 
      </ul> 
      <h2 id="custom-export-path">Custom Export Path</h2> 
-     <p>By default, if the output for a report creates a file e.g. pdf, this file is stored in the <strong>ART_HOME\WEB-INF\work\export</strong> directory. You can designate a different directory to be used as the export path e.g. to a location on the application server that contains more disk space. To do this, modify the <strong>ART_HOME\WEB-INF\art-config.json</strong> file and set the path in the <strong>exportDirectory</strong> field.</p> 
+     <p>By default, if the output for a report creates a file e.g. pdf, this file is stored in the <strong>ART_HOME\WEB-INF\work\export</strong> directory. You can designate a different directory to be used as the export path e.g. to a location on the application server that contains more disk space. To do this, modify the <strong>ART_HOME\WEB-INF\art-custom-settings.json</strong> file and set the path in the <strong>exportDirectory</strong> field.</p> 
     </div> 
    </div> 
    <div> 
