@@ -72,6 +72,36 @@ public class Report implements Serializable {
 	private String numberFormat;
 	private String columnFormats;
 	private String locale;
+	private String nullNumberDisplay;
+	private String nullStringDisplay;
+
+	/**
+	 * @return the nullNumberDisplay
+	 */
+	public String getNullNumberDisplay() {
+		return nullNumberDisplay;
+	}
+
+	/**
+	 * @param nullNumberDisplay the nullNumberDisplay to set
+	 */
+	public void setNullNumberDisplay(String nullNumberDisplay) {
+		this.nullNumberDisplay = nullNumberDisplay;
+	}
+
+	/**
+	 * @return the nullStringDisplay
+	 */
+	public String getNullStringDisplay() {
+		return nullStringDisplay;
+	}
+
+	/**
+	 * @param nullStringDisplay the nullStringDisplay to set
+	 */
+	public void setNullStringDisplay(String nullStringDisplay) {
+		this.nullStringDisplay = nullStringDisplay;
+	}
 
 	/**
 	 * @return the locale

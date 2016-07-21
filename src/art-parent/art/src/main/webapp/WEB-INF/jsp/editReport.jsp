@@ -608,6 +608,24 @@ Edit report page
 							<form:errors path="locale" cssClass="error"/>
 						</div>
 					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="nullNumberDisplay">
+							<spring:message code="reports.label.nullNumberDisplay"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="nullNumberDisplay" maxlength="50" class="form-control"/>
+							<form:errors path="nullNumberDisplay" cssClass="error"/>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="control-label col-md-4" for="nullStringDisplay">
+							<spring:message code="reports.label.nullStringDisplay"/>
+						</label>
+						<div class="col-md-8">
+							<form:input path="nullStringDisplay" maxlength="50" class="form-control"/>
+							<form:errors path="nullStringDisplay" cssClass="error"/>
+						</div>
+					</div>
 				</fieldset>
 
 				<fieldset id="chartFields">

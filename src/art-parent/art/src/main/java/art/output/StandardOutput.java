@@ -548,6 +548,16 @@ public abstract class StandardOutput {
 
 		initializeColumnFormatters(report, rsmd, columnTypes);
 
+		String nullNumberDisplay = report.getNullNumberDisplay();
+		if (nullNumberDisplay == null) {
+			nullNumberDisplay = "";
+		}
+
+		String nullStringDisplay = report.getNullStringDisplay();
+		if (nullStringDisplay == null) {
+			nullStringDisplay = "";
+		}
+
 		while (rs.next()) {
 			rowCount++;
 
@@ -571,7 +581,7 @@ public abstract class StandardOutput {
 				result.setTooManyRows(true);
 				return result;
 			} else {
-				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns);
+				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
 				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
 			}
 		}
@@ -827,6 +837,16 @@ public abstract class StandardOutput {
 
 		initializeColumnFormatters(report, rsmd, columnTypes);
 
+		String nullNumberDisplay = report.getNullNumberDisplay();
+		if (nullNumberDisplay == null) {
+			nullNumberDisplay = "";
+		}
+
+		String nullStringDisplay = report.getNullStringDisplay();
+		if (nullStringDisplay == null) {
+			nullStringDisplay = "";
+		}
+
 		String previousBurstId = null;
 		FileOutputStream fos = null;
 
@@ -927,7 +947,7 @@ public abstract class StandardOutput {
 					fos = endBurstOutput(fos, hiddenColumns, rsmd, totalColumns);
 					previousBurstId = null;
 				} else {
-					outputResultSetColumns(columnTypes, rs, hiddenColumns);
+					outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
 				}
 			}
 
@@ -1127,11 +1147,14 @@ public abstract class StandardOutput {
 	 * @param rs the resultset with the data to output
 	 * @param hiddenColumns column ids or column names of resultset columns that
 	 * should not be included in the output
+	 * @param nullNumberDisplay the string to display for null numeric values
+	 * @param nullStringDisplay the string to display for null string values
 	 * @return data for the output row
 	 * @throws SQLException
 	 */
 	private List<Object> outputResultSetColumns(Map<Integer, ColumnType> columnTypes,
-			ResultSet rs, List<String> hiddenColumns) throws SQLException {
+			ResultSet rs, List<String> hiddenColumns, String nullNumberDisplay,
+			String nullStringDisplay) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -1158,7 +1181,8 @@ public abstract class StandardOutput {
 					Double numericValue = (Double) value;
 
 					if (numericValue == null) {
-						addNumeric(value);
+						String sortValue = "null";
+						addCellNumeric(numericValue, nullNumberDisplay, sortValue);
 					} else {
 						String sortValue = getNumericSortValue(numericValue);
 						String columnFormattedValue = null;
@@ -1239,18 +1263,18 @@ public abstract class StandardOutput {
 					if (clob != null) {
 						value = clob.getSubString(1, (int) clob.length());
 					}
-					addString(value);
+					addString(value, nullStringDisplay);
 					break;
 				case Other: //ms-access (ucanaccess driver) data type
 					value = rs.getObject(columnIndex);
 					if (value != null) {
 						value = value.toString();
 					}
-					addString(value);
+					addString(value, nullStringDisplay);
 					break;
 				default:
 					value = rs.getString(columnIndex);
-					addString(value);
+					addString(value, nullStringDisplay);
 			}
 
 			columnValues.add(value);
@@ -1379,17 +1403,16 @@ public abstract class StandardOutput {
 	}
 
 	/**
-	 * Outputs a numeric value
+	 * Outputs a string value
 	 *
 	 * @param value the value to output
+	 * @param nullStringDisplay the string to output if the value is null
 	 */
-	private void addNumeric(Object value) {
+	private void addString(Object value, String nullStringDisplay) {
 		if (value == null) {
-			//either way, default to displaying empty string or 0 respectively
-			//http://sourceforge.net/p/art/discussion/352129/thread/85b90969/
-			addCellNumeric(0D); //display nulls as 0
+			addCellString(nullStringDisplay);
 		} else {
-			addCellNumeric((Double) value);
+			addCellString((String) value);
 		}
 	}
 
