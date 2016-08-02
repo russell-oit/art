@@ -49,6 +49,8 @@ public class ArtUtils {
 	public static final String RECIPIENT_ID = "recipient_id"; //column name in data query that contains recipient identifier column
 	public static final String RECIPIENT_COLUMN = "recipient_column"; //column name in data query that contains recipient identifier
 	public static final String RECIPIENT_ID_TYPE = "recipient_id_type"; //column name in data query to indicate if recipient id is a number or not
+	public static final String EMAIL_CC = "email_cc"; //column name in data query that contains email cc column
+	public static final String EMAIL_BCC = "email_bcc"; //column name in data query that contains email bcc column
 	public static final String JOB_GROUP = "jobGroup"; //group name for quartz jobs
 	public static final String TRIGGER_GROUP = "triggerGroup"; //group name for quartz triggers
 	public static final String PUBLIC_USER = "public_user"; //username for the public/anonymous/guest user

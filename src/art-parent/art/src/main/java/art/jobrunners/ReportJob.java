@@ -700,15 +700,11 @@ public class ReportJob implements org.quartz.Job {
 						String email = rs.getString(1); //first column has email addresses
 						if (StringUtils.length(email) > 4) {
 							Map<String, String> recipientColumns = new HashMap<>();
-							String columnName;
-							String columnValue;
 							for (int i = 1; i <= columnCount; i++) { //column numbering starts from 1 not 0
-								columnName = rsmd.getColumnLabel(i); //use column alias if available
-
-								if (rs.getString(columnName) == null) {
+								String columnName = rsmd.getColumnLabel(i); //use column alias if available
+								String columnValue = rs.getString(i);
+								if (columnValue == null) {
 									columnValue = "";
-								} else {
-									columnValue = rs.getString(columnName);
 								}
 								recipientColumns.put(columnName, columnValue);
 							}
@@ -1107,6 +1103,18 @@ public class ReportJob implements org.quartz.Job {
 
 				mailer.setTo(emailsArray);
 
+				String emailCcs = recipientColumns.get(ArtUtils.EMAIL_CC);
+				if (emailCcs != null) {
+					String[] emailCcsArray = StringUtils.split(emailCcs, ";");
+					mailer.setCc(emailCcsArray);
+				}
+
+				String emailBccs = recipientColumns.get(ArtUtils.EMAIL_BCC);
+				if (emailBccs != null) {
+					String[] emailBccsArray = StringUtils.split(emailBccs, ";");
+					mailer.setBcc(emailBccsArray);
+				}
+
 				//send email for this recipient
 				try {
 					sendEmail(mailer);
@@ -1497,6 +1505,18 @@ public class ReportJob implements org.quartz.Job {
 								}
 
 								mailer.setTo(emailsArray);
+
+								String emailCcs = recipientColumns.get(ArtUtils.EMAIL_CC);
+								if (emailCcs != null) {
+									String[] emailCcsArray = StringUtils.split(emailCcs, ";");
+									mailer.setCc(emailCcsArray);
+								}
+
+								String emailBccs = recipientColumns.get(ArtUtils.EMAIL_BCC);
+								if (emailBccs != null) {
+									String[] emailBccsArray = StringUtils.split(emailBccs, ";");
+									mailer.setBcc(emailBccsArray);
+								}
 
 								//send email for this recipient
 								try {
