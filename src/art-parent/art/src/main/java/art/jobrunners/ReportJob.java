@@ -640,9 +640,10 @@ public class ReportJob implements org.quartz.Job {
 				//only email column. add dynamic recipient emails to Tos and run like normal job
 				ArrayList<String> emailsList = new ArrayList<>();
 				while (rs.next()) {
-					String email = rs.getString(1); //first column has email addresses
-					if (StringUtils.length(email) > 4) {
-						emailsList.add(email);
+					String emailColumn = rs.getString(1); //first column has email addresses
+					if (StringUtils.length(emailColumn) > 4) {
+						String[] emailArray = StringUtils.split(emailColumn, ";"); //allow multiple emails separated by ;
+						emailsList.addAll(Arrays.asList(emailArray));
 					}
 				}
 
@@ -668,26 +669,22 @@ public class ReportJob implements org.quartz.Job {
 						String email = rs.getString(1); //first column has email addresses
 						if (StringUtils.length(email) > 4) {
 							Map<String, String> recipientColumns = new HashMap<>();
-							String columnName;
-							String columnValue;
 							for (int i = 1; i <= columnCount; i++) { //column numbering starts from 1 not 0
-								columnName = rsmd.getColumnLabel(i); //use column alias if available
-
-								if (rs.getString(columnName) == null) {
+								String columnName = rsmd.getColumnLabel(i); //use column alias if available
+								String columnValue = rs.getString(i);
+								if (columnValue == null) {
 									columnValue = "";
-								} else {
-									columnValue = rs.getString(columnName);
 								}
 								recipientColumns.put(columnName.toLowerCase(Locale.ENGLISH), columnValue); //use lowercase so that special columns are found
 							}
 
-							Map<String, Map<String, String>> recipient = new HashMap<>();
-							recipient.put(email, recipientColumns);
+							Map<String, Map<String, String>> recipientDetails = new HashMap<>();
+							recipientDetails.put(email, recipientColumns);
 
 							//run job for this recipient
 							boolean splitJob = true;
 							boolean recipientFilterPresent = true;
-							runJob(splitJob, jobUser, tos, recipient, recipientFilterPresent);
+							runJob(splitJob, jobUser, tos, recipientDetails, recipientFilterPresent);
 						}
 					}
 
@@ -1099,18 +1096,16 @@ public class ReportJob implements org.quartz.Job {
 		//send customized emails to dynamic recipients
 		if (recipientDetails != null) {
 			Mailer mailer = getMailer();
-
-			String email;
-
 			for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
-				email = entry.getKey();
+				String emails = entry.getKey();
+				String[] emailsArray = StringUtils.split(emails, ";");
 				Map<String, String> recipientColumns = entry.getValue();
 
 				//customize message by replacing field labels with values for this recipient
 				String customMessage = prepareCustomMessage(finalMessage, recipientColumns); //message for a particular recipient. may include personalization e.g. Dear Jane
 				prepareMailer(mailer, customMessage, outputFileName);
 
-				mailer.setTo(email);
+				mailer.setTo(emailsArray);
 
 				//send email for this recipient
 				try {
@@ -1124,7 +1119,7 @@ public class ReportJob implements org.quartz.Job {
 
 					String msg = "Error when sending some emails."
 							+ " \n" + ex.toString()
-							+ " \n To: " + email;
+							+ " \n To: " + emails;
 					logger.warn(msg);
 				}
 			}
@@ -1490,7 +1485,8 @@ public class ReportJob implements org.quartz.Job {
 							Mailer mailer = getMailer();
 
 							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
-								String email = entry.getKey();
+								String emails = entry.getKey();
+								String[] emailsArray = StringUtils.split(emails, ";");
 								Map<String, String> recipientColumns = entry.getValue();
 
 								if (reportType == ReportType.FreeMarker) {
@@ -1500,7 +1496,7 @@ public class ReportJob implements org.quartz.Job {
 									prepareAlertMailer(mailer, customMessage, value);
 								}
 
-								mailer.setTo(email);
+								mailer.setTo(emailsArray);
 
 								//send email for this recipient
 								try {
