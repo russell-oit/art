@@ -67,11 +67,9 @@ public class LoginController {
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
-			Model model, SessionStatus sessionStatus) {
+			Model model, SessionStatus sessionStatus, HttpSession session) {
 
 		logger.debug("Entering showLogin");
-
-		HttpSession session = request.getSession();
 
 		if (!Config.isArtDatabaseConfigured()) {
 			User user = new User();
@@ -242,7 +240,7 @@ public class LoginController {
 			@RequestParam(value = "windowsDomain", required = false) String windowsDomain,
 			@RequestParam("username") String username,
 			@RequestParam("password") String password,
-			Model model, SessionStatus sessionStatus) {
+			Model model, SessionStatus sessionStatus, HttpSession session) {
 
 		logger.debug("Entering processLogin");
 
@@ -263,7 +261,6 @@ public class LoginController {
 			return "login";
 		}
 
-		HttpSession session = request.getSession();
 		String authenticationMethod = (String) session.getAttribute("authenticationMethod");
 		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 

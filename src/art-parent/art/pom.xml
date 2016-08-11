@@ -25,7 +25,6 @@
 	
 	<properties>
 		<!-- jxls-poi as at 1.0.9 has error with poi 3.13+ -->
-		<!-- xdocreport as at 1.0.6 has error with poi 3.12+ -->
 		<poi.version>3.12</poi.version>
 		<owasp.encoder.version>1.2</owasp.encoder.version>
 		<thymeleaf.version>3.0.0.RELEASE</thymeleaf.version>
@@ -411,12 +410,6 @@
 			<version>3.0.5</version>
 			<scope>runtime</scope>
 		</dependency>
-		<!--		<dependency>
-			<groupId>org.apache.phoenix</groupId>
-			<artifactId>phoenix-core</artifactId>
-			<version>4.7.0-HBase-1.1</version>
-			<scope>runtime</scope>
-		</dependency>-->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>

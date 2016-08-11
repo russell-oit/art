@@ -47,7 +47,7 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		config.setUsername(datasourceInfo.getUsername());
 		config.setPassword(datasourceInfo.getPassword());
 		//explicitly set minimum idle connection count to a low value to avoid
-		//too many connection errors where you have multiple report datasources using the same server
+		//"too many connection" errors where you have multiple report datasources using the same server
 		config.setMinimumIdle(1);
 		config.setMaximumPoolSize(maxPoolSize);
 		config.setJdbcUrl(datasourceInfo.getUrl());
@@ -67,6 +67,7 @@ public class HikariCPConnectionPool extends ConnectionPool {
 		config.setDataSourceProperties(getAppNameProperty(datasourceInfo.getUrl(), datasourceInfo.getName()));
 
 		hikariDataSource = new HikariDataSource(config);
+		
 		return hikariDataSource;
 	}
 

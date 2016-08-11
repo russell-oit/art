@@ -349,7 +349,6 @@ public class Config extends HttpServlet {
 	 * upgrade steps on the art database and starts the quartz scheduler
 	 */
 	public static void initializeArtDatabase() {
-		//load art database settings
 		loadArtDatabaseConfiguration();
 
 		if (artDbConfig == null) {
@@ -386,7 +385,9 @@ public class Config extends HttpServlet {
 				artDatabase = mapper.readValue(artDatabaseFile, ArtDatabase.class);
 
 				//decrypt password field
-				artDatabase.setPassword(AesEncryptor.decrypt(artDatabase.getPassword()));
+				String encryptedPassword = artDatabase.getPassword();
+				String decryptedPassword = AesEncryptor.decrypt(encryptedPassword);
+				artDatabase.setPassword(decryptedPassword);
 			} else {
 				logger.info("ART Database configuration file not found");
 			}
@@ -413,7 +414,8 @@ public class Config extends HttpServlet {
 			throws IOException {
 
 		//encrypt password field for storing
-		artDatabase.setPassword(AesEncryptor.encrypt(artDatabase.getPassword()));
+		String encryptedPassword = AesEncryptor.encrypt(artDatabase.getPassword());
+		artDatabase.setPassword(encryptedPassword);
 
 		File artDatabaseFile = new File(artDatabaseFilePath);
 		ObjectMapper mapper = new ObjectMapper();
@@ -795,7 +797,7 @@ public class Config extends HttpServlet {
 	public static String getReportsExportPath() {
 		return exportPath + "reports" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the batch directory
 	 *
@@ -804,7 +806,7 @@ public class Config extends HttpServlet {
 	public static String getBatchPath() {
 		return workDirectoryPath + "batch" + File.separator;
 	}
-	
+
 	/**
 	 * Returns the full path to the WEB-INF\tmp directory
 	 *
