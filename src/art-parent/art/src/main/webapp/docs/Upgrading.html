@@ -35,6 +35,7 @@
       <li>Start Tomcat </li> 
      </ul> </li> 
     <li>Copy the contents of the backup <strong>art\WEB-INF\work</strong> directory to the new version's work directory</li> 
+    <li>If you had modified the <strong>art\WEB-INF\art-custom-settings.json</strong> file, copy the file from the backup directory to the new version directory</li> 
     <li>If you were using the demo HSQLDB database, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="" href="https://sourceforge.net/p/art/wiki/Tips/">Tips</a> documentation to see how you can upgrade an HSQLDB database.</li> 
     <li>If you had put any <strong>JDBC drivers</strong> in the <strong>art\WEB-INF\lib</strong> directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
     <li>Restart Tomcat</li> 
