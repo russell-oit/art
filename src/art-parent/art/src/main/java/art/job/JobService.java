@@ -27,6 +27,7 @@ import art.report.Report;
 import art.report.ReportService;
 import art.user.User;
 import art.user.UserService;
+import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.SchedulerUtils;
 import java.sql.Connection;
@@ -44,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,6 +198,7 @@ public class JobService {
 	 * @return all jobs
 	 * @throws SQLException
 	 */
+	@Cacheable("jobs")
 	public List<Job> getAllJobs() throws SQLException {
 		logger.debug("Entering getAllJobs");
 
@@ -213,19 +216,6 @@ public class JobService {
 	@Cacheable("jobs")
 	public Job getJob(int id) throws SQLException {
 		logger.debug("Entering getJob: id={}", id);
-
-		return getFreshJob(id);
-	}
-
-	/**
-	 * Returns a job. Data always retrieved from the database and not the cache
-	 *
-	 * @param id the job id
-	 * @return job if found, null otherwise
-	 * @throws SQLException
-	 */
-	public Job getFreshJob(int id) throws SQLException {
-		logger.debug("Entering getFreshJob: id={}", id);
 
 		String sql = SQL_SELECT_ALL + " WHERE JOB_ID = ?";
 		ResultSetHandler<Job> h = new BeanHandler<>(Job.class, new JobMapper());
@@ -252,11 +242,17 @@ public class JobService {
 
 		//delete records in quartz tables
 		Scheduler scheduler = SchedulerUtils.getScheduler();
+		
 		if (scheduler == null) {
 			logger.warn("Cannot delete job: {}. Scheduler not available.", id);
 			return;
 		}
-		scheduler.deleteJob(jobKey(String.valueOf(id)));
+		
+		String jobName = "job" + id;
+		String triggerName = "trigger" + id;
+		
+		scheduler.deleteJob(jobKey(jobName, ArtUtils.JOB_GROUP));
+		scheduler.unscheduleJob(triggerKey(triggerName, ArtUtils.TRIGGER_GROUP));
 
 		// Delete the Cached table if this job is a cache result one
 		JobType jobType = job.getJobType();

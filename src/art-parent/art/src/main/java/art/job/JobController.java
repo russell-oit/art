@@ -17,6 +17,7 @@
  */
 package art.job;
 
+import art.cache.CacheHelper;
 import art.datasource.DatasourceService;
 import art.enums.JobType;
 import art.ftpserver.FtpServerService;
@@ -99,9 +100,12 @@ public class JobController {
 
 	@Autowired
 	private JobParameterService jobParameterService;
-	
+
 	@Autowired
 	private FtpServerService ftpServerService;
+
+	@Autowired
+	private CacheHelper cacheHelper;
 
 	@RequestMapping(value = "/app/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
@@ -181,7 +185,7 @@ public class JobController {
 		AjaxResponse response = new AjaxResponse();
 
 		try {
-			Job job = jobService.getFreshJob(id);
+			Job job = jobService.getJob(id);
 
 			String lastRunMessage = job.getLastRunMessage();
 			if (StringUtils.isNotBlank(lastRunMessage)) {
@@ -206,18 +210,21 @@ public class JobController {
 
 	@RequestMapping(value = "/app/runJob", method = RequestMethod.POST)
 	public @ResponseBody
-	AjaxResponse runJob(@RequestParam("id") Integer id) {
+	AjaxResponse runJob(@RequestParam("id") Integer id, HttpServletRequest request) {
 		logger.debug("Entering runJob: id={}", id);
 
 		AjaxResponse response = new AjaxResponse();
 
 		try {
 			String runId = id + "-" + ArtUtils.getUniqueId();
+			
+			String clearJobsCacheUrl = getClearJobsCacheUrl(request);
 
 			JobDetail tempJob = newJob(ReportJob.class)
 					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
 					.usingJobData("jobId", id)
 					.usingJobData("tempJob", Boolean.TRUE)
+					.usingJobData("clearJobsCacheUrl", clearJobsCacheUrl)
 					.build();
 
 			// create SimpleTrigger that will fire once, immediately		        
@@ -240,7 +247,8 @@ public class JobController {
 	@RequestMapping(value = "/app/runLaterJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse runLaterJob(@RequestParam("runLaterJobId") Integer runLaterJobId,
-			@RequestParam("runLaterDate") String runLaterDate) {
+			@RequestParam("runLaterDate") String runLaterDate,
+			HttpServletRequest request) {
 
 		logger.debug("Entering runLaterJob: runLaterJobId={}, runLaterDate='{}'",
 				runLaterJobId, runLaterDate);
@@ -249,11 +257,14 @@ public class JobController {
 
 		try {
 			String runId = runLaterJobId + "-" + ArtUtils.getUniqueId();
+			
+			String clearJobsCacheUrl = getClearJobsCacheUrl(request);
 
 			JobDetail tempJob = newJob(ReportJob.class)
 					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
 					.usingJobData("jobId", runLaterJobId)
 					.usingJobData("tempJob", Boolean.TRUE)
+					.usingJobData("clearJobsCacheUrl", clearJobsCacheUrl)
 					.build();
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
@@ -343,7 +354,7 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			createQuartzJob(job);
+			createQuartzJob(job, request);
 
 			saveJobParameters(request, job.getJobId());
 
@@ -658,9 +669,10 @@ public class JobController {
 	 * Creates a quartz job for the given art job
 	 *
 	 * @param job the art job
+	 * @param request the http request
 	 * @throws SchedulerException
 	 */
-	private void createQuartzJob(Job job) throws SchedulerException {
+	private void createQuartzJob(Job job, HttpServletRequest request) throws SchedulerException {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
@@ -673,9 +685,12 @@ public class JobController {
 		String jobName = "job" + jobId;
 		String triggerName = "trigger" + jobId;
 
+		String clearJobsCacheUrl = getClearJobsCacheUrl(request);
+
 		JobDetail quartzJob = newJob(ReportJob.class)
 				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
 				.usingJobData("jobId", jobId)
+				.usingJobData("clearJobsCacheUrl", clearJobsCacheUrl)
 				.build();
 
 		//build cron expression.
@@ -699,5 +714,26 @@ public class JobController {
 
 		//add job and trigger to scheduler
 		scheduler.scheduleJob(quartzJob, trigger);
+	}
+
+	@RequestMapping(value = "/clearJobsCache", method = RequestMethod.GET)
+	public String clearJobsCache() {
+		cacheHelper.clearJobs();
+		return "clearJobsCache";
+	}
+	
+	/**
+	 * Returns the clear jobs cache url
+	 * 
+	 * @param request the http request
+	 */
+	private String getClearJobsCacheUrl(HttpServletRequest request){
+		//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
+		String clearJobsCacheUrl = request.getScheme() + "://"
+				+ request.getServerName()
+				+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+				+ request.getContextPath() + "/clearJobsCache.do";
+		
+		return clearJobsCacheUrl;
 	}
 }
