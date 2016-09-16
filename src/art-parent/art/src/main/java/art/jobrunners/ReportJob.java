@@ -179,6 +179,15 @@ public class ReportJob implements org.quartz.Job {
 
 		runBatchFile();
 
+		clearJobsCache(dataMap);
+	}
+
+	/**
+	 * Clears the jobs cache
+	 * 
+	 * @param dataMap quartz job data map
+	 */
+	private void clearJobsCache(JobDataMap dataMap) {
 		//clear jobs cache so that job details in jobs page etc are updated
 		String clearJobsCacheUrl = dataMap.getString("clearJobsCacheUrl");
 		if (StringUtils.isBlank(clearJobsCacheUrl)) {

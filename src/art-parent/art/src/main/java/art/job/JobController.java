@@ -716,12 +716,6 @@ public class JobController {
 		scheduler.scheduleJob(quartzJob, trigger);
 	}
 
-	@RequestMapping(value = "/clearJobsCache", method = RequestMethod.GET)
-	public String clearJobsCache() {
-		cacheHelper.clearJobs();
-		return "clearJobsCache";
-	}
-	
 	/**
 	 * Returns the clear jobs cache url
 	 * 
