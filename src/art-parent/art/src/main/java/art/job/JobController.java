@@ -17,7 +17,6 @@
  */
 package art.job;
 
-import art.cache.CacheHelper;
 import art.datasource.DatasourceService;
 import art.enums.JobType;
 import art.ftpserver.FtpServerService;
@@ -103,9 +102,6 @@ public class JobController {
 
 	@Autowired
 	private FtpServerService ftpServerService;
-
-	@Autowired
-	private CacheHelper cacheHelper;
 
 	@RequestMapping(value = "/app/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
