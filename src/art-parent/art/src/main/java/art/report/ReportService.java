@@ -132,6 +132,7 @@ public class ReportService {
 			report.setLocale(rs.getString("LOCALE"));
 			report.setNullNumberDisplay(rs.getString("NULL_NUMBER_DISPLAY"));
 			report.setNullStringDisplay(rs.getString("NULL_STRING_DISPLAY"));
+			report.setFetchSize(rs.getInt("FETCH_SIZE"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -576,9 +577,9 @@ public class ReportService {
 					+ " XMLA_DATASOURCE, XMLA_CATALOG, DEFAULT_REPORT_FORMAT,"
 					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
-					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY,"
+					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 31) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 32) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -610,6 +611,7 @@ public class ReportService {
 				report.getLocale(),
 				report.getNullNumberDisplay(),
 				report.getNullStringDisplay(),
+				report.getFetchSize(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -624,7 +626,7 @@ public class ReportService {
 					+ " XMLA_DATASOURCE=?, XMLA_CATALOG=?, DEFAULT_REPORT_FORMAT=?,"
 					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
-					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?,"
+					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -657,6 +659,7 @@ public class ReportService {
 				report.getLocale(),
 				report.getNullNumberDisplay(),
 				report.getNullStringDisplay(),
+				report.getFetchSize(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
@@ -733,7 +736,7 @@ public class ReportService {
 	 */
 	private void setReportSource(Report report) throws SQLException {
 		logger.debug("Entering setReportSource: report={}", report);
-		
+
 		if (report == null) {
 			return;
 		}
@@ -773,7 +776,7 @@ public class ReportService {
 	 * @throws SQLException
 	 */
 	@CacheEvict(value = "reports", allEntries = true)
-	public void copyReport(Report report, int originalReportId, User actionUser) throws SQLException {
+	public synchronized void copyReport(Report report, int originalReportId, User actionUser) throws SQLException {
 		logger.debug("Entering copyReport: report={}, originalReportId={}, actionUser={}",
 				report, originalReportId, actionUser);
 
@@ -782,13 +785,13 @@ public class ReportService {
 
 		try {
 			//copy parameters
-			copyTableRow("ART_QUERY_FIELDS", "QUERY_ID", originalReportId, newId);
+			copyTableRow("ART_REPORT_PARAMETERS", "REPORT_ID", originalReportId, newId, "REPORT_PARAMETER_ID");
 
 			//copy rules
-			copyTableRow("ART_QUERY_RULES", "QUERY_ID", originalReportId, newId);
+			copyTableRow("ART_QUERY_RULES", "QUERY_ID", originalReportId, newId, null);
 
 			//copy drilldown reports
-			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId);
+			copyTableRow("ART_DRILLDOWN_QUERIES", "QUERY_ID", originalReportId, newId, null);
 		} catch (SQLException ex) {
 			//if an error occurred when copying new report details, delete new report also
 			deleteReport(newId);
@@ -809,7 +812,7 @@ public class ReportService {
 	 * available
 	 */
 	private int copyTableRow(String tableName, String keyColumnName,
-			int keyId, int newKeyId) throws SQLException {
+			int keyId, int newKeyId, String primaryKeyColumn) throws SQLException {
 
 		logger.debug("Entering copyTableRow: tableName='{}', keyColumnName='{}',"
 				+ " keyId={}, newKeyId={}", tableName, keyColumnName, keyId, newKeyId);
@@ -842,6 +845,15 @@ public class ReportService {
 				for (int i = 0; i < columnCount; i++) {
 					if (StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), keyColumnName)) {
 						columnValues.add(newKeyId);
+					} else if (primaryKeyColumn != null && StringUtils.equalsIgnoreCase(rsmd.getColumnName(i + 1), primaryKeyColumn)) {
+						//generate new id
+						String sql2 = "SELECT MAX(" + primaryKeyColumn + ") FROM " + tableName;
+						ResultSetHandler<Integer> h = new ScalarHandler<>();
+						Integer maxId = dbService.query(sql2, h);
+						logger.debug("maxId={}", maxId);
+
+						int newId = maxId + 1;;
+						columnValues.add(newId);
 					} else {
 						columnValues.add(rs.getObject(i + 1));
 					}
@@ -910,7 +922,7 @@ public class ReportService {
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
 	}
-	
+
 	/**
 	 * Returns dashboard reports
 	 *
@@ -1064,7 +1076,7 @@ public class ReportService {
 	 */
 	public boolean hasExclusiveAccess(User user, Report report) throws SQLException {
 		logger.debug("Entering hasExclusiveAccess: user={}, report={}", user, report);
-		
+
 		boolean exclusive = false;
 
 		String sql;

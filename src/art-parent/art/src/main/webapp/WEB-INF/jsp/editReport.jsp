@@ -628,6 +628,16 @@ Edit report page
 					</div>
 				</fieldset>
 
+				<div class="form-group">
+					<label class="control-label col-md-4" for="fetchSize">
+						<spring:message code="reports.label.fetchSize"/>
+					</label>
+					<div class="col-md-8">
+						<form:input path="fetchSize" maxlength="5" class="form-control"/>
+						<form:errors path="fetchSize" cssClass="error"/>
+					</div>
+				</div>
+
 				<fieldset id="chartFields">
 					<fieldset id="chartAxisLabelFields">
 						<div class="form-group">

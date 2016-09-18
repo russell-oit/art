@@ -74,6 +74,21 @@ public class Report implements Serializable {
 	private String locale;
 	private String nullNumberDisplay;
 	private String nullStringDisplay;
+	private int fetchSize;
+
+	/**
+	 * @return the fetchSize
+	 */
+	public int getFetchSize() {
+		return fetchSize;
+	}
+
+	/**
+	 * @param fetchSize the fetchSize to set
+	 */
+	public void setFetchSize(int fetchSize) {
+		this.fetchSize = fetchSize;
+	}
 
 	/**
 	 * @return the nullNumberDisplay

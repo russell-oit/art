@@ -16,6 +16,7 @@
  */
 package art.runreport;
 
+import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
 import art.enums.ReportType;
@@ -46,6 +47,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
@@ -79,6 +81,7 @@ public class ReportRunner {
 	private final List<Object> jdbcParams = new ArrayList<>();
 	private ReportType reportType;
 	private User user;
+	private boolean postgreSqlFetchSizeApplied;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
@@ -598,7 +601,29 @@ public class ReportRunner {
 		Object[] paramValues = jdbcParams.toArray(new Object[0]);
 		finalSql = generateFinalSql(querySql, paramValues);
 
+		int fetchSize = report.getFetchSize();
+		boolean applyFetchSize = false;
+
+		if (fetchSize > 0) {
+			applyFetchSize = true;
+			String jdbcUrl;
+			Datasource datasource = report.getDatasource();
+			if (datasource != null) {
+				jdbcUrl = datasource.getUrl();
+				if (StringUtils.startsWith(jdbcUrl, "jdbc:postgresql")) {
+					postgreSqlFetchSizeApplied = true;
+					connQuery.setAutoCommit(false);
+				} else if (StringUtils.startsWith(jdbcUrl, "jdbc:mysql")) {
+					fetchSize = Integer.MIN_VALUE;
+				}
+			}
+		}
+
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
+
+		if (applyFetchSize) {
+			psQuery.setFetchSize(fetchSize);
+		}
 
 		DatabaseUtils.setValues(psQuery, paramValues);
 
@@ -778,7 +803,7 @@ public class ReportRunner {
 
 		return lovValues;
 	}
-	
+
 	/**
 	 * Runs an lov report and returns the lov values (value and label)
 	 *
@@ -868,6 +893,14 @@ public class ReportRunner {
 	 * IN ORDER TO RETURN THE CONNECTION TO THE POOL.
 	 */
 	public void close() {
+		if (postgreSqlFetchSizeApplied) {
+			try {
+				connQuery.setAutoCommit(true);
+			} catch (SQLException ex) {
+				logger.error("Error", ex);
+			}
+		}
+
 		DatabaseUtils.close(psQuery, connQuery);
 	}
 
