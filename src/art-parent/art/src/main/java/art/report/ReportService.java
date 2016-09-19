@@ -806,6 +806,8 @@ public class ReportService {
 	 * @param keyColumnName the name of the key column
 	 * @param keyId the original value of the key column
 	 * @param newKeyId the new value of the key column
+	 * @param primaryKeyColumn the primary key of the table, that is to be
+	 * incremented by 1. null if this is not required
 	 * @return the number of records copied, 0 otherwise
 	 * @throws SQLException
 	 * @throws IllegalStateException if connection to the art database is not
