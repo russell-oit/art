@@ -31,6 +31,7 @@ import art.settings.Settings;
 import art.utils.ArtUtils;
 import art.utils.SchedulerUtils;
 import art.utils.UpgradeHelper;
+import ch.qos.logback.classic.LoggerContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lowagie.text.FontFactory;
 import freemarker.template.Configuration;
@@ -115,13 +116,6 @@ public class Config extends HttpServlet {
 
 		//shutdown quartz scheduler
 		SchedulerUtils.shutdownScheduler();
-		try {
-			//have delay to avoid tomcat reporting that threads weren't stopped. 
-			//(http://forums.terracotta.org/forums/posts/list/3479.page)
-			TimeUnit.SECONDS.sleep(1);
-		} catch (InterruptedException ex) {
-			logger.error("Error", ex);
-		}
 
 		//close database connections
 		DbConnections.closeAllConnections();
@@ -130,6 +124,11 @@ public class Config extends HttpServlet {
 		deregisterJdbcDrivers();
 
 		logger.info("ART stopped");
+		
+		//http://logback.10977.n7.nabble.com/Shutting-down-async-appenders-when-using-logback-through-slf4j-td12505.html
+		//http://logback.qos.ch/manual/configuration.html#stopContext
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		loggerContext.stop();
 	}
 
 	/**
