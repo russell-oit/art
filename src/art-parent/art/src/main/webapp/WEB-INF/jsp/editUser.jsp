@@ -170,7 +170,7 @@ Display edit user page
 						<spring:message code="users.label.fullName"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="fullName" maxlength="40" class="form-control"/>
+						<form:input path="fullName" maxlength="100" class="form-control"/>
 						<form:errors path="fullName" cssClass="error"/>
 					</div>
 				</div>
@@ -179,7 +179,7 @@ Display edit user page
 						<spring:message code="users.label.email"/>
 					</label>
 					<div class="col-md-8">
-						<form:input type="email" path="email" maxlength="40" class="form-control"/>
+						<form:input type="email" path="email" maxlength="100" class="form-control"/>
 						<form:errors path="email" cssClass="error"/>
 					</div>
 				</div>
