@@ -31,6 +31,7 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,7 +228,8 @@ public class DatasourceService {
 				datasource.getName(),
 				datasource.getDescription(),
 				datasource.getDatasourceType().getValue(),
-				datasource.isJndi(),
+				//postgresql requires explicit cast from boolean to integer
+				BooleanUtils.toInteger(datasource.isJndi()),
 				datasource.getDriver(),
 				datasource.getUrl(),
 				datasource.getUsername(),
@@ -235,7 +237,7 @@ public class DatasourceService {
 				datasource.getPasswordAlgorithm(),
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
-				datasource.isActive(),
+				BooleanUtils.toInteger(datasource.isActive()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -251,7 +253,7 @@ public class DatasourceService {
 				datasource.getName(),
 				datasource.getDescription(),
 				datasource.getDatasourceType().getValue(),
-				datasource.isJndi(),
+				BooleanUtils.toInteger(datasource.isJndi()),
 				datasource.getDriver(),
 				datasource.getUrl(),
 				datasource.getUsername(),
@@ -259,7 +261,7 @@ public class DatasourceService {
 				datasource.getPasswordAlgorithm(),
 				datasource.getConnectionPoolTimeoutMins(),
 				datasource.getTestSql(),
-				datasource.isActive(),
+				BooleanUtils.toInteger(datasource.isActive()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				datasource.getDatasourceId()
@@ -347,7 +349,7 @@ public class DatasourceService {
 					+ " WHERE DATABASE_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
-			valuesList.add(multipleDatasourceEdit.isActive());
+			valuesList.add(BooleanUtils.toInteger(multipleDatasourceEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
 			valuesList.addAll(Arrays.asList(ids));

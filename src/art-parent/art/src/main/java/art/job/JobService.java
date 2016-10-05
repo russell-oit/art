@@ -41,6 +41,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import static org.quartz.JobKey.jobKey;
 import org.quartz.Scheduler;
@@ -380,7 +381,7 @@ public class JobService {
 					+ " WHERE JOB_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
-			valuesList.add(multipleJobEdit.isActive());
+			valuesList.add(BooleanUtils.toInteger(multipleJobEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
 			valuesList.addAll(Arrays.asList(ids));
@@ -550,10 +551,10 @@ public class JobService {
 				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
 				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
 				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
-				job.isActive(),
-				job.isEnableAudit(),
-				job.isAllowSharing(),
-				job.isAllowSplitting(),
+				BooleanUtils.toInteger(job.isActive()),
+				BooleanUtils.toInteger(job.isEnableAudit()),
+				BooleanUtils.toInteger(job.isAllowSharing()),
+				BooleanUtils.toInteger(job.isAllowSplitting()),
 				job.getRecipientsReportId(),
 				job.getRunsToArchive(),
 				migratedToQuartz,
@@ -602,10 +603,10 @@ public class JobService {
 				DatabaseUtils.toSqlTimestamp(job.getStartDate()),
 				DatabaseUtils.toSqlTimestamp(job.getEndDate()),
 				DatabaseUtils.toSqlTimestamp(job.getNextRunDate()),
-				job.isActive(),
-				job.isEnableAudit(),
-				job.isAllowSharing(),
-				job.isAllowSplitting(),
+				BooleanUtils.toInteger(job.isActive()),
+				BooleanUtils.toInteger(job.isEnableAudit()),
+				BooleanUtils.toInteger(job.isAllowSharing()),
+				BooleanUtils.toInteger(job.isAllowSplitting()),
 				job.getRecipientsReportId(),
 				job.getRunsToArchive(),
 				migratedToQuartz,

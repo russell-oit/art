@@ -31,6 +31,7 @@ import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -243,7 +244,7 @@ public class FtpServerService {
 				ftpServer.getFtpServerId(),
 				ftpServer.getName(),
 				ftpServer.getDescription(),
-				ftpServer.isActive(),
+				BooleanUtils.toInteger(ftpServer.isActive()),
 				ftpServer.getServer(),
 				ftpServer.getPort(),
 				ftpServer.getUser(),
@@ -264,7 +265,7 @@ public class FtpServerService {
 			Object[] values = {
 				ftpServer.getName(),
 				ftpServer.getDescription(),
-				ftpServer.isActive(),
+				BooleanUtils.toInteger(ftpServer.isActive()),
 				ftpServer.getServer(),
 				ftpServer.getPort(),
 				ftpServer.getUser(),
@@ -308,7 +309,7 @@ public class FtpServerService {
 					+ " WHERE FTP_SERVER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
-			valuesList.add(multipleFtpServerEdit.isActive());
+			valuesList.add(BooleanUtils.toInteger(multipleFtpServerEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
 			valuesList.addAll(Arrays.asList(ids));

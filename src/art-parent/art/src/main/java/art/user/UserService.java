@@ -33,6 +33,7 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -389,7 +390,7 @@ public class UserService {
 					+ " WHERE USER_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
-			valuesList.add(multipleUserEdit.isActive());
+			valuesList.add(BooleanUtils.toInteger(multipleUserEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
 			valuesList.addAll(Arrays.asList(ids));
@@ -439,8 +440,8 @@ public class UserService {
 				accessLevel,
 				user.getDefaultReportGroup(),
 				user.getStartReport(),
-				user.isCanChangePassword(),
-				user.isActive(),
+				BooleanUtils.toInteger(user.isCanChangePassword()),
+				BooleanUtils.toInteger(user.isActive()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -462,8 +463,8 @@ public class UserService {
 				accessLevel,
 				user.getDefaultReportGroup(),
 				user.getStartReport(),
-				user.isCanChangePassword(),
-				user.isActive(),
+				BooleanUtils.toInteger(user.isCanChangePassword()),
+				BooleanUtils.toInteger(user.isActive()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				user.getUserId()

@@ -32,6 +32,7 @@ import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -348,12 +349,12 @@ public class ParameterService {
 				parameter.getHelpText(),
 				dataType,
 				parameter.getDefaultValue(),
-				parameter.isHidden(),
-				parameter.isUseLov(),
+				BooleanUtils.toInteger(parameter.isHidden()),
+				BooleanUtils.toInteger(parameter.isUseLov()),
 				parameter.getLovReportId(),
-				parameter.isUseRulesInLov(),
+				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
-				parameter.isUseDirectSubstitution(),
+				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -375,12 +376,12 @@ public class ParameterService {
 				parameter.getHelpText(),
 				dataType,
 				parameter.getDefaultValue(),
-				parameter.isHidden(),
-				parameter.isUseLov(),
+				BooleanUtils.toInteger(parameter.isHidden()),
+				BooleanUtils.toInteger(parameter.isUseLov()),
 				parameter.getLovReportId(),
-				parameter.isUseRulesInLov(),
+				BooleanUtils.toInteger(parameter.isUseRulesInLov()),
 				parameter.getDrilldownColumnIndex(),
-				parameter.isUseDirectSubstitution(),
+				BooleanUtils.toInteger(parameter.isUseDirectSubstitution()),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				parameter.getParameterId()

@@ -46,6 +46,7 @@ import org.apache.commons.dbutils.handlers.BeanListHandler;
 import org.apache.commons.dbutils.handlers.ColumnListHandler;
 import org.apache.commons.dbutils.handlers.MapListHandler;
 import org.apache.commons.dbutils.handlers.ScalarHandler;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -520,7 +521,7 @@ public class ReportService {
 					+ " WHERE QUERY_ID IN(" + StringUtils.repeat("?", ",", ids.length) + ")";
 
 			List<Object> valuesList = new ArrayList<>();
-			valuesList.add(multipleReportEdit.isActive());
+			valuesList.add(BooleanUtils.toInteger(multipleReportEdit.isActive()));
 			valuesList.add(actionUser.getUsername());
 			valuesList.add(DatabaseUtils.getCurrentTimeAsSqlTimestamp());
 			valuesList.addAll(Arrays.asList(ids));
@@ -590,10 +591,10 @@ public class ReportService {
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
-				report.isUsesRules(),
-				report.isActive(),
-				report.isHidden(),
-				report.isParametersInOutput(),
+				BooleanUtils.toInteger(report.isUsesRules()),
+				BooleanUtils.toInteger(report.isActive()),
+				BooleanUtils.toInteger(report.isHidden()),
+				BooleanUtils.toInteger(report.isParametersInOutput()),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
 				report.getChartOptionsSetting(),
@@ -638,10 +639,10 @@ public class ReportService {
 				reportGroupId,
 				datasourceId,
 				report.getContactPerson(),
-				report.isUsesRules(),
-				report.isActive(),
-				report.isHidden(),
-				report.isParametersInOutput(),
+				BooleanUtils.toInteger(report.isUsesRules()),
+				BooleanUtils.toInteger(report.isActive()),
+				BooleanUtils.toInteger(report.isHidden()),
+				BooleanUtils.toInteger(report.isParametersInOutput()),
 				report.getxAxisLabel(),
 				report.getyAxisLabel(),
 				report.getChartOptionsSetting(),
