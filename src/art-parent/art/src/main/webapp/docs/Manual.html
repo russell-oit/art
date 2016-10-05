@@ -864,6 +864,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
         <td>For tabular reports, a string that should be used for string columns where the value is null. Leave blank to use the default.</td> 
        </tr> 
        <tr> 
+        <td><strong>Fetch Size</strong></td> 
+        <td>The number of rows retrieved by the database driver per trip to the database. Leave as 0 to use the driver's default. This value reprents a trade-off between memory and query execution time and may be useful to set for reports that return large amounts of data in order to avoid out-of-memory errors. Not all databases honour this setting.</td> 
+       </tr> 
+       <tr> 
         <td><strong>x-axis Label</strong></td> 
         <td>For charts, the x axis label</td> 
        </tr> 
@@ -1234,7 +1238,7 @@ FROM mytable
       <li><strong>jXLS Spreadsheet: Template Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query within the jXLS template will be used to generate the results. The query will be run against the selected datasource.</li> 
       <li><strong>jXLS Spreadsheet: ART Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</li> 
       <li><strong>FreeMarker</strong><br /> Displays a report in the browser based on a freemarker (http://freemarker.org/) template. The query as defined in the SQL source will be used to generate the results.</li> 
-      <li><strong>XDocReport: FreeMarker engine - Docx</strong><br /> You can use MS Word (docx), LibreOffice/OpenOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would like it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the XDocReport wiki, <a href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">https://github.com/opensagres/xdocreport/wiki</a>, for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the FreeMarker or Velocity expressions.</li> 
+      <li><strong>XDocReport: FreeMarker engine - Docx</strong><br /> You can use MS Word (docx), LibreOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would like it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the XDocReport wiki, <a href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">https://github.com/opensagres/xdocreport/wiki</a>, for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the FreeMarker or Velocity expressions.</li> 
      </ul> 
      <p>Displays a report based on the selected docx template, which uses freemarker syntax (http://freemarker.org/docs/index.html) for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
      <ul> 
