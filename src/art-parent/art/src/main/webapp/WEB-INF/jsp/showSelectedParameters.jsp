@@ -10,17 +10,10 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<div align="center">
-	<table style="width: 90%; border: 0;">
-		<tr>
-			<td>
-				<div align="center" class="greyBack">
-					<c:forEach var="parameterDisplayValue" items="${parameterDisplayValues}">
-						${encode:forHtmlContent(parameterDisplayValue.value)}
-						<br>
-					</c:forEach>
-				</div>
-			</td>
-		</tr>
-	</table>
+<div class="well well-sm">
+	<c:forEach var="reportParamEntry" items="${reportParamEntries}">
+		<c:set var="reportParam" value="${reportParamEntry.value}"/>
+		<b>${encode:forHtmlContent(reportParam.parameter.label)}</b>: ${encode:forHtmlContent(reportParam.displayValues)}
+		<br>
+	</c:forEach>
 </div>

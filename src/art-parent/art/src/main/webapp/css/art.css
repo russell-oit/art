@@ -16,13 +16,10 @@
 
 /* report header and footer */
 div.reportBanner {
-	border-color: #08699C;
 	background-color: #FFFFFF;
-	border: 1px solid;
 	color: #000000;
 	font-family: "Verdana", "Helvetica", "Arial";
 	font-size: 10pt;
-	border-color: gray;
 }
 
 /* space to take into account the bootstrap fixed navbar */

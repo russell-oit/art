@@ -259,14 +259,14 @@ public class RunReportController {
 				//get parameter display values if parameters need to be shown in html or file output
 				//especially for lov values where display value may be different from data value
 				//use treemap so that params can be displayed in param position order
-				Map<Integer, String> parameterDisplayValues = new TreeMap<>();
+				Map<Integer, ReportParameter> reportParamEntries = new TreeMap<>();
 
 				boolean showParams = false;
 				if (reportOptions.isShowSelectedParameters() || report.isParametersInOutput()) {
 					showParams = true;
 
 					for (ReportParameter reportParam : reportParamsList) {
-						parameterDisplayValues.put(reportParam.getPosition(), reportParam.getNameAndDisplayValues());
+						reportParamEntries.put(reportParam.getPosition(), reportParam);
 					}
 				}
 
@@ -300,8 +300,10 @@ public class RunReportController {
 					DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale);
 					String startTimeString = df.format(new Date(overallStartTime));
 
-					String reportInfo = "<b>" + reportName + "</b>"
-							+ description + " :: " + startTimeString;
+//					String reportInfo = "<b>" + reportName + "</b>"
+//							+ description + " :: " + startTimeString;
+					String reportInfo = "<h5>" + reportName + "<small>"
+							+ description + " :: " + startTimeString + "</small></h5>";
 
 					displayReportInfo(writer, reportInfo);
 
@@ -309,7 +311,7 @@ public class RunReportController {
 
 					//display parameters
 					if (showParams) {
-						request.setAttribute("parameterDisplayValues", parameterDisplayValues);
+						request.setAttribute("reportParamEntries", reportParamEntries);
 						servletContext.getRequestDispatcher("/WEB-INF/jsp/showSelectedParameters.jsp").include(request, response);
 					}
 

@@ -11,15 +11,9 @@ Display the final sql used to generate a report
 
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<div align="center">
-	<table style="width: 90%; border: 0;">
-		<tr>
-			<td>
-				<div align="center" style="width: 90%;" class="greyBack">
-					<encode:forHtmlContent value="${finalSql}"/>
-				</div>
-			</td>
-		</tr>
-	</table>
+<div class="well well-sm">
+	<code>
+		${encode:forHtmlContent(finalSql)}
+	</code>
 </div>
 
