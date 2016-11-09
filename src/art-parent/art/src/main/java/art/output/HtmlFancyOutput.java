@@ -30,24 +30,24 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void init() {
 		//include required css and javascript files
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlFancyOutput.css'>");
+		//out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlFancyOutput.css'>");
 	}
 
 	@Override
 	public void beginHeader() {
 		out.println("<div style='border: 3px solid white'>");
-		out.println("<table class='qe' style='margin: 0 auto; width: 95%'>");
+		out.println("<table class='table table-condensed table-bordered table-striped'>");
 		out.println("<tr>");
 	}
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<td class='qeattr'>" + value + "</td>");
+		out.println("<th>" + value + "</th>");
 	}
 
 	@Override
 	public void addHeaderCellAlignLeft(String value) {
-		out.println("<td class='qeattrLeft'>" + value + "</td>");
+		out.println("<th class='text-left'>" + value + "</th>");
 	}
 
 	@Override
@@ -59,9 +59,9 @@ public class HtmlFancyOutput extends StandardOutput {
 	public void addCellString(String value) {
 		String cssClass;
 		if (evenRow) {
-			cssClass = "qeevenLeft";
+			cssClass = "text-left";
 		} else {
-			cssClass = "qeoddLeft";
+			cssClass = "text-left";
 		}
 
 		out.println("<td class='" + cssClass + "'>" + value + "</td>");
@@ -73,24 +73,24 @@ public class HtmlFancyOutput extends StandardOutput {
 
 		String cssClass;
 		if (evenRow) {
-			cssClass = "qeeven";
+			cssClass = "text-right";
 		} else {
-			cssClass = "qeodd";
+			cssClass = "text-right";
 		}
 
-		out.println("<td style='text-align: right' class='" + cssClass + "'>" + formattedValue + "</td>");
+		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
 	}
 	
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		String cssClass;
 		if (evenRow) {
-			cssClass = "qeeven";
+			cssClass = "text-right";
 		} else {
-			cssClass = "qeodd";
+			cssClass = "text-right";
 		}
 
-		out.println("<td style='text-align: right' class='" + cssClass + "'>" + formattedValue + "</td>");
+		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
 	}
 
 	@Override
@@ -99,9 +99,9 @@ public class HtmlFancyOutput extends StandardOutput {
 
 		String cssClass;
 		if (evenRow) {
-			cssClass = "qeevenLeft";
+			cssClass = "text-left";
 		} else {
-			cssClass = "qeoddLeft";
+			cssClass = "text-left";
 		}
 
 		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
@@ -112,9 +112,9 @@ public class HtmlFancyOutput extends StandardOutput {
 		String cssClass;
 		
 		if (evenRow) {
-			cssClass = "qeevenLeft";
+			cssClass = "text-left";
 		} else {
-			cssClass = "qeoddLeft";
+			cssClass = "text-left";
 		}
 
 		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
