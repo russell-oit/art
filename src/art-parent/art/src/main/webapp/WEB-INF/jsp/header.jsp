@@ -16,11 +16,11 @@ Header that appears at the top of all pages, except the login and logs pages
 
 	<!-- Fixed navbar -->
 	<div class="navbar navbar-default navbar-fixed-top">
-		<div class="container">
+		<div class="container-fluid">
 			<div class="navbar-header">
 				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
+					<span class="icon-barf"></span>
 					<span class="icon-bar"></span>
 				</button>
 				<a class="navbar-brand" href="${pageContext.request.contextPath}/app/reports.do">
