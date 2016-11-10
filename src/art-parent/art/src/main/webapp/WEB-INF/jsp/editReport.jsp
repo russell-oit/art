@@ -417,7 +417,7 @@ Edit report page
 						<spring:message code="reports.label.contactPerson"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="contactPerson" maxlength="20" class="form-control"/>
+						<form:input path="contactPerson" maxlength="100" class="form-control"/>
 						<form:errors path="contactPerson" cssClass="error"/>
 					</div>
 				</div>
