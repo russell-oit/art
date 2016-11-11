@@ -73,7 +73,7 @@ public class ReportController {
 
 	@Autowired
 	private DatasourceService datasourceService;
-	
+
 	@Autowired
 	private MessageSource messageSource;
 
@@ -88,7 +88,7 @@ public class ReportController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		
+
 		return "reports";
 	}
 
@@ -203,8 +203,11 @@ public class ReportController {
 	public String addReport(Model model, HttpSession session) {
 		logger.debug("Entering addReport");
 
+		User sessionUser = (User) session.getAttribute("sessionUser");
+
 		Report report = new Report();
 		report.setActive(true);
+		report.setContactPerson(sessionUser.getFullName());
 
 		model.addAttribute("report", report);
 		return showEditReport("add", model, session);
@@ -327,7 +330,7 @@ public class ReportController {
 				mailFrom, mailTo, mailCc, mailBcc, mailSubject);
 
 		AjaxResponse response = new AjaxResponse();
-		String fileNotSentMessage=messageSource.getMessage("reports.message.fileNotSent", null, locale);
+		String fileNotSentMessage = messageSource.getMessage("reports.message.fileNotSent", null, locale);
 		response.setSuccess(false);
 		response.setErrorMessage(fileNotSentMessage);
 
