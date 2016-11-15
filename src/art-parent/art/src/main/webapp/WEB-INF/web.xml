@@ -204,15 +204,6 @@
 		<url-pattern>/cewolf/*</url-pattern>
 	</servlet-mapping>
 	<servlet>
-		<servlet-name>dispatcher</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<load-on-startup>2</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>dispatcher</servlet-name>
-		<url-pattern>*.do</url-pattern>
-	</servlet-mapping>
-	<servlet>
 		<!-- description, if it exists, must come before servlet-name -->
 		<description>
 			Initialize ART settings and database connection pools
@@ -220,7 +211,7 @@
 		<servlet-name>ArtConfig</servlet-name>
 		<servlet-class>art.servlets.Config</servlet-class>
 		<!-- Load this servlet at server startup time -->
-		<load-on-startup>3</load-on-startup>
+		<load-on-startup>2</load-on-startup>
 	</servlet>
 	<session-config>
 		<!-- timeout in minutes -->

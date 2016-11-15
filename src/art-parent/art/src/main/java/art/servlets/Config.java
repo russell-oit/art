@@ -37,8 +37,8 @@ import com.lowagie.text.FontFactory;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -52,7 +52,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -124,7 +123,7 @@ public class Config extends HttpServlet {
 		deregisterJdbcDrivers();
 
 		logger.info("ART stopped");
-		
+
 		//http://logback.10977.n7.nabble.com/Shutting-down-async-appenders-when-using-logback-through-slf4j-td12505.html
 		//http://logback.qos.ch/manual/configuration.html#stopContext
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -263,28 +262,26 @@ public class Config extends HttpServlet {
 	 * Loads available language translations
 	 */
 	private void loadLanguages() {
-		Properties prop = new Properties();
-		InputStream inputStream;
+		Properties properties = new Properties();
 
-		String propFileName = "/i18n/languages.properties";
+		String propertiesFilePath = webinfPath + File.separator + "i18n" + File.separator + "languages.properties";
+		File propertiesFile = new File(propertiesFilePath);
+		if (propertiesFile.exists()) {
+			try {
+				try (FileInputStream inputStream = new FileInputStream(propertiesFilePath)) {
+					properties.load(inputStream);
 
-		inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-
-		try {
-
-			if (inputStream != null) {
-				prop.load(inputStream);
-			} else {
-				logger.warn("property file not found in the classpath: '{}'", propFileName);
+					Set<String> propertyNames = properties.stringPropertyNames();
+					for (String key : propertyNames) {
+						String value = properties.getProperty(key);
+						languages.put(value.trim(), key.trim());
+					}
+				}
+			} catch (IOException ex) {
+				logger.error("Error", ex);
 			}
-
-			Set<String> propertyNames = prop.stringPropertyNames();
-			for (String key : propertyNames) {
-				String value = prop.getProperty(key);
-				languages.put(value.trim(), key.trim());
-			}
-		} catch (IOException ex) {
-			logger.error("Error", ex);
+		} else {
+			logger.warn("File not found: {}", propertiesFilePath);
 		}
 	}
 

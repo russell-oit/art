@@ -18,12 +18,14 @@ package art.usergroup;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
  * Spring converter for string (user group id) to user group object
  *
  * @author Timothy Anyona
  */
+@Component
 public class StringToUserGroup implements Converter<String, UserGroup> {
 
 	@Override

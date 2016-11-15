@@ -18,6 +18,7 @@ package art.utils;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
  * Spring converter for string to double. To override the default converter
@@ -26,6 +27,7 @@ import org.springframework.core.convert.converter.Converter;
  *
  * @author Timothy Anyona
  */
+@Component
 public class StringToDouble implements Converter<String, Double> {
 
 	@Override

@@ -86,15 +86,18 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring4.SpringTemplateEngine;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 /**
  * Runs report jobs
  *
  * @author Timothy Anyona
  */
+@Component
 public class ReportJob implements org.quartz.Job {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportJob.class);
@@ -107,17 +110,19 @@ public class ReportJob implements org.quartz.Job {
 	private int jobId;
 	private String runDetails;
 	private String runMessage;
+	
+	@Autowired
+	private TemplateEngine emailTemplateEngine;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
-		//clearing the jobs cache from this method either using a CacheEvict annotation
-		//or calling CacheHelper.clearJobs() doesn't seem to clear the cache.
-		//so don't use a cache for jobs at all? 
-		//or only use jobs cache for job entity details but not when need run details
+		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
+		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+		
 		if (!Config.getSettings().isSchedulingEnabled()) {
 			return;
 		}
-
+		
 		JobDataMap dataMap = context.getMergedJobDataMap();
 		int tempJobId = dataMap.getInt("jobId");
 
@@ -411,8 +416,7 @@ public class ReportJob implements org.quartz.Job {
 		ctx.setVariable("mainMessage", mainMessage);
 		ctx.setVariable("job", job);
 
-		SpringTemplateEngine templateEngine = getTemplateEngine();
-		String finalMessage = templateEngine.process("emailTemplate.html", ctx);
+		String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
 		mailer.setMessage(finalMessage);
 	}
 
@@ -560,32 +564,9 @@ public class ReportJob implements org.quartz.Job {
 			ctx.setVariable("job", job);
 			ctx.setVariable("data", messageData);
 
-			SpringTemplateEngine templateEngine = getTemplateEngine();
-			String finalMessage = templateEngine.process("emailTemplate.html", ctx);
+			String finalMessage = emailTemplateEngine.process("basicEmail", ctx);
 			mailer.setMessage(finalMessage);
 		}
-	}
-
-	/**
-	 * Returns a spring template engine
-	 *
-	 * @return a spring template engine
-	 */
-	private SpringTemplateEngine getTemplateEngine() {
-		logger.debug("Entering getTemplateEngine");
-
-		//http://blog.zenika.com/2013/01/18/introducing-the-thymeleaf-template-engine/
-		//https://stackoverflow.com/questions/14723310/using-thymeleaf-template-for-sending-mail-with-spring
-		ClassLoaderTemplateResolver emailResolver = new ClassLoaderTemplateResolver();
-		emailResolver.setPrefix("mail/");
-		emailResolver.setTemplateMode("HTML");
-		emailResolver.setCharacterEncoding("UTF-8");
-		emailResolver.setOrder(1);
-
-		SpringTemplateEngine engine = new SpringTemplateEngine();
-		engine.addTemplateResolver(emailResolver);
-
-		return engine;
 	}
 
 	/**

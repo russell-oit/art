@@ -18,6 +18,7 @@ package art.utils;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 
 /**
  * Spring converter for string to integer. To override the default converter
@@ -26,6 +27,7 @@ import org.springframework.core.convert.converter.Converter;
  *
  * @author Timothy Anyona
  */
+@Component
 public class StringToInteger implements Converter<String, Integer> {
 
 	//for default converter, see http://docs.spring.io/spring/docs/3.0.0.RC2/reference/html/ch05s05.html
