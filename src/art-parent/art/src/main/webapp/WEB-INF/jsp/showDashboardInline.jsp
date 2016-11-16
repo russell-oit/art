@@ -10,11 +10,14 @@
 <%@taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<div>
-	<b>${dashboard.title}</b> <br>
-    &nbsp;&nbsp;&nbsp;${dashboard.description}
-</div>
-<div align="left">
+<div class="container-fluid">
+ <div class="col-md-12">
+    <div class="row">
+    <h2>${dashboard.title}  
+        <small>  ${dashboard.description}</small>
+    </h2>
+    </div>
+<div class="row">
 	<table class="plain">
 		<tr>
 			<c:forEach var="column" items="${dashboard.columns}">
@@ -38,6 +41,9 @@
 					</c:forEach>
 				</td>
 			</c:forEach>
-		</tr>
-	</table>
+                </tr>
+        </table>
 </div> 
+    </div>
+<!-- Container-fluid -->
+</div>
