@@ -578,6 +578,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 		//with additional processing like antialising and running external post processors
 		//in order to achieve similar look as with interactive/browser display using <cewolf> tags
 		//alternative is to duplicate the code
+		showLegend = chartOptions.isShowLegend();
 		JFreeChart chart = getChart();
 
 		//run internal post processor

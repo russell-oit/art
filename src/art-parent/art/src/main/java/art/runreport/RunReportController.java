@@ -302,8 +302,8 @@ public class RunReportController {
 
 //					String reportInfo = "<b>" + reportName + "</b>"
 //							+ description + " :: " + startTimeString;
-					String reportInfo = "<h5>" + reportName + "<small>"
-							+ description + " :: " + startTimeString + "</small></h5>";
+					String reportInfo = "<h4>" + reportName + "<small>"
+							+ description + " :: " + startTimeString + "</small></h4>";
 
 					displayReportInfo(writer, reportInfo);
 
