@@ -431,6 +431,8 @@ public class ReportOutputGenerator {
 				if (!isJob) {
 					displayFileLink(fileName);
 				}
+			} else {
+				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
 		} finally {
 			DatabaseUtils.close(rs);

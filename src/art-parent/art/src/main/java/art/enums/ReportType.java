@@ -297,10 +297,10 @@ public enum ReportType {
 	}
 
 	/**
-	 * Returns <code>true</code> if this is a tabular, crosstab, lov, job
+	 * Returns <code>true</code> if this is a tabular, crosstab, dynamic lov, job
 	 * recipients report type
 	 *
-	 * @return <code>true</code> if this is a tabular, crosstab, lov, job
+	 * @return <code>true</code> if this is a tabular, crosstab, dynamic lov, job
 	 * recipients report type
 	 */
 	public boolean isStandardOutput() {
@@ -310,7 +310,6 @@ public enum ReportType {
 			case Crosstab:
 			case CrosstabHtml:
 			case LovDynamic:
-			case LovStatic:
 			case JobRecipients:
 				return true;
 			default:
