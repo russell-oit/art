@@ -110,7 +110,7 @@ Reports configuration page
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#editRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -118,7 +118,7 @@ Reports configuration page
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href='${pageContext.request.contextPath}/app/editReports.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/app/editReports.do?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -187,8 +187,8 @@ Reports configuration page
 						</td>
 						<td>${encode:forHtmlContent(report.description)}</td>
 						<td><t:displayActiveStatus active="${report.active}"
-												   activeText="${activeText}"
-												   disabledText="${disabledText}"/>
+											   activeText="${activeText}"
+											   disabledText="${disabledText}"/>
 						</td>
 						<td>
 							<div class="btn-group">
@@ -233,13 +233,15 @@ Reports configuration page
 											<spring:message code="reports.action.drilldowns"/>
 										</a>
 									</li>
-									<li class="divider"></li>
-									<li>
-										<a 
-											href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
-											<spring:message code="reports.action.preview"/>
-										</a>
-									</li>
+									<c:if test="${report.reportType != 'LovStatic'}">
+										<li class="divider"></li>
+										<li>
+											<a 
+												href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
+												<spring:message code="reports.action.preview"/>
+											</a>
+										</li>
+									</c:if>
 								</ul>
 							</div>
 						</td>
