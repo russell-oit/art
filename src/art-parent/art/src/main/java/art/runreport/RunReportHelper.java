@@ -375,6 +375,7 @@ public class RunReportHelper {
 			switch (reportType) {
 				case Tabular:
 				case Crosstab:
+				case LovDynamic:
 					String formatsString = Config.getSettings().getReportFormats();
 					String[] formatsArray = StringUtils.split(formatsString, ",");
 					formats = Arrays.asList(formatsArray);
