@@ -340,7 +340,8 @@ Display section to allow selecting of report parameters and initiate running of 
 												<div class="col-md-7">
 													<div class="checkbox">
 														<label>
-															<input type="checkbox" name="showSelectedParameters" id="showSelectedParameters" value="">
+															<input type="checkbox" name="showSelectedParameters" id="showSelectedParameters"
+																   <c:if test="${report.parametersInOutput}">checked="checked"</c:if> value="">
 														</label>
 													</div>
 												</div>

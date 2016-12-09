@@ -262,7 +262,7 @@ public class RunReportController {
 				Map<Integer, ReportParameter> reportParamEntries = new TreeMap<>();
 
 				boolean showParams = false;
-				if (reportOptions.isShowSelectedParameters() || report.isParametersInOutput()) {
+				if (reportOptions.isShowSelectedParameters()) {
 					showParams = true;
 
 					for (ReportParameter reportParam : reportParamsList) {
