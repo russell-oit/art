@@ -921,7 +921,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Source</strong></td> 
-        <td>The SQL query used to retrieve the required data. It can contain parameter placeholders, specified using labels (<code>#parameter_name#</code>). XML-style elements can be used to create Dynamic SQL statements. Some special tags can be used in the query (<code>:USERNAME</code>, <code>:DATE</code>, <code>:TIME</code>)</td> 
+        <td>The SQL query used to retrieve the required data. It can contain parameter placeholders, specified using labels (<code>#parameter_name#</code>). XML-style elements can be used to create Dynamic SQL statements. Some special tags can be used in the query (<code>:USERNAME:</code>, <code>:DATE:</code>, <code>:TIME:</code>)</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -929,9 +929,9 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      <ul> 
       <li> <p>Three special tags can be used within the SQL statement and are substituted at runtime with their respective values:</p> 
        <div class="codehilite"> 
-        <pre>:USERNAME - replaced by the username of the user who is executing the query
-:DATE - replaced by the current date (format YYYY-MM-DD)
-:TIME - replaced by the current time (format YYYY-MM-DD HH:MI:SS)
+        <pre>:USERNAME: - replaced by the username of the user who is executing the query
+:DATE: - replaced by the current date (format YYYY-MM-DD)
+:TIME: - replaced by the current time (format YYYY-MM-DD HH:MI:SS)
 </pre> 
        </div> </li> 
       <li> <p>You can use a stored procedure to return query results. When defining the query, in the SQL source section, use the syntax for calling a stored procedure in the RDBMS you are using e.g. For MySQL you can use something like &quot;call my_sp&quot;. Another RDBMS may use syntax like &quot;exec my_sp&quot;.</p> </li> 

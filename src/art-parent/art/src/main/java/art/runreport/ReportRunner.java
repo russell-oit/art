@@ -1095,7 +1095,7 @@ public class ReportRunner {
 		if (user != null) {
 			String username = user.getUsername();
 			String replaceString = Matcher.quoteReplacement("'" + username + "'"); //quote in case it contains special regex characters
-			querySql = querySql.replaceAll("(?iu):username", replaceString); //(?iu) makes replace case insensitive across unicode characters
+			querySql = querySql.replaceAll("(?iu):username:", replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
 
 		//replace :DATE with current date
@@ -1104,13 +1104,13 @@ public class ReportRunner {
 		String dateFormat = "yyyy-MM-dd";
 		SimpleDateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 		String date = dateFormatter.format(now);
-		querySql = querySql.replaceAll("(?iu) :date", "'" + date + "'"); //postgresql has casting syntax like ::date
+		querySql = querySql.replaceAll("(?iu):date:", "'" + date + "'"); //postgresql has casting syntax like ::date
 
 		//replace :TIME with current date and time
 		String timeFormat = "yyyy-MM-dd HH:mm:ss";
 		SimpleDateFormat timeFormatter = new SimpleDateFormat(timeFormat);
 		String time = timeFormatter.format(now);
-		querySql = querySql.replaceAll("(?iu) :time", "'" + time + "'");
+		querySql = querySql.replaceAll("(?iu):time:", "'" + time + "'");
 
 		//update querySb with new sql
 		sb.replace(0, sb.length(), querySql);
