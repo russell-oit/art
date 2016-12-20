@@ -214,13 +214,10 @@ public class JobController {
 		try {
 			String runId = id + "-" + ArtUtils.getUniqueId();
 			
-			String clearJobsCacheUrl = getClearJobsCacheUrl(request);
-
 			JobDetail tempJob = newJob(ReportJob.class)
 					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
 					.usingJobData("jobId", id)
 					.usingJobData("tempJob", Boolean.TRUE)
-					.usingJobData("clearJobsCacheUrl", clearJobsCacheUrl)
 					.build();
 
 			// create SimpleTrigger that will fire once, immediately		        
@@ -254,13 +251,10 @@ public class JobController {
 		try {
 			String runId = runLaterJobId + "-" + ArtUtils.getUniqueId();
 			
-			String clearJobsCacheUrl = getClearJobsCacheUrl(request);
-
 			JobDetail tempJob = newJob(ReportJob.class)
 					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
 					.usingJobData("jobId", runLaterJobId)
 					.usingJobData("tempJob", Boolean.TRUE)
-					.usingJobData("clearJobsCacheUrl", clearJobsCacheUrl)
 					.build();
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
@@ -350,7 +344,7 @@ public class JobController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 
-			createQuartzJob(job, request);
+			createQuartzJob(job);
 
 			saveJobParameters(request, job.getJobId());
 
@@ -665,10 +659,9 @@ public class JobController {
 	 * Creates a quartz job for the given art job
 	 *
 	 * @param job the art job
-	 * @param request the http request
 	 * @throws SchedulerException
 	 */
-	private void createQuartzJob(Job job, HttpServletRequest request) throws SchedulerException {
+	private void createQuartzJob(Job job) throws SchedulerException {
 		Scheduler scheduler = SchedulerUtils.getScheduler();
 
 		if (scheduler == null) {
@@ -681,12 +674,10 @@ public class JobController {
 		String jobName = "job" + jobId;
 		String triggerName = "trigger" + jobId;
 
-		String clearJobsCacheUrl = getClearJobsCacheUrl(request);
 
 		JobDetail quartzJob = newJob(ReportJob.class)
 				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
 				.usingJobData("jobId", jobId)
-				.usingJobData("clearJobsCacheUrl", clearJobsCacheUrl)
 				.build();
 
 		//build cron expression.
@@ -712,18 +703,4 @@ public class JobController {
 		scheduler.scheduleJob(quartzJob, trigger);
 	}
 
-	/**
-	 * Returns the clear jobs cache url
-	 * 
-	 * @param request the http request
-	 */
-	private String getClearJobsCacheUrl(HttpServletRequest request){
-		//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
-		String clearJobsCacheUrl = request.getScheme() + "://"
-				+ request.getServerName()
-				+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
-				+ request.getContextPath() + "/clearJobsCache.do";
-		
-		return clearJobsCacheUrl;
-	}
 }

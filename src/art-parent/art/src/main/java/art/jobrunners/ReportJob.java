@@ -17,6 +17,7 @@
  */
 package art.jobrunners;
 
+import art.cache.CacheHelper;
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
 import art.dbutils.DbService;
@@ -80,7 +81,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
-import org.jsoup.Jsoup;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -113,6 +113,9 @@ public class ReportJob implements org.quartz.Job {
 	
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
+	
+	@Autowired
+	private CacheHelper cacheHelper;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -184,34 +187,7 @@ public class ReportJob implements org.quartz.Job {
 
 		runBatchFile();
 
-		clearJobsCache(dataMap);
-	}
-
-	/**
-	 * Clears the jobs cache
-	 * 
-	 * @param dataMap quartz job data map
-	 */
-	private void clearJobsCache(JobDataMap dataMap) {
-		//clear jobs cache so that job details in jobs page etc are updated
-		String clearJobsCacheUrl = dataMap.getString("clearJobsCacheUrl");
-		if (StringUtils.isBlank(clearJobsCacheUrl)) {
-			//for old jobs jobs cache url is not defined. use art base url
-			String artBaseUrl = Config.getSettings().getArtBaseUrl();
-			if (StringUtils.isNotBlank(artBaseUrl)) {
-				clearJobsCacheUrl = artBaseUrl + "/clearJobsCache.do";
-			}
-		}
-
-		if (StringUtils.isBlank(clearJobsCacheUrl)) {
-			logger.warn("Unable to clear the jobs cache after job completion. Please set the ART Base URL in the application settings");
-		} else {
-			try {
-				Jsoup.connect(clearJobsCacheUrl).get();
-			} catch (IOException ex) {
-				logger.error("Error", ex);
-			}
-		}
+		cacheHelper.clearJobs();
 	}
 
 	/**

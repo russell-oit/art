@@ -126,9 +126,4 @@ public class CacheController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/clearJobsCache", method = RequestMethod.GET)
-	public String clearJobsCache() {
-		cacheHelper.clearJobs();
-		return "clearJobsCache";
-	}
 }
