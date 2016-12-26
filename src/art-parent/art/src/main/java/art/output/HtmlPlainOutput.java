@@ -17,7 +17,10 @@
  */
 package art.output;
 
+import art.reportparameter.ReportParameter;
+import art.utils.ArtUtils;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Generates plain html output. Can be used for jobs because the output does not
@@ -37,6 +40,7 @@ public class HtmlPlainOutput extends StandardOutput {
 	@Override
 	public void init() {
 		if (fileOutput) {
+			out.println("<!DOCTYPE html>");
 			out.println("<html>");
 			out.println("<head>");
 			out.println("<meta charset='utf-8'>");
@@ -44,13 +48,52 @@ public class HtmlPlainOutput extends StandardOutput {
 			out.println("<body>");
 		}
 
-		//style should be in the head section. put in body for correct display in email inline jobs
 		//https://www.campaignmonitor.com/css/
 		out.println("<style>"
-				+ "table { border-collapse: collapse; }"
-				+ "\n td { background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; }"
-				+ "\n body { font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000; }"
-				+ "</style>");
+				+ "table {border-collapse: collapse;}"
+				+ "\n td {background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt;}"
+				+ "\n body {font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000;}"
+				+ "\n</style>");
+
+	}
+	
+	@Override
+	public void addTitle() {
+		if (!fileOutput) {
+			return;
+		}
+		
+		out.println("<div align='center'>");
+		out.println("<table border='0' width='90%' cellspacing='1'"
+				+ " cellpadding='1'>");
+		out.println("<tr><td>");
+		
+		out.println("<b>" + reportName + "</b> :: " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
+		
+		out.println("</td></tr></table></div>");
+	}
+
+	@Override
+	public void addSelectedParameters(List<ReportParameter> reportParamsList) {
+		if (reportParamsList == null || reportParamsList.isEmpty()) {
+			return;
+		}
+
+		if (!fileOutput) {
+			return;
+		}
+		
+		out.println("<div align='center'>");
+		out.println("<table border='0' width='90%' cellspacing='1'"
+				+ " cellpadding='1'>");
+		out.println("<tr><td>");
+
+		for (ReportParameter reportParam : reportParamsList) {
+			out.println(reportParam.getNameAndDisplayValues());
+			out.println("<br>");
+		}
+
+		out.println("</td></tr></table></div>");
 	}
 
 	@Override
@@ -81,7 +124,7 @@ public class HtmlPlainOutput extends StandardOutput {
 		String formattedValue = formatNumericValue(value);
 		out.println("<td style='text-align: right'>" + formattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
 		out.println("<td style='text-align: right'>" + formattedValue + "</td>");
@@ -92,7 +135,7 @@ public class HtmlPlainOutput extends StandardOutput {
 		String formattedValue = formatDateValue(value);
 		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
 		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
@@ -108,35 +151,30 @@ public class HtmlPlainOutput extends StandardOutput {
 		//open new row
 		out.println("<tr>");
 	}
-	
+
 	@Override
-	public void endRow(){
+	public void endRow() {
 		out.println("</tr>");
 	}
-	
+
 	@Override
-	public void endRows() {
-		out.println("</tbody>");
-	}
-	
-	@Override
-	public void beginTotalRow(){
+	public void beginTotalRow() {
 		out.println("<tfoot><tr>");
 	}
-	
+
 	@Override
-	public void addCellTotal(Double value){
+	public void addCellTotal(Double value) {
 		String formattedValue = formatNumericValue(value);
 		out.println("<td style='text-align: right'><b>" + formattedValue + "</b></td>");
 	}
-	
+
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
 		out.println("<td style='text-align: right'><b>" + formattedValue + "</b></td>");
 	}
-	
+
 	@Override
-	public void endTotalRow(){
+	public void endTotalRow() {
 		out.println("</tr><tfoot>");
 	}
 

@@ -71,7 +71,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 				+ "}";
 
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
-		out.println("<script type='text/javascript' charset='utf-8'>");
+		out.println("<script type='text/javascript'>");
 		out.println("	var $jQuery = jQuery.noConflict();");
 		out.println("	$jQuery(document).ready(function() {");
 		out.println("		$jQuery('#" + tableId + "').dataTable(" + dataTableOptions + ");");

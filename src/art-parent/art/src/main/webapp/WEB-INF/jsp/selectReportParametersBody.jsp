@@ -118,10 +118,8 @@ Display section to allow selecting of report parameters and initiate running of 
 			delay: 100
 		});
 
-		$(function () {
-			//needed if tooltips shown on input-group element or button
-			$("[data-toggle='tooltip']").tooltip({container: 'body'});
-		});
+		//needed if tooltips shown on input-group element or button
+		$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 
 	}); //end document ready

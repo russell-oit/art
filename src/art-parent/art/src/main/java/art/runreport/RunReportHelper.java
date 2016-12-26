@@ -258,10 +258,10 @@ public class RunReportHelper {
 					enableShowSql = false;
 				}
 
-				if (!reportParamsList.isEmpty()) {
-					enableShowSelectedParameters = true;
-				} else {
+				if (reportParamsList.isEmpty()) {
 					enableShowSelectedParameters = false;
+				} else {
+					enableShowSelectedParameters = true;
 				}
 		}
 		request.setAttribute("enableShowSql", enableShowSql);

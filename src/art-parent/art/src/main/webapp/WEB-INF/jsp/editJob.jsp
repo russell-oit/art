@@ -264,7 +264,7 @@
 
 				toggleEmailFieldsVisibility(jobType, reportTypeId);
 				toggleCachedFieldsVisibility(jobType);
-				toggleRunsToArchiveVisibility(jobType)
+				toggleRunsToArchiveVisibility(jobType);
 				toggleOutputFormatVisibility(jobType, reportTypeId);
 			}
 
@@ -375,7 +375,20 @@
 						<c:set var="labelColClass" value="col-md-4" scope="request"/>
 						<c:set var="inputColClass" value="col-md-8" scope="request"/>
 						<jsp:include page="reportParameters.jsp"/>
-					</fieldset>
+						<div class="form-group">
+							<label class="control-label col-md-4" for="showSelectedParameters">
+								<spring:message code="reports.label.showSelectedParameters"/>
+							</label>
+							<div class="col-md-8">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="showSelectedParameters" id="showSelectedParameters"
+											   <c:if test="${reportOptions.showSelectedParameters}">checked="checked"</c:if> value="">
+										</label>
+									</div>
+								</div>
+							</div>
+						</fieldset>
 				</c:if>
 
 				<fieldset>

@@ -28,6 +28,7 @@ import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
+import art.runreport.ReportOptions;
 import art.schedule.ScheduleService;
 import art.servlets.Config;
 import art.user.User;
@@ -116,7 +117,7 @@ public class JobController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-		
+
 		model.addAttribute("action", "jobs");
 
 		return "jobs";
@@ -215,7 +216,7 @@ public class JobController {
 
 		try {
 			String runId = id + "-" + ArtUtils.getUniqueId();
-			
+
 			JobDetail tempJob = newJob(ReportJob.class)
 					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
 					.usingJobData("jobId", id)
@@ -252,7 +253,7 @@ public class JobController {
 
 		try {
 			String runId = runLaterJobId + "-" + ArtUtils.getUniqueId();
-			
+
 			JobDetail tempJob = newJob(ReportJob.class)
 					.withIdentity(jobKey("tempJob-" + runId, "tempJobGroup"))
 					.usingJobData("jobId", runLaterJobId)
@@ -302,15 +303,7 @@ public class JobController {
 
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
-			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-
-			//create map in order to display parameters by position
-			Map<Integer, ReportParameter> reportParams = new TreeMap<>();
-			for (ReportParameter reportParam : reportParamsList) {
-				reportParams.put(reportParam.getPosition(), reportParam);
-			}
-
-			model.addAttribute("reportParams", reportParams);
+			addParameters(model, paramProcessorResult);
 		} catch (SQLException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -422,6 +415,8 @@ public class JobController {
 		}
 
 		jobParameterService.deleteJobParameters(jobId);
+
+		//add report parameters
 		for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
 			String name = entry.getKey();
 			String[] values = entry.getValue();
@@ -433,6 +428,17 @@ public class JobController {
 				jobParam.setParamTypeString("X");
 				jobParameterService.addJobParameter(jobParam);
 			}
+		}
+
+		//add report options
+		String showSelectedParametersValue = request.getParameter("showSelectedParameters");
+		if (showSelectedParametersValue != null) {
+			JobParameter jobParam = new JobParameter();
+			jobParam.setJobId(jobId);
+			jobParam.setName("showSelectedParameters");
+			jobParam.setValue("true");
+			jobParam.setParamTypeString("X");
+			jobParameterService.addJobParameter(jobParam);
 		}
 	}
 
@@ -447,20 +453,36 @@ public class JobController {
 			ReportJob reportJob = new ReportJob();
 			int reportId = job.getReport().getReportId();
 			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id);
-			List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
-			//create map in order to display parameters by position
-			Map<Integer, ReportParameter> reportParams = new TreeMap<>();
-			for (ReportParameter reportParam : reportParamsList) {
-				reportParams.put(reportParam.getPosition(), reportParam);
-			}
-
-			model.addAttribute("reportParams", reportParams);
+			addParameters(model, paramProcessorResult);
 		} catch (SQLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
 		return showEditJob("edit", model);
+	}
+
+	/**
+	 * Adds report parameters, report options and chart options to the model
+	 *
+	 * @param model the model
+	 * @param paramProcessorResult the parameter processor result that contains
+	 * report parameters, report options and chart options
+	 */
+	private void addParameters(Model model, ParameterProcessorResult paramProcessorResult) {
+		List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+
+		//create map in order to display parameters by position
+		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
+		for (ReportParameter reportParam : reportParamsList) {
+			reportParams.put(reportParam.getPosition(), reportParam);
+		}
+
+		model.addAttribute("reportParams", reportParams);
+
+		//add report options for the showSelectedParameters option
+		ReportOptions reportOptions = paramProcessorResult.getReportOptions();
+		model.addAttribute("reportOptions", reportOptions);
 	}
 
 	@RequestMapping(value = "/app/editJobs", method = RequestMethod.GET)
@@ -675,7 +697,6 @@ public class JobController {
 
 		String jobName = "job" + jobId;
 		String triggerName = "trigger" + jobId;
-
 
 		JobDetail quartzJob = newJob(ReportJob.class)
 				.withIdentity(jobKey(jobName, ArtUtils.JOB_GROUP))
