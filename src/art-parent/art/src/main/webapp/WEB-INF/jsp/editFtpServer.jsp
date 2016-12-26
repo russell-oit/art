@@ -38,17 +38,14 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		
 		<script type="text/javascript">
 			$(document).ready(function () {
-				$(function () {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="ftpServers.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="ftpServers.do"]').parent().addClass('active');
 
-				$(function () {
-					//needed if tooltips shown on input-group element or button
-					$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				});
+				//needed if tooltips shown on input-group element or button
+				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({

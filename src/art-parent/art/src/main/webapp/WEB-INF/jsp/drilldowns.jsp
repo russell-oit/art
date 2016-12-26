@@ -41,15 +41,15 @@ Display report drilldowns
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
-		<script type="text/javascript" charset="utf-8">
+		
+		<script type="text/javascript">
 			$(document).ready(function () {
-				$(function () {
-					$('a[href*="reportsConfig.do"]').parent().addClass('active');
-				});
-				$(function () {
-					//needed if tooltips shown on input-group element or button
-					$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="reportsConfig.do"]').parent().addClass('active');
+				
+				//needed if tooltips shown on input-group element or button
+				$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
+				
 				var tbl = $('#drilldowns');
 
 				var oTable = tbl.dataTable({

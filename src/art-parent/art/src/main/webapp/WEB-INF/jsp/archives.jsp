@@ -5,6 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -20,11 +21,10 @@
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" charset="utf-8">
+		
+		<script type="text/javascript">
 			$(document).ready(function () {
-				$(function () {
-					$('a[href*="archives.do"]').parent().addClass('active');
-				});
+				$('a[href*="archives.do"]').parent().addClass('active');
 
 				var tbl = $("#archives");
 

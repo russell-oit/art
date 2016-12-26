@@ -27,11 +27,11 @@ Display current admin rights
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		
 		<script type="text/javascript">
 			$(document).ready(function() {
-				$(function() {
-					$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
 
 				var tbl = $('#rights');
 

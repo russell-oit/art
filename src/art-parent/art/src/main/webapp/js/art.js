@@ -389,7 +389,7 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
  * Display notification if record cannot be deleted because important linked records exist.
  * String arguments should be html escaped. Message goes to a div with id "ajaxResponse"
  * 
- * @param {array} linkedRecords - array with names of non-deleted records
+ * @param {array} nonDeletedRecords - array with names of non-deleted records
  * @param {string} someRecordsNotDeletedText - basic message shown in notification
  */
 function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedText) {
@@ -561,8 +561,6 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCod
 		deleteUrl, recordDeletedText, errorOccurredText,
 		deleteRow, cannotDeleteRecordText, linkedRecordsExistText,
 		selectAllText, deselectAllText) {
-
-	$('a[id="configure"]').parent().addClass('active');
 
 	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
 			localeCode, addColumnFilters, selectAllText, deselectAllText);

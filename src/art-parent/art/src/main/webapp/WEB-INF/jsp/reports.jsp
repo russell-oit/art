@@ -7,6 +7,7 @@ Reports page. Also main/home page
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -22,11 +23,9 @@ Reports page. Also main/home page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" charset="utf-8">
+		<script type="text/javascript">
 			$(document).ready(function() {
-				$(function() {
-					$('a[href*="reports.do"]').parent().addClass('active');
-				});
+				$('a[href*="reports.do"]').parent().addClass('active');
 
 				var tbl = $('#reports');
 				

@@ -24,9 +24,7 @@ Display application language selection page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function() {
-				$(function() {
-					$('a[href*="language.do"]').parent().addClass('active');
-				});
+				$('a[href*="language.do"]').parent().addClass('active');
 
 				$('#lang').focus();
 			});

@@ -7,6 +7,7 @@ Display user jobs and jobs configuration
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib tagdir="/WEB-INF/tags" prefix="t" %>
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
@@ -49,17 +50,15 @@ Display user jobs and jobs configuration
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
-		<script type="text/javascript" charset="utf-8">
+		<script type="text/javascript">
 			$(document).ready(function () {
-				$(function () {
-					var actionValue = '${action}';
-					if (actionValue === 'config') {
-//						$('a[id="jobsConfigLink"]').parent().addClass('active');
-						$('a[href*="jobsConfig.do"]').parent().addClass('active');
-					} else {
-						$('a[href*="jobs.do"]').parent().addClass('active');
-					}
-				});
+				var actionValue = '${action}';
+				if (actionValue === 'config') {
+					$('a[id="configure"]').parent().addClass('active');
+					$('a[href*="jobsConfig.do"]').parent().addClass('active');
+				} else if (actionValue === 'jobs') {
+					$('a[href*="jobs.do"]').parent().addClass('active');
+				}
 
 				var tbl = $('#jobs');
 

@@ -31,8 +31,10 @@ Display user groups
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		
 		<script type="text/javascript">
 			$(document).ready(function () {
+				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="userGroups.do"]').parent().addClass('active');
 
 				var tbl = $('#userGroups');
@@ -115,14 +117,14 @@ Display user groups
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<p><spring:message code="page.message.errorOccurred"/></p>
 				<c:if test="${showErrors}">
-					<p><encode:forHtmlContent value="${error}"/></p>
+					<p>${encode:forHtmlContent(error)}</p>
 				</c:if>
 			</div>
 		</c:if>
 		<c:if test="${not empty recordSavedMessage}">
 			<div class="alert alert-success alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-				<spring:message code="${recordSavedMessage}"/>: <encode:forHtmlContent value="${recordName}"/>
+				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
 			</div>
 		</c:if>
 

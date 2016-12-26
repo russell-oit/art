@@ -34,15 +34,11 @@ Edit schedule page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function () {
-				$(function () {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="schedules.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="schedules.do"]').parent().addClass('active');
 
-				$(function () {
-					//needed if tooltips shown on input-group element or button
-					$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				});
+				//needed if tooltips shown on input-group element or button
+				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 				$('#name').focus();
 

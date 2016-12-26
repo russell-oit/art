@@ -21,9 +21,7 @@ Display change password page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function () {
-				$(function () {
-					$('a[href*="password.do"]').parent().addClass('active');
-				});
+				$('a[href*="password.do"]').parent().addClass('active');
 
 				$('#newPassword1').focus();
 			});

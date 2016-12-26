@@ -35,12 +35,11 @@ User group membership configuration
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
+		
 		<script type="text/javascript">
 			$(document).ready(function() {
-				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="userGroupMembershipConfig.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="userGroupMembershipConfig.do"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
 					selectableHeader: "<div>${availableText}</div>\n\
@@ -153,7 +152,7 @@ User group membership configuration
 						<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 						<p><spring:message code="page.message.errorOccurred"/></p>
 						<c:if test="${showErrors}">
-							<p><encode:forHtmlContent value="${error}"/></p>
+							<p>${encode:forHtmlContent(error)}</p>
 						</c:if>
 					</div>
 				</c:if>

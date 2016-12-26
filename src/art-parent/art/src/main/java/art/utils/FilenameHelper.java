@@ -21,6 +21,7 @@ import art.job.Job;
 import art.report.Report;
 import java.util.Date;
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
 /**
@@ -49,7 +50,7 @@ public class FilenameHelper {
 	public String getFileName(Job job) {
 		return getFileName(job.getReport(), job, null);
 	}
-	
+
 	/**
 	 * Returns a file name to be used for the given job
 	 *
@@ -81,6 +82,9 @@ public class FilenameHelper {
 		} else {
 			jobId = job.getJobId();
 			namePart = job.getName();
+			if (StringUtils.isBlank(namePart)) {
+				namePart = report.getName();
+			}
 		}
 
 		if (burstId != null) {

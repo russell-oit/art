@@ -116,6 +116,8 @@ public class JobController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
+		
+		model.addAttribute("action", "jobs");
 
 		return "jobs";
 	}

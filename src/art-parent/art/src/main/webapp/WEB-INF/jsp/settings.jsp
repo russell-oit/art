@@ -28,20 +28,14 @@ Settings configuration page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		<script type="text/javascript" charset="utf-8">
+		
+		<script type="text/javascript">
 			$(document).ready(function () {
-				toggleSmtpUsernameEnabled(); // enable/disable on page load
-				toggleLdapBindDnEnabled();
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="settings.do"]').parent().addClass('active');
 
-				$(function () {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="settings.do"]').parent().addClass('active');
-				});
-
-				$(function () {
-					//needed if tooltips shown on input-group element or button
-					$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				});
+				//needed if tooltips shown on input-group element or button
+				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 //				$('#useSmtpAuthentication').change(function () {
 //					toggleSmtpUsernameEnabled();
@@ -58,6 +52,10 @@ Settings configuration page
 				$('#useLdapAnonymousBind').on('switchChange.bootstrapSwitch', function (event, state) {
 					toggleLdapBindDnEnabled();
 				});
+				
+				// enable/disable on page load
+				toggleSmtpUsernameEnabled();
+				toggleLdapBindDnEnabled();
 
 				//enable bootstrap-switch
 				$('.switch-yes-no').bootstrapSwitch({

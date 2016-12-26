@@ -34,6 +34,7 @@ Login page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.10.2.min.js"></script>
+		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('#username').focus();

@@ -22,10 +22,8 @@ Edit user rule value
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function() {
-				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="ruleValuesConfig.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="ruleValuesConfig.do"]').parent().addClass('active');
 
 				$('#ruleValue').focus();
 

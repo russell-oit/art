@@ -110,10 +110,10 @@ public class ReportJob implements org.quartz.Job {
 	private int jobId;
 	private String runDetails;
 	private String runMessage;
-	
+
 	@Autowired
 	private TemplateEngine emailTemplateEngine;
-	
+
 	@Autowired
 	private CacheHelper cacheHelper;
 
@@ -121,11 +121,11 @@ public class ReportJob implements org.quartz.Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		//https://stackoverflow.com/questions/4258313/how-to-use-autowired-in-a-quartz-job
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
-		
+
 		if (!Config.getSettings().isSchedulingEnabled()) {
 			return;
 		}
-		
+
 		JobDataMap dataMap = context.getMergedJobDataMap();
 		int tempJobId = dataMap.getInt("jobId");
 
@@ -1646,17 +1646,38 @@ public class ReportJob implements org.quartz.Job {
 		JobParameterService jobParameterService = new JobParameterService();
 		List<JobParameter> jobParams = jobParameterService.getJobParameters(jId);
 		Map<String, List<String>> paramValues = new HashMap<>();
+
+		//accomodate legacy job parameter names
 		for (JobParameter jobParam : jobParams) {
 			String name = jobParam.getName();
+			String finalName = name;
 			String paramTypeString = jobParam.getParamTypeString();
-			if (!StringUtils.equalsIgnoreCase(paramTypeString, "O")
-					&& !StringUtils.startsWith(name, "p-")) {
-				name = "p-" + name;
+
+			switch (paramTypeString) {
+				case "O":
+					switch (name) {
+						case "_showParams":
+							finalName = "showSelectedParameters";
+							break;
+						default:
+							finalName = name;
+					}
+					break;
+				case "I":
+				case "M":
+					finalName = "p-" + name;
+					break;
+				case "X":
+					finalName = name;
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected job parameter type: " + paramTypeString);
 			}
-			jobParam.setName(name);
-			List<String> values = paramValues.get(name);
+
+			jobParam.setName(finalName);
+			List<String> values = paramValues.get(finalName);
 			if (values == null) {
-				paramValues.put(name, new ArrayList<String>());
+				paramValues.put(finalName, new ArrayList<String>());
 			}
 		}
 

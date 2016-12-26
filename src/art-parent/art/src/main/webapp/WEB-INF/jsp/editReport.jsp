@@ -70,15 +70,11 @@ Edit report page
 
 		<script type="text/javascript">
 			$(document).ready(function () {
-				$(function () {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="reportsConfig.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="reportsConfig.do"]').parent().addClass('active');
 
-				$(function () {
-					//needed if tooltips shown on input-group element or button
-					$("[data-toggle='tooltip']").tooltip({container: 'body'});
-				});
+				//needed if tooltips shown on input-group element or button
+				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 				//Enable Bootstrap-Select
 				$('.selectpicker').selectpicker({

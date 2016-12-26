@@ -35,12 +35,11 @@ Admin rights configuration page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
+		
 		<script type="text/javascript">
 			$(document).ready(function() {
-				$(function() {
-					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
-				});
+				$('a[id="configure"]').parent().addClass('active');
+				$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
 					selectableHeader: "<div>${availableText}</div>\n\
