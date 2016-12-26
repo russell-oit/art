@@ -57,6 +57,7 @@ import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 
 /**
  * Generates standard/tabular output
@@ -85,6 +86,21 @@ public abstract class StandardOutput {
 	private SimpleDateFormat globalDateFormatter;
 	private Map<Integer, Object> columnFormatters;
 	private DecimalFormat globalNumericFormatter;
+	protected MessageSource messageSource;
+
+	/**
+	 * @return the messageSource
+	 */
+	public MessageSource getMessageSource() {
+		return messageSource;
+	}
+
+	/**
+	 * @param messageSource the messageSource to set
+	 */
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
 
 	/**
 	 * @return the showSelectedParameters

@@ -86,6 +86,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 
 /**
  * Generates report output
@@ -185,6 +186,7 @@ public class ReportOutputGenerator {
 	 * @param fullOutputFilename the full path of the output file name
 	 * @param user the user under who's permissions the report is being
 	 * generated
+	 * @param messageSource the messagesource to use
 	 * @return the output result
 	 * @throws IOException
 	 * @throws SQLException
@@ -200,7 +202,7 @@ public class ReportOutputGenerator {
 	public ReportOutputGeneratorResult generateOutput(Report report, ReportRunner reportRunner,
 			ReportFormat reportFormat, Locale locale,
 			ParameterProcessorResult paramProcessorResult,
-			PrintWriter writer, String fullOutputFilename, User user)
+			PrintWriter writer, String fullOutputFilename, User user, MessageSource messageSource)
 			throws IOException, SQLException, JRException,
 			InvalidFormatException, DatasetProduceException, ChartValidationException,
 			PostProcessingException, ServletException, TemplateException, XDocReportException {
@@ -387,6 +389,7 @@ public class ReportOutputGenerator {
 				standardOutput.setShowSelectedParameters(reportOptions.isShowSelectedParameters());
 				standardOutput.setLocale(locale);
 				standardOutput.setReportName(report.getName());
+				standardOutput.setMessageSource(messageSource);
 
 				if (request != null) {
 					String contextPath = request.getContextPath();

@@ -87,6 +87,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 import org.thymeleaf.TemplateEngine;
@@ -116,6 +117,9 @@ public class ReportJob implements org.quartz.Job {
 
 	@Autowired
 	private CacheHelper cacheHelper;
+	
+	@Autowired
+	private MessageSource messageSource;
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -1245,7 +1249,7 @@ public class ReportJob implements org.quartz.Job {
 
 		try {
 			reportOutputGenerator.generateOutput(report, reportRunner,
-					reportFormat, locale, paramProcessorResult, writer, outputFileName, user);
+					reportFormat, locale, paramProcessorResult, writer, outputFileName, user, messageSource);
 		} finally {
 			if (writer != null) {
 				writer.close();

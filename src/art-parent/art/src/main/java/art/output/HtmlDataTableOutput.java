@@ -57,17 +57,24 @@ public class HtmlDataTableOutput extends StandardOutput {
 					+ "js" + File.separator + languageFileName;
 			File languageFile = new File(languageFilePath);
 			if (languageFile.exists()) {
-				languageSetting = ", oLanguage: {\"sUrl\": " + contextPath + "/js/" + languageFileName + "\"}";
+				languageSetting = ", language: {url: " + contextPath + "/js/" + languageFileName + "}";
 			}
 		}
 
-		//set table options. see http://www.datatables.net/ref
-		String dataTableOptions = "{aaSorting: []"
-				+ ", PaginationType:\"full_numbers\""
+		String allText = "All";
+		if (messageSource != null && locale != null) {
+			allText = messageSource.getMessage("dataTables.text.showAllRows", null, locale);
+		}
+
+		//http://www.datatables.net/reference
+		String dataTableOptions
+				= "{"
+				+ "orderClasses: false"
+				+ ", pagingType: 'full_numbers'"
+				+ ", lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, '" + allText + "']]" 
+				+ ", pageLength: 50"
 				+ languageSetting
-				+ ", iDisplayLength: 50" //default item in show entries e.g. -1
-				+ ", aLengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, \"All\"]]" //show entries options
-				+ ", orderClasses: false"
+				+ ", initComplete: function() {$('div.dataTables_filter input').focus();}"
 				+ "}";
 
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
