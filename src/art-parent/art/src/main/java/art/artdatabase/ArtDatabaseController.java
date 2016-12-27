@@ -65,6 +65,7 @@ public class ArtDatabaseController {
 //		databaseTypes.remove("generic-odbc"); //sun jdbc-odbc bridge is removed in Java 8
 		databaseTypes.remove("hbase-phoenix");
 		databaseTypes.remove("msaccess-ucanaccess");
+		databaseTypes.remove("sqlite-xerial");
 		return databaseTypes;
 	}
 

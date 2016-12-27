@@ -153,6 +153,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "net.ucanaccess.jdbc.UcanaccessDriver";
 		urlElement.value = "jdbc:ucanaccess://c:/file_path.mdb";
 		testSqlElement.value = "";
+	} else if (dbType === "sqlite-xerial") {
+		driverElement.value = "org.sqlite.JDBC";
+		urlElement.value = "jdbc:sqlite:<file_path>";
+		testSqlElement.value = "select 1";
 	}
 }
 
