@@ -66,6 +66,8 @@ public class ArtDatabaseController {
 		databaseTypes.remove("hbase-phoenix");
 		databaseTypes.remove("msaccess-ucanaccess");
 		databaseTypes.remove("sqlite-xerial");
+		databaseTypes.remove("csv-csvjdbc");
+		
 		return databaseTypes;
 	}
 

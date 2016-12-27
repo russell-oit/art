@@ -157,6 +157,10 @@ function setDatasourceFields(dbType, driverElementId, urlElementId, testSqlEleme
 		driverElement.value = "org.sqlite.JDBC";
 		urlElement.value = "jdbc:sqlite:<file_path>";
 		testSqlElement.value = "select 1";
+	} else if (dbType === "csv-csvjdbc") {
+		driverElement.value = "org.relique.jdbc.csv.CsvDriver";
+		urlElement.value = "jdbc:relique:csv:<directory_with_csvs>";
+		testSqlElement.value = "";
 	}
 }
 

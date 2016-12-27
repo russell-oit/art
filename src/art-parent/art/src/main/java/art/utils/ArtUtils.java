@@ -238,6 +238,7 @@ public class ArtUtils {
 		databaseTypes.put("hbase-phoenix", "HBase (Phoenix driver) - driver not included");
 		databaseTypes.put("msaccess-ucanaccess", "MS Access (UCanAccess driver)");
 		databaseTypes.put("sqlite-xerial", "SQLite (Xerial driver)");
+		databaseTypes.put("csv-csvjdbc", "CSV (CsvJdbc driver)");
 
 		return databaseTypes;
 	}
