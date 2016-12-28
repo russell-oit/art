@@ -1037,8 +1037,8 @@ public class ReportService {
 			userId //user group access to report group
 		};
 
-		ResultSetHandler<Long> h = new ScalarHandler<>();
-		Long recordCount = dbService.query(sql, h, values);
+		ResultSetHandler<Integer> h = new ScalarHandler<>();
+		Integer recordCount = dbService.query(sql, h, values);
 		if (recordCount == null || recordCount == 0) {
 			return false;
 		} else {

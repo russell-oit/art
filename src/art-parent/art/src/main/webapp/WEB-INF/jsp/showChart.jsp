@@ -13,6 +13,14 @@ Display a chart report
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
+
+<script type="text/javascript">
+	//must use jQuery rather than $ because of conflict with prototype.js when chart shown in dashboard
+	jQuery(document).ready(function () {
+		jQuery("[data-toggle='tooltip']").tooltip({container: 'body'});
+	});
+</script>
+
 <div align="center" style="width: 90%;">
 	<cewolf:chart 
 		id="${htmlElementId}" 

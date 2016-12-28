@@ -45,7 +45,7 @@ Edit user group page
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="userGroups.do"]').parent().addClass('active');
 
-				//needed if tooltips shown on input-group element or button
+				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 				//Enable Bootstrap-Select

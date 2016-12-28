@@ -11,39 +11,39 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <div class="container-fluid">
- <div class="col-md-12">
-    <div class="row">
-    <h2>${dashboard.title}  
-        <small>  ${dashboard.description}</small>
-    </h2>
-    </div>
-<div class="row">
-	<table class="plain">
-		<tr>
-			<c:forEach var="column" items="${dashboard.columns}">
-				<td style="vertical-align: top">
-					<c:forEach var="portlet" items="${column}">
-						<div id="div_${portlet.source}">
-							<ajax:portlet
-								source="portlet_${portlet.source}"
-								baseUrl="${portlet.baseUrl}"
-								classNamePrefix="${portlet.classNamePrefix}"
-								title="${portlet.title}"
-								imageMaximize="${pageContext.request.contextPath}/images/maximize.png"
-								imageMinimize="${pageContext.request.contextPath}/images/minimize.png"
-								imageRefresh="${pageContext.request.contextPath}/images/refresh.png"             
-								executeOnLoad= "${portlet.executeOnLoad}"
-								refreshPeriod="${portlet.refreshPeriod}"
-								preFunction="artAddWork"
-								postFunction="artRemoveWork"
-								/>
-						</div>
+	<div class="col-md-12">
+		<div class="row">
+			<h2>${dashboard.title}  
+				<small>  ${dashboard.description}</small>
+			</h2>
+		</div>
+		<div class="row">
+			<table class="plain">
+				<tr>
+					<c:forEach var="column" items="${dashboard.columns}">
+						<td style="vertical-align: top">
+							<c:forEach var="portlet" items="${column}">
+								<div id="div_${portlet.source}">
+									<ajax:portlet
+										source="portlet_${portlet.source}"
+										baseUrl="${portlet.baseUrl}"
+										classNamePrefix="${portlet.classNamePrefix}"
+										title="${portlet.title}"
+										imageMaximize="${pageContext.request.contextPath}/images/maximize.png"
+										imageMinimize="${pageContext.request.contextPath}/images/minimize.png"
+										imageRefresh="${pageContext.request.contextPath}/images/refresh.png"             
+										executeOnLoad= "${portlet.executeOnLoad}"
+										refreshPeriod="${portlet.refreshPeriod}"
+										preFunction="artAddWork"
+										postFunction="artRemoveWork"
+										/>
+								</div>
+							</c:forEach>
+						</td>
 					</c:forEach>
-				</td>
-			</c:forEach>
                 </tr>
-        </table>
-</div> 
+			</table>
+		</div> 
     </div>
-<!-- Container-fluid -->
+	<!-- Container-fluid -->
 </div>
