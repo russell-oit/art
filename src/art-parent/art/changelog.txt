@@ -14,7 +14,12 @@ ART 3.0
 * Requires Java 7
 * Requires Servlet 3.0
 * Updated libraries, including jasperreports, quartz, jxls, among others
+
+ART 2.5.4
 * Added Lithuanian translation (thanks to Dalius Guzauskas)
+* Added Polish translation (thanks to Pawel Osuch)
+* Updated German translation
+* Minor css updates
 
 ART 2.5.3
 * Fix for incorrect handling of " in parameter value
