@@ -33,7 +33,7 @@ Display report parameters and initiate running of report
 	<jsp:body>
 		<jsp:include page="/WEB-INF/jsp/selectReportParametersBody.jsp"/>
 		<div class="row">
-			<div class="col-md-10 col-md-offset-1">
+			<div class="col-md-12">
 				<div id="reportOutput">
 				</div>
 			</div>
