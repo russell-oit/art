@@ -51,6 +51,6 @@ Html page header fragment when displaying report output in a new page
 					<c:if test="${allowSelectParameters}">
 						<jsp:include page="/WEB-INF/jsp/selectReportParametersBody.jsp"/>
 						<div class="row">
-							<div class="col-md-12">
+							<div class="col-md-10 col-md-offset-1">
 								<div id="reportOutput">
 								</c:if>
