@@ -76,8 +76,8 @@ Display section to allow selecting of report parameters and initiate running of 
 
 						if (statusText === "success") {
 							//make htmlgrid output sortable
-							sorttable.DATE_RE = /^(\d\d?)[\/\.-](\d\d?)[\/\.-]((\d\d)?\d\d)$/;
 							$('.sortable').each(function (i, obj) {
+								sorttable.DATE_RE = /^(\d\d?)[\/\.-](\d\d?)[\/\.-]((\d\d)?\d\d)$/;
 								sorttable.makeSortable(obj);
 							});
 						} else if (statusText === "error") {

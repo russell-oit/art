@@ -10,6 +10,8 @@
 <%@taglib uri="http://art.sourceforge.net/taglib/ajaxtags" prefix="ajax"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
+
 <div class="container-fluid">
 	<div class="col-md-12">
 		<div class="row">

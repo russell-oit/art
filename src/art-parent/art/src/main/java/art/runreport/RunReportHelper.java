@@ -272,7 +272,6 @@ public class RunReportHelper {
 		boolean enableRunInline;
 
 		switch (reportType) {
-			case Dashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:

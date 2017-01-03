@@ -34,7 +34,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -107,8 +106,14 @@ public class DashboardController {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
-
-		return "showDashboard";
+		
+		boolean showInline = Boolean.valueOf(request.getParameter("showInline"));
+		
+		if(showInline){
+			return "showDashboardInline";
+		} else {
+			return "showDashboard";
+		}
 	}
 
 	/**

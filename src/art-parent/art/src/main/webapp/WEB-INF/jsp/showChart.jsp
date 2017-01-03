@@ -15,9 +15,8 @@ Display a chart report
 
 
 <script type="text/javascript">
-	//must use jQuery rather than $ because of conflict with prototype.js when chart shown in dashboard
-	jQuery(document).ready(function () {
-		jQuery("[data-toggle='tooltip']").tooltip({container: 'body'});
+	$(document).ready(function () {
+		$("[data-toggle='tooltip']").tooltip({container: 'body'});
 	});
 </script>
 
