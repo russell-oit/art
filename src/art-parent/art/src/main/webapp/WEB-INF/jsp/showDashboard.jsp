@@ -7,7 +7,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<%@taglib uri="http://art.sourceforge.net/taglib/ajaxtags" prefix="ajax"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
@@ -25,9 +24,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
-
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/simple-js-inheritance.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxtags-art.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 

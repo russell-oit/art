@@ -15,7 +15,6 @@
 	<modules>
 		<module>art-dbcp</module>
 		<module>art-mail</module>
-		<module>art-ajaxtags</module>
 		<module>art</module>
 	</modules>
 

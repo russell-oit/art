@@ -95,8 +95,7 @@
 			<url>http://maven.cubrid.org</url>
 		</repository>
 		<!-- in-project repository for artifacts that are not in a public maven 
-		repository e.g. spnego, cewolf-1.2.x, itext-asian-2.1.7, ajaxtags-1.5.5, 
-		jcommon-1.0.18 -->
+		repository e.g. spnego, cewolf-1.2.x, itext-asian-2.1.7, jcommon-1.0.18 -->
 		<repository>
 			<id>art.local</id>
 			<name>art</name>
@@ -187,11 +186,6 @@
 			<groupId>net.sf.art</groupId>
 			<artifactId>art-mail</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.art</groupId>
-			<artifactId>art-ajaxtags</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<!--		<dependency>
 			<groupId>javax.servlet</groupId>
