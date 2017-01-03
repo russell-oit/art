@@ -17,7 +17,9 @@
 /*jslint bitwise: true, browser: true, eqeqeq: true, immed: true, newcap: true, nomen: true, regexp: true, undef: true, white: true, maxerr: 50, indent: 4 */
 /*global $, $$, $F, Ajax, Autocompleter, Class, Element, Event, Field, Form, Option, Prototype, overlib */
 
-//modifications to use jquery instead of prototype + scriptaculous
+//modifications to remove prototype + scriptaculous and use jquery instead
+//http://andykdocs.de/development/JavaScript/Migrating+from+PrototypeJS+to+jQuery
+//http://andykdocs.de/development/JavaScript/Migrating+from+PrototypeJS+to+jQuery/files/Andyk-Docs-Prototype-To-jQuery-Migration-Tool-Automated-Transformation-Version-1.html
 //// prototype and scriptaculous must be loaded before this script
 //if ((typeof Prototype === 'undefined') || (typeof Element === 'undefined') || (typeof Element.Methods === 'undefined')) {
 //    throw new Error("ajaxtags.js requires the Prototype JavaScript framework >= 1.6");
@@ -69,7 +71,7 @@ AjaxJspTag.DEFAULT_PARAMETER_REGEXP = new RegExp("(\\{" + AjaxJspTag.DEFAULT_PAR
  * Response Parsers defaults and functions which can be used for HTML, TEXT and
  * XML. Call new DefaultResponseParser(TYPE) with the needed type ("html", "text", "xml").
  */
-var DefaultResponseParser = Class.create({
+var DefaultResponseParser = Class.extend({
     initialize: function (defaultType, isPlainText) {
         this.type = defaultType || "xml";
         this.plaintext = !!isPlainText;
@@ -170,7 +172,7 @@ var DefaultResponseParser = Class.create({
 });
 
 
-var ResponseXmlToHtmlLinkListParser = Class.create(DefaultResponseParser, {
+var ResponseXmlToHtmlLinkListParser = Class.extend(DefaultResponseParser, {
     initialize: function ($super) {
         $super("xmltohtmllinklist");
     },
@@ -243,7 +245,7 @@ var ResponseXmlToHtmlLinkListParser = Class.create(DefaultResponseParser, {
 /**
  * AjaxTags.
  */
-AjaxJspTag.Base = Class.create({
+AjaxJspTag.Base = Class.extend({
     initialize: function (options) {
         this.setOptions(options);
         this.createElements();
@@ -318,14 +320,24 @@ AjaxJspTag.Base = Class.create({
                 this.options.handler(this);
             }).bind(this)
         }, this.getRequestOptions(options, ajaxParam));
-        return new Ajax.Request(this.options.baseUrl, options);
+		
+		$.ajax({
+			type : "POST",
+			url : this.options.baseUrl,
+			success : function (response) {
+				this.options.parser.load(response);
+                this.options.handler(this);
+			}
+		});
+//        return new Ajax.Request(this.options.baseUrl, options);
     },
     getAjaxUpdater: function (options, ajaxParam) {
         if (!this.initRequest()) {
             return null;
         }
-        return new Ajax.Updater(this.options.target,
-            this.options.baseUrl, this.getRequestOptions(options, ajaxParam));
+		$(this.options.target).load(this.options.baseUrl);
+//        return new Ajax.Updater(this.options.target,
+//            this.options.baseUrl, this.getRequestOptions(options, ajaxParam));
     },
     getPeriodicalUpdater: function (xoptions, ajaxParam) {
         if (!this.initRequest()) {
@@ -349,7 +361,7 @@ AjaxJspTag.Base = Class.create({
                 this._updater.stop(); // target lost, stop updater
             }
         }).bind(data);
-        data._updater = new Ajax.PeriodicalUpdater(o.target, o.baseUrl, xoptions);
+//        data._updater = new Ajax.PeriodicalUpdater(o.target, o.baseUrl, xoptions);
         return data._updater;
     },
     buildParameterString: function (ajaxParam) {
@@ -397,7 +409,7 @@ AjaxJspTag.Base = Class.create({
 /**
  * UpdateField tag.
  */
-AjaxJspTag.UpdateField = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.UpdateField = Class.extend(AjaxJspTag.Base, {
     getDefaultOptions: function () {
         return {
             parameters: '',
@@ -468,7 +480,7 @@ AjaxJspTag.UpdateField = Class.create(AjaxJspTag.Base, {
 /**
  * Select tag.
  */
-AjaxJspTag.Select = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.Select = Class.extend(AjaxJspTag.Base, {
     initialize: function ($super, options) {
         $super(options);
         if (this.options.executeOnLoad) {
@@ -531,7 +543,7 @@ AjaxJspTag.Select = Class.create(AjaxJspTag.Base, {
 /**
  * HtmlContent tag.
  */
-AjaxJspTag.HtmlContent = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.HtmlContent = Class.extend(AjaxJspTag.Base, {
     getDefaultOptions: function () {
         return {
             parameters: '',
@@ -565,7 +577,7 @@ AjaxJspTag.HtmlContent = Class.create(AjaxJspTag.Base, {
 /**
  * Callout tag.
  */
-AjaxJspTag.Callout = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.Callout = Class.extend(AjaxJspTag.Base, {
     getDefaultOptions: function () {
         return {
             parameters: '',
@@ -615,7 +627,7 @@ AjaxJspTag.Callout = Class.create(AjaxJspTag.Base, {
 /**
  * TabPanel tag.
  */
-AjaxJspTag.TabPanel = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.TabPanel = Class.extend(AjaxJspTag.Base, {
     initialize: function (options) {
         this.setOptions(options);
         this.createElements();
@@ -676,114 +688,114 @@ AjaxJspTag.TabPanel = Class.create(AjaxJspTag.Base, {
 /**
  * Autocomplete tag.
  */
-AjaxJspTag.XmlToHtmlAutocompleter = Class.create(Ajax.Autocompleter, {
-    initialize: function (/*AjaxJspTag.Autocomplete*/autocomplete) {
-        this.autocompleteTag = autocomplete;
-        var o = autocomplete.options, update = {fake: true, style: {}}; // update = o.divElement
-        this.baseInitialize(o.source, update, {
-            minChars: o.minChars,
-            tokens: o.appendSeparator,
-            indicator: o.indicator,
-            autoSelect: o.autoSelect,
-            paramName: o.paramName,
-            evalScripts: true,
-            asynchronous: true,
-            onComplete: this.onComplete.bind(this),
-            afterUpdateElement: function (inputField, selectedItem) {
-                autocomplete.handler(selectedItem);
-            }
-        });
-        this.url = o.baseUrl;
-    },
-    getUpdatedChoices: function ($super) {
-        if (!this.autocompleteTag.initRequest()) {
-            this.stopIndicator(); // stop ac tag
-            return;
-        }
-        if (this.update.fake) {
-            this.update = this.autocompleteTag.createElements(); // lazy creation
-        }
-        // parse parameters and do replacements
-        this.options.defaultParams = this.autocompleteTag.buildParameterString();
-        $super(); // Ajax.Autocompleter#getUpdatedChoices()
-    },
-    onComplete: function (response) {
-        var o = this.autocompleteTag.options;
-        o.parser.load(response);
-        this.updateChoices(o.parser.content);
-        if (o.parser.content === null) {
-            this.stopIndicator(); // stop ac tag
-        }
-        // postFunction
-        if (Object.isFunction(o.onComplete)) {
-            // hier wird nicht base verwendet!!!
-            // Disable onupdate event handler of input field
-            // because, postFunction can change the content of
-            // input field and get into eternal loop.
-            var inputf = $(o.source), onupdateHandler = inputf.onupdate;
-            inputf.onupdate = '';
-            o.onComplete();
-            // Enable onupdate event handler of input field
-            inputf.onupdate = onupdateHandler;
-        }
-    }
-});
-
-AjaxJspTag.Autocomplete = Class.create(AjaxJspTag.Base, {
-    initialize: function (options) {
-        this.setOptions(options);
-        // this.createElements(); lazy creation
-        this.execute();
-    },
-    getDefaultOptions: function () {
-        return {
-            parser: new DefaultResponseParser("xmltohtmllist", true)
-        };
-    },
-    setOptions: function (options) {
-        this.options = Object.extend(this.getDefaultOptions(), options || {});
-        this.options.divElement = "ajaxAuto_" + this.options.source;
-    },
-    createElements: function () {
-        var o = this.options, element = $(o.divElement);
-        // remove previous element, if any
-        if (element) {
-            // element.remove().purge();
-            element.purge();
-            element.parentNode.removeChild(element);
-        }
-        element = new Element("div", {id: o.divElement, className: o.className}).hide();
-        // insert div at the top of the document so it will not be hidden in case of overflow
-        Element.insert(document.body, {top: element});
-        return element;
-    },
-    execute: function () {
-        new AjaxJspTag.XmlToHtmlAutocompleter(this);
-    },
-    handler: function (selectedItem) {
-        var o = this.options, target = $(o.target), value = selectedItem.id;
-        if (target) {
-            if (o.appendSeparator) {
-                if (target.value.length > 0) {
-                    target.value += o.appendSeparator;
-                }
-                target.value += value;
-            } else {
-                target.value = value;
-            }
-        }
-        o.selectedIndex = selectedItem.autocompleteIndex;
-        o.selectedObject = selectedItem;
-        if (Object.isFunction(o.afterUpdate)) {
-            o.afterUpdate(value);
-        }
-    }
-});
+//AjaxJspTag.XmlToHtmlAutocompleter = Class.extend(Ajax.Autocompleter, {
+//    initialize: function (/*AjaxJspTag.Autocomplete*/autocomplete) {
+//        this.autocompleteTag = autocomplete;
+//        var o = autocomplete.options, update = {fake: true, style: {}}; // update = o.divElement
+//        this.baseInitialize(o.source, update, {
+//            minChars: o.minChars,
+//            tokens: o.appendSeparator,
+//            indicator: o.indicator,
+//            autoSelect: o.autoSelect,
+//            paramName: o.paramName,
+//            evalScripts: true,
+//            asynchronous: true,
+//            onComplete: this.onComplete.bind(this),
+//            afterUpdateElement: function (inputField, selectedItem) {
+//                autocomplete.handler(selectedItem);
+//            }
+//        });
+//        this.url = o.baseUrl;
+//    },
+//    getUpdatedChoices: function ($super) {
+//        if (!this.autocompleteTag.initRequest()) {
+//            this.stopIndicator(); // stop ac tag
+//            return;
+//        }
+//        if (this.update.fake) {
+//            this.update = this.autocompleteTag.createElements(); // lazy creation
+//        }
+//        // parse parameters and do replacements
+//        this.options.defaultParams = this.autocompleteTag.buildParameterString();
+//        $super(); // Ajax.Autocompleter#getUpdatedChoices()
+//    },
+//    onComplete: function (response) {
+//        var o = this.autocompleteTag.options;
+//        o.parser.load(response);
+//        this.updateChoices(o.parser.content);
+//        if (o.parser.content === null) {
+//            this.stopIndicator(); // stop ac tag
+//        }
+//        // postFunction
+//        if (Object.isFunction(o.onComplete)) {
+//            // hier wird nicht base verwendet!!!
+//            // Disable onupdate event handler of input field
+//            // because, postFunction can change the content of
+//            // input field and get into eternal loop.
+//            var inputf = $(o.source), onupdateHandler = inputf.onupdate;
+//            inputf.onupdate = '';
+//            o.onComplete();
+//            // Enable onupdate event handler of input field
+//            inputf.onupdate = onupdateHandler;
+//        }
+//    }
+//});
+//
+//AjaxJspTag.Autocomplete = Class.extend(AjaxJspTag.Base, {
+//    initialize: function (options) {
+//        this.setOptions(options);
+//        // this.createElements(); lazy creation
+//        this.execute();
+//    },
+//    getDefaultOptions: function () {
+//        return {
+//            parser: new DefaultResponseParser("xmltohtmllist", true)
+//        };
+//    },
+//    setOptions: function (options) {
+//        this.options = Object.extend(this.getDefaultOptions(), options || {});
+//        this.options.divElement = "ajaxAuto_" + this.options.source;
+//    },
+//    createElements: function () {
+//        var o = this.options, element = $(o.divElement);
+//        // remove previous element, if any
+//        if (element) {
+//            // element.remove().purge();
+//            element.purge();
+//            element.parentNode.removeChild(element);
+//        }
+//        element = new Element("div", {id: o.divElement, className: o.className}).hide();
+//        // insert div at the top of the document so it will not be hidden in case of overflow
+//        Element.insert(document.body, {top: element});
+//        return element;
+//    },
+//    execute: function () {
+//        new AjaxJspTag.XmlToHtmlAutocompleter(this);
+//    },
+//    handler: function (selectedItem) {
+//        var o = this.options, target = $(o.target), value = selectedItem.id;
+//        if (target) {
+//            if (o.appendSeparator) {
+//                if (target.value.length > 0) {
+//                    target.value += o.appendSeparator;
+//                }
+//                target.value += value;
+//            } else {
+//                target.value = value;
+//            }
+//        }
+//        o.selectedIndex = selectedItem.autocompleteIndex;
+//        o.selectedObject = selectedItem;
+//        if (Object.isFunction(o.afterUpdate)) {
+//            o.afterUpdate(value);
+//        }
+//    }
+//});
 
 /**
  * Portlet tag.
  */
-AjaxJspTag.Portlet = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.Portlet = Class.extend(AjaxJspTag.Base, {
     initialize: function ($super, options) {
         $super(options);
         if (this.options.startMinimize) {
@@ -891,7 +903,7 @@ AjaxJspTag.Portlet = Class.create(AjaxJspTag.Base, {
 /**
  * Tree tag.
  */
-AjaxJspTag.Tree = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.Tree = Class.extend(AjaxJspTag.Base, {
     initialize: function (options) {
         this.setOptions(options);
         this.execute();
@@ -966,7 +978,7 @@ AjaxJspTag.Tree = Class.create(AjaxJspTag.Base, {
 /**
  * Toggle tag.
  */
-AjaxJspTag.Toggle = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.Toggle = Class.extend(AjaxJspTag.Base, {
     getDefaultOptions: function () {
         return {
             parameters: ('rating={' + AjaxJspTag.DEFAULT_PARAMETER + '}'),
@@ -1094,7 +1106,7 @@ AjaxJspTag.Toggle = Class.create(AjaxJspTag.Base, {
 /**
  * OnClick tag.
  */
-AjaxJspTag.OnClick = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.OnClick = Class.extend(AjaxJspTag.Base, {
     initialize: function (options) {
         this.setOptions(options);
         this.execute();
@@ -1113,7 +1125,7 @@ AjaxJspTag.OnClick = Class.create(AjaxJspTag.Base, {
 /**
  * Submit tag.
  */
-AjaxJspTag.Submit = Class.create(AjaxJspTag.Base, {
+AjaxJspTag.Submit = Class.extend(AjaxJspTag.Base, {
     // TODO option for multiple submit buttons: serialize(true, {hash: false, submit: ?})
     createListeners: function () {
         this.listener = this.execute.bind(this);

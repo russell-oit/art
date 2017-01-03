@@ -141,9 +141,9 @@ public class DatabaseUtils {
 	 */
 	public static void setValues(PreparedStatement ps, Object... values) throws SQLException {
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] == null) {
-				logger.warn("non-typed null value passed. Driver may throw an exception");
-			}
+//			if (values[i] == null) {
+//				logger.warn("non-typed null value passed. Driver may throw an exception");
+//			}
 			ps.setObject(i + 1, values[i]);
 		}
 	}

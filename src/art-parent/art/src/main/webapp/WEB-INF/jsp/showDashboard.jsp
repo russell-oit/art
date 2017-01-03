@@ -7,7 +7,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
 
-<%@taglib uri="http://ajaxtags.sourceforge.net/tags/ajaxtags" prefix="ajax"%>
+<%@taglib uri="http://art.sourceforge.net/taglib/ajaxtags" prefix="ajax"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
@@ -26,11 +26,8 @@
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/prototype.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/scriptaculous/scriptaculous.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/overlib.js"></script>
-
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxtags.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/simple-js-inheritance.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ajaxtags-art.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/ajaxtags-art.css" /> 
 
@@ -43,6 +40,14 @@
 		<div id="spinner">
 			<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
 		</div>
+		
+		<script type="text/javascript">
+			$(document).ajaxStart(function () {
+				$('#spinner').show();
+			}).ajaxStop(function () {
+				$('#spinner').hide();
+			});
+		</script>
 
 		<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
 

@@ -39,7 +39,7 @@ public class HtmlGridOutput extends StandardOutput {
 		out.println("<div style='border: 3px solid white'>");
 		out.println("<table class='sortable' name='maintable' id='maintable'"
 				+ " cellpadding='2' cellspacing='0'"
-				+ " style='margin: 0 auto; width: 95%'>");
+				+ " style='margin: 0 auto; width: 100%'>");
 		out.println("<thead><tr>");
 	}
 

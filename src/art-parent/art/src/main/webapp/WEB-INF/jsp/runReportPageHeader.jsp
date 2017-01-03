@@ -46,7 +46,7 @@ Html page header fragment when displaying report output in a new page
 			<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
 			<div id="pageContent">
-				<div  class="container">
+				<div class="container-fluid">
 
 					<c:if test="${allowSelectParameters}">
 						<jsp:include page="/WEB-INF/jsp/selectReportParametersBody.jsp"/>

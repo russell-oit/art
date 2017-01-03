@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
@@ -202,14 +203,16 @@ public class DashboardController {
 	private String getPortletRefreshPeriod(String portletXml) {
 		logger.debug("Entering getPortletRefreshPeriod");
 
-		String value = XmlParser.getXmlElementValue(portletXml, "REFRESH");
+		String value = XmlParser.getXmlElementValue(portletXml, "REFRESH"); //specified in seconds
 
 		String refreshPeriodString = null;
-		int minimumRefresh = 5; //5 seconds
+		int minimumRefreshSeconds = 5;
 		if (value != null) {
 			if (NumberUtils.isNumber(value)) {
-				if (Integer.parseInt(value) < minimumRefresh) {
-					refreshPeriodString = String.valueOf(minimumRefresh);
+				if (Integer.parseInt(value) < minimumRefreshSeconds) {
+					refreshPeriodString = String.valueOf(minimumRefreshSeconds);
+				} else {
+					refreshPeriodString = value;
 				}
 			} else {
 				refreshPeriodString = null; //invalid number specified. default to no refresh
@@ -257,10 +260,10 @@ public class DashboardController {
 		} else {
 			// context path as suffix + build url + switch off html header&footer 
 			int reportId = Integer.parseInt(link);
-			
+
 			link = request.getContextPath() + "/app/runReport.do?reportId=" + reportId
 					+ "&isFragment=true";
-			
+
 			//add report parameters
 			StringBuilder paramsSb = new StringBuilder(254);
 			Enumeration<String> htmlParamNames = request.getParameterNames();

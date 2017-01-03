@@ -64,7 +64,7 @@ public class HtmlPlainOutput extends StandardOutput {
 		}
 		
 		out.println("<div align='center'>");
-		out.println("<table border='0' width='90%' cellspacing='1'"
+		out.println("<table border='0' width='100%' cellspacing='1'"
 				+ " cellpadding='1'>");
 		out.println("<tr><td>");
 		
@@ -84,7 +84,7 @@ public class HtmlPlainOutput extends StandardOutput {
 		}
 		
 		out.println("<div align='center'>");
-		out.println("<table border='0' width='90%' cellspacing='1'"
+		out.println("<table border='0' width='100%' cellspacing='1'"
 				+ " cellpadding='1'>");
 		out.println("<tr><td>");
 
@@ -99,7 +99,7 @@ public class HtmlPlainOutput extends StandardOutput {
 	@Override
 	public void beginHeader() {
 		out.println("<div align='center'>");
-		out.println("<table border='0' width='90%' cellspacing='1'"
+		out.println("<table border='0' width='100%' cellspacing='1'"
 				+ " cellpadding='1'>");
 		out.println("<tr>");
 	}
