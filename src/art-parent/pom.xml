@@ -13,8 +13,9 @@
 	<description>Parent project for ART. ART is A Reporting Tool.</description>
 
 	<modules>
-		<module>art-mail</module>
 		<module>art-dbcp</module>
+		<module>art-mail</module>
+		<module>art-ajaxtags</module>
 		<module>art</module>
 	</modules>
 

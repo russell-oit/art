@@ -188,6 +188,11 @@
 			<artifactId>art-mail</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.art</groupId>
+			<artifactId>art-ajaxtags</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
 		<!--		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -340,11 +345,6 @@
 			<groupId>net.sf.cewolf</groupId>
 			<artifactId>cewolf</artifactId>
 			<version>1.2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.ajaxtags</groupId>
-			<artifactId>ajaxtags</artifactId>
-			<version>1.5.5</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>

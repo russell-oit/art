@@ -1,0 +1,4 @@
+art-ajaxtags 1.0.0
+* Based on ajaxtags 1.5.8-SNAPSHOT
+* Uses commons-lang3
+* Uses servlet 3.0 and jsp 2.2 (Requires Java 7)
