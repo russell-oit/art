@@ -86,7 +86,7 @@
 			var parentDiv = $(this).parent('div');
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
-			var src = $(this).attr('src');
+			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
 			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
 			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
 			if (src === mimimizeUrl) {
@@ -105,6 +105,7 @@
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
 			var refreshPeriod = parentDiv.data("refresh-period");
+			
 			$(contentDivId).load(portletUrl);
 			
 			//reset/restart refresh interval
@@ -113,6 +114,7 @@
 
 				var refreshPeriodSeconds = parseInt(refreshPeriod, 10);
 				var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
+				
 				var setIntervalId = setInterval(function () {
 					$(contentDivId).load(portletUrl);
 				}, refreshPeriodMilliseconds);
