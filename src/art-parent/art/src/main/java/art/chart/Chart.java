@@ -380,7 +380,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 
 	//returns true if the data for the chart has expired
 	@Override
-	public boolean hasExpired(@SuppressWarnings("rawtypes") Map params, Date since) {
+	public boolean hasExpired(Map<String, Object> params, Date since) {
 		return true;
 	}
 
