@@ -61,6 +61,7 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 				//set type directly instead of calling setType()
 				//because setType is overridable and overridable methods shouldn't be called in constructors
 				//http://www.javaworld.com/article/2074669/core-java/java-netbeans--overridable-method-call-in-constructor.html
+				//https://stackoverflow.com/questions/3404301/whats-wrong-with-overridable-method-calls-in-constructors
 				type = "bubble";
 				break;
 			case HeatmapChart:
