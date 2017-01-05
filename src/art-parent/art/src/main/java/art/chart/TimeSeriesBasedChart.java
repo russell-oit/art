@@ -65,7 +65,7 @@ public class TimeSeriesBasedChart extends Chart implements XYToolTipGenerator, X
 			case TimeSeriesChart:
 			case DateSeriesChart:
 				this.reportType = reportType;
-				setType("timeseries");
+				type = "timeseries";
 				setHasTooltips(true);
 				break;
 			default:

@@ -47,10 +47,10 @@ public class PieChart extends Chart implements PieToolTipGenerator, PieSectionLi
 
 		switch (reportType) {
 			case Pie2DChart:
-				setType("pie");
+				type = "pie";
 				break;
 			case Pie3DChart:
-				setType("pie3d");
+				type = "pie3d";
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported report type: " + reportType);

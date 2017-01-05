@@ -50,7 +50,7 @@ public class SpeedometerChart extends Chart {
 	private int rangeCount;
 
 	public SpeedometerChart() {
-		setType("meter"); //cewolf chart type as per <cewolf:chart type attribute. not case sensitive. also listed in net.sf.cewolfart.taglib.ChartTypes class code
+		type = "meter"; //cewolf chart type as per <cewolf:chart type attribute. not case sensitive. also listed in net.sf.cewolfart.taglib.ChartTypes class code
 	}
 
 	//prepare graph data structures with query results

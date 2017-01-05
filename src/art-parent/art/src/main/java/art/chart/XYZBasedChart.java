@@ -58,10 +58,13 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 
 		switch (reportType) {
 			case BubbleChart:
-				setType("bubble");
+				//set type directly instead of calling setType()
+				//because setType is overridable and overridable methods shouldn't be called in constructors
+				//http://www.javaworld.com/article/2074669/core-java/java-netbeans--overridable-method-call-in-constructor.html
+				type = "bubble";
 				break;
 			case HeatmapChart:
-				setType("heatmap");
+				type = "heatmap";
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported report type: " + reportType);

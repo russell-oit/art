@@ -51,31 +51,31 @@ public class CategoryBasedChart extends Chart implements CategoryToolTipGenerato
 
 		switch (reportType) {
 			case LineChart:
-				setType("line");
+				type = "line";
 				break;
 			case HorizontalBar2DChart:
-				setType("horizontalBar");
+				type = "horizontalBar";
 				break;
 			case HorizontalBar3DChart:
-				setType("horizontalBar3D");
+				type = "horizontalBar3D";
 				break;
 			case VerticalBar2DChart:
-				setType("verticalBar");
+				type = "verticalBar";
 				break;
 			case VerticalBar3DChart:
-				setType("verticalBar3D");
+				type = "verticalBar3D";
 				break;
 			case StackedHorizontalBar2DChart:
-				setType("stackedHorizontalBar");
+				type = "stackedHorizontalBar";
 				break;
 			case StackedHorizontalBar3DChart:
-				setType("stackedHorizontalBar3D");
+				type = "stackedHorizontalBar3D";
 				break;
 			case StackedVerticalBar2DChart:
-				setType("stackedVerticalBar");
+				type = "stackedVerticalBar";
 				break;
 			case StackedVerticalBar3DChart:
-				setType("stackedVerticalBar3D");
+				type = "stackedVerticalBar3D";
 				break;
 			default:
 				throw new IllegalArgumentException("Unsupported report type: " + reportType);

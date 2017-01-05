@@ -40,7 +40,7 @@ public class XYChart extends Chart implements XYToolTipGenerator, XYItemLinkGene
 	private static final long serialVersionUID = 1L;
 
 	public XYChart() {
-		setType("xy");
+		type = "xy";
 		setHasTooltips(true);
 	}
 
