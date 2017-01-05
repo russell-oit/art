@@ -80,6 +80,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.jasperreports.engine.JRException;
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -371,6 +372,8 @@ public class ReportOutputGenerator {
 
 						if (data != null) {
 							List<DynaBean> dataRows = data.getRows();
+							DynaProperty[] columns = data.getDynaProperties();
+							request.setAttribute("columns", columns);
 							request.setAttribute("dataRows", dataRows);
 							servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartData.jsp").include(request, response);
 						}
