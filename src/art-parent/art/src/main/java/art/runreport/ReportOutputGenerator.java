@@ -60,9 +60,9 @@ import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
-import de.laures.cewolf.ChartValidationException;
-import de.laures.cewolf.DatasetProduceException;
-import de.laures.cewolf.PostProcessingException;
+import net.sf.cewolfart.ChartValidationException;
+import net.sf.cewolfart.DatasetProduceException;
+import net.sf.cewolfart.PostProcessingException;
 import fr.opensagres.xdocreport.core.XDocReportException;
 import freemarker.template.TemplateException;
 import java.io.IOException;
@@ -310,6 +310,8 @@ public class ReportOutputGenerator {
 						swapAxes = true;
 					}
 				}
+				
+				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
 				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, reportParamsList, swapAxes);
 
@@ -355,8 +357,6 @@ public class ReportOutputGenerator {
 					}
 					chart.setSecondaryCharts(secondaryCharts);
 				}
-
-				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
 				if (isJob) {
 					chart.generateFile(reportFormat, fullOutputFilename, data);

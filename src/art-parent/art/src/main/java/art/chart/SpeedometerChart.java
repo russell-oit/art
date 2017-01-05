@@ -50,7 +50,7 @@ public class SpeedometerChart extends Chart {
 	private int rangeCount;
 
 	public SpeedometerChart() {
-		setType("meter"); //cewolf chart type as per <cewolf:chart type attribute. not case sensitive. also listed in de.laures.cewolf.taglib.ChartTypes class code
+		setType("meter"); //cewolf chart type as per <cewolf:chart type attribute. not case sensitive. also listed in net.sf.cewolfart.taglib.ChartTypes class code
 	}
 
 	//prepare graph data structures with query results
@@ -123,8 +123,8 @@ public class SpeedometerChart extends Chart {
 		plot.setRange(new Range(minValue, maxValue));
 		plot.setUnits(unitsDescription);
 
-		plot.setBackgroundPaint(Color.lightGray);
-		plot.setNeedlePaint(Color.darkGray);
+		plot.setBackgroundPaint(Color.LIGHT_GRAY);
+		plot.setNeedlePaint(Color.DARK_GRAY);
 
 		//add color ranges
 		int i;

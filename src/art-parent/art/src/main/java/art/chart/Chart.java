@@ -23,15 +23,15 @@ import art.enums.ReportType;
 import art.report.ChartOptions;
 import art.reportparameter.ReportParameter;
 import art.utils.DrilldownLinkHelper;
-import de.laures.cewolf.ChartPostProcessor;
-import de.laures.cewolf.ChartValidationException;
-import de.laures.cewolf.DatasetProduceException;
-import de.laures.cewolf.DatasetProducer;
-import de.laures.cewolf.PostProcessingException;
-import de.laures.cewolf.cpp.LineRendererProcessor;
-import de.laures.cewolf.cpp.RotatedAxisLabels;
-import de.laures.cewolf.taglib.AbstractChartDefinition;
-import de.laures.cewolf.taglib.CewolfChartFactory;
+import net.sf.cewolfart.ChartPostProcessor;
+import net.sf.cewolfart.ChartValidationException;
+import net.sf.cewolfart.DatasetProduceException;
+import net.sf.cewolfart.DatasetProducer;
+import net.sf.cewolfart.PostProcessingException;
+import net.sf.cewolfart.cpp.LineRendererProcessor;
+import net.sf.cewolfart.cpp.RotatedAxisLabels;
+import net.sf.cewolfart.taglib.AbstractChartDefinition;
+import net.sf.cewolfart.taglib.CewolfChartFactory;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import net.sf.cewolfart.cpp.SeriesPaintProcessor;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.ChartUtilities;
@@ -652,7 +653,7 @@ public abstract class Chart extends AbstractChartDefinition implements DatasetPr
 			return;
 		}
 
-		ArtSeriesPaintProcessor seriesPaintProcessor = new ArtSeriesPaintProcessor();
+		SeriesPaintProcessor seriesPaintProcessor = new SeriesPaintProcessor();
 		seriesPaintProcessor.processChart(chart, seriesColors);
 	}
 

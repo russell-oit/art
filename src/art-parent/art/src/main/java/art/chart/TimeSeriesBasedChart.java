@@ -18,8 +18,8 @@
 package art.chart;
 
 import art.enums.ReportType;
-import de.laures.cewolf.links.XYItemLinkGenerator;
-import de.laures.cewolf.tooltips.XYToolTipGenerator;
+import net.sf.cewolfart.links.XYItemLinkGenerator;
+import net.sf.cewolfart.tooltips.XYToolTipGenerator;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
