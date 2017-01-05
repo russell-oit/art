@@ -211,13 +211,15 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		Objects.requireNonNull(chart, "chart must not be null");
 
 		processYAxisRange(chart);
-		
+
 		//set grid lines to light grey so that they are visible with a default plot background colour of white
 		XYPlot plot = (XYPlot) chart.getPlot();
 		plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
 		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 
-		HeatmapEnhancer heatmapPP = new HeatmapEnhancer();
-		heatmapPP.processChart(chart, heatmapOptions);
+		if (reportType == ReportType.HeatmapChart) {
+			HeatmapEnhancer heatmapPP = new HeatmapEnhancer();
+			heatmapPP.processChart(chart, heatmapOptions);
+		}
 	}
 }
