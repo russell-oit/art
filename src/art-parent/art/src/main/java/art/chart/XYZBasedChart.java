@@ -18,6 +18,7 @@
 package art.chart;
 
 import art.enums.ReportType;
+import java.awt.Color;
 import net.sf.cewolfart.cpp.HeatmapEnhancer;
 import net.sf.cewolfart.links.XYItemLinkGenerator;
 import net.sf.cewolfart.tooltips.XYToolTipGenerator;
@@ -33,6 +34,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultXYZDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYZDataset;
@@ -209,6 +211,11 @@ public class XYZBasedChart extends Chart implements XYToolTipGenerator, XYItemLi
 		Objects.requireNonNull(chart, "chart must not be null");
 
 		processYAxisRange(chart);
+		
+		//set grid lines to light grey so that they are visible with a default plot background colour of white
+		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
+		plot.setDomainGridlinePaint(Color.LIGHT_GRAY);
 
 		HeatmapEnhancer heatmapPP = new HeatmapEnhancer();
 		heatmapPP.processChart(chart, heatmapOptions);
