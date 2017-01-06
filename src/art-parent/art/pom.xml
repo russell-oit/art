@@ -27,7 +27,7 @@
 		<!-- jxls-poi as at 1.0.9 has error with poi 3.13+ -->
 		<poi.version>3.12</poi.version>
 		<owasp.encoder.version>1.2</owasp.encoder.version>
-		<thymeleaf.version>3.0.0.RELEASE</thymeleaf.version>
+		<thymeleaf.version>3.0.3.RELEASE</thymeleaf.version>
 		<xdocreport.version>1.0.6</xdocreport.version>
 	</properties>
 
@@ -101,7 +101,7 @@
 			<name>art</name>
 			<url>file://${project.basedir}/repo</url>
 		</repository>
-		<!-- repository for mondrian and olap4j -->
+		<!-- repository for mondrian -->
 		<repository>
 			<id>pentaho</id>
 			<name>Pentaho</name>
@@ -134,7 +134,7 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
-				<version>4.3.2.RELEASE</version>
+				<version>4.3.5.RELEASE</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -187,28 +187,8 @@
 			<artifactId>art-mail</artifactId>
 			<version>2.0.0-SNAPSHOT</version>
 		</dependency>
-		<!--		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet.jsp</groupId>
-			<artifactId>jsp-api</artifactId>
-			<version>2.1</version>
-			<scope>provided</scope>
-		</dependency>-->
-		<!--		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>jstl</artifactId>
-			<version>1.1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>taglibs</groupId>
-			<artifactId>standard</artifactId>
-			<version>1.1.2</version>
-		</dependency>-->
+		<!-- add jstl 1.2.1 -->
+		<!-- https://stackoverflow.com/questions/24262223/standard-way-of-adding-jslt-1-2-1-in-a-maven-project -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -246,12 +226,12 @@
 					<artifactId>jsp-api</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
+					<groupId>javax.el</groupId>
+					<artifactId>el-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+		<!-- end jstl -->
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
@@ -295,7 +275,11 @@
 			<artifactId>unboundid-ldapsdk</artifactId>
 			<version>3.1.1</version>
 		</dependency>
-		<!-- jpivot specific dependencies -->
+		<dependency>
+			<groupId>com.tonbeller</groupId>
+			<artifactId>jpivot</artifactId>
+			<version>1.8.0-art</version>
+		</dependency>
 		<dependency>
 			<groupId>com.tonbeller</groupId>
 			<artifactId>jpivot-pom</artifactId>
@@ -307,11 +291,6 @@
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.9.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.tonbeller</groupId>
-			<artifactId>jpivot</artifactId>
-			<version>1.8.0-art</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
@@ -338,7 +317,7 @@
 		<dependency>
 			<groupId>net.sf.cewolf-art</groupId>
 			<artifactId>cewolf-art</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>

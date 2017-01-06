@@ -124,11 +124,6 @@ public class SpeedometerChart extends Chart {
 		plot.setUnits(unitsDescription);
 
 		//http://www.jfree.org/phpBB2/viewtopic.php?f=3&t=22082
-//		chart.setBackgroundPaint(Color.LIGHT_GRAY);
-//		plot.setDrawBorder(true);
-//		plot.setBackgroundPaint(Color.BLUE);
-//		plot.setNeedlePaint(Color.RED);
-//		plot.setDialBackgroundPaint(Color.ORANGE);
 		plot.setDialBackgroundPaint(Color.LIGHT_GRAY);
 		plot.setNeedlePaint(Color.DARK_GRAY);
 
