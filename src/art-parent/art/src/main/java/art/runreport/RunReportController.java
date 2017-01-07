@@ -213,6 +213,8 @@ public class RunReportController {
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 				}
+				
+				request.setAttribute("reportType", reportType);
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);
 				writer.flush();

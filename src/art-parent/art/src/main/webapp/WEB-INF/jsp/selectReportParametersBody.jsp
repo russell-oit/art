@@ -21,6 +21,11 @@ Display section to allow selecting of report parameters and initiate running of 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
+<c:if test="${report.reportType.isChart() || report.reportType == 'Dashboard'}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
+	<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
+</c:if>
+
 <script type="text/javascript">
 	$(document).ready(function () {
 		$("#schedule").click(function (e) {
@@ -341,10 +346,10 @@ Display section to allow selecting of report parameters and initiate running of 
 														<label>
 															<input type="checkbox" name="showSelectedParameters" id="showSelectedParameters"
 																   <c:if test="${report.parametersInOutput}">checked="checked"</c:if> value="">
-														</label>
+															</label>
+														</div>
 													</div>
 												</div>
-											</div>
 										</c:if>
 
 										<c:if test="${enableShowSql}">

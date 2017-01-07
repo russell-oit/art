@@ -27,6 +27,10 @@
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 
+		<!-- include tooltipster resources for chart tooltips -->
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
+
 	</head>
 	<body>
 		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
@@ -34,7 +38,7 @@
 		<div id="spinner">
 			<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
 		</div>
-		
+
 		<script type="text/javascript">
 			$(document).ajaxStart(function () {
 				$('#spinner').show();
