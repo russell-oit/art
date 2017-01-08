@@ -500,6 +500,17 @@ public class ReportController {
 			return null;
 		}
 
+		//check file size
+		long maxUploadSize = Config.getSettings().getMaxFileUploadSizeMB(); //size in MB
+		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
+
+		long uploadSize = file.getSize();
+		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
+
+		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) {
+			return "reports.message.fileBiggerThanMax";
+		}
+
 		//check upload file type
 		List<String> validExtensions = new ArrayList<>();
 		validExtensions.add("xml");
@@ -513,19 +524,9 @@ public class ReportController {
 		validExtensions.add("odt");
 		validExtensions.add("pptx");
 
-		long maxUploadSize = Config.getSettings().getMaxFileUploadSizeMB(); //size in MB
-		maxUploadSize = maxUploadSize * 1000L * 1000L; //size in bytes
-
-		//save template file
-		long uploadSize = file.getSize();
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);
 		String extension = FilenameUtils.getExtension(filename).toLowerCase(Locale.ENGLISH);
-
-		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
-		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //0 effectively means no uploads allowed
-			return "reports.message.fileBiggerThanMax";
-		}
 
 		if (!validExtensions.contains(extension)) {
 			return "reports.message.invalidFileType";

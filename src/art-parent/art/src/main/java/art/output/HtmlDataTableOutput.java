@@ -37,7 +37,10 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6-dist/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/css/dataTables.bootstrap.min.css'>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.10.2.min.js'></script>");
+		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
+		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience
+		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/jquery.dataTables.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/dataTables.bootstrap.min.js'></script>");
 
@@ -79,10 +82,9 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 		tableId = "Tid" + Long.toHexString(Double.doubleToLongBits(Math.random()));
 		out.println("<script type='text/javascript'>");
-		out.println("	var $jQuery = jQuery.noConflict();");
-		out.println("	$jQuery(document).ready(function() {");
-		out.println("		$jQuery('#" + tableId + "').dataTable(" + dataTableOptions + ");");
-		out.println("	} );");
+		out.println("	$(document).ready(function() {");
+		out.println("		$('#" + tableId + "').dataTable(" + dataTableOptions + ");");
+		out.println("	});");
 		out.println("</script>");
 
 	}
