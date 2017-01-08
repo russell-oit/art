@@ -38,7 +38,7 @@ Display report drilldowns
 			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
 			$.fn.bsTooltip = $.fn.tooltip.noConflict();
 		</script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
 		
