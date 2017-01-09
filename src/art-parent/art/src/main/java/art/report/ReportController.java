@@ -246,8 +246,8 @@ public class ReportController {
 	public String saveReport(@ModelAttribute("report") @Valid Report report,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session, @RequestParam("action") String action,
-			@RequestParam("templateFile") MultipartFile templateFile,
-			@RequestParam("resourcesFile") MultipartFile resourcesFile) {
+			@RequestParam(value = "templateFile", required = false) MultipartFile templateFile,
+			@RequestParam(value = "resourcesFile", required = false) MultipartFile resourcesFile) {
 
 		logger.debug("Entering saveReport: report={}, action='{}'", report, action);
 
@@ -494,6 +494,11 @@ public class ReportController {
 	 */
 	private String saveFile(MultipartFile file, Report report) throws IOException {
 		logger.debug("Entering saveFile: report={}", report);
+
+		logger.debug("file==null = {}", file == null);
+		if (file == null) {
+			return null;
+		}
 
 		logger.debug("file.isEmpty()={}", file.isEmpty());
 		if (file.isEmpty()) {
