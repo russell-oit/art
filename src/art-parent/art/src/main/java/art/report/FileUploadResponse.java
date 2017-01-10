@@ -22,7 +22,7 @@ package art.report;
  * 
  * @author Timothy Anyona
  */
-public class JqueryFileUploadResponse {
+public class FileUploadResponse {
 	//https://github.com/blueimp/jQuery-File-Upload/wiki/Setup#using-jquery-file-upload-ui-version-with-a-custom-server-side-upload-handler
 	
 	private String name;

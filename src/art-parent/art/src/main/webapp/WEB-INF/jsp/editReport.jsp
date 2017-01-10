@@ -39,6 +39,9 @@ Edit report page
 <spring:message code="page.link.help" var="helpText"/>
 <spring:message code="switch.text.yes" var="yesText"/>
 <spring:message code="switch.text.no" var="noText"/>
+<spring:message code="reports.message.fileTypeNotAllowed" var="fileTypeNotAllowedText"/>
+<%-- https://stackoverflow.com/questions/8588365/spring-message-tag-with-multiple-arguments --%>
+<spring:message code="reports.message.fileTooLargeMB" arguments="${maxFileSizeMB}" var="fileTooLargeMBText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -113,20 +116,25 @@ Edit report page
 
 				$('#name').focus();
 
-				var maxFileSize = ${maxFileSize};
-				if (maxFileSize < 0) {
+				var maxFileSizeBytes = ${maxFileSizeBytes};
+				if (maxFileSizeBytes < 0) {
 					//-1 or any negative value means no size limit
 					//set to undefined
 					//https://stackoverflow.com/questions/5795936/how-to-set-a-javascript-var-as-undefined
-					maxFileSize = void 0;
+					maxFileSizeBytes = void 0;
 				}
 
 				//https://github.com/blueimp/jQuery-File-Upload/wiki/Options
+				//https://stackoverflow.com/questions/34063348/jquery-file-upload-basic-plus-ui-and-i18n
 				$('#fileupload').fileupload({
 					url: '${pageContext.request.contextPath}/app/uploadResources.do',
 					fileInput: $('#fileuploadInput'),
 					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g)$/i,
-					maxFileSize: maxFileSize
+					maxFileSize: maxFileSizeBytes,
+					messages: {
+						acceptFileTypes: '${fileTypeNotAllowedText}',
+						maxFileSize: '${fileTooLargeMBText}'
+					}
 				});
 
 			});

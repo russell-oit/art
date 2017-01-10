@@ -474,9 +474,12 @@ public class ReportController {
 		}
 
 		model.addAttribute("action", action);
-		
-		long maxFileSize = Config.getSettings().getMaxFileUploadSizeMB() * 1000L * 1000L;
-		model.addAttribute("maxFileSize", maxFileSize);
+
+		int maxFileSizeMB = Config.getSettings().getMaxFileUploadSizeMB();
+		model.addAttribute("maxFileSizeMB", maxFileSizeMB);
+
+		long maxFileSizeBytes = maxFileSizeMB * 1000L * 1000L;
+		model.addAttribute("maxFileSizeBytes", maxFileSizeBytes);
 
 		return "editReport";
 	}
@@ -520,7 +523,7 @@ public class ReportController {
 		long uploadSize = file.getSize();
 		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
 
-		if (maxUploadSize >=0 && uploadSize > maxUploadSize) { //-1 or any negative value means no size limit
+		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) { //-1 or any negative value means no size limit
 			return "reports.message.fileBiggerThanMax";
 		}
 
@@ -543,7 +546,7 @@ public class ReportController {
 		String extension = FilenameUtils.getExtension(filename).toLowerCase(Locale.ENGLISH);
 
 		if (!validExtensions.contains(extension)) {
-			return "reports.message.invalidFileType";
+			return "reports.message.fileTypeNotAllowed";
 		}
 
 		//save file
@@ -684,21 +687,23 @@ public class ReportController {
 
 	@PostMapping("/app/uploadResources")
 	public @ResponseBody
-	Map<String, List<JqueryFileUploadResponse>> uploadResources(MultipartHttpServletRequest request,
+	Map<String, List<FileUploadResponse>> uploadResources(MultipartHttpServletRequest request,
 			Locale locale) {
 		//https://github.com/jdmr/fileUpload/blob/master/src/main/java/org/davidmendoza/fileUpload/web/ImageController.java
 		//https://github.com/blueimp/jQuery-File-Upload/wiki/Setup#using-jquery-file-upload-ui-version-with-a-custom-server-side-upload-handler
-		Map<String, List<JqueryFileUploadResponse>> response = new HashMap<>();
-		List<JqueryFileUploadResponse> fileList = new ArrayList<>();
+		Map<String, List<FileUploadResponse>> response = new HashMap<>();
+		List<FileUploadResponse> fileList = new ArrayList<>();
 
+		//http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/MultipartRequest.html
 		Iterator<String> itr = request.getFileNames();
 		while (itr.hasNext()) {
-			MultipartFile mpf = request.getFile(itr.next());
-			JqueryFileUploadResponse fileDetails = new JqueryFileUploadResponse();
-			fileDetails.setName(mpf.getOriginalFilename());
-			fileDetails.setSize(mpf.getSize());
+			String htmlParamName = itr.next();
+			MultipartFile file = request.getFile(htmlParamName);
+			FileUploadResponse fileDetails = new FileUploadResponse();
+			fileDetails.setName(file.getOriginalFilename());
+			fileDetails.setSize(file.getSize());
 			try {
-				String message = saveFile(mpf);
+				String message = saveFile(file);
 				if (message != null) {
 					String errorMessage = messageSource.getMessage(message, null, locale);
 					fileDetails.setError(errorMessage);
