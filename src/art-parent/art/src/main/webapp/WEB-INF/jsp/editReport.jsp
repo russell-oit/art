@@ -859,16 +859,6 @@ Edit report page
 								<b><spring:message code="reports.text.resources"/></b>
 							</div>
 
-							<div class="fileinput fileinput-new" data-provides="fileinput">
-								<span class="btn btn-default btn-file">
-									<span class="fileinput-new">${selectFileText}</span>
-									<span class="fileinput-exists">${changeText}</span>
-									<input type="file" name="resourcesFile">
-								</span>
-								<span class="fileinput-filename"></span>
-								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
-							</div>
-
 							<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
 							<div class="fileupload-buttonbar">
 								<div>
