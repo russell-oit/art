@@ -32,8 +32,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -48,11 +51,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
@@ -469,6 +474,9 @@ public class ReportController {
 		}
 
 		model.addAttribute("action", action);
+		
+		long maxFileSize = Config.getSettings().getMaxFileUploadSizeMB() * 1000L * 1000L;
+		model.addAttribute("maxFileSize", maxFileSize);
 
 		return "editReport";
 	}
@@ -512,7 +520,7 @@ public class ReportController {
 		long uploadSize = file.getSize();
 		logger.debug("maxUploadSize={}, uploadSize={}", maxUploadSize, uploadSize);
 
-		if (maxUploadSize >= 0 && uploadSize > maxUploadSize) {
+		if (maxUploadSize >=0 && uploadSize > maxUploadSize) { //-1 or any negative value means no size limit
 			return "reports.message.fileBiggerThanMax";
 		}
 
@@ -524,6 +532,7 @@ public class ReportController {
 		validExtensions.add("xlsx");
 		validExtensions.add("png");
 		validExtensions.add("jpg");
+		validExtensions.add("jpeg");
 		validExtensions.add("ftl");
 		validExtensions.add("docx");
 		validExtensions.add("odt");
@@ -671,5 +680,39 @@ public class ReportController {
 		}
 
 		return null;
+	}
+
+	@PostMapping("/app/uploadResources")
+	public @ResponseBody
+	Map<String, List<JqueryFileUploadResponse>> uploadResources(MultipartHttpServletRequest request,
+			Locale locale) {
+		//https://github.com/jdmr/fileUpload/blob/master/src/main/java/org/davidmendoza/fileUpload/web/ImageController.java
+		//https://github.com/blueimp/jQuery-File-Upload/wiki/Setup#using-jquery-file-upload-ui-version-with-a-custom-server-side-upload-handler
+		Map<String, List<JqueryFileUploadResponse>> response = new HashMap<>();
+		List<JqueryFileUploadResponse> fileList = new ArrayList<>();
+
+		Iterator<String> itr = request.getFileNames();
+		while (itr.hasNext()) {
+			MultipartFile mpf = request.getFile(itr.next());
+			JqueryFileUploadResponse fileDetails = new JqueryFileUploadResponse();
+			fileDetails.setName(mpf.getOriginalFilename());
+			fileDetails.setSize(mpf.getSize());
+			try {
+				String message = saveFile(mpf);
+				if (message != null) {
+					String errorMessage = messageSource.getMessage(message, null, locale);
+					fileDetails.setError(errorMessage);
+				}
+			} catch (IOException ex) {
+				logger.error("Error", ex);
+				fileDetails.setError(ex.getMessage());
+			}
+
+			fileList.add(fileDetails);
+		}
+
+		response.put("files", fileList);
+
+		return response;
 	}
 }

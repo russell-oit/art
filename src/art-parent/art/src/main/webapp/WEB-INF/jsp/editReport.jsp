@@ -47,6 +47,8 @@ Edit report page
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload-ui.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
@@ -54,6 +56,13 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/hosted/tmpl.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -103,6 +112,22 @@ Edit report page
 				toggleVisibleFields(); //show/hide on page load
 
 				$('#name').focus();
+
+				var maxFileSize = ${maxFileSize};
+				if (maxFileSize < 0) {
+					//-1 or any negative value means no size limit
+					//set to undefined
+					//https://stackoverflow.com/questions/5795936/how-to-set-a-javascript-var-as-undefined
+					maxFileSize = void 0;
+				}
+
+				//https://github.com/blueimp/jQuery-File-Upload/wiki/Options
+				$('#fileupload').fileupload({
+					url: '${pageContext.request.contextPath}/app/uploadResources.do',
+					fileInput: $('#fileuploadInput'),
+					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g)$/i,
+					maxFileSize: maxFileSize
+				});
 
 			});
 		</script>
@@ -237,9 +262,9 @@ Edit report page
 				if (reportTypeId < 0) {
 					$("#chartFields").show();
 					switch (reportTypeId) {
-						case -2: //pie 3d
-						case -13: //pie 2d
-						case -10: //speedometer
+						case - 2: //pie 3d
+						case - 13: //pie 2d
+						case - 10: //speedometer
 							$("#chartAxisLabelFields").hide();
 							break;
 						default:
@@ -287,8 +312,19 @@ Edit report page
 						$("#tabularFields").hide();
 				}
 
+				//show/hide resources
+				switch (reportTypeId) {
+					case 115: //jasper template
+					case 116: //jasper art
+						$("#resourcesDiv").show();
+						break;
+					default:
+						$("#resourcesDiv").hide();
+				}
 			}
 		</script>
+
+
 	</jsp:attribute>
 
 	<jsp:attribute name="aboveMainPanel">
@@ -301,7 +337,7 @@ Edit report page
 
 	<jsp:body>
 		<spring:url var="formUrl" value="/app/saveReport.do"/>
-		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="report" enctype="multipart/form-data">
+		<form:form id="fileupload" class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="report" enctype="multipart/form-data">
 			<fieldset>
 				<c:if test="${formErrors != null}">
 					<div class="alert alert-danger alert-dismissable">
@@ -818,17 +854,53 @@ Edit report page
 							<span class="fileinput-filename"></span>
 							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
 						</div>
-						<div>
-							<b><spring:message code="reports.text.resources"/></b>
-						</div>
-						<div class="fileinput fileinput-new" data-provides="fileinput">
-							<span class="btn btn-default btn-file">
-								<span class="fileinput-new">${selectFileText}</span>
-								<span class="fileinput-exists">${changeText}</span>
-								<input type="file" name="resourcesFile">
-							</span>
-							<span class="fileinput-filename"></span>
-							<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+						<div id="resourcesDiv">
+							<div>
+								<b><spring:message code="reports.text.resources"/></b>
+							</div>
+
+							<div class="fileinput fileinput-new" data-provides="fileinput">
+								<span class="btn btn-default btn-file">
+									<span class="fileinput-new">${selectFileText}</span>
+									<span class="fileinput-exists">${changeText}</span>
+									<input type="file" name="resourcesFile">
+								</span>
+								<span class="fileinput-filename"></span>
+								<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+							</div>
+
+							<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+							<div class="fileupload-buttonbar">
+								<div>
+									<!-- The fileinput-button span is used to style the file input field as button -->
+									<span class="btn btn-success fileinput-button">
+										<i class="glyphicon glyphicon-plus"></i>
+										<span>Add files...</span>
+										<input id="fileuploadInput" type="file" name="files[]" multiple>
+									</span>
+									<button type="submit" class="btn btn-primary start">
+										<i class="glyphicon glyphicon-upload"></i>
+										<span>Start upload</span>
+									</button>
+									<button type="reset" class="btn btn-warning cancel">
+										<i class="glyphicon glyphicon-ban-circle"></i>
+										<span>Cancel upload</span>
+									</button>
+									<!-- The global file processing state -->
+									<span class="fileupload-process"></span>
+								</div>
+								<!-- The global progress state -->
+								<div class="fileupload-progress fade">
+									<!-- The global progress bar -->
+									<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+										<div class="progress-bar progress-bar-success" style="width:0%;"></div>
+									</div>
+									<!-- The extended global progress state -->
+									<div class="progress-extended">&nbsp;</div>
+								</div>
+							</div>
+							<!-- The table listing the files available for upload/download -->
+							<table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
 						</div>
 					</div>
 				</div>
@@ -878,5 +950,82 @@ Edit report page
 				</div>
 			</fieldset>
 		</form:form>
+
+		<!-- The template to display files selected for upload -->
+		<script id="template-upload" type="text/x-tmpl">
+			{% for (var i=0, file; file=o.files[i]; i++) { %}
+			<tr class="template-upload fade">
+			<td>
+            <span class="preview"></span>
+			</td>
+			<td>
+            <p class="name">{%=file.name%}</p>
+            <strong class="error text-danger"></strong>
+			</td>
+			<td>
+            <p class="size">Processing...</p>
+            <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+			<div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+			</td>
+			<td>
+            {% if (!i && !o.options.autoUpload) { %}
+			<button class="btn btn-primary start" disabled>
+			<i class="glyphicon glyphicon-upload"></i>
+			<span>Start</span>
+			</button>
+            {% } %}
+            {% if (!i) { %}
+			<button class="btn btn-warning cancel">
+			<i class="glyphicon glyphicon-ban-circle"></i>
+			<span>Cancel</span>
+			</button>
+            {% } %}
+			</td>
+			</tr>
+			{% } %}
+		</script>
+		<!-- The template to display status of uploaded files -->
+		<script id="template-download" type="text/x-tmpl">
+			{% for (var i=0, file; file=o.files[i]; i++) { %}
+			<tr class="template-download fade">
+			<td>
+            <span class="preview">
+			{% if (file.thumbnailUrl) { %}
+			<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+			{% } %}
+            </span>
+			</td>
+			<td>
+            <p class="name">
+			{% if (file.url) { %}
+			<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+			{% } else { %}
+			<span>{%=file.name%}</span>
+			{% } %}
+            </p>
+            {% if (file.error) { %}
+			<div><span class="label label-danger">Error</span> {%=file.error%}</div>
+            {% } %}
+			</td>
+			<td>
+            <span class="size">{%=o.formatFileSize(file.size)%}</span>
+			</td>
+			<td>
+            {% if (file.deleteUrl) { %}
+			<button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+			<i class="glyphicon glyphicon-trash"></i>
+			<span>Delete</span>
+			</button>
+			<input type="checkbox" name="delete" value="1" class="toggle">
+            {% } else { %}
+			<button class="btn btn-warning cancel">
+			<i class="glyphicon glyphicon-ban-circle"></i>
+			<span>Clear</span>
+			</button>
+            {% } %}
+			</td>
+			</tr>
+			{% } %}
+		</script>
 	</jsp:body>
 </t:mainPageWithPanel>

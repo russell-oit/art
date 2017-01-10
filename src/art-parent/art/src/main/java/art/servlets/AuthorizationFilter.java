@@ -325,7 +325,7 @@ public class AuthorizationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "reportsConfig") || StringUtils.endsWith(page, "Report")
-				|| StringUtils.endsWith(page, "Reports")) {
+				|| StringUtils.endsWith(page, "Reports") || StringUtils.equals(page, "uploadResources")) {
 			//junior admins and above
 			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;

@@ -61,8 +61,7 @@
 		var contentDivId = "#portlet_${portlet.source}";
 		var portletUrl = "${portlet.baseUrl}";
 
-		var executeOnLoad = Boolean(${portlet.executeOnLoad});
-		if (executeOnLoad) {
+		if (${portlet.executeOnLoad}) {
 			$(contentDivId).load(portletUrl);
 		}
 

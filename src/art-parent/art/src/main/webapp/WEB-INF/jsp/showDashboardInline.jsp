@@ -61,8 +61,8 @@
 		var contentDivId = "#portlet_${portlet.source}";
 		var portletUrl = "${portlet.baseUrl}";
 
-		var executeOnLoad = Boolean(${portlet.executeOnLoad});
-		if (executeOnLoad) {
+		//http://balusc.omnifaces.org/2009/05/javajspjsf-and-javascript.html
+		if (${portlet.executeOnLoad}) {
 			$(contentDivId).load(portletUrl);
 		}
 
