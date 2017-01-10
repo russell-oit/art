@@ -876,7 +876,7 @@ Edit report page
 										<span>Add files...</span>
 										<input id="fileuploadInput" type="file" name="files[]" multiple>
 									</span>
-									<button type="submit" class="btn btn-primary start">
+									<button type="button" class="btn btn-primary start">
 										<i class="glyphicon glyphicon-upload"></i>
 										<span>Start upload</span>
 									</button>
