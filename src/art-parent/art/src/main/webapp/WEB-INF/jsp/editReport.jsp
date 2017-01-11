@@ -44,6 +44,8 @@ Edit report page
 <spring:message code="reports.message.fileTooLargeMB" arguments="${maxFileSizeMB}" var="fileTooLargeMBText"/>
 <spring:message code="fileupload.button.start" var="startText"/>
 <spring:message code="fileupload.button.cancel" var="cancelText"/>
+<spring:message code="page.action.delete" var="deleteText"/>
+<spring:message code="caches.action.clear" var="clearText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -169,6 +171,39 @@ Edit report page
 							row.find('.size').text(o.formatFileSize(file.size));
 							if (file.error) {
 								row.find('.error').text(file.error);
+							}
+							rows = rows.add(row);
+						});
+						return rows;
+					},
+					downloadTemplate: function (o) {
+						var rows = $();
+						$.each(o.files, function (index, file) {
+							var row = $('<tr class="template-download fade">' +
+									'<td><p class="name"></p>' +
+									(file.error ? '<strong class="error text-danger"></strong>' : '') +
+									'</td>' +
+									'<td><span class="size"></span></td>' +
+									'<td>' +
+									(file.deleteUrl ? '<button class="btn btn-danger delete">' +
+											'<i class="glyphicon glyphicon-trash"></i> ' +
+											'<span>${deleteText}</span>' +
+											'</button>' : '') +
+									'<button class="btn btn-warning cancel">' +
+									'<i class="glyphicon glyphicon-ban-circle"></i> ' +
+									'<span>${clearText}</span>' +
+									'</button>' +
+									'</td>' +
+									'</tr>');
+							row.find('.name').text(file.name);
+							row.find('.size').text(o.formatFileSize(file.size));
+							if (file.error) {
+								row.find('.error').text(file.error);
+							}
+							if (file.deleteUrl) {
+								row.find('button.delete')
+										.attr('data-type', file.deleteType)
+										.attr('data-url', file.deleteUrl);
 							}
 							rows = rows.add(row);
 						});

@@ -28,6 +28,8 @@ public class FileUploadResponse {
 	private String name;
 	private long size;
 	private String error;
+	private String deleteType = "POST";
+	private String deleteUrl;
 
 	/**
 	 * @return the name
@@ -69,6 +71,34 @@ public class FileUploadResponse {
 	 */
 	public void setError(String error) {
 		this.error = error;
+	}
+
+	/**
+	 * @return the deleteType
+	 */
+	public String getDeleteType() {
+		return deleteType;
+	}
+
+	/**
+	 * @param deleteType the deleteType to set
+	 */
+	public void setDeleteType(String deleteType) {
+		this.deleteType = deleteType;
+	}
+
+	/**
+	 * @return the deleteUrl
+	 */
+	public String getDeleteUrl() {
+		return deleteUrl;
+	}
+
+	/**
+	 * @param deleteUrl the deleteUrl to set
+	 */
+	public void setDeleteUrl(String deleteUrl) {
+		this.deleteUrl = deleteUrl;
 	}
 	
 }

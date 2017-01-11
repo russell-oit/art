@@ -27,8 +27,10 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
+import art.utils.ArtUtils;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -694,19 +696,27 @@ public class ReportController {
 		Map<String, List<FileUploadResponse>> response = new HashMap<>();
 		List<FileUploadResponse> fileList = new ArrayList<>();
 
+		String deleteUrlBase = request.getContextPath() + "/app/deleteResources.do?filename=";
+
 		//http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/MultipartRequest.html
 		Iterator<String> itr = request.getFileNames();
 		while (itr.hasNext()) {
 			String htmlParamName = itr.next();
 			MultipartFile file = request.getFile(htmlParamName);
 			FileUploadResponse fileDetails = new FileUploadResponse();
-			fileDetails.setName(file.getOriginalFilename());
+			String filename = file.getOriginalFilename();
+			fileDetails.setName(filename);
 			fileDetails.setSize(file.getSize());
 			try {
 				String message = saveFile(file);
 				if (message != null) {
 					String errorMessage = messageSource.getMessage(message, null, locale);
 					fileDetails.setError(errorMessage);
+				} else {
+					//save successful
+					String encodedFilename = URLEncoder.encode(filename, "UTF-8");
+					String deleteUrl = deleteUrlBase + encodedFilename;
+					fileDetails.setDeleteUrl(deleteUrl);
 				}
 			} catch (IOException ex) {
 				logger.error("Error", ex);
@@ -716,6 +726,36 @@ public class ReportController {
 			fileList.add(fileDetails);
 		}
 
+		response.put("files", fileList);
+
+		return response;
+	}
+
+	@PostMapping("/app/deleteResources")
+	public @ResponseBody
+	Map<String, List<Map<String, Boolean>>> deleteResources(@RequestParam("filename") List<String> filenames) {
+		Map<String, List<Map<String, Boolean>>> response = new HashMap<>();
+		List<Map<String, Boolean>> fileList = new ArrayList<>();
+
+		String templatesPath = Config.getTemplatesPath();
+		for (String filename : filenames) {
+			Map<String, Boolean> fileDetails = new HashMap<>();
+			
+			String cleanFilename = ArtUtils.cleanFileName(filename);
+			String filePath = templatesPath + File.separator + cleanFilename;
+			
+			File file = new File(filePath);
+			boolean deleted = file.delete();
+			
+			if (deleted) {
+				fileDetails.put(cleanFilename, true);
+			} else {
+				fileDetails.put(cleanFilename, false);
+			}
+			
+			fileList.add(fileDetails);
+		}
+		
 		response.put("files", fileList);
 
 		return response;
