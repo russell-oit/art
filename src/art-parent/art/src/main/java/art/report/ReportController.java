@@ -699,8 +699,6 @@ public class ReportController {
 		Map<String, List<FileUploadResponse>> response = new HashMap<>();
 		List<FileUploadResponse> fileList = new ArrayList<>();
 
-		String deleteUrlBase = request.getContextPath() + "/app/deleteResources.do?filename=";
-
 		//http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/MultipartRequest.html
 		Iterator<String> itr = request.getFileNames();
 		while (itr.hasNext()) {

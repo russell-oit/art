@@ -35,7 +35,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 	@Override
 	public void init() {
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6-dist/css/bootstrap.min.css'>");
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/css/dataTables.bootstrap.min.css'>");
 		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
 		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience

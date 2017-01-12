@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
  */
 public class FinalFilenameValidator {
 
+	//http://vlaurie.com/computers2/Articles/filenames.htm
 	//https://stackoverflow.com/questions/1720191/java-util-regex-importance-of-pattern-compile
 	//https://stackoverflow.com/questions/1360113/is-java-regex-thread-safe
 	//http://www.regexplanet.com/advanced/java/index.html
@@ -36,7 +37,7 @@ public class FinalFilenameValidator {
 	//file name length also limited. should be less than 255 (for ntfs partitions)
 //	private static final String FILENAME_REGEX = "[a-zA-Z0-9]{1,200}\\.[a-zA-Z0-9]{1,10}";
 	//here we are also accepting underscore, dash and space
-	private static final String FILENAME_REGEX = "[a-zA-Z0-9_\\-\\s]{1,200}\\.[a-zA-Z0-9]{1,10}";
+	private static final String FILENAME_REGEX = "[a-zA-Z0-9_\\-\\s]{1,100}\\.[a-zA-Z0-9]{1,10}";
 	private static final Pattern FILENAME_PATTERN = Pattern.compile(FILENAME_REGEX);
 
 	/**
