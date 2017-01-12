@@ -43,6 +43,7 @@ import art.user.User;
 import art.utils.ArtUtils;
 import art.utils.CachedResult;
 import art.utils.FilenameHelper;
+import art.utils.FinalFilenameValidator;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -117,7 +118,7 @@ public class ReportJob implements org.quartz.Job {
 
 	@Autowired
 	private CacheHelper cacheHelper;
-	
+
 	@Autowired
 	private MessageSource messageSource;
 
@@ -291,11 +292,16 @@ public class ReportJob implements org.quartz.Job {
 			return;
 		}
 
+		//restrict file name that can be used for batch file
+		String filenameRegex = "[a-zA-Z0-9]{1,200}\\\\.[a-zA-Z0-9]{1,10}";
+		Pattern pattern = Pattern.compile(filenameRegex);
+		Matcher matcher = pattern.matcher(batchFileName);
+		if (!matcher.matches()) {
+			logger.warn("Invalid batch file name '{}'. Job id {}", batchFileName, jobId);
+			return;
+		}
+
 		logger.debug("batchFileName='{}'", batchFileName);
-
-		batchFileName = ArtUtils.cleanFileName(batchFileName);
-
-		logger.debug("cleaned batchFileName='{}'", batchFileName);
 
 		String batchDirectory = Config.getBatchPath();
 		String fullBatchFileName = batchDirectory + batchFileName;
@@ -1193,17 +1199,22 @@ public class ReportJob implements org.quartz.Job {
 
 		//generate file name to use
 		String exportPath = Config.getJobsExportPath();
-		String outputFileName;
-
 		String fixedFileName = job.getFixedFileName();
+
 		if (StringUtils.isNotBlank(fixedFileName)) {
-			fileName = ArtUtils.cleanFileName(fixedFileName);
+			if (!FinalFilenameValidator.isValid(fixedFileName)) {
+				throw new IllegalArgumentException("Invalid fixed file name - " + fixedFileName);
+			}
 
 			if (job.getRunsToArchive() > 0) {
 				int randomNumber = ArtUtils.getRandomNumber(100, 999);
-				fileName = fileName + "-" + String.valueOf(randomNumber);
+				String baseFilename = FilenameUtils.getBaseName(fixedFileName);
+				String extension = FilenameUtils.getExtension(fixedFileName);
+				String newBaseFilename = baseFilename + "-" + String.valueOf(randomNumber);
+				fileName = newBaseFilename + "." + extension;
 			} else {
-				String fullFixedFileName = exportPath + fileName;
+				fileName = fixedFileName;
+				String fullFixedFileName = exportPath + fixedFileName;
 				File fixedFile = new File(fullFixedFileName);
 				if (fixedFile.exists()) {
 					boolean fileDeleted = fixedFile.delete();
@@ -1214,7 +1225,7 @@ public class ReportJob implements org.quartz.Job {
 			}
 		} else {
 			FilenameHelper filenameHelper = new FilenameHelper();
-			String baseFileName = filenameHelper.getFileName(job);
+			String baseFilename = filenameHelper.getBaseFilename(job);
 			String extension;
 
 			if (reportType.isJxls()) {
@@ -1224,12 +1235,16 @@ public class ReportJob implements org.quartz.Job {
 				extension = reportFormat.getFilenameExtension();
 			}
 
-			fileName = baseFileName + "." + extension;
+			fileName = baseFilename + "." + extension;
 		}
 
-		fileName = ArtUtils.cleanFileName(fileName);
+		logger.debug("fileName = '{}'", fileName);
 
-		outputFileName = exportPath + fileName;
+		if (!FinalFilenameValidator.isValid(fileName)) {
+			throw new IllegalArgumentException("Invalid file name - " + fileName);
+		}
+
+		String outputFileName = exportPath + fileName;
 
 		//create html file to output to as required
 		FileOutputStream fos = null;

@@ -338,7 +338,7 @@ public class RunReportController {
 					//generate output
 					//generate file name to use for report types and formats that generate files
 					FilenameHelper filenameHelper = new FilenameHelper();
-					String baseFileName = filenameHelper.getFileName(report);
+					String baseFileName = filenameHelper.getBaseFilename(report);
 					String exportPath = Config.getReportsExportPath();
 
 					String extension;

@@ -111,28 +111,18 @@ public class ArtUtils {
 	}
 
 	/**
-	 * Utility method to remove characters from a potential file name that may
-	 * result in an invalid file name.
+	 * Removes characters from the base file name part of a file name that may
+	 * result in a dangerous file name on the system
 	 *
-	 * @param fileName potential file name
-	 * @return file name with invalid characters replaced with underscores
+	 * @param baseFilename the initial base file name
+	 * @return final base file name with invalid characters replaced with underscores
 	 */
-	public static String cleanFileName(String fileName) {
-		//https://stackoverflow.com/questions/1155107/is-there-a-cross-platform-java-method-to-remove-filename-special-chars
-		//only allow english alphabets, numbers, dot, underscore, dash, space
-		String sane = fileName.replaceAll("[^a-zA-Z0-9\\._\\-\\s]+", "_");
+	public static String cleanBaseFilename(String baseFilename) {
+		//only allow english alphabets, numbers, underscore, dash, space
+		String sane = baseFilename.replaceAll("[^a-zA-Z0-9_\\-\\s]+", "_");
 		return sane;
-
-//		String cleanName = fileName.replace('/', '_').replace('*', '_').replace('&', '_')
-//				.replace('?', '_').replace('!', '_').replace('\\', '_')
-//				.replace('[', '_').replace(']', '_').replace(':', '_')
-//				.replace('|', '_').replace('<', '_').replace('>', '_')
-//				.replace('"', '_');
-//
-//		//replace accents
-//		return cleanName.replaceAll("[^\\p{ASCII}]", "_");
 	}
-
+	
 	/**
 	 * Get random string to be appended to output filenames
 	 *

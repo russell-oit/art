@@ -32,45 +32,49 @@ import org.apache.commons.lang3.RandomStringUtils;
 public class FilenameHelper {
 
 	/**
-	 * Returns a file name to be used for the given report
+	 * Returns the base file name (file name before extension) to be used for
+	 * the given report
 	 *
 	 * @param report the report
-	 * @return a file name to be used for the given report
+	 * @return the base file name to be used for the given report
 	 */
-	public String getFileName(Report report) {
-		return getFileName(report, null, null);
+	public String getBaseFilename(Report report) {
+		return getBaseFilename(report, null, null);
 	}
 
 	/**
-	 * Returns a file name to be used for the given job
+	 * Returns the base file name (file name before extension) to be used for
+	 * the given job
 	 *
 	 * @param job the job
-	 * @return a file name to be used for the given job
+	 * @return the base file name to be used for the given job
 	 */
-	public String getFileName(Job job) {
-		return getFileName(job.getReport(), job, null);
+	public String getBaseFilename(Job job) {
+		return getBaseFilename(job.getReport(), job, null);
 	}
 
 	/**
-	 * Returns a file name to be used for the given job
+	 * Returns the base file name (file name before extension) to be used for
+	 * the given job
 	 *
 	 * @param job the job
 	 * @param burstId the burst id for the job
-	 * @return a file name to be used for the given job
+	 * @return the base file name to be used for the given job
 	 */
-	public String getFileName(Job job, String burstId) {
-		return getFileName(job.getReport(), job, burstId);
+	public String getBaseFilename(Job job, String burstId) {
+		return getBaseFilename(job.getReport(), job, burstId);
 	}
 
 	/**
-	 * Returns a file name to be used for the given report or job
+	 * Returns the base file name (file name before extension) to be used for
+	 * the given report or job
 	 *
 	 * @param report the report, not null
 	 * @param job the job, may be null
 	 * @param burstId the burst id for the job, may be null
-	 * @return a file name to be used for the given report or job
+	 * @return the base file name to be used for the given report or job
 	 */
-	private String getFileName(Report report, Job job, String burstId) {
+	private String getBaseFilename(Report report, Job job, String burstId) {
 		Objects.requireNonNull(report, "report must not be null");
 
 		int jobId;
@@ -94,13 +98,13 @@ public class FilenameHelper {
 		int reportId = report.getReportId();
 		String timestamp = ArtUtils.fileNameDateFormatter.format(new Date());
 		final int RANDOM_CHARACTER_COUNT = 5;
-		String random = RandomStringUtils.randomAlphanumeric(RANDOM_CHARACTER_COUNT);
+		String randomPart = RandomStringUtils.randomAlphanumeric(RANDOM_CHARACTER_COUNT);
 
-		String fileName = namePart + "-" + timestamp + "-" + random
+		String filename = namePart + "-" + timestamp + "-" + randomPart
 				+ "-" + reportId + "-" + jobId;
 
-		fileName = ArtUtils.cleanFileName(fileName);
+		String cleanFilename = ArtUtils.cleanBaseFilename(filename);
 
-		return fileName;
+		return cleanFilename;
 	}
 }

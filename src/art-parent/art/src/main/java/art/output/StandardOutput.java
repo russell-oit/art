@@ -27,6 +27,7 @@ import art.servlets.Config;
 import art.utils.ArtUtils;
 import art.utils.DrilldownLinkHelper;
 import art.utils.FilenameHelper;
+import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -912,8 +913,13 @@ public abstract class StandardOutput {
 					if (StringUtils.isNotBlank(fixedFileName)) {
 						baseFileName = FilenameUtils.getBaseName(fixedFileName);
 						extension = FilenameUtils.getExtension(fixedFileName);
-						fileName = baseFileName + "-BurstId-" + fileNameBurstId + "." + extension;
-						fileName = ArtUtils.cleanFileName(fileName);
+						String baseFilenameWithBurstId = baseFileName + "-BurstId-" + fileNameBurstId;
+						String finalBaseFilename = ArtUtils.cleanBaseFilename(baseFilenameWithBurstId);
+						fileName = finalBaseFilename + "." + extension;
+						
+						if(!FinalFilenameValidator.isValid(fileName)){
+							throw new IllegalArgumentException("Invalid burst file name - " + fileName);
+						}
 
 						String fullFixedFileName = exportPath + fileName;
 						File fixedFile = new File(fullFixedFileName);
@@ -925,12 +931,14 @@ public abstract class StandardOutput {
 						}
 					} else {
 						FilenameHelper filenameHelper = new FilenameHelper();
-						baseFileName = filenameHelper.getFileName(job, fileNameBurstId);
+						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId);
 						extension = reportFormat.getFilenameExtension();
 						fileName = baseFileName + "." + extension;
+						
+						if(!FinalFilenameValidator.isValid(fileName)){
+							throw new IllegalArgumentException("Invalid file name - " + fileName);
+						}
 					}
-
-					fileName = ArtUtils.cleanFileName(fileName);
 
 					fullOutputFileName = exportPath + fileName;
 
@@ -1445,7 +1453,7 @@ public abstract class StandardOutput {
 
 		/*
 		 * input
-		 */ 		     	 /*
+		 */ /*
 		 * input
 		 */
 		// A Jan 14			     	  A 1 Jan 1 14
@@ -1459,7 +1467,7 @@ public abstract class StandardOutput {
 
 		/*
 		 * output
-		 */		     	 /*
+		 */ /*
 		 * output
 		 */
 		//         y-axis		     	 	  y-axis	      

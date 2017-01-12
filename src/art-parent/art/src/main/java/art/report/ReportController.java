@@ -28,6 +28,7 @@ import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
 import art.utils.ArtUtils;
+import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -551,6 +552,10 @@ public class ReportController {
 			return "reports.message.fileTypeNotAllowed";
 		}
 
+		if (!FinalFilenameValidator.isValid(filename)) {
+			return "reports.message.invalidFilename";
+		}
+
 		//save file
 		String destinationFilename = Config.getTemplatesPath() + filename;
 		File destinationFile = new File(destinationFilename);
@@ -703,24 +708,37 @@ public class ReportController {
 		while (itr.hasNext()) {
 			String htmlParamName = itr.next();
 			MultipartFile file = request.getFile(htmlParamName);
+
 			FileUploadResponse fileDetails = new FileUploadResponse();
+
 			String filename = file.getOriginalFilename();
 			fileDetails.setName(filename);
 			fileDetails.setSize(file.getSize());
-			try {
-				String message = saveFile(file);
-				if (message != null) {
-					String errorMessage = messageSource.getMessage(message, null, locale);
-					fileDetails.setError(errorMessage);
-				} else {
-					//save successful
-					String encodedFilename = URLEncoder.encode(filename, "UTF-8");
-					String deleteUrl = deleteUrlBase + encodedFilename;
-					fileDetails.setDeleteUrl(deleteUrl);
+
+			if (FinalFilenameValidator.isValid(filename)) {
+				try {
+					String message = saveFile(file);
+					if (message != null) {
+						String errorMessage = messageSource.getMessage(message, null, locale);
+						fileDetails.setError(errorMessage);
+					} else {
+						//save successful
+						String encodedFilename = URLEncoder.encode(filename, "UTF-8");
+						String deleteUrl = deleteUrlBase + encodedFilename;
+						fileDetails.setDeleteUrl(deleteUrl);
+					}
+				} catch (IOException ex) {
+					logger.error("Error", ex);
+					if (Config.getCustomSettings().isShowErrors()) {
+						fileDetails.setError(ex.getMessage());
+					} else {
+						String errorMessage = messageSource.getMessage("page.message.errorOccurred", null, locale);
+						fileDetails.setError(errorMessage);
+					}
 				}
-			} catch (IOException ex) {
-				logger.error("Error", ex);
-				fileDetails.setError(ex.getMessage());
+			} else {
+				String errorMessage = messageSource.getMessage("reports.message.invalidFilename", null, locale);
+				fileDetails.setError(errorMessage);
 			}
 
 			fileList.add(fileDetails);
@@ -740,22 +758,25 @@ public class ReportController {
 		String templatesPath = Config.getTemplatesPath();
 		for (String filename : filenames) {
 			Map<String, Boolean> fileDetails = new HashMap<>();
-			
-			String cleanFilename = ArtUtils.cleanFileName(filename);
-			String filePath = templatesPath + File.separator + cleanFilename;
-			
-			File file = new File(filePath);
-			boolean deleted = file.delete();
-			
-			if (deleted) {
-				fileDetails.put(cleanFilename, true);
+
+			if (FinalFilenameValidator.isValid(filename)) {
+				String filePath = templatesPath + filename;
+
+				File file = new File(filePath);
+				boolean deleted = file.delete();
+
+				if (deleted) {
+					fileDetails.put(filename, true);
+				} else {
+					fileDetails.put(filename, false);
+				}
 			} else {
-				fileDetails.put(cleanFilename, false);
+				fileDetails.put(filename, false);
 			}
-			
+
 			fileList.add(fileDetails);
 		}
-		
+
 		response.put("files", fileList);
 
 		return response;
