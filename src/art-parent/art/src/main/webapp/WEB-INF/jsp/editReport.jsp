@@ -64,7 +64,6 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/tmpl.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
@@ -147,7 +146,6 @@ Edit report page
 						var rows = $();
 						$.each(o.files, function (index, file) {
 							var row = $('<tr class="template-upload fade">' +
-									'<td><span class="preview"></span></td>' +
 									'<td><p class="name"></p>' +
 									'<strong class="error text-danger"></strong>' +
 									'</td>' +
