@@ -27,7 +27,6 @@ import art.servlets.Config;
 import art.user.User;
 import art.utils.ActionResult;
 import art.utils.AjaxResponse;
-import art.utils.ArtUtils;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
@@ -722,7 +721,7 @@ public class ReportController {
 						String errorMessage = messageSource.getMessage(message, null, locale);
 						fileDetails.setError(errorMessage);
 					} else {
-						//save successful
+						//save successful. allow delete
 						String encodedFilename = URLEncoder.encode(filename, "UTF-8");
 						String deleteUrl = deleteUrlBase + encodedFilename;
 						fileDetails.setDeleteUrl(deleteUrl);
@@ -751,14 +750,17 @@ public class ReportController {
 
 	@PostMapping("/app/deleteResources")
 	public @ResponseBody
-	Map<String, List<Map<String, Boolean>>> deleteResources(@RequestParam("filename") List<String> filenames) {
-		Map<String, List<Map<String, Boolean>>> response = new HashMap<>();
-		List<Map<String, Boolean>> fileList = new ArrayList<>();
+	Map<String, List<Object>> deleteResources(@RequestParam("filename") List<String> filenames,
+			Locale locale) {
+		
+		Map<String, List<Object>> response = new HashMap<>();
+		List<Object> fileList = new ArrayList<>();
+		
+		//default jquery file upload ui doesn't make use of returned json, whether an error occurred or not
 
 		String templatesPath = Config.getTemplatesPath();
 		for (String filename : filenames) {
-			Map<String, Boolean> fileDetails = new HashMap<>();
-
+			boolean deleteSuccessful = false;
 			if (FinalFilenameValidator.isValid(filename)) {
 				String filePath = templatesPath + filename;
 
@@ -766,15 +768,21 @@ public class ReportController {
 				boolean deleted = file.delete();
 
 				if (deleted) {
+					deleteSuccessful = true;
+					Map<String, Boolean> fileDetails = new HashMap<>();
 					fileDetails.put(filename, true);
-				} else {
-					fileDetails.put(filename, false);
+					fileList.add(fileDetails);
 				}
-			} else {
-				fileDetails.put(filename, false);
 			}
 
-			fileList.add(fileDetails);
+			if (!deleteSuccessful) {
+				FileUploadResponse fileDetails = new FileUploadResponse();
+				fileDetails.setName(filename);
+				String errorMessage = messageSource.getMessage("page.message.errorOccurred", null, locale);
+				fileDetails.setError(errorMessage);
+				fileList.add(fileDetails);
+			}
+
 		}
 
 		response.put("files", fileList);
