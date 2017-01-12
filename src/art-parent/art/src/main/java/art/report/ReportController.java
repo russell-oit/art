@@ -30,7 +30,6 @@ import art.utils.AjaxResponse;
 import art.utils.FinalFilenameValidator;
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -720,12 +719,7 @@ public class ReportController {
 					if (message != null) {
 						String errorMessage = messageSource.getMessage(message, null, locale);
 						fileDetails.setError(errorMessage);
-					} else {
-						//save successful. allow delete
-						String encodedFilename = URLEncoder.encode(filename, "UTF-8");
-						String deleteUrl = deleteUrlBase + encodedFilename;
-						fileDetails.setDeleteUrl(deleteUrl);
-					}
+					} 
 				} catch (IOException ex) {
 					logger.error("Error", ex);
 					if (Config.getCustomSettings().isShowErrors()) {
@@ -748,45 +742,4 @@ public class ReportController {
 		return response;
 	}
 
-	@PostMapping("/app/deleteResources")
-	public @ResponseBody
-	Map<String, List<Object>> deleteResources(@RequestParam("filename") List<String> filenames,
-			Locale locale) {
-		
-		Map<String, List<Object>> response = new HashMap<>();
-		List<Object> fileList = new ArrayList<>();
-		
-		//default jquery file upload ui doesn't make use of returned json, whether an error occurred or not
-
-		String templatesPath = Config.getTemplatesPath();
-		for (String filename : filenames) {
-			boolean deleteSuccessful = false;
-			if (FinalFilenameValidator.isValid(filename)) {
-				String filePath = templatesPath + filename;
-
-				File file = new File(filePath);
-				boolean deleted = file.delete();
-
-				if (deleted) {
-					deleteSuccessful = true;
-					Map<String, Boolean> fileDetails = new HashMap<>();
-					fileDetails.put(filename, true);
-					fileList.add(fileDetails);
-				}
-			}
-
-			if (!deleteSuccessful) {
-				FileUploadResponse fileDetails = new FileUploadResponse();
-				fileDetails.setName(filename);
-				String errorMessage = messageSource.getMessage("page.message.errorOccurred", null, locale);
-				fileDetails.setError(errorMessage);
-				fileList.add(fileDetails);
-			}
-
-		}
-
-		response.put("files", fileList);
-
-		return response;
-	}
 }

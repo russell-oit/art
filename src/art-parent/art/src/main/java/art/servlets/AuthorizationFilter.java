@@ -205,7 +205,7 @@ public class AuthorizationFilter implements Filter {
 		MDC.put("user", user.getUsername());
 		MDC.put("remoteAddr", request.getRemoteAddr());
 		MDC.put("requestURI", request.getRequestURI());
-		
+
 		String xForwardedFor = request.getHeader("X-Forwarded-For");
 		if (xForwardedFor == null) {
 			//ensure it isn't null otherwise pivot table display will throw null pointer error
@@ -325,8 +325,7 @@ public class AuthorizationFilter implements Filter {
 				authorised = true;
 			}
 		} else if (StringUtils.equals(page, "reportsConfig") || StringUtils.endsWith(page, "Report")
-				|| StringUtils.endsWith(page, "Reports") || StringUtils.equals(page, "uploadResources")
-				|| StringUtils.equals(page, "deleteResources")) {
+				|| StringUtils.endsWith(page, "Reports") || StringUtils.equals(page, "uploadResources")) {
 			//junior admins and above
 			if (accessLevel >= AccessLevel.JuniorAdmin.getValue()) {
 				authorised = true;
