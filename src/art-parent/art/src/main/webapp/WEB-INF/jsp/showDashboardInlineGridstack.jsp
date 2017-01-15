@@ -11,6 +11,15 @@
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
+
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
+
+
 <div class="container-fluid">
 	<div class="col-md-12">
 		<div class="row">
@@ -19,11 +28,11 @@
 			</h2>
 		</div>
 		<div class="row">
-			<table class="plain">
-				<tr>
-					<c:forEach var="column" items="${dashboard.columns}">
-						<td style="vertical-align: top">
-							<c:forEach var="portlet" items="${column}">
+			<div class="grid-stack grid-stack-3">
+				<c:forEach var="column" items="${dashboard.columns}">
+					<c:forEach var="portlet" items="${column}">
+						<div class="grid-stack-item">
+							<div class="grid-stack-item-content">
 								<div id="div_${portlet.source}">
 									<div class="${portlet.classNamePrefix}Box">
 										<div class="${portlet.classNamePrefix}Tools"
@@ -40,11 +49,11 @@
 										</div>
 									</div>
 								</div>
-							</c:forEach>
-						</td>
+							</div>
+						</div>
 					</c:forEach>
-                </tr>
-			</table>
+				</c:forEach>
+			</div>
 		</div> 
     </div>
 	<!-- Container-fluid -->
@@ -55,7 +64,7 @@
 		//https://stackoverflow.com/questions/109086/stop-setinterval-call-in-javascript
 		//https://stackoverflow.com/questions/351495/dynamically-creating-keys-in-javascript-associative-array
 		var intervalIds = {};
-		
+
 	<c:forEach var="column" items="${dashboard.columns}">
 		<c:forEach var="portlet" items="${column}">
 		var contentDivId = "#portlet_${portlet.source}";
@@ -104,22 +113,32 @@
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
 			var refreshPeriod = parentDiv.data("refresh-period");
-			
+
 			$(contentDivId).load(portletUrl);
-			
+
 			//reset/restart refresh interval
 			if (refreshPeriod !== '') {
 				clearInterval(intervalIds[contentDivId]);
 
 				var refreshPeriodSeconds = parseInt(refreshPeriod, 10);
 				var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
-				
+
 				var setIntervalId = setInterval(function () {
 					$(contentDivId).load(portletUrl);
 				}, refreshPeriodMilliseconds);
 
 				intervalIds[contentDivId] = setIntervalId;
 			}
+		});
+
+		$('.grid-stack').gridstack({
+			width: 3,
+			alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+			resizable: {
+				handles: 'e, se, s, sw, w'
+			},
+			cellHeight: 100,
+			float: true
 		});
 	});
 </script>

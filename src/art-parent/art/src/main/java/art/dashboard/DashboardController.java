@@ -110,7 +110,8 @@ public class DashboardController {
 		boolean showInline = Boolean.valueOf(request.getParameter("showInline"));
 		
 		if(showInline){
-			return "showDashboardInline";
+			return "showDashboardInlineGridstack";
+//			return "showDashboardInline";
 		} else {
 			return "showDashboard";
 		}
