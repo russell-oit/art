@@ -16,7 +16,10 @@ Display a chart report
 
 <script type="text/javascript">
 	$(document).ready(function () {
-		$('.tooltip-chart').tooltipster({delay: 0});
+		$('.tooltip-chart').tooltipster({
+			delay: 0,
+			animationDuration: 0
+		});
 	});
 </script>
 

@@ -138,7 +138,7 @@
 				handles: 'e, se, s, sw, w'
 			},
 			cellHeight: 100,
-			float: true
+			float: false
 		});
 	});
 </script>
