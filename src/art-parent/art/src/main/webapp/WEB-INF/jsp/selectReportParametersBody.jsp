@@ -219,12 +219,8 @@ Display section to allow selecting of report parameters and initiate running of 
 </c:if>
 
 <div class="row">
-	<div class="col-md-6 col-md-offset-3">
-		<div class="panel panel-success">
-			<div class="panel-body text-center">
-				${encode:forHtmlContent(report.name)}
-			</div>
-		</div>
+	<div class="col-md-12">
+		<h3>${encode:forHtmlContent(report.name)}</h3>
 	</div>
 	<div class="row">
 		<div class="col-md-6 col-md-offset-3">
