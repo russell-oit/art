@@ -47,7 +47,7 @@
 			});
 		</script>
 
-		<jsp:include page="/WEB-INF/jsp/showDashboardInlineGridstack.jsp"/>
+		<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
 
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</body>
