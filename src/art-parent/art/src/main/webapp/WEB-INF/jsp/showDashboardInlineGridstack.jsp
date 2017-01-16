@@ -11,6 +11,7 @@
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
+<%-- https://www.versioneye.com/javascript/troolee:gridstack/0.2.5-dev --%>
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
 
@@ -28,32 +29,34 @@
 			</h2>
 		</div>
 		<div class="row">
-			<div class="grid-stack grid-stack-3">
-				<c:forEach var="column" items="${dashboard.columns}">
-					<c:forEach var="portlet" items="${column}">
-						<div class="grid-stack-item">
-							<div class="grid-stack-item-content">
-								<div id="div_${portlet.source}">
-									<div class="${portlet.classNamePrefix}Box">
-										<div class="${portlet.classNamePrefix}Tools"
-											 data-content-div-id="#portlet_${portlet.source}"
-											 data-url="${portlet.baseUrl}"
-											 data-refresh-period="${portlet.refreshPeriod}">
-											<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
-											<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
-										</div>
-										<div class="${portlet.classNamePrefix}Title">
-											${portlet.title}
-										</div>
-										<div id="portlet_${portlet.source}" class="${portlet.classNamePrefix}Content">
+					<c:forEach var="column" items="${dashboard.columns}">
+						<div class="col-md-4">
+							<div class="grid-stack grid-stack-1">
+								<c:forEach var="portlet" items="${column}">
+									<div class="grid-stack-item" data-gs-auto-position="false">
+										<div class="grid-stack-item-content">
+											<div id="div_${portlet.source}">
+												<div class="${portlet.classNamePrefix}Box">
+													<div class="${portlet.classNamePrefix}Tools"
+														 data-content-div-id="#portlet_${portlet.source}"
+														 data-url="${portlet.baseUrl}"
+														 data-refresh-period="${portlet.refreshPeriod}">
+														<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
+														<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
+													</div>
+													<div class="${portlet.classNamePrefix}Title">
+														${portlet.title}
+													</div>
+													<div id="portlet_${portlet.source}" class="${portlet.classNamePrefix}Content">
+													</div>
+												</div>
+											</div>
 										</div>
 									</div>
-								</div>
+								</c:forEach>
 							</div>
-						</div>
+							</div>
 					</c:forEach>
-				</c:forEach>
-			</div>
 		</div> 
     </div>
 	<!-- Container-fluid -->
@@ -132,7 +135,7 @@
 		});
 
 		$('.grid-stack').gridstack({
-			width: 3,
+			width: 1,
 			alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
 			resizable: {
 				handles: 'e, se, s, sw, w'
