@@ -127,7 +127,7 @@ Edit a drilldown
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="headerText" maxlength="30" class="form-control"/>
+							<form:input path="headerText" maxlength="50" class="form-control"/>
 							<spring:message code="drilldowns.help.headerText" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"
@@ -145,7 +145,7 @@ Edit a drilldown
 					</label>
 					<div class="col-md-8">
 						<div class="input-group">
-							<form:input path="linkText" maxlength="30" class="form-control"/>
+							<form:input path="linkText" maxlength="50" class="form-control"/>
 							<spring:message code="drilldowns.help.linkText" var="help"/>
 							<span class="input-group-btn" >
 								<button class="btn btn-default" type="button"

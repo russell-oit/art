@@ -75,7 +75,7 @@ Edit user rule value
 						<spring:message code="page.text.value"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="ruleValue" maxlength="25" class="form-control"/>
+						<form:input path="ruleValue" maxlength="100" class="form-control"/>
 						<form:errors path="ruleValue" cssClass="error"/>
 					</div>
 				</div>

@@ -207,7 +207,7 @@ Edit datasource page
 						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="name" maxlength="25" class="form-control"/>
+						<form:input path="name" maxlength="50" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
@@ -310,7 +310,7 @@ Edit datasource page
 						<spring:message code="page.label.username"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="username" maxlength="30" class="form-control"/>
+						<form:input path="username" maxlength="50" class="form-control"/>
 						<form:errors path="username" cssClass="error"/>
 					</div>
 				</div>

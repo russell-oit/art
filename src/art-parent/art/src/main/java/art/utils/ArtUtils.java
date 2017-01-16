@@ -217,7 +217,7 @@ public class ArtUtils {
 		databaseTypes.put("mysql", "MySQL");
 		databaseTypes.put("mariadb", "MariaDB");
 		databaseTypes.put("postgresql", "PostgreSQL");
-		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver) - driver not included");
+		databaseTypes.put("sqlserver-ms", "SQL Server (Microsoft driver)");
 		databaseTypes.put("sqlserver-jtds", "SQL Server (jTDS driver)");
 		databaseTypes.put("hsqldb-standalone", "HSQLDB (Standalone mode)");
 		databaseTypes.put("hsqldb-server", "HSQLDB (Server mode)");

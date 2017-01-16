@@ -433,6 +433,54 @@ UPDATE ART_QUERY_FIELDS SET LOV_QUERY_ID = 0 WHERE USE_LOV = 'N';
 -- increase size of contact person column
 ALTER TABLE ART_QUERIES MODIFY CONTACT_PERSON VARCHAR(100);
 
+-- increase size of datasource name column
+ALTER TABLE ART_DATABASES MODIFY NAME VARCHAR(50);
+
+-- increase size of datasource username column
+ALTER TABLE ART_DATABASES MODIFY USERNAME VARCHAR(50);
+
+-- increase size of report groups name column
+ALTER TABLE ART_QUERY_GROUPS MODIFY NAME VARCHAR(50);
+
+-- increase size of report groups description column
+ALTER TABLE ART_QUERY_GROUPS MODIFY DESCRIPTION VARCHAR(100);
+
+-- increase size of rule name column
+ALTER TABLE ART_RULES MODIFY RULE_NAME VARCHAR(50);
+
+-- increase size of rule description column
+ALTER TABLE ART_RULES MODIFY SHORT_DESCRIPTION VARCHAR(100);
+
+-- increase size of query rules rule name column
+ALTER TABLE ART_QUERY_RULES MODIFY RULE_NAME VARCHAR(50);
+
+-- increase size of user rules rule name column
+ALTER TABLE ART_USER_RULES MODIFY RULE_NAME VARCHAR(50);
+
+-- increase size of user rules rule value column
+ALTER TABLE ART_USER_RULES MODIFY RULE_VALUE VARCHAR(100);
+
+-- increase size of user group rules rule name column
+ALTER TABLE ART_USER_GROUP_RULES MODIFY RULE_NAME VARCHAR(50);
+
+-- increase size of user group rules rule value column
+ALTER TABLE ART_USER_GROUP_RULES MODIFY RULE_VALUE VARCHAR(100);
+
+-- increase size of logs ip column
+ALTER TABLE ART_LOGS MODIFY IP VARCHAR(50);
+
+-- increase size of user groups name column
+ALTER TABLE ART_USER_GROUPS MODIFY NAME VARCHAR(50);
+
+-- increase size of user groups description column
+ALTER TABLE ART_USER_GROUPS MODIFY DESCRIPTION VARCHAR(100);
+
+-- increase size of drill down title column
+ALTER TABLE ART_DRILLDOWN_QUERIES MODIFY DRILLDOWN_TITLE VARCHAR(50);
+
+-- increase size of drill down title column
+ALTER TABLE ART_DRILLDOWN_QUERIES MODIFY DRILLDOWN_TEXT VARCHAR(50);
+
 
 
 

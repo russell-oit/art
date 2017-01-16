@@ -110,7 +110,7 @@ Edit a rule
 						<spring:message code="page.text.name"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="name" maxlength="15" class="form-control"/>
+						<form:input path="name" maxlength="50" class="form-control"/>
 						<form:errors path="name" cssClass="error"/>
 					</div>
 				</div>
@@ -119,7 +119,7 @@ Edit a rule
 						<spring:message code="page.text.description"/>
 					</label>
 					<div class="col-md-8">
-						<form:input path="description" maxlength="40" class="form-control"/>
+						<form:input path="description" maxlength="100" class="form-control"/>
 						<form:errors path="description" cssClass="error"/>
 					</div>
 				</div>
