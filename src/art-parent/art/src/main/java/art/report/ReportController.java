@@ -694,6 +694,9 @@ public class ReportController {
 	public @ResponseBody
 	Map<String, List<FileUploadResponse>> uploadResources(MultipartHttpServletRequest request,
 			Locale locale) {
+		
+		logger.debug("Entering uploadResources");
+		
 		//https://github.com/jdmr/fileUpload/blob/master/src/main/java/org/davidmendoza/fileUpload/web/ImageController.java
 		//https://github.com/blueimp/jQuery-File-Upload/wiki/Setup#using-jquery-file-upload-ui-version-with-a-custom-server-side-upload-handler
 		Map<String, List<FileUploadResponse>> response = new HashMap<>();
@@ -703,6 +706,8 @@ public class ReportController {
 		Iterator<String> itr = request.getFileNames();
 		while (itr.hasNext()) {
 			String htmlParamName = itr.next();
+			logger.debug("htmlParamName = '{}'", htmlParamName);
+			
 			MultipartFile file = request.getFile(htmlParamName);
 
 			FileUploadResponse fileDetails = new FileUploadResponse();
@@ -710,6 +715,8 @@ public class ReportController {
 			String filename = file.getOriginalFilename();
 			fileDetails.setName(filename);
 			fileDetails.setSize(file.getSize());
+			
+			logger.debug("filename = '{}'", filename);
 
 			if (FinalFilenameValidator.isValid(filename)) {
 				try {
