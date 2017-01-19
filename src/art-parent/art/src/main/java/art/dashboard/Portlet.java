@@ -27,39 +27,39 @@ import java.io.Serializable;
 public class Portlet implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private String source;
-	private String baseUrl;
+	private String id;
+	private String url;
 	private String classNamePrefix;
 	private String title;
 	private boolean executeOnLoad;
-	private String refreshPeriod;
+	private int refreshPeriodSeconds;
 
 	/**
-	 * @return the source
+	 * @return the id
 	 */
-	public String getSource() {
-		return source;
+	public String getId() {
+		return id;
 	}
 
 	/**
-	 * @param source the source to set
+	 * @param id the id to set
 	 */
-	public void setSource(String source) {
-		this.source = source;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	/**
-	 * @return the baseUrl
+	 * @return the url
 	 */
-	public String getBaseUrl() {
-		return baseUrl;
+	public String getUrl() {
+		return url;
 	}
 
 	/**
-	 * @param baseUrl the baseUrl to set
+	 * @param url the url to set
 	 */
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	/**
@@ -105,16 +105,16 @@ public class Portlet implements Serializable {
 	}
 
 	/**
-	 * @return the refreshPeriod
+	 * @return the refreshPeriodSeconds
 	 */
-	public String getRefreshPeriod() {
-		return refreshPeriod;
+	public int getRefreshPeriodSeconds() {
+		return refreshPeriodSeconds;
 	}
 
 	/**
-	 * @param refreshPeriod the refreshPeriod to set
+	 * @param refreshPeriodSeconds the refreshPeriodSeconds to set
 	 */
-	public void setRefreshPeriod(String refreshPeriod) {
-		this.refreshPeriod = refreshPeriod;
+	public void setRefreshPeriodSeconds(int refreshPeriodSeconds) {
+		this.refreshPeriodSeconds = refreshPeriodSeconds;
 	}
 }

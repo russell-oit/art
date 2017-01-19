@@ -47,7 +47,14 @@
 			});
 		</script>
 
-		<jsp:include page="/WEB-INF/jsp/showDashboardInlineGridstack.jsp"/>
+		<c:choose>
+			<c:when test="${reportType == 'Dashboard'}">
+				<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
+			</c:when>
+			<c:when test="${reportType == 'GridstackDashboard'}">
+				<jsp:include page="/WEB-INF/jsp/showGridstackDashboardInline.jsp"/>
+			</c:when>
+		</c:choose>
 
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</body>

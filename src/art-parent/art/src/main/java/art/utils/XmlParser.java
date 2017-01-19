@@ -28,11 +28,13 @@ import org.apache.commons.lang3.StringUtils;
 public class XmlParser {
 
 	/**
-	 * Returns the text between a given element in a xml string
+	 * Returns the text between a given element in a xml string, null if the
+	 * element is not found
 	 *
-	 * @param xml
-	 * @param element
-	 * @return the text between a given element in a xml string
+	 * @param xml the xml string
+	 * @param element the tag to find
+	 * @return the text between a given element in a xml string, null if the
+	 * element is not found
 	 */
 	public static String getXmlElementValue(String xml, String element) {
 
@@ -64,8 +66,8 @@ public class XmlParser {
 	 * Returns a list (of strings) with the values between a given element in a
 	 * xml string (the list stores all the element values)
 	 *
-	 * @param xml
-	 * @param element
+	 * @param xml the xml string
+	 * @param element the tag to find
 	 * @return list (of strings) with the values between a given element in a
 	 * xml string
 	 */
@@ -101,11 +103,11 @@ public class XmlParser {
 	 * Returns a XmlInfo object that contains the text between a given element
 	 * in a xml string as well as the position of the text in the string
 	 *
-	 * @param xml
-	 * @param element
-	 * @param offset
+	 * @param xml the xml string
+	 * @param element the tag to find
+	 * @param offset the position of in the xml string to start at
 	 * @return XmlInfo object that contains the text between a given element in
-	 * an xml string
+	 * an xml string or null if the element is not found
 	 */
 	public static XmlInfo getXmlElementInfo(String xml, String element, int offset) {
 

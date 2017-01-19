@@ -168,11 +168,13 @@ public class RunReportHelper {
 			}
 		}
 
+		ReportType reportType = report.getReportType();
+
 		//create map in order to display parameters by position
 		Map<Integer, ReportParameter> reportParams = new TreeMap<>();
 		//for dashboard different report parameters for different reports may have
 		//same position so just display all in the order of the list (an arbitrary order)
-		if (report.getReportType() == ReportType.Dashboard) {
+		if (reportType.isDashboard()) {
 			Integer count = 0;
 			for (ReportParameter reportParam : reportParamsList) {
 				count++;
@@ -186,11 +188,10 @@ public class RunReportHelper {
 
 		request.setAttribute("reportParams", reportParams);
 
-		ReportType reportType = report.getReportType();
-
 		boolean enableReportFormats;
 		switch (reportType) {
 			case Dashboard:
+			case GridstackDashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:
@@ -223,6 +224,7 @@ public class RunReportHelper {
 
 			switch (reportType) {
 				case Dashboard:
+				case GridstackDashboard:
 				case Mondrian:
 				case MondrianXmla:
 				case SqlServerXmla:
@@ -242,6 +244,7 @@ public class RunReportHelper {
 
 		switch (reportType) {
 			case Dashboard:
+			case GridstackDashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:
@@ -286,6 +289,7 @@ public class RunReportHelper {
 
 		switch (reportType) {
 			case Dashboard:
+			case GridstackDashboard:
 			case Mondrian:
 			case MondrianXmla:
 			case SqlServerXmla:
@@ -317,6 +321,7 @@ public class RunReportHelper {
 			case CrosstabHtml:
 			case TabularHtml:
 			case Dashboard:
+			case GridstackDashboard:
 			case Text:
 			case Mondrian:
 			case MondrianXmla:

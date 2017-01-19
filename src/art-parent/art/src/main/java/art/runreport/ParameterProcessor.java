@@ -108,7 +108,7 @@ public class ParameterProcessor {
 		ReportService reportService = new ReportService();
 		Report report = reportService.getReport(reportId);
 		List<ReportParameter> reportParamsList;
-		if (report.getReportType() == ReportType.Dashboard) {
+		if (report.getReportType().isDashboard()) {
 			List<Integer> reportIds = report.getDashboardReportIds();
 			List<ReportParameter> tempReportParamsList = reportParameterService.getDashboardReportParameters(reportIds);
 			//remove duplicates
@@ -365,7 +365,9 @@ public class ParameterProcessor {
 	 * @return an object of the appropriate type
 	 * @throws ParseException
 	 */
-	public Object convertParameterStringValueToObject(String value, Parameter param) throws ParseException {
+	public Object convertParameterStringValueToObject(String value, Parameter param)
+			throws ParseException {
+		
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
 
 		ParameterDataType paramDataType = param.getDataType();

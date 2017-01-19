@@ -27,14 +27,16 @@ import java.util.List;
  */
 public enum ReportType {
 
+	//items will be displayed in the order they appear in here in editReport.jsp
 	Tabular(0), Group(1), TabularHtml(103),
 	Update(100), Crosstab(101), CrosstabHtml(102),
-	Dashboard(110), Text(111), Mondrian(112), MondrianXmla(113), SqlServerXmla(114),
+	Dashboard(110), GridstackDashboard(129), Text(111), Mondrian(112),
+	MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
-	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128),
+	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128), 
 	XYChart(-1), Pie3DChart(-2), HorizontalBar3DChart(-3), VerticalBar3DChart(-4),
 	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
@@ -46,7 +48,22 @@ public enum ReportType {
 	private ReportType(int value) {
 		this.value = value;
 	}
-	
+
+	/**
+	 * Returns <code>true</code> if this is a regular or gridstack dashboard
+	 *
+	 * @return <code>true</code> if this is a regular or gridstack dashboard
+	 */
+	public boolean isDashboard() {
+		switch (this) {
+			case Dashboard:
+			case GridstackDashboard:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	/**
 	 * Returns <code>true</code> if this report type is a chart that uses an xy
 	 * plot
@@ -297,11 +314,11 @@ public enum ReportType {
 	}
 
 	/**
-	 * Returns <code>true</code> if this is a tabular, crosstab, dynamic lov, job
-	 * recipients report type
+	 * Returns <code>true</code> if this is a tabular, crosstab, dynamic lov,
+	 * job recipients report type
 	 *
-	 * @return <code>true</code> if this is a tabular, crosstab, dynamic lov, job
-	 * recipients report type
+	 * @return <code>true</code> if this is a tabular, crosstab, dynamic lov,
+	 * job recipients report type
 	 */
 	public boolean isStandardOutput() {
 		switch (this) {
@@ -400,6 +417,8 @@ public enum ReportType {
 				return "Tabular (html only)";
 			case Dashboard:
 				return "Dashboard";
+			case GridstackDashboard:
+				return "Dashboard: Gridstack";
 			case Text:
 				return "Text";
 			case Mondrian:

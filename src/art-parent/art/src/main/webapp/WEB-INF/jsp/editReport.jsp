@@ -234,6 +234,7 @@ Edit report page
 						reportSourceType = "(HTML)";
 						break;
 					case 110:
+					case 129:
 						//dashboard
 						reportSourceType = "(XML)";
 						break;
@@ -252,6 +253,7 @@ Edit report page
 				//show/hide use rules
 				switch (reportTypeId) {
 					case 110: //dashboard
+					case 129: //gridstack dashboard
 					case 111: //text
 					case 115: //jasperreport template
 					case 117: //jxls template
@@ -269,6 +271,7 @@ Edit report page
 				//show/hide datasource
 				switch (reportTypeId) {
 					case 110: //dashboard
+					case 129: //gridstack dashboard
 					case 111: //text
 					case 120: //static lov
 						$("#datasourceDiv").hide();
@@ -316,6 +319,7 @@ Edit report page
 				//show/hide display resultset
 				switch (reportTypeId) {
 					case 110: //dashboard
+					case 129: //gridstack dashboard
 					case 111: //text
 					case 112: //mondrian
 					case 113: //mondrian xmla
@@ -366,6 +370,7 @@ Edit report page
 				//show/hide default report format
 				switch (reportTypeId) {
 					case 110: //dashboard
+					case 129: //gridstack dashboard
 					case 112: //mondrian
 					case 113: //mondrian xmla
 					case 114: //sql server xmla
@@ -401,9 +406,26 @@ Edit report page
 					default:
 						$("#resourcesDiv").hide();
 				}
+
+				//show/hide fetch size
+				switch (reportTypeId) {
+					case 100: //update
+					case 110: //dashboard
+					case 129: //gridstack dashboard
+					case 111: //text
+					case 112: //mondrian
+					case 113: //mondrian xmla
+					case 114: //sql server xmla
+					case 115: //jasper template
+					case 117: //jxls template
+					case 120: //static lov
+						$("#fetchSizeDiv").hide();
+						break;
+					default:
+						$("#fetchSizeDiv").show();
+				}
 			}
 		</script>
-
 
 	</jsp:attribute>
 
@@ -742,7 +764,7 @@ Edit report page
 					</div>
 				</fieldset>
 
-				<div class="form-group">
+				<div id="fetchSizeDiv" class="form-group">
 					<label class="control-label col-md-4" for="fetchSize">
 						<spring:message code="reports.label.fetchSize"/>
 					</label>
