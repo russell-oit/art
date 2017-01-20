@@ -39,11 +39,11 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -404,20 +404,22 @@ public class JobController {
 		logger.debug("Entering saveJobParameters: jobId={}", jobId);
 
 		Map<String, String[]> passedValues = new HashMap<>();
-		Enumeration<String> htmlParamNames = request.getParameterNames();
-		while (htmlParamNames.hasMoreElements()) {
-			String htmlParamName = htmlParamNames.nextElement();
+		
+		Map<String, String[]> requestParameters = request.getParameterMap();
+		for (Entry<String, String[]> entry : requestParameters.entrySet()) {
+			String htmlParamName = entry.getKey();
 			logger.debug("htmlParamName='{}'", htmlParamName);
 
 			if (htmlParamName.startsWith("p-")) {
-				passedValues.put(htmlParamName, request.getParameterValues(htmlParamName));
+				String[] paramValues = entry.getValue();
+				passedValues.put(htmlParamName, paramValues);
 			}
 		}
 
 		jobParameterService.deleteJobParameters(jobId);
 
 		//add report parameters
-		for (Map.Entry<String, String[]> entry : passedValues.entrySet()) {
+		for (Entry<String, String[]> entry : passedValues.entrySet()) {
 			String name = entry.getKey();
 			String[] values = entry.getValue();
 			for (String value : values) {

@@ -31,10 +31,10 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.BooleanUtils;
@@ -307,11 +307,11 @@ public class DashboardController {
 
 			//add report parameters
 			StringBuilder paramsSb = new StringBuilder(254);
-			Enumeration<String> htmlParamNames = request.getParameterNames();
-			while (htmlParamNames.hasMoreElements()) {
-				String htmlParamName = htmlParamNames.nextElement();
+			Map<String, String[]> requestParameters = request.getParameterMap();
+			for(Entry<String, String[]> entry : requestParameters.entrySet()){
+				String htmlParamName = entry.getKey();
 				if (htmlParamName.startsWith("p-")) {
-					String[] paramValues = request.getParameterValues(htmlParamName);
+					String[] paramValues = entry.getValue();
 					for (String value : paramValues) {
 						String encodedParamValue = URLEncoder.encode(value, "UTF-8");
 						paramsSb.append("&").append(htmlParamName).append("=").append(encodedParamValue);

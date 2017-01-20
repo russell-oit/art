@@ -73,14 +73,8 @@ public class ParameterProcessor {
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
 		Map<String, String[]> passedValues = new HashMap<>();
-
-		Enumeration<String> htmlParamNames = request.getParameterNames();
-		while (htmlParamNames.hasMoreElements()) {
-			String htmlParamName = htmlParamNames.nextElement();
-			logger.debug("htmlParamName='{}'", htmlParamName);
-
-			passedValues.put(htmlParamName, request.getParameterValues(htmlParamName));
-		}
+		Map<String, String[]> requestParameters = request.getParameterMap();
+		passedValues.putAll(requestParameters);
 
 		return process(passedValues, reportId);
 	}
@@ -367,7 +361,7 @@ public class ParameterProcessor {
 	 */
 	public Object convertParameterStringValueToObject(String value, Parameter param)
 			throws ParseException {
-		
+
 		logger.debug("Entering convertParameterStringValueToObject: value='{}'", value);
 
 		ParameterDataType paramDataType = param.getDataType();
@@ -406,7 +400,7 @@ public class ParameterProcessor {
 			case Integer:
 			case Datasource:
 				//use Double.valueOf() for cases where something like 15.0 is passed (e.g. with drilldown from chart)
-				//Integer.valueOf() would throw an exception is such a case
+				//Integer.valueOf() would throw an exception in such a case
 				//intValue() merely returns the integer part; it does not do any rounding
 				//https://stackoverflow.com/questions/9102318/cast-double-to-integer-in-java
 				//return Double.valueOf(usedValue).intValue();
