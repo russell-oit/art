@@ -78,6 +78,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@PostConstruct
 	public void init() {
 		//https://github.com/arey/spring-javaconfig-sample/blob/master/src/main/java/com/javaetmoi/sample/config/WebMvcConfig.java
+		//don't include/show model attributes in url (request) when using redirect:
 		requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
 	}
 

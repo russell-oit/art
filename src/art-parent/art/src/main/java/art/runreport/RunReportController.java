@@ -55,6 +55,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * Controller for running reports interactively
@@ -84,7 +85,8 @@ public class RunReportController {
 	@RequestMapping(value = "/app/runReport", method = {RequestMethod.GET, RequestMethod.POST})
 	public String runReport(@RequestParam("reportId") Integer reportId,
 			HttpServletRequest request, HttpServletResponse response,
-			HttpSession session, Model model, Locale locale) throws IOException {
+			HttpSession session, Model model, Locale locale,
+			RedirectAttributes redirectAttributes) throws IOException {
 
 		Report report = null;
 		User sessionUser = null;
@@ -148,7 +150,18 @@ public class RunReportController {
 			if (reportType.isDashboard()) {
 				return "forward:/app/showDashboard.do";
 			} else if (reportType.isOlap()) {
-				return "forward:/app/showAnalysis.do";
+				//setting model attributes won't include parameters in the redirect request because
+				//we have setIgnoreDefaultModelOnRedirect in AppConfig.java
+				//use redirect attributes instead
+//				for (Entry<String, String[]> requestParam : request.getParameterMap().entrySet()) {
+//					String paramName = requestParam.getKey();
+//					String[] paramValue = requestParam.getValue();
+//					model.addAttribute(paramName, paramValue);
+//				}
+
+				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
+				redirectAttributes.addAllAttributes(request.getParameterMap());
+				return "redirect:/app/showAnalysis.do";
 			}
 
 			//get report format to use
@@ -213,7 +226,7 @@ public class RunReportController {
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 				}
-				
+
 				request.setAttribute("reportType", reportType);
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);

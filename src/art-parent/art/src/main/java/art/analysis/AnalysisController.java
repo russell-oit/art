@@ -75,7 +75,8 @@ public class AnalysisController {
 
 		try {
 			int reportId = 0;
-			if (request.getParameter("reportId") == null) {
+			String reportIdParameter = request.getParameter("reportId");
+			if (reportIdParameter == null) {
 				//not passed when using olap navigator
 				Integer sessionReportId = (Integer) session.getAttribute("pivotReportId");
 				logger.debug("sessionReportId={}", sessionReportId);
@@ -84,7 +85,7 @@ public class AnalysisController {
 				}
 			} else {
 				//save to session in case olap navigator is used
-				reportId = Integer.parseInt(request.getParameter("reportId"));
+				reportId = Integer.parseInt(reportIdParameter);
 				session.setAttribute("pivotReportId", reportId);
 
 				logger.debug("reportId={}", reportId);

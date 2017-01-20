@@ -40,7 +40,7 @@ public class GridstackItem implements Serializable {
 	private boolean noMove;
 	private boolean autoposition;
 	private boolean locked;
-	private int minWidth; //0 doesn't have same effect as html attribute not being present in jsp, therefore requires conditional inclusing using ternary operator in jsp
+	private int minWidth; //0 doesn't have same effect as html attribute not being present in jsp, therefore requires conditional inclusion using ternary operator in jsp
 	private int minHeight; //0 has same effect as html attribute no being present in jsp. doesn't require ternary operator in jsp
 	private int maxWidth; //0 results in item having mimimum width, so omit html attribute if 0 (if not specified)
 	private int maxHeight; //0 results in item having mimimum height, so omit html attribute if 0 (if not specified)

@@ -134,18 +134,12 @@
 			}
 		});
 
-		var alwaysShowResizeHandle = ${dashboard.alwaysShowResizeHandle};
-		if (!alwaysShowResizeHandle) {
-			//always show resize handle for mobile devices
-			alwaysShowResizeHandle = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-		}
-
 		//horizontal margin/padding not an api option. defaults to 20px (10px on the left + 10px on the right)
 		//can be overriden in css
 		//https://github.com/troolee/gridstack.js/issues/33
 		$('.grid-stack').gridstack({
 			width: ${dashboard.width},
-			alwaysShowResizeHandle: alwaysShowResizeHandle,
+			alwaysShowResizeHandle: ${dashboard.alwaysShowResizeHandle},
 			resizable: {
 				handles: 'e, se, s, sw, w'
 			},
