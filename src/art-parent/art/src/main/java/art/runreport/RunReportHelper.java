@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -450,7 +451,7 @@ public class RunReportHelper {
 
 		String outputString = sourceString;
 
-		for (Map.Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
+		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			String paramName = entry.getKey();
 			ReportParameter reportParam = entry.getValue();
 

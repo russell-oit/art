@@ -71,6 +71,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
@@ -461,7 +462,7 @@ public class ReportJob implements org.quartz.Job {
 		Map<String, Object> data = new HashMap<>();
 
 		if (recipientColumns != null) {
-			for (Map.Entry<String, String> entry : recipientColumns.entrySet()) {
+			for (Entry<String, String> entry : recipientColumns.entrySet()) {
 				String columnName = entry.getKey();
 				String columnValue = entry.getValue();
 				data.put(columnName, columnValue);
@@ -934,7 +935,7 @@ public class ReportJob implements org.quartz.Job {
 			if (recipientFilterPresent) {
 				//enable report data to be filtered/different for each recipient
 				reportRunner.setRecipientFilterPresent(recipientFilterPresent);
-				for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+				for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 					//map should only have one value if filter present
 					Map<String, String> recipientColumns = entry.getValue();
 					reportRunner.setRecipientColumn(recipientColumns.get(ArtUtils.RECIPIENT_COLUMN));
@@ -1089,7 +1090,7 @@ public class ReportJob implements org.quartz.Job {
 		//send customized emails to dynamic recipients
 		if (recipientDetails != null) {
 			Mailer mailer = getMailer();
-			for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+			for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 				String emails = entry.getKey();
 				String[] emailsArray = StringUtils.split(emails, ";");
 				Map<String, String> recipientColumns = entry.getValue();
@@ -1498,7 +1499,7 @@ public class ReportJob implements org.quartz.Job {
 						if (recipientDetails != null) {
 							Mailer mailer = getMailer();
 
-							for (Map.Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
+							for (Entry<String, Map<String, String>> entry : recipientDetails.entrySet()) {
 								String emails = entry.getKey();
 								String[] emailsArray = StringUtils.split(emails, ";");
 								Map<String, String> recipientColumns = entry.getValue();
@@ -1592,7 +1593,7 @@ public class ReportJob implements org.quartz.Job {
 		String customMessage = message; //message for a particular recipient. may include personalization e.g. Dear Jane
 
 		if (StringUtils.isNotBlank(customMessage)) {
-			for (Map.Entry<String, String> entry : recipientColumns.entrySet()) {
+			for (Entry<String, String> entry : recipientColumns.entrySet()) {
 				String columnName = entry.getKey();
 				String columnValue = entry.getValue();
 

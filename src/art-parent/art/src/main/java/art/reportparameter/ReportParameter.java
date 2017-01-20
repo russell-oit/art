@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -395,7 +396,7 @@ public class ReportParameter implements Serializable {
 	public Map<String, String> convertLovValuesFromObjectToString(Map<Object, String> lovValuesAsObjects) {
 		Map<String, String> stringLovValues = new LinkedHashMap<>();
 
-		for (Map.Entry<Object, String> entry : lovValuesAsObjects.entrySet()) {
+		for (Entry<Object, String> entry : lovValuesAsObjects.entrySet()) {
 			Object dataValue = entry.getKey();
 			String displayValue = entry.getValue();
 
