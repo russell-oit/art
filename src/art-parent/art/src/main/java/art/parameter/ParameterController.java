@@ -16,6 +16,7 @@
  */
 package art.parameter;
 
+import art.enums.ParameterDataType;
 import art.enums.ParameterType;
 import art.report.ReportService;
 import art.user.User;
@@ -194,7 +195,10 @@ public class ParameterController {
 		}
 
 		model.addAttribute("parameterTypes", ParameterType.list());
-		//model.addAttribute("dataTypes", ParameterDataType.list()); //datatypes loaded automatically?
+		//form:options tag by default renders all enum values if no valid items are explicity passed/used
+		//https://jira.spring.io/browse/SPR-3389
+		//https://stackoverflow.com/questions/15073830/spring-formoptions-tag-with-enum
+		model.addAttribute("dataTypes", ParameterDataType.list());
 
 		model.addAttribute("action", action);
 		
