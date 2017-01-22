@@ -33,28 +33,37 @@
 
 	</head>
 	<body>
-		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
+		<div id="wrap">
+			<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
-		<div id="spinner">
-			<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
+			<div id="pageContent">
+				<div class="container-fluid">
+
+					<div id="spinner">
+						<img src="${pageContext.request.contextPath}/images/spinner.gif" alt="Processing..." />
+					</div>
+
+					<script type="text/javascript">
+						$(document).ajaxStart(function () {
+							$('#spinner').show();
+						}).ajaxStop(function () {
+							$('#spinner').hide();
+						});
+					</script>
+
+					<c:choose>
+						<c:when test="${reportType == 'Dashboard'}">
+							<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
+						</c:when>
+						<c:when test="${reportType == 'GridstackDashboard'}">
+							<jsp:include page="/WEB-INF/jsp/showGridstackDashboardInline.jsp"/>
+						</c:when>
+					</c:choose>
+
+				</div>
+			</div>
+			<div id="push"></div>
 		</div>
-
-		<script type="text/javascript">
-			$(document).ajaxStart(function () {
-				$('#spinner').show();
-			}).ajaxStop(function () {
-				$('#spinner').hide();
-			});
-		</script>
-
-		<c:choose>
-			<c:when test="${reportType == 'Dashboard'}">
-				<jsp:include page="/WEB-INF/jsp/showDashboardInline.jsp"/>
-			</c:when>
-			<c:when test="${reportType == 'GridstackDashboard'}">
-				<jsp:include page="/WEB-INF/jsp/showGridstackDashboardInline.jsp"/>
-			</c:when>
-		</c:choose>
 
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
 	</body>

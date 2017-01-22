@@ -7,7 +7,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>ART</title>
+        <title>ART - JPivot Busy</title>
 
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
@@ -22,30 +22,22 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 	</head>
 	<body>
+		<div id="wrap">
+			<jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
-		<jsp:include page="/WEB-INF/jsp/header.jsp"/>
-
-		<table class="centerTableAuto">
-			<tr>
-				<td colspan="2" class="data" align="center">
-					<b><span style="color:red">
+			<div id="pageContent">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-6 col-md-offset-3 alert alert-warning text-center">
 							<spring:message code="analysis.message.jpivotQueryWait"/>
-						</span></b>
-					<img src="${pageContext.request.contextPath}/images/spinner.gif">
-				</td>
-			</tr>
-			<tr>
-				<td class=attr>
-			<spring:message code="analysis.text.message"/>:
-		</td>
-		<td class=data>
-		<spring:message code="analysis.message.jpivotResultsWait"/>
-	</td>
-</tr>
-</table>
+							<img src="${pageContext.request.contextPath}/images/spinner.gif">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="push"></div>
+		</div>
 
-
-<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
-
-</body>
+		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+	</body>
 </html>

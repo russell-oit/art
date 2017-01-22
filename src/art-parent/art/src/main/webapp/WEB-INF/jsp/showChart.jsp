@@ -30,8 +30,7 @@ Display a chart report
 		type="${chart.type}" 
 		xaxislabel="${chart.xAxisLabel}" 
 		yaxislabel="${chart.yAxisLabel}"
-		showlegend="${chart.chartOptions.showLegend}"
-		>
+		showlegend="${chart.chartOptions.showLegend}">
 
 		<cewolf:colorpaint color="${chart.backgroundColor}"/>
 
@@ -48,8 +47,7 @@ Display a chart report
 		renderer="/cewolf" 
 		width="${chart.chartOptions.width}" 
 		height="${chart.chartOptions.height}"
-		removeAfterRender="true"
-		>
+		removeAfterRender="true">
 
 		<c:choose>
 			<c:when test="${(not empty chart.hyperLinks) || (not empty chart.drilldownLinks)}">

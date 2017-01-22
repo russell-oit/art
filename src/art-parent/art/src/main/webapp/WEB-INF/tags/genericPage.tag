@@ -50,7 +50,7 @@ Includes bootstrap css, font awesome css, art css
 			<jsp:invoke fragment="header"/>
 
 			<div id="pageContent">
-				<div  class="container-fluid">
+				<div class="container-fluid">
 					<jsp:doBody/>
 				</div>
 			</div>

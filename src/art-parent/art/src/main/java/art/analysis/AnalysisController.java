@@ -38,7 +38,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -383,14 +382,17 @@ public class AnalysisController {
 	}
 
 	@RequestMapping(value = "/app/jpivotError", method = {RequestMethod.GET, RequestMethod.POST})
-	public String jpivotError(HttpServletRequest request, Locale locale, Model model) {
+	public String jpivotError(HttpServletRequest request, Model model) {
 		logger.debug("Entering jpivotError");
-		
-		String msg = messageSource.getMessage("analysis.text.jpivotError", null, locale);
+
+		boolean showErrors = Config.getCustomSettings().isShowErrors();
+		model.addAttribute("showErrors", showErrors);
+
+		String errorDetails = "";
 
 		Throwable e = (Throwable) request.getAttribute("javax.servlet.jsp.jspException");
 		while (e != null) {
-			msg = msg + e.toString() + "<br><br>";
+			errorDetails = errorDetails + e.toString() + "<br><br>";
 
 			Throwable prev = e;
 			e = e.getCause();
@@ -399,7 +401,7 @@ public class AnalysisController {
 			}
 		}
 
-		model.addAttribute("msg", msg);
+		model.addAttribute("errorDetails", errorDetails);
 
 		return "jpivotError";
 	}
@@ -407,14 +409,14 @@ public class AnalysisController {
 	@RequestMapping(value = "/app/jpivotBusy", method = {RequestMethod.GET, RequestMethod.POST})
 	public String jpivotBusy() {
 		logger.debug("Entering jpivotBusy");
-		
+
 		return "jpivotBusy";
 	}
 
 	@RequestMapping(value = "/app/saveAnalysis", method = RequestMethod.POST)
 	public String saveAnalysis(HttpServletRequest request,
 			HttpSession session, RedirectAttributes redirectAttributes) {
-		
+
 		logger.debug("Entering saveAnalysis");
 
 		try {
@@ -434,7 +436,7 @@ public class AnalysisController {
 
 			int reportId = Integer.parseInt(request.getParameter("pivotReportId"));
 			String mdx = (String) session.getAttribute("mdx" + reportId);
-			
+
 			//check if any modification made
 			if ((mdx == null || mdx.length() == 0) && !deleting) {
 				redirectAttributes.addFlashAttribute("message", "analysis.message.nothingToSave");
@@ -450,7 +452,7 @@ public class AnalysisController {
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			String queryDescription = request.getParameter("newPivotDescription");
-			
+
 			if (overwriting) {
 				//overwrite query source with current mdx
 				//query details loaded. update query
