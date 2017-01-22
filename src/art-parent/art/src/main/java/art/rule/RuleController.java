@@ -56,7 +56,7 @@ public class RuleController {
 
 		try {
 			model.addAttribute("rules", ruleService.getAllRules());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -81,7 +81,7 @@ public class RuleController {
 				//rule not deleted because of linked reports
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -105,7 +105,7 @@ public class RuleController {
 			} else {
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -118,6 +118,7 @@ public class RuleController {
 		logger.debug("Entering addRule");
 
 		model.addAttribute("rule", new Rule());
+		
 		return showEditRule("add", model);
 	}
 
@@ -127,7 +128,7 @@ public class RuleController {
 
 		try {
 			model.addAttribute("rule", ruleService.getRule(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -160,7 +161,7 @@ public class RuleController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", rule.getName());
 			return "redirect:/app/rules.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

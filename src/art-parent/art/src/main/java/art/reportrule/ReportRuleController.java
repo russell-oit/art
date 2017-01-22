@@ -63,7 +63,7 @@ public class ReportRuleController {
 			model.addAttribute("reportId", reportId);
 			model.addAttribute("reportName", reportService.getReportName(reportId));
 			model.addAttribute("reportRules", reportRuleService.getReportRules(reportId));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -81,7 +81,7 @@ public class ReportRuleController {
 		try {
 			reportRuleService.deleteReportRule(id);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -99,7 +99,7 @@ public class ReportRuleController {
 		try {
 			reportRuleService.deleteReportRules(ids);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -112,6 +112,7 @@ public class ReportRuleController {
 		logger.debug("Entering addReportRule: reportId={}", reportId);
 
 		model.addAttribute("reportRule", new ReportRule());
+		
 		return showEditReportRule("add", model, reportId);
 	}
 	
@@ -127,7 +128,7 @@ public class ReportRuleController {
 			if (reportRule != null) {
 				reportId = reportRule.getReportId();
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -159,7 +160,7 @@ public class ReportRuleController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", ruleService.getRuleName(reportRule.getRule().getRuleId()));
 			return "redirect:/app/reportRules.do?reportId=" + reportId;
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -180,7 +181,7 @@ public class ReportRuleController {
 		try {
 			model.addAttribute("reportName", reportService.getReportName(reportId));
 			model.addAttribute("rules", ruleService.getAllRules());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

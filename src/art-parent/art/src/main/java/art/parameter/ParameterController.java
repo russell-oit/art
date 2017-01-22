@@ -60,7 +60,7 @@ public class ParameterController {
 
 		try {
 			model.addAttribute("parameters", parameterService.getAllParameters());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -85,7 +85,7 @@ public class ParameterController {
 				//parameter not deleted because of linked reports
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -109,7 +109,7 @@ public class ParameterController {
 			} else {
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -125,6 +125,7 @@ public class ParameterController {
 		param.setParameterType(ParameterType.SingleValue);
 
 		model.addAttribute("parameter", param);
+		
 		return showEditParameter("add", model);
 	}
 
@@ -134,7 +135,7 @@ public class ParameterController {
 
 		try {
 			model.addAttribute("parameter", parameterService.getParameter(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -167,7 +168,7 @@ public class ParameterController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", parameter.getName());
 			return "redirect:/app/parameters.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -187,7 +188,7 @@ public class ParameterController {
 
 		try {
 			model.addAttribute("lovReports", reportService.getLovReports());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

@@ -62,7 +62,7 @@ public class DrilldownController {
 			model.addAttribute("parentReportId", reportId);
 			model.addAttribute("parentReportName", reportService.getReportName(reportId));
 			model.addAttribute("drilldowns", drilldownService.getDrilldowns(reportId));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -80,7 +80,7 @@ public class DrilldownController {
 		try {
 			drilldownService.deleteDrilldown(id);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -98,7 +98,7 @@ public class DrilldownController {
 		try {
 			drilldownService.deleteDrilldowns(ids);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -130,7 +130,7 @@ public class DrilldownController {
 			if (drilldown != null) {
 				parentReportId = drilldown.getParentReportId();
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -163,7 +163,7 @@ public class DrilldownController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", reportService.getReportName(drilldown.getDrilldownReport().getReportId()));
 			return "redirect:/app/drilldowns.do?reportId=" + parent;
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -187,7 +187,7 @@ public class DrilldownController {
 			List<Report> drilldownReports = reportService.getDrilldownReports();
 			drilldownReports.addAll(reportService.getDashboardReports());
 			model.addAttribute("drilldownReports", drilldownReports);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -222,7 +222,7 @@ public class DrilldownController {
 				response.setSuccess(true);
 				response.setData(drilldown.getDrilldownReport().getName());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

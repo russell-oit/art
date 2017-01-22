@@ -90,7 +90,7 @@ public class ReportController {
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			model.addAttribute("reports", reportService.getAvailableReports(sessionUser.getUserId()));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -114,7 +114,7 @@ public class ReportController {
 				RunReportHelper runReportHelper = new RunReportHelper();
 				runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 			}
-		} catch (SQLException | ParseException ex) {
+		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -133,9 +133,10 @@ public class ReportController {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		List<Report> reports = null;
+		
 		try {
 			reports = reportService.getAvailableReports(sessionUser.getUserId());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 		}
 
@@ -148,7 +149,7 @@ public class ReportController {
 
 		try {
 			model.addAttribute("reports", reportService.getAllReports());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -173,7 +174,7 @@ public class ReportController {
 				//report not deleted because of linked jobs
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -197,7 +198,7 @@ public class ReportController {
 			} else {
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -216,6 +217,7 @@ public class ReportController {
 		report.setContactPerson(sessionUser.getFullName());
 
 		model.addAttribute("report", report);
+		
 		return showEditReport("add", model, session);
 	}
 
@@ -227,7 +229,7 @@ public class ReportController {
 
 		try {
 			model.addAttribute("report", reportService.getReport(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -245,6 +247,7 @@ public class ReportController {
 		multipleReportEdit.setIds(ids);
 
 		model.addAttribute("multipleReportEdit", multipleReportEdit);
+		
 		return "editReports";
 	}
 
@@ -286,7 +289,7 @@ public class ReportController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", report.getName());
 			return "redirect:/app/reportsConfig.do";
-		} catch (SQLException | IOException ex) {
+		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -313,7 +316,7 @@ public class ReportController {
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleReportEdit.getIds());
 			return "redirect:/app/reportsConfig.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -415,13 +418,14 @@ public class ReportController {
 		//disable email for now. feature may be abused by users to send spam?
 		try {
 			mailer.send();
-		} catch (MessagingException | IOException ex) {
+		} catch (MessagingException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			response.setSuccess(false);
 			response.setErrorMessage(ex.toString());
 		}
 
 		response.setSuccess(true);
+		
 		return response;
 	}
 
@@ -443,7 +447,7 @@ public class ReportController {
 
 		try {
 			model.addAttribute("report", reportService.getReport(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -469,7 +473,7 @@ public class ReportController {
 			model.addAttribute("reportTypes", ReportType.list());
 			model.addAttribute("datasources", datasourceService.getAdminDatasources(sessionUser));
 			model.addAttribute("reportFormats", ReportFormat.list());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

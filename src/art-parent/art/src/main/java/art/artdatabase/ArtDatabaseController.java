@@ -188,7 +188,7 @@ public class ArtDatabaseController {
 			//doesn't resubmit the page (PRG pattern)
 			redirectAttributes.addFlashAttribute("message", "artDatabase.message.configurationSaved");
 			return "redirect:/app/success.do";
-		} catch (NamingException | SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException | IOException ex) {
+		} catch (NamingException | RuntimeException | SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		} finally {

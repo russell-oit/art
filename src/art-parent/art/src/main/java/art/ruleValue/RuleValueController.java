@@ -66,7 +66,7 @@ public class RuleValueController {
 		try {
 			model.addAttribute("userRuleValues", ruleValueService.getAllUserRuleValues());
 			model.addAttribute("userGroupRuleValues", ruleValueService.getAllUserGroupRuleValues());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -82,7 +82,7 @@ public class RuleValueController {
 			model.addAttribute("users", userService.getAllUsers());
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("rules", ruleService.getAllRules());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -109,7 +109,7 @@ public class RuleValueController {
 				ruleValueService.deleteUserGroupRuleValue(valueKey);
 			}
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -131,7 +131,7 @@ public class RuleValueController {
 		try {
 			ruleValueService.deleteAllRuleValues(users, userGroups, ruleId);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -160,7 +160,7 @@ public class RuleValueController {
 				ruleValueService.deleteAllRuleValues(users, userGroups, ruleId);
 			}
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -174,7 +174,7 @@ public class RuleValueController {
 
 		try {
 			model.addAttribute("value", ruleValueService.getUserRuleValue(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -203,7 +203,7 @@ public class RuleValueController {
 
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/app/ruleValues.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -217,7 +217,7 @@ public class RuleValueController {
 
 		try {
 			model.addAttribute("value", ruleValueService.getUserGroupRuleValue(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -246,7 +246,7 @@ public class RuleValueController {
 
 			redirectAttributes.addFlashAttribute("recordName", recordName);
 			return "redirect:/app/ruleValues.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

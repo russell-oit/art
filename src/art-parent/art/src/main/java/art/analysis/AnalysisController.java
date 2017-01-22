@@ -45,7 +45,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,9 +63,6 @@ public class AnalysisController {
 
 	@Autowired
 	private ReportService reportService;
-
-	@Autowired
-	private MessageSource messageSource;
 
 	@RequestMapping(value = "/app/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showAnalysis(HttpServletRequest request, Model model, HttpSession session) {
@@ -124,7 +120,7 @@ public class AnalysisController {
 
 			prepareVariables(request, session, report, model);
 
-		} catch (SQLException | NumberFormatException | ParseException | MalformedURLException ex) {
+		} catch (SQLException | RuntimeException | ParseException | MalformedURLException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -509,7 +505,7 @@ public class AnalysisController {
 				redirectAttributes.addFlashAttribute("message", "analysis.message.reportAdded");
 				return "redirect:/app/success.do";
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			redirectAttributes.addFlashAttribute("error", ex);
 			return "redirect:/app/reportError.do";
 		}

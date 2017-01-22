@@ -76,7 +76,7 @@ public class AccessRightController {
 			model.addAttribute("userGroupReportRights", accessRightService.getAllUserGroupReportRights());
 			model.addAttribute("userGroupReportGroupRights", accessRightService.getAllUserGroupReportGroupRights());
 			model.addAttribute("userGroupJobRights", accessRightService.getAllUserGroupJobRights());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -96,7 +96,7 @@ public class AccessRightController {
 			model.addAttribute("reports", reportService.getAllReports());
 			model.addAttribute("reportGroups", reportGroupService.getAdminReportGroups(sessionUser));
 			model.addAttribute("jobs", jobService.getAllJobs());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -130,7 +130,7 @@ public class AccessRightController {
 				accessRightService.deleteUserGroupJobRight(NumberUtils.toInt(values[1]), NumberUtils.toInt(values[2]));
 			}
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -156,7 +156,7 @@ public class AccessRightController {
 		try {
 			accessRightService.updateAccessRights(action, users, userGroups, reports, reportGroups, jobs);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

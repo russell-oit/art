@@ -93,7 +93,7 @@ public class LoginController {
 		try {
 			conn = DbConnections.getArtDbConnection();
 			artDbConnectionOk = true;
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		} finally {
@@ -272,7 +272,7 @@ public class LoginController {
 		User user = null;
 		try {
 			user = userService.getUser(username);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

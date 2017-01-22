@@ -63,7 +63,7 @@ public class ReportParameterController {
 			model.addAttribute("reportId", reportId);
 			model.addAttribute("reportName", reportService.getReportName(reportId));
 			model.addAttribute("reportParameters", reportParameterService.getReportParameters(reportId));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -81,7 +81,7 @@ public class ReportParameterController {
 		try {
 			reportParameterService.deleteReportParameter(id);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -99,7 +99,7 @@ public class ReportParameterController {
 		try {
 			reportParameterService.deleteReportParameters(ids);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -112,6 +112,7 @@ public class ReportParameterController {
 		logger.debug("Entering addReportParameter: reportId={}", reportId);
 
 		model.addAttribute("reportParameter", new ReportParameter());
+		
 		return showEditReportParameter("add", model, reportId);
 	}
 
@@ -127,7 +128,7 @@ public class ReportParameterController {
 			if (reportParameter != null) {
 				reportId = reportParameter.getReport().getReportId();
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -159,7 +160,7 @@ public class ReportParameterController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", parameterService.getParameterName(reportParameter.getParameter().getParameterId()));
 			return "redirect:/app/reportParameterConfig.do?reportId=" + reportId;
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -180,7 +181,7 @@ public class ReportParameterController {
 		try {
 			model.addAttribute("reportName", reportService.getReportName(reportId));
 			model.addAttribute("parameters", parameterService.getAllParameters());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -213,7 +214,7 @@ public class ReportParameterController {
 				response.setSuccess(true);
 				response.setData(reportParameter.getParameter().getName());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

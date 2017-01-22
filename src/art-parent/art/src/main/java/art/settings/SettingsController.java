@@ -86,6 +86,7 @@ public class SettingsController {
 		Settings settings = Config.getSettings();
 
 		model.addAttribute("settings", settings);
+		
 		return "settings";
 	}
 
@@ -136,7 +137,7 @@ public class SettingsController {
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");
 			return "redirect:/app/success.do";
-		} catch (IOException ex) {
+		} catch (IOException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

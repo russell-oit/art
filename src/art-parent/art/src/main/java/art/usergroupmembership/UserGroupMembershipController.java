@@ -57,7 +57,7 @@ public class UserGroupMembershipController {
 
 		try {
 			model.addAttribute("memberships", userGroupMembershipService.getAllUserGroupMemberships());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -72,7 +72,7 @@ public class UserGroupMembershipController {
 		try {
 			model.addAttribute("users", userService.getAllUsers());
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -99,7 +99,7 @@ public class UserGroupMembershipController {
 		try {
 			userGroupMembershipService.deleteUserGroupMembership(userId, userGroupId);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -122,7 +122,7 @@ public class UserGroupMembershipController {
 		try {
 			userGroupMembershipService.updateUserGroupMembership(action, users, userGroups);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}

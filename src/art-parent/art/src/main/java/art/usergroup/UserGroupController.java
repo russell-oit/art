@@ -58,7 +58,7 @@ public class UserGroupController {
 
 		try {
 			model.addAttribute("groups", userGroupService.getAllUserGroups());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -76,7 +76,7 @@ public class UserGroupController {
 		try {
 			userGroupService.deleteUserGroup(id);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -94,7 +94,7 @@ public class UserGroupController {
 		try {
 			userGroupService.deleteUserGroups(ids);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -107,6 +107,7 @@ public class UserGroupController {
 		logger.debug("Entering addUserGroup");
 
 		model.addAttribute("group", new UserGroup());
+		
 		return showEditUserGroup("add", model);
 	}
 
@@ -116,7 +117,7 @@ public class UserGroupController {
 
 		try {
 			model.addAttribute("group", userGroupService.getUserGroup(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -149,7 +150,7 @@ public class UserGroupController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", group.getName());
 			return "redirect:/app/userGroups.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -169,7 +170,7 @@ public class UserGroupController {
 
 		try {
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

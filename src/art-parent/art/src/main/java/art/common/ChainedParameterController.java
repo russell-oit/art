@@ -76,7 +76,7 @@ public class ChainedParameterController {
 
 			boolean useRules = false;
 			values = reportRunner.getLovValues(useRules);
-		} catch (SQLException | ParseException ex) {
+		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {

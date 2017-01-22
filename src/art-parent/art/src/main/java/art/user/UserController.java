@@ -71,7 +71,7 @@ public class UserController {
 
 		try {
 			model.addAttribute("users", userService.getAllUsers());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -98,7 +98,7 @@ public class UserController {
 				//user not deleted because of linked jobs
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -124,7 +124,7 @@ public class UserController {
 			} else {
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -157,7 +157,7 @@ public class UserController {
 
 		try {
 			user = userService.getUser(id);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -168,6 +168,7 @@ public class UserController {
 		}
 
 		model.addAttribute("user", user);
+		
 		return showEditUser("edit", model, session);
 	}
 
@@ -187,7 +188,7 @@ public class UserController {
 				if (!canEditUser(session, user)) {
 					return "accessDenied";
 				}
-			} catch (SQLException ex) {
+			} catch (SQLException | RuntimeException ex) {
 				logger.error("Error", ex);
 				model.addAttribute("error", ex);
 			}
@@ -197,6 +198,7 @@ public class UserController {
 		multipleUserEdit.setIds(ids);
 
 		model.addAttribute("multipleUserEdit", multipleUserEdit);
+		
 		return "editUsers";
 	}
 
@@ -251,7 +253,7 @@ public class UserController {
 			saveUserGroups(user);
 			
 			return "redirect:/app/users.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -289,7 +291,7 @@ public class UserController {
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleUserEdit.getIds());
 			return "redirect:/app/users.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -313,12 +315,13 @@ public class UserController {
 			model.addAttribute("userGroups", userGroupService.getAllUserGroups());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
 			model.addAttribute("accessLevels", getAccessLevels(session));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
 
 		model.addAttribute("action", action);
+		
 		return "editUser";
 	}
 

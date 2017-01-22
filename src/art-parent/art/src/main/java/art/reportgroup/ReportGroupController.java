@@ -55,7 +55,7 @@ public class ReportGroupController {
 
 		try {
 			model.addAttribute("groups", reportGroupService.getAllReportGroups());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -80,7 +80,7 @@ public class ReportGroupController {
 				//report group not deleted because of linked reports
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -104,7 +104,7 @@ public class ReportGroupController {
 			} else {
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -117,6 +117,7 @@ public class ReportGroupController {
 		logger.debug("Entering addReportGroup");
 
 		model.addAttribute("group", new ReportGroup());
+		
 		return showEditReportGroup("add", model);
 	}
 
@@ -126,7 +127,7 @@ public class ReportGroupController {
 
 		try {
 			model.addAttribute("group", reportGroupService.getReportGroup(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -160,7 +161,7 @@ public class ReportGroupController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", group.getName());
 			return "redirect:/app/reportGroups.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -180,6 +181,7 @@ public class ReportGroupController {
 		logger.debug("Entering showEditReportGroup: action='{}'", action);
 
 		model.addAttribute("action", action);
+		
 		return "editReportGroup";
 	}
 }

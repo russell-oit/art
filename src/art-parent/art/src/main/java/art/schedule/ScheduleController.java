@@ -54,7 +54,7 @@ public class ScheduleController {
 
 		try {
 			model.addAttribute("schedules", scheduleService.getAllSchedules());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -72,7 +72,7 @@ public class ScheduleController {
 		try {
 			scheduleService.deleteSchedule(id);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -90,7 +90,7 @@ public class ScheduleController {
 		try {
 			scheduleService.deleteSchedules(ids);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -109,7 +109,7 @@ public class ScheduleController {
 			Schedule schedule = scheduleService.getSchedule(id);
 			response.setSuccess(true);
 			response.setData(schedule);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -122,6 +122,7 @@ public class ScheduleController {
 		logger.debug("Entering addSchedule");
 
 		model.addAttribute("schedule", new Schedule());
+		
 		return showEditSchedule("add", model);
 	}
 
@@ -131,7 +132,7 @@ public class ScheduleController {
 
 		try {
 			model.addAttribute("schedule", scheduleService.getSchedule(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -171,7 +172,7 @@ public class ScheduleController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", schedule.getName());
 			return "redirect:/app/schedules.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -190,6 +191,7 @@ public class ScheduleController {
 		logger.debug("Entering showSchedule: action='{}'", action);
 
 		model.addAttribute("action", action);
+		
 		return "editSchedule";
 	}
 }

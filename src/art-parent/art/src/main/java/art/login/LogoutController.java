@@ -51,7 +51,7 @@ public class LogoutController {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 		try {
 			loginService.removeLoggedInUser(sessionUser);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 		}
 
@@ -60,15 +60,18 @@ public class LogoutController {
 		session.invalidate();
 
 		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
-		if (loginMethod == ArtAuthenticationMethod.Auto) {
-			return "autoLogout";
-		} else if (loginMethod == ArtAuthenticationMethod.CAS) {
-			if (casLogoutUrl != null) {
-				model.addAttribute("casLogoutUrl", casLogoutUrl);
-			}
-			return "casLogout";
-		} else {
+		if (null == loginMethod) {
 			return "redirect:/login.do";
+		} else switch (loginMethod) {
+			case Auto:
+				return "autoLogout";
+			case CAS:
+				if (casLogoutUrl != null) {
+					model.addAttribute("casLogoutUrl", casLogoutUrl);
+				}
+				return "casLogout";
+			default:
+				return "redirect:/login.do";
 		}
 	}
 }

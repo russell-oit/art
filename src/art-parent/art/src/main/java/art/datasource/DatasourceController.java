@@ -70,7 +70,7 @@ public class DatasourceController {
 
 		try {
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -96,7 +96,7 @@ public class DatasourceController {
 				//datasource not deleted because of linked reports
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -119,7 +119,7 @@ public class DatasourceController {
 			} else {
 				response.setData(deleteResult.getData());
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -139,6 +139,7 @@ public class DatasourceController {
 		datasource.setDatasourceType(DatasourceType.JDBC);
 
 		model.addAttribute("datasource", datasource);
+		
 		return showEditDatasource("add", model);
 	}
 
@@ -148,7 +149,7 @@ public class DatasourceController {
 
 		try {
 			model.addAttribute("datasource", datasourceService.getDatasource(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -212,7 +213,7 @@ public class DatasourceController {
 
 			redirectAttributes.addFlashAttribute("recordName", datasource.getName());
 			return "redirect:/app/datasources.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -239,7 +240,7 @@ public class DatasourceController {
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleDatasourceEdit.getIds());
 			return "redirect:/app/datasources.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

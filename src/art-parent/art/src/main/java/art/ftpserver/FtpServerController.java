@@ -56,7 +56,7 @@ public class FtpServerController {
 
 		try {
 			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -74,7 +74,7 @@ public class FtpServerController {
 		try {
 			ftpServerService.deleteFtpServer(id);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -92,7 +92,7 @@ public class FtpServerController {
 		try {
 			ftpServerService.deleteFtpServers(ids);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -118,7 +118,7 @@ public class FtpServerController {
 
 		try {
 			model.addAttribute("ftpServer", ftpServerService.getFtpServer(id));
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -155,7 +155,6 @@ public class FtpServerController {
 		}
 
 		try {
-
 			//set password as appropriate
 			String setPasswordMessage = setPassword(ftpServer, action);
 			logger.debug("setPasswordMessage='{}'", setPasswordMessage);
@@ -174,7 +173,7 @@ public class FtpServerController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", ftpServer.getName());
 			return "redirect:/app/ftpServers.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -201,7 +200,7 @@ public class FtpServerController {
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleFtpServerEdit.getIds());
 			return "redirect:/app/ftpServers.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -233,6 +232,7 @@ public class FtpServerController {
 	 */
 	private String showEditFtpServers() {
 		logger.debug("Entering showEditFtpServers");
+		
 		return "editFtpServers";
 	}
 

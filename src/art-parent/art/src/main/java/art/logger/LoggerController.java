@@ -100,6 +100,7 @@ public class LoggerController {
 		logger.debug("Entering addLogger");
 
 		model.addAttribute("log", new art.logger.Logger());
+		
 		return showEditLogger("add", model);
 	}
 
@@ -148,6 +149,7 @@ public class LoggerController {
 		}
 
 		model.addAttribute("log", log);
+		
 		return showEditLogger("edit", model);
 	}
 

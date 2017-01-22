@@ -83,7 +83,7 @@ public class PasswordController {
 
 				redirectAttributes.addFlashAttribute("message", "password.message.passwordUpdated");
 				return "redirect:/app/success.do";
-			} catch (SQLException ex) {
+			} catch (SQLException | RuntimeException ex) {
 				logger.error("Error", ex);
 				model.addAttribute("error", ex);
 			}

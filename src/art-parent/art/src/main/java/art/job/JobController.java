@@ -113,7 +113,7 @@ public class JobController {
 			List<Job> jobs = jobService.getJobs(sessionUser.getUserId());
 			model.addAttribute("jobs", jobs);
 			model.addAttribute("nextPage", "jobs.do");
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -130,7 +130,7 @@ public class JobController {
 		try {
 			model.addAttribute("jobs", jobService.getAllJobs());
 			model.addAttribute("nextPage", "jobsConfig.do");
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -150,7 +150,7 @@ public class JobController {
 		try {
 			jobService.deleteJob(id);
 			response.setSuccess(true);
-		} catch (SQLException | SchedulerException ex) {
+		} catch (SQLException | RuntimeException | SchedulerException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -168,7 +168,7 @@ public class JobController {
 		try {
 			jobService.deleteJobs(ids);
 			response.setSuccess(true);
-		} catch (SQLException | SchedulerException ex) {
+		} catch (SQLException | RuntimeException | SchedulerException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -199,7 +199,7 @@ public class JobController {
 			response.setData(job);
 
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -232,7 +232,7 @@ public class JobController {
 			Scheduler scheduler = SchedulerUtils.getScheduler();
 			scheduler.scheduleJob(tempJob, tempTrigger);
 			response.setSuccess(true);
-		} catch (SchedulerException ex) {
+		} catch (SchedulerException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -272,7 +272,7 @@ public class JobController {
 			Scheduler scheduler = SchedulerUtils.getScheduler();
 			scheduler.scheduleJob(tempJob, tempTrigger);
 			response.setSuccess(true);
-		} catch (SchedulerException | ParseException ex) {
+		} catch (SchedulerException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -304,7 +304,7 @@ public class JobController {
 			ParameterProcessor parameterProcessor = new ParameterProcessor();
 			ParameterProcessorResult paramProcessorResult = parameterProcessor.processHttpParameters(request);
 			addParameters(model, paramProcessorResult);
-		} catch (SQLException | ParseException ex) {
+		} catch (SQLException | RuntimeException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -345,7 +345,7 @@ public class JobController {
 
 			redirectAttributes.addFlashAttribute("recordName", job.getName());
 			return "redirect:/app/" + nextPage;
-		} catch (SQLException | SchedulerException | ParseException ex) {
+		} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -372,7 +372,7 @@ public class JobController {
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleJobEdit.getIds());
 			return "redirect:/app/jobsConfig.do";
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -456,7 +456,7 @@ public class JobController {
 			int reportId = job.getReport().getReportId();
 			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id);
 			addParameters(model, paramProcessorResult);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -520,7 +520,7 @@ public class JobController {
 			model.addAttribute("schedules", scheduleService.getAllSchedules());
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
 			model.addAttribute("ftpServers", ftpServerService.getAllFtpServers());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

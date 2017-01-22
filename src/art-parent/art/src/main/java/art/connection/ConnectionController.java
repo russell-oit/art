@@ -62,6 +62,7 @@ public class ConnectionController {
 		response.setData(DbConnections.getConnectionPoolDetails(datasourceId));
 
 		response.setSuccess(true);
+		
 		return response;
 	}
 }

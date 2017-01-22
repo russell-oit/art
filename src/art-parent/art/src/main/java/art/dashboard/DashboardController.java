@@ -115,7 +115,7 @@ public class DashboardController {
 			}
 
 			model.addAttribute("reportName", report.getName());
-		} catch (SQLException | UnsupportedEncodingException | ParseException | RuntimeException ex) {
+		} catch (SQLException | RuntimeException | UnsupportedEncodingException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 			return errorPage;

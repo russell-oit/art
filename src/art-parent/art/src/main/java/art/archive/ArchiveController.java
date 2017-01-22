@@ -51,7 +51,7 @@ public class ArchiveController {
 		try {
 			List<Archive> archives = archiveService.getArchives(sessionUser.getUserId());
 			model.addAttribute("archives", archives);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}

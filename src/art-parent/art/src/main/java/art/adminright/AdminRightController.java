@@ -62,7 +62,7 @@ public class AdminRightController {
 		try {
 			model.addAttribute("datasourceRights", adminRightService.getAllAdminDatasourceRights());
 			model.addAttribute("reportGroupRights", adminRightService.getAllAdminReportGroupRights());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -78,7 +78,7 @@ public class AdminRightController {
 			model.addAttribute("admins", userService.getAdminUsers());
 			model.addAttribute("datasources", datasourceService.getAllDatasources());
 			model.addAttribute("reportGroups", reportGroupService.getAllReportGroups());
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 		}
@@ -112,7 +112,7 @@ public class AdminRightController {
 				adminRightService.deleteAdminReportGroupRight(adminUserId, objectId);
 			}
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
@@ -136,7 +136,7 @@ public class AdminRightController {
 		try {
 			adminRightService.updateAdminRights(action, admins, datasources, reportGroups);
 			response.setSuccess(true);
-		} catch (SQLException ex) {
+		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			response.setErrorMessage(ex.toString());
 		}
