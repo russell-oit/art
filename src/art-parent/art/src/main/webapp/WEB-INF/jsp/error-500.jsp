@@ -6,11 +6,8 @@
 Display 500 error (internal server error)
 --%>
 
-<%@page isErrorPage="true"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page trimDirectiveWhitespaces="true" %>
-
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!DOCTYPE html>
 <html>
@@ -21,28 +18,6 @@ Display 500 error (internal server error)
 		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
     </head>
     <body>
-        <h1>Internal Server Error</h1>
-
-		<c:if test="${showErrors}">
-			<table class="table table-bordered">
-				<tr>
-					<td><b>Page:</b></td>
-					<td><c:out value="${pageContext.errorData.requestURI}"/></td>
-				</tr>
-				<tr>
-					<td><b>Status Code:</b></td>
-					<td>${pageContext.errorData.statusCode}</td>
-				</tr>
-				<tr>
-					<td><b>Message:</b></td>
-					<td>
-						<%-- this doesn't have the same content as ${pageContext.exception.message} --%>
-						<pre>
-							<c:out value="${requestScope['javax.servlet.error.message']}"/>
-						</pre>
-					</td>
-				</tr>
-			</table>
-		</c:if>
+        <jsp:include page="/WEB-INF/jsp/error-500-inline.jsp"/>
     </body>
 </html>

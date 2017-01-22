@@ -16,10 +16,14 @@
  */
 package art.common;
 
+import art.servlets.Config;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -36,16 +40,114 @@ public class ErrorController {
 	private static final Logger logger = LoggerFactory.getLogger(ErrorController.class);
 
 	@RequestMapping(value = "/error")
-	public String showError(HttpServletRequest request) {
-		Throwable exception = (Throwable) request.getAttribute("javax.servlet.error.exception");
+	public String showError(HttpServletRequest request, Model model) {
+		//https://stackoverflow.com/questions/3553294/ideal-error-page-for-java-ee-app
+		//http://www.tutorialspoint.com/jsp/jsp_exception_handling.htm
+		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
+		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
+		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
+		model.addAttribute("exception", request.getAttribute("javax.servlet.error.exception"));
 
-		logger.error("Unexpected error", exception);
+		Throwable exception = (Throwable) request.getAttribute("javax.servlet.error.exception");
+		logger.error("Error", exception);
+		
+		String errorDetails;
+
+		if (exception != null) {
+			if (exception instanceof ServletException) {
+				// It's a ServletException: we should extract the root cause
+				ServletException se = (ServletException) exception;
+				Throwable rootCause = se.getRootCause();
+				if (rootCause == null) {
+					rootCause = se;
+				}
+				errorDetails = "<b>** Root cause is:</b> " + rootCause.getMessage();
+				String stackTrace = ExceptionUtils.getStackTrace(rootCause);
+				errorDetails = errorDetails + "<br/>" + stackTrace;
+			} else {
+				// It's not a ServletException, so we'll just show it
+				errorDetails = ExceptionUtils.getStackTrace(exception);
+			}
+		} else {
+			errorDetails = "No error information available";
+		}
+		model.addAttribute("errorDetails", errorDetails);
+		
+		boolean showErrors = Config.getCustomSettings().isShowErrors();
+		model.addAttribute("showErrors", showErrors);
 
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
-			return "error-ajax";
+			return "error-inline";
 		} else {
 			return "error";
+		}
+	}
+
+	@RequestMapping(value = "/error-404")
+	public String showError404(HttpServletRequest request, Model model) {
+		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
+		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
+
+		boolean showErrors = Config.getCustomSettings().isShowErrors();
+		model.addAttribute("showErrors", showErrors);
+
+		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+			//don't return whole html page for ajax calls. Only error details
+			return "error-404-inline";
+		} else {
+			return "error-404";
+		}
+	}
+
+	@RequestMapping(value = "/error-400")
+	public String showError400(HttpServletRequest request, Model model) {
+		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
+		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
+		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
+
+		boolean showErrors = Config.getCustomSettings().isShowErrors();
+		model.addAttribute("showErrors", showErrors);
+
+		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+			//don't return whole html page for ajax calls. Only error details
+			return "error-400-inline";
+		} else {
+			return "error-400";
+		}
+	}
+
+	@RequestMapping(value = "/error-405")
+	public String showError405(HttpServletRequest request, Model model) {
+		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
+		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
+		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
+
+		boolean showErrors = Config.getCustomSettings().isShowErrors();
+		model.addAttribute("showErrors", showErrors);
+
+		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+			//don't return whole html page for ajax calls. Only error details
+			return "error-405-inline";
+		} else {
+			return "error-405";
+		}
+	}
+
+	@RequestMapping(value = "/error-500")
+	public String showError500(HttpServletRequest request, Model model) {
+		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
+		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
+		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
+
+		boolean showErrors = Config.getCustomSettings().isShowErrors();
+		model.addAttribute("showErrors", showErrors);
+
+		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+			//don't return whole html page for ajax calls. Only error details
+			return "error-500-inline";
+		} else {
+			return "error-500";
 		}
 	}
 }

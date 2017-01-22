@@ -22,19 +22,19 @@
     </error-page>
     <error-page>
         <error-code>404</error-code>
-        <location>/WEB-INF/jsp/error-404.jsp</location>
+        <location>/error-404.do</location>
     </error-page>
     <error-page>
         <error-code>405</error-code>
-        <location>/WEB-INF/jsp/error-405.jsp</location>
+        <location>/error-405.do</location>
     </error-page>
     <error-page>
         <error-code>400</error-code>
-        <location>/WEB-INF/jsp/error-400.jsp</location>
+        <location>/error-400.do</location>
     </error-page>
     <error-page>
         <error-code>500</error-code>
-        <location>/WEB-INF/jsp/error-500.jsp</location>
+        <location>/error-500.do</location>
     </error-page>
     <!-- Filters -->
     <filter>
