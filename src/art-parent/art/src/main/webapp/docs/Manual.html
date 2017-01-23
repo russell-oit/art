@@ -87,8 +87,17 @@
      <li><a href="#rss-feeds">RSS Feeds</a></li> 
      <li><a href="#dashboards">Dashboards</a> 
       <ol> 
-       <li><a href="#features">Features</a></li> 
-       <li><a href="#syntax">Syntax</a></li> 
+       <li><a href="#regular-dashboards">Regular Dashboards</a> 
+        <ol> 
+         <li><a href="#features">Features</a></li> 
+         <li><a href="#example-syntax">Example Syntax</a></li> 
+        </ol></li> 
+       <li><a href="#gridstack-dashboards">Gridstack Dashboards</a> 
+        <ol> 
+         <li><a href="#dashboard-properties">Dashboard Properties</a></li> 
+         <li><a href="#item-properties">Item Properties</a></li> 
+         <li><a href="#example-syntax_1">Example Syntax</a></li> 
+        </ol></li> 
       </ol></li> 
      <li><a href="#jxls-spreadsheets">jXLS Spreadsheets</a></li> 
      <li><a href="#pivot-tables-olap">Pivot Tables (OLAP)</a> 
@@ -105,6 +114,7 @@
          <li><a href="#create-the-datasourcesxml-file">Create the datasources.xml file</a></li> 
          <li><a href="#create-a-datasource_1">Create a datasource</a></li> 
          <li><a href="#create-the-report_1">Create the report</a></li> 
+         <li><a href="#potential-errors">Potential errors</a></li> 
          <li><a href="#accessing-the-mondrian-xmla-instance-from-ms-excel">Accessing the Mondrian XMLA instance from MS Excel</a></li> 
         </ol></li> 
        <li><a href="#sql-server-xmla">SQL Server XMLA</a> 
@@ -1196,6 +1206,7 @@ FROM mytable
       <li><strong>Update Statement</strong><br /> Used to execute statements that do not return any rows e.g. INSERT/UPDATE/DELETE statements</li> 
       <li><strong>Text</strong><br /> Used to define a piece of text that can be displayed</li> 
       <li><strong>Dashboard</strong><br /> Used to display reports in a single portal-like page.</li> 
+      <li><strong>Dashboard: Gridstack</strong><br /> Used to display reports in a single portal-like page, allowing for specifying exact positioning of report items within the dashboard, specifying the height and width that the report items should occupy, allowing for resizing the items dynamically using the mouse, and moving the items around using drag-and-drop.</li> 
       <li><strong>JasperReports: Template Query</strong><br /> To generate formatted reports e.g. statements given to customers, you can use Jasper Reports. To create a jasper report, use the <a class="" href="http://jasperforge.org/projects/ireport" rel="nofollow">iReport</a> or <a class="" href="http://community.jaspersoft.com/project/jaspersoft-studio" rel="nofollow">JasperSoft Studio</a> report designer.</li> 
      </ul> 
      <p>Displays a jasper report based on the selected jrxml template. The query within the jasper report template will be used to generate the results. The query will be run against the selected datasource. You can define parameters that will be passed to the jasper report. Jasper report parameters are defined with a specific type. The following mapping of ART and jasperreport parameter types should be used.</p> 
@@ -1230,7 +1241,7 @@ FROM mytable
       </tbody> 
      </table> 
      <p>If the report needs a barcode element, use one of the <strong>Barbecue</strong> barcode elements. The Barcode4J elements will cause an error when the report is run within ART.</p> 
-     <p>If the report contains a subreport, set the <strong>Subreport Expression</strong> property of the subreport object to the file name of the subreport with a .jasper extension e.g. <strong>&quot;subreport1.jasper&quot;</strong> (include the quotes). When creating the report in ART, upload the main report's .jrxml file using the main template field and upload the subreport's .jrxml file using the resources field. If there are multiple subreports, upload one subreport, save the report then upload and save the next one.</p> 
+     <p>If the report contains a subreport, set the <strong>Subreport Expression</strong> property of the subreport object to the file name of the subreport with a .jasper extension e.g. <strong>&quot;subreport1.jasper&quot;</strong> (include the quotes). When creating the report in ART, upload the main report's .jrxml file using the main template field and upload the subreport's .jrxml file using the resources field. If there are multiple subreports, you can select multiple files and upload all of them at once using the <strong>Start upload</strong> button. You can also select files by dragging from the file explorer and dropping to the browser page.</p> 
      <ul> 
       <li><strong>JasperReports: ART Query</strong><br /> Displays a jasper report based on the selected jrxml template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</li> 
       <li><strong>Pivot Table: Mondrian</strong><br /> Used to provide OLAP (slice and dice) analysis using the mondrian engine. The MDX for the query should be put in the source section and the xml file that defines the mondrian cube should be selected in the template field.</li> 
@@ -2192,9 +2203,10 @@ WHERE REGION = #region#
      <!--NewPage--> 
      <h1 id="dashboards">Dashboards</h1> 
      <p>Dashboards are used to display reports on a single portal-like page.</p> 
-     <p>Any ART report can be considered a portlet i.e. a small embeddable frame within a web page. Each portlet uses AJAX components to dynamically load itself within the page. Users can refresh or minimize each portlet independently by clicking on the buttons at the top of the portlet frame. When a user runs a dashboard, he can choose to modify the default parameters used by the reports in the dashboard. All the embedded reports are parsed and their parameters, if any, are displayed. If several reports use the same parameter, this is displayed only once.</p> 
+     <p>Any ART report can be considered a portlet i.e. a small embeddable frame within a web page. Each portlet uses AJAX components to dynamically load itself within the page. Users can refresh or minimize each portlet independently by clicking on the buttons at the top of the portlet frame. When a user runs a dashboard, he can choose to modify the default parameters used by the reports in the dashboard. All the embedded reports are parsed and their parameters, if any, are displayed. If several reports use the same parameter, it is displayed only once.</p> 
      <p><img alt="dashboard-example" src="dashboard-example.png" /></p> 
-     <h2 id="features">Features</h2> 
+     <h2 id="regular-dashboards">Regular Dashboards</h2> 
+     <h3 id="features">Features</h3> 
      <ul> 
       <li>You can define as many columns as you need (tag: <code>&lt;COLUMN&gt;</code>)</li> 
       <li>For each column you can specify a size (tag: <code>&lt;SIZE&gt;</code>)</li> 
@@ -2205,43 +2217,43 @@ WHERE REGION = #region#
       <li>A portlet can be refreshed by the end user by clicking on the refresh button. You can set a refresh time (in seconds) to have the portlet auto-refresh itself. (tag: <code>&lt;REFRESH&gt;</code>)</li> 
       <li>Each portlet is rendered on page load. You can override this and let the user decide when he wants to see the content (by clicking on the refresh button). (tag: <code>&lt;ONLOAD&gt;</code>)</li> 
      </ul> 
-     <h2 id="syntax">Syntax</h2> 
+     <h3 id="example-syntax">Example Syntax</h3> 
      <p>XML-like syntax is used to define the dashboard structure</p> 
      <div class="codehilite"> 
       <pre>    <span class="nt">&lt;DASHBOARD&gt;</span>
 
-    <span class="nt">&lt;COLUMN&gt;</span>
-    <span class="c">&lt;!-- column size: auto|small|medium|large. default is auto--&gt;</span>
-    <span class="nt">&lt;SIZE&gt;</span>medium<span class="nt">&lt;/SIZE&gt;</span>
+        <span class="nt">&lt;COLUMN&gt;</span>
+            <span class="c">&lt;!-- column size: auto|small|medium|large. default is auto--&gt;</span>
+            <span class="nt">&lt;SIZE&gt;</span>medium<span class="nt">&lt;/SIZE&gt;</span>
 
-    <span class="c">&lt;!-- create a new portlet within this column</span>
-<span class="c">    to embed an ART report (tabular, chart, text, etc) --&gt;</span>
-    <span class="nt">&lt;PORTLET&gt;</span>
-    <span class="nt">&lt;TITLE&gt;</span>Portlet title<span class="nt">&lt;/TITLE&gt;</span>
+            <span class="c">&lt;!-- create a new portlet within this column</span>
+<span class="c">            to embed an ART report (tabular, chart, text, etc) --&gt;</span>
+            <span class="nt">&lt;PORTLET&gt;</span>
+                <span class="nt">&lt;TITLE&gt;</span>Portlet title<span class="nt">&lt;/TITLE&gt;</span>
 
-    <span class="c">&lt;!-- (optional, default is true) load content when page is displayed --&gt;</span>
-    <span class="nt">&lt;ONLOAD&gt;</span>false<span class="nt">&lt;/ONLOAD&gt;</span>
+                <span class="c">&lt;!-- (optional, default is true) load content when page is displayed --&gt;</span>
+                <span class="nt">&lt;ONLOAD&gt;</span>false<span class="nt">&lt;/ONLOAD&gt;</span>
 
-    <span class="c">&lt;!-- (optional, default is never) refresh content every 30 seconds--&gt;</span>
-    <span class="nt">&lt;REFRESH&gt;</span>30<span class="nt">&lt;/REFRESH&gt;</span>
+                <span class="c">&lt;!-- (optional, default is -1 meaning never) refresh content every 30 seconds--&gt;</span>
+                <span class="nt">&lt;REFRESH&gt;</span>30<span class="nt">&lt;/REFRESH&gt;</span>
 
-    <span class="c">&lt;!-- embed ART report --&gt;</span>
-    <span class="nt">&lt;REPORTID&gt;</span>2<span class="nt">&lt;/REPORTID&gt;</span>
-    <span class="nt">&lt;/PORTLET&gt;</span>
+                <span class="c">&lt;!-- embed ART report --&gt;</span>
+                <span class="nt">&lt;REPORTID&gt;</span>2<span class="nt">&lt;/REPORTID&gt;</span>
+            <span class="nt">&lt;/PORTLET&gt;</span>
 
-    <span class="c">&lt;!-- create a new portlet within this column</span>
-<span class="c">    to embed an external html page --&gt;</span>
-    <span class="nt">&lt;PORTLET&gt;</span>
-    <span class="nt">&lt;TITLE&gt;</span>Portlet title<span class="nt">&lt;/TITLE&gt;</span>
-    <span class="nt">&lt;URL&gt;</span>http://my.site.com/page.html<span class="nt">&lt;/URL&gt;</span>
-    <span class="nt">&lt;/PORTLET&gt;</span>
+            <span class="c">&lt;!-- create a new portlet within this column</span>
+<span class="c">            to embed an external html page --&gt;</span>
+            <span class="nt">&lt;PORTLET&gt;</span>
+                <span class="nt">&lt;TITLE&gt;</span>Portlet title<span class="nt">&lt;/TITLE&gt;</span>
+                <span class="nt">&lt;URL&gt;</span>http://my.site.com/page.html<span class="nt">&lt;/URL&gt;</span>
+            <span class="nt">&lt;/PORTLET&gt;</span>
 
-    <span class="c">&lt;!-- .. you can add as many portlets as you want --&gt;</span>
-    <span class="nt">&lt;/COLUMN&gt;</span>
+            <span class="c">&lt;!-- .. you can add as many portlets as you want --&gt;</span>
+        <span class="nt">&lt;/COLUMN&gt;</span>
 
-    <span class="nt">&lt;COLUMN&gt;</span>
-    <span class="c">&lt;!-- you can add as many columns as you want --&gt;</span>
-    <span class="nt">&lt;/COLUMN&gt;</span>
+        <span class="nt">&lt;COLUMN&gt;</span>
+            <span class="c">&lt;!-- you can add as many columns as you want --&gt;</span>
+        <span class="nt">&lt;/COLUMN&gt;</span>
 
     <span class="nt">&lt;/DASHBOARD&gt;</span>
 </pre> 
@@ -2253,6 +2265,142 @@ WHERE REGION = #region#
       <li>Tag names are case sensitive (use uppercase)</li> 
       <li>Minimum refresh period allowed is 5 seconds. Be careful with this so as not to overload the server and databases.</li> 
      </ul> 
+     <h2 id="gridstack-dashboards">Gridstack Dashboards</h2> 
+     <p>Gridstack dashboards allow for specifying exact positioning of report items within the dashboard, specifying the height and width that the report items should occupy, allowing for resizing the items dynamically using the mouse, and moving the items around using drag-and-drop.</p> 
+     <h3 id="dashboard-properties">Dashboard Properties</h3> 
+     <p>Gridstack dashboards also use xml syntax, similar to regular dashboards. A number of tags are used to define properties of the dashboard.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th><strong>Tag</strong></th> 
+        <th><strong>Description</strong></th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>&lt;DASHBOARDWIDTH&gt;</strong></td> 
+        <td>(optional - integer) default = 12. The number of columns to be taken up by the grid, forming the basis of the horizontal or x axis of the grid co-ordinates.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;FLOAT&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Allows for moving of report items to arbitrary locations on the dashboard. If false, grid items can only snap to given locations.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;ANIMATE&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Allows for using some animation when grid items are moved around.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;DISABLEDRAG&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Disallows dragging of items.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;DISABLERESIZE&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Disallows resizing of items.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;CELLHEIGHT&gt;</strong></td> 
+        <td>(optional - string) default = 60px. Defines the dimensions of one unit of the grid co-ordinates on the vertical or y axis. Can also be defined in terms of <strong>em</strong> and <strong>rem</strong> units instead of pixels e.g. 10em or 10rem. Can also be defined as &quot;<strong>auto</strong>&quot; in which case the height will be calculated from the cell width.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;VERTICALMARGIN&gt;</strong></td> 
+        <td>(optional - string) default = 20px. Defines the size of the vertical gap between cells. Can also be defined in terms of <strong>em</strong> and <strong>rem</strong> units instead of pixels e.g. 2em or 2rem.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;ALWAYSSHOWRESIZEHANDLE&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Determines if the resizing handles on the bottom corners of a cell are shown even if the user is not hovering over the item.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;DASHBOARDHEIGHT&gt;</strong></td> 
+        <td>(optional - integer) default = 0. The maximum number of rows or y units on the grid co-ordinate system. Items cannot be resized or moved beyond these limits. A value of 0 means that there is no maximum.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <h3 id="item-properties">Item Properties</h3> 
+     <p>A gridstack dashboard has a number of items, enclosed within <strong>&lt;ITEM&gt;</strong> tags. These items have a number of properties as specified in the following tags.</p> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th><strong>Tag</strong></th> 
+        <th><strong>Description</strong></th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>&lt;XPOSITION&gt;</strong></td> 
+        <td>(<strong>required</strong> - integer) The x axis position of the item.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;YPOSITION&gt;</strong></td> 
+        <td>(<strong>required</strong> - integer) The y axis position of the item.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;WIDTH&gt;</strong></td> 
+        <td>(<strong>required</strong> - integer) The width of the item. This defines the number of columns that the item will occupy, in relation to the number of columns of the whole grid as defined by the dashboard's <code>&lt;DASHBOARDWIDTH&gt;</code> property.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;HEIGHT&gt;</strong></td> 
+        <td>(<strong>required</strong> - integer) The height of the item. This defines the number of rows that the item will occupy, one row being the size defined in the dashboard's <code>&lt;CELLHEIGHT&gt;</code> property.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;NORESIZE&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Disables element resizing.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;NOMOVE&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Disables element moving.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;AUTOPOSITION&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Specifies to ignore the <code>&lt;XPOSITION&gt;</code> and <code>&lt;YPOSITION&gt;</code> and instead place the element in the first available position.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;LOCKED&gt;</strong></td> 
+        <td>(optional - boolean) default = false. Defines that the widget will be locked. It means another widget wouldn't be able to move it during dragging or resizing. The widget itself can still be dragged or resized. You need to specify the <strong>&lt;NORESIZE&gt;</strong> and <strong>&lt;NOMOVE&gt;</strong> options to completely lock the widget.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;MINWIDTH&gt;</strong></td> 
+        <td>(optional - integer) default = 0. Specifies the minimum width beyond which the item cannot be resized.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;MINHEIGHT&gt;</strong></td> 
+        <td>(optional - integer) default = 0. Specifies the minimum height beyond which the item cannot be resized.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;MAXWIDTH&gt;</strong></td> 
+        <td>(optional - integer) default = 0. Specifies the maximum width beyond which the item cannot be resized. A value of 0 means no maximum.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>&lt;MAXHEIGHT&gt;</strong></td> 
+        <td>(optional - integer) default = 0. Specifies the maximum height beyond which the item cannot be resized. A value of 0 means no maximum.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <p>In addition to these properties that are unique to gridstack items, the following properties of regular dashboard portlets should also be used within gridstack items, with the same effect: <strong>&lt;TITLE&gt;</strong>, <strong>&lt;REPORTID&gt;</strong>, <strong>&lt;URL&gt;</strong>, <strong>&lt;REFRESH&gt;</strong>, <strong>&lt;ONLOAD&gt;</strong>.</p> 
+     <h3 id="example-syntax_1">Example Syntax</h3> 
+     <div class="codehilite"> 
+      <pre>    <span class="nt">&lt;DASHBOARD&gt;</span>
+
+        <span class="nt">&lt;ITEM&gt;</span>
+            <span class="nt">&lt;TITLE&gt;</span>Report 1<span class="nt">&lt;/TITLE&gt;</span>
+            <span class="nt">&lt;REPORTID&gt;</span>1<span class="nt">&lt;/REPORTID&gt;</span>
+            <span class="nt">&lt;XPOSITION&gt;</span>0<span class="nt">&lt;/XPOSITION&gt;</span>
+            <span class="nt">&lt;YPOSITION&gt;</span>0<span class="nt">&lt;/YPOSITION&gt;</span>
+            <span class="nt">&lt;WIDTH&gt;</span>4<span class="nt">&lt;/WIDTH&gt;</span>
+            <span class="nt">&lt;HEIGHT&gt;</span>4<span class="nt">&lt;/HEIGHT&gt;</span>
+        <span class="nt">&lt;/ITEM&gt;</span>
+
+        <span class="nt">&lt;ITEM&gt;</span>
+            <span class="nt">&lt;TITLE&gt;</span>Report 2<span class="nt">&lt;/TITLE&gt;</span>
+            <span class="nt">&lt;REPORTID&gt;</span>2<span class="nt">&lt;/REPORTID&gt;</span>
+            <span class="nt">&lt;XPOSITION&gt;</span>8<span class="nt">&lt;/XPOSITION&gt;</span>
+            <span class="nt">&lt;YPOSITION&gt;</span>0<span class="nt">&lt;/YPOSITION&gt;</span>
+            <span class="nt">&lt;WIDTH&gt;</span>4<span class="nt">&lt;/WIDTH&gt;</span>
+            <span class="nt">&lt;HEIGHT&gt;</span>4<span class="nt">&lt;/HEIGHT&gt;</span>
+        <span class="nt">&lt;/ITEM&gt;</span>
+
+    <span class="nt">&lt;/DASHBOARD&gt;</span>
+</pre> 
+     </div> 
     </div> 
    </div> 
    <div> 
@@ -2326,7 +2474,14 @@ WHERE REGION = #region#
       <li>Enter the required <strong>XMLA Catalog</strong> name. This should match exactly with the contents of the <strong>Catalog</strong> name in the <strong>datasources.xml</strong> file defined on the external server. These names can be any string and don't have to match any name in the schema xml file.</li> 
       <li>In the MDX source field, enter the MDX for your report</li> 
      </ul> 
-     <p>If you encounter a <strong>404</strong> error, the URL specified in the ART datasource may be invalid. If you encounter a <strong>No metadata for catalog</strong> error, the catalog name in the XMLA Catalog field may be misspelt. Catalog names are case sensitive. If you get a <strong>XMLA connection datasource not found</strong> error, the datasource name in the XMLA Datasource field may be misspelt. Datasource names are case sensitive. If you get a <strong>XMLA Discover unparse results error</strong> error, the file specified in the Definition section of the Catalog section of the datasources.xml may not exist. Alternatively, the JDBC details provided in the DataSourceInfo tag may not be correct. Alternatively, the Catalog name may not be matching the name attribute of the Schema tag in the cube's schema xml file. Alternatively, the DataSource name may not be matching the XMLA Datasource field of the report. If you get a <strong>No metadata schema dimensions for catalog</strong> error, the Catalog name entered in the XMLA Catalog field may be incorrect. Note that if a change is made to the datasources.xml, the application needs to be restarted for the changes to take effect. </p> 
+     <h3 id="potential-errors">Potential errors</h3> 
+     <ul> 
+      <li>If you encounter a <strong>404</strong> error, the URL specified in the ART datasource may be invalid.</li> 
+      <li>If you encounter a <strong>No metadata for catalog</strong> error, the catalog name in the <strong>XMLA Catalog</strong> field may be misspelt. Catalog names are case sensitive.</li> 
+      <li>If you get a <strong>XMLA connection datasource not found</strong> error, the datasource name in the <strong>XMLA Datasource</strong> field may be misspelt. Datasource names are case sensitive.</li> 
+      <li>If you get a <strong>XMLA Discover unparse results error</strong> error, the file specified in the <strong>Definition</strong> section of the <strong>Catalog</strong> section of the <strong>datasources.xml</strong> may not exist. Alternatively, the JDBC details provided in the <strong>DataSourceInfo</strong> tag may not be correct. Alternatively, the <strong>Catalog</strong> name may not be matching the <strong>name</strong> attribute of the <strong>Schema</strong> tag in the cube's schema xml file. Alternatively, the <strong>DataSource</strong> name may not be matching the <strong>XMLA Datasource</strong> field of the report.</li> 
+      <li>If you get a <strong>No metadata schema dimensions for catalog</strong> error, the catalog name entered in the <strong>XMLA Catalog</strong> field may be incorrect. Note that if a change is made to the datasources.xml, the application needs to be restarted for the changes to take effect. </li> 
+     </ul> 
      <h3 id="accessing-the-mondrian-xmla-instance-from-ms-excel">Accessing the Mondrian XMLA instance from MS Excel</h3> 
      <p>You can configure ART to serve as a mondrian XMLA server by defining a file named <strong>datasources.xml</strong> and placing it in the <strong>ART_HOME\WEB-INF\work\templates</strong> directory. A sample datasources.xml file can be found in the ART_HOME\WEB-INF\etc directory. The steps outlined here refer to MS Excel 2010 and may be different for different versions of Excel.</p> 
      <ul> 
