@@ -439,7 +439,7 @@ public class ReportRunner {
 		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
 				|| reportType.isOlap()) {
 			RunReportHelper runReportHelper = new RunReportHelper();
-			String placeholderPrefix = "!"; //use #!<param_name># syntax
+			String placeholderPrefix = "!"; //use !#<param_name># syntax
 			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
 		}
 
@@ -456,7 +456,7 @@ public class ReportRunner {
 
 			String paramIdentifier = "#" + paramName + "#";
 			String searchString = Pattern.quote(paramIdentifier); //quote in case it contains special regex characters
-			String replaceString = Matcher.quoteReplacement(StringUtils.repeat("?", ",", reportParam.getActualParameterValues().size())); //quote in case it contains special regex characters
+			String replaceString = Matcher.quoteReplacement(StringUtils.repeat(" ? ", ",", reportParam.getActualParameterValues().size())); //quote in case it contains special regex characters
 
 			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
