@@ -19,6 +19,7 @@ package art.runreport;
 import art.datasource.Datasource;
 import art.dbutils.DatabaseUtils;
 import art.enums.ParameterDataType;
+import art.enums.ParameterType;
 import art.enums.ReportType;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
@@ -983,11 +984,16 @@ public class ReportRunner {
 				throw new IllegalStateException("Parameter not found: " + paramName);
 			}
 
-			if (reportParam.getEffectiveActualParameterValue() instanceof Date) {
-				Date dateValue = (Date) reportParam.getEffectiveActualParameterValue();
+			if (reportParam.getParameter().getParameterType() != ParameterType.SingleValue) {
+				throw new IllegalArgumentException("Non-single value parameter should not be used in dynamic sql: " + paramName);
+			}
+
+			Object actualParameterValue = reportParam.getEffectiveActualParameterValue();
+			if (actualParameterValue instanceof Date) {
+				Date dateValue = (Date) actualParameterValue;
 				expValue = ArtUtils.isoDateTimeMillisecondsFormatter.format(dateValue);
 			} else {
-				expValue = String.valueOf(reportParam.getActualParameterValues());
+				expValue = String.valueOf(actualParameterValue);
 			}
 		} else {
 			//expression isn't a report parameter. use as is

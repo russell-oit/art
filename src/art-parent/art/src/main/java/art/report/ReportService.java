@@ -1039,10 +1039,11 @@ public class ReportService {
 			userId //user group access to report group
 		};
 
-		//some jdbc drivers return long, some integer
+		//some drivers return long, some integer
 		//https://issues.apache.org/jira/browse/DBUTILS-27
 		//https://issues.apache.org/jira/browse/DBUTILS-17
 		//https://stackoverflow.com/questions/10240901/how-best-to-retrieve-result-of-select-count-from-sql-query-in-java-jdbc-lon
+		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#3279
 		ResultSetHandler<Number> h = new ScalarHandler<>();
 		Number recordCountNumber = dbService.query(sql, h, values);
 		if (recordCountNumber == null) {
