@@ -12,8 +12,8 @@ Display the final sql used to generate a report
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <div class="well well-sm">
-	<code>
+	<pre>
 		${encode:forHtmlContent(finalSql)}
-	</code>
+	</pre>
 </div>
 
