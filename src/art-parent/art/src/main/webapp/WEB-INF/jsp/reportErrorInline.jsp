@@ -15,8 +15,10 @@ Display error when running a report inline (using ajax)
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <c:if test="${not empty message}">
-	<div class="col-md-6 col-md-offset-3 alert alert-danger text-center">
-		<spring:message code="${message}"/>
+	<div class="row">
+		<div class="col-md-6 col-md-offset-3 alert alert-danger text-center">
+			<spring:message code="${message}"/>
+		</div>
 	</div>
 </c:if>
 

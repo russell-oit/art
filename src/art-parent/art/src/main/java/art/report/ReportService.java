@@ -972,6 +972,8 @@ public class ReportService {
 	public boolean canUserRunReport(int userId, int reportId) throws SQLException {
 		logger.debug("Entering canUserRunReport: userId={}, reportId={}", userId, reportId);
 
+		boolean canRunReport;
+
 		String sql = "SELECT COUNT(*)"
 				+ " FROM ART_QUERIES AQ"
 				+ " WHERE QUERY_ID=?"
@@ -1037,13 +1039,24 @@ public class ReportService {
 			userId //user group access to report group
 		};
 
-		ResultSetHandler<Integer> h = new ScalarHandler<>();
-		Integer recordCount = dbService.query(sql, h, values);
-		if (recordCount == null || recordCount == 0) {
-			return false;
+		//some jdbc drivers return long, some integer
+		//https://issues.apache.org/jira/browse/DBUTILS-27
+		//https://issues.apache.org/jira/browse/DBUTILS-17
+		//https://stackoverflow.com/questions/10240901/how-best-to-retrieve-result-of-select-count-from-sql-query-in-java-jdbc-lon
+		ResultSetHandler<Number> h = new ScalarHandler<>();
+		Number recordCountNumber = dbService.query(sql, h, values);
+		if (recordCountNumber == null) {
+			canRunReport = false;
 		} else {
-			return true;
+			long recordCountLong = recordCountNumber.longValue();
+			if (recordCountLong == 0) {
+				canRunReport = false;
+			} else {
+				canRunReport = true;
+			}
 		}
+
+		return canRunReport;
 	}
 
 	/**

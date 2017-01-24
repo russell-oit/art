@@ -439,7 +439,7 @@ public class ReportRunner {
 		if (Config.getCustomSettings().isEnableDirectParameterSubstitution()
 				|| reportType.isOlap()) {
 			RunReportHelper runReportHelper = new RunReportHelper();
-			String placeholderPrefix = "!"; //use !#<param_name># syntax
+			String placeholderPrefix = "!";
 			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
 		}
 

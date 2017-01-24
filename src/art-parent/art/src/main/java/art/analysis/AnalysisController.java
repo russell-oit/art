@@ -381,9 +381,6 @@ public class AnalysisController {
 	public String jpivotError(HttpServletRequest request, Model model) {
 		logger.debug("Entering jpivotError");
 
-		boolean showErrors = Config.getCustomSettings().isShowErrors();
-		model.addAttribute("showErrors", showErrors);
-
 		String errorDetails = "";
 
 		Throwable e = (Throwable) request.getAttribute("javax.servlet.jsp.jspException");

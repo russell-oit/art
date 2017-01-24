@@ -73,9 +73,6 @@ public class ErrorController {
 		}
 		model.addAttribute("errorDetails", errorDetails);
 		
-		boolean showErrors = Config.getCustomSettings().isShowErrors();
-		model.addAttribute("showErrors", showErrors);
-
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-inline";
@@ -88,9 +85,6 @@ public class ErrorController {
 	public String showError404(HttpServletRequest request, Model model) {
 		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
 		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
-
-		boolean showErrors = Config.getCustomSettings().isShowErrors();
-		model.addAttribute("showErrors", showErrors);
 
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
@@ -106,9 +100,6 @@ public class ErrorController {
 		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
 		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
 
-		boolean showErrors = Config.getCustomSettings().isShowErrors();
-		model.addAttribute("showErrors", showErrors);
-
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-400-inline";
@@ -123,9 +114,6 @@ public class ErrorController {
 		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
 		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
 
-		boolean showErrors = Config.getCustomSettings().isShowErrors();
-		model.addAttribute("showErrors", showErrors);
-
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details
 			return "error-405-inline";
@@ -139,9 +127,6 @@ public class ErrorController {
 		model.addAttribute("statusCode", request.getAttribute("javax.servlet.error.status_code"));
 		model.addAttribute("requestUri", request.getAttribute("javax.servlet.error.request_uri"));
 		model.addAttribute("errorMessage", request.getAttribute("javax.servlet.error.message"));
-
-		boolean showErrors = Config.getCustomSettings().isShowErrors();
-		model.addAttribute("showErrors", showErrors);
 
 		if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
 			//don't return whole html page for ajax calls. Only error details

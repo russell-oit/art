@@ -24,16 +24,18 @@ Display an error without the main header
 					<spring:message code="${message}"/>
 				</div>
 			</c:if>
-
-			<c:if test="${error != null}">
-				<div class="alert alert-danger alert-dismissable">
-					<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
-					<p><spring:message code="page.message.errorOccurred"/></p>
-					<c:if test="${showErrors}">
-						<p><encode:forHtmlContent value="${error}"/></p>
-					</c:if>
-				</div>
-			</c:if>
 		</div>
+
+		<c:if test="${error != null}">
+			<div class="alert alert-danger alert-dismissable">
+				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+				<c:if test="${showErrors}">
+					<p><encode:forHtmlContent value="${error}"/></p>
+				</c:if>
+			</div>
+		</c:if>
+
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
 	</jsp:body>
 </t:headerlessPage>
