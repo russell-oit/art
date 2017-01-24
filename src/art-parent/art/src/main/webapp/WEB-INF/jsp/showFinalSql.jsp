@@ -11,9 +11,14 @@ Display the final sql used to generate a report
 
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<div class="well well-sm">
-	<pre>
-		${encode:forHtmlContent(finalSql)}
-	</pre>
-</div>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/highlight-9.9.0/styles/default.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/highlight-9.9.0/highlight.pack.js"></script>
+
+<script>
+	$("pre code").each(function (i, e) {
+		hljs.highlightBlock(e);
+	});
+</script>
+
+<pre><code>${encode:forHtmlContent(finalSql)}</code></pre>
 
