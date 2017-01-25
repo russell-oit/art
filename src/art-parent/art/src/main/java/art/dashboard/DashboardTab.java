@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2017 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,26 +21,41 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Represents a dashboard, whose details are displayed in a dashboard report
+ * Represents a tab within a tabbed dashboard
  *
  * @author Timothy Anyona
  */
-public class Dashboard extends AbstractDashboard {
+public class DashboardTab implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private List<List<Portlet>> columns;
+	private String title;
+	private List<DashboardItem> items;
 
 	/**
-	 * @return the columns
+	 * @return the title
 	 */
-	public List<List<Portlet>> getColumns() {
-		return columns;
+	public String getTitle() {
+		return title;
 	}
 
 	/**
-	 * @param columns the columns to set
+	 * @param title the title to set
 	 */
-	public void setColumns(List<List<Portlet>> columns) {
-		this.columns = columns;
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	/**
+	 * @return the items
+	 */
+	public List<DashboardItem> getItems() {
+		return items;
+	}
+
+	/**
+	 * @param items the items to set
+	 */
+	public void setItems(List<DashboardItem> items) {
+		this.items = items;
 	}
 }

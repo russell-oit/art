@@ -61,9 +61,7 @@ public class ErrorController {
 				if (rootCause == null) {
 					rootCause = se;
 				}
-				errorDetails = "<b>** Root cause is:</b> " + rootCause.getMessage();
-				String stackTrace = ExceptionUtils.getStackTrace(rootCause);
-				errorDetails = errorDetails + "<br/>" + stackTrace;
+				errorDetails = ExceptionUtils.getStackTrace(rootCause);
 			} else {
 				// It's not a ServletException, so we'll just show it
 				errorDetails = ExceptionUtils.getStackTrace(exception);

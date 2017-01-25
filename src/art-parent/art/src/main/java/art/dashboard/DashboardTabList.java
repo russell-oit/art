@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ * Copyright (C) 2017 Enrico Liboni <eliboni@users.sourceforge.net>
  *
  * This file is part of ART.
  *
@@ -21,26 +21,42 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Represents a dashboard, whose details are displayed in a dashboard report
+ * Represents the list of tabs that should be used to display items in a tabbed
+ * dashboard
  *
  * @author Timothy Anyona
  */
-public class Dashboard extends AbstractDashboard {
+public class DashboardTabList implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private List<List<Portlet>> columns;
+	private int defaultTab = 1;
+	private List<DashboardTab> tabs;
 
 	/**
-	 * @return the columns
+	 * @return the defaultTab
 	 */
-	public List<List<Portlet>> getColumns() {
-		return columns;
+	public int getDefaultTab() {
+		return defaultTab;
 	}
 
 	/**
-	 * @param columns the columns to set
+	 * @param defaultTab the defaultTab to set
 	 */
-	public void setColumns(List<List<Portlet>> columns) {
-		this.columns = columns;
+	public void setDefaultTab(int defaultTab) {
+		this.defaultTab = defaultTab;
+	}
+
+	/**
+	 * @return the tabs
+	 */
+	public List<DashboardTab> getTabs() {
+		return tabs;
+	}
+
+	/**
+	 * @param tabs the tabs to set
+	 */
+	public void setTabs(List<DashboardTab> tabs) {
+		this.tabs = tabs;
 	}
 }

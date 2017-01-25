@@ -8,6 +8,7 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
@@ -19,32 +20,81 @@
 			</h2>
 		</div>
 		<div class="row">
-			<table class="plain">
-				<tr>
-					<c:forEach var="column" items="${dashboard.columns}">
-						<td style="vertical-align: top">
-							<c:forEach var="portlet" items="${column}">
-								<div id="portlet_${portlet.index}">
-									<div class="${portlet.classNamePrefix}Box">
-										<div class="${portlet.classNamePrefix}Tools"
-											 data-content-div-id="#portletContent_${portlet.index}"
-											 data-url="${portlet.url}"
-											 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
-											<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
-											<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
+			<c:choose>
+				<%-- https://stackoverflow.com/questions/10738044/jstl-el-equivalent-of-testing-for-null-and-list-size --%>
+				<c:when test="${dashboard.tabList == null}">
+					<table class="plain">
+						<tr>
+							<c:forEach var="column" items="${dashboard.columns}">
+								<td style="vertical-align: top">
+									<c:forEach var="portlet" items="${column}">
+										<div id="portlet_${portlet.index}">
+											<div class="${portlet.classNamePrefix}Box">
+												<div class="${portlet.classNamePrefix}Tools"
+													 data-content-div-id="#portletContent_${portlet.index}"
+													 data-url="${portlet.url}"
+													 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
+													<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
+													<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
+												</div>
+												<div class="${portlet.classNamePrefix}Title">
+													${portlet.title}
+												</div>
+												<div id="portletContent_${portlet.index}" class="${portlet.classNamePrefix}Content">
+												</div>
+											</div>
 										</div>
-										<div class="${portlet.classNamePrefix}Title">
-											${portlet.title}
-										</div>
-										<div id="portletContent_${portlet.index}" class="${portlet.classNamePrefix}Content">
-										</div>
-									</div>
-								</div>
+									</c:forEach>
+								</td>
 							</c:forEach>
-						</td>
-					</c:forEach>
-                </tr>
-			</table>
+						</tr>
+					</table>
+				</c:when>
+				<c:otherwise>
+					<c:set var="defaultTab" value="${dashboard.tabList.defaultTab}"/>
+					<ul class="nav nav-tabs">
+						<%-- https://stackoverflow.com/questions/6600738/use-jstl-foreach-loops-varstatus-as-an-id --%>
+						<c:forEach var="tab" items="${dashboard.tabList.tabs}" varStatus="loop">
+							<li ${loop.count == defaultTab ? 'class="active"' : ''}><a data-toggle="tab" href="#tab${loop.count}">${encode:forHtmlContent(tab.title)}</a></li>
+							</c:forEach>
+					</ul>
+
+					<div class="tab-content">
+						<c:forEach var="tab" items="${dashboard.tabList.tabs}" varStatus="loop">
+							<div id="tab${loop.count}" class="tab-pane ${loop.count == defaultTab ? 'active' : ''}">
+								<table class="plain">
+									<tr>
+										<c:forEach begin="1" end="${dashboard.columns.size()}" varStatus="loop2">
+											<td style="vertical-align: top">
+												<c:forEach var="portlet" items="${tab.items}">
+													<c:if test="${loop2.count == portlet.columnIndex}">
+														<div id="portlet_${portlet.index}">
+															<div class="${portlet.classNamePrefix}Box">
+																<div class="${portlet.classNamePrefix}Tools"
+																	 data-content-div-id="#portletContent_${portlet.index}"
+																	 data-url="${portlet.url}"
+																	 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
+																	<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
+																	<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
+																</div>
+																<div class="${portlet.classNamePrefix}Title">
+																	${portlet.title}
+																</div>
+																<div id="portletContent_${portlet.index}" class="${portlet.classNamePrefix}Content">
+																</div>
+															</div>
+														</div>
+													</c:if>
+												</c:forEach>
+											</td>
+										</c:forEach>
+									</tr>
+								</table>
+							</div>
+						</c:forEach>
+					</div>
+				</c:otherwise>
+			</c:choose>
 		</div> 
     </div>
 	<!-- Container-fluid -->

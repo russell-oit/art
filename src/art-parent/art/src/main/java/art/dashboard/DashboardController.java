@@ -31,6 +31,7 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -167,6 +168,7 @@ public class DashboardController {
 		List<String> columnsXml = XmlParser.getXmlElementValues(dashboardXml, "COLUMN");
 
 		List<List<Portlet>> dashboardColumns = new ArrayList<>();
+		Map<Integer, DashboardItem> itemsMap = new HashMap<>();
 
 		int itemIndex = 0;
 		int columnIndex = 0;
@@ -193,12 +195,59 @@ public class DashboardController {
 				setPortletProperties(portlet, portletXml, request, locale, columnSize);
 
 				columnPortlets.add(portlet);
+
+				itemsMap.put(portlet.getIndex(), portlet);
 			}
 
 			dashboardColumns.add(columnPortlets);
 		}
 
 		dashboard.setColumns(dashboardColumns);
+
+		String tabListXml = XmlParser.getXmlElementValue(dashboardXml, "TABLIST");
+		if (tabListXml != null) {
+			DashboardTabList tabList = new DashboardTabList();
+
+			List<DashboardTab> tabs = new ArrayList<>();
+			List<String> tabsXml = XmlParser.getXmlElementValues(tabListXml, "TAB");
+			for (String tabXml : tabsXml) {
+				DashboardTab tab = new DashboardTab();
+
+				String title = XmlParser.getXmlElementValue(tabXml, "TITLE");
+				tab.setTitle(title);
+
+				List<DashboardItem> items = new ArrayList<>();
+				List<String> itemsXml = XmlParser.getXmlElementValues(tabXml, "ITEM");
+				for (String itemIndexString : itemsXml) {
+					int tabItemIndex = Integer.parseInt(itemIndexString);
+					DashboardItem item = itemsMap.get(tabItemIndex);
+					if (item == null) {
+						throw new IllegalArgumentException("Invalid item index: " + tabItemIndex);
+					}
+					items.add(item);
+				}
+
+				tab.setItems(items);
+
+				tabs.add(tab);
+			}
+
+			tabList.setTabs(tabs);
+
+			int defaultTab;
+			String defaultTabString = XmlParser.getXmlElementValue(tabListXml, "DEFAULTTAB");
+			if (StringUtils.isBlank(defaultTabString)) {
+				defaultTab = 1;
+			} else {
+				defaultTab = Integer.parseInt(defaultTabString);
+				if (defaultTab < 0 || defaultTab > tabsXml.size()) {
+					throw new IllegalArgumentException("Invalid default tab: " + defaultTab);
+				}
+			}
+			tabList.setDefaultTab(defaultTab);
+
+			dashboard.setTabList(tabList);
+		}
 
 		return dashboard;
 	}
@@ -432,7 +481,7 @@ public class DashboardController {
 			GridstackItem item = new GridstackItem();
 			item.setIndex(itemIndex);
 
-			setGridstackItemProperties(item, itemXml, request, locale, itemIndex);
+			setGridstackItemProperties(item, itemXml, request, locale);
 
 			items.add(item);
 		}
@@ -449,11 +498,10 @@ public class DashboardController {
 	 * @param itemXml the item's xml
 	 * @param request the http request
 	 * @param locale the locale being used
-	 * @param itemIndex the index of the item within the dashboard
 	 * @throws UnsupportedEncodingException
 	 */
 	private void setGridstackItemProperties(GridstackItem item, String itemXml,
-			HttpServletRequest request, Locale locale, int itemIndex)
+			HttpServletRequest request, Locale locale)
 			throws UnsupportedEncodingException {
 
 		logger.debug("Entering setGridstackItemProperties");
