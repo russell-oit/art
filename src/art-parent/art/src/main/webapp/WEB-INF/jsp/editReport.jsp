@@ -69,6 +69,7 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -209,6 +210,40 @@ Edit report page
 					}
 				});
 
+				//https://stackoverflow.com/questions/6440439/how-do-i-make-a-textarea-an-ace-editor
+				//https://stackoverflow.com/questions/8963855/how-do-i-get-value-from-ace-editor
+				//https://ace.c9.io/#nav=howto
+				var sqlEditor = ace.edit("sqlEditor");
+				sqlEditor.getSession().setMode("ace/mode/sql");
+				sqlEditor.setHighlightActiveLine(false);
+				//https://stackoverflow.com/questions/14907184/is-there-a-way-to-hide-the-vertical-ruler-in-ace-editor
+				sqlEditor.setShowPrintMargin(false);
+				//https://stackoverflow.com/questions/28283344/is-there-a-way-to-hide-the-line-numbers-in-ace-editor
+				sqlEditor.renderer.setShowGutter(false);
+				
+				document.getElementById('sqlEditor').style.fontSize='14px'; //default seems to be 12px
+
+				var reportSource = $('input[name="reportSource"]');
+				sqlEditor.getSession().setValue(reportSource.val());
+				sqlEditor.getSession().on('change', function () {
+					reportSource.val(sqlEditor.getSession().getValue());
+				});
+				
+				var xmlEditor = ace.edit("xmlEditor");
+				xmlEditor.getSession().setMode("ace/mode/xml");
+				xmlEditor.setHighlightActiveLine(false);
+				xmlEditor.setShowPrintMargin(false);
+				
+				//https://github.com/ajaxorg/ace/commit/abb1e4703b737757e20d1e7040943ba4e2483007
+				xmlEditor.setOption("showLineNumbers", false);
+				
+				document.getElementById('xmlEditor').style.fontSize='14px';
+				
+				xmlEditor.getSession().setValue(reportSource.val());
+				xmlEditor.getSession().on('change', function () {
+					reportSource.val(xmlEditor.getSession().getValue());
+				});
+
 			});
 		</script>
 
@@ -216,7 +251,7 @@ Edit report page
 			function toggleVisibleFields() {
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
 
-				//show/hide report source textarea
+				//show/hide report source
 				if (reportTypeId === 111) {
 					//text
 					$("#reportSourceHtmlDiv").show();
@@ -224,6 +259,18 @@ Edit report page
 				} else {
 					$("#reportSourceHtmlDiv").hide();
 					$("#reportSourceDiv").show();
+
+					switch (reportTypeId) {
+						case 110:
+						case 129:
+							//dashboard
+							$("#sqlEditor").hide();
+							$("#xmlEditor").show();
+							break;
+						default:
+							$("#sqlEditor").show();
+							$("#xmlEditor").hide();
+					}
 				}
 
 				//set report source label text
@@ -1023,8 +1070,9 @@ Edit report page
 
 				<div id="reportSourceDiv" class="form-group">
 					<div class="col-md-12">
-						<form:textarea path="reportSource" rows="20" cols="70" wrap="off" class="form-control"/>
-						<form:errors path="reportSource" cssClass="error"/>
+						<form:hidden path="reportSource"/>
+						<div id="sqlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
+						<div id="xmlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div id="reportSourceHtmlDiv" class="form-group">
