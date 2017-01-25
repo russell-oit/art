@@ -33,6 +33,7 @@ public class Portlet implements Serializable {
 	private String title;
 	private boolean executeOnLoad;
 	private int refreshPeriodSeconds;
+	private int index;
 
 	/**
 	 * @return the id
@@ -116,5 +117,19 @@ public class Portlet implements Serializable {
 	 */
 	public void setRefreshPeriodSeconds(int refreshPeriodSeconds) {
 		this.refreshPeriodSeconds = refreshPeriodSeconds;
+	}
+
+	/**
+	 * @return the index
+	 */
+	public int getIndex() {
+		return index;
+	}
+
+	/**
+	 * @param index the index to set
+	 */
+	public void setIndex(int index) {
+		this.index = index;
 	}
 }

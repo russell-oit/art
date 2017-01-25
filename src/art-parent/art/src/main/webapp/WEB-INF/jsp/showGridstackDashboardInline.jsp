@@ -41,10 +41,10 @@
 						 ${item.maxWidth == 0 ? '' : 'data-gs-max-width="'.concat(item.maxWidth).concat('"')}
 						 ${item.maxHeight == 0 ? '' : 'data-gs-max-height="'.concat(item.maxHeight).concat('"')}>
 						<div class="grid-stack-item-content" style="border: 1px solid #ccc">
-							<div id="div_${item.id}">
+							<div id="item_${item.index}">
 								<div class="portletAUTOBox">
 									<div class="portletAUTOTools"
-										 data-content-div-id="#item_${item.id}"
+										 data-content-div-id="#itemContent_${item.index}"
 										 data-url="${item.url}"
 										 data-refresh-period-seconds="${item.refreshPeriodSeconds}">
 										<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
@@ -53,7 +53,7 @@
 									<div class="portletAUTOTitle">
 										${item.title}
 									</div>
-									<div id="item_${item.id}" class="portletAUTOContent">
+									<div id="itemContent_${item.index}" class="portletAUTOContent">
 									</div>
 								</div>
 							</div>
@@ -73,7 +73,7 @@
 		var intervalIds = {};
 
 	<c:forEach var="item" items="${dashboard.items}">
-		var contentDivId = "#item_${item.id}";
+		var contentDivId = "#itemContent_${item.index}";
 		var itemUrl = "${item.url}";
 
 		if (${item.executeOnLoad}) {
@@ -84,7 +84,7 @@
 		if (refreshPeriodSeconds !== -1) {
 			var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
 			var intervalId = setInterval(function () {
-				$("#item_${item.id}").load("${item.url}");
+				$("#itemContent_${item.index}").load("${item.url}");
 				//https://stackoverflow.com/questions/2441197/javascript-setinterval-loop-not-holding-variable
 				//using variables like below doesn't work properly. setinterval will be set on the last item (last variable contents)
 //				$(contentDivId).load(itemUrl);

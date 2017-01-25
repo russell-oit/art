@@ -169,9 +169,8 @@ public class DashboardController {
 
 		List<List<Portlet>> dashboardColumns = new ArrayList<>();
 
-		int columnIndex = 0;
+		int itemIndex = 0;
 		for (String columnXml : columnsXml) {
-			columnIndex++;
 			logger.debug("columnXml='{}'", columnXml);
 
 			List<Portlet> columnPortlets = new ArrayList<>();
@@ -182,14 +181,14 @@ public class DashboardController {
 			}
 
 			List<String> portletsXml = XmlParser.getXmlElementValues(columnXml, "PORTLET");
-			int portletIndex = 0;
 			for (String portletXml : portletsXml) {
-				portletIndex++;
+				itemIndex++;
 				logger.debug("portletXml='{}'", portletXml);
 
 				Portlet portlet = new Portlet();
+				portlet.setIndex(itemIndex);
 
-				setPortletProperties(portlet, portletXml, request, locale, columnSize, columnIndex, portletIndex);
+				setPortletProperties(portlet, portletXml, request, locale, columnSize);
 
 				columnPortlets.add(portlet);
 			}
@@ -210,22 +209,15 @@ public class DashboardController {
 	 * @param request the http request
 	 * @param locale the locale being used
 	 * @param columnSize the size setting of the column
-	 * @param columnIndex the index of the column in which the portlet is
-	 * contained
-	 * @param portletIndex the index for the portlet within the column
 	 * @throws UnsupportedEncodingException
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
 	private void setPortletProperties(Portlet portlet, String portletXml,
-			HttpServletRequest request, Locale locale, String columnSize,
-			int columnIndex, int portletIndex)
+			HttpServletRequest request, Locale locale, String columnSize)
 			throws UnsupportedEncodingException, ParseException, SQLException {
 
 		logger.debug("Entering setPortletProperties");
-
-		String id = getPortletId(columnIndex, portletIndex);
-		portlet.setId(id);
 
 		int refreshPeriodSeconds = getPortletRefreshPeriod(portletXml);
 		portlet.setRefreshPeriodSeconds(refreshPeriodSeconds);
@@ -241,21 +233,6 @@ public class DashboardController {
 
 		String classNamePrefix = getPortletClassNamePrefix(columnSize);
 		portlet.setClassNamePrefix(classNamePrefix);
-	}
-
-	/**
-	 * Returns a unique id to identify a portlet
-	 *
-	 * @param columnIndex the index of the column in which the portlet is
-	 * contained
-	 * @param portletIndex the index for the portlet within the column
-	 * @return a unique id to identify a portlet
-	 */
-	private String getPortletId(int columnIndex, int portletIndex) {
-		//use a fixed/determinable value instead of a random value to cater for some users needs
-		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#592d
-		String id = String.valueOf(columnIndex) + "_" + String.valueOf(portletIndex);
-		return id;
 	}
 
 	/**
@@ -451,6 +428,7 @@ public class DashboardController {
 			logger.debug("itemXml='{}'", itemXml);
 
 			GridstackItem item = new GridstackItem();
+			item.setIndex(itemIndex);
 
 			setGridstackItemProperties(item, itemXml, request, locale, itemIndex);
 
@@ -477,9 +455,6 @@ public class DashboardController {
 			throws UnsupportedEncodingException {
 
 		logger.debug("Entering setGridstackItemProperties");
-
-		String id = getGridstackItemId(itemIndex);
-		item.setId(id);
 
 		int refreshPeriodSeconds = getPortletRefreshPeriod(itemXml);
 		item.setRefreshPeriodSeconds(refreshPeriodSeconds);
@@ -528,19 +503,6 @@ public class DashboardController {
 
 		int maxHeight = getGridstackItemMaxHeight(itemXml);
 		item.setMaxHeight(maxHeight);
-	}
-
-	/**
-	 * Returns a unique id to identify a gridstack item
-	 *
-	 * @param itemIndex the index of the item within the dashboard
-	 * @return a unique id to identify a gridstack item
-	 */
-	private String getGridstackItemId(int itemIndex) {
-		//use a fixed/determinable value instead of a random value to cater for some users needs
-		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#592d
-		String id = String.valueOf(itemIndex);
-		return id;
 	}
 
 	/**

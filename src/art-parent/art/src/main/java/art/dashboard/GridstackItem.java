@@ -17,21 +17,16 @@
  */
 package art.dashboard;
 
-import java.io.Serializable;
-
 /**
  * Represents an item that is contained within a gridstack dashboard
- * 
+ *
  * @author Timothy Anyona
  */
-public class GridstackItem implements Serializable {
+public class GridstackItem extends Portlet {
+
+	//https://stackoverflow.com/questions/9142516/if-my-class-implements-serializable-do-i-have-to-implement-it-in-its-subclasses
 	//https://github.com/troolee/gridstack.js/tree/master/doc
 	private static final long serialVersionUID = 1L;
-	private String id;
-	private String url;
-	private String title;
-	private boolean executeOnLoad;
-	private int refreshPeriodSeconds;
 	private int xPosition;
 	private int yPosition;
 	private int width;
@@ -44,62 +39,6 @@ public class GridstackItem implements Serializable {
 	private int minHeight; //0 has same effect as html attribute no being present in jsp. doesn't require ternary operator in jsp
 	private int maxWidth; //0 results in item having mimimum width, so omit html attribute if 0 (if not specified)
 	private int maxHeight; //0 results in item having mimimum height, so omit html attribute if 0 (if not specified)
-
-	/**
-	 * @return the url
-	 */
-	public String getUrl() {
-		return url;
-	}
-
-	/**
-	 * @param url the url to set
-	 */
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	/**
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * @param title the title to set
-	 */
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	/**
-	 * @return the executeOnLoad
-	 */
-	public boolean isExecuteOnLoad() {
-		return executeOnLoad;
-	}
-
-	/**
-	 * @param executeOnLoad the executeOnLoad to set
-	 */
-	public void setExecuteOnLoad(boolean executeOnLoad) {
-		this.executeOnLoad = executeOnLoad;
-	}
-
-	/**
-	 * @return the refreshPeriodSeconds
-	 */
-	public int getRefreshPeriodSeconds() {
-		return refreshPeriodSeconds;
-	}
-
-	/**
-	 * @param refreshPeriodSeconds the refreshPeriodSeconds to set
-	 */
-	public void setRefreshPeriodSeconds(int refreshPeriodSeconds) {
-		this.refreshPeriodSeconds = refreshPeriodSeconds;
-	}
 
 	/**
 	 * @return the xPosition
@@ -214,20 +153,6 @@ public class GridstackItem implements Serializable {
 	}
 
 	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	/**
 	 * @return the minWidth
 	 */
 	public int getMinWidth() {
@@ -282,5 +207,5 @@ public class GridstackItem implements Serializable {
 	public void setMaxHeight(int maxHeight) {
 		this.maxHeight = maxHeight;
 	}
-	
+
 }

@@ -24,10 +24,10 @@
 					<c:forEach var="column" items="${dashboard.columns}">
 						<td style="vertical-align: top">
 							<c:forEach var="portlet" items="${column}">
-								<div id="div_${portlet.id}">
+								<div id="portlet_${portlet.index}">
 									<div class="${portlet.classNamePrefix}Box">
 										<div class="${portlet.classNamePrefix}Tools"
-											 data-content-div-id="#portlet_${portlet.id}"
+											 data-content-div-id="#portletContent_${portlet.index}"
 											 data-url="${portlet.url}"
 											 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
 											<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
@@ -36,7 +36,7 @@
 										<div class="${portlet.classNamePrefix}Title">
 											${portlet.title}
 										</div>
-										<div id="portlet_${portlet.id}" class="${portlet.classNamePrefix}Content">
+										<div id="portletContent_${portlet.index}" class="${portlet.classNamePrefix}Content">
 										</div>
 									</div>
 								</div>
@@ -58,7 +58,7 @@
 
 	<c:forEach var="column" items="${dashboard.columns}">
 		<c:forEach var="portlet" items="${column}">
-		var contentDivId = "#portlet_${portlet.id}";
+		var contentDivId = "#portletContent_${portlet.index}";
 		var portletUrl = "${portlet.url}";
 
 		//http://balusc.omnifaces.org/2009/05/javajspjsf-and-javascript.html
@@ -70,7 +70,7 @@
 		if (refreshPeriodSeconds !== -1) {
 			var refreshPeriodMilliseconds = refreshPeriodSeconds * 1000;
 			var intervalId = setInterval(function () {
-				$("#portlet_${portlet.id}").load("${portlet.url}");
+				$("#portletContent_${portlet.index}").load("${portlet.url}");
 				//https://stackoverflow.com/questions/2441197/javascript-setinterval-loop-not-holding-variable
 				//using variables like below doesn't work properly. setinterval will be set on the last portlet (last variable contents)
 //				$(contentDivId).load(portletUrl);
