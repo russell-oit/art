@@ -22,7 +22,7 @@ package art.dashboard;
  *
  * @author Timothy Anyona
  */
-public class GridstackItem extends Portlet {
+public class GridstackItem extends DashboardItem {
 
 	//https://stackoverflow.com/questions/9142516/if-my-class-implements-serializable-do-i-have-to-implement-it-in-its-subclasses
 	//https://github.com/troolee/gridstack.js/tree/master/doc

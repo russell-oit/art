@@ -17,51 +17,16 @@
  */
 package art.dashboard;
 
-import java.io.Serializable;
-
 /**
  * Represents a portlet that is contained within a dashboard
- * 
+ *
  * @author Timothy Anyona
  */
-public class Portlet implements Serializable {
-	
+public class Portlet extends DashboardItem {
+
 	private static final long serialVersionUID = 1L;
-	private String id;
-	private String url;
 	private String classNamePrefix;
-	private String title;
-	private boolean executeOnLoad;
-	private int refreshPeriodSeconds;
-	private int index;
-
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the url
-	 */
-	public String getUrl() {
-		return url;
-	}
-
-	/**
-	 * @param url the url to set
-	 */
-	public void setUrl(String url) {
-		this.url = url;
-	}
+	private int columnIndex;
 
 	/**
 	 * @return the classNamePrefix
@@ -78,58 +43,17 @@ public class Portlet implements Serializable {
 	}
 
 	/**
-	 * @return the title
+	 * @return the columnIndex
 	 */
-	public String getTitle() {
-		return title;
+	public int getColumnIndex() {
+		return columnIndex;
 	}
 
 	/**
-	 * @param title the title to set
+	 * @param columnIndex the columnIndex to set
 	 */
-	public void setTitle(String title) {
-		this.title = title;
+	public void setColumnIndex(int columnIndex) {
+		this.columnIndex = columnIndex;
 	}
 
-	/**
-	 * @return the executeOnLoad
-	 */
-	public boolean isExecuteOnLoad() {
-		return executeOnLoad;
-	}
-
-	/**
-	 * @param executeOnLoad the executeOnLoad to set
-	 */
-	public void setExecuteOnLoad(boolean executeOnLoad) {
-		this.executeOnLoad = executeOnLoad;
-	}
-
-	/**
-	 * @return the refreshPeriodSeconds
-	 */
-	public int getRefreshPeriodSeconds() {
-		return refreshPeriodSeconds;
-	}
-
-	/**
-	 * @param refreshPeriodSeconds the refreshPeriodSeconds to set
-	 */
-	public void setRefreshPeriodSeconds(int refreshPeriodSeconds) {
-		this.refreshPeriodSeconds = refreshPeriodSeconds;
-	}
-
-	/**
-	 * @return the index
-	 */
-	public int getIndex() {
-		return index;
-	}
-
-	/**
-	 * @param index the index to set
-	 */
-	public void setIndex(int index) {
-		this.index = index;
-	}
 }

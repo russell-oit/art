@@ -39,7 +39,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,7 +169,9 @@ public class DashboardController {
 		List<List<Portlet>> dashboardColumns = new ArrayList<>();
 
 		int itemIndex = 0;
+		int columnIndex = 0;
 		for (String columnXml : columnsXml) {
+			columnIndex++;
 			logger.debug("columnXml='{}'", columnXml);
 
 			List<Portlet> columnPortlets = new ArrayList<>();
@@ -187,6 +188,7 @@ public class DashboardController {
 
 				Portlet portlet = new Portlet();
 				portlet.setIndex(itemIndex);
+				portlet.setColumnIndex(columnIndex);
 
 				setPortletProperties(portlet, portletXml, request, locale, columnSize);
 
