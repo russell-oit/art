@@ -189,7 +189,7 @@ public class DashboardController {
 
 				Portlet portlet = new Portlet();
 
-				setPortletProperties(portlet, portletXml, request, locale, columnSize, columnIndex, portletIndex, report);
+				setPortletProperties(portlet, portletXml, request, locale, columnSize, columnIndex, portletIndex);
 
 				columnPortlets.add(portlet);
 			}
@@ -213,19 +213,18 @@ public class DashboardController {
 	 * @param columnIndex the index of the column in which the portlet is
 	 * contained
 	 * @param portletIndex the index for the portlet within the column
-	 * @param report the dashboard report
 	 * @throws UnsupportedEncodingException
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
 	private void setPortletProperties(Portlet portlet, String portletXml,
 			HttpServletRequest request, Locale locale, String columnSize,
-			int columnIndex, int portletIndex, Report report)
+			int columnIndex, int portletIndex)
 			throws UnsupportedEncodingException, ParseException, SQLException {
 
 		logger.debug("Entering setPortletProperties");
 
-		String id = getPortletId(columnIndex, portletIndex, report);
+		String id = getPortletId(columnIndex, portletIndex);
 		portlet.setId(id);
 
 		int refreshPeriodSeconds = getPortletRefreshPeriod(portletXml);
@@ -250,13 +249,12 @@ public class DashboardController {
 	 * @param columnIndex the index of the column in which the portlet is
 	 * contained
 	 * @param portletIndex the index for the portlet within the column
-	 * @param report the dashboard report
 	 * @return a unique id to identify a portlet
 	 */
-	private String getPortletId(int columnIndex, int portletIndex, Report report) {
+	private String getPortletId(int columnIndex, int portletIndex) {
 		//use a fixed/determinable value instead of a random value to cater for some users needs
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#592d
-		String id = String.valueOf(columnIndex) + "_" + String.valueOf(portletIndex) + "_" + String.valueOf(report.getReportId());
+		String id = String.valueOf(columnIndex) + "_" + String.valueOf(portletIndex);
 		return id;
 	}
 
@@ -454,7 +452,7 @@ public class DashboardController {
 
 			GridstackItem item = new GridstackItem();
 
-			setGridstackItemProperties(item, itemXml, request, locale, itemIndex, report);
+			setGridstackItemProperties(item, itemXml, request, locale, itemIndex);
 
 			items.add(item);
 		}
@@ -472,16 +470,15 @@ public class DashboardController {
 	 * @param request the http request
 	 * @param locale the locale being used
 	 * @param itemIndex the index of the item within the dashboard
-	 * @param report the dashboard report
 	 * @throws UnsupportedEncodingException
 	 */
 	private void setGridstackItemProperties(GridstackItem item, String itemXml,
-			HttpServletRequest request, Locale locale, int itemIndex, Report report)
+			HttpServletRequest request, Locale locale, int itemIndex)
 			throws UnsupportedEncodingException {
 
 		logger.debug("Entering setGridstackItemProperties");
 
-		String id = getGridstackItemId(itemIndex, report);
+		String id = getGridstackItemId(itemIndex);
 		item.setId(id);
 
 		int refreshPeriodSeconds = getPortletRefreshPeriod(itemXml);
@@ -537,13 +534,12 @@ public class DashboardController {
 	 * Returns a unique id to identify a gridstack item
 	 *
 	 * @param itemIndex the index of the item within the dashboard
-	 * @param report the dashboard report
 	 * @return a unique id to identify a gridstack item
 	 */
-	private String getGridstackItemId(int itemIndex, Report report) {
+	private String getGridstackItemId(int itemIndex) {
 		//use a fixed/determinable value instead of a random value to cater for some users needs
 		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#592d
-		String id = String.valueOf(itemIndex) + "_" + String.valueOf(report.getReportId());
+		String id = String.valueOf(itemIndex);
 		return id;
 	}
 

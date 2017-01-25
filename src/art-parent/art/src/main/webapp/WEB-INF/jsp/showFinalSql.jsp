@@ -11,7 +11,7 @@ Display the final sql used to generate a report
 
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/highlight-9.9.0/styles/default.css">
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/highlight-9.9.0/styles/magula.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/highlight-9.9.0/highlight.pack.js"></script>
 
 <script>
