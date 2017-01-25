@@ -70,7 +70,6 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ext-statusbar.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -248,11 +247,6 @@ Edit report page
 					reportSource.val(xmlEditor.getSession().getValue());
 				});
 
-				//https://github.com/ajaxorg/ace-builds/blob/master/demo/statusbar.html
-				var StatusBar = ace.require("ace/ext/statusbar").StatusBar;
-				// create a simple selection status indicator
-				var sqlStatusBar = new StatusBar(sqlEditor, document.getElementById("sqlStatusBar"));
-
 			});
 		</script>
 
@@ -274,12 +268,10 @@ Edit report page
 						case 129:
 							//dashboard
 							$("#sqlEditor").hide();
-							$("#sqlStatusBar").hide();
 							$("#xmlEditor").show();
 							break;
 						default:
 							$("#sqlEditor").show();
-							$("#sqlStatusBar").show();
 							$("#xmlEditor").hide();
 					}
 				}
@@ -1084,7 +1076,6 @@ Edit report page
 						<form:hidden path="reportSource"/>
 						<div id="sqlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 						<div id="xmlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
-						<div id="sqlStatusBar" style="height: 20px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div id="reportSourceHtmlDiv" class="form-group">
