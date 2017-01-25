@@ -238,6 +238,12 @@ Reports configuration page
 										<li class="divider"></li>
 										<li>
 											<a 
+												href="${pageContext.request.contextPath}/app/addJob.do?reportId=${report.reportId}">
+												<spring:message code="reports.action.schedule"/>
+											</a>
+										</li>
+										<li>
+											<a 
 												href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
 												<spring:message code="reports.action.preview"/>
 											</a>
