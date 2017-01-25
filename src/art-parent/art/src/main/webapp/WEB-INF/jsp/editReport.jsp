@@ -70,6 +70,7 @@ Edit report page
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ext-statusbar.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -213,6 +214,8 @@ Edit report page
 				//https://stackoverflow.com/questions/6440439/how-do-i-make-a-textarea-an-ace-editor
 				//https://stackoverflow.com/questions/8963855/how-do-i-get-value-from-ace-editor
 				//https://ace.c9.io/#nav=howto
+				//https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts
+				//https://templth.wordpress.com/2014/12/29/using-ace-editor-into-angular-applications/
 				var sqlEditor = ace.edit("sqlEditor");
 				sqlEditor.getSession().setMode("ace/mode/sql");
 				sqlEditor.setHighlightActiveLine(false);
@@ -221,28 +224,34 @@ Edit report page
 				//https://stackoverflow.com/questions/28283344/is-there-a-way-to-hide-the-line-numbers-in-ace-editor
 				sqlEditor.renderer.setShowGutter(false);
 				
-				document.getElementById('sqlEditor').style.fontSize='14px'; //default seems to be 12px
+				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
 
 				var reportSource = $('input[name="reportSource"]');
 				sqlEditor.getSession().setValue(reportSource.val());
 				sqlEditor.getSession().on('change', function () {
 					reportSource.val(sqlEditor.getSession().getValue());
 				});
-				
+
 				var xmlEditor = ace.edit("xmlEditor");
 				xmlEditor.getSession().setMode("ace/mode/xml");
 				xmlEditor.setHighlightActiveLine(false);
 				xmlEditor.setShowPrintMargin(false);
-				
+
 				//https://github.com/ajaxorg/ace/commit/abb1e4703b737757e20d1e7040943ba4e2483007
+				//https://github.com/ajaxorg/ace/wiki/Configuring-Ace
 				xmlEditor.setOption("showLineNumbers", false);
-				
-				document.getElementById('xmlEditor').style.fontSize='14px';
-				
+
+				document.getElementById('xmlEditor').style.fontSize = '14px';
+
 				xmlEditor.getSession().setValue(reportSource.val());
 				xmlEditor.getSession().on('change', function () {
 					reportSource.val(xmlEditor.getSession().getValue());
 				});
+
+				//https://github.com/ajaxorg/ace-builds/blob/master/demo/statusbar.html
+				var StatusBar = ace.require("ace/ext/statusbar").StatusBar;
+				// create a simple selection status indicator
+				var sqlStatusBar = new StatusBar(sqlEditor, document.getElementById("sqlStatusBar"));
 
 			});
 		</script>
@@ -265,10 +274,12 @@ Edit report page
 						case 129:
 							//dashboard
 							$("#sqlEditor").hide();
+							$("#sqlStatusBar").hide();
 							$("#xmlEditor").show();
 							break;
 						default:
 							$("#sqlEditor").show();
+							$("#sqlStatusBar").show();
 							$("#xmlEditor").hide();
 					}
 				}
@@ -1073,6 +1084,7 @@ Edit report page
 						<form:hidden path="reportSource"/>
 						<div id="sqlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
 						<div id="xmlEditor" style="height: 400px; width: 100%; border: 1px solid black"></div>
+						<div id="sqlStatusBar" style="height: 20px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>
 				<div id="reportSourceHtmlDiv" class="form-group">
