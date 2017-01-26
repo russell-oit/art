@@ -542,6 +542,8 @@ public class ReportController {
 		validExtensions.add("jpg");
 		validExtensions.add("jpeg");
 		validExtensions.add("ftl");
+		validExtensions.add("ftlh"); //http://freemarker.org/docs/pgui_config_outputformatsautoesc.html
+		validExtensions.add("ftlx");
 		validExtensions.add("docx");
 		validExtensions.add("odt");
 		validExtensions.add("pptx");
