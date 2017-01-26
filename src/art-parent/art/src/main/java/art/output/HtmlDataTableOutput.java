@@ -68,8 +68,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 			File languageFile = new File(languageFilePath);
 			
 			if (languageFile.exists()) {
-				languageSetting = ", language: {url: " + contextPath + "/js/dataTables-1.10.11/i18n/"
-						+ languageFileName + "}";
+				languageSetting = ", language: {url: '" + contextPath + "/js/dataTables-1.10.11/i18n/"
+						+ languageFileName + "'}";
 			}
 		}
 
