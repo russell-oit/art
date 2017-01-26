@@ -211,7 +211,7 @@ public class ReportRunner {
 
 		applyTags(querySb);
 		applyDynamicSql(querySb);
-		applyParameterPlaceholders(querySb);
+		applyParameterPlaceholders(querySb); //question placeholder put here
 
 		//handle dynamic recipient label
 		applyDynamicRecipient(querySb);
