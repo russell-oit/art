@@ -28,26 +28,11 @@ public abstract class DashboardItem implements Serializable {
 
 	//https://stackoverflow.com/questions/4452941/why-not-serialize-abstract-classes-in-java
 	private static final long serialVersionUID = 1L;
-	private String id;
 	private String url;
 	private String title;
 	private boolean executeOnLoad;
 	private int refreshPeriodSeconds;
 	private int index;
-
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	/**
 	 * @return the url

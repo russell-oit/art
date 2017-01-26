@@ -26,6 +26,7 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
 		<!-- include tooltipster resources for chart tooltips -->
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
@@ -66,5 +67,12 @@
 		</div>
 
 		<jsp:include page="/WEB-INF/jsp/footer.jsp"/>
+
+		<script type="text/javascript">
+			//https://blogs.msdn.microsoft.com/ukadc/2010/02/12/handling-errors-with-jquery-load/
+			$(document).ajaxError(function (event, xhr, options) {
+				ajaxErrorHandler(xhr);
+			});
+		</script>
 	</body>
 </html>

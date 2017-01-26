@@ -106,8 +106,16 @@
 		//https://stackoverflow.com/questions/351495/dynamically-creating-keys-in-javascript-associative-array
 		var intervalIds = {};
 
-	<c:forEach var="column" items="${dashboard.columns}">
-		<c:forEach var="portlet" items="${column}">
+	<c:choose>
+		<c:when test="${dashboard.tabList == null}">
+			<c:set var="items" value="${dashboard.allPortlets}"/>
+		</c:when>
+		<c:otherwise>
+			<c:set var="items" value="${dashboard.tabList.allItems}"/>
+		</c:otherwise>
+	</c:choose>
+
+	<c:forEach var="portlet" items="${items}">
 		var contentDivId = "#portletContent_${portlet.index}";
 		var portletUrl = "${portlet.url}";
 
@@ -128,7 +136,6 @@
 
 			intervalIds[contentDivId] = intervalId;
 		}
-		</c:forEach>
 	</c:forEach>
 
 		$('body').on('click', '.toggle', function () {

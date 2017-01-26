@@ -18,6 +18,7 @@
 package art.dashboard;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ import java.util.List;
 public class DashboardTabList implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private int defaultTab = 1;
+	private int defaultTab;
 	private List<DashboardTab> tabs;
 
 	/**
@@ -58,5 +59,15 @@ public class DashboardTabList implements Serializable {
 	 */
 	public void setTabs(List<DashboardTab> tabs) {
 		this.tabs = tabs;
+	}
+
+	public List<DashboardItem> getAllItems() {
+		List<DashboardItem> allItems = new ArrayList<>();
+		
+		for (DashboardTab tab : tabs) {
+			allItems.addAll(tab.getItems());
+		}
+
+		return allItems;
 	}
 }

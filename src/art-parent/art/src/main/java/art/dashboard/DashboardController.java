@@ -26,6 +26,8 @@ import art.runreport.ParameterProcessorResult;
 import art.runreport.RunReportHelper;
 import art.user.User;
 import art.utils.XmlParser;
+import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.SQLException;
@@ -38,6 +40,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -49,6 +58,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Controller for displaying a dashboard report
@@ -67,6 +82,8 @@ public class DashboardController {
 	private MessageSource messageSource;
 
 	private final int PORTLET_NO_REFRESH_SETTING = -1; //also used in showDashboardInline.jsp and showGridstackDashboardInline.jsp
+	private XPath xPath;
+	private Element rootNode;
 
 	@RequestMapping(value = "/app/showDashboard", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showDashboard(@RequestParam("reportId") Integer reportId,
@@ -115,7 +132,9 @@ public class DashboardController {
 			}
 
 			model.addAttribute("reportName", report.getName());
-		} catch (SQLException | RuntimeException | UnsupportedEncodingException | ParseException ex) {
+		} catch (SQLException | RuntimeException
+				| ParseException | IOException | SAXException
+				| ParserConfigurationException | XPathExpressionException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
 			return errorPage;
@@ -149,11 +168,19 @@ public class DashboardController {
 	 * @throws UnsupportedEncodingException
 	 * @throws SQLException
 	 * @throws ParseException
+	 * @throws javax.xml.parsers.ParserConfigurationException
+	 * @throws org.xml.sax.SAXException
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
 	private Dashboard buildDashboard(Report report, HttpServletRequest request,
-			Locale locale) throws UnsupportedEncodingException, ParseException, SQLException {
+			Locale locale) throws UnsupportedEncodingException, ParseException,
+			SQLException, ParserConfigurationException, IOException,
+			SAXException, IllegalArgumentException, XPathExpressionException {
 
 		logger.debug("Entering buildDashboard");
+
+		String dashboardXml = report.getReportSource();
+		logger.debug("dashboardXml='{}'", dashboardXml);
 
 		Dashboard dashboard = new Dashboard();
 
@@ -162,37 +189,46 @@ public class DashboardController {
 		dashboard.setTitle(dashboardTitle);
 		dashboard.setDescription(report.getDescription());
 
-		String dashboardXml = report.getReportSource();
-		logger.debug("dashboardXml='{}'", dashboardXml);
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document document = builder.parse(new InputSource(new StringReader(dashboardXml)));
+		rootNode = document.getDocumentElement();
 
-		List<String> columnsXml = XmlParser.getXmlElementValues(dashboardXml, "COLUMN");
+		xPath = XPathFactory.newInstance().newXPath();
+
+		NodeList columnNodes = (NodeList) xPath.evaluate("COLUMN", rootNode, XPathConstants.NODESET);
 
 		List<List<Portlet>> dashboardColumns = new ArrayList<>();
 		Map<Integer, DashboardItem> itemsMap = new HashMap<>();
 
 		int itemIndex = 0;
 		int columnIndex = 0;
-		for (String columnXml : columnsXml) {
+		for (int i = 0; i < columnNodes.getLength(); i++) {
 			columnIndex++;
-			logger.debug("columnXml='{}'", columnXml);
+
+			Node columnNode = columnNodes.item(i);
 
 			List<Portlet> columnPortlets = new ArrayList<>();
-			String columnSize = XmlParser.getXmlElementValue(columnXml, "SIZE");
+
+			String columnSize = xPath.evaluate("SIZE", columnNode);
 			logger.debug("columnSize='{}'", columnSize);
-			if (columnSize == null) {
+
+			if (StringUtils.isBlank(columnSize)) {
 				columnSize = "auto";
 			}
 
-			List<String> portletsXml = XmlParser.getXmlElementValues(columnXml, "PORTLET");
-			for (String portletXml : portletsXml) {
+			NodeList portletNodes = (NodeList) xPath.evaluate("PORTLET", columnNode, XPathConstants.NODESET);
+			for (int j = 0; j < portletNodes.getLength(); j++) {
 				itemIndex++;
-				logger.debug("portletXml='{}'", portletXml);
+
+				Node portletNode = portletNodes.item(j);
 
 				Portlet portlet = new Portlet();
+
 				portlet.setIndex(itemIndex);
 				portlet.setColumnIndex(columnIndex);
 
-				setPortletProperties(portlet, portletXml, request, locale, columnSize);
+				setPortletProperties(portlet, portletNode, request, locale, columnSize);
 
 				columnPortlets.add(portlet);
 
@@ -204,21 +240,44 @@ public class DashboardController {
 
 		dashboard.setColumns(dashboardColumns);
 
-		String tabListXml = XmlParser.getXmlElementValue(dashboardXml, "TABLIST");
-		if (tabListXml != null) {
-			DashboardTabList tabList = new DashboardTabList();
+		setDashboardTabs(itemsMap, dashboard);
 
+		return dashboard;
+	}
+
+	/**
+	 * Populates the dashboard tablist according to the defined xml. If no
+	 * TABLIST is defined in the dashboard xml, the tablist will be null.
+	 *
+	 * @param itemsMap the map containing the dashboard's items
+	 * @param dashboard the dashboard object to populate
+	 * @throws IllegalArgumentException
+	 */
+	private void setDashboardTabs(Map<Integer, DashboardItem> itemsMap,
+			AbstractDashboard dashboard) throws IllegalArgumentException, XPathExpressionException {
+
+		logger.debug("Entering setDashboardTabs");
+
+		Node tabListNode = (Node) xPath.evaluate("TABLIST", rootNode, XPathConstants.NODE);
+		if (tabListNode != null) {
+			DashboardTabList tabList = new DashboardTabList();
 			List<DashboardTab> tabs = new ArrayList<>();
-			List<String> tabsXml = XmlParser.getXmlElementValues(tabListXml, "TAB");
-			for (String tabXml : tabsXml) {
+
+			NodeList tabNodes = (NodeList) xPath.evaluate("TAB", tabListNode, XPathConstants.NODESET);
+			for (int i = 0; i < tabNodes.getLength(); i++) {
+				Node tabNode = tabNodes.item(i);
+
 				DashboardTab tab = new DashboardTab();
 
-				String title = XmlParser.getXmlElementValue(tabXml, "TITLE");
+				String title = xPath.evaluate("TITLE", tabNode);
 				tab.setTitle(title);
 
 				List<DashboardItem> items = new ArrayList<>();
-				List<String> itemsXml = XmlParser.getXmlElementValues(tabXml, "ITEM");
-				for (String itemIndexString : itemsXml) {
+				NodeList itemNodes = (NodeList) xPath.evaluate("ITEM/text()", tabNode, XPathConstants.NODESET);
+				//https://stackoverflow.com/questions/27604529/getting-the-text-content-of-an-xml-element-without-getting-the-text-content-of-i
+				for (int j = 0; j < itemNodes.getLength(); j++) {
+					Node itemNode = itemNodes.item(j);
+					String itemIndexString = itemNode.getNodeValue();
 					int tabItemIndex = Integer.parseInt(itemIndexString);
 					DashboardItem item = itemsMap.get(tabItemIndex);
 					if (item == null) {
@@ -235,12 +294,13 @@ public class DashboardController {
 			tabList.setTabs(tabs);
 
 			int defaultTab;
-			String defaultTabString = XmlParser.getXmlElementValue(tabListXml, "DEFAULTTAB");
+			String defaultTabString = xPath.evaluate("TABLIST/DEFAULTTAB", rootNode);
 			if (StringUtils.isBlank(defaultTabString)) {
-				defaultTab = 1;
+				final int FIRST_TAB_INDEX = 1;
+				defaultTab = FIRST_TAB_INDEX;
 			} else {
 				defaultTab = Integer.parseInt(defaultTabString);
-				if (defaultTab < 0 || defaultTab > tabsXml.size()) {
+				if (defaultTab < 0 || defaultTab > tabNodes.getLength()) {
 					throw new IllegalArgumentException("Invalid default tab: " + defaultTab);
 				}
 			}
@@ -248,38 +308,36 @@ public class DashboardController {
 
 			dashboard.setTabList(tabList);
 		}
-
-		return dashboard;
 	}
 
 	/**
 	 * Sets the properties of a dashboard portlet
 	 *
 	 * @param portlet the portlet object to set
-	 * @param portletXml the portlet's xml
+	 * @param portletNode the portlet's node
 	 * @param request the http request
 	 * @param locale the locale being used
 	 * @param columnSize the size setting of the column
 	 * @throws UnsupportedEncodingException
 	 * @throws ParseException
-	 * @throws SQLException
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	private void setPortletProperties(Portlet portlet, String portletXml,
+	private void setPortletProperties(Portlet portlet, Node portletNode,
 			HttpServletRequest request, Locale locale, String columnSize)
-			throws UnsupportedEncodingException, ParseException, SQLException {
+			throws UnsupportedEncodingException, ParseException, XPathExpressionException {
 
 		logger.debug("Entering setPortletProperties");
 
-		int refreshPeriodSeconds = getPortletRefreshPeriod(portletXml);
+		int refreshPeriodSeconds = getPortletRefreshPeriod(portletNode);
 		portlet.setRefreshPeriodSeconds(refreshPeriodSeconds);
 
-		String url = getPortletUrl(portletXml, request);
+		String url = getPortletUrl(portletNode, request);
 		portlet.setUrl(url);
 
-		boolean executeOnLoad = getPortletExecuteOnLoad(portletXml);
+		boolean executeOnLoad = getPortletExecuteOnLoad(portletNode);
 		portlet.setExecuteOnLoad(executeOnLoad);
 
-		String title = getPortletTitle(portletXml, request, executeOnLoad, refreshPeriodSeconds, locale);
+		String title = getPortletTitle(portletNode, request, executeOnLoad, refreshPeriodSeconds, locale);
 		portlet.setTitle(title);
 
 		String classNamePrefix = getPortletClassNamePrefix(columnSize);
@@ -290,23 +348,23 @@ public class DashboardController {
 	 * Returns the refresh period in seconds for a portlet, or -1 for no
 	 * automatic refresh
 	 *
-	 * @param portletXml the portlet's xml
+	 * @param itemNode the portlet's node
 	 * @return the refresh period in seconds for a portlet, or -1 for no
 	 * automatic refresh
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	private int getPortletRefreshPeriod(String portletXml) {
+	private int getPortletRefreshPeriod(Node itemNode) throws XPathExpressionException {
 		logger.debug("Entering getPortletRefreshPeriod");
 
-		String value = XmlParser.getXmlElementValue(portletXml, "REFRESH"); //specified in seconds
+		String value = xPath.evaluate("REFRESH", itemNode); //specified in seconds
 
 		int refreshPeriodSeconds;
-
-		final int MINIMUM_REFRESH_SECONDS = 5;
 
 		if (StringUtils.isBlank(value)) {
 			refreshPeriodSeconds = PORTLET_NO_REFRESH_SETTING;
 		} else {
 			refreshPeriodSeconds = Integer.parseInt(value);
+			final int MINIMUM_REFRESH_SECONDS = 5;
 			if (refreshPeriodSeconds < MINIMUM_REFRESH_SECONDS) {
 				throw new IllegalArgumentException("Refresh setting less than minimum. Setting="
 						+ refreshPeriodSeconds + ", Minimum=5");
@@ -319,39 +377,41 @@ public class DashboardController {
 	/**
 	 * Returns the url to use for a portlet's data
 	 *
-	 * @param portletXml the portlet's xml
+	 * @param itemNode the portlet's node
 	 * @param request
 	 * @return the url to use for the portlet's data
 	 * @throws UnsupportedEncodingException
-	 * @throws SQLException
-	 * @throws ParseException
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	private String getPortletUrl(String portletXml, HttpServletRequest request)
-			throws UnsupportedEncodingException {
+	public String getPortletUrl(Node itemNode, HttpServletRequest request)
+			throws UnsupportedEncodingException, XPathExpressionException {
 
 		logger.debug("Entering getPortletUrl");
 
 		String url;
 
-		// Get the portlet xml info
-		url = XmlParser.getXmlElementValue(portletXml, "OBJECTID");
+		//string returning form of xpath.evaluate() returns empty string if tag is not found
+		//if require null, pass QName e.g. XPathConstants.NODE
+		//https://stackoverflow.com/questions/17390684/jaxp-xpath-1-0-or-2-0-how-to-distinguish-empty-strings-from-non-existent-value
+		//https://stackoverflow.com/questions/1985234/string-javax-xml-xpath-xpathexpression-evaluateobject-item-guarantees-it-never
+		//allow use of OBJECTID tag (legacy)
+		String reportIdString = xPath.evaluate("OBJECTID", itemNode);
 
-		//allow use of QUERYID tag
-		if (url == null) {
-			url = XmlParser.getXmlElementValue(portletXml, "QUERYID");
+		//allow use of QUERYID tag (legacy)
+		if (StringUtils.isBlank(reportIdString)) {
+			reportIdString = xPath.evaluate("QUERYID", itemNode);
 		}
 
-		//allow use of REPORTID tag
-		if (url == null) {
-			url = XmlParser.getXmlElementValue(portletXml, "REPORTID");
+		//allow use of REPORTID tag (3.0+)
+		if (StringUtils.isBlank(reportIdString)) {
+			reportIdString = xPath.evaluate("REPORTID", itemNode);
 		}
 
-		if (url == null) {
+		if (StringUtils.isBlank(reportIdString)) {
 			//no report defined. use url tag
-			url = XmlParser.getXmlElementValue(portletXml, "URL");
+			url = xPath.evaluate("URL", itemNode);
 		} else {
-			// context path as suffix + build url + switch off html header&footer 
-			int reportId = Integer.parseInt(url);
+			int reportId = Integer.parseInt(reportIdString);
 
 			url = request.getContextPath() + "/app/runReport.do?reportId=" + reportId
 					+ "&isFragment=true";
@@ -379,17 +439,22 @@ public class DashboardController {
 	/**
 	 * Returns the portlet's on-load setting
 	 *
-	 * @param portletXml the portlet's xml
+	 * @param itemNode the portlet's node
 	 * @return the portlet's on-load setting
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	private boolean getPortletExecuteOnLoad(String portletXml) {
+	private boolean getPortletExecuteOnLoad(Node itemNode) throws XPathExpressionException {
 		logger.debug("Entering getPortletExecuteOnLoad");
 
-		String value = XmlParser.getXmlElementValue(portletXml, "ONLOAD");
+		String value = xPath.evaluate("ONLOAD", itemNode);
 
-		boolean executeOnLoad = true;
+		boolean executeOnLoad;
+		//can't use BooleanUtils.toBoolean() or Boolean.parseBoolean() because missing tag/empty string means true
+		//these methods would evaluate empty string as false
 		if (StringUtils.equalsIgnoreCase(value, "false")) {
 			executeOnLoad = false;
+		} else {
+			executeOnLoad = true;
 		}
 
 		return executeOnLoad;
@@ -398,19 +463,21 @@ public class DashboardController {
 	/**
 	 * Return's the portlet's title string
 	 *
-	 * @param portletXml the portlet's xml
+	 * @param itemNode the portlet's node
 	 * @param request
 	 * @param executeOnLoad whether to execute the portlet on load
 	 * @param refreshPeriodSeconds the portlet's refresh period setting
 	 * @param locale
 	 * @return the portlet's title string
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	private String getPortletTitle(String portletXml, HttpServletRequest request,
-			boolean executeOnLoad, int refreshPeriodSeconds, Locale locale) {
+	private String getPortletTitle(Node itemNode, HttpServletRequest request,
+			boolean executeOnLoad, int refreshPeriodSeconds, Locale locale)
+			throws XPathExpressionException {
 
 		logger.debug("Entering getPortletTitle");
 
-		String title = XmlParser.getXmlElementValue(portletXml, "TITLE");
+		String title = xPath.evaluate("TITLE", itemNode);
 
 		String contextPath = request.getContextPath();
 		if (!executeOnLoad) {
@@ -425,6 +492,7 @@ public class DashboardController {
 					+ messageSource.getMessage("portlets.text.seconds", null, locale)
 					+ "'/> <small>" + refreshPeriodSeconds + "s</small>";
 		}
+
 		return title;
 	}
 
@@ -453,9 +521,14 @@ public class DashboardController {
 	 * @throws SQLException
 	 * @throws ParseException
 	 * @throws UnsupportedEncodingException
+	 * @throws org.xml.sax.SAXException
+	 * @throws javax.xml.parsers.ParserConfigurationException
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
 	private GridstackDashboard buildGridstackDashboard(Report report, HttpServletRequest request,
-			Locale locale) throws SQLException, ParseException, UnsupportedEncodingException {
+			Locale locale) throws SQLException, ParseException, UnsupportedEncodingException,
+			SAXException, IOException, ParserConfigurationException, IllegalArgumentException,
+			XPathExpressionException {
 
 		logger.debug("Entering buildGridstackDashboard: Report={}", report);
 
@@ -469,24 +542,41 @@ public class DashboardController {
 		dashboard.setTitle(dashboardTitle);
 		dashboard.setDescription(report.getDescription());
 
-		setGridstackDashboardProperties(dashboardXml, dashboard);
+		//https://stackoverflow.com/questions/773012/getting-xml-node-text-value-with-java-dom
+		//https://stackoverflow.com/questions/4076910/how-to-retrieve-element-value-of-xml-using-java
+		//http://www.w3schools.com/xml/xpath_intro.asp
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document document = builder.parse(new InputSource(new StringReader(dashboardXml)));
+		rootNode = document.getDocumentElement();
+
+		xPath = XPathFactory.newInstance().newXPath();
+
+		setGridstackDashboardProperties(dashboard);
 
 		List<GridstackItem> items = new ArrayList<>();
-		List<String> itemsXml = XmlParser.getXmlElementValues(dashboardXml, "ITEM");
+		Map<Integer, DashboardItem> itemsMap = new HashMap<>();
+
+		NodeList itemNodes = (NodeList) xPath.evaluate("ITEM", rootNode, XPathConstants.NODESET);
 		int itemIndex = 0;
-		for (String itemXml : itemsXml) {
+		for (int i = 0; i < itemNodes.getLength(); i++) {
 			itemIndex++;
-			logger.debug("itemXml='{}'", itemXml);
+
+			Node itemNode = itemNodes.item(i);
 
 			GridstackItem item = new GridstackItem();
 			item.setIndex(itemIndex);
 
-			setGridstackItemProperties(item, itemXml, request, locale);
+			setGridstackItemProperties(item, itemNode, request, locale);
 
 			items.add(item);
+
+			itemsMap.put(item.getIndex(), item);
 		}
 
 		dashboard.setItems(items);
+
+		setDashboardTabs(itemsMap, dashboard);
 
 		return dashboard;
 	}
@@ -495,76 +585,115 @@ public class DashboardController {
 	 * Sets the properties of a gridstack item
 	 *
 	 * @param item the gridstack item
-	 * @param itemXml the item's xml
+	 * @param itemNode the item's node
 	 * @param request the http request
 	 * @param locale the locale being used
 	 * @throws UnsupportedEncodingException
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	private void setGridstackItemProperties(GridstackItem item, String itemXml,
+	private void setGridstackItemProperties(GridstackItem item, Node itemNode,
 			HttpServletRequest request, Locale locale)
-			throws UnsupportedEncodingException {
+			throws UnsupportedEncodingException, XPathExpressionException {
 
 		logger.debug("Entering setGridstackItemProperties");
 
-		int refreshPeriodSeconds = getPortletRefreshPeriod(itemXml);
+		int refreshPeriodSeconds = getPortletRefreshPeriod(itemNode);
 		item.setRefreshPeriodSeconds(refreshPeriodSeconds);
 
-		String url = getPortletUrl(itemXml, request);
+		String url = getPortletUrl(itemNode, request);
 		item.setUrl(url);
 
-		boolean executeOnLoad = getPortletExecuteOnLoad(itemXml);
+		boolean executeOnLoad = getPortletExecuteOnLoad(itemNode);
 		item.setExecuteOnLoad(executeOnLoad);
 
-		String title = getPortletTitle(itemXml, request, executeOnLoad, refreshPeriodSeconds, locale);
+		String title = getPortletTitle(itemNode, request, executeOnLoad, refreshPeriodSeconds, locale);
 		item.setTitle(title);
 
-		int xPosition = getGridstackItemXPosition(itemXml);
+		String xPositionString = xPath.evaluate("XPOSITION", itemNode);
+		int xPosition = Integer.parseInt(xPositionString);
 		item.setxPosition(xPosition);
 
-		int yPosition = getGridstackItemYPosition(itemXml);
+		String yPositionString = xPath.evaluate("YPOSITION", itemNode);
+		int yPosition = Integer.parseInt(yPositionString);
 		item.setyPosition(yPosition);
 
-		int width = getGridstackItemWidth(itemXml);
+		String widthString = xPath.evaluate("WIDTH", itemNode);
+		int width = Integer.parseInt(widthString);
 		item.setWidth(width);
 
-		int height = getGridstackItemHeight(itemXml);
+		String heightString = xPath.evaluate("HEIGHT", itemNode);
+		int height = Integer.parseInt(heightString);
 		item.setHeight(height);
 
-		boolean noResize = getGridstackItemNoResizeSetting(itemXml);
+		String noResizeString = xPath.evaluate("NORESIZE", itemNode);
+		boolean noResize = BooleanUtils.toBoolean(noResizeString);
 		item.setNoResize(noResize);
 
-		boolean noMove = getGridstackItemNoMoveSetting(itemXml);
+		String noMoveString = xPath.evaluate("NOMOVE", itemNode);
+		boolean noMove = BooleanUtils.toBoolean(noMoveString);
 		item.setNoMove(noMove);
 
-		boolean autoposition = getGridstackItemAutopositionSetting(itemXml);
+		String autopositionString = xPath.evaluate("AUTOPOSITION", itemNode);
+		boolean autoposition = BooleanUtils.toBoolean(autopositionString);
 		item.setAutoposition(autoposition);
 
-		boolean locked = getGridstackItemLockedSetting(itemXml);
+		String lockedString = xPath.evaluate("LOCKED", itemNode);
+		boolean locked = BooleanUtils.toBoolean(lockedString);
 		item.setLocked(locked);
 
-		int minWidth = getGridstackItemMinWidth(itemXml);
+		int minWidth;
+		String minWidthString = xPath.evaluate("MINWIDTH", itemNode);
+		if (StringUtils.isBlank(minWidthString)) {
+			final int DEFAULT_MIN_WIDTH = 0; //also used in showGridstackDashboardInline.jsp
+			minWidth = DEFAULT_MIN_WIDTH;
+		} else {
+			minWidth = Integer.parseInt(minWidthString);
+		}
 		item.setMinWidth(minWidth);
 
-		int minHeight = getGridstackItemMinHeight(itemXml);
+		int minHeight;
+		String minHeightString = xPath.evaluate("MINHEIGHT", itemNode);
+		if (StringUtils.isBlank(minHeightString)) {
+			final int DEFAULT_MIN_HEIGHT = 0; //also used in showGridstackDashboardInline.jsp
+			minHeight = DEFAULT_MIN_HEIGHT;
+		} else {
+			minHeight = Integer.parseInt(minHeightString);
+		}
 		item.setMinHeight(minHeight);
 
-		int maxWidth = getGridstackItemMaxWidth(itemXml);
+		int maxWidth;
+		String maxWidthString = xPath.evaluate("MAXWIDTH", itemNode);
+		if (StringUtils.isBlank(maxWidthString)) {
+			final int DEFAULT_MAX_WIDTH = 0; //also used in showGridstackDashboardInline.jsp
+			maxWidth = DEFAULT_MAX_WIDTH;
+		} else {
+			maxWidth = Integer.parseInt(maxWidthString);
+		}
 		item.setMaxWidth(maxWidth);
 
-		int maxHeight = getGridstackItemMaxHeight(itemXml);
+		int maxHeight;
+		String maxHeightString = xPath.evaluate("MAXHEIGHT", itemNode);
+		if (StringUtils.isBlank(maxHeightString)) {
+			final int DEFAULT_MAX_HEIGHT = 0; //also used in showGridstackDashboardInline.jsp
+			maxHeight = DEFAULT_MAX_HEIGHT;
+		} else {
+			maxHeight = Integer.parseInt(maxHeightString);
+		}
 		item.setMaxHeight(maxHeight);
 	}
 
 	/**
 	 * Sets the properties of the overall gridstack grid
 	 *
-	 * @param dashboardXml complete dashboard xml
 	 * @param dashboard dashboard object whose properties will be set
+	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
-	private void setGridstackDashboardProperties(String dashboardXml, GridstackDashboard dashboard) {
+	private void setGridstackDashboardProperties(GridstackDashboard dashboard)
+			throws XPathExpressionException {
+
 		logger.debug("Entering setGridstackDashboardProperties");
 
-		String dashboardWidthString = XmlParser.getXmlElementValue(dashboardXml, "DASHBOARDWIDTH");
+		String dashboardWidthString = xPath.evaluate("DASHBOARDWIDTH", rootNode);
 		logger.debug("dashboardWidthString='{}'", dashboardWidthString);
 
 		int dashboardWidth;
@@ -576,29 +705,29 @@ public class DashboardController {
 		}
 		dashboard.setWidth(dashboardWidth);
 
-		String floatEnabledString = XmlParser.getXmlElementValue(dashboardXml, "FLOAT");
+		String floatEnabledString = xPath.evaluate("FLOAT", rootNode);
 		logger.debug("floatEnabledString='{}'", floatEnabledString);
 		//use boolean utils to allow use of "yes" and "on" in addition to "true" (case insensitive)
 		//Boolean.parseBoolean() only allows "true" (case insensitive)
 		boolean floatEnabled = BooleanUtils.toBoolean(floatEnabledString);
 		dashboard.setFloatEnabled(floatEnabled);
 
-		String animateString = XmlParser.getXmlElementValue(dashboardXml, "ANIMATE");
+		String animateString = xPath.evaluate("ANIMATE", rootNode);
 		logger.debug("animateString='{}'", animateString);
 		boolean animate = BooleanUtils.toBoolean(animateString);
 		dashboard.setAnimate(animate);
 
-		String disableDragString = XmlParser.getXmlElementValue(dashboardXml, "DISABLEDRAG");
+		String disableDragString = xPath.evaluate("DISABLEDRAG", rootNode);
 		logger.debug("disableDragString='{}'", disableDragString);
 		boolean disableDrag = BooleanUtils.toBoolean(disableDragString);
 		dashboard.setDisableDrag(disableDrag);
 
-		String disableResizeString = XmlParser.getXmlElementValue(dashboardXml, "DISABLERESIZE");
+		String disableResizeString = xPath.evaluate("DISABLERESIZE", rootNode);
 		logger.debug("disableResizeString='{}'", disableResizeString);
 		boolean disableResize = BooleanUtils.toBoolean(disableResizeString);
 		dashboard.setDisableResize(disableResize);
 
-		String cellHeight = XmlParser.getXmlElementValue(dashboardXml, "CELLHEIGHT");
+		String cellHeight = xPath.evaluate("CELLHEIGHT", rootNode);
 		logger.debug("cellHeight='{}'", cellHeight);
 		if (StringUtils.isBlank(cellHeight)) {
 			final String DEFAULT_CELL_HEIGHT = "60px";
@@ -606,7 +735,7 @@ public class DashboardController {
 		}
 		dashboard.setCellHeight(cellHeight);
 
-		String verticalMargin = XmlParser.getXmlElementValue(dashboardXml, "VERTICALMARGIN");
+		String verticalMargin = xPath.evaluate("VERTICALMARGIN", rootNode);
 		logger.debug("verticalMargin='{}'", verticalMargin);
 		if (StringUtils.isBlank(verticalMargin)) {
 			final String DEFAULT_VERTICAL_MARGIN = "20px";
@@ -614,12 +743,12 @@ public class DashboardController {
 		}
 		dashboard.setVerticalMargin(verticalMargin);
 
-		String alwaysShowResizeHandleString = XmlParser.getXmlElementValue(dashboardXml, "ALWAYSSHOWRESIZEHANDLE");
+		String alwaysShowResizeHandleString = xPath.evaluate("ALWAYSSHOWRESIZEHANDLE", rootNode);
 		logger.debug("alwaysShowResizeHandleString='{}'", alwaysShowResizeHandleString);
 		boolean alwaysShowResizeHandle = BooleanUtils.toBoolean(alwaysShowResizeHandleString);
 		dashboard.setAlwaysShowResizeHandle(alwaysShowResizeHandle);
 
-		String dashboardHeightString = XmlParser.getXmlElementValue(dashboardXml, "DASHBOARDHEIGHT");
+		String dashboardHeightString = xPath.evaluate("DASHBOARDHEIGHT", rootNode);
 		logger.debug("dashboardHeightString='{}'", dashboardHeightString);
 		int dashboardHeight;
 		if (StringUtils.isBlank(dashboardHeightString)) {
@@ -662,13 +791,13 @@ public class DashboardController {
 	/**
 	 * Returns the gridstack item's x position
 	 *
-	 * @param itemXml the item's xml
+	 * @param itemNode the item's node
 	 * @return the gridstack item's x position
 	 */
-	private int getGridstackItemXPosition(String itemXml) {
+	private int getGridstackItemXPosition(Node itemNode) throws XPathExpressionException {
 		logger.debug("Entering getGridstackItemXPosition");
 
-		String xPositionString = XmlParser.getXmlElementValue(itemXml, "XPOSITION");
+		String xPositionString = xPath.evaluate("XPOSITION", itemNode);
 		int xPosition = Integer.parseInt(xPositionString);
 
 		return xPosition;

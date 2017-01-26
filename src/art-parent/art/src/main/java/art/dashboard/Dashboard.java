@@ -17,7 +17,7 @@
  */
 package art.dashboard;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,5 +42,15 @@ public class Dashboard extends AbstractDashboard {
 	 */
 	public void setColumns(List<List<Portlet>> columns) {
 		this.columns = columns;
+	}
+
+	public List<Portlet> getAllPortlets() {
+		List<Portlet> allPortlets = new ArrayList<>();
+
+		for (List<Portlet> column : columns) {
+			allPortlets.addAll(column);
+		}
+
+		return allPortlets;
 	}
 }
