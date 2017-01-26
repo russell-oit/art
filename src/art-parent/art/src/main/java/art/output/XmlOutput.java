@@ -21,7 +21,7 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import java.util.Date;
 import java.util.List;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.owasp.encoder.Encode;
 
 /**
  * Generates xml output
@@ -31,16 +31,16 @@ import org.apache.commons.lang3.StringEscapeUtils;
  */
 public class XmlOutput extends StandardOutput {
 
-    @Override
-    public String getContentType() {
-        return "application/xml"; // mime type (use "text/html" for html)
-    }
-	
 	@Override
-	public boolean outputHeaderandFooter(){
+	public String getContentType() {
+		return "application/xml"; // mime type (use "text/html" for html)
+	}
+
+	@Override
+	public boolean outputHeaderandFooter() {
 		return false;
 	}
-	
+
 	@Override
 	public void init() {
 		out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -59,8 +59,8 @@ public class XmlOutput extends StandardOutput {
 			String paramLabel = reportParam.getParameter().getLabel();
 			String displayValues = reportParam.getDisplayValues();
 
-			String outputString = "<name>" + StringEscapeUtils.escapeXml10(paramLabel)
-					+ "</name><value>" + StringEscapeUtils.escapeXml10(displayValues) + "<value>";
+			String outputString = "<name>" + Encode.forXml(paramLabel)
+					+ "</name><value>" + Encode.forXml(displayValues) + "<value>";
 
 			out.println("<param>");
 			out.println(outputString);
@@ -99,7 +99,8 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<col type=\"header\">" + StringEscapeUtils.escapeXml10(value) + "</col>");
+		String escapedValue = Encode.forXml(value);
+		out.println("<col type=\"header\">" + escapedValue + "</col>");
 	}
 
 	@Override
@@ -109,7 +110,8 @@ public class XmlOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
-		out.println("<col type=\"string\">" + StringEscapeUtils.escapeXml10(value) + "</col>");
+		String escapedValue = Encode.forXml(value);
+		out.println("<col type=\"string\">" + escapedValue + "</col>");
 	}
 
 	@Override
@@ -121,25 +123,29 @@ public class XmlOutput extends StandardOutput {
 		} else {
 			formattedValue = String.valueOf(value);
 		}
+		
+		String escapedFormattedValue = Encode.forXml(formattedValue);
 
-		out.println("<col type=\"numeric\">" + formattedValue + "</col>");
+		out.println("<col type=\"numeric\">" + escapedFormattedValue + "</col>");
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
-		out.println("<col type=\"numeric\">" + formattedValue + "</col>");
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"numeric\">" + escapedFormattedValue + "</col>");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue=Config.getIsoDateDisplayString(value);
-		
-		out.println("<col type=\"date\">" + formattedValue + "</col>");
+		String formattedValue = Config.getIsoDateDisplayString(value);
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
-		out.println("<col type=\"date\">" + formattedValue + "</col>");
+		String escapedFormattedValue = Encode.forXml(formattedValue);
+		out.println("<col type=\"date\">" + escapedFormattedValue + "</col>");
 	}
 
 	@Override
@@ -152,14 +158,14 @@ public class XmlOutput extends StandardOutput {
 		//open new row
 		out.println("<row>");
 	}
-	
+
 	@Override
-	public void endRow(){
+	public void endRow() {
 		out.println("</row>");
 	}
-	
+
 	@Override
-	public void beginTotalRow(){
+	public void beginTotalRow() {
 		out.println("<row>");
 	}
 

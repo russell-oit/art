@@ -17,6 +17,7 @@
 package art.output;
 
 import java.util.Date;
+import org.owasp.encoder.Encode;
 
 /**
  * Generates Grid html output mode
@@ -45,12 +46,14 @@ public class HtmlGridOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<th>" + value + "</th>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<th>" + escapedValue + "</th>");
 	}
 
 	@Override
 	public void addHeaderCellAlignLeft(String value) {
-		out.println("<th style='text-align: left'>" + value + "</th>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<th style='text-align: left'>" + escapedValue + "</th>");
 	}
 
 	@Override
@@ -66,37 +69,46 @@ public class HtmlGridOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
-		out.println("<td style='text-align: left'>" + value + "</td>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
 		String sortValue = getNumericSortValue(value);
+		
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
 
 		out.println("<td style='text-align: right' sorttable_customkey='"
-				+ sortValue + "' >" + formattedValue + "</td>");
+				+ escapedSortValue + "' >" + escapedFormattedValue + "</td>");
 	}
 	
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue){
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
 		out.println("<td style='text-align: right' sorttable_customkey='"
-				+ sortValue + "' >" + formattedValue + "</td>");
+				+ escapedSortValue + "' >" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
 		long sortValue = getDateSortValue(value);
+		
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
 		out.println("<td style='text-align: left' sorttable_customkey='"
-				+ sortValue + "'>" + formattedValue + "</td>");
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 		out.println("<td style='text-align: left' sorttable_customkey='"
-				+ sortValue + "'>" + formattedValue + "</td>");
+				+ sortValue + "'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override

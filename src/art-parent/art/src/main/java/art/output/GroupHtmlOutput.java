@@ -21,6 +21,7 @@ import art.servlets.Config;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import org.owasp.encoder.Encode;
 
 /**
  * Generates group html reports
@@ -55,8 +56,9 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param value the value to output
 	 */
     private void addCellToMainHeader(String value) {
+		String escapedValue = Encode.forHtmlContent(value);
         mainHeader.append("<td>");
-        mainHeader.append(value);
+        mainHeader.append(escapedValue);
         mainHeader.append("</td>");
     }
 
@@ -66,8 +68,9 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param value the value to output
 	 */
     private void addCellToSubHeader(String value) {
+		String escapedValue = Encode.forHtmlContent(value);
         subHeader.append("<td>");
-        subHeader.append(value);
+        subHeader.append(escapedValue);
         subHeader.append("</td>");
     }
 
@@ -102,7 +105,8 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param value the value to output
 	 */
     private void addCellToLine(String value) {
-        out.println("<td class='data'>" + value + "</td>");
+		String escapedValue = Encode.forHtmlContent(value);
+        out.println("<td class='data'>" + escapedValue + "</td>");
     }
 
 	/**
@@ -112,7 +116,8 @@ public class GroupHtmlOutput extends GroupOutput {
 	 * @param numOfCells 
 	 */
     private void addErrorCell(String value, int numOfCells) {
-        out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + value + "</td>");
+		String escapedValue = Encode.forHtmlContent(value);
+        out.println("<td colspan='" + numOfCells + "' class='qeattr' align='left'>" + escapedValue + "</td>");
     }
 
 	/**

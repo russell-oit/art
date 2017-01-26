@@ -21,6 +21,7 @@ import art.reportparameter.ReportParameter;
 import art.utils.ArtUtils;
 import java.util.Date;
 import java.util.List;
+import org.owasp.encoder.Encode;
 
 /**
  * Generates plain html output. Can be used for jobs because the output does not
@@ -56,20 +57,24 @@ public class HtmlPlainOutput extends StandardOutput {
 				+ "\n</style>");
 
 	}
-	
+
 	@Override
 	public void addTitle() {
 		if (!fileOutput) {
 			return;
 		}
-		
+
 		out.println("<div align='center'>");
 		out.println("<table border='0' width='100%' cellspacing='1'"
 				+ " cellpadding='1'>");
 		out.println("<tr><td>");
-		
-		out.println("<b>" + reportName + "</b> :: " + ArtUtils.isoDateTimeSecondsFormatter.format(new Date()));
-		
+
+		String escapedReportName = Encode.forHtmlContent(reportName);
+		String formattedRunDate = ArtUtils.isoDateTimeSecondsFormatter.format(new Date());
+		String escapedFormattedRunDate = Encode.forHtmlContent(formattedRunDate);
+
+		out.println("<b>" + escapedReportName + "</b> :: " + escapedFormattedRunDate);
+
 		out.println("</td></tr></table></div>");
 	}
 
@@ -82,14 +87,16 @@ public class HtmlPlainOutput extends StandardOutput {
 		if (!fileOutput) {
 			return;
 		}
-		
+
 		out.println("<div align='center'>");
 		out.println("<table border='0' width='100%' cellspacing='1'"
 				+ " cellpadding='1'>");
 		out.println("<tr><td>");
 
 		for (ReportParameter reportParam : reportParamsList) {
-			out.println(reportParam.getNameAndDisplayValues());
+			String nameAndDisplayValues = reportParam.getNameAndDisplayValues();
+			String escapedNameAndDisplayValues = Encode.forHtmlContent(nameAndDisplayValues);
+			out.println(escapedNameAndDisplayValues);
 			out.println("<br>");
 		}
 
@@ -106,7 +113,8 @@ public class HtmlPlainOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<td><b>" + value + "</b></td>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<td><b>" + escapedValue + "</b></td>");
 	}
 
 	@Override
@@ -116,29 +124,34 @@ public class HtmlPlainOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
-		out.println("<td style='text-align: left'>" + value + "</td>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
-		out.println("<td style='text-align: right'>" + formattedValue + "</td>");
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		out.println("<td style='text-align: right'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
-		out.println("<td style='text-align: right'>" + formattedValue + "</td>");
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		out.println("<td style='text-align: right'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
-		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
-		out.println("<td style='text-align: left'>" + formattedValue + "</td>");
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		out.println("<td style='text-align: left'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
@@ -165,12 +178,14 @@ public class HtmlPlainOutput extends StandardOutput {
 	@Override
 	public void addCellTotal(Double value) {
 		String formattedValue = formatNumericValue(value);
-		out.println("<td style='text-align: right'><b>" + formattedValue + "</b></td>");
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		out.println("<td style='text-align: right'><b>" + escapedFormattedValue + "</b></td>");
 	}
 
 	@Override
 	public void addCellTotal(Double totalValue, String formattedValue, String sortValue) {
-		out.println("<td style='text-align: right'><b>" + formattedValue + "</b></td>");
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		out.println("<td style='text-align: right'><b>" + escapedFormattedValue + "</b></td>");
 	}
 
 	@Override

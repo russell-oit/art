@@ -21,6 +21,7 @@ import art.servlets.Config;
 import java.io.File;
 import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 
 /**
  * Generates DataTables html output
@@ -40,6 +41,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
 		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience
 		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
+		//however we have to include the script files for report run by ajax to work
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/jquery.dataTables.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/dataTables.bootstrap.min.js'></script>");
@@ -55,18 +57,26 @@ public class HtmlDataTableOutput extends StandardOutput {
 		}
 
 		if (StringUtils.isNotBlank(language)) {
-			String languageFileName = "dataTables." + language + ".txt";
+			String languageFileName = "dataTables_" + language + ".txt";
+			
 			String languageFilePath = Config.getAppPath() + File.separator
-					+ "js" + File.separator + languageFileName;
+					+ "js" + File.separator
+					+ "dataTables-1.10.11" + File.separator
+					+ "i18n" + File.separator
+					+ languageFileName;
+			
 			File languageFile = new File(languageFilePath);
+			
 			if (languageFile.exists()) {
-				languageSetting = ", language: {url: " + contextPath + "/js/" + languageFileName + "}";
+				languageSetting = ", language: {url: " + contextPath + "/js/dataTables-1.10.11/i18n/"
+						+ languageFileName + "}";
 			}
 		}
 
 		String allText = "All";
 		if (messageSource != null && locale != null) {
 			allText = messageSource.getMessage("dataTables.text.showAllRows", null, locale);
+			allText = Encode.forJavaScript(allText);
 		}
 
 		//http://www.datatables.net/reference
@@ -74,7 +84,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 				= "{"
 				+ "orderClasses: false"
 				+ ", pagingType: 'full_numbers'"
-				+ ", lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, '" + allText + "']]" 
+				+ ", lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, '" + allText + "']]"
 				+ ", pageLength: 50"
 				+ languageSetting
 				+ ", initComplete: function() {$('div.dataTables_filter input').focus();}"
@@ -98,12 +108,14 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<th>" + value + "</th>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<th>" + escapedValue + "</th>");
 	}
 
 	@Override
 	public void addHeaderCellAlignLeft(String value) {
-		out.println("<th style='text-align: left'>" + value + "</th>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<th style='text-align: left'>" + escapedValue + "</th>");
 	}
 
 	@Override
@@ -119,37 +131,46 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
-		out.println("<td style='text-align: left'>" + value + "</td>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
 		String sortValue = getNumericSortValue(value);
+		
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
 
-		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
-				+ formattedValue + "</td>");
+		out.println("<td style='text-align: right' data-order='" + escapedSortValue + "'>"
+				+ escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
-		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
-				+ formattedValue + "</td>");
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		String escapedSortValue = Encode.forHtmlAttribute(sortValue);
+		out.println("<td style='text-align: right' data-order='" + escapedSortValue + "'>"
+				+ escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
 		long sortValue = getDateSortValue(value);
+		
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
-				+ formattedValue + "</td>");
+				+ escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 		out.println("<td style='text-align: right' data-order='" + sortValue + "'>"
-				+ formattedValue + "</td>");
+				+ escapedFormattedValue + "</td>");
 	}
 
 	@Override

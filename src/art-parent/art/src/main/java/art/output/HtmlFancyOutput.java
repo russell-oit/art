@@ -18,6 +18,7 @@
 package art.output;
 
 import java.util.Date;
+import org.owasp.encoder.Encode;
 
 /**
  * Fancy html output mode
@@ -42,12 +43,14 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addHeaderCell(String value) {
-		out.println("<th>" + value + "</th>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<th>" + escapedValue + "</th>");
 	}
 
 	@Override
 	public void addHeaderCellAlignLeft(String value) {
-		out.println("<th class='text-left'>" + value + "</th>");
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<th class='text-left'>" + escapedValue + "</th>");
 	}
 
 	@Override
@@ -57,6 +60,8 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
+		String escapedValue = Encode.forHtmlContent(value);
+		
 		String cssClass;
 		if (evenRow) {
 			cssClass = "text-left";
@@ -64,12 +69,14 @@ public class HtmlFancyOutput extends StandardOutput {
 			cssClass = "text-left";
 		}
 
-		out.println("<td class='" + cssClass + "'>" + value + "</td>");
+		out.println("<td class='" + cssClass + "'>" + escapedValue + "</td>");
 	}
 
 	@Override
 	public void addCellNumeric(Double value) {
 		String formattedValue = formatNumericValue(value);
+		
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
 		String cssClass;
 		if (evenRow) {
@@ -78,11 +85,13 @@ public class HtmlFancyOutput extends StandardOutput {
 			cssClass = "text-right";
 		}
 
-		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
+		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
 	}
 	
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		
 		String cssClass;
 		if (evenRow) {
 			cssClass = "text-right";
@@ -90,12 +99,14 @@ public class HtmlFancyOutput extends StandardOutput {
 			cssClass = "text-right";
 		}
 
-		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
+		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
 		String formattedValue = formatDateValue(value);
+		
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
 
 		String cssClass;
 		if (evenRow) {
@@ -104,11 +115,13 @@ public class HtmlFancyOutput extends StandardOutput {
 			cssClass = "text-left";
 		}
 
-		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
+		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
 	}
 	
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
+		String escapedFormattedValue = Encode.forHtmlContent(formattedValue);
+		
 		String cssClass;
 		
 		if (evenRow) {
@@ -117,7 +130,7 @@ public class HtmlFancyOutput extends StandardOutput {
 			cssClass = "text-left";
 		}
 
-		out.println("<td class='" + cssClass + "'>" + formattedValue + "</td>");
+		out.println("<td class='" + cssClass + "'>" + escapedFormattedValue + "</td>");
 	}
 
 	@Override
