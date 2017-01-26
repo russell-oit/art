@@ -82,6 +82,7 @@ public class ReportRunner {
 	private ReportType reportType;
 	private User user;
 	private boolean postgreSqlFetchSizeApplied;
+	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
@@ -215,6 +216,21 @@ public class ReportRunner {
 		//handle dynamic recipient label
 		applyDynamicRecipient(querySb);
 		applyRulesToQuery(querySb);
+
+		//generate final sql and revert question placeholder
+		String querySql = querySb.toString();
+
+		Object[] paramValues = jdbcParams.toArray(new Object[0]);
+		finalSql = generateFinalSql(querySql, paramValues);
+
+		String questionSearchString = Pattern.quote(QUESTION_PLACEHOLDER);
+		String questionReplaceString = Matcher.quoteReplacement("?");
+
+		querySql = querySql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
+		finalSql = finalSql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
+
+		//update querySb with new sql
+		querySb.replace(0, querySb.length(), querySql);
 
 		logger.debug("Sql query now is:\n{}", querySb.toString());
 	}
@@ -444,6 +460,13 @@ public class ReportRunner {
 			querySql = runReportHelper.performDirectParameterSubstitution(querySql, placeholderPrefix, reportParamsMap);
 		}
 
+		//replace literal ? in query with a placeholder, before substituting query parameters with ?
+		//to enable show sql to give correct results when ? literals exist in the query
+		//https://sourceforge.net/p/art/discussion/352129/thread/ee7c78d4/#2c1f/6b3b
+		String questionSearchString = Pattern.quote("?");
+		String questionReplaceString = Matcher.quoteReplacement(QUESTION_PLACEHOLDER);
+		querySql = querySql.replaceAll("(?iu)" + questionSearchString, questionReplaceString);
+
 		//replace jdbc parameter identifiers with ?
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			String paramName = entry.getKey();
@@ -596,11 +619,6 @@ public class ReportRunner {
 		RunReportHelper runReportHelper = new RunReportHelper();
 		connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
 
-		String querySql = querySb.toString();
-
-		Object[] paramValues = jdbcParams.toArray(new Object[0]);
-		finalSql = generateFinalSql(querySql, paramValues);
-
 		int fetchSize = report.getFetchSize();
 		boolean applyFetchSize = false;
 
@@ -619,11 +637,15 @@ public class ReportRunner {
 			}
 		}
 
+		String querySql = querySb.toString();
+		
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 		if (applyFetchSize) {
 			psQuery.setFetchSize(fetchSize);
 		}
+		
+		Object[] paramValues = jdbcParams.toArray(new Object[0]);
 
 		DatabaseUtils.setValues(psQuery, paramValues);
 
