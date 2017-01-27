@@ -11,7 +11,7 @@ ART 3.0
 * Added ability to create reports based on MS Word (docx), LibreOffice Writer (odt) and MS PowerPoint (pptx) templates
 * Added docx, odt, ods report formats for tabular and jasper reports
 * Added gridstack dashboard report type
-* Added syntax highlighting for "Show SQL" option and during report creation
+* Have syntax highlighting during report creation
 * Added tabbed dashboards option
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7

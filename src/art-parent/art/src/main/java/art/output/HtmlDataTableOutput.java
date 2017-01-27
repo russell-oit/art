@@ -46,8 +46,11 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/jquery.dataTables.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/dataTables.bootstrap.min.js'></script>");
 
-		//set language file to use for localization. language files to be put in the /js directory and to be named dataTables.xx_XX.txt	
+		//set language file to use for localization
+		//language files to be put in the /js/datatables/i18n directory and to be named dataTables_xx.json according to the locale
 		//language file content examples at http://datatables.net/plug-ins/i18n
+		//https://datatables.net/reference/api/i18n()
+		//https://datatables.net/reference/option/language
 		//by default don't set the language file option. (will default to english - in jquery.dataTables.min.js)
 		String languageSetting = "";
 
@@ -57,7 +60,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 		}
 
 		if (StringUtils.isNotBlank(language)) {
-			String languageFileName = "dataTables_" + language + ".txt";
+			String languageFileName = "dataTables_" + language + ".json";
 			
 			String languageFilePath = Config.getAppPath() + File.separator
 					+ "js" + File.separator

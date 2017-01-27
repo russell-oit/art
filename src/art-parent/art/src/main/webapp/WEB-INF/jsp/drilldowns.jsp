@@ -77,7 +77,7 @@ Display report drilldowns
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.txt",
+						url: "${pageContext.request.contextPath}/js/dataTables-1.10.11/i18n/dataTables_${pageContext.response.locale}.json",
 						buttons: {
 							selectAll: "${selectAllText}",
 							selectNone: "${deselectAllText}"
