@@ -36,8 +36,6 @@ Display user jobs and jobs configuration
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 <spring:message code="jobs.message.scheduled" var="scheduledText"/>
-<spring:message code="dataTables.button.selectAll" var="selectAllText"/>
-<spring:message code="dataTables.button.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
@@ -79,9 +77,7 @@ Display user jobs and jobs configuration
 						"${errorOccurredText}",
 						true, //deleteRow
 						undefined, //cannotDeleteRecordText
-						undefined, //linkedRecordsExistText
-						"${selectAllText}",
-						"${deselectAllText}"
+						undefined //linkedRecordsExistText
 						);
 
 				var table = oTable.api();

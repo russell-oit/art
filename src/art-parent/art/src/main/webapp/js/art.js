@@ -263,12 +263,10 @@ function datatablesInitComplete() {
  * @param {string} contextPath
  * @param {string} localeCode
  * @param {boolean} addColumnFilters
- * @param {string} selectAllText
- * @param {string} deselectAllText
  * @returns {jQuery} datatables jquery object
  */
 function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-	addColumnFilters, selectAllText, deselectAllText) {
+	addColumnFilters) {
 		
 	if (pageLength === undefined || isNaN(pageLength)) {
 		pageLength = 10;
@@ -307,11 +305,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
         },
 		order: [[ 1, 'asc' ]],
 		language: {
-			url: contextPath + "/js/dataTables-1.10.11/i18n/dataTables_" + localeCode + ".json",
-			buttons: {
-				selectAll: selectAllText,
-				selectNone: deselectAllText
-			}
+			url: contextPath + "/js/dataTables-1.10.11/i18n/dataTables_" + localeCode + ".json"
 		},
 		initComplete: datatablesInitComplete
 	});
@@ -559,19 +553,16 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
  * @param {boolean} deleteRow
  * @param {string} cannotDeleteRecordText
  * @param {string} linkedRecordsExistText
- * @param {string} selectAllText
- * @param {string} deselectAllText
  * @returns {jQuery} datatables jquery object
  */
 function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCode, addColumnFilters,
 		deleteButtonSelector,
 		showConfirmDialog, deleteRecordText, okText, cancelText,
 		deleteUrl, recordDeletedText, errorOccurredText,
-		deleteRow, cannotDeleteRecordText, linkedRecordsExistText,
-		selectAllText, deselectAllText) {
+		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
 
 	var oTable = initConfigTable(tbl, pageLength, showAllRowsText, contextPath,
-			localeCode, addColumnFilters, selectAllText, deselectAllText);
+			localeCode, addColumnFilters);
 
 	//get datatables api object
 	var table = oTable.api();

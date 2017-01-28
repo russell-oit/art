@@ -24,8 +24,6 @@
 <spring:message code="page.help.dragToReorder" var="dragToReorderText"/>
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
-<spring:message code="dataTables.button.selectAll" var="selectAllText"/>
-<spring:message code="dataTables.button.deselectAll" var="deselectAllText"/>
 
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
@@ -68,9 +66,7 @@
 						"${errorOccurredText}",
 						true, //deleteRow
 						undefined, //cannotDeleteRecordText
-						undefined, //linkedRecordsExistText
-						"${selectAllText}",
-						"${deselectAllText}"
+						undefined //linkedRecordsExistText
 						);
 
 				//enable changing of report parameter position using drag and drop

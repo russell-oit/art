@@ -27,21 +27,19 @@ Display datasources
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
-<spring:message code="dataTables.button.selectAll" var="selectAllText"/>
-<spring:message code="dataTables.button.deselectAll" var="deselectAllText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="datasources.do"]').parent().addClass('active');
-				
+
 				var tbl = $('#datasources');
-				
+
 				//initialize datatable and process delete action
 				var oTable = initConfigPage(tbl,
 						undefined, //pageLength. pass undefined to use the default
@@ -59,9 +57,7 @@ Display datasources
 						"${errorOccurredText}",
 						true, //deleteRow
 						"${cannotDeleteRecordText}", //cannotDeleteRecordText
-						"${linkedReportsExistText}", //linkedRecordsExistText
-						"${selectAllText}",
-						"${deselectAllText}"
+						"${linkedReportsExistText}" //linkedRecordsExistText
 						);
 
 				var table = oTable.api();
@@ -111,7 +107,7 @@ Display datasources
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#editRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -119,12 +115,12 @@ Display datasources
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href='${pageContext.request.contextPath}/app/editDatasources.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/app/editDatasources.do?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 			}); //end document ready
 
 		</script>
