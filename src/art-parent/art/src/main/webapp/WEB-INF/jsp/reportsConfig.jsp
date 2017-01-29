@@ -139,7 +139,7 @@ Reports configuration page
 			<div class="alert alert-success alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
-				<c:if test="${record!=null}">
+				<c:if test="${record != null}">
 					&nbsp;
 					<div class="btn-group">
 						<a class="btn btn-default" 

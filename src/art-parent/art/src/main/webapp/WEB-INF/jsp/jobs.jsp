@@ -92,7 +92,7 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/app/runJob.do',
 						dataType: 'json',
 						data: {id: recordId},
-						success: function (response) //on recieve of reply
+						success: function (response)
 						{
 							if (response.success) {
 								notifyActionSuccess("${runningText}", recordName);
@@ -109,7 +109,7 @@ Display user jobs and jobs configuration
 					var recordName = escapeHtmlContent(row.data("name"));
 					var recordId = row.data("id");
 
-					var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss")
+					var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
 					$('#runLaterDate').val(currentTimeString);
 					$('#runLaterJobId').val(recordId);
 					$('#runLaterJobName').val(recordName);
@@ -126,7 +126,7 @@ Display user jobs and jobs configuration
 						url: '${pageContext.request.contextPath}/app/runLaterJob.do',
 						dataType: 'json',
 						data: $('#runLaterForm').serialize(),
-						success: function (response) //on recieve of reply
+						success: function (response)
 						{
 							$("#runLaterModal").modal('hide');
 							if (response.success) {
@@ -239,6 +239,40 @@ Display user jobs and jobs configuration
 					}
 				});
 
+				$('#runSingle').click(function () {
+					var item = $(this);
+					var recordName = escapeHtmlContent(item.data("name"));
+					var recordId = item.data("id");
+
+					$.ajax({
+						type: 'POST',
+						url: '${pageContext.request.contextPath}/app/runJob.do',
+						dataType: 'json',
+						data: {id: recordId},
+						success: function (response)
+						{
+							if (response.success) {
+								notifyActionSuccess("${runningText}", recordName);
+							} else {
+								notifyActionError("${errorOccurredText}", escapeHtmlContent(response.errorMessage));
+							}
+						},
+						error: ajaxErrorHandler
+					});
+				});
+				
+				$('#runLaterSingle').click(function () {
+					var item = $(this);
+					var recordName = escapeHtmlContent(item.data("name"));
+					var recordId = item.data("id");
+
+					var currentTimeString = moment().format("YYYY-MM-DD HH:mm:ss");
+					$('#runLaterDate').val(currentTimeString);
+					$('#runLaterJobId').val(recordId);
+					$('#runLaterJobName').val(recordName);
+					$('#runLaterModal').modal('show');
+				});
+
 				$('.datetimepicker').datetimepicker({
 					format: 'YYYY-MM-DD HH:mm:ss',
 					locale: '${pageContext.response.locale}'
@@ -280,6 +314,26 @@ Display user jobs and jobs configuration
 			<div class="alert alert-success alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
+				<c:if test="${record != null}">
+					&nbsp;
+					<div class="btn-group">
+						<a class="btn btn-default" 
+						   href="${pageContext.request.contextPath}/app/editJob.do?id=${record.jobId}&nextPage=${nextPage}">
+							<spring:message code="page.action.edit"/>
+						</a>
+					</div>
+					<div class="btn-group">
+						<button type="button" id="runSingle" class="btn btn-default"
+								data-id="${record.jobId}" data-name="${encode:forHtmlAttribute(record.name)}">
+							<spring:message code="jobs.action.run"/>
+						</button>
+						<button type="button" id="runLaterSingle" class="btn btn-default"
+								data-id="${record.jobId}" data-name="${encode:forHtmlAttribute(record.name)}"
+								data-toggle="modal">
+							<spring:message code="jobs.action.runLater"/>
+						</button>
+					</div>
+				</c:if>
 			</div>
 		</c:if>
 
