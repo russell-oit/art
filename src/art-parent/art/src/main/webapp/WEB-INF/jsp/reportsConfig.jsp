@@ -32,12 +32,12 @@ Reports configuration page
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
 				$('a[href*="reportsConfig.do"]').parent().addClass('active');
-					
+
 				var tbl = $('#reports');
 
 				//initialize datatable and process delete action
@@ -139,6 +139,41 @@ Reports configuration page
 			<div class="alert alert-success alert-dismissable">
 				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
 				<spring:message code="${recordSavedMessage}"/>: ${encode:forHtmlContent(recordName)}
+				<c:if test="${record!=null}">
+					&nbsp;
+					<div class="btn-group">
+						<a class="btn btn-default" 
+						   href="${pageContext.request.contextPath}/app/editReport.do?id=${record.reportId}">
+							<spring:message code="page.action.edit"/>
+						</a>
+					</div>
+					<div class="btn-group">
+						<a class="btn btn-default"
+						   href="${pageContext.request.contextPath}/app/reportParameterConfig.do?reportId=${record.reportId}">
+							<spring:message code="reports.action.parameters"/>
+						</a>
+						<a class="btn btn-default"
+						   href="${pageContext.request.contextPath}/app/reportRules.do?reportId=${record.reportId}">
+							<spring:message code="reports.action.rules"/>
+						</a>
+						<a class="btn btn-default"
+						   href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${record.reportId}">
+							<spring:message code="reports.action.drilldowns"/>
+						</a>
+					</div>
+					<c:if test="${record.reportType != 'LovStatic'}">
+						<div class="btn-group">
+							<a class="btn btn-default"
+							   href="${pageContext.request.contextPath}/app/addJob.do?reportId=${record.reportId}">
+								<spring:message code="reports.action.schedule"/>
+							</a>
+							<a class="btn btn-default"
+							   href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${record.reportId}">
+								<spring:message code="reports.action.preview"/>
+							</a>
+						</div>
+					</c:if>
+				</c:if>
 			</div>
 		</c:if>
 

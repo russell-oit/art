@@ -288,6 +288,7 @@ public class ReportController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", report.getName());
+			redirectAttributes.addFlashAttribute("record", report);
 			return "redirect:/app/reportsConfig.do";
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);

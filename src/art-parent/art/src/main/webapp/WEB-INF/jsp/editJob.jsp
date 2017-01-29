@@ -217,7 +217,6 @@
 					//xdocreport pptx
 					list.append(new Option('${pptxText}', 'pptx'));
 				} else {
-					//non-chart
 					switch (jobType) {
 						case 'Alert':
 						case 'JustRun':
@@ -255,7 +254,10 @@
 				//set the selected item according to the job output format
 				//https://jsfiddle.net/taditdash/dFK3K/
 				var jobOutputFormat = "${job.outputFormat}";
-				$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
+				//https://stackoverflow.com/questions/5515310/is-there-a-standard-function-to-check-for-null-undefined-or-blank-variables-in
+				if (jobOutputFormat) {
+					$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
+				}
 			}
 
 			function toggleVisibleFields() {
