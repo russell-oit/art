@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
@@ -192,10 +190,6 @@ public class DashboardController {
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		//escape & in case used in url tag where url has multiple parameters defined
-		String searchString = Pattern.quote("&");
-		String replaceString = Matcher.quoteReplacement("&amp;");
-		dashboardXml = dashboardXml.replaceAll(searchString, replaceString);
 		Document document = builder.parse(new InputSource(new StringReader(dashboardXml)));
 		rootNode = document.getDocumentElement();
 
@@ -552,10 +546,6 @@ public class DashboardController {
 		//http://www.w3schools.com/xml/xpath_intro.asp
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		//escape & in case used in url tag where url has multiple parameters defined
-		String searchString = Pattern.quote("&");
-		String replaceString = Matcher.quoteReplacement("&amp;");
-		dashboardXml = dashboardXml.replaceAll(searchString, replaceString);
 		Document document = builder.parse(new InputSource(new StringReader(dashboardXml)));
 		rootNode = document.getDocumentElement();
 
