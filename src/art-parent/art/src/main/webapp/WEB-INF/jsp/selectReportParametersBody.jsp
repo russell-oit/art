@@ -21,10 +21,6 @@ Display section to allow selecting of report parameters and initiate running of 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
-<%-- tooltips for charts (and dashboards, which may contain charts) --%>
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
-
 <script type="text/javascript">
 	$(document).ready(function () {
 		$("#schedule").click(function (e) {

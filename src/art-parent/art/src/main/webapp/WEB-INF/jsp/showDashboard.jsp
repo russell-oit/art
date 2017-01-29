@@ -28,10 +28,6 @@
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/art.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootbox-4.4.0.min.js"></script>
 
-		<!-- include tooltipster resources for chart tooltips -->
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/tooltipster/css/tooltipster.bundle.min.css">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tooltipster/js/tooltipster.bundle.min.js"></script>
-
 	</head>
 	<body>
 		<div id="wrap">
