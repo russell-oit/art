@@ -12,11 +12,47 @@
     "sThousands":       " ",
     "sUrl":             "",
     "sZeroRecords":     "Įrašų nerasta",
- 
     "oPaginate": {
         "sFirst": "Pirmas",
         "sPrevious": "Ankstesnis",
         "sNext": "Tolimesnis",
         "sLast": "Paskutinis"
-    }
+    },
+	"oAria": {
+        "sSortAscending":  ": activate to sort column ascending",
+        "sSortDescending": ": activate to sort column descending"
+    },
+	"select": {
+		"rows": {
+			"_": "%d rows selected",
+			"0": "",
+			"1": "1 row selected"
+		},
+		"columns": {
+			"_": "%d columns selected",
+			"0": "",
+			"1": "1 column selected"
+		},
+		"cells": {
+			"_": "%d cells selected",
+			"0": "",
+			"1": "1 cell selected"
+		}
+	},
+	"buttons": {
+		"selected": "Selected",
+		"selectedSingle": "Selected single",
+		"selectAll": "Select all",
+		"selectNone": "Deselect all",
+		"selectRows": "Select rows",
+		"selectColumns": "Select columns",
+		"selectCells": "Select cells",
+		"colvis": "Columns",
+		"colvisRestore": "Restore",
+		"print": "Print",
+		"excel": "XLSX",
+		"pdf": "PDF",
+		"csv": "CSV",
+		"copy": "Copy"
+	}
 }

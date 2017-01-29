@@ -38,6 +38,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/css/dataTables.bootstrap.min.css'>");
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.10.11/Buttons-1.1.2/css/buttons.dataTables.min.css'>");
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables-1.10.11/Buttons-1.1.2/css/buttons.bootstrap.min.css'>");
 		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
 		//Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects to the end user's experience
 		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
@@ -45,6 +47,14 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/jquery.dataTables.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/DataTables-1.10.11/js/dataTables.bootstrap.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/Buttons-1.1.2/js/dataTables.buttons.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.bootstrap.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/jszip-2.5.0.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/pdfmake-0.1.18/pdfmake.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/pdfmake-0.1.18/vfs_fonts.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.html5.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.print.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.colVis.min.js'></script>");
 
 		//set language file to use for localization
 		//language files to be put in the /js/datatables/i18n directory and to be named dataTables_xx.json according to the locale
@@ -89,6 +99,13 @@ public class HtmlDataTableOutput extends StandardOutput {
 				+ ", pagingType: 'full_numbers'"
 				+ ", lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, '" + allText + "']]"
 				+ ", pageLength: 50"
+				+ ", dom: 'lBfrtip'"
+				+ ", buttons: ["
+				+ "{extend: 'colvis', postfixButtons: ['colvisRestore']},"
+				+ "{extend: 'excel', exportOptions: {columns: ':visible'}},"
+				+ "{extend: 'pdf', exportOptions: {columns: ':visible'}},"
+				+ "{extend: 'print', exportOptions: {columns: ':visible'}}"
+				+ "]"
 				+ languageSetting
 				+ ", initComplete: function() {$('div.dataTables_filter input').focus();}"
 				+ "}";
