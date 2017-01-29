@@ -44,6 +44,13 @@
 		"selectNone": "Toa yote",
 		"selectRows": "Chagua safu",
 		"selectColumns": "Chagua safu-wima",
-		"selectCells": "Chagua seli"
+		"selectCells": "Chagua seli",
+		"colvis": "Safu-wima",
+		"colvisRestore": "Rejesha",
+		"print": "Chapisha",
+		"excel": "XLSX",
+		"pdf": "PDF",
+		"csv": "CSV",
+		"copy": "Nakili"
 	}
 }

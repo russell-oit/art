@@ -48,6 +48,12 @@ bootstrap js, jquery js, datatables css, datatables js
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Select-1.1.2/js/dataTables.select.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Buttons-1.1.2/js/dataTables.buttons.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jszip-2.5.0.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/pdfmake-0.1.18/pdfmake.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/pdfmake-0.1.18/vfs_fonts.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.html5.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.print.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Buttons-1.1.2/js/buttons.colVis.min.js"></script>
 <!--		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Responsive-2.0.2/js/dataTables.responsive.min.js"></script>
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/dataTables-1.10.11/Responsive-2.0.2/js/responsive.bootstrap.min.js"></script>-->
 

@@ -44,6 +44,13 @@
 		"selectNone": "Deselect all",
 		"selectRows": "Select rows",
 		"selectColumns": "Select columns",
-		"selectCells": "Select cells"
+		"selectCells": "Select cells",
+		"colvis": "Columns",
+		"colvisRestore": "Restore",
+		"print": "Print",
+		"excel": "XLSX",
+		"pdf": "PDF",
+		"csv": "CSV",
+		"copy": "Copy"
 	}
 }

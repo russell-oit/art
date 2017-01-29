@@ -255,6 +255,10 @@
 				//https://jsfiddle.net/taditdash/dFK3K/
 				var jobOutputFormat = "${job.outputFormat}";
 				//https://stackoverflow.com/questions/5515310/is-there-a-standard-function-to-check-for-null-undefined-or-blank-variables-in
+				//using .val() to set the value may cause the select to have a blank value
+				//https://stackoverflow.com/questions/13343566/set-select-option-selected-by-value
+				//https://bugs.jquery.com/ticket/8813
+				//https://stackoverflow.com/questions/22983511/jquery-1-10-1-setting-non-existing-value-on-select
 				if (jobOutputFormat) {
 					$("#outputFormat > [value=" + jobOutputFormat + "]").attr("selected", "true");
 				}

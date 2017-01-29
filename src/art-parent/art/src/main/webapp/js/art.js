@@ -173,19 +173,19 @@ var MAP = {'&': '&amp;',
 	"'": '&#39;'};
 
 function escapeHtml(s, forAttribute) {
-	return s.replace(forAttribute ? /[&<>'"]/g : /[&<>]/g, function(c) {
+	return s.replace(forAttribute ? /[&<>'"]/g : /[&<>]/g, function (c) {
 		return MAP[c];
 	});
 }
 
 function escapeHtmlContent(s) {
-	return s.replace(/[&<>]/g, function(c) {
+	return s.replace(/[&<>]/g, function (c) {
 		return MAP[c];
 	});
 }
 
 function escapeHtmlAttribute(s) {
-	return s.replace(/[&<>'"]/g, function(c) {
+	return s.replace(/[&<>'"]/g, function (c) {
 		return MAP[c];
 	});
 }
@@ -205,7 +205,7 @@ function createColumnFilters(tbl) {
 	//insert cloned row as first row because datatables will put heading styling on the last thead row
 	columnFilterRow.insertBefore(headingRow);
 	//put search fields into cloned row
-	columnFilterRow.find('th').each(function() {
+	columnFilterRow.find('th').each(function () {
 		if ($(this).hasClass('noFilter')) {
 			$(this).html('');
 		} else {
@@ -225,7 +225,7 @@ function createColumnFilters(tbl) {
  */
 function applyColumnFilters(tbl, table) {
 	//https://datatables.net/examples/api/multi_filter.html
-	tbl.find('thead input').on('keyup change', function() {
+	tbl.find('thead input').on('keyup change', function () {
 		table
 				.column($(this).parent().index() + ':visible')
 				.search(this.value)
@@ -238,7 +238,7 @@ function applyColumnFilters(tbl, table) {
  */
 function datatablesInitComplete() {
 	$('div.dataTables_filter input').focus();
-	
+
 //	$('.dataTables_length select').addClass('selectpicker');
 ////	$('.dataTables_length select').attr({'data-toggle': 'dropdown', 'data-hover': 'dropdown'});
 ////	$('.dataTables_length select').attr('data-hover','dropdown');
@@ -266,8 +266,8 @@ function datatablesInitComplete() {
  * @returns {jQuery} datatables jquery object
  */
 function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCode,
-	addColumnFilters) {
-		
+		addColumnFilters) {
+
 	if (pageLength === undefined || isNaN(pageLength)) {
 		pageLength = 10;
 	}
@@ -289,21 +289,57 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		pagingType: "full_numbers",
 		lengthMenu: [[5, 10, 25, -1], [5, 10, 25, showAllRowsText]],
 		pageLength: pageLength,
-		columnDefs: [ {
-            orderable: false,
-            className: 'select-checkbox',
-            targets:   0
-        } ],
+		columnDefs: [{
+				orderable: false,
+				className: 'select-checkbox',
+				targets: 0
+			},
+			{
+				targets: "dtHidden", //target name matches class name of th.
+				visible: false
+			}
+		],
 		dom: 'lBfrtip',
 		buttons: [
 			'selectAll',
-			'selectNone'
+			'selectNone',
+			{
+				extend: 'colvis',
+				postfixButtons: ['colvisRestore']
+			},
+			{
+				extend: 'excel',
+				exportOptions: {
+					columns: ':visible',
+					modifier: {
+						selected: true
+					}
+				}
+			},
+			{
+				extend: 'pdf',
+				exportOptions: {
+					columns: ':visible',
+					modifier: {
+						selected: true
+					}
+				}
+			},
+			{
+				extend: 'print',
+				exportOptions: {
+					columns: ':visible',
+					modifier: {
+						selected: true
+					}
+				}
+			}
 		],
 		select: {
-            style: 'multi',
+			style: 'multi',
 			selector: 'td:first-child'
-        },
-		order: [[ 1, 'asc' ]],
+		},
+		order: [[1, 'asc']],
 		language: {
 			url: contextPath + "/js/dataTables-1.10.11/i18n/dataTables_" + localeCode + ".json"
 		},
@@ -377,7 +413,7 @@ function notifyLinkedRecordsExist(linkedRecords, cannotDeleteRecordText, linkedR
 	var msg;
 	msg = alertCloseButton + linkedRecordsExistText + "<ul>";
 
-	$.each(linkedRecords, function(index, value) {
+	$.each(linkedRecords, function (index, value) {
 		msg += "<li>" + value + "</li>";
 	});
 
@@ -398,7 +434,7 @@ function notifySomeRecordsNotDeleted(nonDeletedRecords, someRecordsNotDeletedTex
 	var msg;
 	msg = alertCloseButton + someRecordsNotDeletedText + "<ul>";
 
-	$.each(nonDeletedRecords, function(index, value) {
+	$.each(nonDeletedRecords, function (index, value) {
 		msg += "<li>" + value + "</li>";
 	});
 
@@ -464,7 +500,7 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
 	});
 
 	//register http success callback
-	request.done(function(response) {
+	request.done(function (response) {
 		deleteDoneHandler(response, table, row, recordDeletedText,
 				recordName, errorOccurredText,
 				deleteRow, cannotDeleteRecordText, linkedRecordsExistText);
@@ -497,7 +533,7 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 		deleteRow, cannotDeleteRecordText, linkedRecordsExistText) {
 
 	//delete record
-	tbl.find('tbody').on('click', deleteButtonSelector, function() {
+	tbl.find('tbody').on('click', deleteButtonSelector, function () {
 		var row = $(this).closest("tr"); //jquery object
 		var recordName = escapeHtmlContent(row.data("name"));
 		var recordId = row.data("id");
@@ -514,7 +550,7 @@ function addDeleteRecordHandler(tbl, table, deleteButtonSelector,
 						label: okText
 					}
 				},
-				callback: function(result) {
+				callback: function (result) {
 					if (result) {
 						//user confirmed delete. make delete request
 						sendDeleteRequest(contextPath, deleteUrl, recordId,
@@ -580,13 +616,13 @@ function initConfigPage(tbl, pageLength, showAllRowsText, contextPath, localeCod
  */
 function addSelectDeselectAllHandler() {
 	//handle select all/deselect all
-	$('.select-all').click(function(e) {
+	$('.select-all').click(function (e) {
 		//http://fuelyourcoding.com/jquery-events-stop-misusing-return-false/
 		e.preventDefault();
 		var item = $(this).data('item');
 		$(item).multiSelect('select_all');
 	});
-	$('.deselect-all').click(function(e) {
+	$('.deselect-all').click(function (e) {
 		e.preventDefault();
 		var item = $(this).data('item');
 		$(item).multiSelect('deselect_all');
@@ -601,7 +637,7 @@ function artAddWork() {
 //		Element.show('spinner');
 		jQuery('#spinner').show();
 	}
-	
+
 //	console.log("artAddWork " + workCount);
 }
 function artRemoveWork() {
@@ -611,6 +647,6 @@ function artRemoveWork() {
 //		Element.hide('spinner');
 		jQuery('#spinner').hide();
 	}
-	
+
 //	console.log("artRemoveWork " + workCount);
 }
