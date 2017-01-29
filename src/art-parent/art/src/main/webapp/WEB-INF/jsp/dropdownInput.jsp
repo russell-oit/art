@@ -22,6 +22,6 @@ Display report parameter that uses dropdown input
 		<option value="ALL_ITEMS"><spring:message code="reports.text.allItems"/></option>
 	</c:if>
 	<c:forEach var="lovValue" items="${lovValues}">
-		<option value="${lovValue.key}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${lovValue.value}</option>
+		<option value="${encode:forHtmlAttribute(lovValue.key)}" ${reportParam.htmlValue == lovValue.key ? "selected" : ""}>${encode:forHtmlContent(lovValue.value)}</option>
 	</c:forEach>
 </select>

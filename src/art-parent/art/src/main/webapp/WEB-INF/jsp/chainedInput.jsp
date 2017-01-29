@@ -14,8 +14,8 @@ Display report parameter that uses dropdown input
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <select class="form-control"
-		name="${reportParam.htmlElementName}"
-		id="${reportParam.htmlElementName}">
+		name="${encode:forHtmlAttribute(reportParam.htmlElementName)}"
+		id="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
 	<option value="">--</option>
 </select>
 
@@ -23,9 +23,9 @@ Display report parameter that uses dropdown input
 
 <script type="text/javascript">
 	$("#${reportParam.htmlElementName}").remoteChained({
-		parents: "${reportParam.chainedParentsHtmlIds}",
+		parents: "${encode:forJavaScript(reportParam.chainedParentsHtmlIds)}",
 		url: "${pageContext.request.contextPath}/app/getLovValues.do?reportId=${reportParam.parameter.lovReportId}",
 		loading: "${loadingText}",
-		depends: "${reportParam.chainedDependsHtmlIds}"
+		depends: "${encode:forJavaScript(reportParam.chainedDependsHtmlIds)}"
 	});
 </script>
