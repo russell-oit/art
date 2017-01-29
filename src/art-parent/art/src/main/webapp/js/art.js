@@ -310,28 +310,19 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 			{
 				extend: 'excel',
 				exportOptions: {
-					columns: ':visible',
-					modifier: {
-						selected: true
-					}
+					columns: ':visible'
 				}
 			},
 			{
 				extend: 'pdf',
 				exportOptions: {
-					columns: ':visible',
-					modifier: {
-						selected: true
-					}
+					columns: ':visible'
 				}
 			},
 			{
 				extend: 'print',
 				exportOptions: {
-					columns: ':visible',
-					modifier: {
-						selected: true
-					}
+					columns: ':visible'
 				}
 			}
 		],
