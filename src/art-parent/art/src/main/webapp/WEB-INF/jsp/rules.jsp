@@ -13,6 +13,7 @@ Display rules
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.rules" var="pageTitle"/>
 
@@ -28,7 +29,7 @@ Display rules
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
@@ -150,6 +151,10 @@ Display rules
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
+					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -165,6 +170,14 @@ Display rules
 											   updateDate="${rule.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(rule.description)}</td>
+						<td>${encode:forHtmlContent(rule.createdBy)}</td>
+						<td data-sort="${rule.creationDate.time}">
+							<fmt:formatDate value="${rule.creationDate}" pattern="${dateDisplayPattern}"/>
+						</td>
+						<td>${encode:forHtmlContent(rule.updatedBy)}</td>
+						<td data-sort="${rule.updateDate.time}">
+							<fmt:formatDate value="${rule.updateDate}" pattern="${dateDisplayPattern}"/>
+						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

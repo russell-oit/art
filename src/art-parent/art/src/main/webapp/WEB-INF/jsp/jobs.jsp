@@ -364,6 +364,10 @@ Display user jobs and jobs configuration
 					<th><spring:message code="jobs.text.lastEndDate"/></th>
 					<th><spring:message code="jobs.text.result"/></th>
 					<th><spring:message code="jobs.text.nextRunDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -396,6 +400,14 @@ Display user jobs and jobs configuration
 						</td>
 						<td data-sort="${job.nextRunDate.time}">
 							<fmt:formatDate value="${job.nextRunDate}" pattern="${dateDisplayPattern}"/>
+						</td>
+						<td>${encode:forHtmlContent(job.createdBy)}</td>
+						<td data-sort="${job.creationDate.time}">
+							<fmt:formatDate value="${job.creationDate}" pattern="${dateDisplayPattern}"/>
+						</td>
+						<td>${encode:forHtmlContent(job.updatedBy)}</td>
+						<td data-sort="${job.updateDate.time}">
+							<fmt:formatDate value="${job.updateDate}" pattern="${dateDisplayPattern}"/>
 						</td>
 						<td>
 							<c:if test="${sessionUser.userId == job.user.userId || action == 'config'}">

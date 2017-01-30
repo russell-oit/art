@@ -177,7 +177,7 @@ Display user configuration page
 					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
 					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
 					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
-					<th class="dtHidden"><spring:message code="page.text.updatedDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>

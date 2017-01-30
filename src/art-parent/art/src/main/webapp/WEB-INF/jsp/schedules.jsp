@@ -13,6 +13,7 @@ Display schedules
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.schedules" var="pageTitle"/>
 
@@ -25,7 +26,7 @@ Display schedules
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
@@ -145,6 +146,10 @@ Display schedules
 					<th><spring:message code="page.text.id"/></th>
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
+					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -160,6 +165,14 @@ Display schedules
 											   updateDate="${schedule.updateDate}"/>
 						</td>
 						<td>${encode:forHtmlContent(schedule.description)}</td>
+						<td>${encode:forHtmlContent(schedule.createdBy)}</td>
+						<td data-sort="${schedule.creationDate.time}">
+							<fmt:formatDate value="${schedule.creationDate}" pattern="${dateDisplayPattern}"/>
+						</td>
+						<td>${encode:forHtmlContent(schedule.updatedBy)}</td>
+						<td data-sort="${schedule.updateDate.time}">
+							<fmt:formatDate value="${schedule.updateDate}" pattern="${dateDisplayPattern}"/>
+						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 

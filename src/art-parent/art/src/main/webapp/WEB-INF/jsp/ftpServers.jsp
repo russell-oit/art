@@ -11,6 +11,7 @@
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.ftpServers" var="pageTitle"/>
 
@@ -24,7 +25,7 @@
 <spring:message code="page.message.recordsDeleted" var="recordsDeletedText"/>
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
@@ -163,6 +164,10 @@
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
+					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -179,6 +184,14 @@
 						</td>
 						<td>${encode:forHtmlContent(ftpServer.description)}</td>
 						<td><t:displayActiveStatus active="${ftpServer.active}"/></td>
+						<td>${encode:forHtmlContent(ftpServer.createdBy)}</td>
+						<td data-sort="${ftpServer.creationDate.time}">
+							<fmt:formatDate value="${ftpServer.creationDate}" pattern="${dateDisplayPattern}"/>
+						</td>
+						<td>${encode:forHtmlContent(ftpServer.updatedBy)}</td>
+						<td data-sort="${ftpServer.updateDate.time}">
+							<fmt:formatDate value="${ftpServer.updateDate}" pattern="${dateDisplayPattern}"/>
+						</td>
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" href="${pageContext.request.contextPath}/app/editFtpServer.do?id=${ftpServer.ftpServerId}">

@@ -13,6 +13,7 @@ Reports configuration page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.reportsConfiguration" var="pageTitle"/>
 
@@ -203,6 +204,10 @@ Reports configuration page
 					<th><spring:message code="page.text.name"/></th>
 					<th><spring:message code="page.text.description"/></th>
 					<th><spring:message code="page.text.active"/></th>
+					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updateDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -221,6 +226,14 @@ Reports configuration page
 						<td><t:displayActiveStatus active="${report.active}"
 											   activeText="${activeText}"
 											   disabledText="${disabledText}"/>
+						</td>
+						<td>${encode:forHtmlContent(report.createdBy)}</td>
+						<td data-sort="${report.creationDate.time}">
+							<fmt:formatDate value="${report.creationDate}" pattern="${dateDisplayPattern}"/>
+						</td>
+						<td>${encode:forHtmlContent(report.updatedBy)}</td>
+						<td data-sort="${report.updateDate.time}">
+							<fmt:formatDate value="${report.updateDate}" pattern="${dateDisplayPattern}"/>
 						</td>
 						<td>
 							<div class="btn-group">
