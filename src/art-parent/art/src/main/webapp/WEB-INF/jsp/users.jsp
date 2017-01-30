@@ -13,6 +13,7 @@ Display user configuration page
 <%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <spring:message code="page.title.users" var="pageTitle"/>
 
@@ -30,11 +31,11 @@ Display user configuration page
 <spring:message code="dialog.message.selectRecords" var="selectRecordsText"/>
 <spring:message code="page.message.someRecordsNotDeleted" var="someRecordsNotDeletedText"/>
 
-<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
+<t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
 		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
@@ -109,7 +110,7 @@ Display user configuration page
 						bootbox.alert("${selectRecordsText}");
 					}
 				});
-				
+
 				$('#editRecords').click(function () {
 					var selectedRows = table.rows({selected: true});
 					var data = selectedRows.data();
@@ -117,7 +118,7 @@ Display user configuration page
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href='${pageContext.request.contextPath}/app/editUsers.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/app/editUsers.do?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -164,6 +165,7 @@ Display user configuration page
 			</button>
 		</div>
 
+		<%-- https://stackoverflow.com/questions/26500010/responsive-bootstrap-datatable-not-collapsing-columns-at-the-correct-point --%>
 		<table id="users" class="table table-bordered table-striped table-condensed">
 			<thead>
 				<tr>
@@ -172,6 +174,10 @@ Display user configuration page
 					<th><spring:message code="users.text.username"/></th>
 					<th><spring:message code="users.text.fullName"/></th>
 					<th><spring:message code="page.text.active"/></th>
+					<th class="dtHidden"><spring:message code="page.text.createdBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.creationDate"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updatedBy"/></th>
+					<th class="dtHidden"><spring:message code="page.text.updatedDate"/></th>
 					<th class="noFilter"><spring:message code="page.text.action"/></th>
 				</tr>
 			</thead>
@@ -187,6 +193,14 @@ Display user configuration page
 						<td><t:displayActiveStatus active="${user.active}"
 											   activeText="${activeText}"
 											   disabledText="${disabledText}"/>
+						</td>
+						<td>${encode:forHtmlContent(user.createdBy)}</td>
+						<td data-sort="${user.creationDate.time}">
+							<fmt:formatDate value="${user.creationDate}" pattern="${dateDisplayPattern}"/>
+						</td>
+						<td>${encode:forHtmlContent(user.updatedBy)}</td>
+						<td data-sort="${user.updateDate.time}">
+							<fmt:formatDate value="${user.updateDate}" pattern="${dateDisplayPattern}"/>
 						</td>
 						<td>
 							<div class="btn-group">

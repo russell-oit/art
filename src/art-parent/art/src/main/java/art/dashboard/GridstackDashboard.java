@@ -17,7 +17,6 @@
  */
 package art.dashboard;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**

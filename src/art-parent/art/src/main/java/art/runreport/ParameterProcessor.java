@@ -18,7 +18,6 @@ package art.runreport;
 
 import art.enums.ParameterDataType;
 import art.enums.ParameterType;
-import art.enums.ReportType;
 import art.parameter.Parameter;
 import art.report.ChartOptions;
 import art.report.Report;
@@ -33,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;

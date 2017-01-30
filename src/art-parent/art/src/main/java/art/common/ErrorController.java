@@ -16,7 +16,6 @@
  */
 package art.common;
 
-import art.servlets.Config;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.exception.ExceptionUtils;

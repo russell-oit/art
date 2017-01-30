@@ -18,7 +18,6 @@
 package art.dashboard;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Represents properties that are common between regular and gridstack dashboards
