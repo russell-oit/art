@@ -37,7 +37,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 	public void init() {
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlDataTableOutput.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/bootstrap-3.3.6/css/bootstrap.min.css'>");
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.11/css/dataTables.bootstrap.min.css'>");
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/DataTables-1.10.13/css/dataTables.bootstrap.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/Buttons-1.2.4/css/buttons.dataTables.min.css'>");
 		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/js/dataTables/Buttons-1.2.4/css/buttons.bootstrap.min.css'>");
 		//note that including script files will cause the browser to display the following warning e.g. on firefox's debug console (Ctrl + Shift + I) when report run inline (using ajax)
@@ -45,8 +45,8 @@ public class HtmlDataTableOutput extends StandardOutput {
 		//https://stackoverflow.com/questions/24639335/javascript-console-log-causes-error-synchronous-xmlhttprequest-on-the-main-thr
 		//however we have to include the script files for report run by ajax to work
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/jquery-1.12.4.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.11/js/jquery.dataTables.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.11/js/dataTables.bootstrap.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/jquery.dataTables.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/jszip-2.5.0.min.js'></script>");
