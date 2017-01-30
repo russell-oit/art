@@ -49,9 +49,9 @@ public class HtmlDataTableOutput extends StandardOutput {
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/DataTables-1.10.13/js/dataTables.bootstrap.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/dataTables.buttons.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.bootstrap.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/jszip-2.5.0.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/pdfmake-0.1.18/pdfmake.min.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/js/pdfmake-0.1.18/vfs_fonts.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/JSZip-2.5.0/jszip.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/pdfmake.min.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/pdfmake-0.1.18/vfs_fonts.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.html5.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.print.min.js'></script>");
 		out.println("<script type='text/javascript' src='" + contextPath + "/js/dataTables/Buttons-1.2.4/js/buttons.colVis.min.js'></script>");
@@ -74,7 +74,7 @@ public class HtmlDataTableOutput extends StandardOutput {
 			
 			String languageFilePath = Config.getAppPath() + File.separator
 					+ "js" + File.separator
-					+ "dataTables-1.10.11" + File.separator
+					+ "dataTables" + File.separator
 					+ "i18n" + File.separator
 					+ languageFileName;
 			
