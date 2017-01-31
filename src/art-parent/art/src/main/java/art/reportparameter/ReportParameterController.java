@@ -55,7 +55,7 @@ public class ReportParameterController {
 	@Autowired
 	private ParameterService parameterService;
 
-	@RequestMapping(value = "/app/reportParameterConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/reportParameterConfig", method = RequestMethod.GET)
 	public String showReportParameterConfig(Model model, @RequestParam("reportId") Integer reportId) {
 		logger.debug("Entering showReportParameterConfig: reportId={}", reportId);
 
@@ -71,7 +71,7 @@ public class ReportParameterController {
 		return "reportParameterConfig";
 	}
 
-	@RequestMapping(value = "/app/deleteReportParameter", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReportParameter", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReportParameter(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteReportParameter: id={}", id);
@@ -89,7 +89,7 @@ public class ReportParameterController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/app/deleteReportParameters", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReportParameters", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReportParameters(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteReportParameters: ids={}",(Object) ids);
@@ -107,7 +107,7 @@ public class ReportParameterController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addReportParameter", method = RequestMethod.GET)
+	@RequestMapping(value = "/addReportParameter", method = RequestMethod.GET)
 	public String addReportParameter(Model model, @RequestParam("reportId") Integer reportId) {
 		logger.debug("Entering addReportParameter: reportId={}", reportId);
 
@@ -116,7 +116,7 @@ public class ReportParameterController {
 		return showEditReportParameter("add", model, reportId);
 	}
 
-	@RequestMapping(value = "/app/editReportParameter", method = RequestMethod.GET)
+	@RequestMapping(value = "/editReportParameter", method = RequestMethod.GET)
 	public String editReportParameter(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editReportParameter: id={}", id);
 
@@ -136,7 +136,7 @@ public class ReportParameterController {
 		return showEditReportParameter("edit", model, reportId);
 	}
 
-	@RequestMapping(value = "/app/saveReportParameter", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveReportParameter", method = RequestMethod.POST)
 	public String saveReportParameter(@ModelAttribute("reportParameter") @Valid ReportParameter reportParameter,
 			@RequestParam("action") String action,
 			@RequestParam("reportId") Integer reportId,
@@ -159,7 +159,7 @@ public class ReportParameterController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", parameterService.getParameterName(reportParameter.getParameter().getParameterId()));
-			return "redirect:/app/reportParameterConfig.do?reportId=" + reportId;
+			return "redirect:/reportParameterConfig?reportId=" + reportId;
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -192,7 +192,7 @@ public class ReportParameterController {
 		return "editReportParameter";
 	}
 
-	@RequestMapping(value = "/app/moveReportParameter", method = RequestMethod.POST)
+	@RequestMapping(value = "/moveReportParameter", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse moveReportParameter(Model model,
 			@RequestParam("id") Integer id,

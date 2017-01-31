@@ -104,7 +104,7 @@ public class JobController {
 	@Autowired
 	private FtpServerService ftpServerService;
 
-	@RequestMapping(value = "/app/jobs", method = RequestMethod.GET)
+	@RequestMapping(value = "/jobs", method = RequestMethod.GET)
 	public String showJobs(Model model, HttpSession session) {
 		logger.debug("Entering showJobs");
 
@@ -112,7 +112,7 @@ public class JobController {
 			User sessionUser = (User) session.getAttribute("sessionUser");
 			List<Job> jobs = jobService.getJobs(sessionUser.getUserId());
 			model.addAttribute("jobs", jobs);
-			model.addAttribute("nextPage", "jobs.do");
+			model.addAttribute("nextPage", "jobs");
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -123,13 +123,13 @@ public class JobController {
 		return "jobs";
 	}
 
-	@RequestMapping(value = "/app/jobsConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/jobsConfig", method = RequestMethod.GET)
 	public String showJobsConfig(Model model) {
 		logger.debug("Entering showJobsConfig");
 
 		try {
 			model.addAttribute("jobs", jobService.getAllJobs());
-			model.addAttribute("nextPage", "jobsConfig.do");
+			model.addAttribute("nextPage", "jobsConfig");
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -140,7 +140,7 @@ public class JobController {
 		return "jobs";
 	}
 
-	@RequestMapping(value = "/app/deleteJob", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteJob(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteJob: id={}", id);
@@ -158,7 +158,7 @@ public class JobController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteJobs", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteJobs", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteJobs(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteJobs: ids={}", (Object) ids);
@@ -176,7 +176,7 @@ public class JobController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/refreshJob", method = RequestMethod.POST)
+	@RequestMapping(value = "/refreshJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse refreshJob(@RequestParam("id") Integer id, Locale locale) {
 		logger.debug("Entering refreshJob: id={}", id);
@@ -207,7 +207,7 @@ public class JobController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/runJob", method = RequestMethod.POST)
+	@RequestMapping(value = "/runJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse runJob(@RequestParam("id") Integer id, HttpServletRequest request) {
 		logger.debug("Entering runJob: id={}", id);
@@ -240,7 +240,7 @@ public class JobController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/runLaterJob", method = RequestMethod.POST)
+	@RequestMapping(value = "/runLaterJob", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse runLaterJob(@RequestParam("runLaterJobId") Integer runLaterJobId,
 			@RequestParam("runLaterDate") String runLaterDate,
@@ -280,7 +280,7 @@ public class JobController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addJob", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/addJob", method = {RequestMethod.GET, RequestMethod.POST})
 	public String addJob(Model model, HttpServletRequest request, HttpSession session) {
 		logger.debug("Entering addJob");
 
@@ -312,7 +312,7 @@ public class JobController {
 		return showEditJob("add", model);
 	}
 
-	@RequestMapping(value = "/app/saveJob", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveJob", method = RequestMethod.POST)
 	public String saveJob(@ModelAttribute("job") @Valid Job job,
 			@RequestParam("action") String action, @RequestParam("nextPage") String nextPage,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -345,7 +345,7 @@ public class JobController {
 
 			redirectAttributes.addFlashAttribute("recordName", job.getName());
 			redirectAttributes.addFlashAttribute("record", job);
-			return "redirect:/app/" + nextPage;
+			return "redirect:/" + nextPage;
 		} catch (SQLException | RuntimeException | SchedulerException | ParseException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -354,7 +354,7 @@ public class JobController {
 		return showEditJob(action, model);
 	}
 
-	@RequestMapping(value = "/app/saveJobs", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveJobs", method = RequestMethod.POST)
 	public String saveJobs(@ModelAttribute("multipleJobEdit") @Valid MultipleJobEdit multipleJobEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
@@ -372,7 +372,7 @@ public class JobController {
 			jobService.updateJobs(multipleJobEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleJobEdit.getIds());
-			return "redirect:/app/jobsConfig.do";
+			return "redirect:/jobsConfig";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -445,7 +445,7 @@ public class JobController {
 		}
 	}
 
-	@RequestMapping(value = "/app/editJob", method = RequestMethod.GET)
+	@RequestMapping(value = "/editJob", method = RequestMethod.GET)
 	public String editJob(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editJob: id={}", id);
 
@@ -488,7 +488,7 @@ public class JobController {
 		model.addAttribute("reportOptions", reportOptions);
 	}
 
-	@RequestMapping(value = "/app/editJobs", method = RequestMethod.GET)
+	@RequestMapping(value = "/editJobs", method = RequestMethod.GET)
 	public String editJobs(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
 

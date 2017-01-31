@@ -30,24 +30,24 @@ Display report drilldowns
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
 			$.fn.bsTooltip = $.fn.tooltip.noConflict();
 		</script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
-		
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
+
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="reportsConfig.do"]').parent().addClass('active');
-				
+				$('a[href*="reportsConfig"]').parent().addClass('active');
+
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
-				
+
 				var tbl = $('#drilldowns');
 
 				var oTable = tbl.dataTable({
@@ -75,8 +75,7 @@ Display report drilldowns
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
-						}
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});
@@ -101,7 +100,7 @@ Display report drilldowns
 								$.ajax({
 									type: "POST",
 									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteDrilldown.do",
+									url: "${pageContext.request.contextPath}/deleteDrilldown",
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {
@@ -120,7 +119,7 @@ Display report drilldowns
 				//enable changing of drilldown position using drag and drop
 				oTable.rowReordering({
 					iIndexColumn: 1,
-					sURL: "moveDrilldown.do",
+					sURL: "moveDrilldown",
 					sRequestType: "POST",
 					fnSuccess: function (response) {
 						if (response.success) {
@@ -159,7 +158,7 @@ Display report drilldowns
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteDrilldowns.do",
+										url: "${pageContext.request.contextPath}/deleteDrilldowns",
 										data: {ids: ids},
 										success: function (response) {
 											if (response.success) {
@@ -207,7 +206,7 @@ Display report drilldowns
 			<b><spring:message code="drilldowns.text.parentReport"/>:</b> ${parentReportName}
 		</div>
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addDrilldown.do?parent=${parentReportId}">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addDrilldown?parent=${parentReportId}">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -242,7 +241,7 @@ Display report drilldowns
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editDrilldown.do?id=${drilldown.drilldownId}">
+								   href="${pageContext.request.contextPath}/editDrilldown?id=${drilldown.drilldownId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

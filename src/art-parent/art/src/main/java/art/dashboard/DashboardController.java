@@ -84,7 +84,7 @@ public class DashboardController {
 	private XPath xPath;
 	private Element rootNode;
 
-	@RequestMapping(value = "/app/showDashboard", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/showDashboard", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showDashboard(@RequestParam("reportId") Integer reportId,
 			HttpServletRequest request, Model model, Locale locale,
 			HttpSession session) {
@@ -139,7 +139,7 @@ public class DashboardController {
 			return errorPage;
 		}
 
-		boolean showInline = Boolean.valueOf(request.getParameter("showInline"));
+		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
 
 		if (reportType == ReportType.GridstackDashboard) {
 			if (showInline) {
@@ -412,7 +412,7 @@ public class DashboardController {
 		} else {
 			int reportId = Integer.parseInt(reportIdString);
 
-			url = request.getContextPath() + "/app/runReport.do?reportId=" + reportId
+			url = request.getContextPath() + "/runReport?reportId=" + reportId
 					+ "&isFragment=true";
 
 			//add report parameters

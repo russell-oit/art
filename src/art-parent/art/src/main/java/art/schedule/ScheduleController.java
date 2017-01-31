@@ -48,7 +48,7 @@ public class ScheduleController {
 	@Autowired
 	private ScheduleService scheduleService;
 
-	@RequestMapping(value = "/app/schedules", method = RequestMethod.GET)
+	@RequestMapping(value = "/schedules", method = RequestMethod.GET)
 	public String showSchedules(Model model) {
 		logger.debug("Entering showSchedules");
 
@@ -62,7 +62,7 @@ public class ScheduleController {
 		return "schedules";
 	}
 
-	@RequestMapping(value = "/app/deleteSchedule", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteSchedule", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteSchedule(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteSchedule: id={}", id);
@@ -80,7 +80,7 @@ public class ScheduleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteSchedules", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteSchedules", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteSchedules(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteSchedules: ids={}", (Object) ids);
@@ -98,7 +98,7 @@ public class ScheduleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/getSchedule", method = RequestMethod.POST)
+	@RequestMapping(value = "/getSchedule", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse getSchedule(@RequestParam("id") Integer id) {
 		logger.debug("Entering getSchedule: id={}", id);
@@ -117,7 +117,7 @@ public class ScheduleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addSchedule", method = RequestMethod.GET)
+	@RequestMapping(value = "/addSchedule", method = RequestMethod.GET)
 	public String addSchedule(Model model) {
 		logger.debug("Entering addSchedule");
 
@@ -126,7 +126,7 @@ public class ScheduleController {
 		return showEditSchedule("add", model);
 	}
 
-	@RequestMapping(value = "/app/editSchedule", method = RequestMethod.GET)
+	@RequestMapping(value = "/editSchedule", method = RequestMethod.GET)
 	public String editSchedule(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editSchedule: id={}", id);
 
@@ -140,7 +140,7 @@ public class ScheduleController {
 		return showEditSchedule("edit", model);
 	}
 
-	@RequestMapping(value = "/app/saveSchedule", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveSchedule", method = RequestMethod.POST)
 	public String saveSchedule(@ModelAttribute("schedule") @Valid Schedule schedule,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -171,7 +171,7 @@ public class ScheduleController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", schedule.getName());
-			return "redirect:/app/schedules.do";
+			return "redirect:/schedules";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

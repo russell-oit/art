@@ -38,7 +38,7 @@ public class LogsController {
 
 	private static final Logger logger = LoggerFactory.getLogger(LogsController.class);
 
-	@RequestMapping(value = "/app/logs", method = RequestMethod.GET)
+	@RequestMapping(value = "/logs", method = RequestMethod.GET)
 	public String showLogs(Model model) {
 		logger.debug("Entering showLogs");
 		

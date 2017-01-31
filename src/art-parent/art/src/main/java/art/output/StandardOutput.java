@@ -56,6 +56,8 @@ import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -88,6 +90,21 @@ public abstract class StandardOutput {
 	private Map<Integer, Object> columnFormatters;
 	private DecimalFormat globalNumericFormatter;
 	protected MessageSource messageSource;
+	private String requestBaseUrl;
+
+	/**
+	 * @return the requestBaseUrl
+	 */
+	public String getRequestBaseUrl() {
+		return requestBaseUrl;
+	}
+
+	/**
+	 * @param requestBaseUrl the requestBaseUrl to set
+	 */
+	public void setRequestBaseUrl(String requestBaseUrl) {
+		this.requestBaseUrl = requestBaseUrl;
+	}
 
 	/**
 	 * @return the messageSource
@@ -311,6 +328,17 @@ public abstract class StandardOutput {
 	 * @param value the value to output
 	 */
 	public abstract void addCellString(String value);
+
+	/**
+	 * For html output, outputs cleaned value to the current row. The
+	 * implementing class should not perform further escaping but instead output
+	 * the value as given
+	 *
+	 * @param value
+	 */
+	public void addCellStringClean(String value) {
+		addCellString(value);
+	}
 
 	/**
 	 * Outputs numeric value to the current row
@@ -598,7 +626,7 @@ public abstract class StandardOutput {
 				result.setTooManyRows(true);
 				return result;
 			} else {
-				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
+				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
 				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
 			}
 		}
@@ -916,8 +944,8 @@ public abstract class StandardOutput {
 						String baseFilenameWithBurstId = baseFileName + "-BurstId-" + fileNameBurstId;
 						String finalBaseFilename = ArtUtils.cleanBaseFilename(baseFilenameWithBurstId);
 						fileName = finalBaseFilename + "." + extension;
-						
-						if(!FinalFilenameValidator.isValid(fileName)){
+
+						if (!FinalFilenameValidator.isValid(fileName)) {
 							throw new IllegalArgumentException("Invalid burst file name - " + fileName);
 						}
 
@@ -934,8 +962,8 @@ public abstract class StandardOutput {
 						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId);
 						extension = reportFormat.getFilenameExtension();
 						fileName = baseFileName + "." + extension;
-						
-						if(!FinalFilenameValidator.isValid(fileName)){
+
+						if (!FinalFilenameValidator.isValid(fileName)) {
 							throw new IllegalArgumentException("Invalid file name - " + fileName);
 						}
 					}
@@ -971,7 +999,7 @@ public abstract class StandardOutput {
 					fos = endBurstOutput(fos, hiddenColumns, rsmd, totalColumns);
 					previousBurstId = null;
 				} else {
-					outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
+					outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
 				}
 			}
 
@@ -1173,12 +1201,13 @@ public abstract class StandardOutput {
 	 * should not be included in the output
 	 * @param nullNumberDisplay the string to display for null numeric values
 	 * @param nullStringDisplay the string to display for null string values
+	 * @param reportFormat the report format for the report
 	 * @return data for the output row
 	 * @throws SQLException
 	 */
 	private List<Object> outputResultSetColumns(Map<Integer, ColumnType> columnTypes,
 			ResultSet rs, List<String> hiddenColumns, String nullNumberDisplay,
-			String nullStringDisplay) throws SQLException {
+			String nullStringDisplay, ReportFormat reportFormat) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -1287,18 +1316,18 @@ public abstract class StandardOutput {
 					if (clob != null) {
 						value = clob.getSubString(1, (int) clob.length());
 					}
-					addString(value, nullStringDisplay);
+					addString(value, nullStringDisplay, reportFormat);
 					break;
 				case Other: //ms-access (ucanaccess driver) data type
 					value = rs.getObject(columnIndex);
 					if (value != null) {
 						value = value.toString();
 					}
-					addString(value, nullStringDisplay);
+					addString(value, nullStringDisplay, reportFormat);
 					break;
 				default:
 					value = rs.getString(columnIndex);
-					addString(value, nullStringDisplay);
+					addString(value, nullStringDisplay, reportFormat);
 			}
 
 			columnValues.add(value);
@@ -1337,7 +1366,12 @@ public abstract class StandardOutput {
 					targetAttribute = "target='_blank'";
 				}
 				drilldownTag = "<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
-				addCellString(drilldownTag);
+				if (requestBaseUrl != null) {
+					String cleanedDrilldownTag = Jsoup.clean(drilldownTag, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
+					addCellStringClean(cleanedDrilldownTag);
+				} else {
+					addCellString(drilldownTag);
+				}
 			}
 		}
 	}
@@ -1431,12 +1465,23 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 * @param nullStringDisplay the string to output if the value is null
+	 * @param reportFormat the report format for the report
 	 */
-	private void addString(Object value, String nullStringDisplay) {
+	private void addString(Object value, String nullStringDisplay, ReportFormat reportFormat) {
 		if (value == null) {
-			addCellString(nullStringDisplay);
+			if (requestBaseUrl != null) {
+				String cleanedValue = Jsoup.clean(nullStringDisplay, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
+				addCellStringClean(cleanedValue);
+			} else {
+				addCellString(nullStringDisplay);
+			}
 		} else {
-			addCellString((String) value);
+			if (requestBaseUrl != null) {
+				String cleanedValue = Jsoup.clean((String) value, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
+				addCellStringClean(cleanedValue);
+			} else {
+				addCellString((String) value);
+			}
 		}
 	}
 

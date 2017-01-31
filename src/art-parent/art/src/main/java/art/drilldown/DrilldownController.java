@@ -53,7 +53,7 @@ public class DrilldownController {
 	@Autowired
 	private ReportService reportService;
 
-	@RequestMapping(value = "/app/drilldowns", method = RequestMethod.GET)
+	@RequestMapping(value = "/drilldowns", method = RequestMethod.GET)
 	public String showDrilldowns(Model model, @RequestParam("reportId") Integer reportId) {
 
 		logger.debug("Entering showDrilldowns: reportId={}", reportId);
@@ -70,7 +70,7 @@ public class DrilldownController {
 		return "drilldowns";
 	}
 
-	@RequestMapping(value = "/app/deleteDrilldown", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteDrilldown", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteDrilldown(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteDrilldown: id={}", id);
@@ -88,7 +88,7 @@ public class DrilldownController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteDrilldowns", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteDrilldowns", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteDrilldowns(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteDrilldowns: ids={}", (Object) ids);
@@ -106,7 +106,7 @@ public class DrilldownController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addDrilldown", method = RequestMethod.GET)
+	@RequestMapping(value = "/addDrilldown", method = RequestMethod.GET)
 	public String addDrilldown(Model model,
 			@RequestParam("parent") Integer parent) {
 
@@ -117,7 +117,7 @@ public class DrilldownController {
 		return showEditDrilldown("add", model, parent);
 	}
 
-	@RequestMapping(value = "/app/editDrilldown", method = RequestMethod.GET)
+	@RequestMapping(value = "/editDrilldown", method = RequestMethod.GET)
 	public String editDrilldown(@RequestParam("id") Integer id, Model model) {
 
 		logger.debug("Entering editDrilldown: id={}", id);
@@ -138,7 +138,7 @@ public class DrilldownController {
 		return showEditDrilldown("edit", model, parentReportId);
 	}
 
-	@RequestMapping(value = "/app/saveDrilldown", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveDrilldown", method = RequestMethod.POST)
 	public String saveDrilldown(@ModelAttribute("drilldown") @Valid Drilldown drilldown,
 			@RequestParam("action") String action,
 			@RequestParam("parent") Integer parent,
@@ -162,7 +162,7 @@ public class DrilldownController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", reportService.getReportName(drilldown.getDrilldownReport().getReportId()));
-			return "redirect:/app/drilldowns.do?reportId=" + parent;
+			return "redirect:/drilldowns?reportId=" + parent;
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -200,7 +200,7 @@ public class DrilldownController {
 		return "editDrilldown";
 	}
 
-	@RequestMapping(value = "/app/moveDrilldown", method = RequestMethod.POST)
+	@RequestMapping(value = "/moveDrilldown", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse moveDrilldown(Model model,
 			@RequestParam("id") Integer id,

@@ -65,7 +65,7 @@ public class AccessRightController {
 	@Autowired
 	private JobService jobService;
 
-	@RequestMapping(value = "/app/accessRights", method = RequestMethod.GET)
+	@RequestMapping(value = "/accessRights", method = RequestMethod.GET)
 	public String showAccessRights(Model model) {
 		logger.debug("Entering showAccessRights");
 
@@ -84,7 +84,7 @@ public class AccessRightController {
 		return "accessRights";
 	}
 
-	@RequestMapping(value = "/app/accessRightsConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/accessRightsConfig", method = RequestMethod.GET)
 	public String showAccessRightsConfig(Model model, HttpSession session) {
 		logger.debug("Entering showAccessRightsConfig");
 
@@ -104,7 +104,7 @@ public class AccessRightController {
 		return "accessRightsConfig";
 	}
 
-	@RequestMapping(value = "/app/deleteAccessRight", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteAccessRight", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteAccessRight(@RequestParam("id") String id) {
 		logger.debug("Entering deleteAccessRight: id='{}'", id);
@@ -138,7 +138,7 @@ public class AccessRightController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/updateAccessRight", method = RequestMethod.POST)
+	@RequestMapping(value = "/updateAccessRight", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse updateAccessRight(Model model, @RequestParam("action") String action,
 			@RequestParam(value = "users[]", required = false) String[] users,

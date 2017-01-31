@@ -56,7 +56,7 @@ public class InternalLogin {
 				//user doesn't exist
 				logger.debug("No records returned");
 
-				result.setMessage("login.message.invalidUser");
+				result.setMessage("login.message.artUserInvalid");
 				result.setDetails("invalid user");
 			} else {
 				if (user.isActive()) {
@@ -79,12 +79,12 @@ public class InternalLogin {
 						}
 					} else {
 						//invalid password
-						result.setMessage("login.message.invalidCredentials");
+						result.setMessage("login.message.invalidPassword");
 						result.setDetails("invalid password");
 					}
 				} else {
 					//user disabled
-					result.setMessage("login.message.userDisabled");
+					result.setMessage("login.message.artUserDisabled");
 					result.setDetails("user disabled");
 				}
 			}

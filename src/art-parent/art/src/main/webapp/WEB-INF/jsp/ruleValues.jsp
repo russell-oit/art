@@ -26,12 +26,12 @@ Display rule values
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-10 col-md-offset-1">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="ruleValuesConfig.do"]').parent().addClass('active');
+				$('a[href*="ruleValuesConfig"]').parent().addClass('active');
 
 				var tbl = $('#values');
 				
@@ -44,7 +44,7 @@ Display rule values
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});
@@ -78,7 +78,7 @@ Display rule values
 								$.ajax({
 									type: "POST",
 									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteRuleValue.do",
+									url: "${pageContext.request.contextPath}/deleteRuleValue",
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {
@@ -143,7 +143,7 @@ Display rule values
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editUserRuleValue.do?id=${userRuleValue.ruleValueKey}">
+								   href="${pageContext.request.contextPath}/editUserRuleValue?id=${userRuleValue.ruleValueKey}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>
@@ -169,7 +169,7 @@ Display rule values
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editUserGroupRuleValue.do?id=${userGroupRuleValue.ruleValueKey}">
+								   href="${pageContext.request.contextPath}/editUserGroupRuleValue?id=${userGroupRuleValue.ruleValueKey}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

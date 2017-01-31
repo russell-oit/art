@@ -35,7 +35,7 @@ Edit schedule page
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="schedules.do"]').parent().addClass('active');
+				$('a[href*="schedules"]').parent().addClass('active');
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
@@ -48,7 +48,7 @@ Edit schedule page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/Manual.html#saved-schedules">
+			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#saved-schedules">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
@@ -57,13 +57,13 @@ Edit schedule page
 	<jsp:attribute name="belowMainPanel">
 		<div class="col-md-6 col-md-offset-3">
 			<div class="alert alert-info">
-				<jsp:include page="/WEB-INF/html/scheduleNotes.html" />
+				<jsp:include page="/WEB-INF/jsp/scheduleNotes.jsp" />
 			</div>
 		</div>
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveSchedule.do"/>
+		<spring:url var="formUrl" value="/saveSchedule"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="schedule">
 			<fieldset>
 				<c:if test="${formErrors != null}">

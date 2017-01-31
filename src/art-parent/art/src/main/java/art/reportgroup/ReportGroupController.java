@@ -49,7 +49,7 @@ public class ReportGroupController {
 	@Autowired
 	private ReportGroupService reportGroupService;
 
-	@RequestMapping(value = "/app/reportGroups", method = RequestMethod.GET)
+	@RequestMapping(value = "/reportGroups", method = RequestMethod.GET)
 	public String showReportGroups(Model model) {
 		logger.debug("Entering showReportGroups");
 
@@ -63,7 +63,7 @@ public class ReportGroupController {
 		return "reportGroups";
 	}
 
-	@RequestMapping(value = "/app/deleteReportGroup", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReportGroup", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReportGroup(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteReportGroup: id={}", id);
@@ -88,7 +88,7 @@ public class ReportGroupController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/app/deleteReportGroups", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReportGroups", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReportGroups(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteReportGroups: ids={}", (Object)ids);
@@ -112,7 +112,7 @@ public class ReportGroupController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addReportGroup", method = RequestMethod.GET)
+	@RequestMapping(value = "/addReportGroup", method = RequestMethod.GET)
 	public String addReportGroup(Model model) {
 		logger.debug("Entering addReportGroup");
 
@@ -121,7 +121,7 @@ public class ReportGroupController {
 		return showEditReportGroup("add", model);
 	}
 
-	@RequestMapping(value = "/app/editReportGroup", method = RequestMethod.GET)
+	@RequestMapping(value = "/editReportGroup", method = RequestMethod.GET)
 	public String editReportGroup(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editReportGroup: id={}", id);
 
@@ -135,7 +135,7 @@ public class ReportGroupController {
 		return showEditReportGroup("edit", model);
 	}
 
-	@RequestMapping(value = "/app/saveReportGroup", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveReportGroup", method = RequestMethod.POST)
 	public String saveReportGroup(@ModelAttribute("group") @Valid ReportGroup group,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -160,7 +160,7 @@ public class ReportGroupController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", group.getName());
-			return "redirect:/app/reportGroups.do";
+			return "redirect:/reportGroups";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

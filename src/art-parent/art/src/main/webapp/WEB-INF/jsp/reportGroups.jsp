@@ -31,12 +31,12 @@ Report groups configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="reportGroups.do"]').parent().addClass('active');
+				$('a[href*="reportGroups"]').parent().addClass('active');
 
 				var tbl = $('#reportGroups');
 
@@ -52,7 +52,7 @@ Report groups configuration page
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteReportGroup.do", //deleteUrl
+						"deleteReportGroup", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -85,7 +85,7 @@ Report groups configuration page
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteReportGroups.do",
+										url: "${pageContext.request.contextPath}/deleteReportGroups",
 										data: {ids: ids},
 										success: function (response) {
 											var nonDeletedRecords = response.data;
@@ -133,7 +133,7 @@ Report groups configuration page
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addReportGroup.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReportGroup">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -180,7 +180,7 @@ Report groups configuration page
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editReportGroup.do?id=${group.reportGroupId}">
+								   href="${pageContext.request.contextPath}/editReportGroup?id=${group.reportGroupId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

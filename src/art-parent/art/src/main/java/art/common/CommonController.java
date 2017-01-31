@@ -1,6 +1,7 @@
 package art.common;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -12,19 +13,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class CommonController {
 
-	@RequestMapping(value = "/app/accessDenied", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/accessDenied", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showAccessDenied() {
 		return "accessDenied";
 	}
 
-	@RequestMapping(value = "/app/success", method = RequestMethod.GET)
+	@RequestMapping(value = "/success", method = RequestMethod.GET)
 	public String showSuccess() {
 		return "success";
 	}
 
-	@RequestMapping(value = "/app/reportError", method = RequestMethod.GET)
+	@RequestMapping(value = "/reportError", method = RequestMethod.GET)
 	public String showReportError() {
 		return "reportError";
 	}
-
+	
 }

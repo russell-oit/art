@@ -23,7 +23,7 @@ Edit user group rule value
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="ruleValuesConfig.do"]').parent().addClass('active');
+				$('a[href*="ruleValuesConfig"]').parent().addClass('active');
 
 				$('#ruleValue').focus();
 
@@ -32,7 +32,7 @@ Edit user group rule value
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveUserGroupRuleValue.do"/>
+		<spring:url var="formUrl" value="/saveUserGroupRuleValue"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="value">
 			<fieldset>
 				<c:if test="${formErrors != null}">

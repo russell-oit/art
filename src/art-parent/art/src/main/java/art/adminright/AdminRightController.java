@@ -55,7 +55,7 @@ public class AdminRightController {
 	@Autowired
 	private ReportGroupService reportGroupService;
 
-	@RequestMapping(value = "/app/adminRights", method = RequestMethod.GET)
+	@RequestMapping(value = "/adminRights", method = RequestMethod.GET)
 	public String showAdminRights(Model model) {
 		logger.debug("Entering showAdminRights");
 
@@ -70,7 +70,7 @@ public class AdminRightController {
 		return "adminRights";
 	}
 
-	@RequestMapping(value = "/app/adminRightsConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/adminRightsConfig", method = RequestMethod.GET)
 	public String showAdminRightsConfig(Model model) {
 		logger.debug("Entering showAdminRightsConfig");
 
@@ -86,7 +86,7 @@ public class AdminRightController {
 		return "adminRightsConfig";
 	}
 
-	@RequestMapping(value = "/app/deleteAdminRight", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteAdminRight", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteAdminRight(@RequestParam("id") String id) {
 		logger.debug("Entering deleteAdminRight: id='{}'", id);
@@ -120,7 +120,7 @@ public class AdminRightController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/updateAdminRight", method = RequestMethod.POST)
+	@RequestMapping(value = "/updateAdminRight", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse updateAdminRight(Model model, @RequestParam("action") String action,
 			@RequestParam("admins[]") String[] admins,

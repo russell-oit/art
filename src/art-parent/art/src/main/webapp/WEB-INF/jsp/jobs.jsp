@@ -40,22 +40,22 @@ Display user jobs and jobs configuration
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
 				var actionValue = '${action}';
 				if (actionValue === 'config') {
 					$('a[id="configure"]').parent().addClass('active');
-					$('a[href*="jobsConfig.do"]').parent().addClass('active');
+					$('a[href*="jobsConfig"]').parent().addClass('active');
 				} else if (actionValue === 'jobs') {
-					$('a[href*="jobs.do"]').parent().addClass('active');
+					$('a[href*="jobs"]').parent().addClass('active');
 				}
 
 				var tbl = $('#jobs');
@@ -72,7 +72,7 @@ Display user jobs and jobs configuration
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteJob.do", //deleteUrl
+						"deleteJob", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -89,7 +89,7 @@ Display user jobs and jobs configuration
 
 					$.ajax({
 						type: 'POST',
-						url: '${pageContext.request.contextPath}/app/runJob.do',
+						url: '${pageContext.request.contextPath}/runJob',
 						dataType: 'json',
 						data: {id: recordId},
 						success: function (response)
@@ -123,7 +123,7 @@ Display user jobs and jobs configuration
 
 					$.ajax({
 						type: 'POST',
-						url: '${pageContext.request.contextPath}/app/runLaterJob.do',
+						url: '${pageContext.request.contextPath}/runLaterJob',
 						dataType: 'json',
 						data: $('#runLaterForm').serialize(),
 						success: function (response)
@@ -146,7 +146,7 @@ Display user jobs and jobs configuration
 
 					$.ajax({
 						type: 'POST',
-						url: '${pageContext.request.contextPath}/app/refreshJob.do',
+						url: '${pageContext.request.contextPath}/refreshJob',
 						dataType: 'json',
 						data: {id: recordId},
 						success: function (response)
@@ -206,7 +206,7 @@ Display user jobs and jobs configuration
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteJobs.do",
+										url: "${pageContext.request.contextPath}/deleteJobs",
 										data: {ids: ids},
 										success: function (response) {
 											if (response.success) {
@@ -233,7 +233,7 @@ Display user jobs and jobs configuration
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href = '${pageContext.request.contextPath}/app/editJobs.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/editJobs?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -246,7 +246,7 @@ Display user jobs and jobs configuration
 
 					$.ajax({
 						type: 'POST',
-						url: '${pageContext.request.contextPath}/app/runJob.do',
+						url: '${pageContext.request.contextPath}/runJob',
 						dataType: 'json',
 						data: {id: recordId},
 						success: function (response)
@@ -318,7 +318,7 @@ Display user jobs and jobs configuration
 					&nbsp;
 					<div class="btn-group">
 						<a class="btn btn-default" 
-						   href="${pageContext.request.contextPath}/app/editJob.do?id=${record.jobId}&nextPage=${nextPage}">
+						   href="${pageContext.request.contextPath}/editJob?id=${record.jobId}&nextPage=${nextPage}">
 							<spring:message code="page.action.edit"/>
 						</a>
 					</div>
@@ -413,7 +413,7 @@ Display user jobs and jobs configuration
 							<c:if test="${sessionUser.userId == job.user.userId || action == 'config'}">
 								<div class="btn-group">
 									<a class="btn btn-default" 
-									   href="${pageContext.request.contextPath}/app/editJob.do?id=${job.jobId}&nextPage=${nextPage}">
+									   href="${pageContext.request.contextPath}/editJob?id=${job.jobId}&nextPage=${nextPage}">
 										<i class="fa fa-pencil-square-o"></i>
 										<spring:message code="page.action.edit"/>
 									</a>
@@ -461,7 +461,7 @@ Display user jobs and jobs configuration
 
 					<!-- Modal Body -->
 					<div class="modal-body">
-						<form id="runLaterForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/app/runLaterJob.do">
+						<form id="runLaterForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/runLaterJob">
 							<input type="hidden" id="runLaterJobId" name="runLaterJobId"/>
 							<div class="form-group">
 								<label class="control-label col-md-4" for="runLaterJobName">

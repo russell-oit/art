@@ -14,8 +14,8 @@ Error page for 404 errors (page not found)
     <head>
         <meta charset='utf-8'>
         <title>ART - Page Not Found</title>
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
-		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-3.3.6/css/bootstrap.min.css">
+		<link rel="shortcut icon" href="${pageContext.request.contextPath}/public/images/favicon.ico">
     </head>
     <body>
         <jsp:include page="/WEB-INF/jsp/error-404-inline.jsp"/>

@@ -26,12 +26,12 @@ Display user group membership
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="userGroupMembershipConfig.do"]').parent().addClass('active');
+				$('a[href*="userGroupMembershipConfig"]').parent().addClass('active');
 
 				var tbl = $('#memberships');
 				
@@ -44,7 +44,7 @@ Display user group membership
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});
@@ -78,7 +78,7 @@ Display user group membership
 								$.ajax({
 									type: "POST",
 									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteUserGroupMembership.do",
+									url: "${pageContext.request.contextPath}/deleteUserGroupMembership",
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {

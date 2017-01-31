@@ -25,7 +25,7 @@ Reports page. Also main/home page
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function() {
-				$('a[href*="reports.do"]').parent().addClass('active');
+				$('a[href*="reports"]').parent().addClass('active');
 
 				var tbl = $('#reports');
 				
@@ -53,7 +53,7 @@ Reports page. Also main/home page
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: function() {
 						$('div.dataTables_filter input').focus();
@@ -140,7 +140,7 @@ Reports page. Also main/home page
 						<td><encode:forHtmlContent value="${report.reportGroup.name}"/></td>
 						<td><encode:forHtmlContent value="${report.description}"/></td>
 						<td>
-							<a href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
+							<a href="${pageContext.request.contextPath}/selectReportParameters?reportId=${report.reportId}">
 								<encode:forHtmlContent value="${report.name}"/>
 							</a> &nbsp;
 							<t:displayNewLabel creationDate="${report.creationDate}"

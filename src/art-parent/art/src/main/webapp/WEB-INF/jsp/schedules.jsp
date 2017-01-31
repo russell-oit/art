@@ -29,12 +29,12 @@ Display schedules
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="schedules.do"]').parent().addClass('active');
+				$('a[href*="schedules"]').parent().addClass('active');
 
 				var tbl = $('#schedules');
 
@@ -50,7 +50,7 @@ Display schedules
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteSchedule.do", //deleteUrl
+						"deleteSchedule", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -84,7 +84,7 @@ Display schedules
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteSchedules.do",
+										url: "${pageContext.request.contextPath}/deleteSchedules",
 										data: {ids: ids},
 										success: function (response) {
 											if (response.success) {
@@ -129,7 +129,7 @@ Display schedules
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addSchedule.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addSchedule">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -176,7 +176,7 @@ Display schedules
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editSchedule.do?id=${schedule.scheduleId}">
+								   href="${pageContext.request.contextPath}/editSchedule?id=${schedule.scheduleId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

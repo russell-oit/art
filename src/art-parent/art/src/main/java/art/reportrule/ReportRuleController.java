@@ -54,7 +54,7 @@ public class ReportRuleController {
 	@Autowired
 	private RuleService ruleService;
 
-	@RequestMapping(value = "/app/reportRules", method = RequestMethod.GET)
+	@RequestMapping(value = "/reportRules", method = RequestMethod.GET)
 	public String showReportRules(Model model, @RequestParam("reportId") Integer reportId) {
 
 		logger.debug("Entering showReportRules");
@@ -71,7 +71,7 @@ public class ReportRuleController {
 		return "reportRules";
 	}
 
-	@RequestMapping(value = "/app/deleteReportRule", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReportRule", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReportRule(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteReportRule: id={}", id);
@@ -89,7 +89,7 @@ public class ReportRuleController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/app/deleteReportRules", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReportRules", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReportRules(@RequestParam("ids") Integer[] ids) {
 		logger.debug("Entering deleteReportRules: ids={}",(Object) ids);
@@ -107,7 +107,7 @@ public class ReportRuleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addReportRule", method = RequestMethod.GET)
+	@RequestMapping(value = "/addReportRule", method = RequestMethod.GET)
 	public String addReportRule(Model model, @RequestParam("reportId") Integer reportId) {
 		logger.debug("Entering addReportRule: reportId={}", reportId);
 
@@ -116,7 +116,7 @@ public class ReportRuleController {
 		return showEditReportRule("add", model, reportId);
 	}
 	
-	@RequestMapping(value = "/app/editReportRule", method = RequestMethod.GET)
+	@RequestMapping(value = "/editReportRule", method = RequestMethod.GET)
 	public String editReportRule(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editReportRule: id={}", id);
 
@@ -136,7 +136,7 @@ public class ReportRuleController {
 		return showEditReportRule("edit", model, reportId);
 	}
 
-	@RequestMapping(value = "/app/saveReportRule", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveReportRule", method = RequestMethod.POST)
 	public String saveReportRule(@ModelAttribute("reportRule") @Valid ReportRule reportRule,
 			@RequestParam("action") String action,
 			@RequestParam("reportId") Integer reportId,
@@ -159,7 +159,7 @@ public class ReportRuleController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", ruleService.getRuleName(reportRule.getRule().getRuleId()));
-			return "redirect:/app/reportRules.do?reportId=" + reportId;
+			return "redirect:/reportRules?reportId=" + reportId;
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

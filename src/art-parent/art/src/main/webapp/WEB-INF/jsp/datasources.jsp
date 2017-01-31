@@ -32,12 +32,12 @@ Display datasources
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="datasources.do"]').parent().addClass('active');
+				$('a[href*="datasources"]').parent().addClass('active');
 
 				var tbl = $('#datasources');
 
@@ -53,7 +53,7 @@ Display datasources
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteDatasource.do", //deleteUrl
+						"deleteDatasource", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -86,7 +86,7 @@ Display datasources
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteDatasources.do",
+										url: "${pageContext.request.contextPath}/deleteDatasources",
 										data: {ids: ids},
 										success: function (response) {
 											var nonDeletedRecords = response.data;
@@ -116,7 +116,7 @@ Display datasources
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href = '${pageContext.request.contextPath}/app/editDatasources.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/editDatasources?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -148,7 +148,7 @@ Display datasources
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addDatasource.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addDatasource">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -201,7 +201,7 @@ Display datasources
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editDatasource.do?id=${datasource.datasourceId}">
+								   href="${pageContext.request.contextPath}/editDatasource?id=${datasource.datasourceId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

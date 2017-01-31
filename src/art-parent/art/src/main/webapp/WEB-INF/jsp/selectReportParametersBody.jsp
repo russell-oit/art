@@ -16,16 +16,16 @@ Display section to allow selecting of report parameters and initiate running of 
 
 <spring:message code="reports.message.fileSent" var="fileSentText"/>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 
 <script type="text/javascript">
 	$(document).ready(function () {
 		$("#schedule").click(function (e) {
 			e.preventDefault();
-			var url = "${pageContext.request.contextPath}/app/addJob.do";
+			var url = "${pageContext.request.contextPath}/addJob";
 			$('#parametersForm').attr('action', url).submit();
 		});
 
@@ -37,7 +37,7 @@ Display section to allow selecting of report parameters and initiate running of 
 
 			$.ajax({
 				type: 'POST',
-				url: '${pageContext.request.contextPath}/app/emailReport.do',
+				url: '${pageContext.request.contextPath}/emailReport',
 				dataType: 'json',
 				data: $('#emailReportForm').serialize(),
 				success: function (response) //on recieve of reply
@@ -69,7 +69,8 @@ Display section to allow selecting of report parameters and initiate running of 
 			//disable buttons
 			$('.action').prop('disabled', true);
 
-			var url = "${pageContext.request.contextPath}/app/runReport.do";
+			var url = "${pageContext.request.contextPath}/runReport";
+
 			$("#reportOutput").load(url, $form.serialize(),
 					function (responseText, statusText, xhr) {
 						//callback funtion for when jquery load has finished
@@ -122,6 +123,9 @@ Display section to allow selecting of report parameters and initiate running of 
 		//{container: 'body'} needed if tooltips shown on input-group element or button
 		$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
+		if (${startSelectParametersHidden}) {
+			$("#collapse1").collapse("hide");
+		}
 
 	}); //end document ready
 </script>
@@ -187,7 +191,7 @@ Display section to allow selecting of report parameters and initiate running of 
 
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/tinymce-4.3.8/tinymce.min.js"></script>
 <script type="text/javascript">
 	tinymce.init({
 		selector: "textarea.editor",
@@ -234,12 +238,12 @@ Display section to allow selecting of report parameters and initiate running of 
 		<div class="panel panel-default">
 			<div id="collapse1" class="panel-collapse collapse in">
 				<div class="panel-body">
-					<spring:url var="formUrl" value="/app/runReport.do"/>
+					<spring:url var="formUrl" value="/runReport"/>
 					<form id="parametersForm" class="form-horizontal" method="POST" action="${formUrl}">
 						<fieldset>
 							<input type="hidden" name="reportId" value="${report.reportId}">
 							<input type="hidden" name="showInline" id="showInline" value="true">
-							<input type="hidden" name="nextPage" id="nextPage" value="jobs.do">
+							<input type="hidden" name="nextPage" id="nextPage" value="jobs">
 
 							<c:set var="labelColClass" value="col-md-5" scope="request"/>
 							<c:set var="inputColClass" value="col-md-7" scope="request"/>
@@ -406,7 +410,7 @@ Display section to allow selecting of report parameters and initiate running of 
 	<div class="modal-dialog">
 		<div class="modal-content">
 
-			<form id="emailReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/app/emailReport.do">
+			<form id="emailReportForm" class="form-horizontal" role="form" method="POST" action="${pageContext.request.contextPath}/emailReport">
 				<!-- Modal Header -->
 				<div class="modal-header">
 					<button type="button" class="close" 

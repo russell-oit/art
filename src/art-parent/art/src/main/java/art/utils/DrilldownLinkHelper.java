@@ -83,9 +83,10 @@ public class DrilldownLinkHelper implements Serializable {
 			if (drilldownReportFormat == null || drilldownReportFormat.equalsIgnoreCase("all")) {
 				drilldownReportFormat = "default";
 			}
-			sb.append("runReport.do?reportId=").append(drilldownReportId)
+			sb.append("runReport?reportId=").append(drilldownReportId)
 					.append("&reportFormat=").append(drilldownReportFormat)
-					.append("&allowSelectParameters=true");
+					.append("&allowSelectParameters=true")
+					.append("&startSelectParametersHidden=true");
 		}
 	}
 

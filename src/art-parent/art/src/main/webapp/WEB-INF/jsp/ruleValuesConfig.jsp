@@ -28,20 +28,20 @@ Configure rule value
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/css/multi-select.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/lou-multi-select-0.9.11/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery.quicksearch.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="ruleValuesConfig.do"]').parent().addClass('active');
+				$('a[href*="ruleValuesConfig"]').parent().addClass('active');
 				
 				$('.multi-select').multiSelect({
 					selectableHeader: "<div>${availableText}</div>\n\
@@ -114,7 +114,7 @@ Configure rule value
 					$.ajax({
 						type: "POST",
 						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/updateRuleValue.do",
+						url: "${pageContext.request.contextPath}/updateRuleValue",
 						data: {action: action, users: users, userGroups: userGroups,
 							rule: rule, ruleValue: ruleValue},
 						success: function(response) {
@@ -210,7 +210,7 @@ Configure rule value
 					<div class="col-md-12">
 						<div id="actionsDiv" class="pull-right">
 							<a class="btn btn-default" 
-							   href="${pageContext.request.contextPath}/app/ruleValues.do">
+							   href="${pageContext.request.contextPath}/ruleValues">
 								<spring:message code="page.action.show"/>
 							</a>
 							<button type="button" class="btn btn-default updateValues" data-action="add">

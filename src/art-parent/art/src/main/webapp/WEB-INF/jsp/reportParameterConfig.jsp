@@ -29,20 +29,20 @@
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 	
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			//enable use of bootstrap tooltips. both jquery ui and bootstrap define the tooltip function
 			$.fn.bsTooltip = $.fn.tooltip.noConflict();
 		</script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery.dataTables.rowReordering-1.2.1.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="reportsConfig.do"]').parent().addClass('active');
+				$('a[href*="reportsConfig"]').parent().addClass('active');
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
@@ -61,7 +61,7 @@
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteReportParameter.do", //deleteUrl
+						"deleteReportParameter", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -72,7 +72,7 @@
 				//enable changing of report parameter position using drag and drop
 				oTable.rowReordering({
 					iIndexColumn: 1,
-					sURL: "moveReportParameter.do",
+					sURL: "moveReportParameter",
 					sRequestType: "POST",
 					fnSuccess: function (response) {
 						if (response.success) {
@@ -111,7 +111,7 @@
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteReportParameters.do",
+										url: "${pageContext.request.contextPath}/deleteReportParameters",
 										data: {ids: ids},
 										success: function (response) {
 											if (response.success) {
@@ -159,7 +159,7 @@
 			<b><spring:message code="page.text.report"/>:</b> ${reportName}
 		</div>
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addReportParameter.do?reportId=${reportId}">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReportParameter?reportId=${reportId}">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -194,7 +194,7 @@
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editReportParameter.do?id=${reportParameter.reportParameterId}">
+								   href="${pageContext.request.contextPath}/editReportParameter?id=${reportParameter.reportParameterId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

@@ -45,7 +45,7 @@ public class PasswordController {
 	@Autowired
 	private UserService userService;
 
-	@RequestMapping(value = "/app/password", method = RequestMethod.GET)
+	@RequestMapping(value = "/password", method = RequestMethod.GET)
 	public String showPassword(HttpSession session) {
 		logger.debug("Entering showPassword");
 		
@@ -58,7 +58,7 @@ public class PasswordController {
 		}
 	}
 
-	@RequestMapping(value = "/app/password", method = RequestMethod.POST)
+	@RequestMapping(value = "/password", method = RequestMethod.POST)
 	public String processPassword(HttpSession session,
 			@RequestParam("newPassword1") String newPassword1,
 			@RequestParam("newPassword2") String newPassword2,
@@ -82,7 +82,7 @@ public class PasswordController {
 				sessionUser.setPasswordAlgorithm(passwordAlgorithm);
 
 				redirectAttributes.addFlashAttribute("message", "password.message.passwordUpdated");
-				return "redirect:/app/success.do";
+				return "redirect:/success";
 			} catch (SQLException | RuntimeException ex) {
 				logger.error("Error", ex);
 				model.addAttribute("error", ex);

@@ -35,7 +35,7 @@ Edit report group page
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="reportGroups.do"]').parent().addClass('active');
+				$('a[href*="reportGroups"]').parent().addClass('active');
 
 				$('#name').focus();
 
@@ -45,14 +45,14 @@ Edit report group page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/Manual.html#report-groups">
+			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#report-groups">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveReportGroup.do"/>
+		<spring:url var="formUrl" value="/saveReportGroup"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="group">
 			<fieldset>
 				<c:if test="${formErrors != null}">

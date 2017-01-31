@@ -29,7 +29,6 @@
 					if (rootCause == null) {
 						rootCause = se;
 					}
-					out.println("<b>** Root cause is:</b> " + rootCause.getMessage() + "<br>");
 					rootCause.printStackTrace(pOut);
 				} else {
 					// It's not a ServletException, so we'll just show it

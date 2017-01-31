@@ -55,7 +55,7 @@ public class ParameterController {
 	@Autowired
 	private ReportService reportService;
 
-	@RequestMapping(value = "/app/parameters", method = RequestMethod.GET)
+	@RequestMapping(value = "/parameters", method = RequestMethod.GET)
 	public String showParameters(Model model) {
 		logger.debug("Entering showParameters");
 
@@ -69,7 +69,7 @@ public class ParameterController {
 		return "parameters";
 	}
 
-	@RequestMapping(value = "/app/deleteParameter", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteParameter", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteParameter(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteParameter: id={}", id);
@@ -94,7 +94,7 @@ public class ParameterController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/app/deleteParameters", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteParameters", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteParameters(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteParameters: ids={}", (Object)ids);
@@ -118,7 +118,7 @@ public class ParameterController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addParameter", method = RequestMethod.GET)
+	@RequestMapping(value = "/addParameter", method = RequestMethod.GET)
 	public String addParameter(Model model) {
 		logger.debug("Entering addParameter");
 
@@ -130,7 +130,7 @@ public class ParameterController {
 		return showEditParameter("add", model);
 	}
 
-	@RequestMapping(value = "/app/editParameter", method = RequestMethod.GET)
+	@RequestMapping(value = "/editParameter", method = RequestMethod.GET)
 	public String editParameter(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editParameter: id={}", id);
 
@@ -144,7 +144,7 @@ public class ParameterController {
 		return showEditParameter("edit", model);
 	}
 
-	@RequestMapping(value = "/app/saveParameter", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveParameter", method = RequestMethod.POST)
 	public String saveParameter(@ModelAttribute("parameter") @Valid Parameter parameter,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -168,7 +168,7 @@ public class ParameterController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", parameter.getName());
-			return "redirect:/app/parameters.do";
+			return "redirect:/parameters";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

@@ -332,7 +332,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		},
 		order: [[1, 'asc']],
 		language: {
-			url: contextPath + "/js/dataTables/i18n/dataTables_" + localeCode + ".json"
+			url: contextPath + "/public/js/dataTables/i18n/dataTables_" + localeCode + ".json"
 		},
 		initComplete: datatablesInitComplete
 	});
@@ -486,7 +486,7 @@ function sendDeleteRequest(contextPath, deleteUrl, recordId,
 	var request = $.ajax({
 		type: "POST",
 		dataType: "json",
-		url: contextPath + "/app/" + deleteUrl,
+		url: contextPath + "/" + deleteUrl,
 		data: {id: recordId}
 	});
 

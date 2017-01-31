@@ -26,7 +26,7 @@ Display application logs
 	<jsp:attribute name="javascript">
 		<script type="text/javascript">
 			$(document).ready(function() {
-				$('a[href*="logs.do"]').parent().addClass('active');
+				$('a[href*="logs"]').parent().addClass('active');
 
 				var tbl = $('#logs');
 
@@ -54,7 +54,7 @@ Display application logs
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: -1,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: function() {
 						$('div.dataTables_filter input').focus();

@@ -82,7 +82,7 @@ public class RunReportController {
 	private DrilldownService drilldownService;
 
 	//use post to allow for large parameter input and get to allow for direct url execution
-	@RequestMapping(value = "/app/runReport", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/runReport", method = {RequestMethod.GET, RequestMethod.POST})
 	public String runReport(@RequestParam("reportId") Integer reportId,
 			HttpServletRequest request, HttpServletResponse response,
 			HttpSession session, Model model, Locale locale,
@@ -95,7 +95,7 @@ public class RunReportController {
 		runningReportsCount++;
 
 		//check if output is being displayed within the show report page (inline) or in a new page
-		boolean showInline = Boolean.valueOf(request.getParameter("showInline"));
+		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
 
 		//set appropriate error page to use
 		String errorPage;
@@ -139,7 +139,7 @@ public class RunReportController {
 			ReportType reportType = report.getReportType();
 
 			//check if the html code should be rendered as an html fragment (without <html> and </html> tags) e.g. in a dashboard section
-			boolean isFragment = Boolean.valueOf(request.getParameter("isFragment"));
+			boolean isFragment = Boolean.parseBoolean(request.getParameter("isFragment"));
 
 			//make sure the browser does not cache the result using Ajax (this happens in IE)
 //			if (isFragment) {
@@ -148,7 +148,7 @@ public class RunReportController {
 			response.setHeader("Cache-control", "no-cache");
 
 			if (reportType.isDashboard()) {
-				return "forward:/app/showDashboard.do";
+				return "forward:/showDashboard";
 			} else if (reportType.isOlap()) {
 				//setting model attributes won't include parameters in the redirect request because
 				//we have setIgnoreDefaultModelOnRedirect in AppConfig.java
@@ -161,7 +161,7 @@ public class RunReportController {
 
 				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
 				redirectAttributes.addAllAttributes(request.getParameterMap());
-				return "redirect:/app/showAnalysis.do";
+				return "redirect:/showAnalysis";
 			}
 
 			//get report format to use
@@ -220,13 +220,13 @@ public class RunReportController {
 				request.setAttribute("title", reportName);
 				request.setAttribute("reportFormat", reportFormat.getValue());
 
-				boolean allowSelectParameters = Boolean.valueOf(request.getParameter("allowSelectParameters"));
+				boolean allowSelectParameters = Boolean.parseBoolean(request.getParameter("allowSelectParameters"));
 				if (allowSelectParameters) {
 					request.setAttribute("allowSelectParameters", allowSelectParameters);
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 				}
-
+				
 				request.setAttribute("reportType", reportType);
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);

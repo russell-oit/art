@@ -59,7 +59,7 @@ public class RuleValueController {
 	@Autowired
 	private RuleService ruleService;
 
-	@RequestMapping(value = "/app/ruleValues", method = RequestMethod.GET)
+	@RequestMapping(value = "/ruleValues", method = RequestMethod.GET)
 	public String showRuleValues(Model model) {
 		logger.debug("Entering showRuleValues");
 
@@ -74,7 +74,7 @@ public class RuleValueController {
 		return "ruleValues";
 	}
 
-	@RequestMapping(value = "/app/ruleValuesConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/ruleValuesConfig", method = RequestMethod.GET)
 	public String showRuleValuesConfig(Model model, HttpSession session) {
 		logger.debug("Entering showRuleValuesConfig");
 
@@ -90,7 +90,7 @@ public class RuleValueController {
 		return "ruleValuesConfig";
 	}
 
-	@RequestMapping(value = "/app/deleteRuleValue", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteRuleValue", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteRuleValue(@RequestParam("id") String id) {
 		logger.debug("Entering deleteRuleValue: id='{}'", id);
@@ -117,7 +117,7 @@ public class RuleValueController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteAllRuleValues", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteAllRuleValues", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteAllRuleValues(
 			@RequestParam(value = "users[]", required = false) String[] users,
@@ -139,7 +139,7 @@ public class RuleValueController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/updateRuleValue", method = RequestMethod.POST)
+	@RequestMapping(value = "/updateRuleValue", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse updateRuleValue(Model model, @RequestParam("action") String action,
 			@RequestParam(value = "users[]", required = false) String[] users,
@@ -168,7 +168,7 @@ public class RuleValueController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/editUserRuleValue", method = RequestMethod.GET)
+	@RequestMapping(value = "/editUserRuleValue", method = RequestMethod.GET)
 	public String editUserRuleValue(@RequestParam("id") String id, Model model) {
 		logger.debug("Entering editUserRuleValue: id='{}'", id);
 
@@ -182,7 +182,7 @@ public class RuleValueController {
 		return showEditUserRuleValue();
 	}
 
-	@RequestMapping(value = "/app/saveUserRuleValue", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveUserRuleValue", method = RequestMethod.POST)
 	public String saveUserRuleValue(@ModelAttribute("value") @Valid UserRuleValue value,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
@@ -202,7 +202,7 @@ public class RuleValueController {
 					+ value.getRule().getName() + " - " + value.getRuleValue();
 
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/app/ruleValues.do";
+			return "redirect:/ruleValues";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -211,7 +211,7 @@ public class RuleValueController {
 		return showEditUserRuleValue();
 	}
 
-	@RequestMapping(value = "/app/editUserGroupRuleValue", method = RequestMethod.GET)
+	@RequestMapping(value = "/editUserGroupRuleValue", method = RequestMethod.GET)
 	public String editUserGroupRuleValue(@RequestParam("id") String id, Model model) {
 		logger.debug("Entering editUserGroupRuleValue: id='{}'", id);
 
@@ -225,7 +225,7 @@ public class RuleValueController {
 		return showEditUserGroupRuleValue();
 	}
 
-	@RequestMapping(value = "/app/saveUserGroupRuleValue", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveUserGroupRuleValue", method = RequestMethod.POST)
 	public String saveUserGroupRuleValue(@ModelAttribute("value") @Valid UserGroupRuleValue value,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
 
@@ -245,7 +245,7 @@ public class RuleValueController {
 					+ value.getRule().getName() + " - " + value.getRuleValue();
 
 			redirectAttributes.addFlashAttribute("recordName", recordName);
-			return "redirect:/app/ruleValues.do";
+			return "redirect:/ruleValues";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

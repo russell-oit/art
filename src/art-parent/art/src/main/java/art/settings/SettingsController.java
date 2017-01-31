@@ -79,7 +79,7 @@ public class SettingsController {
 		return DisplayNull.values();
 	}
 
-	@RequestMapping(value = "app/settings", method = RequestMethod.GET)
+	@RequestMapping(value = "settings", method = RequestMethod.GET)
 	public String showSettings(Model model) {
 		logger.debug("Entering showSettings");
 
@@ -90,7 +90,7 @@ public class SettingsController {
 		return "settings";
 	}
 
-	@RequestMapping(value = "app/settings", method = RequestMethod.POST)
+	@RequestMapping(value = "settings", method = RequestMethod.POST)
 	public String processSettings(@ModelAttribute("settings") @Valid Settings settings,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
@@ -136,7 +136,7 @@ public class SettingsController {
 
 			//use redirect after successful submission 
 			redirectAttributes.addFlashAttribute("message", "settings.message.settingsSaved");
-			return "redirect:/app/success.do";
+			return "redirect:/success";
 		} catch (IOException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

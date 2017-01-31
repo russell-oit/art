@@ -311,7 +311,7 @@ public class ReportOutputGenerator {
 						swapAxes = true;
 					}
 				}
-				
+
 				ChartUtils.prepareTheme(Config.getSettings().getPdfFontName());
 
 				Chart chart = prepareChart(report, reportFormat, locale, rs, parameterChartOptions, reportParamsMap, reportParamsList, swapAxes);
@@ -409,6 +409,15 @@ public class ReportOutputGenerator {
 					if (reportFormat.isHtml() && !isJob) {
 						//only drill down for html output. drill down query launched from hyperlink                                            
 						standardOutput.setDrilldowns(drilldownService.getDrilldowns(reportId));
+					}
+
+					//https://stackoverflow.com/questions/16675191/get-full-url-and-query-string-in-servlet-for-both-http-and-https-requests
+					if (request != null) {
+						String requestBaseUrl = request.getScheme() + "://"
+								+ request.getServerName()
+								+ ("http".equals(request.getScheme()) && request.getServerPort() == 80 || "https".equals(request.getScheme()) && request.getServerPort() == 443 ? "" : ":" + request.getServerPort())
+								+ request.getContextPath();
+						standardOutput.setRequestBaseUrl(requestBaseUrl);
 					}
 
 					standardOutputResult = standardOutput.generateTabularOutput(rs, reportFormat, report);

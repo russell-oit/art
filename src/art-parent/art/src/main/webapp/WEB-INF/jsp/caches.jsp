@@ -24,12 +24,12 @@ Page to allow manual clearing of caches
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="caches.do"]').parent().addClass('active');
+				$('a[href*="caches"]').parent().addClass('active');
 
 				var tbl = $('#caches');
 
@@ -39,7 +39,7 @@ Page to allow manual clearing of caches
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});
@@ -52,7 +52,7 @@ Page to allow manual clearing of caches
 					$.ajax({
 						type: "POST",
 						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/clearCache.do",
+						url: "${pageContext.request.contextPath}/clearCache",
 						data: {id: recordId},
 						success: function (response) {
 							if (response.success) {
@@ -68,7 +68,7 @@ Page to allow manual clearing of caches
 				$('#clearAll').click(function () {
 					$.ajax({
 						type: 'POST',
-						url: '${pageContext.request.contextPath}/app/clearAllCaches.do',
+						url: '${pageContext.request.contextPath}/clearAllCaches',
 						dataType: 'json',
 						success: function (response)
 						{

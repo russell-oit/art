@@ -50,7 +50,7 @@ public class FtpServerController {
 	@Autowired
 	private FtpServerService ftpServerService;
 
-	@RequestMapping(value = "/app/ftpServers", method = RequestMethod.GET)
+	@RequestMapping(value = "/ftpServers", method = RequestMethod.GET)
 	public String showFtpServers(Model model) {
 		logger.debug("Entering showFtpServers");
 
@@ -64,7 +64,7 @@ public class FtpServerController {
 		return "ftpServers";
 	}
 
-	@RequestMapping(value = "/app/deleteFtpServer", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteFtpServer", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteFtpServer(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteFtpServer: id={}", id);
@@ -82,7 +82,7 @@ public class FtpServerController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteFtpServers", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteFtpServers", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteFtpServers(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteFtpServers: ids={}", (Object) ids);
@@ -100,7 +100,7 @@ public class FtpServerController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addFtpServer", method = RequestMethod.GET)
+	@RequestMapping(value = "/addFtpServer", method = RequestMethod.GET)
 	public String addFtpServer(Model model) {
 		logger.debug("Entering addFtpServer");
 
@@ -112,7 +112,7 @@ public class FtpServerController {
 		return showEditFtpServer("add", model);
 	}
 
-	@RequestMapping(value = "/app/editFtpServer", method = RequestMethod.GET)
+	@RequestMapping(value = "/editFtpServer", method = RequestMethod.GET)
 	public String editFtpServer(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editFtpServer: id={}", id);
 
@@ -126,7 +126,7 @@ public class FtpServerController {
 		return showEditFtpServer("edit", model);
 	}
 
-	@RequestMapping(value = "/app/editFtpServers", method = RequestMethod.GET)
+	@RequestMapping(value = "/editFtpServers", method = RequestMethod.GET)
 	public String editFtpServers(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
 
@@ -140,7 +140,7 @@ public class FtpServerController {
 		return "editFtpServers";
 	}
 
-	@RequestMapping(value = "/app/saveFtpServer", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveFtpServer", method = RequestMethod.POST)
 	public String saveFtpServer(@ModelAttribute("ftpServer") @Valid FtpServer ftpServer,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -172,7 +172,7 @@ public class FtpServerController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", ftpServer.getName());
-			return "redirect:/app/ftpServers.do";
+			return "redirect:/ftpServers";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -181,7 +181,7 @@ public class FtpServerController {
 		return showEditFtpServer(action, model);
 	}
 	
-	@RequestMapping(value = "/app/saveFtpServers", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveFtpServers", method = RequestMethod.POST)
 	public String saveFtpServers(@ModelAttribute("multipleFtpServerEdit") @Valid MultipleFtpServerEdit multipleFtpServerEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
@@ -199,7 +199,7 @@ public class FtpServerController {
 			ftpServerService.updateFtpServers(multipleFtpServerEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleFtpServerEdit.getIds());
-			return "redirect:/app/ftpServers.do";
+			return "redirect:/ftpServers";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

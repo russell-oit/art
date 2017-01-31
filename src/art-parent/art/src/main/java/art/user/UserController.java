@@ -65,7 +65,7 @@ public class UserController {
 	@Autowired
 	private UserGroupMembershipService userGroupMembershipService;
 
-	@RequestMapping(value = "/app/users", method = RequestMethod.GET)
+	@RequestMapping(value = "/users", method = RequestMethod.GET)
 	public String showUsers(Model model) {
 		logger.debug("Entering showUsers");
 
@@ -79,7 +79,7 @@ public class UserController {
 		return "users";
 	}
 
-	@RequestMapping(value = "/app/deleteUser", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUser(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteUser: id={}", id);
@@ -106,7 +106,7 @@ public class UserController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteUsers", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteUsers", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUsers(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteUsers: ids={}", (Object) ids);
@@ -132,7 +132,7 @@ public class UserController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addUser", method = RequestMethod.GET)
+	@RequestMapping(value = "/addUser", method = RequestMethod.GET)
 	public String addUser(Model model, HttpSession session) {
 		logger.debug("Entering addUser");
 
@@ -147,7 +147,7 @@ public class UserController {
 		return showEditUser("add", model, session);
 	}
 
-	@RequestMapping(value = "/app/editUser", method = RequestMethod.GET)
+	@RequestMapping(value = "/editUser", method = RequestMethod.GET)
 	public String editUser(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
 
@@ -172,7 +172,7 @@ public class UserController {
 		return showEditUser("edit", model, session);
 	}
 
-	@RequestMapping(value = "/app/editUsers", method = RequestMethod.GET)
+	@RequestMapping(value = "/editUsers", method = RequestMethod.GET)
 	public String editUsers(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
 
@@ -202,7 +202,7 @@ public class UserController {
 		return "editUsers";
 	}
 
-	@RequestMapping(value = "/app/saveUser", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveUser", method = RequestMethod.POST)
 	public String saveUser(@ModelAttribute("user") @Valid User user,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -252,7 +252,7 @@ public class UserController {
 
 			saveUserGroups(user);
 			
-			return "redirect:/app/users.do";
+			return "redirect:/users";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -272,7 +272,7 @@ public class UserController {
 		userGroupMembershipService.addUserGroupMemberships(user, user.getUserGroups());
 	}
 
-	@RequestMapping(value = "/app/saveUsers", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveUsers", method = RequestMethod.POST)
 	public String saveUsers(@ModelAttribute("multipleUserEdit") @Valid MultipleUserEdit multipleUserEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
@@ -290,7 +290,7 @@ public class UserController {
 			userService.updateUsers(multipleUserEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleUserEdit.getIds());
-			return "redirect:/app/users.do";
+			return "redirect:/users";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

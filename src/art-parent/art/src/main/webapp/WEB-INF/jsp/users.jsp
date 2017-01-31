@@ -34,12 +34,12 @@ Display user configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="users.do"]').parent().addClass('active');
+				$('a[href*="users"]').parent().addClass('active');
 
 				var tbl = $('#users');
 
@@ -55,7 +55,7 @@ Display user configuration page
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteUser.do", //deleteUrl
+						"deleteUser", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -88,7 +88,7 @@ Display user configuration page
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteUsers.do",
+										url: "${pageContext.request.contextPath}/deleteUsers",
 										data: {ids: ids},
 										success: function (response) {
 											var nonDeletedRecords = response.data;
@@ -118,7 +118,7 @@ Display user configuration page
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href = '${pageContext.request.contextPath}/app/editUsers.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/editUsers?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -151,7 +151,7 @@ Display user configuration page
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addUser.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addUser">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -204,7 +204,7 @@ Display user configuration page
 						</td>
 						<td>
 							<div class="btn-group">
-								<a class="btn btn-default" href="${pageContext.request.contextPath}/app/editUser.do?id=${user.userId}">
+								<a class="btn btn-default" href="${pageContext.request.contextPath}/editUser?id=${user.userId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

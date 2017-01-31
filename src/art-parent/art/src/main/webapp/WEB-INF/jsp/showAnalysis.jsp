@@ -20,22 +20,22 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>ART - ${reportName}</title>
 
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/table/mdxtable.css" />
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/jpivot/navi/mdxnavi.css" />
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/form/xform.css" />
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/table/xtable.css" />
-		<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/wcf/tree/xtree.css" />
-		<script type="text/javascript" src="<%=request.getContextPath()%>/wcf/scroller.js"></script>
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/jpivot/table/mdxtable.css" />
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/jpivot/navi/mdxnavi.css" />
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/wcf/form/xform.css" />
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/wcf/table/xtable.css" />
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/wcf/tree/xtree.css" />
+		<script type="text/javascript" src="${pageContext.request.contextPath}/wcf/scroller.js"></script>
 
-		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
+		<link rel="shortcut icon" href="${pageContext.request.contextPath}/public/images/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/font-awesome-4.5.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/art.css">
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-1.12.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
 	</head>
 	<body>
@@ -72,7 +72,7 @@
 						<tr><td>
 								<br />
 
-								<form action="showAnalysis.do" method="post">
+								<form action="showAnalysis" method="post">
 									<input type="hidden" name="action" value="edit">
 									<input type="hidden" name="reportId" value="${reportId}">
 
@@ -173,7 +173,7 @@
 								<i><spring:message code="analysis.text.saveCurrentView"/></i>
 								<br>
 
-								<form method="post" action="saveAnalysis.do">
+								<form method="post" action="saveAnalysis">
 									<input type="hidden" name="pivotReportId" value="${reportId}" />
 									<table>
 										<tr><td>

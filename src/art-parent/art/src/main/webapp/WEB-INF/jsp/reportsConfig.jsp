@@ -32,12 +32,12 @@ Reports configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="reportsConfig.do"]').parent().addClass('active');
+				$('a[href*="reportsConfig"]').parent().addClass('active');
 
 				var tbl = $('#reports');
 
@@ -53,7 +53,7 @@ Reports configuration page
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteReport.do", //deleteUrl
+						"deleteReport", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -86,7 +86,7 @@ Reports configuration page
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteReports.do",
+										url: "${pageContext.request.contextPath}/deleteReports",
 										data: {ids: ids},
 										success: function (response) {
 											var nonDeletedRecords = response.data;
@@ -116,7 +116,7 @@ Reports configuration page
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href = '${pageContext.request.contextPath}/app/editReports.do?ids=' + ids;
+						window.location.href = '${pageContext.request.contextPath}/editReports?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -144,32 +144,32 @@ Reports configuration page
 					&nbsp;
 					<div class="btn-group">
 						<a class="btn btn-default" 
-						   href="${pageContext.request.contextPath}/app/editReport.do?id=${record.reportId}">
+						   href="${pageContext.request.contextPath}/editReport?id=${record.reportId}">
 							<spring:message code="page.action.edit"/>
 						</a>
 					</div>
 					<div class="btn-group">
 						<a class="btn btn-default"
-						   href="${pageContext.request.contextPath}/app/reportParameterConfig.do?reportId=${record.reportId}">
+						   href="${pageContext.request.contextPath}/reportParameterConfig?reportId=${record.reportId}">
 							<spring:message code="reports.action.parameters"/>
 						</a>
 						<a class="btn btn-default"
-						   href="${pageContext.request.contextPath}/app/reportRules.do?reportId=${record.reportId}">
+						   href="${pageContext.request.contextPath}/reportRules?reportId=${record.reportId}">
 							<spring:message code="reports.action.rules"/>
 						</a>
 						<a class="btn btn-default"
-						   href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${record.reportId}">
+						   href="${pageContext.request.contextPath}/drilldowns?reportId=${record.reportId}">
 							<spring:message code="reports.action.drilldowns"/>
 						</a>
 					</div>
 					<c:if test="${record.reportType != 'LovStatic'}">
 						<div class="btn-group">
 							<a class="btn btn-default"
-							   href="${pageContext.request.contextPath}/app/addJob.do?reportId=${record.reportId}">
+							   href="${pageContext.request.contextPath}/addJob?reportId=${record.reportId}">
 								<spring:message code="reports.action.schedule"/>
 							</a>
 							<a class="btn btn-default"
-							   href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${record.reportId}">
+							   href="${pageContext.request.contextPath}/selectReportParameters?reportId=${record.reportId}">
 								<spring:message code="reports.action.preview"/>
 							</a>
 						</div>
@@ -182,7 +182,7 @@ Reports configuration page
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addReport.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReport">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -238,7 +238,7 @@ Reports configuration page
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editReport.do?id=${report.reportId}">
+								   href="${pageContext.request.contextPath}/editReport?id=${report.reportId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>
@@ -247,7 +247,7 @@ Reports configuration page
 									<spring:message code="page.action.delete"/>
 								</button>
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/copyReport.do?id=${report.reportId}">
+								   href="${pageContext.request.contextPath}/copyReport?id=${report.reportId}">
 									<i class="fa fa-copy"></i>
 									<spring:message code="reports.action.copy"/>
 								</a>
@@ -262,19 +262,19 @@ Reports configuration page
 								<ul class="dropdown-menu">
 									<li>
 										<a 
-											href="${pageContext.request.contextPath}/app/reportParameterConfig.do?reportId=${report.reportId}">
+											href="${pageContext.request.contextPath}/reportParameterConfig?reportId=${report.reportId}">
 											<spring:message code="reports.action.parameters"/>
 										</a>
 									</li>
 									<li>
 										<a 
-											href="${pageContext.request.contextPath}/app/reportRules.do?reportId=${report.reportId}">
+											href="${pageContext.request.contextPath}/reportRules?reportId=${report.reportId}">
 											<spring:message code="reports.action.rules"/>
 										</a>
 									</li>
 									<li>
 										<a 
-											href="${pageContext.request.contextPath}/app/drilldowns.do?reportId=${report.reportId}">
+											href="${pageContext.request.contextPath}/drilldowns?reportId=${report.reportId}">
 											<spring:message code="reports.action.drilldowns"/>
 										</a>
 									</li>
@@ -282,13 +282,13 @@ Reports configuration page
 										<li class="divider"></li>
 										<li>
 											<a 
-												href="${pageContext.request.contextPath}/app/addJob.do?reportId=${report.reportId}">
+												href="${pageContext.request.contextPath}/addJob?reportId=${report.reportId}">
 												<spring:message code="reports.action.schedule"/>
 											</a>
 										</li>
 										<li>
 											<a 
-												href="${pageContext.request.contextPath}/app/selectReportParameters.do?reportId=${report.reportId}">
+												href="${pageContext.request.contextPath}/selectReportParameters?reportId=${report.reportId}">
 												<spring:message code="reports.action.preview"/>
 											</a>
 										</li>

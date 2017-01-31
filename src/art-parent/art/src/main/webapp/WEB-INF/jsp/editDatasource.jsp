@@ -38,19 +38,19 @@ Edit datasource page
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="datasources.do"]').parent().addClass('active');
+				$('a[href*="datasources"]').parent().addClass('active');
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
@@ -71,7 +71,7 @@ Edit datasource page
 					$.ajax({
 						type: "POST",
 						dataType: "json",
-						url: "${pageContext.request.contextPath}/app/testDatasource.do",
+						url: "${pageContext.request.contextPath}/testDatasource",
 						data: {id: id, jndi: jndi, driver: driver, url: url, username: username,
 							password: password, useBlankPassword: useBlankPassword,
 							action: action},
@@ -146,7 +146,7 @@ Edit datasource page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/Manual.html#datasources">
+			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#datasources">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
@@ -155,13 +155,13 @@ Edit datasource page
 	<jsp:attribute name="belowMainPanel">
 		<div class="col-md-6 col-md-offset-3">
 			<div class="alert alert-info">
-				<jsp:include page="/WEB-INF/html/datasourceNotes.html"/>
+				<jsp:include page="/WEB-INF/jsp/datasourceNotes.jsp"/>
 			</div>
 		</div>
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveDatasource.do"/>
+		<spring:url var="formUrl" value="/saveDatasource"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="datasource">
 			<fieldset>
 				<c:if test="${formErrors != null}">

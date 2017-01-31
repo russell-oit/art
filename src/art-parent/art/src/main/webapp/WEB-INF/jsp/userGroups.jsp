@@ -29,12 +29,12 @@ Display user groups
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="userGroups.do"]').parent().addClass('active');
+				$('a[href*="userGroups"]').parent().addClass('active');
 
 				var tbl = $('#userGroups');
 
@@ -50,7 +50,7 @@ Display user groups
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteUserGroup.do", //deleteUrl
+						"deleteUserGroup", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -84,7 +84,7 @@ Display user groups
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteUserGroups.do",
+										url: "${pageContext.request.contextPath}/deleteUserGroups",
 										data: {ids: ids},
 										success: function (response) {
 											if (response.success) {
@@ -129,7 +129,7 @@ Display user groups
 		</div>
 
 		<div id="headerActions" class="dtHeader">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addUserGroup.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addUserGroup">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -177,7 +177,7 @@ Display user groups
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editUserGroup.do?id=${group.userGroupId}">
+								   href="${pageContext.request.contextPath}/editUserGroup?id=${group.userGroupId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

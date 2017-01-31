@@ -28,15 +28,15 @@ Display report filters
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="reportsConfig.do"]').parent().addClass('active');
+				$('a[href*="reportsConfig"]').parent().addClass('active');
 				
 				//{container: 'body'} needed if tooltips shown on input-group element or button
-				$("[data-toggle='tooltip']").bsTooltip({container: 'body'});
+				$("[data-toggle='tooltip']").tooltip({container: 'body'});
 
 				var tbl = $('#reportRules');
 				
@@ -65,7 +65,7 @@ Display report filters
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});
@@ -90,7 +90,7 @@ Display report filters
 								$.ajax({
 									type: "POST",
 									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteReportRule.do",
+									url: "${pageContext.request.contextPath}/deleteReportRule",
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {
@@ -132,7 +132,7 @@ Display report filters
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteReportRules.do",
+										url: "${pageContext.request.contextPath}/deleteReportRules",
 										data: {ids: ids},
 										success: function (response) {
 											if (response.success) {
@@ -180,7 +180,7 @@ Display report filters
 			<b><spring:message code="page.text.report"/>:</b> ${reportName}
 		</div>
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addReportRule.do?reportId=${reportId}">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addReportRule?reportId=${reportId}">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -212,7 +212,7 @@ Display report filters
 						<td>
 							<div class="btn-group">
 								<a class="btn btn-default" 
-								   href="${pageContext.request.contextPath}/app/editReportRule.do?id=${reportRule.reportRuleId}">
+								   href="${pageContext.request.contextPath}/editReportRule?id=${reportRule.reportRuleId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

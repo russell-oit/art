@@ -31,15 +31,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class LanguageController {
 
-	@RequestMapping(value = "/app/language", method = RequestMethod.GET)
+	@RequestMapping(value = "/language", method = RequestMethod.GET)
 	public String showLanguage(Model model) {
 		model.addAttribute("languages", Config.getLanguages());
 		return "language";
 	}
 
-	@RequestMapping(value = "/app/language", method = RequestMethod.POST)
+	@RequestMapping(value = "/language", method = RequestMethod.POST)
 	public String processLanguage(RedirectAttributes redirectAttributes) {
 		redirectAttributes.addFlashAttribute("message", "language.message.languageUpdated");
-		return "redirect:/app/success.do";
+		return "redirect:/success";
 	}
 }

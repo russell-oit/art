@@ -83,7 +83,7 @@ public class ReportController {
 	@Autowired
 	private MessageSource messageSource;
 
-	@RequestMapping(value = "/app/reports", method = RequestMethod.GET)
+	@RequestMapping(value = "/reports", method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		logger.debug("Entering showReports");
 
@@ -98,7 +98,7 @@ public class ReportController {
 		return "reports";
 	}
 
-	@RequestMapping(value = "/app/selectReportParameters", method = RequestMethod.GET)
+	@RequestMapping(value = "/selectReportParameters", method = RequestMethod.GET)
 	public String selectReportParameters(HttpSession session,
 			@RequestParam("reportId") Integer reportId,
 			HttpServletRequest request, Model model) {
@@ -122,7 +122,7 @@ public class ReportController {
 		return "selectReportParameters";
 	}
 
-	@RequestMapping(value = "/app/getReports", method = RequestMethod.GET)
+	@RequestMapping(value = "/getReports", method = RequestMethod.GET)
 	public @ResponseBody
 	List<Report> getReports(HttpSession session, HttpServletRequest request) {
 		//object will be automatically converted to json because of @ResponseBody and presence of jackson libraries
@@ -133,7 +133,7 @@ public class ReportController {
 		User sessionUser = (User) session.getAttribute("sessionUser");
 
 		List<Report> reports = null;
-		
+
 		try {
 			reports = reportService.getAvailableReports(sessionUser.getUserId());
 		} catch (SQLException | RuntimeException ex) {
@@ -143,7 +143,7 @@ public class ReportController {
 		return reports;
 	}
 
-	@RequestMapping(value = "/app/reportsConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/reportsConfig", method = RequestMethod.GET)
 	public String showReportsConfig(Model model) {
 		logger.debug("Entering showReportsConfig");
 
@@ -157,7 +157,7 @@ public class ReportController {
 		return "reportsConfig";
 	}
 
-	@RequestMapping(value = "/app/deleteReport", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReport", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReport(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteReport: id={}", id);
@@ -182,7 +182,7 @@ public class ReportController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteReports", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteReports", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteReports(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteReports: ids={}", (Object) ids);
@@ -206,7 +206,7 @@ public class ReportController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addReport", method = RequestMethod.GET)
+	@RequestMapping(value = "/addReport", method = RequestMethod.GET)
 	public String addReport(Model model, HttpSession session) {
 		logger.debug("Entering addReport");
 
@@ -217,11 +217,11 @@ public class ReportController {
 		report.setContactPerson(sessionUser.getFullName());
 
 		model.addAttribute("report", report);
-		
+
 		return showEditReport("add", model, session);
 	}
 
-	@RequestMapping(value = "/app/editReport", method = RequestMethod.GET)
+	@RequestMapping(value = "/editReport", method = RequestMethod.GET)
 	public String editReport(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
 
@@ -237,7 +237,7 @@ public class ReportController {
 		return showEditReport("edit", model, session);
 	}
 
-	@RequestMapping(value = "/app/editReports", method = RequestMethod.GET)
+	@RequestMapping(value = "/editReports", method = RequestMethod.GET)
 	public String editReports(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
 
@@ -247,11 +247,11 @@ public class ReportController {
 		multipleReportEdit.setIds(ids);
 
 		model.addAttribute("multipleReportEdit", multipleReportEdit);
-		
+
 		return "editReports";
 	}
 
-	@RequestMapping(value = "/app/saveReport", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveReport", method = RequestMethod.POST)
 	public String saveReport(@ModelAttribute("report") @Valid Report report,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session, @RequestParam("action") String action,
@@ -289,7 +289,7 @@ public class ReportController {
 			}
 			redirectAttributes.addFlashAttribute("recordName", report.getName());
 			redirectAttributes.addFlashAttribute("record", report);
-			return "redirect:/app/reportsConfig.do";
+			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -298,7 +298,7 @@ public class ReportController {
 		return showEditReport(action, model, session);
 	}
 
-	@RequestMapping(value = "/app/saveReports", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveReports", method = RequestMethod.POST)
 	public String saveReports(@ModelAttribute("multipleReportEdit") @Valid MultipleReportEdit multipleReportEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
@@ -316,7 +316,7 @@ public class ReportController {
 			reportService.updateReports(multipleReportEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleReportEdit.getIds());
-			return "redirect:/app/reportsConfig.do";
+			return "redirect:/reportsConfig";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -325,7 +325,7 @@ public class ReportController {
 		return showEditReports();
 	}
 
-	@RequestMapping(value = "/app/emailReport", method = RequestMethod.POST)
+	@RequestMapping(value = "/emailReport", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse emailReport(@RequestParam("mailFrom") String mailFrom,
 			@RequestParam("mailTo") String mailTo,
@@ -426,7 +426,7 @@ public class ReportController {
 		}
 
 		response.setSuccess(true);
-		
+
 		return response;
 	}
 
@@ -440,7 +440,7 @@ public class ReportController {
 		return "editReports";
 	}
 
-	@RequestMapping(value = "/app/copyReport", method = RequestMethod.GET)
+	@RequestMapping(value = "/copyReport", method = RequestMethod.GET)
 	public String copyReport(@RequestParam("id") Integer id, Model model,
 			HttpSession session) {
 
@@ -697,13 +697,13 @@ public class ReportController {
 		return null;
 	}
 
-	@PostMapping("/app/uploadResources")
+	@PostMapping("/uploadResources")
 	public @ResponseBody
 	Map<String, List<FileUploadResponse>> uploadResources(MultipartHttpServletRequest request,
 			Locale locale) {
-		
+
 		logger.debug("Entering uploadResources");
-		
+
 		//https://github.com/jdmr/fileUpload/blob/master/src/main/java/org/davidmendoza/fileUpload/web/ImageController.java
 		//https://github.com/blueimp/jQuery-File-Upload/wiki/Setup#using-jquery-file-upload-ui-version-with-a-custom-server-side-upload-handler
 		Map<String, List<FileUploadResponse>> response = new HashMap<>();
@@ -714,7 +714,7 @@ public class ReportController {
 		while (itr.hasNext()) {
 			String htmlParamName = itr.next();
 			logger.debug("htmlParamName = '{}'", htmlParamName);
-			
+
 			MultipartFile file = request.getFile(htmlParamName);
 
 			FileUploadResponse fileDetails = new FileUploadResponse();
@@ -722,7 +722,7 @@ public class ReportController {
 			String filename = file.getOriginalFilename();
 			fileDetails.setName(filename);
 			fileDetails.setSize(file.getSize());
-			
+
 			logger.debug("filename = '{}'", filename);
 
 			if (FinalFilenameValidator.isValid(filename)) {
@@ -731,7 +731,7 @@ public class ReportController {
 					if (message != null) {
 						String errorMessage = messageSource.getMessage(message, null, locale);
 						fileDetails.setError(errorMessage);
-					} 
+					}
 				} catch (IOException ex) {
 					logger.error("Error", ex);
 					if (Config.getCustomSettings().isShowErrors()) {

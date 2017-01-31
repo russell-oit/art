@@ -15,6 +15,7 @@ Login page
 <%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
+<%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
 <spring:message code="page.title.login" var="pageTitle"/>
 
@@ -33,7 +34,7 @@ Login page
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-1.12.4.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -45,11 +46,12 @@ Login page
 	<jsp:body>
 		<div class="row">
 			<div class="well col-md-6 col-md-offset-3 spacer60">
-				<form class="form-horizontal" method="POST" action="">
+				<spring:url var="formUrl" value="/login"/>
+				<form class="form-horizontal" method="POST" action="${formUrl}">
 					<fieldset>
 						<legend class="text-center">ART</legend>
 						<div class="form-group">
-							<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
+							<img src="${pageContext.request.contextPath}/public/images/art-64px.jpg"
 								 alt="" class="img-responsive centered">
 						</div>
 
@@ -59,7 +61,7 @@ Login page
 								<spring:message code="login.message.invalidAutoLoginUser" arguments="${autoLoginUser}"/>
 							</div>
 						</c:if>
-
+								 
 						<c:if test="${invalidCasLogin != null}">
 							<div class="alert alert-danger alert-dismissable">
 								<button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
@@ -138,7 +140,7 @@ Login page
 								<c:set var="localeCode" value="${pageContext.response.locale}"/>
 								<select name="lang" id="lang" class="form-control">
 									<c:forEach var="language" items="${languages}">
-										<option value="${language.value}" ${localeCode == language.value ? "selected" : ""}>${language.key}</option>
+										<option value="${encode:forHtmlAttribute(language.value)}" ${localeCode == language.value ? "selected" : ""}>${encode:forHtmlContent(language.key)}</option>
 									</c:forEach>
 								</select>
 							</div>

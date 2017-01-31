@@ -26,12 +26,12 @@ Display current admin rights
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-8 col-md-offset-2">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="adminRightsConfig.do"]').parent().addClass('active');
+				$('a[href*="adminRightsConfig"]').parent().addClass('active');
 
 				var tbl = $('#rights');
 
@@ -44,7 +44,7 @@ Display current admin rights
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});
@@ -78,7 +78,7 @@ Display current admin rights
 								$.ajax({
 									type: "POST",
 									dataType: "json",
-									url: "${pageContext.request.contextPath}/app/deleteAdminRight.do",
+									url: "${pageContext.request.contextPath}/deleteAdminRight",
 									data: {id: recordId},
 									success: function (response) {
 										if (response.success) {

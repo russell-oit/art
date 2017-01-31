@@ -33,16 +33,16 @@
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="ftpServers.do"]').parent().addClass('active');
+				$('a[href*="ftpServers"]').parent().addClass('active');
 
 				//{container: 'body'} needed if tooltips shown on input-group element or button
 				$("[data-toggle='tooltip']").tooltip({container: 'body'});
@@ -61,14 +61,14 @@
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/docs/Manual.html#ftp-servers">
+			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#ftp-servers">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveFtpServer.do"/>
+		<spring:url var="formUrl" value="/saveFtpServer"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="ftpServer">
 			<fieldset>
 				<c:if test="${formErrors != null}">

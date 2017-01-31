@@ -51,7 +51,7 @@ public class UserGroupMembershipController {
 	@Autowired
 	private UserGroupService userGroupService;
 
-	@RequestMapping(value = "/app/userGroupMembership", method = RequestMethod.GET)
+	@RequestMapping(value = "/userGroupMembership", method = RequestMethod.GET)
 	public String showUserGroupMembership(Model model) {
 		logger.debug("Entering showUserGroupMembership");
 
@@ -65,7 +65,7 @@ public class UserGroupMembershipController {
 		return "userGroupMembership";
 	}
 
-	@RequestMapping(value = "/app/userGroupMembershipConfig", method = RequestMethod.GET)
+	@RequestMapping(value = "/userGroupMembershipConfig", method = RequestMethod.GET)
 	public String showUserGroupMembershipConfig(Model model) {
 		logger.debug("Entering showUserGroupMembershipConfig");
 
@@ -80,7 +80,7 @@ public class UserGroupMembershipController {
 		return "userGroupMembershipConfig";
 	}
 
-	@RequestMapping(value = "/app/deleteUserGroupMembership", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteUserGroupMembership", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUserGroupMembership(@RequestParam("id") String id) {
 
@@ -107,7 +107,7 @@ public class UserGroupMembershipController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/updateUserGroupMembership", method = RequestMethod.POST)
+	@RequestMapping(value = "/updateUserGroupMembership", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse updateUserGroupMembership(Model model, @RequestParam("action") String action,
 			@RequestParam("users[]") String[] users,

@@ -24,7 +24,7 @@ Display logout page when auto login is used
 		</div>
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3 text-center">
-				<a class="btn btn-default" href="${pageContext.request.contextPath}/login.do">
+				<a class="btn btn-default" href="${pageContext.request.contextPath}/login">
 					<spring:message code="logout.link.login"/>
 				</a>
 			</div>

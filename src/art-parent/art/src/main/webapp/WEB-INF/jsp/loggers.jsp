@@ -21,12 +21,12 @@ Display current loggers
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="loggers.do"]').parent().addClass('active');
+				$('a[href*="loggers"]').parent().addClass('active');
 
 				var tbl = $("#loggers");
 
@@ -36,7 +36,7 @@ Display current loggers
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});
@@ -65,7 +65,7 @@ Display current loggers
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addLogger.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addLogger">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -87,7 +87,7 @@ Display current loggers
 						<td>${encode:forHtmlContent(logger.level)}</td>
 						<td>
 							<div class="btn-group">
-								<spring:url var="editUrl" value="/app/editLogger.do">
+								<spring:url var="editUrl" value="/editLogger">
 									<spring:param name="name" value="${logger.name}"/>
 								</spring:url>
 								<a class="btn btn-default" href="${editUrl}">

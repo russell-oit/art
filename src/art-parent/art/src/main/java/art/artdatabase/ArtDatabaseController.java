@@ -76,7 +76,7 @@ public class ArtDatabaseController {
 		return ConnectionPoolLibrary.list();
 	}
 
-	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.GET)
+	@RequestMapping(value = "/artDatabase", method = RequestMethod.GET)
 	public String showArtDatabaseConfiguration(Model model) {
 		logger.debug("Entering showArtDatabaseConfiguration");
 
@@ -99,7 +99,7 @@ public class ArtDatabaseController {
 		return "artDatabase";
 	}
 
-	@RequestMapping(value = "/app/artDatabase", method = RequestMethod.POST)
+	@RequestMapping(value = "/artDatabase", method = RequestMethod.POST)
 	public String processArtDatabaseConfiguration(
 			@ModelAttribute("artDatabase") @Valid ArtDatabase artDatabase,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
@@ -187,7 +187,7 @@ public class ArtDatabaseController {
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)
 			redirectAttributes.addFlashAttribute("message", "artDatabase.message.configurationSaved");
-			return "redirect:/app/success.do";
+			return "redirect:/success";
 		} catch (NamingException | RuntimeException | SQLException | ClassNotFoundException | InstantiationException | IllegalAccessException | IOException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

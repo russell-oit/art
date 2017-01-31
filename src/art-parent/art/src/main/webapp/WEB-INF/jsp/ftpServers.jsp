@@ -28,12 +28,12 @@
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="ftpServers.do"]').parent().addClass('active');
+				$('a[href*="ftpServers"]').parent().addClass('active');
 
 				var tbl = $('#ftpServers');
 
@@ -49,7 +49,7 @@
 						"${deleteRecordText}",
 						"${okText}",
 						"${cancelText}",
-						"deleteFtpServer.do", //deleteUrl
+						"deleteFtpServer", //deleteUrl
 						"${recordDeletedText}",
 						"${errorOccurredText}",
 						true, //deleteRow
@@ -82,7 +82,7 @@
 									$.ajax({
 										type: "POST",
 										dataType: "json",
-										url: "${pageContext.request.contextPath}/app/deleteFtpServers.do",
+										url: "${pageContext.request.contextPath}/deleteFtpServers",
 										data: {ids: ids},
 										success: function (response) {
 											if (response.success) {
@@ -109,7 +109,7 @@
 						var ids = $.map(data, function (item) {
 							return item[1];
 						});
-						window.location.href='${pageContext.request.contextPath}/app/editFtpServers.do?ids=' + ids;
+						window.location.href='${pageContext.request.contextPath}/editFtpServers?ids=' + ids;
 					} else {
 						bootbox.alert("${selectRecordsText}");
 					}
@@ -142,7 +142,7 @@
 		</div>
 
 		<div style="margin-bottom: 10px;">
-			<a class="btn btn-default" href="${pageContext.request.contextPath}/app/addFtpServer.do">
+			<a class="btn btn-default" href="${pageContext.request.contextPath}/addFtpServer">
 				<i class="fa fa-plus"></i>
 				<spring:message code="page.action.add"/>
 			</a>
@@ -194,7 +194,7 @@
 						</td>
 						<td>
 							<div class="btn-group">
-								<a class="btn btn-default" href="${pageContext.request.contextPath}/app/editFtpServer.do?id=${ftpServer.ftpServerId}">
+								<a class="btn btn-default" href="${pageContext.request.contextPath}/editFtpServer?id=${ftpServer.ftpServerId}">
 									<i class="fa fa-pencil-square-o"></i>
 									<spring:message code="page.action.edit"/>
 								</a>

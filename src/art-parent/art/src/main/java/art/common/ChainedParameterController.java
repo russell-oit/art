@@ -48,7 +48,7 @@ public class ChainedParameterController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ChainedParameterController.class);
 
-	@RequestMapping(value = "/app/getLovValues", method = RequestMethod.GET)
+	@RequestMapping(value = "/getLovValues", method = RequestMethod.GET)
 	public @ResponseBody
 	Map<String, String> getLovValues(@RequestParam("reportId") Integer reportId,
 			HttpSession session, HttpServletRequest request) {

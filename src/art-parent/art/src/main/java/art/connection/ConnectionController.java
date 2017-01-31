@@ -39,7 +39,7 @@ public class ConnectionController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConnectionController.class);
 
-	@RequestMapping(value = "/app/connections", method = RequestMethod.GET)
+	@RequestMapping(value = "/connections", method = RequestMethod.GET)
 	public String showConnections(Model model) {
 		logger.debug("Entering showConnections");
 
@@ -51,7 +51,7 @@ public class ConnectionController {
 		return "connections";
 	}
 
-	@RequestMapping(value = "/app/refreshConnectionPool", method = RequestMethod.POST)
+	@RequestMapping(value = "/refreshConnectionPool", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse refreshConnectionPool(@RequestParam("id") Integer datasourceId) {
 		logger.debug("Entering refreshConnectionPool: id={}", datasourceId);

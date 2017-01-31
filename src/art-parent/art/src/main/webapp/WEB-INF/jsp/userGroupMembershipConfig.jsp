@@ -28,18 +28,18 @@ User group membership configuration
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/lou-multi-select-0.9.11/css/multi-select.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery.quicksearch.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="userGroupMembershipConfig.do"]').parent().addClass('active');
+				$('a[href*="userGroupMembershipConfig"]').parent().addClass('active');
 
 				$('.multi-select').multiSelect({
 					selectableHeader: "<div>${availableText}</div>\n\
@@ -104,7 +104,7 @@ User group membership configuration
 				$.ajax({
 					type: "POST",
 					dataType: "json",
-					url: "${pageContext.request.contextPath}/app/updateUserGroupMembership.do",
+					url: "${pageContext.request.contextPath}/updateUserGroupMembership",
 					data: {action: action, users: users, userGroups: userGroups},
 					success: function(response) {
 						var msg;
@@ -196,7 +196,7 @@ User group membership configuration
 					<div class="col-md-12">
 						<div class="pull-right">
 							<a class="btn btn-default" 
-							   href="${pageContext.request.contextPath}/app/userGroupMembership.do">
+							   href="${pageContext.request.contextPath}/userGroupMembership">
 								<spring:message code="page.action.show"/>
 							</a>
 							<button type="button" class="btn btn-default" onclick="updateMembership('ADD');">

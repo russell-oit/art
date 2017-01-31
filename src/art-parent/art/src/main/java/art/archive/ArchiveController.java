@@ -42,7 +42,7 @@ public class ArchiveController {
 	@Autowired
 	private ArchiveService archiveService;
 
-	@RequestMapping(value = "/app/archives", method = RequestMethod.GET)
+	@RequestMapping(value = "/archives", method = RequestMethod.GET)
 	public String showArchives(HttpSession session, Model model) {
 		logger.debug("Entering showArchives");
 		

@@ -31,18 +31,18 @@ Includes bootstrap css, font awesome css, art css
 
 		<jsp:invoke fragment="headContent"/>
 
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/font-awesome-4.5.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/art.css">
 
 		<jsp:invoke fragment="css"/>
 		
-		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
+		<link rel="shortcut icon" href="${pageContext.request.contextPath}/public/images/favicon.ico">
 
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>
-		  <script type='text/javascript' src="${pageContext.request.contextPath}/js/html5shiv-3.7.0.js"></script>
-		  <script type='text/javascript' src="${pageContext.request.contextPath}/js/respond-1.4.2.min.js"></script>
+		  <script type='text/javascript' src="${pageContext.request.contextPath}/public/js/html5shiv-3.7.0.js"></script>
+		  <script type='text/javascript' src="${pageContext.request.contextPath}/public/js/respond-1.4.2.min.js"></script>
 		<![endif]-->
 	</head>
 	<body>

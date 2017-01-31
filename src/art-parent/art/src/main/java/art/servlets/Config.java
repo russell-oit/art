@@ -164,7 +164,7 @@ public class Config extends HttpServlet {
 		appPath = ctx.getRealPath("");
 
 		//set web-inf path
-		webinfPath = appPath + File.separator + "WEB-INF" + File.separator;
+		webinfPath = appPath + "WEB-INF" + File.separator;
 
 		//load custom settings
 		loadCustomSettings();
@@ -173,7 +173,7 @@ public class Config extends HttpServlet {
 		ctx.setAttribute("showErrors", customSettings.isShowErrors());
 
 		//set work directory base path
-		workDirectoryPath = webinfPath + File.separator + "work" + File.separator; //default work directory
+		workDirectoryPath = webinfPath + "work" + File.separator; //default work directory
 
 		String customWorkDirectory = customSettings.getWorkDirectory();
 		if (StringUtils.isNotBlank(customWorkDirectory)) {
@@ -264,7 +264,7 @@ public class Config extends HttpServlet {
 	private void loadLanguages() {
 		Properties properties = new Properties();
 
-		String propertiesFilePath = webinfPath + File.separator + "i18n" + File.separator + "languages.properties";
+		String propertiesFilePath = webinfPath + "i18n" + File.separator + "languages.properties";
 		File propertiesFile = new File(propertiesFilePath);
 		if (propertiesFile.exists()) {
 			try {
@@ -516,7 +516,7 @@ public class Config extends HttpServlet {
 			return;
 		}
 
-		String quartzFilePath = webinfPath + File.separator + "classes" + File.separator + "quartz.properties";
+		String quartzFilePath = webinfPath + "classes" + File.separator + "quartz.properties";
 		Scheduler scheduler = SchedulerUtils.createScheduler(artDbConfig, quartzFilePath);
 		createCleanJob(scheduler);
 	}

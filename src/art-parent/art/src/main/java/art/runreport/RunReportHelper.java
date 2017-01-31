@@ -129,6 +129,9 @@ public class RunReportHelper {
 			throws ParseException, SQLException {
 
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
+		
+		boolean startSelectParametersHidden = Boolean.parseBoolean(request.getParameter("startSelectParametersHidden"));
+		request.setAttribute("startSelectParametersHidden", startSelectParametersHidden);
 
 		request.setAttribute("report", report);
 

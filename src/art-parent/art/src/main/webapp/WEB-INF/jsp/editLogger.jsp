@@ -35,7 +35,7 @@ Edit logger page
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$('a[id="configure"]').parent().addClass('active');
-				$('a[href*="loggers.do"]').parent().addClass('active');
+				$('a[href*="loggers"]').parent().addClass('active');
 
 				$('#name').focus();
 
@@ -44,7 +44,7 @@ Edit logger page
 	</jsp:attribute>
 
 	<jsp:body>
-		<spring:url var="formUrl" value="/app/saveLogger.do"/>
+		<spring:url var="formUrl" value="/saveLogger"/>
 		<form:form class="form-horizontal" method="POST" action="${formUrl}" modelAttribute="log">
 			<fieldset>
 				<c:if test="${formErrors != null}">

@@ -41,7 +41,7 @@ public class CacheController {
 	@Autowired
 	private CacheHelper cacheHelper;
 
-	@RequestMapping(value = "app/caches", method = RequestMethod.GET)
+	@RequestMapping(value = "/caches", method = RequestMethod.GET)
 	public String showCaches(Model model) {
 		logger.debug("Entering showCaches");
 
@@ -50,7 +50,7 @@ public class CacheController {
 		return "caches";
 	}
 
-	@RequestMapping(value = "/app/clearAllCaches", method = RequestMethod.POST)
+	@RequestMapping(value = "/clearAllCaches", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse clearAllCaches() {
 		logger.debug("Entering clearAllCaches");
@@ -64,7 +64,7 @@ public class CacheController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/clearCache", method = RequestMethod.POST)
+	@RequestMapping(value = "/clearCache", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse clearCache(@RequestParam("id") String id) {
 		logger.debug("Entering clearCache: id='{}'", id);

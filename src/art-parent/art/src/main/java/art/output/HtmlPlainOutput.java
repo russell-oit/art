@@ -127,6 +127,11 @@ public class HtmlPlainOutput extends StandardOutput {
 		String escapedValue = Encode.forHtmlContent(value);
 		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
+	
+	@Override
+	public void addCellStringClean(String value) {
+		out.println("<td style='text-align: left'>" + value + "</td>");
+	}
 
 	@Override
 	public void addCellNumeric(Double value) {

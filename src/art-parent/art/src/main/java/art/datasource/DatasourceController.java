@@ -64,7 +64,7 @@ public class DatasourceController {
 	@Autowired
 	private MessageSource messageSource;
 
-	@RequestMapping(value = "/app/datasources", method = RequestMethod.GET)
+	@RequestMapping(value = "/datasources", method = RequestMethod.GET)
 	public String showDatasources(Model model) {
 		logger.debug("Entering showDatasources");
 
@@ -78,7 +78,7 @@ public class DatasourceController {
 		return "datasources";
 	}
 
-	@RequestMapping(value = "/app/deleteDatasource", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteDatasource", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteDatasource(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteDatasource: id={}", id);
@@ -104,7 +104,7 @@ public class DatasourceController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteDatasources", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteDatasources", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteDatasources(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteDatasources: ids={}", (Object) ids);
@@ -127,7 +127,7 @@ public class DatasourceController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addDatasource", method = RequestMethod.GET)
+	@RequestMapping(value = "/addDatasource", method = RequestMethod.GET)
 	public String addDatasource(Model model) {
 		logger.debug("Entering addDatasource");
 
@@ -143,7 +143,7 @@ public class DatasourceController {
 		return showEditDatasource("add", model);
 	}
 
-	@RequestMapping(value = "/app/editDatasource", method = RequestMethod.GET)
+	@RequestMapping(value = "/editDatasource", method = RequestMethod.GET)
 	public String editDatasource(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editDatasource: id={}", id);
 
@@ -157,7 +157,7 @@ public class DatasourceController {
 		return showEditDatasource("edit", model);
 	}
 
-	@RequestMapping(value = "/app/editDatasources", method = RequestMethod.GET)
+	@RequestMapping(value = "/editDatasources", method = RequestMethod.GET)
 	public String editDatasources(@RequestParam("ids") String ids, Model model,
 			HttpSession session) {
 
@@ -171,7 +171,7 @@ public class DatasourceController {
 		return "editDatasources";
 	}
 
-	@RequestMapping(value = "/app/saveDatasource", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveDatasource", method = RequestMethod.POST)
 	public String saveDatasource(@ModelAttribute("datasource")
 			@Valid Datasource datasource, @RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -212,7 +212,7 @@ public class DatasourceController {
 			}
 
 			redirectAttributes.addFlashAttribute("recordName", datasource.getName());
-			return "redirect:/app/datasources.do";
+			return "redirect:/datasources";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -221,7 +221,7 @@ public class DatasourceController {
 		return showEditDatasource(action, model);
 	}
 
-	@RequestMapping(value = "/app/saveDatasources", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveDatasources", method = RequestMethod.POST)
 	public String saveDatasources(@ModelAttribute("multipleDatasourceEdit") @Valid MultipleDatasourceEdit multipleDatasourceEdit,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
 			HttpSession session) {
@@ -239,7 +239,7 @@ public class DatasourceController {
 			datasourceService.updateDatasources(multipleDatasourceEdit, sessionUser);
 			redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordsUpdated");
 			redirectAttributes.addFlashAttribute("recordName", multipleDatasourceEdit.getIds());
-			return "redirect:/app/datasources.do";
+			return "redirect:/datasources";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);
@@ -280,7 +280,7 @@ public class DatasourceController {
 		return "editDatasources";
 	}
 
-	@RequestMapping(value = "/app/testDatasource", method = RequestMethod.POST)
+	@RequestMapping(value = "/testDatasource", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse testDatasource(@RequestParam("id") Integer id,
 			@RequestParam("jndi") Boolean jndi,

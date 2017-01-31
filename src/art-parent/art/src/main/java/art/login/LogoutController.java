@@ -61,7 +61,7 @@ public class LogoutController {
 
 		ArtAuthenticationMethod loginMethod = ArtAuthenticationMethod.toEnum(authenticationMethod);
 		if (null == loginMethod) {
-			return "redirect:/login.do";
+			return "redirect:/";
 		} else switch (loginMethod) {
 			case Auto:
 				return "autoLogout";
@@ -71,7 +71,7 @@ public class LogoutController {
 				}
 				return "casLogout";
 			default:
-				return "redirect:/login.do";
+				return "redirect:/";
 		}
 	}
 }

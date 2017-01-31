@@ -52,7 +52,7 @@ public class UserGroupController {
 	@Autowired
 	private ReportGroupService reportGroupService;
 
-	@RequestMapping(value = "/app/userGroups", method = RequestMethod.GET)
+	@RequestMapping(value = "/userGroups", method = RequestMethod.GET)
 	public String showUserGroups(Model model) {
 		logger.debug("Entering showUserGroups");
 
@@ -66,7 +66,7 @@ public class UserGroupController {
 		return "userGroups";
 	}
 
-	@RequestMapping(value = "/app/deleteUserGroup", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteUserGroup", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUserGroup(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteUserGroup: id={}", id);
@@ -84,7 +84,7 @@ public class UserGroupController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/deleteUserGroups", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteUserGroups", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteUserGroups(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteUserGroups: ids={}", (Object)ids);
@@ -102,7 +102,7 @@ public class UserGroupController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addUserGroup", method = RequestMethod.GET)
+	@RequestMapping(value = "/addUserGroup", method = RequestMethod.GET)
 	public String addUserGroup(Model model) {
 		logger.debug("Entering addUserGroup");
 
@@ -111,7 +111,7 @@ public class UserGroupController {
 		return showEditUserGroup("add", model);
 	}
 
-	@RequestMapping(value = "/app/editUserGroup", method = RequestMethod.GET)
+	@RequestMapping(value = "/editUserGroup", method = RequestMethod.GET)
 	public String editUserGroup(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editUserGroup: id={}", id);
 
@@ -125,7 +125,7 @@ public class UserGroupController {
 		return showEditUserGroup("edit", model);
 	}
 
-	@RequestMapping(value = "/app/saveUserGroup", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveUserGroup", method = RequestMethod.POST)
 	public String saveUserGroup(@ModelAttribute("group") @Valid UserGroup group,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -149,7 +149,7 @@ public class UserGroupController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", group.getName());
-			return "redirect:/app/userGroups.do";
+			return "redirect:/userGroups";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

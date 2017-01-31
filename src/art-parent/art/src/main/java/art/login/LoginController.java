@@ -64,7 +64,8 @@ public class LoginController {
 		return Config.getLanguages();
 	}
 
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	//https://stackoverflow.com/questions/2513031/multiple-spring-requestmapping-annotations
+	@RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
 			Model model, SessionStatus sessionStatus, HttpSession session) {
@@ -81,7 +82,7 @@ public class LoginController {
 			session.setAttribute("sessionUser", user);
 			session.setAttribute("initialSetup", "true");
 
-			return "redirect:/app/artDatabase.do";
+			return "redirect:/artDatabase";
 		}
 
 		session.setAttribute("administratorEmail", Config.getSettings().getAdministratorEmail());
@@ -104,7 +105,7 @@ public class LoginController {
 			model.addAttribute("message", "page.message.artDatabaseNotAvailable");
 			return "headerlessError";
 		}
-
+		
 		ArtAuthenticationMethod loginMethod;
 		ArtAuthenticationMethod loginMethodAppSetting = Config.getSettings().getArtAuthenticationMethod();
 		if (authenticationMethod == null) {
@@ -166,7 +167,7 @@ public class LoginController {
 			//give message and change default to internal login
 			model.addAttribute("invalidAutoLogin", "");
 			model.addAttribute("autoLoginUser", username);
-		} else if(loginMethod==ArtAuthenticationMethod.CAS) {
+		} else if (loginMethod == ArtAuthenticationMethod.CAS) {
 			String ip = request.getRemoteAddr();
 			LoginHelper loginHelper = new LoginHelper();
 
@@ -210,7 +211,7 @@ public class LoginController {
 			//if we are here auto login failed or invalid user or disabed user
 			//log failure
 			loginHelper.logFailure(loginMethod, username, ip, result.getDetails());
-			
+
 			//give message and change default to internal login
 			model.addAttribute("invalidCasLogin", "");
 			model.addAttribute("casLoginUser", username);
@@ -251,6 +252,8 @@ public class LoginController {
 		if (windowsDomain != null) {
 			//ModelMap.addAttribute() does not permit the attribute value to be null,
 			//and will throw an IllegalArgumentException if it is
+			//this seems to have changed in latest spring? at least 4.3.5.RELEASE
+			//exception not thrown if attribute value is null
 			model.addAttribute("selectedDomain", windowsDomain);
 		}
 		model.addAttribute("selectedUsername", username);
@@ -294,24 +297,26 @@ public class LoginController {
 				//enum has other possible values but they aren't relevant here
 				//create default object
 				result = new LoginResult();
-			} else switch (loginMethod) {
-				case Internal:
-					result = InternalLogin.authenticate(username, password);
-					break;
-				case Database:
-					result = DbLogin.authenticate(username, password);
-					break;
-				case LDAP:
-					result = LdapLogin.authenticate(username, password);
-					break;
-				case WindowsDomain:
-					result = WindowsDomainLogin.authenticate(windowsDomain, username, password);
-					break;
-				default:
-					//enum has other possible values but they aren't relevant here
-					//create default object
-					result = new LoginResult();
-					break;
+			} else {
+				switch (loginMethod) {
+					case Internal:
+						result = InternalLogin.authenticate(username, password);
+						break;
+					case Database:
+						result = DbLogin.authenticate(username, password);
+						break;
+					case LDAP:
+						result = LdapLogin.authenticate(username, password);
+						break;
+					case WindowsDomain:
+						result = WindowsDomainLogin.authenticate(windowsDomain, username, password);
+						break;
+					default:
+						//enum has other possible values but they aren't relevant here
+						//create default object
+						result = new LoginResult();
+						break;
+				}
 			}
 		}
 
@@ -360,10 +365,9 @@ public class LoginController {
 			//login failure. always display invalid account message rather than actual result details
 			//better for security if less details are displayed
 			model.addAttribute("invalidLogin", "");
-
-			//add result to be available for display, although not displayed
+			//add authentication failure details to the model in case it's desired to display result details in login.jsp
 			model.addAttribute("result", result);
-
+			
 			return "login";
 		}
 	}
@@ -396,9 +400,9 @@ public class LoginController {
 		if (nextPageAfterLogin == null) {
 			String startReport = user.getEffectiveStartReport();
 			if (StringUtils.isBlank(startReport)) {
-				nextPageAfterLogin = "/app/reports.do";
+				nextPageAfterLogin = "/reports";
 			} else {
-				nextPageAfterLogin = "/app/runReport.do?reportId=" + startReport;
+				nextPageAfterLogin = "/runReport?reportId=" + startReport;
 			}
 		}
 

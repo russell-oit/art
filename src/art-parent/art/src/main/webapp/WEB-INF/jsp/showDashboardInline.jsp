@@ -10,13 +10,13 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/dashboard.css" /> 
 
 <div class="container-fluid">
 	<div class="col-md-12">
 		<div class="row">
-			<h2>${dashboard.title}  
-				<small>  ${dashboard.description}</small>
+			<h2>${encode:forHtmlContent(dashboard.title)}  
+				<small>  ${encode:forHtmlContent(dashboard.description)}</small>
 			</h2>
 		</div>
 		<div class="row">
@@ -34,8 +34,8 @@
 													 data-content-div-id="#portletContent_${portlet.index}"
 													 data-url="${portlet.url}"
 													 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
-													<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
-													<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
+													<img class="refresh" src="${pageContext.request.contextPath}/public/images/refresh.png"/>
+													<img class="toggle" src="${pageContext.request.contextPath}/public/images/minimize.png"/>
 												</div>
 												<div class="${portlet.classNamePrefix}Title">
 													${portlet.title}
@@ -74,8 +74,8 @@
 																	 data-content-div-id="#portletContent_${portlet.index}"
 																	 data-url="${portlet.url}"
 																	 data-refresh-period-seconds="${portlet.refreshPeriodSeconds}">
-																	<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
-																	<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
+																	<img class="refresh" src="${pageContext.request.contextPath}/public/images/refresh.png"/>
+																	<img class="toggle" src="${pageContext.request.contextPath}/public/images/minimize.png"/>
 																</div>
 																<div class="${portlet.classNamePrefix}Title">
 																	${portlet.title}
@@ -143,8 +143,8 @@
 			var contentDivId = parentDiv.data("content-div-id");
 			var portletUrl = parentDiv.data("url");
 			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
-			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
-			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
+			var mimimizeUrl = "${pageContext.request.contextPath}/public/images/minimize.png";
+			var maximizeUrl = "${pageContext.request.contextPath}/public/images/maximize.png";
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
 				$(this).attr('src', maximizeUrl);
@@ -177,5 +177,12 @@
 				intervalIds[contentDivId] = setIntervalId;
 			}
 		});
+	});
+</script>
+
+<script type="text/javascript">
+	//https://blogs.msdn.microsoft.com/ukadc/2010/02/12/handling-errors-with-jquery-load/
+	$(document).ajaxError(function (event, xhr, options) {
+		ajaxErrorHandler(xhr);
 	});
 </script>

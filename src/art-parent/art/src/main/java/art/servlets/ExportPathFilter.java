@@ -63,7 +63,7 @@ public class ExportPathFilter implements Filter {
 				nextPageAfterLogin = nextPageAfterLogin + "?" + request.getQueryString();
 			}
 			session.setAttribute("nextPageAfterLogin", nextPageAfterLogin);
-			request.getRequestDispatcher("/login.do").forward(request, response);
+			request.getRequestDispatcher("/login").forward(request, response);
 			return;
 		}
 
@@ -87,7 +87,7 @@ public class ExportPathFilter implements Filter {
 				ReportService reportService = new ReportService();
 				try {
 					if (!reportService.canUserRunReport(sessionUser.getUserId(), reportId)) {
-						request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
+						request.getRequestDispatcher("/accessDenied").forward(request, response);
 						return;
 					}
 				} catch (SQLException ex) {
@@ -102,7 +102,7 @@ public class ExportPathFilter implements Filter {
 
 		if (!file.exists()) {
 			request.setAttribute("message", "reports.message.fileNotFound");
-			request.getRequestDispatcher("/app/accessDenied.do").forward(request, response);
+			request.getRequestDispatcher("/accessDenied").forward(request, response);
 			return;
 		}
 

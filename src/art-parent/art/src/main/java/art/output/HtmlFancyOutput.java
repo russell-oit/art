@@ -31,7 +31,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void init() {
 		//include required css and javascript files
-		//out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlFancyOutput.css'>");
+		//out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/public/css/htmlFancyOutput.css'>");
 	}
 
 	@Override
@@ -70,6 +70,18 @@ public class HtmlFancyOutput extends StandardOutput {
 		}
 
 		out.println("<td class='" + cssClass + "'>" + escapedValue + "</td>");
+	}
+	
+	@Override
+	public void addCellStringClean(String value) {
+		String cssClass;
+		if (evenRow) {
+			cssClass = "text-left";
+		} else {
+			cssClass = "text-left";
+		}
+
+		out.println("<td class='" + cssClass + "'>" + value + "</td>");
 	}
 
 	@Override

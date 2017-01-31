@@ -50,7 +50,7 @@ public class RuleController {
 	@Autowired
 	private RuleService ruleService;
 
-	@RequestMapping(value = "/app/rules", method = RequestMethod.GET)
+	@RequestMapping(value = "/rules", method = RequestMethod.GET)
 	public String showRules(Model model) {
 		logger.debug("Entering showRules");
 
@@ -64,7 +64,7 @@ public class RuleController {
 		return "rules";
 	}
 
-	@RequestMapping(value = "/app/deleteRule", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteRule", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteRule(@RequestParam("id") Integer id) {
 		logger.debug("Entering deleteRule: id={}", id);
@@ -89,7 +89,7 @@ public class RuleController {
 		return response;
 	}
 	
-	@RequestMapping(value = "/app/deleteRules", method = RequestMethod.POST)
+	@RequestMapping(value = "/deleteRules", method = RequestMethod.POST)
 	public @ResponseBody
 	AjaxResponse deleteRules(@RequestParam("ids[]") Integer[] ids) {
 		logger.debug("Entering deleteRules: id={}", (Object)ids);
@@ -113,7 +113,7 @@ public class RuleController {
 		return response;
 	}
 
-	@RequestMapping(value = "/app/addRule", method = RequestMethod.GET)
+	@RequestMapping(value = "/addRule", method = RequestMethod.GET)
 	public String addRule(Model model) {
 		logger.debug("Entering addRule");
 
@@ -122,7 +122,7 @@ public class RuleController {
 		return showEditRule("add", model);
 	}
 
-	@RequestMapping(value = "/app/editRule", method = RequestMethod.GET)
+	@RequestMapping(value = "/editRule", method = RequestMethod.GET)
 	public String editRule(@RequestParam("id") Integer id, Model model) {
 		logger.debug("Entering editRule: id={}", id);
 
@@ -136,7 +136,7 @@ public class RuleController {
 		return showEditRule("edit", model);
 	}
 
-	@RequestMapping(value = "/app/saveRule", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveRule", method = RequestMethod.POST)
 	public String saveRule(@ModelAttribute("rule") @Valid Rule rule,
 			@RequestParam("action") String action,
 			BindingResult result, Model model, RedirectAttributes redirectAttributes,
@@ -160,7 +160,7 @@ public class RuleController {
 				redirectAttributes.addFlashAttribute("recordSavedMessage", "page.message.recordUpdated");
 			}
 			redirectAttributes.addFlashAttribute("recordName", rule.getName());
-			return "redirect:/app/rules.do";
+			return "redirect:/rules";
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);
 			model.addAttribute("error", ex);

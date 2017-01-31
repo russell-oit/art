@@ -37,6 +37,7 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
@@ -65,6 +66,12 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	@Autowired
 	private StringToDouble stringToDouble;
 
+	@Autowired
+	private AuthorizationInterceptor authorizationInterceptor;
+
+	@Autowired
+	private MdcInterceptor mdcInterceptor;
+
 	private ApplicationContext applicationContext;
 
 	@Override
@@ -80,6 +87,13 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		//https://github.com/arey/spring-javaconfig-sample/blob/master/src/main/java/com/javaetmoi/sample/config/WebMvcConfig.java
 		//don't include/show model attributes in url (request) when using redirect:
 		requestMappingHandlerAdapter.setIgnoreDefaultModelOnRedirect(true);
+	}
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("/public/**").addResourceLocations("/public/");
+		registry.addResourceHandler("/jpivot/**").addResourceLocations("/jpivot/");
+		registry.addResourceHandler("/wcf/**").addResourceLocations("/wcf/");
 	}
 
 	@Bean
@@ -112,7 +126,17 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 	public void addInterceptors(InterceptorRegistry registry) {
 		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
 		localeChangeInterceptor.setParamName("lang");
+
+		//https://stackoverflow.com/questions/11586757/spring-3-interceptor-order
 		registry.addInterceptor(localeChangeInterceptor);
+		registry.addInterceptor(mdcInterceptor);
+
+		//https://ant.apache.org/manual/dirtasks.html#patterns
+		//https://opensourceforgeeks.blogspot.co.ke/2016/01/difference-between-and-in-spring-mvc.html
+		registry.addInterceptor(authorizationInterceptor)
+				.addPathPatterns("/**")
+				.excludePathPatterns("/login", "/logout", "/",
+						"/error", "/error-404", "/error-405", "/error-400", "/error-500");
 	}
 
 	@Bean

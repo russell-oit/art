@@ -64,7 +64,7 @@ public class AnalysisController {
 	@Autowired
 	private ReportService reportService;
 
-	@RequestMapping(value = "/app/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/showAnalysis", method = {RequestMethod.GET, RequestMethod.POST})
 	public String showAnalysis(HttpServletRequest request, Model model, HttpSession session) {
 		logger.debug("Entering showAnalysis");
 
@@ -377,7 +377,7 @@ public class AnalysisController {
 		}
 	}
 
-	@RequestMapping(value = "/app/jpivotError", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/jpivotError", method = {RequestMethod.GET, RequestMethod.POST})
 	public String jpivotError(HttpServletRequest request, Model model) {
 		logger.debug("Entering jpivotError");
 
@@ -399,14 +399,14 @@ public class AnalysisController {
 		return "jpivotError";
 	}
 
-	@RequestMapping(value = "/app/jpivotBusy", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/jpivotBusy", method = {RequestMethod.GET, RequestMethod.POST})
 	public String jpivotBusy() {
 		logger.debug("Entering jpivotBusy");
 
 		return "jpivotBusy";
 	}
 
-	@RequestMapping(value = "/app/saveAnalysis", method = RequestMethod.POST)
+	@RequestMapping(value = "/saveAnalysis", method = RequestMethod.POST)
 	public String saveAnalysis(HttpServletRequest request,
 			HttpSession session, RedirectAttributes redirectAttributes) {
 
@@ -433,14 +433,14 @@ public class AnalysisController {
 			//check if any modification made
 			if ((mdx == null || mdx.length() == 0) && !deleting) {
 				redirectAttributes.addFlashAttribute("message", "analysis.message.nothingToSave");
-				return "redirect:/app/reportError.do";
+				return "redirect:/reportError";
 			}
 
 			Report report = reportService.getReport(reportId);
 
 			if (report == null) {
 				redirectAttributes.addFlashAttribute("message", "reports.message.reportNotFound");
-				return "redirect:/app/reportError.do";
+				return "redirect:/reportError";
 			}
 
 			User sessionUser = (User) session.getAttribute("sessionUser");
@@ -456,12 +456,12 @@ public class AnalysisController {
 				}
 				reportService.updateReport(report, sessionUser);
 				redirectAttributes.addFlashAttribute("message", "analysis.message.reportSaved");
-				return "redirect:/app/success.do";
+				return "redirect:/success";
 			} else if (deleting) {
 				//delete query
 				reportService.deleteReport(reportId);
 				redirectAttributes.addFlashAttribute("message", "analysis.message.reportDeleted");
-				return "redirect:/app/success.do";
+				return "redirect:/success";
 			} else {
 				//create new query based on current query
 				Report newReport = new Report();
@@ -500,11 +500,11 @@ public class AnalysisController {
 				reportService.grantAccess(report, sessionUser);
 
 				redirectAttributes.addFlashAttribute("message", "analysis.message.reportAdded");
-				return "redirect:/app/success.do";
+				return "redirect:/success";
 			}
 		} catch (SQLException | RuntimeException ex) {
 			redirectAttributes.addFlashAttribute("error", ex);
-			return "redirect:/app/reportError.do";
+			return "redirect:/reportError";
 		}
 	}
 }
