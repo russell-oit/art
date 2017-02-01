@@ -19,7 +19,6 @@ package art.springconfig;
 
 import art.usergroup.StringToUserGroup;
 import art.utils.StringToDouble;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +120,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		resolver.setPrefix("/WEB-INF/thymeleaf/");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setSuffix(".html");
-		resolver.setCharacterEncoding(StandardCharsets.UTF_8.name());
+		resolver.setCharacterEncoding("UTF-8");
 		return resolver;
 	}
 
@@ -154,7 +153,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 		messageSource.setBasenames("WEB-INF/i18n/ArtMessages");
 		messageSource.setUseCodeAsDefaultMessage(true);
-		messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
+		messageSource.setDefaultEncoding("UTF-8");
 		messageSource.setFallbackToSystemLocale(false);
 		messageSource.setCacheSeconds((int) TimeUnit.HOURS.toSeconds(1)); //check every x hours
 		return messageSource;

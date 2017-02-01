@@ -46,6 +46,11 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 	//https://stackoverflow.com/questions/23349180/java-config-for-spring-interceptor-where-interceptor-is-using-autowired-spring-b
 	//https://stackoverflow.com/questions/20243130/mvc-java-config-handlerinterceptor-not-excluding-paths
 	//https://stackoverflow.com/questions/18218386/cannot-autowire-service-in-handlerinterceptoradapter
+	//https://stackoverflow.com/questions/14071272/spring-mvc-authorization-in-rest-resources
+	//http://www.journaldev.com/2676/spring-mvc-interceptor-example-handlerinterceptor-handlerinterceptoradapter
+	//https://examples.javacodegeeks.com/enterprise-java/spring/mvc/spring-mvc-interceptor-tutorial/
+	//http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/servlet/handler/HandlerInterceptorAdapter.html
+	//http://www.concretepage.com/spring/spring-mvc/spring-handlerinterceptor-annotation-example-webmvcconfigureradapter
 
 	private static final Logger logger = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 
@@ -55,6 +60,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 		HttpSession session = request.getSession();
 
+		//https://stackoverflow.com/questions/4931323/whats-the-difference-between-getrequesturi-and-getpathinfo-methods-in-httpservl
 		String requestUri = request.getRequestURI();
 		String page = "";
 		String pathMinusContext = "";

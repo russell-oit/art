@@ -254,6 +254,9 @@ public class LoginController {
 			//and will throw an IllegalArgumentException if it is
 			//this seems to have changed in latest spring? at least 4.3.5.RELEASE
 			//exception not thrown if attribute value is null
+			//https://stackoverflow.com/questions/25433942/spring-model-model-object-must-not-be-null
+			//https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/ModelAndView.java
+			//https://github.com/spring-projects/spring-framework/blob/master/spring-context/src/main/java/org/springframework/ui/ModelMap.java
 			model.addAttribute("selectedDomain", windowsDomain);
 		}
 		model.addAttribute("selectedUsername", username);
