@@ -46,7 +46,7 @@ public class MdcInterceptor extends HandlerInterceptorAdapter {
 
 		String username;
 		if (user == null) {
-			username = "[null]";
+			username = "";
 		} else {
 			username = user.getUsername();
 		}
