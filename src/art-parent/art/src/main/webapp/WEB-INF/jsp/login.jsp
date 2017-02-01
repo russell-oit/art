@@ -34,7 +34,7 @@ Login page
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-1.12.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -51,7 +51,7 @@ Login page
 					<fieldset>
 						<legend class="text-center">ART</legend>
 						<div class="form-group">
-							<img src="${pageContext.request.contextPath}/public/images/art-64px.jpg"
+							<img src="${pageContext.request.contextPath}/images/art-64px.jpg"
 								 alt="" class="img-responsive centered">
 						</div>
 

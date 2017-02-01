@@ -24,13 +24,13 @@ Display art database configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 	
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -64,7 +64,7 @@ Display art database configuration page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#art-database">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#art-database">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

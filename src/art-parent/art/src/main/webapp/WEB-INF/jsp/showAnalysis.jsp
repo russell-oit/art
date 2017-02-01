@@ -27,15 +27,15 @@
 		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/wcf/tree/xtree.css" />
 		<script type="text/javascript" src="${pageContext.request.contextPath}/wcf/scroller.js"></script>
 
-		<link rel="shortcut icon" href="${pageContext.request.contextPath}/public/images/favicon.ico">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-3.3.6/css/bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/font-awesome-4.5.0/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/art.css">
+		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font-awesome-4.5.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/art.css">
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-1.12.4.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-3.3.6/js/bootstrap.min.js"></script>
 
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-hover-dropdown-2.0.3.min.js"></script>
 
 	</head>
 	<body>

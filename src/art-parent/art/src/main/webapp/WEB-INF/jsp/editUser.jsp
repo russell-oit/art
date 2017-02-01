@@ -40,13 +40,13 @@ Display edit user page
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -86,7 +86,7 @@ Display edit user page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#users">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#users">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
@@ -209,7 +209,7 @@ Display edit user page
 									 itemLabel="description" 
 									 class="form-control selectpicker"/>
 						<div class="text-right">
-							<a href="${pageContext.request.contextPath}/public/docs/Manual.html#access-levels">
+							<a href="${pageContext.request.contextPath}/docs/Manual.html#access-levels">
 								<spring:message code="page.link.help"/>
 							</a>
 						</div>

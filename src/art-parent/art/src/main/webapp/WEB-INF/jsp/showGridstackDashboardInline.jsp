@@ -10,16 +10,16 @@
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" prefix="encode" %>
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/css/dashboard.css" /> 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/dashboard.css" /> 
 
 <%-- https://www.versioneye.com/javascript/troolee:gridstack/0.2.5-dev --%>
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/gridstack-0.2.5/gridstack.min.css" /> 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.css" /> 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack-extra.min.css" /> 
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/lodash-3.5.0/lodash.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/gridstack-0.2.5/gridstack.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/lodash-3.5.0/lodash.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/gridstack-0.2.5/gridstack.min.js"></script>
 
 
 <div class="container-fluid">
@@ -50,8 +50,8 @@
 												 data-content-div-id="#itemContent_${item.index}"
 												 data-url="${item.url}"
 												 data-refresh-period-seconds="${item.refreshPeriodSeconds}">
-												<img class="refresh" src="${pageContext.request.contextPath}/public/images/refresh.png"/>
-												<img class="toggle" src="${pageContext.request.contextPath}/public/images/minimize.png"/>
+												<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
+												<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 											</div>
 											<div class="portletAUTOTitle">
 												${item.title}
@@ -95,8 +95,8 @@
 															 data-content-div-id="#itemContent_${item.index}"
 															 data-url="${item.url}"
 															 data-refresh-period-seconds="${item.refreshPeriodSeconds}">
-															<img class="refresh" src="${pageContext.request.contextPath}/public/images/refresh.png"/>
-															<img class="toggle" src="${pageContext.request.contextPath}/public/images/minimize.png"/>
+															<img class="refresh" src="${pageContext.request.contextPath}/images/refresh.png"/>
+															<img class="toggle" src="${pageContext.request.contextPath}/images/minimize.png"/>
 														</div>
 														<div class="portletAUTOTitle">
 															${item.title}
@@ -161,8 +161,8 @@
 			var contentDivId = parentDiv.data("content-div-id");
 			var itemUrl = parentDiv.data("url");
 			var src = $(this).attr('src'); //this.src gives full url i.e. http://... while $(this).attr('src') gives relative url i.e. contextpath/...
-			var mimimizeUrl = "${pageContext.request.contextPath}/public/images/minimize.png";
-			var maximizeUrl = "${pageContext.request.contextPath}/public/images/maximize.png";
+			var mimimizeUrl = "${pageContext.request.contextPath}/images/minimize.png";
+			var maximizeUrl = "${pageContext.request.contextPath}/images/maximize.png";
 			if (src === mimimizeUrl) {
 				$(contentDivId).hide();
 				$(this).attr('src', maximizeUrl);

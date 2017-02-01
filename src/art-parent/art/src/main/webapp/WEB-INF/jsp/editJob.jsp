@@ -53,21 +53,21 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/appelsiini-chained-selects/jquery.chained.remote.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects/jquery.chained.remote.min.js"></script>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/tinymce-4.3.8/tinymce.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -346,7 +346,7 @@
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#scheduling">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#scheduling">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

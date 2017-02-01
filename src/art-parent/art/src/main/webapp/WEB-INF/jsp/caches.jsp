@@ -24,7 +24,7 @@ Page to allow manual clearing of caches
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function () {
@@ -39,7 +39,7 @@ Page to allow manual clearing of caches
 					lengthMenu: [[5, 10, 25, -1], [5, 10, 25, "${showAllRowsText}"]],
 					pageLength: 10,
 					language: {
-						url: "${pageContext.request.contextPath}/public/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
+						url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${pageContext.response.locale}.json"
 					},
 					initComplete: datatablesInitComplete
 				});

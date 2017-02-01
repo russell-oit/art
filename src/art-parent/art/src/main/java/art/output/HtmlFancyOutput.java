@@ -31,7 +31,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void init() {
 		//include required css and javascript files
-		//out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/public/css/htmlFancyOutput.css'>");
+		//out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlFancyOutput.css'>");
 	}
 
 	@Override

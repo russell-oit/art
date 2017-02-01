@@ -40,13 +40,13 @@ Display user jobs and jobs configuration
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/eonasdan-datepicker/css/bootstrap-datetimepicker.min.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {

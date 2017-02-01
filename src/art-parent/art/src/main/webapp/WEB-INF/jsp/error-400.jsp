@@ -14,8 +14,8 @@ Display 400 error (bad request)
     <head>
         <meta charset='utf-8'>
         <title>ART - Bad Request</title>
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-3.3.6/css/bootstrap.min.css">
-		<link rel="shortcut icon" href="${pageContext.request.contextPath}/public/images/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-3.3.6/css/bootstrap.min.css">
+		<link rel="shortcut icon" href="${pageContext.request.contextPath}/images/favicon.ico">
     </head>
     <body>
 		<jsp:include page="/WEB-INF/jsp/error-400-inline.jsp"/>

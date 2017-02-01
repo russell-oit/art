@@ -30,9 +30,9 @@ public class HtmlGridOutput extends StandardOutput {
 	@Override
 	public void init() {
 		//include required css and javascript files
-		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/public/css/htmlGridOutput.css'>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/public/js/sorttable.js'></script>");
-		out.println("<script type='text/javascript' src='" + contextPath + "/public/js/htmlGridOutput.js'></script>");
+		out.println("<link rel='stylesheet' type='text/css' href='" + contextPath + "/css/htmlGridOutput.css'>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/sorttable.js'></script>");
+		out.println("<script type='text/javascript' src='" + contextPath + "/js/htmlGridOutput.js'></script>");
 	}
 
 	@Override

@@ -332,7 +332,7 @@ function initConfigTable(tbl, pageLength, showAllRowsText, contextPath, localeCo
 		},
 		order: [[1, 'asc']],
 		language: {
-			url: contextPath + "/public/js/dataTables/i18n/dataTables_" + localeCode + ".json"
+			url: contextPath + "/js/dataTables/i18n/dataTables_" + localeCode + ".json"
 		},
 		initComplete: datatablesInitComplete
 	});

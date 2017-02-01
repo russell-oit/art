@@ -48,7 +48,7 @@ Edit schedule page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#saved-schedules">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#saved-schedules">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>

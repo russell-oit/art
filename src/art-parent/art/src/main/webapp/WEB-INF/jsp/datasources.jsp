@@ -32,7 +32,7 @@ Display datasources
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-12">
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 		<script type="text/javascript">
 			$(document).ready(function () {

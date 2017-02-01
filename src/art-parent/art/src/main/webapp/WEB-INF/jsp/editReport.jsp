@@ -51,25 +51,25 @@ Edit report page
 					 mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/css/jquery.fileupload.css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/css/jquery.fileupload-ui.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/css/bootstrap-select.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/css/jasny-bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/css/jquery.fileupload-ui.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/tinymce-4.3.8/tinymce.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/js/jquery.fileupload.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jasny-bootstrap-3.1.3/js/jasny-bootstrap.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/vendor/jquery.ui.widget.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.iframe-transport.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-process.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-validate.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-file-upload-9.14.2/js/jquery.fileupload-ui.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/ace-min-noconflict-1.2.6/ace.js" charset="utf-8"></script>
 
 		<script type="text/javascript">
 			tinymce.init({
@@ -481,7 +481,7 @@ Edit report page
 
 	<jsp:attribute name="aboveMainPanel">
 		<div class="text-right">
-			<a href="${pageContext.request.contextPath}/public/docs/Manual.html#reports">
+			<a href="${pageContext.request.contextPath}/docs/Manual.html#reports">
 				<spring:message code="page.link.help"/>
 			</a>
 		</div>
@@ -617,7 +617,7 @@ Edit report page
 										  itemLabel="description" itemValue="value"/>
 						</form:select>
 						<div class="text-right">
-							<a href="${pageContext.request.contextPath}/public/docs/Manual.html#report-types">
+							<a href="${pageContext.request.contextPath}/docs/Manual.html#report-types">
 								<spring:message code="page.link.help"/>
 							</a>
 						</div>

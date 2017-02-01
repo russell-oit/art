@@ -28,13 +28,13 @@ Admin rights configuration page
 <t:mainPageWithPanel title="${pageTitle}" mainColumnClass="col-md-6 col-md-offset-3">
 
 	<jsp:attribute name="css">
-		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/public/js/lou-multi-select-0.9.11/css/multi-select.css">
+		<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/css/multi-select.css">
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
-		<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/jquery.quicksearch.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/lou-multi-select-0.9.11/js/jquery.multi-select.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.quicksearch.js"></script>
 		
 		<script type="text/javascript">
 			$(document).ready(function() {

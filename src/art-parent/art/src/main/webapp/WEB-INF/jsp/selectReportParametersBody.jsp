@@ -16,10 +16,10 @@ Display section to allow selecting of report parameters and initiate running of 
 
 <spring:message code="reports.message.fileSent" var="fileSentText"/>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/notify-combined-0.3.1.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/bootstrap-select-1.10.0/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/eonasdan-datepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/notify-combined-0.3.1.min.js"></script>
 
 <script type="text/javascript">
 	$(document).ready(function () {
@@ -191,7 +191,7 @@ Display section to allow selecting of report parameters and initiate running of 
 
 </script>
 
-<script type="text/javascript" src="${pageContext.request.contextPath}/public/js/tinymce-4.3.8/tinymce.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/tinymce-4.3.8/tinymce.min.js"></script>
 <script type="text/javascript">
 	tinymce.init({
 		selector: "textarea.editor",

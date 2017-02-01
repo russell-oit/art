@@ -36,7 +36,7 @@ public class GroupHtmlOutput extends GroupOutput {
 	
 	public void init() {
 		//include required css and javascript files
-		out.println("<link rel='stylesheet' type='text/css' href='" + getContextPath() + "/public/css/groupHtmlOutput.css'>");
+		out.println("<link rel='stylesheet' type='text/css' href='" + getContextPath() + "/css/groupHtmlOutput.css'>");
 	}
 
 
