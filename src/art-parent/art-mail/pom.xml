@@ -44,9 +44,9 @@
 				<!-- plugin to update/add license headers to source files -->
 				<!-- http://code.mycila.com/license-maven-plugin/ -->
 				<plugin>
-					<groupId>com.mycila.maven-license-plugin</groupId>
-					<artifactId>maven-license-plugin</artifactId>
-					<version>1.10.b1</version>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>3.0</version>
 					<configuration>
 						<basedir>${basedir}</basedir>
 						<header>${basedir}/src/license/header.txt</header>
@@ -57,17 +57,22 @@
 						<strictCheck>true</strictCheck>
 						<dryRun>false</dryRun>
 						<failIfMissing>true</failIfMissing>
+						<!-- https://github.com/mycila/license-maven-plugin/pull/109 -->
+						<mapping>
+							<java>SLASHSTAR_STYLE</java>
+						</mapping>
 					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 
 		<plugins>
-			<!-- uncomment and use maven-license-plugin as required e.g. mvn license:check, 
-			license:format, license:remove -->
-
-			<!-- <plugin> <groupId>com.mycila.maven-license-plugin</groupId> <artifactId>maven-license-plugin</artifactId> 
-			</plugin> -->
+			<!-- use License Maven Plugin as required e.g. mvn license:check, 
+			license:format, license:remove to update license headers-->
+			<plugin>
+				<groupId>com.mycila</groupId> 
+				<artifactId>license-maven-plugin</artifactId> 
+			</plugin> 
 		</plugins>
 	</build>
 	

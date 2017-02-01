@@ -20,3 +20,6 @@ src/art-parent/art-mail/.settings/
 src/art-parent/art-dbcp/nb-configuration.xml
 src/art-parent/art-mail/nb-configuration.xml
 src/art-parent/art-ajaxtags/target/
+src/art-parent/art/nbactions.xml
+src/art-parent/art-mail/nbactions.xml
+src/art-parent/art-dbcp/nbactions.xml
