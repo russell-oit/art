@@ -129,7 +129,7 @@ public class HtmlPlainOutput extends StandardOutput {
 	}
 	
 	@Override
-	public void addCellStringClean(String value) {
+	public void addCellStringAsIs(String value) {
 		out.println("<td style='text-align: left'>" + value + "</td>");
 	}
 

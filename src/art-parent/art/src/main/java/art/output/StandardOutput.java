@@ -56,8 +56,6 @@ import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -330,13 +328,12 @@ public abstract class StandardOutput {
 	public abstract void addCellString(String value);
 
 	/**
-	 * For html output, outputs cleaned value to the current row. The
-	 * implementing class should not perform further escaping but instead output
-	 * the value as given
+	 * For html output, outputs the value as is to the current row. The implementing
+	 * class should not perform any escaping.
 	 *
 	 * @param value
 	 */
-	public void addCellStringClean(String value) {
+	public void addCellStringAsIs(String value) {
 		addCellString(value);
 	}
 
@@ -626,7 +623,7 @@ public abstract class StandardOutput {
 				result.setTooManyRows(true);
 				return result;
 			} else {
-				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
+				List<Object> columnValues = outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
 				outputDrilldownColumns(drilldowns, reportParamsList, columnValues);
 			}
 		}
@@ -999,7 +996,7 @@ public abstract class StandardOutput {
 					fos = endBurstOutput(fos, hiddenColumns, rsmd, totalColumns);
 					previousBurstId = null;
 				} else {
-					outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay, reportFormat);
+					outputResultSetColumns(columnTypes, rs, hiddenColumns, nullNumberDisplay, nullStringDisplay);
 				}
 			}
 
@@ -1201,13 +1198,12 @@ public abstract class StandardOutput {
 	 * should not be included in the output
 	 * @param nullNumberDisplay the string to display for null numeric values
 	 * @param nullStringDisplay the string to display for null string values
-	 * @param reportFormat the report format for the report
 	 * @return data for the output row
 	 * @throws SQLException
 	 */
 	private List<Object> outputResultSetColumns(Map<Integer, ColumnType> columnTypes,
 			ResultSet rs, List<String> hiddenColumns, String nullNumberDisplay,
-			String nullStringDisplay, ReportFormat reportFormat) throws SQLException {
+			String nullStringDisplay) throws SQLException {
 		//save column values for use in drill down columns.
 		//for the jdbc-odbc bridge, you can only read
 		//column values ONCE and in the ORDER they appear in the select
@@ -1316,18 +1312,18 @@ public abstract class StandardOutput {
 					if (clob != null) {
 						value = clob.getSubString(1, (int) clob.length());
 					}
-					addString(value, nullStringDisplay, reportFormat);
+					addString(value, nullStringDisplay);
 					break;
 				case Other: //ms-access (ucanaccess driver) data type
 					value = rs.getObject(columnIndex);
 					if (value != null) {
 						value = value.toString();
 					}
-					addString(value, nullStringDisplay, reportFormat);
+					addString(value, nullStringDisplay);
 					break;
 				default:
 					value = rs.getString(columnIndex);
-					addString(value, nullStringDisplay, reportFormat);
+					addString(value, nullStringDisplay);
 			}
 
 			columnValues.add(value);
@@ -1366,12 +1362,14 @@ public abstract class StandardOutput {
 					targetAttribute = "target='_blank'";
 				}
 				drilldownTag = "<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
-				if (requestBaseUrl != null) {
-					String cleanedDrilldownTag = Jsoup.clean(drilldownTag, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
-					addCellStringClean(cleanedDrilldownTag);
-				} else {
-					addCellString(drilldownTag);
-				}
+				//clean to be a custom setting? cleanHtmlReportOutput?
+				addCellStringAsIs(drilldownTag);
+//				if (requestBaseUrl != null) {
+//					String cleanedDrilldownTag = Jsoup.clean(drilldownTag, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
+//					addCellStringAsIs(cleanedDrilldownTag);
+//				} else {
+//					addCellString(drilldownTag);
+//				}
 			}
 		}
 	}
@@ -1454,9 +1452,9 @@ public abstract class StandardOutput {
 	 */
 	private void addString(Object value) {
 		if (value == null) {
-			addCellString(""); //display nulls as empty string
+			addCellStringAsIs(""); //display nulls as empty string
 		} else {
-			addCellString((String) value);
+			addCellStringAsIs((String) value);
 		}
 	}
 
@@ -1465,23 +1463,26 @@ public abstract class StandardOutput {
 	 *
 	 * @param value the value to output
 	 * @param nullStringDisplay the string to output if the value is null
-	 * @param reportFormat the report format for the report
 	 */
-	private void addString(Object value, String nullStringDisplay, ReportFormat reportFormat) {
+	private void addString(Object value, String nullStringDisplay) {
 		if (value == null) {
-			if (requestBaseUrl != null) {
-				String cleanedValue = Jsoup.clean(nullStringDisplay, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
-				addCellStringClean(cleanedValue);
-			} else {
-				addCellString(nullStringDisplay);
-			}
+//			if (requestBaseUrl != null) {
+//				String cleanedValue = Jsoup.clean(nullStringDisplay, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
+//				addCellStringAsIs(cleanedValue);
+//			} else {
+//				addCellString(nullStringDisplay);
+//			}
+
+			addCellStringAsIs(nullStringDisplay);
 		} else {
-			if (requestBaseUrl != null) {
-				String cleanedValue = Jsoup.clean((String) value, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
-				addCellStringClean(cleanedValue);
-			} else {
-				addCellString((String) value);
-			}
+//			if (requestBaseUrl != null) {
+//				String cleanedValue = Jsoup.clean((String) value, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
+//				addCellStringAsIs(cleanedValue);
+//			} else {
+//				addCellString((String) value);
+//			}
+
+			addCellStringAsIs((String) value);
 		}
 	}
 

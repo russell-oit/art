@@ -73,7 +73,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	}
 	
 	@Override
-	public void addCellStringClean(String value) {
+	public void addCellStringAsIs(String value) {
 		String cssClass;
 		if (evenRow) {
 			cssClass = "text-left";
