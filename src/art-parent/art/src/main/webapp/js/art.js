@@ -2,7 +2,7 @@
  * @file ART javascript. General functions and global variables
  * @author Timothy Anyona
  * 
- * @copyright Copyright (C) 2016 Enrico Liboni <eliboni@users.sourceforge.net>
+ * @copyright Copyright (C) 2017 Enrico Liboni <eliboni@users.sf.net>
  *
  * This file is part of ART.
  *

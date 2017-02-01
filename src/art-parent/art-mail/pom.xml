@@ -69,6 +69,7 @@
 		<plugins>
 			<!-- use License Maven Plugin as required e.g. mvn license:check, 
 			license:format, license:remove to update license headers-->
+			<!-- https://groups.google.com/forum/#!topic/sonarqube/efdTNaOEMBg -->
 			<plugin>
 				<groupId>com.mycila</groupId> 
 				<artifactId>license-maven-plugin</artifactId> 
