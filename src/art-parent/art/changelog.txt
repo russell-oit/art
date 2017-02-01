@@ -17,6 +17,7 @@ ART 3.0
 * Requires Java 7
 * Requires Servlet 3.0
 * Updated libraries, including jasperreports, quartz, jxls, among others
+* Changed license from GPLv2 to GPLv3
 
 ART 2.5.4
 * Added Lithuanian translation (thanks to Dalius Guzauskas)
