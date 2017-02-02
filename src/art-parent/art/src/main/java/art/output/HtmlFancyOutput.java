@@ -38,7 +38,7 @@ public class HtmlFancyOutput extends StandardOutput {
 	public void beginHeader() {
 		out.println("<div style='border: 3px solid white'>");
 		out.println("<table class='table table-condensed table-bordered table-striped'>");
-		out.println("<tr>");
+		out.println("<thead><tr>");
 	}
 
 	@Override
@@ -55,7 +55,12 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void endHeader() {
-		out.println("</tr>");
+		out.println("</tr></thead>");
+	}
+	
+	@Override
+	public void beginRows() {
+		out.println("<tbody>");
 	}
 
 	@Override
@@ -159,6 +164,11 @@ public class HtmlFancyOutput extends StandardOutput {
 	@Override
 	public void endRow(){
 		out.println("</tr>");
+	}
+	
+	@Override
+	public void endRows() {
+		out.println("</tbody>");
 	}
 	
 	@Override

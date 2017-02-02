@@ -52,7 +52,8 @@ public class HtmlPlainOutput extends StandardOutput {
 		//https://www.campaignmonitor.com/css/
 		out.println("<style>"
 				+ "table {border-collapse: collapse;}"
-				+ "\n td {background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt;}"
+				+ "\n td {background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; padding:0 2px;}"
+				+ "\n th {background-color: #FFFFFF; border: 1px solid #000000; font-size: 10pt; padding:0 2px;}"
 				+ "\n body {font-family: Verdana, Helvetica , Arial, SansSerif; color: #000000;}"
 				+ "\n</style>");
 
@@ -108,18 +109,23 @@ public class HtmlPlainOutput extends StandardOutput {
 		out.println("<div align='center'>");
 		out.println("<table border='0' width='100%' cellspacing='1'"
 				+ " cellpadding='1'>");
-		out.println("<tr>");
+		out.println("<thead><tr>");
 	}
 
 	@Override
 	public void addHeaderCell(String value) {
 		String escapedValue = Encode.forHtmlContent(value);
-		out.println("<td><b>" + escapedValue + "</b></td>");
+		out.println("<th><b>" + escapedValue + "</b></th>");
 	}
 
 	@Override
 	public void endHeader() {
-		out.println("</tr>");
+		out.println("</tr></thead>");
+	}
+	
+	@Override
+	public void beginRows() {
+		out.println("<tbody>");
 	}
 
 	@Override
@@ -173,6 +179,11 @@ public class HtmlPlainOutput extends StandardOutput {
 	@Override
 	public void endRow() {
 		out.println("</tr>");
+	}
+	
+	@Override
+	public void endRows() {
+		out.println("</tbody>");
 	}
 
 	@Override
