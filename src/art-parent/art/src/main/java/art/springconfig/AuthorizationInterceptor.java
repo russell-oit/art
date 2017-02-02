@@ -196,6 +196,7 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		int accessLevel = user.getAccessLevel().getValue();
 
 		if (StringUtils.equals(page, "reports")
+				|| StringUtils.equals(page, "") //home page "/"
 				|| StringUtils.equals(page, "selectReportParameters")
 				|| StringUtils.equals(page, "showDashboard")
 				|| StringUtils.equals(page, "showAnalysis")

@@ -84,7 +84,7 @@ public class ReportController {
 	@Autowired
 	private MessageSource messageSource;
 
-	@RequestMapping(value = "/reports", method = RequestMethod.GET)
+	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		logger.debug("Entering showReports");
 

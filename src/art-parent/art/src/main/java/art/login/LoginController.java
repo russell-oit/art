@@ -66,7 +66,7 @@ public class LoginController {
 	}
 
 	//https://stackoverflow.com/questions/2513031/multiple-spring-requestmapping-annotations
-	@RequestMapping(value = {"/", "/login"}, method = RequestMethod.GET)
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
 			Model model, SessionStatus sessionStatus, HttpSession session) {
