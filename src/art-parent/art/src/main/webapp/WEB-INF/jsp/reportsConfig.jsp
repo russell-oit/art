@@ -147,6 +147,10 @@ Reports configuration page
 						   href="${pageContext.request.contextPath}/editReport?id=${record.reportId}">
 							<spring:message code="page.action.edit"/>
 						</a>
+						<a class="btn btn-default" 
+						   href="${pageContext.request.contextPath}/copyReport?id=${record.reportId}">
+							<spring:message code="reports.action.copy"/>
+						</a>
 					</div>
 					<div class="btn-group">
 						<a class="btn btn-default"

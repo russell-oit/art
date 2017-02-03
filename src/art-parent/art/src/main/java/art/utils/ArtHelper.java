@@ -37,7 +37,7 @@ public class ArtHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtHelper.class);
 	private static final int MAX_LOG_MESSAGE_LENGTH = 500;
-	
+
 	/**
 	 * Logs some action to the ART_LOGS table.
 	 *
@@ -51,7 +51,7 @@ public class ArtHelper {
 	 */
 	public static void log(String user, String type, String ip, int reportId, long totalTime,
 			long fetchTime, String message) {
-		
+
 		if (StringUtils.length(message) > MAX_LOG_MESSAGE_LENGTH) {
 			message = message.substring(0, MAX_LOG_MESSAGE_LENGTH);
 		}

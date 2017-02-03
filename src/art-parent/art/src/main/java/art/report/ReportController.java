@@ -524,7 +524,10 @@ public class ReportController {
 
 		logger.debug("file.isEmpty()={}", file.isEmpty());
 		if (file.isEmpty()) {
-			return "reports.message.emptyFile";
+			//can be empty if a file name is just typed
+			//or if upload a 0 byte file
+			//don't show message in case of file name being typed
+			return null;
 		}
 
 		//check file size
