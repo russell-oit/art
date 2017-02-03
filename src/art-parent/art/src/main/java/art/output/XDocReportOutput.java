@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,15 @@ public class XDocReportOutput {
 		String templateFileName = report.getTemplate();
 		String templatesPath = Config.getTemplatesPath();
 		String fullTemplateFileName = templatesPath + templateFileName;
-		
+
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
 		//check if template file exists
 		File templateFile = new File(fullTemplateFileName);
 		if (!templateFile.exists()) {
@@ -92,15 +101,15 @@ public class XDocReportOutput {
 		//load doc
 		ReportType reportType = report.getReportType();
 		TemplateEngineKind templateEngineKind;
-		
-		if(reportType.isXDocReportFreeMarker()){
+
+		if (reportType.isXDocReportFreeMarker()) {
 			templateEngineKind = TemplateEngineKind.Freemarker;
-		} else if(reportType.isXDocReportVelocity()){
+		} else if (reportType.isXDocReportVelocity()) {
 			templateEngineKind = TemplateEngineKind.Velocity;
 		} else {
 			throw new IllegalArgumentException("Unexpected report type: " + reportType);
 		}
-		
+
 		InputStream in = new FileInputStream(fullTemplateFileName);
 		IXDocReport xdocReport = XDocReportRegistry.getRegistry().loadReport(in, templateEngineKind);
 
@@ -129,7 +138,7 @@ public class XDocReportOutput {
 			metadata.addFieldAsList(metadataFieldName);
 		}
 		xdocReport.setFieldsMetadata(metadata);
-		
+
 		//create output
 		try (OutputStream out = new FileOutputStream(new File(outputFileName))) {
 			if ((reportType.isXDocReportDocx() && reportFormat == ReportFormat.docx)

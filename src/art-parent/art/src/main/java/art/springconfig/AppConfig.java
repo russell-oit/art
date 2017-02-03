@@ -96,6 +96,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		registry.addResourceHandler("/docs/**").addResourceLocations("/docs/");
 		registry.addResourceHandler("/jpivot/**").addResourceLocations("/jpivot/");
 		registry.addResourceHandler("/wcf/**").addResourceLocations("/wcf/");
+		registry.addResourceHandler("/js-templates/**").addResourceLocations("/js-templates/");
 	}
 
 	@Bean

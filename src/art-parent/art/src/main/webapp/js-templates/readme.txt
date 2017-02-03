@@ -1,0 +1,1 @@
+folder to hold javascript configuration/template files for react pivot reports

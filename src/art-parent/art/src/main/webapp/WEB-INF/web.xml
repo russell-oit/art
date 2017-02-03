@@ -133,7 +133,7 @@
 	End CAS configuration -->
 
 	
-	<!-- order of filter mapping is important. filters executed in the order they appear -->
+	<!-- order of filter mapping is important. filters executed in the order of filter-mapping elements -->
 	<!-- https://stackoverflow.com/questions/7938050/what-will-the-the-order-in-which-filters-will-be-called -->
 	<!-- https://stackoverflow.com/questions/6560969/how-to-define-servlet-filter-order-of-execution-using-annotations-in-war -->
 	

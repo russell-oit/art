@@ -129,7 +129,7 @@ public class RunReportHelper {
 			throws ParseException, SQLException {
 
 		logger.debug("Entering setSelectReportParameterAttributes: report={}", report);
-		
+
 		boolean startSelectParametersHidden = Boolean.parseBoolean(request.getParameter("startSelectParametersHidden"));
 		request.setAttribute("startSelectParametersHidden", startSelectParametersHidden);
 
@@ -206,6 +206,7 @@ public class RunReportHelper {
 			case JxlsArt:
 			case JxlsTemplate:
 			case FreeMarker:
+			case ReactPivot:
 				enableReportFormats = false;
 				break;
 			default:
@@ -225,19 +226,7 @@ public class RunReportHelper {
 		boolean enableSchedule;
 		if (accessLevel >= AccessLevel.ScheduleUser.getValue()
 				&& Config.getSettings().isSchedulingEnabled()) {
-
-			switch (reportType) {
-				case Dashboard:
-				case GridstackDashboard:
-				case Mondrian:
-				case MondrianXmla:
-				case SqlServerXmla:
-				case Text:
-					enableSchedule = false;
-					break;
-				default:
-					enableSchedule = true;
-			}
+			enableSchedule = reportType.canSchedule();
 		} else {
 			enableSchedule = false;
 		}
@@ -245,7 +234,6 @@ public class RunReportHelper {
 
 		boolean enableShowSql;
 		boolean enableShowSelectedParameters;
-
 		switch (reportType) {
 			case Dashboard:
 			case GridstackDashboard:
@@ -277,7 +265,6 @@ public class RunReportHelper {
 		request.setAttribute("isChart", reportType.isChart());
 
 		boolean enableRunInline;
-
 		switch (reportType) {
 			case Mondrian:
 			case MondrianXmla:
@@ -290,7 +277,6 @@ public class RunReportHelper {
 		request.setAttribute("enableRunInline", enableRunInline);
 
 		boolean enablePrint;
-
 		switch (reportType) {
 			case Dashboard:
 			case GridstackDashboard:
@@ -331,6 +317,7 @@ public class RunReportHelper {
 			case MondrianXmla:
 			case SqlServerXmla:
 			case FreeMarker:
+			case ReactPivot:
 				enableEmail = false;
 				break;
 			default:

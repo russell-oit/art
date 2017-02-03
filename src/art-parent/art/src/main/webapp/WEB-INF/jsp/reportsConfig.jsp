@@ -162,12 +162,16 @@ Reports configuration page
 							<spring:message code="reports.action.drilldowns"/>
 						</a>
 					</div>
-					<c:if test="${record.reportType != 'LovStatic'}">
+					<c:if test="${record.reportType.canSchedule()}">
 						<div class="btn-group">
 							<a class="btn btn-default"
 							   href="${pageContext.request.contextPath}/addJob?reportId=${record.reportId}">
 								<spring:message code="reports.action.schedule"/>
 							</a>
+						</div>
+					</c:if>
+					<c:if test="${record.reportType != 'LovStatic'}">
+						<div class="btn-group">
 							<a class="btn btn-default"
 							   href="${pageContext.request.contextPath}/selectReportParameters?reportId=${record.reportId}">
 								<spring:message code="reports.action.preview"/>
@@ -278,14 +282,16 @@ Reports configuration page
 											<spring:message code="reports.action.drilldowns"/>
 										</a>
 									</li>
-									<c:if test="${report.reportType != 'LovStatic'}">
-										<li class="divider"></li>
+									<li class="divider"></li>
+										<c:if test="${report.reportType.canSchedule()}">
 										<li>
 											<a 
 												href="${pageContext.request.contextPath}/addJob?reportId=${report.reportId}">
 												<spring:message code="reports.action.schedule"/>
 											</a>
 										</li>
+									</c:if>
+									<c:if test="${report.reportType != 'LovStatic'}">
 										<li>
 											<a 
 												href="${pageContext.request.contextPath}/selectReportParameters?reportId=${report.reportId}">

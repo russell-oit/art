@@ -111,7 +111,6 @@ public class JasperReportsOutput {
 			File jasperFile = new File(jasperFilePath);
 			File jrxmlFile = new File(jrxmlFilePath);
 
-			//check if template file exists
 			if (!jasperFile.exists() && !jrxmlFile.exists()) {
 				throw new IllegalStateException("Template file not found: " + baseTemplateFileName);
 			}

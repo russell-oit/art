@@ -105,10 +105,10 @@ public class RunReportController {
 		} else {
 			errorPage = "reportError";
 		}
-
+		
 		try {
 			report = reportService.getReport(reportId);
-
+			
 			if (report == null) {
 				model.addAttribute("message", "reports.message.reportNotFound");
 				return errorPage;
@@ -162,6 +162,9 @@ public class RunReportController {
 
 				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
 				redirectAttributes.addAllAttributes(request.getParameterMap());
+				//using forward means adding runReport url-mapping to the jpivotcontroller filter-mapping in the web.xml file
+				//doing this results in errors as a result of the runReport page being handled by jpivotError
+				//so use redirect
 				return "redirect:/showAnalysis";
 			}
 
@@ -453,8 +456,10 @@ public class RunReportController {
 		int resultSetType;
 		if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
 				|| reportType == ReportType.FreeMarker || reportType.isXDocReport()
-				|| reportType == ReportType.Group || reportType.isChart()) {
-			//need scrollable resultset for jasper art report, jxls art report, freemarker, xdocreport in order to display record count
+				|| reportType == ReportType.Group || reportType.isChart()
+				|| reportType == ReportType.ReactPivot) {
+			//need scrollable resultset for jasper art report, jxls art report,
+			//freemarker, xdocreport, react pivot in order to display record count
 			//need scrollable resultset in order to generate group report
 			//need scrollable resultset for charts for show data option
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;

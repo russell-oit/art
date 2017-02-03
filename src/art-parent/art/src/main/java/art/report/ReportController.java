@@ -506,11 +506,15 @@ public class ReportController {
 	 * Saves a file and updates the report template property with the file name
 	 *
 	 * @param file the file to save
-	 * @param report the report to set
+	 * @param report the report to set #param updateTemplateField determines
+	 * whether the template field of the report should be updated with the name
+	 * of the file given
 	 * @return an i18n message string if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveFile(MultipartFile file, Report report) throws IOException {
+	private String saveFile(MultipartFile file, Report report)
+			throws IOException {
+
 		logger.debug("Entering saveFile: report={}", report);
 
 		logger.debug("file==null = {}", file == null);
@@ -520,7 +524,7 @@ public class ReportController {
 
 		logger.debug("file.isEmpty()={}", file.isEmpty());
 		if (file.isEmpty()) {
-			return null;
+			return "reports.message.emptyFile";
 		}
 
 		//check file size
@@ -549,6 +553,7 @@ public class ReportController {
 		validExtensions.add("docx");
 		validExtensions.add("odt");
 		validExtensions.add("pptx");
+		validExtensions.add("js"); //for react pivot templates
 
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);
@@ -563,7 +568,14 @@ public class ReportController {
 		}
 
 		//save file
-		String destinationFilename = Config.getTemplatesPath() + filename;
+		String templatesPath;
+		if (StringUtils.equalsIgnoreCase(extension, "js")) {
+			templatesPath = Config.getJsTemplatesPath();
+		} else {
+			templatesPath = Config.getTemplatesPath();
+		}
+
+		String destinationFilename = templatesPath + filename;
 		File destinationFile = new File(destinationFilename);
 		file.transferTo(destinationFile);
 
@@ -680,7 +692,7 @@ public class ReportController {
 
 		String message;
 
-		message = saveFile(templateFile, report); //update report template property
+		message = saveFile(templateFile, report); //pass report so that template field is updated
 		if (message != null) {
 			return message;
 		}

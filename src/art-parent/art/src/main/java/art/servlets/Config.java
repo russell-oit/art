@@ -839,6 +839,15 @@ public class Config extends HttpServlet {
 	public static String getAppPath() {
 		return appPath;
 	}
+	
+	/**
+	 * Returns the full path to the js-templates directory
+	 *
+	 * @return full path to the js-templates directory
+	 */
+	public static String getJsTemplatesPath() {
+		return appPath + "js-templates" + File.separator;
+	}
 
 	/**
 	 * Returns the art version

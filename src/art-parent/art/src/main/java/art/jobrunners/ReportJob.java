@@ -449,6 +449,14 @@ public class ReportJob implements org.quartz.Job {
 		String templatesPath = Config.getTemplatesPath();
 		String fullTemplateFileName = templatesPath + templateFileName;
 
+		logger.debug("templateFileName='{}'", templateFileName);
+
+		//need to explicitly check if template file is empty string
+		//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+		if (StringUtils.isBlank(templateFileName)) {
+			throw new IllegalArgumentException("Template file not specified");
+		}
+
 		//check if template file exists
 		File templateFile = new File(fullTemplateFileName);
 		if (!templateFile.exists()) {

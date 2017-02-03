@@ -35,6 +35,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.beanutils.RowSetDynaClass;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jxls.common.Context;
 import org.jxls.jdbc.JdbcHelper;
@@ -86,7 +87,14 @@ public class JxlsOutput {
 			String templatesPath = Config.getTemplatesPath();
 			String fullTemplateFileName = templatesPath + templateFileName;
 
-			//check if template file exists
+			logger.debug("templateFileName='{}'", templateFileName);
+
+			//need to explicitly check if template file is empty string
+			//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+			if (StringUtils.isBlank(templateFileName)) {
+				throw new IllegalArgumentException("Template file not specified");
+			}
+
 			File templateFile = new File(fullTemplateFileName);
 			if (!templateFile.exists()) {
 				throw new IllegalStateException("Template file not found: " + templateFileName);

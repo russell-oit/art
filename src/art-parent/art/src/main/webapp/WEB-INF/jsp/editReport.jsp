@@ -344,6 +344,7 @@ Edit report page
 					case 126: //xdocreport velocity odt
 					case 127: //xdocreport freemarker pptx
 					case 128: //xdocreport velocity pptx
+					case 130: //react pivot
 						$("#templateDiv").show();
 						break;
 					default:
@@ -431,6 +432,7 @@ Edit report page
 					case 118: //jxls art
 					case 117: //jxls template
 					case 122: //freemarker
+					case 130: //react pivot
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

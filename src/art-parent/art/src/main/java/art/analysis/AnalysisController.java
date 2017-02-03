@@ -111,11 +111,25 @@ public class AnalysisController {
 				}
 			}
 
-			String template = report.getTemplate();
-			File templateFile = new File(Config.getTemplatesPath() + template);
-			if (report.getReportType() == ReportType.Mondrian && !templateFile.exists()) {
-				model.addAttribute("message", "reports.message.templateFileNotFound");
-				return errorPage;
+			if (report.getReportType() == ReportType.Mondrian) {
+				String templateFileName = report.getTemplate();
+				String templatesPath = Config.getTemplatesPath();
+				String fullTemplateFileName = templatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//need to explicitly check if template file is empty string
+				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+				if (StringUtils.isBlank(templateFileName)) {
+					model.addAttribute("message", "reports.message.templateFileNotSpecified");
+					return errorPage;
+				}
+
+				File templateFile = new File(fullTemplateFileName);
+				if (!templateFile.exists()) {
+					model.addAttribute("message", "reports.message.templateFileNotFound");
+					return errorPage;
+				}
 			}
 
 			prepareVariables(request, session, report, model);
