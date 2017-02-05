@@ -97,6 +97,8 @@ public class FreeMarkerOutput {
 				String paramName = reportParam.getParameter().getName();
 				data.put(paramName, reportParam);
 			}
+			
+			data.put("params", reportParams);
 		}
 
 		//pass report data

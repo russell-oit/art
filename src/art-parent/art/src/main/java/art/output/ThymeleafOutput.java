@@ -91,6 +91,8 @@ public class ThymeleafOutput {
 				String paramName = reportParam.getParameter().getName();
 				variables.put(paramName, reportParam);
 			}
+			
+			variables.put("params", reportParams);
 		}
 
 		//pass report data

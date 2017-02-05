@@ -108,6 +108,8 @@ public class JxlsOutput {
 				String paramName = reportParam.getParameter().getName();
 				context.putVar(paramName, reportParam);
 			}
+			
+			context.putVar("params", reportParams);
 
 			ReportType reportType = report.getReportType();
 			if (reportType == ReportType.JxlsTemplate) {
