@@ -1,0 +1,11 @@
+<div class="row">
+	<div class="col-md-3">
+		Region <th:block th:text="${regionId.value}">1</th:block>
+	</div>
+	<div class="col-md-6">
+		Cities
+		<ul th:each="result : ${results}">
+			<li th:text="${result.get('NAME')}">city1</li>
+		</ul>
+	</div>
+</div>
