@@ -49,6 +49,7 @@ import art.output.PdfOutput;
 import art.output.Rss20Output;
 import art.output.SlkOutput;
 import art.output.StandardOutputResult;
+import art.output.ThymeleafOutput;
 import art.output.TsvOutput;
 import art.output.XDocReportOutput;
 import art.output.XlsOutput;
@@ -442,6 +443,11 @@ public class ReportOutputGenerator {
 				FreeMarkerOutput freemarkerOutput = new FreeMarkerOutput();
 				rs = reportRunner.getResultSet();
 				freemarkerOutput.generateReport(report, reportParamsList, rs, writer);
+				rowsRetrieved = getResultSetRowCount(rs);
+			} else if (reportType == ReportType.Thymeleaf) {
+				ThymeleafOutput thymeleafOutput = new ThymeleafOutput();
+				rs = reportRunner.getResultSet();
+				thymeleafOutput.generateReport(report, reportParamsList, rs, writer);
 				rowsRetrieved = getResultSetRowCount(rs);
 			} else if (reportType.isXDocReport()) {
 				XDocReportOutput xdocReportOutput = new XDocReportOutput();

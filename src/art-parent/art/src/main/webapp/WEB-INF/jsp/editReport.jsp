@@ -338,6 +338,7 @@ Edit report page
 					case 118: //jxls art
 					case 112: //mondrian
 					case 122: //freemarker
+					case 131: //thymeleaf
 					case 123: //xdocreport freemarker docx
 					case 124: //xdocreport velocity docx
 					case 125: //xdocreport freemarker odt
@@ -432,6 +433,7 @@ Edit report page
 					case 118: //jxls art
 					case 117: //jxls template
 					case 122: //freemarker
+					case 131: //thymeleaf
 					case 130: //react pivot
 						$("#defaultReportFormatDiv").hide();
 						break;

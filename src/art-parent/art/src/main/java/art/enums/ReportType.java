@@ -34,7 +34,7 @@ public enum ReportType {
 	Dashboard(110), GridstackDashboard(129), Text(111), Mondrian(112),
 	MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
-	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122),
+	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
 	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128), ReactPivot(130),
@@ -515,6 +515,8 @@ public enum ReportType {
 				return "XDocReport: Velocity engine - PPTX";
 			case ReactPivot:
 				return "ReactPivot";
+			case Thymeleaf:
+				return "Thymeleaf";
 			default:
 				return this.name();
 		}

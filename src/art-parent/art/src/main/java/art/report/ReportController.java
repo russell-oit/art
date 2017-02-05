@@ -557,6 +557,7 @@ public class ReportController {
 		validExtensions.add("odt");
 		validExtensions.add("pptx");
 		validExtensions.add("js"); //for react pivot templates
+		validExtensions.add("html"); //for thymeleaf reports
 
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);

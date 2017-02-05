@@ -457,9 +457,10 @@ public class RunReportController {
 		if (reportType == ReportType.JasperReportsArt || reportType == ReportType.JxlsArt
 				|| reportType == ReportType.FreeMarker || reportType.isXDocReport()
 				|| reportType == ReportType.Group || reportType.isChart()
-				|| reportType == ReportType.ReactPivot) {
+				|| reportType == ReportType.ReactPivot
+				|| reportType == ReportType.Thymeleaf) {
 			//need scrollable resultset for jasper art report, jxls art report,
-			//freemarker, xdocreport, react pivot in order to display record count
+			//freemarker, xdocreport, react pivot, thymeleaf in order to display record count
 			//need scrollable resultset in order to generate group report
 			//need scrollable resultset for charts for show data option
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;

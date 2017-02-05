@@ -206,6 +206,7 @@ public class RunReportHelper {
 			case JxlsArt:
 			case JxlsTemplate:
 			case FreeMarker:
+			case Thymeleaf:
 			case ReactPivot:
 				enableReportFormats = false;
 				break;
@@ -305,6 +306,20 @@ public class RunReportHelper {
 		}
 		request.setAttribute("enablePrint", enablePrint);
 
+		boolean enablePrintAlways;
+		switch (reportType) {
+			case TabularHtml:
+			case CrosstabHtml:
+			case FreeMarker:
+			case Thymeleaf:
+			case ReactPivot:
+				enablePrintAlways = true;
+				break;
+			default:
+				enablePrintAlways = false;
+		}
+		request.setAttribute("enablePrintAlways", enablePrintAlways);
+
 		boolean enableEmail;
 		switch (reportType) {
 			case Update:
@@ -317,6 +332,7 @@ public class RunReportHelper {
 			case MondrianXmla:
 			case SqlServerXmla:
 			case FreeMarker:
+			case Thymeleaf:
 			case ReactPivot:
 				enableEmail = false;
 				break;

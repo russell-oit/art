@@ -69,6 +69,9 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import static org.quartz.TriggerKey.triggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.FileTemplateResolver;
 
 /**
  * Initializes and shuts down the application, including creating and shutting
@@ -98,6 +101,7 @@ public class Config extends HttpServlet {
 	private static String artVersion;
 	private static final Map<String, String> languages = new TreeMap<>();
 	private static Configuration freemarkerConfig;
+	private static TemplateEngine thymeleafReportTemplateEngine;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -212,6 +216,8 @@ public class Config extends HttpServlet {
 		createWorkDirectories();
 
 		createFreemarkerConfiguration();
+		
+		createThymeleafReportTemplateEngine();
 
 		loadLanguages();
 
@@ -248,6 +254,29 @@ public class Config extends HttpServlet {
 	 */
 	public static Configuration getFreemarkerConfig() {
 		return freemarkerConfig;
+	}
+
+	/**
+	 * Creates the template engine to use for the thymeleaf report type. Uses
+	 * html template mode
+	 */
+	private static void createThymeleafReportTemplateEngine() {
+		thymeleafReportTemplateEngine = new TemplateEngine();
+		FileTemplateResolver templateResolver = new FileTemplateResolver();
+		templateResolver.setPrefix(getTemplatesPath());
+		templateResolver.setTemplateMode(TemplateMode.HTML);
+		templateResolver.setCharacterEncoding("UTF-8");
+		templateResolver.setCacheable(false);
+		thymeleafReportTemplateEngine.setTemplateResolver(templateResolver);
+	}
+
+	/**
+	 * Returns the template engine to use for the thymeleaf report type
+	 *
+	 * @return
+	 */
+	public static TemplateEngine getThymeleafReportTemplateEngine() {
+		return thymeleafReportTemplateEngine;
 	}
 
 	/**
@@ -839,7 +868,7 @@ public class Config extends HttpServlet {
 	public static String getAppPath() {
 		return appPath;
 	}
-	
+
 	/**
 	 * Returns the full path to the js-templates directory
 	 *

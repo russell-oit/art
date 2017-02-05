@@ -160,9 +160,8 @@ Display section to allow selecting of report parameters and initiate running of 
 		var reportType = '${report.reportType}';
 
 		//show/hide print button
-		var enablePrint = ${enablePrint};
-		if (enablePrint) {
-			if (reportType === 'ReactPivot') {
+		if (${enablePrint}) {
+			if (${enablePrintAlways}) {
 				$('#printButton').show();
 			} else {
 				switch (reportFormat) {
