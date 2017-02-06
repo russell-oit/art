@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
@@ -506,9 +507,9 @@ public abstract class StandardOutput {
 	/**
 	 * Generates a tabular report
 	 *
-	 * @param rs the resultset to use
-	 * @param reportFormat the report format to use
-	 * @param report the report that is being run
+	 * @param rs the resultset to use, not null
+	 * @param reportFormat the report format to use, not null
+	 * @param report the report that is being run, not null
 	 * @return StandardOutputResult. if successful, rowCount contains the number
 	 * of rows in the resultset. if not, message contains the i18n message
 	 * indicating the problem
@@ -518,7 +519,7 @@ public abstract class StandardOutput {
 			Report report) throws SQLException {
 
 		logger.debug("Entering generateTabularOutput");
-
+		
 		StandardOutputResult result = new StandardOutputResult();
 
 		//initialize number formatters

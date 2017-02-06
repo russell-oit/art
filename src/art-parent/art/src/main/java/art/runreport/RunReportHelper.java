@@ -208,6 +208,7 @@ public class RunReportHelper {
 			case FreeMarker:
 			case Thymeleaf:
 			case ReactPivot:
+			case PivotTableJs:
 				enableReportFormats = false;
 				break;
 			default:
@@ -295,6 +296,7 @@ public class RunReportHelper {
 			case XDocReportVelocityOdt:
 			case XDocReportVelocityPptx:
 			case Update:
+			case PivotTableJs:
 				enablePrint = false;
 				break;
 			default:
@@ -334,6 +336,7 @@ public class RunReportHelper {
 			case FreeMarker:
 			case Thymeleaf:
 			case ReactPivot:
+			case PivotTableJs:
 				enableEmail = false;
 				break;
 			default:

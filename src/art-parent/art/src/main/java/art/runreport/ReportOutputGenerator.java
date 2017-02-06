@@ -42,6 +42,8 @@ import art.output.HtmlFancyOutput;
 import art.output.HtmlGridOutput;
 import art.output.HtmlPlainOutput;
 import art.output.JasperReportsOutput;
+import art.output.JsonOutput;
+import art.output.JsonOutputResult;
 import art.output.JxlsOutput;
 import art.output.OdsOutput;
 import art.output.OdtOutput;
@@ -61,8 +63,6 @@ import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
 import net.sf.cewolfart.PostProcessingException;
@@ -72,10 +72,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -462,18 +460,20 @@ public class ReportOutputGenerator {
 					throw new IllegalStateException("ReactPivot report type not supported for jobs");
 				} else {
 					rs = reportRunner.getResultSet();
-					String jsonString = resultSetToJson(rs);
-					rowsRetrieved = getResultSetRowCount(rs);
+					JsonOutput jsonOutput = new JsonOutput();
+					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					String jsonString = jsonOutputResult.getJsonString();
+					rowsRetrieved = jsonOutputResult.getRowCount();
 
 					String templateFileName = report.getTemplate();
 					String jsTemplatesPath = Config.getJsTemplatesPath();
 					String fullTemplateFileName = jsTemplatesPath + templateFileName;
-					
+
 					logger.debug("templateFileName='{}'", templateFileName);
-					
+
 					//need to explicitly check if template file is empty string
 					//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-					if(StringUtils.isBlank(templateFileName)){
+					if (StringUtils.isBlank(templateFileName)) {
 						throw new IllegalArgumentException("Template file not specified");
 					}
 
@@ -485,6 +485,49 @@ public class ReportOutputGenerator {
 					request.setAttribute("templateFileName", templateFileName);
 					request.setAttribute("rows", jsonString);
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
+				}
+			} else if (reportType == ReportType.PivotTableJs) {
+				if (isJob) {
+					throw new IllegalStateException("PivotTable.js report type not supported for jobs");
+				} else {
+					rs = reportRunner.getResultSet();
+					JsonOutput jsonOutput = new JsonOutput();
+					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					String jsonString = jsonOutputResult.getJsonString();
+					rowsRetrieved = jsonOutputResult.getRowCount();
+
+					String templateFileName = report.getTemplate();
+					String jsTemplatesPath = Config.getJsTemplatesPath();
+					String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+					logger.debug("templateFileName='{}'", templateFileName);
+
+					//template file not mandatory
+					if (StringUtils.isNotBlank(templateFileName)) {
+						File templateFile = new File(fullTemplateFileName);
+						if (!templateFile.exists()) {
+							throw new IllegalStateException("Template file not found: " + templateFileName);
+						}
+						request.setAttribute("templateFileName", templateFileName);
+					}
+
+					String localeString = locale.toString();
+
+					String languageFileName = "pivot." + localeString + ".js";
+
+					String languageFilePath = Config.getAppPath() + File.separator
+							+ "js" + File.separator
+							+ "pivottable-2.7.0" + File.separator
+							+ languageFileName;
+
+					File languageFile = new File(languageFilePath);
+
+					if (languageFile.exists()) {
+						request.setAttribute("locale", localeString);
+					}
+
+					request.setAttribute("input", jsonString);
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 				}
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
@@ -796,36 +839,4 @@ public class ReportOutputGenerator {
 		return effectiveChartOptions;
 	}
 
-	/**
-	 * Converts a resultset to json representation. Result is like:
-	 * [{"ID":"1","NAME":"Tom","AGE":"24"}, {"ID":"2","NAME":"Bob","AGE":"26"}]
-	 *
-	 * @param rs the resultset containing the data
-	 * @return a json string representation of the data in the resultset
-	 * @throws SQLException
-	 * @throws JsonProcessingException
-	 */
-	private String resultSetToJson(ResultSet rs) throws SQLException, JsonProcessingException {
-		//https://stackoverflow.com/questions/18960446/how-to-convert-a-java-resultset-into-json
-		List<Map<String, Object>> rows = new ArrayList<>();
-
-		if (rs != null) {
-			ResultSetMetaData rsmd = rs.getMetaData();
-			int columnCount = rsmd.getColumnCount();
-			while (rs.next()) {
-				Map<String, Object> row = new HashMap<>();
-				for (int i = 1; i <= columnCount; ++i) {
-					String columnName = rsmd.getColumnLabel(i);
-					Object columnData = rs.getObject(i);
-					row.put(columnName, columnData);
-				}
-				rows.add(row);
-			}
-		}
-
-		ObjectMapper mapper = new ObjectMapper();
-		String jsonString = mapper.writeValueAsString(rows);
-
-		return jsonString;
-	}
 }

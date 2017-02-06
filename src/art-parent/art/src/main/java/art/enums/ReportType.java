@@ -35,9 +35,10 @@ public enum ReportType {
 	MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
+	ReactPivot(130), PivotTableJs(132),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
-	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128), ReactPivot(130),
+	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128),
 	XYChart(-1), Pie3DChart(-2), HorizontalBar3DChart(-3), VerticalBar3DChart(-4),
 	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
@@ -65,6 +66,7 @@ public enum ReportType {
 			case Text:
 			case LovStatic:
 			case ReactPivot:
+			case PivotTableJs:
 				return false;
 			default:
 				return true;
@@ -517,6 +519,8 @@ public enum ReportType {
 				return "ReactPivot";
 			case Thymeleaf:
 				return "Thymeleaf";
+			case PivotTableJs:
+				return "PivotTable.js";
 			default:
 				return this.name();
 		}

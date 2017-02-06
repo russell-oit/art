@@ -15,6 +15,7 @@ ART 3.0
 * Have syntax highlighting during report creation
 * Added tabbed dashboards option
 * Added ReactPivot report type
+* Added PivotTable.js report type
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0
