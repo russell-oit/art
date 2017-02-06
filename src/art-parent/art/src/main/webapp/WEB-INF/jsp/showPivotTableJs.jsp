@@ -100,9 +100,6 @@
 			</label>
 		</p>
 		<script type="text/javascript">
-//			$('#csv').parse({
-//				config: csvConfig
-//			});
 			var parseAndPivot = function (f) {
 				$("#pivotTableJsOutput").html("<p align='center' style='color:grey;'>(processing...)</p>");
 				Papa.parse(f, csvConfig);
