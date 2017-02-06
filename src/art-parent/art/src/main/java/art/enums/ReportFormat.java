@@ -31,12 +31,28 @@ public enum ReportFormat {
 	html("html"), htmlPlain("htmlPlain"), htmlFancy("htmlFancy"), htmlGrid("htmlGrid"),
 	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
 	pdf("pdf"), docx("docx"), odt("odt"), ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"),
-	tsv("tsv"), tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png");
+	tsv("tsv"), tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
+	json("json"), jsonBrowser("jsonBrowser");
 
 	private final String value;
 
 	private ReportFormat(String value) {
 		this.value = value;
+	}
+	
+	/**
+	 * Returns <code>true</code> if this is a json or jsonBrowser report format
+	 *
+	 * @return <code>true</code> if this is a json or jsonBrowser report format
+	 */
+	public boolean isJson() {
+		switch (this) {
+			case json:
+			case jsonBrowser:
+				return true;
+			default:
+				return false;
+		}
 	}
 
 	/**

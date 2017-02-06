@@ -105,10 +105,10 @@ public class RunReportController {
 		} else {
 			errorPage = "reportError";
 		}
-		
+
 		try {
 			report = reportService.getReport(reportId);
-			
+
 			if (report == null) {
 				model.addAttribute("message", "reports.message.reportNotFound");
 				return errorPage;
@@ -189,7 +189,7 @@ public class RunReportController {
 
 			boolean showReportHeaderAndFooter = true;
 
-			if (reportType.isStandardOutput()) {
+			if (reportType.isStandardOutput() && !reportFormat.isJson()) {
 				ReportOutputGenerator reportOutputGenerator = new ReportOutputGenerator();
 				boolean isJob = false;
 				StandardOutput standardOutput = reportOutputGenerator.getStandardOutputInstance(reportFormat, isJob, report);
@@ -215,8 +215,16 @@ public class RunReportController {
 			}
 
 			//handle output formats that require data only
-			if (reportFormat == ReportFormat.xml || reportFormat == ReportFormat.rss20) {
-				showInline = true;
+			switch (reportFormat) {
+				case xml:
+				case rss20:
+				case json:
+				case jsonBrowser:
+					showInline = true;
+					showReportHeaderAndFooter = false;
+					break;
+				default:
+				//do nothing
 			}
 
 			//output page header. if showInline, page header and footer already exist. 
@@ -230,7 +238,7 @@ public class RunReportController {
 					RunReportHelper runReportHelper = new RunReportHelper();
 					runReportHelper.setSelectReportParameterAttributes(report, request, session, reportService);
 				}
-				
+
 				request.setAttribute("reportType", reportType);
 
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageHeader.jsp").include(request, response);

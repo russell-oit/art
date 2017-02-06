@@ -512,6 +512,9 @@ public class ParameterProcessor {
 					reportOptions.setSplitColumn(Integer.parseInt(paramValue));
 				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "showSql")) {
 					reportOptions.setShowSql(true);
+				} else if (StringUtils.equalsIgnoreCase(htmlParamName, "prettyPrint")) {
+					boolean prettyPrint = Boolean.parseBoolean(paramValue);
+					reportOptions.setPrettyPrint(prettyPrint);
 				}
 
 			}

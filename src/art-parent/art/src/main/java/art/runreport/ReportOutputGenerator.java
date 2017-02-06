@@ -387,6 +387,22 @@ public class ReportOutputGenerator {
 					}
 					rowsRetrieved = getResultSetRowCount(rs);
 				}
+			} else if (reportType.isStandardOutput() && reportFormat.isJson()) {
+				rs = reportRunner.getResultSet();
+				JsonOutput jsonOutput = new JsonOutput();
+				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
+				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				String jsonString = jsonOutputResult.getJsonString();
+				rowsRetrieved = jsonOutputResult.getRowCount();
+				switch (reportFormat) {
+					case jsonBrowser:
+						//https://stackoverflow.com/questions/14533530/how-to-show-pretty-print-json-string-in-a-jsp-page
+						writer.print("<pre>" + jsonString + "</pre>");
+						break;
+					default:
+						writer.print(jsonString);
+				}
+				writer.flush();
 			} else if (reportType.isStandardOutput()) {
 				StandardOutput standardOutput = getStandardOutputInstance(reportFormat, isJob, report);
 

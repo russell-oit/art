@@ -30,6 +30,21 @@ public class ReportOptions implements Serializable {
 	private boolean showSelectedParameters;
 	private int splitColumn;
 	private boolean showSql;
+	private boolean prettyPrint;
+
+	/**
+	 * @return the prettyPrint
+	 */
+	public boolean isPrettyPrint() {
+		return prettyPrint;
+	}
+
+	/**
+	 * @param prettyPrint the prettyPrint to set
+	 */
+	public void setPrettyPrint(boolean prettyPrint) {
+		this.prettyPrint = prettyPrint;
+	}
 
 	/**
 	 * @return the showSql
