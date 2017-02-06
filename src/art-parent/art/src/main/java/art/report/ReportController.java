@@ -45,6 +45,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -495,24 +496,26 @@ public class ReportController {
 	 * Saves a file
 	 *
 	 * @param file the file to save
+	 * @param reportTypeId the reportTypeId for the report related to the file
 	 * @return an i18n message string if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveFile(MultipartFile file) throws IOException {
-		return saveFile(file, null);
+	private String saveFile(MultipartFile file, int reportTypeId) throws IOException {
+		return saveFile(file, reportTypeId, null);
 	}
 
 	/**
 	 * Saves a file and updates the report template property with the file name
 	 *
 	 * @param file the file to save
+	 * @param reportTypeId the reportTypeId for the report related to the file
 	 * @param report the report to set #param updateTemplateField determines
 	 * whether the template field of the report should be updated with the name
 	 * of the file given
 	 * @return an i18n message string if there was a problem, otherwise null
 	 * @throws IOException
 	 */
-	private String saveFile(MultipartFile file, Report report)
+	private String saveFile(MultipartFile file, int reportTypeId, Report report)
 			throws IOException {
 
 		logger.debug("Entering saveFile: report={}", report);
@@ -558,6 +561,8 @@ public class ReportController {
 		validExtensions.add("pptx");
 		validExtensions.add("js"); //for react pivot templates
 		validExtensions.add("html"); //for thymeleaf reports
+		validExtensions.add("csv"); //for pivottable.js csv server reports (.csv)
+		validExtensions.add("txt"); //for pivottable.js csv server reports (.txt for other delimited files e.g. tab separated, pipe separated etc)
 
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);
@@ -573,10 +578,16 @@ public class ReportController {
 
 		//save file
 		String templatesPath;
-		if (StringUtils.equalsIgnoreCase(extension, "js")) {
-			templatesPath = Config.getJsTemplatesPath();
-		} else {
-			templatesPath = Config.getTemplatesPath();
+		ReportType reportType = ReportType.toEnum(reportTypeId);
+		switch (reportType) {
+			case ReactPivot:
+			case PivotTableJs:
+			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer: //can specify .js template and .csv data file
+				templatesPath = Config.getJsTemplatesPath();
+				break;
+			default:
+				templatesPath = Config.getTemplatesPath();
 		}
 
 		String destinationFilename = templatesPath + filename;
@@ -696,12 +707,13 @@ public class ReportController {
 
 		String message;
 
-		message = saveFile(templateFile, report); //pass report so that template field is updated
+		int reportTypeId = report.getReportTypeId();
+		message = saveFile(templateFile, reportTypeId, report); //pass report so that template field is updated
 		if (message != null) {
 			return message;
 		}
 
-		message = saveFile(resourcesFile);
+		message = saveFile(resourcesFile, reportTypeId);
 		if (message != null) {
 			return message;
 		}
@@ -726,6 +738,9 @@ public class ReportController {
 		Map<String, List<FileUploadResponse>> response = new HashMap<>();
 		List<FileUploadResponse> fileList = new ArrayList<>();
 
+		String reportTypeIdString = request.getParameter("reportTypeId");
+		int reportTypeId = NumberUtils.toInt(reportTypeIdString, Integer.MAX_VALUE);
+
 		//http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/multipart/MultipartRequest.html
 		Iterator<String> itr = request.getFileNames();
 		while (itr.hasNext()) {
@@ -744,7 +759,7 @@ public class ReportController {
 
 			if (FinalFilenameValidator.isValid(filename)) {
 				try {
-					String message = saveFile(file);
+					String message = saveFile(file, reportTypeId);
 					if (message != null) {
 						String errorMessage = messageSource.getMessage(message, null, locale);
 						fileDetails.setError(errorMessage);

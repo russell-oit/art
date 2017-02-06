@@ -611,6 +611,7 @@ public class ReportRunner {
 			case SqlServerXmla:
 			case LovStatic:
 			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				return;
 			default:
 			//do nothing

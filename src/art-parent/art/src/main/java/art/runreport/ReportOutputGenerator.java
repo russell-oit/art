@@ -60,9 +60,11 @@ import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.PivotTableJsCsvServerOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
 import net.sf.cewolfart.PostProcessingException;
@@ -507,7 +509,7 @@ public class ReportOutputGenerator {
 					throw new IllegalStateException("PivotTable.js report types not supported for jobs");
 				} else {
 					request.setAttribute("reportType", reportType);
-					
+
 					if (reportType == ReportType.PivotTableJs) {
 						rs = reportRunner.getResultSet();
 						JsonOutput jsonOutput = new JsonOutput();
@@ -530,6 +532,35 @@ public class ReportOutputGenerator {
 							throw new IllegalStateException("Template file not found: " + templateFileName);
 						}
 						request.setAttribute("templateFileName", templateFileName);
+					}
+
+					if (reportType == ReportType.PivotTableJsCsvServer) {
+						String optionsString = report.getReportOptions();
+
+						if (StringUtils.isBlank(optionsString)) {
+							throw new IllegalArgumentException("Report options not specified");
+						}
+
+						ObjectMapper mapper = new ObjectMapper();
+						PivotTableJsCsvServerOptions options = mapper.readValue(optionsString, PivotTableJsCsvServerOptions.class);
+						String dataFileName = options.getDataFile();
+
+						logger.debug("dataFileName='{}'", dataFileName);
+
+						//need to explicitly check if file name is empty string
+						//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+						if (StringUtils.isBlank(dataFileName)) {
+							throw new IllegalArgumentException("Data file not specified");
+						}
+
+						String fullDataFileName = jsTemplatesPath + dataFileName;
+
+						File dataFile = new File(fullDataFileName);
+						if (!dataFile.exists()) {
+							throw new IllegalStateException("Data file not found: " + dataFileName);
+						}
+
+						request.setAttribute("dataFileName", dataFileName);
 					}
 
 					String localeString = locale.toString();

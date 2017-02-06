@@ -41,10 +41,21 @@
 			$.pivotUtilities.c3_renderers,
 			$.pivotUtilities.export_renderers
 			);
+
 	var options = {renderers: renderers};
 	var overwrite = false;
 	var locale = 'en';
+
+	var download;
+	var reportType = '${reportType}';
+	if (reportType === 'PivotTableJsCsvServer') {
+		download = true;
+	} else {
+		download = false;
+	}
+
 	var csvConfig = {
+		download: download,
 		skipEmptyLines: true,
 		error: function (e) {
 			bootbox.alert(e);
@@ -74,8 +85,15 @@
 	</c:when>
 	<c:when test="${reportType == 'PivotTableJsCsvLocal'}">
 		<%-- http://nicolas.kruchten.com/pivottable/examples/local.html --%>
+		<style>
+			#filechooser {
+                /* color: #555; */
+                text-decoration: underline;
+                cursor: pointer; /* "hand" cursor */
+            }
+		</style>
 		<p align="center" style="line-height: 1.5">
-			<spring:message code="pivotTableJs.text.dropCsv"/> <spring:message code="pivotTableJs.text.or"/>
+			<spring:message code="pivotTableJs.text.dropCsv"/>&nbsp;<spring:message code="pivotTableJs.text.or"/>&nbsp;
 			<label id="filechooser">
 				<spring:message code="pivotTableJs.text.clickToChoose"/>
 				<input id="csv" type="file" style="display:none"/>
@@ -122,6 +140,13 @@
 					.on("dragleave", endDrag)
 					.on("drop", dropped);
 
+		</script>
+	</c:when>
+	<c:when test="${reportType == 'PivotTableJsCsvServer'}">
+		<script type="text/javascript">
+			//http://nicolas.kruchten.com/pivottable/examples/mps_csv.html
+			var dataFile = '${pageContext.request.contextPath}/js-templates/${dataFileName}';
+				Papa.parse(dataFile, csvConfig);
 		</script>
 	</c:when>
 </c:choose>

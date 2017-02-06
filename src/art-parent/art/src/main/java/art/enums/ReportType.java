@@ -35,7 +35,7 @@ public enum ReportType {
 	MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
-	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133),
+	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133), PivotTableJsCsvServer(134),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
 	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128),
@@ -68,6 +68,7 @@ public enum ReportType {
 			case ReactPivot:
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				return false;
 			default:
 				return true;
@@ -85,6 +86,7 @@ public enum ReportType {
 		switch (this) {
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				return true;
 			default:
 				return false;
@@ -541,6 +543,8 @@ public enum ReportType {
 				return "PivotTable.js";
 			case PivotTableJsCsvLocal:
 				return "PivotTable.js: CSV Local";
+			case PivotTableJsCsvServer:
+				return "PivotTable.js: CSV Server";
 			default:
 				return this.name();
 		}

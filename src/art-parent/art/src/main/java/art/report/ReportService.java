@@ -135,6 +135,7 @@ public class ReportService {
 			report.setNullNumberDisplay(rs.getString("NULL_NUMBER_DISPLAY"));
 			report.setNullStringDisplay(rs.getString("NULL_STRING_DISPLAY"));
 			report.setFetchSize(rs.getInt("FETCH_SIZE"));
+			report.setReportOptions(rs.getString("REPORT_OPTIONS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -389,30 +390,30 @@ public class ReportService {
 		String sql;
 
 		//delete query-user relationships
-		sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID = ?";
+		sql = "DELETE FROM ART_USER_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
 		//delete report parameters
-		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID = ?";
+		sql = "DELETE FROM ART_REPORT_PARAMETERS WHERE REPORT_ID=?";
 		dbService.update(sql, id);
 
 		//delete query-rule relationships
-		sql = "DELETE FROM ART_QUERY_RULES WHERE QUERY_ID = ?";
+		sql = "DELETE FROM ART_QUERY_RULES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
-		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE QUERY_ID = ?";
+		sql = "DELETE FROM ART_USER_GROUP_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
 		//delete drilldown queries
-		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID = ?";
+		sql = "DELETE FROM ART_DRILLDOWN_QUERIES WHERE QUERY_ID=?";
 		dbService.update(sql, id);
 
 		//delete sql source
-		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID = ?";
+		sql = "DELETE FROM ART_ALL_SOURCES WHERE OBJECT_ID=?";
 		dbService.update(sql, id);
 
 		//lastly, delete query
-		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID = ?";
+		sql = "DELETE FROM ART_QUERIES WHERE QUERY_ID=?";
 		int affectedRows = dbService.update(sql, id);
 		logger.debug("affectedRows={}", affectedRows);
 
@@ -580,8 +581,9 @@ public class ReportService {
 					+ " HIDDEN_COLUMNS, TOTAL_COLUMNS, DATE_COLUMN_FORMAT,"
 					+ " NUMBER_COLUMN_FORMAT, COLUMN_FORMATS, LOCALE,"
 					+ " NULL_NUMBER_DISPLAY, NULL_STRING_DISPLAY, FETCH_SIZE,"
+					+ " REPORT_OPTIONS,"
 					+ " CREATION_DATE, CREATED_BY)"
-					+ " VALUES(" + StringUtils.repeat("?", ",", 32) + ")";
+					+ " VALUES(" + StringUtils.repeat("?", ",", 33) + ")";
 
 			Object[] values = {
 				report.getReportId(),
@@ -614,6 +616,7 @@ public class ReportService {
 				report.getNullNumberDisplay(),
 				report.getNullStringDisplay(),
 				report.getFetchSize(),
+				report.getReportOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -629,6 +632,7 @@ public class ReportService {
 					+ " HIDDEN_COLUMNS=?, TOTAL_COLUMNS=?, DATE_COLUMN_FORMAT=?,"
 					+ " NUMBER_COLUMN_FORMAT=?, COLUMN_FORMATS=?, LOCALE=?,"
 					+ " NULL_NUMBER_DISPLAY=?, NULL_STRING_DISPLAY=?, FETCH_SIZE=?,"
+					+ " REPORT_OPTIONS=?,"
 					+ " UPDATE_DATE=?, UPDATED_BY=?"
 					+ " WHERE QUERY_ID=?";
 
@@ -662,6 +666,7 @@ public class ReportService {
 				report.getNullNumberDisplay(),
 				report.getNullStringDisplay(),
 				report.getFetchSize(),
+				report.getReportOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()
@@ -938,7 +943,7 @@ public class ReportService {
 		logger.debug("Entering getDashboardReports");
 
 		String sql = SQL_SELECT_ALL
-				+ " WHERE QUERY_TYPE=110";
+				+ " WHERE QUERY_TYPE=110 OR QUERY-TYPE=129";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);

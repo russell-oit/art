@@ -216,7 +216,7 @@ public class Config extends HttpServlet {
 		createWorkDirectories();
 
 		createFreemarkerConfiguration();
-		
+
 		createThymeleafReportTemplateEngine();
 
 		loadLanguages();
@@ -690,9 +690,7 @@ public class Config extends HttpServlet {
 			File customSettingsFile = new File(customSettingsFilePath);
 			if (customSettingsFile.exists()) {
 				ObjectMapper mapper = new ObjectMapper();
-				newCustomSettings
-						= mapper.readValue(customSettingsFile, CustomSettings.class
-						);
+				newCustomSettings = mapper.readValue(customSettingsFile, CustomSettings.class);
 			}
 		} catch (IOException ex) {
 			logger.error("Error", ex);

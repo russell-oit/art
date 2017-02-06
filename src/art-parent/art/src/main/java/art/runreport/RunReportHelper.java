@@ -210,6 +210,7 @@ public class RunReportHelper {
 			case ReactPivot:
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				enableReportFormats = false;
 				break;
 			default:
@@ -247,6 +248,7 @@ public class RunReportHelper {
 			case JxlsTemplate:
 			case Text:
 			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -300,6 +302,7 @@ public class RunReportHelper {
 			case Update:
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				enablePrint = false;
 				break;
 			default:
@@ -341,6 +344,7 @@ public class RunReportHelper {
 			case ReactPivot:
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				enableEmail = false;
 				break;
 			default:

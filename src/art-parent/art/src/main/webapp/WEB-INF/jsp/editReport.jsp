@@ -134,7 +134,7 @@ Edit report page
 				$('#fileupload').fileupload({
 					url: '${pageContext.request.contextPath}/uploadResources',
 					fileInput: $('#fileuploadInput'),
-					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g)$/i,
+					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt)$/i,
 					maxFileSize: maxFileSizeBytes,
 					messages: {
 						acceptFileTypes: '${fileTypeNotAllowedText}',
@@ -225,7 +225,7 @@ Edit report page
 
 				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
 
-				var reportSource = $('input[name="reportSource"]');
+				var reportSource = $('#reportSource');
 				sqlEditor.getSession().setValue(reportSource.val());
 				sqlEditor.getSession().on('change', function () {
 					reportSource.val(sqlEditor.getSession().getValue());
@@ -247,12 +247,34 @@ Edit report page
 					reportSource.val(xmlEditor.getSession().getValue());
 				});
 
+				var jsonEditor = ace.edit("jsonEditor");
+				jsonEditor.getSession().setMode("ace/mode/json");
+				jsonEditor.setHighlightActiveLine(false);
+				jsonEditor.setShowPrintMargin(false);
+				jsonEditor.setOption("showLineNumbers", false);
+				document.getElementById('xmlEditor').style.fontSize = '14px';
+
+				var reportOptions = $('#reportOptions');
+				jsonEditor.getSession().setValue(reportOptions.val());
+				jsonEditor.getSession().on('change', function () {
+					reportOptions.val(jsonEditor.getSession().getValue());
+				});
+
 			});
 		</script>
 
 		<script type="text/javascript">
 			function toggleVisibleFields() {
 				var reportTypeId = parseInt($('#reportTypeId option:selected').val(), 10);
+
+				//show/hide report options
+				switch (reportTypeId) {
+					case 134: //pivottable.js csv server
+						$("#reportOptionsDiv").show();
+						break;
+					default:
+						$("#reportOptionsDiv").hide();
+				}
 
 				//show/hide report source
 				if (reportTypeId === 111) {
@@ -266,6 +288,7 @@ Edit report page
 						case 115: //jasper template
 						case 117: //jxls template
 						case 133: //pivottable.js csv local
+						case 134: //pivottable.js csv server
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -287,7 +310,10 @@ Edit report page
 
 				//show/hide report source label
 				switch (reportTypeId) {
+					case 115: //jasper template
+					case 117: //jxls template
 					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -331,6 +357,7 @@ Edit report page
 					case 113: //mondrian xmla
 					case 114: //microsoft xmla
 					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -344,6 +371,7 @@ Edit report page
 					case 111: //text
 					case 120: //static lov
 					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -368,6 +396,7 @@ Edit report page
 					case 130: //react pivot
 					case 132: //pivottable.js
 					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#templateDiv").show();
 						break;
 					default:
@@ -402,6 +431,7 @@ Edit report page
 					case 117: //jxls template
 					case 120: //static lov
 					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -460,6 +490,7 @@ Edit report page
 					case 130: //react pivot
 					case 132: //pivottable.js
 					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -480,6 +511,7 @@ Edit report page
 				switch (reportTypeId) {
 					case 115: //jasper template
 					case 116: //jasper art
+					case 134: //pivottable.js csv server
 						$("#resourcesDiv").show();
 						break;
 					default:
@@ -499,6 +531,7 @@ Edit report page
 					case 117: //jxls template
 					case 120: //static lov
 					case 133: //pivottable.js csv local
+					case 134: //pivottable.js csv server
 						$("#fetchSizeDiv").hide();
 						break;
 					default:
@@ -1097,6 +1130,16 @@ Edit report page
 						</div>
 					</div>
 				</fieldset>
+
+				<div id="reportOptionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="reportOptions">
+						<spring:message code="reports.label.reportOptions"/>
+					</label>
+					<div class="col-md-12">
+						<form:hidden path="reportOptions"/>
+						<div id="jsonEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
+					</div>
+				</div>
 
 				<label id="reportSourceLabel" class="col-md-12 control-label" style="text-align: center">
 				</label>
