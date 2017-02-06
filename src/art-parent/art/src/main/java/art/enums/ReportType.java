@@ -30,12 +30,12 @@ public enum ReportType {
 
 	//items will be displayed in the order they appear here in editReport.jsp
 	Tabular(0), TabularHtml(103), Crosstab(101), CrosstabHtml(102),
-	Group(1), Update(100), 
+	Group(1), Update(100),
 	Dashboard(110), GridstackDashboard(129), Text(111), Mondrian(112),
 	MondrianXmla(113), SqlServerXmla(114),
 	JasperReportsTemplate(115), JasperReportsArt(116), JxlsTemplate(117), JxlsArt(118),
 	LovDynamic(119), LovStatic(120), JobRecipients(121), FreeMarker(122), Thymeleaf(131),
-	ReactPivot(130), PivotTableJs(132),
+	ReactPivot(130), PivotTableJs(132), PivotTableJsCsvLocal(133),
 	XDocReportFreeMarkerDocx(123), XDocReportVelocityDocx(124),
 	XDocReportFreeMarkerOdt(125), XDocReportVelocityOdt(126),
 	XDocReportFreeMarkerPptx(127), XDocReportVelocityPptx(128),
@@ -67,9 +67,27 @@ public enum ReportType {
 			case LovStatic:
 			case ReactPivot:
 			case PivotTableJs:
+			case PivotTableJsCsvLocal:
 				return false;
 			default:
 				return true;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a regular or csv pivottable.js
+	 * report
+	 *
+	 * @return <code>true</code> if this is a regular or csv pivottable.js
+	 * report
+	 */
+	public boolean isPivotTableJs() {
+		switch (this) {
+			case PivotTableJs:
+			case PivotTableJsCsvLocal:
+				return true;
+			default:
+				return false;
 		}
 	}
 
@@ -521,6 +539,8 @@ public enum ReportType {
 				return "Thymeleaf";
 			case PivotTableJs:
 				return "PivotTable.js";
+			case PivotTableJsCsvLocal:
+				return "PivotTable.js: CSV Local";
 			default:
 				return this.name();
 		}

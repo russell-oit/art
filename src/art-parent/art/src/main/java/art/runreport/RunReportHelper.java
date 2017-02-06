@@ -209,6 +209,7 @@ public class RunReportHelper {
 			case Thymeleaf:
 			case ReactPivot:
 			case PivotTableJs:
+			case PivotTableJsCsvLocal:
 				enableReportFormats = false;
 				break;
 			default:
@@ -245,6 +246,7 @@ public class RunReportHelper {
 			case JasperReportsTemplate:
 			case JxlsTemplate:
 			case Text:
+			case PivotTableJsCsvLocal:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -297,6 +299,7 @@ public class RunReportHelper {
 			case XDocReportVelocityPptx:
 			case Update:
 			case PivotTableJs:
+			case PivotTableJsCsvLocal:
 				enablePrint = false;
 				break;
 			default:
@@ -337,6 +340,7 @@ public class RunReportHelper {
 			case Thymeleaf:
 			case ReactPivot:
 			case PivotTableJs:
+			case PivotTableJsCsvLocal:
 				enableEmail = false;
 				break;
 			default:

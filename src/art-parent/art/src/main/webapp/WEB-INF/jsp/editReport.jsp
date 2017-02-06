@@ -222,7 +222,7 @@ Edit report page
 				sqlEditor.setShowPrintMargin(false);
 				//https://stackoverflow.com/questions/28283344/is-there-a-way-to-hide-the-line-numbers-in-ace-editor
 				sqlEditor.renderer.setShowGutter(false);
-				
+
 				document.getElementById('sqlEditor').style.fontSize = '14px'; //default seems to be 12px
 
 				var reportSource = $('input[name="reportSource"]');
@@ -261,7 +261,16 @@ Edit report page
 					$("#reportSourceDiv").hide();
 				} else {
 					$("#reportSourceHtmlDiv").hide();
-					$("#reportSourceDiv").show();
+
+					switch (reportTypeId) {
+						case 115: //jasper template
+						case 117: //jxls template
+						case 133: //pivottable.js csv local
+							$("#reportSourceDiv").hide();
+							break;
+						default:
+							$("#reportSourceDiv").show();
+					}
 
 					switch (reportTypeId) {
 						case 110:
@@ -274,6 +283,15 @@ Edit report page
 							$("#sqlEditor").show();
 							$("#xmlEditor").hide();
 					}
+				}
+
+				//show/hide report source label
+				switch (reportTypeId) {
+					case 133: //pivottable.js csv local
+						$("#reportSourceLabel").hide();
+						break;
+					default:
+						$("#reportSourceLabel").show();
 				}
 
 				//set report source label text
@@ -312,6 +330,7 @@ Edit report page
 					case 112: //mondrian
 					case 113: //mondrian xmla
 					case 114: //microsoft xmla
+					case 133: //pivottable.js csv local
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -324,6 +343,7 @@ Edit report page
 					case 129: //gridstack dashboard
 					case 111: //text
 					case 120: //static lov
+					case 133: //pivottable.js csv local
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -347,6 +367,7 @@ Edit report page
 					case 128: //xdocreport velocity pptx
 					case 130: //react pivot
 					case 132: //pivottable.js
+					case 133: //pivottable.js csv local
 						$("#templateDiv").show();
 						break;
 					default:
@@ -380,6 +401,7 @@ Edit report page
 					case 115: //jasper template
 					case 117: //jxls template
 					case 120: //static lov
+					case 133: //pivottable.js csv local
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -437,6 +459,7 @@ Edit report page
 					case 131: //thymeleaf
 					case 130: //react pivot
 					case 132: //pivottable.js
+					case 133: //pivottable.js csv local
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -475,6 +498,7 @@ Edit report page
 					case 115: //jasper template
 					case 117: //jxls template
 					case 120: //static lov
+					case 133: //pivottable.js csv local
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

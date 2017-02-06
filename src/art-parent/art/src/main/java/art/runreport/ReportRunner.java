@@ -599,21 +599,21 @@ public class ReportRunner {
 		}
 
 		//Get the SQL String with rules, inline, multi params and tags already applied.
-		//don't process the source for jasper, jxls template, static lov queries
-		if (reportType != ReportType.JasperReportsTemplate
-				&& reportType != ReportType.JxlsTemplate
-				&& reportType != ReportType.LovStatic) {
-			processReportSource();
-		}
+		processReportSource();
 
-		//don't execute sql source for jasper report template query, jxls template query, mdx queries, static lov
-		if (reportType == ReportType.JasperReportsTemplate
-				|| reportType == ReportType.JxlsTemplate
-				|| reportType == ReportType.Mondrian
-				|| reportType == ReportType.MondrianXmla
-				|| reportType == ReportType.SqlServerXmla
-				|| reportType == ReportType.LovStatic) {
-			return;
+		//don't execute sql source for jasper report template query,
+		//jxls template query, mdx queries, static lov, pivottable.js csv local
+		switch (reportType) {
+			case JasperReportsTemplate:
+			case JxlsTemplate:
+			case Mondrian:
+			case MondrianXmla:
+			case SqlServerXmla:
+			case LovStatic:
+			case PivotTableJsCsvLocal:
+				return;
+			default:
+			//do nothing
 		}
 
 		//use dynamic datasource if so configured
@@ -639,13 +639,13 @@ public class ReportRunner {
 		}
 
 		String querySql = querySb.toString();
-		
+
 		psQuery = connQuery.prepareStatement(querySql, resultSetType, ResultSet.CONCUR_READ_ONLY);
 
 		if (applyFetchSize) {
 			psQuery.setFetchSize(fetchSize);
 		}
-		
+
 		Object[] paramValues = jdbcParams.toArray(new Object[0]);
 
 		DatabaseUtils.setValues(psQuery, paramValues);

@@ -8,6 +8,7 @@
 <%@page trimDirectiveWhitespaces="true" %>
 
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="http://www.springframework.org/tags" prefix="spring" %>
 
 <div id="pivotTableJsOutput">
 
@@ -27,12 +28,14 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/c3_renderers.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/export_renderers.min.js"></script>
-<!-- optional: mobile support with jqueryui-touch-punch -->
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
 
 <script type="text/javascript">
 	//set default values. can be overridden in template file
 	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
+	//https://stackoverflow.com/questions/4528744/how-does-extend-work-in-jquery
+	//https://stackoverflow.com/questions/10130908/jquery-merge-two-objects
 	var renderers = $.extend(
 			$.pivotUtilities.renderers,
 			$.pivotUtilities.c3_renderers,
@@ -41,6 +44,15 @@
 	var options = {renderers: renderers};
 	var overwrite = false;
 	var locale = 'en';
+	var csvConfig = {
+		skipEmptyLines: true,
+		error: function (e) {
+			bootbox.alert(e);
+		},
+		complete: function (parsed) {
+			$("#pivotTableJsOutput").pivotUI(parsed.data, options, overwrite, locale);
+		}
+	};
 </script>
 
 <c:if test="${not empty templateFileName}">
@@ -54,6 +66,62 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.${locale}.js"></script>
 </c:if>
 
-<script type="text/javascript">
+<c:choose>
+	<c:when test="${reportType == 'PivotTableJs'}">
+		<script type="text/javascript">
 	$("#pivotTableJsOutput").pivotUI(${input}, options, overwrite, locale);
-</script>
+		</script>
+	</c:when>
+	<c:when test="${reportType == 'PivotTableJsCsvLocal'}">
+		<%-- http://nicolas.kruchten.com/pivottable/examples/local.html --%>
+		<p align="center" style="line-height: 1.5">
+			<spring:message code="pivotTableJs.text.dropCsv"/> <spring:message code="pivotTableJs.text.or"/>
+			<label id="filechooser">
+				<spring:message code="pivotTableJs.text.clickToChoose"/>
+				<input id="csv" type="file" style="display:none"/>
+			</label>
+		</p>
+		<script type="text/javascript">
+//			$('#csv').parse({
+//				config: csvConfig
+//			});
+			var parseAndPivot = function (f) {
+				$("#pivotTableJsOutput").html("<p align='center' style='color:grey;'>(processing...)</p>");
+				Papa.parse(f, csvConfig);
+			};
+
+			$("#csv").bind("change", function (event) {
+				parseAndPivot(event.target.files[0]);
+			});
+
+			var dragging = function (evt) {
+				evt.stopPropagation();
+				evt.preventDefault();
+				evt.originalEvent.dataTransfer.dropEffect = 'copy';
+				$("body").removeClass("whiteborder").addClass("greyborder");
+			};
+
+			var endDrag = function (evt) {
+				evt.stopPropagation();
+				evt.preventDefault();
+				evt.originalEvent.dataTransfer.dropEffect = 'copy';
+				$("body").removeClass("greyborder").addClass("whiteborder");
+			};
+
+			var dropped = function (evt) {
+				evt.stopPropagation();
+				evt.preventDefault();
+				$("body").removeClass("greyborder").addClass("whiteborder");
+				parseAndPivot(evt.originalEvent.dataTransfer.files[0]);
+			};
+
+			$("html")
+					.on("dragover", dragging)
+					.on("dragend", endDrag)
+					.on("dragexit", endDrag)
+					.on("dragleave", endDrag)
+					.on("drop", dropped);
+
+		</script>
+	</c:when>
+</c:choose>

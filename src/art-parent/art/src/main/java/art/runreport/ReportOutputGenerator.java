@@ -502,15 +502,20 @@ public class ReportOutputGenerator {
 					request.setAttribute("rows", jsonString);
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
 				}
-			} else if (reportType == ReportType.PivotTableJs) {
+			} else if (reportType.isPivotTableJs()) {
 				if (isJob) {
-					throw new IllegalStateException("PivotTable.js report type not supported for jobs");
+					throw new IllegalStateException("PivotTable.js report types not supported for jobs");
 				} else {
-					rs = reportRunner.getResultSet();
-					JsonOutput jsonOutput = new JsonOutput();
-					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-					String jsonString = jsonOutputResult.getJsonString();
-					rowsRetrieved = jsonOutputResult.getRowCount();
+					request.setAttribute("reportType", reportType);
+					
+					if (reportType == ReportType.PivotTableJs) {
+						rs = reportRunner.getResultSet();
+						JsonOutput jsonOutput = new JsonOutput();
+						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+						String jsonString = jsonOutputResult.getJsonString();
+						rowsRetrieved = jsonOutputResult.getRowCount();
+						request.setAttribute("input", jsonString);
+					}
 
 					String templateFileName = report.getTemplate();
 					String jsTemplatesPath = Config.getJsTemplatesPath();
@@ -542,7 +547,6 @@ public class ReportOutputGenerator {
 						request.setAttribute("locale", localeString);
 					}
 
-					request.setAttribute("input", jsonString);
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 				}
 			} else {
