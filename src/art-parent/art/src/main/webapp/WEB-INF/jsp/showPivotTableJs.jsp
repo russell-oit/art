@@ -14,18 +14,31 @@
 </div>
 
 
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.css">
-
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-1.12.4.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-ui-1.11.4-all-smoothness/jquery-ui.min.js"></script>
+
+<%-- c3 0.4 doesn't work with d3 4.x --%>
+<%-- https://github.com/nicolaskruchten/pivottable/issues/579 --%>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/d3-3.5.17/d3.min.js"></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/c3-0.4.11/c3.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.css">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/pivot.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/c3_renderers.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-2.7.0/export_renderers.min.js"></script>
 <!-- optional: mobile support with jqueryui-touch-punch -->
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 
 <script type="text/javascript">
 	//set default values. can be overridden in template file
 	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
-	var options = {};
+	var renderers = $.extend(
+			$.pivotUtilities.renderers,
+			$.pivotUtilities.c3_renderers,
+			$.pivotUtilities.export_renderers
+			);
+	var options = {renderers: renderers};
 	var overwrite = false;
 	var locale = 'en';
 </script>
