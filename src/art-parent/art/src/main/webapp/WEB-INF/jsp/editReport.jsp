@@ -254,10 +254,10 @@ Edit report page
 				jsonEditor.setOption("showLineNumbers", false);
 				document.getElementById('xmlEditor').style.fontSize = '14px';
 
-				var reportOptions = $('#reportOptions');
-				jsonEditor.getSession().setValue(reportOptions.val());
+				var options = $('#options');
+				jsonEditor.getSession().setValue(options.val());
 				jsonEditor.getSession().on('change', function () {
-					reportOptions.val(jsonEditor.getSession().getValue());
+					options.val(jsonEditor.getSession().getValue());
 				});
 
 			});
@@ -270,10 +270,10 @@ Edit report page
 				//show/hide report options
 				switch (reportTypeId) {
 					case 134: //pivottable.js csv server
-						$("#reportOptionsDiv").show();
+						$("#optionsDiv").show();
 						break;
 					default:
-						$("#reportOptionsDiv").hide();
+						$("#optionsDiv").hide();
 				}
 
 				//show/hide report source
@@ -1131,12 +1131,12 @@ Edit report page
 					</div>
 				</fieldset>
 
-				<div id="reportOptionsDiv" class="form-group">
-					<label class="control-label col-md-12" style="text-align: center" for="reportOptions">
-						<spring:message code="reports.label.reportOptions"/>
+				<div id="optionsDiv" class="form-group">
+					<label class="control-label col-md-12" style="text-align: center" for="options">
+						<spring:message code="reports.label.options"/>
 					</label>
 					<div class="col-md-12">
-						<form:hidden path="reportOptions"/>
+						<form:hidden path="options"/>
 						<div id="jsonEditor" style="height: 200px; width: 100%; border: 1px solid black"></div>
 					</div>
 				</div>

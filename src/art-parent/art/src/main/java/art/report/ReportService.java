@@ -135,7 +135,7 @@ public class ReportService {
 			report.setNullNumberDisplay(rs.getString("NULL_NUMBER_DISPLAY"));
 			report.setNullStringDisplay(rs.getString("NULL_STRING_DISPLAY"));
 			report.setFetchSize(rs.getInt("FETCH_SIZE"));
-			report.setReportOptions(rs.getString("REPORT_OPTIONS"));
+			report.setOptions(rs.getString("REPORT_OPTIONS"));
 			report.setCreationDate(rs.getTimestamp("CREATION_DATE"));
 			report.setUpdateDate(rs.getTimestamp("UPDATE_DATE"));
 			report.setCreatedBy(rs.getString("CREATED_BY"));
@@ -616,7 +616,7 @@ public class ReportService {
 				report.getNullNumberDisplay(),
 				report.getNullStringDisplay(),
 				report.getFetchSize(),
-				report.getReportOptions(),
+				report.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername()
 			};
@@ -666,7 +666,7 @@ public class ReportService {
 				report.getNullNumberDisplay(),
 				report.getNullStringDisplay(),
 				report.getFetchSize(),
-				report.getReportOptions(),
+				report.getOptions(),
 				DatabaseUtils.getCurrentTimeAsSqlTimestamp(),
 				actionUser.getUsername(),
 				report.getReportId()

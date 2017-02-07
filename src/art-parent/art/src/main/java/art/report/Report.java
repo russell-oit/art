@@ -76,20 +76,20 @@ public class Report implements Serializable {
 	private String nullNumberDisplay;
 	private String nullStringDisplay;
 	private int fetchSize;
-	private String reportOptions;
+	private String options;
 
 	/**
-	 * @return the reportOptions
+	 * @return the options
 	 */
-	public String getReportOptions() {
-		return reportOptions;
+	public String getOptions() {
+		return options;
 	}
 
 	/**
-	 * @param reportOptions the reportOptions to set
+	 * @param options the options to set
 	 */
-	public void setReportOptions(String reportOptions) {
-		this.reportOptions = reportOptions;
+	public void setOptions(String options) {
+		this.options = options;
 	}
 
 	/**

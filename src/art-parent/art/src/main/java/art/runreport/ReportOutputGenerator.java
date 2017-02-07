@@ -535,10 +535,10 @@ public class ReportOutputGenerator {
 					}
 
 					if (reportType == ReportType.PivotTableJsCsvServer) {
-						String optionsString = report.getReportOptions();
+						String optionsString = report.getOptions();
 
 						if (StringUtils.isBlank(optionsString)) {
-							throw new IllegalArgumentException("Report options not specified");
+							throw new IllegalArgumentException("Options not specified");
 						}
 
 						ObjectMapper mapper = new ObjectMapper();
