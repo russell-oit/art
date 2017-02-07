@@ -547,10 +547,9 @@ public class UpgradeHelper {
 				sql = "INSERT INTO ART_PARAMETERS"
 						+ " (PARAMETER_ID, NAME, DESCRIPTION, PARAMETER_TYPE, PARAMETER_LABEL,"
 						+ " HELP_TEXT, DATA_TYPE, DEFAULT_VALUE, HIDDEN, USE_LOV,"
-						+ " LOV_REPORT_ID, USE_RULES_IN_LOV, CHAINED_POSITION,"
-						+ " CHAINED_VALUE_POSITION, DRILLDOWN_COLUMN_INDEX,"
-						+ " USE_DIRECT_SUBSTITUTION)"
-						+ " VALUES(" + StringUtils.repeat("?", ",", 16) + ")";
+						+ " LOV_REPORT_ID, USE_RULES_IN_LOV,"
+						+ " DRILLDOWN_COLUMN_INDEX, USE_DIRECT_SUBSTITUTION)"
+						+ " VALUES(" + StringUtils.repeat("?", ",", 14) + ")";
 
 				ParameterType parameterType;
 				String paramType = (String) parameter.get("PARAM_TYPE");
@@ -582,8 +581,6 @@ public class UpgradeHelper {
 					BooleanUtils.toBoolean(useLov),
 					(Integer) parameter.get("LOV_QUERY_ID"),
 					BooleanUtils.toBoolean(useRulesInLov),
-					(Integer) parameter.get("CHAINED_PARAM_POSITION"),
-					(Integer) parameter.get("CHAINED_VALUE_POSITION"),
 					(Integer) parameter.get("DRILLDOWN_COLUMN"),
 					BooleanUtils.toBoolean(useDirectSubstitution)
 				};

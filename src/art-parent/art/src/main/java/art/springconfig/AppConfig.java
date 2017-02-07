@@ -138,7 +138,7 @@ public class AppConfig extends WebMvcConfigurerAdapter implements ApplicationCon
 		//https://opensourceforgeeks.blogspot.co.ke/2016/01/difference-between-and-in-spring-mvc.html
 		registry.addInterceptor(authorizationInterceptor)
 				.addPathPatterns("/**")
-				.excludePathPatterns("/login", "/logout",
+				.excludePathPatterns("/login", "/logout", "/accessDenied",
 						"/error", "/error-404", "/error-405", "/error-400", "/error-500");
 	}
 

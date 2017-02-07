@@ -36,7 +36,7 @@
 -- IMPORTANT
 
 -- after running this upgrade script, ALSO RUN the tables_xxx.sql script for your database 
--- (found in the quartz directory) this is not the usual process for upgrades.
+-- (found in the quartz directory). this is not the usual process for upgrades.
 
 -- *****************
 

@@ -18,6 +18,7 @@
 package art.report;
 
 import art.datasource.DatasourceService;
+import art.enums.AccessLevel;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.jobrunners.ReportJob;
@@ -88,6 +89,19 @@ public class ReportController {
 	@RequestMapping(value = {"/", "/reports"}, method = RequestMethod.GET)
 	public String showReports(HttpSession session, HttpServletRequest request, Model model) {
 		logger.debug("Entering showReports");
+
+		if (!Config.isArtDatabaseConfigured()) {
+			User user = new User();
+
+			user.setUserId(-1);
+			user.setUsername("initial setup");
+			user.setAccessLevel(AccessLevel.RepositoryUser);
+
+			session.setAttribute("sessionUser", user);
+			session.setAttribute("initialSetup", "true");
+
+			return "redirect:/artDatabase";
+		}
 
 		try {
 			User sessionUser = (User) session.getAttribute("sessionUser");

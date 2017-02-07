@@ -66,7 +66,7 @@ public class LoginController {
 	}
 
 	//https://stackoverflow.com/questions/2513031/multiple-spring-requestmapping-annotations
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	@RequestMapping(value = {"/login"}, method = RequestMethod.GET)
 	public String showLogin(HttpServletRequest request,
 			@RequestParam(value = "authenticationMethod", required = false) String authenticationMethod,
 			Model model, SessionStatus sessionStatus, HttpSession session) {
@@ -106,7 +106,7 @@ public class LoginController {
 			model.addAttribute("message", "page.message.artDatabaseNotAvailable");
 			return "headerlessError";
 		}
-		
+
 		ArtAuthenticationMethod loginMethod;
 		ArtAuthenticationMethod loginMethodAppSetting = Config.getSettings().getArtAuthenticationMethod();
 		if (authenticationMethod == null) {
@@ -371,7 +371,7 @@ public class LoginController {
 			model.addAttribute("invalidLogin", "");
 			//add authentication failure details to the model in case it's desired to display result details in login.jsp
 			model.addAttribute("result", result);
-			
+
 			return "login";
 		}
 	}

@@ -12,6 +12,7 @@
 -- upgrade directory run the scripts one at a time to upgrade to newer versions.
 -- e.g. from 2.0 to 2.1, then 2.1 to 2.2 etc.
 
+-- sql reserved words checker - 
 
 -- ------------------------------------------------
 
