@@ -32,7 +32,6 @@ import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
 import art.output.CsvOutputUnivocity;
-import art.output.CsvOutputOpencsv;
 import art.output.DocxOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
@@ -68,7 +67,6 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVWriter;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
 import net.sf.cewolfart.PostProcessingException;
@@ -94,9 +92,9 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -610,7 +608,7 @@ public class ReportOutputGenerator {
 						rowsRetrieved = getResultSetRowCount(rs);
 						//need to escape string for javascript, otherwise you get Unterminated string literal error
 						//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
-						String escapedCsvString = StringEscapeUtils.escapeEcmaScript(csvString);
+						String escapedCsvString = Encode.forJavaScript(csvString);
 						request.setAttribute("csvData", escapedCsvString);
 					}
 
