@@ -289,6 +289,7 @@ Edit report page
 						case 117: //jxls template
 						case 133: //pivottable.js csv local
 						case 134: //pivottable.js csv server
+						case 136: //dygraphs csv local
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -314,6 +315,7 @@ Edit report page
 					case 117: //jxls template
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -358,6 +360,7 @@ Edit report page
 					case 114: //microsoft xmla
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -372,6 +375,7 @@ Edit report page
 					case 120: //static lov
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -398,6 +402,7 @@ Edit report page
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
 					case 135: //dygraphs
+					case 136: //dygraphs csv local
 						$("#templateDiv").show();
 						break;
 					default:
@@ -433,6 +438,7 @@ Edit report page
 					case 120: //static lov
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -493,6 +499,7 @@ Edit report page
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
 					case 135: //dygraphs
+					case 136: //dygraphs csv local
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -534,6 +541,7 @@ Edit report page
 					case 120: //static lov
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
+					case 136: //dygraphs csv local
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

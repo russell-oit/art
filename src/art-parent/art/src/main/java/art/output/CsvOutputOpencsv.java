@@ -123,8 +123,9 @@ public class CsvOutputOpencsv {
 	 */
 	public void generateOutput(ResultSet rs, Writer outputWriter) throws SQLException, IOException {
 		logger.debug("Entering generateOutput");
-
 		//http://opencsv.sourceforge.net/apidocs/com/opencsv/CSVWriter.html
+		//https://stackoverflow.com/a/36974864/3274227
+		//howtodoinjava.com/3rd-party/parse-read-write-csv-files-opencsv-tutorial/
 		csvWriter = new CSVWriter(outputWriter, separator, quotechar);
 
 		//https://stackoverflow.com/questions/33476281/change-the-default-date-format-while-exporting-the-resultset-data-using-opencsv

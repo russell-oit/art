@@ -593,25 +593,6 @@ public class ReportOutputGenerator {
 
 					if (reportType == ReportType.Dygraphs) {
 						rs = reportRunner.getResultSet();
-//						CsvOutputOpencsv csvOutput = new CsvOutputOpencsv();
-//						//use appropriate date formats to ensure correct interpretation by browsers
-//						//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
-//						//http://dygraphs.com/date-formats.html
-//						String dateFormat = "yyyy/MM/dd";
-//						String dateTimeFormat = "yyyy/MM/dd HH:mm";
-//						csvOutput.setDateFormat(dateFormat);
-//						csvOutput.setDateTimeFormat(dateTimeFormat);
-//						//don't enclose data in quotes. otherwise they won't be recognised by dygraphs
-//						//https://stackoverflow.com/questions/13969254/unwanted-double-quotes-in-generated-csv-file
-//						csvOutput.setQuotechar(CSVWriter.NO_QUOTE_CHARACTER);
-//						String csvString;
-//						//https://stackoverflow.com/questions/21142791/write-csv-to-string-using-opencsv-without-creating-an-actual-file-or-a-temp-file
-//						try (StringWriter stringWriter = new StringWriter()) {
-//							csvOutput.generateOutput(rs, stringWriter);
-//							csvString = stringWriter.toString();
-////							csvOutput.closeCsvWriter();
-//						}
-
 						CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
 						//use appropriate date formats to ensure correct interpretation by browsers
 						//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html

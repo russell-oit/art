@@ -601,9 +601,7 @@ public class ReportRunner {
 		//Get the SQL String with rules, inline, multi params and tags already applied.
 		processReportSource();
 
-		//don't execute sql source for jasper report template query,
-		//jxls template query, mdx queries, static lov, pivottable.js csv local
-		//pivottable.js csv server
+		//don't execute sql source for report types that don't have runnable sql
 		switch (reportType) {
 			case JasperReportsTemplate:
 			case JxlsTemplate:
@@ -613,6 +611,7 @@ public class ReportRunner {
 			case LovStatic:
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer:
+			case DygraphsCsvLocal:
 				return;
 			default:
 			//do nothing

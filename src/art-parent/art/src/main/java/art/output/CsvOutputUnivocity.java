@@ -131,6 +131,7 @@ public class CsvOutputUnivocity {
 	public void generateOutput(ResultSet rs, Writer outputWriter) {
 		logger.debug("Entering generateOutput");
 		//https://stackoverflow.com/questions/37556698/mysql-dump-character-escaping-and-csv-read
+		//https://stackoverflow.com/a/36974864/3274227
 		//https://github.com/uniVocity/univocity-parsers/issues/133#issuecomment-278208696
 		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
 		//assigns a "global" date format conversion for any timestamp that gets written.
