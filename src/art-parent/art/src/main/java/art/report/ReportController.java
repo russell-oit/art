@@ -598,6 +598,9 @@ public class ReportController {
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer: //can specify .js template and .csv data file
+			case Dygraphs:
+			case DygraphsCsvLocal:
+			case DygraphsCsvServer:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			default:

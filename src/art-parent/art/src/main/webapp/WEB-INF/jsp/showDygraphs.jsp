@@ -112,5 +112,11 @@
 
 		</script>
 	</c:when>
+	<c:when test="${reportType == 'DygraphsCsvServer'}">
+		<script type="text/javascript">
+			var dataFile = '${pageContext.request.contextPath}/js-templates/${dataFileName}';
+				new Dygraph(document.getElementById("dygraphsOutput"), dataFile, options);
+		</script>
+	</c:when>
 </c:choose>
 

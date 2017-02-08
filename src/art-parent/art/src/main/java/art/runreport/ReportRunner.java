@@ -612,6 +612,7 @@ public class ReportRunner {
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer:
 			case DygraphsCsvLocal:
+			case DygraphsCsvServer:
 				return;
 			default:
 			//do nothing
