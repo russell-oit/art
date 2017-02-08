@@ -305,6 +305,9 @@ public class RunReportHelper {
 			case XDocReportVelocityOdt:
 			case XDocReportVelocityPptx:
 			case Update:
+			case PivotTableJs:
+			case PivotTableJsCsvLocal:
+			case PivotTableJsCsvServer:
 				enablePrint = false;
 				break;
 			default:
@@ -323,9 +326,6 @@ public class RunReportHelper {
 			case FreeMarker:
 			case Thymeleaf:
 			case ReactPivot:
-			case PivotTableJs:
-			case PivotTableJsCsvLocal:
-			case PivotTableJsCsvServer:
 			case Dygraphs:
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
