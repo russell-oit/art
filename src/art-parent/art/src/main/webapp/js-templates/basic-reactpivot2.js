@@ -94,3 +94,10 @@ var calculations = [
 		className: 'alignRight'
 	}
 ];
+
+$.extend(options,{
+	rows: rows,
+	dimensions: dimensions,
+	reduce: reduce,
+	calculations: calculations
+});

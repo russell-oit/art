@@ -29,4 +29,9 @@ var activeDimensions = [
 	'Item'
 ];
 
-
+$.extend(options,{
+	dimensions: dimensions,
+	reduce: reduce,
+	calculations: calculations,
+	activeDimensions: activeDimensions
+});

@@ -35,4 +35,11 @@ var solo = {
 	"value": "Orange"
 };
 
+$.extend(options,{
+	dimensions: dimensions,
+	reduce: reduce,
+	calculations: calculations,
+	activeDimensions: activeDimensions,
+	solo: solo
+});
 

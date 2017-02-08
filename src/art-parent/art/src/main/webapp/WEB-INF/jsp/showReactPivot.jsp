@@ -18,45 +18,16 @@
 	//set default values. can be overridden in template file
 	//https://github.com/davidguttman/react-pivot
 	//https://github.com/davidguttman/react-pivot/blob/master/index.jsx
-	var rows = ${rows};
-	var dimensions = [];
-	var reduce = function () {};
-	var calculations = [];
-	var compact = false;
-	var csvDownloadFileName = 'table.csv';
-	var csvTemplateFormat = false;
-	var defaultStyles = true;
-	var hiddenColumns = [];
-	var nPaginateRows = 25;
-	var solo = null;
-	var sortBy = null;
-	var sortDir = 'asc';
-	var tableClassName = '';
-	var hideDimensionFilter = false;
-	var activeDimensions = [];
-	var excludeSummaryFromExport = false;
+	var options = {
+		rows: ${rows},
+		dimensions: [],
+		reduce: function () {},
+		calculations: []
+	};
 </script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
 
 <script type="text/javascript">
-	ReactPivot(document.getElementById('reactPivotOutput'), {
-		rows: rows,
-		dimensions: dimensions,
-		reduce: reduce,
-		calculations: calculations,
-		compact: compact,
-		csvDownloadFileName: csvDownloadFileName,
-		csvTemplateFormat: csvTemplateFormat,
-		defaultStyles: defaultStyles,
-		hiddenColumns: hiddenColumns,
-		nPaginateRows: nPaginateRows,
-		solo: solo,
-		sortBy: sortBy,
-		sortDir: sortDir,
-		tableClassName: tableClassName,
-		hideDimensionFilter: hideDimensionFilter,
-		activeDimensions: activeDimensions,
-		excludeSummaryFromExport: excludeSummaryFromExport
-	});
+	ReactPivot(document.getElementById('reactPivotOutput'), options);
 </script>
