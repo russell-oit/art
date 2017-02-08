@@ -525,7 +525,7 @@ public class ReportRunner {
 			//replace #recipient# label with recipient values
 			if (recipientColumn != null && recipientId != null) {
 				String recipientValue;
-				if (StringUtils.equalsIgnoreCase(recipientIdType, "NUMBER") && NumberUtils.isNumber(recipientId)) {
+				if (StringUtils.equalsIgnoreCase(recipientIdType, "NUMBER") && NumberUtils.isCreatable(recipientId)) {
 					//don't quote recipient id
 					recipientValue = recipientId;
 				} else {
@@ -603,6 +603,7 @@ public class ReportRunner {
 
 		//don't execute sql source for jasper report template query,
 		//jxls template query, mdx queries, static lov, pivottable.js csv local
+		//pivottable.js csv server
 		switch (reportType) {
 			case JasperReportsTemplate:
 			case JxlsTemplate:

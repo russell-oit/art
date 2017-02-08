@@ -397,6 +397,7 @@ Edit report page
 					case 132: //pivottable.js
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
+					case 135: //dygraphs
 						$("#templateDiv").show();
 						break;
 					default:
@@ -491,6 +492,7 @@ Edit report page
 					case 132: //pivottable.js
 					case 133: //pivottable.js csv local
 					case 134: //pivottable.js csv server
+					case 135: //dygraphs
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

@@ -12,7 +12,7 @@
 -- upgrade directory run the scripts one at a time to upgrade to newer versions.
 -- e.g. from 2.0 to 2.1, then 2.1 to 2.2 etc.
 
--- sql reserved words checker - 
+-- sql reserved words checker - https://www.petefreitag.com/tools/sql_reserved_words_checker/
 
 -- ------------------------------------------------
 
@@ -217,6 +217,7 @@ INSERT INTO ART_REPORT_TYPES VALUES (131,'Thymeleaf');
 INSERT INTO ART_REPORT_TYPES VALUES (132,'PivotTable.js');
 INSERT INTO ART_REPORT_TYPES VALUES (133,'PivotTable.js: CSV Local');
 INSERT INTO ART_REPORT_TYPES VALUES (134,'PivotTable.js: CSV Server');
+INSERT INTO ART_REPORT_TYPES VALUES (135,'Dygraphs');
 INSERT INTO ART_REPORT_TYPES VALUES (-1,'Chart: XY');
 INSERT INTO ART_REPORT_TYPES VALUES (-2,'Chart: Pie 3D');
 INSERT INTO ART_REPORT_TYPES VALUES (-3,'Chart: Horizontal Bar 3D');

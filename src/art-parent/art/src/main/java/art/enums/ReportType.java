@@ -43,7 +43,8 @@ public enum ReportType {
 	LineChart(-5), TimeSeriesChart(-6), DateSeriesChart(-7), StackedVerticalBar3DChart(-8),
 	StackedHorizontalBar3DChart(-9), SpeedometerChart(-10), BubbleChart(-11),
 	HeatmapChart(-12), Pie2DChart(-13), VerticalBar2DChart(-14), StackedVerticalBar2DChart(-15),
-	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17);
+	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
+	Dygraphs(135);
 
 	private final int value;
 
@@ -69,9 +70,24 @@ public enum ReportType {
 			case PivotTableJs:
 			case PivotTableJsCsvLocal:
 			case PivotTableJsCsvServer:
+			case Dygraphs:
 				return false;
 			default:
 				return true;
+		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a regular or csv dygraphs report
+	 *
+	 * @return <code>true</code> if this is a regular or csv dygraphs report
+	 */
+	public boolean isDygraphs() {
+		switch (this) {
+			case Dygraphs:
+				return true;
+			default:
+				return false;
 		}
 	}
 
@@ -545,6 +561,8 @@ public enum ReportType {
 				return "PivotTable.js: CSV Local";
 			case PivotTableJsCsvServer:
 				return "PivotTable.js: CSV Server";
+			case Dygraphs:
+				return "Dygraphs";
 			default:
 				return this.name();
 		}

@@ -31,6 +31,8 @@ import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
+import art.output.CsvOutputUnivocity;
+import art.output.CsvOutputOpencsv;
 import art.output.DocxOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
@@ -65,6 +67,7 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
 import net.sf.cewolfart.ChartValidationException;
 import net.sf.cewolfart.DatasetProduceException;
 import net.sf.cewolfart.PostProcessingException;
@@ -73,6 +76,7 @@ import freemarker.template.TemplateException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -89,6 +93,7 @@ import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.RowSetDynaClass;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
@@ -579,6 +584,99 @@ public class ReportOutputGenerator {
 					}
 
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
+				}
+			} else if (reportType.isDygraphs()) {
+				if (isJob) {
+					throw new IllegalStateException("Dygraphs report types not supported for jobs");
+				} else {
+					request.setAttribute("reportType", reportType);
+
+					if (reportType == ReportType.Dygraphs) {
+						rs = reportRunner.getResultSet();
+//						CsvOutputOpencsv csvOutput = new CsvOutputOpencsv();
+//						//use appropriate date formats to ensure correct interpretation by browsers
+//						//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
+//						//http://dygraphs.com/date-formats.html
+//						String dateFormat = "yyyy/MM/dd";
+//						String dateTimeFormat = "yyyy/MM/dd HH:mm";
+//						csvOutput.setDateFormat(dateFormat);
+//						csvOutput.setDateTimeFormat(dateTimeFormat);
+//						//don't enclose data in quotes. otherwise they won't be recognised by dygraphs
+//						//https://stackoverflow.com/questions/13969254/unwanted-double-quotes-in-generated-csv-file
+//						csvOutput.setQuotechar(CSVWriter.NO_QUOTE_CHARACTER);
+//						String csvString;
+//						//https://stackoverflow.com/questions/21142791/write-csv-to-string-using-opencsv-without-creating-an-actual-file-or-a-temp-file
+//						try (StringWriter stringWriter = new StringWriter()) {
+//							csvOutput.generateOutput(rs, stringWriter);
+//							csvString = stringWriter.toString();
+////							csvOutput.closeCsvWriter();
+//						}
+
+						CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
+						//use appropriate date formats to ensure correct interpretation by browsers
+						//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
+						//http://dygraphs.com/date-formats.html
+						String dateFormat = "yyyy/MM/dd";
+						String dateTimeFormat = "yyyy/MM/dd HH:mm";
+						csvOutputUnivocity.setDateFormat(dateFormat);
+						csvOutputUnivocity.setDateTimeFormat(dateTimeFormat);
+						String csvString;
+						try (StringWriter stringWriter = new StringWriter()) {
+							csvOutputUnivocity.generateOutput(rs, stringWriter);
+							csvString = stringWriter.toString();
+						}
+						rowsRetrieved = getResultSetRowCount(rs);
+						//need to escape string for javascript, otherwise you get Unterminated string literal error
+						//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
+						String escapedCsvString = StringEscapeUtils.escapeEcmaScript(csvString);
+						request.setAttribute("csvData", escapedCsvString);
+					}
+
+					String templateFileName = report.getTemplate();
+					String jsTemplatesPath = Config.getJsTemplatesPath();
+					String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+					logger.debug("templateFileName='{}'", templateFileName);
+
+					//template file not mandatory
+					if (StringUtils.isNotBlank(templateFileName)) {
+						File templateFile = new File(fullTemplateFileName);
+						if (!templateFile.exists()) {
+							throw new IllegalStateException("Template file not found: " + templateFileName);
+						}
+						request.setAttribute("templateFileName", templateFileName);
+					}
+
+					if (reportType == ReportType.PivotTableJsCsvServer) {
+						String optionsString = report.getOptions();
+
+						if (StringUtils.isBlank(optionsString)) {
+							throw new IllegalArgumentException("Options not specified");
+						}
+
+						ObjectMapper mapper = new ObjectMapper();
+						PivotTableJsCsvServerOptions options = mapper.readValue(optionsString, PivotTableJsCsvServerOptions.class);
+						String dataFileName = options.getDataFile();
+
+						logger.debug("dataFileName='{}'", dataFileName);
+
+						//need to explicitly check if file name is empty string
+						//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+						if (StringUtils.isBlank(dataFileName)) {
+							throw new IllegalArgumentException("Data file not specified");
+						}
+
+						String fullDataFileName = jsTemplatesPath + dataFileName;
+
+						File dataFile = new File(fullDataFileName);
+						if (!dataFile.exists()) {
+							throw new IllegalStateException("Data file not found: " + dataFileName);
+						}
+
+						request.setAttribute("dataFileName", dataFileName);
+					}
+
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
 				}
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
