@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,22 +71,57 @@ public class JsonOutput {
 		logger.debug("Entering generateOutput");
 
 		Objects.requireNonNull(rs, "rs must not be null");
-		
+
 		JsonOutputResult result = new JsonOutputResult();
 
 		//https://stackoverflow.com/questions/18960446/how-to-convert-a-java-resultset-into-json
 		List<Map<String, Object>> rows = new ArrayList<>();
-		List<String> columnNames = new ArrayList<>();
+		List<ResultSetColumn> columns = new ArrayList<>();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
 
 		for (int i = 1; i <= columnCount; i++) {
+			ResultSetColumn column=new ResultSetColumn();
+			
 			String columnName = rsmd.getColumnLabel(i);
-			columnNames.add(columnName);
+			column.setName(columnName);
+			
+			int sqlType = rsmd.getColumnType(i);
+
+			String columnType;
+
+			switch (sqlType) {
+				case Types.NUMERIC:
+				case Types.DECIMAL:
+				case Types.FLOAT:
+				case Types.REAL:
+				case Types.DOUBLE:
+				case Types.INTEGER:
+				case Types.TINYINT:
+				case Types.SMALLINT:
+				case Types.BIGINT:
+					columnType = "numeric";
+					break;
+				case Types.DATE:
+					columnType = "date";
+					break;
+				case Types.TIME:
+					columnType = "time";
+					break;
+				case Types.TIMESTAMP:
+					columnType = "timestamp";
+					break;
+				default:
+					columnType = "unhandled";
+			}
+			
+			column.setType(columnType);
+			
+			columns.add(column);
 		}
 		
-		result.setColumnNames(columnNames);
+		result.setColumns(columns);
 
 		int rowCount = 0;
 		while (rs.next()) {

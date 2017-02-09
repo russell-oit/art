@@ -157,7 +157,6 @@ Display section to allow selecting of report parameters and initiate running of 
 
 	function toggleVisibleButtons() {
 		var reportFormat = $('#reportFormat option:selected').val();
-		var reportType = '${report.reportType}';
 
 		//show/hide print button
 		if (${enablePrint}) {

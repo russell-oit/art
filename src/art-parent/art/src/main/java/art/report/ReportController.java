@@ -601,6 +601,7 @@ public class ReportController {
 			case Dygraphs:
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
+			case DataTables:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			default:

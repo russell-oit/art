@@ -214,6 +214,7 @@ public class RunReportHelper {
 			case Dygraphs:
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
+			case DataTables:
 				enableReportFormats = false;
 				break;
 			default:
@@ -329,6 +330,7 @@ public class RunReportHelper {
 			case Dygraphs:
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
+			case DataTables:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -356,6 +358,7 @@ public class RunReportHelper {
 			case Dygraphs:
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
+			case DataTables:
 				enableEmail = false;
 				break;
 			default:

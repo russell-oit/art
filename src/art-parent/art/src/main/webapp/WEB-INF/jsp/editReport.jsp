@@ -409,6 +409,7 @@ Edit report page
 					case 135: //dygraphs
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
+					case 138: //datatables
 						$("#templateDiv").show();
 						break;
 					default:
@@ -508,6 +509,7 @@ Edit report page
 					case 135: //dygraphs
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
+					case 138: //datatables
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

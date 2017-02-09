@@ -17,59 +17,44 @@
  */
 package art.output;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
- * Represents the result of json output generation
+ * Provides details of a resultset column
  *
  * @author Timothy Anyona
  */
-public class JsonOutputResult {
+public class ResultSetColumn implements Serializable {
 
-	private String jsonData;
-	private int rowCount;
-	private List<ResultSetColumn> columns;
+	private static final long serialVersionUID = 1L;
+	private String name;
+	private String type;
 
 	/**
-	 * @return the jsonData
+	 * @return the name
 	 */
-	public String getJsonData() {
-		return jsonData;
+	public String getName() {
+		return name;
 	}
 
 	/**
-	 * @param jsonData the jsonData to set
+	 * @param name the name to set
 	 */
-	public void setJsonData(String jsonData) {
-		this.jsonData = jsonData;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
-	 * @return the rowCount
+	 * @return the type
 	 */
-	public int getRowCount() {
-		return rowCount;
+	public String getType() {
+		return type;
 	}
 
 	/**
-	 * @param rowCount the rowCount to set
+	 * @param type the type to set
 	 */
-	public void setRowCount(int rowCount) {
-		this.rowCount = rowCount;
+	public void setType(String type) {
+		this.type = type;
 	}
-
-	/**
-	 * @return the columns
-	 */
-	public List<ResultSetColumn> getColumns() {
-		return columns;
-	}
-
-	/**
-	 * @param columns the columns to set
-	 */
-	public void setColumns(List<ResultSetColumn> columns) {
-		this.columns = columns;
-	}
-
 }

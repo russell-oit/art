@@ -49,6 +49,7 @@ import art.output.JxlsOutput;
 import art.output.OdsOutput;
 import art.output.OdtOutput;
 import art.output.PdfOutput;
+import art.output.ResultSetColumn;
 import art.output.Rss20Output;
 import art.output.SlkOutput;
 import art.output.StandardOutputResult;
@@ -657,6 +658,43 @@ public class ReportOutputGenerator {
 					}
 
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
+				}
+			} else if (reportType.isDataTables()) {
+				if (isJob) {
+					throw new IllegalStateException("DataTables report types not supported for jobs");
+				} else {
+					request.setAttribute("reportType", reportType);
+
+					if (reportType == ReportType.DataTables) {
+						rs = reportRunner.getResultSet();
+						JsonOutput jsonOutput = new JsonOutput();
+						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+						String jsonData = jsonOutputResult.getJsonData();
+						List<ResultSetColumn> columns = jsonOutputResult.getColumns();
+						request.setAttribute("data", jsonData);
+						request.setAttribute("columns", columns);
+					}
+					
+					String templateFileName = report.getTemplate();
+					String jsTemplatesPath = Config.getJsTemplatesPath();
+					String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+					logger.debug("templateFileName='{}'", templateFileName);
+
+					//template file not mandatory
+					if (StringUtils.isNotBlank(templateFileName)) {
+						File templateFile = new File(fullTemplateFileName);
+						if (!templateFile.exists()) {
+							throw new IllegalStateException("Template file not found: " + templateFileName);
+						}
+						request.setAttribute("templateFileName", templateFileName);
+					}
+
+					String languageTag = locale.toLanguageTag();
+					request.setAttribute("languageTag", languageTag);
+					String localeString = locale.toString();
+					request.setAttribute("locale", localeString);
+					servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 				}
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
