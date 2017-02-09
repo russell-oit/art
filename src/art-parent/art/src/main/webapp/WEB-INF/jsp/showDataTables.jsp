@@ -40,6 +40,19 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.js"></script>
 
 <script type="text/javascript">
+	//https://stackoverflow.com/questions/27380390/jquery-datatables-format-numbers
+
+	var formatAllNumbers = false;
+	var formattedNumberColumns = [];
+
+	var defaultFormatter = function (data, type, full, meta) {
+		if (data === null) {
+			return '';
+		} else {
+			return String(data);
+		}
+	};
+
 	var numericFormatter = function (data, type, full, meta) {
 		var formattedNumber;
 		if (data === null) {
@@ -107,16 +120,20 @@
 	//https://stackoverflow.com/questions/1290131/javascript-how-to-create-an-array-of-object-literals-in-a-loop
 	//https://stackoverflow.com/questions/14473170/accessing-arraylist-elemnts-in-javascript-from-jsp
 	var columns = [];
+	var i = 0;
 	<c:forEach var="column" items="${columns}">
-	columns.push({
+	i++;
+	var columnDef = {
 		data: "${column.name}",
 		title: "${column.name}"
-//		, render : function (data, type, full, meta) { return numericFormatter(data);}
-		<c:if test="${column.type == 'numeric'}">
-		, render: numericFormatter
-//	, render : function (data, type, full, meta) { return numericFormatter(data); }
-		</c:if>
-	});
+	};
+	var columnType = '${column.type}';
+	if (columnType === 'numeric' && (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1)) {
+		//https://stackoverflow.com/questions/1184123/is-it-possible-to-add-dynamically-named-properties-to-javascript-object
+		columnDef["render"] = numericFormatter;
+	}
+
+	columns.push(columnDef);
 	</c:forEach>
 
 	$.extend(options, {
