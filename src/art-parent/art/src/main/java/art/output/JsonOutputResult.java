@@ -17,6 +17,8 @@
  */
 package art.output;
 
+import java.util.List;
+
 /**
  * Represents the result of json output generation
  * 
@@ -24,21 +26,22 @@ package art.output;
  */
 public class JsonOutputResult {
 	
-	private String jsonString;
+	private String jsonData;
 	private int rowCount;
+	private List<String> columnNames;
 
 	/**
-	 * @return the jsonString
+	 * @return the jsonData
 	 */
-	public String getJsonString() {
-		return jsonString;
+	public String getJsonData() {
+		return jsonData;
 	}
 
 	/**
-	 * @param jsonString the jsonString to set
+	 * @param jsonData the jsonData to set
 	 */
-	public void setJsonString(String jsonString) {
-		this.jsonString = jsonString;
+	public void setJsonData(String jsonData) {
+		this.jsonData = jsonData;
 	}
 
 	/**
@@ -53,6 +56,20 @@ public class JsonOutputResult {
 	 */
 	public void setRowCount(int rowCount) {
 		this.rowCount = rowCount;
+	}
+
+	/**
+	 * @return the columnNames
+	 */
+	public List<String> getColumnNames() {
+		return columnNames;
+	}
+
+	/**
+	 * @param columnNames the columnNames to set
+	 */
+	public void setColumnNames(List<String> columnNames) {
+		this.columnNames = columnNames;
 	}
 	
 }

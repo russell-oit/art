@@ -398,7 +398,7 @@ public class ReportOutputGenerator {
 				JsonOutput jsonOutput = new JsonOutput();
 				jsonOutput.setPrettyPrint(reportOptions.isPrettyPrint());
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-				String jsonString = jsonOutputResult.getJsonString();
+				String jsonString = jsonOutputResult.getJsonData();
 				rowsRetrieved = jsonOutputResult.getRowCount();
 				switch (reportFormat) {
 					case jsonBrowser:
@@ -484,7 +484,7 @@ public class ReportOutputGenerator {
 					rs = reportRunner.getResultSet();
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-					String jsonString = jsonOutputResult.getJsonString();
+					String jsonData = jsonOutputResult.getJsonData();
 					rowsRetrieved = jsonOutputResult.getRowCount();
 
 					String templateFileName = report.getTemplate();
@@ -505,7 +505,7 @@ public class ReportOutputGenerator {
 					}
 
 					request.setAttribute("templateFileName", templateFileName);
-					request.setAttribute("rows", jsonString);
+					request.setAttribute("rows", jsonData);
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
 				}
 			} else if (reportType.isPivotTableJs()) {
@@ -518,9 +518,9 @@ public class ReportOutputGenerator {
 						rs = reportRunner.getResultSet();
 						JsonOutput jsonOutput = new JsonOutput();
 						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-						String jsonString = jsonOutputResult.getJsonString();
+						String jsonData = jsonOutputResult.getJsonData();
 						rowsRetrieved = jsonOutputResult.getRowCount();
-						request.setAttribute("input", jsonString);
+						request.setAttribute("input", jsonData);
 					}
 
 					String templateFileName = report.getTemplate();

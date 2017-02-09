@@ -70,12 +70,23 @@ public class JsonOutput {
 		logger.debug("Entering generateOutput");
 
 		Objects.requireNonNull(rs, "rs must not be null");
+		
+		JsonOutputResult result = new JsonOutputResult();
 
 		//https://stackoverflow.com/questions/18960446/how-to-convert-a-java-resultset-into-json
 		List<Map<String, Object>> rows = new ArrayList<>();
+		List<String> columnNames = new ArrayList<>();
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int columnCount = rsmd.getColumnCount();
+
+		for (int i = 1; i <= columnCount; i++) {
+			String columnName = rsmd.getColumnLabel(i);
+			columnNames.add(columnName);
+		}
+		
+		result.setColumnNames(columnNames);
+
 		int rowCount = 0;
 		while (rs.next()) {
 			rowCount++;
@@ -96,9 +107,7 @@ public class JsonOutput {
 			jsonString = mapper.writeValueAsString(rows);
 		}
 
-		JsonOutputResult result = new JsonOutputResult();
-
-		result.setJsonString(jsonString);
+		result.setJsonData(jsonString);
 		result.setRowCount(rowCount);
 
 		return result;
