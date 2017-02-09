@@ -66,7 +66,7 @@
 				var reader = new FileReader();
 				reader.onload = function (event) {
 					var contents = event.target.result;
-					//csv file should not have quotes - which means column names should not have commas
+					//csv file should not have quotes
 					//https://stackoverflow.com/questions/14708486/csv-cannot-display-two-axis-in-dygraphs-without-hardcoding
 					new Dygraph(document.getElementById("dygraphsOutput"), contents, options);
 				};
