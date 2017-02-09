@@ -12,7 +12,6 @@
 
 <spring:message code="dataTables.text.showAllRows" var="showAllRowsText"/>
 
-
 <div id="dataTablesOutput">
 	<table id="tableData" class="table table-bordered table-striped table-condensed">
 
@@ -75,82 +74,28 @@
 	function afterTableInitialization(settings) {
 		//https://datatables.net/forums/discussion/34352/passing-datatable-object-to-initcomplete-callback
 		$('div.dataTables_filter input').focus();
-		var tbl = $('#tableData');
-//		var columnFilterRow = createColumnFilters2(tbl);
-//		//move column filter row after heading row
-//		columnFilterRow.insertAfter(columnFilterRow.next());
-//		var table = settings.oInstance.api();
-//		// Apply the column filter
-//		applyColumnFilters(tbl, table);
 
+		var tbl = $('#tableData');
 		var headingRow = tbl.find('thead tr:first');
-		var colcount = ${columns.size()};
+		var colCount = ${columns.size()};
 		var cols = '';
-		for (var i = 1; i <= colcount; i++) {
+		for (var i = 1; i <= colCount; i++) {
 			cols += '<th></th>';
 		}
-		;
-		var newrow='<tr>' + cols + '</tr>';
-		
-		var thead = tbl.find('thead');
-		headingRow.after(newrow);
-//		var thead = document.getElementById('tableData').tHead;
-//		thead.insertRow(0);
 
-//		var tab = document.getElementById('tableData');
-//		tab.insertRow(2);
-		
-//console.log(headingRow);
-//		var columnFilterRow = headingRow.clone();
-//		//insert cloned row as first row because datatables will put heading styling on the last thead row
-////		columnFilterRow.insertBefore(headingRow);
-//		columnFilterRow.insertAfter(headingRow);
+		var filterRow = '<tr>' + cols + '</tr>';
+		headingRow.after(filterRow);
 
 		var table = settings.oInstance.api();
-		yadcf.init(table, [
-			{column_number: 0, filter_type: "text", filter_default_label: ""},
-			{column_number: 1, filter_type: "text"}
-		]
-, {filters_tr_index: 1}
-				);
+		var filterColumnDefs = [];
+		for (var i = 0; i < colCount; i++) {
+			filterColumnDefs.push({
+				column_number: i, filter_type: "text", filter_default_label: ""
+			});
+		}
 
-//		test();
+		yadcf.init(table, filterColumnDefs, {filters_tr_index: 1});
 	}
-	;
-
-	function createColumnFilters2(tbl) {
-		//add row to thead to enable column filtering
-		//use clone so that plugins work properly? e.g. colvis
-		var headingRow = tbl.find('thead tr:first');
-		var columnFilterRow = headingRow.clone();
-		//insert cloned row as first row because datatables will put heading styling on the last thead row
-		columnFilterRow.insertBefore(headingRow);
-		//put search fields into cloned row
-		columnFilterRow.find('th').each(function () {
-			if ($(this).hasClass('noFilter')) {
-				$(this).html('');
-			} else {
-				var title = $(this).text();
-				$(this).html('<input type="text" class="form-control input-sm" placeholder="' + title + '">');
-			}
-		});
-
-		return columnFilterRow;
-	}
-
-	function test() {
-		$('#tableData thead td').each(function () {
-			var title = $('#mytable thead th').eq($(this).index()).text();
-			$(this).html('<input type="text" placeholder="Search ' + title + '" />');
-		});
-		$("#tableData thead input").on('keyup change', function () {
-			table
-					.column($(this).parent().index() + ':visible')
-					.search(this.value)
-					.draw();
-		});
-	}
-
 </script>
 
 <c:if test="${not empty templateFileName}">
@@ -159,10 +104,6 @@
 
 <script type="text/javascript">
 	//https://datatables.net/reference/option/
-	var data = [{"col1": 1000.0}];
-
-//	return '';
-
 	//https://stackoverflow.com/questions/1290131/javascript-how-to-create-an-array-of-object-literals-in-a-loop
 	//https://stackoverflow.com/questions/14473170/accessing-arraylist-elemnts-in-javascript-from-jsp
 	var columns = [];
@@ -177,26 +118,16 @@
 		</c:if>
 	});
 	</c:forEach>
+
 	$.extend(options, {
 		data: ${data},
-//	data: data,
-//			columns: [{"title": "one", "data": "col1", render: function (data, type, full, meta) {return data.toLocaleString('en-GB'); }}],
-//		columns: [{"title": "one", "data": "col1", render: $.fn.dataTable.render.number( ',', '.')}],
-//				columns: [{"data": "col1", type: "num"}],
-//		columns: [{"data": "col1"}],
 		columns: columns
-
 	});
 </script>
 
 <script type="text/javascript">
 	$(document).ready(function () {
 		var tbl = $('#tableData');
-
-
-
-		var oTable = tbl.dataTable(options);
-		
-
+		tbl.dataTable(options);
 	});
 </script>

@@ -19,7 +19,6 @@ package art.utils;
 
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
-import art.enums.ColumnType;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
