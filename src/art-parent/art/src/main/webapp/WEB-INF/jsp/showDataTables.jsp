@@ -53,11 +53,13 @@
 
 	//https://stackoverflow.com/questions/35450227/how-to-parse-given-date-string-using-moment-js
 	//http://momentjs.com/docs/
-	var inputDateFormat = 'YYYY-MM-DD';
-	var outputDateFormat = 'DD-MMM-YYYY';
+	var inputDateFormat = 'YYYY-MM-DD'; //moment format
+	var outputDateFormat = ''; //moment format e.g. DD-MMM-YYYY
 
-	var inputDateTimeFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
-	var outputDateTimeFormat = 'DD-MMM-YYYY HH:mm:ss';
+	var inputDateTimeFormat = 'YYYY-MM-DD HH:mm:ss.SSS'; //moment format
+	var outputDateTimeFormat = ''; //moment format e.g. DD-MMM-YYYY HH:mm:ss
+
+	var showColumnFilters = ${showColumnFilters};
 
 	moment.locale('${locale}');
 
@@ -159,6 +161,13 @@
 		//https://datatables.net/forums/discussion/34352/passing-datatable-object-to-initcomplete-callback
 		$('div.dataTables_filter input').focus();
 
+		if (showColumnFilters) {
+			var table = settings.oInstance.api();
+			createColumnFilters(table);
+		}
+	}
+
+	function createColumnFilters(table) {
 		var tbl = $('#tableData');
 		var headingRow = tbl.find('thead tr:first');
 		var colCount = ${columns.size()};
@@ -169,8 +178,6 @@
 
 		var filterRow = '<tr>' + cols + '</tr>';
 		headingRow.after(filterRow);
-
-		var table = settings.oInstance.api();
 		var filterColumnDefs = [];
 		for (var i = 0; i < colCount; i++) {
 			filterColumnDefs.push({
@@ -178,7 +185,7 @@
 			});
 		}
 
-		yadcf.init(table, filterColumnDefs, {filters_tr_index: 1});
+		yadcf.init(table, filterColumnDefs, {filters_tr_index: 1})
 	}
 </script>
 
@@ -231,8 +238,7 @@
 	$.extend(options, {
 		data: ${data},
 		columns: columns
-	});
-</script>
+	});</script>
 
 <script type="text/javascript">
 	$(document).ready(function () {

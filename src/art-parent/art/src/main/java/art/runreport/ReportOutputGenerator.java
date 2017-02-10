@@ -63,6 +63,7 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.CsvServerOptions;
+import art.reportoptions.DataTablesOptions;
 import art.reportoptions.PivotTableJsCsvServerOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -674,7 +675,7 @@ public class ReportOutputGenerator {
 						request.setAttribute("data", jsonData);
 						request.setAttribute("columns", columns);
 					}
-					
+
 					String templateFileName = report.getTemplate();
 					String jsTemplatesPath = Config.getJsTemplatesPath();
 					String fullTemplateFileName = jsTemplatesPath + templateFileName;
@@ -689,6 +690,15 @@ public class ReportOutputGenerator {
 						}
 						request.setAttribute("templateFileName", templateFileName);
 					}
+
+					String optionsString = report.getOptions();
+					boolean showColumnFilters = true;
+					if (StringUtils.isNotBlank(optionsString)) {
+						ObjectMapper mapper = new ObjectMapper();
+						DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
+						showColumnFilters = options.isShowColumnFilters();
+					}
+					request.setAttribute("showColumnFilters", showColumnFilters);
 
 					String languageTag = locale.toLanguageTag();
 					request.setAttribute("languageTag", languageTag);

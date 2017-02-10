@@ -140,9 +140,7 @@ public class JsonOutput {
 		ObjectMapper mapper = new ObjectMapper();
 		//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/
 		//http://wiki.fasterxml.com/JacksonFAQDateHandling
-//		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-//		mapper.configure(SerializationFeature.WRITE_DATES_WITH_ZONE_ID, false);
-		SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 		mapper.setDateFormat(df);
 		String jsonString;
 		if (prettyPrint) {

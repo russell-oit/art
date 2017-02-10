@@ -271,6 +271,7 @@ Edit report page
 				switch (reportTypeId) {
 					case 134: //pivottable.js csv server
 					case 137: //dygraphs csv server
+					case 138: //datatables
 						$("#optionsDiv").show();
 						break;
 					default:
