@@ -41,6 +41,8 @@
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
 
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
+
 <script type="text/javascript">
 	//https://stackoverflow.com/questions/27380390/jquery-datatables-format-numbers
 	//https://softwareengineering.stackexchange.com/questions/160732/function-declaration-as-var-instead-of-function
@@ -170,7 +172,8 @@
 	function createColumnFilters(table) {
 		var tbl = $('#tableData');
 		var headingRow = tbl.find('thead tr:first');
-		var colCount = ${columns.size()};
+		//https://stackoverflow.com/questions/34609173/datatables-1-10-column-count
+		var colCount = table.columns().header().length;
 		var cols = '';
 		for (var i = 1; i <= colCount; i++) {
 			cols += '<th></th>';
@@ -185,64 +188,106 @@
 			});
 		}
 
-		yadcf.init(table, filterColumnDefs, {filters_tr_index: 1})
+		yadcf.init(table, filterColumnDefs, {filters_tr_index: 1});
 	}
+
+	//http://papaparse.com/docs#config
+	var csvConfig = {
+		header: true,
+		error: function (e) {
+			bootbox.alert(e);
+		},
+		complete: function (parsed) {
+			//https://stackoverflow.com/questions/26597460/displaying-csv-headers-using-papaparse-plugin
+			var columns = [];
+			if (parsed.meta['fields']) {
+				$.each(parsed.meta['fields'], function (i) {
+					columns.push({
+						data: parsed.meta['fields'][i],
+						title: parsed.meta['fields'][i]
+					});
+				});
+			} else {
+				var colCount = parsed.data[0].length;
+				for (var i = 1; i <= colCount; i++) {
+					var columnName = "Column " + i;
+					columns.push({
+						title: columnName
+					});
+				}
+			}
+
+			$.extend(options, {
+				data: parsed.data,
+				columns: columns
+			});
+
+			var tbl = $('#tableData');
+			tbl.dataTable(options);
+		}
+	};
 </script>
 
 <c:if test="${not empty templateFileName}">
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
 </c:if>
 
-<script type="text/javascript">
-	//https://datatables.net/reference/option/
-	//https://stackoverflow.com/questions/1290131/javascript-how-to-create-an-array-of-object-literals-in-a-loop
-	//https://stackoverflow.com/questions/14473170/accessing-arraylist-elemnts-in-javascript-from-jsp
-	var columns = [];
-	var i = 0;
-	<c:forEach var="column" items="${columns}">
-	i++;
-	var columnDef = {
-		data: "${column.name}",
-		title: "${column.name}"
+<c:choose>
+
+	<c:when test="${reportType == 'DataTables'}">
+		<style>
+			#filechooser {
+                /* color: #555; */
+                text-decoration: underline;
+                cursor: pointer; /* "hand" cursor */
+            }
+		</style>
+		<p align="center" style="line-height: 1.5">
+			<spring:message code="pivotTableJs.text.dropCsv"/>&nbsp;<spring:message code="pivotTableJs.text.or"/>&nbsp;
+			<label id="filechooser">
+				<spring:message code="pivotTableJs.text.clickToChoose"/>
+				<input id="csv" type="file" style="display:none"/>
+			</label>
+		</p>
+		<script type="text/javascript">
+	var showData = function (f) {
+		Papa.parse(f, csvConfig);
 	};
-	var columnType = '${column.type}';
-	if (columnType === 'numeric') {
-		if (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1) {
-			//https://stackoverflow.com/questions/1184123/is-it-possible-to-add-dynamically-named-properties-to-javascript-object
-			columnDef["render"] = numberFormatter;
-		} else {
-			//https://stackoverflow.com/questions/7106410/looping-through-arrays-of-arrays
-			for (var j = 0; j < customNumberFormats.length; j++) {
-				var customFormat = customNumberFormats[j];
-				var columnIndex = customFormat[0];
-				var formatter = customFormat[1];
-				if (columnIndex === i) {
-					columnDef["render"] = formatter;
-					break;
-				}
-			}
-		}
-	} else if (columnType === 'date') {
-		if (inputDateFormat && outputDateFormat) {
-			columnDef["render"] = dateFormatter;
-		}
-	} else if (columnType === 'timestamp') {
-		if (inputDateTimeFormat && outputDateTimeFormat) {
-			columnDef["render"] = timestampFormatter;
-		}
-	}
 
-	columns.push(columnDef);
-	</c:forEach>
-
-	$.extend(options, {
-		data: ${data},
-		columns: columns
-	});</script>
-
-<script type="text/javascript">
-	$(document).ready(function () {
-		var tbl = $('#tableData');
-		tbl.dataTable(options);
+	$("#csv").bind("change", function (event) {
+		showData(event.target.files[0]);
 	});
-</script>
+
+	var dragging = function (evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+		evt.originalEvent.dataTransfer.dropEffect = 'copy';
+		$("body").removeClass("whiteborder").addClass("greyborder");
+	};
+
+	var endDrag = function (evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+		evt.originalEvent.dataTransfer.dropEffect = 'copy';
+		$("body").removeClass("greyborder").addClass("whiteborder");
+	};
+
+	var dropped = function (evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+		$("body").removeClass("greyborder").addClass("whiteborder");
+		showData(evt.originalEvent.dataTransfer.files[0]);
+	};
+
+	$("html")
+			.on("dragover", dragging)
+			.on("dragend", endDrag)
+			.on("dragexit", endDrag)
+			.on("dragleave", endDrag)
+			.on("drop", dropped);
+
+		</script>
+	</c:when>
+</c:choose>
+
+
