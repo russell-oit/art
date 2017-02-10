@@ -41,12 +41,13 @@
 
 <script type="text/javascript">
 	//https://stackoverflow.com/questions/27380390/jquery-datatables-format-numbers
+	//https://softwareengineering.stackexchange.com/questions/160732/function-declaration-as-var-instead-of-function
 
 	var formatAllNumbers = false;
 	var formattedNumberColumns = [];
 	var customNumberFormats = [[]];
-
-	var twoDecimals = function (data) {
+	
+	function twoDecimals (data) {
 		if (data === null) {
 			return '';
 		} else {
@@ -56,7 +57,7 @@
 		}
 	};
 	
-	var defaultFormatter = function (data) {
+	function defaultFormatter (data) {
 		if (data === null) {
 			return '';
 		} else {
@@ -64,7 +65,7 @@
 		}
 	};
 	
-	var numberFormatter = function (data) {
+	function numberFormatter (data) {
 		var formattedNumber;
 		if (data === null) {
 			formattedNumber = '';
