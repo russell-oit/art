@@ -272,6 +272,7 @@ Edit report page
 					case 134: //pivottable.js csv server
 					case 137: //dygraphs csv server
 					case 138: //datatables
+					case 139: //datatables csv local
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -293,6 +294,7 @@ Edit report page
 						case 134: //pivottable.js csv server
 						case 136: //dygraphs csv local
 						case 137: //dygraphs csv server
+						case 139: //datatables csv local
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -320,6 +322,7 @@ Edit report page
 					case 134: //pivottable.js csv server
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
+					case 139: //datatables csv local
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -366,6 +369,7 @@ Edit report page
 					case 134: //pivottable.js csv server
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
+					case 139: //datatables csv local
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -382,6 +386,7 @@ Edit report page
 					case 134: //pivottable.js csv server
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
+					case 139: //datatables csv local
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -411,6 +416,7 @@ Edit report page
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
 					case 138: //datatables
+					case 139: //datatables csv local
 						$("#templateDiv").show();
 						break;
 					default:
@@ -448,6 +454,7 @@ Edit report page
 					case 134: //pivottable.js csv server
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
+					case 139: //datatables csv local
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -511,6 +518,7 @@ Edit report page
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
 					case 138: //datatables
+					case 139: //datatables csv local
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -555,6 +563,7 @@ Edit report page
 					case 134: //pivottable.js csv server
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
+					case 139: //datatables csv local
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

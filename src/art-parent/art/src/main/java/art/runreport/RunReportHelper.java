@@ -215,6 +215,7 @@ public class RunReportHelper {
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
 			case DataTables:
+			case DataTablesCsvLocal:
 				enableReportFormats = false;
 				break;
 			default:
@@ -255,6 +256,7 @@ public class RunReportHelper {
 			case PivotTableJsCsvServer:
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
+			case DataTablesCsvLocal:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -331,6 +333,7 @@ public class RunReportHelper {
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
 			case DataTables:
+			case DataTablesCsvLocal:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -359,6 +362,7 @@ public class RunReportHelper {
 			case DygraphsCsvLocal:
 			case DygraphsCsvServer:
 			case DataTables:
+			case DataTablesCsvLocal:
 				enableEmail = false;
 				break;
 			default:

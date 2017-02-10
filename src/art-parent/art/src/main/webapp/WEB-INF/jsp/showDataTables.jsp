@@ -143,6 +143,8 @@
 		pagingType: "full_numbers",
 		lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "${showAllRowsText}"]],
 		pageLength: 50,
+		processing: true,
+//		destroy: true,
 		dom: "lBfrtip",
 		buttons: [
 			{extend: 'colvis', postfixButtons: ['colvisRestore']},
@@ -233,8 +235,62 @@
 </c:if>
 
 <c:choose>
-
 	<c:when test="${reportType == 'DataTables'}">
+		<script type="text/javascript">
+	//https://datatables.net/reference/option/
+	//https://stackoverflow.com/questions/1290131/javascript-how-to-create-an-array-of-object-literals-in-a-loop
+	//https://stackoverflow.com/questions/14473170/accessing-arraylist-elemnts-in-javascript-from-jsp
+	var columns = [];
+	var i = 0;
+			<c:forEach var="column" items="${columns}">
+	i++;
+	var columnDef = {
+		data: "${column.name}",
+		title: "${column.name}"
+	};
+	var columnType = '${column.type}';
+	if (columnType === 'numeric') {
+		if (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1) {
+			//https://stackoverflow.com/questions/1184123/is-it-possible-to-add-dynamically-named-properties-to-javascript-object
+			columnDef["render"] = numberFormatter;
+		} else {
+			//https://stackoverflow.com/questions/7106410/looping-through-arrays-of-arrays
+			for (var j = 0; j < customNumberFormats.length; j++) {
+				var customFormat = customNumberFormats[j];
+				var columnIndex = customFormat[0];
+				var formatter = customFormat[1];
+				if (columnIndex === i) {
+					columnDef["render"] = formatter;
+					break;
+				}
+			}
+		}
+	} else if (columnType === 'date') {
+		if (inputDateFormat && outputDateFormat) {
+			columnDef["render"] = dateFormatter;
+		}
+	} else if (columnType === 'timestamp') {
+		if (inputDateTimeFormat && outputDateTimeFormat) {
+			columnDef["render"] = timestampFormatter;
+		}
+	}
+	columns.push(columnDef);
+			</c:forEach>
+
+	$.extend(options, {
+		data: ${data},
+		columns: columns
+	});
+		</script>
+
+		<script type="text/javascript">
+			$(document).ready(function () {
+				var tbl = $('#tableData');
+				tbl.dataTable(options);
+			});
+		</script>
+	</c:when>
+	<c:when test="${reportType == 'DataTablesCsvLocal'}">
 		<style>
 			#filechooser {
                 /* color: #555; */
@@ -250,41 +306,41 @@
 			</label>
 		</p>
 		<script type="text/javascript">
-	var showData = function (f) {
-		Papa.parse(f, csvConfig);
-	};
+			var showData = function (f) {
+				Papa.parse(f, csvConfig);
+			};
 
-	$("#csv").bind("change", function (event) {
-		showData(event.target.files[0]);
-	});
+			$("#csv").bind("change", function (event) {
+				showData(event.target.files[0]);
+			});
 
-	var dragging = function (evt) {
-		evt.stopPropagation();
-		evt.preventDefault();
-		evt.originalEvent.dataTransfer.dropEffect = 'copy';
-		$("body").removeClass("whiteborder").addClass("greyborder");
-	};
+			var dragging = function (evt) {
+				evt.stopPropagation();
+				evt.preventDefault();
+				evt.originalEvent.dataTransfer.dropEffect = 'copy';
+				$("body").removeClass("whiteborder").addClass("greyborder");
+			};
 
-	var endDrag = function (evt) {
-		evt.stopPropagation();
-		evt.preventDefault();
-		evt.originalEvent.dataTransfer.dropEffect = 'copy';
-		$("body").removeClass("greyborder").addClass("whiteborder");
-	};
+			var endDrag = function (evt) {
+				evt.stopPropagation();
+				evt.preventDefault();
+				evt.originalEvent.dataTransfer.dropEffect = 'copy';
+				$("body").removeClass("greyborder").addClass("whiteborder");
+			};
 
-	var dropped = function (evt) {
-		evt.stopPropagation();
-		evt.preventDefault();
-		$("body").removeClass("greyborder").addClass("whiteborder");
-		showData(evt.originalEvent.dataTransfer.files[0]);
-	};
+			var dropped = function (evt) {
+				evt.stopPropagation();
+				evt.preventDefault();
+				$("body").removeClass("greyborder").addClass("whiteborder");
+				showData(evt.originalEvent.dataTransfer.files[0]);
+			};
 
-	$("html")
-			.on("dragover", dragging)
-			.on("dragend", endDrag)
-			.on("dragexit", endDrag)
-			.on("dragleave", endDrag)
-			.on("drop", dropped);
+			$("html")
+					.on("dragover", dragging)
+					.on("dragend", endDrag)
+					.on("dragexit", endDrag)
+					.on("dragleave", endDrag)
+					.on("drop", dropped);
 
 		</script>
 	</c:when>
