@@ -44,16 +44,27 @@
 
 	var formatAllNumbers = false;
 	var formattedNumberColumns = [];
+	var customNumberFormats = [[]];
 
-	var defaultFormatter = function (data, type, full, meta) {
+	var twoDecimals = function (data) {
+		if (data === null) {
+			return '';
+		} else {
+			//https://stackoverflow.com/questions/6134039/format-number-to-always-show-2-decimal-places
+			//https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
+			return new Intl.NumberFormat('${languageTag}', { minimumFractionDigits: 2 }).format(data);
+		}
+	};
+	
+	var defaultFormatter = function (data) {
 		if (data === null) {
 			return '';
 		} else {
 			return String(data);
 		}
 	};
-
-	var numericFormatter = function (data, type, full, meta) {
+	
+	var numberFormatter = function (data) {
 		var formattedNumber;
 		if (data === null) {
 			formattedNumber = '';
@@ -128,9 +139,22 @@
 		title: "${column.name}"
 	};
 	var columnType = '${column.type}';
-	if (columnType === 'numeric' && (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1)) {
-		//https://stackoverflow.com/questions/1184123/is-it-possible-to-add-dynamically-named-properties-to-javascript-object
-		columnDef["render"] = numericFormatter;
+	if (columnType === 'numeric') {
+		if (formatAllNumbers || formattedNumberColumns.indexOf(i) !== -1) {
+			//https://stackoverflow.com/questions/1184123/is-it-possible-to-add-dynamically-named-properties-to-javascript-object
+			columnDef["render"] = numberFormatter;
+		} else {
+			//https://stackoverflow.com/questions/7106410/looping-through-arrays-of-arrays
+			for (var j = 0; j < customNumberFormats.length; j++) {
+				var customFormat = customNumberFormats[j];
+				var columnIndex = customFormat[0];
+				var formatter = customFormat[1];
+				if (columnIndex === i) {
+					columnDef["render"] = formatter;
+					break;
+				}
+			}
+		}
 	}
 
 	columns.push(columnDef);
