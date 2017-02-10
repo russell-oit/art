@@ -39,41 +39,100 @@
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.css"/>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/yadcf-0.9.1/jquery.dataTables.yadcf.js"></script>
 
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/moment-2.17.1/moment-with-locales.min.js"></script>
+
 <script type="text/javascript">
 	//https://stackoverflow.com/questions/27380390/jquery-datatables-format-numbers
 	//https://softwareengineering.stackexchange.com/questions/160732/function-declaration-as-var-instead-of-function
+	//https://stackoverflow.com/questions/5142286/two-functions-with-the-same-name-in-javascript-how-can-this-work
+	//https://stackoverflow.com/questions/336859/javascript-function-declaration-syntax-var-fn-function-vs-function-fn
 
 	var formatAllNumbers = false;
 	var formattedNumberColumns = [];
 	var customNumberFormats = [[]];
-	
-	function twoDecimals (data) {
-		if (data === null) {
-			return '';
+
+	//https://stackoverflow.com/questions/35450227/how-to-parse-given-date-string-using-moment-js
+	//http://momentjs.com/docs/
+	var inputDateFormat = 'YYYY-MM-DD';
+	var outputDateFormat = 'DD-MMM-YYYY';
+
+	var inputDateTimeFormat = 'YYYY-MM-DD HH:mm:ss.SSS';
+	var outputDateTimeFormat = 'DD-MMM-YYYY HH:mm:ss';
+
+	moment.locale('${locale}');
+
+	function dateFormatter(data, type, full, meta) {
+		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
+		if (type === "display") {
+			var formattedDate;
+			if (data === null) {
+				formattedDate = '';
+			} else {
+				formattedDate = moment(data, inputDateFormat).format(outputDateFormat);
+			}
+			return formattedDate;
 		} else {
-			//https://stackoverflow.com/questions/6134039/format-number-to-always-show-2-decimal-places
-			//https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
-			return new Intl.NumberFormat('${languageTag}', { minimumFractionDigits: 2 }).format(data);
+			return data;
 		}
-	};
-	
-	function defaultFormatter (data) {
-		if (data === null) {
-			return '';
+	}
+
+	function timestampFormatter(data, type, full, meta) {
+		//https://stackoverflow.com/questions/25319193/jquery-datatables-column-rendering-and-sorting
+		if (type === "display") {
+			var formattedDate;
+			if (data === null) {
+				formattedDate = '';
+			} else {
+				//http://wiki.fasterxml.com/JacksonFAQDateHandling
+				//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/
+				//https://momentjs.com/docs/#/parsing/string/
+				formattedDate = moment(data, inputDateTimeFormat).format(outputDateTimeFormat);
+			}
+			return formattedDate;
 		} else {
-			return String(data);
+			return data;
 		}
-	};
-	
-	function numberFormatter (data) {
-		var formattedNumber;
-		if (data === null) {
-			formattedNumber = '';
+	}
+
+	function twoDecimals(data, type, full, meta) {
+		if (type === "display") {
+			if (data === null) {
+				return '';
+			} else {
+				//https://stackoverflow.com/questions/6134039/format-number-to-always-show-2-decimal-places
+				//https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
+				return new Intl.NumberFormat('${languageTag}', {minimumFractionDigits: 2}).format(data);
+			}
 		} else {
-			formattedNumber = data.toLocaleString('${languageTag}');
+			return data;
 		}
-		return formattedNumber;
-	};
+	}
+
+	function defaultFormatter(data, type, full, meta) {
+		if (type === "display") {
+			if (data === null) {
+				return '';
+			} else {
+				return String(data);
+			}
+		} else {
+			return data;
+		}
+	}
+
+	function numberFormatter(data, type, full, meta) {
+		if (type === "display") {
+			var formattedNumber;
+			if (data === null) {
+				formattedNumber = '';
+			} else {
+				formattedNumber = data.toLocaleString('${languageTag}');
+			}
+			return formattedNumber;
+		} else {
+			return data;
+		}
+	}
 
 	var options = {
 		orderClasses: false,
@@ -155,6 +214,14 @@
 					break;
 				}
 			}
+		}
+	} else if (columnType === 'date') {
+		if (inputDateFormat && outputDateFormat) {
+			columnDef["render"] = dateFormatter;
+		}
+	} else if (columnType === 'timestamp') {
+		if (inputDateTimeFormat && outputDateTimeFormat) {
+			columnDef["render"] = timestampFormatter;
 		}
 	}
 

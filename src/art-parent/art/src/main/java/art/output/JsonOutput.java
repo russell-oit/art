@@ -19,10 +19,12 @@ package art.output;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,11 +84,11 @@ public class JsonOutput {
 		int columnCount = rsmd.getColumnCount();
 
 		for (int i = 1; i <= columnCount; i++) {
-			ResultSetColumn column=new ResultSetColumn();
-			
+			ResultSetColumn column = new ResultSetColumn();
+
 			String columnName = rsmd.getColumnLabel(i);
 			column.setName(columnName);
-			
+
 			int sqlType = rsmd.getColumnType(i);
 
 			String columnType;
@@ -115,12 +117,12 @@ public class JsonOutput {
 				default:
 					columnType = "unhandled";
 			}
-			
+
 			column.setType(columnType);
-			
+
 			columns.add(column);
 		}
-		
+
 		result.setColumns(columns);
 
 		int rowCount = 0;
@@ -129,16 +131,23 @@ public class JsonOutput {
 			Map<String, Object> row = new HashMap<>();
 			for (int i = 1; i <= columnCount; ++i) {
 				String columnName = rsmd.getColumnLabel(i);
-				Object columnData = rs.getObject(i);
+				Object columnData = rs.getObject(i);;
 				row.put(columnName, columnData);
 			}
 			rows.add(row);
 		}
 
 		ObjectMapper mapper = new ObjectMapper();
+		//https://egkatzioura.wordpress.com/2013/01/22/spring-jackson-and-date-serialization/
+		//http://wiki.fasterxml.com/JacksonFAQDateHandling
+//		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+//		mapper.configure(SerializationFeature.WRITE_DATES_WITH_ZONE_ID, false);
+		SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		mapper.setDateFormat(df);
 		String jsonString;
 		if (prettyPrint) {
-			jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(rows);
+			mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+			jsonString = mapper.writeValueAsString(rows);
 		} else {
 			jsonString = mapper.writeValueAsString(rows);
 		}
