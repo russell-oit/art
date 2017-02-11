@@ -25,6 +25,7 @@ package art.reportoptions;
 public class DataTablesOptions {
 
 	private boolean showColumnFilters = true;
+	private String dataFile;
 
 	/**
 	 * @return the showColumnFilters
@@ -38,5 +39,19 @@ public class DataTablesOptions {
 	 */
 	public void setShowColumnFilters(boolean showColumnFilters) {
 		this.showColumnFilters = showColumnFilters;
+	}
+
+	/**
+	 * @return the dataFile
+	 */
+	public String getDataFile() {
+		return dataFile;
+	}
+
+	/**
+	 * @param dataFile the dataFile to set
+	 */
+	public void setDataFile(String dataFile) {
+		this.dataFile = dataFile;
 	}
 }

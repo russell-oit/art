@@ -192,15 +192,26 @@
 
 		yadcf.init(table, filterColumnDefs, {filters_tr_index: 1});
 	}
+	
+	var download;
+	var reportType = '${reportType}';
+	if (reportType === 'DataTablesCsvServer') {
+		download = true;
+	} else {
+		download = false;
+	}
 
 	//http://papaparse.com/docs#config
+	//https://mwholt.blogspot.co.ke/2014/11/papa-parse-4-fastest-csv-parser.html
 	var csvConfig = {
+		download: download,
 		header: true,
 		error: function (e) {
 			bootbox.alert(e);
 		},
 		complete: function (parsed) {
 			//https://stackoverflow.com/questions/26597460/displaying-csv-headers-using-papaparse-plugin
+			//https://stackoverflow.com/questions/27754135/papaparse-errors-explanation
 			var columns = [];
 			if (parsed.meta['fields']) {
 				$.each(parsed.meta['fields'], function (i) {
@@ -342,6 +353,12 @@
 					.on("dragleave", endDrag)
 					.on("drop", dropped);
 
+		</script>
+	</c:when>
+	<c:when test="${reportType == 'DataTablesCsvServer'}">
+		<script type="text/javascript">
+			var dataFile = '${pageContext.request.contextPath}/js-templates/${dataFileName}';
+				Papa.parse(dataFile, csvConfig);
 		</script>
 	</c:when>
 </c:choose>

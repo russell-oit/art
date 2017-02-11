@@ -273,6 +273,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 138: //datatables
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -295,6 +296,7 @@ Edit report page
 						case 136: //dygraphs csv local
 						case 137: //dygraphs csv server
 						case 139: //datatables csv local
+						case 140: //datatables csv server
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -323,6 +325,7 @@ Edit report page
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -370,6 +373,7 @@ Edit report page
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -387,6 +391,7 @@ Edit report page
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -417,6 +422,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 138: //datatables
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#templateDiv").show();
 						break;
 					default:
@@ -455,6 +461,7 @@ Edit report page
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -519,6 +526,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 138: //datatables
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -541,6 +549,7 @@ Edit report page
 					case 116: //jasper art
 					case 134: //pivottable.js csv server
 					case 137: //dygraphs csv server
+					case 140: //datatables csv server
 						$("#resourcesDiv").show();
 						break;
 					default:
@@ -564,6 +573,7 @@ Edit report page
 					case 136: //dygraphs csv local
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
+					case 140: //datatables csv server
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

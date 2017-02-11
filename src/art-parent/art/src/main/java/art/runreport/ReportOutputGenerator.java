@@ -700,6 +700,33 @@ public class ReportOutputGenerator {
 					}
 					request.setAttribute("showColumnFilters", showColumnFilters);
 
+					if (reportType == ReportType.DataTablesCsvServer) {
+						if (StringUtils.isBlank(optionsString)) {
+							throw new IllegalArgumentException("Options not specified");
+						}
+
+						ObjectMapper mapper = new ObjectMapper();
+						DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
+						String dataFileName = options.getDataFile();
+
+						logger.debug("dataFileName='{}'", dataFileName);
+
+						//need to explicitly check if file name is empty string
+						//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+						if (StringUtils.isBlank(dataFileName)) {
+							throw new IllegalArgumentException("Data file not specified");
+						}
+
+						String fullDataFileName = jsTemplatesPath + dataFileName;
+
+						File dataFile = new File(fullDataFileName);
+						if (!dataFile.exists()) {
+							throw new IllegalStateException("Data file not found: " + dataFileName);
+						}
+
+						request.setAttribute("dataFileName", dataFileName);
+					}
+
 					String languageTag = locale.toLanguageTag();
 					request.setAttribute("languageTag", languageTag);
 					String localeString = locale.toString();

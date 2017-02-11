@@ -45,7 +45,7 @@ public enum ReportType {
 	HeatmapChart(-12), Pie2DChart(-13), VerticalBar2DChart(-14), StackedVerticalBar2DChart(-15),
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
-	DataTables(138), DataTablesCsvLocal(139);
+	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140);
 
 	private final int value;
 
@@ -76,6 +76,7 @@ public enum ReportType {
 			case DygraphsCsvServer:
 			case DataTables:
 			case DataTablesCsvLocal:
+			case DataTablesCsvServer:
 				return false;
 			default:
 				return true;
@@ -91,6 +92,7 @@ public enum ReportType {
 		switch (this) {
 			case DataTables:
 			case DataTablesCsvLocal:
+			case DataTablesCsvServer:
 				return true;
 			default:
 				return false;
@@ -593,6 +595,8 @@ public enum ReportType {
 				return "DataTables";
 			case DataTablesCsvLocal:
 				return "DataTables: CSV Local";
+			case DataTablesCsvServer:
+				return "DataTables: CSV Server";
 			default:
 				return this.name();
 		}
