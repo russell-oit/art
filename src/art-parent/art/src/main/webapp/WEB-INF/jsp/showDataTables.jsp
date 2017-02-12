@@ -144,7 +144,6 @@
 		lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "${showAllRowsText}"]],
 		pageLength: 50,
 		processing: true,
-//		destroy: true,
 		dom: "lBfrtip",
 		buttons: [
 			{extend: 'colvis', postfixButtons: ['colvisRestore']},
@@ -156,9 +155,7 @@
 			//pageContext.response.locale always returns OS locale when page included with requestdispatcher.include?
 			url: "${pageContext.request.contextPath}/js/dataTables/i18n/dataTables_${locale}.json"
 		},
-		initComplete: function (settings) {
-			afterTableInitialization(settings);
-		}
+		initComplete: afterTableInitialization
 	};
 
 	function afterTableInitialization(settings) {
@@ -192,7 +189,7 @@
 
 		yadcf.init(table, filterColumnDefs, {filters_tr_index: 1});
 	}
-	
+
 	var download;
 	var reportType = '${reportType}';
 	if (reportType === 'DataTablesCsvServer') {
@@ -214,6 +211,7 @@
 			//https://stackoverflow.com/questions/27754135/papaparse-errors-explanation
 			var columns = [];
 			if (parsed.meta['fields']) {
+				//if header: true, we get array of objects and parsed.meta['fields'] has column names
 				$.each(parsed.meta['fields'], function (i) {
 					columns.push({
 						data: parsed.meta['fields'][i],
@@ -221,6 +219,8 @@
 					});
 				});
 			} else {
+				//if header: false, we get array of arrays and parsed.meta['fields'] is undefined
+				//https://stackoverflow.com/questions/26416735/initializing-a-jquery-datatable-with-a-local-array-of-arrays-as-datasource
 				var colCount = parsed.data[0].length;
 				for (var i = 1; i <= colCount; i++) {
 					var columnName = "Column " + i;
@@ -230,13 +230,22 @@
 				}
 			}
 
-			$.extend(options, {
+			//https://stackoverflow.com/questions/32911546/how-to-recreate-a-table-with-jquery-datatables
+			//https://stackoverflow.com/questions/24452270/how-to-reinitialize-datatable-in-ajax
+			//https://datatables.net/manual/tech-notes/3
+			var tbl = $('#tableData');
+			
+			if ($.fn.DataTable.isDataTable("#tableData")) {
+				$('#tableData').DataTable().destroy();
+				tbl.empty();
+			}
+
+			var finalOptions = $.extend({}, options, {
 				data: parsed.data,
 				columns: columns
 			});
 
-			var tbl = $('#tableData');
-			tbl.dataTable(options);
+			tbl.DataTable(finalOptions);
 		}
 	};
 </script>
