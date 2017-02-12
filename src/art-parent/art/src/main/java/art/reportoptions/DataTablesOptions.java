@@ -22,10 +22,9 @@ package art.reportoptions;
  *
  * @author Timothy Anyona
  */
-public class DataTablesOptions {
+public class DataTablesOptions extends CsvServerOptions {
 
 	private boolean showColumnFilters = true;
-	private String dataFile;
 
 	/**
 	 * @return the showColumnFilters
@@ -41,17 +40,4 @@ public class DataTablesOptions {
 		this.showColumnFilters = showColumnFilters;
 	}
 
-	/**
-	 * @return the dataFile
-	 */
-	public String getDataFile() {
-		return dataFile;
-	}
-
-	/**
-	 * @param dataFile the dataFile to set
-	 */
-	public void setDataFile(String dataFile) {
-		this.dataFile = dataFile;
-	}
 }

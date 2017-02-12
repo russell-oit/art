@@ -75,6 +75,7 @@ public abstract class StandardOutput {
 	protected int totalColumnCount; //resultset column count + drilldown column count - hidden column count
 	protected DecimalFormat actualNumberFormatter;
 	protected DecimalFormat sortNumberFormatter;
+	protected DecimalFormat plainNumberFormatter;
 	protected String contextPath;
 	protected Locale locale;
 	protected boolean evenRow;
@@ -1050,6 +1051,9 @@ public abstract class StandardOutput {
 		//initialize number formatters
 		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
 		actualNumberFormatter.applyPattern("#,##0.#");
+		
+		plainNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
+		plainNumberFormatter.applyPattern("#.#");
 
 		//specifically use english locale for sorting e.g.
 		//in case user locale uses dot as thousands separator e.g. italian, german locale

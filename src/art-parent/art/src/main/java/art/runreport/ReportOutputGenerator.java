@@ -64,7 +64,6 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
-import art.reportoptions.PivotTableJsCsvServerOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
@@ -548,7 +547,7 @@ public class ReportOutputGenerator {
 						}
 
 						ObjectMapper mapper = new ObjectMapper();
-						PivotTableJsCsvServerOptions options = mapper.readValue(optionsString, PivotTableJsCsvServerOptions.class);
+						CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
 						String dataFileName = options.getDataFile();
 
 						logger.debug("dataFileName='{}'", dataFileName);

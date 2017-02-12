@@ -22,7 +22,6 @@ import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -45,10 +44,7 @@ public class TsvOutput extends StandardOutput {
 	private FileOutputStream fout;
 	private ZipOutputStream zout;
 	private GZIPOutputStream gzout;
-	private StringBuilder exportFileStrBuf;
-	private NumberFormat nfPlain;
-	private int counter;
-	private int columns;
+	private StringBuilder sb;
 	private final int FLUSH_SIZE = 1024 * 4; // flush to disk each 4kb of columns ;)
 	private final ZipType zipType;
 
@@ -69,22 +65,14 @@ public class TsvOutput extends StandardOutput {
 		fout = null;
 		zout = null;
 		gzout = null;
-		exportFileStrBuf = null;
-		nfPlain = null;
-		counter = 0;
-		columns = 0;
+		sb = null;
 	}
 
 	@Override
 	public void init() {
 		resetVariables();
-		
-		exportFileStrBuf = new StringBuilder(8 * 1024);
-		
-		nfPlain = NumberFormat.getInstance(locale);
-		nfPlain.setMinimumFractionDigits(0);
-		nfPlain.setGroupingUsed(false);
-		nfPlain.setMaximumFractionDigits(99);
+
+		sb = new StringBuilder(8 * 1024);
 
 		try {
 			fout = new FileOutputStream(fullOutputFileName);
@@ -110,24 +98,24 @@ public class TsvOutput extends StandardOutput {
 		}
 
 		for (ReportParameter reportParam : reportParamsList) {
-			exportFileStrBuf.append(reportParam.getNameAndDisplayValues());
+			sb.append(reportParam.getNameAndDisplayValues());
 		}
 	}
 
 	@Override
 	public void addHeaderCell(String value) {
-		exportFileStrBuf.append(value);
-		exportFileStrBuf.append("\t");
+		sb.append(value);
+		sb.append("\t");
 	}
 
 	@Override
 	public void addCellString(String value) {
 		if (value == null) {
-			exportFileStrBuf.append(value);
-			exportFileStrBuf.append("\t");
+			sb.append(value);
+			sb.append("\t");
 		} else {
-			exportFileStrBuf.append(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
-			exportFileStrBuf.append("\t");
+			sb.append(value.replace('\t', ' ').replace('\n', ' ').replace('\r', ' '));
+			sb.append("\t");
 
 		}
 	}
@@ -138,36 +126,34 @@ public class TsvOutput extends StandardOutput {
 		if (value == null) {
 			formattedValue = "";
 		} else {
-			formattedValue = nfPlain.format(value.doubleValue());
+			formattedValue = plainNumberFormatter.format(value.doubleValue());
 		}
 
-		exportFileStrBuf.append(formattedValue).append("\t");
+		sb.append(formattedValue).append("\t");
 	}
-	
+
 	@Override
 	public void addCellNumeric(Double numericValue, String formattedValue, String sortValue) {
-		exportFileStrBuf.append(formattedValue).append("\t");
+		sb.append(formattedValue).append("\t");
 	}
 
 	@Override
 	public void addCellDate(Date value) {
-		String formattedValue=Config.getDateDisplayString(value);
-		
-		exportFileStrBuf.append(formattedValue).append("\t");
+		String formattedValue = Config.getDateDisplayString(value);
+		sb.append(formattedValue).append("\t");
 	}
-	
+
 	@Override
 	public void addCellDate(Date dateValue, String formattedValue, long sortValue) {
-		exportFileStrBuf.append(formattedValue).append("\t");
+		sb.append(formattedValue).append("\t");
 	}
 
 	@Override
 	public void newRow() {
-		exportFileStrBuf.append("\n");
-		counter++;
-		if ((counter * columns) > FLUSH_SIZE) {
+		sb.append("\n");
+		if ((rowCount * totalColumnCount) > FLUSH_SIZE) {
 			try {
-				String tmpstr = exportFileStrBuf.toString();
+				String tmpstr = sb.toString();
 				byte[] buf = tmpstr.getBytes("UTF-8");
 
 				if (zout == null) {
@@ -178,7 +164,7 @@ public class TsvOutput extends StandardOutput {
 					zout.flush();
 				}
 
-				exportFileStrBuf = new StringBuilder(32 * 1024);
+				sb = new StringBuilder(8 * 1024);
 			} catch (IOException e) {
 				logger.error("Error. Data not completed. Please narrow your search", e);
 			}
@@ -191,7 +177,7 @@ public class TsvOutput extends StandardOutput {
 //		addCellString("" + (counter));
 
 		try {
-			String tmpstr = exportFileStrBuf.toString();
+			String tmpstr = sb.toString();
 			byte[] buf = tmpstr.getBytes("UTF-8");
 
 			switch (zipType) {

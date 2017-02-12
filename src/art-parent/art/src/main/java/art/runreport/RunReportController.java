@@ -203,6 +203,9 @@ public class RunReportController {
 				//the report output class determines if the report header and footer will be shown
 				//if false the output class needs to take care of all the output
 				showReportHeaderAndFooter = standardOutput.outputHeaderandFooter();
+				if (!showReportHeaderAndFooter) {
+					showInline = false;
+				}
 			} else {
 				response.setContentType("text/html; charset=UTF-8");
 				writer = response.getWriter();
@@ -216,8 +219,6 @@ public class RunReportController {
 
 			//handle output formats that require data only
 			switch (reportFormat) {
-				case xml:
-				case rss20:
 				case json:
 				case jsonBrowser:
 					showInline = true;
