@@ -17,6 +17,7 @@ ART 3.0
 * Added ReactPivot report type
 * Added PivotTable.js report types
 * Added Dygraphs report types
+* Added DataTables report types
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0

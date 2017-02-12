@@ -1,0 +1,3 @@
+$.extend(csvConfig,{
+	header: false
+});
