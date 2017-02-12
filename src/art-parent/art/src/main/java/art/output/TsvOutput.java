@@ -86,8 +86,8 @@ public class TsvOutput extends StandardOutput {
 			} else if (zipType == ZipType.Gzip) {
 				gzout = new GZIPOutputStream(fout);
 			}
-		} catch (IOException e) {
-			logger.error("Error", e);
+		} catch (IOException ex) {
+			logger.error("Error", ex);
 		}
 	}
 
@@ -165,8 +165,8 @@ public class TsvOutput extends StandardOutput {
 				}
 
 				sb = new StringBuilder(8 * 1024);
-			} catch (IOException e) {
-				logger.error("Error. Data not completed. Please narrow your search", e);
+			} catch (IOException ex) {
+				logger.error("Error", ex);
 			}
 		}
 	}

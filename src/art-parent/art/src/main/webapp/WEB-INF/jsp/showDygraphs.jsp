@@ -12,7 +12,7 @@
 
 <%-- must use table to center chart --%>
 <%-- http://dygraphs.com/tutorial.html --%>
-<table align="center">
+<table style="margin: 0px auto;">
 	<tr>
 		<td>
 			<div id="dygraphsOutput">

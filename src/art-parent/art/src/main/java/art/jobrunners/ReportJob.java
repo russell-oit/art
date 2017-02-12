@@ -1235,14 +1235,7 @@ public class ReportJob implements org.quartz.Job {
 		} else {
 			FilenameHelper filenameHelper = new FilenameHelper();
 			String baseFilename = filenameHelper.getBaseFilename(job);
-			String extension;
-
-			if (reportType.isJxls()) {
-				String jxlsFilename = report.getTemplate();
-				extension = FilenameUtils.getExtension(jxlsFilename);
-			} else {
-				extension = reportFormat.getFilenameExtension();
-			}
+			String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 
 			fileName = baseFilename + "." + extension;
 		}
@@ -1331,7 +1324,7 @@ public class ReportJob implements org.quartz.Job {
 			//generate output
 			rs = reportRunner.getResultSet();
 
-			standardOutput.generateBurstOutput(rs, reportFormat, job, report);
+			standardOutput.generateBurstOutput(rs, reportFormat, job, report, reportType);
 			runMessage = "jobs.message.filesGenerated";
 		} finally {
 			DatabaseUtils.close(rs);

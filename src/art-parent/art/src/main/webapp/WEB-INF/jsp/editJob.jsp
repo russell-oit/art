@@ -40,6 +40,7 @@
 <spring:message code="reports.format.odt" var="odtText"/>
 <spring:message code="reports.format.pptx" var="pptxText"/>
 <spring:message code="reports.format.ods" var="odsText"/>
+<spring:message code="reports.format.csv" var="csvText"/>
 
 <t:mainPageWithPanel title="${pageTitle}" mainPanelTitle="${panelTitle}"
 					 mainColumnClass="col-md-6 col-md-offset-3">
@@ -237,6 +238,7 @@
 							list.append(new Option('${pdfText}', 'pdf'));
 							list.append(new Option('${docxText}', 'docx'));
 							list.append(new Option('${odtText}', 'odt'));
+							list.append(new Option('${csvText}', 'csv'));
 							break;
 						case 'Print':
 							list.append(new Option('${htmlPlainText}', 'htmlPlain'));
@@ -245,6 +247,7 @@
 							list.append(new Option('${pdfText}', 'pdf'));
 							list.append(new Option('${docxText}', 'docx'));
 							list.append(new Option('${odtText}', 'odt'));
+							list.append(new Option('${csvText}', 'csv'));
 							break;
 						default:
 							list.append(new Option('--', '--'));

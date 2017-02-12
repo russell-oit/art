@@ -61,7 +61,7 @@ public class Rss20Output extends StandardOutput {
 	}
 
 	@Override
-	public boolean outputHeaderandFooter() {
+	public boolean outputHeaderAndFooter() {
 		return false;
 	}
 

@@ -169,7 +169,7 @@ Reports configuration page
 					<c:if test="${record.reportType.canSchedule()}">
 						<div class="btn-group">
 							<a class="btn btn-default"
-							   href="${pageContext.request.contextPath}/addJob?reportId=${record.reportId}">
+							   href="${pageContext.request.contextPath}/addJob?reportId=${record.reportId}&nextPage=jobsConfig">
 								<spring:message code="reports.action.schedule"/>
 							</a>
 						</div>

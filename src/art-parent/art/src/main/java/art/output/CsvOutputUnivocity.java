@@ -21,7 +21,6 @@ import com.univocity.parsers.common.processor.ObjectRowWriterProcessor;
 import com.univocity.parsers.conversions.Conversions;
 import com.univocity.parsers.csv.CsvFormat;
 import com.univocity.parsers.csv.CsvRoutines;
-import com.univocity.parsers.csv.CsvWriter;
 import com.univocity.parsers.csv.CsvWriterSettings;
 import java.io.Writer;
 import java.sql.ResultSet;

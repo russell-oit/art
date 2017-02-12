@@ -31,6 +31,7 @@ import art.drilldown.DrilldownService;
 import art.enums.ReportFormat;
 import art.enums.ReportType;
 import art.enums.ZipType;
+import art.output.CsvOutputArt;
 import art.output.CsvOutputUnivocity;
 import art.output.DocxOutput;
 import art.output.FreeMarkerOutput;
@@ -62,6 +63,7 @@ import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.CsvOutputArtOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
 import art.reportparameter.ReportParameter;
@@ -420,6 +422,7 @@ public class ReportOutputGenerator {
 				standardOutput.setLocale(locale);
 				standardOutput.setReportName(report.getName());
 				standardOutput.setMessageSource(messageSource);
+				standardOutput.setIsJob(isJob);
 
 				if (request != null) {
 					String contextPath = request.getContextPath();
@@ -451,7 +454,7 @@ public class ReportOutputGenerator {
 				}
 
 				if (standardOutputResult.isSuccess()) {
-					if (!reportFormat.isHtml() && standardOutput.outputHeaderandFooter() && !isJob) {
+					if (!reportFormat.isHtml() && standardOutput.outputHeaderAndFooter() && !isJob) {
 						displayFileLink(fileName);
 					}
 
@@ -852,9 +855,10 @@ public class ReportOutputGenerator {
 	 * @param report the report that is being run
 	 * @return the standard output instance
 	 * @throws IllegalArgumentException
+	 * @throws java.io.IOException
 	 */
 	public StandardOutput getStandardOutputInstance(ReportFormat reportFormat, boolean isJob,
-			Report report) throws IllegalArgumentException {
+			Report report) throws IllegalArgumentException, IOException {
 
 		logger.debug("Entering getStandardOutputInstance: reportFormat={}, isJob={}, report={}", reportFormat, isJob, report);
 
@@ -930,6 +934,17 @@ public class ReportOutputGenerator {
 				break;
 			case ods:
 				standardOutput = new OdsOutput();
+				break;
+			case csv:
+				CsvOutputArtOptions options;
+				String optionsString = report.getOptions();
+				if (StringUtils.isBlank(optionsString)) {
+					options = new CsvOutputArtOptions(); //has default values set
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
+				}
+				standardOutput = new CsvOutputArt(options);
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected standard output report format: " + reportFormat);

@@ -32,7 +32,7 @@ public enum ReportFormat {
 	htmlDataTable("htmlDataTable"), xls("xls"), xlsZip("xlsZip"), xlsx("xlsx"),
 	pdf("pdf"), docx("docx"), odt("odt"), ods("ods"), pptx("pptx"), slk("slk"), slkZip("slkZip"),
 	tsv("tsv"), tsvZip("tsvZip"), tsvGz("tsvGz"), xml("xml"), rss20("rss20"), png("png"),
-	json("json"), jsonBrowser("jsonBrowser");
+	json("json"), jsonBrowser("jsonBrowser"), csv("csv");
 
 	private final String value;
 

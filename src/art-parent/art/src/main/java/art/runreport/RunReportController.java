@@ -202,9 +202,9 @@ public class RunReportController {
 
 				//the report output class determines if the report header and footer will be shown
 				//if false the output class needs to take care of all the output
-				showReportHeaderAndFooter = standardOutput.outputHeaderandFooter();
+				showReportHeaderAndFooter = standardOutput.outputHeaderAndFooter();
 				if (!showReportHeaderAndFooter) {
-					showInline = false;
+					showInline = true;
 				}
 			} else {
 				response.setContentType("text/html; charset=UTF-8");
@@ -366,15 +366,7 @@ public class RunReportController {
 					FilenameHelper filenameHelper = new FilenameHelper();
 					String baseFileName = filenameHelper.getBaseFilename(report);
 					String exportPath = Config.getReportsExportPath();
-
-					String extension;
-					if (reportType.isJxls()) {
-						String jxlsFilename = report.getTemplate();
-						extension = FilenameUtils.getExtension(jxlsFilename);
-					} else {
-						extension = reportFormat.getFilenameExtension();
-					}
-
+					String extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 					String fileName = baseFileName + "." + extension;
 					String outputFileName = exportPath + fileName;
 

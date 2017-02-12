@@ -37,7 +37,7 @@ public class XmlOutput extends StandardOutput {
 	}
 
 	@Override
-	public boolean outputHeaderandFooter() {
+	public boolean outputHeaderAndFooter() {
 		return false;
 	}
 

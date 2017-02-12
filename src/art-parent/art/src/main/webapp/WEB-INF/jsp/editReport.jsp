@@ -274,6 +274,7 @@ Edit report page
 					case 138: //datatables
 					case 139: //datatables csv local
 					case 140: //datatables csv server
+					case 0: //tabular
 						$("#optionsDiv").show();
 						break;
 					default:

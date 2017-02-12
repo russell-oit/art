@@ -17,10 +17,16 @@
  */
 package art.utils;
 
+import art.enums.ReportFormat;
+import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
+import art.reportoptions.CsvOutputArtOptions;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -106,5 +112,44 @@ public class FilenameHelper {
 		String cleanFilename = ArtUtils.cleanBaseFilename(filename);
 
 		return cleanFilename;
+	}
+
+	/**
+	 * Returns the file name extension to be used for the given report
+	 * 
+	 * @param report the report object
+	 * @param reportType the report type
+	 * @param reportFormat the report format
+	 * @return the file name extension to be used for the given report
+	 * @throws java.io.IOException
+	 */
+	public String getFilenameExtension(Report report, ReportType reportType,
+			ReportFormat reportFormat) throws IOException {
+		
+		String extension;
+		
+		if (reportType.isJxls()) {
+			String jxlsFilename = report.getTemplate();
+			extension = FilenameUtils.getExtension(jxlsFilename);
+		} else if (reportFormat == ReportFormat.csv) {
+			CsvOutputArtOptions options;
+			String optionsString = report.getOptions();
+			if (StringUtils.isBlank(optionsString)) {
+				options = new CsvOutputArtOptions(); //has default values set
+			} else {
+				ObjectMapper mapper = new ObjectMapper();
+				options = mapper.readValue(optionsString, CsvOutputArtOptions.class);
+			}
+			String delimiter = options.getDelimiter();
+			if (StringUtils.equals(delimiter, ",")) {
+				extension = "csv";
+			} else {
+				extension = "txt";
+			}
+		} else {
+			extension = reportFormat.getFilenameExtension();
+		}
+
+		return extension;
 	}
 }

@@ -20,6 +20,7 @@ package art.output;
 import art.drilldown.Drilldown;
 import art.enums.ReportFormat;
 import art.enums.ColumnType;
+import art.enums.ReportType;
 import art.job.Job;
 import art.report.Report;
 import art.reportparameter.ReportParameter;
@@ -90,6 +91,15 @@ public abstract class StandardOutput {
 	private DecimalFormat globalNumericFormatter;
 	protected MessageSource messageSource;
 	private String requestBaseUrl;
+	protected int currentColumnIndex;
+	protected boolean isJob;
+
+	/**
+	 * @param isJob the isJob to set
+	 */
+	public void setIsJob(boolean isJob) {
+		this.isJob = isJob;
+	}
 
 	/**
 	 * @return the requestBaseUrl
@@ -255,9 +265,9 @@ public abstract class StandardOutput {
 	/**
 	 * Returns <code>true</code> if page header and footer should be output also
 	 *
-	 * @return
+	 * @return <code>true</code> if page header and footer should be output also
 	 */
-	public boolean outputHeaderandFooter() {
+	public boolean outputHeaderAndFooter() {
 		return true;
 	}
 
@@ -329,8 +339,8 @@ public abstract class StandardOutput {
 	public abstract void addCellString(String value);
 
 	/**
-	 * For html output, outputs the value as is to the current row. The implementing
-	 * class should not perform any escaping.
+	 * For html output, outputs the value as is to the current row. The
+	 * implementing class should not perform any escaping.
 	 *
 	 * @param value
 	 */
@@ -519,7 +529,7 @@ public abstract class StandardOutput {
 			Report report) throws SQLException {
 
 		logger.debug("Entering generateTabularOutput");
-		
+
 		StandardOutputResult result = new StandardOutputResult();
 
 		//initialize number formatters
@@ -557,8 +567,10 @@ public abstract class StandardOutput {
 		beginHeader();
 
 		//output header columns for the result set columns
+		currentColumnIndex = 0;
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
+				currentColumnIndex++;
 				addHeaderCell(rsmd.getColumnLabel(i));
 			}
 		}
@@ -614,7 +626,9 @@ public abstract class StandardOutput {
 
 			if (rowCount > maxRows) {
 				//row limit exceeded
+				currentColumnIndex = 0;
 				for (int i = 0; i < totalColumnCount; i++) {
+					currentColumnIndex++;
 					addCellString("...");
 				}
 
@@ -664,7 +678,7 @@ public abstract class StandardOutput {
 			globalDateFormatter = new SimpleDateFormat(globalDateFormat, columnFormatLocale);
 		}
 
-		if (StringUtils.isNoneBlank(report.getNumberFormat())) {
+		if (StringUtils.isNotBlank(report.getNumberFormat())) {
 			String globalNumberFormat = report.getNumberFormat();
 			globalNumericFormatter = (DecimalFormat) NumberFormat.getInstance(columnFormatLocale);
 			globalNumericFormatter.applyPattern(globalNumberFormat);
@@ -752,8 +766,10 @@ public abstract class StandardOutput {
 
 		beginTotalRow();
 
+		currentColumnIndex = 0;
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
+				currentColumnIndex++;
 				Double columnTotal = columnTotals.get(i);
 				if (columnTotal == null) {
 					addCellString("");
@@ -789,7 +805,9 @@ public abstract class StandardOutput {
 		}
 
 		//output total columns for drilldowns
+		currentColumnIndex = 0;
 		for (int i = 0; i < drilldownCount; i++) {
+			currentColumnIndex++;
 			addCellString("");
 		}
 
@@ -849,11 +867,12 @@ public abstract class StandardOutput {
 	 * @param reportFormat the report format to use
 	 * @param job the job that is generating the burst output
 	 * @param report the report that is being run
+	 * @param reportType the report type of the report
 	 * @throws SQLException
 	 * @throws java.io.IOException
 	 */
 	public void generateBurstOutput(ResultSet rs, ReportFormat reportFormat, Job job,
-			Report report) throws SQLException, IOException {
+			Report report, ReportType reportType) throws SQLException, IOException {
 
 		logger.debug("Entering generateBurstOutput");
 
@@ -958,7 +977,7 @@ public abstract class StandardOutput {
 					} else {
 						FilenameHelper filenameHelper = new FilenameHelper();
 						baseFileName = filenameHelper.getBaseFilename(job, fileNameBurstId);
-						extension = reportFormat.getFilenameExtension();
+						extension = filenameHelper.getFilenameExtension(report, reportType, reportFormat);
 						fileName = baseFileName + "." + extension;
 
 						if (!FinalFilenameValidator.isValid(fileName)) {
@@ -990,7 +1009,9 @@ public abstract class StandardOutput {
 
 				if (rowCount > maxRows) {
 					//row limit exceeded
+					currentColumnIndex = 0;
 					for (int i = 0; i < totalColumnCount; i++) {
+						currentColumnIndex++;
 						addCellString("...");
 					}
 
@@ -1051,7 +1072,7 @@ public abstract class StandardOutput {
 		//initialize number formatters
 		actualNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
 		actualNumberFormatter.applyPattern("#,##0.#");
-		
+
 		plainNumberFormatter = (DecimalFormat) NumberFormat.getInstance(locale);
 		plainNumberFormatter.applyPattern("#.#");
 
@@ -1088,8 +1109,10 @@ public abstract class StandardOutput {
 		beginHeader();
 
 		//output header columns for the result set columns
+		currentColumnIndex = 0;
 		for (int i = 1; i <= resultSetColumnCount; i++) {
 			if (shouldOutputColumn(i, hiddenColumns, rsmd)) {
+				currentColumnIndex++;
 				addHeaderCell(rsmd.getColumnLabel(i));
 			}
 		}
@@ -1215,6 +1238,7 @@ public abstract class StandardOutput {
 
 		ResultSetMetaData rsmd = rs.getMetaData();
 
+		currentColumnIndex = 0;
 		for (Entry<Integer, ColumnType> entry : columnTypes.entrySet()) {
 			int columnIndex = entry.getKey();
 			ColumnType columnType = entry.getValue();
@@ -1222,6 +1246,8 @@ public abstract class StandardOutput {
 			if (!shouldOutputColumn(columnIndex, hiddenColumns, rsmd)) {
 				continue;
 			}
+
+			currentColumnIndex++;
 
 			Object value = null;
 
@@ -1366,6 +1392,8 @@ public abstract class StandardOutput {
 					targetAttribute = "target='_blank'";
 				}
 				drilldownTag = "<a href='" + drilldownUrl + "' " + targetAttribute + ">" + drilldownText + "</a>";
+
+				currentColumnIndex++;
 				//clean to be a custom setting? cleanHtmlReportOutput?
 				addCellStringAsIs(drilldownTag);
 //				if (requestBaseUrl != null) {
