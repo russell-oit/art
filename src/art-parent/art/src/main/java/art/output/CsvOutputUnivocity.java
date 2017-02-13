@@ -33,6 +33,13 @@ import org.slf4j.LoggerFactory;
  * @author Timothy Anyona
  */
 public class CsvOutputUnivocity {
+	//https://github.com/uniVocity/univocity-parsers/blob/master/src/test/java/com/univocity/parsers/examples/RoutineExamples.java
+	//http://www.univocity.com/blogs/news
+	//https://stackoverflow.com/questions/8669967/java-fixed-width-file-format-read-write-library
+	//https://github.com/uniVocity/univocity-parsers/issues/28
+	//https://github.com/uniVocity/csv-parsers-comparison
+	//http://www.univocity.com/pages/univocity-tutorial
+	//https://github.com/uniVocity/univocity-parsers/blob/master/src/test/java/com/univocity/parsers/examples/FixedWidthWriterExamples.java
 
 	private static final Logger logger = LoggerFactory.getLogger(CsvOutputUnivocity.class);
 
@@ -132,6 +139,7 @@ public class CsvOutputUnivocity {
 		//https://stackoverflow.com/questions/37556698/mysql-dump-character-escaping-and-csv-read
 		//https://stackoverflow.com/a/36974864/3274227
 		//https://github.com/uniVocity/univocity-parsers/issues/133#issuecomment-278208696
+		//https://stackoverflow.com/questions/41099391/saving-a-dinamic-sql-query-to-csv
 		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
 		//assigns a "global" date format conversion for any timestamp that gets written.
 		//you can also define field-specific conversions, which will override the default set here.
