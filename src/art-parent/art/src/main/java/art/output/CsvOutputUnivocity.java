@@ -24,6 +24,7 @@ import com.univocity.parsers.csv.CsvRoutines;
 import com.univocity.parsers.csv.CsvWriterSettings;
 import java.io.Writer;
 import java.sql.ResultSet;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +36,9 @@ import org.slf4j.LoggerFactory;
 public class CsvOutputUnivocity {
 	//https://github.com/uniVocity/univocity-parsers/blob/master/src/test/java/com/univocity/parsers/examples/RoutineExamples.java
 	//http://www.univocity.com/blogs/news
-	//https://stackoverflow.com/questions/8669967/java-fixed-width-file-format-read-write-library
 	//https://github.com/uniVocity/univocity-parsers/issues/28
 	//https://github.com/uniVocity/csv-parsers-comparison
 	//http://www.univocity.com/pages/univocity-tutorial
-	//https://github.com/uniVocity/univocity-parsers/blob/master/src/test/java/com/univocity/parsers/examples/FixedWidthWriterExamples.java
 
 	private static final Logger logger = LoggerFactory.getLogger(CsvOutputUnivocity.class);
 
@@ -134,6 +133,13 @@ public class CsvOutputUnivocity {
 		this.includeHeaders = includeHeaders;
 	}
 
+	/**
+	 * Generates csv output for data in the given resultset. The resultset and
+	 * writer get closed by the method.
+	 *
+	 * @param rs the resultset that contains the data to output
+	 * @param outputWriter the writer to output to
+	 */
 	public void generateOutput(ResultSet rs, Writer outputWriter) {
 		logger.debug("Entering generateOutput");
 		//https://stackoverflow.com/questions/37556698/mysql-dump-character-escaping-and-csv-read
@@ -143,8 +149,14 @@ public class CsvOutputUnivocity {
 		ObjectRowWriterProcessor processor = new ObjectRowWriterProcessor();
 		//assigns a "global" date format conversion for any timestamp that gets written.
 		//you can also define field-specific conversions, which will override the default set here.
-		processor.convertType(java.sql.Timestamp.class, Conversions.toDate(dateTimeFormat));
-		processor.convertType(java.sql.Date.class, Conversions.toDate(dateFormat));
+		logger.debug("dateFormat='{}'", dateFormat);
+		logger.debug("dateTimeFormat='{}'", dateTimeFormat);
+		if (StringUtils.isNotBlank(dateFormat)) {
+			processor.convertType(java.sql.Date.class, Conversions.toDate(dateFormat));
+		}
+		if (StringUtils.isNotBlank(dateTimeFormat)) {
+			processor.convertType(java.sql.Timestamp.class, Conversions.toDate(dateTimeFormat));
+		}
 
 		//http://docs.univocity.com/parsers/2.0.0/com/univocity/parsers/csv/CsvWriterSettings.html
 		//http://docs.univocity.com/parsers/2.0.0/com/univocity/parsers/common/CommonWriterSettings.html

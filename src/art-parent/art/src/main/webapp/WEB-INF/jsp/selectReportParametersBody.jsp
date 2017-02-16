@@ -71,25 +71,25 @@ Display section to allow selecting of report parameters and initiate running of 
 
 			var url = "${pageContext.request.contextPath}/runReport";
 
-			$("#reportOutput").load(url, $form.serialize(),
-					function (responseText, statusText, xhr) {
-						//callback funtion for when jquery load has finished
+			//https://www.w3schools.com/jquery/ajax_post.asp
+			$.post(url, $form.serialize(), function (data, status, xhr) {
+				$("#reportOutput").html(data);
 
-						if (statusText === "success") {
-							//make htmlgrid output sortable
-							$('.sortable').each(function (i, obj) {
-								sorttable.DATE_RE = /^(\d\d?)[\/\.-](\d\d?)[\/\.-]((\d\d)?\d\d)$/;
-								sorttable.makeSortable(obj);
-							});
-						} else if (statusText === "error") {
-							bootbox.alert("<b>${errorOccurredText}</b><br>"
-									+ xhr.status + "<br>" + responseText);
-						}
-
-						//enable buttons
-						$('.action').prop('disabled', false);
-
+				if (status === "success") {
+					//make htmlgrid output sortable
+					$('.sortable').each(function (i, obj) {
+						sorttable.DATE_RE = /^(\d\d?)[\/\.-](\d\d?)[\/\.-]((\d\d)?\d\d)$/;
+						sorttable.makeSortable(obj);
 					});
+				} else if (status === "error") {
+					bootbox.alert("<b>${errorOccurredText}</b><br>"
+							+ xhr.status + "<br>" + data);
+				}
+
+				//enable buttons
+				$('.action').prop('disabled', false);
+
+			});
 
 		});
 

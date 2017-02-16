@@ -34,6 +34,7 @@ import art.enums.ZipType;
 import art.output.CsvOutputArt;
 import art.output.CsvOutputUnivocity;
 import art.output.DocxOutput;
+import art.output.FixedWidthOutput;
 import art.output.FreeMarkerOutput;
 import art.output.StandardOutput;
 import art.output.GroupHtmlOutput;
@@ -66,6 +67,7 @@ import art.report.ReportService;
 import art.reportoptions.CsvOutputArtOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
+import art.reportoptions.FixedWidthOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
@@ -735,6 +737,18 @@ public class ReportOutputGenerator {
 					request.setAttribute("locale", localeString);
 					servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 				}
+			} else if (reportType == ReportType.FixedWidth) {
+				String optionsString = report.getOptions();
+				if (StringUtils.isBlank(optionsString)) {
+					throw new IllegalArgumentException("Options not specified");
+				}
+
+				ObjectMapper mapper = new ObjectMapper();
+				FixedWidthOptions options = mapper.readValue(optionsString, FixedWidthOptions.class);
+				FixedWidthOutput fixedWidthOutput = new FixedWidthOutput();
+				rs = reportRunner.getResultSet();
+				fixedWidthOutput.generateOutput(rs, writer, options);
+				rowsRetrieved = getResultSetRowCount(rs);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

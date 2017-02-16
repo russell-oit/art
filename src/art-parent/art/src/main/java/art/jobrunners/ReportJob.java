@@ -1051,6 +1051,7 @@ public class ReportJob implements org.quartz.Job {
 			logger.debug("Job Id {} ...finished", jobId);
 		} catch (Exception ex) {
 			runDetails = "<b>Error:</b> " + ex.toString();
+			fileName = "";
 			logger.error("Error", ex);
 		} finally {
 			if (reportRunner != null) {
@@ -1127,6 +1128,7 @@ public class ReportJob implements org.quartz.Job {
 					runMessage = "jobs.message.fileEmailed";
 				} catch (MessagingException ex) {
 					logger.debug("Error", ex);
+					fileName = "";
 					runMessage = "jobs.message.errorSendingSomeEmails";
 					runDetails = "<b>Error: </b>"
 							+ " <p>" + ex.toString() + "</p>";
@@ -1177,6 +1179,7 @@ public class ReportJob implements org.quartz.Job {
 				}
 			} catch (MessagingException ex) {
 				logger.debug("Error", ex);
+				fileName = "";
 				runMessage = "jobs.message.errorSendingSomeEmails";
 				runDetails = "<b>Error: </b>"
 						+ " <p>" + ex.toString() + "</p>";
@@ -1204,7 +1207,16 @@ public class ReportJob implements org.quartz.Job {
 
 		Report report = job.getReport();
 		ReportType reportType = report.getReportType();
-		ReportFormat reportFormat = ReportFormat.toEnum(job.getOutputFormat());
+		String outputFormat = job.getOutputFormat();
+		ReportFormat reportFormat;
+		if (reportType == ReportType.FixedWidth) {
+			//fixed width jobs don't have a report format
+			//they will have undefined/invalid output format - set in editJob.jsp
+			//just set some default report format
+			reportFormat = ReportFormat.html;
+		} else {
+			reportFormat = ReportFormat.toEnum(outputFormat);
+		}
 
 		//generate file name to use
 		String exportPath = Config.getJobsExportPath();
@@ -1253,7 +1265,8 @@ public class ReportJob implements org.quartz.Job {
 		PrintWriter writer = null;
 
 		if (reportFormat.isHtml() || reportFormat == ReportFormat.xml
-				|| reportFormat == ReportFormat.rss20) {
+				|| reportFormat == ReportFormat.rss20
+				|| reportType == ReportType.FixedWidth) {
 			fos = new FileOutputStream(outputFileName);
 			writer = new PrintWriter(new OutputStreamWriter(fos, "UTF-8")); // make sure we make a utf-8 encoded text
 		}
@@ -1299,6 +1312,7 @@ public class ReportJob implements org.quartz.Job {
 
 		if (!reportType.isTabular()) {
 			logger.warn("Invalid report type for burst job: {}. Job Id: {}", reportType, jobId);
+			fileName = "";
 			runDetails = "Invalid report type for burst job: " + reportType;
 			return;
 		}
@@ -1532,6 +1546,7 @@ public class ReportJob implements org.quartz.Job {
 									runMessage = "jobs.message.alertSent";
 								} catch (MessagingException ex) {
 									logger.debug("Error", ex);
+									fileName = "";
 									runMessage = "jobs.message.errorSendingAlert";
 									runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
 								}
@@ -1563,6 +1578,7 @@ public class ReportJob implements org.quartz.Job {
 								runMessage = "jobs.message.alertSent";
 							} catch (MessagingException ex) {
 								logger.debug("Error", ex);
+								fileName = "";
 								runMessage = "jobs.message.errorSendingAlert";
 								runDetails = "<b>Error: </b> <p>" + ex.toString() + "</p>";
 							}
@@ -1817,7 +1833,7 @@ public class ReportJob implements org.quartz.Job {
 				updateArchives(splitJob, user);
 			} else {
 				//if not archiving, delete previous file
-				if (archiveFileName != null && !archiveFileName.startsWith("-")) {
+				if (StringUtils.isNotBlank(archiveFileName) && !archiveFileName.startsWith("-")) {
 					String filePath = Config.getJobsExportPath() + archiveFileName;
 					File previousFile = new File(filePath);
 					if (previousFile.exists()) {

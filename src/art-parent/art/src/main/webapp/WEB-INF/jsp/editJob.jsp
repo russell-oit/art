@@ -217,6 +217,9 @@
 				} else if (reportTypeId === 127 || reportTypeId === 128) {
 					//xdocreport pptx
 					list.append(new Option('${pptxText}', 'pptx'));
+				} else if (reportTypeId === 141) {
+					//fixed width
+					list.append(new Option('--', '--'));
 				} else {
 					switch (jobType) {
 						case 'Alert':

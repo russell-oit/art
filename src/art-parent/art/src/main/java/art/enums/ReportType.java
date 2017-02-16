@@ -45,7 +45,8 @@ public enum ReportType {
 	HeatmapChart(-12), Pie2DChart(-13), VerticalBar2DChart(-14), StackedVerticalBar2DChart(-15),
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
-	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140);
+	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
+	FixedWidth(141);
 
 	private final int value;
 
@@ -597,6 +598,8 @@ public enum ReportType {
 				return "DataTables: CSV Local";
 			case DataTablesCsvServer:
 				return "DataTables: CSV Server";
+			case FixedWidth:
+				return "Fixed Width";
 			default:
 				return this.name();
 		}

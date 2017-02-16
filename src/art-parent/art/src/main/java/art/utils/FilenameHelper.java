@@ -116,7 +116,7 @@ public class FilenameHelper {
 
 	/**
 	 * Returns the file name extension to be used for the given report
-	 * 
+	 *
 	 * @param report the report object
 	 * @param reportType the report type
 	 * @param reportFormat the report format
@@ -125,9 +125,9 @@ public class FilenameHelper {
 	 */
 	public String getFilenameExtension(Report report, ReportType reportType,
 			ReportFormat reportFormat) throws IOException {
-		
+
 		String extension;
-		
+
 		if (reportType.isJxls()) {
 			String jxlsFilename = report.getTemplate();
 			extension = FilenameUtils.getExtension(jxlsFilename);
@@ -146,6 +146,8 @@ public class FilenameHelper {
 			} else {
 				extension = "txt";
 			}
+		} else if (reportType == ReportType.FixedWidth) {
+			extension = "txt";
 		} else {
 			extension = reportFormat.getFilenameExtension();
 		}
