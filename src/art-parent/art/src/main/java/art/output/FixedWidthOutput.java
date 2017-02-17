@@ -64,6 +64,7 @@ public class FixedWidthOutput {
 
 		String dateFormat = options.getDateFormat();
 		String dateTimeFormat = options.getDateTimeFormat();
+		String numberFormat = options.getNumberFormat();
 
 		logger.debug("dateFormat='{}'", dateFormat);
 		logger.debug("dateTimeFormat='{}'", dateTimeFormat);
@@ -71,8 +72,65 @@ public class FixedWidthOutput {
 		if (StringUtils.isNotBlank(dateFormat)) {
 			processor.convertType(java.sql.Date.class, Conversions.toDate(dateFormat));
 		}
+		
 		if (StringUtils.isNotBlank(dateTimeFormat)) {
 			processor.convertType(java.sql.Timestamp.class, Conversions.toDate(dateTimeFormat));
+		}
+		
+		if (StringUtils.isNotBlank(numberFormat)) {
+			processor.convertType(java.lang.Integer.class, Conversions.formatToNumber(java.lang.Integer.class, numberFormat));
+			processor.convertType(java.lang.Long.class, Conversions.formatToNumber(java.lang.Long.class, numberFormat));
+			processor.convertType(java.lang.Double.class, Conversions.formatToNumber(java.lang.Double.class, numberFormat));
+		}
+		
+		List<Map<String,List<String>>> fieldNumberFormats=options.getFieldNumberFormats();
+		if(!CollectionUtils.isEmpty(fieldNumberFormats)){
+			for(Map<String,List<String>> numberFormatDefinition: fieldNumberFormats){
+				Entry<String, List<String>> entry = numberFormatDefinition.entrySet().iterator().next();
+				String fieldNumberFormat = entry.getKey();
+				List<String> fieldNames = entry.getValue();
+				processor.convertFields(Conversions.formatToNumber(fieldNumberFormat)).set(fieldNames);
+			}
+		}
+		
+		List<Map<String,List<String>>> fieldIntegerFormats=options.getFieldIntegerFormats();
+		if(!CollectionUtils.isEmpty(fieldIntegerFormats)){
+			for(Map<String,List<String>> integerFormatDefinition: fieldIntegerFormats){
+				Entry<String, List<String>> entry = integerFormatDefinition.entrySet().iterator().next();
+				String fieldIntegerFormat = entry.getKey();
+				List<String> fieldNames = entry.getValue();
+				processor.convertFields(Conversions.formatToNumber(java.lang.Integer.class, fieldIntegerFormat)).set(fieldNames);
+			}
+		}
+		
+		List<Map<String,List<String>>> fieldLongFormats=options.getFieldLongFormats();
+		if(!CollectionUtils.isEmpty(fieldLongFormats)){
+			for(Map<String,List<String>> longFormatDefinition: fieldLongFormats){
+				Entry<String, List<String>> entry = longFormatDefinition.entrySet().iterator().next();
+				String fieldLongFormat = entry.getKey();
+				List<String> fieldNames = entry.getValue();
+				processor.convertFields(Conversions.formatToNumber(java.lang.Long.class, fieldLongFormat)).set(fieldNames);
+			}
+		}
+		
+		List<Map<String,List<String>>> fieldDoubleFormats=options.getFieldDoubleFormats();
+		if(!CollectionUtils.isEmpty(fieldDoubleFormats)){
+			for(Map<String,List<String>> doubleFormatDefinition: fieldDoubleFormats){
+				Entry<String, List<String>> entry = doubleFormatDefinition.entrySet().iterator().next();
+				String fieldDoubleFormat = entry.getKey();
+				List<String> fieldNames = entry.getValue();
+				processor.convertFields(Conversions.formatToNumber(java.lang.Double.class, fieldDoubleFormat)).set(fieldNames);
+			}
+		}
+		
+		List<Map<String,List<String>>> fieldDateFormats=options.getFieldDateFormats();
+		if(!CollectionUtils.isEmpty(fieldDateFormats)){
+			for(Map<String,List<String>> dateFormatDefinition: fieldDateFormats){
+				Entry<String, List<String>> entry = dateFormatDefinition.entrySet().iterator().next();
+				String fieldDateFormat = entry.getKey();
+				List<String> fieldNames = entry.getValue();
+				processor.convertFields(Conversions.toDate(fieldDateFormat)).set(fieldNames);
+			}
 		}
 
 		FixedWidthFields fields;
