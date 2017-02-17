@@ -3,7 +3,7 @@
  <head> 
   <meta charset="UTF-8" /> 
   <meta name="pdfTitle" content="ART Administration Manual" /> 
-  <meta name="version" content="3.0-beta4" /> 
+  <meta name="version" content="3.0-beta5" /> 
   <title>ART - Administration Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico" /> 
   <style type="text/css">
@@ -97,6 +97,11 @@
          <li><a href="#dashboard-properties">Dashboard Properties</a></li> 
          <li><a href="#item-properties">Item Properties</a></li> 
          <li><a href="#example-syntax_1">Example Syntax</a></li> 
+        </ol></li> 
+       <li><a href="#tabbed-dashboards">Tabbed Dashboards</a> 
+        <ol> 
+         <li><a href="#example-syntax_2">Example Syntax</a></li> 
+         <li><a href="#tag-descriptions">Tag Descriptions</a></li> 
         </ol></li> 
       </ol></li> 
      <li><a href="#jxls-spreadsheets">jXLS Spreadsheets</a></li> 
@@ -209,6 +214,7 @@
          <li><a href="#using-maven-with-eclipse">Using Maven with Eclipse</a></li> 
         </ol></li> 
        <li><a href="#custom-export-path">Custom Export Path</a></li> 
+       <li><a href="#translating-art">Translating ART</a></li> 
       </ol></li> 
      <li><a href="#support">Support</a></li> 
     </ol> 
@@ -722,20 +728,28 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
      </ul> 
      <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their database login username. Grant them appropriate access to reports. The users can now log in to ART using their database username and password.</p> 
      <h2 id="cas-authentication">CAS Authentication</h2> 
-     <p>ART can use an existing CAS server to do the authentication of users.</p> 
+     <p>ART can use an existing CAS server to do the authentication of users. To use CAS authentication, take the following steps</p> 
      <ul> 
-      <li>In the Settings page, set the <strong>Default Authentication Method</strong> to <strong>CAS</strong></li> 
-      <li>Enter the <strong>CAS Logout URL</strong> e.g. <a href="https://cas-server:8443/cas/logout" rel="nofollow">https://cas-server:8443/cas/logout</a> to enable users to log out of CAS, and thereby logout of all applications that use CAS.</li> 
+      <li>Ensure the CAS server is running</li> 
+      <li>Start ART with Internal authentication configured</li> 
+      <li>Ensure the CAS users are also created within ART. The password within ART is not important as CAS will be doing the authentication.</li> 
+      <li>In the Settings page, change the <strong>Default Authentication Method</strong> to <strong>CAS</strong></li> 
+      <li>Enter the <strong>CAS Logout URL</strong> e.g. <code>https://cas-server:8443/cas/logout</code> to enable users to log out of CAS, and thereby log out of all applications that use CAS.</li> 
+      <li>Log out of ART</li> 
+      <li>Stop ART</li> 
+      <li>Edit ART's <strong>web.xml</strong> file and uncomment the items in the CAS configuration section, providing appropriate urls for the CAS and ART applications.</li> 
+      <li>Start ART again</li> 
+      <li>You should be redirected to the CAS login page where you will provide appropriate credentials, after which you will be redirected back to ART</li> 
      </ul> 
      <p>For each user who requires access to ART, you will also need to create a user within ART with the same username as their CAS login username. Grant them appropriate access to reports. </p> 
      <h2 id="custom-authentication-sources">Custom Authentication Sources</h2> 
-     <p>Additional, custom authentication sources can be used by creating a jsp page to check the user credentials - for example by executing a query on a remote database - and then redirecting to the reports.do page.</p> 
+     <p>Additional, custom authentication sources can be used by creating a jsp page to check the user credentials - for example by executing a query on a remote database - and then redirecting to the reports page.</p> 
      <p>This is the code fragment to redirect an authenticated user to ART.</p> 
      <div class="codehilite"> 
       <pre>    if ( &lt;CONDITION&gt; ) {
     // Authentication Successful!
     session.setAttribute(&quot;username&quot;, username);
-    response.sendRedirect(&quot;/art/app/reports.do&quot;);
+    response.sendRedirect(&quot;/art/reports&quot;);
     }
 </pre> 
      </div> 
@@ -1382,7 +1396,7 @@ WHERE product_name IN(#product_list#)
       <li>If the values for a multi-value parameter are not derived from an LOV, the end user will enter the multiple values required in the text box provided, with each value put on a new line.</li> 
      </ul> 
      <h2 id="running-a-report-via-url">Running a report via URL</h2> 
-     <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL. The basic URL for running a report is something like <a href="http://server_name:port/art/app/runReport.do?reportId=x&amp;other_parameters" rel="nofollow">http://server_name:port/art/app/runReport.do?reportId=x&amp;other_parameters</a></p> 
+     <p>It is possible to run a report directly via URL. The report format and parameters are included in the URL. The basic URL for running a report is something like <code>http://server_name:port/art/runReport?reportId=x&amp;other_parameters</code></p> 
      <p>If direct URL access is needed without requiring the user to log in to ART beforehand, the special user <strong>public_user</strong> must be granted access to the query and <strong>&amp;public=true</strong> must be included in the URL.</p> 
      <h3 id="report-options">Report Options</h3> 
      <p>Some report options can be specified in the URL to determine how the run should be handled.</p> 
@@ -1390,7 +1404,7 @@ WHERE product_name IN(#product_list#)
       <thead> 
        <tr> 
         <th>Option</th> 
-        <th>Option Value Data Type</th> 
+        <th>Data Type</th> 
         <th>Comments</th> 
        </tr> 
       </thead> 
@@ -1428,7 +1442,12 @@ WHERE product_name IN(#product_list#)
        <tr> 
         <td><strong>allowSelectParameters</strong></td> 
         <td>Boolean</td> 
-        <td>If present, indicates the parameters box should be displayed in the browser to allow the user to re-run the report by changing the reports parameter values e.g. <code>allowSelectParameters=true</code>. Omit the parameter entirely if this is not required.</td> 
+        <td>If present, indicates that the parameters box should be displayed in the browser to allow the user to re-run the report by changing the reports parameter values.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>startSelectParametersHidden</strong></td> 
+        <td>Boolean</td> 
+        <td>If present, indicates that the parameters box should start as hidden/collapsed. The parameters box can then be displayed by clicking on the <strong>Parameters</strong> button.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -1438,7 +1457,7 @@ WHERE product_name IN(#product_list#)
       <thead> 
        <tr> 
         <th>Option</th> 
-        <th>Option Value Data Type</th> 
+        <th>Data Type</th> 
         <th>Comments</th> 
        </tr> 
       </thead> 
@@ -1508,7 +1527,7 @@ WHERE product_name IN(#product_list#)
      <h3 id="examples">Examples</h3> 
      <p><strong>Example 1:</strong> (single-value parameters)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=120&amp;reportFormat=html&amp;p-startdate=2006-04-04&amp;p-description=Desktop
 
     runs report 120 in html format.
@@ -1518,13 +1537,13 @@ WHERE product_name IN(#product_list#)
      </div> 
      <p><strong>Example 2:</strong> (chart)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=121&amp;p-date=2006-04-04
 </pre> 
      </div> 
      <p><strong>Example 3:</strong> (group)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=122&amp;splitColumn=2&amp;p-param=abc
 
     runs report 122 in group on 2 columns mode (splitColumn parameter). 
@@ -1533,7 +1552,7 @@ WHERE product_name IN(#product_list#)
      </div> 
      <p><strong>Example 4:</strong> (pdf, public)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=123&amp;reportFormat=pdf&amp;public=true
 
     generates report as a pdf file without requiring the user to log in to ART
@@ -1541,7 +1560,7 @@ WHERE product_name IN(#product_list#)
      </div> 
      <p><strong>Example 5:</strong> (dashboard)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=124&amp;p-param1=value1&amp;p-param2=value2
 
     runs report 124, setting values for parameters param1 and param2
@@ -1549,7 +1568,7 @@ WHERE product_name IN(#product_list#)
      </div> 
      <p><strong>Example 6:</strong> (show selected parameters)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=125&amp;reportFormat=xls&amp;p-startdate=2006-04-04&amp;showSelectedParameters=true
 
     generates report and includes the parameter value used in the report output
@@ -1557,7 +1576,7 @@ WHERE product_name IN(#product_list#)
      </div> 
      <p><strong>Example 7:</strong> (multi-value parameters)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=126&amp;reportFormat=xls&amp;p-category=Laptops&amp;p-category=Desktops&amp;p-category=Tablets
 
     the #category# multi-value parameter (p-category) has 3 values defined: 
@@ -1566,7 +1585,7 @@ WHERE product_name IN(#product_list#)
      </div> 
      <p><strong>Example 8:</strong> (default parameter values)</p> 
      <div class="codehilite"> 
-      <pre>    http://server_name:port/art/app/runReport.do?
+      <pre>    http://server_name:port/art/runReport?
     reportId=127
 
     generates report using default parameter values
@@ -2264,6 +2283,7 @@ WHERE REGION = #region#
       <li>Using the <code>&lt;REPORTID&gt;</code> tag, tabular reports are displayed using the htmlFancy format. To override this, use the <code>&lt;URL&gt;</code> tag and type the direct access URL for the report</li> 
       <li>Tag names are case sensitive (use uppercase)</li> 
       <li>Minimum refresh period allowed is 5 seconds. Be careful with this so as not to overload the server and databases.</li> 
+      <li>If you need to use xml special characters within tag content, ensure to replace them with the relevant xml character entities e.g. if the <code>&lt;URL&gt;</code> tag should contain a url like <code>http://localhost:8080/art/app/runReport.do?reportId=1&amp;p-param1=test</code>, you'll need to replace the <code>&amp;</code> character with <code>&amp;amp;</code>, to have the url as <code>http://localhost:8080/art/app/runReport.do?reportId=1&amp;amp;p-param1=test</code>. For a list of the 5 special xml characters and their respective replacement strings or character entities, see <a href="http://support.esri.com/technical-article/000005870" rel="nofollow">http://support.esri.com/technical-article/000005870</a></li> 
      </ul> 
      <h2 id="gridstack-dashboards">Gridstack Dashboards</h2> 
      <p>Gridstack dashboards allow for specifying exact positioning of report items within the dashboard, specifying the height and width that the report items should occupy, allowing for resizing the items dynamically using the mouse, and moving the items around using drag-and-drop.</p> 
@@ -2278,45 +2298,45 @@ WHERE REGION = #region#
       </thead> 
       <tbody> 
        <tr> 
-        <td><strong>&lt;DASHBOARDWIDTH&gt;</strong></td> 
+        <td><code>&lt;DASHBOARDWIDTH&gt;</code></td> 
         <td>(optional - integer) default = 12. The number of columns to be taken up by the grid, forming the basis of the horizontal or x axis of the grid co-ordinates.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;FLOAT&gt;</strong></td> 
+        <td><code>&lt;FLOAT&gt;</code></td> 
         <td>(optional - boolean) default = false. Allows for moving of report items to arbitrary locations on the dashboard. If false, grid items can only snap to given locations.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;ANIMATE&gt;</strong></td> 
+        <td><code>&lt;ANIMATE&gt;</code></td> 
         <td>(optional - boolean) default = false. Allows for using some animation when grid items are moved around.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;DISABLEDRAG&gt;</strong></td> 
+        <td><code>&lt;DISABLEDRAG&gt;</code></td> 
         <td>(optional - boolean) default = false. Disallows dragging of items.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;DISABLERESIZE&gt;</strong></td> 
+        <td><code>&lt;DISABLERESIZE&gt;</code></td> 
         <td>(optional - boolean) default = false. Disallows resizing of items.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;CELLHEIGHT&gt;</strong></td> 
+        <td><code>&lt;CELLHEIGHT&gt;</code></td> 
         <td>(optional - string) default = 60px. Defines the dimensions of one unit of the grid co-ordinates on the vertical or y axis. Can also be defined in terms of <strong>em</strong> and <strong>rem</strong> units instead of pixels e.g. 10em or 10rem. Can also be defined as &quot;<strong>auto</strong>&quot; in which case the height will be calculated from the cell width.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;VERTICALMARGIN&gt;</strong></td> 
+        <td><code>&lt;VERTICALMARGIN&gt;</code></td> 
         <td>(optional - string) default = 20px. Defines the size of the vertical gap between cells. Can also be defined in terms of <strong>em</strong> and <strong>rem</strong> units instead of pixels e.g. 2em or 2rem.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;ALWAYSSHOWRESIZEHANDLE&gt;</strong></td> 
+        <td><code>&lt;ALWAYSSHOWRESIZEHANDLE&gt;</code></td> 
         <td>(optional - boolean) default = false. Determines if the resizing handles on the bottom corners of a cell are shown even if the user is not hovering over the item.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;DASHBOARDHEIGHT&gt;</strong></td> 
+        <td><code>&lt;DASHBOARDHEIGHT&gt;</code></td> 
         <td>(optional - integer) default = 0. The maximum number of rows or y units on the grid co-ordinate system. Items cannot be resized or moved beyond these limits. A value of 0 means that there is no maximum.</td> 
        </tr> 
       </tbody> 
      </table> 
      <h3 id="item-properties">Item Properties</h3> 
-     <p>A gridstack dashboard has a number of items, enclosed within <strong>&lt;ITEM&gt;</strong> tags. These items have a number of properties as specified in the following tags.</p> 
+     <p>A gridstack dashboard has a number of items, enclosed within <code>&lt;ITEM&gt;</code> tags. These items have a number of properties as specified in the following tags.</p> 
      <table border="1"> 
       <thead> 
        <tr> 
@@ -2326,56 +2346,56 @@ WHERE REGION = #region#
       </thead> 
       <tbody> 
        <tr> 
-        <td><strong>&lt;XPOSITION&gt;</strong></td> 
+        <td><code>&lt;XPOSITION&gt;</code></td> 
         <td>(<strong>required</strong> - integer) The x axis position of the item.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;YPOSITION&gt;</strong></td> 
+        <td><code>&lt;YPOSITION&gt;</code></td> 
         <td>(<strong>required</strong> - integer) The y axis position of the item.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;WIDTH&gt;</strong></td> 
+        <td><code>&lt;WIDTH&gt;</code></td> 
         <td>(<strong>required</strong> - integer) The width of the item. This defines the number of columns that the item will occupy, in relation to the number of columns of the whole grid as defined by the dashboard's <code>&lt;DASHBOARDWIDTH&gt;</code> property.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;HEIGHT&gt;</strong></td> 
+        <td><code>&lt;HEIGHT&gt;</code></td> 
         <td>(<strong>required</strong> - integer) The height of the item. This defines the number of rows that the item will occupy, one row being the size defined in the dashboard's <code>&lt;CELLHEIGHT&gt;</code> property.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;NORESIZE&gt;</strong></td> 
+        <td><code>&lt;NORESIZE&gt;</code></td> 
         <td>(optional - boolean) default = false. Disables element resizing.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;NOMOVE&gt;</strong></td> 
+        <td><code>&lt;NOMOVE&gt;</code></td> 
         <td>(optional - boolean) default = false. Disables element moving.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;AUTOPOSITION&gt;</strong></td> 
+        <td><code>&lt;AUTOPOSITION&gt;</code></td> 
         <td>(optional - boolean) default = false. Specifies to ignore the <code>&lt;XPOSITION&gt;</code> and <code>&lt;YPOSITION&gt;</code> and instead place the element in the first available position.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;LOCKED&gt;</strong></td> 
-        <td>(optional - boolean) default = false. Defines that the widget will be locked. It means another widget wouldn't be able to move it during dragging or resizing. The widget itself can still be dragged or resized. You need to specify the <strong>&lt;NORESIZE&gt;</strong> and <strong>&lt;NOMOVE&gt;</strong> options to completely lock the widget.</td> 
+        <td><code>&lt;LOCKED&gt;</code></td> 
+        <td>(optional - boolean) default = false. Defines that the widget will be locked. It means another widget wouldn't be able to move it during dragging or resizing. The widget itself can still be dragged or resized. You need to specify the <code>&lt;NORESIZE&gt;</code> and <code>&lt;NOMOVE&gt;</code> options to completely lock the widget.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;MINWIDTH&gt;</strong></td> 
+        <td><code>&lt;MINWIDTH&gt;</code></td> 
         <td>(optional - integer) default = 0. Specifies the minimum width beyond which the item cannot be resized.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;MINHEIGHT&gt;</strong></td> 
+        <td><code>&lt;MINHEIGHT&gt;</code></td> 
         <td>(optional - integer) default = 0. Specifies the minimum height beyond which the item cannot be resized.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;MAXWIDTH&gt;</strong></td> 
+        <td><code>&lt;MAXWIDTH&gt;</code></td> 
         <td>(optional - integer) default = 0. Specifies the maximum width beyond which the item cannot be resized. A value of 0 means no maximum.</td> 
        </tr> 
        <tr> 
-        <td><strong>&lt;MAXHEIGHT&gt;</strong></td> 
+        <td><code>&lt;MAXHEIGHT&gt;</code></td> 
         <td>(optional - integer) default = 0. Specifies the maximum height beyond which the item cannot be resized. A value of 0 means no maximum.</td> 
        </tr> 
       </tbody> 
      </table> 
-     <p>In addition to these properties that are unique to gridstack items, the following properties of regular dashboard portlets should also be used within gridstack items, with the same effect: <strong>&lt;TITLE&gt;</strong>, <strong>&lt;REPORTID&gt;</strong>, <strong>&lt;URL&gt;</strong>, <strong>&lt;REFRESH&gt;</strong>, <strong>&lt;ONLOAD&gt;</strong>.</p> 
+     <p>In addition to these properties that are unique to gridstack items, the following properties of regular dashboard portlets should also be used within gridstack items, with the same effect: <code>&lt;TITLE&gt;</code>, <code>&lt;REPORTID&gt;</code>, <code>&lt;URL&gt;</code>, <code>&lt;REFRESH&gt;</code>, <code>&lt;ONLOAD&gt;</code>.</p> 
      <h3 id="example-syntax_1">Example Syntax</h3> 
      <div class="codehilite"> 
       <pre>    <span class="nt">&lt;DASHBOARD&gt;</span>
@@ -2401,6 +2421,72 @@ WHERE REGION = #region#
     <span class="nt">&lt;/DASHBOARD&gt;</span>
 </pre> 
      </div> 
+     <h2 id="tabbed-dashboards">Tabbed Dashboards</h2> 
+     <p>Both regular and gridstack dashboards can be modified to have their components displayed within tabs. This would be done by adding the optional <code>&lt;TABLIST&gt;</code> tag to the dashboard xml. Tabs will then be defined according to the desired number of tabs, and which portlets/items should appear in which tabs.</p> 
+     <h3 id="example-syntax_2">Example Syntax</h3> 
+     <div class="codehilite"> 
+      <pre>    <span class="nt">&lt;DASHBOARD&gt;</span>
+
+        <span class="nt">&lt;ITEM&gt;</span>
+            <span class="nt">&lt;TITLE&gt;</span>Report 1<span class="nt">&lt;/TITLE&gt;</span>
+            <span class="nt">&lt;REPORTID&gt;</span>1<span class="nt">&lt;/REPORTID&gt;</span>
+            <span class="nt">&lt;XPOSITION&gt;</span>0<span class="nt">&lt;/XPOSITION&gt;</span>
+            <span class="nt">&lt;YPOSITION&gt;</span>0<span class="nt">&lt;/YPOSITION&gt;</span>
+            <span class="nt">&lt;WIDTH&gt;</span>4<span class="nt">&lt;/WIDTH&gt;</span>
+            <span class="nt">&lt;HEIGHT&gt;</span>4<span class="nt">&lt;/HEIGHT&gt;</span>
+        <span class="nt">&lt;/ITEM&gt;</span>
+
+        <span class="nt">&lt;ITEM&gt;</span>
+            <span class="nt">&lt;TITLE&gt;</span>Report 2<span class="nt">&lt;/TITLE&gt;</span>
+            <span class="nt">&lt;REPORTID&gt;</span>2<span class="nt">&lt;/REPORTID&gt;</span>
+            <span class="nt">&lt;XPOSITION&gt;</span>8<span class="nt">&lt;/XPOSITION&gt;</span>
+            <span class="nt">&lt;YPOSITION&gt;</span>0<span class="nt">&lt;/YPOSITION&gt;</span>
+            <span class="nt">&lt;WIDTH&gt;</span>4<span class="nt">&lt;/WIDTH&gt;</span>
+            <span class="nt">&lt;HEIGHT&gt;</span>4<span class="nt">&lt;/HEIGHT&gt;</span>
+        <span class="nt">&lt;/ITEM&gt;</span>
+
+        <span class="nt">&lt;TABLIST&gt;</span>
+            <span class="nt">&lt;DEFAULTTAB&gt;</span>1<span class="nt">&lt;/DEFAULTTAB&gt;</span>
+            <span class="nt">&lt;TAB&gt;</span>
+                <span class="nt">&lt;TITLE&gt;</span>Tab 1<span class="nt">&lt;/TITLE&gt;</span>
+                <span class="nt">&lt;ITEM&gt;</span>2<span class="nt">&lt;/ITEM&gt;</span>
+            <span class="nt">&lt;/TAB&gt;</span>
+        <span class="nt">&lt;/TABLIST&gt;</span>
+
+    <span class="nt">&lt;/DASHBOARD&gt;</span>
+</pre> 
+     </div> 
+     <h3 id="tag-descriptions">Tag Descriptions</h3> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th><strong>Tag</strong></th> 
+        <th><strong>Description</strong></th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><code>&lt;TABLIST&gt;</code></td> 
+        <td>Container tag for tab definitions. If present, only the items defined in the tabs will be displayed. If absent, all items as defined in the main dashboard xml will be displayed.</td> 
+       </tr> 
+       <tr> 
+        <td><code>&lt;DEFAULTTAB&gt;</code></td> 
+        <td>(optional - integer) default = 1. Defines the index of the tab that will be active when the dashboard is displayed. The first tab has an index of 1.</td> 
+       </tr> 
+       <tr> 
+        <td><code>&lt;TAB&gt;</code></td> 
+        <td>Container tag for a specific tab. The <code>&lt;TABLIST&gt;</code> can have any number of <code>&lt;TAB&gt;</code> tags.</td> 
+       </tr> 
+       <tr> 
+        <td><code>&lt;TITLE&gt;</code></td> 
+        <td>(optional - string) default = blank/empty string. Defines the title/heading/name of the tab. Even though this tag is optional, it is recommended to always set it so as to have a better visual indication for users of the different tabs.</td> 
+       </tr> 
+       <tr> 
+        <td><code>&lt;ITEM&gt;</code></td> 
+        <td>(optional - integer) no default. The index of the item to display, as it appears in the main dashboard xml definition. The dashboard portlets/items are assigned an index according to the order in which they appear in the xml, with the first item having an index of 1. So setting this to 1 indicates that the fist portlet/item in the main dashboard xml should be displayed. A tab can have any number of <code>&lt;ITEM&gt;</code> tags.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
     </div> 
    </div> 
    <div> 
@@ -3348,6 +3434,21 @@ a2enmod proxy_http
      </ul> 
      <h2 id="custom-export-path">Custom Export Path</h2> 
      <p>By default, if the output for a report creates a file e.g. pdf, this file is stored in the <strong>ART_HOME\WEB-INF\work\export</strong> directory. You can designate a different directory to be used as the export path e.g. to a location on the application server that contains more disk space. To do this, modify the <strong>ART_HOME\WEB-INF\art-custom-settings.json</strong> file and set the path in the <strong>exportDirectory</strong> field.</p> 
+     <h2 id="translating-art">Translating ART</h2> 
+     <p>You can translate ART so that the user interface is displayed in your own language. Follow the following steps to translate ART.</p> 
+     <ul> 
+      <li>Download the latest ART package, unzip it and unzip the <strong>art.war</strong> file using any zip/unzip software. Get the <strong>ArtMessages.properties</strong> file from the <strong>WEB-INF\i18n</strong> directory and and make a copy of it, naming your new file in the format <strong>ArtMessages_xx.properties</strong>, where xx is the ISO 639-1 language code for your language. A List of these language codes can be found here - <a href="http://www.mathguide.de/info/tools/languagecode.html." rel="nofollow">http://www.mathguide.de/info/tools/languagecode.html.</a> An example would be ArtMessages_pt.properties for Portuguese. If your language is written differently in different countries you can add the 2 letter country specifier to the file name so that your have a file name like ArtMessages_pt_BR.properties for Brazilian Portuguese. You can find a list of country codes here - <a href="http://www.immigration-usa.com/country_digraphs.html." rel="nofollow">http://www.immigration-usa.com/country_digraphs.html.</a></li> 
+      <li>Change all the text in your new properties file after the = signs to your language </li> 
+      <li> <p>If your language uses a non ISO-8859 character set (e.g. chinese, arabic, russian etc) name the file ArtMessages_xx-UTF8.properties and then decode it to an ISO-8859 character set with UTF-8 escapes using the <strong>native2ascii</strong> tool that is available with your Java installation. An example command is as below.</p> 
+       <div class="codehilite"> 
+        <pre>native2ascii ArtMessages_xx-UTF8.properties ArtMessages_xx.properties
+</pre> 
+       </div> </li> 
+      <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
+      <li>Now you can log in to the application and include the <strong>lang=xx</strong> parameter in browser url to activate the new language e.g. <code>http://localhost:8080/art/app/reports.do?lang=xx</code></li> 
+      <li>If you would like the new language to be listed for selection within the application e.g. on the login page, add the language code and the language name to the <strong>ART_HOME\WEB-INF\languages.properties</strong> file, save the file and restart the application server.</li> 
+      <li>If in addition you would like this new translation to be included in future ART versions, email the properties file to <strong>tanyona</strong> (at) <strong>users.sf.net</strong> or create a new post on the <a class="" href="https://sourceforge.net/p/art/discussion/352129/">Discussion forum</a> and attach the file there.</li> 
+     </ul> 
     </div> 
    </div> 
    <div> 

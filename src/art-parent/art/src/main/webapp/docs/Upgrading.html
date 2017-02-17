@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
  <head> 
-  <meta charset="UTF-8" /> 
+  <meta charset="UTF-8"> 
   <title>ART - Upgrading</title> 
-  <link rel="shortcut icon" href="../images/favicon.ico" /> 
+  <link rel="shortcut icon" href="../images/favicon.ico"> 
   <style type="text/css">
 			table
 			{
@@ -36,6 +36,7 @@
       <li>Start Tomcat </li> 
      </ul> </li> 
     <li>Copy the contents of the backup <strong>art\WEB-INF\work</strong> directory to the new version's work directory</li> 
+    <li>Copy the contents of the backup <strong>art\js-templates</strong> directory to the new version's js-templates directory</li> 
     <li>If you had modified the <strong>art\WEB-INF\art-custom-settings.json</strong> file, copy the file from the backup directory to the new version directory</li> 
     <li>If you were using the demo HSQLDB database, after running the upgrade scripts on the ArtRepositoryDB database in the backup location, copy the updated files to the <strong>art\WEB-INF\hsqldb</strong> directory of the new version, overwriting the existing files. You can look at the <a class="" href="https://sourceforge.net/p/art/wiki/Tips/">Tips</a> documentation to see how you can upgrade an HSQLDB database.</li> 
     <li>If you had put any <strong>JDBC drivers</strong> in the <strong>art\WEB-INF\lib</strong> directory, copy these drivers from the backup lib directory to the new version's lib directory.</li> 
@@ -69,26 +70,26 @@
      </tr> 
      <tr> 
       <td><strong>Internet Explorer</strong></td> 
-      <td>If using Internet Explorer, you will need to use version 8 and above</td> 
+      <td>If using Internet Explorer, you will need to use version 8 at a minimum. Some features may not work with Internet Explorer 8 so it is recommended, if using Internet Explorer, to use the latest version.</td> 
      </tr> 
      <tr> 
       <td><strong>Java</strong></td> 
       <td>Java 7 and above is required</td> 
      </tr> 
      <tr> 
-      <td><strong>Application Server</strong></td> 
+      <td><strong>Application server</strong></td> 
       <td>An application server that supports servlet 3.0 will be required e.g. Tomcat 7 and above</td> 
      </tr> 
      <tr> 
       <td><strong>Renamed concepts</strong></td> 
-      <td>Some concepts have been renamed e.g. &quot;Queries&quot; are now &quot;Reports&quot;, &quot;Graphs&quot; are now &quot;Charts&quot;, &quot;View Modes&quot; are now &quot;Report Formats&quot;, &quot;Report on Column&quot; report types are now &quot;Group&quot; reports.</td> 
+      <td>Some concepts have been renamed e.g. "Queries" are now "Reports", "Graphs" are now "Charts", "View Modes" are now "Report Formats", "Report on Column" report types are now "Group" reports.</td> 
      </tr> 
      <tr> 
       <td><strong>jXLS templates</strong></td> 
       <td>jXLS templates need to be recreated. Review the sample templates located in the <strong>ART_HOME\WEB-INF\work\templates</strong> directory, or the jXLS website, <a href="http://jxls.sourceforge.net/">http://jxls.sourceforge.net/</a>, to see the new template structure.</td> 
      </tr> 
      <tr> 
-      <td><strong>Chained Parameters</strong></td> 
+      <td><strong>Chained parameters</strong></td> 
       <td>Reports that use chained parameters will need to be modified. Review the chained parameter example in the demo database or the admin manual to see the new method of specifying chained parameters.</td> 
      </tr> 
      <tr> 
@@ -98,6 +99,18 @@
      <tr> 
       <td><strong>XMLA Repors</strong></td> 
       <td>For Mondrian XMLA and Microsoft XMLA reports, the url, username and password fields have been removed from the report definition page and instead a datasource needs to be created from the Datasource Configuration page and then used by selecting the Datasource field in the report definition.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Query tags</strong></td> 
+      <td>The special hardcoded tags or placeholders than can be used within query sql, <strong>:USERNAME</strong>, <strong>:DATE</strong> and <strong>:TIME</strong> have been changed to include a colon at the end i.e. <strong>:USERNAME:</strong>, <strong>:DATE:</strong> and <strong>:TIME:</strong></td> 
+     </tr> 
+     <tr> 
+      <td><strong>Dashboard XML</strong></td> 
+      <td>If you have xml special characters within tag content, ensure to replace them with the relevant xml character entities e.g. if the <code>&lt;URL&gt;</code> tag contains a url like <code>http://localhost:8080/art/app/runReport.do?reportId=1&amp;p-param1=test</code>, you'll need to replace the <code>&amp;</code> character with <code>&amp;amp;</code>, to have the url as <code>http://localhost:8080/art/app/runReport.do?reportId=1&amp;amp;p-param1=test</code>. For a list of the 5 special xml characters and their respective replacement strings or character entities, see <a href="http://support.esri.com/technical-article/000005870" rel="nofollow">http://support.esri.com/technical-article/000005870</a></td> 
+     </tr> 
+     <tr> 
+      <td><strong>LOOKUP rule values</strong></td> 
+      <td>If you had any rule values of type <strong>LOOKUP</strong>, these will no longer be in effect as there is no longer an option for lookup rule values. Instead, define a user group, assign rule values to this user group and put the required users into this user group.</td> 
      </tr> 
     </tbody> 
    </table>
