@@ -339,12 +339,12 @@ public abstract class StandardOutput {
 	public abstract void addCellString(String value);
 
 	/**
-	 * For html output, outputs the value as is to the current row. The
-	 * implementing class should not perform any escaping.
+	 * For html output, the implementing class should perform escaping on the
+	 * value given
 	 *
 	 * @param value
 	 */
-	public void addCellStringAsIs(String value) {
+	public void addCellStringUnsafe(String value) {
 		addCellString(value);
 	}
 
@@ -1395,7 +1395,7 @@ public abstract class StandardOutput {
 
 				currentColumnIndex++;
 				//clean to be a custom setting? cleanHtmlReportOutput?
-				addCellStringAsIs(drilldownTag);
+				addCellString(drilldownTag);
 //				if (requestBaseUrl != null) {
 //					String cleanedDrilldownTag = Jsoup.clean(drilldownTag, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
 //					addCellStringAsIs(cleanedDrilldownTag);
@@ -1484,9 +1484,9 @@ public abstract class StandardOutput {
 	 */
 	private void addString(Object value) {
 		if (value == null) {
-			addCellStringAsIs(""); //display nulls as empty string
+			addCellString(""); //display nulls as empty string
 		} else {
-			addCellStringAsIs((String) value);
+			addCellString((String) value);
 		}
 	}
 
@@ -1505,7 +1505,7 @@ public abstract class StandardOutput {
 //				addCellString(nullStringDisplay);
 //			}
 
-			addCellStringAsIs(nullStringDisplay);
+			addCellString(nullStringDisplay);
 		} else {
 //			if (requestBaseUrl != null) {
 //				String cleanedValue = Jsoup.clean((String) value, requestBaseUrl, Whitelist.relaxed().preserveRelativeLinks(true));
@@ -1514,7 +1514,7 @@ public abstract class StandardOutput {
 //				addCellString((String) value);
 //			}
 
-			addCellStringAsIs((String) value);
+			addCellString((String) value);
 		}
 	}
 

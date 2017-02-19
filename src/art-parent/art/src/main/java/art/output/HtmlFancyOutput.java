@@ -65,6 +65,18 @@ public class HtmlFancyOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
+		String cssClass;
+		if (evenRow) {
+			cssClass = "text-left";
+		} else {
+			cssClass = "text-left";
+		}
+
+		out.println("<td class='" + cssClass + "'>" + value + "</td>");
+	}
+	
+	@Override
+	public void addCellStringUnsafe(String value) {
 		String escapedValue = Encode.forHtmlContent(value);
 		
 		String cssClass;
@@ -75,18 +87,6 @@ public class HtmlFancyOutput extends StandardOutput {
 		}
 
 		out.println("<td class='" + cssClass + "'>" + escapedValue + "</td>");
-	}
-	
-	@Override
-	public void addCellStringAsIs(String value) {
-		String cssClass;
-		if (evenRow) {
-			cssClass = "text-left";
-		} else {
-			cssClass = "text-left";
-		}
-
-		out.println("<td class='" + cssClass + "'>" + value + "</td>");
 	}
 
 	@Override

@@ -151,13 +151,13 @@ public class HtmlDataTableOutput extends StandardOutput {
 
 	@Override
 	public void addCellString(String value) {
-		String escapedValue = Encode.forHtmlContent(value);
-		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
+		out.println("<td style='text-align: left'>" + value + "</td>");
 	}
 	
 	@Override
-	public void addCellStringAsIs(String value) {
-		out.println("<td style='text-align: left'>" + value + "</td>");
+	public void addCellStringUnsafe(String value) {
+		String escapedValue = Encode.forHtmlContent(value);
+		out.println("<td style='text-align: left'>" + escapedValue + "</td>");
 	}
 
 	@Override
