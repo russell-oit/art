@@ -486,257 +486,257 @@ public class ReportOutputGenerator {
 			} else if (reportType == ReportType.ReactPivot) {
 				if (isJob) {
 					throw new IllegalStateException("ReactPivot report type not supported for jobs");
-				} else {
+				}
+
+				rs = reportRunner.getResultSet();
+				JsonOutput jsonOutput = new JsonOutput();
+				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				String jsonData = jsonOutputResult.getJsonData();
+				rowsRetrieved = jsonOutputResult.getRowCount();
+
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//need to explicitly check if template file is empty string
+				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+				if (StringUtils.isBlank(templateFileName)) {
+					throw new IllegalArgumentException("Template file not specified");
+				}
+
+				File templateFile = new File(fullTemplateFileName);
+				if (!templateFile.exists()) {
+					throw new IllegalStateException("Template file not found: " + templateFileName);
+				}
+
+				request.setAttribute("templateFileName", templateFileName);
+				request.setAttribute("rows", jsonData);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
+			} else if (reportType.isPivotTableJs()) {
+				if (isJob) {
+					throw new IllegalStateException("PivotTable.js report types not supported for jobs");
+				}
+
+				request.setAttribute("reportType", reportType);
+
+				if (reportType == ReportType.PivotTableJs) {
 					rs = reportRunner.getResultSet();
 					JsonOutput jsonOutput = new JsonOutput();
 					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
 					String jsonData = jsonOutputResult.getJsonData();
 					rowsRetrieved = jsonOutputResult.getRowCount();
+					request.setAttribute("input", jsonData);
+				}
 
-					String templateFileName = report.getTemplate();
-					String jsTemplatesPath = Config.getJsTemplatesPath();
-					String fullTemplateFileName = jsTemplatesPath + templateFileName;
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
 
-					logger.debug("templateFileName='{}'", templateFileName);
+				logger.debug("templateFileName='{}'", templateFileName);
 
-					//need to explicitly check if template file is empty string
-					//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
-					if (StringUtils.isBlank(templateFileName)) {
-						throw new IllegalArgumentException("Template file not specified");
-					}
-
+				//template file not mandatory
+				if (StringUtils.isNotBlank(templateFileName)) {
 					File templateFile = new File(fullTemplateFileName);
 					if (!templateFile.exists()) {
 						throw new IllegalStateException("Template file not found: " + templateFileName);
 					}
-
 					request.setAttribute("templateFileName", templateFileName);
-					request.setAttribute("rows", jsonData);
-					servletContext.getRequestDispatcher("/WEB-INF/jsp/showReactPivot.jsp").include(request, response);
 				}
-			} else if (reportType.isPivotTableJs()) {
-				if (isJob) {
-					throw new IllegalStateException("PivotTable.js report types not supported for jobs");
-				} else {
-					request.setAttribute("reportType", reportType);
 
-					if (reportType == ReportType.PivotTableJs) {
-						rs = reportRunner.getResultSet();
-						JsonOutput jsonOutput = new JsonOutput();
-						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-						String jsonData = jsonOutputResult.getJsonData();
-						rowsRetrieved = jsonOutputResult.getRowCount();
-						request.setAttribute("input", jsonData);
+				if (reportType == ReportType.PivotTableJsCsvServer) {
+					String optionsString = report.getOptions();
+
+					if (StringUtils.isBlank(optionsString)) {
+						throw new IllegalArgumentException("Options not specified");
 					}
 
-					String templateFileName = report.getTemplate();
-					String jsTemplatesPath = Config.getJsTemplatesPath();
-					String fullTemplateFileName = jsTemplatesPath + templateFileName;
+					ObjectMapper mapper = new ObjectMapper();
+					CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
+					String dataFileName = options.getDataFile();
 
-					logger.debug("templateFileName='{}'", templateFileName);
+					logger.debug("dataFileName='{}'", dataFileName);
 
-					//template file not mandatory
-					if (StringUtils.isNotBlank(templateFileName)) {
-						File templateFile = new File(fullTemplateFileName);
-						if (!templateFile.exists()) {
-							throw new IllegalStateException("Template file not found: " + templateFileName);
-						}
-						request.setAttribute("templateFileName", templateFileName);
+					//need to explicitly check if file name is empty string
+					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+					if (StringUtils.isBlank(dataFileName)) {
+						throw new IllegalArgumentException("Data file not specified");
 					}
 
-					if (reportType == ReportType.PivotTableJsCsvServer) {
-						String optionsString = report.getOptions();
+					String fullDataFileName = jsTemplatesPath + dataFileName;
 
-						if (StringUtils.isBlank(optionsString)) {
-							throw new IllegalArgumentException("Options not specified");
-						}
-
-						ObjectMapper mapper = new ObjectMapper();
-						CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
-						String dataFileName = options.getDataFile();
-
-						logger.debug("dataFileName='{}'", dataFileName);
-
-						//need to explicitly check if file name is empty string
-						//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-						if (StringUtils.isBlank(dataFileName)) {
-							throw new IllegalArgumentException("Data file not specified");
-						}
-
-						String fullDataFileName = jsTemplatesPath + dataFileName;
-
-						File dataFile = new File(fullDataFileName);
-						if (!dataFile.exists()) {
-							throw new IllegalStateException("Data file not found: " + dataFileName);
-						}
-
-						request.setAttribute("dataFileName", dataFileName);
+					File dataFile = new File(fullDataFileName);
+					if (!dataFile.exists()) {
+						throw new IllegalStateException("Data file not found: " + dataFileName);
 					}
 
-					String localeString = locale.toString();
-
-					String languageFileName = "pivot." + localeString + ".js";
-
-					String languageFilePath = Config.getAppPath() + File.separator
-							+ "js" + File.separator
-							+ "pivottable-2.7.0" + File.separator
-							+ languageFileName;
-
-					File languageFile = new File(languageFilePath);
-
-					if (languageFile.exists()) {
-						request.setAttribute("locale", localeString);
-					}
-
-					servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
+					request.setAttribute("dataFileName", dataFileName);
 				}
+
+				String localeString = locale.toString();
+
+				String languageFileName = "pivot." + localeString + ".js";
+
+				String languageFilePath = Config.getAppPath() + File.separator
+						+ "js" + File.separator
+						+ "pivottable-2.7.0" + File.separator
+						+ languageFileName;
+
+				File languageFile = new File(languageFilePath);
+
+				if (languageFile.exists()) {
+					request.setAttribute("locale", localeString);
+				}
+
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showPivotTableJs.jsp").include(request, response);
 			} else if (reportType.isDygraphs()) {
 				if (isJob) {
 					throw new IllegalStateException("Dygraphs report types not supported for jobs");
-				} else {
-					request.setAttribute("reportType", reportType);
-
-					if (reportType == ReportType.Dygraphs) {
-						rs = reportRunner.getResultSet();
-						CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
-						//use appropriate date formats to ensure correct interpretation by browsers
-						//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
-						//http://dygraphs.com/date-formats.html
-						String dateFormat = "yyyy/MM/dd";
-						String dateTimeFormat = "yyyy/MM/dd HH:mm";
-						csvOutputUnivocity.setDateFormat(dateFormat);
-						csvOutputUnivocity.setDateTimeFormat(dateTimeFormat);
-						String csvString;
-						try (StringWriter stringWriter = new StringWriter()) {
-							csvOutputUnivocity.generateOutput(rs, stringWriter);
-							csvString = stringWriter.toString();
-						}
-						rowsRetrieved = getResultSetRowCount(rs);
-						//need to escape string for javascript, otherwise you get Unterminated string literal error
-						//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
-						String escapedCsvString = Encode.forJavaScript(csvString);
-						request.setAttribute("csvData", escapedCsvString);
-					}
-
-					String templateFileName = report.getTemplate();
-					String jsTemplatesPath = Config.getJsTemplatesPath();
-					String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-					logger.debug("templateFileName='{}'", templateFileName);
-
-					//template file not mandatory
-					if (StringUtils.isNotBlank(templateFileName)) {
-						File templateFile = new File(fullTemplateFileName);
-						if (!templateFile.exists()) {
-							throw new IllegalStateException("Template file not found: " + templateFileName);
-						}
-						request.setAttribute("templateFileName", templateFileName);
-					}
-
-					if (reportType == ReportType.DygraphsCsvServer) {
-						String optionsString = report.getOptions();
-
-						if (StringUtils.isBlank(optionsString)) {
-							throw new IllegalArgumentException("Options not specified");
-						}
-
-						ObjectMapper mapper = new ObjectMapper();
-						CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
-						String dataFileName = options.getDataFile();
-
-						logger.debug("dataFileName='{}'", dataFileName);
-
-						//need to explicitly check if file name is empty string
-						//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-						if (StringUtils.isBlank(dataFileName)) {
-							throw new IllegalArgumentException("Data file not specified");
-						}
-
-						String fullDataFileName = jsTemplatesPath + dataFileName;
-
-						File dataFile = new File(fullDataFileName);
-						if (!dataFile.exists()) {
-							throw new IllegalStateException("Data file not found: " + dataFileName);
-						}
-
-						request.setAttribute("dataFileName", dataFileName);
-					}
-
-					servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
 				}
+
+				request.setAttribute("reportType", reportType);
+
+				if (reportType == ReportType.Dygraphs) {
+					rs = reportRunner.getResultSet();
+					CsvOutputUnivocity csvOutputUnivocity = new CsvOutputUnivocity();
+					//use appropriate date formats to ensure correct interpretation by browsers
+					//http://blog.dygraphs.com/2012/03/javascript-and-dates-what-mess.html
+					//http://dygraphs.com/date-formats.html
+					String dateFormat = "yyyy/MM/dd";
+					String dateTimeFormat = "yyyy/MM/dd HH:mm";
+					csvOutputUnivocity.setDateFormat(dateFormat);
+					csvOutputUnivocity.setDateTimeFormat(dateTimeFormat);
+					String csvString;
+					try (StringWriter stringWriter = new StringWriter()) {
+						csvOutputUnivocity.generateOutput(rs, stringWriter);
+						csvString = stringWriter.toString();
+					}
+					rowsRetrieved = getResultSetRowCount(rs);
+					//need to escape string for javascript, otherwise you get Unterminated string literal error
+					//https://stackoverflow.com/questions/5016517/error-using-javascript-and-jsp-string-with-space-gives-unterminated-string-lit
+					String escapedCsvString = Encode.forJavaScript(csvString);
+					request.setAttribute("csvData", escapedCsvString);
+				}
+
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//template file not mandatory
+				if (StringUtils.isNotBlank(templateFileName)) {
+					File templateFile = new File(fullTemplateFileName);
+					if (!templateFile.exists()) {
+						throw new IllegalStateException("Template file not found: " + templateFileName);
+					}
+					request.setAttribute("templateFileName", templateFileName);
+				}
+
+				if (reportType == ReportType.DygraphsCsvServer) {
+					String optionsString = report.getOptions();
+
+					if (StringUtils.isBlank(optionsString)) {
+						throw new IllegalArgumentException("Options not specified");
+					}
+
+					ObjectMapper mapper = new ObjectMapper();
+					CsvServerOptions options = mapper.readValue(optionsString, CsvServerOptions.class);
+					String dataFileName = options.getDataFile();
+
+					logger.debug("dataFileName='{}'", dataFileName);
+
+					//need to explicitly check if file name is empty string
+					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+					if (StringUtils.isBlank(dataFileName)) {
+						throw new IllegalArgumentException("Data file not specified");
+					}
+
+					String fullDataFileName = jsTemplatesPath + dataFileName;
+
+					File dataFile = new File(fullDataFileName);
+					if (!dataFile.exists()) {
+						throw new IllegalStateException("Data file not found: " + dataFileName);
+					}
+
+					request.setAttribute("dataFileName", dataFileName);
+				}
+
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDygraphs.jsp").include(request, response);
 			} else if (reportType.isDataTables()) {
 				if (isJob) {
 					throw new IllegalStateException("DataTables report types not supported for jobs");
-				} else {
-					request.setAttribute("reportType", reportType);
-
-					if (reportType == ReportType.DataTables) {
-						rs = reportRunner.getResultSet();
-						JsonOutput jsonOutput = new JsonOutput();
-						JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
-						String jsonData = jsonOutputResult.getJsonData();
-						List<ResultSetColumn> columns = jsonOutputResult.getColumns();
-						request.setAttribute("data", jsonData);
-						request.setAttribute("columns", columns);
-					}
-
-					String templateFileName = report.getTemplate();
-					String jsTemplatesPath = Config.getJsTemplatesPath();
-					String fullTemplateFileName = jsTemplatesPath + templateFileName;
-
-					logger.debug("templateFileName='{}'", templateFileName);
-
-					//template file not mandatory
-					if (StringUtils.isNotBlank(templateFileName)) {
-						File templateFile = new File(fullTemplateFileName);
-						if (!templateFile.exists()) {
-							throw new IllegalStateException("Template file not found: " + templateFileName);
-						}
-						request.setAttribute("templateFileName", templateFileName);
-					}
-
-					String optionsString = report.getOptions();
-					boolean showColumnFilters = true;
-					if (StringUtils.isNotBlank(optionsString)) {
-						ObjectMapper mapper = new ObjectMapper();
-						DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
-						showColumnFilters = options.isShowColumnFilters();
-					}
-					request.setAttribute("showColumnFilters", showColumnFilters);
-
-					if (reportType == ReportType.DataTablesCsvServer) {
-						if (StringUtils.isBlank(optionsString)) {
-							throw new IllegalArgumentException("Options not specified");
-						}
-
-						ObjectMapper mapper = new ObjectMapper();
-						DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
-						String dataFileName = options.getDataFile();
-
-						logger.debug("dataFileName='{}'", dataFileName);
-
-						//need to explicitly check if file name is empty string
-						//otherwise file.exists() will return true because fullDataFileName will just have the directory name
-						if (StringUtils.isBlank(dataFileName)) {
-							throw new IllegalArgumentException("Data file not specified");
-						}
-
-						String fullDataFileName = jsTemplatesPath + dataFileName;
-
-						File dataFile = new File(fullDataFileName);
-						if (!dataFile.exists()) {
-							throw new IllegalStateException("Data file not found: " + dataFileName);
-						}
-
-						request.setAttribute("dataFileName", dataFileName);
-					}
-
-					String languageTag = locale.toLanguageTag();
-					request.setAttribute("languageTag", languageTag);
-					String localeString = locale.toString();
-					request.setAttribute("locale", localeString);
-					servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 				}
+
+				request.setAttribute("reportType", reportType);
+
+				if (reportType == ReportType.DataTables) {
+					rs = reportRunner.getResultSet();
+					JsonOutput jsonOutput = new JsonOutput();
+					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					String jsonData = jsonOutputResult.getJsonData();
+					List<ResultSetColumn> columns = jsonOutputResult.getColumns();
+					request.setAttribute("data", jsonData);
+					request.setAttribute("columns", columns);
+				}
+
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//template file not mandatory
+				if (StringUtils.isNotBlank(templateFileName)) {
+					File templateFile = new File(fullTemplateFileName);
+					if (!templateFile.exists()) {
+						throw new IllegalStateException("Template file not found: " + templateFileName);
+					}
+					request.setAttribute("templateFileName", templateFileName);
+				}
+
+				String optionsString = report.getOptions();
+				boolean showColumnFilters = true;
+				if (StringUtils.isNotBlank(optionsString)) {
+					ObjectMapper mapper = new ObjectMapper();
+					DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
+					showColumnFilters = options.isShowColumnFilters();
+				}
+				request.setAttribute("showColumnFilters", showColumnFilters);
+
+				if (reportType == ReportType.DataTablesCsvServer) {
+					if (StringUtils.isBlank(optionsString)) {
+						throw new IllegalArgumentException("Options not specified");
+					}
+
+					ObjectMapper mapper = new ObjectMapper();
+					DataTablesOptions options = mapper.readValue(optionsString, DataTablesOptions.class);
+					String dataFileName = options.getDataFile();
+
+					logger.debug("dataFileName='{}'", dataFileName);
+
+					//need to explicitly check if file name is empty string
+					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+					if (StringUtils.isBlank(dataFileName)) {
+						throw new IllegalArgumentException("Data file not specified");
+					}
+
+					String fullDataFileName = jsTemplatesPath + dataFileName;
+
+					File dataFile = new File(fullDataFileName);
+					if (!dataFile.exists()) {
+						throw new IllegalStateException("Data file not found: " + dataFileName);
+					}
+
+					request.setAttribute("dataFileName", dataFileName);
+				}
+
+				String languageTag = locale.toLanguageTag();
+				request.setAttribute("languageTag", languageTag);
+				String localeString = locale.toString();
+				request.setAttribute("locale", localeString);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDataTables.jsp").include(request, response);
 			} else if (reportType == ReportType.FixedWidth) {
 				String optionsString = report.getOptions();
 				if (StringUtils.isBlank(optionsString)) {
@@ -749,6 +749,37 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 				fixedWidthOutput.generateOutput(rs, writer, options);
 				rowsRetrieved = getResultSetRowCount(rs);
+			} else if (reportType ==ReportType.C3) {
+				if (isJob) {
+					throw new IllegalStateException("C3.js report types not supported for jobs");
+				}
+				
+				rs = reportRunner.getResultSet();
+				JsonOutput jsonOutput = new JsonOutput();
+				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				String jsonData = jsonOutputResult.getJsonData();
+				rowsRetrieved = jsonOutputResult.getRowCount();
+
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//need to explicitly check if template file is empty string
+				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+				if (StringUtils.isBlank(templateFileName)) {
+					throw new IllegalArgumentException("Template file not specified");
+				}
+
+				File templateFile = new File(fullTemplateFileName);
+				if (!templateFile.exists()) {
+					throw new IllegalStateException("Template file not found: " + templateFileName);
+				}
+
+				request.setAttribute("templateFileName", templateFileName);
+				request.setAttribute("data", jsonData);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

@@ -425,6 +425,7 @@ Edit report page
 					case 138: //datatables
 					case 139: //datatables csv local
 					case 140: //datatables csv server
+					case 142: //c3
 						$("#templateDiv").show();
 						break;
 					default:
@@ -530,6 +531,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 141: //fixed width
+					case 142: //c3
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

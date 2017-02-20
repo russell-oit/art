@@ -604,6 +604,7 @@ public class ReportController {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
+			case C3:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			default:

@@ -218,6 +218,7 @@ public class RunReportHelper {
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
 			case FixedWidth:
+			case C3:
 				enableReportFormats = false;
 				break;
 			default:
@@ -339,6 +340,7 @@ public class RunReportHelper {
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
 			case FixedWidth:
+			case C3:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -370,6 +372,7 @@ public class RunReportHelper {
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
 			case FixedWidth:
+			case C3:
 				enableEmail = false;
 				break;
 			default:

@@ -18,6 +18,7 @@ ART 3.0
 * Added PivotTable.js report types
 * Added Dygraphs report types
 * Added DataTables report types
+* Added C3.js report type
 * Added ability to create csv output jobs
 * Added ability to create fixed width output jobs
 * Requires Internet Explorer 8+, or recent versions of other browsers

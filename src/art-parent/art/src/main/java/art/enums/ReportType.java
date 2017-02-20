@@ -46,7 +46,7 @@ public enum ReportType {
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
-	FixedWidth(141);
+	FixedWidth(141), C3(142);
 
 	private final int value;
 
@@ -78,6 +78,7 @@ public enum ReportType {
 			case DataTables:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
+			case C3:
 				return false;
 			default:
 				return true;
@@ -600,6 +601,8 @@ public enum ReportType {
 				return "DataTables: CSV Server";
 			case FixedWidth:
 				return "Fixed Width";
+			case C3:
+				return "C3.js";
 			default:
 				return this.name();
 		}
