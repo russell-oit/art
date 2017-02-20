@@ -134,7 +134,7 @@ Edit report page
 				$('#fileupload').fileupload({
 					url: '${pageContext.request.contextPath}/uploadResources',
 					fileInput: $('#fileuploadInput'),
-					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt)$/i,
+					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt|css)$/i,
 					maxFileSize: maxFileSizeBytes,
 					messages: {
 						acceptFileTypes: '${fileTypeNotAllowedText}',
@@ -276,6 +276,7 @@ Edit report page
 					case 140: //datatables csv server
 					case 0: //tabular
 					case 141: //fixed width
+					case 142: //c3
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -555,6 +556,7 @@ Edit report page
 					case 134: //pivottable.js csv server
 					case 137: //dygraphs csv server
 					case 140: //datatables csv server
+					case 142: //c3
 						$("#resourcesDiv").show();
 						break;
 					default:

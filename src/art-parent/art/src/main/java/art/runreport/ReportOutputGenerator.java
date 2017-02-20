@@ -64,6 +64,7 @@ import art.output.XmlOutput;
 import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
+import art.reportoptions.C3Options;
 import art.reportoptions.CsvOutputArtOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
@@ -749,11 +750,11 @@ public class ReportOutputGenerator {
 				rs = reportRunner.getResultSet();
 				fixedWidthOutput.generateOutput(rs, writer, options);
 				rowsRetrieved = getResultSetRowCount(rs);
-			} else if (reportType ==ReportType.C3) {
+			} else if (reportType == ReportType.C3) {
 				if (isJob) {
-					throw new IllegalStateException("C3.js report types not supported for jobs");
+					throw new IllegalStateException("C3.js report type not supported for jobs");
 				}
-				
+
 				rs = reportRunner.getResultSet();
 				JsonOutput jsonOutput = new JsonOutput();
 				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
@@ -775,6 +776,28 @@ public class ReportOutputGenerator {
 				File templateFile = new File(fullTemplateFileName);
 				if (!templateFile.exists()) {
 					throw new IllegalStateException("Template file not found: " + templateFileName);
+				}
+
+				String optionsString = report.getOptions();
+				if (StringUtils.isNotBlank(optionsString)) {
+					ObjectMapper mapper = new ObjectMapper();
+					C3Options options = mapper.readValue(optionsString, C3Options.class);
+					String cssFileName = options.getCssFile();
+
+					logger.debug("cssFileName='{}'", cssFileName);
+
+					//need to explicitly check if file name is empty string
+					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
+					if (StringUtils.isNotBlank(cssFileName)) {
+						String fullDataFileName = jsTemplatesPath + cssFileName;
+
+						File dataFile = new File(fullDataFileName);
+						if (!dataFile.exists()) {
+							throw new IllegalStateException("Css file not found: " + cssFileName);
+						}
+
+						request.setAttribute("cssFileName", cssFileName);
+					}
 				}
 
 				request.setAttribute("templateFileName", templateFileName);

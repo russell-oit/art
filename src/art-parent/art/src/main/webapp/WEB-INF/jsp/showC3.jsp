@@ -19,8 +19,10 @@
 
 
 <script type="text/javascript">
+	var jsonData = ${data};
+	
 	var data = {
-		json: ${data}
+		json: jsonData
 	};
 
 	var options = {
@@ -30,6 +32,10 @@
 </script>
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${templateFileName}"></script>
+
+<c:if test="${not empty cssFileName}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${cssFileName}">
+</c:if>
 
 <script type="text/javascript">
 	c3.generate(options);

@@ -577,6 +577,7 @@ public class ReportController {
 		validExtensions.add("html"); //for thymeleaf reports
 		validExtensions.add("csv"); //for pivottable.js csv server reports (.csv)
 		validExtensions.add("txt"); //for pivottable.js csv server reports (.txt for other delimited files e.g. tab separated, pipe separated etc)
+		validExtensions.add("css"); //for c3.js additional css
 
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);

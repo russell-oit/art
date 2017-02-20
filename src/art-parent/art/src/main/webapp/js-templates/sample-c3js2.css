@@ -1,0 +1,10 @@
+/* https://stackoverflow.com/questions/35702188/how-to-center-labels-inside-a-c3-js-piechart/35750311 */
+
+.c3-chart-arcs text { 
+    text-anchor: start !important;
+}
+
+
+.c3-target-Large text {
+    text-anchor: end !important;
+}
