@@ -21,6 +21,8 @@ import art.cache.CacheHelper;
 import art.dbutils.DatabaseUtils;
 import art.enums.ConnectionPoolLibrary;
 import art.servlets.Config;
+import art.user.User;
+import art.user.UserService;
 import art.utils.ArtUtils;
 import java.io.IOException;
 import java.sql.Connection;
@@ -30,7 +32,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +56,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ArtDatabaseController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArtDatabaseController.class);
-	
+
 	@Autowired
 	private CacheHelper cacheHelper;
+
+	@Autowired
+	private UserService userService;
 
 	@ModelAttribute("databaseTypes")
 	public Map<String, String> addDatabaseTypes() {
@@ -67,7 +74,7 @@ public class ArtDatabaseController {
 		databaseTypes.remove("msaccess-ucanaccess");
 		databaseTypes.remove("sqlite-xerial");
 		databaseTypes.remove("csv-csvjdbc");
-		
+
 		return databaseTypes;
 	}
 
@@ -95,22 +102,23 @@ public class ArtDatabaseController {
 		artDatabase.setUseBlankPassword(false);
 
 		model.addAttribute("artDatabase", artDatabase);
-		
+
 		return "artDatabase";
 	}
 
 	@RequestMapping(value = "/artDatabase", method = RequestMethod.POST)
 	public String processArtDatabaseConfiguration(
 			@ModelAttribute("artDatabase") @Valid ArtDatabase artDatabase,
-			BindingResult result, Model model, RedirectAttributes redirectAttributes) {
-		
+			BindingResult result, Model model, RedirectAttributes redirectAttributes,
+			HttpSession session) {
+
 		logger.debug("Entering processArtDatabaseConfiguration");
 
 		if (result.hasErrors()) {
 			model.addAttribute("formErrors", "");
 			return "artDatabase";
 		}
-		
+
 		cacheHelper.clearAll();
 
 		//set password field as appropriate
@@ -179,11 +187,25 @@ public class ArtDatabaseController {
 
 				ps.executeBatch();
 			}
-			
+
 			Config.saveArtDatabaseConfiguration(artDatabase);
 
 			Config.initializeArtDatabase();
-			
+
+			//refresh session user credentials as per new database
+			boolean initialSetup = BooleanUtils.toBoolean((Boolean) session.getAttribute("initialSetup"));
+			if (!initialSetup) {
+				User sessionUser = (User) session.getAttribute("sessionUser");
+				String sessionUsername = sessionUser.getUsername();
+				User updatedUser = userService.getUser(sessionUsername);
+				if (updatedUser == null || !updatedUser.isActive()) {
+					session.invalidate();
+					return "redirect:/login";
+				} else {
+					session.setAttribute("sessionUser", updatedUser);
+				}
+			}
+
 			//use redirect after successful submission so that a browser page refresh e.g. F5
 			//doesn't resubmit the page (PRG pattern)
 			redirectAttributes.addFlashAttribute("message", "artDatabase.message.configurationSaved");
