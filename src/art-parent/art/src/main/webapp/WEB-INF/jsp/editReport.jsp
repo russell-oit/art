@@ -277,6 +277,7 @@ Edit report page
 					case 0: //tabular
 					case 141: //fixed width
 					case 142: //c3
+					case 143: //chart.js
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -427,6 +428,7 @@ Edit report page
 					case 139: //datatables csv local
 					case 140: //datatables csv server
 					case 142: //c3
+					case 143: //chart.js
 						$("#templateDiv").show();
 						break;
 					default:
@@ -533,6 +535,7 @@ Edit report page
 					case 140: //datatables csv server
 					case 141: //fixed width
 					case 142: //c3
+					case 143: //chart.js
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:

@@ -219,6 +219,7 @@ public class RunReportHelper {
 			case DataTablesCsvServer:
 			case FixedWidth:
 			case C3:
+			case ChartJs:
 				enableReportFormats = false;
 				break;
 			default:
@@ -341,6 +342,7 @@ public class RunReportHelper {
 			case DataTablesCsvServer:
 			case FixedWidth:
 			case C3:
+			case ChartJs:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -373,6 +375,7 @@ public class RunReportHelper {
 			case DataTablesCsvServer:
 			case FixedWidth:
 			case C3:
+			case ChartJs:
 				enableEmail = false;
 				break;
 			default:

@@ -65,6 +65,7 @@ import art.report.ChartOptions;
 import art.report.Report;
 import art.report.ReportService;
 import art.reportoptions.C3Options;
+import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
@@ -803,6 +804,52 @@ public class ReportOutputGenerator {
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("data", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showC3.jsp").include(request, response);
+			} else if (reportType == ReportType.ChartJs) {
+				if (isJob) {
+					throw new IllegalStateException("Chart.js report type not supported for jobs");
+				}
+
+				rs = reportRunner.getResultSet();
+				JsonOutput jsonOutput = new JsonOutput();
+				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				String jsonData = jsonOutputResult.getJsonData();
+				rowsRetrieved = jsonOutputResult.getRowCount();
+
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//need to explicitly check if template file is empty string
+				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+				if (StringUtils.isBlank(templateFileName)) {
+					throw new IllegalArgumentException("Template file not specified");
+				}
+
+				File templateFile = new File(fullTemplateFileName);
+				if (!templateFile.exists()) {
+					throw new IllegalStateException("Template file not found: " + templateFileName);
+				}
+
+				ChartJsOptions options;
+				String optionsString = report.getOptions();
+				if (StringUtils.isBlank(optionsString)) {
+					options = new ChartJsOptions();
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, ChartJsOptions.class);
+				}
+
+				int width = options.getWidth();
+				int height = options.getHeight();
+
+				request.setAttribute("width", width);
+				request.setAttribute("height", height);
+
+				request.setAttribute("templateFileName", templateFileName);
+				request.setAttribute("data", jsonData);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

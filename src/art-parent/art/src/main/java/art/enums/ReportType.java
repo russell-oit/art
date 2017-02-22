@@ -46,7 +46,7 @@ public enum ReportType {
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
-	FixedWidth(141), C3(142);
+	FixedWidth(141), C3(142), ChartJs(143);
 
 	private final int value;
 
@@ -79,6 +79,7 @@ public enum ReportType {
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
 			case C3:
+			case ChartJs:
 				return false;
 			default:
 				return true;
@@ -603,6 +604,8 @@ public enum ReportType {
 				return "Fixed Width";
 			case C3:
 				return "C3.js";
+			case ChartJs:
+				return "Chart.js";
 			default:
 				return this.name();
 		}
