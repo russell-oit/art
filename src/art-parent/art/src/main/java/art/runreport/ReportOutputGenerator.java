@@ -790,10 +790,10 @@ public class ReportOutputGenerator {
 					//need to explicitly check if file name is empty string
 					//otherwise file.exists() will return true because fullDataFileName will just have the directory name
 					if (StringUtils.isNotBlank(cssFileName)) {
-						String fullDataFileName = jsTemplatesPath + cssFileName;
+						String fullCssFileName = jsTemplatesPath + cssFileName;
 
-						File dataFile = new File(fullDataFileName);
-						if (!dataFile.exists()) {
+						File cssFile = new File(fullCssFileName);
+						if (!cssFile.exists()) {
 							throw new IllegalStateException("Css file not found: " + cssFileName);
 						}
 
@@ -841,12 +841,7 @@ public class ReportOutputGenerator {
 					options = mapper.readValue(optionsString, ChartJsOptions.class);
 				}
 
-				int width = options.getWidth();
-				int height = options.getHeight();
-
-				request.setAttribute("width", width);
-				request.setAttribute("height", height);
-
+				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("data", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
