@@ -257,7 +257,9 @@ public class ReportOutputGenerator {
 			ReportType reportType = report.getReportType();
 
 			//generate report output
-			if (reportType.isJasperReports() || reportType.isJxls()) {
+			if (true) {
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
+			} else if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
 					JasperReportsOutput jrOutput = new JasperReportsOutput();
 					if (reportType == ReportType.JasperReportsArt) {
