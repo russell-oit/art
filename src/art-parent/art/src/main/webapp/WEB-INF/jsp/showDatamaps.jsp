@@ -36,6 +36,7 @@
 	//https://gist.github.com/markmarkoh/8856417
 	//http://192.156.137.110/gis/search.asp
 	//https://www.arcgis.com/home/item.html?id=5f83ca29e5b849b8b05bc0b281ae27bc
+	//http://www.spatialthoughts.com/blog/gis/mapshaper-command-line/
 	//https://russiansphinx.blogspot.co.ke/2014/06/simplifying-shapefiles-in-mapshaper.html
 	//https://gis.stackexchange.com/questions/97884/how-to-simplify-shapefiles-without-losing-attributes
 	//https://github.com/markmarkoh/datamaps/blob/master/src/examples/highmaps_world.html
