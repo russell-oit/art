@@ -58,7 +58,7 @@
     <tbody> 
      <tr> 
       <td><strong>URL changes</strong></td> 
-      <td>URLs that were being used in bookmarks or other links will need updating. Review the new application to see the appropriate URL to use or look at the admin manual to see new names for URL parameters.</td> 
+      <td>URLs that were being used in bookmarks or other links will need updating. Review the new application to see the appropriate URL to use or look at the admin manual to see new URLs.</td> 
      </tr> 
      <tr> 
       <td><strong>ART Database configuration</strong></td> 
@@ -111,6 +111,14 @@
      <tr> 
       <td><strong>LOOKUP rule values</strong></td> 
       <td>If you had any rule values of type <strong>LOOKUP</strong>, these will no longer be in effect as there is no longer an option for lookup rule values. Instead, define a user group, assign rule values to this user group and put the required users into this user group.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Non-labelled multi parameters</strong></td> 
+      <td>For reports that use multi parameters where the parameter name is not included in the sql source e.g. <code>... IN(#param#)</code>, the reports will need to be updated to include the parameter placeholder in the sql source.</td> 
+     </tr> 
+     <tr> 
+      <td><strong>Non-labelled rules</strong></td> 
+      <td>For reports that use rules, if the <code>#rules#</code> label doesn't exist in the sql source, such reports will need to be updated to include this label, so that rules can be applied.</td> 
      </tr> 
     </tbody> 
    </table>

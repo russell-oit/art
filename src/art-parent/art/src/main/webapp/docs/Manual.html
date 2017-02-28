@@ -3,7 +3,7 @@
  <head> 
   <meta charset="UTF-8" /> 
   <meta name="pdfTitle" content="ART Administration Manual" /> 
-  <meta name="version" content="3.0-beta5" /> 
+  <meta name="version" content="3.0-beta7" /> 
   <title>ART - Administration Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico" /> 
   <style type="text/css">
@@ -229,7 +229,7 @@
       <li><strong>ART Administrators</strong> define datasources, reports, users, etc.</li> 
       <li><strong>ART Users</strong> run reports and view the results in a browser or in a variety of file formats.<br /> </li> 
      </ul> 
-     <p>ART is open source software distributed under the <a class="" href="http://www.gnu.org/licenses/gpl-2.0.html" rel="nofollow">GPL license</a>. You can install and use it without any charge.</p> 
+     <p>ART is open source software distributed under the <a class="" href="https://www.gnu.org/licenses/gpl-3.0.en.html" rel="nofollow">GPLv3 license</a>. You can install and use it without any charge.</p> 
      <h2 id="administration-overview">Administration Overview</h2> 
      <p>The Administrators define a number of items including</p> 
      <ul> 
@@ -255,8 +255,8 @@
      <p>The typical flow when defining a new report is</p> 
      <ul> 
       <li>Obtain the plain SQL statement</li> 
-      <li>Define the report and report parameters</li> 
-      <li>Modify access rights to allow users to run the report</li> 
+      <li>Define the report</li> 
+      <li>Update access rights to allow users to run the report</li> 
      </ul> 
     </div> 
    </div> 
@@ -934,7 +934,7 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        </tr> 
        <tr> 
         <td><strong>Template</strong></td> 
-        <td>For jasper reports, select the .jrxml file to use. For pivot table (mondrian) reports, select the mondrian cube .xml file to use. For jXLS reports, select the .xls or .xlsx template file to use. For FreeMarker reports, select the .ftl template file to use. For XDocReport reports, select the .docx, .odt or .pptx template file to use.</td> 
+        <td>For jasper reports, select the .jrxml file to use. For pivot table (mondrian) reports, select the mondrian cube .xml file to use. For jXLS reports, select the .xls or .xlsx template file to use. For FreeMarker reports, select the .ftl template file to use. For XDocReport reports, select the .docx, .odt or .pptx template file to use. For ReactPivot reports, specify the .js file that contains the react pivot configuration for the report.</td> 
        </tr> 
        <tr> 
         <td><strong>XMLA Datasource</strong></td> 
@@ -943,6 +943,10 @@ ping -a &lt;ip address of domain controller&gt; (This will get the hostname of t
        <tr> 
         <td><strong>XMLA Catalog</strong></td> 
         <td>For mondrian or mondrian via xmla, the catalog name as it appears in the mondrian cube xml file. For SSAS, the database name.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>Options</strong></td> 
+        <td>Provides additional options depending on the report type. The options are specified in JSON format with different report types expecting different JSON specifications.</td> 
        </tr> 
        <tr> 
         <td><strong>Source</strong></td> 
@@ -1263,12 +1267,26 @@ FROM mytable
       <li><strong>Pivot Table: Microsoft XMLA</strong><br /> Used to provide OLAP analysis by accessing an SQL Server Analysis Services server via the xmla protocol. </li> 
       <li><strong>jXLS Spreadsheet: Template Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query within the jXLS template will be used to generate the results. The query will be run against the selected datasource.</li> 
       <li><strong>jXLS Spreadsheet: ART Query</strong><br /> Displays a report in MS Excel format(xls or xlsx) based on a pre-formatted jXLS template. The query as defined in the SQL source will be used to generate the results. The query will be run against the selected datasource.</li> 
-      <li><strong>FreeMarker</strong><br /> Displays a report in the browser based on a freemarker (http://freemarker.org/) template. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>FreeMarker</strong><br /> Displays a report in the browser based on a freemarker template - <a href="http://freemarker.org/." rel="nofollow">http://freemarker.org/.</a> The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</li> 
+      <li><strong>Thymeleaf</strong><br /> Displays a report in the browser based on a thymeleaf template - <a href="http://www.thymeleaf.org/." rel="nofollow">http://www.thymeleaf.org/.</a> The query as defined in the SQL source will be used to generate the results. The data can be accessed in the template by iterating over the <strong>results</strong> variable. Report parameters are also available using the parameter name e.g. <strong>${param1.value}</strong>. An example report is included in the demo database.</li> 
+      <li><strong>ReactPivot</strong><br /> Generates a pivot-table-like report based on tabular data using the ReactPivot library - <a href="https://davidguttman.github.io/react-pivot/." rel="nofollow">https://davidguttman.github.io/react-pivot/.</a> You will need to create a javascript file that contains the react pivot configuration for the report. You need to define <strong>dimensions</strong>, <strong>reduce</strong> and <strong>calculations</strong> options. Other options can also be defined to override the defaults. The demo database also comes with some samples of this report type. This report type is useful when you want summary and analysis of numeric data by category.</li> 
+      <li><strong>PivotTable.js</strong><br /> Generates a pivot table based on data from a database - making use of the PivotTable.js library - <a href="https://github.com/nicolaskruchten/pivottable." rel="nofollow">https://github.com/nicolaskruchten/pivottable.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains a sample report of this type. Performace should be acceptable up to 100,000 rows, depending on the user's computer.</li> 
+      <li><strong>PivotTable.js: CSV Local</strong><br /> Enables generation of a pivot table using data from a user supplied csv file. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</li> 
+      <li> <p><strong>PivotTable.js: CSV Server</strong><br /> Generates a pivot table based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
+       <div class="codehilite"> 
+        <pre>{
+     &quot;dataFile&quot;: &quot;file_name.csv&quot;
+}
+</pre> 
+       </div> </li> 
+     </ul> 
+     <p>Additionally, a javascript template file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
+     <ul> 
       <li><strong>XDocReport: FreeMarker engine - Docx</strong><br /> You can use MS Word (docx), LibreOffice Writer (odt) or MS PowerPoint (pptx) docments as a template for reports. You simply create the document as you would like it to appear and then insert fields that will be replaced with data at runtime. This uses the <a class="" href="https://github.com/opensagres/xdocreport" rel="nofollow">XDocReport</a> library. You can have a look at the XDocReport wiki, <a href="https://github.com/opensagres/xdocreport/wiki" rel="nofollow">https://github.com/opensagres/xdocreport/wiki</a>, for examples on how to create templates for different needs. The query results will be contained in a variable named <strong>results</strong> which can be used in the FreeMarker or Velocity expressions.</li> 
      </ul> 
-     <p>Displays a report based on the selected docx template, which uses freemarker syntax (http://freemarker.org/docs/index.html) for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
+     <p>Displays a report based on the selected docx template, which uses freemarker syntax - <a href="http://freemarker.org/docs/index.html" rel="nofollow">http://freemarker.org/docs/index.html</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</p> 
      <ul> 
-      <li><strong>XDocReport: Velocity engine - Docx</strong><br /> Displays a report based on the selected docx template, which uses velocity syntax (https://velocity.apache.org/engine/devel/user-guide.html) for expressions within the document. The query as defined in the SQL source will be used to generate the results.</li> 
+      <li><strong>XDocReport: Velocity engine - Docx</strong><br /> Displays a report based on the selected docx template, which uses velocity syntax - <a href="https://velocity.apache.org/engine/devel/user-guide.html" rel="nofollow">https://velocity.apache.org/engine/devel/user-guide.html</a> for expressions within the document. The query as defined in the SQL source will be used to generate the results.</li> 
       <li><strong>XDocReport: FreeMarker engine - ODT</strong><br /> Displays a report based on the selected odt template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</li> 
       <li><strong>XDocReport: Velocity engine - ODT</strong><br /> Displays a report based on the selected odt template, which uses velocity syntax. The query as defined in the SQL source will be used to generate the results.</li> 
       <li><strong>XDocReport: FreeMarker engine - PPTX</strong><br /> Displays a report based on the selected pptx template, which uses freemarker syntax. The query as defined in the SQL source will be used to generate the results.</li> 
@@ -1295,6 +1313,180 @@ pr-02|Desktops
 </pre> 
        </div> </li> 
       <li> <p><strong>Dynamic Job Recipients</strong><br /> Defines a query that can be used to specify dynamic recipients when scheduling a job. It can have either one column, or multiple columns. In either case, the first column must contain email addresses for the recipients.</p> </li> 
+      <li><strong>Dygraphs</strong><br /> Generates a time series chart using data from a database - making use of the dygraphs library - <a href="http://dygraphs.com/." rel="nofollow">http://dygraphs.com/.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. The query must have a minimum of two columns. The first can be a date or number field, and will be the data on the x-axis. The second column must be a number and will represent the first series data. Additional columns of number type can be included, which will be data for additional series. There should be no record with a null date in the query result. If you zoom into the data by clicking and dragging, you double-click on the chart to zoom out.</li> 
+      <li><strong>Dygraphs: CSV Local</strong><br /> Enables generation of a dygraphs chart using data from a user supplied csv file. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv. The first column of the data, if a date, should have dates formatted as <code>yyyy/MM/dd</code> e.g. 2017/02/17, and datetime data formatted as <code>yyyy/MM/dd HH:mm</code> e.g. 2017/02/17 16:02 or <code>yyyy/MM/dd HH:mm:ss</code> e.g. 2017/02/17 16:02:59. The csv data should not contain any quotes.</li> 
+      <li> <p><strong>Dygraphs: CSV Server</strong><br /> Generates a dygraphs chart based on data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
+       <div class="codehilite"> 
+        <pre>{
+     &quot;dataFile&quot;: &quot;file_name.csv&quot;
+}
+</pre> 
+       </div> </li> 
+     </ul> 
+     <p>Additionally, a javascript template file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
+     <ul> 
+      <li> <p><strong>DataTables</strong><br /> Enables display of data from a database in a table using the DataTables library - <a href="https://datatables.net/." rel="nofollow">https://datatables.net/.</a> A javascript file containing custom configuration can be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. By default, column filters are added to all columns. If you would like to turn off column filters, provide a json object in the <strong>Options</strong> field, setting the <strong>showColumnFilters</strong> property to <strong>false</strong> e.g.</p> 
+       <div class="codehilite"> 
+        <pre>{
+     &quot;showColumnFilters&quot;: false
+}
+</pre> 
+       </div> </li> 
+      <li> <p><strong>DataTables: CSV Local</strong><br /> Enables display of data from a user supplied csv file in a DataTables table. Additionally, a javascript file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> </li> 
+      <li> <p><strong>DataTables: CSV Server</strong><br /> Enables display of data from a specific csv file uploaded to the server. This file can be uploaded using the <strong>Add files</strong> button. The file name will also need to be specified in the <strong>Options</strong> field with a format similar to the following. A <strong>dataFile</strong> attribute is expected, whose value is a string - the name of the csv file.</p> 
+       <div class="codehilite"> 
+        <pre>{
+     &quot;dataFile&quot;: &quot;file_name.csv&quot;
+}
+</pre> 
+       </div> </li> 
+     </ul> 
+     <p>Additionally, a javascript template file can be specified in the <strong>Template</strong> field with custom configuration options. Any delimited file can be used, not only csv.</p> 
+     <ul> 
+      <li><strong>Fixed Width</strong><br /> Generates fixed width output, primarily for jobs that require output in fixed width format. The sql query determines which data will be in the output. The <strong>Options</strong> field determines the formatting of this output and has the following possible properties.</li> 
+     </ul> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>fieldLengths</strong></td> 
+        <td>array of integers</td> 
+        <td>Used to define the field lengths of the output e.g. <code>[5,6]</code> means that the first field will have a length of 5 and the second field will have a length of 6</td> 
+       </tr> 
+       <tr> 
+        <td><strong>fieldLengthsByName</strong></td> 
+        <td>array of objects</td> 
+        <td>Each object specifies the field name and the field length e.g. <code>[{&quot;order_id&quot;: 8}, {&quot;order_date&quot;: 14}]</code> means the <code>order_id</code> field will have a length of 8 and the <code>order_date</code> field will have a length of 14. You must specify either the <strong>fieldLengths</strong> or the <strong>fieldLengthsByName</strong> property.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>includeHeaders</strong></td> 
+        <td>optional - boolean (default = true)</td> 
+        <td>Determines whether the column names will be included in the output as the first row</td> 
+       </tr> 
+       <tr> 
+        <td><strong>defaultAlignmentForHeaders</strong></td> 
+        <td>optional - string</td> 
+        <td>Either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. If present, overrides any field alignment set and uses the given alignment for the header columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>padding</strong></td> 
+        <td>optional - string (default = space)</td> 
+        <td>A single character defining the default padding to use for fields. Must not be the empty string.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>useDefaultPaddingForHeaders</strong></td> 
+        <td>optional - boolean (default = true)</td> 
+        <td>Determines if the headers should use the global <strong>padding</strong> setting or use the padding set for individual fields</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dateFormat</strong></td> 
+        <td>optional - string</td> 
+        <td>Determines the format that should be used for DATE columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dateTimeFormat</strong></td> 
+        <td>optional - string</td> 
+        <td>Determines the format that should be used for DATETIME columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>numberFormat</strong></td> 
+        <td>optional - string</td> 
+        <td>Determines the format that should be used for numeric columns</td> 
+       </tr> 
+       <tr> 
+        <td><strong>fieldDateFormats</strong></td> 
+        <td>optional - array of objects</td> 
+        <td>Each object specifies the date format and an array of fields that should use that format e.g. <code>[{&quot;dd/MM/yyyy&quot;: [&quot;order_date&quot;, &quot;due_date&quot;]}, {&quot;dd-MMM-yyyy&quot;: [&quot;payment_date&quot;]}]</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>fieldNumberFormats</strong></td> 
+        <td>optional - array of objects</td> 
+        <td>Each object specifies the number format and an array of fields that should use that format e.g. <code>[{&quot;0.00&quot;: [&quot;amount&quot;]}, {&quot;#,##0.#&quot;: [&quot;volume&quot;]}]</code></td> 
+       </tr> 
+       <tr> 
+        <td><strong>fieldAlignmentByName</strong></td> 
+        <td>optional - array of objects</td> 
+        <td>Each object specifies the alignment to be used and an array of field names that should use that alignment e.g. <code>[{&quot;right&quot;: [&quot;amount&quot;, &quot;volume&quot;]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>fieldAlignmentByPosition</strong></td> 
+        <td>optional - array of objects</td> 
+        <td>Each object specifies the alignment to be used and an array of field positions that should use that alignment e.g. <code>[{&quot;right&quot;: [2, 5]}]</code>. The alignment is either <strong>left</strong>, <strong>right</strong> or <strong>center</strong>. The first field in the output is marked as position 0.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>fieldPaddingByName</strong></td> 
+        <td>optional - array of objects</td> 
+        <td>Each object specifies the padding to be used and an array of field names that should use that padding e.g. <code>[{&quot;_&quot;: [&quot;amount&quot;, &quot;volume&quot;]}]</code>. The padding should be a single character.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>fieldPaddingByPosition</strong></td> 
+        <td>optional - array of objects</td> 
+        <td>Each object specifies the padding to be used and an array of field positions that should use that padding e.g. <code>[{&quot;_&quot;: [2, 5]}]</code>. The padding should be a single character. The first field in the output is marked as position 0.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <p>The demo database has a few sample fixed width reports and jobs.</p> 
+     <ul> 
+      <li> <p><strong>C3.js</strong><br /> Generates charts using the c3.js library - <a href="http://c3js.org/." rel="nofollow">http://c3js.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. If you would like to use custom css, provide a json object in the <strong>Options</strong> field, setting the <strong>cssFile</strong> property to the file name of the css file to use. This file can be uploaded using the <strong>Add files</strong> option.</p> 
+       <div class="codehilite"> 
+        <pre>{
+     &quot;cssFile&quot;: &quot;file_name.css&quot;
+}
+</pre> 
+       </div> </li> 
+      <li> <p><strong>Chart.js</strong><br /> Generates charts using the chart.js library - <a href="http://www.chartjs.org/." rel="nofollow">http://www.chartjs.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. In the <strong>Options</strong> field, you can specify the <strong>width</strong> (integer - default = 300) or <strong>height</strong> (integer - default = 100) properties to define a custom width or height for the chart.</p> </li> 
+      <li> <p><strong>Datamaps</strong><br /> Enables display of data on a map, using the Datamaps library - <a href="https://datamaps.github.io/" rel="nofollow">https://datamaps.github.io/</a>, using data from a database. A javascript file containing datamaps configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> </li> 
+     </ul> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>datamapsJsFile</strong></td> 
+        <td>string</td> 
+        <td>The file name of the datamaps javascript file. Appropriate files can be downloaded from <a href="https://github.com/markmarkoh/datamaps/tree/master/dist." rel="nofollow">https://github.com/markmarkoh/datamaps/tree/master/dist.</a></td> 
+       </tr> 
+       <tr> 
+        <td><strong>width</strong></td> 
+        <td>optional - string (default = 500px)</td> 
+        <td>CSS width for the div that contains the map</td> 
+       </tr> 
+       <tr> 
+        <td><strong>height</strong></td> 
+        <td>optional - string (default = 300px)</td> 
+        <td>CSS height for the div that contains the map</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dataFile</strong></td> 
+        <td>optional - string</td> 
+        <td>The file name of the json or csv file that contains data elements for the map. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dataType</strong></td> 
+        <td>optional - string (default = json)</td> 
+        <td>Either <strong>csv</strong> if the dataFile specified is in csv format or <strong>json</strong> if it's in json format.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>mapFile</strong></td> 
+        <td>optional - string</td> 
+        <td>The file name of a file that contains custom map data in topoJSON format. When using this option, use the <strong>none</strong> datamaps file. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <p>If using a custom map and you have a shapefile, you can <strong>Import</strong> the zip file with shapefile specification files to <a href="http://mapshaper.org/" rel="nofollow">http://mapshaper.org/</a> and then use the <strong>Export</strong> option to convert the shapefile to <strong>topoJSON</strong>. You will then use the topoJSON file for the report.</p> 
+     <ul> 
+      <li><strong>Datamaps: File</strong><br /> Enables display of data on a map, using the Datamaps library, using data from a csv or json file. You can also use this report type if the data is hardcoded within the template file. The demo database contains some sample reports of this type.</li> 
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
@@ -1448,6 +1640,11 @@ WHERE product_name IN(#product_list#)
         <td><strong>startSelectParametersHidden</strong></td> 
         <td>Boolean</td> 
         <td>If present, indicates that the parameters box should start as hidden/collapsed. The parameters box can then be displayed by clicking on the <strong>Parameters</strong> button.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>prettyPrint</strong></td> 
+        <td>Boolean</td> 
+        <td>For <strong>json</strong> and <strong>jsonBrowser</strong> report formats, determines if the json output should be pretty printed.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -1715,6 +1912,21 @@ WHERE product_name IN(#product_list#)
         <td><strong>pptx</strong></td> 
         <td>Document (pptx)</td> 
         <td>Creates a Microsoft PowerPoint document file to download (pptx format). Only available for XDocReport - PPTX reports.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>json</strong></td> 
+        <td>JSON</td> 
+        <td>Outputs data in json format</td> 
+       </tr> 
+       <tr> 
+        <td><strong>jsonBrowser</strong></td> 
+        <td>JSON (Browser)</td> 
+        <td>Outputs data in json format, for display in a browser. Data is output in a <code>&lt;pre&gt;</code> tag.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>csv</strong></td> 
+        <td>CSV</td> 
+        <td>Outputs data in csv format. Can also use another delimiter as defined in the report <strong>Options</strong> field - using the <strong>delimiter</strong> property. This format is primarily intended for jobs.</td> 
        </tr> 
       </tbody> 
      </table> 
@@ -2283,7 +2495,7 @@ WHERE REGION = #region#
       <li>Using the <code>&lt;REPORTID&gt;</code> tag, tabular reports are displayed using the htmlFancy format. To override this, use the <code>&lt;URL&gt;</code> tag and type the direct access URL for the report</li> 
       <li>Tag names are case sensitive (use uppercase)</li> 
       <li>Minimum refresh period allowed is 5 seconds. Be careful with this so as not to overload the server and databases.</li> 
-      <li>If you need to use xml special characters within tag content, ensure to replace them with the relevant xml character entities e.g. if the <code>&lt;URL&gt;</code> tag should contain a url like <code>http://localhost:8080/art/app/runReport.do?reportId=1&amp;p-param1=test</code>, you'll need to replace the <code>&amp;</code> character with <code>&amp;amp;</code>, to have the url as <code>http://localhost:8080/art/app/runReport.do?reportId=1&amp;amp;p-param1=test</code>. For a list of the 5 special xml characters and their respective replacement strings or character entities, see <a href="http://support.esri.com/technical-article/000005870" rel="nofollow">http://support.esri.com/technical-article/000005870</a></li> 
+      <li>If you need to use xml special characters within tag content, ensure to replace them with the relevant xml character entities e.g. if the <code>&lt;URL&gt;</code> tag should contain a url like <code>http://localhost:8080/art/runReport?reportId=1&amp;p-param1=test</code>, you'll need to replace the <code>&amp;</code> character with <code>&amp;amp;</code>, to have the url as <code>http://localhost:8080/art/runReport?reportId=1&amp;amp;p-param1=test</code>. For a list of the 5 special xml characters and their respective replacement strings or character entities, see <a href="http://support.esri.com/technical-article/000005870" rel="nofollow">http://support.esri.com/technical-article/000005870</a></li> 
      </ul> 
      <h2 id="gridstack-dashboards">Gridstack Dashboards</h2> 
      <p>Gridstack dashboards allow for specifying exact positioning of report items within the dashboard, specifying the height and width that the report items should occupy, allowing for resizing the items dynamically using the mouse, and moving the items around using drag-and-drop.</p> 
@@ -3233,7 +3445,7 @@ spnego-server {
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
-      <li>The &quot;service user account&quot; configured to start and stop the Tomcat service needs to have appropriate permissions, otherwise you may get errors when accessing ART. In particular, ART requires write access to the <code>ART_HOME\WEB-INF\work</code> directory.</li> 
+      <li>The &quot;service user account&quot; configured to start and stop the Tomcat service needs to have appropriate permissions, otherwise you may get errors when accessing ART. In particular, ART requires write access to the <code>ART_HOME\WEB-INF\work</code> and <code>ART_HOME\js-templates</code> directories.</li> 
      </ul> 
      <p>If Tomcat is run from a batch file</p> 
      <ul> 
@@ -3445,7 +3657,7 @@ a2enmod proxy_http
 </pre> 
        </div> </li> 
       <li> <p>Once you have your translated properties file in the i18n folder, you can restart the application server to make the new translation available to the application, or wait for 1 hour after which the messages are refreshed.</p> </li> 
-      <li>Now you can log in to the application and include the <strong>lang=xx</strong> parameter in browser url to activate the new language e.g. <code>http://localhost:8080/art/app/reports.do?lang=xx</code></li> 
+      <li>Now you can log in to the application and include the <strong>lang=xx</strong> parameter in browser url to activate the new language e.g. <code>http://localhost:8080/art/reports?lang=xx</code></li> 
       <li>If you would like the new language to be listed for selection within the application e.g. on the login page, add the language code and the language name to the <strong>ART_HOME\WEB-INF\languages.properties</strong> file, save the file and restart the application server.</li> 
       <li>If in addition you would like this new translation to be included in future ART versions, email the properties file to <strong>tanyona</strong> (at) <strong>users.sf.net</strong> or create a new post on the <a class="" href="https://sourceforge.net/p/art/discussion/352129/">Discussion forum</a> and attach the file there.</li> 
      </ul> 
