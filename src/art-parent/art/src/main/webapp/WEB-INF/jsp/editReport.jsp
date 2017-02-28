@@ -134,7 +134,7 @@ Edit report page
 				$('#fileupload').fileupload({
 					url: '${pageContext.request.contextPath}/uploadResources',
 					fileInput: $('#fileuploadInput'),
-					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt|css)$/i,
+					acceptFileTypes: /(\.|\/)(jrxml|png|jpe?g|csv|txt|css|js|json)$/i,
 					maxFileSize: maxFileSizeBytes,
 					messages: {
 						acceptFileTypes: '${fileTypeNotAllowedText}',
@@ -278,6 +278,8 @@ Edit report page
 					case 141: //fixed width
 					case 142: //c3
 					case 143: //chart.js
+					case 144: //datamaps
+					case 145: //datamaps file
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -301,6 +303,7 @@ Edit report page
 						case 137: //dygraphs csv server
 						case 139: //datatables csv local
 						case 140: //datatables csv server
+						case 145: //datamaps file
 							$("#reportSourceDiv").hide();
 							break;
 						default:
@@ -330,6 +333,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
 					case 140: //datatables csv server
+					case 145: //datamaps file
 						$("#reportSourceLabel").hide();
 						break;
 					default:
@@ -378,6 +382,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
 					case 140: //datatables csv server
+					case 145: //datamaps file
 						$("#usesRulesDiv").hide();
 						break;
 					default:
@@ -396,6 +401,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
 					case 140: //datatables csv server
+					case 145: //datamaps file
 						$("#datasourceDiv").hide();
 						break;
 					default:
@@ -429,6 +435,8 @@ Edit report page
 					case 140: //datatables csv server
 					case 142: //c3
 					case 143: //chart.js
+					case 144: //datamaps
+					case 145: //datamaps file
 						$("#templateDiv").show();
 						break;
 					default:
@@ -468,6 +476,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
 					case 140: //datatables csv server
+					case 145: //datamaps file
 						$("#displayResultsetDiv").hide();
 						break;
 					default:
@@ -536,6 +545,8 @@ Edit report page
 					case 141: //fixed width
 					case 142: //c3
 					case 143: //chart.js
+					case 144: //datamaps
+					case 145: //datamaps file
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -560,6 +571,8 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 140: //datatables csv server
 					case 142: //c3
+					case 144: //datamaps
+					case 145: //datamaps file
 						$("#resourcesDiv").show();
 						break;
 					default:
@@ -584,6 +597,7 @@ Edit report page
 					case 137: //dygraphs csv server
 					case 139: //datatables csv local
 					case 140: //datatables csv server
+					case 145: //datamaps file
 						$("#fetchSizeDiv").hide();
 						break;
 					default:

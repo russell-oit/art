@@ -220,6 +220,8 @@ public class RunReportHelper {
 			case FixedWidth:
 			case C3:
 			case ChartJs:
+			case Datamaps:
+			case DatamapsFile:
 				enableReportFormats = false;
 				break;
 			default:
@@ -262,6 +264,7 @@ public class RunReportHelper {
 			case DygraphsCsvServer:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
+			case DatamapsFile:
 				enableShowSql = false;
 				enableShowSelectedParameters = false;
 				break;
@@ -343,6 +346,8 @@ public class RunReportHelper {
 			case FixedWidth:
 			case C3:
 			case ChartJs:
+			case Datamaps:
+			case DatamapsFile:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -376,6 +381,8 @@ public class RunReportHelper {
 			case FixedWidth:
 			case C3:
 			case ChartJs:
+			case Datamaps:
+			case DatamapsFile:
 				enableEmail = false;
 				break;
 			default:

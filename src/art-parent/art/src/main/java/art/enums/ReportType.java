@@ -46,7 +46,7 @@ public enum ReportType {
 	HorizontalBar2DChart(-16), StackedHorizontalBar2DChart(-17),
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
-	FixedWidth(141), C3(142), ChartJs(143);
+	FixedWidth(141), C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145);
 
 	private final int value;
 
@@ -80,9 +80,26 @@ public enum ReportType {
 			case DataTablesCsvServer:
 			case C3:
 			case ChartJs:
+			case Datamaps:
+			case DatamapsFile:
 				return false;
 			default:
 				return true;
+		}
+	}
+	
+	/**
+	 * Returns <code>true</code> if this is a database or file datamaps report
+	 *
+	 * @return <code>true</code> if this is a database or file datamaps report
+	 */
+	public boolean isDatamaps() {
+		switch (this) {
+			case Datamaps:
+			case DatamapsFile:
+				return true;
+			default:
+				return false;
 		}
 	}
 
@@ -606,6 +623,10 @@ public enum ReportType {
 				return "C3.js";
 			case ChartJs:
 				return "Chart.js";
+			case Datamaps:
+				return "Datamaps";
+			case DatamapsFile:
+				return "Datamaps: File";
 			default:
 				return this.name();
 		}

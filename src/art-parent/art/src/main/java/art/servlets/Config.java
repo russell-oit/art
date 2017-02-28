@@ -166,7 +166,11 @@ public class Config extends HttpServlet {
 		setJspEnumValues(ctx);
 
 		//set application path
-		appPath = ctx.getRealPath("");
+		appPath = ctx.getRealPath("/");
+
+		if (!StringUtils.right(appPath, 1).equals(File.separator)) {
+			appPath = appPath + File.separator;
+		}
 
 		//set web-inf path
 		webinfPath = appPath + "WEB-INF" + File.separator;

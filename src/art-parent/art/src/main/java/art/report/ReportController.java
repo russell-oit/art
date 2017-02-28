@@ -578,6 +578,8 @@ public class ReportController {
 		validExtensions.add("csv"); //for pivottable.js csv server reports (.csv)
 		validExtensions.add("txt"); //for pivottable.js csv server reports (.txt for other delimited files e.g. tab separated, pipe separated etc)
 		validExtensions.add("css"); //for c3.js additional css
+		validExtensions.add("js"); //for datamaps additional js
+		validExtensions.add("json"); //for datamaps optional data file
 
 		String filename = file.getOriginalFilename();
 		logger.debug("filename='{}'", filename);
@@ -607,6 +609,8 @@ public class ReportController {
 			case DataTablesCsvServer:
 			case C3:
 			case ChartJs:
+			case Datamaps:
+			case DatamapsFile:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			default:

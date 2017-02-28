@@ -615,6 +615,7 @@ public class ReportRunner {
 			case DygraphsCsvServer:
 			case DataTablesCsvLocal:
 			case DataTablesCsvServer:
+			case DatamapsFile:
 				return;
 			default:
 			//do nothing

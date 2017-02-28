@@ -69,6 +69,7 @@ import art.reportoptions.ChartJsOptions;
 import art.reportoptions.CsvOutputArtOptions;
 import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
+import art.reportoptions.DatamapsOptions;
 import art.reportoptions.FixedWidthOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
@@ -257,9 +258,7 @@ public class ReportOutputGenerator {
 			ReportType reportType = report.getReportType();
 
 			//generate report output
-			if (true) {
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
-			} else if (reportType.isJasperReports() || reportType.isJxls()) {
+			if (reportType.isJasperReports() || reportType.isJxls()) {
 				if (reportType.isJasperReports()) {
 					JasperReportsOutput jrOutput = new JasperReportsOutput();
 					if (reportType == ReportType.JasperReportsArt) {
@@ -847,6 +846,83 @@ public class ReportOutputGenerator {
 				request.setAttribute("templateFileName", templateFileName);
 				request.setAttribute("data", jsonData);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showChartJs.jsp").include(request, response);
+			} else if (reportType.isDatamaps()) {
+				if (isJob) {
+					throw new IllegalStateException("Datamaps report types not supported for jobs");
+				}
+
+				request.setAttribute("reportType", reportType);
+
+				if (reportType == ReportType.Datamaps) {
+					rs = reportRunner.getResultSet();
+					JsonOutput jsonOutput = new JsonOutput();
+					JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+					String jsonData = jsonOutputResult.getJsonData();
+					rowsRetrieved = jsonOutputResult.getRowCount();
+					request.setAttribute("data", jsonData);
+				}
+
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//need to explicitly check if template file is empty string
+				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+				if (StringUtils.isBlank(templateFileName)) {
+					throw new IllegalArgumentException("Template file not specified");
+				}
+
+				File templateFile = new File(fullTemplateFileName);
+				if (!templateFile.exists()) {
+					throw new IllegalStateException("Template file not found: " + templateFileName);
+				}
+
+				DatamapsOptions options;
+				String optionsString = report.getOptions();
+				if (StringUtils.isBlank(optionsString)) {
+					options = new DatamapsOptions();
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, DatamapsOptions.class);
+				}
+
+				String datamapsJsFileName = options.getDatamapsJsFile();
+
+				if (StringUtils.isBlank(datamapsJsFileName)) {
+					throw new IllegalArgumentException("Datamaps js file not specified");
+				}
+
+				String fullDatamapsJsFileName = jsTemplatesPath + datamapsJsFileName;
+				File datamapsJsFile = new File(fullDatamapsJsFileName);
+				if (!datamapsJsFile.exists()) {
+					throw new IllegalStateException("Datamaps js file not found: " + datamapsJsFileName);
+				}
+
+				String dataFileName = options.getDataFile();
+
+				if (StringUtils.isNotBlank(dataFileName)) {
+					String fullDataFileName = jsTemplatesPath + dataFileName;
+					File dataFile = new File(fullDataFileName);
+					if (!dataFile.exists()) {
+						throw new IllegalStateException("Data file not found: " + dataFileName);
+					}
+				}
+
+				String mapFileName = options.getMapFile();
+				if (StringUtils.isNotBlank(mapFileName)) {
+					String fullMapFileName = jsTemplatesPath + mapFileName;
+
+					File mapFile = new File(fullMapFileName);
+					if (!mapFile.exists()) {
+						throw new IllegalStateException("Map file not found: " + mapFileName);
+					}
+				}
+
+				request.setAttribute("options", options);
+				request.setAttribute("templateFileName", templateFileName);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
