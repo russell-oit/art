@@ -1480,11 +1480,16 @@ pr-02|Desktops
        <tr> 
         <td><strong>mapFile</strong></td> 
         <td>optional - string</td> 
-        <td>The file name of a file that contains custom map data in topoJSON format. When using this option, use the <strong>none</strong> datamaps file. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+        <td>The file name of a file that contains the custom map in TopoJSON format. When using this option, use the <strong>datamaps.none.min.js</strong> datamaps js file. This file can be uploaded using the <strong>Add files</strong> option. It is important to note that if using the Add files option to upload files, files with multiple dots in the name are not allowed, so such files need to be renamed e.g. datamaps-none-min.js</td> 
+       </tr> 
+       <tr> 
+        <td><strong>cssFile</strong></td> 
+        <td>optional - string</td> 
+        <td>The file name of a css file that contains custom css to be used with the display. This file can be uploaded using the <strong>Add files</strong> option.</td> 
        </tr> 
       </tbody> 
      </table> 
-     <p>If using a custom map and you have a shapefile, you can <strong>Import</strong> the zip file with shapefile specification files to <a href="http://mapshaper.org/" rel="nofollow">http://mapshaper.org/</a> and then use the <strong>Export</strong> option to convert the shapefile to <strong>topoJSON</strong>. You will then use the topoJSON file for the report.</p> 
+     <p>If using a custom map and you have a shapefile, you can <strong>Import</strong> the zip file with shapefile specification files to <a href="http://mapshaper.org/" rel="nofollow">http://mapshaper.org/</a> and then use the <strong>Export</strong> option to convert the shapefile to <strong>TopoJSON</strong>. You will then use the TopoJSON file for the report.</p> 
      <ul> 
       <li><strong>Datamaps: File</strong><br /> Enables display of data on a map, using the Datamaps library, using data from a csv or json file. You can also use this report type if the data is hardcoded within the template file. The demo database contains some sample reports of this type.</li> 
      </ul> 
