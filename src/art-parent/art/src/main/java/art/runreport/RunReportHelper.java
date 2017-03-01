@@ -222,6 +222,7 @@ public class RunReportHelper {
 			case ChartJs:
 			case Datamaps:
 			case DatamapsFile:
+			case Leaflet:
 				enableReportFormats = false;
 				break;
 			default:
@@ -348,6 +349,7 @@ public class RunReportHelper {
 			case ChartJs:
 			case Datamaps:
 			case DatamapsFile:
+			case Leaflet:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -383,6 +385,7 @@ public class RunReportHelper {
 			case ChartJs:
 			case Datamaps:
 			case DatamapsFile:
+			case Leaflet:
 				enableEmail = false;
 				break;
 			default:

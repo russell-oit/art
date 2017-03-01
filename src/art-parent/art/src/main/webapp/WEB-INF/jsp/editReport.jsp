@@ -280,6 +280,7 @@ Edit report page
 					case 143: //chart.js
 					case 144: //datamaps
 					case 145: //datamaps file
+					case 146: //leaflet
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -437,6 +438,7 @@ Edit report page
 					case 143: //chart.js
 					case 144: //datamaps
 					case 145: //datamaps file
+					case 146: //leaflet
 						$("#templateDiv").show();
 						break;
 					default:
@@ -547,6 +549,7 @@ Edit report page
 					case 143: //chart.js
 					case 144: //datamaps
 					case 145: //datamaps file
+					case 146: //leaflet
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -573,6 +576,7 @@ Edit report page
 					case 142: //c3
 					case 144: //datamaps
 					case 145: //datamaps file
+					case 146: //leaflet
 						$("#resourcesDiv").show();
 						break;
 					default:

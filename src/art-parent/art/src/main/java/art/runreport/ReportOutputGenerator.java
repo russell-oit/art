@@ -71,6 +71,7 @@ import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
 import art.reportoptions.FixedWidthOptions;
+import art.reportoptions.LeafletOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
@@ -106,6 +107,7 @@ import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Generates report output
@@ -901,7 +903,6 @@ public class ReportOutputGenerator {
 				}
 
 				String dataFileName = options.getDataFile();
-
 				if (StringUtils.isNotBlank(dataFileName)) {
 					String fullDataFileName = jsTemplatesPath + dataFileName;
 					File dataFile = new File(fullDataFileName);
@@ -919,7 +920,7 @@ public class ReportOutputGenerator {
 						throw new IllegalStateException("Map file not found: " + mapFileName);
 					}
 				}
-				
+
 				String cssFileName = options.getCssFile();
 				if (StringUtils.isNotBlank(cssFileName)) {
 					String fullCssFileName = jsTemplatesPath + cssFileName;
@@ -933,6 +934,79 @@ public class ReportOutputGenerator {
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
+			} else if (reportType == ReportType.Leaflet) {
+				if (isJob) {
+					throw new IllegalStateException("Leaflet report type not supported for jobs");
+				}
+
+				rs = reportRunner.getResultSet();
+				JsonOutput jsonOutput = new JsonOutput();
+				JsonOutputResult jsonOutputResult = jsonOutput.generateOutput(rs);
+				String jsonData = jsonOutputResult.getJsonData();
+				rowsRetrieved = jsonOutputResult.getRowCount();
+
+				String templateFileName = report.getTemplate();
+				String jsTemplatesPath = Config.getJsTemplatesPath();
+				String fullTemplateFileName = jsTemplatesPath + templateFileName;
+
+				logger.debug("templateFileName='{}'", templateFileName);
+
+				//need to explicitly check if template file is empty string
+				//otherwise file.exists() will return true because fullTemplateFileName will just have the directory name
+				if (StringUtils.isBlank(templateFileName)) {
+					throw new IllegalArgumentException("Template file not specified");
+				}
+
+				File templateFile = new File(fullTemplateFileName);
+				if (!templateFile.exists()) {
+					throw new IllegalStateException("Template file not found: " + templateFileName);
+				}
+
+				LeafletOptions options;
+				String optionsString = report.getOptions();
+				if (StringUtils.isBlank(optionsString)) {
+					options = new LeafletOptions();
+				} else {
+					ObjectMapper mapper = new ObjectMapper();
+					options = mapper.readValue(optionsString, LeafletOptions.class);
+				}
+
+				String cssFileName = options.getCssFile();
+				if (StringUtils.isNotBlank(cssFileName)) {
+					String fullCssFileName = jsTemplatesPath + cssFileName;
+
+					File cssFile = new File(fullCssFileName);
+					if (!cssFile.exists()) {
+						throw new IllegalStateException("Css file not found: " + cssFileName);
+					}
+				}
+
+				String dataFileName = options.getDataFile();
+				if (StringUtils.isNotBlank(dataFileName)) {
+					String fullDataFileName = jsTemplatesPath + dataFileName;
+					File dataFile = new File(fullDataFileName);
+					if (!dataFile.exists()) {
+						throw new IllegalStateException("Data file not found: " + dataFileName);
+					}
+				}
+
+				List<String> jsFileNames = options.getJsFiles();
+				if (!CollectionUtils.isEmpty(jsFileNames)) {
+					for (String jsFileName : jsFileNames) {
+						if (StringUtils.isNotBlank(jsFileName)) {
+							String fullJsFileName = jsTemplatesPath + jsFileName;
+							File jsFile = new File(fullJsFileName);
+							if (!jsFile.exists()) {
+								throw new IllegalStateException("Js file not found: " + jsFileName);
+							}
+						}
+					}
+				}
+
+				request.setAttribute("options", options);
+				request.setAttribute("data", jsonData);
+				request.setAttribute("templateFileName", templateFileName);
+				servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}

@@ -611,6 +611,7 @@ public class ReportController {
 			case ChartJs:
 			case Datamaps:
 			case DatamapsFile:
+			case Leaflet:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			default:
