@@ -18,6 +18,10 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/topojson-2.2.0/topojson.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${options.datamapsJsFile}"></script>
 
+<c:if test="${not empty options.cssFile}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${options.cssFile}">
+</c:if>
+
 <script>
 	//https://blog.basilesimon.fr/2014/04/24/draw-simple-maps-with-no-effort-with-d3-js-and-datamaps-js/
 	//https://stackoverflow.com/questions/41482906/states-not-highlighting
@@ -32,8 +36,10 @@
 	//https://stackoverflow.com/questions/41641124/datamap-change-color-depending-on-value
 	//http://bl.ocks.org/markmarkoh/11331459
 	//http://latitudelongitude.org/
-	////http://www.latlong.net/
+	//http://www.latlong.net/
+	//http://andrew.hedges.name/experiments/convert_lat_long/
 	//https://gist.github.com/markmarkoh/8856417
+	//https://gist.github.com/markmarkoh/8717334
 	//http://192.156.137.110/gis/search.asp
 	//https://www.arcgis.com/home/item.html?id=5f83ca29e5b849b8b05bc0b281ae27bc
 	//http://www.spatialthoughts.com/blog/gis/mapshaper-command-line/

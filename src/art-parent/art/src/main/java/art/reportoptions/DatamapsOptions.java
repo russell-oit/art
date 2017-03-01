@@ -30,6 +30,7 @@ public class DatamapsOptions {
 	private String dataFile;
 	private String dataType = "json";
 	private String mapFile;
+	private String cssFile;
 
 	/**
 	 * @return the width
@@ -113,5 +114,19 @@ public class DatamapsOptions {
 	 */
 	public void setMapFile(String mapFile) {
 		this.mapFile = mapFile;
+	}
+
+	/**
+	 * @return the cssFile
+	 */
+	public String getCssFile() {
+		return cssFile;
+	}
+
+	/**
+	 * @param cssFile the cssFile to set
+	 */
+	public void setCssFile(String cssFile) {
+		this.cssFile = cssFile;
 	}
 }

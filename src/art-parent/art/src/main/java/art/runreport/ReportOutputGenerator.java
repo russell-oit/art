@@ -919,6 +919,16 @@ public class ReportOutputGenerator {
 						throw new IllegalStateException("Map file not found: " + mapFileName);
 					}
 				}
+				
+				String cssFileName = options.getCssFile();
+				if (StringUtils.isNotBlank(cssFileName)) {
+					String fullCssFileName = jsTemplatesPath + cssFileName;
+
+					File cssFile = new File(fullCssFileName);
+					if (!cssFile.exists()) {
+						throw new IllegalStateException("Css file not found: " + cssFileName);
+					}
+				}
 
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
