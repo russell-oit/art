@@ -223,6 +223,7 @@ public class RunReportHelper {
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
+			case OpenLayers:
 				enableReportFormats = false;
 				break;
 			default:
@@ -350,6 +351,7 @@ public class RunReportHelper {
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
+			case OpenLayers:
 				enablePrintAlways = true;
 				break;
 			default:
@@ -386,6 +388,7 @@ public class RunReportHelper {
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
+			case OpenLayers:
 				enableEmail = false;
 				break;
 			default:

@@ -47,7 +47,7 @@ public enum ReportType {
 	Dygraphs(135), DygraphsCsvLocal(136), DygraphsCsvServer(137),
 	DataTables(138), DataTablesCsvLocal(139), DataTablesCsvServer(140),
 	FixedWidth(141), C3(142), ChartJs(143), Datamaps(144), DatamapsFile(145),
-	Leaflet(146);
+	Leaflet(146), OpenLayers(147);
 
 	private final int value;
 
@@ -84,9 +84,25 @@ public enum ReportType {
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
+			case OpenLayers:
 				return false;
 			default:
 				return true;
+		}
+	}
+	
+	/**
+	 * Returns <code>true</code> if this is a leaflet or openlayers report
+	 *
+	 * @return <code>true</code> if this is a leaflet or openlayers report
+	 */
+	public boolean isWebMap() {
+		switch (this) {
+			case Leaflet:
+			case OpenLayers:
+				return true;
+			default:
+				return false;
 		}
 	}
 
@@ -631,6 +647,8 @@ public enum ReportType {
 				return "Datamaps: File";
 			case Leaflet:
 				return "Leaflet";
+			case OpenLayers:
+				return "OpenLayers";
 			default:
 				return this.name();
 		}

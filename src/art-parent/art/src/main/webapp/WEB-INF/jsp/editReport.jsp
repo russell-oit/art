@@ -281,6 +281,7 @@ Edit report page
 					case 144: //datamaps
 					case 145: //datamaps file
 					case 146: //leaflet
+					case 147: //openlayers
 						$("#optionsDiv").show();
 						break;
 					default:
@@ -439,6 +440,7 @@ Edit report page
 					case 144: //datamaps
 					case 145: //datamaps file
 					case 146: //leaflet
+					case 147: //openlayers
 						$("#templateDiv").show();
 						break;
 					default:
@@ -550,6 +552,7 @@ Edit report page
 					case 144: //datamaps
 					case 145: //datamaps file
 					case 146: //leaflet
+					case 147: //openlayers
 						$("#defaultReportFormatDiv").hide();
 						break;
 					default:
@@ -577,6 +580,7 @@ Edit report page
 					case 144: //datamaps
 					case 145: //datamaps file
 					case 146: //leaflet
+					case 147: //openlayers
 						$("#resourcesDiv").show();
 						break;
 					default:

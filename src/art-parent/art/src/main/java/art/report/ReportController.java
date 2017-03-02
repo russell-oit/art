@@ -612,6 +612,7 @@ public class ReportController {
 			case Datamaps:
 			case DatamapsFile:
 			case Leaflet:
+			case OpenLayers:
 				templatesPath = Config.getJsTemplatesPath();
 				break;
 			default:

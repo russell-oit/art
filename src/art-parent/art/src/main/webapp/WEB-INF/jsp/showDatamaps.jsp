@@ -42,6 +42,10 @@
 	//https://gist.github.com/markmarkoh/8717334
 	//http://192.156.137.110/gis/search.asp
 	//https://www.arcgis.com/home/item.html?id=5f83ca29e5b849b8b05bc0b281ae27bc
+	//https://wiki.openstreetmap.org/wiki/WikiProject_Kenya
+	//http://doc.arcgis.com/en/arcgis-online/reference/shapefiles.htm
+	//https://wiki.openstreetmap.org/wiki/Shapefiles
+	//http://docs.qgis.org/2.14/en/docs/gentle_gis_introduction/
 	//http://www.spatialthoughts.com/blog/gis/mapshaper-command-line/
 	//https://russiansphinx.blogspot.co.ke/2014/06/simplifying-shapefiles-in-mapshaper.html
 	//https://gis.stackexchange.com/questions/97884/how-to-simplify-shapefiles-without-losing-attributes

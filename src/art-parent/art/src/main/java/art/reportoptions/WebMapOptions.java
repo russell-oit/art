@@ -20,11 +20,11 @@ package art.reportoptions;
 import java.util.List;
 
 /**
- * Represents report options for leaflet reports
+ * Represents report options for leaflet and openlayers reports
  *
  * @author Timothy Anyona
  */
-public class LeafletOptions {
+public class WebMapOptions {
 
 	private String height = "400px";
 	private String cssFile;

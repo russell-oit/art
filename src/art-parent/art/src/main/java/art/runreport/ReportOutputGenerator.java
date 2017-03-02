@@ -71,7 +71,7 @@ import art.reportoptions.CsvServerOptions;
 import art.reportoptions.DataTablesOptions;
 import art.reportoptions.DatamapsOptions;
 import art.reportoptions.FixedWidthOptions;
-import art.reportoptions.LeafletOptions;
+import art.reportoptions.WebMapOptions;
 import art.reportparameter.ReportParameter;
 import art.servlets.Config;
 import art.user.User;
@@ -934,9 +934,9 @@ public class ReportOutputGenerator {
 				request.setAttribute("options", options);
 				request.setAttribute("templateFileName", templateFileName);
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/showDatamaps.jsp").include(request, response);
-			} else if (reportType == ReportType.Leaflet) {
+			} else if (reportType.isWebMap()) {
 				if (isJob) {
-					throw new IllegalStateException("Leaflet report type not supported for jobs");
+					throw new IllegalStateException("Report type not supported for jobs: " + reportType);
 				}
 
 				rs = reportRunner.getResultSet();
@@ -962,13 +962,13 @@ public class ReportOutputGenerator {
 					throw new IllegalStateException("Template file not found: " + templateFileName);
 				}
 
-				LeafletOptions options;
+				WebMapOptions options;
 				String optionsString = report.getOptions();
 				if (StringUtils.isBlank(optionsString)) {
-					options = new LeafletOptions();
+					options = new WebMapOptions();
 				} else {
 					ObjectMapper mapper = new ObjectMapper();
-					options = mapper.readValue(optionsString, LeafletOptions.class);
+					options = mapper.readValue(optionsString, WebMapOptions.class);
 				}
 
 				String cssFileName = options.getCssFile();
@@ -1002,7 +1002,7 @@ public class ReportOutputGenerator {
 						}
 					}
 				}
-				
+
 				List<String> cssFileNames = options.getCssFiles();
 				if (!CollectionUtils.isEmpty(cssFileNames)) {
 					for (String listCssFileName : cssFileNames) {
@@ -1019,7 +1019,17 @@ public class ReportOutputGenerator {
 				request.setAttribute("options", options);
 				request.setAttribute("data", jsonData);
 				request.setAttribute("templateFileName", templateFileName);
-				servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
+				
+				switch(reportType){
+					case Leaflet:
+						servletContext.getRequestDispatcher("/WEB-INF/jsp/showLeaflet.jsp").include(request, response);
+						break;
+					case OpenLayers:
+						servletContext.getRequestDispatcher("/WEB-INF/jsp/showOpenLayers.jsp").include(request, response);
+						break;
+					default:
+						throw new IllegalArgumentException("Unexpected report type: " + reportType);
+				}
 			} else {
 				throw new IllegalArgumentException("Unexpected report type: " + reportType);
 			}
