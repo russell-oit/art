@@ -1002,6 +1002,19 @@ public class ReportOutputGenerator {
 						}
 					}
 				}
+				
+				List<String> cssFileNames = options.getCssFiles();
+				if (!CollectionUtils.isEmpty(cssFileNames)) {
+					for (String listCssFileName : cssFileNames) {
+						if (StringUtils.isNotBlank(listCssFileName)) {
+							String fullListCssFileName = jsTemplatesPath + listCssFileName;
+							File listCssFile = new File(fullListCssFileName);
+							if (!listCssFile.exists()) {
+								throw new IllegalStateException("Css file not found: " + listCssFileName);
+							}
+						}
+					}
+				}
 
 				request.setAttribute("options", options);
 				request.setAttribute("data", jsonData);

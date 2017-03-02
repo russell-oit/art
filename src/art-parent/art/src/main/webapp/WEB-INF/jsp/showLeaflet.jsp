@@ -26,10 +26,16 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/js-templates/${jsFileName}"></script>
 </c:forEach>
 
+<c:forEach var="cssFileName" items="${options.cssFiles}">
+	<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js-templates/${cssFileName}">
+</c:forEach>
 
 <script type="text/javascript">
 	//http://leafletjs.com/
 	//https://github.com/tmcw/mapmakers-cheatsheet
+	//https://www.mapbox.com/help/how-web-maps-work/
+	//https://gis.stackexchange.com/questions/68489/how-to-load-external-geojson-file-into-leaflet-map
+	//https://gis.stackexchange.com/questions/87332/which-plugin-can-draw-topojson-right-within-leaflet-without-conversion
 	var jsonData = ${data};
 
 	var dataFileUrl = null;

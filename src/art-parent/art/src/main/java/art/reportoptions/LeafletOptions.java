@@ -30,6 +30,7 @@ public class LeafletOptions {
 	private String cssFile;
 	private String dataFile;
 	private List<String> jsFiles;
+	private List<String> cssFiles;
 
 	/**
 	 * @return the height
@@ -85,5 +86,19 @@ public class LeafletOptions {
 	 */
 	public void setJsFiles(List<String> jsFiles) {
 		this.jsFiles = jsFiles;
+	}
+
+	/**
+	 * @return the cssFiles
+	 */
+	public List<String> getCssFiles() {
+		return cssFiles;
+	}
+
+	/**
+	 * @param cssFiles the cssFiles to set
+	 */
+	public void setCssFiles(List<String> cssFiles) {
+		this.cssFiles = cssFiles;
 	}
 }
