@@ -324,6 +324,10 @@ public class ReportParameter implements Serializable {
 	public String getHtmlValue() {
 		Object value = getEffectiveActualParameterValue();
 
+		if (value == null) {
+			return "";
+		}
+
 		switch (parameter.getDataType()) {
 			case Date:
 				return ArtUtils.isoDateFormatter.format(value);
@@ -442,63 +446,64 @@ public class ReportParameter implements Serializable {
 		Object value = getEffectiveActualParameterValue();
 		if (parameterType == null) {
 			throw new IllegalStateException("Unexpected parameter type: " + parameterType);
-		} else switch (parameterType) {
-			case SingleValue:
-				String finalValue;
-				switch (parameter.getDataType()) {
-					case Integer:
-					case Datasource:
-					case Number:
-						finalValue = String.valueOf(value);
-						break;
-					case Date:
-						finalValue = "'" + ArtUtils.isoDateFormatter.format(value) + "'";
-						break;
-					case DateTime:
-						finalValue = "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'";
-						break;
-					default:
-						finalValue = String.valueOf(value);
-						StringUtils.replace(finalValue, "'", "''");
-						finalValue = "'" + finalValue + "'";
-				}
-				return finalValue;
-			case MultiValue:
-				@SuppressWarnings("unchecked")
-						List<Object> values = (List<Object>) value;
-				String finalValues;
-				List<String> stringValues = new ArrayList<>();
-				switch (parameter.getDataType()) {
-					case Integer:
-					case Datasource:
-					case Number:
-						for (Object listValue : values) {
-							stringValues.add(String.valueOf(listValue));
-						}
-						break;
-					case Date:
-						for (Object listValue : values) {
-							stringValues.add("'" + ArtUtils.isoDateFormatter.format(listValue) + "'");
-						}
-						break;
-					case DateTime:
-						for (Object listValue : values) {
-							stringValues.add("'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(listValue) + "'");
-						}
-						break;
-					default:
-						for (Object listValue : values) {
-							String stringValue = String.valueOf(listValue);
-							StringUtils.replace(stringValue, "'", "''");
-							stringValue = "'" + stringValue + "'";
-							stringValues.add(stringValue);
-						}
-				}
-				finalValues = StringUtils.join(stringValues, ",");
-				
-				return finalValues;
-			default:
-				throw new IllegalStateException("Unexpected parameter type: " + parameterType);
+		} else {
+			switch (parameterType) {
+				case SingleValue:
+					String finalValue;
+					switch (parameter.getDataType()) {
+						case Integer:
+						case Datasource:
+						case Number:
+							finalValue = String.valueOf(value);
+							break;
+						case Date:
+							finalValue = "'" + ArtUtils.isoDateFormatter.format(value) + "'";
+							break;
+						case DateTime:
+							finalValue = "'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(value) + "'";
+							break;
+						default:
+							finalValue = String.valueOf(value);
+							StringUtils.replace(finalValue, "'", "''");
+							finalValue = "'" + finalValue + "'";
+					}
+					return finalValue;
+				case MultiValue:
+					@SuppressWarnings("unchecked") List<Object> values = (List<Object>) value;
+					String finalValues;
+					List<String> stringValues = new ArrayList<>();
+					switch (parameter.getDataType()) {
+						case Integer:
+						case Datasource:
+						case Number:
+							for (Object listValue : values) {
+								stringValues.add(String.valueOf(listValue));
+							}
+							break;
+						case Date:
+							for (Object listValue : values) {
+								stringValues.add("'" + ArtUtils.isoDateFormatter.format(listValue) + "'");
+							}
+							break;
+						case DateTime:
+							for (Object listValue : values) {
+								stringValues.add("'" + ArtUtils.isoDateTimeMillisecondsFormatter.format(listValue) + "'");
+							}
+							break;
+						default:
+							for (Object listValue : values) {
+								String stringValue = String.valueOf(listValue);
+								StringUtils.replace(stringValue, "'", "''");
+								stringValue = "'" + stringValue + "'";
+								stringValues.add(stringValue);
+							}
+					}
+					finalValues = StringUtils.join(stringValues, ",");
+
+					return finalValues;
+				default:
+					throw new IllegalStateException("Unexpected parameter type: " + parameterType);
+			}
 		}
 	}
 }
