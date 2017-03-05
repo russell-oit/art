@@ -25,6 +25,7 @@ import art.runreport.ParameterProcessor;
 import art.runreport.ParameterProcessorResult;
 import art.runreport.RunReportHelper;
 import art.user.User;
+import art.utils.ArtHelper;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -95,6 +96,9 @@ public class DashboardController {
 
 		String errorPage = "reportError";
 
+		User sessionUser = (User) session.getAttribute("sessionUser");
+		List<ReportParameter> reportParamsList = null;
+
 		try {
 			Report report = reportService.getReport(reportId);
 
@@ -105,8 +109,6 @@ public class DashboardController {
 
 			//check if user has permission to run report
 			//admins can run all reports, even disabled ones. only check for non admin users
-			User sessionUser = (User) session.getAttribute("sessionUser");
-
 			if (!sessionUser.isAdminUser()) {
 				if (!report.isActive()) {
 					model.addAttribute("message", "reports.message.reportDisabled");
@@ -122,11 +124,16 @@ public class DashboardController {
 			reportType = report.getReportType();
 			model.addAttribute("reportType", reportType);
 
+			ParameterProcessor paramProcessor = new ParameterProcessor();
+			ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
+			reportParamsList = paramProcessorResult.getReportParamsList();
+
 			if (reportType == ReportType.Dashboard) {
-				Dashboard dashboard = buildDashboard(report, request, locale);
+				Dashboard dashboard = buildDashboard(report, request, locale, reportParamsMap);
 				model.addAttribute("dashboard", dashboard);
 			} else if (reportType == ReportType.GridstackDashboard) {
-				GridstackDashboard dashboard = buildGridstackDashboard(report, request, locale);
+				GridstackDashboard dashboard = buildGridstackDashboard(report, request, locale, reportParamsMap);
 				model.addAttribute("dashboard", dashboard);
 			}
 
@@ -140,6 +147,12 @@ public class DashboardController {
 		}
 
 		boolean showInline = Boolean.parseBoolean(request.getParameter("showInline"));
+
+		final int NOT_APPLICABLE = -1;
+		int totalTime = NOT_APPLICABLE;
+		int fetchTime = NOT_APPLICABLE;
+
+		ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "dashboard", reportParamsList);
 
 		if (reportType == ReportType.GridstackDashboard) {
 			if (showInline) {
@@ -163,6 +176,7 @@ public class DashboardController {
 	 * @param report the report to use
 	 * @param request the http request
 	 * @param locale the locale being used
+	 * @param reportParamsMap the report parameters map
 	 * @return the dashboard object to be displayed
 	 * @throws UnsupportedEncodingException
 	 * @throws SQLException
@@ -172,7 +186,8 @@ public class DashboardController {
 	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
 	private Dashboard buildDashboard(Report report, HttpServletRequest request,
-			Locale locale) throws UnsupportedEncodingException, ParseException,
+			Locale locale, Map<String, ReportParameter> reportParamsMap)
+			throws UnsupportedEncodingException, ParseException,
 			SQLException, ParserConfigurationException, IOException,
 			SAXException, IllegalArgumentException, XPathExpressionException {
 
@@ -183,7 +198,7 @@ public class DashboardController {
 
 		Dashboard dashboard = new Dashboard();
 
-		String dashboardTitle = getDashboardTitle(request, report);
+		String dashboardTitle = getDashboardTitle(report, reportParamsMap);
 
 		dashboard.setTitle(dashboardTitle);
 		dashboard.setDescription(report.getDescription());
@@ -515,6 +530,7 @@ public class DashboardController {
 	 * @param report the gridstack dashboard report
 	 * @param request the http request
 	 * @param locale the locale being used
+	 * @param reportParamsMap the report parameters map
 	 * @return the gridstack dashboard object to be used to display the
 	 * gridstack dashboard
 	 * @throws SQLException
@@ -525,7 +541,8 @@ public class DashboardController {
 	 * @throws javax.xml.xpath.XPathExpressionException
 	 */
 	private GridstackDashboard buildGridstackDashboard(Report report, HttpServletRequest request,
-			Locale locale) throws SQLException, ParseException, UnsupportedEncodingException,
+			Locale locale, Map<String, ReportParameter> reportParamsMap)
+			throws SQLException, ParseException, UnsupportedEncodingException,
 			SAXException, IOException, ParserConfigurationException, IllegalArgumentException,
 			XPathExpressionException {
 
@@ -536,7 +553,7 @@ public class DashboardController {
 
 		GridstackDashboard dashboard = new GridstackDashboard();
 
-		String dashboardTitle = getDashboardTitle(request, report);
+		String dashboardTitle = getDashboardTitle(report, reportParamsMap);
 
 		dashboard.setTitle(dashboardTitle);
 		dashboard.setDescription(report.getDescription());
@@ -762,20 +779,16 @@ public class DashboardController {
 	/**
 	 * Returns the string to be used as the dashboard title
 	 *
-	 * @param request the http request
 	 * @param report the dashboard report
+	 * @param reportParamsMap the report parameters map
 	 * @return the string to be used as the dashboard title
 	 * @throws ParseException
 	 * @throws SQLException
 	 */
-	private String getDashboardTitle(HttpServletRequest request, Report report)
+	private String getDashboardTitle(Report report, Map<String, ReportParameter> reportParamsMap)
 			throws ParseException, SQLException {
 
 		logger.debug("Entering getDashboardTitle: Report={}", report);
-
-		ParameterProcessor paramProcessor = new ParameterProcessor();
-		ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
-		Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 
 		String shortDescription = report.getShortDescription();
 		logger.debug("shortDescription='{}'", shortDescription);

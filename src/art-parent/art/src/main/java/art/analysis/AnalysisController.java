@@ -95,6 +95,9 @@ public class AnalysisController {
 				return errorPage;
 			}
 
+			String reportName = report.getName();
+			model.addAttribute("reportName", reportName);
+
 			//check if user has permission to run report
 			//admins can run all reports, even disabled ones. only check for non admin users
 			User sessionUser = (User) session.getAttribute("sessionUser");
@@ -161,9 +164,6 @@ public class AnalysisController {
 
 		int reportId = report.getReportId();
 		model.addAttribute("reportId", reportId);
-
-		String reportName = report.getName();
-		model.addAttribute("reportName", reportName);
 
 		String jpivotQueryId = "query" + reportId;
 		model.addAttribute("jpivotQueryId", jpivotQueryId);

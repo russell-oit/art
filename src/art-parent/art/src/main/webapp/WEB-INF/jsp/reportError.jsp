@@ -15,11 +15,6 @@ Page to display if error occurs in run report controller
 
 <t:mainPage title="${reportName}">
 	<jsp:body>
-		<c:if test="${not empty reportName}">
-			<div class="reportBanner">
-				<encode:forHtmlContent value="${reportName}"/>
-			</div>
-		</c:if>
 		<jsp:include page="/WEB-INF/jsp/reportErrorInline.jsp"/>
 	</jsp:body>
 </t:mainPage>

@@ -19,11 +19,15 @@ package art.utils;
 
 import art.connectionpool.DbConnections;
 import art.dbutils.DatabaseUtils;
+import art.reportparameter.ReportParameter;
+import art.user.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +43,7 @@ public class ArtHelper {
 	private static final int MAX_LOG_MESSAGE_LENGTH = 500;
 
 	/**
-	 * Logs some action to the ART_LOGS table.
+	 * Logs some action to the ART_LOGS table
 	 *
 	 * @param user the username of user who executed the report
 	 * @param type the type of event
@@ -87,7 +91,7 @@ public class ArtHelper {
 	}
 
 	/**
-	 * Logs login attempts to the ART_LOGS table.
+	 * Logs login attempts to the ART_LOGS table
 	 *
 	 * @param user the username
 	 * @param type "login" if successful or "loginerr" if not
@@ -121,5 +125,39 @@ public class ArtHelper {
 		} finally {
 			DatabaseUtils.close(ps, conn);
 		}
+	}
+
+	/**
+	 * Logs an interactive report run in the ART_LOGS table
+	 *
+	 * @param sessionUser the session user
+	 * @param ip the ip address where the report is being run from
+	 * @param reportId the report id of the report being run
+	 * @param totalTime the total time taken (in seconds) to fetch the report
+	 * data and display the results
+	 * @param fetchTime the total time taken (in seconds) to fetch the report
+	 * data
+	 * @param reportFormat the report format
+	 * @param reportParamsList the report parameters list
+	 */
+	public static void logInteractiveReportRun(User sessionUser, String ip, int reportId,
+			long totalTime, long fetchTime, String reportFormat,
+			List<ReportParameter> reportParamsList) {
+
+		List<String> parameterValuesList = new ArrayList<>();
+		if (reportParamsList != null) {
+			for (ReportParameter reportParam : reportParamsList) {
+				String nameAndDisplayValues = reportParam.getNameAndDisplayValues();
+				parameterValuesList.add(nameAndDisplayValues);
+			}
+		}
+
+		String parameters = StringUtils.join(parameterValuesList, ",");
+		if (StringUtils.isNotBlank(parameters)) {
+			parameters = ", " + parameters;
+		}
+
+		String username = sessionUser.getUsername();
+		log(username, "report", ip, reportId, totalTime, fetchTime, reportFormat + parameters);
 	}
 }

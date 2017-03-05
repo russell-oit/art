@@ -159,6 +159,15 @@ public class RunReportController {
 //					model.addAttribute(paramName, paramValue);
 //				}
 
+				final int NOT_APPLICABLE = -1;
+				int totalTime = NOT_APPLICABLE;
+				int fetchTime = NOT_APPLICABLE;
+
+				ParameterProcessor paramProcessor = new ParameterProcessor();
+				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
+				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+				ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, "analysis", reportParamsList);
+
 				//can't use addFlashAttribute() as flash attributes aren't included as part of request parameters
 				redirectAttributes.addAllAttributes(request.getParameterMap());
 				//using forward means adding runReport url-mapping to the jpivotcontroller filter-mapping in the web.xml file
@@ -248,6 +257,8 @@ public class RunReportController {
 			long totalTime = 0;
 			long fetchTime = 0;
 
+			List<ReportParameter> reportParamsList = null;
+
 			if (reportType == ReportType.Text) {
 				//http://jsoup.org/apidocs/org/jsoup/safety/Whitelist.html
 				//https://stackoverflow.com/questions/9213189/jsoup-whitelist-relaxed-mode-too-strict-for-wysiwyg-editor
@@ -280,7 +291,7 @@ public class RunReportController {
 				ParameterProcessorResult paramProcessorResult = paramProcessor.processHttpParameters(request);
 
 				Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
-				List<ReportParameter> reportParamsList = paramProcessorResult.getReportParamsList();
+				reportParamsList = paramProcessorResult.getReportParamsList();
 				ReportOptions reportOptions = paramProcessorResult.getReportOptions();
 
 				//get parameter display values if parameters need to be shown in html or file output
@@ -425,9 +436,7 @@ public class RunReportController {
 				servletContext.getRequestDispatcher("/WEB-INF/jsp/runReportPageFooter.jsp").include(request, response);
 			}
 
-			String username = sessionUser.getUsername();
-			ArtHelper.log(username, "query", request.getRemoteAddr(), reportId, totalTime, fetchTime, "query, " + reportFormatString);
-
+			ArtHelper.logInteractiveReportRun(sessionUser, request.getRemoteAddr(), reportId, totalTime, fetchTime, reportFormat.getValue(), reportParamsList);
 		} catch (Exception ex) {
 			logger.error("Error. {}, {}", report, sessionUser, ex);
 			if (report != null) {
