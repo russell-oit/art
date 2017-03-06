@@ -261,19 +261,21 @@ public class ParameterProcessor {
 					//get all possible lov values.
 					ReportRunner lovReportRunner = null;
 					try {
-						lovReportRunner = new ReportRunner();
-						int lovReportId = param.getLovReportId();
-						ReportService reportService = new ReportService();
-						Report lovReport = reportService.getReport(lovReportId);
-						lovReportRunner.setReport(lovReport);
-						lovReportRunner.setReportParamsMap(reportParamsMap);
-						boolean useRules = false; //don't apply rules so as to get all values
-						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
-
 						List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
-						for (Entry<Object, String> entry2 : lovValues.entrySet()) {
-							Object actualValue = entry2.getKey();
-							actualValues.add(actualValue);
+						if (param.isUseLov()) {
+							lovReportRunner = new ReportRunner();
+							int lovReportId = param.getLovReportId();
+							ReportService reportService = new ReportService();
+							Report lovReport = reportService.getReport(lovReportId);
+							lovReportRunner.setReport(lovReport);
+							lovReportRunner.setReportParamsMap(reportParamsMap);
+							boolean useRules = false; //don't apply rules so as to get all values
+							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
+
+							for (Entry<Object, String> entry2 : lovValues.entrySet()) {
+								Object actualValue = entry2.getKey();
+								actualValues.add(actualValue);
+							}
 						}
 						reportParam.setActualParameterValues(actualValues);
 					} finally {

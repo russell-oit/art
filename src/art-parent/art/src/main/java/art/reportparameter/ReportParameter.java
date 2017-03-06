@@ -326,15 +326,25 @@ public class ReportParameter implements Serializable {
 
 		if (value == null) {
 			return "";
-		}
+		} 
 
-		switch (parameter.getDataType()) {
+		ParameterDataType parameterDataType = parameter.getDataType();
+		switch (parameterDataType) {
 			case Date:
 				return ArtUtils.isoDateFormatter.format(value);
 			case DateTime:
 				return ArtUtils.isoDateTimeFormatter.format(value);
 			default:
-				return String.valueOf(value);
+				if (value instanceof List) {
+					List<Object> values = new ArrayList<>();
+					List valueList = (List) value;
+					for (int i = 0; i < valueList.size(); i++) {
+						values.add(String.valueOf(valueList.get(i)));
+					}
+					return StringUtils.join(values, "\\r\\n");
+				} else {
+					return String.valueOf(value);
+				}
 		}
 	}
 
