@@ -14,14 +14,17 @@
 
 <c:forEach var="reportParameter" items="${reportParams}">
 	<c:set var="reportParam" value="${reportParameter.value}" scope="request"/>
-	
+
 	<c:if test="${!reportParam.parameter.hidden}">
 		<div class="form-group">
 			<label class="control-label ${labelColClass}" for="${encode:forHtmlAttribute(reportParam.htmlElementName)}">
 				${encode:forHtmlContent(reportParam.parameter.label)}
 			</label>
 			<div class="${inputColClass}">
-				<div class="input-group">
+				<c:if test="${not empty fn:trim(reportParam.parameter.helpText)}">
+					<div class="input-group">
+					</c:if>
+
 					<c:choose>
 						<c:when test="${reportParam.parameter.useLov}">
 							<c:set var="lovValues" value="${reportParam.lovValuesAsString}" scope="request"/>
@@ -62,7 +65,10 @@
 							</button>
 						</span>
 					</c:if>
-				</div>
+
+					<c:if test="${not empty fn:trim(reportParam.parameter.helpText)}">
+					</div>
+				</c:if>
 			</div>
 		</div>
 	</c:if>

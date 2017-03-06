@@ -475,8 +475,7 @@ Display section to allow selecting of report parameters and initiate running of 
 						</label>
 						<div class="form-group">
 							<div class="col-md-12">
-								<textarea id="mailMessage" name="mailMessage" rows="5" cols="60" class="form-control editor">
-								</textarea>
+								<textarea id="mailMessage" name="mailMessage" rows="5" cols="60" class="form-control editor"></textarea>
 							</div>
 						</div>
 					</div>
