@@ -31,6 +31,9 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery.ui.touch-punch-0.2.3.min.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/PapaParse-4.1.4/papaparse.min.js"></script>
 
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/js/pivottable-subtotal-renderer-1.7.1/subtotal.min.js"></script>
+
 <script type="text/javascript">
 	//set default values. can be overridden in template file
 	//https://github.com/nicolaskruchten/pivottable/wiki/Parameters
@@ -39,10 +42,15 @@
 	var renderers = $.extend(
 			$.pivotUtilities.renderers,
 			$.pivotUtilities.c3_renderers,
-			$.pivotUtilities.export_renderers
+			$.pivotUtilities.export_renderers,
+			$.pivotUtilities.subtotal_renderers
 			);
 
-	var options = {renderers: renderers};
+	var options = {
+		renderers: renderers,
+		dataClass: $.pivotUtilities.SubtotalPivotData
+	};
+	
 	var overwrite = false;
 	var locale = 'en';
 
