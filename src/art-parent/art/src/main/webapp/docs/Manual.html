@@ -3,7 +3,7 @@
  <head> 
   <meta charset="UTF-8" /> 
   <meta name="pdfTitle" content="ART Administration Manual" /> 
-  <meta name="version" content="3.0-beta7" /> 
+  <meta name="version" content="3.0-beta8" /> 
   <title>ART - Administration Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico" /> 
   <style type="text/css">
@@ -1441,7 +1441,7 @@ pr-02|Desktops
 </pre> 
        </div> </li> 
       <li> <p><strong>Chart.js</strong><br /> Generates charts using the chart.js library - <a href="http://www.chartjs.org/." rel="nofollow">http://www.chartjs.org/.</a> A javascript file containing chart configuration needs to be uploaded using the <strong>Template</strong> field. The demo database contains some sample reports of this type. In the <strong>Options</strong> field, you can specify the <strong>width</strong> (integer - default = 300) or <strong>height</strong> (integer - default = 100) properties to define a custom width or height for the chart.</p> </li> 
-      <li> <p><strong>Datamaps</strong><br /> Enables display of data on a map, using the Datamaps library - <a href="https://datamaps.github.io/" rel="nofollow">https://datamaps.github.io/</a>, using data from a database. A javascript file containing datamaps configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> </li> 
+      <li> <p><strong>Datamaps</strong><br /> Enables display of data on a map, using the Datamaps library - <a href="https://datamaps.github.io/" rel="nofollow">https://datamaps.github.io/</a>, using data from a database. A javascript file containing the datamaps configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> </li> 
      </ul> 
      <table border="1"> 
       <thead> 
@@ -1491,7 +1491,47 @@ pr-02|Desktops
      </table> 
      <p>If using a custom map and you have a shapefile, you can <strong>Import</strong> the zip file with shapefile specification files to <a href="http://mapshaper.org/" rel="nofollow">http://mapshaper.org/</a> and then use the <strong>Export</strong> option to convert the shapefile to <strong>TopoJSON</strong>. You will then use the TopoJSON file for the report.</p> 
      <ul> 
-      <li><strong>Datamaps: File</strong><br /> Enables display of data on a map, using the Datamaps library, using data from a csv or json file. You can also use this report type if the data is hardcoded within the template file. The demo database contains some sample reports of this type.</li> 
+      <li> <p><strong>Datamaps: File</strong><br /> Enables display of data on a map, using the Datamaps library, using data from a csv or json file. You can also use this report type if the data is hardcoded within the template file. Requirements and options are similar to those of the <strong>Datamaps</strong> report type. The demo database contains some sample reports of this type.</p> </li> 
+      <li> <p><strong>Leaflet</strong><br /> Enables display of data on a web map or tiled map using the Leaflet library - <a href="http://leafletjs.com/." rel="nofollow">http://leafletjs.com/.</a> A javascript file containing the leaflet configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified.</p> </li> 
+     </ul> 
+     <table border="1"> 
+      <thead> 
+       <tr> 
+        <th>Property</th> 
+        <th>Data Type</th> 
+        <th>Description</th> 
+       </tr> 
+      </thead> 
+      <tbody> 
+       <tr> 
+        <td><strong>height</strong></td> 
+        <td>optional - string (default = 400px)</td> 
+        <td>CSS height for the div that contains the map</td> 
+       </tr> 
+       <tr> 
+        <td><strong>cssFile</strong></td> 
+        <td>optional - string</td> 
+        <td>The file name of a css file that contains custom css to be used with the display. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>dataFile</strong></td> 
+        <td>optional - string</td> 
+        <td>The file name of a file that contains extra data to be used with the map e.g. a GeoJSON file. This file can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>jsFiles</strong></td> 
+        <td>optional - array of strings</td> 
+        <td>File names of javascript files that need to be incorporated for the map display e.g. leaflet plugins. The files can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+       <tr> 
+        <td><strong>cssFiles</strong></td> 
+        <td>optional - array of strings</td> 
+        <td>File names of additional css files to be used with the display. The files can be uploaded using the <strong>Add files</strong> option.</td> 
+       </tr> 
+      </tbody> 
+     </table> 
+     <ul> 
+      <li><strong>OpenLayers</strong><br /> Enables display of data on a web map using the OpenLayers library - <a href="http://openlayers.org/." rel="nofollow">http://openlayers.org/.</a> A javascript file containing the openlayers configuration needs to be uploaded using the <strong>Template</strong> field. In the <strong>Options</strong> field, there are a number of attributes that can be specified. These attributes are the same as those for Leaflet reports.</li> 
      </ul> 
      <p><strong>Note:</strong></p> 
      <ul> 
