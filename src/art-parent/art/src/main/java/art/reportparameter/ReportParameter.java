@@ -336,8 +336,9 @@ public class ReportParameter implements Serializable {
 				return ArtUtils.isoDateTimeFormatter.format(value);
 			default:
 				if (value instanceof List) {
-					List<Object> values = new ArrayList<>();
-					List valueList = (List) value;
+					List<String> values = new ArrayList<>();
+					@SuppressWarnings("unchecked")
+					List<Object> valueList = (List<Object>) value;
 					for (int i = 0; i < valueList.size(); i++) {
 						values.add(String.valueOf(valueList.get(i)));
 					}

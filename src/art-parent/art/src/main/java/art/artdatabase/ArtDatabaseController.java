@@ -193,7 +193,7 @@ public class ArtDatabaseController {
 			Config.initializeArtDatabase();
 
 			//refresh session user credentials as per new database
-			boolean initialSetup = BooleanUtils.toBoolean((Boolean) session.getAttribute("initialSetup"));
+			boolean initialSetup = BooleanUtils.toBoolean((String) session.getAttribute("initialSetup"));
 			if (!initialSetup) {
 				User sessionUser = (User) session.getAttribute("sessionUser");
 				String sessionUsername = sessionUser.getUsername();
