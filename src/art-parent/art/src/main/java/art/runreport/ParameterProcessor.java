@@ -167,6 +167,7 @@ public class ParameterProcessor {
 					Report lovReport = reportService.getReport(lovReportId);
 					lovReportRunner.setReport(lovReport);
 					lovReportRunner.setReportParamsMap(reportParamsMap);
+					lovReportRunner.setUseDynamicDatasource(false);
 					boolean useRules = false; //don't apply rules so as to get all values
 					Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
 					reportParam.setLovValues(lovValues);

@@ -84,9 +84,24 @@ public class ReportRunner {
 	private User user;
 	private boolean postgreSqlFetchSizeApplied;
 	private final String QUESTION_PLACEHOLDER = "[ART_QUESTION_MARK_PLACEHOLDER]";
+	private boolean useDynamicDatasource = true;
 
 	public ReportRunner() {
 		querySb = new StringBuilder(1024 * 2); // assume the average query is < 2kb
+	}
+
+	/**
+	 * @return the useDynamicDatasource
+	 */
+	public boolean isUseDynamicDatasource() {
+		return useDynamicDatasource;
+	}
+
+	/**
+	 * @param useDynamicDatasource the useDynamicDatasource to set
+	 */
+	public void setUseDynamicDatasource(boolean useDynamicDatasource) {
+		this.useDynamicDatasource = useDynamicDatasource;
 	}
 
 	/**
@@ -623,6 +638,7 @@ public class ReportRunner {
 
 		//use dynamic datasource if so configured
 		RunReportHelper runReportHelper = new RunReportHelper();
+		runReportHelper.setUseDynamicDatasource(useDynamicDatasource);
 		connQuery = runReportHelper.getEffectiveReportDatasource(report, reportParamsMap);
 
 		int fetchSize = report.getFetchSize();
@@ -878,7 +894,7 @@ public class ReportRunner {
 			for (String line : lines) {
 				String[] values = line.trim().split("\\|"); //split by |
 				String dataValue = values[0];
-				String displayValue = null;
+				String displayValue = dataValue;
 				if (values.length > 1) {
 					displayValue = values[1];
 				}

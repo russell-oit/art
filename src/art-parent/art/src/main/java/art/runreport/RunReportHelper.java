@@ -56,6 +56,22 @@ import org.slf4j.LoggerFactory;
 public class RunReportHelper {
 
 	private static final Logger logger = LoggerFactory.getLogger(RunReportHelper.class);
+	
+	private boolean useDynamicDatasource = true;
+
+	/**
+	 * @return the useDynamicDatasource
+	 */
+	public boolean isUseDynamicDatasource() {
+		return useDynamicDatasource;
+	}
+
+	/**
+	 * @param useDynamicDatasource the useDynamicDatasource to set
+	 */
+	public void setUseDynamicDatasource(boolean useDynamicDatasource) {
+		this.useDynamicDatasource = useDynamicDatasource;
+	}
 
 	/**
 	 * Returns the connection to use for running the given report
@@ -73,7 +89,7 @@ public class RunReportHelper {
 		Connection conn;
 
 		Integer dynamicDatasourceId = null;
-		if (reportParams != null) {
+		if (reportParams != null && useDynamicDatasource) {
 			for (ReportParameter reportParam : reportParams) {
 				if (reportParam.getParameter().getDataType() == ParameterDataType.Datasource) {
 					dynamicDatasourceId = (Integer) reportParam.getEffectiveActualParameterValue();
@@ -159,6 +175,7 @@ public class RunReportHelper {
 						lovReportRunner.setUser(sessionUser);
 						lovReportRunner.setReport(lovReport);
 						lovReportRunner.setReportParamsMap(reportParamsMap);
+						lovReportRunner.setUseDynamicDatasource(false);
 						Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
 						reportParam.setLovValues(lovValues);
 						Map<String, String> lovValuesAsString = reportParam.convertLovValuesFromObjectToString(lovValues);
