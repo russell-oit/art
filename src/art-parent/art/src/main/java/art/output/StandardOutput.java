@@ -673,19 +673,19 @@ public abstract class StandardOutput {
 			columnFormatLocale = LocaleUtils.toLocale(reportLocale);
 		}
 
-		if (StringUtils.isNotBlank(report.getDateFormat())) {
-			String globalDateFormat = report.getDateFormat();
+		String globalDateFormat = report.getDateFormat();
+		if (StringUtils.isNotBlank(globalDateFormat)) {
 			globalDateFormatter = new SimpleDateFormat(globalDateFormat, columnFormatLocale);
 		}
 
-		if (StringUtils.isNotBlank(report.getNumberFormat())) {
-			String globalNumberFormat = report.getNumberFormat();
+		String globalNumberFormat = report.getNumberFormat();
+		if (StringUtils.isNotBlank(globalNumberFormat)) {
 			globalNumericFormatter = (DecimalFormat) NumberFormat.getInstance(columnFormatLocale);
 			globalNumericFormatter.applyPattern(globalNumberFormat);
 		}
 
 		String columnFormatsSetting = report.getColumnFormats();
-		if (columnFormatsSetting != null) {
+		if (StringUtils.isNotBlank(columnFormatsSetting)) {
 			columnFormatters = new HashMap<>();
 			String columnFormatsArray[] = columnFormatsSetting.split("\\r?\\n");
 			List<String> columnFormatIds = new ArrayList<>();
@@ -701,7 +701,8 @@ public abstract class StandardOutput {
 
 			for (int i = 1; i <= resultSetColumnCount; i++) {
 				String columnName = rsmd.getColumnLabel(i);
-				if (columnFormatIds.contains(String.valueOf(i)) || columnFormatIds.contains(columnName)) {
+				if (columnFormatIds.contains(String.valueOf(i)) ||
+						(StringUtils.isNotBlank(columnName) && columnFormatIds.contains(columnName))) {
 					String format = columnFormatDetails.get(String.valueOf(i));
 					if (format == null) {
 						format = columnFormatDetails.get(columnName);
