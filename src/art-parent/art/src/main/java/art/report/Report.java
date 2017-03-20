@@ -707,7 +707,7 @@ public class Report implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Report [name=" + name + "]";
+		return "Report{" + "name=" + name + "}";
 	}
 
 	/**
