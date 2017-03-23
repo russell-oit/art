@@ -943,7 +943,7 @@ public class ReportService {
 		logger.debug("Entering getDashboardReports");
 
 		String sql = SQL_SELECT_ALL
-				+ " WHERE QUERY_TYPE=110 OR QUERY-TYPE=129";
+				+ " WHERE QUERY_TYPE=110 OR QUERY_TYPE=129";
 
 		ResultSetHandler<List<Report>> h = new BeanListHandler<>(Report.class, new ReportMapper());
 		return dbService.query(sql, h);
