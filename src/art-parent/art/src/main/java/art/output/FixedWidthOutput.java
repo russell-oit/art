@@ -257,13 +257,7 @@ public class FixedWidthOutput {
 			}
 		}
 
-		//https://github.com/uniVocity/univocity-parsers/issues/135
-		FixedWidthRoutines routines = new FixedWidthRoutines(writerSettings) {
-			@Override
-			protected void adjustColumnLengths(String[] headers, int[] lengths) {
-			}
-		};
-
+		FixedWidthRoutines routines = new FixedWidthRoutines(writerSettings);
 		routines.write(rs, outputWriter);
 	}
 
