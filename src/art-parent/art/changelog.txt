@@ -25,6 +25,7 @@ ART 3.0
 * Added OpenLayers report type
 * Added ability to create csv output jobs
 * Added ability to create fixed width output jobs
+* Allow multi-value parameters with Oracle databases to have more than 1000 items
 * Requires Internet Explorer 8+, or recent versions of other browsers
 * Requires Java 7
 * Requires Servlet 3.0

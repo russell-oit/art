@@ -544,12 +544,14 @@ public class ReportRunner {
 			StringBuilder finalSb = new StringBuilder();
 			finalSb.append("(");
 			List<Object> actualParameterValues = reportParam.getActualParameterValues();
+			//https://stackoverflow.com/questions/11512034/does-java-util-list-isempty-check-if-the-list-itself-is-null
 			if (CollectionUtils.isEmpty(actualParameterValues)) {
 				finalSb.append("1=1");
 			} else {
 				//oracle has a maximum list literal count of 1000 items e.g. in IN clauses
 				//https://sourceforge.net/p/art/discussion/352129/thread/518e3b41/
 				final int MAX_LITERAL_COUNT = 1000;
+				//https://stackoverflow.com/questions/2895342/java-how-can-i-split-an-arraylist-in-multiple-small-arraylists?noredirect=1&lq=1
 				List<List<Object>> listParts = ListUtils.partition(actualParameterValues, MAX_LITERAL_COUNT);
 				List<String> conditions = new ArrayList<>();
 				for (List<Object> listPart : listParts) {
