@@ -3,7 +3,7 @@
  <head> 
   <meta charset="UTF-8" /> 
   <meta name="pdfTitle" content="ART Administration Manual" /> 
-  <meta name="version" content="3.0-beta9" /> 
+  <meta name="version" content="3.0-beta11" /> 
   <title>ART - Administration Manual</title> 
   <link rel="shortcut icon" href="../images/favicon.ico" /> 
   <style type="text/css">
@@ -57,7 +57,11 @@
       <ol> 
        <li><a href="#creating-a-new-report">Creating a new report</a></li> 
        <li><a href="#report-types">Report Types</a></li> 
-       <li><a href="#parameters">Parameters</a></li> 
+       <li><a href="#parameters">Parameters</a> 
+        <ol> 
+         <li><a href="#single-value-parameters">Single-Value Parameters</a></li> 
+         <li><a href="#multi-value-parameters">Multi-Value Parameters</a></li> 
+        </ol></li> 
        <li><a href="#running-a-report-via-url">Running a report via URL</a> 
         <ol> 
          <li><a href="#report-options">Report Options</a></li> 
@@ -1539,16 +1543,15 @@ pr-02|Desktops
      </ul> 
      <h2 id="parameters">Parameters</h2> 
      <p>Parameters enable different output to be generated depending on values selected or input by a user.</p> 
-     <ul> 
-      <li> <p><strong>Single-Value Parameters</strong><br /> Single-value parameters are used to pass single values to the SQL query. The parameter's name surrounded by the <code>#</code> character is used to identify the parameter within the SQL source. For example, the following query has two parameters.</p> 
-       <div class="codehilite"> 
-        <pre>SELECT *
-FROM orders
-WHERE order_date &gt; #date#
-AND vendor_name like #vendor# -- you do not need to put the ' character around the name
+     <h3 id="single-value-parameters">Single-Value Parameters</h3> 
+     <p>Single-value parameters are used to pass single values to the SQL query. The parameter's name surrounded by the <code>#</code> character is used to identify the parameter within the SQL source. For example, the following query has two parameters.</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT *
+    FROM orders
+    WHERE order_date &gt; #date#
+    AND vendor_name like #vendor# -- you do not need to put the ' character around the name
 </pre> 
-       </div> </li> 
-     </ul> 
+     </div> 
      <p>Take the following steps to use a single-value parameter</p> 
      <ul> 
       <li>Create the report, putting the parameter placeholder in the appropriate place within the SQL</li> 
@@ -1613,21 +1616,30 @@ AND vendor_name like #vendor# -- you do not need to put the ' character around t
 </pre> 
      </div> 
      <p><br /></p> 
-     <ul> 
-      <li> <p><strong>Multi-Value Parameters</strong><br /> Multi-value parameters are used to pass multiple values to the SQL query. To define a multi-value parameter, put the WHERE...IN clause in the desired location in your query and include the parameter placeholder to indicate where the values will go e.g.</p> 
-       <div class="codehilite"> 
-        <pre>SELECT *
-FROM orders
-WHERE product_name IN(#product_list#)
+     <h3 id="multi-value-parameters">Multi-Value Parameters</h3> 
+     <p>Multi-value parameters are used to pass multiple values to the SQL query. To define a multi-value parameter, put the WHERE...IN clause in the desired location in your query and include the parameter placeholder to indicate where the values will go e.g.</p> 
+     <div class="codehilite"> 
+      <pre>    SELECT *
+    FROM orders
+    WHERE product_name IN(#product_list#)
 </pre> 
-       </div> </li> 
-     </ul> 
+     </div> 
      <p>Take the following steps to use a multi-value parameter<br /> </p> 
      <ul> 
       <li>Create the report, putting the WHERE...IN clause and parameter placeholder in the appropriate place within the SQL</li> 
       <li>Create the parameter definition using the same process as with single-value parameters</li> 
       <li>Now when a user runs the query, they will be presented with a parameters section where they can select one or more values for the parameter. Multiple values are selected using <strong>control+click</strong> or <strong>shift+click</strong>. An &quot;All&quot; option will be displayed to select all possible values.</li> 
      </ul> 
+     <p><strong>X-Parameter Definitions</strong></p> 
+     <p>There exists an alternative syntax for specifying multi-value parameters. This provides for defining <code>IN</code> and <code>NOT IN</code> clauses where IN clauses take the format <code>$x{in,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> and NOT IN clauses take the format <code>$x{notin,&lt;column_name&gt;,&lt;parameter_name&gt;}</code> e.g.</p> 
+     <div class="codehilite"> 
+      <pre><span class="x">    SELECT *</span>
+<span class="x">    FROM orders</span>
+<span class="x">    WHERE </span><span class="p">$</span><span class="nv">x</span><span class="err">{</span><span class="x">in,product_name,product_list}</span>
+</pre> 
+     </div> 
+     <p>It should be noted that with x-parameter definitions, the parameter name is case sensitive and must be specified exactly the way it is defined in the parameter configuration. Also, a different separator other than a comma can be used to separate the different components of the x-parameter definition e.g. ; or | etc.</p> 
+     <p>X-parameter definitions would particularly be used when running reports against Oracle databases and the multi-value parameter is expected to have more than 1000 items. Using the normal syntax would result in an error like the following <strong>ORA-01795: maximum number of expressions in a list is 1000</strong>.</p> 
      <p><strong>Note:</strong></p> 
      <ul> 
       <li>If the values for a multi-value parameter are not derived from an LOV, the end user will enter the multiple values required in the text box provided, with each value put on a new line.</li> 
