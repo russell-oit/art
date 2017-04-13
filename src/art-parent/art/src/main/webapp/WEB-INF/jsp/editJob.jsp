@@ -60,7 +60,7 @@
 	</jsp:attribute>
 
 	<jsp:attribute name="headContent">
-		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects/jquery.chained.remote.min.js"></script>
+		<script type="text/javascript" src="${pageContext.request.contextPath}/js/appelsiini-chained-selects-1.0.1/jquery.chained.remote.min.js"></script>
 	</jsp:attribute>
 
 	<jsp:attribute name="javascript">
