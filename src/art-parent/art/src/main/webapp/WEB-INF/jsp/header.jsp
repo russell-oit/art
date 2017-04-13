@@ -29,24 +29,26 @@ Header that appears at the top of all pages, except the login and logs pages
 			</div>
 			<div class="navbar-collapse collapse">
 				<ul class="nav navbar-nav">
-					<li>
-						<a href="${pageContext.request.contextPath}/reports">
-							<i class="fa fa-bar-chart-o"></i>
-							<spring:message code="header.link.reports"/>
-						</a>
-					</li>
-					<li>
-						<a href="${pageContext.request.contextPath}/jobs">
-							<i class="fa fa-clock-o"></i> 
-							<spring:message code="header.link.jobs"/>
-						</a>
-					</li>
-					<li>
-						<a href="${pageContext.request.contextPath}/archives">
-							<i class="fa fa-archive"></i> 
-							<spring:message code="header.link.archives"/>
-						</a>
-					</li>
+					<c:if test="${sessionUser.accessLevel.value >= 0}">
+						<li>
+							<a href="${pageContext.request.contextPath}/reports">
+								<i class="fa fa-bar-chart-o"></i>
+								<spring:message code="header.link.reports"/>
+							</a>
+						</li>
+						<li>
+							<a href="${pageContext.request.contextPath}/jobs">
+								<i class="fa fa-clock-o"></i> 
+								<spring:message code="header.link.jobs"/>
+							</a>
+						</li>
+						<li>
+							<a href="${pageContext.request.contextPath}/archives">
+								<i class="fa fa-archive"></i> 
+								<spring:message code="header.link.archives"/>
+							</a>
+						</li>
+					</c:if>
 					<c:if test="${sessionUser.accessLevel.value >= 10 || sessionUser.accessLevel.value < 0}">
 						<li class="dropdown">
 							<a id="configure" href="#" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-delay="100">
@@ -210,12 +212,14 @@ Header that appears at the top of all pages, except the login and logs pages
 							</a>
 						</li>
 					</c:if>
-					<li>
-						<a href="${pageContext.request.contextPath}/language">
-							<i class="fa fa-comment"></i> 
-							<spring:message code="header.link.language"/>
-						</a>
-					</li>
+					<c:if test="${sessionUser.accessLevel.value >= 0}">
+						<li>
+							<a href="${pageContext.request.contextPath}/language">
+								<i class="fa fa-comment"></i> 
+								<spring:message code="header.link.language"/>
+							</a>
+						</li>
+					</c:if>
 					<li>
 						<form method="POST" action="${pageContext.request.contextPath}/logout">
 							<button type="submit" class="btn btn-link navbar-btn">

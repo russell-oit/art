@@ -66,12 +66,14 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
 		String pathMinusContext = "";
 		//https://stackoverflow.com/questions/4050087/how-to-obtain-the-last-path-segment-of-an-uri
 		//https://docs.oracle.com/javase/7/docs/api/java/net/URI.html
+		//https://stackoverflow.com/questions/4931323/whats-the-difference-between-getrequesturi-and-getpathinfo-methods-in-httpservl
 		try {
 			URI uri = new URI(requestUri);
 			String path = uri.getPath();
 			String contextPath = request.getContextPath();
 			pathMinusContext = StringUtils.substringAfter(path, contextPath);
 			page = path.substring(path.lastIndexOf('/') + 1);
+			page = StringUtils.substringBefore(page, ";"); //;jsessionid may be included at the end of the url. may also be in caps? i.e. ;JSESSIONID ?
 		} catch (URISyntaxException ex) {
 			logger.error("Error", ex);
 		}

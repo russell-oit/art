@@ -10,7 +10,7 @@
 <ul>
 	<li>
 		If using <b>Oracle</b>, please note that ART doesn't come with the Oracle JDBC driver.
-		The driver (<b>ojdbc7.jar</b>) needs to be manually
+		The driver (<b>ojdbcX.jar</b>) needs to be manually
 		downloaded and copied to the <b>WEB-INF\lib</b> directory.
 		The application will then need to be restarted. The driver can be downloaded from 
 		<a href="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html">

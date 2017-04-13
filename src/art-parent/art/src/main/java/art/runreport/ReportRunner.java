@@ -43,14 +43,18 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -460,6 +464,9 @@ public class ReportRunner {
 				}
 			}
 
+			setXParameterOrder("in", querySql, jdbcParamOrder);
+			setXParameterOrder("notin", querySql, jdbcParamOrder);
+
 			jdbcParams.clear();
 			for (ReportParameter reportParam : jdbcParamOrder.values()) {
 				for (Object paramValue : reportParam.getActualParameterValues()) {
@@ -501,8 +508,124 @@ public class ReportRunner {
 			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
 		}
 
+		//replace x parameter identifiers with ?
+		Set<String> xParamDefinitions = new HashSet<>();
+		getXParameterDefinitions("in", querySql, xParamDefinitions);
+		getXParameterDefinitions("notin", querySql, xParamDefinitions);
+
+		for (String xParamDefinition : xParamDefinitions) {
+			String xInParamPrefix = "$x{in";
+			String xNotInParamPrefix = "$x{notin";
+			String xParamPrefix;
+			String sqlCommand;
+
+			if (StringUtils.startsWithIgnoreCase(xParamDefinition, xInParamPrefix)) {
+				xParamPrefix = xInParamPrefix;
+				sqlCommand = "IN";
+			} else if (StringUtils.startsWithIgnoreCase(xParamDefinition, xNotInParamPrefix)) {
+				xParamPrefix = xNotInParamPrefix;
+				sqlCommand = "NOT IN";
+			} else {
+				throw new IllegalArgumentException("Unexpected X parameter definition: " + xParamDefinition);
+			}
+
+			String beginSeparator = StringUtils.substring(xParamDefinition, xParamPrefix.length()).trim();
+			String separator = StringUtils.left(beginSeparator, 1);
+			String contents = StringUtils.substringBetween(xParamDefinition, "{", "}");
+			String[] components = StringUtils.split(contents, separator);
+			String column = components[1].trim();
+			String paramName = components[2].trim();
+
+			ReportParameter reportParam = reportParamsMap.get(paramName);
+			if (reportParam == null) {
+				throw new IllegalArgumentException("X parameter not found: " + paramName);
+			}
+
+			StringBuilder finalSb = new StringBuilder();
+			finalSb.append("(");
+			List<Object> actualParameterValues = reportParam.getActualParameterValues();
+			if (CollectionUtils.isEmpty(actualParameterValues)) {
+				finalSb.append("1=1");
+			} else {
+				//oracle has a maximum list literal count of 1000 items e.g. in IN clauses
+				//https://sourceforge.net/p/art/discussion/352129/thread/518e3b41/
+				final int MAX_LITERAL_COUNT = 1000;
+				List<List<Object>> listParts = ListUtils.partition(actualParameterValues, MAX_LITERAL_COUNT);
+				List<String> conditions = new ArrayList<>();
+				for (List<Object> listPart : listParts) {
+					String condition = column + " " + sqlCommand
+							+ "(" + StringUtils.repeat("?", ",", listPart.size()) + ")";
+					conditions.add(condition);
+				}
+				finalSb.append(StringUtils.join(conditions, " OR "));
+			}
+			finalSb.append(")");
+			String finalString = finalSb.toString();
+
+			String searchString = Pattern.quote(xParamDefinition); //quote in case it contains special regex characters
+			String replaceString = Matcher.quoteReplacement(finalString); //quote in case it contains special regex characters
+
+			querySql = querySql.replaceAll("(?iu)" + searchString, replaceString); //(?iu) makes replace case insensitive across unicode characters
+		}
+
 		//update querySb with new sql
 		sb.replace(0, sb.length(), querySql);
+	}
+
+	/**
+	 * Gets x parameter definitions contained in the sql query
+	 *
+	 * @param command the x parameter command
+	 * @param querySql the query sql
+	 * @param xParamDefinitions the object that will be set with found x
+	 * parameter definitions
+	 */
+	private void getXParameterDefinitions(String command, String querySql, Set<String> xParamDefinitions) {
+		String xParamPrefix = "$x{" + command;
+		int index = StringUtils.indexOfIgnoreCase(querySql, xParamPrefix);
+		while (index >= 0) {
+			int end = StringUtils.indexOfIgnoreCase(querySql, "}", index + xParamPrefix.length());
+			end += 1;
+			String xParamDefinition = StringUtils.substring(querySql, index, end);
+			xParamDefinitions.add(xParamDefinition);
+			index = StringUtils.indexOfIgnoreCase(querySql, xParamPrefix, end);
+		}
+	}
+
+	/**
+	 * Sets the jdbc parameter order of the parameter defined using x syntax
+	 *
+	 * @param command the x parameter command
+	 * @param querySql the query sql
+	 * @param jdbcParamOrder the jdbc parameter order map
+	 * @throws IllegalArgumentException
+	 */
+	private void setXParameterOrder(String command, String querySql,
+			Map<Integer, ReportParameter> jdbcParamOrder) throws IllegalArgumentException {
+
+		//search for x-parameter definitions
+		//http://community.jaspersoft.com/questions/516502/x-and-p
+		//http://community.jaspersoft.com/documentation/tibco-jaspersoft-studio-user-guide/v60/using-parameters-queries
+		//https://reportserver.net/en/guides/admin/chapters/using-parameters/
+		//http://community.jaspersoft.com/questions/532261/x-clause-define-columnname-expression
+		String xParamPrefix = "$x{" + command;
+		int index = StringUtils.indexOfIgnoreCase(querySql, xParamPrefix);
+		while (index >= 0) {
+			int end = StringUtils.indexOfIgnoreCase(querySql, "}", index + xParamPrefix.length());
+			end += 1;
+			String xParamDefinition = StringUtils.substring(querySql, index, end);
+			String beginSeparator = StringUtils.substring(xParamDefinition, xParamPrefix.length()).trim();
+			String separator = StringUtils.left(beginSeparator, 1);
+			String contents = StringUtils.substringBetween(xParamDefinition, "{", "}");
+			String[] components = StringUtils.split(contents, separator);
+			String paramName = components[2].trim();
+			ReportParameter reportParam = reportParamsMap.get(paramName);
+			if (reportParam == null) {
+				throw new IllegalArgumentException("X parameter not found: " + paramName);
+			}
+			jdbcParamOrder.put(index, reportParam);
+			index = StringUtils.indexOfIgnoreCase(querySql, xParamPrefix, end);
+		}
 	}
 
 	/**
