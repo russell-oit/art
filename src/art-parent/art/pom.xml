@@ -89,6 +89,21 @@
 				<groupId>com.mycila</groupId> 
 				<artifactId>license-maven-plugin</artifactId> 
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.0</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.6</version>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -104,7 +119,7 @@
 		<repository>
 			<id>art.local</id>
 			<name>art</name>
-			<url>file://${project.basedir}/repo</url>
+			<url>file://${project.basedir}${file.separator}repo</url>
 		</repository>
 		<!-- repository for mondrian -->
 		<repository>
@@ -216,11 +231,13 @@
 			<groupId>javax.servlet.jsp.jstl</groupId>
 			<artifactId>javax.servlet.jsp.jstl-api</artifactId>
 			<version>1.2.1</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.web</groupId>
 			<artifactId>javax.servlet.jsp.jstl</artifactId>
 			<version>1.2.1</version>
+			<scope>runtime</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.servlet</groupId>
@@ -269,11 +286,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>2.7.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>5.2.4.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>com.unboundid</groupId>
@@ -496,6 +508,7 @@
 			<groupId>org.jxls</groupId>
 			<artifactId>jxls-poi</artifactId>
 			<version>1.0.12</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.lowagie</groupId>
@@ -545,6 +558,7 @@
 			<groupId>org.olap4j</groupId>
 			<artifactId>olap4j</artifactId>
 			<version>1.2.0</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.owasp.encoder</groupId>
@@ -555,6 +569,7 @@
 			<groupId>org.owasp.encoder</groupId>
 			<artifactId>encoder-jsp</artifactId>
 			<version>${owasp.encoder.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -576,6 +591,7 @@
 			<groupId>net.sourceforge.barbecue</groupId>
 			<artifactId>barbecue</artifactId>
 			<version>1.5-beta1</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.freemarker</groupId>
