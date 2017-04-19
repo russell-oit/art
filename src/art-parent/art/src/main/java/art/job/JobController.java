@@ -405,7 +405,7 @@ public class JobController {
 		logger.debug("Entering saveJobParameters: jobId={}", jobId);
 
 		Map<String, String[]> passedValues = new HashMap<>();
-		
+
 		Map<String, String[]> requestParameters = request.getParameterMap();
 		for (Entry<String, String[]> entry : requestParameters.entrySet()) {
 			String htmlParamName = entry.getKey();
@@ -446,7 +446,9 @@ public class JobController {
 	}
 
 	@RequestMapping(value = "/editJob", method = RequestMethod.GET)
-	public String editJob(@RequestParam("id") Integer id, Model model) {
+	public String editJob(@RequestParam("id") Integer id, Model model,
+			HttpSession session) {
+
 		logger.debug("Entering editJob: id={}", id);
 
 		try {
@@ -455,7 +457,8 @@ public class JobController {
 
 			ReportJob reportJob = new ReportJob();
 			int reportId = job.getReport().getReportId();
-			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id);
+			User sessionUser = (User) session.getAttribute("sessionUser");
+			ParameterProcessorResult paramProcessorResult = reportJob.buildParameters(reportId, id, sessionUser);
 			addParameters(model, paramProcessorResult);
 		} catch (SQLException | RuntimeException ex) {
 			logger.error("Error", ex);

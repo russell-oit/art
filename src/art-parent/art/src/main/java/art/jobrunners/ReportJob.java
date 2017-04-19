@@ -956,7 +956,7 @@ public class ReportJob implements org.quartz.Job {
 			Report report = job.getReport();
 			int reportId = report.getReportId();
 
-			ParameterProcessorResult paramProcessorResult = buildParameters(reportId, jobId);
+			ParameterProcessorResult paramProcessorResult = buildParameters(reportId, jobId, user);
 			Map<String, ReportParameter> reportParamsMap = paramProcessorResult.getReportParamsMap();
 			reportRunner.setReportParamsMap(reportParamsMap);
 
@@ -1672,10 +1672,13 @@ public class ReportJob implements org.quartz.Job {
 	 *
 	 * @param reportId the report id
 	 * @param jId the job id
+	 * @param user the user under whose permission the job is being run
 	 * @return parameter processor result
 	 * @throws SQLException
 	 */
-	public ParameterProcessorResult buildParameters(int reportId, int jId) throws SQLException {
+	public ParameterProcessorResult buildParameters(int reportId, int jId,
+			User user) throws SQLException {
+		
 		logger.debug("Entering buildParameters: reportId={}, jId={}", reportId, jId);
 
 		ParameterProcessorResult paramProcessorResult = null;
@@ -1736,7 +1739,7 @@ public class ReportJob implements org.quartz.Job {
 
 		try {
 			ParameterProcessor paramProcessor = new ParameterProcessor();
-			paramProcessorResult = paramProcessor.process(finalValues, reportId);
+			paramProcessorResult = paramProcessor.process(finalValues, reportId, user);
 		} catch (ParseException ex) {
 			logger.error("Error", ex);
 		}

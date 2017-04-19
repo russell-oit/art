@@ -25,6 +25,7 @@ import art.report.Report;
 import art.report.ReportService;
 import art.reportparameter.ReportParameter;
 import art.reportparameter.ReportParameterService;
+import art.user.User;
 import art.utils.ArtUtils;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -75,7 +77,10 @@ public class ParameterProcessor {
 		Map<String, String[]> requestParameters = request.getParameterMap();
 		passedValues.putAll(requestParameters);
 
-		return process(passedValues, reportId);
+		HttpSession session = request.getSession();
+		User sessionUser = (User) session.getAttribute("sessionUser");
+
+		return process(passedValues, reportId, sessionUser);
 	}
 
 	/**
@@ -85,12 +90,13 @@ public class ParameterProcessor {
 	 * @param passedValuesMap the parameter values. key is html parameter name
 	 * e.g. p-due_date, value is string array with values
 	 * @param reportId the report id
+	 * @param user the user under whose permission the report is being run
 	 * @return final report parameters
 	 * @throws java.sql.SQLException
 	 * @throws java.text.ParseException
 	 */
 	public ParameterProcessorResult process(Map<String, String[]> passedValuesMap,
-			int reportId) throws SQLException, ParseException {
+			int reportId, User user) throws SQLException, ParseException {
 
 		logger.debug("Entering processParameters: reportId={}", reportId);
 
@@ -125,7 +131,7 @@ public class ParameterProcessor {
 		//set actual values to be used when running the query
 		setActualParameterValues(reportParamsList);
 
-		handleAllValues(reportParamsMap);
+		handleAllValues(reportParamsMap, user);
 
 		setLovValues(reportParamsMap);
 
@@ -239,11 +245,12 @@ public class ParameterProcessor {
 	 * parameters
 	 *
 	 * @param reportParamsMap the report parameters
+	 * @param user the user under whose permission the report is being run
 	 * @throws SQLException
 	 * @throws ParseException
 	 */
-	private void handleAllValues(Map<String, ReportParameter> reportParamsMap)
-			throws SQLException, ParseException {
+	private void handleAllValues(Map<String, ReportParameter> reportParamsMap,
+			User user) throws SQLException, ParseException {
 
 		logger.debug("Entering handleAllValues");
 
@@ -268,9 +275,10 @@ public class ParameterProcessor {
 							int lovReportId = param.getLovReportId();
 							ReportService reportService = new ReportService();
 							Report lovReport = reportService.getReport(lovReportId);
+							lovReportRunner.setUser(user);
 							lovReportRunner.setReport(lovReport);
 							lovReportRunner.setReportParamsMap(reportParamsMap);
-							boolean useRules = false; //don't apply rules so as to get all values
+							boolean useRules = param.isUseRulesInLov();
 							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
 
 							for (Entry<Object, String> entry2 : lovValues.entrySet()) {

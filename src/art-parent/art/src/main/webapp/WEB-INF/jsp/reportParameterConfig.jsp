@@ -189,7 +189,7 @@
 						<td>${reportParameter.position}</td>
 						<td>${reportParameter.reportParameterId}</td>
 						<td data-toggle="tooltip" title="${dragToReorderText}">
-							${encode:forHtmlContent(reportParameter.parameter.name)}
+							${encode:forHtmlContent(reportParameter.parameter.name)}(${reportParameter.parameter.parameterId})
 						</td>							
 						<td>
 							<div class="btn-group">
