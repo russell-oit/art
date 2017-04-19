@@ -266,7 +266,7 @@ public class ParameterProcessor {
 				}
 
 				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
-					//get all possible lov values.
+					//get all lov values that apply for the user
 					ReportRunner lovReportRunner = null;
 					try {
 						List<Object> actualValues = new ArrayList<>(); //actual values list should not be null
@@ -278,8 +278,7 @@ public class ParameterProcessor {
 							lovReportRunner.setUser(user);
 							lovReportRunner.setReport(lovReport);
 							lovReportRunner.setReportParamsMap(reportParamsMap);
-							boolean useRules = param.isUseRulesInLov();
-							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects(useRules);
+							Map<Object, String> lovValues = lovReportRunner.getLovValuesAsObjects();
 
 							for (Entry<Object, String> entry2 : lovValues.entrySet()) {
 								Object actualValue = entry2.getKey();
