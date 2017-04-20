@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
+import org.owasp.encoder.Encode;
 
 /**
  * Represents a report parameter
@@ -340,9 +341,12 @@ public class ReportParameter implements Serializable {
 					@SuppressWarnings("unchecked")
 					List<Object> valueList = (List<Object>) value;
 					for (int i = 0; i < valueList.size(); i++) {
-						values.add(String.valueOf(valueList.get(i)));
+						String htmlValue = String.valueOf(valueList.get(i));
+						htmlValue = Encode.forHtmlContent(htmlValue);
+						values.add(htmlValue);
 					}
-					return StringUtils.join(values, "\\r\\n");
+					//https://stackoverflow.com/questions/8627902/new-line-in-text-area
+					return StringUtils.join(values, "&#10;");
 				} else {
 					return String.valueOf(value);
 				}
@@ -519,8 +523,8 @@ public class ReportParameter implements Serializable {
 	}
 
 	/**
-	 * Returns <code>true</code> if the given lov value should be selected in the
-	 * parameter dropdown list
+	 * Returns <code>true</code> if the given lov value should be selected in
+	 * the parameter dropdown list
 	 *
 	 * @param lovValue the lov value
 	 * @return code>true</code> if the given lov value should be selected in the

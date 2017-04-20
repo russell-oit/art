@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -165,7 +166,7 @@ public class ParameterProcessor {
 			User user) throws SQLException {
 
 		ReportService reportService = new ReportService();
-		
+
 		for (Entry<String, ReportParameter> entry : reportParamsMap.entrySet()) {
 			ReportParameter reportParam = entry.getValue();
 			Parameter param = reportParam.getParameter();
@@ -268,13 +269,9 @@ public class ParameterProcessor {
 			Parameter param = reportParam.getParameter();
 
 			if (param.getParameterType() == ParameterType.MultiValue) {
-				String[] passedValues = reportParam.getPassedParameterValues();
-				List<String> actualValueStrings = new ArrayList<>();
-				if (passedValues != null) {
-					actualValueStrings.addAll(Arrays.asList(passedValues));
-				}
+				List<Object> actualValuesList = reportParam.getActualParameterValues();
 
-				if (actualValueStrings.isEmpty() || actualValueStrings.contains("ALL_ITEMS")) {
+				if (CollectionUtils.isEmpty(actualValuesList)) {
 					//get all lov values that apply for the user
 					ReportRunner lovReportRunner = null;
 					try {
